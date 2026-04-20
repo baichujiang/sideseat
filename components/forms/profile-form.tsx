@@ -20,11 +20,11 @@ type ProfileValues = z.infer<typeof profileSchema>;
 export function ProfileForm({
   initialValues,
   submitLabel,
-  avatarUrl,
+  avatarId,
 }: {
   initialValues: ProfileValues;
   submitLabel: string;
-  avatarUrl: string | null;
+  avatarId: string | null;
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState("");
@@ -62,7 +62,7 @@ export function ProfileForm({
 
   return (
     <form className="space-y-5" onSubmit={onSubmit}>
-      <AvatarPicker initialUrl={avatarUrl} nickname={initialValues.nickname || "?"} />
+      <AvatarPicker initialId={avatarId} />
 
       <div className="grid gap-4">
         <div className="space-y-2">

@@ -1,95 +1,69 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
-import Image from "next/image";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
+import { PresetAvatar } from "@/components/ui/preset-avatar";
+import { avatarPresets } from "@/lib/constants/avatars";
 import { cn } from "@/lib/utils";
 
-export function AvatarPicker({
-  initialUrl,
-  nickname,
-}: {
-  initialUrl: string | null;
-  nickname: string;
-}) {
+export function AvatarPicker({ initialId }: { initialId: string | null }) {
   const router = useRouter();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = useState<string | null>(initialUrl);
+  const [selected, setSelected] = useState<string | null>(initialId);
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    setPreview(initialUrl);
-  }, [initialUrl]);
+    setSelected(initialId);
+  }, [initialId]);
 
-  const display = preview;
-  const initial = (nickname.trim().slice(0, 1) || "?").toUpperCase();
+  const choose = (id: string) => {
+    if (selected === id || isPending) return;
+    const previous = selected;
+    setSelected(id);
+    setMessage("");
+    startTransition(async () => {
+      const response = await fetch("/api/profile/avatar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarId: id }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload.success) {
+        setSelected(previous);
+        setMessage(payload.error ?? "Could not save avatar.");
+        return;
+      }
+      router.refresh();
+    });
+  };
 
   return (
     <div className="space-y-2">
-      <p className="text-sm font-medium">Photo</p>
-      <div className="flex items-center gap-4">
-        <div
-          className={cn(
-            "relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-muted text-xl font-semibold text-muted-foreground",
-          )}
-        >
-          {display ? (
-            <Image
-              alt=""
-              className="object-cover"
-              fill
-              sizes="80px"
-              src={display}
-              unoptimized
-            />
-          ) : (
-            initial
-          )}
-        </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <input
-            accept="image/jpeg,image/png,image/webp"
-            className="sr-only"
-            ref={inputRef}
-            type="file"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (!file) return;
-              setMessage("");
-              startTransition(async () => {
-                const formData = new FormData();
-                formData.set("file", file);
-                const response = await fetch("/api/profile/avatar", {
-                  method: "POST",
-                  body: formData,
-                });
-                const payload = await response.json();
-                if (!response.ok || !payload.success) {
-                  setMessage(payload.error ?? "Upload failed.");
-                  return;
-                }
-                const url = payload.data?.url as string;
-                if (url) setPreview(url);
-                router.refresh();
-              });
-            }}
-          />
-          <Button
-            disabled={isPending}
-            type="button"
-            variant="outline"
-            className="w-full sm:w-auto"
-            onClick={() => inputRef.current?.click()}
-          >
-            {isPending ? "Uploading…" : "Upload photo"}
-          </Button>
-          <p className="text-xs text-muted-foreground">JPG, PNG or WebP · max 2MB</p>
-          {message ? <p className="text-xs text-destructive">{message}</p> : null}
-        </div>
+      <p className="text-sm font-medium">Avatar</p>
+      <div className="grid grid-cols-5 gap-2 sm:grid-cols-10">
+        {avatarPresets.map((preset) => {
+          const isSelected = preset.id === selected;
+          return (
+            <button
+              aria-label={`Avatar ${preset.id}`}
+              aria-pressed={isSelected}
+              className={cn(
+                "rounded-full transition",
+                isSelected
+                  ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
+                  : "opacity-80 hover:opacity-100",
+              )}
+              key={preset.id}
+              onClick={() => choose(preset.id)}
+              type="button"
+            >
+              <PresetAvatar className="h-12 w-12" id={preset.id} />
+            </button>
+          );
+        })}
       </div>
+      {message ? <p className="text-xs text-destructive">{message}</p> : null}
     </div>
   );
 }

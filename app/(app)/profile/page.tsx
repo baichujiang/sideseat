@@ -110,7 +110,7 @@ export default async function ProfilePage({
 
       <ProfileForm
         submitLabel="Save"
-        avatarUrl={user.avatarUrl}
+        avatarId={user.avatarUrl}
         initialValues={{
           nickname: user.nickname ?? "",
           school: normalizeSchoolCode(user.school) ?? DEFAULT_SCHOOL,

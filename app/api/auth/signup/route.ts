@@ -3,6 +3,7 @@ import { ClientSignalAction } from "@prisma/client";
 import { hashPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
 import { recordClientSignal } from "@/lib/abuse/client-signals";
+import { randomAvatarId } from "@/lib/constants/avatars";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseBody } from "@/lib/http";
 import { signupRequestSchema } from "@/lib/validators/auth";
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
       data: {
         username: values.username,
         hashedPassword: await hashPassword(values.password),
+        avatarUrl: randomAvatarId(),
       },
     });
 

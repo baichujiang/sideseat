@@ -10,7 +10,7 @@ export default async function OnboardingPage() {
       <h1 className="text-xl font-semibold tracking-tight">Complete your profile</h1>
       <ProfileForm
         submitLabel="Save profile and continue"
-        avatarUrl={user.avatarUrl}
+        avatarId={user.avatarUrl}
         initialValues={{
           nickname: user.nickname ?? "",
           school: normalizeSchoolCode(user.school) ?? DEFAULT_SCHOOL,
