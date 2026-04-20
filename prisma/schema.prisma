@@ -1,0 +1,367 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LanguageTag {
+  CHINESE
+  ENGLISH
+  GERMAN
+  FRENCH
+  HINDI
+  SPANISH
+  OTHER
+}
+
+enum CourseIntent {
+  GO_TO_CLASS_TOGETHER
+  EAT_AFTER_CLASS
+  STUDY_TOGETHER
+  EXAM_PREP
+}
+
+enum InvitationType {
+  GO_TO_CLASS_TOGETHER
+  EAT_AFTER_CLASS
+  STUDY_TOGETHER
+  SAY_HI
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELED
+  EXPIRED
+}
+
+enum ConnectionStatus {
+  ACTIVE
+  ENDED
+  BLOCKED
+}
+
+enum ContactExchangeStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELED
+}
+
+enum ReportReason {
+  HARASSMENT
+  REPEATED_UNWANTED_CONTACT
+  OFFENSIVE_LANGUAGE
+  SPAM
+  FAKE_IDENTITY
+  OTHER
+}
+
+enum ReportStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  DISMISSED
+}
+
+enum ReportActionType {
+  STATUS_CHANGED
+  NOTES_UPDATED
+  USER_BLOCKED
+  USER_UNBLOCKED
+}
+
+enum StudentVerificationStatus {
+  UNVERIFIED
+  EMAIL_PENDING
+  VERIFIED
+  MANUAL_REVIEW_REQUIRED
+  REJECTED
+}
+
+enum SchoolEmailVerificationStatus {
+  PENDING
+  VERIFIED
+  EXPIRED
+  CANCELED
+}
+
+enum ClientSignalAction {
+  SIGNUP
+  LOGIN
+  INVITATION_SENT
+}
+
+model User {
+  id                           String                   @id @default(cuid())
+  username                     String                   @unique
+  email                        String?                  @unique
+  isGuest                      Boolean                  @default(false)
+  hashedPassword               String
+  nickname                     String?
+  school                       String?
+  major                        String?
+  semester                     Int?
+  avatarUrl                    String?
+  bio                          String?
+  languages                    LanguageTag[]
+  discoverByCourse             Boolean                  @default(true)
+  discoverByMajor              Boolean                  @default(true)
+  discoverBySemester           Boolean                  @default(true)
+  allowInvitationNotes         Boolean                  @default(true)
+  contactInfoOptIn             Boolean                  @default(false)
+  onboardingComplete           Boolean                  @default(false)
+  verifiedStudent              Boolean                  @default(false)
+  studentVerificationStatus    StudentVerificationStatus @default(UNVERIFIED)
+  schoolEmail                  String?
+  schoolEmailVerifiedAt        DateTime?
+  studentVerificationNotes     String?
+  wechatHandle                 String?
+  whatsappHandle               String?
+  telegramHandle               String?
+  instagramHandle              String?
+  createdAt                    DateTime                 @default(now())
+  updatedAt                    DateTime                 @updatedAt
+  sessions                     Session[]
+  courses                      UserCourse[]
+  sentInvitations              Invitation[]             @relation("InvitationSender")
+  receivedInvitations          Invitation[]             @relation("InvitationReceiver")
+  sentMessages                 Message[]
+  sentContactExchangeRequests  ContactExchangeRequest[] @relation("ContactRequester")
+  receivedContactExchangeRequests ContactExchangeRequest[] @relation("ContactResponder")
+  connectionsA                 Connection[]             @relation("ConnectionUserA")
+  connectionsB                 Connection[]             @relation("ConnectionUserB")
+  endedConnections             Connection[]             @relation("ConnectionEndedBy")
+  blocksInitiated              Block[]                  @relation("Blocker")
+  blocksReceived               Block[]                  @relation("Blocked")
+  reportsFiled                 Report[]                 @relation("Reporter")
+  reportsReceived              Report[]                 @relation("ReportedUser")
+  moderationBlocks             ModerationBlock[]
+  schoolEmailVerifications     SchoolEmailVerification[]
+  clientSignals                ClientSignal[]
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  userId     String
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model SchoolEmailVerification {
+  id         String                        @id @default(cuid())
+  userId     String
+  schoolEmail String
+  token      String                        @unique
+  status     SchoolEmailVerificationStatus @default(PENDING)
+  expiresAt  DateTime
+  createdAt  DateTime                      @default(now())
+  verifiedAt DateTime?
+  user       User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+}
+
+model Course {
+  id            String       @id @default(cuid())
+  name          String
+  code          String?
+  school        String
+  semesterLabel String
+  location      String?
+  schedule      String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  members       UserCourse[]
+  invitations   Invitation[]
+
+  @@unique([name, school, semesterLabel])
+  @@unique([code, school, semesterLabel])
+}
+
+model UserCourse {
+  id         String         @id @default(cuid())
+  userId     String
+  courseId   String
+  intentions CourseIntent[]
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+}
+
+model Invitation {
+  id          String           @id @default(cuid())
+  senderId    String
+  receiverId  String
+  courseId    String
+  type        InvitationType
+  note        String?
+  status      InvitationStatus @default(PENDING)
+  expiresAt   DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  sender      User             @relation("InvitationSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User             @relation("InvitationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  connection  Connection?
+  reports     Report[]
+
+  @@index([receiverId, status])
+  @@index([senderId, status])
+  @@index([courseId])
+}
+
+model Connection {
+  id                     String                   @id @default(cuid())
+  invitationId           String?                  @unique
+  userAId                String
+  userBId                String
+  status                 ConnectionStatus         @default(ACTIVE)
+  endedById              String?
+  endedAt                DateTime?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  invitation             Invitation?              @relation(fields: [invitationId], references: [id], onDelete: SetNull)
+  userA                  User                     @relation("ConnectionUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB                  User                     @relation("ConnectionUserB", fields: [userBId], references: [id], onDelete: Cascade)
+  endedBy                User?                    @relation("ConnectionEndedBy", fields: [endedById], references: [id], onDelete: SetNull)
+  messages               Message[]
+  contactExchangeRequests ContactExchangeRequest[]
+  blocks                 Block[]
+  reports                Report[]
+
+  @@index([userAId, status])
+  @@index([userBId, status])
+}
+
+model Message {
+  id           String     @id @default(cuid())
+  connectionId String
+  senderId     String
+  body         String
+  createdAt    DateTime   @default(now())
+  connection   Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  sender       User       @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId, createdAt])
+}
+
+model ContactExchangeRequest {
+  id           String                @id @default(cuid())
+  connectionId String
+  requesterId  String
+  responderId  String
+  status       ContactExchangeStatus @default(PENDING)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  connection   Connection            @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  requester    User                  @relation("ContactRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  responder    User                  @relation("ContactResponder", fields: [responderId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId, status])
+}
+
+model Block {
+  id           String      @id @default(cuid())
+  blockerId    String
+  blockedId    String
+  connectionId String?
+  reason       String?
+  createdAt    DateTime    @default(now())
+  blocker      User        @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked      User        @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  connection   Connection? @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+}
+
+model Report {
+  id             String       @id @default(cuid())
+  reporterId     String
+  reportedUserId String
+  connectionId   String?
+  invitationId   String?
+  reason         ReportReason
+  status         ReportStatus @default(OPEN)
+  details        String?
+  adminNotes     String?
+  reviewedAt     DateTime?
+  resolvedAt     DateTime?
+  handledByEmail String?
+  createdAt      DateTime     @default(now())
+  reporter       User         @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUser   User         @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  connection     Connection?  @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+  invitation     Invitation?  @relation(fields: [invitationId], references: [id], onDelete: SetNull)
+  actionLog      ReportAction[]
+  moderationBlocks ModerationBlock[]
+
+  @@index([reportedUserId])
+  @@index([reason])
+}
+
+model ReportAction {
+  id           String           @id @default(cuid())
+  reportId     String
+  actionType   ReportActionType
+  actorEmail   String
+  fromStatus   ReportStatus?
+  toStatus     ReportStatus?
+  noteSnapshot String?
+  createdAt    DateTime         @default(now())
+  report       Report           @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId, createdAt])
+}
+
+model ModerationBlock {
+  id             String   @id @default(cuid())
+  userId         String
+  reportId       String?
+  reason         String?
+  createdByEmail String
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  report         Report?  @relation(fields: [reportId], references: [id], onDelete: SetNull)
+
+  @@index([userId, isActive])
+}
+
+model ClientSignal {
+  id             String             @id @default(cuid())
+  userId         String?
+  action         ClientSignalAction
+  wasSuccessful  Boolean            @default(true)
+  installId      String?
+  attemptedEmail String?
+  ipHash         String?
+  userAgent      String?
+  acceptLanguage String?
+  timezone       String?
+  platform       String?
+  screenWidth    Int?
+  screenHeight   Int?
+  createdAt      DateTime           @default(now())
+  user           User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([action, createdAt])
+  @@index([installId, createdAt])
+  @@index([attemptedEmail, createdAt])
+  @@index([ipHash, createdAt])
+  @@index([userId, createdAt])
+}
