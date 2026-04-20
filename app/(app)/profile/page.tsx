@@ -79,7 +79,6 @@ export default async function ProfilePage({
 
       <StudentVerificationForm
         currentStatus={user.studentVerificationStatus}
-        school={user.school}
         schoolHint={getSchoolVerificationHint(user.school)}
         notes={user.studentVerificationNotes}
         email={user.email}

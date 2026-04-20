@@ -6,10 +6,9 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
-import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { getSchoolLabel } from "@/lib/constants/schools";
 import { cn } from "@/lib/utils";
 
 type DeliveryKind = "sent" | "failed" | "skipped" | "manual";
@@ -24,13 +23,11 @@ function statusTone(status: StudentVerificationStatus) {
 
 export function StudentVerificationForm({
   currentStatus,
-  school,
   email,
   schoolHint,
   notes,
 }: {
   currentStatus: StudentVerificationStatus;
-  school?: string | null;
   email?: string | null;
   schoolHint: string;
   notes?: string | null;
@@ -87,27 +84,30 @@ export function StudentVerificationForm({
     }
   };
 
-  return (
-    <Card className="space-y-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="space-y-1">
-          <CardTitle>Student verification</CardTitle>
-          <CardDescription>
-            Add your school email to prove you&apos;re a {getSchoolLabel(school)} student.
-          </CardDescription>
+  const isVerified = currentStatus === StudentVerificationStatus.VERIFIED;
+
+  if (isVerified) {
+    return (
+      <Card className="flex items-center justify-between gap-3">
+        <div>
+          <CardTitle className="text-base">Student</CardTitle>
+          <p className="text-sm text-muted-foreground">{email}</p>
         </div>
+        <StatusBadge tone="calm">verified</StatusBadge>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <CardTitle className="text-base">Student verification</CardTitle>
         <StatusBadge tone={statusTone(currentStatus)}>
           {currentStatus.toLowerCase().replaceAll("_", " ")}
         </StatusBadge>
       </div>
 
-      <div className="grid gap-1.5 text-sm text-muted-foreground">
-        {email ? <p>Email: {email}</p> : null}
-        <p>{schoolHint}</p>
-        {notes ? <p className="text-foreground">{notes}</p> : null}
-      </div>
-
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Input
           onChange={(event) => setInput(event.target.value)}
           placeholder="name@tum.de"
@@ -117,8 +117,10 @@ export function StudentVerificationForm({
         <Button className="w-full" disabled={isPending} onClick={submit} type="button">
           {isPending ? "Sending…" : "Send verification email"}
         </Button>
+        <p className="text-xs text-muted-foreground">{schoolHint}</p>
       </div>
 
+      {notes ? <p className="text-sm text-foreground">{notes}</p> : null}
       {message ? <p className={`text-sm ${deliveryTone}`}>{message}</p> : null}
 
       {verifyUrl ? (

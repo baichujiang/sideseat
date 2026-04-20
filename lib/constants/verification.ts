@@ -61,14 +61,12 @@ export function getSchoolVerificationHint(schoolCode?: string | null) {
   const school = getSchoolByCode(schoolCode);
 
   if (!school) {
-    return "Choose your school first before requesting student verification.";
+    return "Choose your school first.";
   }
 
   if (!school.verificationDomains.length) {
-    return `${getSchoolLabel(schoolCode)} currently uses manual review because no verified email domain mapping has been configured yet.`;
+    return "Manual review.";
   }
 
-  return `${getSchoolLabel(schoolCode)} accepts ${school.verificationDomains
-    .map((domain) => `@${domain}`)
-    .join(" or ")} for student verification.`;
+  return `Accepts ${school.verificationDomains.map((domain) => `@${domain}`).join(" or ")}.`;
 }
