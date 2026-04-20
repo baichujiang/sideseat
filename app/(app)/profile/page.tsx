@@ -63,7 +63,7 @@ export default async function ProfilePage({
 
       {query.verification === "success" ? (
         <p className="rounded-2xl border border-[#d5e9df] bg-[#eef8f2] px-4 py-3 text-sm text-foreground">
-          School email verified — you can send invitations now.
+          Student email verified — you can send invitations now.
         </p>
       ) : null}
       {query.verification === "expired" ? (
@@ -78,12 +78,11 @@ export default async function ProfilePage({
       ) : null}
 
       <StudentVerificationForm
-        currentEmail={user.email ?? ""}
         currentStatus={user.studentVerificationStatus}
         school={user.school}
         schoolHint={getSchoolVerificationHint(user.school)}
         notes={user.studentVerificationNotes}
-        schoolEmail={user.schoolEmail}
+        email={user.email}
       />
 
       {isAdmin ? (

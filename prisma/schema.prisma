@@ -117,8 +117,7 @@ model User {
   onboardingComplete           Boolean                  @default(false)
   verifiedStudent              Boolean                  @default(false)
   studentVerificationStatus    StudentVerificationStatus @default(UNVERIFIED)
-  schoolEmail                  String?
-  schoolEmailVerifiedAt        DateTime?
+  emailVerifiedAt              DateTime?
   studentVerificationNotes     String?
   wechatHandle                 String?
   whatsappHandle               String?
@@ -160,7 +159,7 @@ model Session {
 model SchoolEmailVerification {
   id         String                        @id @default(cuid())
   userId     String
-  schoolEmail String
+  email      String
   token      String                        @unique
   status     SchoolEmailVerificationStatus @default(PENDING)
   expiresAt  DateTime

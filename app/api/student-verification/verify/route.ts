@@ -33,11 +33,11 @@ export async function GET(request: Request) {
     await tx.user.update({
       where: { id: verification.userId },
       data: {
-        schoolEmail: verification.schoolEmail,
+        email: verification.email,
         verifiedStudent: true,
         studentVerificationStatus: StudentVerificationStatus.VERIFIED,
-        schoolEmailVerifiedAt: new Date(),
-        studentVerificationNotes: "School email verified successfully.",
+        emailVerifiedAt: new Date(),
+        studentVerificationNotes: "Student email verified successfully.",
       },
     });
   });

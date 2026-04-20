@@ -2,25 +2,24 @@ import { addDays } from "date-fns";
 import { createHash, randomBytes } from "crypto";
 import { StudentVerificationStatus } from "@prisma/client";
 
-import { requireOnboardedUser } from "@/lib/auth/guards";
+import { requireUser } from "@/lib/auth/session";
 import {
   doesEmailMatchSchool,
   getSchoolByEmail,
   getSchoolVerificationHint,
   schoolSupportsAutomaticVerification,
 } from "@/lib/constants/verification";
-import { getSchoolLabel } from "@/lib/constants/schools";
+import { DEFAULT_SCHOOL, getSchoolLabel } from "@/lib/constants/schools";
 import { prisma } from "@/lib/db/prisma";
 import { emailDeliveryConfigured } from "@/lib/email/resend";
 import { sendStudentVerificationEmail } from "@/lib/email/send-student-verification";
 import { error, ok, parseJson } from "@/lib/http";
-import { schoolEmailRequestSchema } from "@/lib/validators/verification";
+import { verifyEmailRequestSchema } from "@/lib/validators/verification";
 
 /**
- * Only send real emails when the verify URL would actually work on the
- * recipient's device. University inboxes routinely reject messages that contain
- * `localhost` / private-IP links, which also wastes Resend quota and sender
- * reputation. When the URL isn't safe for email, the UI fallback takes over.
+ * Don't ship emails when the verify URL can't be opened by the recipient.
+ * Strict university inboxes reject messages containing localhost/private URLs
+ * outright, which also burns Resend reputation.
  */
 function isPublicHttpsLike(rawUrl: string): boolean {
   try {
@@ -39,36 +38,40 @@ function isPublicHttpsLike(rawUrl: string): boolean {
 
 export async function POST(request: Request) {
   try {
-    const user = await requireOnboardedUser();
-    const { schoolEmail } = await parseJson(request, schoolEmailRequestSchema);
-    const matchedSchool = getSchoolByEmail(schoolEmail);
+    const user = await requireUser();
+    const { email } = await parseJson(request, verifyEmailRequestSchema);
 
-    if (!user.school) {
-      return error("Choose your school in your profile before requesting verification.");
+    const school = user.school ?? DEFAULT_SCHOOL;
+    const matchedSchool = getSchoolByEmail(email);
+
+    const emailOwner = await prisma.user.findUnique({ where: { email } });
+    if (emailOwner && emailOwner.id !== user.id) {
+      return error("That email is already linked to another account.", 409);
     }
 
-    if (!schoolSupportsAutomaticVerification(user.school)) {
+    if (!schoolSupportsAutomaticVerification(school)) {
       const updatedUser = await prisma.user.update({
         where: { id: user.id },
         data: {
-          schoolEmail,
+          email,
+          school,
           verifiedStudent: false,
           studentVerificationStatus: StudentVerificationStatus.MANUAL_REVIEW_REQUIRED,
           studentVerificationNotes:
-            `${getSchoolLabel(user.school)} currently uses manual review for student verification.`,
+            `${getSchoolLabel(school)} currently uses manual review for student verification.`,
         },
       });
 
       return ok({
         status: updatedUser.studentVerificationStatus,
         delivery: "manual",
-        message: getSchoolVerificationHint(user.school),
+        message: getSchoolVerificationHint(school),
       });
     }
 
-    if (!doesEmailMatchSchool(schoolEmail, user.school)) {
+    if (!doesEmailMatchSchool(email, school)) {
       return error(
-        `This email does not match your selected school. ${getSchoolVerificationHint(user.school)}`,
+        `This email does not match your selected school. ${getSchoolVerificationHint(school)}`,
       );
     }
 
@@ -76,7 +79,8 @@ export async function POST(request: Request) {
       const updatedUser = await prisma.user.update({
         where: { id: user.id },
         data: {
-          schoolEmail,
+          email,
+          school,
           verifiedStudent: false,
           studentVerificationStatus: StudentVerificationStatus.MANUAL_REVIEW_REQUIRED,
           studentVerificationNotes:
@@ -109,7 +113,7 @@ export async function POST(request: Request) {
     await prisma.schoolEmailVerification.create({
       data: {
         userId: user.id,
-        schoolEmail,
+        email,
         token,
         expiresAt,
       },
@@ -123,7 +127,7 @@ export async function POST(request: Request) {
     const isEmailSafeUrl = isPublicHttpsLike(appUrl);
 
     if (emailDeliveryConfigured() && isEmailSafeUrl) {
-      const result = await sendStudentVerificationEmail({ schoolEmail, verifyUrl });
+      const result = await sendStudentVerificationEmail({ email, verifyUrl });
       if (result.sent) {
         delivery = "sent";
       } else {
@@ -156,7 +160,8 @@ export async function POST(request: Request) {
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        schoolEmail,
+        email,
+        school,
         verifiedStudent: false,
         studentVerificationStatus: StudentVerificationStatus.EMAIL_PENDING,
         studentVerificationNotes: notesByDelivery[delivery],

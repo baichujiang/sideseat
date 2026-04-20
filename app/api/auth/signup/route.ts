@@ -16,10 +16,8 @@ export async function POST(request: Request) {
     }
     const values = parsed.data;
 
-    const existing = await prisma.user.findFirst({
-      where: {
-        OR: [{ username: values.username }, ...(values.email ? [{ email: values.email }] : [])],
-      },
+    const existing = await prisma.user.findUnique({
+      where: { username: values.username },
     });
 
     if (existing) {
@@ -27,20 +25,14 @@ export async function POST(request: Request) {
         request,
         action: ClientSignalAction.SIGNUP,
         wasSuccessful: false,
-        attemptedEmail: values.email,
         clientContext: values.clientContext,
       });
-
-      if (existing.username === values.username) {
-        return error("That username is already taken.", 409);
-      }
-      return error("That email is already registered.", 409);
+      return error("That username is already taken.", 409);
     }
 
     const user = await prisma.user.create({
       data: {
         username: values.username,
-        email: values.email ?? null,
         hashedPassword: await hashPassword(values.password),
       },
     });
@@ -51,7 +43,6 @@ export async function POST(request: Request) {
       action: ClientSignalAction.SIGNUP,
       wasSuccessful: true,
       userId: user.id,
-      attemptedEmail: values.email,
       clientContext: values.clientContext,
     });
 

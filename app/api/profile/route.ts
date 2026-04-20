@@ -34,8 +34,8 @@ export async function PUT(request: Request) {
             ? {
                 verifiedStudent: false,
                 studentVerificationStatus: StudentVerificationStatus.UNVERIFIED,
-                schoolEmail: null,
-                schoolEmailVerifiedAt: null,
+                email: null,
+                emailVerifiedAt: null,
                 studentVerificationNotes:
                   "School community changed. Please verify a matching school email again.",
               }

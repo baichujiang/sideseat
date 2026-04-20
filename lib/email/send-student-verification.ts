@@ -1,10 +1,10 @@
 import { getEmailFrom, getResendClient } from "@/lib/email/resend";
 
 function buildStudentVerificationHtml({
-  schoolEmail,
+  email,
   verifyUrl,
 }: {
-  schoolEmail: string;
+  email: string;
   verifyUrl: string;
 }) {
   return `
@@ -13,7 +13,7 @@ function buildStudentVerificationHtml({
         <p style="margin:0 0 12px;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#7b6b58;">SideSeat</p>
         <h1 style="margin:0 0 16px;font-size:28px;line-height:1.2;color:#17222b;">Verify your student email</h1>
         <p style="margin:0 0 12px;font-size:15px;line-height:1.7;color:#44515b;">
-          You requested student verification for <strong>${schoolEmail}</strong>.
+          You requested student verification for <strong>${email}</strong>.
         </p>
         <p style="margin:0 0 24px;font-size:15px;line-height:1.7;color:#44515b;">
           Confirm this address to unlock invitations and connect with classmates through shared courses.
@@ -44,10 +44,10 @@ export type SendResult =
  * with a local fallback link when delivery is not configured or Resend errors.
  */
 export async function sendStudentVerificationEmail({
-  schoolEmail,
+  email,
   verifyUrl,
 }: {
-  schoolEmail: string;
+  email: string;
   verifyUrl: string;
 }): Promise<SendResult> {
   const resend = getResendClient();
@@ -60,9 +60,9 @@ export async function sendStudentVerificationEmail({
   try {
     const result = await resend.emails.send({
       from,
-      to: schoolEmail,
+      to: email,
       subject: "Verify your SideSeat student email",
-      html: buildStudentVerificationHtml({ schoolEmail, verifyUrl }),
+      html: buildStudentVerificationHtml({ email, verifyUrl }),
     });
 
     if (result.error) {

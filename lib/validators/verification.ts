@@ -1,8 +1,8 @@
 import { StudentVerificationStatus } from "@prisma/client";
 import { z } from "zod";
 
-export const schoolEmailRequestSchema = z.object({
-  schoolEmail: z.string().email().toLowerCase(),
+export const verifyEmailRequestSchema = z.object({
+  email: z.string().email().toLowerCase(),
 });
 
 export const adminVerificationDecisionSchema = z.object({

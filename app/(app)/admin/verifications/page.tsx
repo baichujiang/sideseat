@@ -63,7 +63,7 @@ export default async function AdminVerificationsPage() {
                 <div className="space-y-1">
                   <CardTitle>{user.nickname ?? user.username}</CardTitle>
                   <CardDescription>
-                    Account: {user.email ?? user.username} · School email: {user.schoolEmail ?? "not submitted"}
+                    Username: {user.username} · Email: {user.email ?? "not submitted"}
                   </CardDescription>
                 </div>
                 <StatusBadge tone={tone(user.studentVerificationStatus)}>
@@ -74,8 +74,8 @@ export default async function AdminVerificationsPage() {
               <div className="grid gap-1 text-sm text-muted-foreground">
                 <p>School: {user.school ?? "not set"}</p>
                 <p>Major: {user.major ?? "not set"}</p>
-                {user.schoolEmailVerifiedAt ? (
-                  <p>Verified at: {user.schoolEmailVerifiedAt.toLocaleString()}</p>
+                {user.emailVerifiedAt ? (
+                  <p>Verified at: {user.emailVerifiedAt.toLocaleString()}</p>
                 ) : null}
                 {user.studentVerificationNotes ? (
                   <p className="text-foreground">{user.studentVerificationNotes}</p>

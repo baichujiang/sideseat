@@ -35,7 +35,7 @@ async function main() {
     prisma.user.create({
       data: {
         username: "lin",
-        email: "lin@example.com",
+        email: "lin@tum.de",
         hashedPassword: password,
         nickname: "Lin",
         school: "TUM",
@@ -46,8 +46,7 @@ async function main() {
         onboardingComplete: true,
         verifiedStudent: true,
         studentVerificationStatus: StudentVerificationStatus.VERIFIED,
-        schoolEmail: "lin@tum.de",
-        schoolEmailVerifiedAt: new Date(),
+        emailVerifiedAt: new Date(),
         contactInfoOptIn: true,
         telegramHandle: "@lin_ml",
       },
@@ -55,7 +54,7 @@ async function main() {
     prisma.user.create({
       data: {
         username: "amira",
-        email: "amira@example.com",
+        email: "amira@tum.de",
         hashedPassword: password,
         nickname: "Amira",
         school: "TUM",
@@ -66,8 +65,7 @@ async function main() {
         onboardingComplete: true,
         verifiedStudent: true,
         studentVerificationStatus: StudentVerificationStatus.VERIFIED,
-        schoolEmail: "amira@tum.de",
-        schoolEmailVerifiedAt: new Date(),
+        emailVerifiedAt: new Date(),
         contactInfoOptIn: true,
         whatsappHandle: "+49 111 222333",
       },
@@ -75,7 +73,7 @@ async function main() {
     prisma.user.create({
       data: {
         username: "lucas",
-        email: "lucas@example.com",
+        email: "lucas@tum.de",
         hashedPassword: password,
         nickname: "Lucas",
         school: "TUM",
@@ -86,14 +84,13 @@ async function main() {
         onboardingComplete: true,
         verifiedStudent: true,
         studentVerificationStatus: StudentVerificationStatus.VERIFIED,
-        schoolEmail: "lucas@tum.de",
-        schoolEmailVerifiedAt: new Date(),
+        emailVerifiedAt: new Date(),
       },
     }),
     prisma.user.create({
       data: {
         username: "yuna",
-        email: "yuna@example.com",
+        email: null,
         hashedPassword: password,
         nickname: "Yuna",
         school: "TUM",
@@ -102,7 +99,6 @@ async function main() {
         bio: "Prefer low-pressure intros before sharing contact info.",
         languages: [LanguageTag.ENGLISH, LanguageTag.GERMAN],
         onboardingComplete: true,
-        schoolEmail: "yuna@gmail.com",
         studentVerificationStatus: StudentVerificationStatus.MANUAL_REVIEW_REQUIRED,
         studentVerificationNotes:
           "Public domain submitted for school verification. Needs admin approval.",

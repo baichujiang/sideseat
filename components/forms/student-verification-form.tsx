@@ -23,22 +23,20 @@ function statusTone(status: StudentVerificationStatus) {
 }
 
 export function StudentVerificationForm({
-  currentEmail,
   currentStatus,
   school,
-  schoolEmail,
+  email,
   schoolHint,
   notes,
 }: {
-  currentEmail: string;
   currentStatus: StudentVerificationStatus;
   school?: string | null;
-  schoolEmail?: string | null;
+  email?: string | null;
   schoolHint: string;
   notes?: string | null;
 }) {
   const router = useRouter();
-  const [input, setInput] = useState(schoolEmail ?? "");
+  const [input, setInput] = useState(email ?? "");
   const [message, setMessage] = useState("");
   const [verifyUrl, setVerifyUrl] = useState("");
   const [delivery, setDelivery] = useState<DeliveryKind | "">("");
@@ -62,7 +60,7 @@ export function StudentVerificationForm({
       const response = await fetch("/api/student-verification/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ schoolEmail: input }),
+        body: JSON.stringify({ email: input }),
       });
 
       const payload = await response.json();
@@ -93,9 +91,9 @@ export function StudentVerificationForm({
     <Card className="space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
-          <CardTitle>School email</CardTitle>
+          <CardTitle>Student verification</CardTitle>
           <CardDescription>
-            Confirm your school address to unlock invitations.
+            Add your school email to prove you&apos;re a {getSchoolLabel(school)} student.
           </CardDescription>
         </div>
         <StatusBadge tone={statusTone(currentStatus)}>
@@ -104,9 +102,7 @@ export function StudentVerificationForm({
       </div>
 
       <div className="grid gap-1.5 text-sm text-muted-foreground">
-        <p>Login email: {currentEmail || "Not set"}</p>
-        <p>School: {getSchoolLabel(school)}</p>
-        {schoolEmail ? <p>School email: {schoolEmail}</p> : null}
+        {email ? <p>Email: {email}</p> : null}
         <p>{schoolHint}</p>
         {notes ? <p className="text-foreground">{notes}</p> : null}
       </div>
@@ -114,7 +110,7 @@ export function StudentVerificationForm({
       <div className="space-y-3">
         <Input
           onChange={(event) => setInput(event.target.value)}
-          placeholder="name@your-school-domain.de"
+          placeholder="name@tum.de"
           type="email"
           value={input}
         />

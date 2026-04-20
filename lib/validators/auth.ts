@@ -18,10 +18,6 @@ const usernameSchema = z
 export const signupSchema = z.object({
   username: usernameSchema,
   password: z.string().min(8, "Password must be at least 8 characters."),
-  email: z
-    .union([z.string().email("Enter a valid email or leave this blank."), z.literal("")])
-    .optional()
-    .transform((v) => (v && String(v).trim() ? String(v).trim().toLowerCase() : undefined)),
 });
 
 export const loginSchema = z.object({

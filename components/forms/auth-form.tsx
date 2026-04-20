@@ -33,7 +33,6 @@ export function AuthForm({
     defaultValues: {
       username: mode === "signup" ? initialIdentifier : "",
       password: initialPassword,
-      email: "",
     },
   });
 
@@ -109,19 +108,9 @@ export function AuthForm({
             />
             <FormMessage message={signupForm.formState.errors.password?.message} />
           </div>
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Email</label>
-              <span className="text-xs text-muted-foreground">optional</span>
-            </div>
-            <Input
-              type="email"
-              autoComplete="email"
-              placeholder="For recovery & school verification"
-              {...signupForm.register("email")}
-            />
-            <FormMessage message={signupForm.formState.errors.email?.message} />
-          </div>
+          <p className="text-xs text-muted-foreground">
+            Add your TUM email later in Profile to verify as a student.
+          </p>
           <FormMessage message={serverError} />
           <Button className="w-full" disabled={signupForm.formState.isSubmitting} type="submit">
             {signupForm.formState.isSubmitting ? "Please wait..." : "Create account"}

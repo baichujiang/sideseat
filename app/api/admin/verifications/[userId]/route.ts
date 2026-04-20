@@ -19,7 +19,7 @@ export async function PATCH(
       data: {
         verifiedStudent: status === StudentVerificationStatus.VERIFIED,
         studentVerificationStatus: status,
-        schoolEmailVerifiedAt:
+        emailVerifiedAt:
           status === StudentVerificationStatus.VERIFIED ? new Date() : null,
         studentVerificationNotes: note || `Last reviewed by ${admin.email}.`,
       },
