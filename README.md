@@ -254,3 +254,4 @@ Password for all seeded users:
 
 - This MVP intentionally does not include public feeds, random discovery, media messaging, typing indicators, or read receipts.
 - If you later wrap this into iOS or Android shells, the current mobile-first web architecture is already suitable for a WebView-based first release.
+# sideseat
