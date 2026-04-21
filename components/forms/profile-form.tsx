@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormMessage } from "@/components/forms/form-message";
-import { getSchoolLabel } from "@/lib/constants/schools";
+import { schoolOptions } from "@/lib/constants/schools";
 import {
   DEGREE_LEVEL_LABELS,
   DEGREE_LEVELS,
@@ -46,7 +46,7 @@ export function ProfileForm({
     formState: { errors, isSubmitting },
   } = useForm<ProfileValues>({
     resolver: zodResolver(profileSchema),
-    defaultValues: { ...initialValues, school: "TUM" },
+    defaultValues: initialValues,
   });
 
   const onSubmit = handleSubmit(async (values) => {
@@ -95,8 +95,6 @@ export function ProfileForm({
 
   return (
     <form className="space-y-4" onSubmit={onSubmit}>
-      <input type="hidden" {...register("school")} value="TUM" />
-
       <AvatarPicker initialId={avatarId}>
         <label className="block text-xs font-medium text-muted-foreground">Nickname</label>
         <Input {...register("nickname")} placeholder="QuietCoder" />
@@ -104,23 +102,36 @@ export function ProfileForm({
       </AvatarPicker>
 
       <section className="space-y-3 rounded-3xl border border-border bg-card p-4">
-        <div className="flex items-baseline justify-between gap-2">
-          <h2 className="text-sm font-semibold">Academic</h2>
-          <span className="text-xs text-muted-foreground">{getSchoolLabel("TUM")}</span>
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">Degree</label>
-          <select
-            className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm"
-            {...register("degreeLevel")}
-          >
-            {DEGREE_LEVELS.map((level) => (
-              <option key={level} value={level}>
-                {DEGREE_LEVEL_LABELS[level]}
-              </option>
-            ))}
-          </select>
-          <FormMessage message={errors.degreeLevel?.message} />
+        <h2 className="text-sm font-semibold">Studies</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">School</label>
+            <select
+              className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm"
+              {...register("school")}
+            >
+              {schoolOptions.map((school) => (
+                <option key={school.value} value={school.value}>
+                  {school.shortLabel}
+                </option>
+              ))}
+            </select>
+            <FormMessage message={errors.school?.message} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Degree</label>
+            <select
+              className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm"
+              {...register("degreeLevel")}
+            >
+              {DEGREE_LEVELS.map((level) => (
+                <option key={level} value={level}>
+                  {DEGREE_LEVEL_LABELS[level]}
+                </option>
+              ))}
+            </select>
+            <FormMessage message={errors.degreeLevel?.message} />
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
