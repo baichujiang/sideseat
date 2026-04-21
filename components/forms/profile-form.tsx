@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { AvatarPicker } from "@/components/forms/avatar-picker";
+import { SearchableSelect } from "@/components/forms/searchable-select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,17 +125,12 @@ export function ProfileForm({
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground">Major</label>
-            <select
-              className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm"
-              {...register("major")}
-            >
-              <option value="">Choose…</option>
-              {majorOptions.map((major) => (
-                <option key={major} value={major}>
-                  {major}
-                </option>
-              ))}
-            </select>
+            <input type="hidden" {...register("major")} />
+            <SearchableSelect
+              value={currentMajor ?? ""}
+              options={majorOptions}
+              onChange={(value) => setValue("major", value, { shouldValidate: true })}
+            />
             <FormMessage message={errors.major?.message} />
           </div>
           <div className="space-y-1">
