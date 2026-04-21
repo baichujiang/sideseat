@@ -11,12 +11,11 @@
 
 import type { DegreeLevel } from "@prisma/client";
 
-export const DEGREE_LEVELS = ["BACHELOR", "MASTER", "PHD", "OTHER"] as const;
+export const DEGREE_LEVELS = ["BACHELOR", "MASTER", "OTHER"] as const;
 
 export const DEGREE_LEVEL_LABELS: Record<DegreeLevel, string> = {
   BACHELOR: "Bachelor",
   MASTER: "Master",
-  PHD: "PhD / Doctorate",
   OTHER: "Other (State exam, certificate, …)",
 };
 
@@ -192,11 +191,6 @@ export const MASTER_MAJORS = [
   "Vocational Education Structural Engineering",
 ] as const;
 
-export const PHD_MAJORS = [
-  "Medical Life Science and Technology",
-  "Other doctoral program",
-] as const;
-
 export const OTHER_MAJORS = [
   "Medicine (State Exam)",
   "Lehramt Sport",
@@ -210,7 +204,6 @@ export const OTHER_MAJORS = [
 export const MAJORS_BY_LEVEL: Record<DegreeLevel, readonly string[]> = {
   BACHELOR: BACHELOR_MAJORS,
   MASTER: MASTER_MAJORS,
-  PHD: PHD_MAJORS,
   OTHER: OTHER_MAJORS,
 };
 
@@ -219,13 +212,13 @@ export function isKnownMajor(level: DegreeLevel, value: string): boolean {
 }
 
 /**
- * Reasonable upper bound on the "semester in current program" field. PhDs and
- * the OTHER bucket get more headroom because their programs vary widely.
+ * Reasonable upper bound on the "semester in current program" field. The
+ * OTHER bucket gets more headroom because state-exam programs (Medicine,
+ * Lehramt) run longer than a normal Bachelor.
  */
 export const SEMESTER_LIMITS: Record<DegreeLevel, number> = {
   BACHELOR: 12,
   MASTER: 8,
-  PHD: 16,
   OTHER: 14,
 };
 
