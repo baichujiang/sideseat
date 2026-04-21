@@ -96,6 +96,13 @@ enum ClientSignalAction {
   INVITATION_SENT
 }
 
+enum DegreeLevel {
+  BACHELOR
+  MASTER
+  PHD
+  OTHER
+}
+
 model User {
   id                           String                   @id @default(cuid())
   username                     String                   @unique
@@ -104,6 +111,7 @@ model User {
   hashedPassword               String
   nickname                     String?
   school                       String?
+  degreeLevel                  DegreeLevel?
   major                        String?
   semester                     Int?
   avatarUrl                    String?

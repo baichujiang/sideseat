@@ -17,6 +17,7 @@ export async function PUT(request: Request) {
         data: {
           nickname: values.nickname,
           school: values.school,
+          degreeLevel: values.degreeLevel,
           major: values.major,
           semester: values.semester,
           bio: values.bio || null,

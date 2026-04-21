@@ -14,6 +14,7 @@ export default async function OnboardingPage() {
         initialValues={{
           nickname: user.nickname ?? "",
           school: normalizeSchoolCode(user.school) ?? DEFAULT_SCHOOL,
+          degreeLevel: user.degreeLevel ?? "BACHELOR",
           major: user.major ?? "",
           semester: user.semester ?? 1,
           bio: user.bio ?? "",

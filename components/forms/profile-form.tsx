@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,7 +13,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormMessage } from "@/components/forms/form-message";
 import { getSchoolLabel } from "@/lib/constants/schools";
-import { TUM_MAJORS, SEMESTER_OPTIONS } from "@/lib/constants/majors";
+import {
+  DEGREE_LEVEL_LABELS,
+  DEGREE_LEVELS,
+  MAJORS_BY_LEVEL,
+  semesterOptions,
+} from "@/lib/constants/majors";
 import { profileSchema } from "@/lib/validators/profile";
 
 type ProfileValues = z.infer<typeof profileSchema>;
@@ -64,13 +69,28 @@ export function ProfileForm({
     router.refresh();
   });
 
-  // Preserve legacy free-text majors so existing rows stay selected even when
-  // the value isn't in the curated TUM list yet.
-  const initialMajor = initialValues.major;
+  const degreeLevel = watch("degreeLevel");
+  const semester = watch("semester");
+  const currentMajor = watch("major");
+
+  // Build the major list for the selected degree level. Preserve any legacy
+  // free-text major so old rows don't silently get reset to empty.
+  const baseMajors = degreeLevel ? MAJORS_BY_LEVEL[degreeLevel] : [];
   const majorOptions =
-    initialMajor && !TUM_MAJORS.includes(initialMajor as (typeof TUM_MAJORS)[number])
-      ? [initialMajor, ...TUM_MAJORS]
-      : TUM_MAJORS;
+    currentMajor && baseMajors.length && !baseMajors.includes(currentMajor)
+      ? [currentMajor, ...baseMajors]
+      : baseMajors;
+
+  const semesterChoices = semesterOptions(degreeLevel);
+
+  // Clamp semester if the user switches to a level with a lower max.
+  useEffect(() => {
+    if (!degreeLevel) return;
+    const max = semesterChoices[semesterChoices.length - 1];
+    if (typeof semester === "number" && semester > max) {
+      setValue("semester", max, { shouldValidate: true });
+    }
+  }, [degreeLevel, semester, semesterChoices, setValue]);
 
   return (
     <form className="space-y-4" onSubmit={onSubmit}>
@@ -86,6 +106,20 @@ export function ProfileForm({
         <div className="flex items-baseline justify-between gap-2">
           <h2 className="text-sm font-semibold">Academic</h2>
           <span className="text-xs text-muted-foreground">{getSchoolLabel("TUM")}</span>
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-muted-foreground">Degree</label>
+          <select
+            className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm"
+            {...register("degreeLevel")}
+          >
+            {DEGREE_LEVELS.map((level) => (
+              <option key={level} value={level}>
+                {DEGREE_LEVEL_LABELS[level]}
+              </option>
+            ))}
+          </select>
+          <FormMessage message={errors.degreeLevel?.message} />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
@@ -109,7 +143,7 @@ export function ProfileForm({
               className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm"
               {...register("semester", { valueAsNumber: true })}
             >
-              {SEMESTER_OPTIONS.map((n) => (
+              {semesterChoices.map((n) => (
                 <option key={n} value={n}>
                   {n}
                 </option>
