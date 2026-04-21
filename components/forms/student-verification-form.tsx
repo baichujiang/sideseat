@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
-import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils";
@@ -88,55 +87,48 @@ export function StudentVerificationForm({
 
   if (isVerified) {
     return (
-      <Card className="flex items-center justify-between gap-3">
-        <div>
-          <CardTitle className="text-base">Student</CardTitle>
-          <p className="text-sm text-muted-foreground">{email}</p>
-        </div>
+      <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#d5e9df] bg-[#eef8f2] px-3 py-2">
+        <p className="truncate text-sm">{email}</p>
         <StatusBadge tone="calm">verified</StatusBadge>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <CardTitle className="text-base">Student verification</CardTitle>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-medium text-muted-foreground">Student verification</p>
         <StatusBadge tone={statusTone(currentStatus)}>
           {currentStatus.toLowerCase().replaceAll("_", " ")}
         </StatusBadge>
       </div>
-
-      <div className="space-y-2">
+      <div className="flex gap-2">
         <Input
+          className="flex-1"
           onChange={(event) => setInput(event.target.value)}
           placeholder="name@tum.de"
           type="email"
           value={input}
         />
-        <Button className="w-full" disabled={isPending} onClick={submit} type="button">
-          {isPending ? "Sending…" : "Send verification email"}
+        <Button disabled={isPending} onClick={submit} type="button">
+          {isPending ? "Sending…" : "Verify"}
         </Button>
-        <p className="text-xs text-muted-foreground">{schoolHint}</p>
       </div>
+      <p className="text-xs text-muted-foreground">{schoolHint}</p>
 
       {notes ? <p className="text-sm text-foreground">{notes}</p> : null}
       {message ? <p className={`text-sm ${deliveryTone}`}>{message}</p> : null}
 
       {verifyUrl ? (
-        <div className="space-y-2 rounded-2xl border border-border bg-[#faf7f1] p-3 text-sm">
+        <div className="space-y-2 rounded-2xl border border-border bg-[#faf7f1] p-3 text-xs">
           <p className="font-medium">Verification link</p>
-          <p className="text-xs text-muted-foreground">
-            Works even if the email didn&apos;t arrive. Open it from the device signed in to this
-            account.
-          </p>
           <div className="flex flex-col gap-2 sm:flex-row">
             <a
               className={cn(buttonVariants({ size: "sm" }), "sm:flex-1")}
               href={verifyUrl}
               rel="noreferrer"
             >
-              Open verification link
+              Open link
             </a>
             <Button
               className="sm:flex-1"
@@ -145,7 +137,7 @@ export function StudentVerificationForm({
               type="button"
               variant="outline"
             >
-              {copied ? "Copied" : "Copy link"}
+              {copied ? "Copied" : "Copy"}
             </Button>
           </div>
           <a className="block break-all text-[11px] text-muted-foreground underline" href={verifyUrl}>
@@ -153,6 +145,6 @@ export function StudentVerificationForm({
           </a>
         </div>
       ) : null}
-    </Card>
+    </div>
   );
 }

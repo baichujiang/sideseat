@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormMessage } from "@/components/forms/form-message";
 import { getSchoolLabel } from "@/lib/constants/schools";
+import { TUM_MAJORS, SEMESTER_OPTIONS } from "@/lib/constants/majors";
 import { profileSchema } from "@/lib/validators/profile";
 
 type ProfileValues = z.infer<typeof profileSchema>;
@@ -21,10 +22,13 @@ export function ProfileForm({
   initialValues,
   submitLabel,
   avatarId,
+  verificationSlot,
 }: {
   initialValues: ProfileValues;
   submitLabel: string;
   avatarId: string | null;
+  /** Rendered inside the Academic card so school + verification feel like one module. */
+  verificationSlot?: React.ReactNode;
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState("");
@@ -60,63 +64,90 @@ export function ProfileForm({
     router.refresh();
   });
 
-  return (
-    <form className="space-y-5" onSubmit={onSubmit}>
-      <AvatarPicker initialId={avatarId} />
+  // Preserve legacy free-text majors so existing rows stay selected even when
+  // the value isn't in the curated TUM list yet.
+  const initialMajor = initialValues.major;
+  const majorOptions =
+    initialMajor && !TUM_MAJORS.includes(initialMajor as (typeof TUM_MAJORS)[number])
+      ? [initialMajor, ...TUM_MAJORS]
+      : TUM_MAJORS;
 
-      <div className="grid gap-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Nickname</label>
-          <Input {...register("nickname")} placeholder="QuietCoder" />
-          <FormMessage message={errors.nickname?.message} />
+  return (
+    <form className="space-y-4" onSubmit={onSubmit}>
+      <input type="hidden" {...register("school")} value="TUM" />
+
+      <AvatarPicker initialId={avatarId}>
+        <label className="block text-xs font-medium text-muted-foreground">Nickname</label>
+        <Input {...register("nickname")} placeholder="QuietCoder" />
+        <FormMessage message={errors.nickname?.message} />
+      </AvatarPicker>
+
+      <section className="space-y-3 rounded-3xl border border-border bg-card p-4">
+        <div className="flex items-baseline justify-between gap-2">
+          <h2 className="text-sm font-semibold">Academic</h2>
+          <span className="text-xs text-muted-foreground">{getSchoolLabel("TUM")}</span>
         </div>
-        <input type="hidden" {...register("school")} value="TUM" />
-        <div className="space-y-1 rounded-3xl border border-border bg-muted/30 px-4 py-3">
-          <p className="text-xs text-muted-foreground">School</p>
-          <p className="text-sm font-medium">{getSchoolLabel("TUM")}</p>
-          <p className="text-xs text-muted-foreground">
-            Only TUM is supported right now. More schools coming soon.
-          </p>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Major</label>
+            <select
+              className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm"
+              {...register("major")}
+            >
+              <option value="">Choose…</option>
+              {majorOptions.map((major) => (
+                <option key={major} value={major}>
+                  {major}
+                </option>
+              ))}
+            </select>
+            <FormMessage message={errors.major?.message} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Semester</label>
+            <select
+              className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm"
+              {...register("semester", { valueAsNumber: true })}
+            >
+              {SEMESTER_OPTIONS.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+            <FormMessage message={errors.semester?.message} />
+          </div>
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Major</label>
-          <Input {...register("major")} placeholder="Robotics" />
-          <FormMessage message={errors.major?.message} />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Semester</label>
-          <Input type="number" {...register("semester", { valueAsNumber: true })} />
-          <FormMessage message={errors.semester?.message} />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Tagline</label>
-          <Textarea
-            {...register("bio")}
-            placeholder="One short line — like a status or signature."
-            rows={3}
-          />
-          <p className="text-xs text-muted-foreground">Up to 120 characters.</p>
-          <FormMessage message={errors.bio?.message} />
-        </div>
+        {verificationSlot}
+      </section>
+
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-muted-foreground">Tagline</label>
+        <Textarea
+          {...register("bio")}
+          placeholder="One short line — like a status or signature."
+          rows={2}
+        />
+        <FormMessage message={errors.bio?.message} />
       </div>
 
-      <div className="space-y-3 rounded-3xl border border-border bg-card p-4">
-        <p className="text-sm font-medium">Discovery & privacy</p>
-        <div className="space-y-3">
+      <section className="space-y-2 rounded-3xl border border-border bg-card p-4">
+        <p className="text-sm font-semibold">Discovery</p>
+        <div className="grid gap-1.5">
           <Checkbox
             checked={watch("discoverByCourse")}
             onChange={(checked) => setValue("discoverByCourse", checked)}
-            label="Show me people through shared courses"
+            label="Shared courses"
           />
           <Checkbox
             checked={watch("discoverByMajor")}
             onChange={(checked) => setValue("discoverByMajor", checked)}
-            label="Show me people through shared majors"
+            label="Same major"
           />
           <Checkbox
             checked={watch("discoverBySemester")}
             onChange={(checked) => setValue("discoverBySemester", checked)}
-            label="Show me people through shared semesters"
+            label="Same semester"
           />
           <Checkbox
             checked={watch("allowInvitationNotes")}
@@ -126,20 +157,20 @@ export function ProfileForm({
           <Checkbox
             checked={watch("contactInfoOptIn")}
             onChange={(checked) => setValue("contactInfoOptIn", checked)}
-            label="Allow contact exchange requests"
+            label="Allow contact exchange"
           />
         </div>
-      </div>
+      </section>
 
-      <div className="space-y-3 rounded-3xl border border-border bg-card p-4">
-        <p className="text-sm font-medium">Private contact handles</p>
-        <div className="grid gap-3">
+      <section className="space-y-2 rounded-3xl border border-border bg-card p-4">
+        <p className="text-sm font-semibold">Contact handles</p>
+        <div className="grid grid-cols-2 gap-2">
           <Input {...register("wechatHandle")} placeholder="WeChat" />
           <Input {...register("whatsappHandle")} placeholder="WhatsApp" />
           <Input {...register("telegramHandle")} placeholder="Telegram" />
           <Input {...register("instagramHandle")} placeholder="Instagram" />
         </div>
-      </div>
+      </section>
 
       <FormMessage message={serverError} />
 

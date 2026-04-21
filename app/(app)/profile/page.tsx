@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { StudentVerificationForm } from "@/components/forms/student-verification-form";
 import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import { ProfileForm } from "@/components/forms/profile-form";
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { adminEmails } from "@/lib/constants/app";
@@ -58,7 +58,7 @@ export default async function ProfilePage({
   const isAdmin = Boolean(user.email && adminEmails.includes(user.email.toLowerCase()));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <h1 className="text-xl font-semibold tracking-tight">Profile</h1>
 
       {query.verification === "success" ? (
@@ -76,13 +76,6 @@ export default async function ProfilePage({
           That link wasn&apos;t valid. Request a fresh verification email below.
         </p>
       ) : null}
-
-      <StudentVerificationForm
-        currentStatus={user.studentVerificationStatus}
-        schoolHint={getSchoolVerificationHint(user.school)}
-        notes={user.studentVerificationNotes}
-        email={user.email}
-      />
 
       {isAdmin ? (
         <div className="flex flex-wrap gap-2 rounded-2xl border border-border bg-muted/40 px-3 py-2.5">
@@ -111,6 +104,14 @@ export default async function ProfilePage({
       <ProfileForm
         submitLabel="Save"
         avatarId={user.avatarUrl}
+        verificationSlot={
+          <StudentVerificationForm
+            currentStatus={user.studentVerificationStatus}
+            schoolHint={getSchoolVerificationHint(user.school)}
+            notes={user.studentVerificationNotes}
+            email={user.email}
+          />
+        }
         initialValues={{
           nickname: user.nickname ?? "",
           school: normalizeSchoolCode(user.school) ?? DEFAULT_SCHOOL,
