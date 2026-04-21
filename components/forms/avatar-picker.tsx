@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { PresetAvatar } from "@/components/ui/preset-avatar";
-import { avatarPresets } from "@/lib/constants/avatars";
+import { AVATAR_IDS } from "@/lib/constants/avatars";
 import { cn } from "@/lib/utils";
 
 export function AvatarPicker({
@@ -66,11 +66,11 @@ export function AvatarPicker({
       </div>
       {expanded ? (
         <div className="grid grid-cols-5 gap-2 rounded-2xl border border-border bg-muted/30 p-2 sm:grid-cols-10">
-          {avatarPresets.map((preset) => {
-            const isSelected = preset.id === selected;
+          {AVATAR_IDS.map((id) => {
+            const isSelected = id === selected;
             return (
               <button
-                aria-label={`Avatar ${preset.id}`}
+                aria-label={`Avatar ${id}`}
                 aria-pressed={isSelected}
                 className={cn(
                   "rounded-full transition",
@@ -78,11 +78,11 @@ export function AvatarPicker({
                     ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
                     : "opacity-80 hover:opacity-100",
                 )}
-                key={preset.id}
-                onClick={() => choose(preset.id)}
+                key={id}
+                onClick={() => choose(id)}
                 type="button"
               >
-                <PresetAvatar className="h-10 w-10" id={preset.id} />
+                <PresetAvatar className="h-10 w-10" id={id} />
               </button>
             );
           })}
