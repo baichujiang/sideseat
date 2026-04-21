@@ -7,7 +7,6 @@ export default async function OnboardingPage() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-xl font-semibold tracking-tight">Complete your profile</h1>
       <ProfileForm
         submitLabel="Save profile and continue"
         avatarId={user.avatarUrl}

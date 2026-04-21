@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { CourseForm } from "@/components/forms/course-form";
 import { requireOnboardedUser } from "@/lib/auth/guards";
 
@@ -6,7 +8,9 @@ export default async function AddCoursePage() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-xl font-semibold tracking-tight">Add a TUM course</h1>
+      <Link className="text-xs text-muted-foreground hover:text-foreground" href="/courses">
+        ← Courses
+      </Link>
       <CourseForm />
     </div>
   );

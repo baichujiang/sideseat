@@ -17,12 +17,9 @@ export default async function InboxRequestsPage() {
 
   return (
     <div className="space-y-5">
-      <div className="space-y-1">
-        <Link className="text-xs text-muted-foreground hover:text-foreground" href="/inbox">
-          ← Inbox
-        </Link>
-        <h1 className="text-xl font-semibold tracking-tight">Requests</h1>
-      </div>
+      <Link className="text-xs text-muted-foreground hover:text-foreground" href="/inbox">
+        ← Inbox
+      </Link>
 
       {received.length ? (
         <div className="space-y-3">

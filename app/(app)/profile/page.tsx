@@ -21,8 +21,6 @@ export default async function ProfilePage({
   if (user.isGuest) {
     return (
       <div className="space-y-6">
-        <h1 className="text-xl font-semibold tracking-tight">Profile</h1>
-
         <Card className="space-y-3 border-dashed border-primary/30 bg-muted/30">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
@@ -59,8 +57,6 @@ export default async function ProfilePage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold tracking-tight">Profile</h1>
-
       {query.verification === "success" ? (
         <p className="rounded-2xl border border-[#d5e9df] bg-[#eef8f2] px-4 py-3 text-sm text-foreground">
           Student email verified — you can send invitations now.

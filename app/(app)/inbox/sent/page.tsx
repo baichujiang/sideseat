@@ -16,12 +16,9 @@ export default async function InboxSentPage() {
 
   return (
     <div className="space-y-5">
-      <div className="space-y-1">
-        <Link className="text-xs text-muted-foreground hover:text-foreground" href="/inbox">
-          ← Inbox
-        </Link>
-        <h1 className="text-xl font-semibold tracking-tight">Sent</h1>
-      </div>
+      <Link className="text-xs text-muted-foreground hover:text-foreground" href="/inbox">
+        ← Inbox
+      </Link>
 
       {sent.length ? (
         <div className="space-y-3">

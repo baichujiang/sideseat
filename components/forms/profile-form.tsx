@@ -96,16 +96,14 @@ export function ProfileForm({
   return (
     <form className="space-y-4" onSubmit={onSubmit}>
       <AvatarPicker initialId={avatarId}>
-        <label className="block text-xs font-medium text-muted-foreground">Nickname</label>
-        <Input {...register("nickname")} placeholder="QuietCoder" />
+        <Input {...register("nickname")} placeholder="Nickname" />
         <FormMessage message={errors.nickname?.message} />
       </AvatarPicker>
 
       <section className="space-y-3 rounded-3xl border border-border bg-card p-4">
-        <h2 className="text-sm font-semibold">Studies</h2>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">School</label>
+            <FieldLabel>School</FieldLabel>
             <select
               className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm"
               {...register("school")}
@@ -119,7 +117,7 @@ export function ProfileForm({
             <FormMessage message={errors.school?.message} />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">Degree</label>
+            <FieldLabel>Degree</FieldLabel>
             <select
               className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm"
               {...register("degreeLevel")}
@@ -135,7 +133,7 @@ export function ProfileForm({
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">Major</label>
+            <FieldLabel>Major</FieldLabel>
             <input type="hidden" {...register("major")} />
             <SearchableSelect
               value={currentMajor ?? ""}
@@ -145,7 +143,7 @@ export function ProfileForm({
             <FormMessage message={errors.major?.message} />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">Semester</label>
+            <FieldLabel>Semester</FieldLabel>
             <select
               className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm"
               {...register("semester", { valueAsNumber: true })}
@@ -162,33 +160,29 @@ export function ProfileForm({
         {verificationSlot}
       </section>
 
-      <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">Tagline</label>
-        <Textarea
-          {...register("bio")}
-          placeholder="One short line — like a status or signature."
-          rows={2}
-        />
-        <FormMessage message={errors.bio?.message} />
-      </div>
+      <Textarea
+        {...register("bio")}
+        placeholder="Tagline — one short line, like a status or signature"
+        rows={2}
+      />
+      <FormMessage message={errors.bio?.message} />
 
       <section className="space-y-2 rounded-3xl border border-border bg-card p-4">
-        <p className="text-sm font-semibold">Discovery</p>
         <div className="grid gap-1.5">
           <Checkbox
             checked={watch("discoverByCourse")}
             onChange={(checked) => setValue("discoverByCourse", checked)}
-            label="Shared courses"
+            label="Discoverable via shared courses"
           />
           <Checkbox
             checked={watch("discoverByMajor")}
             onChange={(checked) => setValue("discoverByMajor", checked)}
-            label="Same major"
+            label="Discoverable via same major"
           />
           <Checkbox
             checked={watch("discoverBySemester")}
             onChange={(checked) => setValue("discoverBySemester", checked)}
-            label="Same semester"
+            label="Discoverable via same semester"
           />
           <Checkbox
             checked={watch("allowInvitationNotes")}
@@ -203,8 +197,7 @@ export function ProfileForm({
         </div>
       </section>
 
-      <section className="space-y-2 rounded-3xl border border-border bg-card p-4">
-        <p className="text-sm font-semibold">Contact handles</p>
+      <section className="rounded-3xl border border-border bg-card p-4">
         <div className="grid grid-cols-2 gap-2">
           <Input {...register("wechatHandle")} placeholder="WeChat" />
           <Input {...register("whatsappHandle")} placeholder="WhatsApp" />
@@ -219,5 +212,13 @@ export function ProfileForm({
         {isSubmitting ? "Saving..." : submitLabel}
       </Button>
     </form>
+  );
+}
+
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="block text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+      {children}
+    </span>
   );
 }

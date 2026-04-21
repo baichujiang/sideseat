@@ -36,8 +36,6 @@ export default async function InboxPage() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-xl font-semibold tracking-tight">Inbox</h1>
-
       <div className="flex gap-2">
         <InboxPill
           href="/inbox/requests"
