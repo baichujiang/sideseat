@@ -8,3 +8,4 @@ dist
 *.log
 public/uploads
 tsconfig.tsbuildinfo
+.DS_Store
