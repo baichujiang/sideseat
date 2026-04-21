@@ -23,26 +23,18 @@ export async function getDiscoverPeople(userId: string) {
   const schoolValues = getSchoolMatchValues(user.school);
   const orConditions: Prisma.UserWhereInput[] = [];
 
-  if (user.discoverByCourse && courseIds.length) {
+  if (courseIds.length) {
     orConditions.push({
-      courses: {
-        some: {
-          courseId: { in: courseIds },
-        },
-      },
+      courses: { some: { courseId: { in: courseIds } } },
     });
   }
 
-  if (user.discoverByMajor && user.major) {
-    orConditions.push({
-      major: user.major,
-    });
+  if (user.major) {
+    orConditions.push({ major: user.major });
   }
 
-  if (user.discoverBySemester && user.semester) {
-    orConditions.push({
-      semester: user.semester,
-    });
+  if (user.semester) {
+    orConditions.push({ semester: user.semester });
   }
 
   if (!orConditions.length) {

@@ -113,7 +113,7 @@ export async function POST(request: Request) {
         receiverId: values.receiverId,
         courseId: values.courseId,
         type: values.type,
-        note: user.allowInvitationNotes ? values.note || null : null,
+        note: values.note || null,
         expiresAt: subMinutes(new Date(), -60 * 24 * 7),
       },
     });

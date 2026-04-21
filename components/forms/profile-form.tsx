@@ -8,7 +8,6 @@ import { z } from "zod";
 
 import { AvatarPicker } from "@/components/forms/avatar-picker";
 import { SearchableSelect } from "@/components/forms/searchable-select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -166,36 +165,6 @@ export function ProfileForm({
         rows={2}
       />
       <FormMessage message={errors.bio?.message} />
-
-      <section className="space-y-2 rounded-3xl border border-border bg-card p-4">
-        <div className="grid gap-1.5">
-          <Checkbox
-            checked={watch("discoverByCourse")}
-            onChange={(checked) => setValue("discoverByCourse", checked)}
-            label="Discoverable via shared courses"
-          />
-          <Checkbox
-            checked={watch("discoverByMajor")}
-            onChange={(checked) => setValue("discoverByMajor", checked)}
-            label="Discoverable via same major"
-          />
-          <Checkbox
-            checked={watch("discoverBySemester")}
-            onChange={(checked) => setValue("discoverBySemester", checked)}
-            label="Discoverable via same semester"
-          />
-          <Checkbox
-            checked={watch("allowInvitationNotes")}
-            onChange={(checked) => setValue("allowInvitationNotes", checked)}
-            label="Allow invitation notes"
-          />
-          <Checkbox
-            checked={watch("contactInfoOptIn")}
-            onChange={(checked) => setValue("contactInfoOptIn", checked)}
-            label="Allow contact exchange"
-          />
-        </div>
-      </section>
 
       <section className="rounded-3xl border border-border bg-card p-4">
         <div className="grid grid-cols-2 gap-2">
