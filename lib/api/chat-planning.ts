@@ -10,9 +10,9 @@ type JsonResult<T> = {
 
 export type AvailabilitySharePayload = {
   visibilityMode: "FREE_BUSY";
-  rangeStart: string;
-  rangeEnd: string;
-  selectedDates?: string[];
+  rangeStart?: string;
+  rangeEnd?: string;
+  includedDates?: string[];
   expiresAt?: string;
 };
 
@@ -66,7 +66,7 @@ export function loadAvailabilityShare(shareId: string) {
     status: "active" | "revoked" | "expired";
     rangeStart: string;
     rangeEnd: string;
-    selectedDates: string[];
+    includedDates: string[];
     days: Array<{
       date: string;
       slots: Array<{

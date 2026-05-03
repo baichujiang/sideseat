@@ -109,14 +109,9 @@ export function ShareAvailabilityModal({
           return;
         }
         const sortedDates = [...selectedDayKeys].sort();
-        const rangeStart = startOfDay(new Date(`${sortedDates[0]}T00:00:00`));
-        const rangeEnd = endOfDay(new Date(`${sortedDates[sortedDates.length - 1]}T00:00:00`));
-
         await createAvailabilityShare(connectionId, {
           visibilityMode: "FREE_BUSY",
-          rangeStart: rangeStart.toISOString(),
-          rangeEnd: rangeEnd.toISOString(),
-          selectedDates: sortedDates,
+          includedDates: sortedDates,
           expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined,
         });
       } else {

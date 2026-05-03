@@ -64,6 +64,7 @@ export async function GET(
       status,
       rangeStart: share.rangeStart.toISOString(),
       rangeEnd: share.rangeEnd.toISOString(),
+      includedDates: included,
       days: days.map((day) => ({
         date: day.date,
         slots: day.slots.map((slot) => ({
