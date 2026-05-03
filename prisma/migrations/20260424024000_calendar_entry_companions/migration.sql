@@ -1,0 +1,4 @@
+-- Superseded placeholder.
+-- This timestamp was created before CalendarEntry existed, so the real
+-- companion table migration now lives later in the chain:
+-- 20260428120000_calendar_entry_companions

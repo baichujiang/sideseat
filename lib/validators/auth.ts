@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import { clientContextSchema } from "@/lib/validators/client-context";
-
 const usernameSchema = z
   .string()
   .trim()
@@ -25,14 +23,8 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Enter your password."),
 });
 
-export const signupRequestSchema = signupSchema.extend({
-  clientContext: clientContextSchema.optional(),
-});
+export const signupRequestSchema = signupSchema;
 
-export const loginRequestSchema = loginSchema.extend({
-  clientContext: clientContextSchema.optional(),
-});
+export const loginRequestSchema = loginSchema;
 
-export const guestRequestSchema = z.object({
-  clientContext: clientContextSchema.optional(),
-});
+export const guestRequestSchema = z.object({});

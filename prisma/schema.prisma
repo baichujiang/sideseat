@@ -52,6 +52,13 @@ enum ContactExchangeStatus {
   CANCELED
 }
 
+/// Upgrade from “matched chat” to mutual “close friend” (shown in Contacts).
+enum FriendLinkStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
 enum ReportReason {
   HARASSMENT
   REPEATED_UNWANTED_CONTACT
@@ -59,6 +66,22 @@ enum ReportReason {
   SPAM
   FAKE_IDENTITY
   OTHER
+}
+
+/// Study-session proposal lifecycle.
+///  - PROPOSED   → waiting on the other side to decide.
+///  - ACCEPTED   → confirmed; CalendarEntry rows exist for both sides.
+///  - DECLINED   → recipient said no.
+///  - CANCELED   → proposer withdrew (only allowed while PROPOSED).
+///  - SUPERSEDED → a counter-proposal replaced it; keeps the audit trail.
+///  - EXPIRED    → startAt is in the past and it was never accepted.
+enum StudySessionProposalStatus {
+  PROPOSED
+  ACCEPTED
+  DECLINED
+  CANCELED
+  SUPERSEDED
+  EXPIRED
 }
 
 enum ReportStatus {
@@ -90,16 +113,65 @@ enum SchoolEmailVerificationStatus {
   CANCELED
 }
 
-enum ClientSignalAction {
-  SIGNUP
-  LOGIN
-  INVITATION_SENT
-}
-
 enum DegreeLevel {
   BACHELOR
   MASTER
   OTHER
+}
+
+enum Weekday {
+  MON
+  TUE
+  WED
+  THU
+  FRI
+  SAT
+  SUN
+}
+
+enum ActivityType {
+  STUDY_SESSION
+  LUNCH
+  MEETUP
+  GO_TO_CLASS
+}
+
+enum CalendarRepeatRule {
+  NONE
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum MessageType {
+  TEXT
+  AVAILABILITY_CARD
+  PLAN_REQUEST_CARD
+  PLAN_CONFIRMED_CARD
+  SYSTEM
+}
+
+enum AvailabilityVisibilityMode {
+  FREE_BUSY
+}
+
+enum PlanType {
+  STUDY
+  MEAL
+  SPORTS
+  LANGUAGE
+  CUSTOM
+}
+
+enum PlanRequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  COUNTER_PROPOSED
+  CANCELED
+  EXPIRED
 }
 
 model User {
@@ -126,17 +198,23 @@ model User {
   studentVerificationStatus    StudentVerificationStatus @default(UNVERIFIED)
   emailVerifiedAt              DateTime?
   studentVerificationNotes     String?
+  manualReviewProofUrl         String?
+  manualReviewProofFilename    String?
+  manualReviewRequestedAt      DateTime?
   wechatHandle                 String?
   whatsappHandle               String?
   telegramHandle               String?
   instagramHandle              String?
   createdAt                    DateTime                 @default(now())
   updatedAt                    DateTime                 @updatedAt
+  lastActiveAt                 DateTime?
   sessions                     Session[]
   courses                      UserCourse[]
+  savedCourses                 SavedCourse[]
   sentInvitations              Invitation[]             @relation("InvitationSender")
   receivedInvitations          Invitation[]             @relation("InvitationReceiver")
   sentMessages                 Message[]
+  courseRoomMessages           CourseRoomMessage[]
   sentContactExchangeRequests  ContactExchangeRequest[] @relation("ContactRequester")
   receivedContactExchangeRequests ContactExchangeRequest[] @relation("ContactResponder")
   connectionsA                 Connection[]             @relation("ConnectionUserA")
@@ -148,7 +226,15 @@ model User {
   reportsReceived              Report[]                 @relation("ReportedUser")
   moderationBlocks             ModerationBlock[]
   schoolEmailVerifications     SchoolEmailVerification[]
-  clientSignals                ClientSignal[]
+  friendLinksRequested         FriendLink[]               @relation("FriendLinkRequester")
+  friendLinksToRespond         FriendLink[]               @relation("FriendLinkResponder")
+  pushSubscriptions            PushSubscription[]
+  studyProposalsCreated        StudySessionProposal[]     @relation("StudyProposer")
+  availabilitySharesOwned      AvailabilityShare[]        @relation("AvailabilityShareOwner")
+  planRequestsProposed         PlanRequest[]              @relation("PlanRequestProposer")
+  planRequestsReceived         PlanRequest[]              @relation("PlanRequestReceiver")
+  calendarEntries              CalendarEntry[]
+  calendarEntryCompanionships  CalendarEntryCompanion[]
 }
 
 model Session {
@@ -183,26 +269,56 @@ model Course {
   code          String?
   school        String
   semesterLabel String
-  location      String?
-  schedule      String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   members       UserCourse[]
+  savedBy       SavedCourse[]
   invitations   Invitation[]
+  courseRoomMessages CourseRoomMessage[]
+  originConnections Connection[] @relation("ConnectionOriginCourse")
 
   @@unique([name, school, semesterLabel])
   @@unique([code, school, semesterLabel])
 }
 
+model CourseSession {
+  id           String     @id @default(cuid())
+  userCourseId String
+  weekday      Weekday
+  startMinute  Int
+  endMinute    Int
+  location     String?
+  createdAt    DateTime   @default(now())
+  userCourse   UserCourse @relation(fields: [userCourseId], references: [id], onDelete: Cascade)
+
+  @@index([userCourseId])
+  @@index([weekday, startMinute])
+}
+
 model UserCourse {
-  id         String         @id @default(cuid())
+  id         String          @id @default(cuid())
   userId     String
   courseId   String
   intentions CourseIntent[]
-  createdAt  DateTime       @default(now())
-  updatedAt  DateTime       @updatedAt
-  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course     Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  sessions   CourseSession[]
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+}
+
+/// Courses the user is interested in but has not added to their weekly schedule.
+/// Discover, overlap, and invitations still use `UserCourse` only.
+model SavedCourse {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
   @@index([courseId])
@@ -232,7 +348,13 @@ model Invitation {
 
 model Connection {
   id                     String                   @id @default(cuid())
+  /// Legacy link to the accepted invitation this connection was born from.
+  /// Null for connections created directly via the first-message flow.
   invitationId           String?                  @unique
+  /// Course context that seeded this connection (for "Connected via …" UI).
+  /// Set when the new-thread flow is initiated from a course or classmate
+  /// profile; may also be backfilled from `invitation.courseId` for legacy rows.
+  originCourseId         String?
   userAId                String
   userBId                String
   status                 ConnectionStatus         @default(ACTIVE)
@@ -241,16 +363,22 @@ model Connection {
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt
   invitation             Invitation?              @relation(fields: [invitationId], references: [id], onDelete: SetNull)
+  originCourse           Course?                  @relation("ConnectionOriginCourse", fields: [originCourseId], references: [id], onDelete: SetNull)
   userA                  User                     @relation("ConnectionUserA", fields: [userAId], references: [id], onDelete: Cascade)
   userB                  User                     @relation("ConnectionUserB", fields: [userBId], references: [id], onDelete: Cascade)
   endedBy                User?                    @relation("ConnectionEndedBy", fields: [endedById], references: [id], onDelete: SetNull)
   messages               Message[]
   contactExchangeRequests ContactExchangeRequest[]
+  friendLink              FriendLink?
   blocks                 Block[]
   reports                Report[]
+  studyProposals         StudySessionProposal[]
+  availabilityShares     AvailabilityShare[]
+  planRequests           PlanRequest[]
 
   @@index([userAId, status])
   @@index([userBId, status])
+  @@index([originCourseId])
 }
 
 model Message {
@@ -258,11 +386,102 @@ model Message {
   connectionId String
   senderId     String
   body         String
+  type         MessageType @default(TEXT)
+  availabilityShareId String?
+  planRequestId String?
+  /// Optional reply pointer; null when the message is not a reply.
+  replyToId    String?
+  /// Soft-delete timestamp. Non-null means the body should not be rendered
+  /// directly — show a tombstone instead. We keep the row so replies that
+  /// quoted this message don't lose their anchor.
+  deletedAt    DateTime?
   createdAt    DateTime   @default(now())
   connection   Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
   sender       User       @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  availabilityShare AvailabilityShare? @relation(fields: [availabilityShareId], references: [id], onDelete: SetNull)
+  planRequest   PlanRequest? @relation(fields: [planRequestId], references: [id], onDelete: SetNull)
+  replyTo      Message?   @relation("MessageReply", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies      Message[]  @relation("MessageReply")
+  reports      Report[]   @relation("MessageReports")
 
   @@index([connectionId, createdAt])
+  @@index([replyToId])
+  @@index([availabilityShareId])
+  @@index([planRequestId])
+}
+
+model AvailabilityShare {
+  id             String                   @id @default(cuid())
+  ownerUserId     String
+  connectionId    String
+  visibilityMode  AvailabilityVisibilityMode @default(FREE_BUSY)
+  rangeStart      DateTime
+  rangeEnd        DateTime
+  /// When set, only these calendar days (yyyy-MM-dd) are shared; otherwise all days in [rangeStart, rangeEnd].
+  includedDates   Json?
+  expiresAt       DateTime?
+  isRevoked       Boolean                  @default(false)
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  owner           User                     @relation("AvailabilityShareOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  connection      Connection               @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  messages        Message[]
+  planRequests    PlanRequest[]
+
+  @@index([connectionId, createdAt])
+  @@index([ownerUserId, createdAt])
+  @@index([expiresAt])
+}
+
+model PlanRequest {
+  id                 String            @id @default(cuid())
+  connectionId       String
+  availabilityShareId String?
+  counterOfId        String?
+  proposerUserId     String
+  receiverUserId     String
+  planType           PlanType
+  title              String
+  location           String?
+  message            String?
+  startTime          DateTime
+  endTime            DateTime
+  status             PlanRequestStatus @default(PENDING)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  connection         Connection        @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  availabilityShare  AvailabilityShare? @relation(fields: [availabilityShareId], references: [id], onDelete: SetNull)
+  counterOf          PlanRequest?      @relation("PlanRequestCounter", fields: [counterOfId], references: [id], onDelete: SetNull)
+  counters           PlanRequest[]     @relation("PlanRequestCounter")
+  proposer           User              @relation("PlanRequestProposer", fields: [proposerUserId], references: [id], onDelete: Cascade)
+  receiver           User              @relation("PlanRequestReceiver", fields: [receiverUserId], references: [id], onDelete: Cascade)
+  messages           Message[]
+  calendarEntries    CalendarEntry[]
+
+  @@index([connectionId, createdAt])
+  @@index([availabilityShareId, createdAt])
+  @@index([proposerUserId, createdAt])
+  @@index([receiverUserId, createdAt])
+  @@index([status, startTime])
+}
+
+/// Public course chat — one timeline per course; only enrolled members (UserCourse) may read/post.
+model CourseRoomMessage {
+  id         String   @id @default(cuid())
+  courseId   String
+  senderId   String
+  body       String
+  replyToId  String?
+  deletedAt  DateTime?
+  createdAt  DateTime @default(now())
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  sender     User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  replyTo    CourseRoomMessage?  @relation("CRMReply", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies    CourseRoomMessage[] @relation("CRMReply")
+  reports    Report[] @relation("CRMReports")
+
+  @@index([courseId, createdAt])
+  @@index([replyToId])
 }
 
 model ContactExchangeRequest {
@@ -278,6 +497,23 @@ model ContactExchangeRequest {
   responder    User                  @relation("ContactResponder", fields: [responderId], references: [id], onDelete: Cascade)
 
   @@index([connectionId, status])
+}
+
+/// Mutual “close friends” link tied to an active connection (address book).
+model FriendLink {
+  id           String           @id @default(cuid())
+  connectionId String           @unique
+  requesterId  String
+  responderId  String
+  status       FriendLinkStatus @default(PENDING)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  connection   Connection       @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  requester    User             @relation("FriendLinkRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  responder    User             @relation("FriendLinkResponder", fields: [responderId], references: [id], onDelete: Cascade)
+
+  @@index([responderId, status])
+  @@index([requesterId, status])
 }
 
 model Block {
@@ -301,6 +537,12 @@ model Report {
   reportedUserId String
   connectionId   String?
   invitationId   String?
+  /// Optional pointer to a specific 1:1 message being reported. We keep the
+  /// user-level fields too so admins still know who the report is about even
+  /// if the source message is later deleted.
+  messageId           String?
+  /// Optional pointer to a specific course-room message being reported.
+  courseRoomMessageId String?
   reason         ReportReason
   status         ReportStatus @default(OPEN)
   details        String?
@@ -313,11 +555,15 @@ model Report {
   reportedUser   User         @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
   connection     Connection?  @relation(fields: [connectionId], references: [id], onDelete: SetNull)
   invitation     Invitation?  @relation(fields: [invitationId], references: [id], onDelete: SetNull)
+  message           Message?           @relation("MessageReports", fields: [messageId], references: [id], onDelete: SetNull)
+  courseRoomMessage CourseRoomMessage? @relation("CRMReports", fields: [courseRoomMessageId], references: [id], onDelete: SetNull)
   actionLog      ReportAction[]
   moderationBlocks ModerationBlock[]
 
   @@index([reportedUserId])
   @@index([reason])
+  @@index([messageId])
+  @@index([courseRoomMessageId])
 }
 
 model ReportAction {
@@ -348,26 +594,100 @@ model ModerationBlock {
   @@index([userId, isActive])
 }
 
-model ClientSignal {
-  id             String             @id @default(cuid())
-  userId         String?
-  action         ClientSignalAction
-  wasSuccessful  Boolean            @default(true)
-  installId      String?
-  attemptedEmail String?
-  ipHash         String?
-  userAgent      String?
-  acceptLanguage String?
-  timezone       String?
-  platform       String?
-  screenWidth    Int?
-  screenHeight   Int?
-  createdAt      DateTime           @default(now())
-  user           User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+/// Web Push subscription registered by a user's browser (PWA or desktop).
+/// Scaffold only: nothing sends pushes yet. When we wire notifications, the
+/// server looks up rows by `userId` and calls `web-push` with the stored
+/// endpoint + keys. Uniqueness on `endpoint` lets the SW replace stale subs
+/// on re-subscription without creating duplicates.
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([action, createdAt])
-  @@index([installId, createdAt])
-  @@index([attemptedEmail, createdAt])
-  @@index([ipHash, createdAt])
-  @@index([userId, createdAt])
+  @@index([userId])
+}
+
+/// A study-session proposal posted inside a 1:1 chat. Renders in the chat
+/// stream as a card interleaved by `createdAt` alongside normal messages.
+///
+/// For MVP this is 1:1 only (`connectionId` required). The column is kept
+/// nullable so we can extend to course-room proposals later without a
+/// schema migration.
+///
+/// Counter-proposals form a short chain via `counterOfId`. Accepting any
+/// proposal marks the earlier ones in the chain as `SUPERSEDED` and creates
+/// `CalendarEntry` rows for both participants (idempotent).
+model StudySessionProposal {
+  id           String                     @id @default(cuid())
+  proposerId   String
+  connectionId String?
+  counterOfId  String?
+  activityType ActivityType               @default(STUDY_SESSION)
+  startAt      DateTime
+  endAt        DateTime
+  location     String?
+  note         String?
+  status       StudySessionProposalStatus @default(PROPOSED)
+  createdAt    DateTime                   @default(now())
+  updatedAt    DateTime                   @updatedAt
+  proposer     User                        @relation("StudyProposer", fields: [proposerId], references: [id], onDelete: Cascade)
+  connection   Connection?                 @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  counterOf    StudySessionProposal?       @relation("ProposalCounter", fields: [counterOfId], references: [id], onDelete: SetNull)
+  counters     StudySessionProposal[]      @relation("ProposalCounter")
+  calendarEntries CalendarEntry[]
+
+  @@index([connectionId, createdAt])
+  @@index([proposerId, createdAt])
+  @@index([status, startAt])
+}
+
+/// One-off calendar entry. Created on proposal accept, but intentionally
+/// decoupled from the proposal row so we can also surface events from other
+/// sources later (admin-scheduled, imported, etc.) without special-casing.
+///
+/// When the originating proposal is deleted, we `SetNull` rather than cascade
+/// so the entry stays visible — it's a "this happened / is happening" record,
+/// not a live pointer.
+model CalendarEntry {
+  id         String   @id @default(cuid())
+  userId     String
+  proposalId String?
+  planRequestId String?
+  title      String
+  eventType  PlanType?
+  source     String   @default("manual")
+  location   String?
+  note       String?
+  repeatRule CalendarRepeatRule @default(NONE)
+  repeatUntil DateTime?
+  startAt    DateTime
+  endAt      DateTime
+  createdAt  DateTime @default(now())
+  user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  proposal   StudySessionProposal? @relation(fields: [proposalId], references: [id], onDelete: SetNull)
+  planRequest PlanRequest?         @relation(fields: [planRequestId], references: [id], onDelete: SetNull)
+  companions CalendarEntryCompanion[]
+
+  @@unique([userId, proposalId])
+  @@unique([userId, planRequestId])
+  @@index([userId, startAt])
+}
+
+model CalendarEntryCompanion {
+  id              String        @id @default(cuid())
+  calendarEntryId String
+  userId          String?
+  displayName     String
+  createdAt       DateTime      @default(now())
+  calendarEntry   CalendarEntry @relation(fields: [calendarEntryId], references: [id], onDelete: Cascade)
+  user            User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([calendarEntryId])
+  @@index([userId])
 }

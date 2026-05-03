@@ -3,8 +3,7 @@ import {
   ContactExchangeStatus,
   CourseIntent,
   DegreeLevel,
-  InvitationStatus,
-  InvitationType,
+  FriendLinkStatus,
   LanguageTag,
   ReportActionType,
   ReportReason,
@@ -13,7 +12,12 @@ import {
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
+import { getCurrentSemesterLabel } from "@/lib/constants/semester";
 import { prisma } from "@/lib/db/prisma";
+
+const minutesAgo = (m: number) => new Date(Date.now() - m * 60 * 1000);
+const hoursAgo = (h: number) => new Date(Date.now() - h * 60 * 60 * 1000);
+const daysAgo = (d: number) => new Date(Date.now() - d * 24 * 60 * 60 * 1000);
 
 async function main() {
   await prisma.reportAction.deleteMany();
@@ -22,6 +26,8 @@ async function main() {
   await prisma.block.deleteMany();
   await prisma.contactExchangeRequest.deleteMany();
   await prisma.message.deleteMany();
+  await prisma.courseRoomMessage.deleteMany();
+  await prisma.friendLink.deleteMany();
   await prisma.connection.deleteMany();
   await prisma.invitation.deleteMany();
   await prisma.userCourse.deleteMany();
@@ -32,7 +38,19 @@ async function main() {
 
   const password = await bcrypt.hash("Password123", 12);
 
-  const [lin, amira, lucas, yuna] = await Promise.all([
+  const [
+    lin,
+    amira,
+    lucas,
+    yuna,
+    kai,
+    lena,
+    sofia,
+    jonas,
+    elena,
+    marco,
+    nina,
+  ] = await Promise.all([
     prisma.user.create({
       data: {
         username: "lin",
@@ -113,6 +131,139 @@ async function main() {
           "Public domain submitted for school verification. Needs admin approval.",
       },
     }),
+    prisma.user.create({
+      data: {
+        username: "kai",
+        email: "kai@tum.de",
+        hashedPassword: password,
+        avatarUrl: "p03",
+        nickname: "Kai",
+        school: "TUM",
+        degreeLevel: DegreeLevel.BACHELOR,
+        major: "Informatics",
+        semester: 2,
+        bio: "Into paper discussions and whiteboard sessions.",
+        languages: [LanguageTag.GERMAN, LanguageTag.ENGLISH],
+        onboardingComplete: true,
+        verifiedStudent: true,
+        studentVerificationStatus: StudentVerificationStatus.VERIFIED,
+        emailVerifiedAt: new Date(),
+      },
+    }),
+    prisma.user.create({
+      data: {
+        username: "lena",
+        email: "lena@tum.de",
+        hashedPassword: password,
+        avatarUrl: "p04",
+        nickname: "Lena",
+        school: "TUM",
+        degreeLevel: DegreeLevel.BACHELOR,
+        major: "Informatics",
+        semester: 2,
+        bio: "Quiet but reliable for exam prep.",
+        languages: [LanguageTag.GERMAN, LanguageTag.ENGLISH],
+        onboardingComplete: true,
+        verifiedStudent: true,
+        studentVerificationStatus: StudentVerificationStatus.VERIFIED,
+        emailVerifiedAt: new Date(),
+      },
+    }),
+    prisma.user.create({
+      data: {
+        username: "sofia",
+        email: "sofia@tum.de",
+        hashedPassword: password,
+        avatarUrl: "p05",
+        nickname: "Sofia",
+        school: "TUM",
+        degreeLevel: DegreeLevel.BACHELOR,
+        major: "Informatics",
+        semester: 2,
+        bio: "Coffee after ML lecture is a ritual.",
+        languages: [LanguageTag.ENGLISH, LanguageTag.SPANISH],
+        onboardingComplete: true,
+        verifiedStudent: true,
+        studentVerificationStatus: StudentVerificationStatus.VERIFIED,
+        emailVerifiedAt: new Date(),
+      },
+    }),
+    prisma.user.create({
+      data: {
+        username: "jonas",
+        email: "jonas@tum.de",
+        hashedPassword: password,
+        avatarUrl: "p08",
+        nickname: "Jonas",
+        school: "TUM",
+        degreeLevel: DegreeLevel.BACHELOR,
+        major: "Informatics",
+        semester: 2,
+        bio: "Shares notes in the group drive.",
+        languages: [LanguageTag.GERMAN, LanguageTag.ENGLISH],
+        onboardingComplete: true,
+        verifiedStudent: true,
+        studentVerificationStatus: StudentVerificationStatus.VERIFIED,
+        emailVerifiedAt: new Date(),
+      },
+    }),
+    prisma.user.create({
+      data: {
+        username: "elena",
+        email: "elena@tum.de",
+        hashedPassword: password,
+        avatarUrl: "p09",
+        nickname: "Elena",
+        school: "TUM",
+        degreeLevel: DegreeLevel.BACHELOR,
+        major: "Informatics",
+        semester: 2,
+        bio: "Mostly async, prefers email.",
+        languages: [LanguageTag.ENGLISH, LanguageTag.GERMAN],
+        onboardingComplete: true,
+        verifiedStudent: true,
+        studentVerificationStatus: StudentVerificationStatus.VERIFIED,
+        emailVerifiedAt: new Date(),
+      },
+    }),
+    prisma.user.create({
+      data: {
+        username: "marco",
+        email: "marco@tum.de",
+        hashedPassword: password,
+        avatarUrl: "p10",
+        nickname: "Marco",
+        school: "TUM",
+        degreeLevel: DegreeLevel.BACHELOR,
+        major: "Informatics",
+        semester: 2,
+        bio: "Just matched — say hi anytime.",
+        languages: [LanguageTag.ENGLISH, LanguageTag.GERMAN, LanguageTag.SPANISH],
+        onboardingComplete: true,
+        verifiedStudent: true,
+        studentVerificationStatus: StudentVerificationStatus.VERIFIED,
+        emailVerifiedAt: new Date(),
+      },
+    }),
+    prisma.user.create({
+      data: {
+        username: "nina",
+        email: "nina@tum.de",
+        hashedPassword: password,
+        avatarUrl: "p11",
+        nickname: "Nina",
+        school: "TUM",
+        degreeLevel: DegreeLevel.BACHELOR,
+        major: "Informatics",
+        semester: 2,
+        bio: "Weekend study blocks at the library.",
+        languages: [LanguageTag.GERMAN, LanguageTag.ENGLISH],
+        onboardingComplete: true,
+        verifiedStudent: true,
+        studentVerificationStatus: StudentVerificationStatus.VERIFIED,
+        emailVerifiedAt: new Date(),
+      },
+    }),
   ]);
 
   const [ml, idl, intro] = await Promise.all([
@@ -121,9 +272,7 @@ async function main() {
         name: "Machine Learning",
         code: "IN2064",
         school: "TUM",
-        semesterLabel: "WS 2026/27",
-        location: "MI HS 1",
-        schedule: "Tue 14:00",
+        semesterLabel: getCurrentSemesterLabel(),
       },
     }),
     prisma.course.create({
@@ -131,9 +280,7 @@ async function main() {
         name: "Introduction to Deep Learning",
         code: "IN2346",
         school: "TUM",
-        semesterLabel: "WS 2026/27",
-        location: "MI HS 2",
-        schedule: "Thu 10:00",
+        semesterLabel: getCurrentSemesterLabel(),
       },
     }),
     prisma.course.create({
@@ -141,9 +288,7 @@ async function main() {
         name: "Einführung in die Informatik 1",
         code: "IN0001",
         school: "TUM",
-        semesterLabel: "WS 2026/27",
-        location: "MW 2001",
-        schedule: "Fri 09:00",
+        semesterLabel: getCurrentSemesterLabel(),
       },
     }),
   ]);
@@ -180,62 +325,225 @@ async function main() {
         courseId: idl.id,
         intentions: [CourseIntent.STUDY_TOGETHER],
       },
+      { userId: kai.id, courseId: ml.id, intentions: [CourseIntent.STUDY_TOGETHER, CourseIntent.EXAM_PREP] },
+      { userId: lena.id, courseId: ml.id, intentions: [CourseIntent.GO_TO_CLASS_TOGETHER] },
+      { userId: sofia.id, courseId: ml.id, intentions: [CourseIntent.EAT_AFTER_CLASS, CourseIntent.STUDY_TOGETHER] },
+      { userId: jonas.id, courseId: ml.id, intentions: [CourseIntent.STUDY_TOGETHER] },
+      { userId: elena.id, courseId: idl.id, intentions: [CourseIntent.STUDY_TOGETHER] },
+      { userId: marco.id, courseId: ml.id, intentions: [CourseIntent.STUDY_TOGETHER] },
+      { userId: nina.id, courseId: ml.id, intentions: [CourseIntent.EXAM_PREP] },
     ],
   });
 
-  const acceptedInvitation = await prisma.invitation.create({
-    data: {
-      senderId: lin.id,
-      receiverId: amira.id,
-      courseId: ml.id,
-      type: InvitationType.STUDY_TOGETHER,
-      note: "Want to review the lecture after class this week?",
-      status: InvitationStatus.ACCEPTED,
-    },
-  });
+  // --- Connections + messages (order / unread / empty-chat previews) ---
+  //
+  // No more legacy invitations in fresh seeds — the first-message flow creates
+  // Connections directly with an `originCourseId`. Older rows in production
+  // keep their `invitationId` backfill; the migration copies the courseId over.
 
-  const pendingInvitation = await prisma.invitation.create({
+  const connAmira = await prisma.connection.create({
     data: {
-      senderId: lucas.id,
-      receiverId: lin.id,
-      courseId: ml.id,
-      type: InvitationType.GO_TO_CLASS_TOGETHER,
-      note: "We seem to have the same Tuesday schedule.",
-      status: InvitationStatus.PENDING,
-    },
-  });
-
-  const connection = await prisma.connection.create({
-    data: {
-      invitationId: acceptedInvitation.id,
       userAId: lin.id,
       userBId: amira.id,
       status: ConnectionStatus.ACTIVE,
+      originCourseId: ml.id,
+      updatedAt: minutesAgo(12),
+    },
+  });
+
+  const connJonas = await prisma.connection.create({
+    data: {
+      userAId: lin.id,
+      userBId: jonas.id,
+      status: ConnectionStatus.ACTIVE,
+      originCourseId: ml.id,
+      updatedAt: hoursAgo(1),
+    },
+  });
+
+  const connNina = await prisma.connection.create({
+    data: {
+      userAId: lin.id,
+      userBId: nina.id,
+      status: ConnectionStatus.ACTIVE,
+      originCourseId: ml.id,
+      updatedAt: daysAgo(2),
+    },
+  });
+
+  const connSofia = await prisma.connection.create({
+    data: {
+      userAId: lin.id,
+      userBId: sofia.id,
+      status: ConnectionStatus.ACTIVE,
+      originCourseId: ml.id,
+      updatedAt: daysAgo(1),
+    },
+  });
+
+  const connMarco = await prisma.connection.create({
+    data: {
+      userAId: lin.id,
+      userBId: marco.id,
+      status: ConnectionStatus.ACTIVE,
+      originCourseId: ml.id,
+      updatedAt: daysAgo(3),
     },
   });
 
   await prisma.message.createMany({
     data: [
       {
-        connectionId: connection.id,
+        connectionId: connAmira.id,
         senderId: lin.id,
         body: "Hi, would you like to study after class on Thursday?",
+        createdAt: daysAgo(2),
       },
       {
-        connectionId: connection.id,
+        connectionId: connAmira.id,
         senderId: amira.id,
         body: "Yes, that sounds good. The library cafe works for me.",
+        createdAt: daysAgo(1),
+      },
+      {
+        connectionId: connAmira.id,
+        senderId: lin.id,
+        body: "Perfect — I’ll grab a table near the window.",
+        createdAt: hoursAgo(5),
+      },
+      {
+        connectionId: connAmira.id,
+        senderId: amira.id,
+        body: "Running 10 min late — save me a seat?",
+        createdAt: minutesAgo(12),
+      },
+    ],
+  });
+
+  await prisma.message.createMany({
+    data: [
+      {
+        connectionId: connJonas.id,
+        senderId: jonas.id,
+        body: "Slides for lecture 7 are in the shared folder.",
+        createdAt: daysAgo(1),
+      },
+      {
+        connectionId: connJonas.id,
+        senderId: lin.id,
+        body: "Thanks — I’ll review before tutorial.",
+        createdAt: hoursAgo(3),
+      },
+      {
+        connectionId: connJonas.id,
+        senderId: jonas.id,
+        body: "Can we do 15 min before class tomorrow to align?",
+        createdAt: hoursAgo(1),
+      },
+    ],
+  });
+
+  await prisma.message.createMany({
+    data: [
+      {
+        connectionId: connNina.id,
+        senderId: nina.id,
+        body: "Here’s the exercise sheet link.",
+        createdAt: daysAgo(3),
+      },
+      {
+        connectionId: connNina.id,
+        senderId: lin.id,
+        body: "Got it, thanks!",
+        createdAt: daysAgo(2),
+      },
+    ],
+  });
+
+  await prisma.message.createMany({
+    data: [
+      {
+        connectionId: connSofia.id,
+        senderId: lin.id,
+        body: "Still on for coffee after ML?",
+        createdAt: daysAgo(2),
+      },
+      {
+        connectionId: connSofia.id,
+        senderId: sofia.id,
+        body: "Yes — same spot as last time.",
+        createdAt: daysAgo(1),
+      },
+    ],
+  });
+
+  // connMarco: no messages → inbox shows “Say hi” / course fallback
+
+  await prisma.courseRoomMessage.createMany({
+    data: [
+      {
+        courseId: ml.id,
+        senderId: jonas.id,
+        body: "Office hours moved to Thursday 14:00 this week — FYI.",
+        createdAt: hoursAgo(4),
+      },
+      {
+        courseId: ml.id,
+        senderId: nina.id,
+        body: "Anyone want to form a study group for problem set 5?",
+        createdAt: hoursAgo(2),
+      },
+      {
+        courseId: ml.id,
+        senderId: lin.id,
+        body: "I'm in — same library spot as last time works for me.",
+        createdAt: hoursAgo(1),
+      },
+      {
+        courseId: idl.id,
+        senderId: yuna.id,
+        body: "Does anyone have notes from the tutorial we missed?",
+        createdAt: daysAgo(3),
       },
     ],
   });
 
   await prisma.contactExchangeRequest.create({
     data: {
-      connectionId: connection.id,
+      connectionId: connAmira.id,
       requesterId: lin.id,
       responderId: amira.id,
       status: ContactExchangeStatus.ACCEPTED,
     },
+  });
+
+  await prisma.friendLink.createMany({
+    data: [
+      {
+        connectionId: connAmira.id,
+        requesterId: lin.id,
+        responderId: amira.id,
+        status: FriendLinkStatus.ACCEPTED,
+      },
+      {
+        connectionId: connSofia.id,
+        requesterId: lin.id,
+        responderId: sofia.id,
+        status: FriendLinkStatus.ACCEPTED,
+      },
+      {
+        connectionId: connJonas.id,
+        requesterId: jonas.id,
+        responderId: lin.id,
+        status: FriendLinkStatus.ACCEPTED,
+      },
+      {
+        connectionId: connMarco.id,
+        requesterId: lin.id,
+        responderId: marco.id,
+        status: FriendLinkStatus.PENDING,
+      },
+    ],
   });
 
   const report = await prisma.report.create({
@@ -259,14 +567,12 @@ async function main() {
     },
   });
 
-  console.log("Seeded users:", {
-    lin: lin.email,
-    amira: amira.email,
-    lucas: lucas.email,
-    yuna: yuna.email,
-  });
-  console.log("Shared login password:", "Password123");
-  console.log("Pending invitation:", pendingInvitation.id);
+  console.log("Inbox demo login: lin@tum.de / Password123");
+  console.log(
+    "Messages: 5 DMs + 2 course chats (Machine Learning, Introduction to Deep Learning)",
+  );
+  console.log("Chats: 5 (Amira unread, Jonas unread, Nina read, Sofia read, Marco empty)");
+  console.log("Contacts: 3 accepted (Amira, Sofia, Jonas); Marco has pending friend request from Lin");
 }
 
 main()

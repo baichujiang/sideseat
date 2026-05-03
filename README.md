@@ -9,10 +9,10 @@ The product principle is:
 ## Architecture Summary
 
 - Frontend and backend live in one Next.js App Router app for a faster MVP with a cleaner deployment story.
-- PostgreSQL + Prisma provide a relational schema that keeps courses, invitations, connections, messages, blocks, reports, and contact exchange flows consistent.
+- PostgreSQL + Prisma provide a relational schema that keeps courses, connections, messages, blocks, reports, and contact exchange flows consistent.
 - Auth uses email/password plus secure, opaque, database-backed sessions stored in an `HttpOnly` cookie.
 - Discovery is intentionally constrained to shared academic context: same course, major, or semester.
-- Free chat is blocked until an invitation is accepted.
+- Direct messaging uses the first-message flow: the sender's first message creates the 1:1 thread atomically (no approval step). Access requires at least one shared course, and a per-hour cap bounds abuse.
 - Private contact info is hidden until contact exchange is explicitly requested and accepted.
 
 ## Tech Stack
@@ -58,8 +58,7 @@ The product principle is:
 │   │   ├── courses/[courseId]/route.ts
 │   │   ├── courses/route.ts
 │   │   ├── discover/route.ts
-│   │   ├── invitations/[invitationId]/route.ts
-│   │   ├── invitations/route.ts
+│   │   ├── connections/start/route.ts
 │   │   ├── profile/route.ts
 │   │   └── reports/route.ts
 │   ├── globals.css
@@ -95,8 +94,8 @@ Main models:
 - `Session`: opaque database-backed login sessions
 - `Course`: shared academic context
 - `UserCourse`: user-course membership plus per-course intention tags
-- `Invitation`: structured invite gate before chat
-- `Connection`: created only after invitation acceptance
+- `Connection`: 1:1 thread metadata; `originCourseId` records the shared course context it was seeded from
+- `Invitation` (legacy): pre-MVP approval gate; no longer written to, kept for historical rows and admin reads
 - `Message`: lightweight plain-text chat
 - `ContactExchangeRequest`: explicit private contact unlock flow
 - `Block`: anti-harassment protection
@@ -126,11 +125,10 @@ See [prisma/schema.prisma](prisma/schema.prisma) for the full schema.
 - `DELETE /api/courses/:courseId`
 - `GET /api/discover`
 
-### Invitations and Connections
+### Connections and Messages
 
-- `POST /api/invitations`
-- `PATCH /api/invitations/:invitationId`
-- `POST /api/connections/:connectionId/messages`
+- `POST /api/connections/start` — create a new 1:1 thread by sending the first message (first-message flow)
+- `POST /api/connections/:connectionId/messages` — reply on an existing thread
 - `POST /api/connections/:connectionId/contact-exchange`
 - `POST /api/connections/:connectionId/end`
 
@@ -215,7 +213,7 @@ Password for all seeded users:
 
 ### Phase 2
 
-- Structured invitations
+- First-message chat flow (no invite gate; per-hour new-thread rate limit)
 - Inbox
 - Accepted connections
 
@@ -240,7 +238,7 @@ Password for all seeded users:
 - Set `ADMIN_EMAILS` to a comma-separated allowlist for moderation access.
 - Set `RESEND_API_KEY` and `EMAIL_FROM` to enable real student verification emails. If they are missing, the app falls back to a local verification link for development.
 - Student email auto-verification is currently restricted to a small Munich launch whitelist of officially confirmed domains. Other domains go to manual review.
-- Lightweight anti-abuse signals are captured on signup, login, and invitation send: install ID, hashed IP, user agent, language, platform, timezone, and screen size. These are used as moderation hints rather than hard identity proof.
+- Lightweight anti-abuse signals are captured on signup, login, and first-message send: install ID, hashed IP, user agent, language, platform, timezone, and screen size. These are used as moderation hints rather than hard identity proof.
 - Run Prisma migration during deploy or release step.
 - Session cookies are configured as secure in production.
 - For a production launch, add:

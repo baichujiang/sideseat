@@ -1,150 +1,278 @@
-import { format } from "date-fns";
-import { ReportReason } from "@prisma/client";
+import Link from "next/link";
+import type { Route } from "next";
+import { format, isSameDay, isToday, isYesterday } from "date-fns";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
-import { MessageForm } from "@/components/forms/message-form";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { AvailabilityCardMessage } from "@/components/chat/availability-card-message";
+import { ChatComposer } from "@/components/chat/chat-composer";
+import { ChatReplyProvider } from "@/components/chat/chat-reply-context";
+import { ChatScrollContainer } from "@/components/chat/chat-scroll-container";
+import { MessageActionMenu } from "@/components/chat/message-action-menu";
+import { MessageBubbleContent } from "@/components/chat/message-bubble-content";
+import {
+  PlanConfirmedCardMessage,
+  PlanRequestCardMessage,
+} from "@/components/chat/plan-request-card-message";
+import { BackLink } from "@/components/nav/back-link";
+import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { requireConnection } from "@/lib/auth/guards";
+import { safeReturnPath } from "@/lib/nav/back";
+import { cn } from "@/lib/utils";
+
+function dayDividerLabel(d: Date): string {
+  if (isToday(d)) return "Today";
+  if (isYesterday(d)) return "Yesterday";
+  return format(d, "MMM d, yyyy");
+}
+
+function timeLabel(d: Date): string {
+  return format(d, "HH:mm");
+}
 
 export default async function ConnectionPage({
   params,
   searchParams,
 }: {
   params: Promise<{ connectionId: string }>;
-  searchParams?: Promise<{ reported?: string }>;
+  searchParams?: Promise<{ returnTo?: string }>;
 }) {
   const { connectionId } = await params;
   const query = (await searchParams) ?? {};
+  const backHref = safeReturnPath(query.returnTo, "/inbox");
   const { connection, user } = await requireConnection(connectionId);
   const otherUser = connection.userAId === user.id ? connection.userB : connection.userA;
-  const pendingExchangeRequest = connection.contactExchangeRequests.find(
-    (request) => request.responderId === user.id && request.status === "PENDING",
-  );
-  const acceptedContactExchange = connection.contactExchangeRequests.find(
-    (request) => request.status === "ACCEPTED",
-  );
+
+  const courseName = connection.invitation?.course?.name ?? null;
+  const messages = connection.messages;
+  const peerHref =
+    `/users/${otherUser.id}?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route;
 
   return (
-    <div className="space-y-5">
-      <Card className="space-y-3 bg-[linear-gradient(135deg,rgba(238,244,240,0.96),rgba(255,255,255,0.94))]">
-        <div className="flex items-start justify-between gap-3">
-          <CardTitle>{otherUser.nickname}</CardTitle>
-          <StatusBadge tone="calm">light chat</StatusBadge>
-        </div>
-        {connection.invitation?.course ? (
-          <div className="flex flex-wrap gap-2">
-            <StatusBadge tone="neutral">{connection.invitation.course.name}</StatusBadge>
+    <ChatReplyProvider>
+    <div className="flex h-full min-h-0 flex-1 flex-col bg-background">
+      {/* Chat app bar */}
+      <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
+        <BackLink href={backHref} label="Back" />
+        <Link
+          href={`/users/${otherUser.id}?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}`}
+          className="flex min-w-0 flex-1 items-center gap-2 rounded-xl py-1 pl-1 pr-2 text-left transition hover:bg-muted/70 active:bg-muted"
+          aria-label={`View ${otherUser.nickname?.trim() || "Student"}'s profile`}
+        >
+          <PresetAvatar id={otherUser.avatarUrl} size={40} className="shrink-0" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold leading-tight">
+              {otherUser.nickname ?? "Student"}
+            </p>
+            {courseName ? (
+              <p className="truncate text-[11px] text-muted-foreground">{courseName}</p>
+            ) : (
+              <p className="truncate text-[11px] text-muted-foreground">Direct message</p>
+            )}
           </div>
-        ) : null}
-      </Card>
+        </Link>
+      </header>
 
-      {query.reported === "1" ? (
-        <Card className="space-y-2 border-[#d5e9df] bg-[#eef8f2]">
-          <CardTitle>Report submitted</CardTitle>
-        </Card>
-      ) : null}
+      <div className="shrink-0 border-b border-border/70 bg-background/80 px-3 py-2">
+        <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground/85">
+          {courseName ? `Connected via ${courseName}` : "Direct connection"}
+        </span>
+      </div>
 
-      <Card className="space-y-4 bg-[rgba(255,255,255,0.7)]">
-        <CardTitle>Conversation</CardTitle>
-        <div className="space-y-3">
-          {connection.messages.map((message) => {
-            const isOwn = message.senderId === user.id;
-
-            return (
-              <div
-                key={message.id}
-                className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[84%] rounded-3xl px-4 py-3 text-sm ${
-                    isOwn ? "bg-primary text-primary-foreground" : "bg-card text-foreground"
-                  }`}
-                >
-                  <p>{message.body}</p>
-                  <p className="mt-2 text-[11px] opacity-75">
-                    {format(message.createdAt, "MMM d, HH:mm")}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </Card>
-
-      <Card className="space-y-4">
-        <CardTitle>Send a message</CardTitle>
-        <MessageForm connectionId={connection.id} />
-      </Card>
-
-      <Card className="space-y-3">
-        <CardTitle>Private contact exchange</CardTitle>
-        {acceptedContactExchange ? (
-          <div className="space-y-2 text-sm">
-            {otherUser.wechatHandle ? <p>WeChat: {otherUser.wechatHandle}</p> : null}
-            {otherUser.whatsappHandle ? <p>WhatsApp: {otherUser.whatsappHandle}</p> : null}
-            {otherUser.telegramHandle ? <p>Telegram: {otherUser.telegramHandle}</p> : null}
-            {otherUser.instagramHandle ? <p>Instagram: {otherUser.instagramHandle}</p> : null}
+      <ChatScrollContainer messageCount={messages.length}>
+        {messages.length === 0 ? (
+          <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
+            <p className="text-sm font-medium text-foreground">No messages yet</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Say hi — or share availability and suggest a plan from the plus menu.
+            </p>
           </div>
-        ) : pendingExchangeRequest ? (
-          <form action={`/api/connections/${connection.id}/contact-exchange`} method="post">
-            <input name="action" type="hidden" value="accept" />
-            <Button className="w-full" type="submit">
-              Accept contact exchange
-            </Button>
-          </form>
         ) : (
-          <form action={`/api/connections/${connection.id}/contact-exchange`} method="post">
-            <input name="action" type="hidden" value="request" />
-            <Button className="w-full" type="submit" variant="outline">
-              Request contact exchange
-            </Button>
-          </form>
+          <div className="space-y-3 pb-2">
+            {messages.map((message, index) => {
+              const showDay =
+                index === 0 ||
+                !isSameDay(message.createdAt, messages[index - 1]!.createdAt);
+
+              const dayStrip = showDay ? (
+                <div className="flex justify-center py-2">
+                  <span className="rounded-full bg-muted px-3 py-1 text-[10px] font-medium text-muted-foreground">
+                    {dayDividerLabel(message.createdAt)}
+                  </span>
+                </div>
+              ) : null;
+
+              if (message.type === "AVAILABILITY_CARD" && message.availabilityShare) {
+                return (
+                  <div key={message.id}>
+                    {dayStrip}
+                    <AvailabilityCardMessage
+                      shareId={message.availabilityShare.id}
+                      ownerName={
+                        message.availabilityShare.owner.nickname ??
+                        message.availabilityShare.owner.username
+                      }
+                      isOwner={message.availabilityShare.ownerUserId === user.id}
+                    />
+                  </div>
+                );
+              }
+
+              if (message.type === "PLAN_REQUEST_CARD" && message.planRequest) {
+                const request = message.planRequest;
+                return (
+                  <div key={message.id}>
+                    {dayStrip}
+                    <PlanRequestCardMessage
+                      requestId={request.id}
+                      proposerName={request.proposer.nickname ?? request.proposer.username}
+                      receiverName={request.receiver.nickname ?? request.receiver.username}
+                      viewerUserId={user.id}
+                      proposerUserId={request.proposerUserId}
+                      receiverUserId={request.receiverUserId}
+                      planType={request.planType}
+                      title={request.title}
+                      location={request.location}
+                      message={request.message}
+                      startTimeISO={request.startTime.toISOString()}
+                      endTimeISO={request.endTime.toISOString()}
+                      status={request.status}
+                    />
+                  </div>
+                );
+              }
+
+              if (message.type === "PLAN_CONFIRMED_CARD" && message.planRequest) {
+                const request = message.planRequest;
+                return (
+                  <div key={message.id}>
+                    {dayStrip}
+                    <PlanConfirmedCardMessage
+                      title={request.title}
+                      startTimeISO={request.startTime.toISOString()}
+                      endTimeISO={request.endTime.toISOString()}
+                    />
+                  </div>
+                );
+              }
+
+              if (message.type === "SYSTEM") {
+                return (
+                  <div key={message.id}>
+                    {dayStrip}
+                    <div className="flex justify-center py-1">
+                      <span className="rounded-full bg-muted px-3 py-1 text-[11px] text-muted-foreground">
+                        {message.body}
+                      </span>
+                    </div>
+                  </div>
+                );
+              }
+
+              const isOwn = message.senderId === user.id;
+
+              return (
+                <div key={message.id}>
+                  {dayStrip}
+                  <div
+                    className={cn(
+                      "group flex gap-2",
+                      isOwn ? "justify-end" : "justify-start",
+                    )}
+                  >
+                    {!isOwn ? (
+                      <Link
+                        href={peerHref}
+                        className="mt-0.5 shrink-0 self-end rounded-full transition hover:opacity-90 active:opacity-80"
+                        aria-label={`View ${otherUser.nickname?.trim() || "Student"}'s profile`}
+                      >
+                        <PresetAvatar id={message.sender.avatarUrl} size={32} />
+                      </Link>
+                    ) : null}
+                    {isOwn ? (
+                      <MessageActionMenu
+                        isOwn
+                        message={{
+                          id: message.id,
+                          body: message.body,
+                          senderName: message.sender.nickname,
+                          senderId: message.senderId,
+                        }}
+                        target={{
+                          kind: "direct",
+                          connectionId: connection.id,
+                          messageId: message.id,
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className={cn(
+                        "max-w-[min(100%,20rem)] shrink",
+                        isOwn ? "text-right" : "text-left",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "inline-block px-3.5 py-2 text-[15px] leading-snug text-left",
+                          isOwn
+                            ? "rounded-[1.25rem] rounded-br-md bg-primary text-primary-foreground"
+                            : "rounded-[1.25rem] rounded-bl-md bg-muted text-foreground",
+                        )}
+                      >
+                        <MessageBubbleContent
+                          isOwn={isOwn}
+                          body={message.body}
+                          deleted={message.deletedAt != null}
+                          reply={
+                            message.replyTo
+                              ? {
+                                  senderName: message.replyTo.sender?.nickname ?? null,
+                                  body: message.replyTo.body,
+                                  deleted: message.replyTo.deletedAt != null,
+                                }
+                              : null
+                          }
+                        />
+                      </div>
+                      <time
+                        className={cn(
+                          "mt-0.5 block text-[10px] text-muted-foreground",
+                          isOwn ? "pr-0.5" : "pl-0.5",
+                        )}
+                        dateTime={message.createdAt.toISOString()}
+                      >
+                        {timeLabel(message.createdAt)}
+                      </time>
+                    </div>
+                    {!isOwn ? (
+                      <MessageActionMenu
+                        isOwn={false}
+                        message={{
+                          id: message.id,
+                          body: message.body,
+                          senderName: message.sender.nickname,
+                          senderId: message.senderId,
+                        }}
+                        target={{
+                          kind: "direct",
+                          connectionId: connection.id,
+                          messageId: message.id,
+                        }}
+                      />
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
-      </Card>
+      </ChatScrollContainer>
 
-      <Card className="space-y-4">
-        <CardTitle>Safety controls</CardTitle>
-        <form action="/api/reports" className="space-y-3" method="post">
-          <input name="reportedUserId" type="hidden" value={otherUser.id} />
-          <input name="connectionId" type="hidden" value={connection.id} />
-          <input name="returnTo" type="hidden" value={`/connections/${connection.id}`} />
-          <select
-            className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm"
-            defaultValue={ReportReason.HARASSMENT}
-            name="reason"
-          >
-            {Object.values(ReportReason).map((reason) => (
-              <option key={reason} value={reason}>
-                {reason.toLowerCase().replaceAll("_", " ")}
-              </option>
-            ))}
-          </select>
-          <textarea
-            className="min-h-24 w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm"
-            name="details"
-            placeholder="Optional details for the moderation team"
-          />
-          <Button className="w-full" type="submit" variant="ghost">
-            Submit report
-          </Button>
-        </form>
-      </Card>
-
-      <div className="grid gap-3">
-        <form action={`/api/connections/${connection.id}/end`} method="post">
-          <Button className="w-full" type="submit" variant="outline">
-            End connection
-          </Button>
-        </form>
-        <form action="/api/blocks" method="post">
-          <input name="blockedId" type="hidden" value={otherUser.id} />
-          <input name="connectionId" type="hidden" value={connection.id} />
-          <Button className="w-full" type="submit" variant="outline">
-            Block user
-          </Button>
-        </form>
+      <div className="shrink-0 border-t border-border bg-background/95 px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
+        <ChatComposer
+          connectionId={connection.id}
+          peerName={otherUser.nickname ?? "Student"}
+        />
       </div>
     </div>
+    </ChatReplyProvider>
   );
 }

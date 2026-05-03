@@ -1,8 +1,9 @@
-import { ClientSignalAction } from "@prisma/client";
-
 import { hashPassword } from "@/lib/auth/password";
+import {
+  defaultNicknameFromUsername,
+  SIGNUP_DEFAULT_PROFILE,
+} from "@/lib/auth/signup-defaults";
 import { createSession } from "@/lib/auth/session";
-import { recordClientSignal } from "@/lib/abuse/client-signals";
 import { randomAvatarId } from "@/lib/constants/avatars";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseBody } from "@/lib/http";
@@ -22,12 +23,6 @@ export async function POST(request: Request) {
     });
 
     if (existing) {
-      await recordClientSignal({
-        request,
-        action: ClientSignalAction.SIGNUP,
-        wasSuccessful: false,
-        clientContext: values.clientContext,
-      });
       return error("That username is already taken.", 409);
     }
 
@@ -36,17 +31,13 @@ export async function POST(request: Request) {
         username: values.username,
         hashedPassword: await hashPassword(values.password),
         avatarUrl: randomAvatarId(),
+        nickname: defaultNicknameFromUsername(values.username),
+        school: SIGNUP_DEFAULT_PROFILE.school,
+        onboardingComplete: false,
       },
     });
 
     await createSession(user.id);
-    await recordClientSignal({
-      request,
-      action: ClientSignalAction.SIGNUP,
-      wasSuccessful: true,
-      userId: user.id,
-      clientContext: values.clientContext,
-    });
 
     return ok({ userId: user.id, onboardingComplete: user.onboardingComplete }, { status: 201 });
   } catch (cause) {

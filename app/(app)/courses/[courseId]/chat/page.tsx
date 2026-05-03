@@ -1,0 +1,245 @@
+import Link from "next/link";
+import type { Route } from "next";
+import { format, isSameDay, isToday, isYesterday } from "date-fns";
+
+import { CourseChatComposer } from "@/components/chat/course-chat-composer";
+import { ChatReplyProvider } from "@/components/chat/chat-reply-context";
+import { ChatScrollContainer } from "@/components/chat/chat-scroll-container";
+import { MessageActionMenu } from "@/components/chat/message-action-menu";
+import { MessageBubbleContent } from "@/components/chat/message-bubble-content";
+import { BackLink } from "@/components/nav/back-link";
+import { PresetAvatar } from "@/components/ui/preset-avatar";
+import { requireCourseChatMember } from "@/lib/auth/guards";
+import { prisma } from "@/lib/db/prisma";
+import { cn } from "@/lib/utils";
+import { getSchoolLabel } from "@/lib/constants/schools";
+import { safeReturnPath } from "@/lib/nav/back";
+
+function dayDividerLabel(d: Date): string {
+  if (isToday(d)) return "Today";
+  if (isYesterday(d)) return "Yesterday";
+  return format(d, "MMM d, yyyy");
+}
+
+function timeLabel(d: Date): string {
+  return format(d, "HH:mm");
+}
+
+export default async function CourseChatPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ courseId: string }>;
+  searchParams?: Promise<{ returnTo?: string }>;
+}) {
+  const { courseId } = await params;
+  const query = (await searchParams) ?? {};
+  const backHref = safeReturnPath(query.returnTo, `/courses/${courseId}`);
+  const { user, course } = await requireCourseChatMember(courseId);
+
+  /**
+   * Hide messages from anyone:
+   *  - currently moderation-blocked (platform-level), or
+   *  - mutually blocked with the current user (either direction).
+   * The composer enforces the same rules on POST; this is the read-side mirror.
+   */
+  const [hiddenIds, messages, memberCount] = await Promise.all([
+    Promise.all([
+      prisma.moderationBlock.findMany({
+        where: { isActive: true },
+        select: { userId: true },
+      }),
+      prisma.block.findMany({
+        where: {
+          OR: [{ blockerId: user.id }, { blockedId: user.id }],
+        },
+        select: { blockerId: true, blockedId: true },
+      }),
+    ]).then(([modBlocks, mutualBlocks]) => {
+      const ids = new Set<string>();
+      for (const b of modBlocks) ids.add(b.userId);
+      for (const b of mutualBlocks) {
+        ids.add(b.blockerId === user.id ? b.blockedId : b.blockerId);
+      }
+      return ids;
+    }),
+    prisma.courseRoomMessage.findMany({
+      where: { courseId },
+      include: {
+        sender: true,
+        replyTo: { include: { sender: true } },
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.userCourse.count({ where: { courseId } }),
+  ]);
+
+  const visibleMessages = messages.filter((m) => !hiddenIds.has(m.senderId));
+
+  return (
+    <ChatReplyProvider>
+    <div className="flex h-full min-h-0 flex-1 flex-col bg-background">
+      <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
+        <BackLink href={backHref} label="Back" />
+        <Link
+          href={`/courses/${courseId}`}
+          className="flex min-w-0 flex-1 flex-col rounded-xl py-1 pl-1 pr-2 text-left transition hover:bg-muted/70 active:bg-muted"
+        >
+          <p className="truncate text-sm font-semibold leading-tight">{course.name}</p>
+          <p className="truncate text-[11px] text-muted-foreground">
+            Course chat · {memberCount} classmate{memberCount === 1 ? "" : "s"} ·{" "}
+            {getSchoolLabel(course.school)}
+          </p>
+        </Link>
+      </header>
+
+      <ChatScrollContainer messageCount={visibleMessages.length}>
+        {visibleMessages.length === 0 ? (
+          <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
+            <p className="text-sm font-medium text-foreground">No messages yet</p>
+            <p className="mt-1 max-w-[18rem] text-xs leading-relaxed text-muted-foreground">
+              Say hi, ask about assignments, or find study partners — everyone enrolled in this course
+              can see this chat.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3 pb-2">
+            {visibleMessages.map((message, index) => {
+              const isOwn = message.senderId === user.id;
+              const showDay =
+                index === 0 || !isSameDay(message.createdAt, visibleMessages[index - 1]!.createdAt);
+              const peerHref =
+                `/users/${message.senderId}?returnTo=${encodeURIComponent(`/courses/${courseId}/chat`)}` as Route;
+
+              return (
+                <div key={message.id}>
+                  {showDay ? (
+                    <div className="flex justify-center py-2">
+                      <span className="rounded-full bg-muted px-3 py-1 text-[10px] font-medium text-muted-foreground">
+                        {dayDividerLabel(message.createdAt)}
+                      </span>
+                    </div>
+                  ) : null}
+
+                  <div
+                    className={cn(
+                      "group flex items-start gap-2",
+                      isOwn ? "justify-end" : "justify-start",
+                    )}
+                  >
+                    {!isOwn ? (
+                      <Link
+                        href={peerHref}
+                        className="mt-5 shrink-0 rounded-full transition hover:opacity-90 active:opacity-80"
+                        aria-label={`View ${message.sender.nickname ?? "student"}'s profile`}
+                      >
+                        <PresetAvatar id={message.sender.avatarUrl} size={32} />
+                      </Link>
+                    ) : null}
+                    {isOwn ? (
+                      <MessageActionMenu
+                        anchorClassName="mt-6"
+                        isOwn
+                        message={{
+                          id: message.id,
+                          body: message.body,
+                          senderName: message.sender.nickname,
+                          senderId: message.senderId,
+                        }}
+                        target={{
+                          kind: "course",
+                          courseId,
+                          messageId: message.id,
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className={cn(
+                        "max-w-[min(100%,20rem)] shrink",
+                        isOwn ? "text-right" : "text-left",
+                      )}
+                    >
+                      {isOwn ? (
+                        <p className="mb-0.5 truncate pr-0.5 text-[11px] font-medium text-muted-foreground">
+                          You
+                        </p>
+                      ) : (
+                        <Link
+                          href={peerHref}
+                          className="mb-0.5 block truncate pl-0.5 text-[11px] font-medium text-muted-foreground transition hover:text-foreground"
+                        >
+                          {message.sender.nickname ?? "Student"}
+                        </Link>
+                      )}
+                      <div
+                        className={cn(
+                          "inline-block px-3.5 py-2 text-[15px] leading-snug text-left",
+                          isOwn
+                            ? "rounded-[1.25rem] rounded-br-md bg-primary text-primary-foreground"
+                            : "rounded-[1.25rem] rounded-bl-md bg-muted text-foreground",
+                        )}
+                      >
+                        <MessageBubbleContent
+                          isOwn={isOwn}
+                          body={message.body}
+                          deleted={message.deletedAt != null}
+                          reply={
+                            message.replyTo
+                              ? {
+                                  senderName: message.replyTo.sender?.nickname ?? null,
+                                  body: message.replyTo.body,
+                                  deleted: message.replyTo.deletedAt != null,
+                                }
+                              : null
+                          }
+                        />
+                      </div>
+                      <time
+                        className={cn(
+                          "mt-0.5 block text-[10px] text-muted-foreground",
+                          isOwn ? "pr-0.5" : "pl-0.5",
+                        )}
+                        dateTime={message.createdAt.toISOString()}
+                      >
+                        {timeLabel(message.createdAt)}
+                      </time>
+                    </div>
+                    {!isOwn ? (
+                      <MessageActionMenu
+                        anchorClassName="mt-6"
+                        isOwn={false}
+                        message={{
+                          id: message.id,
+                          body: message.body,
+                          senderName: message.sender.nickname,
+                          senderId: message.senderId,
+                        }}
+                        target={{
+                          kind: "course",
+                          courseId,
+                          messageId: message.id,
+                        }}
+                      />
+                    ) : null}
+                    {isOwn ? (
+                      <Link
+                        href={"/me" as Route}
+                        className="mt-5 shrink-0 rounded-full transition hover:opacity-90 active:opacity-80"
+                        aria-label="View your profile"
+                      >
+                        <PresetAvatar id={user.avatarUrl} size={32} />
+                      </Link>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </ChatScrollContainer>
+
+      <CourseChatComposer courseId={courseId} />
+    </div>
+    </ChatReplyProvider>
+  );
+}

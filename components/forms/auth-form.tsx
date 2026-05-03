@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import { buildClientContext } from "@/lib/client/install-context";
 import { loginSchema, signupSchema } from "@/lib/validators/auth";
+import { safeReturnPath } from "@/lib/nav/back";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,10 +21,13 @@ export function AuthForm({
   mode,
   initialIdentifier = "",
   initialPassword = "",
+  returnTo,
 }: {
   mode: "login" | "signup";
   initialIdentifier?: string;
   initialPassword?: string;
+  /** Safe in-app path to open after a successful login (onboarding must already be complete). */
+  returnTo?: string | null;
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState("");
@@ -49,18 +53,14 @@ export function AuthForm({
     const response = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...values,
-        clientContext: buildClientContext(),
-      }),
+      body: JSON.stringify(values),
     });
     const payload = await response.json();
     if (!response.ok) {
       setServerError(payload.error ?? "Unable to continue.");
       return;
     }
-    const nextPath = payload.data?.onboardingComplete ? "/home" : "/onboarding";
-    router.push(nextPath);
+    router.push("/onboarding");
     router.refresh();
   });
 
@@ -69,18 +69,17 @@ export function AuthForm({
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...values,
-        clientContext: buildClientContext(),
-      }),
+      body: JSON.stringify(values),
     });
     const payload = await response.json();
     if (!response.ok) {
       setServerError(payload.error ?? "Unable to continue.");
       return;
     }
-    const nextPath = payload.data?.onboardingComplete ? "/home" : "/onboarding";
-    router.push(nextPath);
+    const nextPath = payload.data?.onboardingComplete
+      ? safeReturnPath(returnTo, "/home")
+      : "/onboarding";
+    router.push(nextPath as Route);
     router.refresh();
   });
 
@@ -108,9 +107,6 @@ export function AuthForm({
             />
             <FormMessage message={signupForm.formState.errors.password?.message} />
           </div>
-          <p className="text-xs text-muted-foreground">
-            Add your TUM email later in Profile to verify as a student.
-          </p>
           <FormMessage message={serverError} />
           <Button className="w-full" disabled={signupForm.formState.isSubmitting} type="submit">
             {signupForm.formState.isSubmitting ? "Please wait..." : "Create account"}

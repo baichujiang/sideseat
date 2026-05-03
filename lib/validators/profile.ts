@@ -3,6 +3,23 @@ import { z } from "zod";
 import { schoolDirectory } from "@/lib/constants/schools";
 import { DEGREE_LEVELS, MAX_SEMESTER } from "@/lib/constants/majors";
 
+/** Name + tagline only (e.g. Home card). Avatar uses POST /api/profile/avatar. */
+export const homeProfileQuickSchema = z.object({
+  nickname: z.string().min(2).max(32),
+  bio: z.string().max(120).optional().or(z.literal("")),
+});
+
+/** PATCH: update nickname and/or bio independently (at least one field required). */
+export const homeProfileQuickPatchSchema = z
+  .object({
+    nickname: z.string().min(2).max(32).optional(),
+    bio: z.string().max(120).optional().or(z.literal("")),
+  })
+  .strict()
+  .refine((d) => d.nickname !== undefined || d.bio !== undefined, {
+    message: "Nothing to update.",
+  });
+
 /** Profile fields saved via PUT /api/profile (avatar is POST /api/profile/avatar; languages stay default/legacy). */
 export const profileSchema = z.object({
   nickname: z.string().min(2).max(32),

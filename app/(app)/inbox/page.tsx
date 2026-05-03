@@ -1,19 +1,86 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import type { Route } from "next";
+import type { ReactNode } from "react";
+import type { Course, CourseRoomMessage, User } from "@prisma/client";
 import { formatDistanceToNowStrict } from "date-fns";
+import { ChevronRight, MessageCircle, Send, UserRound } from "lucide-react";
 
+import { DirectInboxRow } from "@/components/inbox/direct-inbox-row";
+import { CourseAvatar } from "@/components/ui/course-avatar";
 import { EmptyState } from "@/components/ui/empty-state";
-import { requireOnboardedUser } from "@/lib/auth/guards";
+import { cn } from "@/lib/utils";
+import { GuestAppCta } from "@/components/app/guest-app-cta";
+import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
+import { ConnectionStatus, FriendLinkStatus } from "@prisma/client";
+
+type ConnectionInbox = Awaited<
+  ReturnType<
+    typeof prisma.connection.findMany<{
+      include: {
+        userA: true;
+        userB: true;
+        invitation: { include: { course: true } };
+        originCourse: true;
+        messages: { orderBy: { createdAt: "desc" }; take: 1; include: { sender: true } };
+        _count: { select: { messages: true } };
+      };
+    }>
+  >
+>[number];
+
+type UserCourseWithCourse = Awaited<
+  ReturnType<
+    typeof prisma.userCourse.findMany<{
+      include: { course: true };
+    }>
+  >
+>[number];
+
+type CourseRoomMessageWithSender = CourseRoomMessage & { sender: User };
+
+type InboxMerged =
+  | { kind: "direct"; sortAt: Date; connection: ConnectionInbox }
+  | {
+      kind: "course";
+      sortAt: Date;
+      course: Course;
+      userCourse: UserCourseWithCourse;
+      last: CourseRoomMessageWithSender | undefined;
+    };
 
 export default async function InboxPage() {
-  const user = await requireOnboardedUser();
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) {
+    return (
+      <div className="space-y-5">
+        <header className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Contacts</h1>
+          <p className="text-sm text-muted-foreground">Chats, course rooms, and people you can reach</p>
+        </header>
+        <GuestAppCta
+          returnTo="/inbox"
+          headline="Sign in to see contacts"
+          body="Your inbox syncs across devices once you log in."
+        />
+      </div>
+    );
+  }
+  if (!sessionUser.onboardingComplete) {
+    redirect("/onboarding");
+  }
+  const user = sessionUser;
 
-  const [pendingReceivedCount, sentCount, connections] = await Promise.all([
-    prisma.invitation.count({
-      where: { receiverId: user.id, status: "PENDING" },
-    }),
-    prisma.invitation.count({
-      where: { senderId: user.id },
+  const [contactsCount, connections, userCourses] = await Promise.all([
+    prisma.friendLink.count({
+      where: {
+        status: FriendLinkStatus.ACCEPTED,
+        connection: {
+          status: ConnectionStatus.ACTIVE,
+          OR: [{ userAId: user.id }, { userBId: user.id }],
+        },
+      },
     }),
     prisma.connection.findMany({
       where: {
@@ -24,115 +91,217 @@ export default async function InboxPage() {
         userA: true,
         userB: true,
         invitation: { include: { course: true } },
+        originCourse: true,
         messages: {
           orderBy: { createdAt: "desc" },
           take: 1,
           include: { sender: true },
         },
+        _count: { select: { messages: true } },
       },
       orderBy: { updatedAt: "desc" },
     }),
+    prisma.userCourse.findMany({
+      where: { userId: user.id },
+      include: { course: true },
+    }),
   ]);
+
+  const courseIds = userCourses.map((uc) => uc.courseId);
+  const courseMessages =
+    courseIds.length > 0
+      ? await prisma.courseRoomMessage.findMany({
+          where: { courseId: { in: courseIds } },
+          orderBy: { createdAt: "desc" },
+          include: { sender: true },
+          take: 400,
+        })
+      : [];
+
+  const lastCourseMessageByCourseId = new Map<string, CourseRoomMessageWithSender>();
+  for (const m of courseMessages) {
+    if (!lastCourseMessageByCourseId.has(m.courseId)) {
+      lastCourseMessageByCourseId.set(m.courseId, m);
+    }
+  }
+
+  const merged: InboxMerged[] = [
+    ...connections.map((connection) => ({
+      kind: "direct" as const,
+      sortAt: connection.messages[0]?.createdAt ?? connection.updatedAt,
+      connection,
+    })),
+    ...userCourses.map((uc) => ({
+      kind: "course" as const,
+      sortAt: lastCourseMessageByCourseId.get(uc.courseId)?.createdAt ?? uc.updatedAt,
+      course: uc.course,
+      userCourse: uc,
+      last: lastCourseMessageByCourseId.get(uc.courseId),
+    })),
+  ].sort((a, b) => b.sortAt.getTime() - a.sortAt.getTime());
+
+  const firstMessageConnections = connections.filter(
+    (connection) => connection._count.messages === 1 && connection.messages[0],
+  );
+  const toReplyCount = firstMessageConnections.filter(
+    (connection) => connection.messages[0]?.senderId !== user.id,
+  ).length;
+  const fromYouCount = firstMessageConnections.filter(
+    (connection) => connection.messages[0]?.senderId === user.id,
+  ).length;
 
   return (
     <div className="space-y-5">
-      <div className="flex gap-2">
-        <InboxPill
-          href="/inbox/requests"
-          label="Requests"
-          count={pendingReceivedCount}
-          highlight={pendingReceivedCount > 0}
+      <header className="space-y-1 px-0.5">
+        <h1 className="text-[1.375rem] font-semibold tracking-tight text-foreground">Contacts</h1>
+        <p className="text-[13px] leading-snug text-muted-foreground">
+          Course chats and direct conversations
+        </p>
+      </header>
+
+      <section className="grid grid-cols-3 gap-2.5">
+        <InboxShortcut
+          href="/inbox/to-reply"
+          icon={<MessageCircle className="h-5 w-5" strokeWidth={2} aria-hidden />}
+          label="To reply"
+          count={toReplyCount}
         />
-        <InboxPill href="/inbox/sent" label="Sent" count={sentCount} />
-      </div>
+        <InboxShortcut
+          href="/inbox/from-you"
+          icon={<Send className="h-5 w-5" strokeWidth={2} aria-hidden />}
+          label="From you"
+          count={fromYouCount}
+        />
+        <InboxShortcut
+          href="/inbox/contacts"
+          icon={<UserRound className="h-5 w-5" strokeWidth={2} aria-hidden />}
+          label="Contacts"
+        />
+      </section>
 
       <section className="space-y-2">
-        {connections.length ? (
-          <ul className="divide-y divide-border overflow-hidden rounded-3xl border border-border bg-card">
-            {connections.map((connection) => {
-              const other =
-                connection.userAId === user.id ? connection.userB : connection.userA;
-              const lastMessage = connection.messages[0];
-              const fromMe = lastMessage?.senderId === user.id;
-              const preview = lastMessage?.body
-                ? `${fromMe ? "You: " : ""}${lastMessage.body}`
-                : connection.invitation?.course
-                  ? `Matched via ${connection.invitation.course.name}`
-                  : "Say hi";
-              const when = lastMessage?.createdAt ?? connection.updatedAt;
-              const unread = Boolean(lastMessage && !fromMe);
-              const initial = (other.nickname ?? "?").slice(0, 1).toUpperCase();
-
-              return (
-                <li key={connection.id}>
-                  <Link
-                    href={`/connections/${connection.id}`}
-                    className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/60"
-                  >
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
-                      {initial}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="truncate text-sm font-medium text-foreground">
-                          {other.nickname ?? "Student"}
-                        </p>
-                        <span className="shrink-0 text-[11px] text-muted-foreground">
-                          {formatDistanceToNowStrict(when, { addSuffix: false })}
-                        </span>
-                      </div>
-                      <p
-                        className={`truncate text-xs ${
-                          unread ? "font-medium text-foreground" : "text-muted-foreground"
-                        }`}
-                      >
-                        {preview}
-                      </p>
-                    </div>
-                    {unread ? (
-                      <span className="h-2 w-2 shrink-0 rounded-full bg-primary" aria-hidden />
-                    ) : null}
-                  </Link>
-                </li>
-              );
-            })}
+        {merged.length ? (
+          <ul className="overflow-hidden rounded-[1.125rem] border border-border/60 bg-card shadow-[0_2px_16px_-4px_rgba(15,23,42,0.06)]">
+            {merged.map((item) =>
+              item.kind === "direct" ? (
+                <DirectInboxRow key={item.connection.id} userId={user.id} connection={item.connection} />
+              ) : (
+                <CourseInboxRow
+                  key={item.course.id}
+                  userId={user.id}
+                  course={item.course}
+                  userCourse={item.userCourse}
+                  last={item.last}
+                />
+              ),
+            )}
           </ul>
         ) : (
-          <EmptyState title="No chats yet" />
+          <EmptyState
+            title="No conversations yet"
+            description="Join a course to see its group chat, or start a direct chat from Discover."
+          />
         )}
       </section>
     </div>
   );
 }
 
-function InboxPill({
+function InboxShortcut({
   href,
+  icon,
   label,
   count,
-  highlight = false,
 }: {
-  href: "/inbox/requests" | "/inbox/sent";
+  href: Route;
+  icon: ReactNode;
   label: string;
-  count: number;
-  highlight?: boolean;
+  count?: number;
 }) {
   return (
     <Link
       href={href}
-      className={`flex flex-1 items-center justify-between gap-2 rounded-2xl border px-3 py-2 text-sm transition-colors ${
-        highlight
-          ? "border-primary/30 bg-primary/10 text-foreground"
-          : "border-border bg-card text-foreground hover:bg-muted/60"
-      }`}
+      className="flex min-h-[4.75rem] flex-col items-center justify-center gap-1.5 rounded-[1rem] border border-border/60 bg-card px-2.5 py-2.5 text-center shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] transition-colors active:bg-muted/40 [@media(hover:hover)]:hover:bg-muted/30"
     >
-      <span className="font-medium">{label}</span>
-      <span
-        className={`inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1.5 text-[11px] font-semibold ${
-          highlight ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-        }`}
-      >
-        {count}
+      <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
+        {icon}
+        {(count ?? 0) > 0 ? (
+          <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-rose-500 px-1 py-0.5 text-[10px] font-semibold leading-none text-white">
+            {count}
+          </span>
+        ) : null}
       </span>
+      <p className="max-w-full truncate text-[12px] font-semibold leading-tight">{label}</p>
     </Link>
+  );
+}
+
+function CourseInboxRow({
+  userId,
+  course,
+  userCourse,
+  last,
+}: {
+  userId: string;
+  course: Course;
+  userCourse: UserCourseWithCourse;
+  last: CourseRoomMessageWithSender | undefined;
+}) {
+  const when = last?.createdAt ?? userCourse.updatedAt;
+  const fromMe = last?.senderId === userId;
+  const preview = last?.body
+    ? `${fromMe ? "You: " : `${last.sender.nickname ?? "Someone"}: `}${last.body}`
+    : "Course chat — say hi to the class";
+  const unread = Boolean(last && !fromMe);
+
+  return (
+    <li className="border-b border-border/50 last:border-b-0">
+      <Link
+        href={`/courses/${course.id}/chat?returnTo=%2Finbox` as Route}
+        className="flex min-h-[4.25rem] items-center gap-3.5 px-4 py-3.5 transition-colors active:bg-muted/50 [@media(hover:hover)]:hover:bg-muted/45"
+      >
+        <CourseAvatar
+          id={course.id}
+          code={course.code}
+          name={course.name}
+          size={52}
+          className="ring-2 ring-background"
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline justify-between gap-2">
+            <p className="truncate text-[15px] font-semibold leading-tight text-foreground">
+              {course.name}
+            </p>
+            <time
+              className="shrink-0 text-[11px] tabular-nums text-muted-foreground"
+              dateTime={when.toISOString()}
+            >
+              {formatDistanceToNowStrict(when, { addSuffix: false })}
+            </time>
+          </div>
+          <p
+            className={cn(
+              "mt-0.5 truncate text-[13px] leading-snug",
+              unread ? "font-medium text-foreground/90" : "text-muted-foreground",
+            )}
+          >
+            {preview}
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5 pl-0.5">
+          {unread ? (
+            <span
+              className="h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_0_2px_hsl(var(--card))]"
+              aria-label="Unread"
+            />
+          ) : null}
+          <ChevronRight
+            className="h-4 w-4 shrink-0 text-muted-foreground/45"
+            strokeWidth={2}
+            aria-hidden
+          />
+        </div>
+      </Link>
+    </li>
   );
 }

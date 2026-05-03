@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { buildClientContext } from "@/lib/client/install-context";
 import { Button } from "@/components/ui/button";
 
 export function GuestBrowseButton({ className }: { className?: string }) {
@@ -18,7 +17,7 @@ export function GuestBrowseButton({ className }: { className?: string }) {
       const response = await fetch("/api/auth/guest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clientContext: buildClientContext() }),
+        body: JSON.stringify({}),
       });
       const payload = await response.json();
       if (!response.ok) {

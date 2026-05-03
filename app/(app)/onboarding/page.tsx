@@ -1,9 +1,15 @@
+import { redirect } from "next/navigation";
+
 import { ProfileForm } from "@/components/forms/profile-form";
 import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
 import { requireUser } from "@/lib/auth/session";
 
 export default async function OnboardingPage() {
   const user = await requireUser();
+
+  if (user.onboardingComplete) {
+    redirect("/home");
+  }
 
   return (
     <div className="space-y-5">

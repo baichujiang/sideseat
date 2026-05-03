@@ -86,6 +86,22 @@ export default async function AdminVerificationsPage() {
                     {user.schoolEmailVerifications[0].expiresAt.toLocaleString()}
                   </p>
                 ) : null}
+                {user.manualReviewProofUrl ? (
+                  <p className="text-foreground">
+                    Enrollment certificate:{" "}
+                    <a
+                      className="font-medium underline"
+                      href={user.manualReviewProofUrl}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      {user.manualReviewProofFilename ?? "Open file"}
+                    </a>
+                    {user.manualReviewRequestedAt
+                      ? ` · uploaded ${user.manualReviewRequestedAt.toLocaleString()}`
+                      : null}
+                  </p>
+                ) : null}
               </div>
 
               <StudentVerificationReview userId={user.id} />

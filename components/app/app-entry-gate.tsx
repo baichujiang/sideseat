@@ -22,7 +22,10 @@ export function AppEntryGate() {
         </div>
 
         <div className="grid gap-3">
-          <LinkButton className="w-full" href="/login">
+          <LinkButton className="w-full" href="/signup">
+            Create account
+          </LinkButton>
+          <LinkButton className="w-full" href="/login" variant="outline">
             Log in
           </LinkButton>
           <GuestBrowseButton className="w-full" />

@@ -1,10 +1,10 @@
 import { randomBytes } from "crypto";
 
-import { ClientSignalAction, LanguageTag } from "@prisma/client";
+import { LanguageTag } from "@prisma/client";
 
 import { hashPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
-import { recordClientSignal } from "@/lib/abuse/client-signals";
+import { DEFAULT_SCHOOL } from "@/lib/constants/schools";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseBody } from "@/lib/http";
 import { guestRequestSchema } from "@/lib/validators/auth";
@@ -16,7 +16,6 @@ export async function POST(request: Request) {
     if (!parsed.ok) {
       return error(parsed.error, 422);
     }
-    const { clientContext } = parsed.data;
 
     const username = `guest_${randomBytes(6).toString("hex")}`;
     const hashedPassword = await hashPassword(randomBytes(32).toString("hex"));
@@ -28,7 +27,7 @@ export async function POST(request: Request) {
         isGuest: true,
         hashedPassword,
         nickname: "Guest",
-        school: "TU_BERLIN",
+        school: DEFAULT_SCHOOL,
         major: "Exploring",
         semester: 1,
         languages: [LanguageTag.ENGLISH],
@@ -37,13 +36,6 @@ export async function POST(request: Request) {
     });
 
     await createSession(user.id);
-    await recordClientSignal({
-      request,
-      action: ClientSignalAction.LOGIN,
-      wasSuccessful: true,
-      userId: user.id,
-      clientContext,
-    });
 
     return ok(
       { userId: user.id, onboardingComplete: true, isGuest: true },

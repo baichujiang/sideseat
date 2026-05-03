@@ -1,0 +1,5 @@
+-- Superseded placeholder.
+-- This timestamp was created before CalendarEntry existed in the migration
+-- chain, so applying ALTER TABLE here breaks fresh databases/shadow DBs.
+-- The actual CalendarRepeatRule + CalendarEntry repeat columns now live in:
+-- 20260427120000_study_session_proposals

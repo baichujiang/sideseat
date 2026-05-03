@@ -4,6 +4,11 @@ export const schoolDirectory = {
     shortLabel: "TUM",
     verificationDomains: ["tum.de", "mytum.de"],
   },
+  LMU: {
+    label: "Ludwig Maximilian University of Munich",
+    shortLabel: "LMU",
+    verificationDomains: ["lmu.de"],
+  },
 } as const;
 
 export type SchoolCode = keyof typeof schoolDirectory;

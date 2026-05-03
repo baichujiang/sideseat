@@ -1,13 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { AppEntryGate } from "@/components/app/app-entry-gate";
-import { getSessionUser } from "@/lib/auth/session";
-
+/** Always enter the app shell at Home — guests see the real tabs + sign-in prompts. */
 export default async function RootPage() {
-  const user = await getSessionUser();
-  if (user) {
-    redirect("/home");
-  }
-
-  return <AppEntryGate />;
+  redirect("/home");
 }

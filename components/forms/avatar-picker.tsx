@@ -10,10 +10,13 @@ import { cn } from "@/lib/utils";
 export function AvatarPicker({
   initialId,
   children,
+  homepage = false,
 }: {
   initialId: string | null;
   /** Rendered next to the avatar on the trigger row (usually the nickname input). */
   children?: React.ReactNode;
+  /** Tighter home header: larger tap target, top-aligned with multi-line text. */
+  homepage?: boolean;
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(initialId);
@@ -48,24 +51,43 @@ export function AvatarPicker({
   };
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-3">
+    <div className={cn("space-y-2", homepage && "space-y-2.5")}>
+      <div className={cn("flex gap-3", homepage ? "items-start" : "items-center")}>
         <button
           aria-expanded={expanded}
           aria-label="Change avatar"
           className={cn(
-            "rounded-full transition",
-            expanded ? "ring-2 ring-foreground ring-offset-2 ring-offset-background" : "hover:opacity-90",
+            "shrink-0 rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+            homepage
+              ? cn(
+                  "bg-background shadow-sm ring-2",
+                  expanded
+                    ? "ring-primary ring-offset-2 ring-offset-background"
+                    : "ring-border/55 hover:ring-primary/45",
+                )
+              : expanded
+                ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
+                : "hover:opacity-90",
           )}
           onClick={() => setExpanded((open) => !open)}
           type="button"
         >
-          <PresetAvatar className="h-12 w-12" id={selected} />
+          <PresetAvatar
+            className={homepage ? "h-[3.25rem] w-[3.25rem]" : "h-12 w-12"}
+            id={selected}
+          />
         </button>
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="min-w-0 flex-1 pt-px">{children}</div>
       </div>
       {expanded ? (
-        <div className="grid grid-cols-5 gap-2 rounded-2xl border border-border bg-muted/30 p-2 sm:grid-cols-10">
+        <div
+          className={cn(
+            "grid grid-cols-5 gap-2 rounded-2xl border p-2 sm:grid-cols-10",
+            homepage
+              ? "border-border/80 bg-card/95 shadow-sm backdrop-blur-sm"
+              : "border-border bg-muted/30",
+          )}
+        >
           {AVATAR_IDS.map((id) => {
             const isSelected = id === selected;
             return (

@@ -3,21 +3,35 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
 import { FormMessage } from "@/components/forms/form-message";
 
-export function CourseRemoveButton({ courseId }: { courseId: string }) {
+export function CourseRemoveButton({
+  courseId,
+  compact = false,
+  label = "Remove from my courses",
+}: {
+  courseId: string;
+  compact?: boolean;
+  label?: string;
+}) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
 
   return (
     <div className="space-y-2">
-      <Button
+      <button
         type="button"
-        variant="outline"
         disabled={pending}
+        className={
+          compact
+            ? "inline-flex h-8 items-center rounded-full px-3 text-[12px] font-semibold text-destructive/85 transition hover:bg-destructive/8 hover:text-destructive disabled:pointer-events-none disabled:opacity-50"
+            : "inline-flex h-10 w-full items-center justify-center rounded-xl border border-destructive/20 bg-destructive/5 px-4 text-sm font-semibold text-destructive transition hover:bg-destructive/10 disabled:pointer-events-none disabled:opacity-50"
+        }
         onClick={async () => {
+          if (!window.confirm("Remove this course from your schedule?")) {
+            return;
+          }
           setError("");
           setPending(true);
           const response = await fetch(`/api/courses/${courseId}`, { method: "DELETE" });
@@ -31,12 +45,11 @@ export function CourseRemoveButton({ courseId }: { courseId: string }) {
             return;
           }
 
-          router.push("/courses");
           router.refresh();
         }}
       >
-        {pending ? "Removing..." : "Remove from my courses"}
-      </Button>
+        {pending ? "Removing..." : label}
+      </button>
       <FormMessage message={error} />
     </div>
   );

@@ -28,12 +28,15 @@ export function ProfileForm({
   submitLabel,
   avatarId,
   verificationSlot,
+  /** School/program only; avatar, name, bio are edited on Me /profile. Contact handles are onboarding (`full`) only. */
+  variant = "full",
 }: {
   initialValues: ProfileValues;
   submitLabel: string;
   avatarId: string | null;
   /** Rendered inside the Academic card so school + verification feel like one module. */
   verificationSlot?: React.ReactNode;
+  variant?: "full" | "academicOnly";
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState("");
@@ -94,12 +97,10 @@ export function ProfileForm({
 
   return (
     <form className="space-y-4" onSubmit={onSubmit}>
-      <AvatarPicker initialId={avatarId}>
-        <Input {...register("nickname")} placeholder="Nickname" />
-        <FormMessage message={errors.nickname?.message} />
-      </AvatarPicker>
-
       <section className="space-y-3 rounded-3xl border border-border bg-card p-4">
+        <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+          School and program
+        </p>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
             <FieldLabel>School</FieldLabel>
@@ -159,21 +160,56 @@ export function ProfileForm({
         {verificationSlot}
       </section>
 
-      <Textarea
-        {...register("bio")}
-        placeholder="Tagline — one short line, like a status or signature"
-        rows={2}
-      />
-      <FormMessage message={errors.bio?.message} />
+      {variant === "academicOnly" ? (
+        <>
+          <input type="hidden" {...register("wechatHandle")} />
+          <input type="hidden" {...register("whatsappHandle")} />
+          <input type="hidden" {...register("telegramHandle")} />
+          <input type="hidden" {...register("instagramHandle")} />
+        </>
+      ) : (
+        <section className="rounded-3xl border border-border bg-card p-4">
+          <p className="mb-3 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            Contact (optional)
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <Input {...register("wechatHandle")} placeholder="WeChat" />
+            <Input {...register("whatsappHandle")} placeholder="WhatsApp" />
+            <Input {...register("telegramHandle")} placeholder="Telegram" />
+            <Input {...register("instagramHandle")} placeholder="Instagram" />
+          </div>
+        </section>
+      )}
 
-      <section className="rounded-3xl border border-border bg-card p-4">
-        <div className="grid grid-cols-2 gap-2">
-          <Input {...register("wechatHandle")} placeholder="WeChat" />
-          <Input {...register("whatsappHandle")} placeholder="WhatsApp" />
-          <Input {...register("telegramHandle")} placeholder="Telegram" />
-          <Input {...register("instagramHandle")} placeholder="Instagram" />
-        </div>
-      </section>
+      {variant === "academicOnly" ? (
+        <>
+          <input type="hidden" {...register("nickname")} />
+          <input type="hidden" {...register("bio")} />
+        </>
+      ) : (
+        <section className="space-y-3 rounded-3xl border border-border bg-card p-4">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              Home and profile
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Avatar, name, and tagline — also shown to classmates.
+            </p>
+          </div>
+          <AvatarPicker initialId={avatarId}>
+            <Input {...register("nickname")} placeholder="Nickname" />
+            <FormMessage message={errors.nickname?.message} />
+          </AvatarPicker>
+          <div className="space-y-1">
+            <Textarea
+              {...register("bio")}
+              placeholder="Tagline — one short line, like a status or signature"
+              rows={2}
+            />
+            <FormMessage message={errors.bio?.message} />
+          </div>
+        </section>
+      )}
 
       <FormMessage message={serverError} />
 
