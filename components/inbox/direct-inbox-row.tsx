@@ -47,7 +47,12 @@ export function DirectInboxRow({
   const pinned = connection.userAId === userId ? Boolean(connection.pinnedByAAt) : Boolean(connection.pinnedByBAt);
 
   return (
-    <li className="border-b border-border/50 last:border-b-0">
+    <li
+      className={cn(
+        "border-b border-border/50 last:border-b-0",
+        pinned ? "bg-amber-50/80 dark:bg-amber-500/10" : "",
+      )}
+    >
       <InboxSwipeRow href={href} connectionId={connection.id} returnTo={returnTo} pinned={pinned}>
         <PresetAvatar id={other.avatarUrl} size={52} className="ring-2 ring-background shadow-sm" />
         <div className="min-w-0 flex-1">
