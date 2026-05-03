@@ -3,26 +3,32 @@
 import Link from "next/link";
 import type { Route } from "next";
 import type { RefObject } from "react";
+import { addDays, format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import {
   BookOpen,
   Coffee,
+  Edit3,
   Dumbbell,
   Languages,
   Loader2,
-  MessageCircle,
+  Plus,
   Search,
   SlidersHorizontal,
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ClassmatePostCategory } from "@prisma/client";
 
+import { DiscoverMessageButton } from "@/components/discover/discover-message-button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { cn } from "@/lib/utils";
 
 type SceneKind = "shared" | "study" | "meals" | "language" | "sports";
+type PostExpiryPreset = "3d" | "1w" | "1m" | "never";
 
 type CourseRef = {
   id: string;
@@ -55,6 +61,30 @@ export type DiscoverRow = {
   connectionId: string | null;
 };
 
+export type DiscoverPostRow = {
+  id: string;
+  category: ClassmatePostCategory;
+  city: string;
+  title: string;
+  body: string | null;
+  expiresAt: Date;
+  isOwn: boolean;
+  userId: string;
+  nickname: string;
+  avatarUrl: string | null;
+  major: string | null;
+  semester: number | null;
+  school: string | null;
+  languages: string[];
+  verifiedStudent: boolean;
+  studentVerificationStatus:
+    | "UNVERIFIED"
+    | "EMAIL_PENDING"
+    | "VERIFIED"
+    | "MANUAL_REVIEW_REQUIRED"
+    | "REJECTED";
+};
+
 type UserSearchHit = {
   id: string;
   username: string;
@@ -77,9 +107,11 @@ type UserSearchHit = {
 
 export function DiscoverList({
   rows,
+  posts,
   allowSearch = true,
 }: {
   rows: DiscoverRow[];
+  posts: DiscoverPostRow[];
   /** When false (logged-out Discover tab), hide people search — the API requires a signed-in student context. */
   allowSearch?: boolean;
 }) {
@@ -91,46 +123,61 @@ export function DiscoverList({
   const [semesterFilter, setSemesterFilter] = useState<string>("All");
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [postOpen, setPostOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const router = useRouter();
 
   const trimmed = query.trim();
   const searchActive = allowSearch && trimmed.length >= 2;
+  const filterPeople = rows.map((row) => ({
+    school: row.school,
+    major: row.major,
+    languages: row.languages,
+    semester: row.semester,
+    studentVerificationStatus: row.studentVerificationStatus,
+  })).concat(
+    posts.map((post) => ({
+      school: post.school,
+      major: post.major,
+      languages: post.languages,
+      semester: post.semester,
+      studentVerificationStatus: post.studentVerificationStatus,
+    })),
+  );
   const schoolOptions = Array.from(
-    new Set(rows.map((row) => row.school).filter((school): school is string => Boolean(school))),
+    new Set(filterPeople.map((row) => row.school).filter((school): school is string => Boolean(school))),
   ).sort();
   const majorOptions = Array.from(
-    new Set(rows.map((row) => row.major).filter((major): major is string => Boolean(major))),
+    new Set(filterPeople.map((row) => row.major).filter((major): major is string => Boolean(major))),
   ).sort();
   const languageOptions = Array.from(
-    new Set(rows.flatMap((row) => row.languages).filter((language): language is string => Boolean(language))),
+    new Set(filterPeople.flatMap((row) => row.languages).filter((language): language is string => Boolean(language))),
   ).sort();
   const semesterOptions = Array.from(
-    new Set(rows.map((row) => row.semester).filter((semester): semester is number => Boolean(semester))),
+    new Set(filterPeople.map((row) => row.semester).filter((semester): semester is number => Boolean(semester))),
   ).sort((a, b) => a - b);
 
-  const filteredRows = rows.filter((row) => {
-    if (schoolFilter !== "All" && row.school !== schoolFilter) return false;
-    if (majorFilter !== "All" && row.major !== majorFilter) return false;
-    if (languageFilter !== "All" && !row.languages.includes(languageFilter)) return false;
-    if (semesterFilter !== "All" && row.semester !== Number(semesterFilter)) return false;
-    if (statusFilter === "Verified" && row.studentVerificationStatus !== "VERIFIED") return false;
-    if (
-      statusFilter === "Pending" &&
-      row.studentVerificationStatus !== "EMAIL_PENDING" &&
-      row.studentVerificationStatus !== "MANUAL_REVIEW_REQUIRED"
-    ) {
-      return false;
-    }
-    if (
-      statusFilter === "Unverified" &&
-      row.studentVerificationStatus !== "UNVERIFIED" &&
-      row.studentVerificationStatus !== "REJECTED"
-    ) {
-      return false;
-    }
-    return true;
-  });
+  const filteredRows = rows.filter((row) => passesFilters(row, {
+    schoolFilter,
+    majorFilter,
+    languageFilter,
+    semesterFilter,
+    statusFilter,
+  }));
+  const filteredPosts = posts.filter((post) => passesFilters(post, {
+    schoolFilter,
+    majorFilter,
+    languageFilter,
+    semesterFilter,
+    statusFilter,
+  }));
   const sceneRows = filteredRows.filter((row) => matchesScene(row, scene));
+  const scenePosts = filteredPosts
+    .filter((post) => matchesPostScene(post, scene))
+    .sort((a, b) => {
+      if (a.isOwn !== b.isOwn) return a.isOwn ? -1 : 1;
+      return new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime();
+    });
 
   const activeChips = [
     schoolFilter !== "All" ? schoolFilter : null,
@@ -210,7 +257,12 @@ export function DiscoverList({
       {searchActive ? (
         <UserSearchResults query={trimmed} />
       ) : (
-        <RecommendationSurface rows={sceneRows} scene={scene} />
+        <RecommendationSurface
+          rows={sceneRows}
+          posts={scenePosts}
+          scene={scene}
+          onOpenPost={() => setPostOpen(true)}
+        />
       )}
 
       {filtersOpen ? (
@@ -282,6 +334,16 @@ export function DiscoverList({
           </div>
         </div>
       ) : null}
+
+      <CreatePostSheet
+        open={postOpen}
+        scene={scene}
+        onClose={() => setPostOpen(false)}
+        onCreated={() => {
+          setPostOpen(false);
+          router.refresh();
+        }}
+      />
     </div>
   );
 }
@@ -369,15 +431,9 @@ function matchesScene(row: DiscoverRow, scene: SceneKind) {
   );
 }
 
-function scenePromptForRow(row: DiscoverRow, scene: SceneKind) {
-  const bio = row.bio?.trim();
-  if (bio) return bio;
-
-  if (scene === "study") return "Looking for a study partner this week.";
-  if (scene === "meals") return "Open to lunch or coffee after class.";
-  if (scene === "language") return "Would like to do language exchange.";
-  if (scene === "sports") return "Looking for sports buddies around campus.";
-  return "";
+function matchesPostScene(post: DiscoverPostRow, scene: SceneKind) {
+  if (scene === "shared") return false;
+  return post.category === sceneToCategory(scene);
 }
 
 function FilterSection({
@@ -474,22 +530,63 @@ function SearchBar({
 
 function RecommendationSurface({
   rows,
+  posts,
   scene,
+  onOpenPost,
 }: {
   rows: DiscoverRow[];
+  posts: DiscoverPostRow[];
   scene: SceneKind;
+  onOpenPost: () => void;
 }) {
-  if (rows.length === 0) {
+  const showingShared = scene === "shared";
+  const hasItems = showingShared ? rows.length > 0 : posts.length > 0;
+
+  if (!hasItems) {
     return (
-      <div className="rounded-2xl border border-border bg-card px-4 py-6 text-center text-[13px] text-muted-foreground">
-        No classmates match this category yet.
+      <div className="space-y-3">
+        <SceneHeader scene={scene} onOpenPost={!showingShared ? onOpenPost : undefined} />
+        <div className="rounded-2xl border border-border bg-card px-4 py-6 text-center text-[13px] text-muted-foreground">
+          {showingShared
+            ? "No classmates match this category yet."
+            : "No posts in this category yet. Be the first to share what you're looking for."}
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-3">
-      <div className="space-y-1 px-1">
+      <SceneHeader scene={scene} onOpenPost={!showingShared ? onOpenPost : undefined} />
+
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+        {showingShared
+          ? rows.map((r, i) => (
+              <RecommendationRow
+                key={r.userId}
+                row={r}
+                isLast={i === rows.length - 1}
+                scene={scene}
+              />
+            ))
+          : posts.map((post, i) => (
+              <PostRow key={post.id} post={post} isLast={i === posts.length - 1} />
+            ))}
+      </div>
+    </div>
+  );
+}
+
+function SceneHeader({
+  scene,
+  onOpenPost,
+}: {
+  scene: SceneKind;
+  onOpenPost?: () => void;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-3 px-1">
+      <div className="space-y-1">
         <h3 className="text-sm font-semibold tracking-tight text-foreground">
           {sceneHeading(scene)}
         </h3>
@@ -497,17 +594,16 @@ function RecommendationSurface({
           {sceneDescription(scene)}
         </p>
       </div>
-
-      <div className="overflow-hidden rounded-2xl border border-border bg-card">
-        {rows.map((r, i) => (
-          <RecommendationRow
-            key={r.userId}
-            row={r}
-            isLast={i === rows.length - 1}
-            scene={scene}
-          />
-        ))}
-      </div>
+      {onOpenPost ? (
+        <button
+          type="button"
+          onClick={onOpenPost}
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-border/70 bg-card px-3 text-[12px] font-medium text-foreground shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]"
+        >
+          <Plus className="h-4 w-4 text-muted-foreground" strokeWidth={2.25} />
+          Post
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -530,13 +626,13 @@ function sceneHeading(scene: SceneKind) {
 function sceneDescription(scene: SceneKind) {
   switch (scene) {
     case "study":
-      return "People who look open to studying, review sessions, and exam prep.";
+      return "Posts from students actively looking for study partners and review sessions.";
     case "meals":
-      return "Low-pressure classmates for lunch, coffee, or a quick break after class.";
+      return "Students posting about lunch, coffee, or a quick break after class.";
     case "language":
-      return "Students with language overlap who may be good for conversation and exchange.";
+      return "Students looking for language exchange or conversation practice.";
     case "sports":
-      return "Students whose profile hints at sports, exercise, or active meetups.";
+      return "Posts about sports, gym buddies, and active meetups around campus.";
     default:
       return "People you already overlap with through shared courses.";
   }
@@ -670,7 +766,6 @@ function RecommendationRow({
   const sharedCount = row.sharedCourses.length;
   const sharedLabel =
     sharedCount === 1 ? "1 shared course" : `${sharedCount} shared courses`;
-  const scenePrompt = scene === "shared" ? null : scenePromptForRow(row, scene);
   const profileHref = `/users/${row.userId}?returnTo=%2Fdiscover` as Route;
 
   return (
@@ -706,8 +801,6 @@ function RecommendationRow({
 
         {scene === "shared" ? (
           <p className="mt-1 text-xs font-medium text-foreground/85">{sharedLabel}</p>
-        ) : scenePrompt ? (
-          <p className="mt-1 text-[12px] leading-snug text-foreground/80">{scenePrompt}</p>
         ) : null}
 
         {scene === "shared" && row.sharedCourses.length > 0 ? (
@@ -735,53 +828,331 @@ function RecommendationRow({
   );
 }
 
-function DiscoverMessageButton({
-  peerId,
-  courseId,
-}: {
-  peerId: string;
-  courseId?: string;
-}) {
-  const router = useRouter();
-  const [opening, setOpening] = useState(false);
+function PostRow({ post, isLast }: { post: DiscoverPostRow; isLast: boolean }) {
+  const meta = [post.major, post.semester ? `sem ${post.semester}` : null]
+    .filter(Boolean)
+    .join(" · ");
+  const postPath = `/discover/posts/${post.id}`;
+  const postDetailHref =
+    `${postPath}?returnTo=${encodeURIComponent("/discover")}` as Route;
+  const profileHref = (
+    post.isOwn
+      ? postDetailHref
+      : `/users/${post.userId}?returnTo=${encodeURIComponent(postPath)}`
+  ) as Route;
 
-  async function openChat() {
-    if (opening) return;
-    setOpening(true);
+  return (
+    <div
+      className={cn(
+        "flex items-start gap-3 px-3 py-3 transition hover:bg-muted/20",
+        !isLast && "border-b border-border",
+      )}
+    >
+      <Link href={profileHref} className="shrink-0">
+        <PresetAvatar id={post.avatarUrl} size={52} className="shrink-0" />
+      </Link>
+
+      <Link href={postDetailHref} className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="truncate text-sm font-medium">{post.nickname}</span>
+          <VerifiedBadge
+            size="xs"
+            school={post.school}
+            verifiedStudent={post.verifiedStudent}
+            status={post.studentVerificationStatus}
+          />
+          {post.isOwn ? (
+            <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+              your post
+            </span>
+          ) : null}
+        </div>
+        {meta ? (
+          <p className="truncate text-xs text-muted-foreground">{meta}</p>
+        ) : null}
+        <p className="mt-1 text-[12px] font-medium leading-snug text-foreground/90">{post.title}</p>
+        {post.body ? (
+          <p className="mt-0.5 text-[12px] leading-snug text-foreground/75">{post.body}</p>
+        ) : null}
+        <p className="mt-1 text-[10.5px] text-muted-foreground">
+          {isNeverExpiry(post.expiresAt)
+            ? "No expiry"
+            : `Active until ${format(new Date(post.expiresAt), "MMM d")}`}
+        </p>
+      </Link>
+
+      <DiscoverMessageButton peerId={post.userId} returnTo={postPath} />
+    </div>
+  );
+}
+
+function sceneToCategory(scene: SceneKind): ClassmatePostCategory {
+  switch (scene) {
+    case "study":
+      return ClassmatePostCategory.STUDY;
+    case "meals":
+      return ClassmatePostCategory.MEALS;
+    case "language":
+      return ClassmatePostCategory.LANGUAGE;
+    case "sports":
+      return ClassmatePostCategory.SPORTS;
+    default:
+      return ClassmatePostCategory.STUDY;
+  }
+}
+
+function passesFilters(
+  value: {
+    school: string | null;
+    major: string | null;
+    languages: string[];
+    semester: number | null;
+    studentVerificationStatus:
+      | "UNVERIFIED"
+      | "EMAIL_PENDING"
+      | "VERIFIED"
+      | "MANUAL_REVIEW_REQUIRED"
+      | "REJECTED";
+  },
+  filters: {
+    schoolFilter: string;
+    majorFilter: string;
+    languageFilter: string;
+    semesterFilter: string;
+    statusFilter: string;
+  },
+) {
+  if (filters.schoolFilter !== "All" && value.school !== filters.schoolFilter) return false;
+  if (filters.majorFilter !== "All" && value.major !== filters.majorFilter) return false;
+  if (filters.languageFilter !== "All" && !value.languages.includes(filters.languageFilter)) return false;
+  if (filters.semesterFilter !== "All" && value.semester !== Number(filters.semesterFilter)) return false;
+  if (filters.statusFilter === "Verified" && value.studentVerificationStatus !== "VERIFIED") return false;
+  if (
+    filters.statusFilter === "Pending" &&
+    value.studentVerificationStatus !== "EMAIL_PENDING" &&
+    value.studentVerificationStatus !== "MANUAL_REVIEW_REQUIRED"
+  ) {
+    return false;
+  }
+  if (
+    filters.statusFilter === "Unverified" &&
+    value.studentVerificationStatus !== "UNVERIFIED" &&
+    value.studentVerificationStatus !== "REJECTED"
+  ) {
+    return false;
+  }
+  return true;
+}
+
+function CreatePostSheet({
+  open,
+  scene,
+  onClose,
+  onCreated,
+}: {
+  open: boolean;
+  scene: SceneKind;
+  onClose: () => void;
+  onCreated: () => void;
+}) {
+  const canPost = scene !== "shared";
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [expiryPreset, setExpiryPreset] = useState<PostExpiryPreset>("1w");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setTitle("");
+    setBody("");
+    setError(null);
+    setExpiryPreset("1w");
+  }, [open, scene]);
+
+  if (!open || !canPost) return null;
+
+  async function submit() {
+    if (submitting) return;
+    setSubmitting(true);
+    setError(null);
     try {
-      const res = await fetch("/api/connections/open", {
+      const res = await fetch("/api/classmate-posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ peerId, ...(courseId ? { courseId } : {}) }),
+        body: JSON.stringify({
+          city: "Munich",
+          category: sceneToCategory(scene),
+          title,
+          body,
+          expiresAt: expiryPresetToDate(expiryPreset).toISOString(),
+        }),
       });
       const payload = await res.json().catch(() => ({}));
-      const connectionId = payload?.data?.connectionId as string | undefined;
-      if (!res.ok || !connectionId) {
-        setOpening(false);
-        return;
+      if (!res.ok || !payload?.success) {
+        throw new Error(payload?.error || "Unable to create post.");
       }
-      router.push(`/connections/${connectionId}?returnTo=%2Fdiscover`);
-      router.refresh();
-    } catch {
-      setOpening(false);
+      onCreated();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to create post.");
+      setSubmitting(false);
     }
   }
 
   return (
+    <div className="fixed inset-0 z-40 flex items-end bg-foreground/10 backdrop-blur-[1px]">
+      <button type="button" aria-label="Close post sheet" className="absolute inset-0" onClick={onClose} />
+      <div className="relative w-full rounded-t-[1.75rem] border border-border/60 bg-background px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 shadow-2xl">
+        <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border/80" />
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div>
+            <h3 className="text-[15px] font-semibold text-foreground">Post in {sceneHeading(scene)}</h3>
+            <p className="mt-1 text-[12px] leading-snug text-muted-foreground">
+              Share a short note about who or what you&apos;re looking for.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" strokeWidth={2.25} />
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
+            <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">What are you looking for?</p>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={postPlaceholder(scene)}
+              className="h-11 rounded-xl border-border/70 text-[14px]"
+            />
+          </div>
+
+          <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
+            <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">Optional details</p>
+            <textarea
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              placeholder="Add a little context if helpful."
+              className="min-h-24 w-full resize-none rounded-xl border border-input bg-background px-3 py-2.5 text-[14px] outline-none transition focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+            />
+          </div>
+
+          <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
+            <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">Expires</p>
+            <div className="flex flex-wrap gap-2">
+              <ExpiryOption
+                label="3 days"
+                active={expiryPreset === "3d"}
+                onClick={() => setExpiryPreset("3d")}
+              />
+              <ExpiryOption
+                label="1 week"
+                active={expiryPreset === "1w"}
+                onClick={() => setExpiryPreset("1w")}
+              />
+              <ExpiryOption
+                label="1 month"
+                active={expiryPreset === "1m"}
+                onClick={() => setExpiryPreset("1m")}
+              />
+              <ExpiryOption
+                label="Never"
+                active={expiryPreset === "never"}
+                onClick={() => setExpiryPreset("never")}
+              />
+            </div>
+          </div>
+        </div>
+
+        {error ? <p className="mt-3 text-[12px] text-destructive">{error}</p> : null}
+
+        <div className="mt-4 flex gap-2">
+          <Button type="button" variant="ghost" className="h-11 flex-1 rounded-xl" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="button" className="h-11 flex-1 rounded-xl" onClick={() => void submit()} disabled={submitting}>
+            {submitting ? (
+              <>
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                Posting…
+              </>
+            ) : (
+              <>
+                <Edit3 className="mr-1.5 h-4 w-4" />
+                Post
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function postPlaceholder(scene: SceneKind) {
+  switch (scene) {
+    case "study":
+      return "Looking for someone to review IN2064 this week";
+    case "meals":
+      return "Anyone up for lunch after class near Garching?";
+    case "language":
+      return "Want to practice German over coffee";
+    case "sports":
+      return "Looking for a basketball buddy this weekend";
+    default:
+      return "Share what you're looking for";
+  }
+}
+
+function ExpiryOption({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
     <button
       type="button"
-      onClick={openChat}
-      disabled={opening}
-      className="inline-flex h-9 shrink-0 items-center justify-center rounded-full bg-primary/10 px-3 text-[12px] font-semibold text-primary transition-colors hover:bg-primary/15 active:bg-primary/20 disabled:opacity-70"
-    >
-      {opening ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <>
-          <MessageCircle className="mr-1 h-4 w-4" />
-          Message
-        </>
+      onClick={onClick}
+      className={cn(
+        "inline-flex h-9 items-center rounded-full border px-3 text-[12px] font-medium transition-colors",
+        active
+          ? "border-primary bg-primary/10 text-primary"
+          : "border-border/70 bg-background text-foreground/78",
       )}
+    >
+      {label}
     </button>
   );
+}
+
+function expiryPresetToDate(preset: PostExpiryPreset) {
+  switch (preset) {
+    case "3d":
+      return endOfDay(addDays(new Date(), 3));
+    case "1m":
+      return endOfDay(addDays(new Date(), 30));
+    case "never":
+      return new Date("2099-12-31T23:59:59.999Z");
+    default:
+      return endOfDay(addDays(new Date(), 7));
+  }
+}
+
+function endOfDay(date: Date) {
+  const next = new Date(date);
+  next.setHours(23, 59, 59, 999);
+  return next;
+}
+
+function isNeverExpiry(value: Date) {
+  return new Date(value).getUTCFullYear() >= 2099;
 }

@@ -13,10 +13,19 @@ import { SESSION_COOKIE_NAME, authRoutes } from "@/lib/constants/app";
  * - Auth pages: `/login`, `/signup` (+ subpaths if any)
  */
 function isPublicAppPath(pathname: string): boolean {
+  /** PWA: manifest, SW, and generated icons must not redirect to login. */
+  if (
+    pathname === "/manifest.webmanifest" ||
+    pathname === "/sw.js" ||
+    pathname.startsWith("/icons/")
+  ) {
+    return true;
+  }
   if (
     pathname === "/" ||
     pathname === "/home" ||
     pathname === "/discover" ||
+    pathname.startsWith("/discover/") ||
     pathname === "/courses" ||
     pathname === "/forgot-password"
   ) {

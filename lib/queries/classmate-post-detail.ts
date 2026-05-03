@@ -1,0 +1,152 @@
+import "server-only";
+
+import { ClassmatePostCategory, ClassmatePostStatus } from "@prisma/client";
+
+import { prisma } from "@/lib/db/prisma";
+
+const DISCOVER_POST_CITY = "Munich";
+
+export type ClassmatePostDetailAuthor = {
+  id: string;
+  username: string;
+  nickname: string | null;
+  avatarUrl: string | null;
+  major: string | null;
+  semester: number | null;
+  school: string | null;
+  languages: string[];
+  verifiedStudent: boolean;
+  studentVerificationStatus:
+    | "UNVERIFIED"
+    | "EMAIL_PENDING"
+    | "VERIFIED"
+    | "MANUAL_REVIEW_REQUIRED"
+    | "REJECTED";
+};
+
+export type ClassmatePostDetail = {
+  id: string;
+  userId: string;
+  city: string;
+  category: ClassmatePostCategory;
+  title: string;
+  body: string | null;
+  status: ClassmatePostStatus;
+  expiresAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type ClassmatePostDetailView =
+  | {
+      ok: true;
+      post: ClassmatePostDetail;
+      author: ClassmatePostDetailAuthor;
+      isAuthor: boolean;
+      /** False for your own post; true when another user's live post is visible. */
+      viewerCanMessage: boolean;
+    }
+  | { ok: false };
+
+/**
+ * Same visibility rules as Discover post list for non-authors; authors always
+ * see their own row (any status / expiry).
+ */
+export async function getClassmatePostDetailForViewer(
+  postId: string,
+  viewerId: string,
+): Promise<ClassmatePostDetailView> {
+  const post = await prisma.classmatePost.findUnique({
+    where: { id: postId },
+    include: {
+      user: {
+        select: {
+          id: true,
+          username: true,
+          nickname: true,
+          avatarUrl: true,
+          major: true,
+          semester: true,
+          school: true,
+          languages: true,
+          verifiedStudent: true,
+          studentVerificationStatus: true,
+        },
+      },
+    },
+  });
+
+  if (!post) {
+    return { ok: false };
+  }
+
+  const author = post.user;
+
+  if (post.userId === viewerId) {
+    return {
+      ok: true,
+      post: {
+        id: post.id,
+        userId: post.userId,
+        city: post.city,
+        category: post.category,
+        title: post.title,
+        body: post.body,
+        status: post.status,
+        expiresAt: post.expiresAt,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+      },
+      author,
+      isAuthor: true,
+      viewerCanMessage: false,
+    };
+  }
+
+  const now = new Date();
+  if (post.status !== ClassmatePostStatus.ACTIVE || post.expiresAt <= now) {
+    return { ok: false };
+  }
+  if (post.city !== DISCOVER_POST_CITY) {
+    return { ok: false };
+  }
+
+  const [moderationBlock, mutualBlock] = await Promise.all([
+    prisma.moderationBlock.findFirst({
+      where: { userId: post.userId, isActive: true },
+      select: { id: true },
+    }),
+    prisma.block.findFirst({
+      where: {
+        OR: [
+          { blockerId: viewerId, blockedId: post.userId },
+          { blockerId: post.userId, blockedId: viewerId },
+        ],
+      },
+      select: { id: true },
+    }),
+  ]);
+
+  if (moderationBlock || mutualBlock) {
+    return { ok: false };
+  }
+
+  return {
+    ok: true,
+    post: {
+      id: post.id,
+      userId: post.userId,
+      city: post.city,
+      category: post.category,
+      title: post.title,
+      body: post.body,
+      status: post.status,
+      expiresAt: post.expiresAt,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+    },
+    author,
+    isAuthor: false,
+    viewerCanMessage: true,
+  };
+}

@@ -174,6 +174,19 @@ enum PlanRequestStatus {
   EXPIRED
 }
 
+enum ClassmatePostCategory {
+  STUDY
+  MEALS
+  LANGUAGE
+  SPORTS
+}
+
+enum ClassmatePostStatus {
+  ACTIVE
+  CLOSED
+  EXPIRED
+}
+
 model User {
   id                           String                   @id @default(cuid())
   username                     String                   @unique
@@ -235,6 +248,7 @@ model User {
   planRequestsReceived         PlanRequest[]              @relation("PlanRequestReceiver")
   calendarEntries              CalendarEntry[]
   calendarEntryCompanionships  CalendarEntryCompanion[]
+  classmatePosts               ClassmatePost[]
 }
 
 model Session {
@@ -246,6 +260,24 @@ model Session {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([expiresAt])
+}
+
+model ClassmatePost {
+  id         String                @id @default(cuid())
+  userId     String
+  city       String
+  category   ClassmatePostCategory
+  title      String
+  body       String?
+  status     ClassmatePostStatus   @default(ACTIVE)
+  expiresAt  DateTime
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+  user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([category, status, city, createdAt])
+  @@index([userId, category, status])
   @@index([expiresAt])
 }
 

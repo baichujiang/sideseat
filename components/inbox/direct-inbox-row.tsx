@@ -31,7 +31,9 @@ export function DirectInboxRow({
   connection: DirectInboxConnection;
   returnTo?: string;
 }) {
+  const isSelfNotes = connection.userAId === connection.userBId;
   const other = connection.userAId === userId ? connection.userB : connection.userA;
+  const displayName = isSelfNotes ? "Notes to self" : (other.nickname ?? "Student");
   const lastMessage = connection.messages[0];
   const fromMe = lastMessage?.senderId === userId;
   const contextCourseName =
@@ -62,7 +64,7 @@ export function DirectInboxRow({
                 <Pin className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-amber-500" strokeWidth={2} aria-hidden />
               ) : null}
               <p className="truncate text-[15px] font-semibold leading-tight text-foreground">
-                {other.nickname ?? "Student"}
+                {displayName}
               </p>
             </div>
             <time

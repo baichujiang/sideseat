@@ -10,6 +10,7 @@ import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
 import { startConversationSchema } from "@/lib/validators/invitation";
+import { findOrCreateSelfNotesConnection } from "@/lib/queries/self-notes-connection";
 
 /**
  * First-message flow: creates a 1:1 conversation (or reuses an existing ACTIVE
@@ -39,13 +40,25 @@ export async function POST(request: Request) {
     const user = await requireOnboardedUser();
     const values = await parseJson(request, startConversationSchema);
 
-    if (values.peerId === user.id) {
-      return error("You cannot start a conversation with yourself.");
-    }
-
     const body = values.body.trim();
     if (body.length === 0) {
       return error("Message cannot be empty.");
+    }
+
+    if (values.peerId === user.id) {
+      const { connectionId, created } = await findOrCreateSelfNotesConnection(user.id);
+      const message = await prisma.message.create({
+        data: {
+          connectionId,
+          senderId: user.id,
+          body,
+        },
+      });
+      await prisma.connection.update({
+        where: { id: connectionId },
+        data: { updatedAt: message.createdAt },
+      });
+      return ok({ connectionId, created }, { status: created ? 201 : 200 });
     }
 
     const [peer, mutualBlock, peerModerated, sharedCourse, existingConnection] =

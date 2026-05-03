@@ -9,22 +9,31 @@ export function getConnectionPinnedAt<
   return connection.userAId === userId ? connection.pinnedByAAt : connection.pinnedByBAt;
 }
 
+export function isConnectionPinned<
+  T extends {
+    userAId: string;
+    userBId: string;
+    pinnedByAAt: Date | null;
+    pinnedByBAt: Date | null;
+  },
+>(connection: T, userId: string) {
+  return Boolean(getConnectionPinnedAt(connection, userId));
+}
+
 export function compareConnectionsForInbox<
   T extends {
     userAId: string;
     userBId: string;
     pinnedByAAt: Date | null;
     pinnedByBAt: Date | null;
-    updatedAt: Date;
   },
->(a: T, b: T, userId: string) {
-  const aPinnedAt = getConnectionPinnedAt(a, userId);
-  const bPinnedAt = getConnectionPinnedAt(b, userId);
+>(a: T, b: T, userId: string, getSortAt: (value: T) => Date) {
+  const aPinned = isConnectionPinned(a, userId);
+  const bPinned = isConnectionPinned(b, userId);
 
-  if (aPinnedAt && bPinnedAt) {
-    return bPinnedAt.getTime() - aPinnedAt.getTime();
+  if (aPinned !== bPinned) {
+    return aPinned ? -1 : 1;
   }
-  if (aPinnedAt) return -1;
-  if (bPinnedAt) return 1;
-  return b.updatedAt.getTime() - a.updatedAt.getTime();
+
+  return getSortAt(b).getTime() - getSortAt(a).getTime();
 }

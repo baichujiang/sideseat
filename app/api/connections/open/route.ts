@@ -10,6 +10,7 @@ import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
 import { openConversationSchema } from "@/lib/validators/invitation";
+import { findOrCreateSelfNotesConnection } from "@/lib/queries/self-notes-connection";
 
 /**
  * Open-chat flow for profile cards:
@@ -25,7 +26,8 @@ export async function POST(request: Request) {
     const values = await parseJson(request, openConversationSchema);
 
     if (values.peerId === user.id) {
-      return error("You cannot open a conversation with yourself.");
+      const { connectionId, created } = await findOrCreateSelfNotesConnection(user.id);
+      return ok({ connectionId, created }, { status: created ? 201 : 200 });
     }
 
     const [peer, mutualBlock, peerModerated, sharedCourse, existingConnection] =

@@ -1,10 +1,14 @@
 import type { Route } from "next";
-import { ConnectionStatus } from "@prisma/client";
+import { ClassmatePostCategory, ClassmatePostStatus, ConnectionStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { MapPin } from "lucide-react";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
-import { DiscoverList, type DiscoverRow } from "@/components/discover/discover-list";
+import {
+  DiscoverList,
+  type DiscoverPostRow,
+  type DiscoverRow,
+} from "@/components/discover/discover-list";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LinkButton } from "@/components/ui/link-button";
 import { getSessionUser } from "@/lib/auth/session";
@@ -23,7 +27,7 @@ export default async function DiscoverPage() {
     return (
       <div className="space-y-5">
         <PageHeader />
-        <DiscoverList rows={[]} allowSearch={false} />
+        <DiscoverList rows={[]} posts={[]} allowSearch={false} />
         <GuestAppCta
           returnTo="/discover"
           headline="Sign in to find classmates"
@@ -37,34 +41,13 @@ export default async function DiscoverPage() {
   }
   const user = sessionUser;
 
-  const [hits, enrolledCount, savedCount] = await Promise.all([
-    getDiscoverPeople(user.id),
-    prisma.userCourse.count({ where: { userId: user.id } }),
-    prisma.savedCourse.count({ where: { userId: user.id } }),
-  ]);
-
-  const hasAnyCourseSignal = enrolledCount > 0 || savedCount > 0;
-
-  if (!hasAnyCourseSignal) {
-    return (
-      <div className="space-y-5">
-        <PageHeader />
-        <EmptyState
-          title="Nobody to show yet"
-          description="Add a course to your calendar so we can match you with classmates."
-          action={
-            <LinkButton href="/courses/add" size="sm">
-              Add a course
-            </LinkButton>
-          }
-        />
-      </div>
-    );
-  }
+  const hits = await getDiscoverPeople(user.id);
+  const freshHitsBase = hits;
+  const savedCount = await prisma.savedCourse.count({ where: { userId: user.id } });
 
   // Filter out people we're already chatting with. Once connected, Inbox is
   // the right surface; Discover should only offer net-new introductions.
-  const otherIds = hits.map((h) => h.userId);
+  const otherIds = freshHitsBase.map((h) => h.userId);
   const activeConnections = await prisma.connection.findMany({
     where: {
       status: ConnectionStatus.ACTIVE,
@@ -78,9 +61,31 @@ export default async function DiscoverPage() {
   const connectedUserIds = new Set<string>(
     activeConnections.map((c) => (c.userAId === user.id ? c.userBId : c.userAId)),
   );
-  const freshHits = hits.filter((h) => !connectedUserIds.has(h.userId));
 
-  if (freshHits.length === 0) {
+  const activePosts = await prisma.classmatePost.findMany({
+    where: {
+      status: ClassmatePostStatus.ACTIVE,
+      expiresAt: { gt: new Date() },
+      city: "Munich",
+      user: {
+        moderationBlocks: { none: { isActive: true } },
+        blocksReceived: { none: { blockerId: user.id } },
+        blocksInitiated: { none: { blockedId: user.id } },
+      },
+    },
+    include: {
+      user: true,
+    },
+    orderBy: { createdAt: "desc" },
+    take: 120,
+  });
+
+  const freshHits = freshHitsBase.filter((h) => !connectedUserIds.has(h.userId));
+  const freshPosts = activePosts.filter(
+    (post) => post.userId === user.id || !connectedUserIds.has(post.userId),
+  );
+
+  if (freshHits.length === 0 && freshPosts.length === 0) {
     return (
       <div className="space-y-5">
         <PageHeader />
@@ -125,10 +130,29 @@ export default async function DiscoverPage() {
     connectionId: null,
   }));
 
+  const posts: DiscoverPostRow[] = freshPosts.map((post) => ({
+    id: post.id,
+    category: post.category,
+    city: post.city,
+    title: post.title,
+    body: post.body,
+    expiresAt: post.expiresAt,
+    isOwn: post.user.id === user.id,
+    userId: post.user.id,
+    nickname: post.user.nickname ?? post.user.username,
+    avatarUrl: post.user.avatarUrl,
+    major: post.user.major,
+    semester: post.user.semester,
+    school: post.user.school,
+    languages: post.user.languages,
+    verifiedStudent: post.user.verifiedStudent,
+    studentVerificationStatus: post.user.studentVerificationStatus,
+  }));
+
   return (
     <div className="space-y-4">
       <PageHeader />
-      <DiscoverList rows={rows} />
+      <DiscoverList rows={rows} posts={posts} />
     </div>
   );
 }

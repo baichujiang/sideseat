@@ -24,7 +24,8 @@ export function ChatScrollContainer({
   children: React.ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const prevCount = useRef(messageCount);
+  /** `null` until the first layout pass for this mount (avoids treating every run as "initial"). */
+  const prevCount = useRef<number | null>(null);
   const [showFab, setShowFab] = useState(false);
 
   const nearBottom = (el: HTMLDivElement) =>
@@ -33,9 +34,15 @@ export function ChatScrollContainer({
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const firstRun = prevCount.current === messageCount;
+
+    if (prevCount.current === null) {
+      el.scrollTop = el.scrollHeight;
+      prevCount.current = messageCount;
+      return;
+    }
+
     const grew = messageCount > prevCount.current;
-    if (firstRun || (grew && nearBottom(el))) {
+    if (grew && nearBottom(el)) {
       el.scrollTop = el.scrollHeight;
     }
     prevCount.current = messageCount;

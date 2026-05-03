@@ -47,7 +47,14 @@ export default async function ToReplyPage() {
   });
 
   const toReply = connections
-    .sort((a, b) => compareConnectionsForInbox(a, b, user.id))
+    .sort((a, b) =>
+      compareConnectionsForInbox(
+        a,
+        b,
+        user.id,
+        (value) => value.messages[0]?.createdAt ?? value.updatedAt,
+      ),
+    )
     .filter(
     (connection) =>
       connection._count.messages === 1 && connection.messages[0]?.senderId !== user.id,

@@ -2,54 +2,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { Route } from "next";
 import type { ReactNode } from "react";
-import type { Course, CourseRoomMessage, User } from "@prisma/client";
-import { formatDistanceToNowStrict } from "date-fns";
-import { ChevronRight, MessageCircle, Send, UserRound } from "lucide-react";
+import { BellDot, CalendarRange, FileText } from "lucide-react";
 
 import { DirectInboxRow } from "@/components/inbox/direct-inbox-row";
-import { CourseAvatar } from "@/components/ui/course-avatar";
+import { CourseInboxRow } from "@/components/inbox/course-inbox-row";
 import { EmptyState } from "@/components/ui/empty-state";
-import { cn } from "@/lib/utils";
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { getSessionUser } from "@/lib/auth/session";
-import { prisma } from "@/lib/db/prisma";
-import { ConnectionStatus, FriendLinkStatus } from "@prisma/client";
-import { compareConnectionsForInbox, getConnectionPinnedAt } from "@/lib/queries/inbox-order";
-
-type ConnectionInbox = Awaited<
-  ReturnType<
-    typeof prisma.connection.findMany<{
-      include: {
-        userA: true;
-        userB: true;
-        invitation: { include: { course: true } };
-        originCourse: true;
-        messages: { orderBy: { createdAt: "desc" }; take: 1; include: { sender: true } };
-        _count: { select: { messages: true } };
-      };
-    }>
-  >
->[number];
-
-type UserCourseWithCourse = Awaited<
-  ReturnType<
-    typeof prisma.userCourse.findMany<{
-      include: { course: true };
-    }>
-  >
->[number];
-
-type CourseRoomMessageWithSender = CourseRoomMessage & { sender: User };
-
-type InboxMerged =
-  | { kind: "direct"; sortAt: Date; connection: ConnectionInbox }
-  | {
-      kind: "course";
-      sortAt: Date;
-      course: Course;
-      userCourse: UserCourseWithCourse;
-      last: CourseRoomMessageWithSender | undefined;
-    };
+import { getInboxMergeBundle } from "@/lib/queries/inbox-merge";
 
 export default async function InboxPage() {
   const sessionUser = await getSessionUser();
@@ -73,84 +33,9 @@ export default async function InboxPage() {
   }
   const user = sessionUser;
 
-  const [contactsCount, connections, userCourses] = await Promise.all([
-    prisma.friendLink.count({
-      where: {
-        status: FriendLinkStatus.ACCEPTED,
-        connection: {
-          status: ConnectionStatus.ACTIVE,
-          OR: [{ userAId: user.id }, { userBId: user.id }],
-        },
-      },
-    }),
-    prisma.connection.findMany({
-      where: {
-        status: "ACTIVE",
-        OR: [{ userAId: user.id }, { userBId: user.id }],
-      },
-      include: {
-        userA: true,
-        userB: true,
-        invitation: { include: { course: true } },
-        originCourse: true,
-        messages: {
-          orderBy: { createdAt: "desc" },
-          take: 1,
-          include: { sender: true },
-        },
-        _count: { select: { messages: true } },
-      },
-    }),
-    prisma.userCourse.findMany({
-      where: { userId: user.id },
-      include: { course: true },
-    }),
-  ]);
-
-  const courseIds = userCourses.map((uc) => uc.courseId);
-  const courseMessages =
-    courseIds.length > 0
-      ? await prisma.courseRoomMessage.findMany({
-          where: { courseId: { in: courseIds } },
-          orderBy: { createdAt: "desc" },
-          include: { sender: true },
-          take: 400,
-        })
-      : [];
-
-  const lastCourseMessageByCourseId = new Map<string, CourseRoomMessageWithSender>();
-  for (const m of courseMessages) {
-    if (!lastCourseMessageByCourseId.has(m.courseId)) {
-      lastCourseMessageByCourseId.set(m.courseId, m);
-    }
-  }
-
-  const merged: InboxMerged[] = [
-    ...connections
-      .sort((a, b) => compareConnectionsForInbox(a, b, user.id))
-      .map((connection) => ({
-      kind: "direct" as const,
-      sortAt: getConnectionPinnedAt(connection, user.id) ?? connection.messages[0]?.createdAt ?? connection.updatedAt,
-      connection,
-      })),
-    ...userCourses.map((uc) => ({
-      kind: "course" as const,
-      sortAt: lastCourseMessageByCourseId.get(uc.courseId)?.createdAt ?? uc.updatedAt,
-      course: uc.course,
-      userCourse: uc,
-      last: lastCourseMessageByCourseId.get(uc.courseId),
-    })),
-  ].sort((a, b) => b.sortAt.getTime() - a.sortAt.getTime());
-
-  const firstMessageConnections = connections.filter(
-    (connection) => connection._count.messages === 1 && connection.messages[0],
+  const { merged, unreadTotal, plansNeedingYourAction, activePostCount } = await getInboxMergeBundle(
+    user.id,
   );
-  const toReplyCount = firstMessageConnections.filter(
-    (connection) => connection.messages[0]?.senderId !== user.id,
-  ).length;
-  const fromYouCount = firstMessageConnections.filter(
-    (connection) => connection.messages[0]?.senderId === user.id,
-  ).length;
 
   return (
     <div className="space-y-5">
@@ -163,21 +48,22 @@ export default async function InboxPage() {
 
       <section className="grid grid-cols-3 gap-2.5">
         <InboxShortcut
-          href="/inbox/to-reply"
-          icon={<MessageCircle className="h-5 w-5" strokeWidth={2} aria-hidden />}
-          label="To reply"
-          count={toReplyCount}
+          href="/inbox/unread"
+          icon={<BellDot className="h-5 w-5" strokeWidth={2} aria-hidden />}
+          label="Unread"
+          count={unreadTotal}
         />
         <InboxShortcut
-          href="/inbox/from-you"
-          icon={<Send className="h-5 w-5" strokeWidth={2} aria-hidden />}
-          label="From you"
-          count={fromYouCount}
+          href="/inbox/plans"
+          icon={<CalendarRange className="h-5 w-5" strokeWidth={2} aria-hidden />}
+          label="Plans"
+          count={plansNeedingYourAction}
         />
         <InboxShortcut
-          href="/inbox/contacts"
-          icon={<UserRound className="h-5 w-5" strokeWidth={2} aria-hidden />}
-          label="Contacts"
+          href="/inbox/my-posts"
+          icon={<FileText className="h-5 w-5" strokeWidth={2} aria-hidden />}
+          label="My posts"
+          count={activePostCount}
         />
       </section>
 
@@ -235,75 +121,5 @@ function InboxShortcut({
       </span>
       <p className="max-w-full truncate text-[12px] font-semibold leading-tight">{label}</p>
     </Link>
-  );
-}
-
-function CourseInboxRow({
-  userId,
-  course,
-  userCourse,
-  last,
-}: {
-  userId: string;
-  course: Course;
-  userCourse: UserCourseWithCourse;
-  last: CourseRoomMessageWithSender | undefined;
-}) {
-  const when = last?.createdAt ?? userCourse.updatedAt;
-  const fromMe = last?.senderId === userId;
-  const preview = last?.body
-    ? `${fromMe ? "You: " : `${last.sender.nickname ?? "Someone"}: `}${last.body}`
-    : "Course chat — say hi to the class";
-  const unread = Boolean(last && !fromMe);
-
-  return (
-    <li className="border-b border-border/50 last:border-b-0">
-      <Link
-        href={`/courses/${course.id}/chat?returnTo=%2Finbox` as Route}
-        className="flex min-h-[4.25rem] items-center gap-3.5 px-4 py-3.5 transition-colors active:bg-muted/50 [@media(hover:hover)]:hover:bg-muted/45"
-      >
-        <CourseAvatar
-          id={course.id}
-          code={course.code}
-          name={course.name}
-          size={52}
-          className="ring-2 ring-background"
-        />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-baseline justify-between gap-2">
-            <p className="truncate text-[15px] font-semibold leading-tight text-foreground">
-              {course.name}
-            </p>
-            <time
-              className="shrink-0 text-[11px] tabular-nums text-muted-foreground"
-              dateTime={when.toISOString()}
-            >
-              {formatDistanceToNowStrict(when, { addSuffix: false })}
-            </time>
-          </div>
-          <p
-            className={cn(
-              "mt-0.5 truncate text-[13px] leading-snug",
-              unread ? "font-medium text-foreground/90" : "text-muted-foreground",
-            )}
-          >
-            {preview}
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-1.5 pl-0.5">
-          {unread ? (
-            <span
-              className="h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_0_2px_hsl(var(--card))]"
-              aria-label="Unread"
-            />
-          ) : null}
-          <ChevronRight
-            className="h-4 w-4 shrink-0 text-muted-foreground/45"
-            strokeWidth={2}
-            aria-hidden
-          />
-        </div>
-      </Link>
-    </li>
   );
 }

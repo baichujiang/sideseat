@@ -12,9 +12,12 @@ import { cn } from "@/lib/utils";
 export function ChatComposer({
   connectionId,
   peerName,
+  hideAttachments = false,
 }: {
   connectionId: string;
   peerName: string;
+  /** Hide share-availability / plan (+) — used for notes-to-self threads. */
+  hideAttachments?: boolean;
 }) {
   const router = useRouter();
   const { replyTo, setReplyTo } = useChatReply();
@@ -61,7 +64,11 @@ export function ChatComposer({
         />
       ) : null}
       <div className="flex items-end gap-2 px-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-1">
-        <ChatAttachmentMenu connectionId={connectionId} peerName={peerName} />
+        {hideAttachments ? (
+          <span className="h-11 w-11 shrink-0" aria-hidden />
+        ) : (
+          <ChatAttachmentMenu connectionId={connectionId} peerName={peerName} />
+        )}
         <label className="sr-only" htmlFor={`chat-input-${connectionId}`}>
           Message
         </label>

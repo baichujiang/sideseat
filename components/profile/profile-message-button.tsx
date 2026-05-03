@@ -57,7 +57,6 @@ export function ProfileMessageButton({
 
       const suffix = returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : "";
       router.push(`/connections/${data.connectionId}${suffix}`);
-      router.refresh();
     } catch {
       setOpening(false);
       setErrorText("Network error. Try again.");

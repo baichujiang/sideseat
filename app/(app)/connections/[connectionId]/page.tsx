@@ -39,12 +39,15 @@ export default async function ConnectionPage({
   const query = (await searchParams) ?? {};
   const backHref = safeReturnPath(query.returnTo, "/inbox");
   const { connection, user } = await requireConnection(connectionId);
+  const isSelfNotes = connection.userAId === connection.userBId;
   const otherUser = connection.userAId === user.id ? connection.userB : connection.userA;
 
   const courseName = connection.invitation?.course?.name ?? null;
   const messages = connection.messages;
-  const peerHref =
-    `/users/${otherUser.id}?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route;
+  const profileLinkHref = isSelfNotes
+    ? (`/profile?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route)
+    : (`/users/${otherUser.id}?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route);
+  const peerHref = profileLinkHref;
 
   return (
     <ChatReplyProvider>
@@ -53,37 +56,46 @@ export default async function ConnectionPage({
       <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
         <BackLink href={backHref} label="Back" />
         <Link
-          href={`/users/${otherUser.id}?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}`}
+          href={profileLinkHref}
           className="flex min-w-0 flex-1 items-center gap-2 rounded-xl py-1 pl-1 pr-2 text-left transition hover:bg-muted/70 active:bg-muted"
-          aria-label={`View ${otherUser.nickname?.trim() || "Student"}'s profile`}
+          aria-label={
+            isSelfNotes
+              ? "Open your profile"
+              : `View ${otherUser.nickname?.trim() || "Student"}'s profile`
+          }
         >
           <PresetAvatar id={otherUser.avatarUrl} size={40} className="shrink-0" />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold leading-tight">
-              {otherUser.nickname ?? "Student"}
+              {isSelfNotes ? "Notes to self" : (otherUser.nickname ?? "Student")}
             </p>
-            {courseName ? (
+            {!isSelfNotes && courseName ? (
               <p className="truncate text-[11px] text-muted-foreground">{courseName}</p>
-            ) : (
+            ) : null}
+            {!isSelfNotes && !courseName ? (
               <p className="truncate text-[11px] text-muted-foreground">Direct message</p>
-            )}
+            ) : null}
           </div>
         </Link>
       </header>
 
-      <div className="shrink-0 border-b border-border/70 bg-background/80 px-3 py-2">
-        <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground/85">
-          {courseName ? `Connected via ${courseName}` : "Direct connection"}
-        </span>
-      </div>
+      {!isSelfNotes ? (
+        <div className="shrink-0 border-b border-border/70 bg-background/80 px-3 py-2">
+          <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground/85">
+            {courseName ? `Connected via ${courseName}` : "Direct connection"}
+          </span>
+        </div>
+      ) : null}
 
       <ChatScrollContainer messageCount={messages.length}>
         {messages.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
             <p className="text-sm font-medium text-foreground">No messages yet</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Say hi — or share availability and suggest a plan from the plus menu.
-            </p>
+            {!isSelfNotes ? (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Say hi — or share availability and suggest a plan from the plus menu.
+              </p>
+            ) : null}
           </div>
         ) : (
           <div className="space-y-3 pb-2">
@@ -270,6 +282,7 @@ export default async function ConnectionPage({
         <ChatComposer
           connectionId={connection.id}
           peerName={otherUser.nickname ?? "Student"}
+          hideAttachments={isSelfNotes}
         />
       </div>
     </div>
