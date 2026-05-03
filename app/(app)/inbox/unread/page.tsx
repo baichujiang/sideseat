@@ -35,14 +35,7 @@ export default async function InboxUnreadPage() {
 
   const { merged } = await getInboxMergeBundle(user.id);
 
-  const unreadItems = merged.filter((item) => {
-    if (item.kind === "direct") {
-      const last = item.connection.messages[0];
-      return Boolean(last && last.senderId !== user.id);
-    }
-    const last = item.last;
-    return Boolean(last && last.senderId !== user.id);
-  });
+  const unreadItems = merged.filter((item) => item.unreadCount > 0);
 
   const pendingPlans = await prisma.planRequest.findMany({
     where: {
@@ -136,6 +129,7 @@ export default async function InboxUnreadPage() {
                       key={item.connection.id}
                       userId={user.id}
                       connection={item.connection}
+                      unreadCount={item.unreadCount}
                       returnTo="/inbox/unread"
                     />
                   ) : (
@@ -145,6 +139,7 @@ export default async function InboxUnreadPage() {
                       course={item.course}
                       userCourse={item.userCourse}
                       last={item.last}
+                      unreadCount={item.unreadCount}
                       returnTo="/inbox/unread"
                     />
                   ),

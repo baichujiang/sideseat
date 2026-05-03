@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { compareConnectionsForInbox } from "@/lib/queries/inbox-order";
+import { inboxDirectUnreadCounts } from "@/lib/queries/inbox-unread-counts";
 
 export default async function FromYouPage() {
   const sessionUser = await getSessionUser();
@@ -60,6 +61,11 @@ export default async function FromYouPage() {
       connection._count.messages === 1 && connection.messages[0]?.senderId === user.id,
     );
 
+  const unreadByConn = await inboxDirectUnreadCounts(
+    user.id,
+    fromYou.map((c) => c.id),
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -77,6 +83,7 @@ export default async function FromYouPage() {
               key={connection.id}
               userId={user.id}
               connection={connection}
+              unreadCount={unreadByConn.get(connection.id) ?? 0}
               returnTo="/inbox/from-you"
             />
           ))}

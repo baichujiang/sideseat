@@ -37,6 +37,7 @@ export function AuthForm({
     defaultValues: {
       username: mode === "signup" ? initialIdentifier : "",
       password: initialPassword,
+      confirmPassword: "",
     },
   });
 
@@ -106,6 +107,16 @@ export function AuthForm({
               {...signupForm.register("password")}
             />
             <FormMessage message={signupForm.formState.errors.password?.message} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">Confirm password</label>
+            <Input
+              type="password"
+              autoComplete="new-password"
+              placeholder="Re-enter your password"
+              {...signupForm.register("confirmPassword")}
+            />
+            <FormMessage message={signupForm.formState.errors.confirmPassword?.message} />
           </div>
           <FormMessage message={serverError} />
           <Button className="w-full" disabled={signupForm.formState.isSubmitting} type="submit">

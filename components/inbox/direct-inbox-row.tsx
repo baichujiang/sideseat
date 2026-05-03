@@ -4,6 +4,7 @@ import type { Course, Invitation, Message, User } from "@prisma/client";
 import { formatDistanceToNowStrict } from "date-fns";
 import { ChevronRight, Pin } from "lucide-react";
 
+import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { InboxSwipeRow } from "@/components/inbox/inbox-swipe-row";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { cn } from "@/lib/utils";
@@ -25,10 +26,12 @@ export type DirectInboxConnection = {
 export function DirectInboxRow({
   userId,
   connection,
+  unreadCount,
   returnTo = "/inbox",
 }: {
   userId: string;
   connection: DirectInboxConnection;
+  unreadCount: number;
   returnTo?: string;
 }) {
   const isSelfNotes = connection.userAId === connection.userBId;
@@ -44,7 +47,7 @@ export function DirectInboxRow({
       ? `Connected via ${contextCourseName}`
       : "Say hi";
   const when = lastMessage?.createdAt ?? connection.updatedAt;
-  const unread = Boolean(lastMessage && !fromMe);
+  const unread = unreadCount > 0;
   const href = `/connections/${connection.id}?returnTo=${encodeURIComponent(returnTo)}` as Route;
   const pinned = connection.userAId === userId ? Boolean(connection.pinnedByAAt) : Boolean(connection.pinnedByBAt);
 
@@ -55,7 +58,12 @@ export function DirectInboxRow({
         pinned ? "bg-amber-50/80 dark:bg-amber-500/10" : "",
       )}
     >
-      <InboxSwipeRow href={href} connectionId={connection.id} returnTo={returnTo} pinned={pinned}>
+      <InboxSwipeRow
+        href={href}
+        returnTo={returnTo}
+        pinned={pinned}
+        swipeTarget={{ type: "direct", connectionId: connection.id }}
+      >
         <PresetAvatar id={other.avatarUrl} size={52} className="ring-2 ring-background shadow-sm" />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2">
@@ -84,12 +92,7 @@ export function DirectInboxRow({
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1.5 pl-0.5">
-          {unread ? (
-            <span
-              className="h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_0_2px_hsl(var(--card))]"
-              aria-label="Unread"
-            />
-          ) : null}
+          <InboxUnreadBadge count={unreadCount} />
           <ChevronRight
             className="h-4 w-4 shrink-0 text-muted-foreground/45"
             strokeWidth={2}

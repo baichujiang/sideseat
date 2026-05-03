@@ -1,3 +1,5 @@
+import { LanguageTag } from "@prisma/client";
+
 import { hashPassword } from "@/lib/auth/password";
 import {
   defaultNicknameFromUsername,
@@ -33,6 +35,7 @@ export async function POST(request: Request) {
         avatarUrl: randomAvatarId(),
         nickname: defaultNicknameFromUsername(values.username),
         school: SIGNUP_DEFAULT_PROFILE.school,
+        languages: [LanguageTag.ENGLISH],
         onboardingComplete: false,
       },
     });

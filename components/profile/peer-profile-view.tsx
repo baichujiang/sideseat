@@ -1,20 +1,11 @@
-import type { DegreeLevel } from "@prisma/client";
+import type { DegreeLevel, LanguageTag } from "@prisma/client";
 
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
+import { LANGUAGE_TAG_LABEL } from "@/lib/constants/languages";
 import { DEGREE_LEVEL_LABELS } from "@/lib/constants/majors";
 import { getSchoolLabel } from "@/lib/constants/schools";
 import { formatSemester } from "@/lib/utils";
-
-const LANG_LABEL: Record<string, string> = {
-  CHINESE: "Chinese",
-  ENGLISH: "English",
-  GERMAN: "German",
-  FRENCH: "French",
-  HINDI: "Hindi",
-  SPANISH: "Spanish",
-  OTHER: "Other",
-};
 
 export type PeerProfileFields = {
   nickname: string | null;
@@ -108,7 +99,7 @@ export function PeerProfileView({
                   key={lang}
                   className="rounded-full bg-foreground/5 px-2.5 py-0.5 text-xs font-medium text-foreground/80"
                 >
-                  {LANG_LABEL[lang] ?? lang}
+                  {LANGUAGE_TAG_LABEL[lang as LanguageTag] ?? lang}
                 </span>
               ))}
             </div>

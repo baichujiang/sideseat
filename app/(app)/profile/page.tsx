@@ -5,11 +5,13 @@ import { ChevronRight, ShieldBan } from "lucide-react";
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { StudentVerificationForm } from "@/components/forms/student-verification-form";
 import { ProfileIdentitySheets } from "@/components/profile/profile-identity-sheets";
+import { PushNotificationsCard } from "@/components/profile/push-notifications-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { ProfileForm } from "@/components/forms/profile-form";
 import { getSessionUser } from "@/lib/auth/session";
 import { adminEmails } from "@/lib/constants/app";
+import { coerceProfileLanguages } from "@/lib/constants/languages";
 import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
 import { getSchoolVerificationHint } from "@/lib/constants/verification";
 import { prisma } from "@/lib/db/prisma";
@@ -137,6 +139,8 @@ export default async function ProfilePage({
         </div>
       </section>
 
+      <PushNotificationsCard />
+
       <section aria-labelledby="section-academic">
         <h2 id="section-academic" className="sr-only">
           School and program
@@ -162,6 +166,7 @@ export default async function ProfilePage({
               degreeLevel: user.degreeLevel ?? "BACHELOR",
               major: user.major ?? "",
               semester: user.semester ?? 1,
+              languages: coerceProfileLanguages(user.languages),
               bio: user.bio ?? "",
               wechatHandle: user.wechatHandle ?? "",
               whatsappHandle: user.whatsappHandle ?? "",

@@ -217,6 +217,26 @@ export default async function CourseDetailPage({
 
   return (
     <div className="space-y-5">
+      {membership.inboxHiddenAt ? (
+        <div className="rounded-2xl border border-amber-200/80 bg-amber-50/50 px-3 py-2.5 dark:border-amber-900/40 dark:bg-amber-950/25">
+          <form
+            action={`/api/courses/${membership.course.id}/inbox-restore`}
+            method="post"
+            className="flex flex-wrap items-center gap-2"
+          >
+            <input type="hidden" name="returnTo" value={`/courses/${membership.course.id}`} />
+            <p className="min-w-0 flex-1 text-[12px] leading-snug text-foreground">
+              This course chat is hidden from Contacts. You can still open group chat below.
+            </p>
+            <button
+              type="submit"
+              className="shrink-0 rounded-full border border-border bg-background px-3 py-1.5 text-[11px] font-semibold text-foreground shadow-sm transition hover:bg-muted/60"
+            >
+              Show in Contacts
+            </button>
+          </form>
+        </div>
+      ) : null}
       <div className="flex items-start gap-2">
         <BackLink href={backHref} label="Back to courses" className="-ml-2 mt-0.5" />
         <div className="min-w-0 flex-1">

@@ -2,6 +2,7 @@ import type { Course, CourseRoomMessage, User } from "@prisma/client";
 import { ClassmatePostStatus, ConnectionStatus, PlanRequestStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
+import { inboxCourseUnreadCounts, inboxDirectUnreadCounts } from "@/lib/queries/inbox-unread-counts";
 import {
   compareConnectionsForInbox,
   isConnectionPinned,
@@ -33,13 +34,14 @@ type UserCourseWithCourse = Awaited<
 export type CourseRoomMessageWithSender = CourseRoomMessage & { sender: User };
 
 export type InboxMerged =
-  | { kind: "direct"; sortAt: Date; connection: ConnectionInbox }
+  | { kind: "direct"; sortAt: Date; connection: ConnectionInbox; unreadCount: number }
   | {
       kind: "course";
       sortAt: Date;
       course: Course;
       userCourse: UserCourseWithCourse;
       last: CourseRoomMessageWithSender | undefined;
+      unreadCount: number;
     };
 
 export type InboxMergeBundle = {
@@ -49,6 +51,35 @@ export type InboxMergeBundle = {
   plansNeedingYourAction: number;
   activePostCount: number;
 };
+
+/** Same total as {@link InboxMergeBundle.unreadTotal}, without loading merged rows (for nav badges). */
+export async function getInboxUnreadTotal(userId: string): Promise<number> {
+  const [connections, userCourses] = await Promise.all([
+    prisma.connection.findMany({
+      where: {
+        status: ConnectionStatus.ACTIVE,
+        OR: [{ userAId: userId }, { userBId: userId }],
+      },
+      select: { id: true },
+    }),
+    prisma.userCourse.findMany({
+      where: { userId, inboxHiddenAt: null },
+      select: { courseId: true },
+    }),
+  ]);
+
+  const connectionIds = connections.map((c) => c.id);
+  const courseIds = userCourses.map((uc) => uc.courseId);
+  const [directUnread, courseUnread] = await Promise.all([
+    inboxDirectUnreadCounts(userId, connectionIds),
+    inboxCourseUnreadCounts(userId, courseIds),
+  ]);
+
+  let unreadTotal = 0;
+  for (const id of connectionIds) unreadTotal += directUnread.get(id) ?? 0;
+  for (const id of courseIds) unreadTotal += courseUnread.get(id) ?? 0;
+  return unreadTotal;
+}
 
 export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBundle> {
   const [connections, userCourses, activePostCount, plansNeedingYourAction] = await Promise.all([
@@ -71,7 +102,7 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
       },
     }),
     prisma.userCourse.findMany({
-      where: { userId },
+      where: { userId, inboxHiddenAt: null },
       include: { course: true },
     }),
     prisma.classmatePost.count({
@@ -111,6 +142,12 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
     }
   }
 
+  const connectionIds = connections.map((c) => c.id);
+  const [directUnread, courseUnread] = await Promise.all([
+    inboxDirectUnreadCounts(userId, connectionIds),
+    inboxCourseUnreadCounts(userId, courseIds),
+  ]);
+
   const merged: InboxMerged[] = [
     ...connections
       .sort((a, b) =>
@@ -125,6 +162,7 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
         kind: "direct" as const,
         sortAt: connection.messages[0]?.createdAt ?? connection.updatedAt,
         connection,
+        unreadCount: directUnread.get(connection.id) ?? 0,
       })),
     ...userCourses.map((uc) => ({
       kind: "course" as const,
@@ -132,10 +170,13 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
       course: uc.course,
       userCourse: uc,
       last: lastCourseMessageByCourseId.get(uc.courseId),
+      unreadCount: courseUnread.get(uc.courseId) ?? 0,
     })),
   ].sort((a, b) => {
-    const aPinned = a.kind === "direct" ? isConnectionPinned(a.connection, userId) : false;
-    const bPinned = b.kind === "direct" ? isConnectionPinned(b.connection, userId) : false;
+    const aPinned =
+      a.kind === "direct" ? isConnectionPinned(a.connection, userId) : Boolean(a.userCourse.inboxPinnedAt);
+    const bPinned =
+      b.kind === "direct" ? isConnectionPinned(b.connection, userId) : Boolean(b.userCourse.inboxPinnedAt);
 
     if (aPinned !== bPinned) {
       return aPinned ? -1 : 1;
@@ -144,17 +185,13 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
     return b.sortAt.getTime() - a.sortAt.getTime();
   });
 
-  const unreadDirectCount = connections.filter(
-    (connection) => connection.messages[0] && connection.messages[0].senderId !== userId,
-  ).length;
-  const unreadCourseCount = userCourses.filter((uc) => {
-    const last = lastCourseMessageByCourseId.get(uc.courseId);
-    return Boolean(last && last.senderId !== userId);
-  }).length;
+  let unreadTotal = 0;
+  for (const id of connectionIds) unreadTotal += directUnread.get(id) ?? 0;
+  for (const id of courseIds) unreadTotal += courseUnread.get(id) ?? 0;
 
   return {
     merged,
-    unreadTotal: unreadDirectCount + unreadCourseCount,
+    unreadTotal,
     plansNeedingYourAction,
     activePostCount,
   };

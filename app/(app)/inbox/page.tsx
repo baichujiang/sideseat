@@ -72,7 +72,12 @@ export default async function InboxPage() {
           <ul className="overflow-hidden rounded-[1.125rem] border border-border/60 bg-card shadow-[0_2px_16px_-4px_rgba(15,23,42,0.06)]">
             {merged.map((item) =>
               item.kind === "direct" ? (
-                <DirectInboxRow key={item.connection.id} userId={user.id} connection={item.connection} />
+                <DirectInboxRow
+                  key={item.connection.id}
+                  userId={user.id}
+                  connection={item.connection}
+                  unreadCount={item.unreadCount}
+                />
               ) : (
                 <CourseInboxRow
                   key={item.course.id}
@@ -80,6 +85,7 @@ export default async function InboxPage() {
                   course={item.course}
                   userCourse={item.userCourse}
                   last={item.last}
+                  unreadCount={item.unreadCount}
                 />
               ),
             )}

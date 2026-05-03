@@ -35,7 +35,7 @@ export default async function CourseChatPage({
   const { courseId } = await params;
   const query = (await searchParams) ?? {};
   const backHref = safeReturnPath(query.returnTo, `/courses/${courseId}`);
-  const { user, course } = await requireCourseChatMember(courseId);
+  const { user, course, userCourse } = await requireCourseChatMember(courseId);
 
   /**
    * Hide messages from anyone:
@@ -92,6 +92,31 @@ export default async function CourseChatPage({
           </p>
         </Link>
       </header>
+
+      {userCourse.inboxHiddenAt ? (
+        <div className="shrink-0 border-b border-amber-200/70 bg-amber-50/60 px-3 py-2 dark:border-amber-900/40 dark:bg-amber-950/25">
+          <form
+            action={`/api/courses/${courseId}/inbox-restore`}
+            method="post"
+            className="flex flex-wrap items-center gap-2"
+          >
+            <input
+              type="hidden"
+              name="returnTo"
+              value={`/courses/${courseId}/chat`}
+            />
+            <p className="min-w-0 flex-1 text-[11px] leading-snug text-foreground">
+              Hidden from Contacts — restore the row anytime.
+            </p>
+            <button
+              type="submit"
+              className="shrink-0 rounded-full border border-border bg-background px-2.5 py-1 text-[10px] font-semibold shadow-sm"
+            >
+              Show in Contacts
+            </button>
+          </form>
+        </div>
+      ) : null}
 
       <ChatScrollContainer messageCount={visibleMessages.length}>
         {visibleMessages.length === 0 ? (

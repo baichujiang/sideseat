@@ -332,6 +332,10 @@ model UserCourse {
   userId     String
   courseId   String
   intentions CourseIntent[]
+  /// When set, this course chat is sorted with pinned DMs in Contacts.
+  inboxPinnedAt DateTime?
+  /// When set, the course row is hidden from Contacts (enrollment unchanged). Clear via course page.
+  inboxHiddenAt DateTime?
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
   user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -629,10 +633,8 @@ model ModerationBlock {
 }
 
 /// Web Push subscription registered by a user's browser (PWA or desktop).
-/// Scaffold only: nothing sends pushes yet. When we wire notifications, the
-/// server looks up rows by `userId` and calls `web-push` with the stored
-/// endpoint + keys. Uniqueness on `endpoint` lets the SW replace stale subs
-/// on re-subscription without creating duplicates.
+/// The server looks up rows by `userId` and sends via `web-push` (VAPID).
+/// Uniqueness on `endpoint` lets the SW replace stale subs on re-subscription.
 model PushSubscription {
   id        String   @id @default(cuid())
   userId    String
@@ -702,6 +704,8 @@ model CalendarEntry {
   repeatUntil DateTime?
   startAt    DateTime
   endAt      DateTime
+  /// When set, the 15-minute-before-start Web Push reminder was already sent.
+  reminder15mSentAt DateTime?
   createdAt  DateTime @default(now())
   user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   proposal   StudySessionProposal? @relation(fields: [proposalId], references: [id], onDelete: SetNull)

@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import type { LanguageTag } from "@prisma/client";
 
 import { AvatarPicker } from "@/components/forms/avatar-picker";
-import { SearchableSelect } from "@/components/forms/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +19,7 @@ import {
   MAJORS_BY_LEVEL,
   semesterOptions,
 } from "@/lib/constants/majors";
+import { LANGUAGE_TAG_OPTIONS } from "@/lib/constants/languages";
 import { profileSchema } from "@/lib/validators/profile";
 
 type ProfileValues = z.infer<typeof profileSchema>;
@@ -75,6 +76,7 @@ export function ProfileForm({
   const degreeLevel = watch("degreeLevel");
   const semester = watch("semester");
   const currentMajor = watch("major");
+  const selectedLanguages = watch("languages") ?? [];
 
   // Build the major list for the selected degree level. Preserve any legacy
   // free-text major so old rows don't silently get reset to empty.
@@ -134,12 +136,22 @@ export function ProfileForm({
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
             <FieldLabel>Major</FieldLabel>
-            <input type="hidden" {...register("major")} />
-            <SearchableSelect
-              value={currentMajor ?? ""}
-              options={majorOptions}
-              onChange={(value) => setValue("major", value, { shouldValidate: true })}
+            <Input
+              list="profile-major-suggestions"
+              autoComplete="off"
+              spellCheck={false}
+              placeholder="Type your major or pick a suggestion"
+              className="h-10 rounded-xl"
+              {...register("major")}
             />
+            <datalist id="profile-major-suggestions">
+              {majorOptions.map((m) => (
+                <option key={m} value={m} />
+              ))}
+            </datalist>
+            <p className="text-[10px] leading-snug text-muted-foreground">
+              Free text is fine — suggestions match your degree level when available.
+            </p>
             <FormMessage message={errors.major?.message} />
           </div>
           <div className="space-y-1">
@@ -156,6 +168,37 @@ export function ProfileForm({
             </select>
             <FormMessage message={errors.semester?.message} />
           </div>
+        </div>
+        <div className="space-y-2">
+          <FieldLabel>Languages you use</FieldLabel>
+          <p className="text-[11px] leading-snug text-muted-foreground">
+            Shown on your profile so classmates know how to reach you. Pick all that apply.
+          </p>
+          <div className="flex flex-wrap gap-x-3 gap-y-2">
+            {LANGUAGE_TAG_OPTIONS.map(({ value, label }) => {
+              const checked = selectedLanguages.includes(value);
+              return (
+                <label
+                  key={value}
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border/80 bg-background px-3 py-1.5 text-[12px] font-medium text-foreground transition has-[:checked]:border-primary/50 has-[:checked]:bg-primary/8"
+                >
+                  <input
+                    type="checkbox"
+                    className="h-3.5 w-3.5 rounded border-border accent-primary"
+                    checked={checked}
+                    onChange={(e) => {
+                      const next = e.target.checked
+                        ? [...selectedLanguages, value]
+                        : selectedLanguages.filter((t: LanguageTag) => t !== value);
+                      setValue("languages", next, { shouldValidate: true });
+                    }}
+                  />
+                  {label}
+                </label>
+              );
+            })}
+          </div>
+          <FormMessage message={errors.languages?.message} />
         </div>
         {verificationSlot}
       </section>

@@ -1,6 +1,7 @@
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
+import { notifyNewCourseRoomMessage } from "@/lib/push/notify-user";
 import { messageSchema } from "@/lib/validators/invitation";
 
 export async function POST(
@@ -48,6 +49,17 @@ export async function POST(
         replyToId,
       },
     });
+
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      select: { name: true },
+    });
+    void notifyNewCourseRoomMessage({
+      courseId,
+      courseName: course?.name ?? "Course chat",
+      senderId: user.id,
+      bodyPreview: values.body.trim(),
+    }).catch(() => {});
 
     return ok(message, { status: 201 });
   } catch (cause) {

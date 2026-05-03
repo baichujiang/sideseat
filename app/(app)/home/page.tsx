@@ -33,7 +33,7 @@ export default async function HomePage() {
     const now = new Date();
     const semesterRange = getCurrentSemesterDateRange(now);
     return (
-      <div className="space-y-5 pb-[var(--schedule-content-clearance)]">
+      <div className="space-y-5">
         <HomeHero nickname={null} avatarUrl={null} nowDate={now} />
         <ScheduleSurface
           classBlocks={[]}
@@ -141,7 +141,7 @@ export default async function HomePage() {
   const hasAnyCourse = memberships.length > 0;
 
   return (
-    <div className="space-y-5 pb-[var(--schedule-content-clearance)]">
+    <div className="space-y-5">
       <HomeHero
         nickname={user.nickname}
         avatarUrl={user.avatarUrl}

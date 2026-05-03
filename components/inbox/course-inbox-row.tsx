@@ -2,8 +2,10 @@ import Link from "next/link";
 import type { Route } from "next";
 import type { Course } from "@prisma/client";
 import { formatDistanceToNowStrict } from "date-fns";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Pin } from "lucide-react";
 
+import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
+import { InboxSwipeRow } from "@/components/inbox/inbox-swipe-row";
 import { CourseAvatar } from "@/components/ui/course-avatar";
 import { cn } from "@/lib/utils";
 import type { CourseRoomMessageWithSender } from "@/lib/queries/inbox-merge";
@@ -11,6 +13,7 @@ import type { CourseRoomMessageWithSender } from "@/lib/queries/inbox-merge";
 type UserCourseWithCourse = {
   courseId: string;
   updatedAt: Date;
+  inboxPinnedAt: Date | null;
   course: Course;
 };
 
@@ -19,12 +22,14 @@ export function CourseInboxRow({
   course,
   userCourse,
   last,
+  unreadCount,
   returnTo = "/inbox",
 }: {
   userId: string;
   course: Course;
   userCourse: UserCourseWithCourse;
   last: CourseRoomMessageWithSender | undefined;
+  unreadCount: number;
   returnTo?: string;
 }) {
   const when = last?.createdAt ?? userCourse.updatedAt;
@@ -32,15 +37,19 @@ export function CourseInboxRow({
   const preview = last?.body
     ? `${fromMe ? "You: " : `${last.sender.nickname ?? "Someone"}: `}${last.body}`
     : "Course chat — say hi to the class";
-  const unread = Boolean(last && !fromMe);
+  const unread = unreadCount > 0;
   const returnEnc = encodeURIComponent(returnTo);
+  const href = `/courses/${course.id}/chat?returnTo=${returnEnc}` as Route;
+  const pinned = Boolean(userCourse.inboxPinnedAt);
 
   return (
-    <li className="border-b border-border/50 last:border-b-0">
-      <Link
-        href={`/courses/${course.id}/chat?returnTo=${returnEnc}` as Route}
-        className="flex min-h-[4.25rem] items-center gap-3.5 px-4 py-3.5 transition-colors active:bg-muted/50 [@media(hover:hover)]:hover:bg-muted/45"
-      >
+    <li
+      className={cn(
+        "border-b border-border/50 last:border-b-0",
+        pinned ? "bg-amber-50/80 dark:bg-amber-500/10" : "",
+      )}
+    >
+      <InboxSwipeRow href={href} returnTo={returnTo} pinned={pinned} swipeTarget={{ type: "course", courseId: course.id }}>
         <CourseAvatar
           id={course.id}
           code={course.code}
@@ -50,9 +59,12 @@ export function CourseInboxRow({
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2">
-            <p className="truncate text-[15px] font-semibold leading-tight text-foreground">
-              {course.name}
-            </p>
+            <div className="flex min-w-0 items-center gap-1.5">
+              {pinned ? (
+                <Pin className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-amber-500" strokeWidth={2} aria-hidden />
+              ) : null}
+              <p className="truncate text-[15px] font-semibold leading-tight text-foreground">{course.name}</p>
+            </div>
             <time
               className="shrink-0 text-[11px] tabular-nums text-muted-foreground"
               dateTime={when.toISOString()}
@@ -70,19 +82,14 @@ export function CourseInboxRow({
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1.5 pl-0.5">
-          {unread ? (
-            <span
-              className="h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_0_2px_hsl(var(--card))]"
-              aria-label="Unread"
-            />
-          ) : null}
+          <InboxUnreadBadge count={unreadCount} />
           <ChevronRight
             className="h-4 w-4 shrink-0 text-muted-foreground/45"
             strokeWidth={2}
             aria-hidden
           />
         </div>
-      </Link>
+      </InboxSwipeRow>
     </li>
   );
 }

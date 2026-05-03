@@ -8,15 +8,19 @@ const ACTION_WIDTH = 76;
 const SNAP_OPEN = -(ACTION_WIDTH * 2);
 const DRAG_THRESHOLD = 8;
 
+export type InboxSwipeTarget =
+  | { type: "direct"; connectionId: string }
+  | { type: "course"; courseId: string };
+
 export function InboxSwipeRow({
   href,
-  connectionId,
+  swipeTarget,
   returnTo = "/inbox",
   pinned = false,
   children,
 }: {
   href: Route;
-  connectionId: string;
+  swipeTarget: InboxSwipeTarget;
   returnTo?: string;
   pinned?: boolean;
   children: React.ReactNode;
@@ -84,14 +88,18 @@ export function InboxSwipeRow({
     }
   };
 
+  const pinAction =
+    swipeTarget.type === "direct"
+      ? `/api/connections/${swipeTarget.connectionId}/pin`
+      : `/api/courses/${swipeTarget.courseId}/inbox-pin`;
+  const removeAction =
+    swipeTarget.type === "direct"
+      ? `/api/connections/${swipeTarget.connectionId}/end`
+      : `/api/courses/${swipeTarget.courseId}/inbox-hide`;
   return (
     <div className="relative overflow-hidden">
       <div className="absolute inset-y-0 right-0 z-0 flex w-[152px] items-stretch justify-stretch">
-        <form
-          action={`/api/connections/${connectionId}/pin`}
-          method="post"
-          className="flex w-[76px] shrink-0"
-        >
+        <form action={pinAction} method="post" className="flex w-[76px] shrink-0">
           <input type="hidden" name="returnTo" value={returnTo} />
           <button
             type="submit"
@@ -100,14 +108,15 @@ export function InboxSwipeRow({
             {pinned ? "Unpin" : "Pin"}
           </button>
         </form>
-        <form
-          action={`/api/connections/${connectionId}/end`}
-          method="post"
-          className="flex w-[76px] shrink-0"
-        >
+        <form action={removeAction} method="post" className="flex w-[76px] shrink-0">
           <input type="hidden" name="returnTo" value={returnTo} />
           <button
             type="submit"
+            title={
+              swipeTarget.type === "course"
+                ? "Remove from Contacts list only — you stay enrolled in the course."
+                : undefined
+            }
             className="flex flex-1 items-center justify-center bg-destructive px-2 text-center text-[11px] font-semibold uppercase tracking-wide text-destructive-foreground"
           >
             Delete

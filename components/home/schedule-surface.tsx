@@ -413,19 +413,23 @@ export function ScheduleSurface({
         companionOptions={companionOptions}
       />
 
-      <div className="flex items-center justify-between gap-3">
-        <ViewTabs
-          value={view}
-          onChange={(next) => {
-            if (next === "week") {
-              setWeekHorizontalMode(
-                isSameDay(selectedDate, now) && isWeekendDay(now) ? "include-anchor" : "workweek",
-              );
-            }
-            setView(next);
-          }}
-        />
-        <div className="w-[5.5rem]" aria-hidden />
+      <div className="flex items-center gap-2">
+        <div className="min-w-0 flex-1">
+          <ViewTabs
+            value={view}
+            onChange={(next) => {
+              if (next === "week") {
+                setWeekHorizontalMode(
+                  isSameDay(selectedDate, now) && isWeekendDay(now) ? "include-anchor" : "workweek",
+                );
+              }
+              setView(next);
+            }}
+          />
+        </div>
+        {!adding && !detailItem ? (
+          <ScheduleToolbarAddButton onClick={toggleAddPanel} />
+        ) : null}
       </div>
 
       <div className="grid grid-cols-[1fr_auto] items-center gap-2">
@@ -506,8 +510,6 @@ export function ScheduleSurface({
         />
       ) : null}
 
-      {!adding && !detailItem ? <FloatingAddButton onToggle={toggleAddPanel} /> : null}
-
       <ScheduleItemDetailSheet
         item={detailItem}
         open={Boolean(detailItem)}
@@ -522,31 +524,18 @@ export function ScheduleSurface({
   );
 }
 
-function FloatingAddButton({
-  onToggle,
-}: {
-  onToggle: () => void;
-}) {
+/** Sits in the schedule toolbar so it does not cover the PWA install prompt above the tab bar. */
+function ScheduleToolbarAddButton({ onClick }: { onClick: () => void }) {
   return (
-    <div
-      className="pointer-events-none fixed inset-x-0 bottom-[var(--schedule-fab-clearance)] z-30 flex justify-center"
-      style={{
-        paddingLeft: "max(1rem, env(safe-area-inset-left))",
-        paddingRight: "max(1rem, env(safe-area-inset-right))",
-      }}
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Add to schedule"
+      className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-border/70 bg-background px-3 text-foreground shadow-sm transition hover:bg-muted/30"
     >
-      <div className="pointer-events-none flex w-full max-w-md justify-end px-4 sm:px-5">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-label="Add to schedule"
-        className="pointer-events-auto inline-flex h-11 items-center gap-2 rounded-full border border-border/70 bg-background/95 px-4 text-foreground shadow-lg backdrop-blur-md transition hover:bg-background"
-      >
-        <Plus className="h-4 w-4" strokeWidth={2.25} />
-        <span className="text-[13px] font-medium">Add</span>
-      </button>
-      </div>
-    </div>
+      <Plus className="h-4 w-4" strokeWidth={2.25} />
+      <span className="text-[12px] font-semibold">Add</span>
+    </button>
   );
 }
 
@@ -562,7 +551,7 @@ function ViewTabs({
     <div
       role="tablist"
       aria-label="Schedule view"
-      className="inline-flex w-2/3 rounded-full border border-border bg-muted/40 p-0.5 text-[12px] font-medium"
+      className="inline-flex w-full max-w-[14.5rem] rounded-full border border-border bg-muted/40 p-0.5 text-[12px] font-medium sm:max-w-[16rem]"
     >
       {tabs.map((t) => {
         const active = t === value;

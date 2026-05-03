@@ -20,6 +20,7 @@ export async function PUT(request: Request) {
           degreeLevel: values.degreeLevel,
           major: values.major,
           semester: values.semester,
+          languages: values.languages,
           bio: values.bio || null,
           wechatHandle: values.wechatHandle || null,
           whatsappHandle: values.whatsappHandle || null,
