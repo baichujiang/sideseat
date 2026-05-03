@@ -6,7 +6,7 @@
     "dev": "next dev",
     "dev:clean": "sh -c 'chmod -R u+w .next 2>/dev/null || true; rm -rf .next'",
     "dev:reset": "npm run dev:clean && npm run dev",
-    "build": "prisma migrate deploy && next build",
+    "build": "node scripts/build.mjs",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
