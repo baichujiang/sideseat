@@ -27,7 +27,6 @@ type RangePreset = "NEXT_WEEK" | "CUSTOM";
 const FIELD_INPUT =
   "h-11 w-full rounded-xl border border-input bg-background px-3.5 text-[14px] outline-none transition focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30";
 
-/** Next Mon–Sun week after the current week (Monday week start). */
 function nextCalendarWeekBounds() {
   const now = new Date();
   const thisMonday = startOfWeek(now, { weekStartsOn: 1 });
@@ -109,10 +108,15 @@ export function ShareAvailabilityModal({
           setBusy(false);
           return;
         }
-        const includedDates = [...selectedDayKeys].sort();
+        const sortedDates = [...selectedDayKeys].sort();
+        const rangeStart = startOfDay(new Date(`${sortedDates[0]}T00:00:00`));
+        const rangeEnd = endOfDay(new Date(`${sortedDates[sortedDates.length - 1]}T00:00:00`));
+
         await createAvailabilityShare(connectionId, {
           visibilityMode: "FREE_BUSY",
-          includedDates,
+          rangeStart: rangeStart.toISOString(),
+          rangeEnd: rangeEnd.toISOString(),
+          selectedDates: sortedDates,
           expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined,
         });
       } else {
@@ -133,10 +137,13 @@ export function ShareAvailabilityModal({
     }
   }
 
-  const shellClassName = "fixed inset-0 z-50 flex items-end justify-center bg-black/35";
-
   return (
-    <div className={shellClassName} role="dialog" aria-modal="true" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/35"
+      role="dialog"
+      aria-modal="true"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
       <div
         ref={panelRef}
         className="flex w-full max-w-md flex-col rounded-t-[1.75rem] bg-background shadow-2xl"
@@ -169,12 +176,10 @@ export function ShareAvailabilityModal({
         <div className="flex-1 space-y-3 overflow-y-auto px-4 pb-3">
           <Labeled label="Dates to share">
             <div className="grid grid-cols-2 gap-2">
-              {(
-                [
-                  { value: "NEXT_WEEK" as const, label: "Next week", hint: "Mon–Sun" },
-                  { value: "CUSTOM" as const, label: "Custom", hint: "Pick days" },
-                ] as const
-              ).map((option) => {
+              {([
+                { value: "NEXT_WEEK" as const, label: "Next week", hint: "Mon–Sun" },
+                { value: "CUSTOM" as const, label: "Custom", hint: "Pick days" },
+              ] as const).map((option) => {
                 const active = option.value === preset;
                 return (
                   <button
@@ -189,7 +194,9 @@ export function ShareAvailabilityModal({
                     )}
                   >
                     <span className="block">{option.label}</span>
-                    <span className="mt-0.5 block text-[10.5px] font-normal text-muted-foreground">{option.hint}</span>
+                    <span className="mt-0.5 block text-[10.5px] font-normal text-muted-foreground">
+                      {option.hint}
+                    </span>
                   </button>
                 );
               })}

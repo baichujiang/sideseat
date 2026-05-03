@@ -10,11 +10,9 @@ type JsonResult<T> = {
 
 export type AvailabilitySharePayload = {
   visibilityMode: "FREE_BUSY";
-  /** Continuous span (e.g. next week). Omit when sending `includedDates`. */
-  rangeStart?: string;
-  rangeEnd?: string;
-  /** Specific days (yyyy-MM-dd); non-contiguous selections. */
-  includedDates?: string[];
+  rangeStart: string;
+  rangeEnd: string;
+  selectedDates?: string[];
   expiresAt?: string;
 };
 
@@ -68,6 +66,7 @@ export function loadAvailabilityShare(shareId: string) {
     status: "active" | "revoked" | "expired";
     rangeStart: string;
     rangeEnd: string;
+    selectedDates: string[];
     days: Array<{
       date: string;
       slots: Array<{
