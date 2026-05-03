@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import type { Course, Invitation, Message, User } from "@prisma/client";
 import { formatDistanceToNowStrict } from "date-fns";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Pin } from "lucide-react";
 
 import { InboxSwipeRow } from "@/components/inbox/inbox-swipe-row";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
@@ -13,6 +13,8 @@ export type DirectInboxConnection = {
   userAId: string;
   userBId: string;
   updatedAt: Date;
+  pinnedByAAt: Date | null;
+  pinnedByBAt: Date | null;
   userA: User;
   userB: User;
   originCourse: Course | null;
@@ -42,16 +44,22 @@ export function DirectInboxRow({
   const when = lastMessage?.createdAt ?? connection.updatedAt;
   const unread = Boolean(lastMessage && !fromMe);
   const href = `/connections/${connection.id}?returnTo=${encodeURIComponent(returnTo)}` as Route;
+  const pinned = connection.userAId === userId ? Boolean(connection.pinnedByAAt) : Boolean(connection.pinnedByBAt);
 
   return (
     <li className="border-b border-border/50 last:border-b-0">
-      <InboxSwipeRow href={href} connectionId={connection.id}>
+      <InboxSwipeRow href={href} connectionId={connection.id} returnTo={returnTo} pinned={pinned}>
         <PresetAvatar id={other.avatarUrl} size={52} className="ring-2 ring-background shadow-sm" />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2">
-            <p className="truncate text-[15px] font-semibold leading-tight text-foreground">
-              {other.nickname ?? "Student"}
-            </p>
+            <div className="flex min-w-0 items-center gap-1.5">
+              {pinned ? (
+                <Pin className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-amber-500" strokeWidth={2} aria-hidden />
+              ) : null}
+              <p className="truncate text-[15px] font-semibold leading-tight text-foreground">
+                {other.nickname ?? "Student"}
+              </p>
+            </div>
             <time
               className="shrink-0 text-[11px] tabular-nums text-muted-foreground"
               dateTime={when.toISOString()}

@@ -358,6 +358,8 @@ model Connection {
   userAId                String
   userBId                String
   status                 ConnectionStatus         @default(ACTIVE)
+  pinnedByAAt            DateTime?
+  pinnedByBAt            DateTime?
   endedById              String?
   endedAt                DateTime?
   createdAt              DateTime                 @default(now())

@@ -14,6 +14,7 @@ import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { ConnectionStatus, FriendLinkStatus } from "@prisma/client";
+import { compareConnectionsForInbox, getConnectionPinnedAt } from "@/lib/queries/inbox-order";
 
 type ConnectionInbox = Awaited<
   ReturnType<
@@ -99,7 +100,6 @@ export default async function InboxPage() {
         },
         _count: { select: { messages: true } },
       },
-      orderBy: { updatedAt: "desc" },
     }),
     prisma.userCourse.findMany({
       where: { userId: user.id },
@@ -126,11 +126,13 @@ export default async function InboxPage() {
   }
 
   const merged: InboxMerged[] = [
-    ...connections.map((connection) => ({
+    ...connections
+      .sort((a, b) => compareConnectionsForInbox(a, b, user.id))
+      .map((connection) => ({
       kind: "direct" as const,
-      sortAt: connection.messages[0]?.createdAt ?? connection.updatedAt,
+      sortAt: getConnectionPinnedAt(connection, user.id) ?? connection.messages[0]?.createdAt ?? connection.updatedAt,
       connection,
-    })),
+      })),
     ...userCourses.map((uc) => ({
       kind: "course" as const,
       sortAt: lastCourseMessageByCourseId.get(uc.courseId)?.createdAt ?? uc.updatedAt,

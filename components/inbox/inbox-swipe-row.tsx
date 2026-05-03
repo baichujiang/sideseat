@@ -4,16 +4,21 @@ import Link from "next/link";
 import type { Route } from "next";
 import { useCallback, useRef, useState } from "react";
 
-const SNAP_OPEN = -76;
+const ACTION_WIDTH = 76;
+const SNAP_OPEN = -(ACTION_WIDTH * 2);
 const DRAG_THRESHOLD = 8;
 
 export function InboxSwipeRow({
   href,
   connectionId,
+  returnTo = "/inbox",
+  pinned = false,
   children,
 }: {
   href: Route;
   connectionId: string;
+  returnTo?: string;
+  pinned?: boolean;
   children: React.ReactNode;
 }) {
   const [offset, setOffset] = useState(0);
@@ -81,11 +86,29 @@ export function InboxSwipeRow({
 
   return (
     <div className="relative overflow-hidden">
-      <div className="absolute inset-y-0 right-0 z-0 flex w-[76px] items-stretch justify-stretch bg-destructive">
-        <form action={`/api/connections/${connectionId}/end`} method="post" className="flex flex-1">
+      <div className="absolute inset-y-0 right-0 z-0 flex w-[152px] items-stretch justify-stretch">
+        <form
+          action={`/api/connections/${connectionId}/pin`}
+          method="post"
+          className="flex w-[76px] shrink-0"
+        >
+          <input type="hidden" name="returnTo" value={returnTo} />
           <button
             type="submit"
-            className="flex flex-1 items-center justify-center px-2 text-center text-[11px] font-semibold uppercase tracking-wide text-destructive-foreground"
+            className="flex flex-1 items-center justify-center bg-amber-500 px-2 text-center text-[11px] font-semibold uppercase tracking-wide text-white"
+          >
+            {pinned ? "Unpin" : "Pin"}
+          </button>
+        </form>
+        <form
+          action={`/api/connections/${connectionId}/end`}
+          method="post"
+          className="flex w-[76px] shrink-0"
+        >
+          <input type="hidden" name="returnTo" value={returnTo} />
+          <button
+            type="submit"
+            className="flex flex-1 items-center justify-center bg-destructive px-2 text-center text-[11px] font-semibold uppercase tracking-wide text-destructive-foreground"
           >
             Delete
           </button>

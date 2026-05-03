@@ -7,6 +7,7 @@ import { BackLink } from "@/components/nav/back-link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
+import { compareConnectionsForInbox } from "@/lib/queries/inbox-order";
 
 export default async function FromYouPage() {
   const sessionUser = await getSessionUser();
@@ -43,13 +44,14 @@ export default async function FromYouPage() {
       },
       _count: { select: { messages: true } },
     },
-    orderBy: { updatedAt: "desc" },
   });
 
-  const fromYou = connections.filter(
+  const fromYou = connections
+    .sort((a, b) => compareConnectionsForInbox(a, b, user.id))
+    .filter(
     (connection) =>
       connection._count.messages === 1 && connection.messages[0]?.senderId === user.id,
-  );
+    );
 
   return (
     <div className="space-y-4">
