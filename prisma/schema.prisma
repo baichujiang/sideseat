@@ -842,10 +842,14 @@ model CalendarEntry {
   planRequest PlanRequest?         @relation(fields: [planRequestId], references: [id], onDelete: SetNull)
   companions CalendarEntryCompanion[]
 
+  /// When set, this row mirrors a recurring course session so Home can show it as a draggable calendar event (dedupe key per slot).
+  courseScheduleMirrorKey String?
+
   @@unique([userId, proposalId])
   @@unique([userId, planRequestId])
   @@index([userId, startAt])
   @@index([categoryId])
+  @@index([userId, courseScheduleMirrorKey])
 }
 
 model CalendarEntryCompanion {

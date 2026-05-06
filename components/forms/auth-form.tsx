@@ -144,7 +144,7 @@ export function AuthForm({
           <label className="text-sm font-medium">Username or email</label>
           <Input
             autoComplete="username"
-            placeholder="you@tum.de"
+            placeholder="e.g. janedoe or alex@example.com"
             {...loginForm.register("identifier")}
           />
           <FormMessage message={loginForm.formState.errors.identifier?.message} />

@@ -245,13 +245,20 @@ export default async function CourseDetailPage({
     return a.startMinute - b.startMinute;
   });
 
-  const [courseChatUnreadMap, courseRoomLatest] = await Promise.all([
+  const [courseChatUnreadMap, courseRoomLatest, scheduleMirrorCount] = await Promise.all([
     inboxCourseUnreadCounts(user.id, [membership.course.id]),
     prisma.courseRoomMessage.aggregate({
       where: { courseId: membership.course.id, deletedAt: null },
       _max: { createdAt: true },
     }),
+    prisma.calendarEntry.count({
+      where: {
+        userId: user.id,
+        courseScheduleMirrorKey: { startsWith: `${courseId}_` },
+      },
+    }),
   ]);
+  const initialScheduleMirrorSync = scheduleMirrorCount > 0;
   const courseChatUnread = courseChatUnreadMap.get(membership.course.id) ?? 0;
   const courseChatLastAt = courseRoomLatest._max.createdAt;
   const courseChatLastActiveLabel =
@@ -347,6 +354,7 @@ export default async function CourseDetailPage({
               end: formatHM(session.endMinute),
               location: session.location ?? "",
             }))}
+            initialScheduleMirrorSync={initialScheduleMirrorSync}
             triggerVariant="neutral"
           />
         </div>

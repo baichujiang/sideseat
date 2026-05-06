@@ -3,12 +3,12 @@
 import { apiFetch } from "@/lib/auth/api-fetch";
 
 import { CourseIntent, Weekday } from "@prisma/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarCheck2, CalendarPlus2, PencilLine, Plus, X } from "lucide-react";
+import { CalendarCheck2, CalendarPlus2, PencilLine } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { isCompleteMiniSession, MiniWorkweekCourseGrid } from "@/components/courses/mini-workweek-course-grid";
 import { profileSectionLabelClassName } from "@/lib/ui/profile-section-label";
 import { cn } from "@/lib/utils";
 
@@ -199,12 +199,15 @@ export function CourseCalendarPanel({
   course,
   intentions,
   initialSessions,
+  /** When true, user has synced this course’s slots as Home calendar events (draggable). */
+  initialScheduleMirrorSync = false,
   /** Match course hero primary actions (outline pill) instead of accent chip. */
   triggerVariant = "accent",
 }: {
   course: CourseRef;
   intentions: CourseIntent[];
   initialSessions: SessionDraft[];
+  initialScheduleMirrorSync?: boolean;
   triggerVariant?: "accent" | "neutral";
 }) {
   const router = useRouter();
@@ -213,6 +216,11 @@ export function CourseCalendarPanel({
   const [sessions, setSessions] = useState<SessionDraft[]>(initialSessions);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [syncHomeCalendarEvents, setSyncHomeCalendarEvents] = useState(initialScheduleMirrorSync);
+
+  useEffect(() => {
+    setSyncHomeCalendarEvents(initialScheduleMirrorSync);
+  }, [initialScheduleMirrorSync]);
   const hasCalendarSetup = initialSessions.length > 0;
   const hasDraftSessions = sessions.length > 0;
 
@@ -223,32 +231,38 @@ export function CourseCalendarPanel({
     return a.start.localeCompare(b.start);
   });
 
-  function updateSession(index: number, key: keyof SessionDraft, value: string) {
-    setSessions((current) =>
-      current.map((session, i) => (i === index ? { ...session, [key]: value } : session)),
-    );
-  }
-
-  function addSession() {
-    setSessions((current) => [
-      ...current,
-      { weekday: "TUE", start: "14:00", end: "16:00", location: "" },
-    ]);
-  }
-
-  function removeSession(index: number) {
-    setSessions((current) => current.filter((_, i) => i !== index));
-  }
-
   async function save(nextSessions: SessionDraft[]) {
     setSaving(true);
     setError("");
     const result = await persistCourseSetup({ course, intentions, sessions: nextSessions });
-    setSaving(false);
     if (!result.ok) {
+      setSaving(false);
       setError(result.error);
       return false;
     }
+
+    const complete = nextSessions.filter(isCompleteMiniSession);
+    const mirrorRes = await apiFetch("/api/calendar/mirror-course-sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        courseId: course.id,
+        enabled: syncHomeCalendarEvents && complete.length > 0,
+        sessions: complete,
+      }),
+    });
+    const mirrorPayload = await mirrorRes.json().catch(() => ({}));
+    if (!mirrorRes.ok) {
+      setError(
+        typeof mirrorPayload.error === "string"
+          ? mirrorPayload.error
+          : "Class times saved, but calendar sync failed. You can try again from Edit.",
+      );
+    } else if (complete.length === 0) {
+      setSyncHomeCalendarEvents(false);
+    }
+
+    setSaving(false);
     setEditing(false);
     router.refresh();
     return true;
@@ -267,6 +281,7 @@ export function CourseCalendarPanel({
   function cancelEditing() {
     setSessions(initialSessions);
     setError("");
+    setSyncHomeCalendarEvents(initialScheduleMirrorSync);
     setEditing(false);
     if (!hasCalendarSetup) {
       setExpanded(false);
@@ -285,7 +300,7 @@ export function CourseCalendarPanel({
           setExpanded(true);
           setEditing(true);
           if (!hasDraftSessions) {
-            setSessions([{ weekday: "TUE", start: "", end: "", location: "" }]);
+            setSessions([]);
           }
           setError("");
         }}
@@ -301,7 +316,7 @@ export function CourseCalendarPanel({
         ) : (
           <CalendarPlus2 className="h-3.5 w-3.5 text-[#2563EB] dark:text-blue-300" strokeWidth={2.25} />
         )}
-        {hasCalendarSetup ? "Class times set" : "Add class time"}
+        {hasCalendarSetup ? "On your Home schedule" : "Add to Home schedule"}
       </button>
 
       {expanded ? (
@@ -312,12 +327,12 @@ export function CourseCalendarPanel({
           <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="text-[15px] font-semibold leading-tight">
-                {hasCalendarSetup ? "Your class times" : "Add class time"}
+                {hasCalendarSetup ? "Your class times" : "Add this course to your week"}
               </h3>
               <p className="mt-0.5 text-[12px] text-muted-foreground">
                 {hasCalendarSetup
-                  ? "When this course meets on your weekly home schedule"
-                  : "Set when this class meets so it appears on your week view"}
+                  ? "These blocks repeat every week on your Home schedule."
+                  : "Enter when you meet, then save — times show up on Home in your week view (your personal calendar, not the school’s)."}
               </p>
             </div>
             <button
@@ -359,7 +374,7 @@ export function CourseCalendarPanel({
                 <div className="rounded-xl border border-dashed border-border/70 bg-muted/15 px-3 py-3">
                   <p className="text-[13px] font-medium text-foreground">Not on your schedule yet</p>
                   <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
-                    Add weekday and start/end time so this course shows on your home schedule.
+                    Tap the button above, add your weekly times, and save — that adds this course to your Home week view.
                   </p>
                 </div>
               )}
@@ -380,78 +395,37 @@ export function CourseCalendarPanel({
             </div>
           ) : (
             <div className="mt-3 space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-[12px] font-medium text-foreground">Weekly times</p>
-                  <button
-                    type="button"
-                    onClick={addSession}
-                    className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold text-foreground/80 transition hover:bg-muted/80"
-                  >
-                    <Plus className="h-3.5 w-3.5" strokeWidth={2.25} />
-                    Add time
-                  </button>
-                </div>
-
-                {sessions.length > 0 ? (
-                  <div className="space-y-2">
-                  {sessions.map((session, index) => (
-                    <div
-                      key={`${index}-${session.weekday}-${session.start}`}
-                      className="rounded-xl border border-border/70 bg-muted/20 p-3"
-                    >
-                      <div className="grid gap-2 sm:grid-cols-[6rem_1fr_1fr_auto]">
-                        <select
-                          value={session.weekday}
-                          onChange={(e) => updateSession(index, "weekday", e.target.value)}
-                          className="h-10 rounded-xl border border-input bg-background px-3 text-[13px]"
-                        >
-                          {WEEKDAY_ORDER.map((weekday) => (
-                            <option key={weekday} value={weekday}>
-                              {WEEKDAY_SHORT[weekday]}
-                            </option>
-                          ))}
-                        </select>
-                        <Input
-                          type="time"
-                          value={session.start}
-                          onChange={(e) => updateSession(index, "start", e.target.value)}
-                        />
-                        <Input
-                          type="time"
-                          value={session.end}
-                          onChange={(e) => updateSession(index, "end", e.target.value)}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeSession(index)}
-                          disabled={sessions.length === 1}
-                          className={cn(
-                            "inline-flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground",
-                            sessions.length === 1 && "pointer-events-none opacity-35",
-                          )}
-                          aria-label="Remove session"
-                        >
-                          <X className="h-4 w-4" strokeWidth={2.25} />
-                        </button>
-                      </div>
-                      <Input
-                        className="mt-2"
-                        placeholder="Location (optional)"
-                        value={session.location}
-                        onChange={(e) => updateSession(index, "location", e.target.value)}
-                      />
-                    </div>
-                  ))}
-                  </div>
-                ) : (
-                  <div className="rounded-xl border border-dashed border-border/70 bg-muted/15 px-3 py-3">
-                    <p className="text-[12px] text-muted-foreground">
-                      No time set yet.
-                    </p>
-                  </div>
-                )}
+              <div
+                className="rounded-xl border border-[#BFDBFE]/80 bg-[#EFF6FF]/90 px-3 py-2.5 text-[12px] leading-snug text-[#1E40AF] dark:border-blue-900/50 dark:bg-blue-950/35 dark:text-blue-200"
+                role="note"
+              >
+                Saving here updates <span className="font-semibold">your Home week</span> only. It does not change
+                enrollment or send anything to your school.
               </div>
+
+              <MiniWorkweekCourseGrid
+                courseTitle={course.name}
+                sessions={sessions}
+                onSessionsChange={setSessions}
+              />
+
+              {sessions.length > 0 ? (
+                <label className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 h-4 w-4 rounded border-border text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    checked={syncHomeCalendarEvents}
+                    onChange={(e) => setSyncHomeCalendarEvents(e.target.checked)}
+                  />
+                  <span>
+                    <span className="text-[13px] font-medium text-foreground">Sync to Home calendar events</span>
+                    <span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">
+                      Creates weekly blocks you can drag on Home (same times as here). The duplicate course strip is
+                      hidden so you only see one block per slot.
+                    </span>
+                  </span>
+                </label>
+              ) : null}
 
                 {error ? <p className="text-[12px] text-destructive">{error}</p> : null}
 
@@ -462,10 +436,27 @@ export function CourseCalendarPanel({
                 <Button
                   type="button"
                   className="flex-1"
-                  onClick={() => void save(sessions)}
+                  onClick={() => {
+                    if (sessions.length === 0) {
+                      setError("Tap the week grid to add at least one class time.");
+                      return;
+                    }
+                    if (!sessions.every(isCompleteMiniSession)) {
+                      setError("Fix every row so end time is after start time.");
+                      return;
+                    }
+                    setError("");
+                    void save(sessions);
+                  }}
                   disabled={saving}
                 >
-                  {saving ? "Saving…" : hasCalendarSetup ? "Save" : "Save class times"}
+                  {saving
+                    ? hasCalendarSetup
+                      ? "Saving…"
+                      : "Adding…"
+                    : hasCalendarSetup
+                      ? "Update Home schedule"
+                      : "Add to Home schedule"}
                 </Button>
               </div>
             </div>

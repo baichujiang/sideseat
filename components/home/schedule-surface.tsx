@@ -24,7 +24,7 @@ import {
   Minimize2,
   Upload,
 } from "lucide-react";
-import { type ChangeEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { type ChangeEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
@@ -535,6 +535,7 @@ export function ScheduleSurface({
         categoryId: s.categoryId,
         categoryName: s.categoryName,
         categoryColor: s.categoryColor,
+        calendarEntryId: s.id,
       }));
     const courseBlocks = includeClasses
       ? classBlocks.map((block) => ({
@@ -547,7 +548,7 @@ export function ScheduleSurface({
           eventParticipants: [],
         }))
       : [];
-    const merged = [...courseBlocks, ...studyBlocks];
+    const merged: WeekCalendarBlock[] = [...courseBlocks, ...studyBlocks];
     if (adding && !editingItem && draftEventStart && draftEventEnd) {
       const draftStart = new Date(draftEventStart);
       const draftEnd = new Date(draftEventEnd);
@@ -732,6 +733,38 @@ export function ScheduleSurface({
   const weekAnchorWeekday =
     weekStart <= now && now <= weekEnd ? WEEKDAY_BY_JS[now.getDay()] : WEEKDAY_BY_JS[selectedDate.getDay()];
 
+  const patchCalendarEventTimes = useCallback(
+    async (args: { eventId: string; startAt: Date; endAt: Date }): Promise<boolean> => {
+      const entry = studyEntries.find((s) => s.id === args.eventId);
+      if (!entry) return false;
+      const withUserIds = entry.eventParticipants.map((p) => p.userId).filter((id): id is string => Boolean(id));
+      const res = await apiFetch(`/api/calendar/events/${args.eventId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: entry.title,
+          location: entry.location?.trim() ?? "",
+          note: entry.note?.trim() ?? "",
+          startAt: args.startAt.toISOString(),
+          endAt: args.endAt.toISOString(),
+          withUserIds,
+          repeat: entry.repeatRule,
+          repeatUntil:
+            entry.repeatRule === "NONE"
+              ? ""
+              : entry.repeatUntilISO
+                ? new Date(entry.repeatUntilISO).toISOString()
+                : "",
+          categoryId: entry.categoryId,
+        }),
+      });
+      if (!res.ok) return false;
+      router.refresh();
+      return true;
+    },
+    [studyEntries, router],
+  );
+
   const weekCalendarProps = {
     blocks: weekBlocks,
     anchorWeekday: weekAnchorWeekday,
@@ -743,6 +776,7 @@ export function ScheduleSurface({
     today: now,
     onCreateEvent: openEventDraft,
     onOpenItem: handleWeekOpenItem,
+    onPatchCalendarEventTimes: patchCalendarEventTimes,
   };
 
   return (

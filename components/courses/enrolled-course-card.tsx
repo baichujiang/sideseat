@@ -150,7 +150,7 @@ export function EnrolledCourseCard({
           </ul>
         ) : (
           <p className="mt-1 text-[12px] leading-5 text-[#5F6B7A] dark:text-muted-foreground sm:text-[13px]">
-            No sessions yet · Add class time
+            No weekly times on Home · Open this course to add them
           </p>
         )}
 

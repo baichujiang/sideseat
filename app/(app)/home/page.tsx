@@ -66,7 +66,7 @@ export default async function HomePage() {
 
   await ensureUserCalendarCategories(prisma, user.id);
 
-  const [memberships, calendarEntries, calendarCategories] = await Promise.all([
+  const [memberships, calendarEntries, calendarCategories, mirroredScheduleKeys] = await Promise.all([
     prisma.userCourse.findMany({
       where: { userId: user.id },
       include: { course: true, sessions: true },
@@ -91,7 +91,17 @@ export default async function HomePage() {
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       select: { id: true, name: true, color: true, presetKey: true, sortOrder: true },
     }),
+    prisma.calendarEntry.findMany({
+      where: { userId: user.id, courseScheduleMirrorKey: { not: null } },
+      select: { courseScheduleMirrorKey: true },
+    }),
   ]);
+
+  const mirroredSlotKeySet = new Set(
+    mirroredScheduleKeys
+      .map((r) => r.courseScheduleMirrorKey)
+      .filter((k): k is string => Boolean(k)),
+  );
 
   const connections = await prisma.connection.findMany({
     where: {
@@ -112,18 +122,23 @@ export default async function HomePage() {
   const courseCategory = calendarCategories.find((c) => c.presetKey === "course");
 
   const classBlocks: ClassBlock[] = memberships.flatMap((m) =>
-    m.sessions.map((s) => ({
-      courseId: m.course.id,
-      courseName: m.course.name,
-      courseCode: m.course.code,
-      weekday: s.weekday,
-      startMinute: s.startMinute,
-      endMinute: s.endMinute,
-      location: s.location,
-      categoryColor: courseCategory?.color ?? null,
-      categoryId: courseCategory?.id ?? null,
-      categoryName: courseCategory?.name ?? null,
-    })),
+    m.sessions
+      .filter((s) => {
+        const key = `${m.course.id}_${s.weekday}_${s.startMinute}`;
+        return !mirroredSlotKeySet.has(key);
+      })
+      .map((s) => ({
+        courseId: m.course.id,
+        courseName: m.course.name,
+        courseCode: m.course.code,
+        weekday: s.weekday,
+        startMinute: s.startMinute,
+        endMinute: s.endMinute,
+        location: s.location,
+        categoryColor: courseCategory?.color ?? null,
+        categoryId: courseCategory?.id ?? null,
+        categoryName: courseCategory?.name ?? null,
+      })),
   );
 
   // Dates don't serialize cleanly across the client boundary, so ship ISO

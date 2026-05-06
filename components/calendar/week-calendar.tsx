@@ -33,6 +33,8 @@ export type WeekCalendarBlock = {
   categoryName?: string | null;
   /** When set, block uses this color instead of tone heuristics. */
   categoryColor?: string | null;
+  /** Stable id for PATCH when `source === "calendar"` (user-created events). */
+  calendarEntryId?: string | null;
 };
 
 const DAY_ORDER: Weekday[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
@@ -57,6 +59,15 @@ const WEEK_COL_DIVIDER = "border-[#F3EFE8] dark:border-white/[0.07]";
 const VISUAL_PADDING_MINUTES = 30;
 const FULL_DAY_MINUTES = 24 * 60;
 const WEEK_HEADER_HEIGHT_PX = 32;
+const LONG_PRESS_MS = 450;
+const POINTER_SLOP_PX = 14;
+const SNAP_MINUTES = 15;
+const MIN_EVENT_MINUTES = 15;
+
+function snapMinute(m: number): number {
+  const s = Math.round(m / SNAP_MINUTES) * SNAP_MINUTES;
+  return Math.max(0, Math.min(FULL_DAY_MINUTES - 1, s));
+}
 
 export type WeekCalendarDensity = "default" | "immersive";
 
@@ -133,6 +144,7 @@ export function WeekCalendar({
   today,
   onCreateEvent,
   onOpenItem,
+  onPatchCalendarEventTimes,
   density = "default",
   /** When set (e.g. fullscreen), overrides the scroll viewport height in px. */
   viewportBodyPx,
@@ -149,6 +161,8 @@ export function WeekCalendar({
   today?: Date;
   onCreateEvent?: (start: Date, end: Date) => void;
   onOpenItem?: (item: WeekCalendarBlock, occurrenceDate: Date) => void;
+  /** Long-press drag / resize calendar events (PATCH start/end only). */
+  onPatchCalendarEventTimes?: (args: { eventId: string; startAt: Date; endAt: Date }) => Promise<boolean>;
   density?: WeekCalendarDensity;
   viewportBodyPx?: number;
   fillParent?: boolean;
@@ -167,6 +181,29 @@ export function WeekCalendar({
   const holdTimerRef = useRef<number | null>(null);
   const [frameWidth, setFrameWidth] = useState(0);
   const [selectedBlockKey, setSelectedBlockKey] = useState<string | null>(null);
+  const [dragOverride, setDragOverride] = useState<{
+    eventId: string;
+    weekday: Weekday;
+    startMinute: number;
+    endMinute: number;
+  } | null>(null);
+  const dayBodyElRef = useRef<Map<Weekday, HTMLDivElement | null>>(new Map());
+  const suppressOpenClickRef = useRef(false);
+
+  const effectiveBlocks = useMemo(() => {
+    if (!dragOverride) return blocks;
+    return blocks.map((b) => {
+      if (b.calendarEntryId && b.calendarEntryId === dragOverride.eventId) {
+        return {
+          ...b,
+          weekday: dragOverride.weekday,
+          startMinute: dragOverride.startMinute,
+          endMinute: dragOverride.endMinute,
+        };
+      }
+      return b;
+    });
+  }, [blocks, dragOverride]);
 
   const visibleDays = DAY_ORDER;
   const visualStartMinute = -VISUAL_PADDING_MINUTES;
@@ -200,7 +237,7 @@ export function WeekCalendar({
   }, [visualStartMinute, weekStartDate, focusDate, DEFAULT_VIEW_START, MINUTE_PX]);
 
   const blocksByDay = new Map<Weekday, WeekCalendarBlock[]>();
-  for (const block of blocks) {
+  for (const block of effectiveBlocks) {
     const list = blocksByDay.get(block.weekday) ?? [];
     list.push(block);
     blocksByDay.set(block.weekday, list);
@@ -213,7 +250,9 @@ export function WeekCalendar({
         computeEventOverlapLayout(
           dayBlocks.map((block, index) => ({
             ...block,
-            id: `${block.courseId}-${block.startMinute}-${block.endMinute}-${index}`,
+            id: block.calendarEntryId
+              ? `cal-${block.calendarEntryId}`
+              : `${block.courseId}-${block.startMinute}-${block.endMinute}-${index}`,
           })),
         ),
       ] as const;
@@ -254,6 +293,158 @@ export function WeekCalendar({
   }
 
   const trackWidthPx = TIME_COLUMN_PX + dayTrackWidth;
+
+  function weekdayFromClientXY(clientX: number, clientY: number): Weekday | null {
+    for (const d of DAY_ORDER) {
+      const el = dayBodyElRef.current.get(d);
+      if (!el) continue;
+      const r = el.getBoundingClientRect();
+      if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) {
+        return d;
+      }
+    }
+    return null;
+  }
+
+  function minuteFromClientYForDay(clientY: number, weekday: Weekday): number {
+    const el = dayBodyElRef.current.get(weekday);
+    if (!el) return snapMinute(12 * 60);
+    const r = el.getBoundingClientRect();
+    if (r.height <= 1) return 0;
+    const frac = Math.max(0, Math.min(1, (clientY - r.top) / r.height));
+    const raw = visualStartMinute + frac * totalMinutes;
+    return snapMinute(raw);
+  }
+
+  function buildStartEndAt(weekday: Weekday, startMinute: number, endMinute: number): { startAt: Date; endAt: Date } {
+    const idx = DAY_ORDER.indexOf(weekday);
+    const base = addDays(weekStartDate, idx);
+    const dayStart = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+    const sm = Math.max(0, Math.min(FULL_DAY_MINUTES - 1, startMinute));
+    const em = Math.max(sm + MIN_EVENT_MINUTES, Math.min(FULL_DAY_MINUTES, endMinute));
+    const startAt = addMinutes(dayStart, sm);
+    let endAt = addMinutes(dayStart, em);
+    if (endAt <= startAt) {
+      endAt = addMinutes(startAt, MIN_EVENT_MINUTES);
+    }
+    return { startAt, endAt };
+  }
+
+  function startCalendarPointerSession(
+    e: React.PointerEvent,
+    block: WeekCalendarBlock,
+    mode: "move" | "resize-start" | "resize-end",
+    fromWeekday: Weekday,
+  ) {
+    if (!onPatchCalendarEventTimes || !block.calendarEntryId) return;
+    if (block.courseId === "__draft-preview__") return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+
+    const eventId = block.calendarEntryId;
+    const pointerId = e.pointerId;
+    const x0 = e.clientX;
+    const y0 = e.clientY;
+    const captureEl = e.currentTarget as HTMLElement;
+
+    let curWeekday: Weekday = fromWeekday;
+    let curStart = block.startMinute;
+    let curEnd = block.endMinute;
+    const originDuration = Math.max(MIN_EVENT_MINUTES, block.endMinute - block.startMinute);
+    const grabOffsetMove = mode === "move" ? minuteFromClientYForDay(e.clientY, fromWeekday) - block.startMinute : 0;
+
+    let activatedForDrag = false;
+    let longPressTimer: number | null = window.setTimeout(() => {
+      longPressTimer = null;
+      activatedForDrag = true;
+      try {
+        captureEl.setPointerCapture(pointerId);
+      } catch {
+        /* ignore */
+      }
+      setDragOverride({
+        eventId,
+        weekday: curWeekday,
+        startMinute: curStart,
+        endMinute: curEnd,
+      });
+    }, LONG_PRESS_MS);
+
+    const clearLongPress = () => {
+      if (longPressTimer != null) {
+        window.clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    };
+
+    const detach = () => {
+      document.removeEventListener("pointermove", onDocMove);
+      document.removeEventListener("pointerup", onDocUp);
+      document.removeEventListener("pointercancel", onDocUp);
+    };
+
+    const onDocMove = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
+      if (!activatedForDrag) {
+        if (longPressTimer != null && Math.hypot(ev.clientX - x0, ev.clientY - y0) > POINTER_SLOP_PX) {
+          clearLongPress();
+          detach();
+        }
+        return;
+      }
+      const hit = weekdayFromClientXY(ev.clientX, ev.clientY);
+      if (hit) curWeekday = hit;
+      const m = minuteFromClientYForDay(ev.clientY, curWeekday);
+      if (mode === "move") {
+        let ns = snapMinute(m - grabOffsetMove);
+        ns = Math.max(0, Math.min(FULL_DAY_MINUTES - originDuration, ns));
+        curStart = ns;
+        curEnd = ns + originDuration;
+      } else if (mode === "resize-start") {
+        let ns = snapMinute(m);
+        ns = Math.min(ns, curEnd - MIN_EVENT_MINUTES);
+        ns = Math.max(0, ns);
+        curStart = ns;
+      } else {
+        let ne = snapMinute(m);
+        ne = Math.max(ne, curStart + MIN_EVENT_MINUTES);
+        ne = Math.min(FULL_DAY_MINUTES, ne);
+        curEnd = ne;
+      }
+      setDragOverride({ eventId, weekday: curWeekday, startMinute: curStart, endMinute: curEnd });
+    };
+
+    const onDocUp = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
+      clearLongPress();
+      detach();
+      if (!activatedForDrag) return;
+      try {
+        captureEl.releasePointerCapture(pointerId);
+      } catch {
+        /* ignore */
+      }
+      void (async () => {
+        const patch = onPatchCalendarEventTimes;
+        const { startAt, endAt } = buildStartEndAt(curWeekday, curStart, curEnd);
+        if (patch && endAt > startAt) {
+          const ok = await patch({ eventId, startAt, endAt });
+          if (!ok) {
+            setDragOverride(null);
+            return;
+          }
+        }
+        suppressOpenClickRef.current = true;
+        window.setTimeout(() => {
+          suppressOpenClickRef.current = false;
+        }, 280);
+        setDragOverride(null);
+      })();
+    };
+
+    document.addEventListener("pointermove", onDocMove);
+    document.addEventListener("pointerup", onDocUp);
+    document.addEventListener("pointercancel", onDocUp);
+  }
 
   return (
     <div
@@ -482,6 +673,10 @@ export function WeekCalendar({
                       return (
                         <div
                           key={day}
+                          ref={(node) => {
+                            dayBodyElRef.current.set(day, node);
+                          }}
+                          data-weekday={day}
                           className={cn(
                             "relative border-l bg-white/90",
                             WEEK_COL_DIVIDER,
@@ -628,6 +823,67 @@ export function WeekCalendar({
                               useCategoryColor && catHex
                                 ? { ...positionStyle, ...categoryBlockSurfaceStyle(catHex, selected) }
                                 : positionStyle;
+
+                            const isDraggableCalendar =
+                              Boolean(onPatchCalendarEventTimes) &&
+                              block.source === "calendar" &&
+                              Boolean(block.calendarEntryId) &&
+                              block.courseId !== "__draft-preview__";
+
+                            if (isDraggableCalendar) {
+                              return (
+                                <div
+                                  key={key}
+                                  className={cn(className, "touch-none")}
+                                  style={surfaceStyle}
+                                  title={title}
+                                  role="group"
+                                >
+                                  <div
+                                    className="absolute inset-x-0.5 top-0 z-30 h-2 cursor-ns-resize rounded-t-md bg-black/[0.04] hover:bg-black/[0.09] dark:bg-white/[0.06] dark:hover:bg-white/[0.12]"
+                                    onPointerDown={(ev) => {
+                                      ev.stopPropagation();
+                                      startCalendarPointerSession(ev, block, "resize-start", day);
+                                    }}
+                                    aria-label={`Adjust start: ${titleLine}`}
+                                  />
+                                  <div
+                                    role="button"
+                                    tabIndex={0}
+                                    className="absolute inset-x-0 bottom-2 top-2 z-20 cursor-grab overflow-hidden active:cursor-grabbing"
+                                    onKeyDown={(ev) => {
+                                      if (ev.key === "Enter" || ev.key === " ") {
+                                        ev.preventDefault();
+                                        setSelectedBlockKey(key);
+                                        onOpenItem?.(block, addDays(weekStartDate, dayIndex));
+                                      }
+                                    }}
+                                    onClick={(ev) => {
+                                      ev.stopPropagation();
+                                      if (suppressOpenClickRef.current) return;
+                                      setSelectedBlockKey(key);
+                                      onOpenItem?.(block, addDays(weekStartDate, dayIndex));
+                                    }}
+                                    onPointerDown={(ev) => {
+                                      ev.stopPropagation();
+                                      startCalendarPointerSession(ev, block, "move", day);
+                                    }}
+                                  >
+                                    <div className="pointer-events-none flex h-full flex-col items-start justify-start">
+                                      {inner}
+                                    </div>
+                                  </div>
+                                  <div
+                                    className="absolute inset-x-0.5 bottom-0 z-30 h-2 cursor-ns-resize rounded-b-md bg-black/[0.04] hover:bg-black/[0.09] dark:bg-white/[0.06] dark:hover:bg-white/[0.12]"
+                                    onPointerDown={(ev) => {
+                                      ev.stopPropagation();
+                                      startCalendarPointerSession(ev, block, "resize-end", day);
+                                    }}
+                                    aria-label={`Adjust end: ${titleLine}`}
+                                  />
+                                </div>
+                              );
+                            }
 
                             return (
                               <button

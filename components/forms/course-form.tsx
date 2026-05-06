@@ -57,6 +57,7 @@ export function CourseForm({
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState("");
+  const [syncHomeCalendarEvents, setSyncHomeCalendarEvents] = useState(false);
 
   // Course identity UI state: either "search" (typing to find/create) or
   // "picked" (a course is locked in). In "search" mode the user can also
@@ -265,7 +266,19 @@ export function CourseForm({
       setServerError(payload.error ?? "Unable to add course.");
       return;
     }
-    router.push(`/courses/${payload.data.courseId}`);
+    const courseId = payload.data?.courseId as string | undefined;
+    if (courseId && syncHomeCalendarEvents && values.sessions.length > 0) {
+      await apiFetch("/api/calendar/mirror-course-sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          courseId,
+          enabled: true,
+          sessions: values.sessions,
+        }),
+      });
+    }
+    router.push(`/courses/${courseId}`);
     router.refresh();
   });
 
@@ -445,7 +458,12 @@ export function CourseForm({
 
           <div className="space-y-3 rounded-3xl border border-border bg-card p-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-medium">Weekly sessions</p>
+              <div className="min-w-0">
+                <p className="text-sm font-medium">Weekly times for Home</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  These repeat on your Home week view after you enroll — only your personal schedule.
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => {
@@ -460,7 +478,7 @@ export function CourseForm({
 
             {fields.length === 0 ? (
               <p className="text-xs text-muted-foreground">
-                No sessions — add at least one class time so this course shows on your home schedule.
+                Add at least one weekly slot so this course appears on your Home schedule.
               </p>
             ) : null}
 
@@ -525,6 +543,14 @@ export function CourseForm({
                         "Check session times.")
                     : (errors.sessions as { message?: string })?.message
                 }
+              />
+            ) : null}
+
+            {fields.length > 0 ? (
+              <Checkbox
+                checked={syncHomeCalendarEvents}
+                onChange={setSyncHomeCalendarEvents}
+                label="Also sync these times to Home calendar events (draggable; hides duplicate course strip)"
               />
             ) : null}
           </div>
