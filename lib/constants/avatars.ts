@@ -17,13 +17,23 @@ export type AvatarId = (typeof AVATAR_IDS)[number];
 export const DEFAULT_AVATAR_ID: AvatarId = "p01";
 
 const BLOB_HOST_SUFFIX = ".public.blob.vercel-storage.com";
+const INLINE_AVATAR_DATA_URL_PREFIXES = ["data:image/jpeg;base64,", "data:image/png;base64,", "data:image/webp;base64,"];
 
 export function userCustomAvatarBlobPrefix(userId: string): string {
   return `avatars/custom/${userId}/`;
 }
 
+export function isInlineAvatarDataUrl(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.length <= 2_000_000 &&
+    INLINE_AVATAR_DATA_URL_PREFIXES.some((prefix) => value.startsWith(prefix))
+  );
+}
+
 /** True for HTTPS URLs on Vercel Blob that look safe to render as an image. */
 export function isDisplayableCustomAvatarUrl(value: unknown): value is string {
+  if (isInlineAvatarDataUrl(value)) return true;
   if (typeof value !== "string" || value.length > 2048) return false;
   if (!value.startsWith("https://")) return false;
   try {

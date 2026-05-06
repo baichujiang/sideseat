@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import type { z } from "zod";
 
+import { AvatarCropEditor } from "@/components/profile/avatar-crop-editor";
 import { ProfileForm } from "@/components/forms/profile-form";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { UserGenderProfileMark } from "@/components/ui/user-gender-icon";
@@ -77,6 +78,7 @@ export function ProfileIdentitySheets({
   const [draftAvatarId, setDraftAvatarId] = useState<string | null>(null);
   const [avatarAtEditOpen, setAvatarAtEditOpen] = useState<string | null>(null);
   const [avatarReturnToEdit, setAvatarReturnToEdit] = useState(false);
+  const [avatarCropFile, setAvatarCropFile] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
 
@@ -274,6 +276,7 @@ export function ProfileIdentitySheets({
   const displayName = nickname.trim() || "Your name";
   const bioDisplay = bio.trim() ? bio.trim() : "No tagline yet";
   const schoolLine = schoolSummary ? buildSchoolSubtitle(schoolSummary) : null;
+  const isCropOpen = avatarCropFile !== null;
 
   return (
     <>
@@ -387,12 +390,12 @@ export function ProfileIdentitySheets({
         </nav>
       )}
 
-      {sheet ? (
+      {sheet || isCropOpen ? (
         <div className="fixed inset-0 z-[50] flex flex-col justify-end" role="dialog" aria-modal="true">
           <input
             ref={avatarUploadInputRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/*"
             className="sr-only"
             tabIndex={-1}
             aria-hidden
@@ -400,7 +403,11 @@ export function ProfileIdentitySheets({
               const file = e.target.files?.[0];
               e.target.value = "";
               if (!file || pending) return;
-              runAvatarUpload(file, avatarUploadTargetRef.current);
+              if (!file.type.startsWith("image/")) {
+                setError("Choose an image file.");
+                return;
+              }
+              setAvatarCropFile(file);
             }}
           />
           <button
@@ -409,6 +416,10 @@ export function ProfileIdentitySheets({
             aria-label="Close"
             onClick={() => {
               if (pending) return;
+              if (isCropOpen) {
+                setAvatarCropFile(null);
+                return;
+              }
               if (sheet === "edit" && sheetProfileInitialValues) {
                 setSheet(null);
                 return;
@@ -422,7 +433,23 @@ export function ProfileIdentitySheets({
           >
             <div className="mx-auto mt-2 h-1 w-9 rounded-full bg-muted" aria-hidden />
 
-            {sheet === "edit" ? (
+            {isCropOpen ? (
+              <div className="max-h-[min(82dvh,720px)] overflow-y-auto px-4 py-4">
+                <AvatarCropEditor
+                  file={avatarCropFile}
+                  pending={pending}
+                  onCancel={() => setAvatarCropFile(null)}
+                  onConfirm={async (nextFile) => {
+                    const mode = avatarUploadTargetRef.current;
+                    setAvatarCropFile(null);
+                    runAvatarUpload(nextFile, mode);
+                  }}
+                />
+                {error ? <p className="mt-3 text-center text-[12px] text-destructive">{error}</p> : null}
+              </div>
+            ) : null}
+
+            {sheet === "edit" && !isCropOpen ? (
               <>
                 <div className="border-b border-border px-4 py-3 text-center text-[16px] font-semibold text-foreground">
                   Edit profile
@@ -528,7 +555,7 @@ export function ProfileIdentitySheets({
               </>
             ) : null}
 
-            {sheet === "avatar" ? (
+            {sheet === "avatar" && !isCropOpen ? (
               <>
                 <div className="border-b border-border px-4 py-3 text-center text-[16px] font-semibold text-foreground">
                   Photo
@@ -555,7 +582,7 @@ export function ProfileIdentitySheets({
                     >
                       Upload photo
                     </Button>
-                    <p className="text-center text-[10px] text-muted-foreground">JPG, PNG, or WEBP · max 2 MB</p>
+                    <p className="text-center text-[10px] text-muted-foreground">Any image format · saved as a square avatar</p>
                   </div>
                   <div className="grid grid-cols-5 gap-3">
                     {AVATAR_IDS.map((id) => (
@@ -592,7 +619,7 @@ export function ProfileIdentitySheets({
               </>
             ) : null}
 
-            {sheet === "name" ? (
+            {sheet === "name" && !isCropOpen ? (
               <>
                 <div className="border-b border-border px-4 py-3 text-center text-[16px] font-semibold text-foreground">
                   Name
@@ -621,7 +648,7 @@ export function ProfileIdentitySheets({
               </>
             ) : null}
 
-            {sheet === "bio" ? (
+            {sheet === "bio" && !isCropOpen ? (
               <>
                 <div className="border-b border-border px-4 py-3 text-center text-[16px] font-semibold text-foreground">
                   Bio

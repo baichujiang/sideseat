@@ -5,6 +5,7 @@ import { apiFetch } from "@/lib/auth/api-fetch";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
+import { AvatarCropEditor } from "@/components/profile/avatar-crop-editor";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { Button } from "@/components/ui/button";
 import { AVATAR_IDS, isDisplayableCustomAvatarUrl, isValidAvatarId } from "@/lib/constants/avatars";
@@ -31,6 +32,7 @@ export function AvatarPicker({
   const fileRef = useRef<HTMLInputElement>(null);
   const [selected, setSelected] = useState<string | null>(initialId);
   const [expanded, setExpanded] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -135,54 +137,74 @@ export function AvatarPicker({
           <input
             ref={fileRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/*"
             className="sr-only"
             tabIndex={-1}
             aria-hidden
             onChange={(e) => {
               const file = e.target.files?.[0];
               e.target.value = "";
-              if (file) uploadCustom(file);
+              if (!file) return;
+              if (!file.type.startsWith("image/")) {
+                setMessage("Choose an image file.");
+                return;
+              }
+              setCropFile(file);
             }}
           />
-          <div className="flex flex-wrap items-center gap-2 px-0.5">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isPending}
-              className="h-9 rounded-full px-4 text-[13px]"
-              onClick={() => fileRef.current?.click()}
-            >
-              Upload photo
-            </Button>
-            {isDisplayableCustomAvatarUrl(selected) ? (
-              <span className="text-[11px] text-muted-foreground">Using your photo</span>
-            ) : null}
-            <span className="text-[10px] text-muted-foreground">JPG, PNG, WEBP · max 2 MB</span>
-          </div>
-          <div className={cn("grid grid-cols-5 gap-2 sm:grid-cols-10")}>
-            {AVATAR_IDS.map((id) => {
-              const isSelected = isValidAvatarId(selected) && id === selected;
-              return (
-                <button
-                  aria-label={`Avatar ${id}`}
-                  aria-pressed={isSelected}
-                  className={cn(
-                    "rounded-full transition",
-                    isSelected
-                      ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
-                      : "opacity-80 hover:opacity-100",
-                  )}
-                  key={id}
-                  onClick={() => choose(id)}
+          {cropFile ? (
+            <AvatarCropEditor
+              file={cropFile}
+              pending={isPending}
+              className="px-1 py-1"
+              onCancel={() => setCropFile(null)}
+              onConfirm={async (nextFile) => {
+                setCropFile(null);
+                uploadCustom(nextFile);
+              }}
+            />
+          ) : (
+            <>
+              <div className="flex flex-wrap items-center gap-2 px-0.5">
+                <Button
                   type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isPending}
+                  className="h-9 rounded-full px-4 text-[13px]"
+                  onClick={() => fileRef.current?.click()}
                 >
-                  <PresetAvatar className="h-10 w-10" id={id} />
-                </button>
-              );
-            })}
-          </div>
+                  Upload photo
+                </Button>
+                {isDisplayableCustomAvatarUrl(selected) ? (
+                  <span className="text-[11px] text-muted-foreground">Using your photo</span>
+                ) : null}
+                <span className="text-[10px] text-muted-foreground">Any image format · saved as square avatar</span>
+              </div>
+              <div className={cn("grid grid-cols-5 gap-2 sm:grid-cols-10")}>
+                {AVATAR_IDS.map((id) => {
+                  const isSelected = isValidAvatarId(selected) && id === selected;
+                  return (
+                    <button
+                      aria-label={`Avatar ${id}`}
+                      aria-pressed={isSelected}
+                      className={cn(
+                        "rounded-full transition",
+                        isSelected
+                          ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
+                          : "opacity-80 hover:opacity-100",
+                      )}
+                      key={id}
+                      onClick={() => choose(id)}
+                      type="button"
+                    >
+                      <PresetAvatar className="h-10 w-10" id={id} />
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       ) : null}
       {message ? <p className="text-xs text-destructive">{message}</p> : null}

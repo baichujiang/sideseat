@@ -19,14 +19,14 @@ function extForMime(type: string): string {
   return "jpg";
 }
 
+async function fileToDataUrl(file: File): Promise<string> {
+  const bytes = Buffer.from(await file.arrayBuffer());
+  return `data:${file.type};base64,${bytes.toString("base64")}`;
+}
+
 export async function POST(request: Request) {
   try {
     const user = await requireUser();
-
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      console.error("[avatar/upload] BLOB_READ_WRITE_TOKEN is not configured.");
-      return error("Photo uploads are not configured on the server yet.", 500);
-    }
 
     const formData = await request.formData();
     const file = formData.get("file");
@@ -52,27 +52,34 @@ export async function POST(request: Request) {
       select: { avatarUrl: true },
     });
 
-    const token = randomBytes(18).toString("hex");
-    const ext = extForMime(file.type);
-    const blobKey = `${userCustomAvatarBlobPrefix(user.id)}${token}.${ext}`;
+    let nextAvatarUrl: string;
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      const token = randomBytes(18).toString("hex");
+      const ext = extForMime(file.type);
+      const blobKey = `${userCustomAvatarBlobPrefix(user.id)}${token}.${ext}`;
 
-    const blob = await put(blobKey, file, {
-      access: "public",
-      contentType: file.type,
-      addRandomSuffix: false,
-    });
+      const blob = await put(blobKey, file, {
+        access: "public",
+        contentType: file.type,
+        addRandomSuffix: false,
+      });
+      nextAvatarUrl = blob.url;
+    } else {
+      console.warn("[avatar/upload] BLOB_READ_WRITE_TOKEN is not configured. Falling back to inline avatar storage.");
+      nextAvatarUrl = await fileToDataUrl(file);
+    }
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { avatarUrl: blob.url },
+      data: { avatarUrl: nextAvatarUrl },
     });
 
     const oldUrl = prev?.avatarUrl ?? null;
-    if (oldUrl && isTrustedUserAvatarBlobUrl(user.id, oldUrl) && oldUrl !== blob.url) {
+    if (oldUrl && isTrustedUserAvatarBlobUrl(user.id, oldUrl) && oldUrl !== nextAvatarUrl) {
       del(oldUrl).catch(() => {});
     }
 
-    return ok({ avatarUrl: blob.url });
+    return ok({ avatarUrl: nextAvatarUrl });
   } catch (cause) {
     console.error(cause);
     return error("Could not upload photo.");
