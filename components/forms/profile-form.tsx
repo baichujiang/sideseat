@@ -49,6 +49,7 @@ export function ProfileForm({
   submitLabel,
   avatarId,
   verificationSlot,
+  onSaved,
   /** `sheet`: Me page bottom sheet — card (avatar/name/bio) first, then school & languages (no verification slot). */
   variant = "full",
   /** When true, Save stays disabled until the user changes something (Me /profile). Onboarding should pass false. */
@@ -61,6 +62,7 @@ export function ProfileForm({
   avatarId: string | null;
   /** When set, rendered in its own “Verified email” card after Languages (Me /profile). */
   verificationSlot?: React.ReactNode;
+  onSaved?: () => void;
   variant?: "full" | "academicOnly" | "sheet";
   requireDirtyToSubmit?: boolean;
   mePageStructure?: boolean;
@@ -117,6 +119,7 @@ export function ProfileForm({
     reset(values);
     setJustSaved(true);
     router.refresh();
+    onSaved?.();
   });
 
   /** Block submit while idle-but-pristine, during request, or briefly after success (avoids double POST). */

@@ -435,6 +435,7 @@ export function ProfileIdentitySheets({
                       initialValues={sheetProfileInitialValues}
                       avatarId={avatarId}
                       submitLabel="Save changes"
+                      onSaved={() => setSheet(null)}
                       requireDirtyToSubmit
                       mePageStructure={false}
                     />
