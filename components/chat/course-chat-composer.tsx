@@ -56,7 +56,7 @@ export function CourseChatComposer({ courseId }: { courseId: string }) {
           onCancel={() => setReplyTo(null)}
         />
       ) : null}
-      <div className="flex items-center gap-2 px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2">
+      <div className="flex items-center gap-2 px-3 py-2 pb-0 pt-2">
         <label className="sr-only" htmlFor={`course-chat-input-${courseId}`}>
           Message
         </label>

@@ -65,7 +65,7 @@ export function ChatComposer({
           onCancel={() => setReplyTo(null)}
         />
       ) : null}
-      <div className="flex items-end gap-2 px-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-1">
+      <div className="flex items-end gap-2 px-1 pb-0 pt-1">
         {hideAttachments ? (
           <button
             type="button"
