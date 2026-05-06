@@ -243,7 +243,7 @@ export function ScheduleSurface({
   useEffect(() => {
     if (!weekImmersiveOpen) return;
     /** No title bar — only edge padding + floating close. */
-    const padPx = 8;
+    const padPx = 4;
 
     const measure = () => {
       const iw = window.innerWidth;
@@ -1025,7 +1025,7 @@ export function ScheduleSurface({
                 >
                   <Minimize2 className="h-5 w-5" strokeWidth={2} aria-hidden />
                 </button>
-                <div className="min-h-0 flex-1 overflow-hidden px-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-[max(0.25rem,env(safe-area-inset-top))]">
+                <div className="min-h-0 flex-1 overflow-hidden px-[2px] pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
                   <WeekCalendar
                     {...weekCalendarProps}
                     density="immersive"

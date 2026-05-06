@@ -64,6 +64,7 @@ const DENSITY_LAYOUT: Record<
   {
     timeColumnPx: number;
     minutePx: number;
+    bottomSpacerPx: number;
     visibleWeekDays: number;
     viewStart: number;
     viewEnd: number;
@@ -78,6 +79,7 @@ const DENSITY_LAYOUT: Record<
   default: {
     timeColumnPx: 44,
     minutePx: 0.72,
+    bottomSpacerPx: 96,
     visibleWeekDays: 5,
     viewStart: 8 * 60,
     viewEnd: 20 * 60,
@@ -90,7 +92,8 @@ const DENSITY_LAYOUT: Record<
   },
   immersive: {
     timeColumnPx: 52,
-    minutePx: 0.95,
+    minutePx: 0.84,
+    bottomSpacerPx: 48,
     visibleWeekDays: 7,
     viewStart: 8 * 60,
     viewEnd: 20 * 60,
@@ -152,6 +155,7 @@ export function WeekCalendar({
   const cfg = DENSITY_LAYOUT[density];
   const TIME_COLUMN_PX = cfg.timeColumnPx;
   const MINUTE_PX = cfg.minutePx;
+  const BOTTOM_SPACER_PX = cfg.bottomSpacerPx;
   const VISIBLE_WEEK_DAYS = cfg.visibleWeekDays;
   const DEFAULT_VIEW_START = cfg.viewStart;
   const DEFAULT_VIEW_END = cfg.viewEnd;
@@ -408,7 +412,7 @@ export function WeekCalendar({
                     </div>
                   ) : null}
                 </div>
-                <div className="h-24 shrink-0 bg-[#FAF9F6] dark:bg-muted/25" aria-hidden />
+                <div className="shrink-0 bg-[#FAF9F6] dark:bg-muted/25" style={{ height: `${BOTTOM_SPACER_PX}px` }} aria-hidden />
               </div>
 
               <div className="min-w-0 bg-white dark:bg-card" style={{ width: dayTrackWidth }}>
@@ -621,7 +625,7 @@ export function WeekCalendar({
                       );
                     })}
                 </div>
-                <div className="h-24 shrink-0" aria-hidden />
+                <div className="shrink-0" style={{ height: `${BOTTOM_SPACER_PX}px` }} aria-hidden />
               </div>
             </div>
           </div>
