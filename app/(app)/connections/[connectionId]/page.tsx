@@ -49,12 +49,14 @@ export default async function ConnectionPage({
   const courseName = connection.invitation?.course?.name ?? null;
   const myRemark = contactRemarkForViewer(connection, user.id);
   const peerNickname = otherUser.nickname?.trim() ?? "";
+  const selfBaseLabel = selfNotesDisplayTitle(user, null);
   const headerTitle = isSelfNotes
     ? selfNotesDisplayTitle(user, myRemark)
     : (myRemark || peerNickname || "Student");
   const showPeerNicknameLine =
     !isSelfNotes && Boolean(myRemark) && myRemark !== peerNickname && peerNickname.length > 0;
   const showPeerUsernameLine = !isSelfNotes && Boolean(myRemark) && !peerNickname.length;
+  const showSelfBaseLine = isSelfNotes && Boolean(myRemark) && headerTitle !== selfBaseLabel;
   const messages = connection.messages;
   const latestMessageId = messages.at(-1)?.id ?? null;
   const profileLinkHref = isSelfNotes
@@ -93,15 +95,16 @@ export default async function ConnectionPage({
               >
                 <p className="truncate text-sm font-semibold leading-tight">{headerTitle}</p>
               </Link>
-              {!isSelfNotes ? (
-                <ContactRemarkEditor
-                  connectionId={connection.id}
-                  initialRemark={myRemark}
-                  isSelfNotes={false}
-                  variant="inline"
-                />
-              ) : null}
+              <ContactRemarkEditor
+                connectionId={connection.id}
+                initialRemark={myRemark}
+                isSelfNotes={isSelfNotes}
+                variant="inline"
+              />
             </div>
+            {showSelfBaseLine ? (
+              <p className="truncate text-[11px] text-muted-foreground">{selfBaseLabel}</p>
+            ) : null}
             {showPeerNicknameLine ? (
               <p className="truncate text-[11px] text-muted-foreground">{peerNickname}</p>
             ) : null}
@@ -123,14 +126,7 @@ export default async function ConnectionPage({
             </span>
           ) : null}
         </div>
-      ) : (
-        <ContactRemarkEditor
-          connectionId={connection.id}
-          initialRemark={myRemark}
-          isSelfNotes
-          variant="minimal"
-        />
-      )}
+      ) : null}
 
       <ChatScrollContainer messageCount={messages.length}>
         {messages.length === 0 ? (
