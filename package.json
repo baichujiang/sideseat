@@ -12,6 +12,7 @@
     "postinstall": "prisma generate",
     "smoke:auth": "tsx scripts/smoke-auth.ts",
     "sync:course-instructors": "tsx scripts/sync-course-instructors.ts",
+    "sync:tum-exam-catalog": "tsx scripts/sync-tum-exam-catalog.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts"
