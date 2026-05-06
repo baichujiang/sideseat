@@ -8,6 +8,7 @@ import {
   categoryAccentColor,
   categoryBlockSurfaceStyle,
 } from "@/lib/calendar/category-visual";
+import { computeEventOverlapLayout } from "@/lib/calendar/event-overlap-layout";
 import {
   inferScheduleEventToneKey,
   SCHEDULE_EVENT_TONE_STYLES,
@@ -267,6 +268,8 @@ export function ScheduleDayTimeline({
                 totalMinutes={totalMinutes}
                 columnIndex={item.columnIndex}
                 columnCount={item.columnCount}
+                stackDepth={item.stackDepth}
+                hasShortOverlap={item.hasShortOverlap}
                 isToday={isToday}
                 nowMinute={nowMinute}
                 selected={selectedItemId === item.id}
@@ -292,6 +295,8 @@ function TimelineBlock({
   totalMinutes,
   columnIndex,
   columnCount,
+  stackDepth,
+  hasShortOverlap,
   isToday,
   nowMinute,
   selected,
@@ -302,6 +307,8 @@ function TimelineBlock({
   totalMinutes: number;
   columnIndex: number;
   columnCount: number;
+  stackDepth: number;
+  hasShortOverlap: boolean;
   isToday: boolean;
   nowMinute: number;
   selected: boolean;
@@ -412,12 +419,13 @@ function TimelineBlock({
   const columnWidth = 100 / Math.max(columnCount, 1);
   const horizontalGapPct = columnCount > 1 ? 0.8 : 0;
   const widthPct = Math.max(8, columnWidth - horizontalGapPct);
+  const stackInsetPx = hasShortOverlap ? Math.min(stackDepth * 8, 18) : 0;
   const positionStyle = {
     top: `${top}%`,
     height: `${effectiveHeight}%`,
-    left: `${columnIndex * columnWidth}%`,
-    width: `${widthPct}%`,
-    zIndex: selected ? 3 : columnIndex + 1,
+    left: `calc(${columnIndex * columnWidth}% + ${stackInsetPx}px)`,
+    width: `calc(${widthPct}% - ${stackInsetPx}px)`,
+    zIndex: selected ? 4 : columnIndex * 10 + stackDepth + 1,
   };
   const surfaceStyle =
     useCategoryColor && catHex
@@ -428,7 +436,11 @@ function TimelineBlock({
   return (
     <button
       type="button"
-      className={cn(toneClass, "z-[1]")}
+      className={cn(
+        toneClass,
+        "z-[1]",
+        hasShortOverlap && !selected && "shadow-[0_12px_28px_-18px_rgba(15,23,42,0.45)]",
+      )}
       style={surfaceStyle}
       title={title}
       onClick={(e) => {
@@ -444,65 +456,12 @@ function TimelineBlock({
 type PositionedTimelineItem = DayTimelineItem & {
   columnIndex: number;
   columnCount: number;
+  stackDepth: number;
+  hasShortOverlap: boolean;
 };
 
 function computeTimelineColumns(items: DayTimelineItem[]): PositionedTimelineItem[] {
-  if (items.length === 0) return [];
-
-  const sorted = [...items].sort((a, b) => {
-    if (a.startMinute !== b.startMinute) return a.startMinute - b.startMinute;
-    if (a.endMinute !== b.endMinute) return a.endMinute - b.endMinute;
-    return a.id.localeCompare(b.id);
-  });
-
-  const clusters: DayTimelineItem[][] = [];
-  let currentCluster: DayTimelineItem[] = [];
-  let clusterEnd = -1;
-
-  for (const item of sorted) {
-    if (currentCluster.length === 0 || item.startMinute < clusterEnd) {
-      currentCluster.push(item);
-      clusterEnd = Math.max(clusterEnd, item.endMinute);
-      continue;
-    }
-    clusters.push(currentCluster);
-    currentCluster = [item];
-    clusterEnd = item.endMinute;
-  }
-
-  if (currentCluster.length > 0) {
-    clusters.push(currentCluster);
-  }
-
-  return clusters.flatMap((cluster) => {
-    const activeColumnsEnd: number[] = [];
-    const byId = new Map<string, PositionedTimelineItem>();
-
-    for (const item of cluster) {
-      let columnIndex = activeColumnsEnd.findIndex((endMinute) => endMinute <= item.startMinute);
-      if (columnIndex === -1) {
-        columnIndex = activeColumnsEnd.length;
-        activeColumnsEnd.push(item.endMinute);
-      } else {
-        activeColumnsEnd[columnIndex] = item.endMinute;
-      }
-
-      byId.set(item.id, {
-        ...item,
-        columnIndex,
-        columnCount: 0,
-      });
-    }
-
-    const columnCount = activeColumnsEnd.length;
-    return cluster.map((item) => {
-      const positioned = byId.get(item.id)!;
-      return {
-        ...positioned,
-        columnCount,
-      };
-    });
-  });
+  return computeEventOverlapLayout(items);
 }
 
 function formatHM(minutes: number): string {

@@ -10,6 +10,7 @@ import {
   categoryAccentColor,
   categoryBlockSurfaceStyle,
 } from "@/lib/calendar/category-visual";
+import { computeEventOverlapLayout } from "@/lib/calendar/event-overlap-layout";
 import { cn } from "@/lib/utils";
 
 export type WeekCalendarBlock = {
@@ -204,6 +205,20 @@ export function WeekCalendar({
     list.push(block);
     blocksByDay.set(block.weekday, list);
   }
+  const positionedBlocksByDay = new Map(
+    DAY_ORDER.map((day) => {
+      const dayBlocks = blocksByDay.get(day) ?? [];
+      return [
+        day,
+        computeEventOverlapLayout(
+          dayBlocks.map((block, index) => ({
+            ...block,
+            id: `${block.courseId}-${block.startMinute}-${block.endMinute}-${index}`,
+          })),
+        ),
+      ] as const;
+    }),
+  );
 
   const dayColumnWidth = useMemo(
     () => Math.max(frameWidth / VISIBLE_WEEK_DAYS, 56),
@@ -444,7 +459,7 @@ export function WeekCalendar({
                     ) : null}
 
                     {visibleDays.map((day) => {
-                      const dayBlocks = blocksByDay.get(day) ?? [];
+                      const dayBlocks = positionedBlocksByDay.get(day) ?? [];
                       const isAnchor = anchorWeekday === day;
                       const isWeekend = day === "SAT" || day === "SUN";
                       const dayIndex = DAY_ORDER.indexOf(day);
@@ -525,6 +540,7 @@ export function WeekCalendar({
                           {dayBlocks.map((block, index) => {
                             const top = ((block.startMinute - visualStartMinute) / totalMinutes) * 100;
                             const height = ((block.endMinute - block.startMinute) / totalMinutes) * 100;
+                            const effectiveHeight = Math.max(height, Math.min(4, height));
                             const isStudy = block.kind === "study";
                             const labelText = [block.courseCode, block.courseName]
                               .filter(Boolean)
@@ -537,14 +553,15 @@ export function WeekCalendar({
                             });
                             const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
                             const isDraftNewTone = toneKey === "draftNew";
-                            const key = `${block.courseId}-${index}`;
+                            const key = block.id;
                             const selected = selectedBlockKey === key;
                             const catHex = block.categoryColor?.trim();
                             const useCategoryColor = Boolean(catHex);
                             const className = cn(
-                              "absolute inset-x-0 z-[1] overflow-hidden rounded-2xl px-1.5 py-1 text-left leading-tight transition hover:brightness-[0.98] active:brightness-95",
+                              "absolute z-[1] overflow-hidden rounded-2xl px-1.5 py-1 text-left leading-tight transition hover:brightness-[0.98] active:brightness-95",
                               !useCategoryColor && (selected ? tone.cardSelected : tone.card),
                               useCategoryColor && "shadow-sm",
+                              block.hasShortOverlap && !selected && "shadow-[0_12px_28px_-18px_rgba(15,23,42,0.45)]",
                             );
                             const metaCls = cn(
                               "truncate leading-tight",
@@ -560,7 +577,7 @@ export function WeekCalendar({
                             const titleLine = labelText || block.courseName || "Event";
                             const inner = (
                               <>
-                                {height > 0 ? (
+                                {effectiveHeight > 0 ? (
                                   <p
                                     className={cn(
                                       "truncate text-left tabular-nums font-medium leading-none",
@@ -587,16 +604,26 @@ export function WeekCalendar({
                                 >
                                   {titleLine}
                                 </p>
-                                {height > cfg.metaLocPct && block.location ? (
+                                {effectiveHeight > cfg.metaLocPct && block.location ? (
                                   <p className={cn("mt-px", metaCls)}>{block.location}</p>
                                 ) : null}
-                                {height > cfg.metaWithPct && block.withLabel ? (
+                                {effectiveHeight > cfg.metaWithPct && block.withLabel ? (
                                   <p className={cn("mt-px", metaCls)}>{block.withLabel}</p>
                                 ) : null}
                               </>
                             );
                             const title = `${block.courseName} · ${formatTime(block.startMinute)}`;
-                            const positionStyle = { top: `${top}%`, height: `${height}%` };
+                            const columnWidth = 100 / Math.max(block.columnCount, 1);
+                            const horizontalGapPct = block.columnCount > 1 ? 0.8 : 0;
+                            const widthPct = Math.max(8, columnWidth - horizontalGapPct);
+                            const stackInsetPx = block.hasShortOverlap ? Math.min(block.stackDepth * 8, 18) : 0;
+                            const positionStyle = {
+                              top: `${top}%`,
+                              height: `${effectiveHeight}%`,
+                              left: `calc(${block.columnIndex * columnWidth}% + ${stackInsetPx}px)`,
+                              width: `calc(${widthPct}% - ${stackInsetPx}px)`,
+                              zIndex: selected ? 4 : block.columnIndex * 10 + block.stackDepth + 1,
+                            };
                             const surfaceStyle =
                               useCategoryColor && catHex
                                 ? { ...positionStyle, ...categoryBlockSurfaceStyle(catHex, selected) }
