@@ -1,0 +1,1 @@
+-- Migration intentionally empty (superseded by 20260504180000_connection_contact_remark)

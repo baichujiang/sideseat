@@ -1,0 +1,1 @@
+-- Migration intentionally empty (superseded by later contact remark migrations)

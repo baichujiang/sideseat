@@ -27,7 +27,7 @@ export default async function DiscoverPage() {
   const sessionUser = await getSessionUser();
   if (!sessionUser) {
     return (
-      <div className="space-y-5">
+      <div className="space-y-3">
         <PageHeader />
         <DiscoverList rows={[]} posts={[]} allowSearch={false} />
         <GuestAppCta
@@ -157,7 +157,7 @@ export default async function DiscoverPage() {
   }));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <PageHeader />
       <DiscoverList rows={rows} posts={posts} />
     </div>

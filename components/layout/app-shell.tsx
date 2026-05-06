@@ -58,7 +58,7 @@ export function AppShell({
           shellSurface,
           isChatThread
             ? "px-0 pb-0 pt-[max(0.25rem,env(safe-area-inset-top))]"
-            : "px-3 pb-[var(--bottom-nav-clearance)] pt-6 sm:px-3",
+            : "px-3 pb-[var(--bottom-nav-clearance)] pt-3 sm:px-3",
         )}
       >
         {children}

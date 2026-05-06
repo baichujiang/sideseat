@@ -36,7 +36,7 @@ export default async function HomePage() {
     return (
       <div className="flex min-h-0 flex-1 flex-col">
         <HomeHero nickname={null} avatarUrl={null} nowDate={now} />
-        <div className="mt-6 flex min-h-0 flex-1 flex-col gap-3">
+        <div className="mt-3 flex min-h-0 flex-1 flex-col gap-3">
           <ScheduleSurface
             classBlocks={[]}
             studyEntries={[]}
@@ -173,7 +173,7 @@ export default async function HomePage() {
     <div className="flex min-h-0 flex-1 flex-col">
       <HomeHero nickname={user.nickname} avatarUrl={user.avatarUrl} nowDate={now} />
 
-      <div className="mt-6 flex min-h-0 flex-1 flex-col gap-3">
+      <div className="mt-3 flex min-h-0 flex-1 flex-col gap-3">
         <ScheduleSurface
           classBlocks={classBlocks}
           studyEntries={studyEntries}

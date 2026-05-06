@@ -61,7 +61,7 @@ export default async function ProfilePage({
 
   if (!sessionUser) {
     return (
-      <div className="space-y-6 pb-2">
+      <div className="space-y-3 pb-2">
         <header className="px-0.5">
           <h1 className="page-screen-title">Profile</h1>
           <p className="page-screen-subtitle mt-0.5">
@@ -125,7 +125,7 @@ export default async function ProfilePage({
   const sheetProfileFormKey = `${user.id}-${user.updatedAt.getTime()}`;
 
   return (
-    <div className="space-y-8 pb-2">
+    <div className="space-y-4 pb-2">
       <header className="px-0.5">
         <h1 className="page-screen-title">Me</h1>
       </header>

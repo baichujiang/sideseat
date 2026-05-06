@@ -10,7 +10,7 @@ export default async function InboxPage() {
   const sessionUser = await getSessionUser();
   if (!sessionUser) {
     return (
-      <div className="space-y-5">
+      <div className="space-y-3">
         <header className="px-0.5">
           <h1 className="page-screen-title">Chats</h1>
           <p className="page-screen-subtitle mt-0.5">
@@ -35,7 +35,7 @@ export default async function InboxPage() {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <header className="px-0.5">
         <h1 className="page-screen-title">Chats</h1>
         <p className="page-screen-subtitle mt-0.5">

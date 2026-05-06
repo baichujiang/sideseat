@@ -25,32 +25,19 @@ export function HomeHero({
   const todayLine = format(nowDate, "EEEE, MMMM d");
 
   return (
-    <header className="flex items-start justify-between gap-3">
-      <div className="min-w-0 flex-1 pr-1">
+    <header className="flex items-center justify-between gap-3">
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-[#8A94A6] dark:text-muted-foreground/80">
+          {todayLine}
+        </p>
         <h1
           className={cn(
-            "truncate text-[30px] font-bold leading-[1.12] tracking-tight text-[#111827]",
-            "sm:text-[32px] dark:text-foreground",
+            "mt-0.5 truncate text-[20px] font-bold leading-tight tracking-tight text-[#111827]",
+            "dark:text-foreground",
           )}
         >
           {greeting}, {name}
         </h1>
-        <p
-          className={cn(
-            "mt-1 text-sm leading-snug text-[#5F6B7A]",
-            "dark:text-muted-foreground",
-          )}
-        >
-          Plan your day and keep track of study sessions.
-        </p>
-        <p
-          className={cn(
-            "mt-1 text-xs font-medium leading-tight text-[#8A94A6]",
-            "dark:text-muted-foreground/90",
-          )}
-        >
-          {todayLine}
-        </p>
       </div>
       <Link
         href={"/profile" as Route}
@@ -59,12 +46,12 @@ export function HomeHero({
       >
         <span
           className={cn(
-            "inline-flex h-16 w-16 items-center justify-center overflow-hidden rounded-full",
-            "border border-[#E7E0D6] bg-white shadow-[0_4px_14px_rgba(15,23,42,0.08)]",
-            "dark:border-border dark:bg-card dark:shadow-[0_4px_14px_rgba(0,0,0,0.25)]",
+            "inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full",
+            "border border-[#E7E0D6] bg-white shadow-[0_2px_8px_rgba(15,23,42,0.08)]",
+            "dark:border-border dark:bg-card dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]",
           )}
         >
-          <PresetAvatar id={avatarUrl} size={64} className="h-16 w-16" />
+          <PresetAvatar id={avatarUrl} size={40} className="h-10 w-10" />
         </span>
       </Link>
     </header>

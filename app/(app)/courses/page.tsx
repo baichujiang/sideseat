@@ -199,7 +199,7 @@ export default async function CoursesPage({
 
   if (!sessionUser) {
     return (
-      <div className="space-y-5 pb-6">
+      <div className="space-y-3 pb-4">
         <CoursesHeader selectedSchool={selectedSchool} />
         <CoursesEntryTabs activeTab={activeTab} selectedSchool={selectedSchool} query={rawCourseQuery} />
 
@@ -283,7 +283,7 @@ export default async function CoursesPage({
     }));
 
   return (
-    <div className="space-y-5 pb-6">
+    <div className="space-y-3 pb-4">
       <CoursesHeader selectedSchool={selectedSchool} />
       <CoursesEntryTabs activeTab={activeTab} selectedSchool={selectedSchool} query={rawCourseQuery} />
 
