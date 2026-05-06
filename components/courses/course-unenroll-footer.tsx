@@ -3,9 +3,10 @@
 import { apiFetch } from "@/lib/auth/api-fetch";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { FormMessage } from "@/components/forms/form-message";
+import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { cn } from "@/lib/utils";
 
 /**
@@ -23,18 +24,6 @@ export function CourseUnenrollFooter({
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-
-  useEffect(() => {
-    if (!confirmOpen) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape" && !pending) {
-        setConfirmOpen(false);
-        setError("");
-      }
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [confirmOpen, pending]);
 
   function openUnenrollDialog() {
     setError("");
@@ -75,29 +64,20 @@ export function CourseUnenrollFooter({
         </div>
       </footer>
 
-      {confirmOpen ? (
-        <div
-          className="fixed inset-0 z-[100] flex items-end justify-center p-4 sm:items-center"
-          role="presentation"
-        >
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/45 dark:bg-black/60"
-            aria-label="Dismiss"
-            disabled={pending}
-            onClick={() => {
-              if (!pending) {
-                setConfirmOpen(false);
-                setError("");
-              }
-            }}
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="course-unenroll-title"
-            className="relative z-10 w-full max-w-md rounded-[24px] border border-[#E7E0D6] bg-white p-5 shadow-[0_16px_48px_rgba(15,23,42,0.14)] dark:border-border dark:bg-card dark:shadow-[0_16px_48px_rgba(0,0,0,0.45)]"
-          >
+      <AppPushLayer
+        open={confirmOpen}
+        onClose={() => {
+          if (pending) return;
+          setConfirmOpen(false);
+          setError("");
+        }}
+        zClassName="z-[100]"
+        backdropClassName="bg-black/45 dark:bg-black/60 !backdrop-blur-none"
+        panelClassName="w-[min(100vw,28rem)] border-0 bg-transparent shadow-none dark:shadow-none"
+        ariaLabelledBy="course-unenroll-title"
+      >
+        <div className="flex h-full min-h-0 flex-col justify-center p-4 sm:p-6">
+          <div className="rounded-[24px] border border-[#E7E0D6] bg-white p-5 shadow-[0_16px_48px_rgba(15,23,42,0.14)] dark:border-border dark:bg-card dark:shadow-[0_16px_48px_rgba(0,0,0,0.45)]">
             <h2
               id="course-unenroll-title"
               className="text-base font-semibold leading-snug tracking-tight text-classmates-ink dark:text-foreground"
@@ -136,7 +116,7 @@ export function CourseUnenrollFooter({
             </div>
           </div>
         </div>
-      ) : null}
+      </AppPushLayer>
     </>
   );
 }

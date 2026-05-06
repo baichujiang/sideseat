@@ -6,6 +6,7 @@ import { Loader2, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -99,84 +100,78 @@ export function ScheduleCalendarCategoryManager({
     router.refresh();
   }
 
-  if (!open) return null;
-
   return (
-    <>
-      <button
-        type="button"
-        aria-label="Close category manager"
-        className="fixed inset-0 z-40 bg-foreground/12 backdrop-blur-[1px]"
-        onClick={onClose}
-      />
-
-      <div className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-md px-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-        <section className="flex max-h-[min(78vh,36rem)] flex-col overflow-hidden rounded-[2rem] border border-border/60 bg-card shadow-[0_-8px_40px_-18px_rgba(15,23,42,0.28)]">
-          <div className="flex justify-center pt-2">
-            <span className="h-1 w-10 rounded-full bg-muted-foreground/20" />
+    <AppPushLayer
+      open={open}
+      onClose={onClose}
+      zClassName="z-50"
+      panelClassName="w-[min(100vw,28rem)] border-0 bg-card shadow-none dark:shadow-none"
+    >
+      <section className="flex h-full min-h-0 flex-col overflow-hidden px-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-[max(0.5rem,env(safe-area-inset-top))]">
+        <div className="flex justify-center pt-2">
+          <span className="h-1 w-10 rounded-full bg-muted-foreground/20" />
+        </div>
+        <div className="flex items-center justify-between gap-3 border-b border-border/50 px-4 pb-3 pt-2">
+          <div>
+            <h2 className="text-[16px] font-semibold text-foreground">Calendar categories</h2>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
+              Built-in lists can be renamed or recolored; custom lists can be deleted.
+            </p>
           </div>
-          <div className="flex items-center justify-between gap-3 border-b border-border/50 px-4 pb-3 pt-2">
-            <div>
-              <h2 className="text-[16px] font-semibold text-foreground">Calendar categories</h2>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">
-                Built-in lists can be renamed or recolored; custom lists can be deleted.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 bg-background text-muted-foreground transition hover:text-foreground"
-            >
-              <X className="h-4 w-4" strokeWidth={2.25} />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 bg-background text-muted-foreground transition hover:text-foreground"
+          >
+            <X className="h-4 w-4" strokeWidth={2.25} />
+          </button>
+        </div>
 
-          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3">
-            {categories.map((row) => (
-              <CategoryEditorRow
-                key={row.id}
-                row={row}
-                busy={busyId === row.id}
-                onPatch={(body) => void patchRow(row.id, body)}
-                onDelete={row.presetKey ? undefined : () => void removeRow(row.id)}
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3">
+          {categories.map((row) => (
+            <CategoryEditorRow
+              key={row.id}
+              row={row}
+              busy={busyId === row.id}
+              onPatch={(body) => void patchRow(row.id, body)}
+              onDelete={row.presetKey ? undefined : () => void removeRow(row.id)}
+            />
+          ))}
+
+          <div className="rounded-2xl border border-border/70 bg-muted/[0.06] p-3">
+            <p className="mb-2 text-[12px] font-medium text-muted-foreground">New category</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Name"
+                className="h-10 min-w-[8rem] flex-1 rounded-xl border-border/70 bg-background"
               />
-            ))}
-
-            <div className="rounded-2xl border border-border/70 bg-muted/[0.06] p-3">
-              <p className="mb-2 text-[12px] font-medium text-muted-foreground">New category</p>
-              <div className="flex flex-wrap items-center gap-2">
-                <Input
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="Name"
-                  className="h-10 min-w-[8rem] flex-1 rounded-xl border-border/70 bg-background"
+              <label className="flex h-10 cursor-pointer items-center gap-2 rounded-xl border border-border/70 bg-background px-2 text-[12px] text-muted-foreground">
+                <input
+                  type="color"
+                  value={normalizeHex(newColor)}
+                  onChange={(e) => setNewColor(normalizeHex(e.target.value))}
+                  className="h-8 w-10 cursor-pointer rounded border-0 bg-transparent p-0"
+                  aria-label="Color"
                 />
-                <label className="flex h-10 cursor-pointer items-center gap-2 rounded-xl border border-border/70 bg-background px-2 text-[12px] text-muted-foreground">
-                  <input
-                    type="color"
-                    value={normalizeHex(newColor)}
-                    onChange={(e) => setNewColor(normalizeHex(e.target.value))}
-                    className="h-8 w-10 cursor-pointer rounded border-0 bg-transparent p-0"
-                    aria-label="Color"
-                  />
-                  Color
-                </label>
-                <Button
-                  type="button"
-                  size="sm"
-                  className="h-10 shrink-0 rounded-xl"
-                  disabled={adding || !newName.trim()}
-                  onClick={() => void addRow()}
-                >
-                  {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add"}
-                </Button>
-              </div>
+                Color
+              </label>
+              <Button
+                type="button"
+                size="sm"
+                className="h-10 shrink-0 rounded-xl"
+                disabled={adding || !newName.trim()}
+                onClick={() => void addRow()}
+              >
+                {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add"}
+              </Button>
             </div>
           </div>
-        </section>
-      </div>
-    </>
+        </div>
+      </section>
+    </AppPushLayer>
   );
 }
 

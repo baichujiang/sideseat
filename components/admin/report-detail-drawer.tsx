@@ -1,11 +1,12 @@
 "use client";
 
 import { ReportStatus } from "@prisma/client";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { AdminBlockButton } from "@/components/admin/admin-block-button";
 import { ReportReviewForm } from "@/components/admin/report-review-form";
 import { Button } from "@/components/ui/button";
+import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 
@@ -42,9 +43,14 @@ function toneForStatus(status: ReportStatus) {
 
 export function ReportDetailDrawer({ reports }: { reports: ReportRecord[] }) {
   const [activeReportId, setActiveReportId] = useState<string | null>(null);
-  const activeReport = useMemo(
-    () => reports.find((report) => report.id === activeReportId) ?? null,
-    [activeReportId, reports],
+  const lastDetailIdRef = useRef<string | null>(null);
+  if (activeReportId != null) {
+    lastDetailIdRef.current = activeReportId;
+  }
+  const detailReportId = activeReportId ?? lastDetailIdRef.current;
+  const detailReport = useMemo(
+    () => (detailReportId ? reports.find((report) => report.id === detailReportId) ?? null : null),
+    [detailReportId, reports],
   );
 
   return (
@@ -76,14 +82,19 @@ export function ReportDetailDrawer({ reports }: { reports: ReportRecord[] }) {
         ))}
       </div>
 
-      {activeReport ? (
-        <div className="fixed inset-0 z-40 bg-black/30">
-          <div className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col overflow-y-auto border-l border-border bg-background p-5 shadow-soft">
+      <AppPushLayer
+        open={activeReportId != null}
+        onClose={() => setActiveReportId(null)}
+        zClassName="z-40"
+        panelClassName="w-[min(100vw,28rem)] border-0 bg-background shadow-none dark:shadow-none"
+      >
+        {detailReport ? (
+          <div className="flex h-full min-h-0 flex-col overflow-y-auto p-5">
             <div className="mb-4 flex items-start justify-between gap-3">
               <div className="space-y-1">
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Report detail</p>
                 <h2 className="text-xl font-semibold">
-                  {activeReport.reason.toLowerCase().replaceAll("_", " ")}
+                  {detailReport.reason.toLowerCase().replaceAll("_", " ")}
                 </h2>
               </div>
               <Button onClick={() => setActiveReportId(null)} size="sm" type="button" variant="ghost">
@@ -95,13 +106,13 @@ export function ReportDetailDrawer({ reports }: { reports: ReportRecord[] }) {
               <Card className="space-y-3">
                 <CardTitle>Context</CardTitle>
                 <div className="grid gap-2 text-sm text-muted-foreground">
-                  <p>Reporter: {activeReport.reporterLabel}</p>
-                  <p>Reported user: {activeReport.reportedLabel}</p>
-                  <p>Submitted: {new Date(activeReport.createdAt).toLocaleString()}</p>
-                  {activeReport.courseName ? <p>Course: {activeReport.courseName}</p> : null}
-                  {activeReport.connectionId ? <p>Connection: {activeReport.connectionId}</p> : null}
-                  {activeReport.details ? (
-                    <p className="text-foreground">Reporter notes: {activeReport.details}</p>
+                  <p>Reporter: {detailReport.reporterLabel}</p>
+                  <p>Reported user: {detailReport.reportedLabel}</p>
+                  <p>Submitted: {new Date(detailReport.createdAt).toLocaleString()}</p>
+                  {detailReport.courseName ? <p>Course: {detailReport.courseName}</p> : null}
+                  {detailReport.connectionId ? <p>Connection: {detailReport.connectionId}</p> : null}
+                  {detailReport.details ? (
+                    <p className="text-foreground">Reporter notes: {detailReport.details}</p>
                   ) : null}
                 </div>
               </Card>
@@ -109,18 +120,18 @@ export function ReportDetailDrawer({ reports }: { reports: ReportRecord[] }) {
               <Card className="space-y-3">
                 <CardTitle>Handling</CardTitle>
                 <ReportReviewForm
-                  initialNotes={activeReport.adminNotes}
-                  initialStatus={activeReport.status}
-                  reportId={activeReport.id}
+                  initialNotes={detailReport.adminNotes}
+                  initialStatus={detailReport.status}
+                  reportId={detailReport.id}
                 />
-                <AdminBlockButton blocked={activeReport.isUserBlocked} reportId={activeReport.id} />
+                <AdminBlockButton blocked={detailReport.isUserBlocked} reportId={detailReport.id} />
               </Card>
 
               <Card className="space-y-3">
                 <CardTitle>History</CardTitle>
-                {activeReport.actionLog.length ? (
+                {detailReport.actionLog.length ? (
                   <div className="space-y-3">
-                    {activeReport.actionLog.map((entry) => (
+                    {detailReport.actionLog.map((entry) => (
                       <div key={entry.id} className="rounded-2xl border border-border/70 bg-white/70 p-3 text-sm">
                         <p className="font-medium text-foreground">
                           {entry.actionType.toLowerCase().replaceAll("_", " ")}
@@ -145,8 +156,8 @@ export function ReportDetailDrawer({ reports }: { reports: ReportRecord[] }) {
               </Card>
             </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
+      </AppPushLayer>
     </>
   );
 }

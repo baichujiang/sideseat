@@ -2,9 +2,10 @@
 
 import { differenceInMinutes, format, parseISO } from "date-fns";
 import { Loader2, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { loadAvailabilityShare } from "@/lib/api/chat-planning";
+import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { PlanRequestModal } from "@/components/chat/plan-request-modal";
 import { cn } from "@/lib/utils";
@@ -27,7 +28,6 @@ export function AvailabilityViewer({
   peerName: string;
   onClose: () => void;
 }) {
-  const panelRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AvailabilityData | null>(null);
@@ -48,41 +48,16 @@ export function AvailabilityViewer({
       .finally(() => setLoading(false));
   }, [open, shareId]);
 
-  useEffect(() => {
-    if (!open || selectedSlot) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    const onPointerDown = (e: MouseEvent | TouchEvent) => {
-      const panel = panelRef.current;
-      if (panel && e.target instanceof Node && !panel.contains(e.target)) onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("touchstart", onPointerDown, { passive: true });
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("touchstart", onPointerDown);
-    };
-  }, [open, onClose, selectedSlot]);
-
   const selectedDay = useMemo(() => {
     if (!data || !selectedDate) return null;
     return data.days.find((day) => day.date === selectedDate) ?? data.days[0] ?? null;
   }, [data, selectedDate]);
 
-  if (!open) return null;
-
   return (
     <>
-      <div
-        className="fixed inset-0 z-50 flex items-end justify-center bg-black/35"
-        role="dialog"
-        aria-modal="true"
-        onClick={(e) => e.target === e.currentTarget && onClose()}
-      >
-        <div ref={panelRef} className="flex w-full max-w-md flex-col rounded-t-[1.75rem] bg-background shadow-2xl">
-          <div className="px-4 pb-3 pt-2">
-            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-muted" />
+      <AppPushLayer open={open} onClose={onClose} zClassName="z-50" panelClassName="w-[min(100vw,28rem)] border-0">
+        <div className="flex h-full min-h-0 flex-col bg-background pt-[env(safe-area-inset-top)]">
+          <div className="shrink-0 px-4 pb-3 pt-2">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-sm font-semibold">{peerName}'s availability</h2>
@@ -101,7 +76,7 @@ export function AvailabilityViewer({
             </div>
           </div>
 
-          <div className="max-h-[75dvh] space-y-3 overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
             {loading ? (
               <div className="flex items-center justify-center py-10 text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -136,7 +111,7 @@ export function AvailabilityViewer({
             )}
           </div>
         </div>
-      </div>
+      </AppPushLayer>
 
       <PlanRequestModal
         open={selectedSlot != null}

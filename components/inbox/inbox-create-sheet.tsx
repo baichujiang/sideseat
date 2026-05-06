@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Plus, Search, UsersRound, X } from "lucide-react";
 
+import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
@@ -52,14 +53,6 @@ export function InboxCreateSheet({
   useEffect(() => {
     setContacts(initialContacts);
   }, [initialContacts]);
-
-  useEffect(() => {
-    if (!open) return;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
 
   useEffect(() => {
     if (!open || mode !== "contact") return;
@@ -195,11 +188,9 @@ export function InboxCreateSheet({
         <Plus className="h-5 w-5" strokeWidth={2.3} />
       </button>
 
-      {!open ? null : (
-        <div className="fixed inset-0 z-40 flex items-end bg-black/20 backdrop-blur-[1px]">
-          <button type="button" className="absolute inset-0" aria-label="Close" onClick={close} />
-          <div className="relative w-full rounded-t-[1.75rem] border border-border/60 bg-background px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 shadow-2xl">
-            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border/80" />
+      <AppPushLayer open={open} onClose={close} zClassName="z-40" panelClassName="w-[min(100vw,28rem)] border-0">
+        <div className="flex h-full min-h-0 flex-col bg-background pt-[env(safe-area-inset-top)]">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-[15px] font-semibold text-foreground">New chat</h3>
@@ -418,7 +409,7 @@ export function InboxCreateSheet({
             )}
           </div>
         </div>
-      )}
+      </AppPushLayer>
     </>
   );
 }

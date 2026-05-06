@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarClock, X } from "lucide-react";
 
+import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { ACTIVITY_TYPE_OPTIONS, type ActivityTypeValue } from "@/lib/constants/activities";
 import { cn } from "@/lib/utils";
@@ -67,7 +68,7 @@ export function StudySessionSheet({
   }, [open, defaults]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || presentation !== "anchored") return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
@@ -85,20 +86,13 @@ export function StudySessionSheet({
       document.removeEventListener("mousedown", onPointerDown);
       document.removeEventListener("touchstart", onPointerDown);
     };
-  }, [open, onClose]);
+  }, [open, onClose, presentation]);
 
-  if (!open) return null;
-
-  const shellClassName =
-    presentation === "anchored"
-      ? "absolute inset-x-0 bottom-[calc(100%+0.75rem)] z-40 flex justify-center px-1"
-      : "fixed inset-0 z-40 flex items-end justify-center bg-black/40 sm:items-center";
-
-  const panelClassName = cn(
+  const anchoredShellClassName =
+    "absolute inset-x-0 bottom-[calc(100%+0.75rem)] z-40 flex justify-center px-1";
+  const anchoredPanelClassName = cn(
     "flex w-full max-w-md flex-col bg-background shadow-xl",
-    presentation === "anchored"
-      ? "max-h-[min(70dvh,42rem)] rounded-[1.5rem] border border-border/70"
-      : "max-h-[92dvh] rounded-t-[1.75rem] sm:max-h-[min(90vh,48rem)] sm:rounded-2xl",
+    "max-h-[min(70dvh,42rem)] rounded-[1.5rem] border border-border/70",
   );
 
   const submit = async () => {
@@ -131,16 +125,8 @@ export function StudySessionSheet({
     router.refresh();
   };
 
-  return (
-    <div
-      className={shellClassName}
-      role={presentation === "modal" ? "dialog" : "presentation"}
-      aria-modal="true"
-      onClick={(e) => {
-        if (presentation === "modal" && e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div ref={panelRef} className={panelClassName}>
+  const sheetBody = (
+    <>
         <div className="shrink-0 px-4 pb-3 pt-2">
           {presentation === "modal" ? (
             <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-muted sm:hidden" />
@@ -262,8 +248,26 @@ export function StudySessionSheet({
             </Button>
           </div>
         </div>
+    </>
+  );
+
+  if (presentation === "anchored") {
+    if (!open) return null;
+    return (
+      <div className={anchoredShellClassName} role="presentation" aria-modal="true">
+        <div ref={panelRef} className={anchoredPanelClassName}>
+          {sheetBody}
+        </div>
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <AppPushLayer open={open} onClose={onClose} zClassName="z-40" panelClassName="w-[min(100vw,28rem)] border-0">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden bg-background pt-[env(safe-area-inset-top)]">
+        {sheetBody}
+      </div>
+    </AppPushLayer>
   );
 }
 

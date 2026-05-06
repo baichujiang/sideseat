@@ -41,6 +41,7 @@ import {
   type DayTimelineItem,
 } from "@/components/home/schedule-day-timeline";
 import { ScheduleMonthView } from "@/components/home/schedule-month-view";
+import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { cn } from "@/lib/utils";
 
 type ViewKind = "day" | "week" | "month";
@@ -1024,20 +1025,22 @@ export function ScheduleSurface({
         onDelete={() => void deleteDetailItem()}
       />
 
-      {portalReady && weekImmersiveOpen
+      {portalReady
         ? createPortal(
-            <div
-              className="fixed inset-0 z-[100] overflow-hidden bg-background"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Week calendar expanded"
+            <AppPushLayer
+              open={weekImmersiveOpen}
+              onClose={() => setWeekImmersiveOpen(false)}
+              zClassName="z-[100]"
+              ariaLabel="Week calendar expanded"
+              panelClassName="h-full w-full max-w-none overflow-hidden border-0 bg-background shadow-none dark:shadow-none"
+              backdropClassName="bg-background !backdrop-blur-none"
             >
               <div
                 className={cn(
-                  "relative flex min-h-0 flex-col bg-background",
+                  "relative flex h-full min-h-0 flex-col bg-background",
                   immersiveLayout.rotatePortrait
                     ? "absolute left-1/2 top-1/2 box-border h-[100dvw] w-[100dvh] max-h-[100vw] max-w-[100vh] -translate-x-1/2 -translate-y-1/2 rotate-90"
-                    : "h-full min-h-0 w-full",
+                    : "w-full",
                 )}
               >
                 {/*
@@ -1068,7 +1071,7 @@ export function ScheduleSurface({
                   />
                 </div>
               </div>
-            </div>,
+            </AppPushLayer>,
             document.body,
           )
         : null}

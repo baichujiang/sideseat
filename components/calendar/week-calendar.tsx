@@ -64,6 +64,24 @@ const POINTER_SLOP_PX = 14;
 const SNAP_MINUTES = 15;
 const MIN_EVENT_MINUTES = 15;
 
+/** Nested calendar drags — only clear body `user-select` when outermost ends. */
+let calendarDragSelectLockDepth = 0;
+function lockBrowserTextSelectionForCalendarDrag() {
+  if (calendarDragSelectLockDepth === 0) {
+    document.body.style.userSelect = "none";
+    document.documentElement.style.userSelect = "none";
+  }
+  calendarDragSelectLockDepth += 1;
+}
+function unlockBrowserTextSelectionForCalendarDrag() {
+  if (calendarDragSelectLockDepth <= 0) return;
+  calendarDragSelectLockDepth -= 1;
+  if (calendarDragSelectLockDepth === 0) {
+    document.body.style.userSelect = "";
+    document.documentElement.style.userSelect = "";
+  }
+}
+
 function snapMinute(m: number): number {
   const s = Math.round(m / SNAP_MINUTES) * SNAP_MINUTES;
   return Math.max(0, Math.min(FULL_DAY_MINUTES - 1, s));
@@ -279,6 +297,17 @@ export function WeekCalendar({
 
   useEffect(() => () => clearDragClearFallbackTimer(), []);
 
+  useEffect(
+    () => () => {
+      if (calendarDragSelectLockDepth > 0) {
+        calendarDragSelectLockDepth = 0;
+        document.body.style.userSelect = "";
+        document.documentElement.style.userSelect = "";
+      }
+    },
+    [],
+  );
+
   const blocksByDay = new Map<Weekday, WeekCalendarBlock[]>();
   for (const block of effectiveBlocks) {
     const list = blocksByDay.get(block.weekday) ?? [];
@@ -384,6 +413,8 @@ export function WeekCalendar({
     if (block.courseId === "__draft-preview__") return;
     if (e.pointerType === "mouse" && e.button !== 0) return;
 
+    e.preventDefault();
+
     if (dragOverride && dragOverride.eventId !== block.calendarEntryId) {
       pendingDragClearRef.current = null;
       clearDragClearFallbackTimer();
@@ -403,10 +434,15 @@ export function WeekCalendar({
     const grabOffsetMove =
       mode === "move" ? rawMinuteFromClientYForDay(e.clientY, fromWeekday) - block.startMinute : 0;
 
-    let activatedForDrag = false;
-    let longPressTimer: number | null = window.setTimeout(() => {
-      longPressTimer = null;
-      activatedForDrag = true;
+    /** Top/bottom length handles: drag immediately. Body still uses long-press to move. */
+    const immediateActivate = mode === "resize-start" || mode === "resize-end";
+
+    let activatedForDrag = immediateActivate;
+    let longPressTimer: number | null = null;
+
+    if (immediateActivate) {
+      lockBrowserTextSelectionForCalendarDrag();
+      window.getSelection()?.removeAllRanges();
       try {
         captureEl.setPointerCapture(pointerId);
       } catch {
@@ -418,7 +454,25 @@ export function WeekCalendar({
         startMinute: curStart,
         endMinute: curEnd,
       });
-    }, LONG_PRESS_MS);
+    } else {
+      longPressTimer = window.setTimeout(() => {
+        longPressTimer = null;
+        activatedForDrag = true;
+        lockBrowserTextSelectionForCalendarDrag();
+        window.getSelection()?.removeAllRanges();
+        try {
+          captureEl.setPointerCapture(pointerId);
+        } catch {
+          /* ignore */
+        }
+        setDragOverride({
+          eventId,
+          weekday: curWeekday,
+          startMinute: curStart,
+          endMinute: curEnd,
+        });
+      }, LONG_PRESS_MS);
+    }
 
     const clearLongPress = () => {
       if (longPressTimer != null) {
@@ -431,12 +485,16 @@ export function WeekCalendar({
       document.removeEventListener("pointermove", onDocMove);
       document.removeEventListener("pointerup", onDocUp);
       document.removeEventListener("pointercancel", onDocUp);
+      unlockBrowserTextSelectionForCalendarDrag();
     };
 
     const onDocMove = (ev: PointerEvent) => {
       if (ev.pointerId !== pointerId) return;
       if (!activatedForDrag) {
-        if (longPressTimer != null && Math.hypot(ev.clientX - x0, ev.clientY - y0) > POINTER_SLOP_PX) {
+        if (
+          longPressTimer != null &&
+          Math.hypot(ev.clientX - x0, ev.clientY - y0) > POINTER_SLOP_PX
+        ) {
           clearLongPress();
           detach();
         }
@@ -539,6 +597,7 @@ export function WeekCalendar({
   return (
     <div
       className={cn(
+        "select-none [-webkit-touch-callout:none]",
         fillParent
           ? "mt-0 flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-[#E7E0D6] bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:border-border dark:bg-card dark:shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
           : cn(WEEK_CALENDAR_CARD, "flex flex-col overflow-hidden"),
@@ -939,25 +998,36 @@ export function WeekCalendar({
                               return (
                                 <div
                                   key={key}
-                                  className={cn(className, "touch-none")}
+                                  className={cn(
+                                    className,
+                                    "flex min-h-0 touch-none select-none flex-col",
+                                  )}
                                   style={surfaceStyle}
                                   title={title}
                                   role="group"
                                 >
-                                  <div
-                                    className="absolute inset-x-0.5 top-0 z-30 h-2 cursor-ns-resize rounded-t-md bg-black/[0.04] hover:bg-black/[0.09] dark:bg-white/[0.06] dark:hover:bg-white/[0.12]"
+                                  <button
+                                    type="button"
+                                    className={cn(
+                                      "relative z-40 mx-auto flex h-7 w-9 shrink-0 cursor-ns-resize touch-none items-center justify-center rounded-full border-0 bg-transparent p-0 outline-none ring-offset-2 ring-offset-white hover:bg-black/[0.06] focus-visible:ring-2 focus-visible:ring-[#E53935]/60 dark:hover:bg-white/[0.08] dark:ring-offset-card",
+                                    )}
+                                    aria-label={`Drag anchor to change start time: ${titleLine}`}
                                     onPointerDown={(ev) => {
                                       ev.stopPropagation();
                                       startCalendarPointerSession(ev, block, "resize-start", day);
                                     }}
-                                    aria-label={`Adjust start: ${titleLine}`}
-                                  />
+                                  >
+                                    <span
+                                      className="pointer-events-none block h-2.5 w-2.5 rounded-full border-2 border-[#E53935] bg-white shadow-[0_1px_4px_rgba(15,23,42,0.2)] dark:border-red-400 dark:bg-card"
+                                      aria-hidden
+                                    />
+                                  </button>
                                   <div
                                     role="button"
                                     tabIndex={0}
                                     className={cn(
-                                      "absolute inset-x-0 bottom-2 top-2 z-20 overflow-hidden",
-                                      draggingThis ? "cursor-grabbing" : "cursor-grab active:cursor-grabbing",
+                                      "relative z-20 min-h-0 flex-1 cursor-grab overflow-hidden active:cursor-grabbing",
+                                      draggingThis && "cursor-grabbing",
                                     )}
                                     onKeyDown={(ev) => {
                                       if (ev.key === "Enter" || ev.key === " ") {
@@ -977,18 +1047,26 @@ export function WeekCalendar({
                                       startCalendarPointerSession(ev, block, "move", day);
                                     }}
                                   >
-                                    <div className="pointer-events-none flex h-full flex-col items-start justify-start">
+                                    <div className="pointer-events-none flex min-h-0 flex-1 flex-col items-start justify-start overflow-hidden">
                                       {inner}
                                     </div>
                                   </div>
-                                  <div
-                                    className="absolute inset-x-0.5 bottom-0 z-30 h-2 cursor-ns-resize rounded-b-md bg-black/[0.04] hover:bg-black/[0.09] dark:bg-white/[0.06] dark:hover:bg-white/[0.12]"
+                                  <button
+                                    type="button"
+                                    className={cn(
+                                      "relative z-40 mx-auto flex h-7 w-9 shrink-0 cursor-ns-resize touch-none items-center justify-center rounded-full border-0 bg-transparent p-0 outline-none ring-offset-2 ring-offset-white hover:bg-black/[0.06] focus-visible:ring-2 focus-visible:ring-[#E53935]/60 dark:hover:bg-white/[0.08] dark:ring-offset-card",
+                                    )}
+                                    aria-label={`Drag anchor to change end time: ${titleLine}`}
                                     onPointerDown={(ev) => {
                                       ev.stopPropagation();
                                       startCalendarPointerSession(ev, block, "resize-end", day);
                                     }}
-                                    aria-label={`Adjust end: ${titleLine}`}
-                                  />
+                                  >
+                                    <span
+                                      className="pointer-events-none block h-2.5 w-2.5 rounded-full border-2 border-[#E53935] bg-white shadow-[0_1px_4px_rgba(15,23,42,0.2)] dark:border-red-400 dark:bg-card"
+                                      aria-hidden
+                                    />
+                                  </button>
                                 </div>
                               );
                             }

@@ -14,6 +14,7 @@ import { AvatarCropEditor } from "@/components/profile/avatar-crop-editor";
 import { ProfileForm } from "@/components/forms/profile-form";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { UserGenderProfileMark } from "@/components/ui/user-gender-icon";
+import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -90,17 +91,6 @@ export function ProfileIdentitySheets({
 
   useEffect(() => {
     setError("");
-  }, [sheet]);
-
-  useEffect(() => {
-    if (sheet) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
   }, [sheet]);
 
   const openName = () => {
@@ -278,6 +268,19 @@ export function ProfileIdentitySheets({
   const schoolLine = schoolSummary ? buildSchoolSubtitle(schoolSummary) : null;
   const isCropOpen = avatarCropFile !== null;
 
+  const dismissOverlay = useCallback(() => {
+    if (pending) return;
+    if (isCropOpen) {
+      setAvatarCropFile(null);
+      return;
+    }
+    if (sheet === "edit" && sheetProfileInitialValues) {
+      setSheet(null);
+      return;
+    }
+    setSheet(avatarReturnToEdit ? "edit" : null);
+  }, [pending, isCropOpen, sheet, sheetProfileInitialValues, avatarReturnToEdit]);
+
   return (
     <>
       {variant === "summary" ? (
@@ -390,8 +393,13 @@ export function ProfileIdentitySheets({
         </nav>
       )}
 
-      {sheet || isCropOpen ? (
-        <div className="fixed inset-0 z-[50] flex flex-col justify-end" role="dialog" aria-modal="true">
+      <AppPushLayer
+        open={Boolean(sheet || isCropOpen)}
+        onClose={dismissOverlay}
+        zClassName="z-[50]"
+        panelClassName="w-[min(100vw,28rem)] border-0"
+      >
+        <div className="flex h-full min-h-0 flex-col bg-background pt-[env(safe-area-inset-top)]">
           <input
             ref={avatarUploadInputRef}
             type="file"
@@ -410,29 +418,10 @@ export function ProfileIdentitySheets({
               setAvatarCropFile(file);
             }}
           />
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/45"
-            aria-label="Close"
-            onClick={() => {
-              if (pending) return;
-              if (isCropOpen) {
-                setAvatarCropFile(null);
-                return;
-              }
-              if (sheet === "edit" && sheetProfileInitialValues) {
-                setSheet(null);
-                return;
-              }
-              setSheet(avatarReturnToEdit ? "edit" : null);
-            }}
-          />
           <div
-            className="relative max-h-[88dvh] w-full overflow-hidden rounded-t-[28px] bg-background shadow-[0_-8px_32px_rgba(0,0,0,0.12)]"
+            className="flex min-h-0 flex-1 flex-col overflow-hidden"
             style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
           >
-            <div className="mx-auto mt-2 h-1 w-9 rounded-full bg-muted" aria-hidden />
-
             {isCropOpen ? (
               <div className="max-h-[min(82dvh,720px)] overflow-y-auto px-4 py-4">
                 <AvatarCropEditor
@@ -679,7 +668,7 @@ export function ProfileIdentitySheets({
             ) : null}
           </div>
         </div>
-      ) : null}
+      </AppPushLayer>
     </>
   );
 }

@@ -11,6 +11,7 @@ import { z } from "zod";
 import { LanguageProficiency, LanguageTag } from "@prisma/client";
 
 import { AvatarPicker } from "@/components/forms/avatar-picker";
+import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -549,41 +550,36 @@ export function ProfileForm({
       ) : null}
       </MeAcademicShell>
 
-      {languagePickerOpen ? (
+      <AppPushLayer
+        open={languagePickerOpen}
+        onClose={() => setLanguagePickerOpen(false)}
+        zClassName={languagePickerZ}
+        panelClassName="w-[min(100vw,28rem)] border-0 bg-background shadow-none dark:shadow-none"
+        backdropClassName="bg-black/45 !backdrop-blur-none"
+        ariaLabelledBy="language-picker-title"
+      >
         <div
-          className={cn("fixed inset-0 flex flex-col justify-end", languagePickerZ)}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="language-picker-title"
+          className="flex h-full min-h-0 max-h-[88dvh] flex-col overflow-hidden sm:max-h-none"
+          style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
         >
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/45"
-            aria-label="Close"
-            onClick={() => setLanguagePickerOpen(false)}
-          />
-          <div
-            className="relative max-h-[88dvh] w-full overflow-hidden rounded-t-[28px] bg-background shadow-[0_-8px_32px_rgba(0,0,0,0.12)]"
-            style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
-          >
-            <div className="mx-auto mt-2 h-1 w-9 rounded-full bg-muted" aria-hidden />
-            <div className="border-b border-border px-4 py-3 text-center">
-              <h2 id="language-picker-title" className="text-[16px] font-semibold text-foreground">
-                Add language
-              </h2>
-              <p className="mt-1 text-[12px] text-muted-foreground">Search and tap to add. You can set level on the form.</p>
-            </div>
-            <div className="px-4 pt-3">
-              <Input
-                value={languageSearch}
-                onChange={(e) => setLanguageSearch(e.target.value)}
-                placeholder="Search languages…"
-                autoComplete="off"
-                className="h-11 rounded-[20px] border-border bg-muted/40 text-[15px]"
-                autoFocus
-              />
-            </div>
-            <div className="max-h-[min(52dvh,420px)] overflow-y-auto px-2 pb-2 pt-2">
+          <div className="mx-auto mt-2 h-1 w-9 shrink-0 rounded-full bg-muted" aria-hidden />
+          <div className="shrink-0 border-b border-border px-4 py-3 text-center">
+            <h2 id="language-picker-title" className="text-[16px] font-semibold text-foreground">
+              Add language
+            </h2>
+            <p className="mt-1 text-[12px] text-muted-foreground">Search and tap to add. You can set level on the form.</p>
+          </div>
+          <div className="shrink-0 px-4 pt-3">
+            <Input
+              value={languageSearch}
+              onChange={(e) => setLanguageSearch(e.target.value)}
+              placeholder="Search languages…"
+              autoComplete="off"
+              className="h-11 rounded-[20px] border-border bg-muted/40 text-[15px]"
+              autoFocus
+            />
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2 pt-2">
               {unselectedMain.length === 0 && !unselectedOtherVisible ? (
                 <p className="px-2 py-6 text-center text-[13px] text-muted-foreground">No matches.</p>
               ) : (
@@ -642,14 +638,13 @@ export function ProfileForm({
                 </>
               )}
             </div>
-            <div className="border-t border-border px-4 pt-3">
-              <Button type="button" className="w-full rounded-full" onClick={() => setLanguagePickerOpen(false)}>
-                Done
-              </Button>
-            </div>
+          <div className="shrink-0 border-t border-border px-4 pt-3">
+            <Button type="button" className="w-full rounded-full" onClick={() => setLanguagePickerOpen(false)}>
+              Done
+            </Button>
           </div>
         </div>
-      ) : null}
+      </AppPushLayer>
 
       {variant === "academicOnly" || isSheet ? (
         <>

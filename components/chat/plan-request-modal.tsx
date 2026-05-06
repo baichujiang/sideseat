@@ -3,7 +3,7 @@
 import { PlanType } from "@prisma/client";
 import { format } from "date-fns";
 import { CalendarClock, MapPin, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -12,6 +12,7 @@ import {
   createPlanRequestFromShare,
 } from "@/lib/api/chat-planning";
 import { ScheduleStyleDateTimeRange } from "@/components/schedule/event-datetime-pickers";
+import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -45,7 +46,6 @@ export function PlanRequestModal({
   slot?: { startTime: string; endTime: string } | null;
 }) {
   const router = useRouter();
-  const panelRef = useRef<HTMLDivElement | null>(null);
   const defaults = useMemo(() => computeDefaults(slot), [slot]);
   const [planType, setPlanType] = useState<PlanType>("STUDY");
   const [title, setTitle] = useState("");
@@ -66,25 +66,6 @@ export function PlanRequestModal({
     setEndAt(defaults.endAt);
     setErr(null);
   }, [open, defaults]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    const onPointerDown = (e: MouseEvent | TouchEvent) => {
-      const panel = panelRef.current;
-      if (panel && e.target instanceof Node && !panel.contains(e.target)) onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("touchstart", onPointerDown, { passive: true });
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("touchstart", onPointerDown);
-    };
-  }, [open, onClose]);
-
-  if (!open) return null;
 
   async function submit() {
     setBusy(true);
@@ -115,10 +96,9 @@ export function PlanRequestModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/35" role="dialog" aria-modal="true" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div ref={panelRef} className="flex w-full max-w-md flex-col rounded-t-[1.75rem] bg-background shadow-2xl">
-        <div className="px-4 pb-3 pt-2">
-          <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-muted" />
+    <AppPushLayer open={open} onClose={onClose} zClassName="z-50" panelClassName="w-[min(100vw,28rem)] border-0">
+      <div className="flex h-full min-h-0 flex-col bg-background pt-[env(safe-area-inset-top)]">
+        <div className="shrink-0 px-4 pb-3 pt-2">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
               <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
@@ -144,7 +124,7 @@ export function PlanRequestModal({
           </div>
         </div>
 
-        <div className="flex-1 space-y-3 overflow-y-auto px-4 pb-3">
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-3">
           <Labeled label="Type">
             <div className="grid grid-cols-2 gap-2">
               {PLAN_OPTIONS.map((option) => {
@@ -224,7 +204,7 @@ export function PlanRequestModal({
           </div>
         </div>
       </div>
-    </div>
+    </AppPushLayer>
   );
 }
 

@@ -33,6 +33,7 @@ import {
   CLASSMATES_PERSON_ROW_AVATAR_RING_DISCOVER,
 } from "@/components/classmates/classmates-person-row";
 import { DiscoverMessageButton } from "@/components/discover/discover-message-button";
+import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UserGenderCardIcon } from "@/components/ui/user-gender-icon";
@@ -285,15 +286,14 @@ export function DiscoverList({
         />
       )}
 
-      {filtersOpen ? (
-        <div className="fixed inset-0 z-40 flex items-end bg-foreground/10 backdrop-blur-[1px]">
-          <button
-            type="button"
-            aria-label="Close filters"
-            className="absolute inset-0"
-            onClick={() => setFiltersOpen(false)}
-          />
-          <div className="relative w-full rounded-t-[1.75rem] border border-[#E7E0D6]/80 bg-classmates-warm-alt px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 shadow-2xl">
+      <AppPushLayer
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        zClassName="z-40"
+        panelClassName="w-[min(100vw,28rem)] border-0 bg-classmates-warm-alt shadow-none dark:shadow-none"
+      >
+        <div className="flex h-full min-h-0 flex-col px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))]">
+          <div className="shrink-0">
             <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border/80" />
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-[15px] font-semibold text-foreground">Filter classmates</h3>
@@ -311,7 +311,9 @@ export function DiscoverList({
                 Reset
               </button>
             </div>
+          </div>
 
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto">
             <FilterSection
               label="School"
               options={["All", ...schoolOptions]}
@@ -345,17 +347,17 @@ export function DiscoverList({
               onChange={setStatusFilter}
               renderLabel={(v) => (v === "Pending" ? "Verifying" : v)}
             />
-
-            <button
-              type="button"
-              onClick={() => setFiltersOpen(false)}
-              className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full bg-classmates-blue text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-classmates-blue/90 active:bg-classmates-blue/95"
-            >
-              Done
-            </button>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setFiltersOpen(false)}
+            className="mt-auto shrink-0 inline-flex h-11 w-full items-center justify-center rounded-full bg-classmates-blue text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-classmates-blue/90 active:bg-classmates-blue/95"
+          >
+            Done
+          </button>
         </div>
-      ) : null}
+      </AppPushLayer>
 
       <CreatePostSheet
         open={postOpen}
@@ -1070,7 +1072,7 @@ function CreatePostSheet({
     setExpiryPreset("1w");
   }, [open, scene]);
 
-  if (!open || !canPost) return null;
+  if (!canPost) return null;
 
   async function submit() {
     if (submitting) return;
@@ -1100,11 +1102,15 @@ function CreatePostSheet({
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end bg-foreground/10 backdrop-blur-[1px]">
-      <button type="button" aria-label="Close post sheet" className="absolute inset-0" onClick={onClose} />
-      <div className="relative w-full rounded-t-[1.75rem] border border-border/60 bg-background px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 shadow-2xl">
-        <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border/80" />
-        <div className="mb-3 flex items-start justify-between gap-3">
+    <AppPushLayer
+      open={open}
+      onClose={onClose}
+      zClassName="z-40"
+      panelClassName="w-[min(100vw,28rem)] border-0 bg-background shadow-none dark:shadow-none"
+    >
+      <div className="flex h-full min-h-0 flex-col px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))]">
+        <div className="mx-auto mb-3 h-1.5 w-12 shrink-0 rounded-full bg-border/80" />
+        <div className="mb-3 flex shrink-0 items-start justify-between gap-3">
           <div>
             <h3 className="text-[15px] font-semibold text-foreground">Post in {sceneHeading(scene)}</h3>
             <p className="mt-1 text-[12px] leading-snug text-muted-foreground">
@@ -1121,7 +1127,7 @@ function CreatePostSheet({
           </button>
         </div>
 
-        <div className="space-y-3">
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto">
           <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
             <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">What are you looking for?</p>
             <Input
@@ -1167,11 +1173,11 @@ function CreatePostSheet({
               />
             </div>
           </div>
+
+          {error ? <p className="text-[12px] text-destructive">{error}</p> : null}
         </div>
 
-        {error ? <p className="mt-3 text-[12px] text-destructive">{error}</p> : null}
-
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex shrink-0 gap-2">
           <Button type="button" variant="ghost" className="h-11 flex-1 rounded-xl" onClick={onClose}>
             Cancel
           </Button>
@@ -1190,7 +1196,7 @@ function CreatePostSheet({
           </Button>
         </div>
       </div>
-    </div>
+    </AppPushLayer>
   );
 }
 
