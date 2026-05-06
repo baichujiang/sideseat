@@ -189,6 +189,30 @@ export function WeekCalendar({
   } | null>(null);
   const dayBodyElRef = useRef<Map<Weekday, HTMLDivElement | null>>(new Map());
   const suppressOpenClickRef = useRef(false);
+  /** After PATCH success, keep `dragOverride` until `blocks` reflect new times (avoids one frame of old position). */
+  const pendingDragClearRef = useRef<{
+    eventId: string;
+    weekday: Weekday;
+    startMinute: number;
+    endMinute: number;
+  } | null>(null);
+  const dragClearFallbackTimerRef = useRef<number | null>(null);
+
+  function clearDragClearFallbackTimer() {
+    if (dragClearFallbackTimerRef.current !== null) {
+      window.clearTimeout(dragClearFallbackTimerRef.current);
+      dragClearFallbackTimerRef.current = null;
+    }
+  }
+
+  function scheduleDragClearFallback() {
+    clearDragClearFallbackTimer();
+    dragClearFallbackTimerRef.current = window.setTimeout(() => {
+      dragClearFallbackTimerRef.current = null;
+      pendingDragClearRef.current = null;
+      setDragOverride(null);
+    }, 5000);
+  }
 
   const effectiveBlocks = useMemo(() => {
     if (!dragOverride) return blocks;
@@ -235,6 +259,25 @@ export function WeekCalendar({
       (DEFAULT_VIEW_START - VISUAL_PADDING_MINUTES - visualStartMinute) * MINUTE_PX;
     if (verticalScrollRef.current) verticalScrollRef.current.scrollTop = scrollTop;
   }, [visualStartMinute, weekStartDate, focusDate, DEFAULT_VIEW_START, MINUTE_PX]);
+
+  useEffect(() => {
+    const pending = pendingDragClearRef.current;
+    if (!pending) return;
+    const found = blocks.some(
+      (b) =>
+        b.calendarEntryId === pending.eventId &&
+        b.weekday === pending.weekday &&
+        Math.round(b.startMinute) === Math.round(pending.startMinute) &&
+        Math.round(b.endMinute) === Math.round(pending.endMinute),
+    );
+    if (found) {
+      pendingDragClearRef.current = null;
+      clearDragClearFallbackTimer();
+      setDragOverride(null);
+    }
+  }, [blocks]);
+
+  useEffect(() => () => clearDragClearFallbackTimer(), []);
 
   const blocksByDay = new Map<Weekday, WeekCalendarBlock[]>();
   for (const block of effectiveBlocks) {
@@ -340,6 +383,12 @@ export function WeekCalendar({
     if (!onPatchCalendarEventTimes || !block.calendarEntryId) return;
     if (block.courseId === "__draft-preview__") return;
     if (e.pointerType === "mouse" && e.button !== 0) return;
+
+    if (dragOverride && dragOverride.eventId !== block.calendarEntryId) {
+      pendingDragClearRef.current = null;
+      clearDragClearFallbackTimer();
+      setDragOverride(null);
+    }
 
     const eventId = block.calendarEntryId;
     const pointerId = e.pointerId;
@@ -458,15 +507,27 @@ export function WeekCalendar({
         if (patch && endAt > startAt) {
           const ok = await patch({ eventId, startAt, endAt });
           if (!ok) {
+            pendingDragClearRef.current = null;
+            clearDragClearFallbackTimer();
             setDragOverride(null);
             return;
           }
+          pendingDragClearRef.current = {
+            eventId,
+            weekday: curWeekday,
+            startMinute: snapStart,
+            endMinute: snapEnd,
+          };
+          scheduleDragClearFallback();
+        } else {
+          pendingDragClearRef.current = null;
+          clearDragClearFallbackTimer();
+          setDragOverride(null);
         }
         suppressOpenClickRef.current = true;
         window.setTimeout(() => {
           suppressOpenClickRef.current = false;
         }, 280);
-        setDragOverride(null);
       })();
     };
 
