@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Input } from "@/components/ui/input";
+import { getSchoolByCode } from "@/lib/constants/schools";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { SchoolCode } from "@/lib/constants/schools";
 import { getSchoolLogoPath } from "@/lib/constants/schools";
@@ -144,6 +145,9 @@ export function StudentVerificationForm({
 
   const isVerified = currentStatus === StudentVerificationStatus.VERIFIED;
   const schoolLogoSrc = getSchoolLogoPath(schoolCode);
+  const schoolConfig = getSchoolByCode(schoolCode);
+  const primaryVerificationDomain = schoolConfig?.verificationDomains[0] ?? "university.edu";
+  const emailPlaceholder = `name@${primaryVerificationDomain}`;
 
   if (isVerified) {
     const displayEmail = email?.trim() || "—";
@@ -216,7 +220,7 @@ export function StudentVerificationForm({
         <Input
           className="flex-1"
           onChange={(event) => setInput(event.target.value)}
-          placeholder="name@tum.de"
+          placeholder={emailPlaceholder}
           type="email"
           value={input}
         />
@@ -260,8 +264,7 @@ export function StudentVerificationForm({
         <div className="space-y-2 rounded-[24px] border border-border bg-[#faf7f1] p-3 text-xs">
           <p className="font-medium">Manual review</p>
           <p className="text-[11px] text-muted-foreground">
-            Upload your official TUM enrollment certificate (Studienbescheinigung).
-            PDF or image, up to 5 MB.
+            Upload your official {schoolShortLabel ?? "school"} enrollment certificate. PDF or image, up to 5 MB.
           </p>
           <Input
             ref={fileInputRef}
