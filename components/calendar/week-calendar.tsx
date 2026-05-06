@@ -1009,7 +1009,7 @@ export function WeekCalendar({
                                   <button
                                     type="button"
                                     className={cn(
-                                      "relative z-40 mx-auto flex h-7 w-9 shrink-0 cursor-ns-resize touch-none items-center justify-center rounded-full border-0 bg-transparent p-0 outline-none ring-offset-2 ring-offset-white hover:bg-black/[0.06] focus-visible:ring-2 focus-visible:ring-[#E53935]/60 dark:hover:bg-white/[0.08] dark:ring-offset-card",
+                                      "relative z-40 flex h-7 w-9 shrink-0 cursor-ns-resize touch-none items-center justify-end self-end rounded-full border-0 bg-transparent p-0 pr-1 outline-none ring-offset-2 ring-offset-white hover:bg-black/[0.06] focus-visible:ring-2 focus-visible:ring-[#E53935]/60 dark:hover:bg-white/[0.08] dark:ring-offset-card",
                                     )}
                                     aria-label={`Drag anchor to change start time: ${titleLine}`}
                                     onPointerDown={(ev) => {
@@ -1054,7 +1054,7 @@ export function WeekCalendar({
                                   <button
                                     type="button"
                                     className={cn(
-                                      "relative z-40 mx-auto flex h-7 w-9 shrink-0 cursor-ns-resize touch-none items-center justify-center rounded-full border-0 bg-transparent p-0 outline-none ring-offset-2 ring-offset-white hover:bg-black/[0.06] focus-visible:ring-2 focus-visible:ring-[#E53935]/60 dark:hover:bg-white/[0.08] dark:ring-offset-card",
+                                      "relative z-40 flex h-7 w-9 shrink-0 cursor-ns-resize touch-none items-center justify-start self-start rounded-full border-0 bg-transparent p-0 pl-1 outline-none ring-offset-2 ring-offset-white hover:bg-black/[0.06] focus-visible:ring-2 focus-visible:ring-[#E53935]/60 dark:hover:bg-white/[0.08] dark:ring-offset-card",
                                     )}
                                     aria-label={`Drag anchor to change end time: ${titleLine}`}
                                     onPointerDown={(ev) => {

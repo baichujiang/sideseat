@@ -3,9 +3,10 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { BookOpen, Calendar, Inbox, UsersRound, UserRound } from "lucide-react";
 
+import { EdgeSwipeBack } from "@/components/layout/edge-swipe-back";
 import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { PwaInstallBar } from "@/components/pwa/pwa-install-bar";
 import { apiFetch } from "@/lib/auth/api-fetch";
@@ -60,6 +61,8 @@ export function AppShell({
   inboxUnreadTotal?: number;
 }) {
   const pathname = usePathname();
+  const shellRef = useRef<HTMLDivElement>(null);
+  const swipeBounds = useCallback(() => shellRef.current?.getBoundingClientRect() ?? null, []);
   const [liveUnreadTotal, setLiveUnreadTotal] = useState(inboxUnreadTotal);
 
   useEffect(() => {
@@ -118,6 +121,7 @@ export function AppShell({
 
   return (
     <div
+      ref={shellRef}
       style={
         isChatThread
           ? undefined
@@ -131,6 +135,7 @@ export function AppShell({
         "h-dvh max-h-dvh overflow-hidden",
       )}
     >
+      <EdgeSwipeBack getBounds={swipeBounds} />
       <main
         className={cn(
           "relative flex min-h-0 flex-1 flex-col",

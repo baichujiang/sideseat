@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import { AuthRootWithEdgeBack } from "@/components/layout/auth-root-with-edge-back";
 import { APP_NAME } from "@/lib/constants/app";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col px-4 py-8 sm:px-5">
+    <AuthRootWithEdgeBack>
       <div className="mb-8 flex items-center justify-between">
         <Link
           aria-label="Back"
@@ -20,6 +21,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <span className="w-9" aria-hidden />
       </div>
       {children}
-    </div>
+    </AuthRootWithEdgeBack>
   );
 }
