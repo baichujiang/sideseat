@@ -1,8 +1,8 @@
 import type { Route } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
+import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
 import { CoursesSchoolSelect } from "@/components/courses/courses-school-select";
 import {
   EnrolledCourseCard,
@@ -225,10 +225,6 @@ export default async function CoursesPage({
     );
   }
 
-  if (!sessionUser.onboardingComplete) {
-    redirect("/onboarding");
-  }
-
   const user = sessionUser;
 
   const [memberships, savedRows] = await Promise.all([
@@ -284,6 +280,12 @@ export default async function CoursesPage({
 
   return (
     <div className="space-y-3 pb-4">
+      {!user.onboardingComplete ? (
+        <OnboardingContinueCta
+          title="Finish setup to get the most from Courses"
+          body="You can explore courses already. Completing your profile helps with saved views, classmates, and recommendations."
+        />
+      ) : null}
       <CoursesHeader selectedSchool={selectedSchool} />
       <CoursesEntryTabs activeTab={activeTab} selectedSchool={selectedSchool} query={rawCourseQuery} />
 

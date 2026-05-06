@@ -2,9 +2,8 @@ import Link from "next/link";
 import type { Route } from "next";
 import type { Weekday } from "@prisma/client";
 import { addDays, subDays } from "date-fns";
-import { redirect } from "next/navigation";
-
 import { GuestAppCta } from "@/components/app/guest-app-cta";
+import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
 import { HomeHero } from "@/components/home/home-hero";
 import {
   ScheduleSurface,
@@ -54,9 +53,6 @@ export default async function HomePage() {
         </div>
       </div>
     );
-  }
-  if (!sessionUser.onboardingComplete) {
-    redirect("/onboarding");
   }
   const user = sessionUser;
   const now = new Date();
@@ -174,6 +170,12 @@ export default async function HomePage() {
       <HomeHero nickname={user.nickname} avatarUrl={user.avatarUrl} nowDate={now} />
 
       <div className="mt-3 flex min-h-0 flex-1 flex-col gap-3">
+        {!user.onboardingComplete ? (
+          <OnboardingContinueCta
+            title="Finish setup to personalize Home"
+            body="Your schedule already works. Completing your profile helps us tailor recommendations and class matching."
+          />
+        ) : null}
         <ScheduleSurface
           classBlocks={classBlocks}
           studyEntries={studyEntries}

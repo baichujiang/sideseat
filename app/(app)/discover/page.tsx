@@ -1,11 +1,11 @@
 import type { Route } from "next";
 import { ClassmatePostCategory, ClassmatePostStatus, ConnectionStatus } from "@prisma/client";
-import { redirect } from "next/navigation";
 import { ChevronDown, MapPin } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
+import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
 import {
   DiscoverList,
   type DiscoverPostRow,
@@ -37,9 +37,6 @@ export default async function DiscoverPage() {
         />
       </div>
     );
-  }
-  if (!sessionUser.onboardingComplete) {
-    redirect("/onboarding");
   }
   const user = sessionUser;
 
@@ -159,6 +156,12 @@ export default async function DiscoverPage() {
   return (
     <div className="space-y-3">
       <PageHeader />
+      {!user.onboardingComplete ? (
+        <OnboardingContinueCta
+          title="Finish setup for better classmate matches"
+          body="You can browse people now. Completing your profile sharpens course overlap, language, and program suggestions."
+        />
+      ) : null}
       <DiscoverList rows={rows} posts={posts} />
     </div>
   );

@@ -1,5 +1,4 @@
-import { redirect } from "next/navigation";
-
+import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
 import { InboxChatsView } from "@/components/inbox/inbox-chats-view";
 import { InboxQuickChips } from "@/components/inbox/inbox-quick-chips";
 import { InboxRealtimeRefresh } from "@/components/inbox/inbox-realtime-refresh";
@@ -25,9 +24,6 @@ export default async function InboxPage() {
         />
       </div>
     );
-  }
-  if (!sessionUser.onboardingComplete) {
-    redirect("/onboarding");
   }
   const user = sessionUser;
 
@@ -65,6 +61,13 @@ export default async function InboxPage() {
           Course chats and direct conversations
         </p>
       </header>
+
+      {!user.onboardingComplete ? (
+        <OnboardingContinueCta
+          title="Finish setup when you're ready"
+          body="Your inbox is already available. Completing your profile helps classmates recognize you more easily."
+        />
+      ) : null}
 
       <InboxQuickChips
         unreadTotal={unreadTotal}

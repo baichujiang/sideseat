@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import type { Route } from "next";
 import { ChevronRight, LogOut, Settings, ShieldBan } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
+import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
 import { LogoutForm } from "@/components/auth/logout-form";
 import { StudentVerificationForm } from "@/components/forms/student-verification-form";
 import { ProfileIdentitySheets } from "@/components/profile/profile-identity-sheets";
@@ -76,9 +76,6 @@ export default async function ProfilePage({
       </div>
     );
   }
-  if (!sessionUser.onboardingComplete) {
-    redirect("/onboarding");
-  }
   const user = sessionUser;
 
   if (user.isGuest) {
@@ -129,6 +126,13 @@ export default async function ProfilePage({
       <header className="px-0.5">
         <h1 className="page-screen-title">Me</h1>
       </header>
+
+      {!user.onboardingComplete ? (
+        <OnboardingContinueCta
+          title="Finish setup from here or later"
+          body="Your main tabs stay available now. Continue the guided setup anytime to mark your profile as complete."
+        />
+      ) : null}
 
       {query.verification === "success" ? (
         <p className="rounded-[24px] border border-[#d5e9df] bg-[#eef8f2] px-4 py-3 text-sm text-foreground">
