@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import type { Route } from "next";
 import { ChevronDown } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -20,9 +21,11 @@ type Props = {
 export function CoursesSchoolSelect({ value, id = "courses-school-select", className }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const detailsRef = useRef<HTMLDetailsElement | null>(null);
   const selected = schoolOptions.find((s) => s.value === value) ?? schoolOptions[0];
 
   function navigate(next: SchoolCode) {
+    detailsRef.current?.removeAttribute("open");
     const params = new URLSearchParams(searchParams.toString());
     params.set("school", next);
     const url = `/courses?${params.toString()}` as Route;
@@ -30,7 +33,7 @@ export function CoursesSchoolSelect({ value, id = "courses-school-select", class
   }
 
   return (
-    <details className={cn("relative w-full max-w-[11.5rem] shrink-0", className)}>
+    <details ref={detailsRef} className={cn("relative w-full max-w-[11.5rem] shrink-0", className)}>
       <summary
         id={id}
         aria-label={`School filter: ${selected?.shortLabel ?? value}`}
