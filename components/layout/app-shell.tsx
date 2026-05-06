@@ -19,6 +19,37 @@ const navItems = [
   { href: "/profile", label: "Me", icon: UserRound },
 ] satisfies Array<{ href: Route; label: string; icon: typeof Calendar }>;
 
+const navItemTone: Partial<
+  Record<
+    Route,
+    {
+      activeTab: string;
+      activeIcon: string;
+      activeLabel: string;
+      inactiveHover: string;
+      inactiveIcon: string;
+      inactiveLabel: string;
+    }
+  >
+> = {
+  "/courses": {
+    activeTab: "bg-[#FFF0D9] text-[#B45309] shadow-[0_1px_2px_rgba(180,83,9,0.10)]",
+    activeIcon: "text-[#D97706]",
+    activeLabel: "text-[#B45309]",
+    inactiveHover: "hover:bg-[#FFF7ED] hover:text-[#9A5B13]",
+    inactiveIcon: "text-[#D29B5A] group-hover:text-[#C27117]",
+    inactiveLabel: "text-[#9C7A4D] group-hover:text-[#9A5B13]",
+  },
+  "/discover": {
+    activeTab: "bg-classmates-blue-soft/90 text-classmates-blue shadow-[0_1px_2px_rgba(37,99,235,0.08)]",
+    activeIcon: "text-classmates-blue",
+    activeLabel: "text-classmates-blue",
+    inactiveHover: "hover:bg-[#EEF6FF] hover:text-[#2563EB]",
+    inactiveIcon: "text-[#72A7E8] group-hover:text-[#2563EB]",
+    inactiveLabel: "text-[#5E88B8] group-hover:text-[#2563EB]",
+  },
+};
+
 /** Mobile shell: bottom tab bar only (no top nav bar). */
 export function AppShell({
   children,
@@ -121,7 +152,7 @@ export function AppShell({
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-              const classmatesTabActive = isActive && item.href === "/discover";
+              const tone = navItemTone[item.href];
 
               return (
                 <Link
@@ -130,22 +161,19 @@ export function AppShell({
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
                     "flex min-h-[3rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-[20px] px-1.5 py-1.5 text-[11px] font-semibold leading-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    classmatesTabActive
-                      ? "bg-classmates-blue-soft/90 text-classmates-blue shadow-[0_1px_2px_rgba(37,99,235,0.08)]"
-                      : isActive
-                        ? "bg-classmates-mint/85 text-classmates-ink shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
-                        : "group text-classmates-sub hover:bg-classmates-mint/55 hover:text-classmates-ink",
+                    isActive
+                      ? tone?.activeTab ?? "bg-classmates-mint/85 text-classmates-ink shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
+                      : tone?.inactiveHover ?? "group text-classmates-sub hover:bg-classmates-mint/55 hover:text-classmates-ink",
+                    !isActive && !tone && "group text-classmates-sub hover:bg-classmates-mint/55 hover:text-classmates-ink",
                   )}
                 >
                   <span className="relative inline-flex shrink-0">
                     <Icon
                       className={cn(
                         "h-5 w-5",
-                        classmatesTabActive
-                          ? "text-classmates-blue"
-                          : isActive
-                            ? "text-classmates-ink"
-                            : "text-classmates-sub group-hover:text-classmates-ink",
+                        isActive
+                          ? tone?.activeIcon ?? "text-classmates-ink"
+                          : tone?.inactiveIcon ?? "text-classmates-sub group-hover:text-classmates-ink",
                       )}
                       strokeWidth={isActive ? 2.25 : 2}
                       aria-hidden
@@ -159,11 +187,9 @@ export function AppShell({
                   <span
                     className={cn(
                       "truncate",
-                      classmatesTabActive
-                        ? "text-classmates-blue"
-                        : isActive
-                          ? "text-classmates-ink"
-                          : "text-classmates-sub group-hover:text-classmates-ink",
+                      isActive
+                        ? tone?.activeLabel ?? "text-classmates-ink"
+                        : tone?.inactiveLabel ?? "text-classmates-sub group-hover:text-classmates-ink",
                     )}
                   >
                     {item.label}
