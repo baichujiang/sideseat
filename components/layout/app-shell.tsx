@@ -3,11 +3,12 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import type { CSSProperties } from "react";
+import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import { BookOpen, Calendar, Inbox, UsersRound, UserRound } from "lucide-react";
 
 import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { PwaInstallBar } from "@/components/pwa/pwa-install-bar";
+import { apiFetch } from "@/lib/auth/api-fetch";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -28,6 +29,52 @@ export function AppShell({
   inboxUnreadTotal?: number;
 }) {
   const pathname = usePathname();
+  const [liveUnreadTotal, setLiveUnreadTotal] = useState(inboxUnreadTotal);
+
+  useEffect(() => {
+    setLiveUnreadTotal(inboxUnreadTotal);
+  }, [inboxUnreadTotal]);
+
+  const refreshUnreadTotal = useCallback(async () => {
+    const response = await apiFetch("/api/inbox/unread-total", {
+      cache: "no-store",
+    }).catch(() => null);
+    if (!response?.ok) return;
+
+    const payload = await response.json().catch(() => null);
+    const next = payload?.data?.unreadTotal;
+    if (typeof next === "number") {
+      setLiveUnreadTotal(next);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshUnreadTotal();
+
+    const id = window.setInterval(() => {
+      if (document.visibilityState === "visible" && navigator.onLine) {
+        void refreshUnreadTotal();
+      }
+    }, 10000);
+    const onFocus = () => void refreshUnreadTotal();
+    const onUnreadChanged = () => void refreshUnreadTotal();
+
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("sideseat:inbox-unread-changed", onUnreadChanged);
+    document.addEventListener("visibilitychange", onUnreadChanged);
+
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("sideseat:inbox-unread-changed", onUnreadChanged);
+      document.removeEventListener("visibilitychange", onUnreadChanged);
+    };
+  }, [refreshUnreadTotal]);
+
+  useEffect(() => {
+    void refreshUnreadTotal();
+  }, [pathname, refreshUnreadTotal]);
+
   /** Full-height drill-ins: hide tab bar (chat thread, course chat, peer profile). */
   const isChatThread =
     /^\/connections\/[^/]+$/.test(pathname) ||
@@ -104,7 +151,7 @@ export function AppShell({
                     />
                     {item.href === "/inbox" ? (
                       <span className="pointer-events-none absolute -right-1 -top-1">
-                        <InboxUnreadBadge count={inboxUnreadTotal} variant="countBrand" />
+                        <InboxUnreadBadge count={liveUnreadTotal} variant="countBrand" />
                       </span>
                     ) : null}
                   </span>

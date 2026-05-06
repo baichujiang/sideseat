@@ -3,8 +3,8 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 
 /**
- * Per-connection: messages from others after your last outbound message in that
- * thread (or all inbound from others if you never sent). Excludes tombstoned rows.
+ * Per-connection: messages from others after the viewer last opened the thread.
+ * Excludes tombstoned rows.
  */
 export async function inboxDirectUnreadCounts(
   userId: string,
@@ -14,29 +14,28 @@ export async function inboxDirectUnreadCounts(
 
   const rows = await prisma.$queryRaw<Array<{ connectionId: string; cnt: bigint }>>(
     Prisma.sql`
-      WITH last_outbound AS (
-        SELECT "connectionId", MAX("createdAt") AS ts
-        FROM "Message"
-        WHERE "senderId" = ${userId}
-          AND "deletedAt" IS NULL
-          AND "connectionId" IN (${Prisma.join(connectionIds)})
-        GROUP BY "connectionId"
-      )
-      SELECT m."connectionId", COUNT(*)::bigint AS cnt
-      FROM "Message" m
-      LEFT JOIN last_outbound lo ON lo."connectionId" = m."connectionId"
-      WHERE m."connectionId" IN (${Prisma.join(connectionIds)})
+      SELECT c."id" AS "connectionId", COUNT(m."id")::bigint AS cnt
+      FROM "Connection" c
+      JOIN "Message" m ON m."connectionId" = c."id"
+      WHERE c."id" IN (${Prisma.join(connectionIds)})
         AND m."senderId" <> ${userId}
         AND m."deletedAt" IS NULL
-        AND m."createdAt" > COALESCE(lo.ts, to_timestamp(0))
-      GROUP BY m."connectionId"
+        AND m."createdAt" > COALESCE(
+          CASE
+            WHEN c."userAId" = ${userId} THEN c."readByAAt"
+            WHEN c."userBId" = ${userId} THEN c."readByBAt"
+            ELSE NULL
+          END,
+          to_timestamp(0)
+        )
+      GROUP BY c."id"
     `,
   );
 
   return new Map(rows.map((r) => [r.connectionId, Number(r.cnt)]));
 }
 
-/** Same semantics as direct chat, for course room timelines. */
+/** Same read-cursor semantics as direct chat, for course room timelines. */
 export async function inboxCourseUnreadCounts(
   userId: string,
   courseIds: readonly string[],
@@ -45,21 +44,15 @@ export async function inboxCourseUnreadCounts(
 
   const rows = await prisma.$queryRaw<Array<{ courseId: string; cnt: bigint }>>(
     Prisma.sql`
-      WITH last_outbound AS (
-        SELECT "courseId", MAX("createdAt") AS ts
-        FROM "CourseRoomMessage"
-        WHERE "senderId" = ${userId}
-          AND "deletedAt" IS NULL
-          AND "courseId" IN (${Prisma.join(courseIds)})
-        GROUP BY "courseId"
-      )
-      SELECT m."courseId", COUNT(*)::bigint AS cnt
+      SELECT m."courseId", COUNT(m."id")::bigint AS cnt
       FROM "CourseRoomMessage" m
-      LEFT JOIN last_outbound lo ON lo."courseId" = m."courseId"
+      JOIN "UserCourse" uc
+        ON uc."courseId" = m."courseId"
+       AND uc."userId" = ${userId}
       WHERE m."courseId" IN (${Prisma.join(courseIds)})
         AND m."senderId" <> ${userId}
         AND m."deletedAt" IS NULL
-        AND m."createdAt" > COALESCE(lo.ts, to_timestamp(0))
+        AND m."createdAt" > COALESCE(uc."courseChatReadAt", to_timestamp(0))
       GROUP BY m."courseId"
     `,
   );

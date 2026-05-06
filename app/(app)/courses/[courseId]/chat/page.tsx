@@ -4,6 +4,7 @@ import { format, isSameDay, isToday, isYesterday } from "date-fns";
 
 import { CourseChatComposer } from "@/components/chat/course-chat-composer";
 import { ChatReplyProvider } from "@/components/chat/chat-reply-context";
+import { ChatRealtimeRefresh } from "@/components/chat/chat-realtime-refresh";
 import { ChatScrollContainer } from "@/components/chat/chat-scroll-container";
 import { MessageActionMenu } from "@/components/chat/message-action-menu";
 import { MessageBubbleContent } from "@/components/chat/message-bubble-content";
@@ -75,9 +76,11 @@ export default async function CourseChatPage({
   ]);
 
   const visibleMessages = messages.filter((m) => !hiddenIds.has(m.senderId));
+  const latestMessageId = visibleMessages.at(-1)?.id ?? null;
 
   return (
     <ChatReplyProvider>
+    <ChatRealtimeRefresh kind="course" courseId={courseId} latestMessageId={latestMessageId} />
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background">
       <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
         <BackLink href={backHref} label="Back" />

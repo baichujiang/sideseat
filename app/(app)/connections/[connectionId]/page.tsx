@@ -5,6 +5,7 @@ import { format, isSameDay, isToday, isYesterday } from "date-fns";
 import { AvailabilityCardMessage } from "@/components/chat/availability-card-message";
 import { ChatComposer } from "@/components/chat/chat-composer";
 import { ChatReplyProvider } from "@/components/chat/chat-reply-context";
+import { ChatRealtimeRefresh } from "@/components/chat/chat-realtime-refresh";
 import { ChatScrollContainer } from "@/components/chat/chat-scroll-container";
 import { MessageActionMenu } from "@/components/chat/message-action-menu";
 import { MessageBubbleContent } from "@/components/chat/message-bubble-content";
@@ -55,6 +56,7 @@ export default async function ConnectionPage({
     !isSelfNotes && Boolean(myRemark) && myRemark !== peerNickname && peerNickname.length > 0;
   const showPeerUsernameLine = !isSelfNotes && Boolean(myRemark) && !peerNickname.length;
   const messages = connection.messages;
+  const latestMessageId = messages.at(-1)?.id ?? null;
   const profileLinkHref = isSelfNotes
     ? (`/profile?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route)
     : (`/users/${otherUser.id}?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route);
@@ -62,6 +64,11 @@ export default async function ConnectionPage({
 
   return (
     <ChatReplyProvider>
+    <ChatRealtimeRefresh
+      kind="direct"
+      connectionId={connection.id}
+      latestMessageId={latestMessageId}
+    />
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background">
       {/* Chat app bar */}
       <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">

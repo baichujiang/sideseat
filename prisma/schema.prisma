@@ -366,6 +366,8 @@ model UserCourse {
   inboxPinnedAt DateTime?
   /// When set, the course row is hidden from Contacts (enrollment unchanged). Clear via course page.
   inboxHiddenAt DateTime?
+  /// Last time this user viewed the course room chat; drives unread counts.
+  courseChatReadAt DateTime?
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
   user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -430,6 +432,10 @@ model Connection {
   contactRemarkByA       String?                  @db.VarChar(64)
   /// User B's private display name for this thread (only B sees it).
   contactRemarkByB       String?                  @db.VarChar(64)
+  /// Last time user A viewed this thread; drives unread counts.
+  readByAAt              DateTime?
+  /// Last time user B viewed this thread; drives unread counts.
+  readByBAt              DateTime?
   endedById              String?
   endedAt                DateTime?
   createdAt              DateTime                 @default(now())
