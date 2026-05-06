@@ -17,18 +17,28 @@ type ChatRealtimeRefreshProps =
       courseId: string;
       latestMessageId: string | null;
       intervalMs?: number;
+    }
+  | {
+      kind: "group";
+      groupChatId: string;
+      latestMessageId: string | null;
+      intervalMs?: number;
     };
 
 function readUrl(props: ChatRealtimeRefreshProps): string {
   return props.kind === "direct"
     ? `/api/connections/${props.connectionId}/read`
-    : `/api/courses/${props.courseId}/chat/read`;
+    : props.kind === "course"
+      ? `/api/courses/${props.courseId}/chat/read`
+      : `/api/group-chats/${props.groupChatId}/read`;
 }
 
 function latestUrl(props: ChatRealtimeRefreshProps): string {
   return props.kind === "direct"
     ? `/api/connections/${props.connectionId}/messages/latest`
-    : `/api/courses/${props.courseId}/chat/messages/latest`;
+    : props.kind === "course"
+      ? `/api/courses/${props.courseId}/chat/messages/latest`
+      : `/api/group-chats/${props.groupChatId}/messages/latest`;
 }
 
 export function ChatRealtimeRefresh(props: ChatRealtimeRefreshProps) {
@@ -37,7 +47,11 @@ export function ChatRealtimeRefresh(props: ChatRealtimeRefreshProps) {
   const searchParams = useSearchParams();
   const intervalMs = props.intervalMs ?? 5000;
   const targetKey =
-    props.kind === "direct" ? `direct:${props.connectionId}` : `course:${props.courseId}`;
+    props.kind === "direct"
+      ? `direct:${props.connectionId}`
+      : props.kind === "course"
+        ? `course:${props.courseId}`
+        : `group:${props.groupChatId}`;
   const staleRefreshAttempts = useRef(0);
 
   useEffect(() => {

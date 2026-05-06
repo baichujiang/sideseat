@@ -8,6 +8,7 @@ import { PlanRequestStatus, ConnectionStatus } from "@prisma/client";
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { DirectInboxRow } from "@/components/inbox/direct-inbox-row";
 import { CourseInboxRow } from "@/components/inbox/course-inbox-row";
+import { GroupInboxRow } from "@/components/inbox/group-inbox-row";
 import { BackLink } from "@/components/nav/back-link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getSessionUser } from "@/lib/auth/session";
@@ -127,7 +128,7 @@ export default async function InboxUnreadPage() {
                       unreadCount={item.unreadCount}
                       returnTo="/inbox/unread"
                     />
-                  ) : (
+                  ) : item.kind === "course" ? (
                     <CourseInboxRow
                       key={item.course.id}
                       userId={user.id}
@@ -135,6 +136,13 @@ export default async function InboxUnreadPage() {
                       userCourse={item.userCourse}
                       last={item.last}
                       unreadCount={item.unreadCount}
+                      returnTo="/inbox/unread"
+                    />
+                  ) : (
+                    <GroupInboxRow
+                      key={item.groupChat.id}
+                      userId={user.id}
+                      item={item}
                       returnTo="/inbox/unread"
                     />
                   ),

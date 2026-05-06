@@ -1,5 +1,6 @@
 import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
 import { InboxChatsView } from "@/components/inbox/inbox-chats-view";
+import { InboxCreateSheet } from "@/components/inbox/inbox-create-sheet";
 import { InboxQuickChips } from "@/components/inbox/inbox-quick-chips";
 import { InboxRealtimeRefresh } from "@/components/inbox/inbox-realtime-refresh";
 import { GuestAppCta } from "@/components/app/guest-app-cta";
@@ -30,6 +31,19 @@ export default async function InboxPage() {
   const { merged, unreadTotal, plansNeedingYourAction, activePostCount } = await getInboxMergeBundle(
     user.id,
   );
+  const directContacts = merged
+    .filter((item): item is Extract<(typeof merged)[number], { kind: "direct" }> => item.kind === "direct")
+    .filter((item) => item.connection.userAId !== item.connection.userBId)
+    .map((item) => {
+      const peer = item.connection.userAId === user.id ? item.connection.userB : item.connection.userA;
+      return {
+        peerId: peer.id,
+        connectionId: item.connection.id,
+        nickname: peer.nickname,
+        username: peer.username,
+        avatarUrl: peer.avatarUrl,
+      };
+    });
   const inboxVersion = merged
     .map((item) => {
       if (item.kind === "direct") {
@@ -42,9 +56,19 @@ export default async function InboxPage() {
         ].join(":");
       }
 
+      if (item.kind === "course") {
+        return [
+          "course",
+          item.course.id,
+          item.last?.id ?? "none",
+          item.unreadCount,
+          item.sortAt.toISOString(),
+        ].join(":");
+      }
+
       return [
-        "course",
-        item.course.id,
+        "group",
+        item.groupChat.id,
         item.last?.id ?? "none",
         item.unreadCount,
         item.sortAt.toISOString(),
@@ -56,10 +80,15 @@ export default async function InboxPage() {
     <div className="space-y-3">
       <InboxRealtimeRefresh version={inboxVersion} />
       <header className="px-0.5">
-        <h1 className="page-screen-title">Chats</h1>
-        <p className="page-screen-subtitle mt-0.5">
-          Course chats and direct conversations
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="page-screen-title">Chats</h1>
+            <p className="page-screen-subtitle mt-0.5">
+              Course chats, contacts, and group conversations
+            </p>
+          </div>
+          {user.onboardingComplete ? <InboxCreateSheet initialContacts={directContacts} /> : null}
+        </div>
       </header>
 
       {!user.onboardingComplete ? (

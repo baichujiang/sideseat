@@ -1,8 +1,12 @@
-import type { Course, CourseRoomMessage, User } from "@prisma/client";
+import type { Course, CourseRoomMessage, GroupChat, GroupChatMessage, User } from "@prisma/client";
 import { ClassmatePostStatus, ConnectionStatus, PlanRequestStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
-import { inboxCourseUnreadCounts, inboxDirectUnreadCounts } from "@/lib/queries/inbox-unread-counts";
+import {
+  inboxCourseUnreadCounts,
+  inboxDirectUnreadCounts,
+  inboxGroupUnreadCounts,
+} from "@/lib/queries/inbox-unread-counts";
 import {
   compareConnectionsForInbox,
   isConnectionPinned,
@@ -38,6 +42,17 @@ type UserCourseWithCourse = Awaited<
 >[number];
 
 export type CourseRoomMessageWithSender = CourseRoomMessage & { sender: User };
+export type GroupChatMessageWithSender = GroupChatMessage & { sender: User };
+
+type GroupChatInbox = GroupChat & {
+  participants: Array<{
+    userId: string;
+    joinedAt: Date;
+    lastReadAt: Date | null;
+    user: User;
+  }>;
+  messages: Array<GroupChatMessageWithSender>;
+};
 
 export type InboxMerged =
   | { kind: "direct"; sortAt: Date; connection: ConnectionInbox; unreadCount: number }
@@ -47,6 +62,13 @@ export type InboxMerged =
       course: Course;
       userCourse: UserCourseWithCourse;
       last: CourseRoomMessageWithSender | undefined;
+      unreadCount: number;
+    }
+  | {
+      kind: "group";
+      sortAt: Date;
+      groupChat: GroupChatInbox;
+      last: GroupChatMessageWithSender | undefined;
       unreadCount: number;
     };
 
@@ -60,7 +82,7 @@ export type InboxMergeBundle = {
 
 /** Same total as {@link InboxMergeBundle.unreadTotal}, without loading merged rows (for nav badges). */
 export async function getInboxUnreadTotal(userId: string): Promise<number> {
-  const [connections, userCourses] = await Promise.all([
+  const [connections, userCourses, groupParticipants] = await Promise.all([
     prisma.connection.findMany({
       where: {
         status: ConnectionStatus.ACTIVE,
@@ -72,23 +94,31 @@ export async function getInboxUnreadTotal(userId: string): Promise<number> {
       where: { userId, inboxHiddenAt: null },
       select: { courseId: true },
     }),
+    prisma.groupChatParticipant.findMany({
+      where: { userId },
+      select: { groupChatId: true },
+    }),
   ]);
 
   const connectionIds = connections.map((c) => c.id);
   const courseIds = userCourses.map((uc) => uc.courseId);
-  const [directUnread, courseUnread] = await Promise.all([
+  const groupChatIds = groupParticipants.map((p) => p.groupChatId);
+  const [directUnread, courseUnread, groupUnread] = await Promise.all([
     inboxDirectUnreadCounts(userId, connectionIds),
     inboxCourseUnreadCounts(userId, courseIds),
+    inboxGroupUnreadCounts(userId, groupChatIds),
   ]);
 
   let unreadTotal = 0;
   for (const id of connectionIds) unreadTotal += directUnread.get(id) ?? 0;
   for (const id of courseIds) unreadTotal += courseUnread.get(id) ?? 0;
+  for (const id of groupChatIds) unreadTotal += groupUnread.get(id) ?? 0;
   return unreadTotal;
 }
 
 export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBundle> {
-  const [connections, userCourses, activePostCount, plansNeedingYourAction] = await Promise.all([
+  const [connections, userCourses, groupParticipants, activePostCount, plansNeedingYourAction] =
+    await Promise.all([
     prisma.connection.findMany({
       where: {
         status: ConnectionStatus.ACTIVE,
@@ -117,6 +147,24 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
       where: { userId, inboxHiddenAt: null },
       include: { course: true },
     }),
+    prisma.groupChatParticipant.findMany({
+      where: { userId },
+      include: {
+        groupChat: {
+          include: {
+            participants: {
+              include: { user: true },
+              orderBy: { joinedAt: "asc" },
+            },
+            messages: {
+              orderBy: { createdAt: "desc" },
+              take: 1,
+              include: { sender: true },
+            },
+          },
+        },
+      },
+    }),
     prisma.classmatePost.count({
       where: {
         userId,
@@ -134,9 +182,11 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
         status: PlanRequestStatus.PENDING,
       },
     }),
-  ]);
+    ]);
 
   const courseIds = userCourses.map((uc) => uc.courseId);
+  const groupChats = groupParticipants.map((participant) => participant.groupChat);
+  const groupChatIds = groupChats.map((groupChat) => groupChat.id);
   const courseMessages =
     courseIds.length > 0
       ? await prisma.courseRoomMessage.findMany({
@@ -155,9 +205,10 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
   }
 
   const connectionIds = connections.map((c) => c.id);
-  const [directUnread, courseUnread] = await Promise.all([
+  const [directUnread, courseUnread, groupUnread] = await Promise.all([
     inboxDirectUnreadCounts(userId, connectionIds),
     inboxCourseUnreadCounts(userId, courseIds),
+    inboxGroupUnreadCounts(userId, groupChatIds),
   ]);
 
   const merged: InboxMerged[] = [
@@ -181,14 +232,29 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
       sortAt: lastCourseMessageByCourseId.get(uc.courseId)?.createdAt ?? uc.updatedAt,
       course: uc.course,
       userCourse: uc,
-      last: lastCourseMessageByCourseId.get(uc.courseId),
-      unreadCount: courseUnread.get(uc.courseId) ?? 0,
+        last: lastCourseMessageByCourseId.get(uc.courseId),
+        unreadCount: courseUnread.get(uc.courseId) ?? 0,
+    })),
+    ...groupChats.map((groupChat) => ({
+      kind: "group" as const,
+      sortAt: groupChat.messages[0]?.createdAt ?? groupChat.updatedAt,
+      groupChat,
+      last: groupChat.messages[0],
+      unreadCount: groupUnread.get(groupChat.id) ?? 0,
     })),
   ].sort((a, b) => {
     const aPinned =
-      a.kind === "direct" ? isConnectionPinned(a.connection, userId) : Boolean(a.userCourse.inboxPinnedAt);
+      a.kind === "direct"
+        ? isConnectionPinned(a.connection, userId)
+        : a.kind === "course"
+          ? Boolean(a.userCourse.inboxPinnedAt)
+          : false;
     const bPinned =
-      b.kind === "direct" ? isConnectionPinned(b.connection, userId) : Boolean(b.userCourse.inboxPinnedAt);
+      b.kind === "direct"
+        ? isConnectionPinned(b.connection, userId)
+        : b.kind === "course"
+          ? Boolean(b.userCourse.inboxPinnedAt)
+          : false;
 
     if (aPinned !== bPinned) {
       return aPinned ? -1 : 1;
@@ -200,6 +266,7 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
   let unreadTotal = 0;
   for (const id of connectionIds) unreadTotal += directUnread.get(id) ?? 0;
   for (const id of courseIds) unreadTotal += courseUnread.get(id) ?? 0;
+  for (const id of groupChatIds) unreadTotal += groupUnread.get(id) ?? 0;
 
   return {
     merged,

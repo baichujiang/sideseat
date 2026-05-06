@@ -102,3 +102,33 @@ export async function notifyNewCourseRoomMessage(params: {
     ),
   );
 }
+
+export async function notifyNewGroupChatMessage(params: {
+  groupChatId: string;
+  title: string | null;
+  senderId: string;
+  bodyPreview: string;
+}): Promise<void> {
+  const members = await prisma.groupChatParticipant.findMany({
+    where: { groupChatId: params.groupChatId, userId: { not: params.senderId } },
+    select: { userId: true },
+  });
+  if (members.length === 0) return;
+
+  const sender = await prisma.user.findUnique({
+    where: { id: params.senderId },
+    select: { nickname: true, username: true },
+  });
+  const senderName = sender?.nickname?.trim() || sender?.username || "Someone";
+  const body = `${senderName}: ${truncate(params.bodyPreview, 100)}`;
+
+  await Promise.all(
+    members.map((member) =>
+      notifyUserPush(member.userId, {
+        title: params.title?.trim() || "Group chat",
+        body,
+        url: `/groups/${params.groupChatId}`,
+      }),
+    ),
+  );
+}

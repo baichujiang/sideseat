@@ -6,6 +6,7 @@ import { Search } from "lucide-react";
 
 import { DirectInboxRow } from "@/components/inbox/direct-inbox-row";
 import { CourseInboxRow } from "@/components/inbox/course-inbox-row";
+import { GroupInboxRow } from "@/components/inbox/group-inbox-row";
 import { EmptyState } from "@/components/ui/empty-state";
 import { inboxChatMatchesQuery } from "@/lib/inbox/inbox-chat-search";
 import { inboxRowKey, partitionInboxSections } from "@/lib/inbox/partition-inbox-sections";
@@ -48,7 +49,7 @@ export function InboxChatsView({ userId, merged }: { userId: string; merged: Inb
       {merged.length === 0 ? (
         <EmptyState
           title="No conversations yet"
-          description="Join a course to see its group chat, or start a direct chat from Discover."
+          description="Join a course, add a contact, or start a group chat to see conversations here."
         />
       ) : filtered.length === 0 ? (
         <EmptyState
@@ -102,7 +103,7 @@ function InboxSection({
 function InboxMergedRow({ userId, item }: { userId: string; item: InboxMerged }) {
   return item.kind === "direct" ? (
     <DirectInboxRow userId={userId} connection={item.connection} unreadCount={item.unreadCount} />
-  ) : (
+  ) : item.kind === "course" ? (
     <CourseInboxRow
       userId={userId}
       course={item.course}
@@ -110,5 +111,7 @@ function InboxMergedRow({ userId, item }: { userId: string; item: InboxMerged })
       last={item.last}
       unreadCount={item.unreadCount}
     />
+  ) : (
+    <GroupInboxRow userId={userId} item={item} />
   );
 }

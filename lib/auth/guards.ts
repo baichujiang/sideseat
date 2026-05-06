@@ -104,6 +104,34 @@ export async function requireConnection(connectionId: string) {
   return { connection, user };
 }
 
+export async function requireGroupChatParticipant(groupChatId: string) {
+  const user = await requireOnboardedUser();
+  const groupChat = await prisma.groupChat.findFirst({
+    where: {
+      id: groupChatId,
+      participants: {
+        some: { userId: user.id },
+      },
+    },
+    include: {
+      participants: {
+        include: { user: true },
+        orderBy: { joinedAt: "asc" },
+      },
+      messages: {
+        include: { sender: true },
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+
+  if (!groupChat) {
+    notFound();
+  }
+
+  return { groupChat, user };
+}
+
 /**
  * Load another user's public profile only when there is an active connection
  * between the current user and that peer (same moderation rules as chat).

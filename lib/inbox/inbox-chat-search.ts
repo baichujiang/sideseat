@@ -23,9 +23,17 @@ function haystackForInboxItem(item: InboxMerged, userId: string): string {
     for (const p of c.planRequests ?? []) {
       if (p.receiverUserId === userId || p.proposerUserId === userId) parts.push(p.title);
     }
-  } else {
+  } else if (item.kind === "course") {
     const { course, last } = item;
     parts.push(course.name, course.code ?? "", course.school, course.semesterLabel);
+    if (last?.body) parts.push(last.body);
+    if (last?.sender.nickname) parts.push(last.sender.nickname);
+  } else {
+    const { groupChat, last } = item;
+    parts.push(groupChat.title ?? "");
+    for (const participant of groupChat.participants) {
+      parts.push(participant.user.nickname ?? "", participant.user.username);
+    }
     if (last?.body) parts.push(last.body);
     if (last?.sender.nickname) parts.push(last.sender.nickname);
   }

@@ -59,3 +59,28 @@ export async function inboxCourseUnreadCounts(
 
   return new Map(rows.map((r) => [r.courseId, Number(r.cnt)]));
 }
+
+/** Same last-read semantics for ad-hoc group chats. */
+export async function inboxGroupUnreadCounts(
+  userId: string,
+  groupChatIds: readonly string[],
+): Promise<Map<string, number>> {
+  if (groupChatIds.length === 0) return new Map();
+
+  const rows = await prisma.$queryRaw<Array<{ groupChatId: string; cnt: bigint }>>(
+    Prisma.sql`
+      SELECT m."groupChatId", COUNT(m."id")::bigint AS cnt
+      FROM "GroupChatMessage" m
+      JOIN "GroupChatParticipant" p
+        ON p."groupChatId" = m."groupChatId"
+       AND p."userId" = ${userId}
+      WHERE m."groupChatId" IN (${Prisma.join(groupChatIds)})
+        AND m."senderId" <> ${userId}
+        AND m."deletedAt" IS NULL
+        AND m."createdAt" > COALESCE(p."lastReadAt", to_timestamp(0))
+      GROUP BY m."groupChatId"
+    `,
+  );
+
+  return new Map(rows.map((r) => [r.groupChatId, Number(r.cnt)]));
+}

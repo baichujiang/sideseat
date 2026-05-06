@@ -1,4 +1,4 @@
-import { requireOnboardedUser } from "@/lib/auth/guards";
+import { requireUser } from "@/lib/auth/session";
 import { ok, error } from "@/lib/http";
 import { getInboxMergeBundle } from "@/lib/queries/inbox-merge";
 
@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const user = await requireOnboardedUser();
+    const user = await requireUser();
     const { merged, unreadTotal, plansNeedingYourAction, activePostCount } =
       await getInboxMergeBundle(user.id);
 
@@ -22,9 +22,19 @@ export async function GET() {
           ].join(":");
         }
 
+        if (item.kind === "course") {
+          return [
+            "course",
+            item.course.id,
+            item.last?.id ?? "none",
+            item.unreadCount,
+            item.sortAt.toISOString(),
+          ].join(":");
+        }
+
         return [
-          "course",
-          item.course.id,
+          "group",
+          item.groupChat.id,
           item.last?.id ?? "none",
           item.unreadCount,
           item.sortAt.toISOString(),

@@ -79,7 +79,8 @@ export function AppShell({
   const isChatThread =
     /^\/connections\/[^/]+$/.test(pathname) ||
     /^\/users\/[^/]+$/.test(pathname) ||
-    /^\/courses\/[^/]+\/chat$/.test(pathname);
+    /^\/courses\/[^/]+\/chat$/.test(pathname) ||
+    /^\/groups\/[^/]+$/.test(pathname);
 
   const isDiscover = pathname === "/discover" || pathname.startsWith("/discover/");
   const shellSurface = isDiscover && !isChatThread ? "bg-classmates-warm" : "bg-background";

@@ -268,6 +268,9 @@ model User {
   userCalendarCategories       UserCalendarCategory[]
   classmatePosts               ClassmatePost[]
   userLanguages                UserLanguage[]
+  groupChatsCreated            GroupChat[]               @relation("GroupChatCreator")
+  groupChatParticipants        GroupChatParticipant[]
+  groupChatMessages            GroupChatMessage[]
 }
 
 model UserLanguage {
@@ -560,6 +563,48 @@ model CourseRoomMessage {
 
   @@index([courseId, createdAt])
   @@index([replyToId])
+}
+
+/// Multi-person chat started from the Chats tab. Membership is explicit and
+/// independent from course enrollment.
+model GroupChat {
+  id          String                 @id @default(cuid())
+  title       String?                @db.VarChar(80)
+  createdById String
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  createdBy   User                   @relation("GroupChatCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  participants GroupChatParticipant[]
+  messages    GroupChatMessage[]
+
+  @@index([updatedAt])
+  @@index([createdById, createdAt])
+}
+
+model GroupChatParticipant {
+  groupChatId String
+  userId      String
+  joinedAt    DateTime    @default(now())
+  lastReadAt  DateTime?
+  groupChat   GroupChat   @relation(fields: [groupChatId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([groupChatId, userId])
+  @@index([userId, joinedAt])
+}
+
+model GroupChatMessage {
+  id          String     @id @default(cuid())
+  groupChatId String
+  senderId    String
+  body        String
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  groupChat   GroupChat  @relation(fields: [groupChatId], references: [id], onDelete: Cascade)
+  sender      User       @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([groupChatId, createdAt])
+  @@index([senderId, createdAt])
 }
 
 model ContactExchangeRequest {
