@@ -1,5 +1,7 @@
 import { format, isSameDay, isToday, isYesterday } from "date-fns";
 import { UsersRound } from "lucide-react";
+import Link from "next/link";
+import type { Route } from "next";
 
 import { GroupChatComposer } from "@/components/chat/group-chat-composer";
 import { ChatRealtimeRefresh } from "@/components/chat/chat-realtime-refresh";
@@ -39,6 +41,8 @@ export default async function GroupChatPage({
     groupChat.participants.map((participant) => participant.user),
     user.id,
   );
+  const infoHref =
+    (`/groups/${groupChat.id}/info?returnTo=${encodeURIComponent(`/groups/${groupChat.id}`)}` as Route);
 
   return (
     <>
@@ -47,15 +51,25 @@ export default async function GroupChatPage({
         <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
           <BackLink href={backHref} label="Back" />
           <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl py-1 pl-1 pr-2">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-classmates-blue-soft/80 text-classmates-blue">
-              <UsersRound className="h-5 w-5" strokeWidth={2.2} aria-hidden />
-            </span>
+            <Link href={infoHref} className="shrink-0 rounded-full transition hover:opacity-90 active:opacity-80">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-classmates-blue-soft/80 text-classmates-blue">
+                <UsersRound className="h-5 w-5" strokeWidth={2.2} aria-hidden />
+              </span>
+            </Link>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold leading-tight">{title}</p>
+              <Link href={infoHref} className="block min-w-0 rounded-md py-0.5 text-left transition hover:bg-muted/70 active:bg-muted">
+                <p className="truncate text-sm font-semibold leading-tight">{title}</p>
+              </Link>
               <p className="truncate text-[11px] text-muted-foreground">
                 Group chat · {groupChat.participants.length} member{groupChat.participants.length === 1 ? "" : "s"}
               </p>
             </div>
+            <Link
+              href={infoHref}
+              className="rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground active:bg-muted/80"
+            >
+              Info
+            </Link>
           </div>
         </header>
 
@@ -124,7 +138,9 @@ export default async function GroupChatPage({
           )}
         </ChatScrollContainer>
 
-        <GroupChatComposer groupChatId={groupChat.id} />
+        <div className="shrink-0 border-t border-border bg-background/95 px-3 py-2 pb-[max(0.25rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
+          <GroupChatComposer groupChatId={groupChat.id} />
+        </div>
       </div>
     </>
   );
