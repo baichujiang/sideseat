@@ -256,6 +256,7 @@ model User {
   reportsReceived              Report[]                 @relation("ReportedUser")
   moderationBlocks             ModerationBlock[]
   schoolEmailVerifications     SchoolEmailVerification[]
+  schoolVerificationStates     UserSchoolVerification[]
   friendLinksRequested         FriendLink[]               @relation("FriendLinkRequester")
   friendLinksToRespond         FriendLink[]               @relation("FriendLinkResponder")
   pushSubscriptions            PushSubscription[]
@@ -316,6 +317,7 @@ model ClassmatePost {
 model SchoolEmailVerification {
   id         String                        @id @default(cuid())
   userId     String
+  school     String
   email      String
   token      String                        @unique
   status     SchoolEmailVerificationStatus @default(PENDING)
@@ -325,6 +327,28 @@ model SchoolEmailVerification {
   user       User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, status])
+  @@index([userId, school, status])
+}
+
+/// One persisted verification state per user per school. Switching the active
+/// school simply swaps which row is mirrored onto the User table.
+model UserSchoolVerification {
+  userId                  String
+  school                  String
+  email                   String?
+  verifiedStudent         Boolean                  @default(false)
+  studentVerificationStatus StudentVerificationStatus @default(UNVERIFIED)
+  emailVerifiedAt         DateTime?
+  studentVerificationNotes String?
+  manualReviewProofUrl    String?
+  manualReviewProofFilename String?
+  manualReviewRequestedAt DateTime?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  user                    User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, school])
+  @@index([school, studentVerificationStatus])
 }
 
 model Course {

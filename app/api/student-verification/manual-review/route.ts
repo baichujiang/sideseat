@@ -4,8 +4,10 @@ import { StudentVerificationStatus } from "@prisma/client";
 import { put } from "@vercel/blob";
 
 import { requireUser } from "@/lib/auth/session";
+import { DEFAULT_SCHOOL } from "@/lib/constants/schools";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok } from "@/lib/http";
+import { mirrorSchoolVerificationToUser, upsertSchoolVerificationState } from "@/lib/verification/school-state";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED_TYPES = new Set([
@@ -70,18 +72,20 @@ export async function POST(request: Request) {
       addRandomSuffix: false,
     });
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        email: email || undefined,
+    const school = user.school ?? DEFAULT_SCHOOL;
+    await prisma.$transaction(async (tx) => {
+      await upsertSchoolVerificationState(tx, user.id, school, {
+        email: email || null,
         verifiedStudent: false,
         studentVerificationStatus: StudentVerificationStatus.MANUAL_REVIEW_REQUIRED,
+        emailVerifiedAt: null,
         manualReviewProofUrl: blob.url,
         manualReviewProofFilename: file.name,
         manualReviewRequestedAt: new Date(),
         studentVerificationNotes:
           "Manual review requested — enrollment certificate uploaded.",
-      },
+      });
+      await mirrorSchoolVerificationToUser(tx, user.id, school);
     });
 
     return ok({

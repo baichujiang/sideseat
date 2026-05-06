@@ -14,6 +14,7 @@ import { prisma } from "@/lib/db/prisma";
 import { emailDeliveryConfigured } from "@/lib/email/resend";
 import { sendStudentVerificationEmail } from "@/lib/email/send-student-verification";
 import { error, ok, parseJson } from "@/lib/http";
+import { mirrorSchoolVerificationToUser, upsertSchoolVerificationState } from "@/lib/verification/school-state";
 import { verifyEmailRequestSchema } from "@/lib/validators/verification";
 
 /**
@@ -50,20 +51,23 @@ export async function POST(request: Request) {
     }
 
     if (!schoolSupportsAutomaticVerification(school)) {
-      const updatedUser = await prisma.user.update({
-        where: { id: user.id },
-        data: {
+      await prisma.$transaction(async (tx) => {
+        await upsertSchoolVerificationState(tx, user.id, school, {
           email,
-          school,
           verifiedStudent: false,
           studentVerificationStatus: StudentVerificationStatus.MANUAL_REVIEW_REQUIRED,
+          emailVerifiedAt: null,
           studentVerificationNotes:
             `${getSchoolLabel(school)} currently uses manual review for student verification.`,
-        },
+          manualReviewProofUrl: null,
+          manualReviewProofFilename: null,
+          manualReviewRequestedAt: null,
+        });
+        await mirrorSchoolVerificationToUser(tx, user.id, school);
       });
 
       return ok({
-        status: updatedUser.studentVerificationStatus,
+        status: StudentVerificationStatus.MANUAL_REVIEW_REQUIRED,
         delivery: "manual",
         message: getSchoolVerificationHint(school),
       });
@@ -76,20 +80,20 @@ export async function POST(request: Request) {
     }
 
     if (!matchedSchool) {
-      const updatedUser = await prisma.user.update({
-        where: { id: user.id },
-        data: {
+      await prisma.$transaction(async (tx) => {
+        await upsertSchoolVerificationState(tx, user.id, school, {
           email,
-          school,
           verifiedStudent: false,
           studentVerificationStatus: StudentVerificationStatus.MANUAL_REVIEW_REQUIRED,
+          emailVerifiedAt: null,
           studentVerificationNotes:
             "The submitted email could not be matched to a verified school domain and needs manual review.",
-        },
+        });
+        await mirrorSchoolVerificationToUser(tx, user.id, school);
       });
 
       return ok({
-        status: updatedUser.studentVerificationStatus,
+        status: StudentVerificationStatus.MANUAL_REVIEW_REQUIRED,
         delivery: "manual",
         message:
           "This school email could not be matched automatically, so it was sent to manual review.",
@@ -103,6 +107,7 @@ export async function POST(request: Request) {
     await prisma.schoolEmailVerification.updateMany({
       where: {
         userId: user.id,
+        school,
         status: "PENDING",
       },
       data: {
@@ -113,6 +118,7 @@ export async function POST(request: Request) {
     await prisma.schoolEmailVerification.create({
       data: {
         userId: user.id,
+        school,
         email,
         token,
         expiresAt,
@@ -157,15 +163,15 @@ export async function POST(request: Request) {
       skipped: skippedReason,
     };
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
+    await prisma.$transaction(async (tx) => {
+      await upsertSchoolVerificationState(tx, user.id, school, {
         email,
-        school,
         verifiedStudent: false,
         studentVerificationStatus: StudentVerificationStatus.EMAIL_PENDING,
+        emailVerifiedAt: null,
         studentVerificationNotes: notesByDelivery[delivery],
-      },
+      });
+      await mirrorSchoolVerificationToUser(tx, user.id, school);
     });
 
     const userMessage =

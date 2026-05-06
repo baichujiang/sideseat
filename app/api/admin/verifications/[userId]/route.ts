@@ -4,6 +4,7 @@ import { del } from "@vercel/blob";
 import { requireAdminUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
+import { mirrorSchoolVerificationToUser, upsertSchoolVerificationState } from "@/lib/verification/school-state";
 import { adminVerificationDecisionSchema } from "@/lib/validators/verification";
 
 export async function PATCH(
@@ -17,16 +18,19 @@ export async function PATCH(
 
     const existing = await prisma.user.findUnique({
       where: { id: userId },
-      select: { manualReviewProofUrl: true },
+      select: { school: true, manualReviewProofUrl: true, email: true },
     });
+    if (!existing?.school) {
+      return error("User has no active school selected.", 400);
+    }
 
     const isFinalDecision =
       status === StudentVerificationStatus.VERIFIED ||
       status === StudentVerificationStatus.REJECTED;
 
-    const user = await prisma.user.update({
-      where: { id: userId },
-      data: {
+    await prisma.$transaction(async (tx) => {
+      await upsertSchoolVerificationState(tx, userId, existing.school!, {
+        email: existing.email ?? null,
         verifiedStudent: status === StudentVerificationStatus.VERIFIED,
         studentVerificationStatus: status,
         emailVerifiedAt:
@@ -39,7 +43,8 @@ export async function PATCH(
               manualReviewRequestedAt: null,
             }
           : {}),
-      },
+      });
+      await mirrorSchoolVerificationToUser(tx, userId, existing.school!);
     });
 
     // Best-effort: purge the uploaded proof from blob storage once a decision
@@ -52,7 +57,7 @@ export async function PATCH(
       }
     }
 
-    return ok({ userId: user.id, status: user.studentVerificationStatus });
+    return ok({ userId, status });
   } catch (cause) {
     console.error(cause);
     return error("Unable to update student verification.", 400);

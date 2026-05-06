@@ -1,15 +1,13 @@
-import { StudentVerificationStatus } from "@prisma/client";
-
 import { requireUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
+import { mirrorSchoolVerificationToUser } from "@/lib/verification/school-state";
 import { profileSchema } from "@/lib/validators/profile";
 
 export async function PUT(request: Request) {
   try {
     const user = await requireUser();
     const values = await parseJson(request, profileSchema);
-    const schoolChanged = Boolean(user.school && user.school !== values.school);
 
     await prisma.$transaction(async (tx) => {
       await tx.userLanguage.deleteMany({ where: { userId: user.id } });
@@ -41,30 +39,9 @@ export async function PUT(request: Request) {
           contactInfoOptIn: values.contactInfoOptIn,
           hideFromCourseMembers: values.hideFromCourseMembers,
           onboardingComplete: true,
-          ...(schoolChanged
-            ? {
-                verifiedStudent: false,
-                studentVerificationStatus: StudentVerificationStatus.UNVERIFIED,
-                email: null,
-                emailVerifiedAt: null,
-                studentVerificationNotes:
-                  "School community changed. Please verify a matching school email again.",
-              }
-            : {}),
         },
       });
-
-      if (schoolChanged) {
-        await tx.schoolEmailVerification.updateMany({
-          where: {
-            userId: user.id,
-            status: "PENDING",
-          },
-          data: {
-            status: "CANCELED",
-          },
-        });
-      }
+      await mirrorSchoolVerificationToUser(tx, user.id, values.school);
     });
 
     return ok({ saved: true });

@@ -3,6 +3,7 @@ import { Prisma, StudentVerificationStatus } from "@prisma/client";
 import { requireAdminUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
+import { mirrorSchoolVerificationToUser, upsertSchoolVerificationState } from "@/lib/verification/school-state";
 import { adminUserUpdateSchema } from "@/lib/validators/admin-user";
 
 export async function PATCH(
@@ -16,7 +17,7 @@ export async function PATCH(
 
     const target = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true },
+      select: { id: true, email: true, school: true },
     });
 
     if (!target) {
@@ -81,9 +82,37 @@ export async function PATCH(
           : values.studentVerificationNotes;
     }
 
-    const updated = await prisma.user.update({
-      where: { id: userId },
-      data,
+    const updated = await prisma.$transaction(async (tx) => {
+      const result = await tx.user.update({
+        where: { id: userId },
+        data,
+      });
+
+      const targetSchool = values.school ?? target.school;
+      const verificationTouched =
+        values.email !== undefined ||
+        values.studentVerificationStatus !== undefined ||
+        values.verifiedStudent !== undefined ||
+        values.studentVerificationNotes !== undefined;
+      const schoolChanged = values.school !== undefined && values.school !== target.school;
+
+      if (targetSchool && verificationTouched) {
+        await upsertSchoolVerificationState(tx, userId, targetSchool, {
+          email: result.email ?? null,
+          verifiedStudent: result.verifiedStudent,
+          studentVerificationStatus: result.studentVerificationStatus,
+          emailVerifiedAt: result.emailVerifiedAt,
+          studentVerificationNotes: result.studentVerificationNotes,
+          manualReviewProofUrl: result.manualReviewProofUrl,
+          manualReviewProofFilename: result.manualReviewProofFilename,
+          manualReviewRequestedAt: result.manualReviewRequestedAt,
+        });
+        await mirrorSchoolVerificationToUser(tx, userId, targetSchool);
+      } else if (targetSchool && schoolChanged) {
+        await mirrorSchoolVerificationToUser(tx, userId, targetSchool);
+      }
+
+      return result;
     });
 
     return ok({ userId: updated.id });
