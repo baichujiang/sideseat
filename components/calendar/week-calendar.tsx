@@ -306,14 +306,15 @@ export function WeekCalendar({
     return null;
   }
 
-  function minuteFromClientYForDay(clientY: number, weekday: Weekday): number {
+  /** Sub-minute precision — use while dragging; snap only on release / commit. */
+  function rawMinuteFromClientYForDay(clientY: number, weekday: Weekday): number {
     const el = dayBodyElRef.current.get(weekday);
-    if (!el) return snapMinute(12 * 60);
+    if (!el) return 12 * 60;
     const r = el.getBoundingClientRect();
     if (r.height <= 1) return 0;
     const frac = Math.max(0, Math.min(1, (clientY - r.top) / r.height));
     const raw = visualStartMinute + frac * totalMinutes;
-    return snapMinute(raw);
+    return Math.max(0, Math.min(FULL_DAY_MINUTES, raw));
   }
 
   function buildStartEndAt(weekday: Weekday, startMinute: number, endMinute: number): { startAt: Date; endAt: Date } {
@@ -350,7 +351,8 @@ export function WeekCalendar({
     let curStart = block.startMinute;
     let curEnd = block.endMinute;
     const originDuration = Math.max(MIN_EVENT_MINUTES, block.endMinute - block.startMinute);
-    const grabOffsetMove = mode === "move" ? minuteFromClientYForDay(e.clientY, fromWeekday) - block.startMinute : 0;
+    const grabOffsetMove =
+      mode === "move" ? rawMinuteFromClientYForDay(e.clientY, fromWeekday) - block.startMinute : 0;
 
     let activatedForDrag = false;
     let longPressTimer: number | null = window.setTimeout(() => {
@@ -393,19 +395,19 @@ export function WeekCalendar({
       }
       const hit = weekdayFromClientXY(ev.clientX, ev.clientY);
       if (hit) curWeekday = hit;
-      const m = minuteFromClientYForDay(ev.clientY, curWeekday);
+      const m = rawMinuteFromClientYForDay(ev.clientY, curWeekday);
       if (mode === "move") {
-        let ns = snapMinute(m - grabOffsetMove);
+        let ns = m - grabOffsetMove;
         ns = Math.max(0, Math.min(FULL_DAY_MINUTES - originDuration, ns));
         curStart = ns;
         curEnd = ns + originDuration;
       } else if (mode === "resize-start") {
-        let ns = snapMinute(m);
+        let ns = m;
         ns = Math.min(ns, curEnd - MIN_EVENT_MINUTES);
         ns = Math.max(0, ns);
         curStart = ns;
       } else {
-        let ne = snapMinute(m);
+        let ne = m;
         ne = Math.max(ne, curStart + MIN_EVENT_MINUTES);
         ne = Math.min(FULL_DAY_MINUTES, ne);
         curEnd = ne;
@@ -423,9 +425,36 @@ export function WeekCalendar({
       } catch {
         /* ignore */
       }
+      let snapStart = curStart;
+      let snapEnd = curEnd;
+      if (mode === "move") {
+        let ns = snapMinute(curStart);
+        ns = Math.max(0, Math.min(FULL_DAY_MINUTES - originDuration, ns));
+        snapStart = ns;
+        snapEnd = ns + originDuration;
+      } else if (mode === "resize-start") {
+        let ns = snapMinute(curStart);
+        ns = Math.min(ns, curEnd - MIN_EVENT_MINUTES);
+        ns = Math.max(0, ns);
+        snapStart = ns;
+        snapEnd = curEnd;
+      } else {
+        let ne = snapMinute(curEnd);
+        ne = Math.max(ne, curStart + MIN_EVENT_MINUTES);
+        ne = Math.min(FULL_DAY_MINUTES, ne);
+        snapEnd = ne;
+        snapStart = curStart;
+      }
+      setDragOverride({
+        eventId,
+        weekday: curWeekday,
+        startMinute: snapStart,
+        endMinute: snapEnd,
+      });
+
       void (async () => {
         const patch = onPatchCalendarEventTimes;
-        const { startAt, endAt } = buildStartEndAt(curWeekday, curStart, curEnd);
+        const { startAt, endAt } = buildStartEndAt(curWeekday, snapStart, snapEnd);
         if (patch && endAt > startAt) {
           const ok = await patch({ eventId, startAt, endAt });
           if (!ok) {
@@ -750,22 +779,32 @@ export function WeekCalendar({
                             const isDraftNewTone = toneKey === "draftNew";
                             const key = block.id;
                             const selected = selectedBlockKey === key;
+                            const draggingThis = Boolean(
+                              dragOverride?.eventId && block.calendarEntryId === dragOverride.eventId,
+                            );
+                            const highlighted = selected || draggingThis;
                             const catHex = block.categoryColor?.trim();
                             const useCategoryColor = Boolean(catHex);
+                            const startMinuteShown = draggingThis
+                              ? snapMinute(block.startMinute)
+                              : block.startMinute;
                             const className = cn(
                               "absolute z-[1] overflow-hidden rounded-2xl px-1.5 py-1 text-left leading-tight transition hover:brightness-[0.98] active:brightness-95",
-                              !useCategoryColor && (selected ? tone.cardSelected : tone.card),
+                              draggingThis && "!transition-none",
+                              !useCategoryColor && (highlighted ? tone.cardSelected : tone.card),
                               useCategoryColor && "shadow-sm",
-                              block.hasShortOverlap && !selected && "shadow-[0_12px_28px_-18px_rgba(15,23,42,0.45)]",
+                              block.hasShortOverlap && !highlighted && "shadow-[0_12px_28px_-18px_rgba(15,23,42,0.45)]",
+                              draggingThis &&
+                                "z-[80] scale-[1.02] shadow-[0_16px_40px_-12px_rgba(15,23,42,0.35)] ring-2 ring-[#E53935]/55 ring-offset-2 ring-offset-white dark:ring-red-400/50 dark:ring-offset-card",
                             );
                             const metaCls = cn(
                               "truncate leading-tight",
                               cfg.metaClass,
                               useCategoryColor
-                                ? selected
+                                ? highlighted
                                   ? "text-white/85"
                                   : "text-[#111827]/65 dark:text-muted-foreground"
-                                : selected && !isDraftNewTone
+                                : highlighted && !isDraftNewTone
                                   ? "text-white/80"
                                   : "text-[#111827]/65 dark:text-muted-foreground",
                             );
@@ -777,24 +816,25 @@ export function WeekCalendar({
                                     className={cn(
                                       "truncate text-left tabular-nums font-medium leading-none",
                                       cfg.blockTimeClass,
-                                      !useCategoryColor && (selected ? tone.accentColorSelected : tone.accentColor),
+                                      !useCategoryColor &&
+                                        (highlighted ? tone.accentColorSelected : tone.accentColor),
                                     )}
                                     style={
                                       useCategoryColor && catHex
-                                        ? { color: selected ? "#ffffff" : categoryAccentColor(catHex) }
+                                        ? { color: highlighted ? "#ffffff" : categoryAccentColor(catHex) }
                                         : undefined
                                     }
                                   >
-                                    {formatTime(block.startMinute)}
+                                    {formatTime(startMinuteShown)}
                                   </p>
                                 ) : null}
                                 <p
                                   className={cn(
                                     "mt-px truncate text-left font-semibold leading-snug",
                                     cfg.blockTitleClass,
-                                    !useCategoryColor && (selected ? tone.titleSelected : tone.title),
+                                    !useCategoryColor && (highlighted ? tone.titleSelected : tone.title),
                                     useCategoryColor &&
-                                      (selected ? "text-white" : "text-[#111827] dark:text-foreground"),
+                                      (highlighted ? "text-white" : "text-[#111827] dark:text-foreground"),
                                   )}
                                 >
                                   {titleLine}
@@ -807,7 +847,7 @@ export function WeekCalendar({
                                 ) : null}
                               </>
                             );
-                            const title = `${block.courseName} · ${formatTime(block.startMinute)}`;
+                            const title = `${block.courseName} · ${formatTime(startMinuteShown)}`;
                             const columnWidth = 100 / Math.max(block.columnCount, 1);
                             const horizontalGapPct = block.columnCount > 1 ? 0.8 : 0;
                             const widthPct = Math.max(8, columnWidth - horizontalGapPct);
@@ -817,11 +857,15 @@ export function WeekCalendar({
                               height: `${effectiveHeight}%`,
                               left: `calc(${block.columnIndex * columnWidth}% + ${stackInsetPx}px)`,
                               width: `calc(${widthPct}% - ${stackInsetPx}px)`,
-                              zIndex: selected ? 4 : block.columnIndex * 10 + block.stackDepth + 1,
+                              zIndex: draggingThis
+                                ? 80
+                                : selected
+                                  ? 4
+                                  : block.columnIndex * 10 + block.stackDepth + 1,
                             };
                             const surfaceStyle =
                               useCategoryColor && catHex
-                                ? { ...positionStyle, ...categoryBlockSurfaceStyle(catHex, selected) }
+                                ? { ...positionStyle, ...categoryBlockSurfaceStyle(catHex, highlighted) }
                                 : positionStyle;
 
                             const isDraggableCalendar =
@@ -850,7 +894,10 @@ export function WeekCalendar({
                                   <div
                                     role="button"
                                     tabIndex={0}
-                                    className="absolute inset-x-0 bottom-2 top-2 z-20 cursor-grab overflow-hidden active:cursor-grabbing"
+                                    className={cn(
+                                      "absolute inset-x-0 bottom-2 top-2 z-20 overflow-hidden",
+                                      draggingThis ? "cursor-grabbing" : "cursor-grab active:cursor-grabbing",
+                                    )}
                                     onKeyDown={(ev) => {
                                       if (ev.key === "Enter" || ev.key === " ") {
                                         ev.preventDefault();
