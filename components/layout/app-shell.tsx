@@ -128,7 +128,7 @@ export function AppShell({
       className={cn(
         "mx-auto flex max-w-md flex-col",
         shellSurface,
-        isChatThread ? "h-dvh max-h-dvh overflow-hidden" : "min-h-dvh",
+        "h-dvh max-h-dvh overflow-hidden",
       )}
     >
       <main
@@ -137,7 +137,7 @@ export function AppShell({
           shellSurface,
           isChatThread
             ? "px-0 pb-0 pt-[max(0.25rem,env(safe-area-inset-top))]"
-            : "px-3 pb-[var(--bottom-nav-clearance)] pt-3 sm:px-3",
+            : "overflow-y-auto overscroll-y-contain px-3 pb-[var(--bottom-nav-clearance)] pt-3 sm:px-3",
         )}
       >
         {children}

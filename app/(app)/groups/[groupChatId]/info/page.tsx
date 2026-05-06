@@ -55,7 +55,7 @@ export default async function GroupChatInfoPage({
 
             return (
               <Link
-                key={participant.id}
+                key={participant.userId}
                 href={profileHref}
                 className="flex items-center gap-3 rounded-2xl border border-border bg-card px-3 py-2.5 transition hover:bg-muted/40 active:bg-muted/70"
               >
