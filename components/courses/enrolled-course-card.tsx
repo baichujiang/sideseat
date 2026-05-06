@@ -4,6 +4,7 @@ import type { Weekday } from "@prisma/client";
 import { ChevronRight, MapPin, Users } from "lucide-react";
 
 import { SaveBookmarkButton } from "@/components/courses/save-bookmark-button";
+import { courseCodeBadgeLabel } from "@/lib/courses/course-code-label";
 import { cn } from "@/lib/utils";
 
 const WEEKDAY_SHORT: Record<Weekday, string> = {
@@ -20,13 +21,6 @@ function formatHM(minutes: number): string {
   const h = Math.floor(minutes / 60).toString().padStart(2, "0");
   const m = (minutes % 60).toString().padStart(2, "0");
   return `${h}:${m}`;
-}
-
-function extractStudentCodes(name: string, rawCode: string | null): string[] {
-  const source = `${rawCode ?? ""} ${name}`.toUpperCase();
-  const matches = source.match(/\bIN[\s-]?(\d{4})\b/g) ?? [];
-  const normalized = matches.map((token) => `IN${token.replace(/[^0-9]/g, "").slice(-4)}`);
-  return [...new Set(normalized)];
 }
 
 function extractInstructorHint(name: string): string | null {
@@ -84,8 +78,7 @@ export function EnrolledCourseCard({
   });
 
   const location = sortedSessions.find((s) => s.location)?.location ?? null;
-  const studentCodes = extractStudentCodes(course.name, course.code);
-  const codeLabel = studentCodes.join(" · ");
+  const codeLabel = courseCodeBadgeLabel(course.name, course.code);
   const instructorLabel = course.instructorSummary?.trim() || extractInstructorHint(course.name);
 
   return (

@@ -3,14 +3,8 @@ import Link from "next/link";
 import { ChevronRight, Users } from "lucide-react";
 
 import { SaveBookmarkButton } from "@/components/courses/save-bookmark-button";
+import { courseCodeBadgeLabel } from "@/lib/courses/course-code-label";
 import { cn } from "@/lib/utils";
-
-function extractStudentCodes(name: string, rawCode: string | null): string[] {
-  const source = `${rawCode ?? ""} ${name}`.toUpperCase();
-  const matches = source.match(/\bIN[\s-]?(\d{4})\b/g) ?? [];
-  const normalized = matches.map((token) => `IN${token.replace(/[^0-9]/g, "").slice(-4)}`);
-  return [...new Set(normalized)];
-}
 
 function extractInstructorHint(name: string): string | null {
   const match = name.match(/\(([^()]+)\)\s*$/);
@@ -41,8 +35,7 @@ export function PopularCourseCard({
   /** When set (signed-in Popular list), bookmark is shown on the card. */
   viewer?: { saved: boolean; enrolled: boolean } | null;
 }) {
-  const studentCodes = extractStudentCodes(course.name, course.code);
-  const codeLabel = studentCodes.join(" · ");
+  const codeLabel = courseCodeBadgeLabel(course.name, course.code);
   const instructorLabel = course.instructorSummary?.trim() || extractInstructorHint(course.name);
   const bookmark = viewer ?? null;
 
