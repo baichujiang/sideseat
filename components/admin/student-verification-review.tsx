@@ -1,5 +1,7 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import { StudentVerificationStatus } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -20,7 +22,7 @@ export function StudentVerificationReview({
   const submit = (status: StudentVerificationStatus) => {
     startTransition(async () => {
       setError("");
-      const response = await fetch(`/api/admin/verifications/${userId}`, {
+      const response = await apiFetch(`/api/admin/verifications/${userId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

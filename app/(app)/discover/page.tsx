@@ -1,7 +1,9 @@
 import type { Route } from "next";
 import { ClassmatePostCategory, ClassmatePostStatus, ConnectionStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
-import { MapPin } from "lucide-react";
+import { ChevronDown, MapPin } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import {
@@ -74,7 +76,7 @@ export default async function DiscoverPage() {
       },
     },
     include: {
-      user: true,
+      user: { include: { userLanguages: true } },
     },
     orderBy: { createdAt: "desc" },
     take: 120,
@@ -115,6 +117,7 @@ export default async function DiscoverPage() {
   const rows: DiscoverRow[] = freshHits.map((h) => ({
     userId: h.userId,
     nickname: h.nickname,
+    gender: h.gender,
     avatarUrl: h.avatarUrl,
     major: h.major,
     semester: h.semester,
@@ -140,11 +143,15 @@ export default async function DiscoverPage() {
     isOwn: post.user.id === user.id,
     userId: post.user.id,
     nickname: post.user.nickname ?? post.user.username,
+    gender: post.user.gender,
     avatarUrl: post.user.avatarUrl,
     major: post.user.major,
     semester: post.user.semester,
     school: post.user.school,
-    languages: post.user.languages,
+    languages: post.user.userLanguages.map((r) => ({
+      tag: r.tag,
+      proficiency: r.proficiency,
+    })),
     verifiedStudent: post.user.verifiedStudent,
     studentVerificationStatus: post.user.studentVerificationStatus,
   }));
@@ -159,22 +166,43 @@ export default async function DiscoverPage() {
 
 function PageHeader() {
   return (
-    <div className="space-y-2">
-      <div className="flex items-start justify-between gap-3">
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold leading-tight tracking-tight">Classmates</h2>
-          <p className="text-[13px] leading-snug text-muted-foreground">
-            Meet students through classes, study plans, meals, languages, and sports.
+    <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0 space-y-0.5">
+        <h1 className="page-screen-title">Classmates</h1>
+        <p className="page-screen-subtitle mt-0.5">
+          Find classmates through shared courses and social plans.
+        </p>
+      </div>
+      <details className="group/details relative shrink-0">
+        <summary
+          aria-label="Area filter: Munich. Open to see options."
+          className={cn(
+            "inline-flex h-10 cursor-pointer list-none select-none items-center gap-1.5 rounded-full border border-[#E7E0D6] bg-white px-3 pr-2.5 text-[13px] font-medium text-foreground shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] transition-colors",
+            "hover:border-border hover:bg-muted/35 active:bg-muted/50",
+            "[&::-webkit-details-marker]:hidden",
+          )}
+        >
+          <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={2.25} aria-hidden />
+          <span className="shrink-0">Munich</span>
+          <ChevronDown
+            className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200 group-open/details:rotate-180"
+            strokeWidth={2.25}
+            aria-hidden
+          />
+        </summary>
+        <div className="absolute right-0 z-20 mt-1.5 min-w-[13rem] rounded-xl border border-[#E7E0D6] bg-white py-1 shadow-lg">
+          <div
+            className="px-3 py-2 text-[13px] font-medium text-foreground"
+            role="status"
+          >
+            <span className="text-muted-foreground">Area · </span>
+            Munich
+          </div>
+          <p className="border-t border-border px-3 py-2 text-[11px] leading-snug text-muted-foreground">
+            More cities and radius filters are on the way. Everything here is scoped to Munich for now.
           </p>
         </div>
-        <button
-          type="button"
-          className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-border/70 bg-card px-3.5 text-[13px] font-medium text-foreground shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]"
-        >
-          <MapPin className="h-4 w-4 text-muted-foreground" strokeWidth={2.25} />
-          Munich
-        </button>
-      </div>
+      </details>
     </div>
   );
 }

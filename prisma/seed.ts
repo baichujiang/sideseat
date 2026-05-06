@@ -4,6 +4,7 @@ import {
   CourseIntent,
   DegreeLevel,
   FriendLinkStatus,
+  LanguageProficiency,
   LanguageTag,
   ReportActionType,
   ReportReason,
@@ -18,6 +19,10 @@ import { prisma } from "@/lib/db/prisma";
 const minutesAgo = (m: number) => new Date(Date.now() - m * 60 * 1000);
 const hoursAgo = (h: number) => new Date(Date.now() - h * 60 * 60 * 1000);
 const daysAgo = (d: number) => new Date(Date.now() - d * 24 * 60 * 60 * 1000);
+
+const seedLangs = (...tags: LanguageTag[]) => ({
+  create: tags.map((tag) => ({ tag, proficiency: LanguageProficiency.FLUENT })),
+});
 
 async function main() {
   await prisma.reportAction.deleteMany();
@@ -63,7 +68,7 @@ async function main() {
         major: "Informatics",
         semester: 2,
         bio: "New in Munich and looking for calm study partners.",
-        languages: [LanguageTag.CHINESE, LanguageTag.ENGLISH, LanguageTag.GERMAN],
+        userLanguages: seedLangs(LanguageTag.CHINESE, LanguageTag.ENGLISH, LanguageTag.GERMAN),
         onboardingComplete: true,
         verifiedStudent: true,
         studentVerificationStatus: StudentVerificationStatus.VERIFIED,
@@ -84,7 +89,7 @@ async function main() {
         major: "Informatics",
         semester: 2,
         bio: "Usually free after class for coffee and review sessions.",
-        languages: [LanguageTag.ENGLISH, LanguageTag.GERMAN],
+        userLanguages: seedLangs(LanguageTag.ENGLISH, LanguageTag.GERMAN),
         onboardingComplete: true,
         verifiedStudent: true,
         studentVerificationStatus: StudentVerificationStatus.VERIFIED,
@@ -105,7 +110,7 @@ async function main() {
         major: "Informatics",
         semester: 2,
         bio: "Happy to walk to class together if schedules line up.",
-        languages: [LanguageTag.ENGLISH, LanguageTag.GERMAN, LanguageTag.SPANISH],
+        userLanguages: seedLangs(LanguageTag.ENGLISH, LanguageTag.GERMAN, LanguageTag.SPANISH),
         onboardingComplete: true,
         verifiedStudent: true,
         studentVerificationStatus: StudentVerificationStatus.VERIFIED,
@@ -124,7 +129,7 @@ async function main() {
         major: "Informatics",
         semester: 3,
         bio: "Prefer low-pressure intros before sharing contact info.",
-        languages: [LanguageTag.ENGLISH, LanguageTag.GERMAN],
+        userLanguages: seedLangs(LanguageTag.ENGLISH, LanguageTag.GERMAN),
         onboardingComplete: true,
         studentVerificationStatus: StudentVerificationStatus.MANUAL_REVIEW_REQUIRED,
         studentVerificationNotes:
@@ -143,7 +148,7 @@ async function main() {
         major: "Informatics",
         semester: 2,
         bio: "Into paper discussions and whiteboard sessions.",
-        languages: [LanguageTag.GERMAN, LanguageTag.ENGLISH],
+        userLanguages: seedLangs(LanguageTag.GERMAN, LanguageTag.ENGLISH),
         onboardingComplete: true,
         verifiedStudent: true,
         studentVerificationStatus: StudentVerificationStatus.VERIFIED,
@@ -162,7 +167,7 @@ async function main() {
         major: "Informatics",
         semester: 2,
         bio: "Quiet but reliable for exam prep.",
-        languages: [LanguageTag.GERMAN, LanguageTag.ENGLISH],
+        userLanguages: seedLangs(LanguageTag.GERMAN, LanguageTag.ENGLISH),
         onboardingComplete: true,
         verifiedStudent: true,
         studentVerificationStatus: StudentVerificationStatus.VERIFIED,
@@ -181,7 +186,7 @@ async function main() {
         major: "Informatics",
         semester: 2,
         bio: "Coffee after ML lecture is a ritual.",
-        languages: [LanguageTag.ENGLISH, LanguageTag.SPANISH],
+        userLanguages: seedLangs(LanguageTag.ENGLISH, LanguageTag.SPANISH),
         onboardingComplete: true,
         verifiedStudent: true,
         studentVerificationStatus: StudentVerificationStatus.VERIFIED,
@@ -200,7 +205,7 @@ async function main() {
         major: "Informatics",
         semester: 2,
         bio: "Shares notes in the group drive.",
-        languages: [LanguageTag.GERMAN, LanguageTag.ENGLISH],
+        userLanguages: seedLangs(LanguageTag.GERMAN, LanguageTag.ENGLISH),
         onboardingComplete: true,
         verifiedStudent: true,
         studentVerificationStatus: StudentVerificationStatus.VERIFIED,
@@ -219,7 +224,7 @@ async function main() {
         major: "Informatics",
         semester: 2,
         bio: "Mostly async, prefers email.",
-        languages: [LanguageTag.ENGLISH, LanguageTag.GERMAN],
+        userLanguages: seedLangs(LanguageTag.ENGLISH, LanguageTag.GERMAN),
         onboardingComplete: true,
         verifiedStudent: true,
         studentVerificationStatus: StudentVerificationStatus.VERIFIED,
@@ -238,7 +243,7 @@ async function main() {
         major: "Informatics",
         semester: 2,
         bio: "Just matched — say hi anytime.",
-        languages: [LanguageTag.ENGLISH, LanguageTag.GERMAN, LanguageTag.SPANISH],
+        userLanguages: seedLangs(LanguageTag.ENGLISH, LanguageTag.GERMAN, LanguageTag.SPANISH),
         onboardingComplete: true,
         verifiedStudent: true,
         studentVerificationStatus: StudentVerificationStatus.VERIFIED,
@@ -257,7 +262,7 @@ async function main() {
         major: "Informatics",
         semester: 2,
         bio: "Weekend study blocks at the library.",
-        languages: [LanguageTag.GERMAN, LanguageTag.ENGLISH],
+        userLanguages: seedLangs(LanguageTag.GERMAN, LanguageTag.ENGLISH),
         onboardingComplete: true,
         verifiedStudent: true,
         studentVerificationStatus: StudentVerificationStatus.VERIFIED,

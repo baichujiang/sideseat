@@ -39,6 +39,7 @@ export async function PATCH(
     const data: Prisma.UserUpdateInput = {};
 
     if (values.nickname !== undefined) data.nickname = values.nickname;
+    if (values.gender !== undefined) data.gender = values.gender;
     if (values.email !== undefined) data.email = values.email === "" ? null : values.email;
     if (values.school !== undefined) data.school = values.school;
     if (values.degreeLevel !== undefined) data.degreeLevel = values.degreeLevel;

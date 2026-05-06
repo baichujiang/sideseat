@@ -44,7 +44,7 @@ export function FriendLinkPanel({
         <p className="mt-0.5 text-xs text-muted-foreground">
           You&apos;ve upgraded this match — they appear in your{" "}
           <Link href={"/inbox/contacts" as Route} className="font-semibold text-primary underline">
-            Contacts
+            Close friends list
           </Link>
           .
         </p>
@@ -110,7 +110,7 @@ export function FriendLinkPanel({
         Getting along? Upgrade to <span className="font-medium text-foreground">close friends</span>{" "}
         — after both agree, they show up in{" "}
         <Link href={"/inbox/contacts" as Route} className="font-semibold text-primary underline">
-          Contacts
+          Close friends list
         </Link>
         .
       </p>

@@ -7,7 +7,9 @@ import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { BackLink } from "@/components/nav/back-link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
+import { UserGenderCardIcon } from "@/components/ui/user-gender-icon";
 import { getSessionUser } from "@/lib/auth/session";
+import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
 import { prisma } from "@/lib/db/prisma";
 
 export default async function ContactsPage() {
@@ -16,8 +18,8 @@ export default async function ContactsPage() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <BackLink href="/inbox" label="Back to contacts" />
-          <h1 className="text-lg font-semibold">Contacts</h1>
+          <BackLink href="/inbox" label="Back to Chats" />
+          <h1 className="page-screen-title">Close friends</h1>
         </div>
         <GuestAppCta returnTo="/inbox/contacts" />
       </div>
@@ -51,10 +53,9 @@ export default async function ContactsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <BackLink href="/inbox" label="Back to contacts" />
+        <BackLink href="/inbox" label="Back to Chats" />
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">Contacts</h1>
-          <p className="text-xs text-muted-foreground">Close friends you upgraded from a chat</p>
+          <h1 className="page-screen-title">Close friends</h1>
         </div>
       </div>
 
@@ -63,8 +64,10 @@ export default async function ContactsPage() {
           {links.map((link) => {
             const c = link.connection;
             const peer = c.userAId === user.id ? c.userB : c.userA;
-            const subtitle =
-              c.invitation?.course?.name ?? (c.invitationId ? "Class match" : "Direct chat");
+            const myRemark = contactRemarkForViewer(c, user.id);
+            const peerNick = peer.nickname?.trim() ?? "";
+            const listTitle = myRemark || peerNick || "Student";
+            const subtitle = c.invitation?.course?.name ?? null;
             const profileHref =
               `/users/${peer.id}?returnTo=${encodeURIComponent("/inbox/contacts")}` as Route;
             const chatHref = `/connections/${c.id}?returnTo=%2Finbox%2Fcontacts` as Route;
@@ -78,13 +81,23 @@ export default async function ContactsPage() {
                   <PresetAvatar id={peer.avatarUrl} size={52} className="ring-2 ring-background shadow-sm" />
                 </Link>
                 <div className="min-w-0 flex-1">
-                  <Link
-                    href={profileHref}
-                    className="block truncate text-[15px] font-semibold leading-tight text-foreground"
-                  >
-                    {peer.nickname ?? "Student"}
-                  </Link>
-                  <p className="mt-0.5 truncate text-[13px] text-muted-foreground">{subtitle}</p>
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Link
+                      href={profileHref}
+                      className="min-w-0 flex-1 truncate text-[15px] font-semibold leading-tight text-foreground"
+                    >
+                      {listTitle}
+                    </Link>
+                    <UserGenderCardIcon gender={peer.gender} className="shrink-0" />
+                  </div>
+                  {myRemark && myRemark !== peerNick ? (
+                    <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
+                      {peerNick || `@${peer.username}`}
+                    </p>
+                  ) : null}
+                  {subtitle ? (
+                    <p className="mt-0.5 truncate text-[13px] text-muted-foreground">{subtitle}</p>
+                  ) : null}
                 </div>
                 <Link
                   href={chatHref}
@@ -98,7 +111,7 @@ export default async function ContactsPage() {
         </ul>
       ) : (
         <EmptyState
-          title="No contacts yet"
+          title="No close friends yet"
           description="When a chat goes well, invite them as a close friend from their profile or the chat screen. After you both accept, they appear here."
         />
       )}

@@ -1,6 +1,6 @@
 import { randomBytes } from "crypto";
 
-import { LanguageTag } from "@prisma/client";
+import { LanguageProficiency, LanguageTag } from "@prisma/client";
 
 import { hashPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
@@ -30,15 +30,23 @@ export async function POST(request: Request) {
         school: DEFAULT_SCHOOL,
         major: "Exploring",
         semester: 1,
-        languages: [LanguageTag.ENGLISH],
+        userLanguages: {
+          create: [{ tag: LanguageTag.ENGLISH, proficiency: LanguageProficiency.FLUENT }],
+        },
         onboardingComplete: true,
       },
     });
 
-    await createSession(user.id);
+    const { accessToken, expiresIn } = await createSession(user.id);
 
     return ok(
-      { userId: user.id, onboardingComplete: true, isGuest: true },
+      {
+        userId: user.id,
+        onboardingComplete: true,
+        isGuest: true,
+        accessToken,
+        expiresIn,
+      },
       { status: 201 },
     );
   } catch (cause) {

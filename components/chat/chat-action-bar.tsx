@@ -80,7 +80,7 @@ export function ChatActionBar({
       case "incoming_pending":
         return "Needs your reply";
       case "outgoing_pending":
-        return "Waiting on them";
+        return "Request sent";
       case "cooldown":
         return "Temporarily paused";
       default:
@@ -89,7 +89,7 @@ export function ChatActionBar({
   }, [contactState.kind]);
 
   const friendSummary = useMemo(() => {
-    if (friendLink?.status === FriendLinkStatus.ACCEPTED) return "In contacts";
+    if (friendLink?.status === FriendLinkStatus.ACCEPTED) return "Close friends";
     if (
       friendLink?.status === FriendLinkStatus.PENDING &&
       friendLink.responderId === currentUserId
@@ -100,7 +100,7 @@ export function ChatActionBar({
       friendLink?.status === FriendLinkStatus.PENDING &&
       friendLink.requesterId === currentUserId
     ) {
-      return "Waiting on them";
+      return "Invite sent";
     }
     return "Optional upgrade";
   }, [friendLink, currentUserId]);

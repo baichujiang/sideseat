@@ -48,6 +48,17 @@ export async function POST(request: Request) {
       return error("Some classmates can no longer be added to this event.", 400);
     }
 
+    let categoryId: string | null = values.categoryId ?? null;
+    if (categoryId) {
+      const cat = await prisma.userCalendarCategory.findFirst({
+        where: { id: categoryId, userId: user.id },
+        select: { id: true },
+      });
+      if (!cat) {
+        return error("Choose a valid calendar category.", 400);
+      }
+    }
+
     const entries: Array<{
       title: string;
       location: string | null;
@@ -92,6 +103,7 @@ export async function POST(request: Request) {
             title: entry.title,
             location: entry.location,
             note: entry.note,
+            categoryId,
             repeatRule: values.repeat,
             repeatUntil,
             startAt: entry.startAt,

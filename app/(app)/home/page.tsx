@@ -11,6 +11,7 @@ import {
   type ClassBlock,
   type StudyEntry,
 } from "@/components/home/schedule-surface";
+import { ensureUserCalendarCategories } from "@/lib/calendar/default-user-calendar-categories";
 import { getCurrentSemesterDateRange } from "@/lib/constants/semester";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
@@ -33,21 +34,24 @@ export default async function HomePage() {
     const now = new Date();
     const semesterRange = getCurrentSemesterDateRange(now);
     return (
-      <div className="space-y-5">
+      <div className="flex min-h-0 flex-1 flex-col">
         <HomeHero nickname={null} avatarUrl={null} nowDate={now} />
-        <ScheduleSurface
-          classBlocks={[]}
-          studyEntries={[]}
-          companionOptions={[]}
-          nowISO={now.toISOString()}
-          semesterStartISO={semesterRange.start.toISOString()}
-          semesterEndISO={semesterRange.end.toISOString()}
-        />
-        <GuestAppCta
-          returnTo="/home"
-          headline="Sign in to build your schedule"
-          body="Add courses and study blocks — they sync once you have an account."
-        />
+        <div className="mt-6 flex min-h-0 flex-1 flex-col gap-3">
+          <ScheduleSurface
+            classBlocks={[]}
+            studyEntries={[]}
+            companionOptions={[]}
+            initialCalendarCategories={[]}
+            nowISO={now.toISOString()}
+            semesterStartISO={semesterRange.start.toISOString()}
+            semesterEndISO={semesterRange.end.toISOString()}
+          />
+          <GuestAppCta
+            returnTo="/home"
+            headline="Sign in to build your schedule"
+            body="Add courses and study blocks — they sync once you have an account."
+          />
+        </div>
       </div>
     );
   }
@@ -64,7 +68,9 @@ export default async function HomePage() {
   const windowStart = subDays(now, CALENDAR_WINDOW_DAYS);
   const windowEnd = addDays(now, CALENDAR_WINDOW_DAYS);
 
-  const [memberships, calendarEntries] = await Promise.all([
+  await ensureUserCalendarCategories(prisma, user.id);
+
+  const [memberships, calendarEntries, calendarCategories] = await Promise.all([
     prisma.userCourse.findMany({
       where: { userId: user.id },
       include: { course: true, sessions: true },
@@ -78,8 +84,16 @@ export default async function HomePage() {
         companions: {
           orderBy: { createdAt: "asc" },
         },
+        category: {
+          select: { id: true, name: true, color: true },
+        },
       },
       orderBy: { startAt: "asc" },
+    }),
+    prisma.userCalendarCategory.findMany({
+      where: { userId: user.id },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      select: { id: true, name: true, color: true, presetKey: true, sortOrder: true },
     }),
   ]);
 
@@ -99,6 +113,8 @@ export default async function HomePage() {
     orderBy: { updatedAt: "desc" },
   });
 
+  const courseCategory = calendarCategories.find((c) => c.presetKey === "course");
+
   const classBlocks: ClassBlock[] = memberships.flatMap((m) =>
     m.sessions.map((s) => ({
       courseId: m.course.id,
@@ -108,6 +124,9 @@ export default async function HomePage() {
       startMinute: s.startMinute,
       endMinute: s.endMinute,
       location: s.location,
+      categoryColor: courseCategory?.color ?? null,
+      categoryId: courseCategory?.id ?? null,
+      categoryName: courseCategory?.name ?? null,
     })),
   );
 
@@ -127,6 +146,16 @@ export default async function HomePage() {
       userId: companion.userId,
       name: companion.displayName,
     })),
+    categoryId: e.categoryId,
+    categoryColor: e.category?.color ?? null,
+    categoryName: e.category?.name ?? null,
+  }));
+
+  const initialCalendarCategories = calendarCategories.map((c) => ({
+    id: c.id,
+    name: c.name,
+    color: c.color,
+    presetKey: c.presetKey,
   }));
 
   const companionOptions = connections.map((connection) => {
@@ -141,34 +170,33 @@ export default async function HomePage() {
   const hasAnyCourse = memberships.length > 0;
 
   return (
-    <div className="space-y-5">
-      <HomeHero
-        nickname={user.nickname}
-        avatarUrl={user.avatarUrl}
-        nowDate={now}
-      />
+    <div className="flex min-h-0 flex-1 flex-col">
+      <HomeHero nickname={user.nickname} avatarUrl={user.avatarUrl} nowDate={now} />
 
-      <ScheduleSurface
-        classBlocks={classBlocks}
-        studyEntries={studyEntries}
-        companionOptions={companionOptions}
-        nowISO={now.toISOString()}
-        semesterStartISO={semesterRange.start.toISOString()}
-        semesterEndISO={semesterRange.end.toISOString()}
-      />
+      <div className="mt-6 flex min-h-0 flex-1 flex-col gap-3">
+        <ScheduleSurface
+          classBlocks={classBlocks}
+          studyEntries={studyEntries}
+          companionOptions={companionOptions}
+          initialCalendarCategories={initialCalendarCategories}
+          nowISO={now.toISOString()}
+          semesterStartISO={semesterRange.start.toISOString()}
+          semesterEndISO={semesterRange.end.toISOString()}
+        />
 
-      {!hasAnyCourse ? (
-        <div className="rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-5 text-center text-sm text-muted-foreground">
-          Your schedule is empty.{" "}
-          <Link
-            href={"/courses/add" as Route}
-            className="font-medium text-foreground underline-offset-2 hover:underline"
-          >
-            Add your first course
-          </Link>
-          .
-        </div>
-      ) : null}
+        {!hasAnyCourse ? (
+          <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-5 text-center text-sm text-[#5F6B7A] shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:border-border dark:bg-card dark:text-muted-foreground dark:shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
+            Your schedule is empty.{" "}
+            <Link
+              href={"/courses/add" as Route}
+              className="font-semibold text-[#2563EB] underline-offset-2 hover:underline dark:text-blue-400"
+            >
+              Add your first course
+            </Link>
+            .
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

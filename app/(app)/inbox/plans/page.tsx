@@ -19,7 +19,7 @@ export default async function InboxPlansPage() {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <BackLink href="/inbox" label="Back" />
-          <h1 className="text-lg font-semibold">Plans</h1>
+          <h1 className="page-screen-title">Plans</h1>
         </div>
         <GuestAppCta returnTo="/inbox/plans" />
       </div>
@@ -66,7 +66,7 @@ export default async function InboxPlansPage() {
       <div className="flex items-center gap-2 px-0.5">
         <BackLink href="/inbox" label="Back" />
         <div>
-          <h1 className="text-[1.375rem] font-semibold tracking-tight text-foreground">Plans</h1>
+          <h1 className="page-screen-title">Plans</h1>
           <p className="text-[13px] leading-snug text-muted-foreground">
             Pending invites and upcoming times you confirmed in chat
           </p>

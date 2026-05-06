@@ -1,5 +1,7 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -43,7 +45,7 @@ export function FirstMessageComposer({
     setSending(true);
     setError("");
     try {
-      const res = await fetch("/api/connections/start", {
+      const res = await apiFetch("/api/connections/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ peerId, body: trimmed, courseId }),

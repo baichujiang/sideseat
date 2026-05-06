@@ -1,15 +1,35 @@
-/* SideSeat — minimal service worker for PWA install + offline shell hints.
- * Pass-through fetch keeps installability without aggressive caching. */
-self.addEventListener("install", (event) => {
-  event.waitUntil(self.skipWaiting());
+/* SideSeat — PWA shell + push; updates wait for user “Update now” before skipWaiting.
+ * API / navigations / RSC fetches bypass HTTP cache so old SW + disk cache don’t pin stale data. */
+
+self.addEventListener("install", () => {
+  /* Intentionally no skipWaiting — client posts SKIP_WAITING after user confirms. */
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    void self.skipWaiting();
+  }
+});
+
+function shouldBypassHttpCache(request) {
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return false;
+  if (request.method !== "GET" && request.method !== "HEAD") return true;
+  if (url.pathname.startsWith("/api/")) return true;
+  if (request.mode === "navigate") return true;
+  if (request.headers.get("RSC") === "1") return true;
+  if (request.headers.get("Next-Router-Prefetch")) return true;
+  return false;
+}
+
 self.addEventListener("fetch", (event) => {
-  event.respondWith(fetch(event.request));
+  const { request } = event;
+  const opts = shouldBypassHttpCache(request) ? { cache: "no-store" } : {};
+  event.respondWith(fetch(request, opts));
 });
 
 self.addEventListener("push", (event) => {

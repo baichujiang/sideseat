@@ -1,5 +1,7 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CornerUpLeft, Copy, Flag, Trash2, MoreHorizontal } from "lucide-react";
@@ -120,7 +122,7 @@ export function MessageActionMenu({
       target.kind === "direct"
         ? `/api/connections/${target.connectionId}/messages/${target.messageId}`
         : `/api/courses/${target.courseId}/chat/messages/${target.messageId}`;
-    const r = await fetch(url, { method: "DELETE" });
+    const r = await apiFetch(url, { method: "DELETE" });
     setBusy(false);
     if (!r.ok) {
       setErr("Couldn't delete.");
@@ -143,7 +145,7 @@ export function MessageActionMenu({
             reason,
             details,
           };
-    const r = await fetch(`/api/reports`, {
+    const r = await apiFetch(`/api/reports`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

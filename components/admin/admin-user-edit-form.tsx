@@ -1,6 +1,8 @@
 "use client";
 
-import { StudentVerificationStatus } from "@prisma/client";
+import { apiFetch } from "@/lib/auth/api-fetch";
+
+import { StudentVerificationStatus, type UserGender } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -13,10 +15,12 @@ import {
   DEGREE_LEVELS,
   semesterOptions,
 } from "@/lib/constants/majors";
+import { USER_GENDER_OPTIONS } from "@/lib/constants/gender";
 import { schoolOptions } from "@/lib/constants/schools";
 
 export type AdminUserFormInitialValues = {
   nickname: string;
+  gender: UserGender;
   email: string;
   school: string;
   degreeLevel: (typeof DEGREE_LEVELS)[number] | "";
@@ -68,11 +72,12 @@ export function AdminUserEditForm({
       setMessage("");
       setError("");
 
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await apiFetch(`/api/admin/users/${userId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nickname: values.nickname || undefined,
+          gender: values.gender,
           email: values.email,
           school: values.school || undefined,
           degreeLevel: values.degreeLevel || undefined,
@@ -108,6 +113,15 @@ export function AdminUserEditForm({
           onChange={(event) => set("nickname", event.target.value)}
           value={values.nickname}
         />
+      </Row>
+      <Row label="Gender">
+        <Select onChange={(event) => set("gender", event.target.value as UserGender)} value={values.gender}>
+          {USER_GENDER_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </Select>
       </Row>
       <Row label="Email">
         <Input

@@ -1,28 +1,36 @@
 import { redirect } from "next/navigation";
 
+import { LogoutForm } from "@/components/auth/logout-form";
 import { ProfileForm } from "@/components/forms/profile-form";
 import { StudentVerificationForm } from "@/components/forms/student-verification-form";
 import { ProfileIdentitySheets } from "@/components/profile/profile-identity-sheets";
 import { PushNotificationsCard } from "@/components/profile/push-notifications-card";
 import { Button } from "@/components/ui/button";
 import { requireUser } from "@/lib/auth/session";
-import { coerceProfileLanguages } from "@/lib/constants/languages";
-import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
+import { profileLanguagesFormDefault } from "@/lib/constants/languages";
+import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
 import { getSchoolVerificationHint } from "@/lib/constants/verification";
+import { prisma } from "@/lib/db/prisma";
 
 export default async function OnboardingPage() {
   const user = await requireUser();
+  const profileUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    include: { userLanguages: true },
+  });
 
   if (user.onboardingComplete) {
     redirect("/home");
   }
 
   const formKey = `${user.id}-${user.updatedAt.getTime()}`;
+  const schoolCode = normalizeSchoolCode(user.school) ?? DEFAULT_SCHOOL;
+  const schoolShort = schoolOptions.find((s) => s.value === schoolCode)?.shortLabel ?? schoolCode;
 
   return (
     <div className="space-y-6 pb-2">
       <header className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Set up your profile</h1>
+        <h1 className="page-screen-title">Set up your profile</h1>
         <p className="text-sm text-muted-foreground">
           Same sections as <span className="font-medium text-foreground/90">Me</span> — you can change
           these anytime after you continue.
@@ -52,11 +60,14 @@ export default async function OnboardingPage() {
           key={formKey}
           submitLabel="Save profile and continue"
           variant="academicOnly"
+          requireDirtyToSubmit={false}
           avatarId={user.avatarUrl}
           verificationSlot={
             <StudentVerificationForm
               currentStatus={user.studentVerificationStatus}
+              schoolCode={schoolCode}
               schoolHint={getSchoolVerificationHint(user.school)}
+              schoolShortLabel={schoolShort}
               notes={user.studentVerificationNotes}
               email={user.email}
               hasProofUploaded={Boolean(user.manualReviewProofUrl)}
@@ -64,26 +75,33 @@ export default async function OnboardingPage() {
           }
           initialValues={{
             nickname: user.nickname ?? "",
-            school: normalizeSchoolCode(user.school) ?? DEFAULT_SCHOOL,
+            gender: user.gender,
+            school: schoolCode,
             degreeLevel: user.degreeLevel ?? "BACHELOR",
             major: user.major ?? "",
             semester: user.semester ?? 1,
-            languages: coerceProfileLanguages(user.languages),
+            languages: profileLanguagesFormDefault(profileUser?.userLanguages ?? []),
             bio: user.bio ?? "",
             wechatHandle: user.wechatHandle ?? "",
             whatsappHandle: user.whatsappHandle ?? "",
             telegramHandle: user.telegramHandle ?? "",
             instagramHandle: user.instagramHandle ?? "",
+            discoverByCourse: user.discoverByCourse,
+            discoverByMajor: user.discoverByMajor,
+            discoverBySemester: user.discoverBySemester,
+            allowInvitationNotes: user.allowInvitationNotes,
+            contactInfoOptIn: user.contactInfoOptIn,
+            hideFromCourseMembers: user.hideFromCourseMembers,
           }}
         />
       </section>
 
       <section className="border-t border-border/60 pt-4">
-        <form action="/api/auth/logout" method="post">
+        <LogoutForm>
           <Button className="w-full" type="submit" variant="outline">
             Log out
           </Button>
-        </form>
+        </LogoutForm>
       </section>
     </div>
   );

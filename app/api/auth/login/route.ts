@@ -19,9 +19,14 @@ export async function POST(request: Request) {
       return error("Invalid username/email or password.", 401);
     }
 
-    await createSession(user.id);
+    const { accessToken, expiresIn } = await createSession(user.id);
 
-    return ok({ userId: user.id, onboardingComplete: user.onboardingComplete });
+    return ok({
+      userId: user.id,
+      onboardingComplete: user.onboardingComplete,
+      accessToken,
+      expiresIn,
+    });
   } catch (cause) {
     console.error(cause);
     return error("Unable to log in.", 400);

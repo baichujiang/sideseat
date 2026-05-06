@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Plus, X } from "lucide-react";
+import { Check, Loader2, Plus, X } from "lucide-react";
 import { addMinutes, addMonths, format } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -16,7 +16,6 @@ import {
   withDate,
   withTime,
 } from "@/components/schedule/event-datetime-pickers";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { cn } from "@/lib/utils";
@@ -27,6 +26,13 @@ type CompanionOption = {
   id: string;
   name: string;
   avatarUrl: string | null;
+};
+
+export type CalendarCategoryOption = {
+  id: string;
+  name: string;
+  color: string;
+  presetKey: string | null;
 };
 
 function nextWholeHour(date: Date) {
@@ -81,6 +87,8 @@ export function ScheduleAddPanel({
   initialRepeatUntil,
   initialWithUserIds,
   initialOpenCompanionList = false,
+  initialCategoryId,
+  calendarCategories = [],
   companionOptions,
 }: {
   selectedDate: Date;
@@ -98,6 +106,9 @@ export function ScheduleAddPanel({
   initialRepeatUntil?: string;
   initialWithUserIds?: string[];
   initialOpenCompanionList?: boolean;
+  /** When `undefined`, new events default to the "Study" preset (or first list). When `null`, no category. */
+  initialCategoryId?: string | null;
+  calendarCategories?: CalendarCategoryOption[];
   companionOptions: CompanionOption[];
 }) {
   const router = useRouter();
@@ -121,6 +132,7 @@ export function ScheduleAddPanel({
   const [withUserIds, setWithUserIds] = useState<string[]>([]);
   const [withDraft, setWithDraft] = useState("");
   const [showCompanionList, setShowCompanionList] = useState(false);
+  const [categoryId, setCategoryId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -148,6 +160,11 @@ export function ScheduleAddPanel({
     setWithUserIds(initialWithUserIds ?? []);
     setWithDraft("");
     setShowCompanionList(initialOpenCompanionList);
+    const defaultCat =
+      calendarCategories.find((c) => c.presetKey === "study")?.id ??
+      calendarCategories[0]?.id ??
+      null;
+    setCategoryId(initialCategoryId !== undefined ? initialCategoryId : defaultCat);
   }, [
     open,
     selectedDate,
@@ -163,6 +180,8 @@ export function ScheduleAddPanel({
     initialRepeatUntil,
     initialWithUserIds,
     initialOpenCompanionList,
+    initialCategoryId,
+    calendarCategories,
   ]);
 
   const canSave = useMemo(() => Boolean(title.trim() && startAt && endAt), [endAt, startAt, title]);
@@ -206,6 +225,7 @@ export function ScheduleAddPanel({
         withUserIds,
         repeat,
         repeatUntil: repeat === "NONE" ? "" : new Date(`${repeatUntil}T23:59`).toISOString(),
+        categoryId,
       }),
     });
     const payload = await response.json().catch(() => ({}));
@@ -285,25 +305,40 @@ export function ScheduleAddPanel({
       />
 
       <div className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-md px-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-        <section className="overflow-hidden rounded-[2rem] border border-border/60 bg-card shadow-[0_-8px_40px_-18px_rgba(15,23,42,0.28)]">
+        <section className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-card shadow-[0_-8px_40px_-18px_rgba(15,23,42,0.28)]">
           <div className="flex justify-center pt-2">
             <span className="h-1 w-10 rounded-full bg-muted-foreground/20" />
           </div>
 
           <div className="flex max-h-[min(86vh,46rem)] flex-col">
-            <div className="flex items-center justify-between gap-3 border-b border-border/50 px-4 pb-3 pt-2">
-              <div>
-                <h2 className="text-[16px] font-semibold text-foreground">
-                  {mode === "edit" ? "Edit schedule item" : "Add to Calendar"}
-                </h2>
-              </div>
+            <div className="relative flex min-h-12 items-center justify-center border-b border-border/50 px-4 py-2.5">
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="Close add to calendar"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 bg-background text-muted-foreground transition hover:text-foreground"
+                aria-label="Close"
+                className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border/70 bg-background text-muted-foreground transition hover:bg-muted hover:text-foreground"
               >
-                <X className="h-4 w-4" strokeWidth={2.25} />
+                <X className="h-5 w-5" strokeWidth={2.25} />
+              </button>
+              <h2 className="pointer-events-none text-center text-[16px] font-semibold text-foreground">
+                {mode === "edit" ? "Edit schedule item" : "Add to Calendar"}
+              </h2>
+              <button
+                type="button"
+                aria-label={mode === "edit" ? "Save changes" : "Add event"}
+                title={saving ? (mode === "edit" ? "Saving…" : "Adding…") : mode === "edit" ? "Save" : "Add"}
+                onClick={() => void submitEntry()}
+                disabled={!canSave || saving}
+                className={cn(
+                  "absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-primary/25 bg-primary text-primary-foreground shadow-sm transition",
+                  "hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-40",
+                )}
+              >
+                {saving ? (
+                  <Loader2 className="h-5 w-5 animate-spin" strokeWidth={2.25} aria-hidden />
+                ) : (
+                  <Check className="h-5 w-5" strokeWidth={2.75} aria-hidden />
+                )}
               </button>
             </div>
 
@@ -322,6 +357,49 @@ export function ScheduleAddPanel({
           placeholder="Location (optional)"
           className="h-11 rounded-2xl border-border/70 bg-muted/10 shadow-none"
         />
+
+        {calendarCategories.length > 0 ? (
+          <div className="rounded-2xl border border-border/70 bg-muted/[0.06] px-3 py-3">
+            <p className="mb-2 px-1 text-[12px] font-medium text-muted-foreground">Category</p>
+            <div className="flex max-h-32 flex-wrap gap-2 overflow-y-auto">
+              <button
+                type="button"
+                onClick={() => setCategoryId(null)}
+                className={cn(
+                  "rounded-full border px-3 py-1.5 text-[13px] transition",
+                  categoryId === null
+                    ? "border-primary font-medium ring-2 ring-primary/20"
+                    : "border-border/70 text-muted-foreground hover:bg-muted/50",
+                )}
+              >
+                None
+              </button>
+              {calendarCategories.map((c) => {
+                const active = categoryId === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setCategoryId(c.id)}
+                    className={cn(
+                      "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[13px] transition",
+                      active
+                        ? "border-primary font-medium ring-2 ring-primary/20"
+                        : "border-border/70 hover:bg-muted/50",
+                    )}
+                  >
+                    <span
+                      className="h-3 w-3 shrink-0 rounded-full border border-black/10 shadow-sm dark:border-white/15"
+                      style={{ backgroundColor: c.color }}
+                      aria-hidden
+                    />
+                    {c.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
 
         <div className="rounded-2xl border border-border/70 bg-muted/[0.06] px-4 py-1 text-foreground">
           <EventDateTimeRow
@@ -550,20 +628,6 @@ export function ScheduleAddPanel({
         </div>
 
         {error ? <p className="text-[12px] text-destructive">{error}</p> : null}
-
-                <div className="mt-1 flex items-center gap-2 border-t border-border/50 bg-card pt-3">
-                  <Button type="button" variant="ghost" className="h-11 flex-1 rounded-full" onClick={onClose}>
-                    Cancel
-                  </Button>
-                  <Button
-                    type="button"
-                    className="h-11 flex-1 rounded-full"
-                    onClick={() => void submitEntry()}
-                    disabled={!canSave || saving}
-                  >
-                    {saving ? (mode === "edit" ? "Saving…" : "Adding…") : mode === "edit" ? "Save" : "Add"}
-                  </Button>
-                </div>
               </div>
             </div>
           </div>

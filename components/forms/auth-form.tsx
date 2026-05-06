@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
+import { setAccessToken } from "@/lib/auth/client-access-token";
 import { loginSchema, signupSchema } from "@/lib/validators/auth";
 import { safeReturnPath } from "@/lib/nav/back";
 import { Button } from "@/components/ui/button";
@@ -54,12 +55,16 @@ export function AuthForm({
     const response = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(values),
     });
     const payload = await response.json();
     if (!response.ok) {
       setServerError(payload.error ?? "Unable to continue.");
       return;
+    }
+    if (payload.data?.accessToken) {
+      setAccessToken(payload.data.accessToken);
     }
     router.push("/onboarding");
     router.refresh();
@@ -70,12 +75,16 @@ export function AuthForm({
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(values),
     });
     const payload = await response.json();
     if (!response.ok) {
       setServerError(payload.error ?? "Unable to continue.");
       return;
+    }
+    if (payload.data?.accessToken) {
+      setAccessToken(payload.data.accessToken);
     }
     const nextPath = payload.data?.onboardingComplete
       ? safeReturnPath(returnTo, "/home")

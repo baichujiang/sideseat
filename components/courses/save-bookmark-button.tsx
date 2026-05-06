@@ -1,5 +1,7 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import { Bookmark } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -48,7 +50,57 @@ export function SaveBookmarkButton({
     setSaved(initialSaved);
   }, [initialSaved, courseId]);
 
-  if (enrolled) return null;
+  /** Enrolled users can’t use SavedCourse (API rejects); keep the control visible as “on schedule”. */
+  if (enrolled) {
+    if (variant === "icon") {
+      return (
+        <button
+          type="button"
+          disabled
+          aria-label="On your schedule"
+          title="On your schedule"
+          className={cn(
+            "inline-flex h-8 w-8 shrink-0 cursor-default items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary opacity-95",
+            className,
+          )}
+        >
+          <Bookmark className="h-4 w-4 fill-primary" strokeWidth={2.25} />
+        </button>
+      );
+    }
+    if (variant === "chip") {
+      return (
+        <button
+          type="button"
+          disabled
+          aria-label="On your schedule"
+          title="On your schedule"
+          className={cn(
+            "inline-flex shrink-0 cursor-default items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary opacity-95",
+            className,
+          )}
+        >
+          <Bookmark className="h-3 w-3 fill-primary" strokeWidth={2.25} />
+          On schedule
+        </button>
+      );
+    }
+    return (
+      <button
+        type="button"
+        disabled
+        aria-label="On your schedule"
+        title="On your schedule"
+        className={cn(
+          "flex w-full cursor-default items-center justify-center gap-2 rounded-2xl border border-primary/25 bg-primary/5 px-4 py-2.5 text-sm font-medium text-foreground opacity-95",
+          className,
+        )}
+      >
+        <Bookmark className="h-4 w-4 fill-primary text-primary" strokeWidth={2.25} />
+        On your schedule
+      </button>
+    );
+  }
 
   async function toggle(e?: React.MouseEvent | React.FormEvent) {
     e?.preventDefault();
@@ -57,7 +109,7 @@ export function SaveBookmarkButton({
     setPending(true);
     try {
       if (saved) {
-        const res = await fetch(
+        const res = await apiFetch(
           `/api/courses/saved?courseId=${encodeURIComponent(courseId)}`,
           { method: "DELETE" },
         );
@@ -65,7 +117,7 @@ export function SaveBookmarkButton({
         setSaved(false);
         onChange?.(false);
       } else {
-        const res = await fetch("/api/courses/saved", {
+        const res = await apiFetch("/api/courses/saved", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ courseId }),
@@ -81,7 +133,7 @@ export function SaveBookmarkButton({
   }
 
   const label = saved ? "Saved" : "Save";
-  const ariaLabel = saved ? "Remove from saved" : "Save for later";
+  const ariaLabel = saved ? "Remove from saved" : "Save";
 
   if (variant === "icon") {
     return (
@@ -151,7 +203,7 @@ export function SaveBookmarkButton({
         className={cn("h-4 w-4", saved ? "fill-primary text-primary" : undefined)}
         strokeWidth={2.25}
       />
-      {saved ? "Saved — tap to remove" : "Save for later"}
+      {saved ? "Saved — tap to remove" : "Save"}
     </button>
   );
 }

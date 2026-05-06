@@ -18,6 +18,12 @@ type ConnectionInbox = Awaited<
         originCourse: true;
         messages: { orderBy: { createdAt: "desc" }; take: 1; include: { sender: true } };
         _count: { select: { messages: true } };
+        planRequests: {
+          where: { status: "PENDING" },
+          take: 4,
+          orderBy: { updatedAt: "desc" },
+          select: { id: true, title: true, receiverUserId: true, proposerUserId: true },
+        };
       };
     }>
   >
@@ -99,6 +105,12 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
           include: { sender: true },
         },
         _count: { select: { messages: true } },
+        planRequests: {
+          where: { status: "PENDING" },
+          take: 4,
+          orderBy: { updatedAt: "desc" },
+          select: { id: true, title: true, receiverUserId: true, proposerUserId: true },
+        },
       },
     }),
     prisma.userCourse.findMany({

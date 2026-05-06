@@ -20,7 +20,7 @@ export default async function InboxMyPostsPage() {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <BackLink href="/inbox" label="Back" />
-          <h1 className="text-lg font-semibold">My posts</h1>
+          <h1 className="page-screen-title">My posts</h1>
         </div>
         <GuestAppCta returnTo="/inbox/my-posts" />
       </div>
@@ -45,7 +45,7 @@ export default async function InboxMyPostsPage() {
       <div className="flex items-center gap-2 px-0.5">
         <BackLink href="/inbox" label="Back" />
         <div>
-          <h1 className="text-[1.375rem] font-semibold tracking-tight text-foreground">My posts</h1>
+          <h1 className="page-screen-title">My posts</h1>
           <p className="text-[13px] leading-snug text-muted-foreground">
             Discover posts you published — classmates see them on the Discover tab
           </p>

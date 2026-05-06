@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { ConnectionStatus } from "@prisma/client";
+import { ConnectionStatus, type UserGender } from "@prisma/client";
 
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
@@ -10,6 +10,7 @@ export type UserSearchHit = {
   id: string;
   username: string;
   nickname: string | null;
+  gender: UserGender;
   avatarUrl: string | null;
   major: string | null;
   semester: number | null;
@@ -91,6 +92,7 @@ export async function GET(request: NextRequest) {
       id: true,
       username: true,
       nickname: true,
+      gender: true,
       avatarUrl: true,
       major: true,
       semester: true,
@@ -144,6 +146,7 @@ export async function GET(request: NextRequest) {
       id: m.id,
       username: m.username,
       nickname: m.nickname,
+      gender: m.gender,
       avatarUrl: m.avatarUrl,
       major: m.major,
       semester: m.semester,

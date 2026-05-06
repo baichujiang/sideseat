@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { LanguageProficiency, LanguageTag } from "@prisma/client";
 import { ClassmatePostCategory, ClassmatePostStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
@@ -14,7 +15,7 @@ export type ClassmatePostDetailAuthor = {
   major: string | null;
   semester: number | null;
   school: string | null;
-  languages: string[];
+  languages: Array<{ tag: LanguageTag; proficiency: LanguageProficiency }>;
   verifiedStudent: boolean;
   studentVerificationStatus:
     | "UNVERIFIED"
@@ -48,6 +49,34 @@ export type ClassmatePostDetailView =
     }
   | { ok: false };
 
+type UserAuthorSelect = {
+  id: string;
+  username: string;
+  nickname: string | null;
+  avatarUrl: string | null;
+  major: string | null;
+  semester: number | null;
+  school: string | null;
+  verifiedStudent: boolean;
+  studentVerificationStatus: ClassmatePostDetailAuthor["studentVerificationStatus"];
+  userLanguages: Array<{ tag: LanguageTag; proficiency: LanguageProficiency }>;
+};
+
+function toAuthor(user: UserAuthorSelect): ClassmatePostDetailAuthor {
+  return {
+    id: user.id,
+    username: user.username,
+    nickname: user.nickname,
+    avatarUrl: user.avatarUrl,
+    major: user.major,
+    semester: user.semester,
+    school: user.school,
+    languages: user.userLanguages.map((r) => ({ tag: r.tag, proficiency: r.proficiency })),
+    verifiedStudent: user.verifiedStudent,
+    studentVerificationStatus: user.studentVerificationStatus,
+  };
+}
+
 /**
  * Same visibility rules as Discover post list for non-authors; authors always
  * see their own row (any status / expiry).
@@ -68,9 +97,9 @@ export async function getClassmatePostDetailForViewer(
           major: true,
           semester: true,
           school: true,
-          languages: true,
           verifiedStudent: true,
           studentVerificationStatus: true,
+          userLanguages: { select: { tag: true, proficiency: true } },
         },
       },
     },
@@ -80,7 +109,7 @@ export async function getClassmatePostDetailForViewer(
     return { ok: false };
   }
 
-  const author = post.user;
+  const author = toAuthor(post.user);
 
   if (post.userId === viewerId) {
     return {

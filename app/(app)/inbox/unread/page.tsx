@@ -22,7 +22,7 @@ export default async function InboxUnreadPage() {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <BackLink href="/inbox" label="Back" />
-          <h1 className="text-lg font-semibold">Unread</h1>
+          <h1 className="page-screen-title">Unread</h1>
         </div>
         <GuestAppCta returnTo="/inbox/unread" />
       </div>
@@ -61,8 +61,8 @@ export default async function InboxUnreadPage() {
       <div className="flex items-center gap-2 px-0.5">
         <BackLink href="/inbox" label="Back" />
         <div>
-          <h1 className="text-[1.375rem] font-semibold tracking-tight text-foreground">Unread</h1>
-          <p className="text-[13px] leading-snug text-muted-foreground">
+          <h1 className="page-screen-title">Unread</h1>
+          <p className="page-screen-subtitle mt-0.5">
             Chats waiting on you and plan invites to respond to
           </p>
         </div>
@@ -117,12 +117,7 @@ export default async function InboxUnreadPage() {
               <h2 className="px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                 Messages
               </h2>
-              <ul
-                className={cn(
-                  "overflow-hidden rounded-[1.125rem] border border-border/60 bg-card shadow-[0_2px_16px_-4px_rgba(15,23,42,0.06)]",
-                  pendingPlans.length > 0 ? "mt-1" : "",
-                )}
-              >
+              <ul className={cn("space-y-2", pendingPlans.length > 0 ? "mt-1" : "")}>
                 {unreadItems.map((item) =>
                   item.kind === "direct" ? (
                     <DirectInboxRow

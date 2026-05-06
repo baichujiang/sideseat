@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { setAccessToken } from "@/lib/auth/client-access-token";
 import { Button } from "@/components/ui/button";
 
 export function GuestBrowseButton({ className }: { className?: string }) {
@@ -17,12 +18,16 @@ export function GuestBrowseButton({ className }: { className?: string }) {
       const response = await fetch("/api/auth/guest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({}),
       });
       const payload = await response.json();
       if (!response.ok) {
         setError(payload.error ?? "Could not start guest session.");
         return;
+      }
+      if (payload.data?.accessToken) {
+        setAccessToken(payload.data.accessToken);
       }
       router.push("/courses");
       router.refresh();

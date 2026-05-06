@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { apiFetch } from "@/lib/auth/api-fetch";
+
+import { useCallback, useEffect, useId, useState } from "react";
 import { Bell, BellOff, Loader2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { urlBase64ToUint8Array } from "@/lib/push/url-base64";
+import { cn } from "@/lib/utils";
 
 type ApiOk<T> = { success: true; data: T };
 type ApiErr = { success: false; error: string };
@@ -14,7 +15,56 @@ async function readJson<T>(res: Response): Promise<T | ApiErr> {
   return (await res.json()) as T | ApiErr;
 }
 
+/** iOS-style settings switch (track + thumb). */
+function IosStyleSwitch({
+  on,
+  disabled,
+  busy,
+  onToggle,
+  labelledBy,
+}: {
+  on: boolean;
+  disabled: boolean;
+  busy: boolean;
+  onToggle: () => void;
+  labelledBy?: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      {...(labelledBy ? { "aria-labelledby": labelledBy } : {})}
+      disabled={disabled || busy}
+      onClick={onToggle}
+      className={cn(
+        "relative h-[31px] w-[51px] shrink-0 rounded-full transition-colors duration-200 ease-out",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-classmates-blue focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "disabled:opacity-45",
+        on ? "bg-[#34C759]" : "bg-[#E5E5EA] dark:bg-zinc-600",
+      )}
+    >
+      <span
+        className={cn(
+          "pointer-events-none absolute top-[2px] h-[27px] w-[27px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2),0_1px_1px_rgba(0,0,0,0.06)] transition-[left] duration-200 ease-out",
+          on ? "left-[calc(100%-29px)]" : "left-[2px]",
+        )}
+      />
+      {busy ? (
+        <Loader2
+          className="pointer-events-none absolute inset-0 m-auto h-3.5 w-3.5 animate-spin text-white/95"
+          aria-hidden
+        />
+      ) : null}
+    </button>
+  );
+}
+
+const settingCardClass =
+  "rounded-2xl border border-classmates-edge bg-classmates-surface px-4 py-4 shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card";
+
 export function PushNotificationsCard() {
+  const titleId = useId();
   const [phase, setPhase] = useState<"loading" | "ready">("loading");
   const [supported, setSupported] = useState(false);
   const [serverKey, setServerKey] = useState<string | null>(null);
@@ -32,7 +82,7 @@ export function PushNotificationsCard() {
       return;
     }
 
-    const vRes = await fetch("/api/push/vapid-public", { credentials: "same-origin" });
+    const vRes = await apiFetch("/api/push/vapid-public", { credentials: "same-origin" });
     const vJson = await readJson<ApiOk<{ publicKey: string | null }>>(vRes);
     if (!("success" in vJson) || !vJson.success) {
       setServerKey(null);
@@ -62,7 +112,7 @@ export function PushNotificationsCard() {
     try {
       const perm = await Notification.requestPermission();
       if (perm !== "granted") {
-        setHint("Notifications were blocked. You can allow them in browser settings.");
+        setHint("Notifications are off — allow them in browser settings, then try again.");
         setBusy(false);
         return;
       }
@@ -81,7 +131,7 @@ export function PushNotificationsCard() {
         setBusy(false);
         return;
       }
-      const res = await fetch("/api/push/subscribe", {
+      const res = await apiFetch("/api/push/subscribe", {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
@@ -112,7 +162,7 @@ export function PushNotificationsCard() {
       if (sub) {
         const j = sub.toJSON();
         if (j.endpoint) {
-          await fetch("/api/push/subscribe", {
+          await apiFetch("/api/push/subscribe", {
             method: "DELETE",
             credentials: "same-origin",
             headers: { "Content-Type": "application/json" },
@@ -130,70 +180,98 @@ export function PushNotificationsCard() {
 
   if (phase === "loading") {
     return (
-      <Card className="flex items-center gap-3 border-border/80">
-        <Loader2 className="h-5 w-5 shrink-0 animate-spin text-muted-foreground" aria-hidden />
-        <CardTitle className="text-base">Notifications</CardTitle>
-      </Card>
+      <div className={cn(settingCardClass, "flex items-start gap-3")}>
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] bg-muted/50 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-3">
+            <p id={titleId} className="text-[15px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
+              Notifications
+            </p>
+            <span className="h-[31px] w-[51px] shrink-0 rounded-full bg-muted/60 dark:bg-muted" aria-hidden />
+          </div>
+          <p className="mt-1 text-[13px] leading-snug text-classmates-sub dark:text-zinc-400">Loading…</p>
+        </div>
+      </div>
     );
   }
 
   if (!supported) {
     return (
-      <Card className="space-y-2 border-dashed border-border/80 bg-muted/20">
-        <div className="flex items-center gap-2">
-          <BellOff className="h-5 w-5 text-muted-foreground" aria-hidden />
-          <CardTitle className="text-base">Push notifications</CardTitle>
+      <div className={cn(settingCardClass, "flex items-start gap-3")}>
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] bg-muted/45 text-muted-foreground">
+          <BellOff className="h-5 w-5" strokeWidth={2} aria-hidden />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-3">
+            <p id={titleId} className="text-[15px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
+              Notifications
+            </p>
+            <span className="shrink-0 text-[12px] font-medium text-muted-foreground">Unavailable</span>
+          </div>
+          <p className="mt-1 text-[13px] leading-snug text-classmates-sub dark:text-zinc-400">
+            Not available in this browser. Use Safari / Chrome or an installed app to get alerts.
+          </p>
         </div>
-        <CardDescription>
-          This browser does not support Web Push, or you need to install the app from a supported
-          home-screen shortcut first.
-        </CardDescription>
-      </Card>
+      </div>
     );
   }
 
   if (!serverKey) {
     return (
-      <Card className="space-y-2 border-dashed border-amber-200/80 bg-amber-50/40 dark:bg-amber-950/20">
-        <div className="flex items-center gap-2">
-          <Bell className="h-5 w-5 text-amber-800 dark:text-amber-200" aria-hidden />
-          <CardTitle className="text-base">Push notifications</CardTitle>
+      <div
+        className={cn(
+          settingCardClass,
+          "flex items-start gap-3 border-amber-200/80 bg-amber-50/40 dark:border-amber-900/45 dark:bg-amber-950/25",
+        )}
+      >
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-800 dark:text-amber-200">
+          <Bell className="h-5 w-5" strokeWidth={2} aria-hidden />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-3">
+            <p id={titleId} className="text-[15px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
+              Notifications
+            </p>
+            <span className="shrink-0 text-[12px] font-medium text-amber-900/80 dark:text-amber-200/90">Setup</span>
+          </div>
+          <p className="mt-1 text-[13px] leading-snug text-classmates-sub dark:text-zinc-400">
+            Server is missing VAPID keys — see <code className="rounded bg-background/80 px-1 text-[12px]">.env.example</code>.
+          </p>
         </div>
-        <CardDescription>
-          The server is missing VAPID keys. Add VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, and
-          VAPID_SUBJECT to the environment (see <code className="text-xs">.env.example</code>).
-        </CardDescription>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="space-y-3 border-border/80">
-      <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
+    <div className="space-y-2">
+      <div className={cn(settingCardClass, "flex items-start gap-3")}>
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] bg-classmates-blue-soft text-classmates-blue">
           <Bell className="h-5 w-5" strokeWidth={2} aria-hidden />
         </span>
-        <div className="min-w-0 flex-1 space-y-1">
-          <CardTitle className="text-base">Push notifications</CardTitle>
-          <CardDescription>
-            Get alerted for new chat messages and calendar entries starting in about 15 minutes.
-          </CardDescription>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-3">
+            <p id={titleId} className="text-[15px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
+              Notifications
+            </p>
+            <IosStyleSwitch
+              labelledBy={titleId}
+              on={subscribed}
+              disabled={!serverKey}
+              busy={busy}
+              onToggle={() => {
+                if (busy) return;
+                void (subscribed ? disable() : enable());
+              }}
+            />
+          </div>
+          <p className="mt-1 pr-1 text-[12px] leading-snug text-classmates-sub dark:text-zinc-400">
+            Messages and plans on this device.
+          </p>
         </div>
       </div>
-      {hint ? <p className="text-sm text-destructive">{hint}</p> : null}
-      <div className="flex flex-wrap gap-2">
-        {subscribed ? (
-          <Button type="button" variant="outline" disabled={busy} onClick={() => void disable()}>
-            {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Turn off on this device
-          </Button>
-        ) : (
-          <Button type="button" disabled={busy} onClick={() => void enable()}>
-            {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Turn on
-          </Button>
-        )}
-      </div>
-    </Card>
+      {hint ? <p className="px-1 text-xs text-destructive">{hint}</p> : null}
+    </div>
   );
 }

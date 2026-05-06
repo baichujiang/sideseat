@@ -20,9 +20,9 @@ export default async function BlockedUsersPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <BackLink href="/profile" label="Back to Me" />
+        <BackLink href="/profile" label="Back to profile" />
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">Blocked users</h1>
+          <h1 className="page-screen-title">Blocked users</h1>
           <p className="text-xs text-muted-foreground">People you have blocked from contacting you</p>
         </div>
       </div>

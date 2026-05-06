@@ -1,9 +1,20 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import type { CalendarRepeatRule } from "@prisma/client";
 import type { Route } from "next";
 import { format } from "date-fns";
-import { Clock3, Loader2, MapPin, MessageCircle, Repeat2, UsersRound, X } from "lucide-react";
+import {
+  Clock3,
+  Loader2,
+  MapPin,
+  MessageCircle,
+  Palette,
+  Repeat2,
+  UsersRound,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
@@ -23,6 +34,9 @@ export type ScheduleDetailItem = {
   repeatRule: CalendarRepeatRule;
   repeatUntilISO: string | null;
   eventParticipants: Array<{ userId: string | null; name: string }>;
+  categoryId?: string | null;
+  categoryName?: string | null;
+  categoryColor?: string | null;
 };
 
 export function ScheduleItemDetailSheet({
@@ -64,6 +78,11 @@ export function ScheduleItemDetailSheet({
   const locationValue = item.location?.trim() ? item.location : "No location";
   const repeatValue = item.repeatLabel;
   const noteValue = item.note?.trim() ? item.note : "No notes";
+  const categoryLabel = item.categoryName?.trim()
+    ? item.categoryName
+    : item.categoryColor
+      ? "Custom"
+      : null;
 
   const participants = item.eventParticipants;
   const hasPeople = participants.length > 0;
@@ -74,7 +93,7 @@ export function ScheduleItemDetailSheet({
     setChatError(null);
     setOpeningChatUserId(peerId);
     try {
-      const res = await fetch("/api/connections/open", {
+      const res = await apiFetch("/api/connections/open", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ peerId }),
@@ -140,11 +159,31 @@ export function ScheduleItemDetailSheet({
             <div className="flex-1 overflow-y-auto px-4 pb-4 pt-3">
               <div className="space-y-2.5">
                 <div className="rounded-2xl border border-border/70 bg-muted/[0.03] px-4 py-3">
+                  {categoryLabel ? (
+                    <DetailRow
+                      icon={<Palette className="h-4 w-4" strokeWidth={2.1} />}
+                      label="Category"
+                      value={
+                        <span className="inline-flex items-center gap-2">
+                          {item.categoryColor ? (
+                            <span
+                              className="h-3 w-3 shrink-0 rounded-full border border-border/60 shadow-sm"
+                              style={{ backgroundColor: item.categoryColor }}
+                              aria-hidden
+                            />
+                          ) : null}
+                          <span>{categoryLabel}</span>
+                        </span>
+                      }
+                      compact
+                    />
+                  ) : null}
                   <DetailRow
                     icon={<MapPin className="h-4 w-4" strokeWidth={2.1} />}
                     label="Location"
                     value={locationValue}
                     compact
+                    divider={Boolean(categoryLabel)}
                   />
                   <DetailRow
                     icon={<Repeat2 className="h-4 w-4" strokeWidth={2.1} />}
@@ -257,7 +296,7 @@ function DetailRow({
 }: {
   icon: ReactNode;
   label: string;
-  value: string;
+  value: ReactNode;
   compact?: boolean;
   divider?: boolean;
 }) {
@@ -272,7 +311,7 @@ function DetailRow({
       <span className="mt-0.5 shrink-0 text-muted-foreground">{icon}</span>
       <div className="min-w-0 flex-1">
         <p className="text-[12px] font-medium text-muted-foreground">{label}</p>
-        <p className="mt-0.5 text-[13px] leading-relaxed text-foreground">{value}</p>
+        <div className="mt-0.5 text-[13px] leading-relaxed text-foreground">{value}</div>
       </div>
     </div>
   );

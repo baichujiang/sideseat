@@ -12,9 +12,12 @@ import {
   PlanConfirmedCardMessage,
   PlanRequestCardMessage,
 } from "@/components/chat/plan-request-card-message";
+import { ContactRemarkEditor } from "@/components/chat/contact-remark-editor";
 import { BackLink } from "@/components/nav/back-link";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { requireConnection } from "@/lib/auth/guards";
+import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
+import { selfNotesDisplayTitle } from "@/lib/connections/self-notes-title";
 import { safeReturnPath } from "@/lib/nav/back";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +46,14 @@ export default async function ConnectionPage({
   const otherUser = connection.userAId === user.id ? connection.userB : connection.userA;
 
   const courseName = connection.invitation?.course?.name ?? null;
+  const myRemark = contactRemarkForViewer(connection, user.id);
+  const peerNickname = otherUser.nickname?.trim() ?? "";
+  const headerTitle = isSelfNotes
+    ? selfNotesDisplayTitle(user, myRemark)
+    : (myRemark || peerNickname || "Student");
+  const showPeerNicknameLine =
+    !isSelfNotes && Boolean(myRemark) && myRemark !== peerNickname && peerNickname.length > 0;
+  const showPeerUsernameLine = !isSelfNotes && Boolean(myRemark) && !peerNickname.length;
   const messages = connection.messages;
   const profileLinkHref = isSelfNotes
     ? (`/profile?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route)
@@ -55,47 +66,69 @@ export default async function ConnectionPage({
       {/* Chat app bar */}
       <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
         <BackLink href={backHref} label="Back" />
-        <Link
-          href={profileLinkHref}
-          className="flex min-w-0 flex-1 items-center gap-2 rounded-xl py-1 pl-1 pr-2 text-left transition hover:bg-muted/70 active:bg-muted"
-          aria-label={
-            isSelfNotes
-              ? "Open your profile"
-              : `View ${otherUser.nickname?.trim() || "Student"}'s profile`
-          }
-        >
-          <PresetAvatar id={otherUser.avatarUrl} size={40} className="shrink-0" />
+        <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl py-1 pl-1 pr-2">
+          <Link
+            href={profileLinkHref}
+            className="shrink-0 rounded-full transition hover:opacity-90 active:opacity-80"
+            aria-label={
+              isSelfNotes
+                ? "Open your profile"
+                : `View ${peerNickname || otherUser.username}'s profile`
+            }
+          >
+            <PresetAvatar id={otherUser.avatarUrl} size={40} className="shrink-0" />
+          </Link>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold leading-tight">
-              {isSelfNotes ? "Notes to self" : (otherUser.nickname ?? "Student")}
-            </p>
+            <div className="flex min-w-0 items-center gap-1.5">
+              <Link
+                href={profileLinkHref}
+                className="min-w-0 rounded-md py-0.5 text-left transition hover:bg-muted/70 active:bg-muted"
+              >
+                <p className="truncate text-sm font-semibold leading-tight">{headerTitle}</p>
+              </Link>
+              {!isSelfNotes ? (
+                <ContactRemarkEditor
+                  connectionId={connection.id}
+                  initialRemark={myRemark}
+                  isSelfNotes={false}
+                  variant="inline"
+                />
+              ) : null}
+            </div>
+            {showPeerNicknameLine ? (
+              <p className="truncate text-[11px] text-muted-foreground">{peerNickname}</p>
+            ) : null}
+            {showPeerUsernameLine ? (
+              <p className="truncate text-[11px] text-muted-foreground">@{otherUser.username}</p>
+            ) : null}
             {!isSelfNotes && courseName ? (
               <p className="truncate text-[11px] text-muted-foreground">{courseName}</p>
             ) : null}
-            {!isSelfNotes && !courseName ? (
-              <p className="truncate text-[11px] text-muted-foreground">Direct message</p>
-            ) : null}
           </div>
-        </Link>
+        </div>
       </header>
 
       {!isSelfNotes ? (
-        <div className="shrink-0 border-b border-border/70 bg-background/80 px-3 py-2">
-          <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground/85">
-            {courseName ? `Connected via ${courseName}` : "Direct connection"}
-          </span>
+        <div className="shrink-0 space-y-1 border-b border-border/70 bg-background/80 px-3 py-2">
+          {courseName ? (
+            <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground/85">
+              {courseName}
+            </span>
+          ) : null}
         </div>
-      ) : null}
+      ) : (
+        <ContactRemarkEditor
+          connectionId={connection.id}
+          initialRemark={myRemark}
+          isSelfNotes
+          variant="minimal"
+        />
+      )}
 
       <ChatScrollContainer messageCount={messages.length}>
         {messages.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
             <p className="text-sm font-medium text-foreground">No messages yet</p>
-            {!isSelfNotes ? (
-              <p className="mt-1 text-xs text-muted-foreground">
-                Say hi — or share availability and suggest a plan from the plus menu.
-              </p>
-            ) : null}
           </div>
         ) : (
           <div className="space-y-3 pb-2">

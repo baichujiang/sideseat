@@ -57,19 +57,19 @@ export default async function DiscoverPostDetailPage({
         <BackLink href={backHref} label="Back" />
       </header>
 
-      <article className="overflow-hidden rounded-[1.25rem] border border-border/60 bg-card shadow-[0_2px_16px_-4px_rgba(15,23,42,0.06)]">
-        <div className="border-b border-border/50 px-4 py-4">
+      <article className="overflow-hidden rounded-[1.25rem] border border-[#E7E0D6] bg-white shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
+        <div className="border-b border-[#E7E0D6]/80 px-4 py-4">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
+            <span className="rounded-full border border-classmates-teal-border/60 bg-classmates-teal-soft px-2.5 py-1 text-[11px] font-semibold text-classmates-teal">
               {labelCategory(post.category)}
             </span>
             {isAuthor ? (
-              <span className="rounded-full bg-primary/12 px-2.5 py-1 text-[11px] font-semibold text-primary">
+              <span className="rounded-full border border-classmates-blue-border/80 bg-classmates-blue-soft px-2.5 py-1 text-[11px] font-semibold text-classmates-blue">
                 Your post
               </span>
             ) : null}
             {live ? (
-              <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+              <span className="rounded-full border border-classmates-teal-border/70 bg-classmates-teal-soft px-2.5 py-1 text-[11px] font-semibold text-classmates-teal dark:text-teal-200">
                 Active
               </span>
             ) : (
@@ -78,7 +78,7 @@ export default async function DiscoverPostDetailPage({
               </span>
             )}
           </div>
-          <h1 className="mt-3 text-[1.35rem] font-semibold leading-tight tracking-tight text-foreground">
+          <h1 className="page-screen-title mt-3">
             {post.title}
           </h1>
           {post.body ? (
@@ -137,7 +137,7 @@ export default async function DiscoverPostDetailPage({
             />
             <Link
               href="/discover"
-              className="mt-4 inline-flex text-[13px] font-semibold text-primary underline-offset-4 hover:underline"
+              className="mt-4 inline-flex text-[13px] font-semibold text-classmates-blue underline-offset-4 hover:underline"
             >
               Back to Classmates
             </Link>

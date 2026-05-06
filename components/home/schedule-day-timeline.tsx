@@ -4,6 +4,14 @@ import { addMinutes } from "date-fns";
 import { BookOpen, CalendarClock, MapPin } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import {
+  categoryAccentColor,
+  categoryBlockSurfaceStyle,
+} from "@/lib/calendar/category-visual";
+import {
+  inferScheduleEventToneKey,
+  SCHEDULE_EVENT_TONE_STYLES,
+} from "@/lib/schedule-event-card-tone";
 import { cn } from "@/lib/utils";
 
 /**
@@ -25,22 +33,18 @@ export type DayTimelineItem = {
   repeatUntilISO?: string | null;
   eventParticipants?: Array<{ userId: string | null; name: string }>;
   courseId?: string | null;
+  categoryId?: string | null;
+  categoryName?: string | null;
+  categoryColor?: string | null;
 };
 
 const MINUTE_PX = 0.72;
 const VISUAL_PADDING_MINUTES = 30;
 const FULL_DAY_MINUTES = 24 * 60;
+/** Initial scroll window: 08:00–20:00 (content still spans −0:30…24:30 for label clearance). */
 const DEFAULT_VIEW_START = 8 * 60;
-const DEFAULT_VIEW_END = 21 * 60;
-
-const COURSE_TONE = {
-  soft: "border-amber-300/70 bg-amber-100/70 text-amber-950 before:absolute before:bottom-0 before:left-0 before:top-0 before:w-1 before:bg-amber-400",
-  solid: "border-amber-400 bg-amber-400 text-white",
-};
-const STUDY_TONE = {
-  soft: "border-dashed border-foreground/25 bg-muted/55 text-foreground before:absolute before:bottom-0 before:left-0 before:top-0 before:w-1 before:bg-foreground/35",
-  solid: "border-foreground/80 bg-foreground text-background",
-};
+const DEFAULT_VIEW_END = 20 * 60;
+const TIME_COL_PX = 60;
 
 /**
  * Day-view timeline. A single-column version of the week grid: hour axis on
@@ -129,20 +133,29 @@ export function ScheduleDayTimeline({
   }
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card p-2">
+    <div
+      className={cn(
+        "mt-4 overflow-hidden rounded-2xl border border-[#E7E0D6] bg-white p-2 shadow-[0_8px_24px_rgba(15,23,42,0.05)]",
+        "dark:border-border dark:bg-card dark:shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
+      )}
+    >
       <div
         ref={scrollRef}
         className="overflow-y-auto overscroll-contain"
         style={{ height: `${viewportHeight}px` }}
       >
-        <div
-          className="relative grid gap-px"
-          style={{
-            gridTemplateColumns: "2.25rem minmax(0, 1fr)",
-            height: `${fullHeight}px`,
-          }}
-        >
-          <div className="relative">
+        <>
+          <div
+            className="relative grid"
+            style={{
+              gridTemplateColumns: `${TIME_COL_PX}px minmax(0, 1fr)`,
+              height: `${fullHeight}px`,
+            }}
+          >
+          <div
+            className="relative cursor-default border-r border-[#F0ECE6] bg-[#FAF9F6] dark:border-white/[0.08] dark:bg-muted/25"
+            onClick={() => setSelectedItemId(null)}
+          >
             {hourLabels.map((m) => {
               const hiddenByNow =
                 hasNowLine && Math.abs(m - nowMinute) < 28;
@@ -151,28 +164,33 @@ export function ScheduleDayTimeline({
               return (
                 <div
                   key={m}
-                  className="absolute -translate-y-1/2 pr-1 text-right text-[10px] font-medium text-muted-foreground"
-                  style={{ top: `${top}%`, right: 0, left: 0 }}
+                  className="pointer-events-none absolute inset-x-0 -translate-y-1/2 px-1.5 text-right tabular-nums"
+                  style={{ top: `${top}%` }}
                 >
-                  {m === FULL_DAY_MINUTES ? "24:00" : formatHM(m)}
+                  <span className="text-xs font-medium text-[#5F6B7A] dark:text-muted-foreground">
+                    {m === FULL_DAY_MINUTES ? "24:00" : formatHM(m)}
+                  </span>
                 </div>
               );
             })}
 
             {hasNowLine ? (
               <div
-                className="pointer-events-none absolute left-0 right-0 z-20 -translate-y-1/2 pr-1 text-right text-[10px] font-semibold tabular-nums text-rose-500"
+                className="pointer-events-none absolute inset-x-0 z-20 -translate-y-1/2 px-1 text-right tabular-nums"
                 style={{ top: `${((nowMinute - visualStartMinute) / totalMinutes) * 100}%` }}
               >
-                {formatHM(nowMinute)}
+                <span className="inline-block rounded-full bg-[#E53935] px-2 py-0.5 text-[11px] font-semibold tabular-nums leading-none text-white shadow-sm dark:bg-red-500">
+                  {formatHM(nowMinute)}
+                </span>
               </div>
             ) : null}
           </div>
 
-          <div className="relative border-l border-border/60 bg-background/40">
+          <div className="relative border-l border-[#F3EFE8] bg-white/90 dark:border-white/[0.07] dark:bg-card/80">
             <button
               type="button"
               aria-label="Create event"
+              onClick={() => setSelectedItemId(null)}
               onDoubleClick={(event) => {
                 createFromPointer(
                   event.clientY,
@@ -203,12 +221,12 @@ export function ScheduleDayTimeline({
               className="absolute inset-0 z-0 cursor-default"
             />
 
-            {hourLabels.slice(1, -1).map((m) => {
+            {hourLabels.map((m) => {
               const top = ((m - visualStartMinute) / totalMinutes) * 100;
               return (
                 <div
                   key={m}
-                  className="absolute left-0 right-0 border-t border-border/25"
+                  className="pointer-events-none absolute left-0 right-0 border-t border-[#F0ECE6] dark:border-white/[0.08]"
                   style={{ top: `${top}%` }}
                 />
               );
@@ -216,12 +234,18 @@ export function ScheduleDayTimeline({
 
             {hasNowLine ? (
               <div
-                className="absolute left-0 right-0 z-20 h-px bg-rose-500"
+                className="pointer-events-none absolute inset-x-0 z-20"
                 style={{
                   top: `${((nowMinute - visualStartMinute) / totalMinutes) * 100}%`,
                 }}
               >
-                <span className="absolute -left-1 -top-[3px] h-[7px] w-[7px] rounded-full bg-rose-500" />
+                <div className="relative h-0 w-full -translate-y-1/2">
+                  <span
+                    className="absolute left-0 top-1/2 -translate-y-1/2 border-y-[4px] border-y-transparent border-l-[6px] border-l-[#E53935] dark:border-l-red-400"
+                    aria-hidden
+                  />
+                  <div className="absolute left-2 right-0 top-1/2 h-px -translate-y-1/2 bg-[#E53935]/90 dark:bg-red-400/90" />
+                </div>
               </div>
             ) : null}
 
@@ -243,6 +267,7 @@ export function ScheduleDayTimeline({
                 nowMinute={nowMinute}
                 selected={selectedItemId === item.id}
                 onSelect={() => {
+                  if (item.id === "__draft-preview__") return;
                   setSelectedItemId(item.id);
                   onOpenItem?.(item);
                 }}
@@ -250,6 +275,8 @@ export function ScheduleDayTimeline({
             ))}
           </div>
         </div>
+        <div className="h-24 shrink-0" aria-hidden />
+        </>
       </div>
     </div>
   );
@@ -286,15 +313,23 @@ function TimelineBlock({
   const isStudy = item.kind === "study";
   const Icon = isStudy ? CalendarClock : BookOpen;
 
-  const tone = isStudy ? STUDY_TONE : COURSE_TONE;
+  const toneKey = inferScheduleEventToneKey({
+    kind: isStudy ? "study" : "class",
+    title: item.title,
+  });
+  const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
+  const isDraftNewTone = toneKey === "draftNew";
+  const catHex = item.categoryColor?.trim();
+  const useCategoryColor = Boolean(catHex);
   const toneClass = cn(
-    "absolute left-0.5 right-0.5 overflow-hidden rounded-[2px] border px-2 py-1 text-left text-[11px] leading-tight shadow-sm transition",
-    selected ? tone.solid : tone.soft,
+    "absolute inset-x-0 overflow-hidden rounded-2xl px-2 py-1.5 text-left transition",
+    !useCategoryColor && (selected ? tone.cardSelected : tone.card),
+    useCategoryColor && "shadow-sm",
     state === "past" ? "opacity-55" : undefined,
     state === "ongoing"
-      ? "ring-2 ring-primary/40 ring-offset-1 ring-offset-background"
+      ? "ring-2 ring-[#E53935]/30 ring-offset-1 ring-offset-background dark:ring-red-400/35"
       : undefined,
-    "hover:brightness-95 active:brightness-90",
+    "hover:brightness-[0.98] active:brightness-95",
   );
 
   // Minimum visual height so a 30-min block doesn't collapse into illegibility.
@@ -305,54 +340,84 @@ function TimelineBlock({
   const showLocationRow = effectiveHeight > 9 && item.location;
   const showWithRow = effectiveHeight > 11 && item.withLabel;
 
+  const metaCls = cn(
+    "truncate text-xs",
+    useCategoryColor
+      ? selected
+        ? "text-white/85"
+        : "text-[#111827]/65 dark:text-muted-foreground"
+      : selected && !isDraftNewTone
+        ? "text-white/80"
+        : "text-[#111827]/65 dark:text-muted-foreground",
+  );
+
   const inner = (
     <>
       {showTimeRow ? (
-        <div className="truncate text-left text-[10px] tabular-nums opacity-75">
+        <p
+          className={cn(
+            "truncate text-left text-[12px] font-medium tabular-nums leading-none",
+            !useCategoryColor && (selected ? tone.accentColorSelected : tone.accentColor),
+          )}
+          style={
+            useCategoryColor && catHex
+              ? { color: selected ? "#ffffff" : categoryAccentColor(catHex) }
+              : undefined
+          }
+        >
           {formatHM(item.startMinute)}
-        </div>
+        </p>
       ) : null}
-      <div className="flex items-center gap-1">
+      <div className="mt-0.5 flex min-h-0 items-center gap-1.5">
         <Icon
           className={cn(
-            "h-3 w-3 shrink-0",
-            selected
-              ? "text-current"
-              : state === "ongoing"
-                ? "text-primary"
-                : "text-foreground/70",
+            "h-3.5 w-3.5 shrink-0",
+            !useCategoryColor && (selected ? tone.accentColorSelected : tone.accentColor),
           )}
+          style={
+            useCategoryColor && catHex
+              ? { color: selected ? "#ffffff" : categoryAccentColor(catHex) }
+              : undefined
+          }
           strokeWidth={2.25}
         />
-        <span
+        <p
           className={cn(
-            "truncate text-left font-semibold",
-            !selected && state === "ongoing" ? "text-primary" : undefined,
+            "min-w-0 flex-1 truncate text-left text-[13px] font-bold leading-snug",
+            !useCategoryColor && (selected ? tone.titleSelected : tone.title),
+            useCategoryColor && (selected ? "text-white" : "text-[#111827] dark:text-foreground"),
           )}
         >
           {item.title}
-        </span>
+        </p>
       </div>
       {showLocationRow ? (
-        <div className="flex items-center gap-1 truncate text-[10px] opacity-75">
-          <MapPin className="h-2.5 w-2.5 shrink-0" strokeWidth={2.25} />
+        <div className={cn("mt-1 flex items-center gap-1 truncate", metaCls)}>
+          <MapPin className="h-3 w-3 shrink-0 opacity-80" strokeWidth={2.25} />
           <span className="truncate">{item.location}</span>
         </div>
       ) : null}
-      {showWithRow ? <div className="truncate text-[10px] opacity-70">{item.withLabel}</div> : null}
+      {showWithRow ? <p className={cn("mt-0.5 truncate", metaCls)}>{item.withLabel}</p> : null}
     </>
   );
 
-  const style = { top: `${top}%`, height: `${effectiveHeight}%` };
+  const positionStyle = { top: `${top}%`, height: `${effectiveHeight}%` };
+  const surfaceStyle =
+    useCategoryColor && catHex
+      ? { ...positionStyle, ...categoryBlockSurfaceStyle(catHex, selected) }
+      : positionStyle;
   const title = `${item.title} · ${formatHM(item.startMinute)}`;
 
   return (
     <button
       type="button"
-      className={toneClass}
-      style={style}
+      className={cn(toneClass, "z-[1]")}
+      style={surfaceStyle}
       title={title}
-      onClick={onSelect}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect();
+      }}
     >
       <div className="flex h-full flex-col items-start justify-start">{inner}</div>
     </button>

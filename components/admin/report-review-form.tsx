@@ -1,5 +1,7 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import { ReportStatus } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -49,7 +51,7 @@ export function ReportReviewForm({
         onClick={() =>
           startTransition(async () => {
             setError("");
-            const response = await fetch(`/api/admin/reports/${reportId}`, {
+            const response = await apiFetch(`/api/admin/reports/${reportId}`, {
               method: "PATCH",
               headers: {
                 "Content-Type": "application/json",

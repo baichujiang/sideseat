@@ -29,6 +29,33 @@ const config: Config = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        /** Classmates / Discover — blues for CTAs & chips, teal for social “link”, warm surfaces */
+        /** Product surface + ink — Profile, Discover cards, inbox (light). */
+        classmates: {
+          blue: "#2563EB",
+          "blue-soft": "#EFF6FF",
+          "blue-border": "#BFDBFE",
+          "blue-heading": "#1E3A8A",
+          "blue-body": "#1E40AF",
+          teal: "#0F766E",
+          "teal-soft": "#F0FDFA",
+          "teal-border": "#99F6E4",
+          warm: "#F8F7F4",
+          "warm-alt": "#FAF9F6",
+          surface: "#FFFFFF",
+          edge: "#E7E0D6",
+          hairline: "#EFECE6",
+          rail: "#E6E3DC",
+          ink: "#111827",
+          sub: "#5F6B7A",
+          hint: "#8A94A6",
+          success: "#059669",
+          "success-soft": "#ECFDF5",
+          /** Bottom nav active pill (not in base spec; harmonizes with warm page). */
+          mint: "#E8F1F0",
+          /** Soft focus border on inputs (blue-300). */
+          azure: "#93C5FD",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

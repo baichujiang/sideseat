@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 
+import { ContactRemarkEditor } from "@/components/chat/contact-remark-editor";
 import { PeerProfileMenu } from "@/components/profile/peer-profile-menu";
 import { ProfileMessageButton } from "@/components/profile/profile-message-button";
 import { PeerProfileView } from "@/components/profile/peer-profile-view";
@@ -32,9 +33,18 @@ export default async function PeerUserProfilePage({
         <BackLink href={backHref} label="Back" />
         <div className="min-w-0 flex-1 pr-2">
           <p className="truncate text-sm font-semibold">Profile</p>
-          <p className="truncate text-[11px] text-muted-foreground">
-            {peer.nickname?.trim() || "Student"}
-          </p>
+          <div className="flex min-w-0 items-center gap-1">
+            <p className="truncate text-[11px] text-muted-foreground">
+              {peer.nickname?.trim() || "Student"}
+            </p>
+            {access.mode === "connection" ? (
+              <ContactRemarkEditor
+                connectionId={access.connectionId}
+                initialRemark={access.myContactRemark}
+                variant="inline"
+              />
+            ) : null}
+          </div>
         </div>
         <PeerProfileMenu
           peerUserId={peer.id}
@@ -48,6 +58,7 @@ export default async function PeerUserProfilePage({
         <PeerProfileView
           peer={{
             nickname: peer.nickname,
+            gender: peer.gender,
             avatarUrl: peer.avatarUrl,
             bio: peer.bio,
             major: peer.major,
@@ -56,7 +67,10 @@ export default async function PeerUserProfilePage({
             degreeLevel: peer.degreeLevel,
             verifiedStudent: peer.verifiedStudent,
             studentVerificationStatus: peer.studentVerificationStatus,
-            languages: [...peer.languages],
+            languages: peer.userLanguages.map((r) => ({
+              tag: r.tag,
+              proficiency: r.proficiency,
+            })),
           }}
           metVia={
             access.mode === "connection"
@@ -110,14 +124,12 @@ export default async function PeerUserProfilePage({
 
         <div className="mt-4">
           {access.mode === "connection" ? (
-            <div>
-              <Link
-                href={`/connections/${access.connectionId}?returnTo=${encodeURIComponent(friendLinkReturnTo)}`}
-                className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
-              >
-                Open chat
-              </Link>
-            </div>
+            <Link
+              href={`/connections/${access.connectionId}?returnTo=${encodeURIComponent(friendLinkReturnTo)}`}
+              className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+            >
+              Open chat
+            </Link>
           ) : (
             <ProfileMessageButton
               peerId={peer.id}

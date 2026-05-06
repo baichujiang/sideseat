@@ -1,8 +1,10 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CornerUpLeft, Send, X } from "lucide-react";
+import { CornerUpLeft, Plus, Send, X } from "lucide-react";
 
 import { FormMessage } from "@/components/forms/form-message";
 import { useChatReply } from "@/components/chat/chat-reply-context";
@@ -32,7 +34,7 @@ export function ChatComposer({
     setSubmitting(true);
     setError("");
 
-    const response = await fetch(`/api/connections/${connectionId}/messages`, {
+    const response = await apiFetch(`/api/connections/${connectionId}/messages`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -65,7 +67,18 @@ export function ChatComposer({
       ) : null}
       <div className="flex items-end gap-2 px-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-1">
         {hideAttachments ? (
-          <span className="h-11 w-11 shrink-0" aria-hidden />
+          <button
+            type="button"
+            disabled
+            aria-label="Attachments unavailable in self chat"
+            title="Attachments unavailable in self chat"
+            className={cn(
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-dashed border-border/70 bg-muted/35 text-muted-foreground/60",
+              "cursor-not-allowed",
+            )}
+          >
+            <Plus className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />
+          </button>
         ) : (
           <ChatAttachmentMenu connectionId={connectionId} peerName={peerName} />
         )}

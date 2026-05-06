@@ -2,6 +2,8 @@ import bcrypt from "bcryptjs";
 import {
   AvailabilityVisibilityMode,
   ConnectionStatus,
+  LanguageProficiency,
+  LanguageTag,
   MessageType,
   PlanRequestStatus,
   PlanType,
@@ -17,6 +19,20 @@ const DEMO_TEXT_BODY = "[demo] chat planning intro";
 const DEMO_AVAILABILITY_BODY = "[demo] availability share";
 const DEMO_PLAN_BODY = "[demo] suggest a plan";
 const DEMO_PLAN_TITLE = "Study IN2064 together";
+
+const demoLangsUpdate = {
+  deleteMany: {} as const,
+  create: [
+    { tag: LanguageTag.ENGLISH, proficiency: LanguageProficiency.FLUENT },
+    { tag: LanguageTag.GERMAN, proficiency: LanguageProficiency.FLUENT },
+  ],
+};
+const demoLangsCreate = {
+  create: [
+    { tag: LanguageTag.ENGLISH, proficiency: LanguageProficiency.FLUENT },
+    { tag: LanguageTag.GERMAN, proficiency: LanguageProficiency.FLUENT },
+  ],
+};
 
 function nextSlotDate(daysFromNow: number, hour: number, minute = 0) {
   const date = new Date();
@@ -54,7 +70,7 @@ async function main() {
       verifiedStudent: true,
       studentVerificationStatus: StudentVerificationStatus.VERIFIED,
       emailVerifiedAt: new Date(),
-      languages: ["ENGLISH", "GERMAN"],
+      userLanguages: demoLangsUpdate,
     },
     create: {
       username: DEMO_USERNAME,
@@ -71,7 +87,7 @@ async function main() {
       verifiedStudent: true,
       studentVerificationStatus: StudentVerificationStatus.VERIFIED,
       emailVerifiedAt: new Date(),
-      languages: ["ENGLISH", "GERMAN"],
+      userLanguages: demoLangsCreate,
     },
     select: { id: true, username: true, nickname: true },
   });

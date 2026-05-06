@@ -16,8 +16,8 @@ export default async function ToReplyPage() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <BackLink href="/inbox" label="Back to contacts" />
-          <h1 className="text-lg font-semibold">To reply</h1>
+          <BackLink href="/inbox" label="Back to Chats" />
+          <h1 className="page-screen-title">To reply</h1>
         </div>
         <GuestAppCta returnTo="/inbox/to-reply" />
       </div>
@@ -69,15 +69,15 @@ export default async function ToReplyPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <BackLink href="/inbox" label="Back to contacts" />
+        <BackLink href="/inbox" label="Back to Chats" />
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">To reply</h1>
+          <h1 className="page-screen-title">To reply</h1>
           <p className="text-xs text-muted-foreground">First hellos from classmates waiting for you</p>
         </div>
       </div>
 
       {toReply.length ? (
-        <ul className="overflow-hidden rounded-[1.125rem] border border-border/60 bg-card shadow-[0_2px_16px_-4px_rgba(15,23,42,0.06)]">
+        <ul className="space-y-2">
           {toReply.map((connection) => (
             <DirectInboxRow
               key={connection.id}

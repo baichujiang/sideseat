@@ -1,5 +1,7 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import { CourseIntent, Weekday } from "@prisma/client";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -101,7 +103,7 @@ export function CourseForm({
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/courses/${encodeURIComponent(id)}`);
+        const res = await apiFetch(`/api/courses/${encodeURIComponent(id)}`);
         if (!res.ok) return;
         const json = (await res.json()) as {
           data?: { id: string; code: string | null; name: string };
@@ -137,7 +139,7 @@ export function CourseForm({
     const timer = setTimeout(async () => {
       setSearchLoading(true);
       try {
-        const res = await fetch(`/api/courses/search?q=${encodeURIComponent(q)}`, {
+        const res = await apiFetch(`/api/courses/search?q=${encodeURIComponent(q)}`, {
           signal: controller.signal,
         });
         if (!res.ok) return;
@@ -202,7 +204,7 @@ export function CourseForm({
     const controller = new AbortController();
     (async () => {
       try {
-        const res = await fetch(`/api/courses/schedule-variants?${params.toString()}`, {
+        const res = await apiFetch(`/api/courses/schedule-variants?${params.toString()}`, {
           signal: controller.signal,
         });
         if (!res.ok) return;
@@ -253,7 +255,7 @@ export function CourseForm({
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError("");
-    const response = await fetch("/api/courses", {
+    const response = await apiFetch("/api/courses", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(values),
@@ -458,7 +460,7 @@ export function CourseForm({
 
             {fields.length === 0 ? (
               <p className="text-xs text-muted-foreground">
-                No sessions — add at least one so the course shows on your calendar.
+                No sessions — add at least one class time so this course shows on your home schedule.
               </p>
             ) : null}
 

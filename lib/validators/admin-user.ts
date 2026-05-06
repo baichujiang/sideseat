@@ -1,4 +1,4 @@
-import { StudentVerificationStatus } from "@prisma/client";
+import { StudentVerificationStatus, UserGender } from "@prisma/client";
 import { z } from "zod";
 
 import { schoolDirectory } from "@/lib/constants/schools";
@@ -10,6 +10,7 @@ import { DEGREE_LEVELS, MAX_SEMESTER } from "@/lib/constants/majors";
  */
 export const adminUserUpdateSchema = z.object({
   nickname: z.string().trim().min(1).max(32).optional(),
+  gender: z.nativeEnum(UserGender).optional(),
   email: z
     .union([z.string().trim().email().toLowerCase(), z.literal("")])
     .optional(),

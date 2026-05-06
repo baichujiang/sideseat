@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import { PwaUpdatePrompt } from "@/components/pwa/pwa-update-prompt";
 
 /**
  * Registers the service worker so Chromium-based browsers can treat the site
@@ -8,14 +10,21 @@ import { useEffect } from "react";
  * manifest + meta tags only; SW is ignored but harmless.
  */
 export function PwaRegister() {
+  const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
+
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
       return;
     }
     const onLoad = () => {
-      void navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {
-        /* ignore — e.g. localhost http quirks or disabled SW */
-      });
+      void navigator.serviceWorker
+        .register("/sw.js", { scope: "/", updateViaCache: "none" })
+        .then((reg) => {
+          setRegistration(reg);
+        })
+        .catch(() => {
+          /* ignore — e.g. localhost http quirks or disabled SW */
+        });
     };
     if (document.readyState === "complete") {
       onLoad();
@@ -24,5 +33,5 @@ export function PwaRegister() {
     }
   }, []);
 
-  return null;
+  return <PwaUpdatePrompt registration={registration} />;
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -25,7 +27,7 @@ export function AdminBlockButton({
         onClick={() =>
           startTransition(async () => {
             setError("");
-            const response = await fetch(`/api/admin/reports/${reportId}/block`, {
+            const response = await apiFetch(`/api/admin/reports/${reportId}/block`, {
               method: blocked ? "DELETE" : "POST",
             });
 

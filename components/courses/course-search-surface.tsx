@@ -1,5 +1,7 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import Link from "next/link";
 import type { Route } from "next";
 import { Search, Users, X } from "lucide-react";
@@ -69,7 +71,7 @@ export function CourseSearchSurface({
     const id = window.setTimeout(() => {
       const params = new URLSearchParams({ q: trimmed });
       if (school) params.set("school", school);
-      fetch(`/api/courses/search?${params.toString()}`, {
+      apiFetch(`/api/courses/search?${params.toString()}`, {
         signal: controller.signal,
       })
         .then((r) => r.json())
@@ -88,9 +90,10 @@ export function CourseSearchSurface({
   }, [trimmed, active]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <SearchBar
-        ref={inputRef}
+        id="course-catalog-search"
+        inputRef={inputRef}
         value={q}
         onChange={setQ}
         onClear={() => {
@@ -114,38 +117,42 @@ export function CourseSearchSurface({
 }
 
 type SearchBarProps = {
+  id?: string;
+  inputRef: React.RefObject<HTMLInputElement | null>;
   value: string;
   onChange: (v: string) => void;
   onClear: () => void;
 };
 
 function SearchBar({
-  ref,
+  id,
+  inputRef,
   value,
   onChange,
   onClear,
-}: SearchBarProps & { ref: React.RefObject<HTMLInputElement | null> }) {
+}: SearchBarProps) {
   return (
-    <div className="relative">
-      <Search
-        className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-muted-foreground"
-        strokeWidth={2.25}
-        aria-hidden
-      />
+    <div
+      className={cn(
+        "relative flex items-center gap-3 rounded-[1.25rem] border border-[#E7E0D6] bg-white px-4 py-3.5 sm:px-5 sm:py-4",
+        "shadow-[0_3px_14px_rgba(15,23,42,0.045)] dark:border-border dark:bg-card",
+      )}
+    >
+      <Search className="h-5 w-5 shrink-0 text-[#8A94A6] dark:text-muted-foreground" strokeWidth={2.25} aria-hidden />
       <Input
-        ref={ref}
-        type="search"
+        id={id}
+        ref={inputRef}
+        type="text"
         inputMode="search"
         enterKeyHint="search"
         autoComplete="off"
         spellCheck={false}
-        placeholder="Search courses — code, name, keyword…"
+        placeholder="Search by code or course name"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className={cn(
-          "h-12 rounded-2xl border-border bg-card pl-11 pr-11 text-[15px]",
-          "shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]",
-          "placeholder:text-muted-foreground/80",
+          "h-auto min-h-0 flex-1 border-0 bg-transparent p-0 text-[16px] font-medium leading-snug tracking-tight text-[#111827] shadow-none sm:text-[17px]",
+          "placeholder:text-[#8A94A6] focus-visible:ring-0 dark:text-foreground dark:placeholder:text-muted-foreground",
         )}
       />
       {value.length > 0 ? (
@@ -153,9 +160,9 @@ function SearchBar({
           type="button"
           onClick={onClear}
           aria-label="Clear search"
-          className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#8A94A6] transition hover:bg-[#F3F0EA] hover:text-[#111827] dark:hover:bg-muted"
         >
-          <X className="h-3.5 w-3.5" strokeWidth={2.25} />
+          <X className="h-4 w-4" strokeWidth={2.25} />
         </button>
       ) : null}
     </div>
@@ -196,10 +203,10 @@ function ResultsList({
 
   return (
     <div className="space-y-2">
-      <p className="px-1 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+      <p className="px-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
         {hits.length} {hits.length === 1 ? "result" : "results"}
       </p>
-      <ul className="divide-y divide-border/50 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[0_2px_16px_-4px_rgba(15,23,42,0.06)]">
+      <ul className="divide-y divide-border/50 overflow-hidden rounded-[1.25rem] border border-border/60 bg-card shadow-[0_2px_14px_-3px_rgba(15,23,42,0.06)]">
         {hits.map((hit) => (
           <SearchHitRow key={hit.id} hit={hit} guestMode={guestMode} />
         ))}
@@ -216,19 +223,19 @@ function SearchHitRow({
   guestMode: boolean;
 }) {
   return (
-    <li className="flex items-center gap-3 px-4 py-3">
+    <li className="flex items-center gap-3 px-4 py-3.5 sm:px-4 sm:py-4">
       <Link
         href={`/courses/${hit.id}?returnTo=%2Fcourses` as Route}
         className="min-w-0 flex-1"
       >
-        <p className="truncate text-[14.5px] font-semibold leading-tight">
+        <p className="truncate text-[15px] font-semibold leading-snug tracking-tight">
           {hit.code ? (
             <span className="mr-1.5 text-primary">{hit.code}</span>
           ) : null}
           <span className="text-foreground">{hit.name}</span>
         </p>
-        <p className="mt-0.5 flex items-center gap-1 text-[11.5px] text-muted-foreground">
-          <Users className="h-3 w-3" strokeWidth={2.25} />
+        <p className="mt-1 flex items-center gap-1 text-[12px] text-muted-foreground">
+          <Users className="h-3.5 w-3.5 shrink-0 opacity-90" strokeWidth={2.25} />
           <span>
             {hit.memberCount}{" "}
             {hit.memberCount === 1 ? "classmate" : "classmates"}

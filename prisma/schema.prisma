@@ -17,6 +17,14 @@ enum LanguageTag {
   OTHER
 }
 
+enum LanguageProficiency {
+  NATIVE
+  FLUENT
+  CONVERSATIONAL
+  BASIC
+  LEARNING
+}
+
 enum CourseIntent {
   GO_TO_CLASS_TOGETHER
   EAT_AFTER_CLASS
@@ -104,6 +112,14 @@ enum StudentVerificationStatus {
   VERIFIED
   MANUAL_REVIEW_REQUIRED
   REJECTED
+}
+
+/// Shown on profile and user cards (icons + localized gender label).
+enum UserGender {
+  MALE
+  FEMALE
+  /// Not disclosed — default for existing rows until the user chooses.
+  PRIVATE
 }
 
 enum SchoolEmailVerificationStatus {
@@ -194,18 +210,19 @@ model User {
   isGuest                      Boolean                  @default(false)
   hashedPassword               String
   nickname                     String?
+  gender                       UserGender               @default(PRIVATE)
   school                       String?
   degreeLevel                  DegreeLevel?
   major                        String?
   semester                     Int?
   avatarUrl                    String?
   bio                          String?
-  languages                    LanguageTag[]
   discoverByCourse             Boolean                  @default(true)
   discoverByMajor              Boolean                  @default(true)
   discoverBySemester           Boolean                  @default(true)
   allowInvitationNotes         Boolean                  @default(true)
   contactInfoOptIn             Boolean                  @default(false)
+  hideFromCourseMembers        Boolean                  @default(false)
   onboardingComplete           Boolean                  @default(false)
   verifiedStudent              Boolean                  @default(false)
   studentVerificationStatus    StudentVerificationStatus @default(UNVERIFIED)
@@ -248,7 +265,19 @@ model User {
   planRequestsReceived         PlanRequest[]              @relation("PlanRequestReceiver")
   calendarEntries              CalendarEntry[]
   calendarEntryCompanionships  CalendarEntryCompanion[]
+  userCalendarCategories       UserCalendarCategory[]
   classmatePosts               ClassmatePost[]
+  userLanguages                UserLanguage[]
+}
+
+model UserLanguage {
+  userId        String
+  tag           LanguageTag
+  proficiency   LanguageProficiency
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, tag])
+  @@index([userId])
 }
 
 model Session {
@@ -299,6 +328,7 @@ model Course {
   id            String       @id @default(cuid())
   name          String
   code          String?
+  instructorSummary String?
   school        String
   semesterLabel String
   createdAt     DateTime     @default(now())
@@ -396,6 +426,10 @@ model Connection {
   status                 ConnectionStatus         @default(ACTIVE)
   pinnedByAAt            DateTime?
   pinnedByBAt            DateTime?
+  /// User A's private display name for this thread (only A sees it).
+  contactRemarkByA       String?                  @db.VarChar(64)
+  /// User B's private display name for this thread (only B sees it).
+  contactRemarkByB       String?                  @db.VarChar(64)
   endedById              String?
   endedAt                DateTime?
   createdAt              DateTime                 @default(now())
@@ -690,6 +724,25 @@ model StudySessionProposal {
 /// When the originating proposal is deleted, we `SetNull` rather than cascade
 /// so the entry stays visible — it's a "this happened / is happening" record,
 /// not a live pointer.
+/// User-defined calendar groups (preset + custom) with color — like iOS calendar lists.
+model UserCalendarCategory {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  /// Hex RGB e.g. #2563EB
+  color     String
+  sortOrder Int      @default(0)
+  /// Built-in template key (course, study, …). Null = user-created; only one row per user per key when set.
+  presetKey String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  entries   CalendarEntry[]
+
+  @@unique([userId, presetKey])
+  @@index([userId, sortOrder])
+}
+
 model CalendarEntry {
   id         String   @id @default(cuid())
   userId     String
@@ -706,6 +759,8 @@ model CalendarEntry {
   endAt      DateTime
   /// When set, the 15-minute-before-start Web Push reminder was already sent.
   reminder15mSentAt DateTime?
+  categoryId String?
+  category   UserCalendarCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   createdAt  DateTime @default(now())
   user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   proposal   StudySessionProposal? @relation(fields: [proposalId], references: [id], onDelete: SetNull)
@@ -715,6 +770,7 @@ model CalendarEntry {
   @@unique([userId, proposalId])
   @@unique([userId, planRequestId])
   @@index([userId, startAt])
+  @@index([categoryId])
 }
 
 model CalendarEntryCompanion {

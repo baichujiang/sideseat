@@ -1,5 +1,7 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import { MessageCircle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -33,7 +35,7 @@ export function ProfileMessageButton({
     setOpening(true);
     setErrorText("");
     try {
-      const res = await fetch("/api/connections/open", {
+      const res = await apiFetch("/api/connections/open", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ peerId, ...(courseId ? { courseId } : {}) }),

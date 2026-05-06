@@ -105,7 +105,7 @@ export function PwaInstallBar({ className }: { className?: string }) {
       <div
         className={cn(
           "pointer-events-auto fixed left-1/2 z-[21] w-full max-w-md -translate-x-1/2 px-3",
-          "bottom-[calc(4.85rem+env(safe-area-inset-bottom))]",
+          "bottom-[calc(6.5rem+env(safe-area-inset-bottom))]",
           className,
         )}
       >

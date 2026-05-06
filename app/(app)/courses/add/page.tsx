@@ -17,7 +17,7 @@ export default async function AddCoursePage({
     <div className="space-y-5">
       <header className="flex items-center gap-2">
         <BackLink href={backHref} label="Back to courses" />
-        <h1 className="text-[17px] font-semibold leading-tight tracking-tight">Add course</h1>
+        <h1 className="page-screen-title-ink">Add course</h1>
       </header>
       <CourseForm key={prefill ?? "none"} prefillCourseId={prefill} />
     </div>

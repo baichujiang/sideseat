@@ -1,61 +1,31 @@
 import "server-only";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createHash, randomBytes } from "crypto";
 import { addDays } from "date-fns";
 
+import { signAccessToken, verifyAccessToken } from "@/lib/auth/access-token";
 import { prisma } from "@/lib/db/prisma";
 import {
-  SESSION_COOKIE_NAME,
-  SESSION_DURATION_DAYS,
+  LEGACY_SESSION_COOKIE_NAME,
+  REFRESH_COOKIE_NAME,
+  REFRESH_TOKEN_TTL_DAYS,
 } from "@/lib/constants/app";
 
 function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }
 
-export async function createSession(userId: string) {
-  const rawToken = randomBytes(32).toString("hex");
-  const tokenHash = hashToken(rawToken);
-  const expiresAt = addDays(new Date(), SESSION_DURATION_DAYS);
-
-  await prisma.session.create({
-    data: {
-      userId,
-      tokenHash,
-      expiresAt,
-    },
-  });
-
-  const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE_NAME, rawToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    expires: expiresAt,
-  });
+function readRefreshRaw(cookieStore: Awaited<ReturnType<typeof cookies>>) {
+  return (
+    cookieStore.get(REFRESH_COOKIE_NAME)?.value ?? cookieStore.get(LEGACY_SESSION_COOKIE_NAME)?.value ?? null
+  );
 }
 
-export async function destroySession() {
+async function getUserFromRefreshCookie() {
   const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-
-  if (token) {
-    await prisma.session.deleteMany({
-      where: {
-        tokenHash: hashToken(token),
-      },
-    });
-  }
-
-  cookieStore.delete(SESSION_COOKIE_NAME);
-}
-
-export async function getSessionUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  const token = readRefreshRaw(cookieStore);
 
   if (!token) {
     return null;
@@ -71,17 +41,89 @@ export async function getSessionUser() {
   });
 
   if (!session || session.expiresAt < new Date()) {
-    // Cookie cleanup must happen in a Route Handler / Server Action, not an RSC.
-    // Silently ignore mutation errors here; middleware + logout handle cleanup.
+    if (session) {
+      await prisma.session.deleteMany({ where: { id: session.id } }).catch(() => {
+        /* ignore */
+      });
+    }
     try {
-      cookieStore.delete(SESSION_COOKIE_NAME);
+      cookieStore.delete(REFRESH_COOKIE_NAME);
+      cookieStore.delete(LEGACY_SESSION_COOKIE_NAME);
     } catch {
-      // no-op in RSC context
+      /* RSC may forbid mutation */
     }
     return null;
   }
 
   return session.user;
+}
+
+/**
+ * Creates a refresh session (DB + HttpOnly cookie) and returns a short-lived access JWT
+ * for the client to hold in memory only.
+ */
+export async function createSession(userId: string) {
+  const rawToken = randomBytes(32).toString("hex");
+  const tokenHash = hashToken(rawToken);
+  const expiresAt = addDays(new Date(), REFRESH_TOKEN_TTL_DAYS);
+
+  await prisma.session.create({
+    data: {
+      userId,
+      tokenHash,
+      expiresAt,
+    },
+  });
+
+  const cookieStore = await cookies();
+  cookieStore.set(REFRESH_COOKIE_NAME, rawToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    expires: expiresAt,
+  });
+  cookieStore.delete(LEGACY_SESSION_COOKIE_NAME);
+
+  const { token: accessToken, expiresIn } = await signAccessToken(userId);
+  return { accessToken, expiresIn };
+}
+
+export async function destroySession() {
+  const cookieStore = await cookies();
+  const token = readRefreshRaw(cookieStore);
+
+  if (token) {
+    await prisma.session.deleteMany({
+      where: {
+        tokenHash: hashToken(token),
+      },
+    });
+  }
+
+  cookieStore.delete(REFRESH_COOKIE_NAME);
+  cookieStore.delete(LEGACY_SESSION_COOKIE_NAME);
+}
+
+export async function getSessionUser() {
+  const fromCookie = await getUserFromRefreshCookie();
+  if (fromCookie) {
+    return fromCookie;
+  }
+
+  const headerList = await headers();
+  const auth = headerList.get("authorization");
+  if (auth?.startsWith("Bearer ")) {
+    const sub = await verifyAccessToken(auth.slice(7).trim());
+    if (sub) {
+      const user = await prisma.user.findUnique({ where: { id: sub } });
+      if (user) {
+        return user;
+      }
+    }
+  }
+
+  return null;
 }
 
 export async function requireUser() {

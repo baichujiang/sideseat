@@ -97,13 +97,13 @@ export function InboxSwipeRow({
       ? `/api/connections/${swipeTarget.connectionId}/end`
       : `/api/courses/${swipeTarget.courseId}/inbox-hide`;
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-hidden rounded-[24px]">
       <div className="absolute inset-y-0 right-0 z-0 flex w-[152px] items-stretch justify-stretch">
         <form action={pinAction} method="post" className="flex w-[76px] shrink-0">
           <input type="hidden" name="returnTo" value={returnTo} />
           <button
             type="submit"
-            className="flex flex-1 items-center justify-center bg-amber-500 px-2 text-center text-[11px] font-semibold uppercase tracking-wide text-white"
+            className="flex flex-1 items-center justify-center bg-[#D97706] px-2 text-center text-[11px] font-semibold uppercase tracking-wide text-white transition-colors hover:bg-[#B45309]"
           >
             {pinned ? "Unpin" : "Pin"}
           </button>
@@ -114,10 +114,10 @@ export function InboxSwipeRow({
             type="submit"
             title={
               swipeTarget.type === "course"
-                ? "Remove from Contacts list only — you stay enrolled in the course."
+                ? "Remove from Chats list only — you stay enrolled in the course."
                 : undefined
             }
-            className="flex flex-1 items-center justify-center bg-destructive px-2 text-center text-[11px] font-semibold uppercase tracking-wide text-destructive-foreground"
+            className="flex flex-1 items-center justify-center bg-[#94A3B8] px-2 text-center text-[11px] font-semibold uppercase tracking-wide text-white transition-colors hover:bg-[#64748B]"
           >
             Delete
           </button>
@@ -131,7 +131,7 @@ export function InboxSwipeRow({
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         style={{ transform: `translateX(${offset}px)` }}
-        className="relative z-[1] touch-pan-y bg-card will-change-transform"
+        className="relative z-[1] touch-pan-y rounded-[24px] bg-[#FFFFFF] will-change-transform"
       >
         <Link
           href={href}
@@ -143,7 +143,7 @@ export function InboxSwipeRow({
               dragged.current = false;
             }
           }}
-          className="flex min-h-[4.25rem] items-center gap-3.5 px-4 py-3.5 transition-colors active:bg-muted/50 [@media(hover:hover)]:hover:bg-muted/45"
+          className="flex min-h-0 items-center gap-4 px-4 py-4 transition-colors active:bg-[#F8F7F4] [@media(hover:hover)]:hover:bg-[#FAF9F6]"
         >
           {children}
         </Link>

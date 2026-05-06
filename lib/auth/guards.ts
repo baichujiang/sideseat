@@ -5,6 +5,7 @@ import type { User } from "@prisma/client";
 import { ConnectionStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
+import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
 import { requireUser } from "@/lib/auth/session";
 import { adminEmails } from "@/lib/constants/app";
 import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
@@ -148,8 +149,8 @@ export async function requirePeerProfileAccess(peerUserId: string) {
         },
       },
       friendLink: true,
-      userA: true,
-      userB: true,
+      userA: { include: { userLanguages: true } },
+      userB: { include: { userLanguages: true } },
     },
   });
 
@@ -216,8 +217,8 @@ export async function requireClassmateOrConnectionProfileAccess(peerUserId: stri
       invitation: { include: { course: true } },
       contactExchangeRequests: { orderBy: { createdAt: "desc" } },
       friendLink: true,
-      userA: true,
-      userB: true,
+      userA: { include: { userLanguages: true } },
+      userB: { include: { userLanguages: true } },
     },
   });
 
@@ -249,7 +250,10 @@ export async function requireClassmateOrConnectionProfileAccess(peerUserId: stri
     notFound();
   }
 
-  const peer = await prisma.user.findUnique({ where: { id: peerUserId } });
+  const peer = await prisma.user.findUnique({
+    where: { id: peerUserId },
+    include: { userLanguages: true },
+  });
   if (!peer) {
     notFound();
   }
@@ -296,6 +300,7 @@ export async function requirePublicProfileAccess(peerUserId: string) {
       id: true,
       username: true,
       nickname: true,
+      gender: true,
       avatarUrl: true,
       bio: true,
       major: true,
@@ -304,7 +309,7 @@ export async function requirePublicProfileAccess(peerUserId: string) {
       degreeLevel: true,
       verifiedStudent: true,
       studentVerificationStatus: true,
-      languages: true,
+      userLanguages: { select: { tag: true, proficiency: true } },
       onboardingComplete: true,
       wechatHandle: true,
       whatsappHandle: true,
@@ -355,8 +360,8 @@ export async function requirePublicProfileAccess(peerUserId: string) {
         invitation: { include: { course: true } },
         contactExchangeRequests: { orderBy: { createdAt: "desc" } },
         friendLink: true,
-        userA: true,
-        userB: true,
+        userA: { include: { userLanguages: true } },
+        userB: { include: { userLanguages: true } },
       },
     }),
     prisma.course.findMany({
@@ -399,6 +404,7 @@ export async function requirePublicProfileAccess(peerUserId: string) {
       peer,
       courseName: connection.invitation?.course?.name ?? null,
       connectionId: connection.id,
+      myContactRemark: contactRemarkForViewer(connection, user.id),
       contactExchangeRequests: connection.contactExchangeRequests,
       friendLink: connection.friendLink,
     };

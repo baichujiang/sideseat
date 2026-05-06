@@ -1,5 +1,7 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Send } from "lucide-react";
@@ -23,7 +25,7 @@ export function CourseChatComposer({ courseId }: { courseId: string }) {
     setSubmitting(true);
     setError("");
 
-    const response = await fetch(`/api/courses/${courseId}/chat/messages`, {
+    const response = await apiFetch(`/api/courses/${courseId}/chat/messages`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

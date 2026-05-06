@@ -1,4 +1,4 @@
-import { LanguageTag } from "@prisma/client";
+import { LanguageProficiency, LanguageTag } from "@prisma/client";
 
 import { hashPassword } from "@/lib/auth/password";
 import {
@@ -35,14 +35,24 @@ export async function POST(request: Request) {
         avatarUrl: randomAvatarId(),
         nickname: defaultNicknameFromUsername(values.username),
         school: SIGNUP_DEFAULT_PROFILE.school,
-        languages: [LanguageTag.ENGLISH],
+        userLanguages: {
+          create: [{ tag: LanguageTag.ENGLISH, proficiency: LanguageProficiency.FLUENT }],
+        },
         onboardingComplete: false,
       },
     });
 
-    await createSession(user.id);
+    const { accessToken, expiresIn } = await createSession(user.id);
 
-    return ok({ userId: user.id, onboardingComplete: user.onboardingComplete }, { status: 201 });
+    return ok(
+      {
+        userId: user.id,
+        onboardingComplete: user.onboardingComplete,
+        accessToken,
+        expiresIn,
+      },
+      { status: 201 },
+    );
   } catch (cause) {
     console.error(cause);
     return error("Unable to sign up.", 400);

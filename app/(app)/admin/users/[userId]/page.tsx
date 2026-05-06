@@ -59,6 +59,7 @@ export default async function AdminUserDetailPage({
 
   const initial: AdminUserFormInitialValues = {
     nickname: user.nickname ?? "",
+    gender: user.gender,
     email: user.email ?? "",
     school: user.school ?? "",
     degreeLevel: user.degreeLevel ?? "",

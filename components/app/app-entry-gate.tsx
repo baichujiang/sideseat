@@ -13,7 +13,7 @@ export function AppEntryGate() {
       <div className="flex flex-1 flex-col justify-center gap-10">
         <div className="space-y-2 text-center">
           <p className="text-sm font-medium text-muted-foreground">{APP_NAME}</p>
-          <h1 className="text-2xl font-semibold leading-snug tracking-tight text-foreground">
+          <h1 className="page-screen-title leading-snug">
             Courses & classmates
           </h1>
           <p className="text-sm leading-relaxed text-muted-foreground">

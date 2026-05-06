@@ -50,12 +50,23 @@ export async function PATCH(
       return error("Some classmates can no longer be added to this event.", 400);
     }
 
+    if (values.categoryId) {
+      const cat = await prisma.userCalendarCategory.findFirst({
+        where: { id: values.categoryId, userId: user.id },
+        select: { id: true },
+      });
+      if (!cat) {
+        return error("Choose a valid calendar category.", 400);
+      }
+    }
+
     await prisma.calendarEntry.update({
       where: { id: existing.id },
       data: {
         title: values.title.trim(),
         location: values.location?.trim() || null,
         note: values.note?.trim() || null,
+        ...(values.categoryId !== undefined ? { categoryId: values.categoryId } : {}),
         repeatRule: values.repeat,
         repeatUntil: values.repeat === "NONE" ? null : values.repeatUntil ? new Date(values.repeatUntil) : null,
         startAt: new Date(values.startAt),

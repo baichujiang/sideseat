@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
+  getCachedAvailabilityShare,
   loadAvailabilityShare,
   revokeAvailabilityShare,
 } from "@/lib/api/chat-planning";
@@ -22,9 +23,14 @@ export function AvailabilityCardMessage({
   isOwner: boolean;
 }) {
   const router = useRouter();
+  const cached = getCachedAvailabilityShare(shareId);
   const [viewerOpen, setViewerOpen] = useState(false);
-  const [preview, setPreview] = useState<Array<{ startTime: string; endTime: string }>>([]);
-  const [status, setStatus] = useState<"loading" | "active" | "revoked" | "expired">("loading");
+  const [preview, setPreview] = useState<Array<{ startTime: string; endTime: string }>>(
+    cached ? cached.days.flatMap((day) => day.slots).slice(0, 2) : [],
+  );
+  const [status, setStatus] = useState<"loading" | "active" | "revoked" | "expired">(
+    cached?.status ?? "loading",
+  );
   const [revoking, setRevoking] = useState(false);
 
   useEffect(() => {

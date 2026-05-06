@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 
 import "./globals.css";
+import { AuthBootstrap } from "@/components/auth/auth-bootstrap";
 import { PwaRegister } from "@/components/pwa/pwa-register";
 import { APP_NAME } from "@/lib/constants/app";
 
@@ -55,6 +56,7 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body className="min-h-dvh bg-transparent font-sans text-[15px] leading-relaxed antialiased text-foreground">
         {children}
+        <AuthBootstrap />
         <PwaRegister />
       </body>
     </html>

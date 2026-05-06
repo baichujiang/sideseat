@@ -1,21 +1,12 @@
 import Link from "next/link";
 import type { Route } from "next";
+import { format } from "date-fns";
 
 import { PresetAvatar } from "@/components/ui/preset-avatar";
+import { cn } from "@/lib/utils";
 
 /**
- * Home hero. Replaces the old profile-preview card with a greeting that
- * makes Home feel contextual instead of static.
- *
- * Layout:
- *   ┌──────────────────────────────┐
- *   │ Good afternoon, Lin     [av] │
- *   │ 2 classes left today         │
- *   └──────────────────────────────┘
- *
- * The avatar is a small tap target (40 px) tucked into the corner — the
- * dedicated Me tab owns the profile surface, so we don't waste vertical
- * space repeating what users already see in the navbar.
+ * Home hero — contextual greeting + light hint toward the schedule below.
  *
  * `nowDate` is injected so the server can render with a stable "now"
  * snapshot; the greeting is computed from the user's local hour.
@@ -31,20 +22,50 @@ export function HomeHero({
 }) {
   const name = nickname?.trim() || "Student";
   const greeting = greetingFor(nowDate.getHours());
+  const todayLine = format(nowDate, "EEEE, MMMM d");
 
   return (
-    <header className="flex items-center gap-3 pt-1">
-      <div className="min-w-0 flex-1">
-        <h1 className="truncate text-[22px] font-semibold leading-tight tracking-tight">
+    <header className="flex items-start justify-between gap-3">
+      <div className="min-w-0 flex-1 pr-1">
+        <h1
+          className={cn(
+            "truncate text-[30px] font-bold leading-[1.12] tracking-tight text-[#111827]",
+            "sm:text-[32px] dark:text-foreground",
+          )}
+        >
           {greeting}, {name}
         </h1>
+        <p
+          className={cn(
+            "mt-1 text-sm leading-snug text-[#5F6B7A]",
+            "dark:text-muted-foreground",
+          )}
+        >
+          Plan your day and keep track of study sessions.
+        </p>
+        <p
+          className={cn(
+            "mt-1 text-xs font-medium leading-tight text-[#8A94A6]",
+            "dark:text-muted-foreground/90",
+          )}
+        >
+          {todayLine}
+        </p>
       </div>
       <Link
         href={"/profile" as Route}
         aria-label="Open profile"
-        className="shrink-0 rounded-full ring-1 ring-border/50 transition hover:ring-border active:opacity-85"
+        className="shrink-0 rounded-full transition hover:opacity-90 active:opacity-85"
       >
-        <PresetAvatar id={avatarUrl} size={40} />
+        <span
+          className={cn(
+            "inline-flex h-16 w-16 items-center justify-center overflow-hidden rounded-full",
+            "border border-[#E7E0D6] bg-white shadow-[0_4px_14px_rgba(15,23,42,0.08)]",
+            "dark:border-border dark:bg-card dark:shadow-[0_4px_14px_rgba(0,0,0,0.25)]",
+          )}
+        >
+          <PresetAvatar id={avatarUrl} size={64} className="h-16 w-16" />
+        </span>
       </Link>
     </header>
   );

@@ -1,5 +1,7 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import { StudentVerificationStatus } from "@prisma/client";
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -8,7 +10,12 @@ import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
+import type { SchoolCode } from "@/lib/constants/schools";
+import { getSchoolLogoPath } from "@/lib/constants/schools";
 import { cn } from "@/lib/utils";
+
+const verifiedChipClass =
+  "shrink-0 rounded-md px-2 py-0.5 text-[11px] font-semibold leading-none text-classmates-success bg-classmates-success-soft";
 
 type DeliveryKind = "sent" | "failed" | "skipped" | "manual";
 
@@ -24,12 +31,18 @@ export function StudentVerificationForm({
   currentStatus,
   email,
   schoolHint,
+  /** Profile school code — used to show the school logo next to verification. */
+  schoolCode,
+  /** Short school label (e.g. TUM) — shown in verified-state trust copy. */
+  schoolShortLabel,
   notes,
   hasProofUploaded,
 }: {
   currentStatus: StudentVerificationStatus;
   email?: string | null;
   schoolHint: string;
+  schoolCode?: SchoolCode | null;
+  schoolShortLabel?: string | null;
   notes?: string | null;
   hasProofUploaded?: boolean;
 }) {
@@ -67,7 +80,7 @@ export function StudentVerificationForm({
       setDelivery("");
       setCopied(false);
 
-      const response = await fetch("/api/student-verification/request", {
+      const response = await apiFetch("/api/student-verification/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: input }),
@@ -100,7 +113,7 @@ export function StudentVerificationForm({
       formData.append("file", selectedFile);
       if (manualEmail) formData.append("email", manualEmail);
 
-      const response = await fetch("/api/student-verification/manual-review", {
+      const response = await apiFetch("/api/student-verification/manual-review", {
         method: "POST",
         body: formData,
       });
@@ -130,12 +143,51 @@ export function StudentVerificationForm({
   };
 
   const isVerified = currentStatus === StudentVerificationStatus.VERIFIED;
+  const schoolLogoSrc = getSchoolLogoPath(schoolCode);
 
   if (isVerified) {
+    const displayEmail = email?.trim() || "—";
+    const logoAlt = schoolShortLabel ? `${schoolShortLabel} logo` : "University logo";
     return (
-      <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#d5e9df] bg-[#eef8f2] px-3 py-2">
-        <p className="truncate text-sm">{email}</p>
-        <StatusBadge tone="calm">verified</StatusBadge>
+      <div
+        className="rounded-[20px] border border-[#D1FAE5] bg-[#FAFFFE] px-2.5 py-2 dark:border-emerald-900/40 dark:bg-emerald-950/20"
+        role="status"
+        aria-label={
+          schoolShortLabel
+            ? `Verified ${schoolShortLabel} school email: ${displayEmail}`
+            : `Verified university email: ${displayEmail}`
+        }
+      >
+        <div className="flex gap-3">
+          {schoolLogoSrc ? (
+            <div className="flex h-11 shrink-0 items-center justify-center self-start rounded-xl border border-emerald-200/80 bg-white px-2 py-1 shadow-[0_1px_2px_rgba(15,23,42,0.06)] dark:border-emerald-800/50 dark:bg-emerald-950/40">
+              <img
+                src={schoolLogoSrc}
+                alt={logoAlt}
+                className="h-7 w-auto max-w-[5.75rem] object-contain object-left"
+                width={92}
+                height={28}
+                decoding="async"
+              />
+            </div>
+          ) : null}
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              University email
+            </p>
+            {schoolShortLabel ? (
+              <p className="text-[12px] font-semibold leading-tight text-classmates-success dark:text-emerald-400">
+                Verified {schoolShortLabel} email
+              </p>
+            ) : null}
+            <div className="flex min-h-[1.75rem] items-center justify-between gap-2">
+              <p className="min-w-0 truncate text-[13px] font-medium tabular-nums text-foreground">
+                {displayEmail}
+              </p>
+              <span className={verifiedChipClass}>Verified</span>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -143,7 +195,19 @@ export function StudentVerificationForm({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-medium text-muted-foreground">Student verification</p>
+        <div className="flex min-w-0 items-center gap-2">
+          {schoolLogoSrc ? (
+            <img
+              src={schoolLogoSrc}
+              alt={schoolShortLabel ? `${schoolShortLabel} logo` : ""}
+              className="h-7 w-auto max-w-[4.5rem] shrink-0 object-contain opacity-90 dark:opacity-95"
+              width={72}
+              height={28}
+              decoding="async"
+            />
+          ) : null}
+          <p className="text-xs font-medium text-muted-foreground">Student verification</p>
+        </div>
         <StatusBadge tone={statusTone(currentStatus)}>
           {currentStatus.toLowerCase().replaceAll("_", " ")}
         </StatusBadge>
@@ -166,7 +230,7 @@ export function StudentVerificationForm({
       {message ? <p className={`text-sm ${deliveryTone}`}>{message}</p> : null}
 
       {verifyUrl ? (
-        <div className="space-y-2 rounded-2xl border border-border bg-[#faf7f1] p-3 text-xs">
+        <div className="space-y-2 rounded-[24px] border border-border bg-[#faf7f1] p-3 text-xs">
           <p className="font-medium">Verification link</p>
           <div className="flex flex-col gap-2 sm:flex-row">
             <a
@@ -193,7 +257,7 @@ export function StudentVerificationForm({
       ) : null}
 
       {showManual ? (
-        <div className="space-y-2 rounded-2xl border border-border bg-[#faf7f1] p-3 text-xs">
+        <div className="space-y-2 rounded-[24px] border border-border bg-[#faf7f1] p-3 text-xs">
           <p className="font-medium">Manual review</p>
           <p className="text-[11px] text-muted-foreground">
             Upload your official TUM enrollment certificate (Studienbescheinigung).

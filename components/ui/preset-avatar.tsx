@@ -1,11 +1,13 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 import { cn } from "@/lib/utils";
-import { DEFAULT_AVATAR_ID, getAvatarSrc, isValidAvatarId } from "@/lib/constants/avatars";
+import { DEFAULT_AVATAR_ID, getAvatarSrc, resolveAvatarImageSrc } from "@/lib/constants/avatars";
 
 /**
- * Renders one of the preset avatars (JPEGs shipped in `/public/avatars/`).
- * Pass `size` to control the rendered dimensions; the image stays square and
- * is clipped to a circle via CSS. `alt` stays empty because the avatar is
- * decorative — nicknames live next to it in every context.
+ * Renders a preset avatar (`/public/avatars/`) or a user-uploaded blob URL
+ * stored in `User.avatarUrl`. `alt` stays empty — avatars are decorative.
  */
 export function PresetAvatar({
   id,
@@ -16,15 +18,25 @@ export function PresetAvatar({
   className?: string;
   size?: number;
 }) {
-  const safeId = isValidAvatarId(id) ? id : DEFAULT_AVATAR_ID;
+  const primarySrc = resolveAvatarImageSrc(id);
+  const [broken, setBroken] = useState(false);
+
+  useEffect(() => {
+    setBroken(false);
+  }, [primarySrc]);
+
+  const fallbackSrc = getAvatarSrc(DEFAULT_AVATAR_ID);
+  const src = broken ? fallbackSrc : primarySrc;
+
   return (
     <img
       alt=""
       aria-hidden="true"
       className={cn("block rounded-full object-cover", className)}
       height={size}
-      src={getAvatarSrc(safeId)}
+      src={src}
       width={size}
+      onError={() => setBroken(true)}
     />
   );
 }

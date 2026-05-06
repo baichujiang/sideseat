@@ -36,7 +36,7 @@ export function ScheduleMonthView({
   today: Date;
   /** Returns number of events on `date` (classes + study sessions combined). */
   getDensityForDate: (date: Date) => number;
-  /** Fired when a user taps a cell; parent should move Day view to that date. */
+  /** Fired when a user taps a cell; parent updates selection (e.g. shows that day below). */
   onSelectDate: (date: Date) => void;
 }) {
   const monthStart = startOfMonth(anchorDate);
@@ -48,7 +48,12 @@ export function ScheduleMonthView({
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card p-2">
+    <div
+      className={cn(
+        "mt-2 overflow-hidden rounded-2xl border border-[#E7E0D6] bg-white p-2 shadow-[0_8px_24px_rgba(15,23,42,0.05)]",
+        "dark:border-border dark:bg-card dark:shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
+      )}
+    >
       <div className="grid grid-cols-7 text-center text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
           <div key={d} className="py-1">
@@ -63,12 +68,12 @@ export function ScheduleMonthView({
           const isSelected = isSameDay(date, selectedDate);
           const isWeekend = date.getDay() === 0 || date.getDay() === 6;
           const density = getDensityForDate(date);
-          const baseCellBg = isWeekend ? "bg-muted/35" : "bg-white";
+          const baseCellBg = isWeekend ? "bg-[#FAF8F5] dark:bg-muted/35" : "bg-white";
           const cellState = isToday
-            ? "border-border text-foreground"
+            ? "border-[#F0ECE6] text-foreground dark:border-white/12"
             : isSelected
-              ? "border-foreground ring-1 ring-foreground/10 text-foreground"
-              : "border-border/60 text-foreground hover:bg-muted/10";
+              ? "border-[#E7E0D6] text-foreground ring-1 ring-[#E7E0D6]/50 dark:border-border dark:ring-border/40"
+              : "border-[#F0ECE6] text-foreground hover:bg-[#FAFAF8] dark:border-white/12 dark:hover:bg-muted/15";
 
           return (
             <button
@@ -87,10 +92,8 @@ export function ScheduleMonthView({
               <span
                 className={cn(
                   "font-semibold tabular-nums leading-none",
-                  isToday ? "text-white" : isSelected ? undefined : undefined,
-                  isToday
-                    ? "inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-rose-500 px-1.5"
-                    : undefined,
+                  isToday &&
+                    "inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-[#2563EB] px-1.5 text-sm font-bold text-white dark:bg-[#2563EB]",
                 )}
               >
                 {date.getDate()}
@@ -126,7 +129,7 @@ function DensityDots({
     tone === "inverse"
       ? "bg-background/70"
       : tone === "primary"
-        ? "bg-rose-500"
+        ? "bg-[#2563EB]"
         : "bg-foreground/50";
   return (
     <span className="mt-1 flex gap-0.5" aria-hidden>

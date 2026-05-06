@@ -1,5 +1,7 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -34,7 +36,7 @@ export function CourseRemoveButton({
           }
           setError("");
           setPending(true);
-          const response = await fetch(`/api/courses/${courseId}`, { method: "DELETE" });
+          const response = await apiFetch(`/api/courses/${courseId}`, { method: "DELETE" });
           const payload = await response.json().catch(() => ({}));
           setPending(false);
 

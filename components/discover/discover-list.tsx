@@ -1,30 +1,43 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import Link from "next/link";
 import type { Route } from "next";
 import type { RefObject } from "react";
 import { addDays, format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import {
-  BookOpen,
-  Coffee,
+  BookUser,
   Edit3,
   Dumbbell,
   Languages,
   Loader2,
+  NotebookPen,
   Plus,
   Search,
   SlidersHorizontal,
+  UtensilsCrossed,
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ClassmatePostCategory } from "@prisma/client";
+import {
+  ClassmatePostCategory,
+  type LanguageProficiency,
+  type LanguageTag,
+  type UserGender,
+} from "@prisma/client";
 
+import {
+  ClassmatesPersonRow,
+  CLASSMATES_PERSON_ROW_AVATAR_RING_DISCOVER,
+} from "@/components/classmates/classmates-person-row";
 import { DiscoverMessageButton } from "@/components/discover/discover-message-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PresetAvatar } from "@/components/ui/preset-avatar";
+import { UserGenderCardIcon } from "@/components/ui/user-gender-icon";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
+import { LANGUAGE_TAG_LABEL } from "@/lib/constants/languages";
 import { cn } from "@/lib/utils";
 
 type SceneKind = "shared" | "study" | "meals" | "language" | "sports";
@@ -41,12 +54,13 @@ type SharedCourse = CourseRef;
 export type DiscoverRow = {
   userId: string;
   nickname: string;
+  gender: UserGender;
   avatarUrl: string | null;
   major: string | null;
   semester: number | null;
   bio: string | null;
   school: string | null;
-  languages: string[];
+  languages: Array<{ tag: LanguageTag; proficiency: LanguageProficiency }>;
   verifiedStudent: boolean;
   studentVerificationStatus:
     | "UNVERIFIED"
@@ -71,11 +85,12 @@ export type DiscoverPostRow = {
   isOwn: boolean;
   userId: string;
   nickname: string;
+  gender: UserGender;
   avatarUrl: string | null;
   major: string | null;
   semester: number | null;
   school: string | null;
-  languages: string[];
+  languages: Array<{ tag: LanguageTag; proficiency: LanguageProficiency }>;
   verifiedStudent: boolean;
   studentVerificationStatus:
     | "UNVERIFIED"
@@ -89,11 +104,12 @@ type UserSearchHit = {
   id: string;
   username: string;
   nickname: string | null;
+  gender: UserGender;
   avatarUrl: string | null;
   major: string | null;
   semester: number | null;
   school: string | null;
-  languages?: string[];
+  languages?: LanguageTag[];
   verifiedStudent: boolean;
   studentVerificationStatus:
     | "UNVERIFIED"
@@ -129,21 +145,23 @@ export function DiscoverList({
 
   const trimmed = query.trim();
   const searchActive = allowSearch && trimmed.length >= 2;
-  const filterPeople = rows.map((row) => ({
-    school: row.school,
-    major: row.major,
-    languages: row.languages,
-    semester: row.semester,
-    studentVerificationStatus: row.studentVerificationStatus,
-  })).concat(
-    posts.map((post) => ({
-      school: post.school,
-      major: post.major,
-      languages: post.languages,
-      semester: post.semester,
-      studentVerificationStatus: post.studentVerificationStatus,
-    })),
-  );
+  const filterPeople = rows
+    .map((row) => ({
+      school: row.school,
+      major: row.major,
+      languageTags: row.languages.map((l) => l.tag),
+      semester: row.semester,
+      studentVerificationStatus: row.studentVerificationStatus,
+    }))
+    .concat(
+      posts.map((post) => ({
+        school: post.school,
+        major: post.major,
+        languageTags: post.languages.map((l) => l.tag),
+        semester: post.semester,
+        studentVerificationStatus: post.studentVerificationStatus,
+      })),
+    );
   const schoolOptions = Array.from(
     new Set(filterPeople.map((row) => row.school).filter((school): school is string => Boolean(school))),
   ).sort();
@@ -151,7 +169,9 @@ export function DiscoverList({
     new Set(filterPeople.map((row) => row.major).filter((major): major is string => Boolean(major))),
   ).sort();
   const languageOptions = Array.from(
-    new Set(filterPeople.flatMap((row) => row.languages).filter((language): language is string => Boolean(language))),
+    new Set(
+      filterPeople.flatMap((row) => row.languageTags).filter((language): language is LanguageTag => Boolean(language)),
+    ),
   ).sort();
   const semesterOptions = Array.from(
     new Set(filterPeople.map((row) => row.semester).filter((semester): semester is number => Boolean(semester))),
@@ -189,7 +209,7 @@ export function DiscoverList({
 
   if (!allowSearch) {
     return (
-      <p className="rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-6 text-center text-[13px] text-muted-foreground">
+      <p className="rounded-2xl border border-dashed border-classmates-teal-border/60 bg-classmates-teal-soft/60 px-4 py-6 text-center text-[13px] text-classmates-teal">
         Sign in to search classmates by name or @handle.
       </p>
     );
@@ -200,31 +220,31 @@ export function DiscoverList({
       <div className="grid grid-cols-5 gap-1.5">
         <SceneTab
           label="Shared courses"
-          icon={<BookOpen className="h-7 w-7" strokeWidth={1.9} />}
+          icon={<BookUser className="h-6 w-6" strokeWidth={1.9} aria-hidden />}
           active={scene === "shared"}
           onClick={() => setScene("shared")}
         />
         <SceneTab
           label="Study"
-          icon={<BookOpen className="h-7 w-7" strokeWidth={1.9} />}
+          icon={<NotebookPen className="h-6 w-6" strokeWidth={1.9} aria-hidden />}
           active={scene === "study"}
           onClick={() => setScene("study")}
         />
         <SceneTab
           label="Meals"
-          icon={<Coffee className="h-7 w-7" strokeWidth={1.9} />}
+          icon={<UtensilsCrossed className="h-6 w-6" strokeWidth={1.9} aria-hidden />}
           active={scene === "meals"}
           onClick={() => setScene("meals")}
         />
         <SceneTab
           label="Language"
-          icon={<Languages className="h-7 w-7" strokeWidth={1.9} />}
+          icon={<Languages className="h-6 w-6" strokeWidth={1.9} aria-hidden />}
           active={scene === "language"}
           onClick={() => setScene("language")}
         />
         <SceneTab
           label="Sports"
-          icon={<Dumbbell className="h-7 w-7" strokeWidth={1.9} />}
+          icon={<Dumbbell className="h-6 w-6" strokeWidth={1.9} aria-hidden />}
           active={scene === "sports"}
           onClick={() => setScene("sports")}
         />
@@ -235,7 +255,7 @@ export function DiscoverList({
           {activeChips.map((chip) => (
             <span
               key={chip}
-              className="inline-flex items-center rounded-full bg-foreground/5 px-2.5 py-1 text-[11px] font-medium text-foreground/80"
+              className="inline-flex items-center rounded-full border border-classmates-teal-border/70 bg-classmates-teal-soft px-2.5 py-1 text-[11px] font-medium text-classmates-teal"
             >
               {chip}
             </span>
@@ -273,7 +293,7 @@ export function DiscoverList({
             className="absolute inset-0"
             onClick={() => setFiltersOpen(false)}
           />
-          <div className="relative w-full rounded-t-[1.75rem] border border-border/60 bg-background px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 shadow-2xl">
+          <div className="relative w-full rounded-t-[1.75rem] border border-[#E7E0D6]/80 bg-classmates-warm-alt px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 shadow-2xl">
             <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border/80" />
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-[15px] font-semibold text-foreground">Filter classmates</h3>
@@ -286,7 +306,7 @@ export function DiscoverList({
                   setSemesterFilter("All");
                   setStatusFilter("All");
                 }}
-                className="text-[12px] font-medium text-muted-foreground"
+                className="text-[12px] font-medium text-classmates-blue hover:text-classmates-blue/80"
               >
                 Reset
               </button>
@@ -309,6 +329,7 @@ export function DiscoverList({
               options={["All", ...languageOptions]}
               value={languageFilter}
               onChange={setLanguageFilter}
+              renderLabel={(v) => (v === "All" ? "All" : LANGUAGE_TAG_LABEL[v as LanguageTag] ?? v)}
             />
             <FilterSection
               label="Semester"
@@ -322,12 +343,13 @@ export function DiscoverList({
               options={["All", "Verified", "Pending", "Unverified"]}
               value={statusFilter}
               onChange={setStatusFilter}
+              renderLabel={(v) => (v === "Pending" ? "Verifying" : v)}
             />
 
             <button
               type="button"
               onClick={() => setFiltersOpen(false)}
-              className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full bg-primary text-[14px] font-semibold text-primary-foreground shadow-sm"
+              className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full bg-classmates-blue text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-classmates-blue/90 active:bg-classmates-blue/95"
             >
               Done
             </button>
@@ -363,22 +385,28 @@ function SceneTab({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={cn(
-        "relative flex h-[4.6rem] min-w-0 flex-col items-center justify-center overflow-hidden rounded-[1rem] border px-1.5 py-1.5 text-center text-[10px] font-medium leading-tight transition-all",
+        "relative flex h-[4rem] min-w-0 flex-col items-center justify-center overflow-hidden rounded-[0.875rem] border px-1 py-1 text-center text-[10px] font-medium leading-tight transition-all",
         active
-          ? "border-primary/40 bg-primary/[0.08] text-primary shadow-[0_6px_16px_-10px_rgba(37,99,235,0.45)]"
-          : "border-border/70 bg-card text-foreground/82 shadow-[0_2px_12px_-8px_rgba(15,23,42,0.12)]",
+          ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue shadow-[0_4px_14px_rgba(37,99,235,0.14)] dark:border-blue-400/55 dark:bg-blue-950/40 dark:text-blue-300 dark:shadow-[0_4px_14px_rgba(37,99,235,0.2)]"
+          : "border-[#E7E0D6] bg-white text-[#374151] shadow-[0_1px_2px_rgba(15,23,42,0.04)] dark:border-border/80 dark:bg-card dark:text-muted-foreground",
       )}
     >
       <span
         className={cn(
-          "pointer-events-none absolute inset-x-0 top-1.5 bottom-6 inline-flex items-center justify-center",
-          active ? "text-primary" : "text-foreground/70",
+          "pointer-events-none absolute inset-x-0 top-0.5 bottom-[1.4rem] inline-flex items-center justify-center",
+          active ? "text-classmates-blue dark:text-blue-300" : "text-[#6B7280] dark:text-muted-foreground/90",
         )}
       >
         {icon}
       </span>
-      <span className="relative z-[1] mt-auto block whitespace-normal text-center leading-[1.1]">
+      <span
+        className={cn(
+          "relative z-[1] mt-auto block whitespace-normal text-center leading-[1.1]",
+          active ? "font-semibold text-classmates-blue dark:text-blue-300" : "font-medium text-[#374151] dark:text-muted-foreground",
+        )}
+      >
         {label}
       </span>
     </button>
@@ -388,7 +416,7 @@ function SceneTab({
 function matchesScene(row: DiscoverRow, scene: SceneKind) {
   const bio = row.bio?.toLowerCase() ?? "";
   const reasons = row.primaryReason.toLowerCase();
-  const languages = row.languages.map((language) => language.toUpperCase());
+  const languages = row.languages.map((l) => l.tag.toUpperCase());
 
   if (scene === "shared") {
     return true;
@@ -463,8 +491,8 @@ function FilterSection({
               className={cn(
                 "inline-flex h-9 items-center rounded-full border px-3 text-[12px] font-medium transition-colors",
                 active
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border/70 bg-card text-foreground/80",
+                  ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
+                  : "border-[#E7E0D6]/90 bg-white text-foreground/80",
               )}
             >
               {renderLabel ? renderLabel(option) : option}
@@ -489,41 +517,49 @@ function SearchBar({
   inputRef: RefObject<HTMLInputElement | null>;
   onOpenFilters: () => void;
 }) {
+  const hasValue = value.length > 0;
   return (
-    <div className="flex items-center gap-2">
-      <div className="relative min-w-0 flex-1">
-        <Search
-          className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-muted-foreground"
-          strokeWidth={2.25}
-        />
-        <Input
-          ref={inputRef}
-          placeholder="Search classmates"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-11 rounded-2xl pl-11 pr-10 text-[15px]"
-          inputMode="search"
-          autoComplete="off"
-        />
-        {value ? (
+    <div className="relative min-w-0">
+      <Search
+        className="pointer-events-none absolute left-3.5 top-1/2 z-10 h-[18px] w-[18px] -translate-y-1/2 text-muted-foreground"
+        strokeWidth={2.25}
+        aria-hidden
+      />
+      <Input
+        ref={inputRef}
+        placeholder="Search classmates"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={cn(
+          "h-11 w-full rounded-2xl border-[#E7E0D6]/90 bg-white pl-11 text-[15px] shadow-sm",
+          hasValue ? "pr-[5.25rem]" : "pr-14",
+        )}
+        inputMode="search"
+        autoComplete="off"
+      />
+      <div className="pointer-events-none absolute inset-y-0 right-1.5 z-10 flex items-center gap-1">
+        <div className="pointer-events-auto flex items-center gap-1">
+          {hasValue ? (
+            <button
+              type="button"
+              onClick={onClear}
+              aria-label="Clear search"
+              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            >
+              <X className="h-4 w-4" strokeWidth={2.25} />
+            </button>
+          ) : null}
+          <span className="h-5 w-px shrink-0 bg-border/55" aria-hidden />
           <button
             type="button"
-            onClick={onClear}
-            aria-label="Clear search"
-            className="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            onClick={onOpenFilters}
+            aria-label="Filter classmates"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
-            <X className="h-4 w-4" strokeWidth={2.25} />
+            <SlidersHorizontal className="h-[18px] w-[18px]" strokeWidth={2.25} aria-hidden />
           </button>
-        ) : null}
+        </div>
       </div>
-      <button
-        type="button"
-        onClick={onOpenFilters}
-        className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full border border-border/70 bg-card px-3 text-[12px] font-medium text-foreground shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]"
-      >
-        <SlidersHorizontal className="h-4 w-4 text-muted-foreground" strokeWidth={2.25} />
-        Filter
-      </button>
     </div>
   );
 }
@@ -546,7 +582,7 @@ function RecommendationSurface({
     return (
       <div className="space-y-3">
         <SceneHeader scene={scene} onOpenPost={!showingShared ? onOpenPost : undefined} />
-        <div className="rounded-2xl border border-border bg-card px-4 py-6 text-center text-[13px] text-muted-foreground">
+        <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-6 text-center text-[13px] text-muted-foreground shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
           {showingShared
             ? "No classmates match this category yet."
             : "No posts in this category yet. Be the first to share what you're looking for."}
@@ -559,18 +595,13 @@ function RecommendationSurface({
     <div className="space-y-3">
       <SceneHeader scene={scene} onOpenPost={!showingShared ? onOpenPost : undefined} />
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="space-y-2.5">
         {showingShared
-          ? rows.map((r, i) => (
-              <RecommendationRow
-                key={r.userId}
-                row={r}
-                isLast={i === rows.length - 1}
-                scene={scene}
-              />
+          ? rows.map((r) => (
+              <RecommendationRow key={r.userId} row={r} scene={scene} />
             ))
-          : posts.map((post, i) => (
-              <PostRow key={post.id} post={post} isLast={i === posts.length - 1} />
+          : posts.map((post) => (
+              <PostRow key={post.id} post={post} />
             ))}
       </div>
     </div>
@@ -598,9 +629,9 @@ function SceneHeader({
         <button
           type="button"
           onClick={onOpenPost}
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-border/70 bg-card px-3 text-[12px] font-medium text-foreground shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-classmates-blue-border bg-classmates-blue-soft px-3 text-[12px] font-medium text-classmates-blue shadow-[0_2px_12px_-4px_rgba(37,99,235,0.08)] transition-colors hover:bg-classmates-blue-border/40"
         >
-          <Plus className="h-4 w-4 text-muted-foreground" strokeWidth={2.25} />
+          <Plus className="h-4 w-4 text-classmates-blue" strokeWidth={2.25} />
           Post
         </button>
       ) : null}
@@ -634,7 +665,7 @@ function sceneDescription(scene: SceneKind) {
     case "sports":
       return "Posts about sports, gym buddies, and active meetups around campus.";
     default:
-      return "People you already overlap with through shared courses.";
+      return "Same courses as you — strongest overlap first.";
   }
 }
 
@@ -652,7 +683,7 @@ function UserSearchResults({ query }: { query: string }) {
     const ac = new AbortController();
     const timer = window.setTimeout(() => {
       setSearching(true);
-      fetch(`/api/users/search?q=${encodeURIComponent(query)}`, {
+      apiFetch(`/api/users/search?q=${encodeURIComponent(query)}`, {
         signal: ac.signal,
       })
         .then((r) => (r.ok ? r.json() : null))
@@ -678,7 +709,7 @@ function UserSearchResults({ query }: { query: string }) {
 
   if (searching && hits.length === 0) {
     return (
-      <div className="rounded-2xl border border-border bg-card px-4 py-6 text-center text-[13px] text-muted-foreground">
+      <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-6 text-center text-[13px] text-muted-foreground shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
         Searching…
       </div>
     );
@@ -686,22 +717,22 @@ function UserSearchResults({ query }: { query: string }) {
 
   if (!searching && hits.length === 0) {
     return (
-      <div className="rounded-2xl border border-border bg-card px-4 py-6 text-center text-[13px] text-muted-foreground">
+      <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-6 text-center text-[13px] text-muted-foreground shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
         No one matches &ldquo;{query}&rdquo; at your school.
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card">
-      {hits.map((hit, i) => (
-        <UserSearchRow key={hit.id} hit={hit} isLast={i === hits.length - 1} />
+    <div className="space-y-2.5">
+      {hits.map((hit) => (
+        <UserSearchRow key={hit.id} hit={hit} />
       ))}
     </div>
   );
 }
 
-function UserSearchRow({ hit, isLast }: { hit: UserSearchHit; isLast: boolean }) {
+function UserSearchRow({ hit }: { hit: UserSearchHit }) {
   const name = hit.nickname?.trim() || hit.username;
   const meta = [hit.major, hit.semester ? `sem ${hit.semester}` : null]
     .filter(Boolean)
@@ -709,126 +740,183 @@ function UserSearchRow({ hit, isLast }: { hit: UserSearchHit; isLast: boolean })
   const profileHref = `/users/${hit.id}?returnTo=%2Fdiscover` as Route;
 
   return (
-    <div
-      className={cn(
-        "flex items-start gap-3 px-3 py-3 transition hover:bg-muted/20",
-        !isLast && "border-b border-border",
-      )}
-    >
-      <Link href={profileHref} className="shrink-0">
-        <PresetAvatar id={hit.avatarUrl} size={52} className="shrink-0" />
-      </Link>
-
-      <Link href={profileHref} className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="truncate text-sm font-medium">{name}</span>
+    <ClassmatesPersonRow
+      avatarHref={profileHref}
+      avatarUrl={hit.avatarUrl}
+      profileAriaLabel={`View ${name}'s profile`}
+      name={name}
+      titleAdornment={
+        <>
           <VerifiedBadge
             size="xs"
             school={hit.school}
             verifiedStudent={hit.verifiedStudent}
             status={hit.studentVerificationStatus}
           />
+          <UserGenderCardIcon gender={hit.gender} className="shrink-0" />
           {hit.hasActiveConnection ? (
-            <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+            <span className="shrink-0 rounded-full border border-classmates-teal-border/80 bg-classmates-teal-soft px-2 py-0.5 text-[10px] font-semibold text-classmates-teal">
               chatting
             </span>
           ) : null}
-        </div>
-        <p className="truncate text-[11.5px] text-muted-foreground">
-          @{hit.username}
-          {meta ? <span> · {meta}</span> : null}
-        </p>
-        {hit.sharedCourseCount > 0 ? (
-          <p className="mt-0.5 text-[11px] text-primary/90">
-            {hit.sharedCourseCount}{" "}
-            {hit.sharedCourseCount === 1 ? "shared course" : "shared courses"}
+        </>
+      }
+      body={
+        <>
+          <p className="mt-1 truncate text-[12px] leading-snug text-muted-foreground">
+            @{hit.username}
+            {meta ? <span> · {meta}</span> : null}
           </p>
-        ) : null}
-      </Link>
-
-      <DiscoverMessageButton peerId={hit.id} />
-    </div>
+          {hit.sharedCourseCount > 0 ? (
+            <p className="mt-1 text-[11px] font-medium text-classmates-blue">
+              {hit.sharedCourseCount}{" "}
+              {hit.sharedCourseCount === 1 ? "shared course" : "shared courses"}
+            </p>
+          ) : null}
+        </>
+      }
+      action={
+        <DiscoverMessageButton
+          peerId={hit.id}
+          tone="subtle"
+          hasExistingChat={hit.hasActiveConnection}
+          className="w-full justify-center sm:w-auto"
+        />
+      }
+    />
   );
 }
 
-function RecommendationRow({
-  row,
-  isLast,
-  scene,
-}: {
-  row: DiscoverRow;
-  isLast: boolean;
-  scene: SceneKind;
-}) {
+function sharedCourseChipLabel(c: { code: string | null; name: string }): string {
+  const code = c.code?.trim();
+  return code || c.name.trim();
+}
+
+function RecommendationRow({ row, scene }: { row: DiscoverRow; scene: SceneKind }) {
   const meta = [row.major, row.semester ? `sem ${row.semester}` : null]
     .filter(Boolean)
     .join(" · ");
   const sharedCount = row.sharedCourses.length;
-  const sharedLabel =
-    sharedCount === 1 ? "1 shared course" : `${sharedCount} shared courses`;
   const profileHref = `/users/${row.userId}?returnTo=%2Fdiscover` as Route;
+  const isSharedScene = scene === "shared";
+  const hasSharedCourses = isSharedScene && sharedCount > 0;
+
+  /** Compact course chip — used both for shared courses and primary course hint. */
+  function CourseChip({ code, name }: { code: string | null; name: string }) {
+    const label = code?.trim() || name.trim();
+    return (
+      <span
+        title={name}
+        className={cn(
+          "inline-flex max-w-[10rem] items-center truncate rounded-full px-2.5 py-0.5 text-[11px] font-bold tabular-nums",
+          "bg-classmates-blue-soft text-classmates-blue ring-1 ring-inset ring-classmates-blue-border",
+          "dark:bg-blue-950/45 dark:text-blue-200 dark:ring-blue-500/35",
+        )}
+      >
+        {label}
+      </span>
+    );
+  }
 
   return (
-    <div
-      className={cn(
-        "flex items-start gap-3 px-3 py-3 transition hover:bg-muted/20",
-        !isLast && "border-b border-border",
-      )}
-    >
-      <Link href={profileHref} className="shrink-0">
-        <PresetAvatar id={row.avatarUrl} size={52} className="shrink-0" />
-      </Link>
-
-      <Link href={profileHref} className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="truncate text-sm font-medium">{row.nickname}</span>
+    <ClassmatesPersonRow
+      avatarHref={profileHref}
+      avatarUrl={row.avatarUrl}
+      avatarSize={72}
+      avatarLinkClassName={CLASSMATES_PERSON_ROW_AVATAR_RING_DISCOVER}
+      profileAriaLabel={`View ${row.nickname}'s profile`}
+      name={row.nickname}
+      titleAdornment={
+        <>
           <VerifiedBadge
             size="xs"
             school={row.school}
             verifiedStudent={row.verifiedStudent}
             status={row.studentVerificationStatus}
           />
+          <UserGenderCardIcon gender={row.gender} className="shrink-0" />
           {row.connectionId ? (
-            <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-              chatting
+            <span className="shrink-0 rounded-full border border-classmates-teal-border/80 bg-classmates-teal-soft px-2 py-0.5 text-[10px] font-semibold text-classmates-teal dark:bg-teal-950/40 dark:text-teal-200">
+              Chatting
             </span>
           ) : null}
+        </>
+      }
+      body={
+        <>
+          {/* — meta: major + semester */}
+          {meta ? (
+            <p className="mt-1 truncate text-[12px] font-medium leading-snug text-muted-foreground">{meta}</p>
+          ) : null}
+
+          {/* — bio: gives personality, fills empty space */}
+          {row.bio ? (
+            <p className="mt-1.5 line-clamp-2 text-[12px] leading-snug text-foreground/80 dark:text-foreground/70">
+              {row.bio}
+            </p>
+          ) : null}
+
+          {/* — course match: inline chips, no heavy box */}
+          {hasSharedCourses ? (
+            <div
+              className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1.5"
+              aria-label="Courses you both take"
+            >
+              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.07em] text-classmates-teal dark:text-teal-300">
+                Shared
+              </span>
+              {row.sharedCourses.slice(0, 3).map((c) => (
+                <CourseChip key={c.id} code={c.code} name={c.name} />
+              ))}
+              {sharedCount > 3 ? (
+                <span className="text-[11px] font-medium text-muted-foreground">
+                  +{sharedCount - 3} more
+                </span>
+              ) : null}
+              {/* Full name hint when only one shared course with a code */}
+              {sharedCount === 1 && row.sharedCourses[0]?.code ? (
+                <span className="w-full truncate text-[11px] leading-snug text-muted-foreground">
+                  {row.sharedCourses[0].name}
+                </span>
+              ) : null}
+            </div>
+          ) : isSharedScene ? (
+            /* In shared scene but no confirmed shared courses — show primary course */
+            <div className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.07em] text-muted-foreground/70 dark:text-zinc-500">
+                Nearby
+              </span>
+              {row.primaryCourse.code ? (
+                <CourseChip code={row.primaryCourse.code} name={row.primaryCourse.name} />
+              ) : null}
+              <span className="min-w-0 truncate text-[11px] text-muted-foreground">
+                {row.primaryCourse.name}
+              </span>
+            </div>
+          ) : null}
+        </>
+      }
+      action={
+        <div className="flex w-full flex-col items-stretch gap-1.5 sm:items-end">
+          {hasSharedCourses ? (
+            <p className="text-center text-[10px] font-semibold tabular-nums text-classmates-teal dark:text-teal-300 sm:text-right">
+              {sharedCount === 1 ? "1 course in common" : `${sharedCount} courses in common`}
+            </p>
+          ) : null}
+          <DiscoverMessageButton
+            peerId={row.userId}
+            courseId={row.primaryCourse.id}
+            tone={hasSharedCourses ? "soft" : "subtle"}
+            hasExistingChat={Boolean(row.connectionId)}
+            className="w-full justify-center sm:w-auto"
+          />
         </div>
-
-        {meta ? (
-          <p className="truncate text-xs text-muted-foreground">{meta}</p>
-        ) : null}
-
-        {scene === "shared" ? (
-          <p className="mt-1 text-xs font-medium text-foreground/85">{sharedLabel}</p>
-        ) : null}
-
-        {scene === "shared" && row.sharedCourses.length > 0 ? (
-          <div className="mt-1.5 flex flex-wrap gap-1">
-            {row.sharedCourses.slice(0, 3).map((c) => (
-              <span
-                key={c.id}
-                className="inline-flex max-w-full items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary"
-                title={c.name}
-              >
-                <span className="truncate">{c.code ?? c.name}</span>
-              </span>
-            ))}
-            {row.sharedCourses.length > 3 ? (
-              <span className="rounded-full bg-foreground/5 px-2 py-0.5 text-[10px] text-muted-foreground">
-                +{row.sharedCourses.length - 3}
-              </span>
-            ) : null}
-          </div>
-        ) : null}
-      </Link>
-
-      <DiscoverMessageButton peerId={row.userId} courseId={row.primaryCourse.id} />
-    </div>
+      }
+    />
   );
 }
 
-function PostRow({ post, isLast }: { post: DiscoverPostRow; isLast: boolean }) {
+function PostRow({ post }: { post: DiscoverPostRow }) {
   const meta = [post.major, post.semester ? `sem ${post.semester}` : null]
     .filter(Boolean)
     .join(" · ");
@@ -842,47 +930,54 @@ function PostRow({ post, isLast }: { post: DiscoverPostRow; isLast: boolean }) {
   ) as Route;
 
   return (
-    <div
-      className={cn(
-        "flex items-start gap-3 px-3 py-3 transition hover:bg-muted/20",
-        !isLast && "border-b border-border",
-      )}
-    >
-      <Link href={profileHref} className="shrink-0">
-        <PresetAvatar id={post.avatarUrl} size={52} className="shrink-0" />
-      </Link>
-
-      <Link href={postDetailHref} className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="truncate text-sm font-medium">{post.nickname}</span>
+    <ClassmatesPersonRow
+      avatarHref={profileHref}
+      contentHref={postDetailHref}
+      avatarUrl={post.avatarUrl}
+      profileAriaLabel={`View ${post.nickname}'s profile`}
+      name={post.nickname}
+      titleAdornment={
+        <>
           <VerifiedBadge
             size="xs"
             school={post.school}
             verifiedStudent={post.verifiedStudent}
             status={post.studentVerificationStatus}
           />
+          <UserGenderCardIcon gender={post.gender} className="shrink-0" />
           {post.isOwn ? (
-            <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+            <span className="shrink-0 rounded-full border border-classmates-blue-border/80 bg-classmates-blue-soft px-2 py-0.5 text-[10px] font-semibold text-classmates-blue">
               your post
             </span>
           ) : null}
-        </div>
-        {meta ? (
-          <p className="truncate text-xs text-muted-foreground">{meta}</p>
-        ) : null}
-        <p className="mt-1 text-[12px] font-medium leading-snug text-foreground/90">{post.title}</p>
-        {post.body ? (
-          <p className="mt-0.5 text-[12px] leading-snug text-foreground/75">{post.body}</p>
-        ) : null}
-        <p className="mt-1 text-[10.5px] text-muted-foreground">
-          {isNeverExpiry(post.expiresAt)
-            ? "No expiry"
-            : `Active until ${format(new Date(post.expiresAt), "MMM d")}`}
-        </p>
-      </Link>
-
-      <DiscoverMessageButton peerId={post.userId} returnTo={postPath} />
-    </div>
+        </>
+      }
+      body={
+        <>
+          {meta ? (
+            <p className="mt-1 truncate text-[12px] leading-snug text-muted-foreground">{meta}</p>
+          ) : null}
+          <p className="mt-1 text-[12px] font-medium leading-snug text-foreground/90">{post.title}</p>
+          {post.body ? (
+            <p className="mt-0.5 text-[12px] leading-snug text-foreground/75">{post.body}</p>
+          ) : null}
+          <p className="mt-1 text-[10.5px] text-muted-foreground">
+            {isNeverExpiry(post.expiresAt)
+              ? "No expiry"
+              : `Active until ${format(new Date(post.expiresAt), "MMM d")}`}
+          </p>
+        </>
+      }
+      action={
+        <DiscoverMessageButton
+          peerId={post.userId}
+          returnTo={postPath}
+          tone="subtle"
+          hasExistingChat={false}
+          className="w-full justify-center sm:w-auto"
+        />
+      }
+    />
   );
 }
 
@@ -905,7 +1000,7 @@ function passesFilters(
   value: {
     school: string | null;
     major: string | null;
-    languages: string[];
+    languages: Array<{ tag: LanguageTag; proficiency: LanguageProficiency }>;
     semester: number | null;
     studentVerificationStatus:
       | "UNVERIFIED"
@@ -924,7 +1019,12 @@ function passesFilters(
 ) {
   if (filters.schoolFilter !== "All" && value.school !== filters.schoolFilter) return false;
   if (filters.majorFilter !== "All" && value.major !== filters.majorFilter) return false;
-  if (filters.languageFilter !== "All" && !value.languages.includes(filters.languageFilter)) return false;
+  if (
+    filters.languageFilter !== "All" &&
+    !value.languages.some((l) => l.tag === filters.languageFilter)
+  ) {
+    return false;
+  }
   if (filters.semesterFilter !== "All" && value.semester !== Number(filters.semesterFilter)) return false;
   if (filters.statusFilter === "Verified" && value.studentVerificationStatus !== "VERIFIED") return false;
   if (
@@ -977,7 +1077,7 @@ function CreatePostSheet({
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch("/api/classmate-posts", {
+      const res = await apiFetch("/api/classmate-posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1125,8 +1225,8 @@ function ExpiryOption({
       className={cn(
         "inline-flex h-9 items-center rounded-full border px-3 text-[12px] font-medium transition-colors",
         active
-          ? "border-primary bg-primary/10 text-primary"
-          : "border-border/70 bg-background text-foreground/78",
+          ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
+          : "border-[#E7E0D6]/90 bg-white text-foreground/78",
       )}
     >
       {label}

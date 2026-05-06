@@ -1,8 +1,8 @@
 /**
  * Twenty preset avatars, served as static JPEGs under `/public/avatars/`.
- * `User.avatarUrl` stores a short id like "p07", which maps 1:1 to the file
- * `/avatars/p07.jpeg`. Keeping IDs (not URLs) in the DB means we can swap the
- * actual artwork later without touching user rows.
+ * `User.avatarUrl` is usually a short id like "p07" → `/avatars/p07.jpeg`.
+ * It may also hold a public Vercel Blob URL for a user-uploaded photo under
+ * `avatars/custom/<userId>/…` (written only by `/api/profile/avatar/upload`).
  */
 
 export const AVATAR_IDS = [
@@ -15,6 +15,42 @@ export const AVATAR_IDS = [
 export type AvatarId = (typeof AVATAR_IDS)[number];
 
 export const DEFAULT_AVATAR_ID: AvatarId = "p01";
+
+const BLOB_HOST_SUFFIX = ".public.blob.vercel-storage.com";
+
+export function userCustomAvatarBlobPrefix(userId: string): string {
+  return `avatars/custom/${userId}/`;
+}
+
+/** True for HTTPS URLs on Vercel Blob that look safe to render as an image. */
+export function isDisplayableCustomAvatarUrl(value: unknown): value is string {
+  if (typeof value !== "string" || value.length > 2048) return false;
+  if (!value.startsWith("https://")) return false;
+  try {
+    const u = new URL(value);
+    if (!u.hostname.toLowerCase().endsWith(BLOB_HOST_SUFFIX)) return false;
+    return u.pathname.length > 1;
+  } catch {
+    return false;
+  }
+}
+
+/** Blob URL under this user's upload prefix (server + client for UI hints). */
+export function isTrustedUserAvatarBlobUrl(userId: string, url: string): boolean {
+  if (!isDisplayableCustomAvatarUrl(url)) return false;
+  try {
+    const u = new URL(url);
+    const prefix = `/${userCustomAvatarBlobPrefix(userId)}`;
+    return u.pathname.startsWith(prefix);
+  } catch {
+    return false;
+  }
+}
+
+export function resolveAvatarImageSrc(id?: string | null): string {
+  if (isDisplayableCustomAvatarUrl(id)) return id;
+  return getAvatarSrc(id);
+}
 
 export function getAvatarSrc(id?: string | null): string {
   const safe = isValidAvatarId(id) ? id : DEFAULT_AVATAR_ID;

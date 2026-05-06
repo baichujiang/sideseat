@@ -1,5 +1,7 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import { Check, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -46,7 +48,7 @@ export function QuickEnrollButton({
     if (state !== "idle") return;
     setState("pending");
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `/api/courses/${encodeURIComponent(courseId)}/enroll`,
         { method: "POST" },
       );

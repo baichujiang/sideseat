@@ -9,25 +9,26 @@
 }
 
 :root {
-  --background: 45 30% 98%;
-  --foreground: 216 26% 16%;
+  /* Page background ≈ #F8F7F4; text ≈ #111827 / #5F6B7A; borders ≈ #E7E0D6 */
+  --background: 40 23% 97%;
+  --foreground: 222 47% 11%;
   --card: 0 0% 100%;
-  --card-foreground: 216 26% 16%;
+  --card-foreground: 222 47% 11%;
   --popover: 0 0% 100%;
-  --popover-foreground: 216 26% 16%;
-  --primary: 201 76% 33%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 217 91% 53%;
   --primary-foreground: 0 0% 100%;
   --secondary: 170 20% 92%;
   --secondary-foreground: 176 32% 22%;
   --muted: 42 28% 94%;
-  --muted-foreground: 214 12% 42%;
+  --muted-foreground: 218 15% 42%;
   --accent: 39 66% 92%;
   --accent-foreground: 24 48% 25%;
   --destructive: 0 75% 54%;
   --destructive-foreground: 0 0% 100%;
-  --border: 34 20% 85%;
-  --input: 34 20% 85%;
-  --ring: 201 76% 33%;
+  --border: 38 20% 87%;
+  --input: 38 20% 87%;
+  --ring: 217 91% 53%;
   --radius: 1.5rem;
 }
 
@@ -54,9 +55,19 @@ a {
 }
 
 @layer components {
+  /** Primary page title — matches Discover “Classmates” line (text-lg / semibold). */
+  .page-screen-title {
+    @apply text-lg font-semibold leading-tight tracking-tight text-foreground;
+  }
+  .page-screen-title-ink {
+    @apply text-lg font-semibold leading-tight tracking-tight text-classmates-ink dark:text-foreground;
+  }
+  .page-screen-subtitle {
+    @apply text-[13px] leading-tight text-muted-foreground;
+  }
   .field-select {
-    @apply flex h-11 w-full appearance-none rounded-2xl border border-border bg-background px-4 py-2 pr-10 text-sm text-foreground shadow-sm outline-none transition;
-    @apply focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    @apply flex h-11 w-full appearance-none rounded-2xl border border-classmates-edge bg-background px-4 py-2 pr-10 text-sm text-foreground shadow-sm outline-none transition dark:border-border;
+    @apply focus-visible:border-classmates-azure focus-visible:ring-2 focus-visible:ring-classmates-azure/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
     @apply disabled:cursor-not-allowed disabled:opacity-50;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-size: 1rem;

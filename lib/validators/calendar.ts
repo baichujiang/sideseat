@@ -3,6 +3,8 @@ import { z } from "zod";
 
 import { courseSessionInput } from "@/lib/validators/course";
 
+const hexColor = z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Use a #RRGGBB color.");
+
 export const calendarEventSchema = z
   .object({
     title: z.string().trim().min(1).max(120),
@@ -13,6 +15,8 @@ export const calendarEventSchema = z
     withUserIds: z.array(z.string().cuid()).max(8).optional().default([]),
     repeat: z.enum(["NONE", "DAILY", "WEEKLY", "BIWEEKLY", "MONTHLY", "YEARLY"]).default("NONE"),
     repeatUntil: z.string().optional().or(z.literal("")),
+    /** Optional calendar list / category */
+    categoryId: z.string().cuid().nullable().optional(),
   })
   .superRefine((value, ctx) => {
     const start = new Date(value.startAt);
@@ -55,6 +59,16 @@ export const calendarCourseAddSchema = z.object({
 
 export type CalendarEventInput = z.infer<typeof calendarEventSchema>;
 export type CalendarCourseAddInput = z.infer<typeof calendarCourseAddSchema>;
+
+export const calendarCategoryCreateSchema = z.object({
+  name: z.string().trim().min(1).max(40),
+  color: hexColor,
+});
+
+export const calendarCategoryPatchSchema = z.object({
+  name: z.string().trim().min(1).max(40).optional(),
+  color: hexColor.optional(),
+});
 export type CalendarCourseSessionInput = {
   weekday: Weekday;
   start: string;

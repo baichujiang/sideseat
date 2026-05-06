@@ -1,6 +1,15 @@
 import bcrypt from "bcryptjs";
+import { LanguageProficiency, LanguageTag } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
+
+const demoLangsUpdate = {
+  deleteMany: {} as const,
+  create: [{ tag: LanguageTag.ENGLISH, proficiency: LanguageProficiency.FLUENT }],
+};
+const demoLangsCreate = {
+  create: [{ tag: LanguageTag.ENGLISH, proficiency: LanguageProficiency.FLUENT }],
+};
 
 async function main() {
   const hashedPassword = await bcrypt.hash("Password123", 12);
@@ -21,7 +30,7 @@ async function main() {
       verifiedStudent: false,
       studentVerificationStatus: "UNVERIFIED",
       emailVerifiedAt: null,
-      languages: ["ENGLISH"],
+      userLanguages: demoLangsUpdate,
     },
     create: {
       username: "unverified-test",
@@ -38,7 +47,7 @@ async function main() {
       verifiedStudent: false,
       studentVerificationStatus: "UNVERIFIED",
       emailVerifiedAt: null,
-      languages: ["ENGLISH"],
+      userLanguages: demoLangsCreate,
     },
     select: {
       id: true,

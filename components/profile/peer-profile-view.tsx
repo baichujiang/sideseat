@@ -1,14 +1,16 @@
-import type { DegreeLevel, LanguageTag } from "@prisma/client";
+import type { DegreeLevel, LanguageProficiency, LanguageTag, UserGender } from "@prisma/client";
 
 import { PresetAvatar } from "@/components/ui/preset-avatar";
+import { UserGenderProfileMark } from "@/components/ui/user-gender-icon";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
-import { LANGUAGE_TAG_LABEL } from "@/lib/constants/languages";
+import { LANGUAGE_PROFICIENCY_LABEL, LANGUAGE_TAG_LABEL } from "@/lib/constants/languages";
 import { DEGREE_LEVEL_LABELS } from "@/lib/constants/majors";
 import { getSchoolLabel } from "@/lib/constants/schools";
 import { formatSemester } from "@/lib/utils";
 
 export type PeerProfileFields = {
   nickname: string | null;
+  gender: UserGender;
   avatarUrl: string | null;
   bio: string | null;
   major: string | null;
@@ -22,7 +24,7 @@ export type PeerProfileFields = {
     | "VERIFIED"
     | "MANUAL_REVIEW_REQUIRED"
     | "REJECTED";
-  languages: string[];
+  languages: Array<{ tag: LanguageTag; proficiency: LanguageProficiency }>;
 };
 
 export function PeerProfileView({
@@ -51,6 +53,7 @@ export function PeerProfileView({
           <div className="min-w-0 flex-1 pt-0.5">
             <h1 className="flex flex-wrap items-center gap-2 text-[22px] font-semibold tracking-tight">
               <span className="break-words">{name}</span>
+              <UserGenderProfileMark gender={peer.gender} iconClassName="h-5 w-5" />
               <VerifiedBadge
                 size="sm"
                 school={peer.school}
@@ -69,7 +72,7 @@ export function PeerProfileView({
 
         {metVia ? (
           <div className="mt-3 inline-flex max-w-full items-center rounded-full bg-primary/10 px-3 py-1 text-[11px] font-medium text-primary">
-            Connected via {metVia}
+            {metVia}
           </div>
         ) : null}
       </section>
@@ -94,12 +97,13 @@ export function PeerProfileView({
               Languages
             </p>
             <div className="mt-1.5 flex flex-wrap gap-1.5">
-              {peer.languages.map((lang) => (
+              {peer.languages.map((row) => (
                 <span
-                  key={lang}
+                  key={row.tag}
                   className="rounded-full bg-foreground/5 px-2.5 py-0.5 text-xs font-medium text-foreground/80"
+                  title={LANGUAGE_PROFICIENCY_LABEL[row.proficiency]}
                 >
-                  {LANGUAGE_TAG_LABEL[lang as LanguageTag] ?? lang}
+                  {LANGUAGE_TAG_LABEL[row.tag]} · {LANGUAGE_PROFICIENCY_LABEL[row.proficiency]}
                 </span>
               ))}
             </div>

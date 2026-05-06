@@ -12,20 +12,34 @@ export async function PUT(request: Request) {
     const schoolChanged = Boolean(user.school && user.school !== values.school);
 
     await prisma.$transaction(async (tx) => {
+      await tx.userLanguage.deleteMany({ where: { userId: user.id } });
+      await tx.userLanguage.createMany({
+        data: values.languages.map((l) => ({
+          userId: user.id,
+          tag: l.tag,
+          proficiency: l.proficiency,
+        })),
+      });
       await tx.user.update({
         where: { id: user.id },
         data: {
           nickname: values.nickname,
+          gender: values.gender,
           school: values.school,
           degreeLevel: values.degreeLevel,
           major: values.major,
           semester: values.semester,
-          languages: values.languages,
           bio: values.bio || null,
           wechatHandle: values.wechatHandle || null,
           whatsappHandle: values.whatsappHandle || null,
           telegramHandle: values.telegramHandle || null,
           instagramHandle: values.instagramHandle || null,
+          discoverByCourse: values.discoverByCourse,
+          discoverByMajor: values.discoverByMajor,
+          discoverBySemester: values.discoverBySemester,
+          allowInvitationNotes: values.allowInvitationNotes,
+          contactInfoOptIn: values.contactInfoOptIn,
+          hideFromCourseMembers: values.hideFromCourseMembers,
           onboardingComplete: true,
           ...(schoolChanged
             ? {

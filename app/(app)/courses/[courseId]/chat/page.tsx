@@ -106,13 +106,13 @@ export default async function CourseChatPage({
               value={`/courses/${courseId}/chat`}
             />
             <p className="min-w-0 flex-1 text-[11px] leading-snug text-foreground">
-              Hidden from Contacts — restore the row anytime.
+              Hidden from Chats — restore the row anytime.
             </p>
             <button
               type="submit"
               className="shrink-0 rounded-full border border-border bg-background px-2.5 py-1 text-[10px] font-semibold shadow-sm"
             >
-              Show in Contacts
+              Show in Chats
             </button>
           </form>
         </div>

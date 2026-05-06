@@ -1,5 +1,7 @@
 "use client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 import { useEffect, useRef, useState } from "react";
 import { MoreHorizontal, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -47,7 +49,7 @@ export function CoursePageMenu({
 
     setPending(true);
     setError("");
-    const response = await fetch(`/api/courses/${courseId}`, { method: "DELETE" });
+    const response = await apiFetch(`/api/courses/${courseId}`, { method: "DELETE" });
     const payload = await response.json().catch(() => ({}));
     setPending(false);
 

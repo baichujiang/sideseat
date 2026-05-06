@@ -1,20 +1,28 @@
 "use client";
 
-import { CourseIntent } from "@prisma/client";
+import { apiFetch } from "@/lib/auth/api-fetch";
+
+import { CourseIntent, type UserGender } from "@prisma/client";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
 
+import { ClassmatesPersonRow, CLASSMATES_PERSON_ROW_CLASS } from "@/components/classmates/classmates-person-row";
+import { CourseShareLinkAction } from "@/components/courses/course-share-link-action";
 import { Input } from "@/components/ui/input";
-import { PresetAvatar } from "@/components/ui/preset-avatar";
+import { UserGenderCardIcon } from "@/components/ui/user-gender-icon";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { cn } from "@/lib/utils";
+
+/** Visible classmates in list at or below this → invite / share growth strip (see share action threshold). */
+const LOW_CLASSMATES_GROWTH_THRESHOLD = 3;
 
 export type CourseMember = {
   membershipId: string;
   userId: string;
   nickname: string;
+  gender: UserGender;
   avatarUrl: string | null;
   major: string | null;
   semester: number | null;
@@ -39,12 +47,27 @@ export type CourseMember = {
     | { kind: "ACTIVE"; connectionId: string };
 };
 
-const INTENT_LABEL: Record<CourseIntent, string> = {
-  STUDY_TOGETHER: "study",
-  EXAM_PREP: "exam prep",
-  GO_TO_CLASS_TOGETHER: "go together",
-  EAT_AFTER_CLASS: "eat after",
+/** How this person wants to connect — title case, same meanings as course intent picker. */
+const MEMBER_INTENT_LABEL: Record<CourseIntent, string> = {
+  STUDY_TOGETHER: "Study together",
+  EXAM_PREP: "Exam prep",
+  GO_TO_CLASS_TOGETHER: "Go together",
+  EAT_AFTER_CLASS: "Get coffee",
 };
+
+const intentChipClass =
+  "rounded-full bg-[#F0FDFA] px-3 py-1 text-xs font-semibold text-[#0F766E] dark:border dark:border-teal-800/40 dark:bg-teal-950/45 dark:text-teal-100";
+
+/** No thread yet — primary CTA, brand blue (not near-black). */
+const memberMessageButtonClass =
+  "inline-flex min-h-[2.25rem] items-center justify-center rounded-full bg-[#2563EB] px-3.5 text-xs font-semibold text-white shadow-[0_2px_8px_rgba(37,99,235,0.22)] transition hover:bg-[#1D4ED8] active:bg-[#1E40AF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:bg-blue-600 dark:hover:bg-blue-500 dark:focus-visible:ring-blue-400/50 dark:ring-offset-card";
+
+/** Existing thread — secondary, matches calendar-style chips on course hub. */
+const memberOpenChatLinkClass =
+  "inline-flex min-h-[2.25rem] items-center justify-center rounded-full border border-[#BFDBFE] bg-[#EFF6FF] px-3.5 text-xs font-semibold text-[#2563EB] transition hover:bg-[#DBEAFE] active:bg-[#BFDBFE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-blue-800/60 dark:bg-blue-950/45 dark:text-blue-200 dark:hover:bg-blue-950/70 dark:focus-visible:ring-blue-400/40 dark:ring-offset-card";
+
+const classmateCardClass =
+  "rounded-[24px] border border-[#E7E0D6] bg-white px-4 py-4 shadow-[0_4px_16px_rgba(15,23,42,0.04)] transition-[border-color,box-shadow] sm:px-5 sm:py-[1.125rem] dark:border-border dark:bg-card dark:shadow-[0_4px_14px_rgba(0,0,0,0.18)] [@media(hover:hover)]:hover:border-[#D4C9BA] [@media(hover:hover)]:hover:shadow-[0_6px_22px_rgba(15,23,42,0.08)] dark:[@media(hover:hover)]:hover:border-zinc-600";
 
 function formatOverlapShort(minutes: number): string {
   if (minutes <= 0) return "";
@@ -57,9 +80,18 @@ function formatOverlapShort(minutes: number): string {
 export function CourseMemberList({
   courseId,
   members,
+  courseCode,
+  schoolShortLabel,
+  shareMemberCount,
 }: {
   courseId: string;
   members: CourseMember[];
+  /** When set, title becomes “Classmates in {code}”. */
+  courseCode?: string | null;
+  /** Shown after the count, e.g. “8 classmates · TUM”. */
+  schoolShortLabel?: string | null;
+  /** Total enrolled in course — invite vs share copy for growth CTAs. */
+  shareMemberCount: number;
 }) {
   const [query, setQuery] = useState("");
 
@@ -72,64 +104,125 @@ export function CourseMemberList({
     });
   }, [members, query]);
 
-  if (members.length === 0) {
-    return (
-      <div className="rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
-        You are the only one in this course so far.
-      </div>
-    );
-  }
+  const codeTrimmed = courseCode?.trim() ?? "";
+  /** Course hub wireframe: social list is “in this course”, not a generic code title. */
+  const sectionTitle = "Classmates in this course";
+  const n = members.length;
+  const showGrowth = n <= LOW_CLASSMATES_GROWTH_THRESHOLD;
+  const countLine =
+    n === 0
+      ? "No classmates in your list yet"
+      : `${n} student${n === 1 ? "" : "s"} already joined` +
+        (schoolShortLabel ? ` · ${schoolShortLabel}` : "");
 
   return (
-    <div className="space-y-3">
-      <div className="space-y-1 px-1">
-        <h3 className="text-[15px] font-semibold leading-tight text-foreground">Classmates</h3>
-        <p className="text-[12px] text-muted-foreground">
-          People already in this course
-        </p>
-      </div>
-
-      <Input
-        placeholder={`Search ${members.length} classmate${members.length === 1 ? "" : "s"}`}
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-
-      <div className="overflow-hidden rounded-2xl border border-border bg-card">
-        {filtered.length === 0 ? (
-          <div className="px-4 py-6 text-center text-sm text-muted-foreground">
-            No match for &ldquo;{query.trim()}&rdquo;
-          </div>
+    <section
+      className="space-y-2.5 border-t border-classmates-hairline pt-8 dark:border-border/60"
+      aria-labelledby="course-classmates-heading"
+    >
+      <div className="space-y-1.5 px-0.5">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <h3
+            id="course-classmates-heading"
+            className="min-w-0 flex-1 text-base font-semibold leading-tight tracking-tight text-classmates-ink dark:text-foreground"
+          >
+            {sectionTitle}
+          </h3>
+          {showGrowth ? (
+            <CourseShareLinkAction
+              courseId={courseId}
+              memberCount={shareMemberCount}
+              variant="buttonPrimary"
+              labelOverride="Invite"
+              className="h-9 min-h-0 shrink-0 px-4 py-2 text-xs shadow-[0_4px_12px_rgba(37,99,235,0.18)]"
+            />
+          ) : null}
+        </div>
+        {showGrowth ? (
+          <p className="text-[12px] font-semibold leading-snug text-[#0F766E] dark:text-teal-300">
+            {codeTrimmed
+              ? `Invite classmates to ${codeTrimmed}`
+              : "Invite classmates to this course"}
+          </p>
         ) : null}
-        {filtered.map((m, i) => (
-          <MemberRow
-            key={m.membershipId}
-            member={m}
-            courseId={courseId}
-            isLast={i === filtered.length - 1}
-          />
-        ))}
+        <p className="text-[13px] font-semibold leading-snug text-classmates-ink/95 dark:text-zinc-100">
+          {countLine}
+        </p>
+        {n > 0 ? (
+          <p className="text-[12px] leading-snug text-classmates-sub dark:text-zinc-400">
+            Same course as you — tap{" "}
+            <span className="font-medium text-classmates-ink/80 dark:text-zinc-300">Message</span> to start a private
+            chat. Sorted by schedule overlap first.
+          </p>
+        ) : (
+          <p className="text-[12px] leading-snug text-classmates-sub dark:text-zinc-400">
+            When classmates enroll and match this course, they&apos;ll appear here. Use Invite or share the link below.
+          </p>
+        )}
       </div>
-    </div>
+
+      {n > 0 ? (
+        <Input
+          placeholder={`Search ${members.length} classmate${members.length === 1 ? "" : "s"}`}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="h-9 rounded-xl border-classmates-edge/90 px-3 py-1.5 text-[13px] leading-tight shadow-none ring-offset-0 focus-visible:ring-1 focus-visible:ring-classmates-azure/40 focus-visible:ring-offset-0 dark:border-border/80"
+          aria-label="Search classmates in this course"
+        />
+      ) : null}
+
+      {showGrowth ? (
+        <div className="rounded-[20px] border border-[#BFDBFE] bg-[#EFF6FF] px-3.5 py-3 dark:border-blue-800/50 dark:bg-blue-950/35">
+          <p className="text-[13px] font-semibold text-classmates-ink dark:text-zinc-100">Know someone in this course?</p>
+          <p className="mt-1 text-[12px] leading-snug text-classmates-sub dark:text-zinc-400">
+            Send them the course link so they can join SideSeat and show up in this list.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <CourseShareLinkAction
+              courseId={courseId}
+              memberCount={shareMemberCount}
+              variant="button"
+              labelOverride="Share course link"
+              className="h-9 min-h-0 w-full justify-center px-4 py-2 text-xs sm:w-auto"
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {n === 0 ? (
+        <p className="px-1 text-center text-[12px] leading-snug text-classmates-hint dark:text-zinc-500">
+          No classmates to show yet — invite a few people and check back.
+        </p>
+      ) : (
+        <div className="flex flex-col gap-2.5">
+          {filtered.length === 0 ? (
+            <div
+              className={cn(
+                CLASSMATES_PERSON_ROW_CLASS,
+                "py-8 text-center text-sm text-muted-foreground dark:text-zinc-400",
+              )}
+            >
+              No match for &ldquo;{query.trim()}&rdquo;
+            </div>
+          ) : (
+            filtered.map((m) => <MemberRow key={m.membershipId} member={m} courseId={courseId} />)
+          )}
+        </div>
+      )}
+    </section>
   );
 }
 
-function MemberRow({
-  member,
-  courseId,
-  isLast,
-}: {
-  member: CourseMember;
-  courseId: string;
-  isLast: boolean;
-}) {
+function MemberRow({ member, courseId }: { member: CourseMember; courseId: string }) {
   const router = useRouter();
   const [opening, setOpening] = useState(false);
   const overlap = formatOverlapShort(member.overlapMinutes);
-  const metaLine = [
-    member.major,
-    member.semester ? `sem ${member.semester}` : null,
-  ]
+  const profileHref =
+    `/users/${member.userId}?returnTo=${encodeURIComponent(`/courses/${courseId}`)}` as Route;
+  const schoolInBadge =
+    member.studentVerificationStatus === "VERIFIED" && member.verifiedStudent;
+  const schoolMeta = !schoolInBadge && member.school?.trim() ? member.school.trim() : null;
+  const metaLine = [member.major, member.semester ? `sem ${member.semester}` : null, schoolMeta]
     .filter(Boolean)
     .join(" · ");
 
@@ -137,7 +230,7 @@ function MemberRow({
     if (opening) return;
     setOpening(true);
     try {
-      const response = await fetch("/api/connections/open", {
+      const response = await apiFetch("/api/connections/open", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -158,75 +251,72 @@ function MemberRow({
     }
   }
 
+  const cta =
+    member.threadState.kind === "ACTIVE" ? (
+      <Link
+        href={
+          `/connections/${member.threadState.connectionId}?returnTo=${encodeURIComponent(`/courses/${courseId}`)}` as Route
+        }
+        className={memberOpenChatLinkClass}
+      >
+        Open chat
+      </Link>
+    ) : (
+      <button
+        type="button"
+        onClick={() => void openChat()}
+        disabled={opening}
+        className={cn(memberMessageButtonClass, opening && "pointer-events-none opacity-60")}
+      >
+        {opening ? "Opening…" : "Message"}
+      </button>
+    );
+
   return (
-    <div className={cn("px-3 py-3", !isLast && "border-b border-border")}>
-      <div className="flex items-start gap-3">
-        <PresetAvatar id={member.avatarUrl} size={50} className="shrink-0" />
-
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <span className="truncate text-sm font-medium">{member.nickname}</span>
-            <VerifiedBadge
-              size="xs"
-              school={member.school}
-              verifiedStudent={member.verifiedStudent}
-              status={member.studentVerificationStatus}
-            />
-            {overlap ? (
-              <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                {overlap} overlap
-              </span>
-            ) : null}
-          </div>
-
+    <ClassmatesPersonRow
+      avatarHref={profileHref}
+      avatarUrl={member.avatarUrl}
+      profileAriaLabel={`View ${member.nickname}'s profile`}
+      name={member.nickname}
+      titleAdornment={
+        <>
+          <VerifiedBadge
+            size="xs"
+            school={member.school}
+            verifiedStudent={member.verifiedStudent}
+            status={member.studentVerificationStatus}
+          />
+          <UserGenderCardIcon gender={member.gender} className="shrink-0" />
+        </>
+      }
+      body={
+        <>
           {metaLine ? (
-            <p className="truncate text-xs text-muted-foreground">{metaLine}</p>
+            <p className="mt-1 truncate text-[12px] leading-snug text-muted-foreground">{metaLine}</p>
           ) : null}
-
-          {member.bio ? (
-            <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground/90">
-              {member.bio}
+          {overlap ? (
+            <p className="mt-1 text-[11px] font-semibold leading-snug text-[#0F766E] dark:text-teal-300">
+              {overlap} weekly overlap with your schedule
             </p>
           ) : null}
-
-          {member.intentions.length ? (
-            <div className="mt-1.5 flex flex-wrap gap-1">
-              {member.intentions.map((intent) => (
-                <span
-                  key={intent}
-                  className="rounded-full bg-foreground/5 px-2 py-0.5 text-[10px] font-medium text-foreground/80"
-                >
-                  {INTENT_LABEL[intent]}
-                </span>
-              ))}
-            </div>
+          {member.bio ? (
+            <p className="mt-1 line-clamp-2 text-[12px] leading-snug text-muted-foreground/90">{member.bio}</p>
           ) : null}
-        </div>
-
-        <div className="shrink-0">
-          {member.threadState.kind === "ACTIVE" ? (
-            <Link
-              href={`/connections/${member.threadState.connectionId}?returnTo=${encodeURIComponent(`/courses/${courseId}`)}` as Route}
-              className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-medium text-primary transition hover:bg-primary/15"
-            >
-              Open chat
-            </Link>
-          ) : (
-            <button
-              type="button"
-              onClick={() => void openChat()}
-              disabled={opening}
-              className={cn(
-                "rounded-full border px-3 py-1 text-xs font-medium transition",
-                "border-foreground/20 bg-foreground text-background hover:bg-foreground/90",
-                opening && "pointer-events-none opacity-60",
-              )}
-            >
-              {opening ? "Opening…" : "Message"}
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
+        </>
+      }
+      footer={
+        member.intentions.length ? (
+          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5 pt-1">
+            <span className="shrink-0 text-[12px] font-semibold text-classmates-sub dark:text-zinc-400">Wants to:</span>
+            {member.intentions.map((intent) => (
+              <span key={intent} className={intentChipClass}>
+                {MEMBER_INTENT_LABEL[intent]}
+              </span>
+            ))}
+          </div>
+        ) : null
+      }
+      action={cta}
+    />
   );
 }

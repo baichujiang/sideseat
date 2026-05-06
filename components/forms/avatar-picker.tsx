@@ -1,24 +1,34 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { apiFetch } from "@/lib/auth/api-fetch";
+
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { PresetAvatar } from "@/components/ui/preset-avatar";
-import { AVATAR_IDS } from "@/lib/constants/avatars";
+import { Button } from "@/components/ui/button";
+import { AVATAR_IDS, isDisplayableCustomAvatarUrl, isValidAvatarId } from "@/lib/constants/avatars";
+import { uploadProfileAvatarPhoto } from "@/lib/profile/upload-avatar";
 import { cn } from "@/lib/utils";
+
+const AVATAR_SHEET_PX = "h-[3.25rem] w-[3.25rem]"; /* 52px */
 
 export function AvatarPicker({
   initialId,
   children,
   homepage = false,
+  /** Me edit sheet: larger avatar, name field height matched, vertically centered row. */
+  sheet = false,
 }: {
   initialId: string | null;
   /** Rendered next to the avatar on the trigger row (usually the nickname input). */
   children?: React.ReactNode;
   /** Tighter home header: larger tap target, top-aligned with multi-line text. */
   homepage?: boolean;
+  sheet?: boolean;
 }) {
   const router = useRouter();
+  const fileRef = useRef<HTMLInputElement>(null);
   const [selected, setSelected] = useState<string | null>(initialId);
   const [expanded, setExpanded] = useState(false);
   const [message, setMessage] = useState("");
@@ -34,7 +44,7 @@ export function AvatarPicker({
     setSelected(id);
     setMessage("");
     startTransition(async () => {
-      const response = await fetch("/api/profile/avatar", {
+      const response = await apiFetch("/api/profile/avatar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ avatarId: id }),
@@ -50,64 +60,129 @@ export function AvatarPicker({
     });
   };
 
+  const uploadCustom = (file: File) => {
+    if (isPending) return;
+    const previous = selected;
+    setMessage("");
+    startTransition(async () => {
+      try {
+        const url = await uploadProfileAvatarPhoto(file);
+        setSelected(url);
+        setExpanded(false);
+        router.refresh();
+      } catch (e) {
+        setSelected(previous);
+        setMessage(e instanceof Error ? e.message : "Could not upload photo.");
+      }
+    });
+  };
+
   return (
     <div className={cn("space-y-2", homepage && "space-y-2.5")}>
-      <div className={cn("flex gap-3", homepage ? "items-start" : "items-center")}>
+      <div
+        className={cn(
+          "flex gap-3",
+          homepage && !sheet ? "items-start" : "items-center",
+        )}
+      >
         <button
           aria-expanded={expanded}
           aria-label="Change avatar"
           className={cn(
             "shrink-0 rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-            homepage
+            homepage && !sheet
               ? cn(
                   "bg-background shadow-sm ring-2",
                   expanded
                     ? "ring-primary ring-offset-2 ring-offset-background"
                     : "ring-border/55 hover:ring-primary/45",
                 )
-              : expanded
-                ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
-                : "hover:opacity-90",
+              : sheet
+                ? cn(
+                    "ring-2 ring-border/50 shadow-sm",
+                    expanded ? "ring-primary ring-offset-2 ring-offset-background" : "hover:ring-primary/40",
+                  )
+                : expanded
+                  ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
+                  : "hover:opacity-90",
           )}
           onClick={() => setExpanded((open) => !open)}
           type="button"
         >
           <PresetAvatar
-            className={homepage ? "h-[3.25rem] w-[3.25rem]" : "h-12 w-12"}
+            className={cn(sheet ? AVATAR_SHEET_PX : homepage ? "h-[3.25rem] w-[3.25rem]" : "h-12 w-12")}
             id={selected}
           />
         </button>
-        <div className="min-w-0 flex-1 pt-px">{children}</div>
+        <div
+          className={cn(
+            "min-w-0 flex-1",
+            sheet ? "flex min-h-[3.25rem] items-center" : "pt-px",
+          )}
+        >
+          {children}
+        </div>
       </div>
       {expanded ? (
         <div
           className={cn(
-            "grid grid-cols-5 gap-2 rounded-2xl border p-2 sm:grid-cols-10",
+            "space-y-2 rounded-2xl border p-2",
             homepage
               ? "border-border/80 bg-card/95 shadow-sm backdrop-blur-sm"
               : "border-border bg-muted/30",
           )}
         >
-          {AVATAR_IDS.map((id) => {
-            const isSelected = id === selected;
-            return (
-              <button
-                aria-label={`Avatar ${id}`}
-                aria-pressed={isSelected}
-                className={cn(
-                  "rounded-full transition",
-                  isSelected
-                    ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
-                    : "opacity-80 hover:opacity-100",
-                )}
-                key={id}
-                onClick={() => choose(id)}
-                type="button"
-              >
-                <PresetAvatar className="h-10 w-10" id={id} />
-              </button>
-            );
-          })}
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (file) uploadCustom(file);
+            }}
+          />
+          <div className="flex flex-wrap items-center gap-2 px-0.5">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isPending}
+              className="h-9 rounded-full px-4 text-[13px]"
+              onClick={() => fileRef.current?.click()}
+            >
+              Upload photo
+            </Button>
+            {isDisplayableCustomAvatarUrl(selected) ? (
+              <span className="text-[11px] text-muted-foreground">Using your photo</span>
+            ) : null}
+            <span className="text-[10px] text-muted-foreground">JPG, PNG, WEBP · max 2 MB</span>
+          </div>
+          <div className={cn("grid grid-cols-5 gap-2 sm:grid-cols-10")}>
+            {AVATAR_IDS.map((id) => {
+              const isSelected = isValidAvatarId(selected) && id === selected;
+              return (
+                <button
+                  aria-label={`Avatar ${id}`}
+                  aria-pressed={isSelected}
+                  className={cn(
+                    "rounded-full transition",
+                    isSelected
+                      ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
+                      : "opacity-80 hover:opacity-100",
+                  )}
+                  key={id}
+                  onClick={() => choose(id)}
+                  type="button"
+                >
+                  <PresetAvatar className="h-10 w-10" id={id} />
+                </button>
+              );
+            })}
+          </div>
         </div>
       ) : null}
       {message ? <p className="text-xs text-destructive">{message}</p> : null}

@@ -7,13 +7,15 @@ const email = process.env.SMOKE_EMAIL ?? "lin@example.com";
 const password = process.env.SMOKE_PASSWORD ?? "Password123";
 
 function extractCookie(response: Response) {
-  const cookie = response.headers.get("set-cookie");
-
-  if (!cookie) {
+  const header = response.headers.get("set-cookie");
+  if (!header) {
     throw new Error("Login response did not return a session cookie.");
   }
-
-  return cookie.split(";")[0];
+  const match = header.match(/(?:sideseat_refresh|sideseat_session)=[^;]+/);
+  if (!match) {
+    throw new Error(`Login Set-Cookie did not include refresh cookie: ${header.slice(0, 120)}…`);
+  }
+  return match[0];
 }
 
 async function expectPage(path: string, cookie: string, expectedText: string) {
@@ -91,7 +93,7 @@ async function main() {
   await expectPage("/home", cookie, "This week");
   await expectPage("/courses", cookie, "My courses");
   await expectPage("/discover", cookie, "Discover");
-  await expectPage("/inbox", cookie, "Contacts");
+  await expectPage("/inbox", cookie, "Chats");
   await expectPage(`/connections/${connection.id}`, cookie, "Message…");
   await expectPageIfPresent("/admin/reports", cookie, "Moderation queue");
 

@@ -1,54 +1,14 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { SESSION_COOKIE_NAME, authRoutes } from "@/lib/constants/app";
-
-/**
- * Paths reachable without a session cookie. Product choice: first-time visitors
- * land in the real app chrome (tabs) instead of a full-screen login wall.
- *
- * - Tab roots: `/home`, `/discover`, `/courses`, `/inbox` (+ `/inbox/*`)
- * - Me tab root only: `/profile` exact — `/profile/blocked`, `/profile/edit`, …
- *   still require auth.
- * - Auth pages: `/login`, `/signup` (+ subpaths if any)
- */
-function isPublicAppPath(pathname: string): boolean {
-  /** PWA: manifest, SW, and generated icons must not redirect to login. */
-  if (
-    pathname === "/manifest.webmanifest" ||
-    pathname === "/sw.js" ||
-    pathname.startsWith("/icons/")
-  ) {
-    return true;
-  }
-  if (
-    pathname === "/" ||
-    pathname === "/home" ||
-    pathname === "/discover" ||
-    pathname.startsWith("/discover/") ||
-    pathname === "/courses" ||
-    pathname === "/forgot-password"
-  ) {
-    return true;
-  }
-  if (pathname === "/profile") {
-    return true;
-  }
-  if (pathname === "/inbox" || pathname.startsWith("/inbox/")) {
-    return true;
-  }
-  if (pathname === "/login" || pathname.startsWith("/login/")) {
-    return true;
-  }
-  if (pathname === "/signup" || pathname.startsWith("/signup/")) {
-    return true;
-  }
-  return false;
-}
+import { LEGACY_SESSION_COOKIE_NAME, REFRESH_COOKIE_NAME } from "@/lib/constants/app";
+import { isPublicAppPath } from "@/lib/nav/public-app-path";
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  const sessionCookie =
+    request.cookies.get(REFRESH_COOKIE_NAME)?.value ??
+    request.cookies.get(LEGACY_SESSION_COOKIE_NAME)?.value;
 
   if (!isPublicAppPath(pathname) && !sessionCookie) {
     const loginUrl = new URL("/login", request.url);

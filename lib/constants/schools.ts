@@ -1,3 +1,7 @@
+/**
+ * Canonical school list for filtering (e.g. /courses). Add an entry here and
+ * it appears in `schoolOptions` and the courses school `<select>` automatically.
+ */
 export const schoolDirectory = {
   TUM: {
     label: "Technical University of Munich",
@@ -13,7 +17,13 @@ export const schoolDirectory = {
 
 export type SchoolCode = keyof typeof schoolDirectory;
 
-/** The one supported school right now. Use this when a default is needed. */
+/** Static logos under `/public/schools/` — replace with official assets if needed. */
+const SCHOOL_LOGO_PATH: Record<SchoolCode, string> = {
+  TUM: "/schools/tum.svg",
+  LMU: "/schools/lmu.svg",
+};
+
+/** Default scope when no school is in the URL or profile. */
 export const DEFAULT_SCHOOL: SchoolCode = "TUM";
 
 export const schoolOptions = Object.entries(schoolDirectory).map(([value, school]) => ({
@@ -36,6 +46,15 @@ export function normalizeSchoolCode(code?: string | null): SchoolCode | null {
   );
 
   return matched?.value ?? null;
+}
+
+/** Public URL path for the school wordmark/logo, or null if none. */
+export function getSchoolLogoPath(code?: string | null): string | null {
+  const normalized = normalizeSchoolCode(code);
+  if (!normalized) {
+    return null;
+  }
+  return SCHOOL_LOGO_PATH[normalized] ?? null;
 }
 
 export function getSchoolByCode(code?: string | null) {

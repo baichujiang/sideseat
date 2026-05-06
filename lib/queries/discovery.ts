@@ -1,6 +1,13 @@
 import "server-only";
 
-import { CourseIntent, Prisma, type Weekday } from "@prisma/client";
+import {
+  CourseIntent,
+  Prisma,
+  type LanguageProficiency,
+  type LanguageTag,
+  type UserGender,
+  type Weekday,
+} from "@prisma/client";
 
 import { getSchoolMatchValues } from "@/lib/constants/schools";
 import { prisma } from "@/lib/db/prisma";
@@ -46,12 +53,13 @@ export type DiscoverWeeklySlot = {
 export type DiscoverHit = {
   userId: string;
   nickname: string;
+  gender: UserGender;
   avatarUrl: string | null;
   major: string | null;
   semester: number | null;
   bio: string | null;
   school: string | null;
-  languages: string[];
+  languages: Array<{ tag: LanguageTag; proficiency: LanguageProficiency }>;
   verifiedStudent: boolean;
   studentVerificationStatus:
     | "UNVERIFIED"
@@ -152,6 +160,7 @@ export async function getDiscoverPeople(
       courses: {
         include: { course: true, sessions: true },
       },
+      userLanguages: true,
     },
     take: 200,
   });
@@ -295,12 +304,16 @@ export async function getDiscoverPeople(
     hits.push({
       userId: person.id,
       nickname: person.nickname ?? "Student",
+      gender: person.gender,
       avatarUrl: person.avatarUrl,
       major: person.major,
       semester: person.semester,
       bio: person.bio,
       school: person.school,
-      languages: [...person.languages],
+      languages: person.userLanguages.map((r) => ({
+        tag: r.tag,
+        proficiency: r.proficiency,
+      })),
       verifiedStudent: person.verifiedStudent,
       studentVerificationStatus: person.studentVerificationStatus,
       lastActiveAt: person.lastActiveAt,

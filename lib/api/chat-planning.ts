@@ -26,6 +26,28 @@ export type PlanRequestPayload = {
   receiverUserId?: string;
 };
 
+type AvailabilityShareData = {
+  id: string;
+  owner: { id: string; name: string };
+  visibilityMode: "FREE_BUSY";
+  status: "active" | "revoked" | "expired";
+  rangeStart: string;
+  rangeEnd: string;
+  includedDates: string[];
+  days: Array<{
+    date: string;
+    slots: Array<{
+      startTime: string;
+      endTime: string;
+      status: "available";
+      canSuggest: boolean;
+    }>;
+  }>;
+};
+
+const availabilityShareCache = new Map<string, AvailabilityShareData>();
+const availabilityShareInFlight = new Map<string, Promise<AvailabilityShareData>>();
+
 async function postJson<T>(url: string, body?: unknown): Promise<T> {
   const response = await fetch(url, {
     method: "POST",
@@ -58,29 +80,40 @@ export function createAvailabilityShare(
   );
 }
 
+export function getCachedAvailabilityShare(shareId: string): AvailabilityShareData | null {
+  return availabilityShareCache.get(shareId) ?? null;
+}
+
 export function loadAvailabilityShare(shareId: string) {
-  return getJson<{
-    id: string;
-    owner: { id: string; name: string };
-    visibilityMode: "FREE_BUSY";
-    status: "active" | "revoked" | "expired";
-    rangeStart: string;
-    rangeEnd: string;
-    includedDates: string[];
-    days: Array<{
-      date: string;
-      slots: Array<{
-        startTime: string;
-        endTime: string;
-        status: "available";
-        canSuggest: boolean;
-      }>;
-    }>;
-  }>(`/api/availability-shares/${shareId}`);
+  const cached = availabilityShareCache.get(shareId);
+  if (cached) return Promise.resolve(cached);
+
+  const inflight = availabilityShareInFlight.get(shareId);
+  if (inflight) return inflight;
+
+  const request = getJson<AvailabilityShareData>(`/api/availability-shares/${shareId}`)
+    .then((data) => {
+      availabilityShareCache.set(shareId, data);
+      availabilityShareInFlight.delete(shareId);
+      return data;
+    })
+    .catch((error) => {
+      availabilityShareInFlight.delete(shareId);
+      throw error;
+    });
+
+  availabilityShareInFlight.set(shareId, request);
+  return request;
 }
 
 export function revokeAvailabilityShare(shareId: string) {
-  return postJson<{ status: string }>(`/api/availability-shares/${shareId}/revoke`);
+  return postJson<{ status: string }>(`/api/availability-shares/${shareId}/revoke`).then((payload) => {
+    const cached = availabilityShareCache.get(shareId);
+    if (cached) {
+      availabilityShareCache.set(shareId, { ...cached, status: "revoked" });
+    }
+    return payload;
+  });
 }
 
 export function createPlanRequestFromShare(

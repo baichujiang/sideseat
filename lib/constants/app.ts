@@ -1,6 +1,19 @@
 export const APP_NAME = "SideSeat";
-export const SESSION_COOKIE_NAME = "sideseat_session";
-export const SESSION_DURATION_DAYS = 14;
+
+/** HttpOnly refresh token cookie. Legacy `sideseat_session` is still read for migration. */
+export const REFRESH_COOKIE_NAME = "sideseat_refresh";
+/** @deprecated Use {@link REFRESH_COOKIE_NAME}; kept for one-sided read migration. */
+export const LEGACY_SESSION_COOKIE_NAME = "sideseat_session";
+
+/** Refresh session row TTL (days). */
+export const REFRESH_TOKEN_TTL_DAYS = 30;
+/** Short-lived JWT for API / Authorization header (minutes). */
+export const ACCESS_TOKEN_TTL_MINUTES = 45;
+
+/** @deprecated Use {@link REFRESH_COOKIE_NAME} */
+export const SESSION_COOKIE_NAME = LEGACY_SESSION_COOKIE_NAME;
+/** @deprecated Use {@link REFRESH_TOKEN_TTL_DAYS} */
+export const SESSION_DURATION_DAYS = REFRESH_TOKEN_TTL_DAYS;
 /**
  * Abuse rate limit for the first-message flow: a single user can open at most
  * NEW_THREAD_RATE_LIMIT_COUNT brand-new 1:1 threads per window. Existing
