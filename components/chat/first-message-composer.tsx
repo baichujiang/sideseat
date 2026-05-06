@@ -80,7 +80,7 @@ export function FirstMessageComposer({
     <div className={compact ? "space-y-2" : "space-y-2 rounded-xl border border-border bg-muted/30 p-3"}>
       <textarea
         autoFocus={autoFocus}
-        className="min-h-16 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+        className="min-h-16 w-full rounded-xl border border-border bg-background px-3 py-2 text-[16px] leading-snug focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
         placeholder={placeholder ?? "Say hi…"}
         value={body}
         onChange={(event) => setBody(event.target.value)}

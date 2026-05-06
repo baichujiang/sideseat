@@ -101,7 +101,7 @@ export function ChatComposer({
           rows={1}
           placeholder={replyTo ? "Write your reply…" : "Write a message…"}
           className={cn(
-            "min-h-[44px] max-h-32 flex-1 resize-none rounded-2xl border border-input bg-muted/40 px-4 py-3 text-sm",
+            "min-h-[44px] max-h-32 flex-1 resize-none rounded-2xl border border-input bg-muted/40 px-4 py-3 text-[16px] leading-snug",
             "placeholder:text-muted-foreground/70",
             "outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
             "disabled:opacity-60",

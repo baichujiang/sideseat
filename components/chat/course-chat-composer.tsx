@@ -76,7 +76,7 @@ export function CourseChatComposer({ courseId }: { courseId: string }) {
           }}
           placeholder={replyTo ? "Reply…" : "Message the class…"}
           className={cn(
-            "min-h-11 flex-1 rounded-full border border-input bg-muted/40 px-4 py-2.5 text-sm",
+            "min-h-11 flex-1 rounded-full border border-input bg-muted/40 px-4 py-2.5 text-[16px] leading-snug",
             "placeholder:text-muted-foreground/70",
             "outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
             "disabled:opacity-60",
