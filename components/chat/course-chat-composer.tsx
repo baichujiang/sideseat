@@ -4,7 +4,7 @@ import { apiFetch } from "@/lib/auth/api-fetch";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Send } from "lucide-react";
+import { Plus, Send } from "lucide-react";
 
 import { FormMessage } from "@/components/forms/form-message";
 import { ReplyPreview } from "@/components/chat/chat-composer";
@@ -49,6 +49,7 @@ export function CourseChatComposer({ courseId }: { courseId: string }) {
 
   return (
     <div className="shrink-0 border-t border-border bg-background/95 backdrop-blur-sm">
+      <div className="relative space-y-2 bg-background/95 p-2 backdrop-blur-sm">
       {replyTo ? (
         <ReplyPreview
           senderName={replyTo.senderName}
@@ -56,13 +57,24 @@ export function CourseChatComposer({ courseId }: { courseId: string }) {
           onCancel={() => setReplyTo(null)}
         />
       ) : null}
-      <div className="flex items-center gap-2 px-3 py-2 pb-0 pt-2">
+      <div className="flex items-end gap-2 px-1 pb-0 pt-1">
+        <button
+          type="button"
+          disabled
+          aria-label="Attachments unavailable in course chat"
+          title="Attachments unavailable in course chat"
+          className={cn(
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-dashed border-border/70 bg-muted/35 text-muted-foreground/60",
+            "cursor-not-allowed",
+          )}
+        >
+          <Plus className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />
+        </button>
         <label className="sr-only" htmlFor={`course-chat-input-${courseId}`}>
           Message
         </label>
-        <input
+        <textarea
           id={`course-chat-input-${courseId}`}
-          type="text"
           autoComplete="off"
           enterKeyHint="send"
           value={body}
@@ -74,9 +86,10 @@ export function CourseChatComposer({ courseId }: { courseId: string }) {
               void submit();
             }
           }}
+          rows={1}
           placeholder={replyTo ? "Reply…" : "Message the class…"}
           className={cn(
-            "min-h-11 flex-1 rounded-full border border-input bg-muted/40 px-4 py-2.5 text-[16px] leading-snug",
+            "min-h-[44px] max-h-32 flex-1 resize-none rounded-2xl border border-input bg-muted/40 px-4 py-3 text-[16px] leading-snug",
             "placeholder:text-muted-foreground/70",
             "outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
             "disabled:opacity-60",
@@ -101,6 +114,7 @@ export function CourseChatComposer({ courseId }: { courseId: string }) {
           <FormMessage message={error} />
         </div>
       ) : null}
+      </div>
     </div>
   );
 }
