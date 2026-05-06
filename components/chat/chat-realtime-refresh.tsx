@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
@@ -25,11 +25,24 @@ function readUrl(props: ChatRealtimeRefreshProps): string {
     : `/api/courses/${props.courseId}/chat/read`;
 }
 
+function latestUrl(props: ChatRealtimeRefreshProps): string {
+  return props.kind === "direct"
+    ? `/api/connections/${props.connectionId}/messages/latest`
+    : `/api/courses/${props.courseId}/chat/messages/latest`;
+}
+
 export function ChatRealtimeRefresh(props: ChatRealtimeRefreshProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const intervalMs = props.intervalMs ?? 5000;
   const targetKey =
     props.kind === "direct" ? `direct:${props.connectionId}` : `course:${props.courseId}`;
+  const staleRefreshAttempts = useRef(0);
+
+  useEffect(() => {
+    staleRefreshAttempts.current = 0;
+  }, [props.latestMessageId, targetKey]);
 
   useEffect(() => {
     let cancelled = false;
@@ -48,14 +61,37 @@ export function ChatRealtimeRefresh(props: ChatRealtimeRefreshProps) {
   }, [props.latestMessageId, targetKey]);
 
   useEffect(() => {
-    const id = window.setInterval(() => {
-      if (document.visibilityState === "visible" && navigator.onLine) {
+    async function pollLatest() {
+      if (document.visibilityState !== "visible" || !navigator.onLine) return;
+
+      const response = await apiFetch(latestUrl(props), {
+        cache: "no-store",
+      }).catch(() => null);
+      if (!response?.ok) return;
+
+      const payload = await response.json().catch(() => null);
+      const remoteLatest = payload?.data?.latestMessageId;
+      if (typeof remoteLatest !== "string" && remoteLatest !== null) return;
+
+      if (remoteLatest !== props.latestMessageId) {
+        staleRefreshAttempts.current += 1;
         router.refresh();
+
+        if (staleRefreshAttempts.current >= 2) {
+          const query = searchParams.toString();
+          window.location.replace(query ? `${pathname}?${query}` : pathname);
+        }
+      } else {
+        staleRefreshAttempts.current = 0;
       }
+    }
+
+    const id = window.setInterval(() => {
+      void pollLatest();
     }, intervalMs);
 
     return () => window.clearInterval(id);
-  }, [intervalMs, router]);
+  }, [intervalMs, pathname, props, router, searchParams]);
 
   return null;
 }
