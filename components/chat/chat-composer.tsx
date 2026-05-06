@@ -57,7 +57,7 @@ export function ChatComposer({
   };
 
   return (
-    <div className="relative space-y-2 rounded-2xl border border-border bg-background/95 p-2 backdrop-blur-sm">
+    <div className="relative space-y-2 bg-background/95 p-2 backdrop-blur-sm">
       {replyTo ? (
         <ReplyPreview
           senderName={replyTo.senderName}
