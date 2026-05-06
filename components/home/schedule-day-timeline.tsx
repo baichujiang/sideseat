@@ -132,6 +132,8 @@ export function ScheduleDayTimeline({
     onCreateEvent(start, end);
   }
 
+  const positionedItems = computeTimelineColumns(items);
+
   return (
     <div
       className={cn(
@@ -257,12 +259,14 @@ export function ScheduleDayTimeline({
               </div>
             ) : null}
 
-            {items.map((item) => (
+            {positionedItems.map((item) => (
               <TimelineBlock
                 key={`${item.kind}-${item.id}`}
                 item={item}
                 dayStart={visualStartMinute}
                 totalMinutes={totalMinutes}
+                columnIndex={item.columnIndex}
+                columnCount={item.columnCount}
                 isToday={isToday}
                 nowMinute={nowMinute}
                 selected={selectedItemId === item.id}
@@ -286,6 +290,8 @@ function TimelineBlock({
   item,
   dayStart,
   totalMinutes,
+  columnIndex,
+  columnCount,
   isToday,
   nowMinute,
   selected,
@@ -294,6 +300,8 @@ function TimelineBlock({
   item: DayTimelineItem;
   dayStart: number;
   totalMinutes: number;
+  columnIndex: number;
+  columnCount: number;
   isToday: boolean;
   nowMinute: number;
   selected: boolean;
@@ -322,7 +330,7 @@ function TimelineBlock({
   const catHex = item.categoryColor?.trim();
   const useCategoryColor = Boolean(catHex);
   const toneClass = cn(
-    "absolute inset-x-0 overflow-hidden rounded-2xl px-2 py-1.5 text-left transition",
+    "absolute overflow-hidden rounded-2xl px-2 py-1.5 text-left transition",
     !useCategoryColor && (selected ? tone.cardSelected : tone.card),
     useCategoryColor && "shadow-sm",
     state === "past" ? "opacity-55" : undefined,
@@ -401,7 +409,16 @@ function TimelineBlock({
     </>
   );
 
-  const positionStyle = { top: `${top}%`, height: `${effectiveHeight}%` };
+  const columnWidth = 100 / Math.max(columnCount, 1);
+  const horizontalGapPct = columnCount > 1 ? 0.8 : 0;
+  const widthPct = Math.max(8, columnWidth - horizontalGapPct);
+  const positionStyle = {
+    top: `${top}%`,
+    height: `${effectiveHeight}%`,
+    left: `${columnIndex * columnWidth}%`,
+    width: `${widthPct}%`,
+    zIndex: selected ? 3 : columnIndex + 1,
+  };
   const surfaceStyle =
     useCategoryColor && catHex
       ? { ...positionStyle, ...categoryBlockSurfaceStyle(catHex, selected) }
@@ -422,6 +439,70 @@ function TimelineBlock({
       <div className="flex h-full flex-col items-start justify-start">{inner}</div>
     </button>
   );
+}
+
+type PositionedTimelineItem = DayTimelineItem & {
+  columnIndex: number;
+  columnCount: number;
+};
+
+function computeTimelineColumns(items: DayTimelineItem[]): PositionedTimelineItem[] {
+  if (items.length === 0) return [];
+
+  const sorted = [...items].sort((a, b) => {
+    if (a.startMinute !== b.startMinute) return a.startMinute - b.startMinute;
+    if (a.endMinute !== b.endMinute) return a.endMinute - b.endMinute;
+    return a.id.localeCompare(b.id);
+  });
+
+  const clusters: DayTimelineItem[][] = [];
+  let currentCluster: DayTimelineItem[] = [];
+  let clusterEnd = -1;
+
+  for (const item of sorted) {
+    if (currentCluster.length === 0 || item.startMinute < clusterEnd) {
+      currentCluster.push(item);
+      clusterEnd = Math.max(clusterEnd, item.endMinute);
+      continue;
+    }
+    clusters.push(currentCluster);
+    currentCluster = [item];
+    clusterEnd = item.endMinute;
+  }
+
+  if (currentCluster.length > 0) {
+    clusters.push(currentCluster);
+  }
+
+  return clusters.flatMap((cluster) => {
+    const activeColumnsEnd: number[] = [];
+    const byId = new Map<string, PositionedTimelineItem>();
+
+    for (const item of cluster) {
+      let columnIndex = activeColumnsEnd.findIndex((endMinute) => endMinute <= item.startMinute);
+      if (columnIndex === -1) {
+        columnIndex = activeColumnsEnd.length;
+        activeColumnsEnd.push(item.endMinute);
+      } else {
+        activeColumnsEnd[columnIndex] = item.endMinute;
+      }
+
+      byId.set(item.id, {
+        ...item,
+        columnIndex,
+        columnCount: 0,
+      });
+    }
+
+    const columnCount = activeColumnsEnd.length;
+    return cluster.map((item) => {
+      const positioned = byId.get(item.id)!;
+      return {
+        ...positioned,
+        columnCount,
+      };
+    });
+  });
 }
 
 function formatHM(minutes: number): string {
