@@ -1000,33 +1000,18 @@ export function WeekCalendar({
                                   key={key}
                                   className={cn(
                                     className,
-                                    "flex min-h-0 touch-none select-none flex-col",
+                                    "touch-none select-none overflow-visible",
                                   )}
                                   style={surfaceStyle}
                                   title={title}
                                   role="group"
                                 >
-                                  <button
-                                    type="button"
-                                    className={cn(
-                                      "relative z-40 flex h-7 w-9 shrink-0 cursor-ns-resize touch-none items-center justify-end self-end rounded-full border-0 bg-transparent p-0 pr-1 outline-none ring-offset-2 ring-offset-white hover:bg-black/[0.06] focus-visible:ring-2 focus-visible:ring-[#E53935]/60 dark:hover:bg-white/[0.08] dark:ring-offset-card",
-                                    )}
-                                    aria-label={`Drag anchor to change start time: ${titleLine}`}
-                                    onPointerDown={(ev) => {
-                                      ev.stopPropagation();
-                                      startCalendarPointerSession(ev, block, "resize-start", day);
-                                    }}
-                                  >
-                                    <span
-                                      className="pointer-events-none block h-2.5 w-2.5 rounded-full border-2 border-[#E53935] bg-white shadow-[0_1px_4px_rgba(15,23,42,0.2)] dark:border-red-400 dark:bg-card"
-                                      aria-hidden
-                                    />
-                                  </button>
+                                  {/* Draggable body — fills the card */}
                                   <div
                                     role="button"
                                     tabIndex={0}
                                     className={cn(
-                                      "relative z-20 min-h-0 flex-1 cursor-grab overflow-hidden active:cursor-grabbing",
+                                      "absolute inset-0 z-20 cursor-grab overflow-hidden rounded-[inherit] active:cursor-grabbing",
                                       draggingThis && "cursor-grabbing",
                                     )}
                                     onKeyDown={(ev) => {
@@ -1047,26 +1032,45 @@ export function WeekCalendar({
                                       startCalendarPointerSession(ev, block, "move", day);
                                     }}
                                   >
-                                    <div className="pointer-events-none flex min-h-0 flex-1 flex-col items-start justify-start overflow-hidden">
+                                    <div className="pointer-events-none flex h-full min-h-0 flex-col items-start justify-start overflow-hidden px-1 py-0.5">
                                       {inner}
                                     </div>
                                   </div>
-                                  <button
-                                    type="button"
-                                    className={cn(
-                                      "relative z-40 flex h-7 w-9 shrink-0 cursor-ns-resize touch-none items-center justify-start self-start rounded-full border-0 bg-transparent p-0 pl-1 outline-none ring-offset-2 ring-offset-white hover:bg-black/[0.06] focus-visible:ring-2 focus-visible:ring-[#E53935]/60 dark:hover:bg-white/[0.08] dark:ring-offset-card",
-                                    )}
-                                    aria-label={`Drag anchor to change end time: ${titleLine}`}
-                                    onPointerDown={(ev) => {
-                                      ev.stopPropagation();
-                                      startCalendarPointerSession(ev, block, "resize-end", day);
-                                    }}
-                                  >
-                                    <span
-                                      className="pointer-events-none block h-2.5 w-2.5 rounded-full border-2 border-[#E53935] bg-white shadow-[0_1px_4px_rgba(15,23,42,0.2)] dark:border-red-400 dark:bg-card"
-                                      aria-hidden
-                                    />
-                                  </button>
+                                  {/* Resize handles — only appear when card is selected */}
+                                  {selected ? (
+                                    <>
+                                      <button
+                                        type="button"
+                                        className="absolute right-1 z-40 flex h-6 w-6 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
+                                        style={{ top: "-4px", transform: "translateY(-50%)" }}
+                                        aria-label={`Drag anchor to change start time: ${titleLine}`}
+                                        onPointerDown={(ev) => {
+                                          ev.stopPropagation();
+                                          startCalendarPointerSession(ev, block, "resize-start", day);
+                                        }}
+                                      >
+                                        <span
+                                          className="pointer-events-none block h-[6px] w-[6px] rounded-full border-[1.5px] border-[#E53935] bg-white shadow-[0_0_3px_rgba(15,23,42,0.2)] dark:border-red-400 dark:bg-card"
+                                          aria-hidden
+                                        />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="absolute left-1 z-40 flex h-6 w-6 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
+                                        style={{ bottom: "-4px", transform: "translateY(50%)" }}
+                                        aria-label={`Drag anchor to change end time: ${titleLine}`}
+                                        onPointerDown={(ev) => {
+                                          ev.stopPropagation();
+                                          startCalendarPointerSession(ev, block, "resize-end", day);
+                                        }}
+                                      >
+                                        <span
+                                          className="pointer-events-none block h-[6px] w-[6px] rounded-full border-[1.5px] border-[#E53935] bg-white shadow-[0_0_3px_rgba(15,23,42,0.2)] dark:border-red-400 dark:bg-card"
+                                          aria-hidden
+                                        />
+                                      </button>
+                                    </>
+                                  ) : null}
                                 </div>
                               );
                             }

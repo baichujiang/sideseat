@@ -101,12 +101,16 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   /** Drag-ready mode: card deepens, anchors visible (triggered by long-press). */
   const [dragSelectedIndex, setDragSelectedIndex] = useState<number | null>(null);
+  /** Toolbar visible for this index (only on initial long-press, dismissed on any interaction). */
+  const [toolbarIndex, setToolbarIndex] = useState<number | null>(null);
   const [liveBlock, setLiveBlock] = useState<{
     index: number;
     weekday: Weekday;
     startMin: number;
     endMin: number;
   } | null>(null);
+  /** Clipboard for cut/copy. */
+  const [clipboard, setClipboard] = useState<{ session: MiniSessionDraft; isCut: boolean } | null>(null);
 
   const sessionsRef = useRef(sessions);
   sessionsRef.current = sessions;
@@ -134,6 +138,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
       location: "",
     };
     onSessionsChange([...sessions, next]);
+    setToolbarIndex(null);
     setDragSelectedIndex(null);
     setSelectedIndex(sessions.length);
   }
@@ -159,6 +164,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
 
   function removeSession(index: number) {
     onSessionsChange(sessions.filter((_, i) => i !== index));
+    setToolbarIndex(null);
     setDragSelectedIndex(null);
     setSelectedIndex((cur) => {
       if (cur === null) return null;
@@ -240,23 +246,27 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
       setLiveBlock({ index, weekday: curWeekday, startMin: curStart, endMin: curEnd });
     };
 
+    // Prevent browser scroll while dragging on touch devices
+    const preventScroll = (ev: TouchEvent) => { ev.preventDefault(); };
+
     if (immediateActivate) {
       lockMiniDragSelect();
       window.getSelection()?.removeAllRanges();
       try { captureEl.setPointerCapture(pointerId); } catch { /* ignore */ }
+      document.addEventListener("touchmove", preventScroll, { passive: false });
       applyLive();
     } else {
       longPressTimer = window.setTimeout(() => {
         longPressTimer = null;
         activatedForDrag = true;
-        // Enter drag-selected mode: close edit panel, show anchors + deepen color
         setSelectedIndex(null);
         setDragSelectedIndex(index);
+        setToolbarIndex(index);
         lockMiniDragSelect();
         window.getSelection()?.removeAllRanges();
         try { captureEl.setPointerCapture(pointerId); } catch { /* ignore */ }
+        document.addEventListener("touchmove", preventScroll, { passive: false });
         applyLive();
-        // Suppress the click that would fire on pointerup
         suppressClickRef.current = true;
       }, LONG_PRESS_MS);
     }
@@ -272,6 +282,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
       document.removeEventListener("pointermove", onDocMove);
       document.removeEventListener("pointerup", onDocUp);
       document.removeEventListener("pointercancel", onDocUp);
+      document.removeEventListener("touchmove", preventScroll);
       unlockMiniDragSelect();
     };
 
@@ -287,8 +298,9 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
         }
         return;
       }
-      if (Math.hypot(ev.clientX - x0, ev.clientY - y0) > POINTER_SLOP_PX) {
+      if (!didMove && Math.hypot(ev.clientX - x0, ev.clientY - y0) > POINTER_SLOP_PX) {
         didMove = true;
+        setToolbarIndex(null);
       }
       const hit = weekdayFromClientX(ev.clientX);
       if (hit) curWeekday = hit;
@@ -461,19 +473,28 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                         <div
                           role="button"
                           tabIndex={0}
-                          className="absolute inset-0 z-10 cursor-grab select-none overflow-hidden rounded-[inherit] px-1 py-0.5 active:cursor-grabbing"
+                          className={cn(
+                            "absolute inset-0 z-10 cursor-grab select-none overflow-hidden rounded-[inherit] px-1 py-0.5 active:cursor-grabbing",
+                            isDragSelected && "touch-none",
+                          )}
                           onKeyDown={(ev) => {
                             if (ev.key === "Enter" || ev.key === " ") {
                               ev.preventDefault();
-                              setDragSelectedIndex(null);
+                              if (isDragSelected) {
+                                setDragSelectedIndex(null);
+                                return;
+                              }
                               setSelectedIndex(isEditing ? null : index);
                             }
                           }}
                           onClick={(e) => {
                             e.stopPropagation();
                             if (suppressClickRef.current) return;
-                            // Tap: open/close edit panel, exit drag mode
-                            setDragSelectedIndex(null);
+                            setToolbarIndex(null);
+                            if (isDragSelected) {
+                              setDragSelectedIndex(null);
+                              return;
+                            }
                             setSelectedIndex(isEditing ? null : index);
                           }}
                           onPointerDown={(e) => startGridPointerSession(e, index, "move")}
@@ -489,7 +510,6 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                         {/* Resize handles — only visible in drag-selected mode */}
                         {isDragSelected || dragging ? (
                           <>
-                            {/* Top handle: slightly outside card top edge, shifted right */}
                             <button
                               type="button"
                               className="absolute right-1 z-50 flex h-6 w-6 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
@@ -497,15 +517,15 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                               aria-label={`Adjust start time for ${courseTitle}`}
                               onPointerDown={(e) => {
                                 e.stopPropagation();
+                                setToolbarIndex(null);
                                 startGridPointerSession(e, index, "resize-start");
                               }}
                             >
                               <span
-                                className="pointer-events-none block h-[7px] w-[7px] rounded-full border-2 border-[#E53935] bg-white shadow-[0_1px_3px_rgba(15,23,42,0.3)] dark:border-red-400 dark:bg-card"
+                                className="pointer-events-none block h-[6px] w-[6px] rounded-full border-[1.5px] border-[#E53935] bg-white shadow-[0_0_3px_rgba(15,23,42,0.2)] dark:border-red-400 dark:bg-card"
                                 aria-hidden
                               />
                             </button>
-                            {/* Bottom handle: slightly outside card bottom edge, shifted left */}
                             <button
                               type="button"
                               className="absolute left-1 z-50 flex h-6 w-6 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
@@ -513,15 +533,69 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                               aria-label={`Adjust end time for ${courseTitle}`}
                               onPointerDown={(e) => {
                                 e.stopPropagation();
+                                setToolbarIndex(null);
                                 startGridPointerSession(e, index, "resize-end");
                               }}
                             >
                               <span
-                                className="pointer-events-none block h-[7px] w-[7px] rounded-full border-2 border-[#E53935] bg-white shadow-[0_1px_3px_rgba(15,23,42,0.3)] dark:border-red-400 dark:bg-card"
+                                className="pointer-events-none block h-[6px] w-[6px] rounded-full border-[1.5px] border-[#E53935] bg-white shadow-[0_0_3px_rgba(15,23,42,0.2)] dark:border-red-400 dark:bg-card"
                                 aria-hidden
                               />
                             </button>
                           </>
+                        ) : null}
+
+                        {/* Floating toolbar — shown once on initial long-press */}
+                        {toolbarIndex === index ? (
+                          <div
+                            className="absolute left-1/2 z-[60] flex -translate-x-1/2 items-center gap-0 rounded-lg border border-border/80 bg-popover px-0.5 py-0.5 shadow-lg"
+                            style={{ bottom: "calc(100% + 6px)" }}
+                            onPointerDown={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              type="button"
+                              className="rounded-md px-2 py-1 text-[10px] font-medium text-foreground transition-colors hover:bg-muted"
+                              onClick={() => {
+                                setClipboard({ session: { ...session }, isCut: true });
+                                removeSession(index);
+                                setToolbarIndex(null);
+                              }}
+                            >
+                              Cut
+                            </button>
+                            <button
+                              type="button"
+                              className="rounded-md px-2 py-1 text-[10px] font-medium text-foreground transition-colors hover:bg-muted"
+                              onClick={() => {
+                                setClipboard({ session: { ...session }, isCut: false });
+                                setToolbarIndex(null);
+                              }}
+                            >
+                              Copy
+                            </button>
+                            <button
+                              type="button"
+                              className="rounded-md px-2 py-1 text-[10px] font-medium text-destructive transition-colors hover:bg-destructive/10"
+                              onClick={() => {
+                                removeSession(index);
+                                setToolbarIndex(null);
+                              }}
+                            >
+                              Delete
+                            </button>
+                            <button
+                              type="button"
+                              className="rounded-md px-2 py-1 text-[10px] font-medium text-foreground transition-colors hover:bg-muted"
+                              onClick={() => {
+                                const dup: MiniSessionDraft = { ...session };
+                                onSessionsChange([...sessions, dup]);
+                                setToolbarIndex(null);
+                                setDragSelectedIndex(null);
+                              }}
+                            >
+                              Duplicate
+                            </button>
+                          </div>
                         ) : null}
                       </div>
                     );
