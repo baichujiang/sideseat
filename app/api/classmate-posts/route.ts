@@ -16,6 +16,10 @@ export async function POST(request: Request) {
     }
 
     const values = parsed.data;
+    const postBody =
+      typeof values.body === "string" && values.body.trim().length > 0
+        ? values.body.trim()
+        : null;
     const expiresAt = new Date(values.expiresAt);
     if (Number.isNaN(expiresAt.getTime())) {
       return error("Choose a valid expiry date.", 400);
@@ -58,7 +62,7 @@ export async function POST(request: Request) {
           city: values.city ?? "Munich",
           category: values.category,
           title: values.title,
-          body: values.body || null,
+          body: postBody,
           expiresAt,
           status: ClassmatePostStatus.ACTIVE,
         },

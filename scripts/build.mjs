@@ -12,6 +12,16 @@ const buildEnv = {
     .join(":"),
 };
 
+// Prisma schema requires `directUrl = env("DIRECT_URL")`. Vercel/CI often only set DATABASE_URL.
+// Mirror DATABASE_URL so migrate + generate validate; for Neon, prefer a separate non-pooler DIRECT_URL
+// in production to avoid migrate advisory-lock timeouts (P1002).
+if (!String(buildEnv.DIRECT_URL ?? "").trim() && buildEnv.DATABASE_URL) {
+  buildEnv.DIRECT_URL = buildEnv.DATABASE_URL;
+  console.warn(
+    "[build] DIRECT_URL unset — using DATABASE_URL for Prisma. Add DIRECT_URL (Neon direct host, no -pooler) in Vercel env for more reliable migrations.\n",
+  );
+}
+
 function run(command, args, { allowFailure = false } = {}) {
   const result = spawnSync(command, args, {
     stdio: "inherit",
