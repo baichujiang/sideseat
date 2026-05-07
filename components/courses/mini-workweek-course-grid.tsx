@@ -208,10 +208,16 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
     const b0 = sessionBounds(row);
     if (!b0) return;
 
-    e.preventDefault();
-    e.stopPropagation();
+    const immediateActivate = mode === "resize-start" || mode === "resize-end";
 
-    setSelectedIndex(index);
+    // For resize handles (deliberate action): prevent immediately to avoid any default.
+    // For move (long-press drag): do NOT preventDefault here — calling it on pointerdown
+    // suppresses the click event on WebKit/Safari, which would break "tap to edit".
+    if (immediateActivate) {
+      e.preventDefault();
+    }
+    // Always stop propagation so the background slot button doesn't fire.
+    e.stopPropagation();
 
     const pointerId = e.pointerId;
     const x0 = e.clientX;
@@ -225,9 +231,10 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
     const grabOffsetMove =
       mode === "move" ? rawMinuteFromClientY(e.clientY, row.weekday) - curStart : 0;
 
-    const immediateActivate = mode === "resize-start" || mode === "resize-end";
     let activatedForDrag = immediateActivate;
     let longPressTimer: number | null = null;
+    /** True only when the pointer actually moved past POINTER_SLOP_PX after drag activated. */
+    let didMove = false;
 
     const applyLive = () => {
       setLiveBlock({ index, weekday: curWeekday, startMin: curStart, endMin: curEnd });
@@ -236,11 +243,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
     if (immediateActivate) {
       lockMiniDragSelect();
       window.getSelection()?.removeAllRanges();
-      try {
-        captureEl.setPointerCapture(pointerId);
-      } catch {
-        /* ignore */
-      }
+      try { captureEl.setPointerCapture(pointerId); } catch { /* ignore */ }
       applyLive();
     } else {
       longPressTimer = window.setTimeout(() => {
@@ -248,11 +251,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
         activatedForDrag = true;
         lockMiniDragSelect();
         window.getSelection()?.removeAllRanges();
-        try {
-          captureEl.setPointerCapture(pointerId);
-        } catch {
-          /* ignore */
-        }
+        try { captureEl.setPointerCapture(pointerId); } catch { /* ignore */ }
         applyLive();
       }, LONG_PRESS_MS);
     }
@@ -274,6 +273,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
     const onDocMove = (ev: PointerEvent) => {
       if (ev.pointerId !== pointerId) return;
       if (!activatedForDrag) {
+        // Cancel long-press if user is clearly scrolling
         if (
           longPressTimer != null &&
           Math.hypot(ev.clientX - x0, ev.clientY - y0) > POINTER_SLOP_PX
@@ -282,6 +282,9 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
           detach();
         }
         return;
+      }
+      if (Math.hypot(ev.clientX - x0, ev.clientY - y0) > POINTER_SLOP_PX) {
+        didMove = true;
       }
       const hit = weekdayFromClientX(ev.clientX);
       if (hit) curWeekday = hit;
@@ -309,15 +312,15 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
       if (ev.pointerId !== pointerId) return;
       clearLongPress();
       detach();
-      if (!activatedForDrag) {
+
+      // If no drag happened (quick tap or long-press-without-movement), clear live state
+      // and let the native click event fire so the edit panel opens.
+      if (!activatedForDrag || !didMove) {
         setLiveBlock(null);
         return;
       }
-      try {
-        captureEl.releasePointerCapture(pointerId);
-      } catch {
-        /* ignore */
-      }
+
+      try { captureEl.releasePointerCapture(pointerId); } catch { /* ignore */ }
 
       let snapStart = curStart;
       let snapEnd = curEnd;
@@ -343,19 +346,13 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
 
       const next = sessionsRef.current.map((s, i) => {
         if (i !== index) return s;
-        return {
-          ...s,
-          weekday: curWeekday,
-          start: formatMinutes(snapStart),
-          end: formatMinutes(snapEnd),
-        };
+        return { ...s, weekday: curWeekday, start: formatMinutes(snapStart), end: formatMinutes(snapEnd) };
       });
       onSessionsChange(next);
       setLiveBlock(null);
+      // Suppress the click that follows pointerup so edit panel doesn't flash open/close
       suppressClickRef.current = true;
-      window.setTimeout(() => {
-        suppressClickRef.current = false;
-      }, 280);
+      window.setTimeout(() => { suppressClickRef.current = false; }, 280);
     };
 
     document.addEventListener("pointermove", onDocMove);
@@ -366,10 +363,10 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
   return (
     <div className="space-y-3">
       <p className="text-[11px] leading-snug text-muted-foreground">
-        Tap an empty slot for <span className="font-medium text-foreground">1h 30m</span> (adjust below).
-        <span className="font-medium text-foreground"> Long-press</span> a block to drag it (another day or
-        time); drag the <span className="font-medium text-foreground">top / bottom dot</span> to change length.
-        Mon–Fri on the grid — weekend below.
+        <span className="font-medium text-foreground">Tap</span> an empty slot to add 1h 30m.{" "}
+        <span className="font-medium text-foreground">Tap a block</span> to edit or select it
+        (dots appear on edges).{" "}
+        <span className="font-medium text-foreground">Long-press &amp; drag</span> to move.
       </p>
 
       <div className="max-h-[min(420px,70vh)] overflow-y-auto overflow-x-auto rounded-xl border border-border/80 bg-muted/15">
@@ -431,80 +428,86 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                     if (visEnd <= visStart) return null;
                     const topPct = ((visStart - GRID_VIEW_START) / totalMinutes) * 100;
                     const heightPct = ((visEnd - visStart) / totalMinutes) * 100;
-                    const blockHeightPx = Math.max((heightPct / 100) * bodyHeight, 18);
-                    const showResizeHandles = blockHeightPx >= 52;
                     const isSel = selectedIndex === index;
                     const dragging = liveBlock?.index === index;
                     const timeLabel = `${formatMinutes(disp.start)}–${formatMinutes(disp.end)}`;
                     return (
+                      // overflow-visible so resize handle dots can peek outside the card border
                       <div
                         key={`block-${index}`}
                         className={cn(
-                          "absolute left-0.5 right-0.5 z-10 flex min-h-0 touch-none select-none flex-col overflow-hidden rounded-md border text-left shadow-sm transition",
-                          "border-primary/35 bg-primary/15 hover:bg-primary/20",
-                          isSel && "ring-2 ring-primary ring-offset-1 ring-offset-background",
-                          dragging && "z-20 scale-[1.02] ring-2 ring-primary/60",
+                          "absolute left-0.5 right-0.5 z-10 overflow-visible rounded-md border shadow-sm",
+                          "border-primary/35 bg-primary/15",
+                          isSel && "z-20 ring-2 ring-primary ring-offset-1 ring-offset-background",
+                          dragging && "z-30 scale-[1.02] ring-2 ring-primary/60",
+                          dragging ? "transition-none" : "transition-[box-shadow,transform]",
                         )}
                         style={{
                           top: `${topPct}%`,
                           height: `${Math.max(heightPct, (18 / bodyHeight) * 100)}%`,
                         }}
                       >
-                        {showResizeHandles ? (
-                          <button
-                            type="button"
-                            className={cn(
-                              "relative z-40 flex h-5 w-8 shrink-0 cursor-ns-resize touch-none items-center justify-end self-end rounded-full border-0 bg-transparent p-0 pr-0.5 outline-none",
-                              "hover:bg-black/[0.06] focus-visible:ring-2 focus-visible:ring-primary/50 dark:hover:bg-white/[0.08]",
-                            )}
-                            aria-label={`Adjust start time for ${courseTitle}`}
-                            onPointerDown={(e) => startGridPointerSession(e, index, "resize-start")}
-                          >
-                            <span
-                              className="pointer-events-none block h-1.5 w-1.5 rounded-full border-2 border-primary bg-white shadow-sm dark:bg-card"
-                              aria-hidden
-                            />
-                          </button>
-                        ) : null}
+                        {/* Body — tap to open edit, long-press to drag */}
                         <div
                           role="button"
                           tabIndex={0}
-                          className={cn(
-                            "relative z-20 min-h-0 flex-1 cursor-grab overflow-hidden px-1 py-0.5 active:cursor-grabbing",
-                          )}
+                          className="absolute inset-0 z-10 cursor-grab select-none overflow-hidden rounded-[inherit] px-1 py-0.5 hover:bg-primary/5 active:cursor-grabbing"
                           onKeyDown={(ev) => {
                             if (ev.key === "Enter" || ev.key === " ") {
                               ev.preventDefault();
-                              setSelectedIndex(index);
+                              setSelectedIndex(isSel ? null : index);
                             }
                           }}
                           onClick={(e) => {
                             e.stopPropagation();
                             if (suppressClickRef.current) return;
-                            setSelectedIndex(index);
+                            // Toggle: click again deselects (closes edit panel)
+                            setSelectedIndex(isSel ? null : index);
                           }}
                           onPointerDown={(e) => startGridPointerSession(e, index, "move")}
                         >
                           <span className="line-clamp-2 text-[9px] font-semibold leading-tight text-foreground">
                             {courseTitle}
                           </span>
-                          <span className="block text-[8px] tabular-nums text-muted-foreground">{timeLabel}</span>
+                          <span className="block text-[8px] tabular-nums text-muted-foreground">
+                            {timeLabel}
+                          </span>
                         </div>
-                        {showResizeHandles ? (
-                          <button
-                            type="button"
-                            className={cn(
-                              "relative z-40 flex h-5 w-8 shrink-0 cursor-ns-resize touch-none items-center justify-start self-start rounded-full border-0 bg-transparent p-0 pl-0.5 outline-none",
-                              "hover:bg-black/[0.06] focus-visible:ring-2 focus-visible:ring-primary/50 dark:hover:bg-white/[0.08]",
-                            )}
-                            aria-label={`Adjust end time for ${courseTitle}`}
-                            onPointerDown={(e) => startGridPointerSession(e, index, "resize-end")}
-                          >
-                            <span
-                              className="pointer-events-none block h-1.5 w-1.5 rounded-full border-2 border-primary bg-white shadow-sm dark:bg-card"
-                              aria-hidden
-                            />
-                          </button>
+
+                        {/* Resize handles — only visible when selected, on the card border */}
+                        {isSel ? (
+                          <>
+                            {/* Start-time handle: top edge, shifted right */}
+                            <button
+                              type="button"
+                              className="absolute right-1 top-0 z-50 -translate-y-1/2 flex h-5 w-5 cursor-ns-resize touch-none items-center justify-center rounded-full border-0 bg-transparent p-0 outline-none hover:scale-125"
+                              aria-label={`Adjust start time for ${courseTitle}`}
+                              onPointerDown={(e) => {
+                                e.stopPropagation();
+                                startGridPointerSession(e, index, "resize-start");
+                              }}
+                            >
+                              <span
+                                className="pointer-events-none block h-2.5 w-2.5 rounded-full border-2 border-primary bg-white shadow-[0_1px_4px_rgba(15,23,42,0.25)] dark:bg-card"
+                                aria-hidden
+                              />
+                            </button>
+                            {/* End-time handle: bottom edge, shifted left */}
+                            <button
+                              type="button"
+                              className="absolute bottom-0 left-1 z-50 translate-y-1/2 flex h-5 w-5 cursor-ns-resize touch-none items-center justify-center rounded-full border-0 bg-transparent p-0 outline-none hover:scale-125"
+                              aria-label={`Adjust end time for ${courseTitle}`}
+                              onPointerDown={(e) => {
+                                e.stopPropagation();
+                                startGridPointerSession(e, index, "resize-end");
+                              }}
+                            >
+                              <span
+                                className="pointer-events-none block h-2.5 w-2.5 rounded-full border-2 border-primary bg-white shadow-[0_1px_4px_rgba(15,23,42,0.25)] dark:bg-card"
+                                aria-hidden
+                              />
+                            </button>
+                          </>
                         ) : null}
                       </div>
                     );
