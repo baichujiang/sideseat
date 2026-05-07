@@ -36,6 +36,7 @@ export type ClassmatePostDetail = {
   expiresAt: Date;
   createdAt: Date;
   updatedAt: Date;
+  linkedCourses: Array<{ id: string; code: string | null; name: string }>;
 };
 
 export type ClassmatePostDetailView =
@@ -102,6 +103,7 @@ export async function getClassmatePostDetailForViewer(
           userLanguages: { select: { tag: true, proficiency: true } },
         },
       },
+      courses: { include: { course: { select: { id: true, code: true, name: true } } } },
     },
   });
 
@@ -110,6 +112,12 @@ export async function getClassmatePostDetailForViewer(
   }
 
   const author = toAuthor(post.user);
+
+  const linkedCourses = post.courses.map((pc) => ({
+    id: pc.course.id,
+    code: pc.course.code,
+    name: pc.course.name,
+  }));
 
   if (post.userId === viewerId) {
     return {
@@ -125,6 +133,7 @@ export async function getClassmatePostDetailForViewer(
         expiresAt: post.expiresAt,
         createdAt: post.createdAt,
         updatedAt: post.updatedAt,
+        linkedCourses,
       },
       author,
       isAuthor: true,
@@ -173,6 +182,7 @@ export async function getClassmatePostDetailForViewer(
       expiresAt: post.expiresAt,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
+      linkedCourses,
     },
     author,
     isAuthor: false,

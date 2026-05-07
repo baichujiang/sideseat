@@ -35,7 +35,7 @@ export async function POST(
           userId: report.reportedUserId,
           reportId: report.id,
           reason: report.reason.toLowerCase().replaceAll("_", " "),
-          createdByEmail: admin.email,
+          createdByEmail: admin.adminActor,
         },
       });
 
@@ -54,7 +54,7 @@ export async function POST(
         where: { id: report.id },
         data: {
           status: ReportStatus.UNDER_REVIEW,
-          handledByEmail: admin.email,
+          handledByEmail: admin.adminActor,
           reviewedAt: new Date(),
         },
       });
@@ -63,7 +63,7 @@ export async function POST(
         data: {
           reportId: report.id,
           actionType: ReportActionType.USER_BLOCKED,
-          actorEmail: admin.email,
+          actorEmail: admin.adminActor,
           fromStatus: report.status,
           toStatus: ReportStatus.UNDER_REVIEW,
           noteSnapshot: "Admin created a platform-level moderation block.",
@@ -115,7 +115,7 @@ export async function DELETE(
         data: {
           reportId: report.id,
           actionType: ReportActionType.USER_UNBLOCKED,
-          actorEmail: admin.email,
+          actorEmail: admin.adminActor,
           fromStatus: report.status,
           toStatus: report.status,
           noteSnapshot: "Admin removed the platform-level moderation block.",

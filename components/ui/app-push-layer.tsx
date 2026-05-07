@@ -58,6 +58,8 @@ export function AppPushLayer({
   const [mounted, setMounted] = useState(open);
   const [entered, setEntered] = useState(false);
   const closeTimerRef = useRef<number | null>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (open) {
@@ -102,21 +104,27 @@ export function AppPushLayer({
   useEffect(() => {
     if (!mounted) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [mounted, onClose]);
+  }, [mounted]);
 
-  // Register in global layer stack so EdgeSwipeBack can dismiss us
+  // Register in global layer stack so EdgeSwipeBack can dismiss us.
+  // Depend only on `open`: parents often pass an inline `onClose` that changes every render; re-running
+  // this effect would remove then re-add the layer and briefly leave the stack empty so a swipe
+  // falls through to `router.back()` (wrong: feels like switching tabs). Latest `onClose` via ref.
   useEffect(() => {
     if (!open) return;
-    layerCloseStack.push(onClose);
+    const closeFromEdgeGesture = () => {
+      onCloseRef.current();
+    };
+    layerCloseStack.push(closeFromEdgeGesture);
     return () => {
-      const idx = layerCloseStack.indexOf(onClose);
+      const idx = layerCloseStack.indexOf(closeFromEdgeGesture);
       if (idx !== -1) layerCloseStack.splice(idx, 1);
     };
-  }, [open, onClose]);
+  }, [open]);
 
   useEffect(() => {
     if (!lockBodyScroll || !mounted) return;

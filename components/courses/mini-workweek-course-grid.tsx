@@ -330,15 +330,17 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
       if (mode === "move") {
         let ns = m - grabOffsetMove;
         ns = Math.max(0, Math.min(DAY_LAST_MINUTE - originDuration, ns));
+        ns = snapMiniMinute(ns);
+        ns = Math.max(0, Math.min(DAY_LAST_MINUTE - originDuration, ns));
         curStart = ns;
         curEnd = ns + originDuration;
       } else if (mode === "resize-start") {
-        let ns = m;
+        let ns = snapMiniMinute(m);
         ns = Math.min(ns, curEnd - MIN_BLOCK_MINUTES);
         ns = Math.max(0, ns);
         curStart = ns;
       } else {
-        let ne = m;
+        let ne = snapMiniMinute(m);
         ne = Math.max(ne, curStart + MIN_BLOCK_MINUTES);
         ne = Math.min(DAY_LAST_MINUTE, ne);
         curEnd = ne;

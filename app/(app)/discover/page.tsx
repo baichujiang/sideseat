@@ -1,5 +1,4 @@
-import type { Route } from "next";
-import { ClassmatePostCategory, ClassmatePostStatus, ConnectionStatus } from "@prisma/client";
+import { ClassmatePostStatus, ConnectionStatus } from "@prisma/client";
 import { ChevronDown, MapPin } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -11,8 +10,6 @@ import {
   type DiscoverPostRow,
   type DiscoverRow,
 } from "@/components/discover/discover-list";
-import { EmptyState } from "@/components/ui/empty-state";
-import { LinkButton } from "@/components/ui/link-button";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { getDiscoverPeople } from "@/lib/queries/discovery";
@@ -61,55 +58,35 @@ export default async function DiscoverPage() {
     activeConnections.map((c) => (c.userAId === user.id ? c.userBId : c.userAId)),
   );
 
-  const activePosts = await prisma.classmatePost.findMany({
-    where: {
-      status: ClassmatePostStatus.ACTIVE,
-      expiresAt: { gt: new Date() },
-      city: "Munich",
-      user: {
-        moderationBlocks: { none: { isActive: true } },
-        blocksReceived: { none: { blockerId: user.id } },
-        blocksInitiated: { none: { blockedId: user.id } },
+  const [activePosts, myEnrolledCourses] = await Promise.all([
+    prisma.classmatePost.findMany({
+      where: {
+        status: ClassmatePostStatus.ACTIVE,
+        expiresAt: { gt: new Date() },
+        city: "Munich",
+        user: {
+          moderationBlocks: { none: { isActive: true } },
+          blocksReceived: { none: { blockerId: user.id } },
+          blocksInitiated: { none: { blockedId: user.id } },
+        },
       },
-    },
-    include: {
-      user: { include: { userLanguages: true } },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 120,
-  });
+      include: {
+        user: { include: { userLanguages: true } },
+        courses: { include: { course: { select: { id: true, code: true, name: true } } } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 120,
+    }),
+    prisma.userCourse.findMany({
+      where: { userId: user.id },
+      select: { courseId: true, course: { select: { id: true, code: true, name: true } } },
+    }),
+  ]);
 
   const freshHits = freshHitsBase.filter((h) => !connectedUserIds.has(h.userId));
   const freshPosts = activePosts.filter(
     (post) => post.userId === user.id || !connectedUserIds.has(post.userId),
   );
-
-  if (freshHits.length === 0 && freshPosts.length === 0) {
-    return (
-      <div className="space-y-5">
-        <PageHeader />
-        <EmptyState
-          title="No new classmates to show"
-          description={
-            savedCount === 0
-              ? "You're already connected with everyone we'd suggest. Add another course to widen your matches."
-              : "You're already connected with everyone we'd suggest. Check back as more classmates join."
-          }
-          action={
-            savedCount === 0 ? (
-              <LinkButton href={"/courses/add" as Route} size="sm">
-                Add a course
-              </LinkButton>
-            ) : (
-              <LinkButton href={"/inbox" as Route} size="sm" variant="outline">
-                Open inbox
-              </LinkButton>
-            )
-          }
-        />
-      </div>
-    );
-  }
 
   const rows: DiscoverRow[] = freshHits.map((h) => ({
     userId: h.userId,
@@ -151,6 +128,17 @@ export default async function DiscoverPage() {
     })),
     verifiedStudent: post.user.verifiedStudent,
     studentVerificationStatus: post.user.studentVerificationStatus,
+    linkedCourses: post.courses.map((pc) => ({
+      id: pc.course.id,
+      code: pc.course.code,
+      name: pc.course.name,
+    })),
+  }));
+
+  const enrolledCourses = myEnrolledCourses.map((uc) => ({
+    id: uc.course.id,
+    code: uc.course.code,
+    name: uc.course.name,
   }));
 
   return (
@@ -162,7 +150,7 @@ export default async function DiscoverPage() {
           body="You can browse people now. Completing your profile sharpens course overlap, language, and program suggestions."
         />
       ) : null}
-      <DiscoverList rows={rows} posts={posts} />
+      <DiscoverList rows={rows} posts={posts} savedCourseCount={savedCount} enrolledCourses={enrolledCourses} />
     </div>
   );
 }

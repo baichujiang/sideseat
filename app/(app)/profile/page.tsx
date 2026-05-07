@@ -12,7 +12,7 @@ import { MePageSection } from "@/components/profile/me-page-section";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { getSessionUser } from "@/lib/auth/session";
-import { adminEmails } from "@/lib/constants/app";
+import { isConfiguredAdmin } from "@/lib/constants/app";
 import { DEGREE_LEVEL_LABELS } from "@/lib/constants/majors";
 import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
 import { profileLanguagesFormDefault } from "@/lib/constants/languages";
@@ -110,7 +110,7 @@ export default async function ProfilePage({
   }
 
   const blockedCount = await prisma.block.count({ where: { blockerId: user.id } });
-  const isAdmin = Boolean(user.email && adminEmails.includes(user.email.toLowerCase()));
+  const isAdmin = isConfiguredAdmin(user);
 
   const profileForSheet = await prisma.user.findUnique({
     where: { id: user.id },

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ChevronRight, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { ConnectionStatus } from "@prisma/client";
 
 import { CourseClassmatesCountChip } from "@/components/courses/course-classmates-count-chip";
@@ -327,7 +327,7 @@ export default async function CourseDetailPage({
           >
             <input type="hidden" name="returnTo" value={`/courses/${membership.course.id}`} />
             <p className="min-w-0 flex-1 text-[12px] leading-snug text-foreground">
-              This course chat is hidden from Chats. You can still open group chat below.
+              This course chat is hidden from Chats. You can still open it from Group chat next to the member count.
             </p>
             <button
               type="submit"
@@ -356,7 +356,7 @@ export default async function CourseDetailPage({
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           {enrolledOthers <= 0 ? (
             <CourseClassmatesCountChip
               label="Just you"
@@ -369,6 +369,21 @@ export default async function CourseDetailPage({
               compactHeadline={String(enrolledOthers)}
             />
           )}
+          <Link
+            href={`/courses/${membership.course.id}/chat`}
+            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#2563EB] underline-offset-2 hover:underline dark:text-blue-400"
+            title={
+              courseChatUnread > 0 || courseChatMetaDetail
+                ? `${courseChatMetaBase}${courseChatMetaDetail ? ` · ${courseChatMetaDetail}` : ""}`
+                : "Open course group chat"
+            }
+          >
+            <MessageCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} aria-hidden />
+            Group chat
+            {courseChatUnread > 0 ? (
+              <span className="tabular-nums text-[#2563EB] dark:text-blue-400">({courseChatUnread})</span>
+            ) : null}
+          </Link>
         </div>
 
         {enrolledOthers === 0 ? (
@@ -396,39 +411,6 @@ export default async function CourseDetailPage({
           layout="inline"
         />
       </section>
-
-      <Link
-        href={`/courses/${membership.course.id}/chat`}
-        className="group flex items-center gap-3 rounded-2xl border border-classmates-hairline bg-white/60 px-4 py-3.5 shadow-[0_2px_8px_rgba(15,23,42,0.04)] transition hover:bg-white/90 active:scale-[0.99] dark:border-border/60 dark:bg-card/60 dark:shadow-[0_2px_8px_rgba(0,0,0,0.1)] dark:hover:bg-card/90"
-      >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#EFF6FF] dark:bg-blue-950/50">
-          <MessageCircle
-            className="h-5 w-5 text-[#2563EB] dark:text-blue-400"
-            strokeWidth={2.25}
-            aria-hidden
-          />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[14px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
-            Group chat
-          </p>
-          <p className="mt-0.5 text-[12px] leading-snug text-classmates-sub dark:text-zinc-400">
-            {courseChatMetaBase}
-            {courseChatUnread > 0 ? (
-              <>
-                {" \u00b7 "}
-                <span className="font-semibold text-[#2563EB] dark:text-blue-400">{courseChatMetaDetail}</span>
-              </>
-            ) : courseChatMetaDetail ? (
-              <>
-                {" \u00b7 "}
-                <span>{courseChatMetaDetail}</span>
-              </>
-            ) : null}
-          </p>
-        </div>
-        <ChevronRight className="h-4 w-4 shrink-0 text-classmates-hint dark:text-zinc-500" strokeWidth={2.5} aria-hidden />
-      </Link>
 
       <CourseMemberList
         courseId={membership.course.id}

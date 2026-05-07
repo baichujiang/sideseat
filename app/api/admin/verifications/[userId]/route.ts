@@ -35,7 +35,7 @@ export async function PATCH(
         studentVerificationStatus: status,
         emailVerifiedAt:
           status === StudentVerificationStatus.VERIFIED ? new Date() : null,
-        studentVerificationNotes: note || `Last reviewed by ${admin.email}.`,
+        studentVerificationNotes: note || `Last reviewed by ${admin.adminActor}.`,
         ...(isFinalDecision
           ? {
               manualReviewProofUrl: null,

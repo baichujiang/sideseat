@@ -7,7 +7,7 @@ import { ConnectionStatus } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
 import { requireUser } from "@/lib/auth/session";
-import { adminEmails } from "@/lib/constants/app";
+import { isConfiguredAdmin } from "@/lib/constants/app";
 import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
 
 // Throttle window for lastActiveAt writes. Every page load calls
@@ -481,14 +481,15 @@ export async function requireCourseChatMember(courseId: string) {
   return { user, course: membership.course, userCourse: membership };
 }
 
-/** Admin actions require a verified admin email on the account (guest/username-only accounts cannot be admins). */
-export async function requireAdminUser(): Promise<User & { email: string }> {
+/**
+ * Admin routes: allow accounts listed in ADMIN_EMAILS and/or ADMIN_USERNAMES
+ * (see `lib/constants/app.ts`). `adminActor` is used in audit fields (email or username).
+ */
+export async function requireAdminUser(): Promise<User & { adminActor: string }> {
   const user = await requireOnboardedUser();
-  const email = user.email?.toLowerCase();
-
-  if (!email || !adminEmails.includes(email)) {
+  if (!isConfiguredAdmin(user)) {
     redirect("/home");
   }
-
-  return { ...user, email };
+  const adminActor = user.email?.trim() || user.username;
+  return { ...user, adminActor };
 }

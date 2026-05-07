@@ -42,16 +42,19 @@ export function HomeHero({
       <Link
         href={"/profile" as Route}
         aria-label="Open profile"
-        className="shrink-0 rounded-full transition hover:opacity-90 active:opacity-85"
+        className={cn(
+          "shrink-0 rounded-full p-1.5 -m-1.5 touch-manipulation transition hover:opacity-90 active:opacity-85",
+          "inline-flex items-center justify-center",
+        )}
       >
         <span
           className={cn(
-            "inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full",
+            "inline-flex h-14 w-14 items-center justify-center overflow-hidden rounded-full",
             "border border-[#E7E0D6] bg-white shadow-[0_2px_8px_rgba(15,23,42,0.08)]",
             "dark:border-border dark:bg-card dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]",
           )}
         >
-          <PresetAvatar id={avatarUrl} size={40} className="h-10 w-10" />
+          <PresetAvatar id={avatarUrl} size={56} className="h-14 w-14" />
         </span>
       </Link>
     </header>

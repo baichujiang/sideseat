@@ -3,8 +3,10 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Non-pooled Neon host (no "-pooler"). Required for reliable `migrate deploy` on CI/Vercel.
+  directUrl = env("DIRECT_URL")
 }
 
 enum LanguageTag {
@@ -309,10 +311,23 @@ model ClassmatePost {
   createdAt  DateTime              @default(now())
   updatedAt  DateTime              @updatedAt
   user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courses    ClassmatePostCourse[]
 
   @@index([category, status, city, createdAt])
   @@index([userId, category, status])
   @@index([expiresAt])
+}
+
+/// Courses attached to a SHARED_COURSES post — "I'm looking for classmates in these courses".
+model ClassmatePostCourse {
+  id        String        @id @default(cuid())
+  postId    String
+  courseId   String
+  post      ClassmatePost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  course    Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, courseId])
+  @@index([courseId])
 }
 
 model SchoolEmailVerification {
@@ -366,6 +381,7 @@ model Course {
   invitations   Invitation[]
   courseRoomMessages CourseRoomMessage[]
   originConnections Connection[] @relation("ConnectionOriginCourse")
+  classmatePostCourses ClassmatePostCourse[]
 
   @@unique([name, school, semesterLabel])
   @@unique([code, school, semesterLabel])

@@ -31,6 +31,9 @@ export const NEW_THREAD_RATE_LIMIT_COUNT = 10;
  */
 export const CONTACT_EXCHANGE_DECLINE_COOLDOWN_HOURS = 24;
 
+/** Max simultaneous live Discover posts per user per category (ACTIVE and not yet expired). */
+export const MAX_ACTIVE_CLASSMATE_POSTS_PER_CATEGORY = 3;
+
 /**
  * @deprecated Main-tab routes are public without a cookie; see `middleware.ts`
  * `isPublicAppPath`. Kept for scripts/docs that still refer to "protected" lists.
@@ -50,3 +53,17 @@ export const adminEmails = (process.env.ADMIN_EMAILS ?? "")
   .split(",")
   .map((email) => email.trim().toLowerCase())
   .filter(Boolean);
+
+/** Comma-separated login usernames (case-insensitive) who may use admin routes. */
+export const adminUsernames = (process.env.ADMIN_USERNAMES ?? "")
+  .split(",")
+  .map((u) => u.trim().toLowerCase())
+  .filter(Boolean);
+
+/** True if this account is listed in ADMIN_EMAILS or ADMIN_USERNAMES. */
+export function isConfiguredAdmin(user: { email: string | null; username: string }): boolean {
+  const email = user.email?.trim().toLowerCase() ?? "";
+  if (email && adminEmails.includes(email)) return true;
+  const uname = user.username.trim().toLowerCase();
+  return adminUsernames.length > 0 && adminUsernames.includes(uname);
+}

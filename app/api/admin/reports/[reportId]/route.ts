@@ -30,7 +30,7 @@ export async function PATCH(
       data: {
         status: values.status,
         adminNotes: values.adminNotes || null,
-        handledByEmail: admin.email,
+        handledByEmail: admin.adminActor,
         reviewedAt: new Date(),
         resolvedAt:
           values.status === ReportStatus.RESOLVED || values.status === ReportStatus.DISMISSED
@@ -45,7 +45,7 @@ export async function PATCH(
       actions.push({
         reportId,
         actionType: ReportActionType.STATUS_CHANGED,
-        actorEmail: admin.email,
+        actorEmail: admin.adminActor,
         fromStatus: currentReport.status,
         toStatus: values.status,
         noteSnapshot: values.adminNotes || null,
@@ -56,7 +56,7 @@ export async function PATCH(
       actions.push({
         reportId,
         actionType: ReportActionType.NOTES_UPDATED,
-        actorEmail: admin.email,
+        actorEmail: admin.adminActor,
         fromStatus: values.status,
         toStatus: values.status,
         noteSnapshot: values.adminNotes || null,

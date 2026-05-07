@@ -63,6 +63,18 @@ export default async function DiscoverPostDetailPage({
             {post.body ? (
               <p className="mt-2 text-[15px] leading-relaxed text-foreground/85">{post.body}</p>
             ) : null}
+            {post.courses.length > 0 ? (
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {post.courses.map((pc) => (
+                  <span
+                    key={pc.course.id}
+                    className="inline-flex rounded-full border border-classmates-blue-border/60 bg-classmates-blue-soft/50 px-2.5 py-1 text-[11px] font-medium text-classmates-blue"
+                  >
+                    {pc.course.code ?? pc.course.name}
+                  </span>
+                ))}
+              </div>
+            ) : null}
             <p className="mt-3 text-[13px] text-muted-foreground">
               {post.city} · {live ? `Until ${format(post.expiresAt, "MMM d, yyyy")}` : `Updated ${format(post.updatedAt, "MMM d, yyyy")}`}
             </p>
@@ -152,6 +164,18 @@ export default async function DiscoverPostDetailPage({
           </h1>
           {post.body ? (
             <p className="mt-2 text-[15px] leading-relaxed text-foreground/85">{post.body}</p>
+          ) : null}
+          {post.linkedCourses.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {post.linkedCourses.map((c) => (
+                <span
+                  key={c.id}
+                  className="inline-flex rounded-full border border-classmates-blue-border/60 bg-classmates-blue-soft/50 px-2.5 py-1 text-[11px] font-medium text-classmates-blue"
+                >
+                  {c.code ?? c.name}
+                </span>
+              ))}
+            </div>
           ) : null}
           <p className="mt-3 text-[13px] text-muted-foreground">
             {post.city} ·{" "}
@@ -251,6 +275,7 @@ async function getClassmatePostDetailForGuest(postId: string, now: Date) {
           studentVerificationStatus: true,
         },
       },
+      courses: { select: { course: { select: { id: true, code: true, name: true } } } },
     },
   });
 }

@@ -36,6 +36,7 @@ import { DiscoverMessageButton } from "@/components/discover/discover-message-bu
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LinkButton } from "@/components/ui/link-button";
 import { UserGenderCardIcon } from "@/components/ui/user-gender-icon";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { LANGUAGE_TAG_LABEL } from "@/lib/constants/languages";
@@ -99,7 +100,10 @@ export type DiscoverPostRow = {
     | "VERIFIED"
     | "MANUAL_REVIEW_REQUIRED"
     | "REJECTED";
+  linkedCourses?: Array<{ id: string; code: string | null; name: string }>;
 };
+
+export type EnrolledCourseOption = { id: string; code: string | null; name: string };
 
 type UserSearchHit = {
   id: string;
@@ -126,11 +130,16 @@ export function DiscoverList({
   rows,
   posts,
   allowSearch = true,
+  savedCourseCount,
+  enrolledCourses = [],
 }: {
   rows: DiscoverRow[];
   posts: DiscoverPostRow[];
   /** When false (logged-out Discover tab), hide people search — the API requires a signed-in student context. */
   allowSearch?: boolean;
+  /** Saved courses count — used to suggest “Add a course” when the shared tab is empty. */
+  savedCourseCount?: number;
+  enrolledCourses?: EnrolledCourseOption[];
 }) {
   const [query, setQuery] = useState("");
   const searchParams = useSearchParams();
@@ -300,6 +309,7 @@ export function DiscoverList({
           posts={scenePosts}
           scene={scene}
           onOpenPost={() => setPostOpen(true)}
+          savedCourseCount={savedCourseCount}
         />
       )}
 
@@ -379,6 +389,7 @@ export function DiscoverList({
       <CreatePostSheet
         open={postOpen}
         scene={scene}
+        enrolledCourses={enrolledCourses}
         onClose={() => setPostOpen(false)}
         onCreated={() => {
           setPostOpen(false);
@@ -587,11 +598,13 @@ function RecommendationSurface({
   posts,
   scene,
   onOpenPost,
+  savedCourseCount,
 }: {
   rows: DiscoverRow[];
   posts: DiscoverPostRow[];
   scene: SceneKind;
   onOpenPost: () => void;
+  savedCourseCount?: number;
 }) {
   const showingShared = scene === "shared";
   const hasItems = showingShared ? rows.length > 0 || posts.length > 0 : posts.length > 0;
@@ -604,6 +617,13 @@ function RecommendationSurface({
           {showingShared
             ? "No recommendations or posts yet. Tap Post to say what you're looking for in shared courses, or check back as more classmates join."
             : "No posts in this category yet. Be the first to share what you're looking for."}
+          {showingShared && savedCourseCount === 0 ? (
+            <div className="mt-4 flex justify-center">
+              <LinkButton href={"/courses/add" as Route} size="sm">
+                Add a course
+              </LinkButton>
+            </div>
+          ) : null}
         </div>
       </div>
     );
@@ -987,6 +1007,18 @@ function PostRow({ post, scene }: { post: DiscoverPostRow; scene: SceneKind }) {
           {post.body ? (
             <p className="mt-0.5 text-[12px] leading-snug text-foreground/75">{post.body}</p>
           ) : null}
+          {post.linkedCourses && post.linkedCourses.length > 0 ? (
+            <div className="mt-1.5 flex flex-wrap gap-1">
+              {post.linkedCourses.map((c) => (
+                <span
+                  key={c.id}
+                  className="inline-flex rounded-full border border-classmates-blue-border/60 bg-classmates-blue-soft/50 px-2 py-0.5 text-[10px] font-medium text-classmates-blue"
+                >
+                  {c.code ?? c.name}
+                </span>
+              ))}
+            </div>
+          ) : null}
           <p className="mt-1 text-[10.5px] text-muted-foreground">
             {isNeverExpiry(post.expiresAt)
               ? "No expiry"
@@ -1073,19 +1105,23 @@ function passesFilters(
 function CreatePostSheet({
   open,
   scene,
+  enrolledCourses = [],
   onClose,
   onCreated,
 }: {
   open: boolean;
   scene: SceneKind;
+  enrolledCourses?: EnrolledCourseOption[];
   onClose: () => void;
   onCreated: () => void;
 }) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [expiryPreset, setExpiryPreset] = useState<PostExpiryPreset>("1w");
+  const [selectedCourseIds, setSelectedCourseIds] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isSharedScene = scene === "shared";
 
   useEffect(() => {
     if (!open) return;
@@ -1093,10 +1129,33 @@ function CreatePostSheet({
     setBody("");
     setError(null);
     setExpiryPreset("1w");
+    setSelectedCourseIds(new Set());
   }, [open, scene]);
+
+  function toggleCourse(id: string) {
+    setSelectedCourseIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function selectAllCourses() {
+    setSelectedCourseIds(new Set(enrolledCourses.map((c) => c.id)));
+  }
 
   async function submit() {
     if (submitting) return;
+    const trimmedTitle = title.trim();
+    if (isSharedScene && selectedCourseIds.size === 0) {
+      setError("Select at least one course to share.");
+      return;
+    }
+    if (!trimmedTitle) {
+      setError("Add a short title so classmates know what you’re looking for.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -1106,15 +1165,19 @@ function CreatePostSheet({
         body: JSON.stringify({
           city: "Munich",
           category: sceneToCategory(scene),
-          title,
-          body,
+          title: trimmedTitle,
+          body: body.trim(),
           expiresAt: expiryPresetToDate(expiryPreset).toISOString(),
+          ...(isSharedScene && selectedCourseIds.size > 0
+            ? { courseIds: [...selectedCourseIds] }
+            : {}),
         }),
       });
       const payload = await res.json().catch(() => ({}));
       if (!res.ok || !payload?.success) {
         throw new Error(payload?.error || "Unable to create post.");
       }
+      setSubmitting(false);
       onCreated();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to create post.");
@@ -1149,6 +1212,47 @@ function CreatePostSheet({
         </div>
 
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto">
+          {isSharedScene && enrolledCourses.length > 0 ? (
+            <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
+              <div className="mb-1.5 flex items-center justify-between">
+                <p className="text-[11px] font-medium text-muted-foreground">
+                  Which courses? ({selectedCourseIds.size}/{enrolledCourses.length})
+                </p>
+                <button
+                  type="button"
+                  className="text-[11px] font-medium text-classmates-blue hover:text-classmates-blue/80"
+                  onClick={selectedCourseIds.size === enrolledCourses.length ? () => setSelectedCourseIds(new Set()) : selectAllCourses}
+                >
+                  {selectedCourseIds.size === enrolledCourses.length ? "Deselect all" : "Select all"}
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {enrolledCourses.map((course) => {
+                  const active = selectedCourseIds.has(course.id);
+                  return (
+                    <button
+                      key={course.id}
+                      type="button"
+                      onClick={() => toggleCourse(course.id)}
+                      className={cn(
+                        "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
+                        active
+                          ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
+                          : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
+                      )}
+                    >
+                      {course.code ?? course.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : isSharedScene && enrolledCourses.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-amber-200/80 bg-amber-50/40 px-3 py-3 text-center text-[12px] text-muted-foreground">
+              You need to enroll in at least one course before posting here.
+            </div>
+          ) : null}
+
           <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
             <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">What are you looking for?</p>
             <Input
@@ -1202,7 +1306,12 @@ function CreatePostSheet({
           <Button type="button" variant="ghost" className="h-11 flex-1 rounded-xl" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="button" className="h-11 flex-1 rounded-xl" onClick={() => void submit()} disabled={submitting}>
+          <Button
+            type="button"
+            className="h-11 flex-1 rounded-xl"
+            onClick={() => void submit()}
+            disabled={submitting || !title.trim() || (isSharedScene && selectedCourseIds.size === 0)}
+          >
             {submitting ? (
               <>
                 <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />

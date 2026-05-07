@@ -1,4 +1,4 @@
-import { spawnSync } from "node:child_process";
+import { execSync, spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -24,6 +24,42 @@ function run(command, args, { allowFailure = false } = {}) {
   }
 }
 
+function sleepMs(ms) {
+  const sec = Math.max(1, Math.round(ms / 1000));
+  try {
+    execSync(`sleep ${sec}`, { stdio: "ignore" });
+  } catch {
+    const end = Date.now() + ms;
+    while (Date.now() < end) {
+      /* fallback if sleep is unavailable */
+    }
+  }
+}
+
+function migrateDeployWithRetries() {
+  const maxAttempts = Number(process.env.PRISMA_MIGRATE_DEPLOY_ATTEMPTS || "4");
+  const delayMs = Number(process.env.PRISMA_MIGRATE_RETRY_DELAY_MS || "12000");
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const result = spawnSync("npx", ["prisma", "migrate", "deploy"], {
+      stdio: "inherit",
+      env: buildEnv,
+      cwd: repoRoot,
+    });
+    if (result.status === 0) {
+      return;
+    }
+    if (attempt < maxAttempts) {
+      console.warn(
+        `\n[build] prisma migrate deploy failed (exit ${result.status ?? 1}), attempt ${attempt}/${maxAttempts}. Retrying in ${delayMs}ms…\n`,
+      );
+      sleepMs(delayMs);
+    } else {
+      process.exit(result.status ?? 1);
+    }
+  }
+}
+
 if (process.env.VERCEL) {
   run(
     "npx",
@@ -38,5 +74,5 @@ if (process.env.VERCEL) {
   );
 }
 
-run("npx", ["prisma", "migrate", "deploy"]);
+migrateDeployWithRetries();
 run("npx", ["next", "build"]);

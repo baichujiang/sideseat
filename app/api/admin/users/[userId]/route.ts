@@ -78,7 +78,7 @@ export async function PATCH(
     if (values.studentVerificationNotes !== undefined) {
       data.studentVerificationNotes =
         values.studentVerificationNotes === ""
-          ? `Edited by ${admin.email}.`
+          ? `Edited by ${admin.adminActor}.`
           : values.studentVerificationNotes;
     }
 
