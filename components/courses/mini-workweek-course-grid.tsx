@@ -97,7 +97,10 @@ type Props = {
 };
 
 export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle }: Props) {
+  /** Edit panel open for this index (triggered by tap). */
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  /** Drag-ready mode: card deepens, anchors visible (triggered by long-press). */
+  const [dragSelectedIndex, setDragSelectedIndex] = useState<number | null>(null);
   const [liveBlock, setLiveBlock] = useState<{
     index: number;
     weekday: Weekday;
@@ -131,6 +134,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
       location: "",
     };
     onSessionsChange([...sessions, next]);
+    setDragSelectedIndex(null);
     setSelectedIndex(sessions.length);
   }
 
@@ -155,6 +159,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
 
   function removeSession(index: number) {
     onSessionsChange(sessions.filter((_, i) => i !== index));
+    setDragSelectedIndex(null);
     setSelectedIndex((cur) => {
       if (cur === null) return null;
       if (cur === index) return null;
@@ -210,13 +215,9 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
 
     const immediateActivate = mode === "resize-start" || mode === "resize-end";
 
-    // For resize handles (deliberate action): prevent immediately to avoid any default.
-    // For move (long-press drag): do NOT preventDefault here — calling it on pointerdown
-    // suppresses the click event on WebKit/Safari, which would break "tap to edit".
     if (immediateActivate) {
       e.preventDefault();
     }
-    // Always stop propagation so the background slot button doesn't fire.
     e.stopPropagation();
 
     const pointerId = e.pointerId;
@@ -233,7 +234,6 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
 
     let activatedForDrag = immediateActivate;
     let longPressTimer: number | null = null;
-    /** True only when the pointer actually moved past POINTER_SLOP_PX after drag activated. */
     let didMove = false;
 
     const applyLive = () => {
@@ -249,10 +249,15 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
       longPressTimer = window.setTimeout(() => {
         longPressTimer = null;
         activatedForDrag = true;
+        // Enter drag-selected mode: close edit panel, show anchors + deepen color
+        setSelectedIndex(null);
+        setDragSelectedIndex(index);
         lockMiniDragSelect();
         window.getSelection()?.removeAllRanges();
         try { captureEl.setPointerCapture(pointerId); } catch { /* ignore */ }
         applyLive();
+        // Suppress the click that would fire on pointerup
+        suppressClickRef.current = true;
       }, LONG_PRESS_MS);
     }
 
@@ -273,7 +278,6 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
     const onDocMove = (ev: PointerEvent) => {
       if (ev.pointerId !== pointerId) return;
       if (!activatedForDrag) {
-        // Cancel long-press if user is clearly scrolling
         if (
           longPressTimer != null &&
           Math.hypot(ev.clientX - x0, ev.clientY - y0) > POINTER_SLOP_PX
@@ -313,14 +317,21 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
       clearLongPress();
       detach();
 
-      // If no drag happened (quick tap or long-press-without-movement), clear live state
-      // and let the native click event fire so the edit panel opens.
-      if (!activatedForDrag || !didMove) {
+      if (!activatedForDrag) {
         setLiveBlock(null);
+        // Allow native click to fire → will open edit panel
         return;
       }
 
       try { captureEl.releasePointerCapture(pointerId); } catch { /* ignore */ }
+
+      if (!didMove) {
+        // Long-press without movement: stay in drag-selected state (anchors visible)
+        setLiveBlock(null);
+        suppressClickRef.current = true;
+        window.setTimeout(() => { suppressClickRef.current = false; }, 280);
+        return;
+      }
 
       let snapStart = curStart;
       let snapEnd = curEnd;
@@ -350,7 +361,6 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
       });
       onSessionsChange(next);
       setLiveBlock(null);
-      // Suppress the click that follows pointerup so edit panel doesn't flash open/close
       suppressClickRef.current = true;
       window.setTimeout(() => { suppressClickRef.current = false; }, 280);
     };
@@ -363,10 +373,9 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
   return (
     <div className="space-y-3">
       <p className="text-[11px] leading-snug text-muted-foreground">
-        <span className="font-medium text-foreground">Tap</span> an empty slot to add 1h 30m.{" "}
-        <span className="font-medium text-foreground">Tap a block</span> to edit or select it
-        (dots appear on edges).{" "}
-        <span className="font-medium text-foreground">Long-press &amp; drag</span> to move.
+        <span className="font-medium text-foreground">Tap</span> empty slot → add 1h 30m.{" "}
+        <span className="font-medium text-foreground">Tap</span> a block → edit.{" "}
+        <span className="font-medium text-foreground">Long-press</span> → select (dots appear) → drag to move or resize.
       </p>
 
       <div className="max-h-[min(420px,70vh)] overflow-y-auto overflow-x-auto rounded-xl border border-border/80 bg-muted/15">
@@ -428,41 +437,44 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                     if (visEnd <= visStart) return null;
                     const topPct = ((visStart - GRID_VIEW_START) / totalMinutes) * 100;
                     const heightPct = ((visEnd - visStart) / totalMinutes) * 100;
-                    const isSel = selectedIndex === index;
+                    const isEditing = selectedIndex === index;
+                    const isDragSelected = dragSelectedIndex === index;
                     const dragging = liveBlock?.index === index;
                     const timeLabel = `${formatMinutes(disp.start)}–${formatMinutes(disp.end)}`;
                     return (
-                      // overflow-visible so resize handle dots can peek outside the card border
                       <div
                         key={`block-${index}`}
                         className={cn(
                           "absolute left-0.5 right-0.5 z-10 overflow-visible rounded-md border shadow-sm",
                           "border-primary/35 bg-primary/15",
-                          isSel && "z-20 ring-2 ring-primary ring-offset-1 ring-offset-background",
-                          dragging && "z-30 scale-[1.02] ring-2 ring-primary/60",
-                          dragging ? "transition-none" : "transition-[box-shadow,transform]",
+                          isEditing && "z-20 ring-2 ring-primary ring-offset-1 ring-offset-background",
+                          isDragSelected && !dragging && "z-20 border-primary/60 bg-primary/30",
+                          dragging && "z-30 scale-[1.02] border-primary/60 bg-primary/30 ring-2 ring-primary/60",
+                          dragging ? "transition-none" : "transition-[box-shadow,transform,background-color]",
                         )}
                         style={{
                           top: `${topPct}%`,
                           height: `${Math.max(heightPct, (18 / bodyHeight) * 100)}%`,
                         }}
                       >
-                        {/* Body — tap to open edit, long-press to drag */}
+                        {/* Body — tap to open edit, long-press to enter drag mode */}
                         <div
                           role="button"
                           tabIndex={0}
-                          className="absolute inset-0 z-10 cursor-grab select-none overflow-hidden rounded-[inherit] px-1 py-0.5 hover:bg-primary/5 active:cursor-grabbing"
+                          className="absolute inset-0 z-10 cursor-grab select-none overflow-hidden rounded-[inherit] px-1 py-0.5 active:cursor-grabbing"
                           onKeyDown={(ev) => {
                             if (ev.key === "Enter" || ev.key === " ") {
                               ev.preventDefault();
-                              setSelectedIndex(isSel ? null : index);
+                              setDragSelectedIndex(null);
+                              setSelectedIndex(isEditing ? null : index);
                             }
                           }}
                           onClick={(e) => {
                             e.stopPropagation();
                             if (suppressClickRef.current) return;
-                            // Toggle: click again deselects (closes edit panel)
-                            setSelectedIndex(isSel ? null : index);
+                            // Tap: open/close edit panel, exit drag mode
+                            setDragSelectedIndex(null);
+                            setSelectedIndex(isEditing ? null : index);
                           }}
                           onPointerDown={(e) => startGridPointerSession(e, index, "move")}
                         >
@@ -474,13 +486,14 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                           </span>
                         </div>
 
-                        {/* Resize handles — only visible when selected, on the card border */}
-                        {isSel ? (
+                        {/* Resize handles — only visible in drag-selected mode */}
+                        {isDragSelected || dragging ? (
                           <>
-                            {/* Start-time handle: top edge, shifted right */}
+                            {/* Top handle: slightly outside card top edge, shifted right */}
                             <button
                               type="button"
-                              className="absolute right-1 top-0 z-50 -translate-y-1/2 flex h-5 w-5 cursor-ns-resize touch-none items-center justify-center rounded-full border-0 bg-transparent p-0 outline-none hover:scale-125"
+                              className="absolute right-1 z-50 flex h-6 w-6 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
+                              style={{ top: "-4px", transform: "translateY(-50%)" }}
                               aria-label={`Adjust start time for ${courseTitle}`}
                               onPointerDown={(e) => {
                                 e.stopPropagation();
@@ -488,14 +501,15 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                               }}
                             >
                               <span
-                                className="pointer-events-none block h-2.5 w-2.5 rounded-full border-2 border-primary bg-white shadow-[0_1px_4px_rgba(15,23,42,0.25)] dark:bg-card"
+                                className="pointer-events-none block h-[7px] w-[7px] rounded-full border-2 border-[#E53935] bg-white shadow-[0_1px_3px_rgba(15,23,42,0.3)] dark:border-red-400 dark:bg-card"
                                 aria-hidden
                               />
                             </button>
-                            {/* End-time handle: bottom edge, shifted left */}
+                            {/* Bottom handle: slightly outside card bottom edge, shifted left */}
                             <button
                               type="button"
-                              className="absolute bottom-0 left-1 z-50 translate-y-1/2 flex h-5 w-5 cursor-ns-resize touch-none items-center justify-center rounded-full border-0 bg-transparent p-0 outline-none hover:scale-125"
+                              className="absolute left-1 z-50 flex h-6 w-6 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
+                              style={{ bottom: "-4px", transform: "translateY(50%)" }}
                               aria-label={`Adjust end time for ${courseTitle}`}
                               onPointerDown={(e) => {
                                 e.stopPropagation();
@@ -503,7 +517,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                               }}
                             >
                               <span
-                                className="pointer-events-none block h-2.5 w-2.5 rounded-full border-2 border-primary bg-white shadow-[0_1px_4px_rgba(15,23,42,0.25)] dark:bg-card"
+                                className="pointer-events-none block h-[7px] w-[7px] rounded-full border-2 border-[#E53935] bg-white shadow-[0_1px_3px_rgba(15,23,42,0.3)] dark:border-red-400 dark:bg-card"
                                 aria-hidden
                               />
                             </button>
