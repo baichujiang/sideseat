@@ -1,26 +1,34 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 
-/** iOS-like: start within this many px of the shell’s left edge (not viewport). */
 const EDGE_PX = 28;
-/** Minimum rightward travel to count as “go back”. */
 const MIN_DX = 72;
-/** If vertical movement dominates, treat as scroll — cancel. */
 const VERTICAL_DOMINANCE = 1.15;
 
+/**
+ * Track internal navigation depth so we only call router.back() when there's
+ * a real in-app page to go back to. Avoids jumping to random external pages.
+ */
+let internalNavDepth = 0;
+
 type EdgeSwipeBackProps = {
-  /** Column to measure against (centered `max-w-md` shell). If null, falls back to viewport left. */
   getBounds?: () => DOMRect | null;
 };
 
-/**
- * Touch / pen: swipe right from the left edge of the app column → `router.back()`.
- * Capture-phase listeners; does not call `preventDefault` so normal taps still work.
- */
 export function EdgeSwipeBack({ getBounds }: EdgeSwipeBackProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const prevPathnameRef = useRef(pathname);
+
+  useEffect(() => {
+    if (prevPathnameRef.current !== pathname) {
+      internalNavDepth += 1;
+      prevPathnameRef.current = pathname;
+    }
+  }, [pathname]);
+
   const sessionRef = useRef<{
     pointerId: number;
     x0: number;
@@ -37,6 +45,15 @@ export function EdgeSwipeBack({ getBounds }: EdgeSwipeBackProps) {
     },
     [getBounds],
   );
+
+  const goBack = useCallback(() => {
+    if (internalNavDepth > 0) {
+      internalNavDepth -= 1;
+      router.back();
+    } else {
+      router.push("/");
+    }
+  }, [router]);
 
   useEffect(() => {
     const onDown = (e: PointerEvent) => {
@@ -74,7 +91,7 @@ export function EdgeSwipeBack({ getBounds }: EdgeSwipeBackProps) {
       if (dx < MIN_DX) return;
       if (Math.abs(dy) > dx * 0.85) return;
 
-      router.back();
+      goBack();
     };
 
     window.addEventListener("pointerdown", onDown, { capture: true });
@@ -88,7 +105,7 @@ export function EdgeSwipeBack({ getBounds }: EdgeSwipeBackProps) {
       window.removeEventListener("pointerup", end, { capture: true });
       window.removeEventListener("pointercancel", end, { capture: true });
     };
-  }, [getBounds, inEdgeZone, router]);
+  }, [getBounds, inEdgeZone, goBack]);
 
   return null;
 }

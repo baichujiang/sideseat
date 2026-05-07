@@ -413,7 +413,14 @@ export function WeekCalendar({
     if (block.courseId === "__draft-preview__") return;
     if (e.pointerType === "mouse" && e.button !== 0) return;
 
-    e.preventDefault();
+    const immediateActivate = mode === "resize-start" || mode === "resize-end";
+
+    // Only preventDefault for resize (deliberate action).
+    // For move: do NOT preventDefault — it would suppress click on WebKit,
+    // breaking "tap to open edit". We use suppressOpenClickRef instead.
+    if (immediateActivate) {
+      e.preventDefault();
+    }
 
     if (dragOverride && dragOverride.eventId !== block.calendarEntryId) {
       pendingDragClearRef.current = null;
@@ -434,20 +441,17 @@ export function WeekCalendar({
     const grabOffsetMove =
       mode === "move" ? rawMinuteFromClientYForDay(e.clientY, fromWeekday) - block.startMinute : 0;
 
-    /** Top/bottom length handles: drag immediately. Body still uses long-press to move. */
-    const immediateActivate = mode === "resize-start" || mode === "resize-end";
-
     let activatedForDrag = immediateActivate;
     let longPressTimer: number | null = null;
+    let didMove = false;
+
+    const preventScroll = (ev: TouchEvent) => { ev.preventDefault(); };
 
     if (immediateActivate) {
       lockBrowserTextSelectionForCalendarDrag();
       window.getSelection()?.removeAllRanges();
-      try {
-        captureEl.setPointerCapture(pointerId);
-      } catch {
-        /* ignore */
-      }
+      try { captureEl.setPointerCapture(pointerId); } catch { /* ignore */ }
+      document.addEventListener("touchmove", preventScroll, { passive: false });
       setDragOverride({
         eventId,
         weekday: curWeekday,
@@ -458,13 +462,12 @@ export function WeekCalendar({
       longPressTimer = window.setTimeout(() => {
         longPressTimer = null;
         activatedForDrag = true;
+        // Suppress the click that would fire on pointerup so edit window doesn't open
+        suppressOpenClickRef.current = true;
         lockBrowserTextSelectionForCalendarDrag();
         window.getSelection()?.removeAllRanges();
-        try {
-          captureEl.setPointerCapture(pointerId);
-        } catch {
-          /* ignore */
-        }
+        try { captureEl.setPointerCapture(pointerId); } catch { /* ignore */ }
+        document.addEventListener("touchmove", preventScroll, { passive: false });
         setDragOverride({
           eventId,
           weekday: curWeekday,
@@ -485,6 +488,7 @@ export function WeekCalendar({
       document.removeEventListener("pointermove", onDocMove);
       document.removeEventListener("pointerup", onDocUp);
       document.removeEventListener("pointercancel", onDocUp);
+      document.removeEventListener("touchmove", preventScroll);
       unlockBrowserTextSelectionForCalendarDrag();
     };
 
@@ -499,6 +503,9 @@ export function WeekCalendar({
           detach();
         }
         return;
+      }
+      if (!didMove && Math.hypot(ev.clientX - x0, ev.clientY - y0) > POINTER_SLOP_PX) {
+        didMove = true;
       }
       const hit = weekdayFromClientXY(ev.clientX, ev.clientY);
       if (hit) curWeekday = hit;
@@ -526,7 +533,21 @@ export function WeekCalendar({
       if (ev.pointerId !== pointerId) return;
       clearLongPress();
       detach();
+
+      // Quick tap (no drag activated): let click fire naturally → opens edit
       if (!activatedForDrag) return;
+
+      // Long-press activated but no movement: just select the card, suppress click
+      if (!didMove && mode === "move") {
+        setDragOverride(null);
+        const blockKey = block.calendarEntryId
+          ? `cal-${block.calendarEntryId}`
+          : `${block.courseId}-${block.startMinute}-${block.endMinute}`;
+        setSelectedBlockKey(blockKey);
+        suppressOpenClickRef.current = true;
+        window.setTimeout(() => { suppressOpenClickRef.current = false; }, 300);
+        return;
+      }
       try {
         captureEl.releasePointerCapture(pointerId);
       } catch {
@@ -559,6 +580,10 @@ export function WeekCalendar({
         endMinute: snapEnd,
       });
 
+      // Suppress click synchronously so the edit window doesn't open after drag
+      suppressOpenClickRef.current = true;
+      window.setTimeout(() => { suppressOpenClickRef.current = false; }, 300);
+
       void (async () => {
         const patch = onPatchCalendarEventTimes;
         const { startAt, endAt } = buildStartEndAt(curWeekday, snapStart, snapEnd);
@@ -582,10 +607,6 @@ export function WeekCalendar({
           clearDragClearFallbackTimer();
           setDragOverride(null);
         }
-        suppressOpenClickRef.current = true;
-        window.setTimeout(() => {
-          suppressOpenClickRef.current = false;
-        }, 280);
       })();
     };
 

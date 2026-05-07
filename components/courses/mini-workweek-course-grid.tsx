@@ -1,7 +1,8 @@
 "use client";
 
 import type { Weekday } from "@prisma/client";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -116,6 +117,23 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
   sessionsRef.current = sessions;
   const dayColElRef = useRef<Partial<Record<Weekday, HTMLDivElement | null>>>({});
   const suppressClickRef = useRef(false);
+  const blockElRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
+  const [toolbarPos, setToolbarPos] = useState<{ top: number; left: number } | null>(null);
+  const [portalReady, setPortalReady] = useState(false);
+
+  useEffect(() => { setPortalReady(true); }, []);
+
+  const updateToolbarPos = useCallback((idx: number) => {
+    const el = blockElRefs.current.get(idx);
+    if (!el) { setToolbarPos(null); return; }
+    const r = el.getBoundingClientRect();
+    setToolbarPos({ top: r.bottom + 6, left: r.left + r.width / 2 });
+  }, []);
+
+  useEffect(() => {
+    if (toolbarIndex === null) { setToolbarPos(null); return; }
+    updateToolbarPos(toolbarIndex);
+  }, [toolbarIndex, updateToolbarPos]);
 
   const totalMinutes = GRID_VIEW_END - GRID_VIEW_START;
   const bodyHeight = GRID_BODY_HEIGHT_PX;
@@ -456,6 +474,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                     return (
                       <div
                         key={`block-${index}`}
+                        ref={(el) => { blockElRefs.current.set(index, el); }}
                         className={cn(
                           "absolute left-0.5 right-0.5 z-10 overflow-visible rounded-md border shadow-sm",
                           "border-primary/35 bg-primary/15",
@@ -545,58 +564,6 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                           </>
                         ) : null}
 
-                        {/* Floating toolbar — shown once on initial long-press */}
-                        {toolbarIndex === index ? (
-                          <div
-                            className="absolute left-1/2 z-[60] flex -translate-x-1/2 items-center gap-0 rounded-lg border border-border/80 bg-popover px-0.5 py-0.5 shadow-lg"
-                            style={{ bottom: "calc(100% + 6px)" }}
-                            onPointerDown={(e) => e.stopPropagation()}
-                          >
-                            <button
-                              type="button"
-                              className="rounded-md px-2 py-1 text-[10px] font-medium text-foreground transition-colors hover:bg-muted"
-                              onClick={() => {
-                                setClipboard({ session: { ...session }, isCut: true });
-                                removeSession(index);
-                                setToolbarIndex(null);
-                              }}
-                            >
-                              Cut
-                            </button>
-                            <button
-                              type="button"
-                              className="rounded-md px-2 py-1 text-[10px] font-medium text-foreground transition-colors hover:bg-muted"
-                              onClick={() => {
-                                setClipboard({ session: { ...session }, isCut: false });
-                                setToolbarIndex(null);
-                              }}
-                            >
-                              Copy
-                            </button>
-                            <button
-                              type="button"
-                              className="rounded-md px-2 py-1 text-[10px] font-medium text-destructive transition-colors hover:bg-destructive/10"
-                              onClick={() => {
-                                removeSession(index);
-                                setToolbarIndex(null);
-                              }}
-                            >
-                              Delete
-                            </button>
-                            <button
-                              type="button"
-                              className="rounded-md px-2 py-1 text-[10px] font-medium text-foreground transition-colors hover:bg-muted"
-                              onClick={() => {
-                                const dup: MiniSessionDraft = { ...session };
-                                onSessionsChange([...sessions, dup]);
-                                setToolbarIndex(null);
-                                setDragSelectedIndex(null);
-                              }}
-                            >
-                              Duplicate
-                            </button>
-                          </div>
-                        ) : null}
                       </div>
                     );
                   })}
@@ -609,9 +576,31 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
 
       {selected && selectedIndex !== null && WORKDAYS.includes(selected.weekday) ? (
         <div className="rounded-xl border border-border/70 bg-card p-3">
-          <p className="text-[11px] font-medium text-foreground">Edit time · {DAY_SHORT[selected.weekday]}</p>
-          <p className="mt-0.5 line-clamp-2 text-[11px] text-muted-foreground">{courseTitle}</p>
-          <div className="mt-2 grid grid-cols-2 gap-2">
+          {/* Header: back (left) / title (center) / confirm (right) */}
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              aria-label="Close"
+              onClick={() => setSelectedIndex(null)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <div className="text-center">
+              <p className="text-[11px] font-medium text-foreground">{DAY_SHORT[selected.weekday]}</p>
+              <p className="line-clamp-1 text-[10px] text-muted-foreground">{courseTitle}</p>
+            </div>
+            <button
+              type="button"
+              className="flex h-7 w-7 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/10"
+              aria-label="Done"
+              onClick={() => setSelectedIndex(null)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+          </div>
+          {/* Time inputs */}
+          <div className="mt-2.5 grid grid-cols-2 gap-2">
             <div>
               <label className="text-[10px] text-muted-foreground">Start</label>
               <Input
@@ -637,20 +626,16 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
             value={selected.location}
             onChange={(e) => updateSession(selectedIndex, { location: e.target.value })}
           />
-          <div className="mt-2 flex gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-8 flex-1 text-[12px] text-destructive"
-              onClick={() => removeSession(selectedIndex)}
-            >
-              Remove
-            </Button>
-            <Button type="button" variant="secondary" size="sm" className="h-8 flex-1 text-[12px]" onClick={() => setSelectedIndex(null)}>
-              Done
-            </Button>
-          </div>
+          {/* Delete at bottom */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="mt-3 h-8 w-full text-[12px] text-destructive hover:bg-destructive/10 hover:text-destructive"
+            onClick={() => removeSession(selectedIndex)}
+          >
+            Delete
+          </Button>
         </div>
       ) : null}
 
@@ -723,6 +708,66 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
           + Sunday
         </Button>
       </div>
+
+      {/* Toolbar portal — rendered at body level to avoid overflow clipping */}
+      {portalReady && toolbarIndex !== null && toolbarPos && sessionsRef.current[toolbarIndex]
+        ? createPortal(
+            <div
+              className="fixed z-[200] flex -translate-x-1/2 items-center gap-0 whitespace-nowrap rounded-lg border border-border/80 bg-popover px-0.5 py-0.5 shadow-xl"
+              style={{ top: toolbarPos.top, left: toolbarPos.left }}
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                className="rounded-md px-2.5 py-1.5 text-[11px] font-medium text-foreground transition-colors hover:bg-muted"
+                onClick={() => {
+                  const s = sessionsRef.current[toolbarIndex!];
+                  if (s) setClipboard({ session: { ...s }, isCut: true });
+                  removeSession(toolbarIndex!);
+                  setToolbarIndex(null);
+                }}
+              >
+                Cut
+              </button>
+              <button
+                type="button"
+                className="rounded-md px-2.5 py-1.5 text-[11px] font-medium text-foreground transition-colors hover:bg-muted"
+                onClick={() => {
+                  const s = sessionsRef.current[toolbarIndex!];
+                  if (s) setClipboard({ session: { ...s }, isCut: false });
+                  setToolbarIndex(null);
+                }}
+              >
+                Copy
+              </button>
+              <button
+                type="button"
+                className="rounded-md px-2.5 py-1.5 text-[11px] font-medium text-destructive transition-colors hover:bg-destructive/10"
+                onClick={() => {
+                  removeSession(toolbarIndex!);
+                  setToolbarIndex(null);
+                }}
+              >
+                Delete
+              </button>
+              <button
+                type="button"
+                className="rounded-md px-2.5 py-1.5 text-[11px] font-medium text-foreground transition-colors hover:bg-muted"
+                onClick={() => {
+                  const s = sessionsRef.current[toolbarIndex!];
+                  if (s) {
+                    onSessionsChange([...sessionsRef.current, { ...s }]);
+                  }
+                  setToolbarIndex(null);
+                  setDragSelectedIndex(null);
+                }}
+              >
+                Duplicate
+              </button>
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }
