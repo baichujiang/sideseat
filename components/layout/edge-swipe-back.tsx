@@ -9,11 +9,11 @@ const EDGE_PX = 28;
 const MIN_DX = 72;
 const VERTICAL_DOMINANCE = 1.15;
 
-/**
- * Track internal navigation depth so we only call router.back() when there's
- * a real in-app page to go back to. Avoids jumping to random external pages.
- */
-let internalNavDepth = 0;
+const ROOT_PATHS = ["/home", "/courses", "/discover", "/inbox", "/profile"];
+
+function isRootPage(pathname: string): boolean {
+  return ROOT_PATHS.includes(pathname);
+}
 
 type EdgeSwipeBackProps = {
   getBounds?: () => DOMRect | null;
@@ -22,14 +22,6 @@ type EdgeSwipeBackProps = {
 export function EdgeSwipeBack({ getBounds }: EdgeSwipeBackProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const prevPathnameRef = useRef(pathname);
-
-  useEffect(() => {
-    if (prevPathnameRef.current !== pathname) {
-      internalNavDepth += 1;
-      prevPathnameRef.current = pathname;
-    }
-  }, [pathname]);
 
   const sessionRef = useRef<{
     pointerId: number;
@@ -49,16 +41,12 @@ export function EdgeSwipeBack({ getBounds }: EdgeSwipeBackProps) {
   );
 
   const goBack = useCallback(() => {
-    // If a push-layer overlay is open, close it instead of navigating
     if (dismissTopPushLayer()) return;
 
-    if (internalNavDepth > 0) {
-      internalNavDepth -= 1;
-      router.back();
-    } else {
-      router.push("/");
-    }
-  }, [router]);
+    if (isRootPage(pathname)) return;
+
+    router.back();
+  }, [router, pathname]);
 
   useEffect(() => {
     const onDown = (e: PointerEvent) => {

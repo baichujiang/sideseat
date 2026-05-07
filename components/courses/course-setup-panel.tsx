@@ -3,7 +3,7 @@
 import { apiFetch } from "@/lib/auth/api-fetch";
 
 import { CourseIntent, Weekday } from "@prisma/client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarCheck2, CalendarPlus2, PencilLine } from "lucide-react";
 
@@ -23,7 +23,7 @@ const WEEKDAY_SHORT: Record<Weekday, string> = {
   SUN: "Sun",
 };
 
-/** Human copy for “how I want to connect” in this course (teal intent chips). */
+/** Human copy for "how I want to connect" in this course (teal intent chips). */
 const CONNECTION_INTENT_LABEL: Record<CourseIntent, string> = {
   GO_TO_CLASS_TOGETHER: "Go together",
   EAT_AFTER_CLASS: "Eat after class",
@@ -186,7 +186,7 @@ export function CourseTagsPanel({
               Cancel
             </Button>
             <Button type="button" size="sm" className="flex-1 h-9 text-[13px]" onClick={() => void save()} disabled={saving}>
-              {saving ? "Saving…" : "Save"}
+              {saving ? "Saving\u2026" : "Save"}
             </Button>
           </div>
         </div>
@@ -199,15 +199,11 @@ export function CourseCalendarPanel({
   course,
   intentions,
   initialSessions,
-  /** When true, user has synced this course’s slots as Home calendar events (draggable). */
-  initialScheduleMirrorSync = false,
-  /** Match course hero primary actions (outline pill) instead of accent chip. */
   triggerVariant = "accent",
 }: {
   course: CourseRef;
   intentions: CourseIntent[];
   initialSessions: SessionDraft[];
-  initialScheduleMirrorSync?: boolean;
   triggerVariant?: "accent" | "neutral";
 }) {
   const router = useRouter();
@@ -216,11 +212,6 @@ export function CourseCalendarPanel({
   const [sessions, setSessions] = useState<SessionDraft[]>(initialSessions);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [syncHomeCalendarEvents, setSyncHomeCalendarEvents] = useState(initialScheduleMirrorSync);
-
-  useEffect(() => {
-    setSyncHomeCalendarEvents(initialScheduleMirrorSync);
-  }, [initialScheduleMirrorSync]);
   const hasCalendarSetup = initialSessions.length > 0;
   const hasDraftSessions = sessions.length > 0;
 
@@ -247,7 +238,7 @@ export function CourseCalendarPanel({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         courseId: course.id,
-        enabled: syncHomeCalendarEvents && complete.length > 0,
+        enabled: complete.length > 0,
         sessions: complete,
       }),
     });
@@ -258,8 +249,6 @@ export function CourseCalendarPanel({
           ? mirrorPayload.error
           : "Class times saved, but calendar sync failed. You can try again from Edit.",
       );
-    } else if (complete.length === 0) {
-      setSyncHomeCalendarEvents(false);
     }
 
     setSaving(false);
@@ -281,7 +270,6 @@ export function CourseCalendarPanel({
   function cancelEditing() {
     setSessions(initialSessions);
     setError("");
-    setSyncHomeCalendarEvents(initialScheduleMirrorSync);
     setEditing(false);
     if (!hasCalendarSetup) {
       setExpanded(false);
@@ -316,7 +304,7 @@ export function CourseCalendarPanel({
         ) : (
           <CalendarPlus2 className="h-3.5 w-3.5 text-[#2563EB] dark:text-blue-300" strokeWidth={2.25} />
         )}
-        {hasCalendarSetup ? "编辑课程时间" : "添加课程时间"}
+        {hasCalendarSetup ? "\u7F16\u8F91\u8BFE\u7A0B\u65F6\u95F4" : "\u6DFB\u52A0\u8BFE\u7A0B\u65F6\u95F4"}
       </button>
 
       {expanded ? (
@@ -332,7 +320,7 @@ export function CourseCalendarPanel({
               <p className="mt-0.5 text-[12px] text-muted-foreground">
                 {hasCalendarSetup
                   ? "These blocks repeat every week on your Home schedule."
-                  : "Enter when you meet, then save — times show up on Home in your week view (your personal calendar, not the school’s)."}
+                  : "Enter when you meet, then save \u2014 times show up on Home in your week view (your personal calendar, not the school\u2019s)."}
               </p>
             </div>
             <button
@@ -362,7 +350,7 @@ export function CourseCalendarPanel({
                       className="rounded-xl bg-muted/35 px-3 py-2"
                     >
                       <p className="text-[13px] font-medium text-foreground">
-                        {WEEKDAY_SHORT[session.weekday]} {session.start}–{session.end}
+                        {WEEKDAY_SHORT[session.weekday]} {session.start}\u2013{session.end}
                       </p>
                       <p className="mt-0.5 text-[11.5px] text-muted-foreground">
                         {session.location.trim() || "No location set"}
@@ -374,7 +362,7 @@ export function CourseCalendarPanel({
                 <div className="rounded-xl border border-dashed border-border/70 bg-muted/15 px-3 py-3">
                   <p className="text-[13px] font-medium text-foreground">Not on your schedule yet</p>
                   <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
-                    Tap the button above, add your weekly times, and save — that adds this course to your Home week view.
+                    Tap the button above, add your weekly times, and save \u2014 that adds this course to your Home week view.
                   </p>
                 </div>
               )}
@@ -409,24 +397,6 @@ export function CourseCalendarPanel({
                 onSessionsChange={setSessions}
               />
 
-              {sessions.length > 0 ? (
-                <label className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
-                  <input
-                    type="checkbox"
-                    className="mt-0.5 h-4 w-4 rounded border-border text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                    checked={syncHomeCalendarEvents}
-                    onChange={(e) => setSyncHomeCalendarEvents(e.target.checked)}
-                  />
-                  <span>
-                    <span className="text-[13px] font-medium text-foreground">Sync to Home calendar events</span>
-                    <span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">
-                      Creates weekly blocks you can drag on Home (same times as here). The duplicate course strip is
-                      hidden so you only see one block per slot.
-                    </span>
-                  </span>
-                </label>
-              ) : null}
-
                 {error ? <p className="text-[12px] text-destructive">{error}</p> : null}
 
               <div className="flex gap-2">
@@ -452,11 +422,11 @@ export function CourseCalendarPanel({
                 >
                   {saving
                     ? hasCalendarSetup
-                      ? "保存中…"
-                      : "添加中…"
+                      ? "\u4FDD\u5B58\u4E2D\u2026"
+                      : "\u6DFB\u52A0\u4E2D\u2026"
                     : hasCalendarSetup
-                      ? "保存课程时间"
-                      : "添加课程时间"}
+                      ? "\u4FDD\u5B58\u8BFE\u7A0B\u65F6\u95F4"
+                      : "\u6DFB\u52A0\u8BFE\u7A0B\u65F6\u95F4"}
                 </Button>
               </div>
             </div>

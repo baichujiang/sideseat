@@ -57,7 +57,6 @@ export function CourseForm({
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState("");
-  const [syncHomeCalendarEvents, setSyncHomeCalendarEvents] = useState(false);
 
   // Course identity UI state: either "search" (typing to find/create) or
   // "picked" (a course is locked in). In "search" mode the user can also
@@ -267,7 +266,7 @@ export function CourseForm({
       return;
     }
     const courseId = payload.data?.courseId as string | undefined;
-    if (courseId && syncHomeCalendarEvents && values.sessions.length > 0) {
+    if (courseId && values.sessions.length > 0) {
       await apiFetch("/api/calendar/mirror-course-sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -546,13 +545,6 @@ export function CourseForm({
               />
             ) : null}
 
-            {fields.length > 0 ? (
-              <Checkbox
-                checked={syncHomeCalendarEvents}
-                onChange={setSyncHomeCalendarEvents}
-                label="Also sync these times to Home calendar events (draggable; hides duplicate course strip)"
-              />
-            ) : null}
           </div>
 
           <div className="space-y-3 rounded-3xl border border-border bg-card p-4">
