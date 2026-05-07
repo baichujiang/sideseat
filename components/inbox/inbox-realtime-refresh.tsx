@@ -4,10 +4,11 @@ import { useEffect, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { apiFetch } from "@/lib/auth/api-fetch";
+import { INBOX_POLL_INTERVAL_MS } from "@/lib/constants/app";
 
 export function InboxRealtimeRefresh({
   version,
-  intervalMs = 5000,
+  intervalMs = INBOX_POLL_INTERVAL_MS,
 }: {
   version: string;
   intervalMs?: number;
@@ -52,11 +53,17 @@ export function InboxRealtimeRefresh({
       void pollInboxState();
     }, intervalMs);
     const onFocus = () => void pollInboxState();
+    const onVis = () => {
+      if (document.visibilityState === "visible") void pollInboxState();
+    };
 
+    void pollInboxState();
     window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVis);
     return () => {
       window.clearInterval(id);
       window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVis);
     };
   }, [intervalMs, pathname, router, searchParams, version]);
 

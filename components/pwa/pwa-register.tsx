@@ -16,6 +16,16 @@ export function PwaRegister() {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
       return;
     }
+
+    /** Safari / some environments: no WindowClient.navigate — SW asks page to navigate. */
+    const onSwMessage = (event: MessageEvent) => {
+      const d = event.data;
+      if (!d || d.type !== "NOTIFICATION_NAVIGATE") return;
+      const url = typeof d.url === "string" ? d.url : "/home";
+      window.location.assign(new URL(url, window.location.origin).href);
+    };
+    navigator.serviceWorker.addEventListener("message", onSwMessage);
+
     const onLoad = () => {
       void navigator.serviceWorker
         .register("/sw.js", { scope: "/", updateViaCache: "none" })
@@ -31,6 +41,10 @@ export function PwaRegister() {
     } else {
       window.addEventListener("load", onLoad, { once: true });
     }
+
+    return () => {
+      navigator.serviceWorker.removeEventListener("message", onSwMessage);
+    };
   }, []);
 
   return <PwaUpdatePrompt registration={registration} />;

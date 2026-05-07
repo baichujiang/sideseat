@@ -61,18 +61,45 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = event.notification?.data?.url || "/home";
-  const target = new URL(url, self.location.origin).href;
+  const rawUrl =
+    typeof event.notification?.data?.url === "string" ? event.notification.data.url : "/home";
+  const targetHref = new URL(rawUrl, self.location.origin).href;
+
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
-      for (const client of clientList) {
-        if (!client.url.startsWith(self.location.origin) || !("focus" in client)) continue;
-        if ("navigate" in client && typeof client.navigate === "function") {
-          return client.navigate(target).then(() => client.focus());
+      function sameDocument(clientUrl, wantedHref) {
+        try {
+          const a = new URL(clientUrl);
+          const b = new URL(wantedHref);
+          return a.pathname === b.pathname && a.search === b.search;
+        } catch {
+          return false;
         }
+      }
+
+      function navigateExisting(client) {
+        if (sameDocument(client.url, targetHref)) {
+          return client.focus();
+        }
+        if ("navigate" in client && typeof client.navigate === "function") {
+          return client
+            .navigate(targetHref)
+            .then(() => client.focus())
+            .catch(() => {
+              client.postMessage({ type: "NOTIFICATION_NAVIGATE", url: rawUrl });
+              return client.focus();
+            });
+        }
+        client.postMessage({ type: "NOTIFICATION_NAVIGATE", url: rawUrl });
         return client.focus();
       }
-      return self.clients.openWindow ? self.clients.openWindow(target) : undefined;
+
+      for (const client of clientList) {
+        if (!client.url.startsWith(self.location.origin)) continue;
+        return navigateExisting(client);
+      }
+
+      return self.clients.openWindow ? self.clients.openWindow(targetHref) : undefined;
     }),
   );
 });

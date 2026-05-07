@@ -34,6 +34,12 @@ export const CONTACT_EXCHANGE_DECLINE_COOLDOWN_HOURS = 24;
 /** Max simultaneous live Discover posts per user per category (ACTIVE and not yet expired). */
 export const MAX_ACTIVE_CLASSMATE_POSTS_PER_CATEGORY = 3;
 
+/** Server poll interval inside the chat SSE stream (`/messages/stream`). */
+export const CHAT_SSE_POLL_MS = 1500;
+
+/** Inbox list (`/api/inbox/state`) poll while the tab is visible. */
+export const INBOX_POLL_INTERVAL_MS = 2500;
+
 /**
  * @deprecated Main-tab routes are public without a cookie; see `middleware.ts`
  * `isPublicAppPath`. Kept for scripts/docs that still refer to "protected" lists.
