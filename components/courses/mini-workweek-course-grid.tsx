@@ -487,7 +487,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                         key={`block-${index}`}
                         ref={(el) => { blockElRefs.current.set(index, el); }}
                         className={cn(
-                          "absolute left-0.5 right-0.5 z-10 overflow-visible rounded-md border shadow-sm",
+                          "absolute left-0.5 right-0.5 z-10 overflow-visible rounded-sm border shadow-sm",
                           "border-primary/35 bg-primary/15",
                           isEditing && "z-20 ring-2 ring-primary ring-offset-1 ring-offset-background",
                           isDragSelected && !dragging && "z-20 border-primary/60 bg-primary/30",
@@ -594,7 +594,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
               return (
                 <div
                   key="drag-overlay"
-                  className="pointer-events-none absolute z-40 overflow-visible rounded-md border border-primary/60 bg-primary/30 shadow-lg"
+                  className="pointer-events-none absolute z-40 overflow-visible rounded-sm border border-primary/60 bg-primary/30 shadow-lg"
                   style={{
                     top: headerH + (topPct / 100) * bodyHeight,
                     height: Math.max((heightPct / 100) * bodyHeight, 18),

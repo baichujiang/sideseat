@@ -1,5 +1,6 @@
 import type { Weekday } from "@prisma/client";
 import { CalendarRepeatRule } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { requireOnboardedUser } from "@/lib/auth/guards";
@@ -41,6 +42,8 @@ export async function POST(request: Request) {
           courseScheduleMirrorKey: { startsWith: prefix },
         },
       });
+      revalidatePath("/home");
+      revalidatePath(`/courses/${values.courseId}`);
       return ok({ cleared: true });
     }
 
@@ -63,6 +66,8 @@ export async function POST(request: Request) {
           courseScheduleMirrorKey: { startsWith: prefix },
         },
       });
+      revalidatePath("/home");
+      revalidatePath(`/courses/${values.courseId}`);
       return ok({ cleared: true });
     }
 
@@ -131,6 +136,9 @@ export async function POST(request: Request) {
         await tx.calendarEntry.create({ data: row });
       }
     });
+
+    revalidatePath("/home");
+    revalidatePath(`/courses/${values.courseId}`);
 
     return ok({ created: rows.length });
   } catch (cause) {

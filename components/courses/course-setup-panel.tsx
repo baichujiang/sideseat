@@ -89,10 +89,13 @@ export function CourseTagsPanel({
   course,
   initialIntentions,
   sessions,
+  /** `inline`: section divider only, no card frame (e.g. course detail page). */
+  layout = "card",
 }: {
   course: CourseRef;
   initialIntentions: CourseIntent[];
   sessions: SessionDraft[];
+  layout?: "card" | "inline";
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -120,7 +123,13 @@ export function CourseTagsPanel({
   }
 
   return (
-    <section className="rounded-[1.125rem] border border-border/60 bg-card px-3.5 py-3 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] dark:border-border/80">
+    <section
+      className={cn(
+        layout === "inline"
+          ? "border-t border-classmates-hairline pt-5 dark:border-border/60"
+          : "rounded-[1.125rem] border border-border/60 bg-card px-3.5 py-3 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] dark:border-border/80",
+      )}
+    >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 pr-1">
           <p className={cn(profileSectionLabelClassName, "!mb-1")}>Connection tags</p>
@@ -200,11 +209,14 @@ export function CourseCalendarPanel({
   intentions,
   initialSessions,
   triggerVariant = "accent",
+  /** `inline`: no card frame around expanded panel (e.g. course detail page). */
+  layout = "card",
 }: {
   course: CourseRef;
   intentions: CourseIntent[];
   initialSessions: SessionDraft[];
   triggerVariant?: "accent" | "neutral";
+  layout?: "card" | "inline";
 }) {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
@@ -244,11 +256,13 @@ export function CourseCalendarPanel({
     });
     const mirrorPayload = await mirrorRes.json().catch(() => ({}));
     if (!mirrorRes.ok) {
+      setSaving(false);
       setError(
         typeof mirrorPayload.error === "string"
           ? mirrorPayload.error
-          : "Class times saved, but calendar sync failed. You can try again from Edit.",
+          : "课表已保存，但同步到首页日历失败。请检查网络后重试「同步到日历」。",
       );
+      return false;
     }
 
     setSaving(false);
@@ -276,8 +290,15 @@ export function CourseCalendarPanel({
     }
   }
 
+  function clearDraftSessions() {
+    if (sessions.length === 0) return;
+    if (!window.confirm("清空当前所有课表时段？")) return;
+    setSessions([]);
+    setError("");
+  }
+
   return (
-    <div className="space-y-3">
+    <div className={cn("space-y-3", layout === "inline" && "space-y-2")}>
       <button
         type="button"
         onClick={() => {
@@ -304,13 +325,17 @@ export function CourseCalendarPanel({
         ) : (
           <CalendarPlus2 className="h-3.5 w-3.5 text-[#2563EB] dark:text-blue-300" strokeWidth={2.25} />
         )}
-        {hasCalendarSetup ? "\u7F16\u8F91\u8BFE\u7A0B\u65F6\u95F4" : "\u6DFB\u52A0\u8BFE\u7A0B\u65F6\u95F4"}
+        {hasCalendarSetup ? "\u7F16\u8F91\u5468\u5386\u65F6\u95F4" : "\u6DFB\u52A0\u5468\u5386\u65F6\u95F4"}
       </button>
 
       {expanded ? (
         <section
           id="course-calendar"
-          className="rounded-[1.125rem] border border-border/60 bg-card px-4 py-3.5 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]"
+          className={cn(
+            layout === "inline"
+              ? "border-t border-classmates-hairline pt-4 dark:border-border/60"
+              : "rounded-[1.125rem] border border-border/60 bg-card px-4 py-3.5 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]",
+          )}
         >
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -343,11 +368,13 @@ export function CourseCalendarPanel({
           {!editing ? (
             <div className="mt-3 space-y-3">
               {sortedSessions.length > 0 ? (
-                <ul className="space-y-2">
+                <ul className={cn(layout === "inline" ? "divide-y divide-border/50" : "space-y-2")}>
                   {sortedSessions.map((session) => (
                     <li
                       key={`${session.weekday}-${session.start}-${session.end}-${session.location}`}
-                      className="rounded-xl bg-muted/35 px-3 py-2"
+                      className={cn(
+                        layout === "inline" ? "py-2.5 first:pt-0" : "rounded-xl bg-muted/35 px-3 py-2",
+                      )}
                     >
                       <p className="text-[13px] font-medium text-foreground">
                         {WEEKDAY_SHORT[session.weekday]} {session.start}\u2013{session.end}
@@ -359,7 +386,13 @@ export function CourseCalendarPanel({
                   ))}
                 </ul>
               ) : (
-                <div className="rounded-xl border border-dashed border-border/70 bg-muted/15 px-3 py-3">
+                <div
+                  className={cn(
+                    layout === "inline"
+                      ? "py-1"
+                      : "rounded-xl border border-dashed border-border/70 bg-muted/15 px-3 py-3",
+                  )}
+                >
                   <p className="text-[13px] font-medium text-foreground">Not on your schedule yet</p>
                   <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
                     Tap the button above, add your weekly times, and save \u2014 that adds this course to your Home week view.
@@ -384,11 +417,21 @@ export function CourseCalendarPanel({
           ) : (
             <div className="mt-3 space-y-4">
               <div
-                className="rounded-xl border border-[#BFDBFE]/80 bg-[#EFF6FF]/90 px-3 py-2.5 text-[12px] leading-snug text-[#1E40AF] dark:border-blue-900/50 dark:bg-blue-950/35 dark:text-blue-200"
+                className={cn(
+                  "text-[12px] leading-snug text-[#1E40AF] dark:text-blue-200",
+                  layout === "inline"
+                    ? "border-l-[3px] border-[#2563EB] bg-muted/25 py-2 pl-3 dark:border-blue-500 dark:bg-blue-950/20"
+                    : "rounded-xl border border-[#BFDBFE]/80 bg-[#EFF6FF]/90 px-3 py-2.5 dark:border-blue-900/50 dark:bg-blue-950/35",
+                )}
                 role="note"
               >
-                Saving here updates <span className="font-semibold">your Home week</span> only. It does not change
-                enrollment or send anything to your school.
+                <p>
+                  此处只影响你在本站的<span className="font-semibold">个人周历</span>，不会改选课状态，也不会向学校发送任何信息。
+                </p>
+                <p className="mt-2 border-t border-[#BFDBFE]/60 pt-2 dark:border-blue-900/40">
+                  <span className="font-semibold">同步：</span>
+                  点下方「<span className="font-semibold">同步到日历</span>」后，会把当前所有时段写入首页可拖动的日历事件；打开或返回首页即可看到更新。
+                </p>
               </div>
 
               <MiniWorkweekCourseGrid
@@ -400,6 +443,15 @@ export function CourseCalendarPanel({
                 {error ? <p className="text-[12px] text-destructive">{error}</p> : null}
 
               <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  onClick={clearDraftSessions}
+                  disabled={saving || sessions.length === 0}
+                >
+                  一键清空时段
+                </Button>
                 <Button type="button" variant="ghost" className="flex-1" onClick={cancelEditing}>
                   Cancel
                 </Button>
@@ -420,13 +472,7 @@ export function CourseCalendarPanel({
                   }}
                   disabled={saving}
                 >
-                  {saving
-                    ? hasCalendarSetup
-                      ? "\u4FDD\u5B58\u4E2D\u2026"
-                      : "\u6DFB\u52A0\u4E2D\u2026"
-                    : hasCalendarSetup
-                      ? "\u4FDD\u5B58\u8BFE\u7A0B\u65F6\u95F4"
-                      : "\u6DFB\u52A0\u8BFE\u7A0B\u65F6\u95F4"}
+                  {saving ? "\u540C\u6B65\u4E2D\u2026" : "\u540C\u6B65\u5230\u65E5\u5386"}
                 </Button>
               </div>
             </div>

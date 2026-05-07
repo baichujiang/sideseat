@@ -117,7 +117,7 @@ export function CourseMemberList({
 
   return (
     <section
-      className="space-y-2.5 border-t border-classmates-hairline pt-8 dark:border-border/60"
+      className="space-y-2.5 border-t border-classmates-hairline pt-5 dark:border-border/60"
       aria-labelledby="course-classmates-heading"
     >
       <div className="space-y-1.5 px-0.5">
