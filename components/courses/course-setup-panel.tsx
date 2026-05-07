@@ -316,7 +316,7 @@ export function CourseCalendarPanel({
         ) : (
           <CalendarPlus2 className="h-3.5 w-3.5 text-[#2563EB] dark:text-blue-300" strokeWidth={2.25} />
         )}
-        {hasCalendarSetup ? "On your Home schedule" : "Add to Home schedule"}
+        {hasCalendarSetup ? "编辑课程时间" : "添加课程时间"}
       </button>
 
       {expanded ? (
@@ -452,11 +452,11 @@ export function CourseCalendarPanel({
                 >
                   {saving
                     ? hasCalendarSetup
-                      ? "Saving…"
-                      : "Adding…"
+                      ? "保存中…"
+                      : "添加中…"
                     : hasCalendarSetup
-                      ? "Update Home schedule"
-                      : "Add to Home schedule"}
+                      ? "保存课程时间"
+                      : "添加课程时间"}
                 </Button>
               </div>
             </div>

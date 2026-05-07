@@ -7,6 +7,21 @@ import { cn } from "@/lib/utils";
 /** Matches ~iOS navigation push timing (ms). */
 export const APP_PUSH_TRANSITION_MS = 340;
 
+/**
+ * Global stack of open push-layer close callbacks.
+ * EdgeSwipeBack checks this before navigating — if non-empty, the top layer
+ * is closed instead of triggering page navigation.
+ */
+const layerCloseStack: Array<() => void> = [];
+
+/** Called by EdgeSwipeBack: returns true if a layer was closed, false if navigation should proceed. */
+export function dismissTopPushLayer(): boolean {
+  if (layerCloseStack.length === 0) return false;
+  const top = layerCloseStack[layerCloseStack.length - 1];
+  top();
+  return true;
+}
+
 type AppPushLayerProps = {
   open: boolean;
   onClose: () => void;
@@ -92,6 +107,16 @@ export function AppPushLayer({
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [mounted, onClose]);
+
+  // Register in global layer stack so EdgeSwipeBack can dismiss us
+  useEffect(() => {
+    if (!open) return;
+    layerCloseStack.push(onClose);
+    return () => {
+      const idx = layerCloseStack.indexOf(onClose);
+      if (idx !== -1) layerCloseStack.splice(idx, 1);
+    };
+  }, [open, onClose]);
 
   useEffect(() => {
     if (!lockBodyScroll || !mounted) return;

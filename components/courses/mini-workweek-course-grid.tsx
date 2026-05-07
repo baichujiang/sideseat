@@ -1,7 +1,7 @@
 "use client";
 
 import type { Weekday } from "@prisma/client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { Button } from "@/components/ui/button";
@@ -109,6 +109,8 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
     weekday: Weekday;
     startMin: number;
     endMin: number;
+    /** Pointer clientX for smooth horizontal positioning during move drag. */
+    dragX?: number;
   } | null>(null);
   /** Clipboard for cut/copy. */
   const [clipboard, setClipboard] = useState<{ session: MiniSessionDraft; isCut: boolean } | null>(null);
@@ -116,6 +118,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
   const sessionsRef = useRef(sessions);
   sessionsRef.current = sessions;
   const dayColElRef = useRef<Partial<Record<Weekday, HTMLDivElement | null>>>({});
+  const gridColsElRef = useRef<HTMLDivElement | null>(null);
   const suppressClickRef = useRef(false);
   const blockElRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
   const [toolbarPos, setToolbarPos] = useState<{ top: number; left: number } | null>(null);
@@ -138,13 +141,6 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
   const totalMinutes = GRID_VIEW_END - GRID_VIEW_START;
   const bodyHeight = GRID_BODY_HEIGHT_PX;
 
-  const weekendSessions = useMemo(
-    () =>
-      sessions
-        .map((s, i) => ({ s, i }))
-        .filter(({ s }) => s.weekday === "SAT" || s.weekday === "SUN"),
-    [sessions],
-  );
 
   function addAtSlot(weekday: Weekday, slotStartMin: number) {
     const startMin = slotStartMin;
@@ -259,9 +255,16 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
     let activatedForDrag = immediateActivate;
     let longPressTimer: number | null = null;
     let didMove = false;
+    let curClientX = x0;
 
     const applyLive = () => {
-      setLiveBlock({ index, weekday: curWeekday, startMin: curStart, endMin: curEnd });
+      setLiveBlock({
+        index,
+        weekday: curWeekday,
+        startMin: curStart,
+        endMin: curEnd,
+        dragX: mode === "move" ? curClientX : undefined,
+      });
     };
 
     // Prevent browser scroll while dragging on touch devices
@@ -320,6 +323,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
         didMove = true;
         setToolbarIndex(null);
       }
+      curClientX = ev.clientX;
       const hit = weekdayFromClientX(ev.clientX);
       if (hit) curWeekday = hit;
       const m = rawMinuteFromClientY(ev.clientY, curWeekday);
@@ -427,7 +431,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
             </div>
           </div>
 
-          <div className="flex min-w-0 flex-1 items-stretch">
+          <div className="relative flex min-w-0 flex-1 items-stretch" ref={(el) => { gridColsElRef.current = el; }}>
             {WORKDAYS.map((weekday) => (
               <div
                 key={weekday}
@@ -465,6 +469,8 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                   </div>
 
                   {sessions.map((session, index) => {
+                    // Skip rendering in column if this block is being smoothly dragged
+                    if (liveBlock?.index === index && liveBlock.dragX != null) return null;
                     const disp = blockDisplay(index, session);
                     if (!disp || disp.weekday !== weekday) return null;
                     const visStart = Math.max(disp.start, GRID_VIEW_START);
@@ -570,6 +576,43 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                 </div>
               </div>
             ))}
+
+            {/* Smooth-dragging block rendered as overlay across all columns */}
+            {liveBlock && liveBlock.dragX != null && sessions[liveBlock.index] && (() => {
+              const visStart = Math.max(liveBlock.startMin, GRID_VIEW_START);
+              const visEnd = Math.min(liveBlock.endMin, GRID_VIEW_END);
+              if (visEnd <= visStart) return null;
+              const topPct = ((visStart - GRID_VIEW_START) / totalMinutes) * 100;
+              const heightPct = ((visEnd - visStart) / totalMinutes) * 100;
+              const gridEl = gridColsElRef.current;
+              const colWidth = gridEl ? gridEl.offsetWidth / WORKDAYS.length : 52;
+              const gridRect = gridEl?.getBoundingClientRect();
+              const headerH = 28;
+              const relX = gridRect ? liveBlock.dragX! - gridRect.left : 0;
+              const leftPx = relX - colWidth / 2;
+              const timeLabel = `${formatMinutes(liveBlock.startMin)}\u2013${formatMinutes(liveBlock.endMin)}`;
+              return (
+                <div
+                  key="drag-overlay"
+                  className="pointer-events-none absolute z-40 overflow-visible rounded-md border border-primary/60 bg-primary/30 shadow-lg"
+                  style={{
+                    top: headerH + (topPct / 100) * bodyHeight,
+                    height: Math.max((heightPct / 100) * bodyHeight, 18),
+                    left: leftPx,
+                    width: colWidth - 4,
+                  }}
+                >
+                  <div className="overflow-hidden px-1 py-0.5">
+                    <span className="line-clamp-2 text-[9px] font-semibold leading-tight text-foreground">
+                      {courseTitle}
+                    </span>
+                    <span className="block text-[8px] tabular-nums text-muted-foreground">
+                      {timeLabel}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
@@ -639,75 +682,6 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
         </div>
       ) : null}
 
-      {weekendSessions.length > 0 ? (
-        <div className="space-y-2 rounded-xl border border-dashed border-border/70 bg-muted/10 p-3">
-          <p className="text-[11px] font-medium text-foreground">Weekend</p>
-          {weekendSessions.map(({ s, i }) => (
-            <div key={i} className="flex flex-wrap items-center gap-2 text-[12px]">
-              <span className="font-medium">{DAY_SHORT[s.weekday]}</span>
-              <Input
-                type="time"
-                className="h-8 w-[7rem] text-[13px]"
-                value={s.start}
-                onChange={(e) => updateSession(i, { start: e.target.value })}
-              />
-              <span className="text-muted-foreground">–</span>
-              <Input
-                type="time"
-                className="h-8 w-[7rem] text-[13px]"
-                value={s.end}
-                onChange={(e) => updateSession(i, { end: e.target.value })}
-              />
-              <Input
-                className="h-8 min-w-[6rem] flex-1 text-[13px]"
-                placeholder="Room"
-                value={s.location}
-                onChange={(e) => updateSession(i, { location: e.target.value })}
-              />
-              <Button type="button" variant="ghost" size="sm" className="h-8 px-2 text-destructive" onClick={() => removeSession(i)}>
-                ×
-              </Button>
-            </div>
-          ))}
-        </div>
-      ) : null}
-
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-8 text-[11px]"
-          onClick={() => {
-            const next: MiniSessionDraft = {
-              weekday: "SAT",
-              start: "10:00",
-              end: formatMinutes(10 * 60 + DEFAULT_SESSION_LENGTH_MIN),
-              location: "",
-            };
-            onSessionsChange([...sessions, next]);
-          }}
-        >
-          + Saturday
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-8 text-[11px]"
-          onClick={() => {
-            const next: MiniSessionDraft = {
-              weekday: "SUN",
-              start: "10:00",
-              end: formatMinutes(10 * 60 + DEFAULT_SESSION_LENGTH_MIN),
-              location: "",
-            };
-            onSessionsChange([...sessions, next]);
-          }}
-        >
-          + Sunday
-        </Button>
-      </div>
 
       {/* Toolbar portal — rendered at body level to avoid overflow clipping */}
       {portalReady && toolbarIndex !== null && toolbarPos && sessionsRef.current[toolbarIndex]

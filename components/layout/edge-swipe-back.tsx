@@ -3,6 +3,8 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 
+import { dismissTopPushLayer } from "@/components/ui/app-push-layer";
+
 const EDGE_PX = 28;
 const MIN_DX = 72;
 const VERTICAL_DOMINANCE = 1.15;
@@ -47,6 +49,9 @@ export function EdgeSwipeBack({ getBounds }: EdgeSwipeBackProps) {
   );
 
   const goBack = useCallback(() => {
+    // If a push-layer overlay is open, close it instead of navigating
+    if (dismissTopPushLayer()) return;
+
     if (internalNavDepth > 0) {
       internalNavDepth -= 1;
       router.back();

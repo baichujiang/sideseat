@@ -20,7 +20,7 @@ import {
   UtensilsCrossed,
   X,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ClassmatePostCategory,
   type LanguageProficiency,
@@ -133,7 +133,25 @@ export function DiscoverList({
   allowSearch?: boolean;
 }) {
   const [query, setQuery] = useState("");
-  const [scene, setScene] = useState<SceneKind>("shared");
+  const searchParams = useSearchParams();
+  const validScenes: SceneKind[] = ["shared", "study", "meals", "language", "sports"];
+  const paramScene = searchParams.get("tab") as SceneKind | null;
+  const [scene, setSceneState] = useState<SceneKind>(
+    paramScene && validScenes.includes(paramScene) ? paramScene : "shared",
+  );
+  const router = useRouter();
+
+  const setScene = (s: SceneKind) => {
+    setSceneState(s);
+    const url = new URL(window.location.href);
+    if (s === "shared") {
+      url.searchParams.delete("tab");
+    } else {
+      url.searchParams.set("tab", s);
+    }
+    window.history.replaceState(null, "", url.toString());
+  };
+
   const [schoolFilter, setSchoolFilter] = useState<string>("All");
   const [majorFilter, setMajorFilter] = useState<string>("All");
   const [languageFilter, setLanguageFilter] = useState<string>("All");
@@ -142,7 +160,6 @@ export function DiscoverList({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [postOpen, setPostOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const router = useRouter();
 
   const trimmed = query.trim();
   const searchActive = allowSearch && trimmed.length >= 2;
@@ -603,7 +620,7 @@ function RecommendationSurface({
               <RecommendationRow key={r.userId} row={r} scene={scene} />
             ))
           : posts.map((post) => (
-              <PostRow key={post.id} post={post} />
+              <PostRow key={post.id} post={post} scene={scene} />
             ))}
       </div>
     </div>
@@ -918,13 +935,14 @@ function RecommendationRow({ row, scene }: { row: DiscoverRow; scene: SceneKind 
   );
 }
 
-function PostRow({ post }: { post: DiscoverPostRow }) {
+function PostRow({ post, scene }: { post: DiscoverPostRow; scene: SceneKind }) {
   const meta = [post.major, post.semester ? `sem ${post.semester}` : null]
     .filter(Boolean)
     .join(" · ");
   const postPath = `/discover/posts/${post.id}`;
+  const returnTo = scene === "shared" ? "/discover" : `/discover?tab=${scene}`;
   const postDetailHref =
-    `${postPath}?returnTo=${encodeURIComponent("/discover")}` as Route;
+    `${postPath}?returnTo=${encodeURIComponent(returnTo)}` as Route;
   const profileHref = (
     post.isOwn
       ? postDetailHref
