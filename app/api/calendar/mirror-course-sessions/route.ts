@@ -103,7 +103,8 @@ export async function POST(request: Request) {
       const slots = materializeWeeklyCourseSlot({
         semesterStart,
         semesterEnd,
-        notBefore: now,
+        // Mirror the full semester timeline (not just future from "today").
+        notBefore: semesterStart,
         weekday: s.weekday,
         startMinute: s.startMinute,
         endMinute: s.endMinute,
