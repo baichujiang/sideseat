@@ -9,10 +9,7 @@ import {
   CourseMemberList,
   type CourseMember,
 } from "@/components/courses/course-member-list";
-import {
-  CourseCalendarPanel,
-  CourseTagsPanel,
-} from "@/components/courses/course-setup-panel";
+import { CourseCalendarPanel } from "@/components/courses/course-setup-panel";
 import { CourseShareLinkAction } from "@/components/courses/course-share-link-action";
 import { QuickEnrollButton } from "@/components/courses/quick-enroll-button";
 import { SaveBookmarkButton } from "@/components/courses/save-bookmark-button";
@@ -32,6 +29,10 @@ import { inboxCourseUnreadCounts } from "@/lib/queries/inbox-unread-counts";
 import { profileSectionLabelClassName } from "@/lib/ui/profile-section-label";
 import { weeklyOverlapMinutes, type SessionBlock } from "@/lib/queries/schedule-overlap";
 import { cn } from "@/lib/utils";
+
+/** Course hub — matches enrolled / popular course cards: blue pill + border. */
+const courseCodeBadgeClassName =
+  "inline-flex shrink-0 items-center rounded-full border border-[#BFDBFE] bg-[#EFF6FF] px-2 py-0.5 text-[11px] font-semibold tabular-nums tracking-wide text-[#2563EB] dark:border-blue-800/50 dark:bg-blue-950/40 dark:text-blue-300";
 
 export default async function CourseDetailPage({
   params,
@@ -65,24 +66,24 @@ export default async function CourseDetailPage({
 
   if (!sessionUser) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-5">
         <div className="flex items-center justify-between gap-2">
           <BackLink href={backHref} label="Back to courses" className="-ml-2" />
           <CourseShareLinkAction courseId={course.id} memberCount={totalMembers} variant="icon" />
         </div>
 
-        <header className="space-y-2">
-          <h1 className="page-screen-title-ink leading-tight">{course.name}</h1>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-classmates-sub dark:text-zinc-400">
-            {course.code ? (
-              <span className="rounded-full border border-classmates-edge bg-classmates-warm-alt/80 px-2.5 py-0.5 text-[11px] font-semibold tabular-nums text-classmates-ink dark:border-border dark:bg-muted/50">
-                {course.code}
-              </span>
-            ) : null}
-            {course.code ? <span className="text-classmates-hint" aria-hidden>·</span> : null}
-            <span>{schoolLabel}</span>
+        <header className="space-y-3">
+          <div className="space-y-1.5">
+            <h1 className="page-screen-title-ink flex flex-wrap items-center gap-x-2 gap-y-1 leading-tight">
+              {course.code ? <span className={courseCodeBadgeClassName}>{course.code}</span> : null}
+              <span className="min-w-0">{course.name}</span>
+            </h1>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-classmates-sub dark:text-zinc-400">
+              <span>{schoolLabel}</span>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+
+          <div className="flex items-center gap-3">
             {totalMembers <= 0 ? (
               <CourseClassmatesCountChip
                 label="No one yet"
@@ -101,8 +102,9 @@ export default async function CourseDetailPage({
               />
             )}
           </div>
-          <p className="text-[13px] font-medium text-classmates-ink/90 dark:text-foreground/90">
-            Browse basic course info without signing in. Sign in to join this course, open chat, and view member details.
+
+          <p className="text-[13px] leading-snug text-classmates-sub dark:text-zinc-400">
+            Sign in to join this course, open chat, and view member details.
           </p>
         </header>
       </div>
@@ -151,24 +153,24 @@ export default async function CourseDetailPage({
   if (!membership) {
     const isSaved = Boolean(savedRow);
     return (
-      <div className="space-y-4">
+      <div className="space-y-5">
         <div className="flex items-center justify-between gap-2">
           <BackLink href={backHref} label="Back to courses" className="-ml-2" />
           <CourseShareLinkAction courseId={course.id} memberCount={totalMembers} variant="icon" />
         </div>
 
-        <header className="space-y-2">
-          <h1 className="page-screen-title-ink leading-tight">{course.name}</h1>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-classmates-sub dark:text-zinc-400">
-            {course.code ? (
-              <span className="rounded-full border border-classmates-edge bg-classmates-warm-alt/80 px-2.5 py-0.5 text-[11px] font-semibold tabular-nums text-classmates-ink dark:border-border dark:bg-muted/50">
-                {course.code}
-              </span>
-            ) : null}
-            {course.code ? <span className="text-classmates-hint" aria-hidden>·</span> : null}
-            <span>{schoolLabel}</span>
+        <header className="space-y-3">
+          <div className="space-y-1.5">
+            <h1 className="page-screen-title-ink flex flex-wrap items-center gap-x-2 gap-y-1 leading-tight">
+              {course.code ? <span className={courseCodeBadgeClassName}>{course.code}</span> : null}
+              <span className="min-w-0">{course.name}</span>
+            </h1>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-classmates-sub dark:text-zinc-400">
+              <span>{schoolLabel}</span>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+
+          <div className="flex items-center gap-3">
             {totalMembers <= 0 ? (
               <CourseClassmatesCountChip
                 label="No one yet"
@@ -187,30 +189,25 @@ export default async function CourseDetailPage({
               />
             )}
           </div>
-          <p className="text-[13px] font-medium text-classmates-ink/90 dark:text-foreground/90">
+
+          <p className="text-[13px] leading-snug text-classmates-sub dark:text-zinc-400">
             {totalMembers <= 0
-              ? "No one has enrolled yet — be the first or share the course link."
+              ? "No one has enrolled yet \u2014 be the first or share the course link."
               : totalMembers === 1
-                ? "One person is in this course — enroll to connect."
+                ? "One person is in this course \u2014 enroll to connect."
                 : "Enroll to join the hub, group chat, and your weekly schedule for this class."}
           </p>
         </header>
 
-        <div className="border-t border-classmates-hairline pt-4 dark:border-border/60">
-          <p className="text-[12px] text-muted-foreground">
-            <span className="font-medium text-foreground">{isSaved ? "Saved · not on schedule" : "Not on schedule"}</span>
-            {" — "}
-            Enroll to unlock group chat, classmates, and your weekly time for this class.
-          </p>
+        <div className="space-y-3 border-t border-classmates-hairline pt-5 dark:border-border/60">
+          <QuickEnrollButton courseId={course.id} variant="block" />
+
+          <SaveBookmarkButton
+            courseId={course.id}
+            initialSaved={isSaved}
+            variant="block"
+          />
         </div>
-
-        <QuickEnrollButton courseId={course.id} variant="block" />
-
-        <SaveBookmarkButton
-          courseId={course.id}
-          initialSaved={isSaved}
-          variant="block"
-        />
       </div>
     );
   }
@@ -311,10 +308,6 @@ export default async function CourseDetailPage({
       return short === "<1m" ? "Last active just now" : `Last active ${short} ago`;
     })();
 
-  const courseChatSubtitle = membership.course.code
-    ? `Ask questions and talk with everyone in ${membership.course.code}.`
-    : "Ask questions and talk with everyone in this course.";
-
   const courseChatMetaBase = `${enrolledTotal} member${enrolledTotal === 1 ? "" : "s"}`;
   const courseChatMetaDetail =
     courseChatUnread > 0
@@ -324,9 +317,9 @@ export default async function CourseDetailPage({
   const classmatesSchoolShort = getSchoolByCode(membership.course.school)?.shortLabel;
 
   return (
-    <div className="space-y-0">
+    <div className="space-y-5">
       {membership.inboxHiddenAt ? (
-        <div className="mb-3 rounded-lg border border-amber-200/80 bg-amber-50/50 px-3 py-2.5 dark:border-amber-900/40 dark:bg-amber-950/25">
+        <div className="rounded-lg border border-amber-200/80 bg-amber-50/50 px-3 py-2.5 dark:border-amber-900/40 dark:bg-amber-950/25">
           <form
             action={`/api/courses/${membership.course.id}/inbox-restore`}
             method="post"
@@ -350,18 +343,20 @@ export default async function CourseDetailPage({
         <CourseShareLinkAction courseId={membership.course.id} memberCount={enrolledTotal} variant="icon" />
       </div>
 
-      <header className="mt-2 space-y-2">
-        <h1 className="page-screen-title-ink leading-tight">{membership.course.name}</h1>
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-classmates-sub dark:text-zinc-400">
-          {membership.course.code ? (
-            <span className="rounded-full border border-classmates-edge bg-classmates-warm-alt/80 px-2.5 py-0.5 text-[11px] font-semibold tabular-nums text-classmates-ink dark:border-border dark:bg-muted/50">
-              {membership.course.code}
-            </span>
-          ) : null}
-          {membership.course.code ? <span className="text-classmates-hint" aria-hidden>·</span> : null}
-          <span>{schoolLabel}</span>
+      <header className="space-y-3">
+        <div className="space-y-1.5">
+          <h1 className="page-screen-title-ink flex flex-wrap items-center gap-x-2 gap-y-1 leading-tight">
+            {membership.course.code ? (
+              <span className={courseCodeBadgeClassName}>{membership.course.code}</span>
+            ) : null}
+            <span className="min-w-0">{membership.course.name}</span>
+          </h1>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-classmates-sub dark:text-zinc-400">
+            <span>{schoolLabel}</span>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+
+        <div className="flex items-center gap-3">
           {enrolledOthers <= 0 ? (
             <CourseClassmatesCountChip
               label="Just you"
@@ -375,15 +370,16 @@ export default async function CourseDetailPage({
             />
           )}
         </div>
+
         {enrolledOthers === 0 ? (
-          <p className="text-[13px] font-medium text-classmates-ink/90 dark:text-foreground/90">
-            No classmates in this course yet — share the link so people can join.
+          <p className="text-[13px] leading-snug text-classmates-sub dark:text-zinc-400">
+            No classmates yet — share the link so people can join.
           </p>
         ) : null}
       </header>
 
-      <div className="mt-4 border-t border-classmates-hairline pt-4 dark:border-border/60">
-        <p className={cn(profileSectionLabelClassName, "!mb-1.5")}>Your week</p>
+      <section className="space-y-2 border-t border-classmates-hairline pt-5 dark:border-border/60">
+        <p className={cn(profileSectionLabelClassName, "!mb-0")}>Your week</p>
         <CourseCalendarPanel
           course={{
             id: membership.course.id,
@@ -397,75 +393,47 @@ export default async function CourseDetailPage({
             end: formatHM(session.endMinute),
             location: session.location ?? "",
           }))}
-          triggerVariant="neutral"
           layout="inline"
         />
-      </div>
-
-      <CourseTagsPanel
-        course={{
-          id: membership.course.id,
-          code: membership.course.code,
-          name: membership.course.name,
-        }}
-        initialIntentions={[...membership.intentions]}
-        sessions={myCourseSessions.map((session) => ({
-          weekday: session.weekday,
-          start: formatHM(session.startMinute),
-          end: formatHM(session.endMinute),
-          location: session.location ?? "",
-        }))}
-        layout="inline"
-      />
+      </section>
 
       <Link
         href={`/courses/${membership.course.id}/chat`}
-        className="group mt-5 flex items-center gap-3 border-t border-classmates-hairline py-4 dark:border-border/60"
+        className="group flex items-center gap-3 rounded-2xl border border-classmates-hairline bg-white/60 px-4 py-3.5 shadow-[0_2px_8px_rgba(15,23,42,0.04)] transition hover:bg-white/90 active:scale-[0.99] dark:border-border/60 dark:bg-card/60 dark:shadow-[0_2px_8px_rgba(0,0,0,0.1)] dark:hover:bg-card/90"
       >
-        <MessageCircle
-          className="h-5 w-5 shrink-0 text-[#2563EB] dark:text-blue-400"
-          strokeWidth={2.25}
-          aria-hidden
-        />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#EFF6FF] dark:bg-blue-950/50">
+          <MessageCircle
+            className="h-5 w-5 text-[#2563EB] dark:text-blue-400"
+            strokeWidth={2.25}
+            aria-hidden
+          />
+        </div>
         <div className="min-w-0 flex-1">
-          <p className={cn(profileSectionLabelClassName, "!mb-0")}>Group chat</p>
-          <p className="text-[15px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
-            Course chat
+          <p className="text-[14px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
+            Group chat
           </p>
-          <p className="mt-0.5 text-[13px] leading-snug text-classmates-sub dark:text-zinc-400">{courseChatSubtitle}</p>
-          <p className="mt-0.5 text-[12px] leading-snug text-classmates-hint dark:text-zinc-500">
-            <span className="font-medium text-classmates-sub dark:text-zinc-400">{courseChatMetaBase}</span>
+          <p className="mt-0.5 text-[12px] leading-snug text-classmates-sub dark:text-zinc-400">
+            {courseChatMetaBase}
             {courseChatUnread > 0 ? (
               <>
-                <span className="text-classmates-hint dark:text-zinc-600" aria-hidden>
-                  {" "}
-                  ·{" "}
-                </span>
+                {" \u00b7 "}
                 <span className="font-semibold text-[#2563EB] dark:text-blue-400">{courseChatMetaDetail}</span>
               </>
             ) : courseChatMetaDetail ? (
               <>
-                <span className="text-classmates-hint dark:text-zinc-600" aria-hidden>
-                  {" "}
-                  ·{" "}
-                </span>
+                {" \u00b7 "}
                 <span>{courseChatMetaDetail}</span>
               </>
             ) : null}
           </p>
         </div>
-        <span className="inline-flex shrink-0 items-center gap-0.5 text-[13px] font-semibold text-[#2563EB] dark:text-blue-400">
-          Open
-          <ChevronRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-        </span>
+        <ChevronRight className="h-4 w-4 shrink-0 text-classmates-hint dark:text-zinc-500" strokeWidth={2.5} aria-hidden />
       </Link>
 
       <CourseMemberList
         courseId={membership.course.id}
         members={memberList}
-        courseCode={membership.course.code}
         schoolShortLabel={classmatesSchoolShort}
-        shareMemberCount={enrolledTotal}
       />
 
       <CourseUnenrollFooter courseId={membership.course.id} courseName={membership.course.name} />

@@ -195,6 +195,7 @@ enum ClassmatePostCategory {
   MEALS
   LANGUAGE
   SPORTS
+  SHARED_COURSES
 }
 
 enum ClassmatePostStatus {

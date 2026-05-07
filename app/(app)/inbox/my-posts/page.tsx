@@ -170,13 +170,15 @@ function PostRow({
 
 function labelCategory(c: ClassmatePostCategory) {
   switch (c) {
+    case ClassmatePostCategory.SHARED_COURSES:
+      return "Shared courses";
     case ClassmatePostCategory.MEALS:
       return "Meals";
     case ClassmatePostCategory.LANGUAGE:
       return "Language";
     case ClassmatePostCategory.SPORTS:
       return "Sports";
-    default:
+    case ClassmatePostCategory.STUDY:
       return "Study";
   }
 }

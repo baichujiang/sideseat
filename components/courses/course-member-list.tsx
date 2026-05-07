@@ -9,14 +9,10 @@ import Link from "next/link";
 import type { Route } from "next";
 
 import { ClassmatesPersonRow, CLASSMATES_PERSON_ROW_CLASS } from "@/components/classmates/classmates-person-row";
-import { CourseShareLinkAction } from "@/components/courses/course-share-link-action";
 import { Input } from "@/components/ui/input";
 import { UserGenderCardIcon } from "@/components/ui/user-gender-icon";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { cn } from "@/lib/utils";
-
-/** Visible classmates in list at or below this → invite / share growth strip (see share action threshold). */
-const LOW_CLASSMATES_GROWTH_THRESHOLD = 3;
 
 export type CourseMember = {
   membershipId: string;
@@ -80,18 +76,12 @@ function formatOverlapShort(minutes: number): string {
 export function CourseMemberList({
   courseId,
   members,
-  courseCode,
   schoolShortLabel,
-  shareMemberCount,
 }: {
   courseId: string;
   members: CourseMember[];
-  /** When set, title becomes “Classmates in {code}”. */
-  courseCode?: string | null;
   /** Shown after the count, e.g. “8 classmates · TUM”. */
   schoolShortLabel?: string | null;
-  /** Total enrolled in course — invite vs share copy for growth CTAs. */
-  shareMemberCount: number;
 }) {
   const [query, setQuery] = useState("");
 
@@ -104,11 +94,9 @@ export function CourseMemberList({
     });
   }, [members, query]);
 
-  const codeTrimmed = courseCode?.trim() ?? "";
   /** Course hub wireframe: social list is “in this course”, not a generic code title. */
   const sectionTitle = "Classmates in this course";
   const n = members.length;
-  const showGrowth = n <= LOW_CLASSMATES_GROWTH_THRESHOLD;
   const countLine =
     n === 0
       ? "No classmates in your list yet"
@@ -128,23 +116,7 @@ export function CourseMemberList({
           >
             {sectionTitle}
           </h3>
-          {showGrowth ? (
-            <CourseShareLinkAction
-              courseId={courseId}
-              memberCount={shareMemberCount}
-              variant="buttonPrimary"
-              labelOverride="Invite"
-              className="h-9 min-h-0 shrink-0 px-4 py-2 text-xs shadow-[0_4px_12px_rgba(37,99,235,0.18)]"
-            />
-          ) : null}
         </div>
-        {showGrowth ? (
-          <p className="text-[12px] font-semibold leading-snug text-[#0F766E] dark:text-teal-300">
-            {codeTrimmed
-              ? `Invite classmates to ${codeTrimmed}`
-              : "Invite classmates to this course"}
-          </p>
-        ) : null}
         <p className="text-[13px] font-semibold leading-snug text-classmates-ink/95 dark:text-zinc-100">
           {countLine}
         </p>
@@ -156,7 +128,7 @@ export function CourseMemberList({
           </p>
         ) : (
           <p className="text-[12px] leading-snug text-classmates-sub dark:text-zinc-400">
-            When classmates enroll and match this course, they&apos;ll appear here. Use Invite or share the link below.
+            When classmates enroll and match this course, they&apos;ll appear here.
           </p>
         )}
       </div>
@@ -171,27 +143,9 @@ export function CourseMemberList({
         />
       ) : null}
 
-      {showGrowth ? (
-        <div className="rounded-[20px] border border-[#BFDBFE] bg-[#EFF6FF] px-3.5 py-3 dark:border-blue-800/50 dark:bg-blue-950/35">
-          <p className="text-[13px] font-semibold text-classmates-ink dark:text-zinc-100">Know someone in this course?</p>
-          <p className="mt-1 text-[12px] leading-snug text-classmates-sub dark:text-zinc-400">
-            Send them the course link so they can join SideSeat and show up in this list.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <CourseShareLinkAction
-              courseId={courseId}
-              memberCount={shareMemberCount}
-              variant="button"
-              labelOverride="Share course link"
-              className="h-9 min-h-0 w-full justify-center px-4 py-2 text-xs sm:w-auto"
-            />
-          </div>
-        </div>
-      ) : null}
-
       {n === 0 ? (
         <p className="px-1 text-center text-[12px] leading-snug text-classmates-hint dark:text-zinc-500">
-          No classmates to show yet — invite a few people and check back.
+          No classmates to show yet — check back after others join this course.
         </p>
       ) : (
         <div className="flex flex-col gap-2.5">

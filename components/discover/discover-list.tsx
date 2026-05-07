@@ -479,7 +479,6 @@ function matchesScene(row: DiscoverRow, scene: SceneKind) {
 }
 
 function matchesPostScene(post: DiscoverPostRow, scene: SceneKind) {
-  if (scene === "shared") return false;
   return post.category === sceneToCategory(scene);
 }
 
@@ -595,15 +594,15 @@ function RecommendationSurface({
   onOpenPost: () => void;
 }) {
   const showingShared = scene === "shared";
-  const hasItems = showingShared ? rows.length > 0 : posts.length > 0;
+  const hasItems = showingShared ? rows.length > 0 || posts.length > 0 : posts.length > 0;
 
   if (!hasItems) {
     return (
       <div className="space-y-3">
-        <SceneHeader scene={scene} onOpenPost={!showingShared ? onOpenPost : undefined} />
+        <SceneHeader scene={scene} onOpenPost={onOpenPost} />
         <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-6 text-center text-[13px] text-muted-foreground shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
           {showingShared
-            ? "No classmates match this category yet."
+            ? "No recommendations or posts yet. Tap Post to say what you're looking for in shared courses, or check back as more classmates join."
             : "No posts in this category yet. Be the first to share what you're looking for."}
         </div>
       </div>
@@ -612,16 +611,23 @@ function RecommendationSurface({
 
   return (
     <div className="space-y-3">
-      <SceneHeader scene={scene} onOpenPost={!showingShared ? onOpenPost : undefined} />
+      <SceneHeader scene={scene} onOpenPost={onOpenPost} />
 
       <div className="space-y-2.5">
-        {showingShared
-          ? rows.map((r) => (
-              <RecommendationRow key={r.userId} row={r} scene={scene} />
-            ))
-          : posts.map((post) => (
+        {showingShared ? (
+          <>
+            {posts.map((post) => (
               <PostRow key={post.id} post={post} scene={scene} />
             ))}
+            {rows.map((r) => (
+              <RecommendationRow key={r.userId} row={r} scene={scene} />
+            ))}
+          </>
+        ) : (
+          posts.map((post) => (
+            <PostRow key={post.id} post={post} scene={scene} />
+          ))
+        )}
       </div>
     </div>
   );
@@ -660,6 +666,8 @@ function SceneHeader({
 
 function sceneHeading(scene: SceneKind) {
   switch (scene) {
+    case "shared":
+      return "Shared courses";
     case "study":
       return "Study together";
     case "meals":
@@ -668,13 +676,13 @@ function sceneHeading(scene: SceneKind) {
       return "Language exchange";
     case "sports":
       return "Sports";
-    default:
-      return "Recommended classmates";
   }
 }
 
 function sceneDescription(scene: SceneKind) {
   switch (scene) {
+    case "shared":
+      return "Post what you want in courses you share, plus people ranked by same-class overlap.";
     case "study":
       return "Posts from students actively looking for study partners and review sessions.";
     case "meals":
@@ -683,8 +691,6 @@ function sceneDescription(scene: SceneKind) {
       return "Students looking for language exchange or conversation practice.";
     case "sports":
       return "Posts about sports, gym buddies, and active meetups around campus.";
-    default:
-      return "Same courses as you — strongest overlap first.";
   }
 }
 
@@ -1003,6 +1009,8 @@ function PostRow({ post, scene }: { post: DiscoverPostRow; scene: SceneKind }) {
 
 function sceneToCategory(scene: SceneKind): ClassmatePostCategory {
   switch (scene) {
+    case "shared":
+      return ClassmatePostCategory.SHARED_COURSES;
     case "study":
       return ClassmatePostCategory.STUDY;
     case "meals":
@@ -1011,8 +1019,6 @@ function sceneToCategory(scene: SceneKind): ClassmatePostCategory {
       return ClassmatePostCategory.LANGUAGE;
     case "sports":
       return ClassmatePostCategory.SPORTS;
-    default:
-      return ClassmatePostCategory.STUDY;
   }
 }
 
@@ -1075,7 +1081,6 @@ function CreatePostSheet({
   onClose: () => void;
   onCreated: () => void;
 }) {
-  const canPost = scene !== "shared";
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [expiryPreset, setExpiryPreset] = useState<PostExpiryPreset>("1w");
@@ -1089,8 +1094,6 @@ function CreatePostSheet({
     setError(null);
     setExpiryPreset("1w");
   }, [open, scene]);
-
-  if (!canPost) return null;
 
   async function submit() {
     if (submitting) return;
@@ -1220,6 +1223,8 @@ function CreatePostSheet({
 
 function postPlaceholder(scene: SceneKind) {
   switch (scene) {
+    case "shared":
+      return "Looking for a study partner in Linear Algebra (MA0902)";
     case "study":
       return "Looking for someone to review IN2064 this week";
     case "meals":
@@ -1228,8 +1233,6 @@ function postPlaceholder(scene: SceneKind) {
       return "Want to practice German over coffee";
     case "sports":
       return "Looking for a basketball buddy this weekend";
-    default:
-      return "Share what you're looking for";
   }
 }
 

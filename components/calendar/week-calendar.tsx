@@ -1,6 +1,6 @@
 import type { CalendarRepeatRule, Weekday } from "@prisma/client";
 import { addDays, addMinutes, isSameDay } from "date-fns";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import {
   inferScheduleEventToneKey,
@@ -260,7 +260,9 @@ export function WeekCalendar({
     (DEFAULT_VIEW_END - DEFAULT_VIEW_START + VISUAL_PADDING_MINUTES * 2) * MINUTE_PX;
   const viewportHeightPx = viewportBodyPx ?? computedViewportBodyPx;
 
-  useEffect(() => {
+  // Measure before paint so the first hydrated frame does not use the 56px
+  // fallback column width (narrow grid → wide grid flash).
+  useLayoutEffect(() => {
     const node = horizontalFrameRef.current;
     if (!node) return;
 
@@ -338,7 +340,7 @@ export function WeekCalendar({
   const dayTrackWidth = dayColumnWidth * visibleDays.length;
   const gridTemplateColumns = `repeat(${visibleDays.length}, minmax(${dayColumnWidth}px, ${dayColumnWidth}px))`;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const node = horizontalFrameRef.current;
     if (!node || dayColumnWidth <= 0) return;
     const startIndex =
