@@ -631,9 +631,9 @@ function SceneHeader({
         <button
           type="button"
           onClick={onOpenPost}
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-classmates-blue-border bg-classmates-blue-soft px-3 text-[12px] font-medium text-classmates-blue shadow-[0_2px_12px_-4px_rgba(37,99,235,0.08)] transition-colors hover:bg-classmates-blue-border/40"
+          className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-classmates-blue px-4 text-[13px] font-semibold text-white shadow-[0_4px_14px_-3px_rgba(37,99,235,0.35)] transition-all hover:scale-[1.03] hover:shadow-[0_6px_20px_-3px_rgba(37,99,235,0.4)] active:scale-[0.97]"
         >
-          <Plus className="h-4 w-4 text-classmates-blue" strokeWidth={2.25} />
+          <Plus className="h-[18px] w-[18px]" strokeWidth={2.5} />
           Post
         </button>
       ) : null}

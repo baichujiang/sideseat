@@ -452,6 +452,11 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                           aria-label={`Add ${courseTitle} ${DAY_SHORT[weekday]} ${formatMinutes(slotStart)}`}
                           className="absolute inset-0 z-0 transition hover:bg-primary/5"
                           onClick={() => {
+                            if (dragSelectedIndex !== null) {
+                              setDragSelectedIndex(null);
+                              setToolbarIndex(null);
+                              return;
+                            }
                             addAtSlot(weekday, slotStart);
                           }}
                         />
@@ -499,10 +504,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                           onKeyDown={(ev) => {
                             if (ev.key === "Enter" || ev.key === " ") {
                               ev.preventDefault();
-                              if (isDragSelected) {
-                                setDragSelectedIndex(null);
-                                return;
-                              }
+                              if (isDragSelected) return;
                               setSelectedIndex(isEditing ? null : index);
                             }
                           }}
@@ -510,10 +512,8 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                             e.stopPropagation();
                             if (suppressClickRef.current) return;
                             setToolbarIndex(null);
-                            if (isDragSelected) {
-                              setDragSelectedIndex(null);
-                              return;
-                            }
+                            // In drag mode: clicking the card does nothing (stay in drag mode)
+                            if (isDragSelected) return;
                             setSelectedIndex(isEditing ? null : index);
                           }}
                           onPointerDown={(e) => startGridPointerSession(e, index, "move")}
