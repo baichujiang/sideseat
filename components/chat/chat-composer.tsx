@@ -2,7 +2,7 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CornerUpLeft, Plus, Send, X } from "lucide-react";
 
@@ -23,11 +23,13 @@ export function ChatComposer({
 }) {
   const router = useRouter();
   const { replyTo, setReplyTo } = useChatReply();
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const submit = async () => {
+    if (submitting) return;
     const text = body.trim();
     if (!text) return;
 
@@ -54,6 +56,11 @@ export function ChatComposer({
     setReplyTo(null);
     setSubmitting(false);
     router.refresh();
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        inputRef.current?.focus({ preventScroll: true });
+      });
+    });
   };
 
   return (
@@ -86,11 +93,11 @@ export function ChatComposer({
           Message
         </label>
         <textarea
+          ref={inputRef}
           id={`chat-input-${connectionId}`}
           autoComplete="off"
           enterKeyHint="send"
           value={body}
-          disabled={submitting}
           onChange={(e) => setBody(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -104,7 +111,6 @@ export function ChatComposer({
             "min-h-[44px] max-h-32 flex-1 resize-none rounded-2xl border border-input bg-muted/40 px-4 py-3 text-[16px] leading-snug",
             "placeholder:text-muted-foreground/70",
             "outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
-            "disabled:opacity-60",
           )}
         />
         <button
