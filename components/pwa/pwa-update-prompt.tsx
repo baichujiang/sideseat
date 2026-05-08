@@ -19,7 +19,8 @@ export function PwaUpdatePrompt({ registration }: { registration: ServiceWorkerR
   const [show, setShow] = useState(false);
   const reloadOnce = useRef(false);
   const pendingBuildIdRef = useRef<string | null>(null);
-  const showDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Browser timers return `number`; Node typings use `Timeout` — use explicit number for `window.setTimeout`. */
+  const showDebounceRef = useRef<number | null>(null);
 
   const applyUpdate = useCallback(() => {
     if (reloadOnce.current) return;
