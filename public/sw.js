@@ -53,8 +53,8 @@ self.addEventListener("push", (event) => {
     self.registration.showNotification(payload.title, {
       body: payload.body || "Open SideSeat",
       data: { url: payload.url },
-      icon: "/icons/192",
-      badge: "/icons/192",
+      icon: "/icons/app-icon.png",
+      badge: "/icons/app-icon.png",
     }),
   );
 });
