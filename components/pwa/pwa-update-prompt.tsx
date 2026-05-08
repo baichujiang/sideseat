@@ -6,24 +6,20 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const UPDATE_CHECK_MS = 60 * 60 * 1000;
-const IOS_BUILD_CHECK_MS = 15 * 60 * 1000;
+const BUILD_POLL_MS = 15 * 60 * 1000;
+const SHOW_DEBOUNCE_MS = 450;
 const BUILD_STORAGE_KEY = "sideseat_client_build_id";
-
-function isIosLike(): boolean {
-  if (typeof navigator === "undefined") return false;
-  const ua = navigator.userAgent;
-  return /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-}
 
 /**
  * Chromium: new `sw.js` stays in `waiting` until user confirms → SKIP_WAITING + reload.
- * iOS (all WebKit/Chrome shells on iPhone/iPad): poll `/api/client-build` — SW lifecycle
- * is unreliable for “Update now”; deploy id mismatch triggers the same bar + hard reload.
+ * All clients: `/api/client-build` catches deploy fingerprint when SW lifecycle is flaky (esp. iOS).
+ * Multiple rapid deploys → one debounced bar pointing at the latest known build id.
  */
 export function PwaUpdatePrompt({ registration }: { registration: ServiceWorkerRegistration | null }) {
   const [show, setShow] = useState(false);
   const reloadOnce = useRef(false);
   const pendingBuildIdRef = useRef<string | null>(null);
+  const showDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const applyUpdate = useCallback(() => {
     if (reloadOnce.current) return;
@@ -55,60 +51,36 @@ export function PwaUpdatePrompt({ registration }: { registration: ServiceWorkerR
     window.location.reload();
   }, [registration]);
 
-  useEffect(() => {
-    if (!registration) return;
+  const scheduleShow = useCallback(() => {
+    if (showDebounceRef.current !== null) {
+      window.clearTimeout(showDebounceRef.current);
+    }
+    showDebounceRef.current = window.setTimeout(() => {
+      showDebounceRef.current = null;
+      setShow(true);
+    }, SHOW_DEBOUNCE_MS);
+  }, []);
 
-    const showIfWaiting = () => {
-      if (registration.waiting) setShow(true);
-    };
+  const evaluateUpdates = useCallback(
+    async (reg: ServiceWorkerRegistration | null) => {
+      let wantShow = false;
 
-    showIfWaiting();
-
-    const onUpdateFound = () => {
-      const installing = registration.installing;
-      if (!installing) return;
-      installing.addEventListener("statechange", () => {
-        if (installing.state === "installed" && navigator.serviceWorker.controller) {
-          showIfWaiting();
-        }
-      });
-    };
-
-    registration.addEventListener("updatefound", onUpdateFound);
-    void registration.update();
-
-    const interval = window.setInterval(() => void registration.update(), UPDATE_CHECK_MS);
-    const onFocus = () => void registration.update();
-    window.addEventListener("focus", onFocus);
-
-    const onVis = () => {
-      if (document.visibilityState === "visible") {
-        void registration.update();
-        showIfWaiting();
+      if (reg?.waiting) {
+        wantShow = true;
       }
-    };
-    document.addEventListener("visibilitychange", onVis);
 
-    return () => {
-      registration.removeEventListener("updatefound", onUpdateFound);
-      window.clearInterval(interval);
-      window.removeEventListener("focus", onFocus);
-      document.removeEventListener("visibilitychange", onVis);
-    };
-  }, [registration]);
-
-  useEffect(() => {
-    if (!isIosLike()) return;
-
-    let cancelled = false;
-
-    const check = async () => {
       try {
         const res = await fetch("/api/client-build", { cache: "no-store" });
-        if (!res.ok || cancelled) return;
+        if (!res.ok) {
+          if (wantShow) scheduleShow();
+          return;
+        }
         const data = (await res.json()) as { id?: string };
         const id = typeof data.id === "string" ? data.id : "";
-        if (!id || id === "development") return;
+        if (!id || id === "development") {
+          if (wantShow) scheduleShow();
+          return;
+        }
 
         let stored: string | null = null;
         try {
@@ -123,34 +95,84 @@ export function PwaUpdatePrompt({ registration }: { registration: ServiceWorkerR
           } catch {
             /* ignore */
           }
-          return;
-        }
-
-        if (stored !== id) {
+        } else if (stored !== id) {
           pendingBuildIdRef.current = id;
-          setShow(true);
+          wantShow = true;
         }
       } catch {
-        /* offline */
+        if (wantShow) scheduleShow();
+        return;
       }
+
+      if (wantShow) scheduleShow();
+    },
+    [scheduleShow],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const tick = async () => {
+      if (cancelled) return;
+      await evaluateUpdates(registration);
     };
 
-    void check();
-    const interval = window.setInterval(() => void check(), IOS_BUILD_CHECK_MS);
-    const onFocus = () => void check();
-    window.addEventListener("focus", onFocus);
-    const onVis = () => {
-      if (document.visibilityState === "visible") void check();
+    const tickWithSwFetch = async () => {
+      if (cancelled) return;
+      if (registration) {
+        try {
+          await registration.update();
+        } catch {
+          /* ignore */
+        }
+      }
+      await evaluateUpdates(registration);
     };
+
+    void tickWithSwFetch();
+
+    const onUpdateFound = () => {
+      if (!registration) return;
+      const installing = registration.installing;
+      if (!installing) return;
+      installing.addEventListener("statechange", () => {
+        if (installing.state === "installed" && navigator.serviceWorker.controller) {
+          void tick();
+        }
+      });
+    };
+
+    if (registration) {
+      registration.addEventListener("updatefound", onUpdateFound);
+    }
+
+    const pollBuild = window.setInterval(() => void tick(), BUILD_POLL_MS);
+    const pollSw = registration
+      ? window.setInterval(() => void tickWithSwFetch(), UPDATE_CHECK_MS)
+      : null;
+
+    const onFocus = () => void tickWithSwFetch();
+    const onVis = () => {
+      if (document.visibilityState === "visible") void tickWithSwFetch();
+    };
+    window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVis);
 
     return () => {
       cancelled = true;
-      window.clearInterval(interval);
+      if (showDebounceRef.current !== null) {
+        window.clearTimeout(showDebounceRef.current);
+        showDebounceRef.current = null;
+      }
+      if (registration) {
+        registration.removeEventListener("updatefound", onUpdateFound);
+      }
+      window.clearInterval(pollBuild);
+      if (pollSw !== null) window.clearInterval(pollSw);
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVis);
     };
-  }, []);
+  }, [registration, evaluateUpdates]);
 
   if (!show) return null;
 

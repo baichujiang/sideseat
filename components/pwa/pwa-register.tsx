@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { PwaUpdatePrompt } from "@/components/pwa/pwa-update-prompt";
+import { registerBeforeInstallPromptCapture } from "@/lib/pwa/deferred-install";
 
 /**
  * Registers the service worker so Chromium-based browsers can treat the site
@@ -11,6 +12,10 @@ import { PwaUpdatePrompt } from "@/components/pwa/pwa-update-prompt";
  */
 export function PwaRegister() {
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
+
+  useEffect(() => {
+    return registerBeforeInstallPromptCapture();
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) {

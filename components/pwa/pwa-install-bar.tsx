@@ -1,73 +1,44 @@
 "use client";
 
-import { Download, Share, SquarePlus, X } from "lucide-react";
+import { Download, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
-import { AppPushLayer } from "@/components/ui/app-push-layer";
+import { PwaIosInstallHelpModal } from "@/components/pwa/pwa-ios-install-help";
 import { Button } from "@/components/ui/button";
 import { APP_NAME } from "@/lib/constants/app";
+import {
+  getDeferredInstallPrompt,
+  runDeferredInstallPrompt,
+  subscribeDeferredInstall,
+} from "@/lib/pwa/deferred-install";
+import { isIosSafari, isStandalonePwa } from "@/lib/pwa/pwa-environment";
 import { cn } from "@/lib/utils";
 
 const DISMISS_KEY = "sideseat_pwa_install_bar_dismissed";
 
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-};
-
-function isStandalonePwa(): boolean {
-  if (typeof window === "undefined") return true;
-  const nav = window.navigator as Navigator & { standalone?: boolean };
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.matchMedia("(display-mode: minimal-ui)").matches ||
-    nav.standalone === true
-  );
-}
-
-function isIosSafari(): boolean {
-  if (typeof navigator === "undefined") return false;
-  const ua = navigator.userAgent;
-  const isIos = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  const isWebkit = /WebKit/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua);
-  return isIos && isWebkit;
-}
-
 /**
- * Chromium: uses `beforeinstallprompt` → one tap opens the system install sheet.
+ * Chromium: uses captured `beforeinstallprompt` → one tap opens the system install sheet.
  * iOS Safari: no API — one tap opens short instructions (Share → Add to Home Screen).
  */
 export function PwaInstallBar({ className }: { className?: string }) {
-  const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [iosHelpOpen, setIosHelpOpen] = useState(false);
-  const [visible, setVisible] = useState(false);
+  const [, refresh] = useState(0);
+  const [barDismissed, setBarDismissed] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => subscribeDeferredInstall(() => refresh((x) => x + 1)), []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (isStandalonePwa()) return;
     try {
-      if (sessionStorage.getItem(DISMISS_KEY) === "1") return;
+      if (sessionStorage.getItem(DISMISS_KEY) === "1") setBarDismissed(true);
     } catch {
       /* private mode */
     }
-
-    const onBip = (e: Event) => {
-      e.preventDefault();
-      setDeferred(e as BeforeInstallPromptEvent);
-      setVisible(true);
-    };
-    window.addEventListener("beforeinstallprompt", onBip);
-
-    if (isIosSafari()) {
-      setVisible(true);
-    }
-
-    return () => window.removeEventListener("beforeinstallprompt", onBip);
   }, []);
 
   const dismiss = useCallback(() => {
-    setVisible(false);
+    setBarDismissed(true);
     try {
       sessionStorage.setItem(DISMISS_KEY, "1");
     } catch {
@@ -76,29 +47,27 @@ export function PwaInstallBar({ className }: { className?: string }) {
   }, []);
 
   const onInstallClick = useCallback(async () => {
-    if (!deferred) return;
     setBusy(true);
     try {
-      await deferred.prompt();
-      await deferred.userChoice;
+      await runDeferredInstallPrompt();
+      dismiss();
     } finally {
       setBusy(false);
-      setDeferred(null);
-      dismiss();
     }
-  }, [deferred, dismiss]);
+  }, [dismiss]);
 
-  if (!visible || isStandalonePwa()) {
-    return iosHelpOpen ? (
-      <IosInstallModal open onClose={() => setIosHelpOpen(false)} />
-    ) : null;
-  }
-
+  const deferred = getDeferredInstallPrompt();
   const showChromium = deferred !== null;
   const showIos = !showChromium && isIosSafari();
 
+  if (isStandalonePwa()) return null;
+
+  if (barDismissed) {
+    return <PwaIosInstallHelpModal open={iosHelpOpen} onClose={() => setIosHelpOpen(false)} />;
+  }
+
   if (!showChromium && !showIos) {
-    return null;
+    return <PwaIosInstallHelpModal open={iosHelpOpen} onClose={() => setIosHelpOpen(false)} />;
   }
 
   return (
@@ -152,54 +121,7 @@ export function PwaInstallBar({ className }: { className?: string }) {
           </button>
         </div>
       </div>
-      <IosInstallModal open={iosHelpOpen} onClose={() => setIosHelpOpen(false)} />
+      <PwaIosInstallHelpModal open={iosHelpOpen} onClose={() => setIosHelpOpen(false)} />
     </>
-  );
-}
-
-function IosInstallModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  return (
-    <AppPushLayer
-      open={open}
-      onClose={onClose}
-      zClassName="z-[60]"
-      backdropClassName="bg-black/40 !backdrop-blur-none"
-      panelClassName="w-[min(100vw,24rem)] border-0 bg-transparent shadow-none dark:shadow-none"
-      ariaLabelledBy="pwa-ios-title"
-    >
-      <div className="flex h-full min-h-0 flex-col justify-end px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-12 sm:justify-center">
-        <div className="w-full rounded-2xl border border-border bg-card p-4 shadow-xl">
-          <h2 id="pwa-ios-title" className="text-base font-semibold text-foreground">
-            Add to Home Screen
-          </h2>
-          <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
-            On iOS, you add web apps from the system menu—Safari can’t show an install dialog like
-            Chrome.
-          </p>
-          <ol className="mt-3 space-y-3 text-[13px] text-foreground">
-            <li className="flex gap-3">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Share className="h-4 w-4" strokeWidth={2.25} />
-              </span>
-              <span>
-                Tap the <strong className="font-semibold">Share</strong> button in the toolbar
-                <span className="text-muted-foreground"> (square with an arrow)</span>
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <SquarePlus className="h-4 w-4" strokeWidth={2.25} />
-              </span>
-              <span>
-                Scroll down and choose <strong className="font-semibold">Add to Home Screen</strong>
-              </span>
-            </li>
-          </ol>
-          <Button type="button" className="mt-4 w-full rounded-xl" onClick={onClose}>
-            Got it
-          </Button>
-        </div>
-      </div>
-    </AppPushLayer>
   );
 }

@@ -7,6 +7,7 @@ import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
 import { LogoutForm } from "@/components/auth/logout-form";
 import { StudentVerificationForm } from "@/components/forms/student-verification-form";
+import { MePageInstallCard } from "@/components/pwa/me-page-install-card";
 import { ProfileIdentitySheets } from "@/components/profile/profile-identity-sheets";
 import { MePageSection } from "@/components/profile/me-page-section";
 import { Button } from "@/components/ui/button";
@@ -153,6 +154,8 @@ export default async function ProfilePage({
           </Link>
         </div>
       ) : null}
+
+      <MePageInstallCard />
 
       <MePageSection id="me-profile-summary-heading" title="Profile summary">
         <ProfileIdentitySheets
