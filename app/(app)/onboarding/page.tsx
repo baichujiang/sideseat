@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { requireUser } from "@/lib/auth/session";
 import { profileLanguagesFormDefault } from "@/lib/constants/languages";
 import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
-import { getSchoolVerificationHint } from "@/lib/constants/verification";
 import { prisma } from "@/lib/db/prisma";
 
 export default async function OnboardingPage() {
@@ -66,7 +65,6 @@ export default async function OnboardingPage() {
             <StudentVerificationForm
               currentStatus={user.studentVerificationStatus}
               schoolCode={schoolCode}
-              schoolHint={getSchoolVerificationHint(user.school)}
               schoolShortLabel={schoolShort}
               notes={user.studentVerificationNotes}
               email={user.email}

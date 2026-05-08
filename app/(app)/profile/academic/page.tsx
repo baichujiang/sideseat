@@ -6,7 +6,6 @@ import { BackLink } from "@/components/nav/back-link";
 import { getSessionUser } from "@/lib/auth/session";
 import { profileLanguagesFormDefault } from "@/lib/constants/languages";
 import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
-import { getSchoolVerificationHint } from "@/lib/constants/verification";
 import { prisma } from "@/lib/db/prisma";
 
 export default async function ProfileAcademicPage() {
@@ -44,7 +43,6 @@ export default async function ProfileAcademicPage() {
           <StudentVerificationForm
             currentStatus={user.studentVerificationStatus}
             schoolCode={schoolCode}
-            schoolHint={getSchoolVerificationHint(user.school)}
             schoolShortLabel={schoolShort}
             notes={user.studentVerificationNotes}
             email={user.email}

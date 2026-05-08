@@ -16,7 +16,6 @@ import { isConfiguredAdmin } from "@/lib/constants/app";
 import { DEGREE_LEVEL_LABELS } from "@/lib/constants/majors";
 import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
 import { profileLanguagesFormDefault } from "@/lib/constants/languages";
-import { getSchoolVerificationHint } from "@/lib/constants/verification";
 import { prisma } from "@/lib/db/prisma";
 import { cn } from "@/lib/utils";
 import { profileSectionLabelClassName } from "@/lib/ui/profile-section-label";
@@ -155,11 +154,7 @@ export default async function ProfilePage({
         </div>
       ) : null}
 
-      <MePageSection
-        id="me-profile-summary-heading"
-        title="Profile summary"
-        description="Avatar, name, and tagline — what classmates see on your card."
-      >
+      <MePageSection id="me-profile-summary-heading" title="Profile summary">
         <ProfileIdentitySheets
           variant="summary"
           gender={user.gender}
@@ -196,15 +191,10 @@ export default async function ProfilePage({
         />
       </MePageSection>
 
-      <MePageSection
-        id="me-verification-heading"
-        title="School verification"
-        description="Verify your student email to unlock invitations and trust signals."
-      >
+      <MePageSection id="me-verification-heading" title="School verification">
         <StudentVerificationForm
           currentStatus={user.studentVerificationStatus}
           schoolCode={schoolCode}
-          schoolHint={getSchoolVerificationHint(user.school)}
           schoolShortLabel={schoolShort}
           notes={user.studentVerificationNotes}
           email={user.email}
@@ -212,7 +202,7 @@ export default async function ProfilePage({
         />
       </MePageSection>
 
-      <MePageSection id="me-manage-heading" title="More settings" description="Focused pages for account-level preferences.">
+      <MePageSection id="me-manage-heading" title="More settings">
         <div className="overflow-hidden rounded-2xl border border-classmates-edge bg-classmates-surface shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card">
           <MeDestRow href={'/profile/account' as Route} icon={Settings} title="Preferences & account" subtitle="Notifications, discover toggles, safety, and support" />
         </div>

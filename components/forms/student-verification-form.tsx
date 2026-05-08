@@ -31,7 +31,6 @@ function statusTone(status: StudentVerificationStatus) {
 export function StudentVerificationForm({
   currentStatus,
   email,
-  schoolHint,
   /** Profile school code — used to show the school logo next to verification. */
   schoolCode,
   /** Short school label (e.g. TUM) — shown in verified-state trust copy. */
@@ -41,7 +40,6 @@ export function StudentVerificationForm({
 }: {
   currentStatus: StudentVerificationStatus;
   email?: string | null;
-  schoolHint: string;
   schoolCode?: SchoolCode | null;
   schoolShortLabel?: string | null;
   notes?: string | null;
@@ -146,8 +144,15 @@ export function StudentVerificationForm({
   const isVerified = currentStatus === StudentVerificationStatus.VERIFIED;
   const schoolLogoSrc = getSchoolLogoPath(schoolCode);
   const schoolConfig = getSchoolByCode(schoolCode);
-  const primaryVerificationDomain = schoolConfig?.verificationDomains[0] ?? "university.edu";
-  const emailPlaceholder = `name@${primaryVerificationDomain}`;
+  const verificationDomains = schoolConfig?.verificationDomains ?? [];
+  const emailPlaceholder =
+    verificationDomains.length === 0
+      ? "School email"
+      : verificationDomains.map((d) => `name@${d}`).join(" or ");
+  const manualEmailPlaceholder =
+    verificationDomains.length === 0
+      ? "School email (optional)"
+      : `Optional · ${verificationDomains.map((d) => `name@${d}`).join(" or ")}`;
 
   if (isVerified) {
     const displayEmail = email?.trim() || "—";
@@ -228,7 +233,6 @@ export function StudentVerificationForm({
           {isPending ? "Sending…" : "Verify"}
         </Button>
       </div>
-      <p className="text-xs text-muted-foreground">{schoolHint}</p>
 
       {notes ? <p className="text-sm text-foreground">{notes}</p> : null}
       {message ? <p className={`text-sm ${deliveryTone}`}>{message}</p> : null}
@@ -276,7 +280,7 @@ export function StudentVerificationForm({
           <Input
             className="text-xs"
             onChange={(event) => setManualEmail(event.target.value)}
-            placeholder="TUM email (optional, e.g. name@tum.de)"
+            placeholder={manualEmailPlaceholder}
             type="email"
             value={manualEmail}
           />

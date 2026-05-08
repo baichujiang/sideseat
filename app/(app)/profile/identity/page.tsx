@@ -20,7 +20,6 @@ export default async function ProfileIdentityPage() {
         <BackLink href="/profile" label="Back" />
         <div>
           <h1 className="page-screen-title-ink">Identity</h1>
-          <p className="page-screen-subtitle mt-0.5">Name, avatar, and tagline.</p>
         </div>
       </header>
 
