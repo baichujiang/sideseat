@@ -17,6 +17,8 @@ export type MessageTarget =
 export type MessageSummary = {
   id: string;
   body: string;
+  /** Reply / copy when `body` is not enough (e.g. image had no caption). */
+  actionSnippet?: string;
   senderName: string | null;
   senderId: string;
 };
@@ -98,7 +100,8 @@ export function MessageActionMenu({
 
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(message.body);
+      const text = (message.actionSnippet ?? message.body).trim();
+      await navigator.clipboard.writeText(text);
       close();
     } catch {
       setErr("Couldn't copy.");
@@ -108,7 +111,7 @@ export function MessageActionMenu({
   const doReply = () => {
     setReplyTo({
       id: message.id,
-      body: message.body,
+      body: message.actionSnippet ?? message.body,
       senderName: message.senderName,
     });
     close();

@@ -209,7 +209,7 @@ export default async function CourseChatPage({
                       >
                         <MessageBubbleContent
                           isOwn={isOwn}
-                          body={message.body}
+                          payload={{ kind: "text", body: message.body }}
                           deleted={message.deletedAt != null}
                           reply={
                             message.replyTo

@@ -116,7 +116,12 @@ export default async function GroupChatPage({
                               : "rounded-bl-md bg-muted text-foreground",
                           )}
                         >
-                          <MessageBubbleContent isOwn={isOwn} body={message.body} deleted={message.deletedAt != null} reply={null} />
+                          <MessageBubbleContent
+                            isOwn={isOwn}
+                            payload={{ kind: "text", body: message.body }}
+                            deleted={message.deletedAt != null}
+                            reply={null}
+                          />
                         </div>
                         <time
                           className={cn("mt-0.5 block text-[10px] text-muted-foreground", isOwn ? "pr-0.5" : "pl-0.5")}

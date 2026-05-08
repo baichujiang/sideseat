@@ -1,39 +1,86 @@
-import { CornerUpLeft } from "lucide-react";
+import { CornerUpLeft, MapPin } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+
+export type MessageBubblePayload =
+  | { kind: "text"; body: string }
+  | { kind: "image"; imageUrl: string; caption: string }
+  | {
+      kind: "location";
+      lat: number;
+      lng: number;
+      name: string | null;
+      caption: string;
+    };
 
 /**
  * Renders the inside of a chat bubble, including:
  *  - A small "replying to X" strip if the message quotes another.
  *  - A tombstone placeholder if the message has been soft-deleted.
- *  - The body otherwise.
- *
- * Kept presentational so both 1:1 and course-room chats can share it — the
- * bubble shell (bg color, rounded-corner direction, alignment) stays with
- * the calling page.
+ *  - Text, image, or location content otherwise.
  */
 export function MessageBubbleContent({
-  body,
+  payload,
   deleted,
   reply,
   isOwn,
 }: {
-  body: string;
+  payload: MessageBubblePayload;
   deleted: boolean;
   reply: { senderName: string | null; body: string; deleted: boolean } | null;
   isOwn: boolean;
 }) {
   if (deleted) {
     return (
-      <p className="italic text-[13px] text-muted-foreground">
-        Message deleted
-      </p>
+      <p className="italic text-[13px] text-muted-foreground">Message deleted</p>
     );
   }
   return (
     <div>
       {reply ? <QuoteStrip reply={reply} isOwn={isOwn} /> : null}
-      <p className="whitespace-pre-wrap break-words">{body}</p>
+      {payload.kind === "text" ? (
+        <p className="whitespace-pre-wrap break-words">{payload.body}</p>
+      ) : payload.kind === "image" ? (
+        <div className="space-y-1.5">
+          {/* eslint-disable-next-line @next/next/no-img-element -- user-uploaded / blob URL */}
+          <img
+            src={payload.imageUrl}
+            alt=""
+            className="max-h-64 w-full max-w-[min(100vw-4rem,20rem)] rounded-xl object-cover"
+          />
+          {payload.caption ? (
+            <p className="whitespace-pre-wrap break-words text-[15px] leading-snug">
+              {payload.caption}
+            </p>
+          ) : null}
+        </div>
+      ) : (
+        <div className="space-y-1.5 text-left">
+          <a
+            href={`https://www.google.com/maps?q=${payload.lat},${payload.lng}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-start gap-2 text-left font-medium underline-offset-2 hover:underline"
+          >
+            <MapPin
+              className="mt-0.5 h-[18px] w-[18px] shrink-0 opacity-90"
+              strokeWidth={2.25}
+              aria-hidden
+            />
+            <span className="min-w-0">
+              {payload.name?.trim() || "Shared location"}
+              <span className="mt-0.5 block text-[11px] font-normal opacity-80">
+                Open in Maps
+              </span>
+            </span>
+          </a>
+          {payload.caption ? (
+            <p className="whitespace-pre-wrap break-words text-[15px] leading-snug">
+              {payload.caption}
+            </p>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,10 +1,11 @@
-import { ConnectionStatus } from "@prisma/client";
+import { ConnectionStatus, MessageType } from "@prisma/client";
 
 import { requireOnboardedUser } from "@/lib/auth/guards";
+import { isAllowedChatImageUrl } from "@/lib/constants/chat-media";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
 import { notifyNewDirectChatMessage } from "@/lib/push/notify-user";
-import { messageSchema } from "@/lib/validators/invitation";
+import { directMessageSchema, type DirectMessageInput } from "@/lib/validators/invitation";
 
 export async function POST(
   request: Request,
@@ -13,7 +14,10 @@ export async function POST(
   try {
     const user = await requireOnboardedUser();
     const { connectionId } = await params;
-    const values = await parseJson(request, messageSchema);
+    const values = (await parseJson(
+      request,
+      directMessageSchema,
+    )) as DirectMessageInput;
 
     const connection = await prisma.connection.findFirst({
       where: {
@@ -41,9 +45,6 @@ export async function POST(
       return error("Connection not found.", 404);
     }
 
-    // Validate replyToId: must belong to the same connection and not be
-    // a deleted (tombstoned) row. We fall back to null on mismatch rather
-    // than erroring, so a stale client state doesn't block sending.
     let replyToId: string | null = null;
     if (values.replyToId) {
       const target = await prisma.message.findFirst({
@@ -57,19 +58,74 @@ export async function POST(
       if (target) replyToId = target.id;
     }
 
+    let bodyPreview: string;
+
+    if (values.type === "TEXT") {
+      const body = values.body.trim();
+      bodyPreview = body;
+      const message = await prisma.message.create({
+        data: {
+          connectionId,
+          senderId: user.id,
+          body,
+          type: MessageType.TEXT,
+          replyToId,
+        },
+      });
+      void notifyNewDirectChatMessage({
+        connectionId,
+        senderId: user.id,
+        bodyPreview,
+      }).catch(() => {});
+      return ok(message, { status: 201 });
+    }
+
+    if (values.type === "IMAGE") {
+      if (!isAllowedChatImageUrl(connectionId, values.imageUrl)) {
+        return error("Invalid image.", 400);
+      }
+      const caption = (values.body ?? "").trim();
+      bodyPreview = caption || "Photo";
+      const message = await prisma.message.create({
+        data: {
+          connectionId,
+          senderId: user.id,
+          body: caption,
+          type: MessageType.IMAGE,
+          imageUrl: values.imageUrl,
+          replyToId,
+        },
+      });
+      void notifyNewDirectChatMessage({
+        connectionId,
+        senderId: user.id,
+        bodyPreview,
+      }).catch(() => {});
+      return ok(message, { status: 201 });
+    }
+
+    const caption = (values.body ?? "").trim();
+    const name =
+      values.locationName && values.locationName.trim().length > 0
+        ? values.locationName.trim()
+        : null;
+    bodyPreview = caption || name || "Location";
     const message = await prisma.message.create({
       data: {
         connectionId,
         senderId: user.id,
-        body: values.body.trim(),
+        body: caption,
+        type: MessageType.LOCATION,
+        locationLat: values.locationLat,
+        locationLng: values.locationLng,
+        locationName: name,
         replyToId,
       },
     });
-
     void notifyNewDirectChatMessage({
       connectionId,
       senderId: user.id,
-      bodyPreview: values.body.trim(),
+      bodyPreview,
     }).catch(() => {});
 
     return ok(message, { status: 201 });

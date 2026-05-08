@@ -7,6 +7,7 @@ import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { InboxSwipeRow } from "@/components/inbox/inbox-swipe-row";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { selfNotesDisplayTitle } from "@/lib/connections/self-notes-title";
+import { directMessageActionSnippet } from "@/lib/chat/direct-message-preview";
 import { formatShortRelativeTime } from "@/lib/format/short-relative-time";
 import { cn } from "@/lib/utils";
 
@@ -53,11 +54,16 @@ export function DirectInboxRow({
   const fromMe = lastMessage?.senderId === userId;
   const contextCourseName =
     connection.originCourse?.name ?? connection.invitation?.course?.name ?? null;
-  const preview = lastMessage?.body
-    ? `${fromMe ? "You: " : ""}${lastMessage.body}`
-    : contextCourseName
-      ? contextCourseName
-      : "Say hi";
+  const preview =
+    lastMessage != null
+      ? `${fromMe ? "You: " : ""}${directMessageActionSnippet({
+          type: lastMessage.type,
+          body: lastMessage.body,
+          locationName: lastMessage.locationName,
+        })}`
+      : contextCourseName
+        ? contextCourseName
+        : "Say hi";
   const when = lastMessage?.createdAt ?? connection.updatedAt;
   const isUnread = unreadCount > 0;
   const href = `/connections/${connection.id}?returnTo=${encodeURIComponent(returnTo)}` as Route;

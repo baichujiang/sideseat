@@ -17,6 +17,7 @@ import { ContactRemarkEditor } from "@/components/chat/contact-remark-editor";
 import { BackLink } from "@/components/nav/back-link";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { requireConnection } from "@/lib/auth/guards";
+import { directMessageActionSnippet } from "@/lib/chat/direct-message-preview";
 import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
 import { selfNotesDisplayTitle } from "@/lib/connections/self-notes-title";
 import { safeReturnPath } from "@/lib/nav/back";
@@ -216,6 +217,29 @@ export default async function ConnectionPage({
               }
 
               const isOwn = message.senderId === user.id;
+              const actionSnippet = directMessageActionSnippet({
+                type: message.type,
+                body: message.body,
+                locationName: message.locationName,
+              });
+              const bubblePayload =
+                message.type === "IMAGE" && message.imageUrl
+                  ? {
+                      kind: "image" as const,
+                      imageUrl: message.imageUrl,
+                      caption: message.body,
+                    }
+                  : message.type === "LOCATION" &&
+                      message.locationLat != null &&
+                      message.locationLng != null
+                    ? {
+                        kind: "location" as const,
+                        lat: message.locationLat,
+                        lng: message.locationLng,
+                        name: message.locationName,
+                        caption: message.body,
+                      }
+                    : { kind: "text" as const, body: message.body };
 
               return (
                 <div key={message.id}>
@@ -241,6 +265,7 @@ export default async function ConnectionPage({
                         message={{
                           id: message.id,
                           body: message.body,
+                          actionSnippet,
                           senderName: message.sender.nickname,
                           senderId: message.senderId,
                         }}
@@ -267,13 +292,17 @@ export default async function ConnectionPage({
                       >
                         <MessageBubbleContent
                           isOwn={isOwn}
-                          body={message.body}
+                          payload={bubblePayload}
                           deleted={message.deletedAt != null}
                           reply={
                             message.replyTo
                               ? {
                                   senderName: message.replyTo.sender?.nickname ?? null,
-                                  body: message.replyTo.body,
+                                  body: directMessageActionSnippet({
+                                    type: message.replyTo.type,
+                                    body: message.replyTo.body,
+                                    locationName: message.replyTo.locationName,
+                                  }),
                                   deleted: message.replyTo.deletedAt != null,
                                 }
                               : null
@@ -296,6 +325,7 @@ export default async function ConnectionPage({
                         message={{
                           id: message.id,
                           body: message.body,
+                          actionSnippet,
                           senderName: message.sender.nickname,
                           senderId: message.senderId,
                         }}

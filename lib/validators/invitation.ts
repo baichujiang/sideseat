@@ -5,12 +5,51 @@ import { z } from "zod";
 // was retired when we switched to the first-message model. The `Invitation`
 // table and its enums stay in the DB for existing rows and admin read paths.
 
-export const messageSchema = z.object({
+/** Plain text — used by course-room and group chat APIs. */
+export const chatTextMessageSchema = z.object({
   body: z.string().min(1).max(500),
   /** Optional: if present, this message is a reply to the given message in the
    *  same chat. The API validates ownership/visibility before persisting. */
   replyToId: z.string().cuid().optional(),
 });
+
+/** @deprecated Use `chatTextMessageSchema`; kept as alias for existing imports. */
+export const messageSchema = chatTextMessageSchema;
+
+const directMessageDiscriminated = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("TEXT"),
+    body: z.string().min(1).max(500),
+    replyToId: z.string().cuid().optional(),
+  }),
+  z.object({
+    type: z.literal("IMAGE"),
+    imageUrl: z.string().min(1).max(4_000_000),
+    body: z.string().max(500).optional(),
+    replyToId: z.string().cuid().optional(),
+  }),
+  z.object({
+    type: z.literal("LOCATION"),
+    locationLat: z.number().gte(-90).lte(90),
+    locationLng: z.number().gte(-180).lte(180),
+    locationName: z.string().max(200).optional().or(z.literal("")),
+    body: z.string().max(500).optional(),
+    replyToId: z.string().cuid().optional(),
+  }),
+]);
+
+/**
+ * 1:1 connection chat — text, shared image (URL from our upload endpoint), or location pin.
+ * Legacy clients omit `type`; they are treated as TEXT.
+ */
+export const directMessageSchema = z.preprocess((raw: unknown) => {
+  if (raw && typeof raw === "object" && raw !== null && !("type" in raw) && "body" in raw) {
+    return { ...raw, type: "TEXT" as const };
+  }
+  return raw;
+}, directMessageDiscriminated);
+
+export type DirectMessageInput = z.infer<typeof directMessageDiscriminated>;
 
 /**
  * First-message flow: start a 1:1 conversation by sending one message. The

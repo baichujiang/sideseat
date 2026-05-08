@@ -165,6 +165,8 @@ enum CalendarRepeatRule {
 
 enum MessageType {
   TEXT
+  IMAGE
+  LOCATION
   AVAILABILITY_CARD
   PLAN_REQUEST_CARD
   PLAN_CONFIRMED_CARD
@@ -509,6 +511,12 @@ model Message {
   senderId     String
   body         String
   type         MessageType @default(TEXT)
+  /// Set when `type` is IMAGE — public HTTPS blob URL or dev inline data URL from upload.
+  imageUrl     String?
+  /// Shared pin; used when `type` is LOCATION.
+  locationLat  Float?
+  locationLng  Float?
+  locationName String?
   availabilityShareId String?
   planRequestId String?
   /// Optional reply pointer; null when the message is not a reply.
