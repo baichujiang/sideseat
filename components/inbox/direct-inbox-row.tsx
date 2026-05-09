@@ -1,6 +1,6 @@
 import type { Route } from "next";
 import type { Course, Invitation, Message, PlanRequest, User } from "@prisma/client";
-import { ChevronRight, Pin } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import { inboxConversationTileClassName } from "@/components/inbox/inbox-conversation-tile";
 import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
@@ -96,14 +96,6 @@ export function DirectInboxRow({
             >
               {displayName}
             </p>
-            {pinned ? (
-              <span
-                className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#FEF3C7] text-[#D97706] dark:bg-amber-950/45 dark:text-amber-200"
-                aria-label="Pinned"
-              >
-                <Pin className="h-2.5 w-2.5" strokeWidth={2} aria-hidden />
-              </span>
-            ) : null}
           </div>
           <p
             className={cn(

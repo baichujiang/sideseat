@@ -4,6 +4,8 @@ import Link from "next/link";
 import type { Route } from "next";
 import { useCallback, useRef, useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 const ACTION_WIDTH = 76;
 const SNAP_OPEN = -(ACTION_WIDTH * 2);
 const DRAG_THRESHOLD = 8;
@@ -131,7 +133,12 @@ export function InboxSwipeRow({
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         style={{ transform: `translateX(${offset}px)` }}
-        className="relative z-[1] touch-pan-y bg-white will-change-transform dark:bg-card"
+        className={cn(
+          "relative z-[1] touch-pan-y will-change-transform",
+          pinned
+            ? "bg-[#F5F1EA] dark:bg-amber-950/20"
+            : "bg-white dark:bg-card",
+        )}
       >
         <Link
           href={href}
@@ -143,8 +150,14 @@ export function InboxSwipeRow({
               dragged.current = false;
             }
           }}
-          className="flex min-h-0 items-center gap-3 px-3 py-2.5 transition-colors active:bg-muted/40 [@media(hover:hover)]:hover:bg-muted/25"
+          className={cn(
+            "flex min-h-0 items-center gap-3 px-3 py-2.5 transition-colors active:bg-muted/40",
+            pinned
+              ? "[@media(hover:hover)]:hover:bg-black/[0.04] dark:[@media(hover:hover)]:hover:bg-white/[0.05]"
+              : "[@media(hover:hover)]:hover:bg-muted/25",
+          )}
         >
+          {pinned ? <span className="sr-only">Pinned conversation</span> : null}
           {children}
         </Link>
       </div>

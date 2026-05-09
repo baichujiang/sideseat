@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { useDeferredValue, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 
@@ -58,46 +57,16 @@ export function InboxChatsView({ userId, merged }: { userId: string; merged: Inb
           description={hasQuery ? `Nothing matches “${query.trim()}”. Try another name or course.` : undefined}
         />
       ) : (
-        <div className="space-y-4">
-          {pinned.length > 0 ? (
-            <InboxSection title="Pinned" headingId="inbox-section-pinned">
-              {pinned.map((item) => (
-                <InboxMergedRow key={inboxRowKey(item)} userId={userId} item={item} />
-              ))}
-            </InboxSection>
-          ) : null}
-          {recent.length > 0 ? (
-            <InboxSection title="Recent" headingId="inbox-section-recent">
-              {recent.map((item) => (
-                <InboxMergedRow key={inboxRowKey(item)} userId={userId} item={item} />
-              ))}
-            </InboxSection>
-          ) : null}
-        </div>
+        <ul className={inboxChatListUlClassName}>
+          {pinned.map((item) => (
+            <InboxMergedRow key={inboxRowKey(item)} userId={userId} item={item} />
+          ))}
+          {recent.map((item) => (
+            <InboxMergedRow key={inboxRowKey(item)} userId={userId} item={item} />
+          ))}
+        </ul>
       )}
     </div>
-  );
-}
-
-function InboxSection({
-  title,
-  headingId,
-  children,
-}: {
-  title: string;
-  headingId: string;
-  children: ReactNode;
-}) {
-  return (
-    <section className="space-y-2" aria-labelledby={headingId} role="region">
-      <h2
-        id={headingId}
-        className="px-0.5 text-[12px] font-semibold uppercase tracking-[0.18em] text-[#5F6B7A] dark:text-zinc-400"
-      >
-        {title}
-      </h2>
-      <ul className={inboxChatListUlClassName}>{children}</ul>
-    </section>
   );
 }
 
