@@ -124,8 +124,8 @@ const DENSITY_LAYOUT: Record<
   },
   immersive: {
     timeColumnPx: 52,
-    minutePx: 0.84,
-    bottomSpacerPx: 48,
+    minutePx: 0.59,
+    bottomSpacerPx: 28,
     visibleWeekDays: 7,
     viewStart: 8 * 60,
     viewEnd: 20 * 60,

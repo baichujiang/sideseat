@@ -9,6 +9,7 @@ import type { Route } from "next";
 import { Bookmark, Users, X } from "lucide-react";
 
 import { QuickEnrollButton } from "@/components/courses/quick-enroll-button";
+import { inboxChatListUlClassName } from "@/components/inbox/inbox-conversation-tile";
 import { cn } from "@/lib/utils";
 
 export type SavedRow = {
@@ -62,7 +63,7 @@ export function SavedCoursesPanel({
   const hasRows = rows.length > 0;
 
   return (
-    <section className={cn(hasRows ? "space-y-3" : "space-y-2")}>
+    <section className="space-y-2">
       <div className="flex items-baseline justify-between gap-3 px-0.5">
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5F6B7A] dark:text-muted-foreground">
           Saved
@@ -73,9 +74,10 @@ export function SavedCoursesPanel({
       </div>
 
       {hasRows ? (
-        <ul className="divide-y divide-[#F0ECE6] overflow-hidden rounded-[1.25rem] border border-[#E7E0D6] bg-white shadow-[0_2px_12px_rgba(15,23,42,0.04)] dark:divide-border dark:border-border dark:bg-card dark:shadow-none">
+        <ul className={inboxChatListUlClassName}>
           {rows.map((row) => (
-            <li key={row.savedId} className="flex items-center gap-2.5 px-4 py-3.5">
+            <li key={row.savedId} className="list-none">
+              <div className="flex items-center gap-3 px-3 py-2.5 transition-colors active:bg-muted/40 [@media(hover:hover)]:hover:bg-muted/25">
               <Link
                 href={`/courses/${row.courseId}?returnTo=%2Fcourses` as Route}
                 className="min-w-0 flex-1"
@@ -86,7 +88,7 @@ export function SavedCoursesPanel({
                   ) : null}
                   <span>{row.name}</span>
                 </p>
-                <p className="mt-1 flex items-center gap-1 text-[12px] text-[#5F6B7A] dark:text-muted-foreground">
+                <p className="mt-0.5 flex items-center gap-1 text-[13px] leading-snug text-[#5F6B7A] dark:text-zinc-400">
                   <Users className="h-3.5 w-3.5 shrink-0 opacity-90" strokeWidth={2.25} aria-hidden />
                   <span>
                     {row.memberCount} {row.memberCount === 1 ? "classmate" : "classmates"} enrolled
@@ -104,6 +106,7 @@ export function SavedCoursesPanel({
               >
                 <X className="h-3.5 w-3.5" strokeWidth={2.25} />
               </button>
+              </div>
             </li>
           ))}
         </ul>

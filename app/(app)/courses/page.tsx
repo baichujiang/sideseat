@@ -4,6 +4,7 @@ import Link from "next/link";
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
 import { CoursesSchoolSelect } from "@/components/courses/courses-school-select";
+import { inboxChatListUlClassName } from "@/components/inbox/inbox-conversation-tile";
 import {
   EnrolledCourseCard,
   type EnrolledSession,
@@ -327,7 +328,7 @@ export default async function CoursesPage({
             </div>
           </div>
         ) : (
-          <ul className="space-y-3">
+          <ul className={inboxChatListUlClassName}>
             {memberships.map((membership) => {
               const sessions: EnrolledSession[] = membership.sessions.map((s) => ({
                 weekday: s.weekday,
@@ -336,8 +337,9 @@ export default async function CoursesPage({
                 location: s.location,
               }));
               return (
-                <li key={membership.id}>
+                <li key={membership.id} className="list-none">
                   <EnrolledCourseCard
+                    variant="compact"
                     course={{
                       id: membership.course.id,
                       name: membership.course.name,
@@ -496,10 +498,11 @@ function CourseRowsList({
   }
 
   return (
-    <ul className="space-y-3">
+    <ul className={inboxChatListUlClassName}>
       {rows.map((row) => (
-        <li key={row.id}>
+        <li key={row.id} className="list-none">
           <PopularCourseCard
+            variant="compact"
             course={{
               id: row.id,
               name: row.name,

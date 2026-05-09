@@ -1116,7 +1116,7 @@ export function ScheduleSurface({
                 >
                   <Minimize2 className="h-5 w-5" strokeWidth={2} aria-hidden />
                 </button>
-                <div className="min-h-0 flex-1 overflow-hidden px-[2px] pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
+                <div className="min-h-0 flex-1 overflow-hidden px-[2px] pb-3 pt-[max(0.625rem,calc(env(safe-area-inset-top)+6px))]">
                   <WeekCalendar
                     {...weekCalendarProps}
                     density="immersive"
