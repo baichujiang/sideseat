@@ -13,6 +13,7 @@ import {
   inferScheduleEventToneKey,
   SCHEDULE_EVENT_TONE_STYLES,
 } from "@/lib/schedule-event-card-tone";
+import { isLongOrAllDayTimedMinutes } from "@/lib/calendar/long-calendar-block";
 import { cn } from "@/lib/utils";
 
 /**
@@ -38,6 +39,14 @@ export type DayTimelineItem = {
   categoryName?: string | null;
   categoryColor?: string | null;
 };
+
+function isAllDayStyleTimelineItem(item: DayTimelineItem): boolean {
+  return (
+    item.kind === "study" &&
+    item.source === "calendar" &&
+    isLongOrAllDayTimedMinutes(item.startMinute, item.endMinute)
+  );
+}
 
 const MINUTE_PX = 0.72;
 const VISUAL_PADDING_MINUTES = 30;
@@ -101,7 +110,8 @@ export function ScheduleDayTimeline({
   const hasNowLine =
     isToday && nowMinute >= 0 && nowMinute <= FULL_DAY_MINUTES;
 
-  const isEmpty = items.length === 0;
+  const allDayItems = items.filter(isAllDayStyleTimelineItem);
+  const timedItems = items.filter((i) => !isAllDayStyleTimelineItem(i));
 
   function clearHoldTimer() {
     if (holdTimerRef.current !== null) {
@@ -133,7 +143,7 @@ export function ScheduleDayTimeline({
     onCreateEvent(start, end);
   }
 
-  const positionedItems = computeTimelineColumns(items);
+  const positionedItems = computeTimelineColumns(timedItems);
 
   return (
     <div
@@ -142,6 +152,47 @@ export function ScheduleDayTimeline({
         "dark:border-border dark:bg-card dark:shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
       )}
     >
+      {allDayItems.length > 0 ? (
+        <div className="mb-2 flex flex-col gap-1.5 rounded-xl border border-[#F0ECE6] bg-[#FAFAF8] px-2.5 py-2 dark:border-white/[0.08] dark:bg-muted/25">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            All day
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {allDayItems.map((item) => {
+              const isStudy = item.kind === "study";
+              const toneKey = inferScheduleEventToneKey({
+                kind: isStudy ? "study" : "class",
+                title: item.title,
+              });
+              const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
+              const catHex = item.categoryColor?.trim();
+              const useCategory = Boolean(catHex);
+              return (
+                <button
+                  key={`${item.kind}-${item.id}`}
+                  type="button"
+                  onClick={() => {
+                    if (item.id === "__draft-preview__") return;
+                    setSelectedItemId(item.id);
+                    onOpenItem?.(item);
+                  }}
+                  className={cn(
+                    "max-w-full truncate rounded-lg px-2.5 py-1.5 text-left text-[12px] font-semibold leading-snug transition",
+                    "hover:brightness-[0.98] active:brightness-95",
+                    !useCategory && tone.card,
+                    useCategory && "border border-black/10 shadow-sm dark:border-white/10",
+                  )}
+                  style={
+                    useCategory && catHex ? categoryBlockSurfaceStyle(catHex, false) : undefined
+                  }
+                >
+                  {item.title}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
       <div
         ref={scrollRef}
         className="overflow-y-auto overscroll-contain"
@@ -252,10 +303,14 @@ export function ScheduleDayTimeline({
               </div>
             ) : null}
 
-            {isEmpty ? (
+            {timedItems.length === 0 ? (
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-4 text-center">
                 <p className="rounded-full bg-muted/70 px-3 py-1 text-[11px] font-medium text-muted-foreground">
-                  {isToday ? "Nothing scheduled today" : "Nothing scheduled"}
+                  {allDayItems.length > 0
+                    ? "No timed events — see All day above"
+                    : isToday
+                      ? "Nothing scheduled today"
+                      : "Nothing scheduled"}
                 </p>
               </div>
             ) : null}

@@ -2,8 +2,8 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import { CourseIntent, Weekday } from "@prisma/client";
-import { useState } from "react";
+import { CourseIntent, type Weekday } from "@prisma/client";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,16 @@ type SessionDraft = {
   end: string;
   location: string;
 };
+
+/** Order-insensitive compare (trim times/location). */
+function sessionsDraftEqual(a: SessionDraft[], b: SessionDraft[]): boolean {
+  if (a.length !== b.length) return false;
+  const norm = (s: SessionDraft) =>
+    `${s.weekday}\0${s.start.trim()}\0${s.end.trim()}\0${s.location.trim()}`;
+  const sa = [...a].map(norm).sort((x, y) => x.localeCompare(y));
+  const sb = [...b].map(norm).sort((x, y) => x.localeCompare(y));
+  return sa.every((k, i) => k === sb[i]);
+}
 
 async function persistCourseSetup(args: {
   course: CourseRef;
@@ -52,7 +62,28 @@ async function persistCourseSetup(args: {
     };
   }
 
-  return { ok: true as const };
+  const savedCourseId =
+    payload.data != null &&
+    typeof payload.data === "object" &&
+    "courseId" in payload.data &&
+    typeof (payload.data as { courseId: unknown }).courseId === "string"
+      ? (payload.data as { courseId: string }).courseId
+      : undefined;
+
+  return { ok: true as const, courseId: savedCourseId };
+}
+
+async function mirrorCourseSessions(courseId: string, sessions: SessionDraft[]) {
+  const complete = sessions.filter(isCompleteMiniSession);
+  return apiFetch("/api/calendar/mirror-course-sessions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      courseId,
+      enabled: complete.length > 0,
+      sessions: complete,
+    }),
+  });
 }
 
 export function CourseCalendarPanel({
@@ -68,55 +99,86 @@ export function CourseCalendarPanel({
   layout?: "card" | "inline";
 }) {
   const router = useRouter();
+  const [isEditing, setIsEditing] = useState(false);
   const [sessions, setSessions] = useState<SessionDraft[]>(initialSessions);
   const [saving, setSaving] = useState(false);
+  const [syncingCalendar, setSyncingCalendar] = useState(false);
   const [error, setError] = useState("");
   const hasCalendarSetup = initialSessions.length > 0;
 
-  async function save(nextSessions: SessionDraft[]) {
+  useEffect(() => {
+    if (!isEditing) {
+      setSessions(initialSessions);
+    }
+  }, [initialSessions, isEditing]);
+
+  const canSyncCalendar = course.code != null && course.code.trim().length > 0;
+  const sessionEditsPending = !sessionsDraftEqual(sessions, initialSessions);
+
+  function enterEdit() {
+    setError("");
+    setSessions(initialSessions);
+    setIsEditing(true);
+  }
+
+  function cancelEdit() {
+    setSessions(initialSessions);
+    setError("");
+    setIsEditing(false);
+  }
+
+  async function saveEdits() {
+    if (sessions.length > 0 && !sessions.every(isCompleteMiniSession)) {
+      setError("Fix every block so end time is after start time.");
+      return;
+    }
+
     setSaving(true);
     setError("");
-    const result = await persistCourseSetup({ course, intentions, sessions: nextSessions });
+    const result = await persistCourseSetup({ course, intentions, sessions });
     if (!result.ok) {
       setSaving(false);
       setError(result.error);
-      return false;
+      return;
     }
 
-    const complete = nextSessions.filter(isCompleteMiniSession);
-    const mirrorRes = await apiFetch("/api/calendar/mirror-course-sessions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        courseId: course.id,
-        enabled: complete.length > 0,
-        sessions: complete,
-      }),
-    });
+    const mirrorTargetId = result.courseId ?? course.id;
+    const mirrorRes = await mirrorCourseSessions(mirrorTargetId, sessions);
     const mirrorPayload = await mirrorRes.json().catch(() => ({}));
     if (!mirrorRes.ok) {
       setSaving(false);
+      setIsEditing(false);
+      router.refresh();
       setError(
         typeof mirrorPayload.error === "string"
-          ? mirrorPayload.error
-          : "Schedule saved, but syncing to Home calendar failed. Check your network and try 'Sync to calendar' again.",
+          ? `Class times saved. Calendar sync failed: ${mirrorPayload.error}`
+          : "Class times saved. Calendar didn’t update — tap “Sync to calendar” to retry.",
       );
-      return false;
+      return;
     }
 
     setSaving(false);
+    setIsEditing(false);
     router.refresh();
-    return true;
   }
 
-  function resetDraftSessions() {
-    setSessions(initialSessions);
+  async function syncCalendarOnly() {
+    if (!canSyncCalendar) return;
+    setSyncingCalendar(true);
     setError("");
+    const mirrorRes = await mirrorCourseSessions(course.id, initialSessions);
+    const mirrorPayload = await mirrorRes.json().catch(() => ({}));
+    setSyncingCalendar(false);
+    if (!mirrorRes.ok) {
+      setError(typeof mirrorPayload.error === "string" ? mirrorPayload.error : "Could not sync calendar.");
+      return;
+    }
+    router.refresh();
   }
 
   function clearDraftSessions() {
     if (sessions.length === 0) return;
-    if (!window.confirm("Clear all current class time blocks?")) return;
+    if (!window.confirm("Clear all class time blocks in this editor?")) return;
     setSessions([]);
     setError("");
   }
@@ -130,57 +192,64 @@ export function CourseCalendarPanel({
           : "rounded-[1.125rem] border border-border/60 bg-card px-4 py-3.5 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]",
       )}
     >
-      <div>
-        <h3 className="text-[15px] font-semibold leading-tight">
-          {hasCalendarSetup ? "Your class times" : "Add this course to your week"}
-        </h3>
-        <p className="mt-0.5 text-[12px] text-muted-foreground">
-          Enter when you meet, then sync - times show up on Home in your week view (your personal calendar, not the school's).
-        </p>
-      </div>
-
-      <div className="mt-3 space-y-4">
-        <MiniWorkweekCourseGrid
-          courseTitle={course.name}
-          sessions={sessions}
-          onSessionsChange={setSessions}
-        />
-
-        {error ? <p className="text-[12px] text-destructive">{error}</p> : null}
-
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
-            onClick={clearDraftSessions}
-            disabled={saving || sessions.length === 0}
-          >
-            Clear all blocks
-          </Button>
-          <Button type="button" variant="ghost" className="flex-1" onClick={resetDraftSessions} disabled={saving}>
-            Reset
-          </Button>
-          <Button
-            type="button"
-            className="flex-1"
-            onClick={() => {
-              if (sessions.length === 0) {
-                setError("Tap the week grid to add at least one class time.");
-                return;
-              }
-              if (!sessions.every(isCompleteMiniSession)) {
-                setError("Fix every row so end time is after start time.");
-                return;
-              }
-              setError("");
-              void save(sessions);
-            }}
-            disabled={saving}
-          >
-            {saving ? "Syncing..." : "Sync to calendar"}
-          </Button>
-        </div>
+      <div className="space-y-4">
+        {isEditing ? (
+          <>
+            <MiniWorkweekCourseGrid
+              key="edit"
+              courseTitle={course.name}
+              sessions={sessions}
+              onSessionsChange={setSessions}
+            />
+            {error ? <p className="text-[12px] text-destructive">{error}</p> : null}
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                onClick={clearDraftSessions}
+                disabled={saving || sessions.length === 0}
+              >
+                Clear all blocks
+              </Button>
+              <Button type="button" variant="ghost" className="min-w-0 flex-1" onClick={cancelEdit} disabled={saving}>
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="min-w-0 flex-1"
+                onClick={() => void saveEdits()}
+                disabled={saving || !sessionEditsPending}
+              >
+                {saving ? "Saving…" : "Save"}
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <MiniWorkweekCourseGrid
+              key="view"
+              readOnly
+              courseTitle={course.name}
+              sessions={initialSessions}
+              onSessionsChange={() => {}}
+            />
+            {error ? <p className="text-[12px] text-destructive">{error}</p> : null}
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" className="min-w-0 flex-1" onClick={enterEdit} disabled={saving}>
+                {hasCalendarSetup ? "Edit" : "Add times"}
+              </Button>
+              <Button
+                type="button"
+                className="min-w-0 flex-1"
+                onClick={() => void syncCalendarOnly()}
+                disabled={saving || syncingCalendar || !canSyncCalendar}
+              >
+                {syncingCalendar ? "Syncing…" : "Sync to calendar"}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </section>
   );

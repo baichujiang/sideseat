@@ -7,6 +7,7 @@ import {
 } from "@/lib/auth/signup-defaults";
 import { createSession } from "@/lib/auth/session";
 import { randomAvatarId } from "@/lib/constants/avatars";
+import { isDatabaseUnreachable, warnDatabaseUnreachableThrottled } from "@/lib/db/prisma-errors";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseBody } from "@/lib/http";
 import { signupRequestSchema } from "@/lib/validators/auth";
@@ -54,6 +55,13 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (cause) {
+    if (isDatabaseUnreachable(cause)) {
+      warnDatabaseUnreachableThrottled("POST /api/auth/signup");
+      return error(
+        "Cannot connect to the database. Check DATABASE_URL and that your Neon project is awake.",
+        503,
+      );
+    }
     console.error(cause);
     return error("Unable to sign up.", 400);
   }

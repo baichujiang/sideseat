@@ -1,19 +1,15 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import type { Route } from "next";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 
 import { dismissTopPushLayer } from "@/components/ui/app-push-layer";
+import { isTabRootPath, resolveSwipeBackHref } from "@/lib/nav/swipe-back-target";
 
 const EDGE_PX = 28;
 const MIN_DX = 72;
 const VERTICAL_DOMINANCE = 1.15;
-
-const ROOT_PATHS = ["/home", "/courses", "/discover", "/inbox", "/profile"];
-
-function isRootPage(pathname: string): boolean {
-  return ROOT_PATHS.includes(pathname);
-}
 
 type EdgeSwipeBackProps = {
   getBounds?: () => DOMRect | null;
@@ -22,6 +18,7 @@ type EdgeSwipeBackProps = {
 export function EdgeSwipeBack({ getBounds }: EdgeSwipeBackProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const sessionRef = useRef<{
     pointerId: number;
@@ -43,10 +40,16 @@ export function EdgeSwipeBack({ getBounds }: EdgeSwipeBackProps) {
   const goBack = useCallback(() => {
     if (dismissTopPushLayer()) return;
 
-    if (isRootPage(pathname)) return;
+    if (isTabRootPath(pathname) || pathname === "/onboarding") return;
+
+    const href = resolveSwipeBackHref(pathname, searchParams);
+    if (href != null) {
+      router.replace(href as Route);
+      return;
+    }
 
     router.back();
-  }, [router, pathname]);
+  }, [router, pathname, searchParams]);
 
   useEffect(() => {
     const onDown = (e: PointerEvent) => {

@@ -7,6 +7,7 @@ import { Search } from "lucide-react";
 import { DirectInboxRow } from "@/components/inbox/direct-inbox-row";
 import { CourseInboxRow } from "@/components/inbox/course-inbox-row";
 import { GroupInboxRow } from "@/components/inbox/group-inbox-row";
+import { inboxChatListUlClassName } from "@/components/inbox/inbox-conversation-tile";
 import { EmptyState } from "@/components/ui/empty-state";
 import { inboxChatMatchesQuery } from "@/lib/inbox/inbox-chat-search";
 import { inboxRowKey, partitionInboxSections } from "@/lib/inbox/partition-inbox-sections";
@@ -57,7 +58,7 @@ export function InboxChatsView({ userId, merged }: { userId: string; merged: Inb
           description={hasQuery ? `Nothing matches “${query.trim()}”. Try another name or course.` : undefined}
         />
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {pinned.length > 0 ? (
             <InboxSection title="Pinned" headingId="inbox-section-pinned">
               {pinned.map((item) => (
@@ -88,14 +89,14 @@ function InboxSection({
   children: ReactNode;
 }) {
   return (
-    <section className="space-y-2.5" aria-labelledby={headingId} role="region">
+    <section className="space-y-2" aria-labelledby={headingId} role="region">
       <h2
         id={headingId}
         className="px-0.5 text-[12px] font-semibold uppercase tracking-[0.18em] text-[#5F6B7A] dark:text-zinc-400"
       >
         {title}
       </h2>
-      <ul className="space-y-2">{children}</ul>
+      <ul className={inboxChatListUlClassName}>{children}</ul>
     </section>
   );
 }

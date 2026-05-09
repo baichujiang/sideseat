@@ -97,7 +97,7 @@ export function InboxSwipeRow({
       ? `/api/connections/${swipeTarget.connectionId}/end`
       : `/api/courses/${swipeTarget.courseId}/inbox-hide`;
   return (
-    <div className="relative overflow-hidden rounded-[24px]">
+    <div className="relative overflow-hidden">
       <div className="absolute inset-y-0 right-0 z-0 flex w-[152px] items-stretch justify-stretch">
         <form action={pinAction} method="post" className="flex w-[76px] shrink-0">
           <input type="hidden" name="returnTo" value={returnTo} />
@@ -131,7 +131,7 @@ export function InboxSwipeRow({
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         style={{ transform: `translateX(${offset}px)` }}
-        className="relative z-[1] touch-pan-y rounded-[24px] bg-[#FFFFFF] will-change-transform"
+        className="relative z-[1] touch-pan-y bg-white will-change-transform dark:bg-card"
       >
         <Link
           href={href}
@@ -143,7 +143,7 @@ export function InboxSwipeRow({
               dragged.current = false;
             }
           }}
-          className="flex min-h-0 items-center gap-4 px-4 py-4 transition-colors active:bg-[#F8F7F4] [@media(hover:hover)]:hover:bg-[#FAF9F6]"
+          className="flex min-h-0 items-center gap-3 px-3 py-2.5 transition-colors active:bg-muted/40 [@media(hover:hover)]:hover:bg-muted/25"
         >
           {children}
         </Link>

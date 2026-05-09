@@ -130,7 +130,7 @@ export function AppShell({
             } as CSSProperties)
       }
       className={cn(
-        "mx-auto flex max-w-md flex-col",
+        "mx-auto flex min-w-0 max-w-md flex-col",
         shellSurface,
         "h-dvh max-h-dvh overflow-hidden",
       )}
@@ -138,7 +138,7 @@ export function AppShell({
       <EdgeSwipeBack getBounds={swipeBounds} />
       <main
         className={cn(
-          "relative flex min-h-0 flex-1 flex-col",
+          "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden",
           shellSurface,
           isChatThread
             ? "px-0 pb-0 pt-[max(0.25rem,env(safe-area-inset-top))]"

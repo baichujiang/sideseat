@@ -11,7 +11,7 @@ import {
   type StudyEntry,
 } from "@/components/home/schedule-surface";
 import { ensureUserCalendarCategories } from "@/lib/calendar/default-user-calendar-categories";
-import { getCurrentSemesterDateRange } from "@/lib/constants/semester";
+import { getClassScheduleDateRange } from "@/lib/constants/vorlesungszeit";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 
@@ -25,13 +25,15 @@ const WEEKDAY_BY_JS: Record<number, Weekday> = {
   6: "SAT",
 };
 
-const CALENDAR_WINDOW_DAYS = 90;
+/** One-off calendar rows shown on Home — recurring courses are computed separately. */
+const CALENDAR_WINDOW_PAST_DAYS = 90;
+const CALENDAR_WINDOW_FUTURE_DAYS = 180;
 
 export default async function HomePage() {
   const sessionUser = await getSessionUser();
   if (!sessionUser) {
     const now = new Date();
-    const semesterRange = getCurrentSemesterDateRange(now);
+    const semesterRange = getClassScheduleDateRange({ school: null, now });
     return (
       <div className="flex min-h-0 flex-1 flex-col">
         <HomeHero nickname={null} avatarUrl={null} nowDate={now} />
@@ -56,13 +58,12 @@ export default async function HomePage() {
   }
   const user = sessionUser;
   const now = new Date();
-  const semesterRange = getCurrentSemesterDateRange(now);
+  const semesterRange = getClassScheduleDateRange({ school: user.school, now });
 
-  // ±90 days of calendar entries lets the Day/Week/Month views navigate a
-  // full semester's range without re-fetching. Courses are recurring so they
-  // don't need a window at all.
-  const windowStart = subDays(now, CALENDAR_WINDOW_DAYS);
-  const windowEnd = addDays(now, CALENDAR_WINDOW_DAYS);
+  // Date-scoped entries (imports, manual events) need a fetch window; recurring
+  // courses are computed separately and are not clipped here.
+  const windowStart = subDays(now, CALENDAR_WINDOW_PAST_DAYS);
+  const windowEnd = addDays(now, CALENDAR_WINDOW_FUTURE_DAYS);
 
   await ensureUserCalendarCategories(prisma, user.id);
 
@@ -74,7 +75,7 @@ export default async function HomePage() {
     prisma.calendarEntry.findMany({
       where: {
         userId: user.id,
-        startAt: { gte: windowStart, lte: windowEnd },
+        AND: [{ startAt: { lte: windowEnd } }, { endAt: { gte: windowStart } }],
       },
       include: {
         companions: {

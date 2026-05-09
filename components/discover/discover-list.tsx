@@ -9,9 +9,11 @@ import { addDays, format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import {
   BookUser,
+  Clock,
   Edit3,
   Dumbbell,
   Languages,
+  Link2,
   Loader2,
   NotebookPen,
   Plus,
@@ -40,6 +42,12 @@ import { LinkButton } from "@/components/ui/link-button";
 import { UserGenderCardIcon } from "@/components/ui/user-gender-icon";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { LANGUAGE_TAG_LABEL } from "@/lib/constants/languages";
+import {
+  buildViewerCourseMatchIndex,
+  courseMatchesViewer,
+  type ViewerCourseMatchIndex,
+} from "@/lib/discover/viewer-course-match";
+import { SCENE_TAB_PALETTE, type SceneTabPalette } from "@/lib/discover/scene-palette";
 import { cn } from "@/lib/utils";
 
 type SceneKind = "shared" | "study" | "meals" | "language" | "sports";
@@ -51,7 +59,8 @@ type CourseRef = {
   name: string;
 };
 
-type SharedCourse = CourseRef;
+/** Shared-course tab rows — chips need overlap to distinguish schedule match vs enrollment-only. */
+type SharedCourse = CourseRef & { overlapMinutes: number };
 
 export type DiscoverRow = {
   userId: string;
@@ -169,6 +178,7 @@ export function DiscoverList({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [postOpen, setPostOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const viewerCourseMatchIndex = buildViewerCourseMatchIndex(enrolledCourses);
 
   const trimmed = query.trim();
   const searchActive = allowSearch && trimmed.length >= 2;
@@ -244,34 +254,39 @@ export function DiscoverList({
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-5 gap-1.5">
+      <div className="grid grid-cols-5 gap-2">
         <SceneTab
           label="Shared courses"
-          icon={<BookUser className="h-6 w-6" strokeWidth={1.9} aria-hidden />}
+          icon={<BookUser className="h-[1.45rem] w-[1.45rem] sm:h-6 sm:w-6" strokeWidth={1.9} aria-hidden />}
+          palette="teal"
           active={scene === "shared"}
           onClick={() => setScene("shared")}
         />
         <SceneTab
           label="Study"
-          icon={<NotebookPen className="h-6 w-6" strokeWidth={1.9} aria-hidden />}
+          icon={<NotebookPen className="h-[1.45rem] w-[1.45rem] sm:h-6 sm:w-6" strokeWidth={1.9} aria-hidden />}
+          palette="indigo"
           active={scene === "study"}
           onClick={() => setScene("study")}
         />
         <SceneTab
           label="Meals"
-          icon={<UtensilsCrossed className="h-6 w-6" strokeWidth={1.9} aria-hidden />}
+          icon={<UtensilsCrossed className="h-[1.45rem] w-[1.45rem] sm:h-6 sm:w-6" strokeWidth={1.9} aria-hidden />}
+          palette="amber"
           active={scene === "meals"}
           onClick={() => setScene("meals")}
         />
         <SceneTab
           label="Language"
-          icon={<Languages className="h-6 w-6" strokeWidth={1.9} aria-hidden />}
+          icon={<Languages className="h-[1.45rem] w-[1.45rem] sm:h-6 sm:w-6" strokeWidth={1.9} aria-hidden />}
+          palette="violet"
           active={scene === "language"}
           onClick={() => setScene("language")}
         />
         <SceneTab
           label="Sports"
-          icon={<Dumbbell className="h-6 w-6" strokeWidth={1.9} aria-hidden />}
+          icon={<Dumbbell className="h-[1.45rem] w-[1.45rem] sm:h-6 sm:w-6" strokeWidth={1.9} aria-hidden />}
+          palette="rose"
           active={scene === "sports"}
           onClick={() => setScene("sports")}
         />
@@ -310,6 +325,7 @@ export function DiscoverList({
           scene={scene}
           onOpenPost={() => setPostOpen(true)}
           savedCourseCount={savedCourseCount}
+          viewerCourseMatchIndex={viewerCourseMatchIndex}
         />
       )}
 
@@ -403,38 +419,42 @@ export function DiscoverList({
 function SceneTab({
   label,
   icon,
+  palette,
   active,
   onClick,
 }: {
   label: string;
   icon: React.ReactNode;
+  palette: SceneTabPalette;
   active: boolean;
   onClick: () => void;
 }) {
+  const p = SCENE_TAB_PALETTE[palette];
+
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "relative flex h-[4rem] min-w-0 flex-col items-center justify-center overflow-hidden rounded-[0.875rem] border px-1 py-1 text-center text-[10px] font-medium leading-tight transition-all",
-        active
-          ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue shadow-[0_4px_14px_rgba(37,99,235,0.14)] dark:border-blue-400/55 dark:bg-blue-950/40 dark:text-blue-300 dark:shadow-[0_4px_14px_rgba(37,99,235,0.2)]"
-          : "border-[#E7E0D6] bg-white text-[#374151] shadow-[0_1px_2px_rgba(15,23,42,0.04)] dark:border-border/80 dark:bg-card dark:text-muted-foreground",
+        "relative flex h-[4.35rem] min-w-0 flex-col items-center justify-center overflow-hidden rounded-xl border px-0.5 pb-1 pt-0.5 text-center text-[9px] font-medium leading-tight transition-all duration-200 ease-out sm:h-[4.5rem] sm:rounded-[1rem] sm:text-[10px]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-classmates-azure/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "active:scale-[0.97]",
+        active ? p.surfaceActive : p.surface,
       )}
     >
       <span
         className={cn(
-          "pointer-events-none absolute inset-x-0 top-0.5 bottom-[1.4rem] inline-flex items-center justify-center",
-          active ? "text-classmates-blue dark:text-blue-300" : "text-[#6B7280] dark:text-muted-foreground/90",
+          "pointer-events-none absolute inset-x-0 top-0.5 bottom-[1.45rem] inline-flex items-center justify-center transition-colors duration-200 sm:bottom-[1.5rem]",
+          active ? p.iconActive : p.icon,
         )}
       >
         {icon}
       </span>
       <span
         className={cn(
-          "relative z-[1] mt-auto block whitespace-normal text-center leading-[1.1]",
-          active ? "font-semibold text-classmates-blue dark:text-blue-300" : "font-medium text-[#374151] dark:text-muted-foreground",
+          "relative z-[1] mt-auto block max-w-[100%] whitespace-normal px-0.5 text-center leading-[1.12] transition-colors duration-200",
+          active ? cn("font-semibold", p.labelActive) : p.label,
         )}
       >
         {label}
@@ -599,12 +619,14 @@ function RecommendationSurface({
   scene,
   onOpenPost,
   savedCourseCount,
+  viewerCourseMatchIndex,
 }: {
   rows: DiscoverRow[];
   posts: DiscoverPostRow[];
   scene: SceneKind;
   onOpenPost: () => void;
   savedCourseCount?: number;
+  viewerCourseMatchIndex: ViewerCourseMatchIndex;
 }) {
   const showingShared = scene === "shared";
   const hasItems = showingShared ? rows.length > 0 || posts.length > 0 : posts.length > 0;
@@ -637,7 +659,12 @@ function RecommendationSurface({
         {showingShared ? (
           <>
             {posts.map((post) => (
-              <PostRow key={post.id} post={post} scene={scene} />
+              <PostRow
+                key={post.id}
+                post={post}
+                scene={scene}
+                viewerCourseMatchIndex={viewerCourseMatchIndex}
+              />
             ))}
             {rows.map((r) => (
               <RecommendationRow key={r.userId} row={r} scene={scene} />
@@ -645,7 +672,12 @@ function RecommendationSurface({
           </>
         ) : (
           posts.map((post) => (
-            <PostRow key={post.id} post={post} scene={scene} />
+            <PostRow
+              key={post.id}
+              post={post}
+              scene={scene}
+              viewerCourseMatchIndex={viewerCourseMatchIndex}
+            />
           ))
         )}
       </div>
@@ -837,6 +869,45 @@ function sharedCourseChipLabel(c: { code: string | null; name: string }): string
   return code || c.name.trim();
 }
 
+/**
+ * Shared tab — one chip per mutual course. Teal + clock = weekly session overlap;
+ * amber + book = same course enrollment but no overlapping times (not “deeper blue”).
+ */
+function SharedCourseChipForRow({
+  code,
+  name,
+  overlapMinutes,
+}: {
+  code: string | null;
+  name: string;
+  overlapMinutes: number;
+}) {
+  const label = sharedCourseChipLabel({ code, name });
+  const hasScheduleOverlap = overlapMinutes > 0;
+  return (
+    <span
+      title={
+        hasScheduleOverlap
+          ? `${name} — calendar overlaps with yours this week`
+          : `${name} — same course; no overlapping sessions in your schedules`
+      }
+      className={cn(
+        "inline-flex max-w-[10rem] items-center gap-1 truncate rounded-full px-2.5 py-0.5 text-[11px] font-bold tabular-nums ring-1 ring-inset",
+        hasScheduleOverlap
+          ? "bg-classmates-teal-soft text-classmates-teal ring-classmates-teal-border dark:bg-teal-950/45 dark:text-teal-200 dark:ring-teal-500/40"
+          : "bg-amber-50/95 text-amber-950 ring-amber-200/90 dark:bg-amber-950/40 dark:text-amber-100 dark:ring-amber-500/35",
+      )}
+    >
+      {hasScheduleOverlap ? (
+        <Clock className="h-3 w-3 shrink-0 opacity-85" aria-hidden />
+      ) : (
+        <BookUser className="h-3 w-3 shrink-0 opacity-75" aria-hidden />
+      )}
+      <span className="truncate">{label}</span>
+    </span>
+  );
+}
+
 function RecommendationRow({ row, scene }: { row: DiscoverRow; scene: SceneKind }) {
   const meta = [row.major, row.semester ? `sem ${row.semester}` : null]
     .filter(Boolean)
@@ -846,21 +917,9 @@ function RecommendationRow({ row, scene }: { row: DiscoverRow; scene: SceneKind 
   const isSharedScene = scene === "shared";
   const hasSharedCourses = isSharedScene && sharedCount > 0;
 
-  /** Compact course chip — used both for shared courses and primary course hint. */
-  function CourseChip({ code, name }: { code: string | null; name: string }) {
-    const label = code?.trim() || name.trim();
-    return (
-      <span
-        title={name}
-        className={cn(
-          "inline-flex max-w-[10rem] items-center truncate rounded-full px-2.5 py-0.5 text-[11px] font-bold tabular-nums",
-          "bg-classmates-blue-soft text-classmates-blue ring-1 ring-inset ring-classmates-blue-border",
-          "dark:bg-blue-950/45 dark:text-blue-200 dark:ring-blue-500/35",
-        )}
-      >
-        {label}
-      </span>
-    );
+  /** Primary course when not listing shared chips — style as enrollment-only hint. */
+  function PrimaryCourseHintChip({ code, name }: { code: string | null; name: string }) {
+    return <SharedCourseChipForRow code={code} name={name} overlapMinutes={0} />;
   }
 
   return (
@@ -911,7 +970,12 @@ function RecommendationRow({ row, scene }: { row: DiscoverRow; scene: SceneKind 
                 Shared
               </span>
               {row.sharedCourses.slice(0, 3).map((c) => (
-                <CourseChip key={c.id} code={c.code} name={c.name} />
+                <SharedCourseChipForRow
+                  key={c.id}
+                  code={c.code}
+                  name={c.name}
+                  overlapMinutes={c.overlapMinutes}
+                />
               ))}
               {sharedCount > 3 ? (
                 <span className="text-[11px] font-medium text-muted-foreground">
@@ -932,7 +996,10 @@ function RecommendationRow({ row, scene }: { row: DiscoverRow; scene: SceneKind 
                 Nearby
               </span>
               {row.primaryCourse.code ? (
-                <CourseChip code={row.primaryCourse.code} name={row.primaryCourse.name} />
+                <PrimaryCourseHintChip
+                  code={row.primaryCourse.code}
+                  name={row.primaryCourse.name}
+                />
               ) : null}
               <span className="min-w-0 truncate text-[11px] text-muted-foreground">
                 {row.primaryCourse.name}
@@ -961,7 +1028,15 @@ function RecommendationRow({ row, scene }: { row: DiscoverRow; scene: SceneKind 
   );
 }
 
-function PostRow({ post, scene }: { post: DiscoverPostRow; scene: SceneKind }) {
+function PostRow({
+  post,
+  scene,
+  viewerCourseMatchIndex,
+}: {
+  post: DiscoverPostRow;
+  scene: SceneKind;
+  viewerCourseMatchIndex: ViewerCourseMatchIndex;
+}) {
   const meta = [post.major, post.semester ? `sem ${post.semester}` : null]
     .filter(Boolean)
     .join(" · ");
@@ -969,18 +1044,15 @@ function PostRow({ post, scene }: { post: DiscoverPostRow; scene: SceneKind }) {
   const returnTo = scene === "shared" ? "/discover" : `/discover?tab=${scene}`;
   const postDetailHref =
     `${postPath}?returnTo=${encodeURIComponent(returnTo)}` as Route;
-  const profileHref = (
-    post.isOwn
-      ? postDetailHref
-      : `/users/${post.userId}?returnTo=${encodeURIComponent(postPath)}`
-  ) as Route;
 
   return (
     <ClassmatesPersonRow
-      avatarHref={profileHref}
+      avatarHref={postDetailHref}
       contentHref={postDetailHref}
       avatarUrl={post.avatarUrl}
-      profileAriaLabel={`View ${post.nickname}'s profile`}
+      profileAriaLabel={
+        post.isOwn ? "View your post" : `View ${post.nickname}'s post`
+      }
       name={post.nickname}
       titleAdornment={
         <>
@@ -1009,14 +1081,30 @@ function PostRow({ post, scene }: { post: DiscoverPostRow; scene: SceneKind }) {
           ) : null}
           {post.linkedCourses && post.linkedCourses.length > 0 ? (
             <div className="mt-1.5 flex flex-wrap gap-1">
-              {post.linkedCourses.map((c) => (
-                <span
-                  key={c.id}
-                  className="inline-flex rounded-full border border-classmates-blue-border/60 bg-classmates-blue-soft/50 px-2 py-0.5 text-[10px] font-medium text-classmates-blue"
-                >
-                  {c.code ?? c.name}
-                </span>
-              ))}
+              {post.linkedCourses.map((c) => {
+                const matchesViewer = courseMatchesViewer(c, viewerCourseMatchIndex);
+                return (
+                  <span
+                    key={c.id}
+                    className={cn(
+                      "inline-flex max-w-[11rem] items-center gap-1 truncate rounded-full px-2 py-0.5 text-[10px] tabular-nums",
+                      matchesViewer
+                        ? "border-2 border-dashed border-classmates-teal-border bg-classmates-teal-soft/70 font-semibold text-classmates-teal dark:border-teal-500/55 dark:bg-teal-950/35 dark:text-teal-200"
+                        : "border border-classmates-blue-border/60 bg-classmates-blue-soft/50 font-medium text-classmates-blue",
+                    )}
+                    title={
+                      matchesViewer
+                        ? `${c.name} — same course as yours (code or enrollment)`
+                        : c.name
+                    }
+                  >
+                    {matchesViewer ? (
+                      <Link2 className="h-3 w-3 shrink-0 opacity-90" aria-hidden />
+                    ) : null}
+                    <span className="truncate">{c.code ?? c.name}</span>
+                  </span>
+                );
+              })}
             </div>
           ) : null}
           <p className="mt-1 text-[10.5px] text-muted-foreground">

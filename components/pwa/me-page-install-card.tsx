@@ -1,9 +1,8 @@
 "use client";
 
-import { Download } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
-import { PwaIosInstallHelpModal } from "@/components/pwa/pwa-ios-install-help";
+import { PwaIosInstallSteps } from "@/components/pwa/pwa-ios-install-steps";
 import { Button } from "@/components/ui/button";
 import { APP_NAME } from "@/lib/constants/app";
 import {
@@ -11,13 +10,15 @@ import {
   runDeferredInstallPrompt,
   subscribeDeferredInstall,
 } from "@/lib/pwa/deferred-install";
-import { isIosSafari, isStandalonePwa } from "@/lib/pwa/pwa-environment";
+import { canIosShareForInstall, openIosShareForInstall } from "@/lib/pwa/ios-share-for-install";
+import { isIosDevice, isStandalonePwa } from "@/lib/pwa/pwa-environment";
+import { cn } from "@/lib/utils";
 
 /** Persistent Me-tab entry for install / Add to Home Screen (survives floating bar dismiss). */
-export function MePageInstallCard() {
+export function MePageInstallCard({ compact = false }: { compact?: boolean }) {
   const [, refresh] = useState(0);
-  const [iosHelpOpen, setIosHelpOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [iosShareBusy, setIosShareBusy] = useState(false);
 
   useEffect(() => subscribeDeferredInstall(() => refresh((x) => x + 1)), []);
 
@@ -30,51 +31,80 @@ export function MePageInstallCard() {
     }
   }, []);
 
+  const onIosShare = useCallback(async () => {
+    if (typeof window === "undefined") return;
+    setIosShareBusy(true);
+    try {
+      await openIosShareForInstall(APP_NAME, window.location.href);
+    } finally {
+      setIosShareBusy(false);
+    }
+  }, []);
+
   if (isStandalonePwa()) return null;
 
   const deferred = getDeferredInstallPrompt();
   const showInstall = deferred !== null;
-  const showIos = !showInstall && isIosSafari();
+  const showIos = !showInstall && isIosDevice();
+  const iosCanShare = showIos && canIosShareForInstall();
+
+  const pad = compact ? "p-2.5" : "p-3";
 
   return (
-    <>
-      <div className="overflow-hidden rounded-2xl border border-classmates-edge bg-classmates-surface p-4 shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card">
-        <div className="flex gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary">
-            <Download className="h-5 w-5" strokeWidth={2.25} aria-hidden />
-          </span>
-          <div className="min-w-0 flex-1 space-y-2">
-            <p className="text-[14px] font-semibold leading-tight text-foreground">Add to Home Screen</p>
-            <p className="text-[12px] leading-snug text-muted-foreground">
-              {showInstall
-                ? `Install ${APP_NAME} for quick access like an app.`
-                : showIos
-                  ? "Open from your home screen with one tap."
-                  : "If your browser shows Install or Add to Home Screen, you can add this page anytime."}
+    <div
+      className={cn(
+        "overflow-hidden rounded-xl border border-classmates-edge bg-classmates-surface shadow-[0_2px_10px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card",
+        pad,
+      )}
+    >
+      <p className="sr-only">Add to Home Screen</p>
+      <div className="space-y-2">
+        {showInstall ? (
+          <>
+            <Button
+              type="button"
+              className={cn("h-8 w-full rounded-lg px-3 text-[12px] font-semibold", !compact && "h-9")}
+              disabled={busy}
+              onClick={() => void onInstall()}
+            >
+              {busy ? "…" : `Install ${APP_NAME}`}
+            </Button>
+            <p className="text-[11px] leading-snug text-muted-foreground">
+              If no dialog appears, use your browser menu and choose Install app or Add to Home Screen.
             </p>
-            {showInstall ? (
+          </>
+        ) : showIos ? (
+          <>
+            {iosCanShare ? (
               <Button
                 type="button"
-                className="mt-1 h-9 rounded-xl px-4 text-[13px] font-semibold"
-                disabled={busy}
-                onClick={() => void onInstall()}
+                className={cn("h-8 w-full rounded-lg px-3 text-[12px] font-semibold", !compact && "h-9")}
+                disabled={iosShareBusy}
+                onClick={() => void onIosShare()}
               >
-                {busy ? "…" : "Install"}
-              </Button>
-            ) : showIos ? (
-              <Button
-                type="button"
-                variant="secondary"
-                className="mt-1 h-9 rounded-xl px-4 text-[13px] font-semibold"
-                onClick={() => setIosHelpOpen(true)}
-              >
-                How to add
+                {iosShareBusy ? "…" : "Add via Share menu"}
               </Button>
             ) : null}
-          </div>
-        </div>
+            <p className="text-[11px] leading-snug text-muted-foreground">
+              {iosCanShare
+                ? "Opens the system Share sheet — choose Add to Home Screen. If it is missing, use the manual steps below."
+                : "iOS does not support one-tap install from the web. Use the manual steps below."}
+            </p>
+            <details className="rounded-lg border border-border/60 bg-muted/20 px-2 py-1.5 text-[11px] text-foreground">
+              <summary className="cursor-pointer list-none font-medium text-classmates-azure outline-none">
+                Manual steps (if Share did not work)
+              </summary>
+              <div className="mt-2 border-t border-border/50 pt-2">
+                <PwaIosInstallSteps />
+              </div>
+            </details>
+          </>
+        ) : (
+          <p className="text-[11px] leading-snug text-muted-foreground">
+            Install prompt not available on this browser. Try Chrome or Edge on Android, or Safari on iPhone.
+          </p>
+        )}
       </div>
-      <PwaIosInstallHelpModal open={iosHelpOpen} onClose={() => setIosHelpOpen(false)} />
-    </>
+    </div>
   );
 }

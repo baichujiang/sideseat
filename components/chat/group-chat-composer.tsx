@@ -48,8 +48,8 @@ export function GroupChatComposer({ groupChatId }: { groupChatId: string }) {
   };
 
   return (
-    <div className="relative space-y-2 bg-background/95 p-2 backdrop-blur-sm">
-      <div className="flex items-end gap-2 px-1 pb-0 pt-1">
+    <div className="relative space-y-2">
+      <div className="flex items-end gap-2">
         <label className="sr-only" htmlFor={`group-chat-input-${groupChatId}`}>
           Message
         </label>
@@ -69,7 +69,7 @@ export function GroupChatComposer({ groupChatId }: { groupChatId: string }) {
           rows={1}
           placeholder="Message the group…"
           className={cn(
-            "min-h-[44px] max-h-32 flex-1 resize-none rounded-2xl border border-input bg-muted/40 px-4 py-3 text-[16px] leading-snug",
+            "min-h-[44px] max-h-32 flex-1 resize-none rounded-[1.25rem] border border-input bg-muted/40 px-3.5 py-2.5 text-[16px] leading-snug",
             "placeholder:text-muted-foreground/70",
             "outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
           )}
@@ -89,7 +89,7 @@ export function GroupChatComposer({ groupChatId }: { groupChatId: string }) {
         </button>
       </div>
       {error ? (
-        <div className="px-3 pb-2">
+        <div className="pb-0.5">
           <FormMessage message={error} />
         </div>
       ) : null}

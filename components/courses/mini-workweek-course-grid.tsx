@@ -95,9 +95,16 @@ type Props = {
   sessions: MiniSessionDraft[];
   onSessionsChange: (next: MiniSessionDraft[]) => void;
   courseTitle: string;
+  /** View-only: same week grid, no add / drag / edit (use on course detail before tapping Edit). */
+  readOnly?: boolean;
 };
 
-export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle }: Props) {
+export function MiniWorkweekCourseGrid({
+  sessions,
+  onSessionsChange,
+  courseTitle,
+  readOnly = false,
+}: Props) {
   /** Edit panel open for this index (triggered by tap). */
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   /** Drag-ready mode: card deepens, anchors visible (triggered by long-press). */
@@ -226,6 +233,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
     index: number,
     mode: "move" | "resize-start" | "resize-end",
   ) {
+    if (readOnly) return;
     if (e.pointerType === "mouse" && e.button !== 0) return;
 
     const row = sessionsRef.current[index];
@@ -408,14 +416,26 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
 
   return (
     <div className="space-y-3">
-      <p className="text-[11px] leading-snug text-muted-foreground">
-        <span className="font-medium text-foreground">Tap</span> empty slot → add 1h 30m.{" "}
-        <span className="font-medium text-foreground">Tap</span> a block → edit.{" "}
-        <span className="font-medium text-foreground">Long-press</span> → select (dots appear) → drag to move or resize.
-      </p>
+      {readOnly ? (
+        <p className="text-[11px] leading-snug text-muted-foreground">
+          <span className="font-medium text-foreground">Edit</span> to add or change times.
+        </p>
+      ) : (
+        <p className="text-[11px] leading-snug text-muted-foreground">
+          <span className="font-medium text-foreground">Tap</span> empty slot → add 1h 30m.{" "}
+          <span className="font-medium text-foreground">Tap</span> a block → edit.{" "}
+          <span className="font-medium text-foreground">Long-press</span> → select (dots appear) → drag to move or
+          resize.
+        </p>
+      )}
 
-      <div className="max-h-[min(420px,70vh)] overflow-y-auto overflow-x-auto rounded-xl border border-border/80 bg-muted/15">
-        <div className="flex items-stretch">
+      <div
+        className={cn(
+          "max-h-[min(420px,70vh)] w-full min-w-0 overflow-y-auto overflow-x-hidden rounded-xl border border-border/80 bg-muted/15 touch-pan-y",
+          readOnly && "bg-muted/10",
+        )}
+      >
+        <div className="flex w-full min-w-0 items-stretch">
           <div
             className="flex shrink-0 flex-col border-r border-border/60 bg-muted/25"
             style={{ width: TIME_COL_PX }}
@@ -433,11 +453,16 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
             </div>
           </div>
 
-          <div className="relative flex min-w-0 flex-1 items-stretch" ref={(el) => { gridColsElRef.current = el; }}>
+          <div
+            className="relative flex min-w-0 flex-1 items-stretch"
+            ref={(el) => {
+              gridColsElRef.current = el;
+            }}
+          >
             {WORKDAYS.map((weekday) => (
               <div
                 key={weekday}
-                className="relative flex min-w-[52px] flex-1 flex-col border-r border-border/40 last:border-r-0"
+                className="relative flex min-w-0 flex-1 flex-col border-r border-border/40 last:border-r-0"
               >
                 <div className={cn(HEADER_ROW_CLASS, "justify-center text-[10px] font-semibold text-foreground")}>
                   {DAY_SHORT[weekday]}
@@ -453,19 +478,23 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                   <div className="absolute inset-0 flex flex-col">
                     {SLOT_ROW_STARTS.map((slotStart) => (
                       <div key={slotStart} className="relative min-h-0 flex-1 border-b border-dashed border-border/25">
-                        <button
-                          type="button"
-                          aria-label={`Add ${courseTitle} ${DAY_SHORT[weekday]} ${formatMinutes(slotStart)}`}
-                          className="absolute inset-0 z-0 transition hover:bg-primary/5"
-                          onClick={() => {
-                            if (dragSelectedIndex !== null) {
-                              setDragSelectedIndex(null);
-                              setToolbarIndex(null);
-                              return;
-                            }
-                            addAtSlot(weekday, slotStart);
-                          }}
-                        />
+                        {readOnly ? (
+                          <span className="absolute inset-0 z-0" aria-hidden />
+                        ) : (
+                          <button
+                            type="button"
+                            aria-label={`Add ${courseTitle} ${DAY_SHORT[weekday]} ${formatMinutes(slotStart)}`}
+                            className="absolute inset-0 z-0 transition hover:bg-primary/5"
+                            onClick={() => {
+                              if (dragSelectedIndex !== null) {
+                                setDragSelectedIndex(null);
+                                setToolbarIndex(null);
+                                return;
+                              }
+                              addAtSlot(weekday, slotStart);
+                            }}
+                          />
+                        )}
                       </div>
                     ))}
                   </div>
@@ -490,52 +519,65 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
                         ref={(el) => { blockElRefs.current.set(index, el); }}
                         className={cn(
                           "absolute left-0.5 right-0.5 z-10 overflow-visible rounded-sm border shadow-sm",
-                          "border-primary/35 bg-primary/15",
-                          isEditing && "z-20 ring-2 ring-primary ring-offset-1 ring-offset-background",
-                          isDragSelected && !dragging && "z-20 border-primary/60 bg-primary/30",
-                          dragging && "z-30 scale-[1.02] border-primary/60 bg-primary/30 ring-2 ring-primary/60",
-                          dragging ? "transition-none" : "transition-[box-shadow,transform,background-color]",
+                          readOnly ? "border-border/50 bg-muted/40" : "border-primary/35 bg-primary/15",
+                          !readOnly && isEditing && "z-20 ring-2 ring-primary ring-offset-1 ring-offset-background",
+                          !readOnly && isDragSelected && !dragging && "z-20 border-primary/60 bg-primary/30",
+                          !readOnly && dragging && "z-30 scale-[1.02] border-primary/60 bg-primary/30 ring-2 ring-primary/60",
+                          !readOnly && (dragging ? "transition-none" : "transition-[box-shadow,transform,background-color]"),
                         )}
                         style={{
                           top: `${topPct}%`,
                           height: `${Math.max(heightPct, (18 / bodyHeight) * 100)}%`,
                         }}
                       >
-                        {/* Body — tap to open edit, long-press to enter drag mode */}
-                        <div
-                          role="button"
-                          tabIndex={0}
-                          className={cn(
-                            "absolute inset-0 z-10 cursor-grab select-none overflow-hidden rounded-[inherit] px-1 py-0.5 active:cursor-grabbing",
-                            isDragSelected && "touch-none",
-                          )}
-                          onKeyDown={(ev) => {
-                            if (ev.key === "Enter" || ev.key === " ") {
-                              ev.preventDefault();
-                              if (isDragSelected) return;
-                              setSelectedIndex(isEditing ? null : index);
-                            }
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (suppressClickRef.current) return;
-                            setToolbarIndex(null);
-                            // In drag mode: clicking the card does nothing (stay in drag mode)
-                            if (isDragSelected) return;
-                            setSelectedIndex(isEditing ? null : index);
-                          }}
-                          onPointerDown={(e) => startGridPointerSession(e, index, "move")}
-                        >
-                          <span className="line-clamp-2 text-[9px] font-semibold leading-tight text-foreground">
-                            {courseTitle}
-                          </span>
-                          <span className="block text-[8px] tabular-nums text-muted-foreground">
-                            {timeLabel}
-                          </span>
-                        </div>
+                        {readOnly ? (
+                          <div
+                            className="absolute inset-0 z-10 select-none overflow-hidden rounded-[inherit] px-1 py-0.5"
+                            aria-label={`${courseTitle} ${DAY_SHORT[weekday]} ${timeLabel}`}
+                          >
+                            <span className="line-clamp-2 text-[9px] font-semibold leading-tight text-foreground">
+                              {courseTitle}
+                            </span>
+                            <span className="block text-[8px] tabular-nums text-muted-foreground">{timeLabel}</span>
+                          </div>
+                        ) : (
+                          <>
+                            {/* Body — tap to open edit, long-press to enter drag mode */}
+                            <div
+                              role="button"
+                              tabIndex={0}
+                              className={cn(
+                                "absolute inset-0 z-10 cursor-grab select-none overflow-hidden rounded-[inherit] px-1 py-0.5 active:cursor-grabbing",
+                                isDragSelected && "touch-none",
+                              )}
+                              onKeyDown={(ev) => {
+                                if (ev.key === "Enter" || ev.key === " ") {
+                                  ev.preventDefault();
+                                  if (isDragSelected) return;
+                                  setSelectedIndex(isEditing ? null : index);
+                                }
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (suppressClickRef.current) return;
+                                setToolbarIndex(null);
+                                if (isDragSelected) return;
+                                setSelectedIndex(isEditing ? null : index);
+                              }}
+                              onPointerDown={(e) => startGridPointerSession(e, index, "move")}
+                            >
+                              <span className="line-clamp-2 text-[9px] font-semibold leading-tight text-foreground">
+                                {courseTitle}
+                              </span>
+                              <span className="block text-[8px] tabular-nums text-muted-foreground">
+                                {timeLabel}
+                              </span>
+                            </div>
+                          </>
+                        )}
 
                         {/* Resize handles — only visible in drag-selected mode */}
-                        {isDragSelected || dragging ? (
+                        {!readOnly && (isDragSelected || dragging) ? (
                           <>
                             <button
                               type="button"
@@ -580,7 +622,11 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
             ))}
 
             {/* Smooth-dragging block rendered as overlay across all columns */}
-            {liveBlock && liveBlock.dragX != null && sessions[liveBlock.index] && (() => {
+            {!readOnly &&
+              liveBlock &&
+              liveBlock.dragX != null &&
+              sessions[liveBlock.index] &&
+              (() => {
               const visStart = Math.max(liveBlock.startMin, GRID_VIEW_START);
               const visEnd = Math.min(liveBlock.endMin, GRID_VIEW_END);
               if (visEnd <= visStart) return null;
@@ -619,7 +665,7 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
         </div>
       </div>
 
-      {selected && selectedIndex !== null && WORKDAYS.includes(selected.weekday) ? (
+      {!readOnly && selected && selectedIndex !== null && WORKDAYS.includes(selected.weekday) ? (
         <div className="rounded-xl border border-border/70 bg-card p-3">
           {/* Header: back (left) / title (center) / confirm (right) */}
           <div className="flex items-center justify-between">
@@ -686,7 +732,11 @@ export function MiniWorkweekCourseGrid({ sessions, onSessionsChange, courseTitle
 
 
       {/* Toolbar portal — rendered at body level to avoid overflow clipping */}
-      {portalReady && toolbarIndex !== null && toolbarPos && sessionsRef.current[toolbarIndex]
+      {portalReady &&
+        !readOnly &&
+        toolbarIndex !== null &&
+        toolbarPos &&
+        sessionsRef.current[toolbarIndex]
         ? createPortal(
             <div
               className="fixed z-[200] flex -translate-x-1/2 items-center gap-0 whitespace-nowrap rounded-lg border border-border/80 bg-popover px-0.5 py-0.5 shadow-xl"

@@ -84,41 +84,41 @@ export default async function PeerUserProfilePage({
             Courses
           </p>
           {access.peerCourses.length === 0 ? (
-            <p className="text-xs text-muted-foreground">No courses shared yet.</p>
+            <p className="text-xs text-muted-foreground">No courses on their profile yet.</p>
           ) : (
-            <ul className="flex flex-wrap gap-1.5">
-              {access.peerCourses.map((course) => {
-                const isShared = access.sharedCourses.some((c) => c.id === course.id);
-                const courseHref =
-                  `/courses/${course.id}?returnTo=${encodeURIComponent(friendLinkReturnTo)}` as Route;
-                const courseLabel = course.code ? `[${course.code}] ${course.name}` : course.name;
-                return (
-                  <li key={course.id}>
-                    <Link
-                      href={courseHref}
-                      className={
-                        isShared
-                          ? "inline-flex max-w-[14rem] rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary transition hover:bg-primary/15"
-                          : "inline-flex max-w-[14rem] rounded-full bg-foreground/5 px-2.5 py-1 text-[11px] text-foreground/75 transition hover:bg-foreground/10"
-                      }
-                      title={courseLabel}
-                    >
-                      <span className="truncate">{courseLabel}</span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-          {access.sharedCourses.length > 0 ? (
-            <p className="text-[11px] text-primary/90">
-              {access.sharedCourses.length} shared{" "}
-              {access.sharedCourses.length === 1 ? "course" : "courses"}
-            </p>
-          ) : (
-            <p className="text-[11px] text-muted-foreground">
-              No shared courses yet.
-            </p>
+            <>
+              <ul className="flex flex-wrap gap-1.5">
+                {access.peerCourses.map((course) => {
+                  const isShared = access.sharedCourses.some((c) => c.id === course.id);
+                  const courseHref =
+                    `/courses/${course.id}?returnTo=${encodeURIComponent(friendLinkReturnTo)}` as Route;
+                  const courseLabel = course.code ? `[${course.code}] ${course.name}` : course.name;
+                  return (
+                    <li key={course.id}>
+                      <Link
+                        href={courseHref}
+                        className={
+                          isShared
+                            ? "inline-flex max-w-[14rem] rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary transition hover:bg-primary/15"
+                            : "inline-flex max-w-[14rem] rounded-full bg-foreground/5 px-2.5 py-1 text-[11px] text-foreground/75 transition hover:bg-foreground/10"
+                        }
+                        title={courseLabel}
+                      >
+                        <span className="truncate">{courseLabel}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+              {access.sharedCourses.length > 0 ? (
+                <p className="text-[11px] text-primary/90">
+                  {access.sharedCourses.length} shared{" "}
+                  {access.sharedCourses.length === 1 ? "course" : "courses"}
+                </p>
+              ) : (
+                <p className="text-[11px] text-muted-foreground">No overlap with your courses.</p>
+              )}
+            </>
           )}
         </div>
 

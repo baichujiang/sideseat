@@ -2,7 +2,17 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
 import { format } from "date-fns";
-import { ChevronRight, MapPin } from "lucide-react";
+import {
+  BookUser,
+  Calendar,
+  ChevronRight,
+  Clock,
+  Dumbbell,
+  Languages,
+  MapPin,
+  NotebookPen,
+  UtensilsCrossed,
+} from "lucide-react";
 import { ClassmatePostCategory, ClassmatePostStatus } from "@prisma/client";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
@@ -10,6 +20,10 @@ import { BackLink } from "@/components/nav/back-link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LinkButton } from "@/components/ui/link-button";
 import { getSessionUser } from "@/lib/auth/session";
+import {
+  classmatePostCategoryToPalette,
+  SCENE_LIST_ROW,
+} from "@/lib/discover/scene-palette";
 import { prisma } from "@/lib/db/prisma";
 import { cn } from "@/lib/utils";
 
@@ -63,28 +77,28 @@ export default async function InboxMyPostsPage() {
           }
         />
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-6">
           {active.length > 0 ? (
-            <section className="space-y-2">
-              <h2 className="px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Live
+            <section className="space-y-3">
+              <h2 className="px-0.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-classmates-teal dark:text-teal-300">
+                Live on Discover
               </h2>
-              <ul className="overflow-hidden rounded-[1.125rem] border border-border/60 bg-card shadow-[0_2px_16px_-4px_rgba(15,23,42,0.06)]">
-                {active.map((post, i) => (
-                  <PostRow key={post.id} post={post} isLast={i === active.length - 1} />
+              <ul className="space-y-2.5">
+                {active.map((post) => (
+                  <PostRow key={post.id} post={post} />
                 ))}
               </ul>
             </section>
           ) : null}
 
           {archived.length > 0 ? (
-            <section className="space-y-2">
-              <h2 className="px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <section className="space-y-3">
+              <h2 className="px-0.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                 Past
               </h2>
-              <ul className="overflow-hidden rounded-[1.125rem] border border-border/60 bg-card shadow-[0_2px_16px_-4px_rgba(15,23,42,0.06)]">
-                {archived.map((post, i) => (
-                  <PostRow key={post.id} post={post} isLast={i === archived.length - 1} muted />
+              <ul className="space-y-2.5">
+                {archived.map((post) => (
+                  <PostRow key={post.id} post={post} muted />
                 ))}
               </ul>
             </section>
@@ -95,9 +109,24 @@ export default async function InboxMyPostsPage() {
   );
 }
 
+function categoryIcon(c: ClassmatePostCategory) {
+  const cls = "h-[18px] w-[18px] shrink-0";
+  switch (c) {
+    case ClassmatePostCategory.SHARED_COURSES:
+      return <BookUser className={cls} strokeWidth={1.85} aria-hidden />;
+    case ClassmatePostCategory.MEALS:
+      return <UtensilsCrossed className={cls} strokeWidth={1.85} aria-hidden />;
+    case ClassmatePostCategory.LANGUAGE:
+      return <Languages className={cls} strokeWidth={1.85} aria-hidden />;
+    case ClassmatePostCategory.SPORTS:
+      return <Dumbbell className={cls} strokeWidth={1.85} aria-hidden />;
+    case ClassmatePostCategory.STUDY:
+      return <NotebookPen className={cls} strokeWidth={1.85} aria-hidden />;
+  }
+}
+
 function PostRow({
   post,
-  isLast,
   muted = false,
 }: {
   post: {
@@ -108,9 +137,9 @@ function PostRow({
     body: string | null;
     status: ClassmatePostStatus;
     expiresAt: Date;
+    createdAt: Date;
     updatedAt: Date;
   };
-  isLast: boolean;
   muted?: boolean;
 }) {
   const postHref =
@@ -123,46 +152,101 @@ function PostRow({
         ? "Expired"
         : "Ended"
     : null;
+  const wasEdited = post.updatedAt.getTime() - post.createdAt.getTime() > 60_000;
+
+  const palette = classmatePostCategoryToPalette(post.category);
+  const row = SCENE_LIST_ROW[palette];
 
   return (
-    <li className={cn(!isLast && "border-b border-border/50")}>
+    <li>
       <Link
         href={postHref}
         className={cn(
-          "flex min-h-[4.25rem] items-start gap-3.5 px-4 py-3.5 transition-colors active:bg-muted/50 [@media(hover:hover)]:hover:bg-muted/45",
-          muted && "opacity-80",
+          "flex items-start gap-3.5 rounded-[1.25rem] border p-4 transition-all duration-200 ease-out active:bg-black/[0.03] dark:active:bg-white/[0.04]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-classmates-azure/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          row.card,
+          row.cardHover,
+          muted && "opacity-[0.88] saturate-[0.9]",
         )}
       >
-        <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <MapPin className="h-4 w-4" strokeWidth={2} />
+        <span
+          className={cn(
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border",
+            row.iconWrap,
+            muted && "opacity-90",
+          )}
+        >
+          {muted ? (
+            <Calendar className="h-[18px] w-[18px] shrink-0 opacity-85" strokeWidth={1.85} aria-hidden />
+          ) : (
+            categoryIcon(post.category)
+          )}
         </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+        <div className="min-w-0 flex-1 pt-0.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span
+              className={cn("rounded-full border px-2 py-0.5 text-[10px]", row.categoryChip)}
+            >
               {labelCategory(post.category)}
             </span>
             {live ? (
-              <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">
+              <span className="rounded-full border border-emerald-500/35 bg-emerald-500/12 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 dark:text-emerald-300">
                 Active
               </span>
             ) : statusLabel ? (
-              <span className="rounded-full bg-foreground/5 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                 {statusLabel}
               </span>
             ) : null}
           </div>
-          <p className="mt-1.5 text-[15px] font-semibold leading-snug text-foreground">{post.title}</p>
-          {post.body ? (
-            <p className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-muted-foreground">{post.body}</p>
-          ) : null}
-          <p className="mt-1.5 text-[11px] text-muted-foreground">
-            {post.city} ·{" "}
-            {live
-              ? `Until ${format(post.expiresAt, "MMM d, yyyy")}`
-              : `Updated ${format(post.updatedAt, "MMM d, yyyy")}`}
+          <p className="mt-2 text-[15px] font-semibold leading-snug tracking-tight text-foreground">
+            {post.title}
           </p>
+          {post.body ? (
+            <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-muted-foreground">
+              {post.body}
+            </p>
+          ) : null}
+          <div className="mt-2 flex flex-col gap-1.5 text-[11px] leading-snug text-muted-foreground">
+            <span className="inline-flex flex-wrap items-center gap-1.5">
+              <Clock className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
+              <span className="font-medium text-foreground/75">Posted</span>
+              <time dateTime={post.createdAt.toISOString()}>
+                {format(post.createdAt, "MMM d, yyyy · h:mm a")}
+              </time>
+            </span>
+            {wasEdited ? (
+              <span className="inline-flex flex-wrap items-center gap-1.5 pl-[1.125rem] sm:pl-0">
+                <span className="font-medium text-foreground/75">Last edited</span>
+                <time dateTime={post.updatedAt.toISOString()}>
+                  {format(post.updatedAt, "MMM d, yyyy · h:mm a")}
+                </time>
+              </span>
+            ) : null}
+            <span className="inline-flex flex-wrap items-center gap-x-1 gap-y-0.5">
+              <MapPin className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
+              {post.city}
+              <span aria-hidden>·</span>
+              {live ? (
+                <>
+                  <span className="sr-only">Listing expires</span>
+                  Until {format(post.expiresAt, "MMM d, yyyy")}
+                </>
+              ) : (
+                <>
+                  {statusLabel ? `${statusLabel} · ` : null}
+                  <span className="sr-only">Last update</span>
+                  {format(post.updatedAt, "MMM d, yyyy")}
+                </>
+              )}
+            </span>
+          </div>
         </div>
-        <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground/45" strokeWidth={2} />
+        <ChevronRight
+          className="mt-2 h-4 w-4 shrink-0 text-muted-foreground/40"
+          strokeWidth={2}
+          aria-hidden
+        />
       </Link>
     </li>
   );

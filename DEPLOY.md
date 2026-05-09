@@ -42,8 +42,29 @@ Check `prisma/migrations/` is committed and `.env` is NOT.
    | `ADMIN_EMAILS` | your login email, comma-separated |
    | `RESEND_API_KEY` | existing `re_...` key |
    | `EMAIL_FROM` | `SideSeat <noreply@sideseat.de>` |
+   | `STRIPE_SECRET_KEY` | optional — `sk_live_…` for tips on Me (see §2b) |
 6. Deploy. First build installs deps → `postinstall` runs `prisma generate` →
    `build` runs `prisma migrate deploy` against Neon → Next builds. Done.
+
+## 2b. Stripe tips (optional)
+
+Voluntary tips use **Stripe Checkout** (`app/api/tip/checkout/route.ts`). The Me page only shows the tip card when `STRIPE_SECRET_KEY` is set.
+
+1. **Create or open a Stripe account** at [dashboard.stripe.com](https://dashboard.stripe.com).
+2. **Developers → API keys**  
+   - For Vercel **Preview** / local dev: use **Test mode** and copy the **Secret key** (`sk_test_…`).  
+   - For **Production**: switch to **Live mode** and copy the **Secret key** (`sk_live_…`).
+3. In **Vercel → Project → Settings → Environment Variables**, add:
+   | Key | Environment | Value |
+   | --- | --- | --- |
+   | `STRIPE_SECRET_KEY` | Production | `sk_live_…` |
+   | `STRIPE_SECRET_KEY` | Preview (optional) | `sk_test_…` so previews can test checkout |
+4. Keep **`NEXT_PUBLIC_APP_URL`** set to your real public URL (e.g. `https://sideseat.de`). Checkout **success** and **cancel** URLs are built from this origin so users return to the right host after payment.
+5. Redeploy so the new env vars are available at build/runtime.
+
+**Local:** copy `.env.example` to `.env`, set `STRIPE_SECRET_KEY=sk_test_…` and `NEXT_PUBLIC_APP_URL=http://localhost:3000`, run `npm run dev`, open `/profile`, and complete checkout with test card `4242 4242 4242 4242`.
+
+**Note:** Webhooks (`checkout.session.completed`) are not wired yet; success today is driven by the redirect back to `/profile?tip=success`. For production-grade confirmation and ledgering, add a webhook endpoint and `STRIPE_WEBHOOK_SECRET` later.
 
 ## 3. Connect sideseat.de
 
@@ -91,4 +112,6 @@ DATABASE_URL="<neon-pooled-url>" npx tsx prisma/seed.ts
 | Build fails on `prisma generate` | Confirm `DATABASE_URL` is set for the Build step, not just runtime. |
 | 500s on cold start, log mentions `Can't reach database` | You used the **direct** Neon URL instead of the **pooled** one. Swap it. |
 | Emails sent to TUM still bounce | Check `NEXT_PUBLIC_APP_URL` is `https://sideseat.de` (not localhost, not a Vercel preview URL). Preview deploys intentionally skip sending. |
+| Tip checkout 503 “not enabled” | `STRIPE_SECRET_KEY` missing in that environment — add it and redeploy. |
+| After Stripe pay, wrong site or 404 on return | `NEXT_PUBLIC_APP_URL` must match the URL users open in the browser (no trailing slash). |
 | DMARC report complaints | Add `rua=mailto:dmarc@sideseat.de` to the existing `_dmarc` record. |

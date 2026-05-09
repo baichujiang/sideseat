@@ -235,6 +235,7 @@ Password for all seeded users:
 ## Deployment Notes
 
 - Set `DATABASE_URL`, `SESSION_SECRET`, and `NEXT_PUBLIC_APP_URL` in your deployment environment.
+- **Stripe tips (optional):** set `STRIPE_SECRET_KEY` (`sk_test_…` or `sk_live_…`) to enable the Me-page tip flow via Stripe Checkout. Use a public `NEXT_PUBLIC_APP_URL` so success/cancel redirects match your domain. See `DEPLOY.md` §2b for Dashboard steps.
 - Set `ADMIN_EMAILS` to a comma-separated allowlist for moderation access.
 - Set `RESEND_API_KEY` and `EMAIL_FROM` to enable real student verification emails. If they are missing, the app falls back to a local verification link for development.
 - Student email auto-verification is currently restricted to a small Munich launch whitelist of officially confirmed domains. Other domains go to manual review.

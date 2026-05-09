@@ -3,6 +3,7 @@ import { ConnectionStatus } from "@prisma/client";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { DirectInboxRow } from "@/components/inbox/direct-inbox-row";
+import { inboxChatListUlClassName } from "@/components/inbox/inbox-conversation-tile";
 import { BackLink } from "@/components/nav/back-link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getSessionUser } from "@/lib/auth/session";
@@ -77,7 +78,7 @@ export default async function FromYouPage() {
       </div>
 
       {fromYou.length ? (
-        <ul className="space-y-2">
+        <ul className={inboxChatListUlClassName}>
           {fromYou.map((connection) => (
             <DirectInboxRow
               key={connection.id}

@@ -37,7 +37,8 @@ function applyClock(baseDay: Date, minuteOfDay: number): Date {
 }
 
 /**
- * Materialized start/end instants for a weekly class slot from semester bounds (same as Home semester).
+ * Materialized start/end instants for a weekly class slot from **Vorlesungszeit**
+ * bounds (same as Home class schedule range).
  */
 export function materializeWeeklyCourseSlot(params: {
   semesterStart: Date;

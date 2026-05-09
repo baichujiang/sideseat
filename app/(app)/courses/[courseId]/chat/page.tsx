@@ -266,7 +266,9 @@ export default async function CourseChatPage({
         )}
       </ChatScrollContainer>
 
-      <CourseChatComposer courseId={courseId} />
+      <div className="shrink-0 border-t border-border/80 bg-background/95 px-3 pt-2 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
+        <CourseChatComposer courseId={courseId} />
+      </div>
     </div>
     </ChatReplyProvider>
   );

@@ -1,0 +1,125 @@
+import { expect, test } from "@playwright/test";
+
+/**
+ * Standard regression path: login → each main tab → common drill-ins.
+ *
+ * Prereqs: DB migrated + seeded onboarded user (`npm run prisma:seed` — default `lin` / `Password123`).
+ *
+ * Env: E2E_USER, E2E_PASSWORD, PLAYWRIGHT_BASE_URL, E2E_COURSE_ID (optional course chat deep link),
+ *      E2E_SIGNUP=1 to run the optional new-account smoke (creates a user in DB).
+ */
+
+const E2E_USER = process.env.E2E_USER ?? "lin";
+const E2E_PASSWORD = process.env.E2E_PASSWORD ?? "Password123";
+
+function logStep(name: string) {
+  // eslint-disable-next-line no-console
+  console.log(`\n[e2e] ${name}`);
+}
+
+async function loginWithPassword(page: import("@playwright/test").Page) {
+  await page.goto("/login");
+  await expect(page.getByRole("heading", { name: /log in/i })).toBeVisible();
+  await page.getByPlaceholder(/janedoe or alex@example.com/i).fill(E2E_USER);
+  await page.locator('input[type="password"]').first().fill(E2E_PASSWORD);
+  await page.getByRole("button", { name: "Log in" }).click();
+  await page.waitForURL(/\/(home|onboarding)/, { timeout: 30_000 });
+  if (page.url().includes("/onboarding")) {
+    throw new Error(
+      `User "${E2E_USER}" landed on /onboarding — use an account with onboarding already complete (e.g. prisma seed).`,
+    );
+  }
+  await expect(page).toHaveURL(/\/home/);
+}
+
+async function goMainTab(page: import("@playwright/test").Page, label: string, urlRe: RegExp) {
+  const nav = page.getByRole("navigation", { name: "Main navigation" });
+  // `name` is substring by default — "Me" matches "Home"; always use exact tab labels.
+  await nav.getByRole("link", { name: label, exact: true }).click();
+  await expect(page).toHaveURL(urlRe);
+}
+
+test.describe("Standard user flow (login + tabs + drill-ins)", () => {
+  test("walks main surfaces after login", async ({ page }) => {
+    logStep("Login");
+    await loginWithPassword(page);
+
+    logStep("Tab: Home");
+    await goMainTab(page, "Home", /\/home$/);
+    await expect(page.getByText(/Week \d+/)).toBeVisible();
+
+    logStep("Tab: Courses");
+    await goMainTab(page, "Courses", /\/courses$/);
+    await expect(page.getByRole("heading", { name: "Courses" })).toBeVisible();
+
+    logStep("Drill-in: Add course");
+    await page.goto("/courses/add");
+    await expect(page.getByRole("heading", { name: "Add course" })).toBeVisible();
+
+    logStep("Tab: Classmates (Discover)");
+    await goMainTab(page, "Classmates", /\/discover$/);
+    await expect(page.getByRole("heading", { name: "Classmates" })).toBeVisible();
+
+    logStep("Tab: Chats");
+    await goMainTab(page, "Chats", /\/inbox$/);
+    await expect(page.getByRole("heading", { name: "Chats" })).toBeVisible();
+
+    const dmLinks = page.locator('a[href^="/connections/"]');
+    if ((await dmLinks.count()) > 0) {
+      logStep("Drill-in: first DM thread (if inbox has one)");
+      const firstDm = dmLinks.first();
+      await firstDm.click();
+      await expect(page).toHaveURL(/\/connections\/[^/]+$/);
+      await expect(page.getByRole("textbox", { name: /message/i })).toBeVisible({ timeout: 15_000 });
+      await page.goBack();
+      await expect(page).toHaveURL(/\/inbox/);
+    } else {
+      logStep("Skip DM thread — no /connections/ link in inbox");
+    }
+
+    const courseId = process.env.E2E_COURSE_ID?.trim();
+    if (courseId) {
+      logStep("Drill-in: course chat (E2E_COURSE_ID)");
+      await page.goto(`/courses/${courseId}/chat`);
+      await expect(page.getByRole("textbox", { name: /message/i })).toBeVisible({ timeout: 15_000 });
+    } else {
+      logStep("Skip course chat — set E2E_COURSE_ID to a course the user is enrolled in");
+    }
+
+    logStep("Tab: Me");
+    await goMainTab(page, "Me", /\/profile$/);
+    await expect(page.getByRole("heading", { name: "Me" })).toBeVisible();
+
+    logStep("Profile: school verification block");
+    await expect(page.locator("#me-verification-heading")).toBeVisible();
+
+    logStep("Drill-in: Preferences & account");
+    await page.getByRole("link", { name: /preferences & account/i }).click();
+    await expect(page).toHaveURL(/\/profile\/account$/);
+    await expect(page.getByRole("heading", { name: "Preferences & account" })).toBeVisible();
+    await page.getByRole("link", { name: "Back", exact: true }).click();
+    await expect(page).toHaveURL(/\/profile$/);
+
+    logStep("Done");
+  });
+});
+
+test.describe("Optional signup smoke", () => {
+  test("signup reaches onboarding", async ({ page, context }) => {
+    test.skip(process.env.E2E_SIGNUP !== "1", "Set E2E_SIGNUP=1 to run (creates a real user).");
+
+    const username = `e2e_${Date.now()}`;
+    const password = "Password123!";
+
+    await context.clearCookies();
+    await page.goto("/signup");
+    await expect(page.getByRole("heading", { name: /create account/i })).toBeVisible();
+    await page.getByPlaceholder(/letters, numbers/i).fill(username);
+    const pwInputs = page.locator('input[type="password"]');
+    await pwInputs.nth(0).fill(password);
+    await pwInputs.nth(1).fill(password);
+    await page.getByRole("button", { name: "Create account" }).click();
+    await page.waitForURL(/\/onboarding/, { timeout: 30_000 });
+    await expect(page.getByRole("heading", { name: /set up your profile/i })).toBeVisible();
+  });
+});

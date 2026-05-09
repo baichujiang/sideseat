@@ -4,6 +4,9 @@
 //
 // We derive the current semester from the server clock so users never have to
 // type it. If TUM changes the boundary months, tweak the ranges here.
+//
+// **Recurring class sessions** on Home / course mirror / .ics use **Vorlesungszeit**
+// (lecture period), not these full semester months — see `lib/constants/vorlesungszeit.ts`.
 
 export function getCurrentSemesterLabel(now: Date = new Date()): string {
   const month = now.getMonth() + 1;

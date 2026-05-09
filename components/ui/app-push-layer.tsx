@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { cn } from "@/lib/utils";
 
@@ -135,13 +136,16 @@ export function AppPushLayer({
     };
   }, [lockBodyScroll, mounted]);
 
-  if (!mounted) return null;
+  if (!mounted || typeof document === "undefined") return null;
 
   const dur = `${APP_PUSH_TRANSITION_MS}ms`;
 
-  return (
+  return createPortal(
     <div
-      className={cn("fixed inset-0", zClassName)}
+      className={cn(
+        "fixed inset-x-0 top-0 flex h-dvh max-h-dvh min-h-0 flex-col overflow-hidden",
+        zClassName,
+      )}
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel}
@@ -158,10 +162,10 @@ export function AppPushLayer({
         )}
         style={{ transitionDuration: dur }}
       />
-      <div className="pointer-events-none absolute inset-y-0 right-0 flex max-w-full">
+      <div className="pointer-events-none absolute inset-y-0 right-0 flex min-h-0 max-h-full max-w-full">
         <div
           className={cn(
-            "pointer-events-auto flex h-full w-[min(100vw,28rem)] flex-col border-l border-border/60 bg-card shadow-[-12px_0_40px_-16px_rgba(15,23,42,0.22)] dark:shadow-[-12px_0_40px_-12px_rgba(0,0,0,0.5)]",
+            "pointer-events-auto flex h-full max-h-full min-h-0 w-[min(100vw,28rem)] flex-col overflow-hidden border-l border-border/60 bg-card shadow-[-12px_0_40px_-16px_rgba(15,23,42,0.22)] dark:shadow-[-12px_0_40px_-12px_rgba(0,0,0,0.5)]",
             "transition-transform ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform",
             entered ? "translate-x-0" : "translate-x-full",
             panelClassName,
@@ -172,6 +176,7 @@ export function AppPushLayer({
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -1,5 +1,4 @@
 import { format, isSameDay, isToday, isYesterday } from "date-fns";
-import { UsersRound } from "lucide-react";
 import Link from "next/link";
 import type { Route } from "next";
 
@@ -8,6 +7,7 @@ import { ChatRealtimeRefresh } from "@/components/chat/chat-realtime-refresh";
 import { ChatScrollContainer } from "@/components/chat/chat-scroll-container";
 import { MessageBubbleContent } from "@/components/chat/message-bubble-content";
 import { BackLink } from "@/components/nav/back-link";
+import { GroupChatAvatarCollage } from "@/components/ui/group-chat-avatar-collage";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { requireGroupChatParticipant } from "@/lib/auth/guards";
 import { groupChatDisplayTitle } from "@/lib/group-chats/title";
@@ -41,8 +41,13 @@ export default async function GroupChatPage({
     groupChat.participants.map((participant) => participant.user),
     user.id,
   );
+  const groupThreadPath =
+    query.returnTo != null && query.returnTo !== ""
+      ? `/groups/${groupChat.id}?returnTo=${encodeURIComponent(query.returnTo)}`
+      : `/groups/${groupChat.id}`;
+  const groupThreadReturnToParam = encodeURIComponent(groupThreadPath);
   const infoHref =
-    (`/groups/${groupChat.id}/info?returnTo=${encodeURIComponent(`/groups/${groupChat.id}`)}` as Route);
+    (`/groups/${groupChat.id}/info?returnTo=${encodeURIComponent(groupThreadPath)}` as Route);
 
   return (
     <>
@@ -51,10 +56,14 @@ export default async function GroupChatPage({
         <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
           <BackLink href={backHref} label="Back" />
           <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl py-1 pl-1 pr-2">
-            <Link href={infoHref} className="shrink-0 rounded-full transition hover:opacity-90 active:opacity-80">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-classmates-blue-soft/80 text-classmates-blue">
-                <UsersRound className="h-5 w-5" strokeWidth={2.2} aria-hidden />
-              </span>
+            <Link href={infoHref} className="shrink-0 transition hover:opacity-90 active:opacity-80">
+              <GroupChatAvatarCollage
+                participants={groupChat.participants.map((participant) => ({
+                  userId: participant.userId,
+                  avatarUrl: participant.user.avatarUrl,
+                }))}
+                sizePx={40}
+              />
             </Link>
             <div className="min-w-0 flex-1">
               <Link href={infoHref} className="block min-w-0 rounded-md py-0.5 text-left transition hover:bg-muted/70 active:bg-muted">
@@ -85,6 +94,9 @@ export default async function GroupChatPage({
             <div className="space-y-3 pb-2">
               {groupChat.messages.map((message, index) => {
                 const isOwn = message.senderId === user.id;
+                const peerProfileHref =
+                  (`/users/${message.senderId}?returnTo=${groupThreadReturnToParam}` as Route);
+                const selfProfileHref = (`/profile?returnTo=${groupThreadReturnToParam}` as Route);
                 const showDay =
                   index === 0 || !isSameDay(message.createdAt, groupChat.messages[index - 1]!.createdAt);
 
@@ -100,14 +112,32 @@ export default async function GroupChatPage({
 
                     <div className={cn("group flex items-start gap-2", isOwn ? "justify-end" : "justify-start")}>
                       {!isOwn ? (
-                        <span className="mt-5 shrink-0">
+                        <Link
+                          href={peerProfileHref}
+                          aria-label={`Open ${message.sender.nickname?.trim() || message.sender.username}'s profile`}
+                          className="mt-5 shrink-0 rounded-full ring-offset-background transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        >
                           <PresetAvatar id={message.sender.avatarUrl} size={32} />
-                        </span>
+                        </Link>
                       ) : null}
                       <div className={cn("max-w-[min(100%,20rem)] shrink", isOwn ? "text-right" : "text-left")}>
-                        <p className={cn("mb-0.5 truncate text-[11px] font-medium text-muted-foreground", isOwn ? "pr-0.5" : "pl-0.5")}>
-                          {isOwn ? "You" : message.sender.nickname?.trim() || message.sender.username}
-                        </p>
+                        {isOwn ? (
+                          <Link
+                            href={selfProfileHref}
+                            className="mb-0.5 block truncate pr-0.5 text-[11px] font-medium text-muted-foreground underline-offset-2 hover:underline"
+                          >
+                            You
+                          </Link>
+                        ) : (
+                          <Link
+                            href={peerProfileHref}
+                            className={cn(
+                              "mb-0.5 block truncate text-[11px] font-medium text-muted-foreground underline-offset-2 hover:underline pl-0.5",
+                            )}
+                          >
+                            {message.sender.nickname?.trim() || message.sender.username}
+                          </Link>
+                        )}
                         <div
                           className={cn(
                             "inline-block rounded-[1.25rem] px-3.5 py-2 text-[15px] leading-snug text-left",
@@ -131,9 +161,13 @@ export default async function GroupChatPage({
                         </time>
                       </div>
                       {isOwn ? (
-                        <span className="mt-5 shrink-0">
+                        <Link
+                          href={selfProfileHref}
+                          aria-label="Open your profile"
+                          className="mt-5 shrink-0 rounded-full ring-offset-background transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        >
                           <PresetAvatar id={user.avatarUrl} size={32} />
-                        </span>
+                        </Link>
                       ) : null}
                     </div>
                   </div>
@@ -143,7 +177,7 @@ export default async function GroupChatPage({
           )}
         </ChatScrollContainer>
 
-        <div className="shrink-0 border-t border-border bg-background/95 px-3 py-2 pb-[max(0.25rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
+        <div className="shrink-0 border-t border-border/80 bg-background/95 px-3 pt-2 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
           <GroupChatComposer groupChatId={groupChat.id} />
         </div>
       </div>

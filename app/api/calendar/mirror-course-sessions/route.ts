@@ -6,9 +6,10 @@ import { z } from "zod";
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { ensureUserCalendarCategories } from "@/lib/calendar/default-user-calendar-categories";
 import { courseScheduleMirrorKey, materializeWeeklyCourseSlot } from "@/lib/calendar/course-schedule-mirror";
-import { getCurrentSemesterDateRange } from "@/lib/constants/semester";
+import { getClassScheduleDateRange } from "@/lib/constants/vorlesungszeit";
+import { isDatabaseUnreachable } from "@/lib/db/prisma-errors";
 import { prisma } from "@/lib/db/prisma";
-import { error, ok, parseJson } from "@/lib/http";
+import { error, ok, parseBody } from "@/lib/http";
 import { courseSessionInput, parseTimeToMinutes } from "@/lib/validators/course";
 
 const bodySchema = z.object({
@@ -17,10 +18,26 @@ const bodySchema = z.object({
   sessions: z.array(courseSessionInput).max(8).default([]),
 });
 
+function isNextNavigationRedirect(cause: unknown): boolean {
+  if (typeof cause !== "object" || cause === null || !("digest" in cause)) return false;
+  const digest = (cause as { digest?: unknown }).digest;
+  return typeof digest === "string" && digest.startsWith("NEXT_REDIRECT");
+}
+
 export async function POST(request: Request) {
   try {
     const user = await requireOnboardedUser();
-    const values = await parseJson(request, bodySchema);
+    let raw: unknown;
+    try {
+      raw = await request.json();
+    } catch {
+      return error("Invalid request body.", 400);
+    }
+    const parsed = parseBody(raw, bodySchema);
+    if (!parsed.ok) {
+      return error(parsed.error, 400);
+    }
+    const values = parsed.data;
 
     const membership = await prisma.userCourse.findFirst({
       where: { userId: user.id, courseId: values.courseId },
@@ -78,7 +95,10 @@ export async function POST(request: Request) {
     });
 
     const now = new Date();
-    const { start: semesterStart, end: semesterEnd } = getCurrentSemesterDateRange(now);
+    const { start: semesterStart, end: semesterEnd } = getClassScheduleDateRange({
+      school: user.school,
+      now,
+    });
     const title =
       membership.course.code && membership.course.code.trim().length > 0
         ? `${membership.course.code.trim()} · ${membership.course.name}`
@@ -143,7 +163,11 @@ export async function POST(request: Request) {
 
     return ok({ created: rows.length });
   } catch (cause) {
+    if (isNextNavigationRedirect(cause)) throw cause;
     console.error(cause);
+    if (isDatabaseUnreachable(cause)) {
+      return error("Database is temporarily unavailable. Try again in a moment.", 503);
+    }
     return error("Unable to sync course times to calendar.");
   }
 }

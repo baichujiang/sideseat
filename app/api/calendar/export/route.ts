@@ -1,4 +1,4 @@
-import { getCurrentSemesterDateRange } from "@/lib/constants/semester";
+import { getClassScheduleDateRange } from "@/lib/constants/vorlesungszeit";
 import { buildSideSeatIcsExport } from "@/lib/calendar/ical-export";
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
@@ -7,7 +7,10 @@ export async function GET() {
   try {
     const user = await requireOnboardedUser();
     const now = new Date();
-    const { start: semesterStart, end: semesterEnd } = getCurrentSemesterDateRange(now);
+    const { start: semesterStart, end: semesterEnd } = getClassScheduleDateRange({
+      school: user.school,
+      now,
+    });
 
     const [memberships, entries] = await Promise.all([
       prisma.userCourse.findMany({

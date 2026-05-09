@@ -76,12 +76,9 @@ function formatOverlapShort(minutes: number): string {
 export function CourseMemberList({
   courseId,
   members,
-  schoolShortLabel,
 }: {
   courseId: string;
   members: CourseMember[];
-  /** Shown after the count, e.g. “8 classmates · TUM”. */
-  schoolShortLabel?: string | null;
 }) {
   const [query, setQuery] = useState("");
 
@@ -94,44 +91,19 @@ export function CourseMemberList({
     });
   }, [members, query]);
 
-  /** Course hub wireframe: social list is “in this course”, not a generic code title. */
-  const sectionTitle = "Classmates in this course";
   const n = members.length;
-  const countLine =
-    n === 0
-      ? "No classmates in your list yet"
-      : `${n} student${n === 1 ? "" : "s"} already joined` +
-        (schoolShortLabel ? ` · ${schoolShortLabel}` : "");
 
   return (
     <section
       className="space-y-2.5 border-t border-classmates-hairline pt-5 dark:border-border/60"
       aria-labelledby="course-classmates-heading"
     >
-      <div className="space-y-1.5 px-0.5">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <h3
-            id="course-classmates-heading"
-            className="min-w-0 flex-1 text-base font-semibold leading-tight tracking-tight text-classmates-ink dark:text-foreground"
-          >
-            {sectionTitle}
-          </h3>
-        </div>
-        <p className="text-[13px] font-semibold leading-snug text-classmates-ink/95 dark:text-zinc-100">
-          {countLine}
-        </p>
-        {n > 0 ? (
-          <p className="text-[12px] leading-snug text-classmates-sub dark:text-zinc-400">
-            Same course as you — tap{" "}
-            <span className="font-medium text-classmates-ink/80 dark:text-zinc-300">Message</span> to start a private
-            chat. Sorted by schedule overlap first.
-          </p>
-        ) : (
-          <p className="text-[12px] leading-snug text-classmates-sub dark:text-zinc-400">
-            When classmates enroll and match this course, they&apos;ll appear here.
-          </p>
-        )}
-      </div>
+      <h3
+        id="course-classmates-heading"
+        className="px-0.5 text-base font-semibold leading-tight tracking-tight text-classmates-ink dark:text-foreground"
+      >
+        Classmates
+      </h3>
 
       {n > 0 ? (
         <Input

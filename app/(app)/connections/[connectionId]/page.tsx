@@ -344,7 +344,7 @@ export default async function ConnectionPage({
         )}
       </ChatScrollContainer>
 
-      <div className="shrink-0 border-t border-border bg-background/95 px-3 py-2 pb-[max(0.25rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
+      <div className="shrink-0 border-t border-border/80 bg-background/95 px-3 pt-2 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
         <ChatComposer
           connectionId={connection.id}
           peerName={otherUser.nickname ?? "Student"}

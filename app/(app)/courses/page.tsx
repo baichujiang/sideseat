@@ -365,11 +365,8 @@ function CoursesHeader({ selectedSchool }: { selectedSchool: SchoolCode }) {
   const schoolLabel = getSchoolLabel(selectedSchool);
   return (
     <div className="flex items-start justify-between gap-3">
-      <header className="min-w-0 space-y-0.5">
+      <header className="min-w-0">
         <h1 className="page-screen-title">Courses</h1>
-        <p className="page-screen-subtitle mt-0.5 max-w-md">
-          Browse all courses, manage your enrolled list, and keep bookmarks in one place.
-        </p>
       </header>
 
       <div className="shrink-0 space-y-1">

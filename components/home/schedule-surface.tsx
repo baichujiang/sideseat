@@ -42,6 +42,11 @@ import {
 } from "@/components/home/schedule-day-timeline";
 import { ScheduleMonthView } from "@/components/home/schedule-month-view";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
+import {
+  berlinClockMinutes,
+  berlinWeekdayFromInstant,
+  scheduleDateKeyInBerlin,
+} from "@/lib/calendar/schedule-berlin";
 import { cn } from "@/lib/utils";
 
 type ViewKind = "day" | "week" | "month";
@@ -125,6 +130,51 @@ const WEEKDAY_BY_JS: Record<number, Weekday> = {
   6: "SAT",
 };
 
+type IcsSaveOutcome = "saved" | "cancelled" | "fallback";
+
+/**
+ * Prefer the File System Access save picker when available so we can tell save vs cancel.
+ * Fallback `<a download>` cannot detect cancellation — do not show a false “success” for that path.
+ */
+async function saveIcsBlobWithPickerOrDownload(blob: Blob, filename: string): Promise<IcsSaveOutcome> {
+  const g = globalThis as typeof globalThis & {
+    showSaveFilePicker?: (options?: {
+      suggestedName?: string;
+      types?: Array<{ description: string; accept: Record<string, string[]> }>;
+    }) => Promise<FileSystemFileHandle>;
+  };
+
+  if (typeof g.showSaveFilePicker === "function") {
+    try {
+      const handle = await g.showSaveFilePicker({
+        suggestedName: filename,
+        types: [{ description: "iCalendar", accept: { "text/calendar": [".ics"] } }],
+      });
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return "saved";
+    } catch (e) {
+      const name = e && typeof e === "object" && "name" in e ? String((e as { name: unknown }).name) : "";
+      if (name === "AbortError") return "cancelled";
+      throw e;
+    }
+  }
+
+  const url = URL.createObjectURL(blob);
+  try {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+  return "fallback";
+}
+
 /**
  * Schedule surface — the single interactive calendar on Home.
  *
@@ -134,8 +184,8 @@ const WEEKDAY_BY_JS: Record<number, Weekday> = {
  *
  * Data model: `classBlocks` is inherently recurring (we just filter by
  * weekday), `studyEntries` is a flat list of materialized calendar rows.
- * Parent fetches a ±90-day window of study entries so scrolling through
- * a handful of months without a round-trip feels right.
+ * Parent fetches a wide date window of one-off calendar rows (see Home page);
+ * recurring courses are not windowed.
  */
 export function ScheduleSurface({
   classBlocks,
@@ -380,13 +430,13 @@ export function ScheduleSurface({
       }),
     );
     const studyItems: DayTimelineItem[] = studies
-      .filter((s) => isSameDay(s.start, date))
+      .filter((s) => scheduleDateKeyInBerlin(s.start) === scheduleDateKeyInBerlin(date))
       .map((s) => ({
         id: s.id,
         kind: "study",
         source: "calendar",
-        startMinute: s.start.getHours() * 60 + s.start.getMinutes(),
-        endMinute: s.end.getHours() * 60 + s.end.getMinutes(),
+        startMinute: berlinClockMinutes(s.start),
+        endMinute: berlinClockMinutes(s.end),
         title: s.title,
         location: s.location,
         withLabel: s.withLabel,
@@ -513,18 +563,17 @@ export function ScheduleSurface({
   // Week view: classes repeat every week, so we can show them on any
   // anchor week. Study entries need to be filtered to that week and
   // injected as "study"-kind blocks.
-  const weekBlocks = useMemo(() => {
+  const { weekTimedBlocks } = useMemo(() => {
     const includeClasses = weekEnd >= semesterStart && weekStart <= semesterEnd;
-    const studyBlocks = studies
-      .filter((s) => s.start >= weekStart && s.start <= weekEnd)
+    const studyBlocks = studies.filter((s) => s.start <= weekEnd && s.end >= weekStart)
       .map((s) => ({
         courseId: `study-${s.id}`,
         courseName: s.title,
         courseCode: null,
         source: "calendar" as const,
-        weekday: WEEKDAY_BY_JS[s.start.getDay()],
-        startMinute: s.start.getHours() * 60 + s.start.getMinutes(),
-        endMinute: s.end.getHours() * 60 + s.end.getMinutes(),
+        weekday: berlinWeekdayFromInstant(s.start),
+        startMinute: berlinClockMinutes(s.start),
+        endMinute: berlinClockMinutes(s.end),
         location: s.location,
         withLabel: s.withLabel,
         note: s.note,
@@ -549,7 +598,9 @@ export function ScheduleSurface({
           eventParticipants: [],
         }))
       : [];
-    const merged: WeekCalendarBlock[] = [...courseBlocks, ...studyBlocks];
+
+    const timedMerged: WeekCalendarBlock[] = [...courseBlocks, ...studyBlocks];
+
     if (adding && !editingItem && draftEventStart && draftEventEnd) {
       const draftStart = new Date(draftEventStart);
       const draftEnd = new Date(draftEventEnd);
@@ -559,7 +610,7 @@ export function ScheduleSurface({
         draftStart >= weekStart &&
         draftStart <= weekEnd
       ) {
-        merged.push({
+        const draftBlock: WeekCalendarBlock = {
           courseId: "__draft-preview__",
           courseName: "New event",
           courseCode: null,
@@ -578,13 +629,16 @@ export function ScheduleSurface({
           categoryId: draftCategoryMeta.id,
           categoryName: draftCategoryMeta.name,
           categoryColor: draftCategoryMeta.color,
-        });
+        };
+        timedMerged.push(draftBlock);
       }
     }
-    return merged;
+
+    return { weekTimedBlocks: timedMerged };
   }, [
     classBlocks,
     studies,
+    selectedDate,
     weekStart,
     weekEnd,
     semesterStart,
@@ -634,16 +688,19 @@ export function ScheduleSurface({
 
     const studyCountByDateKey = new Map<string, number>();
     for (const s of studies) {
-      const key = dateKey(s.start);
+      const key = scheduleDateKeyInBerlin(s.start);
       studyCountByDateKey.set(key, (studyCountByDateKey.get(key) ?? 0) + 1);
     }
     return (d: Date): number => {
       const weekday = WEEKDAY_BY_JS[d.getDay()];
       const classDensity = d >= semesterStart && d <= semesterEnd ? classCountByWeekday[weekday] : 0;
-      let n = classDensity + (studyCountByDateKey.get(dateKey(d)) ?? 0);
+      let n = classDensity + (studyCountByDateKey.get(scheduleDateKeyInBerlin(d)) ?? 0);
       if (adding && !editingItem && draftEventStart && draftEventEnd) {
         const draftStart = new Date(draftEventStart);
-        if (!Number.isNaN(draftStart.getTime()) && isSameDay(draftStart, d)) {
+        if (
+          !Number.isNaN(draftStart.getTime()) &&
+          scheduleDateKeyInBerlin(draftStart) === scheduleDateKeyInBerlin(d)
+        ) {
           n += 1;
         }
       }
@@ -679,15 +736,10 @@ export function ScheduleSurface({
         return;
       }
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "sideseat-schedule.ics";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      setIcsNotice({ tone: "ok", message: "Downloaded sideseat-schedule.ics" });
+      const outcome = await saveIcsBlobWithPickerOrDownload(blob, "sideseat-schedule.ics");
+      if (outcome === "saved") {
+        setIcsNotice({ tone: "ok", message: "Calendar saved." });
+      }
     } catch {
       setIcsNotice({ tone: "err", message: "Could not export calendar." });
     } finally {
@@ -767,7 +819,7 @@ export function ScheduleSurface({
   );
 
   const weekCalendarProps = {
-    blocks: weekBlocks,
+    blocks: weekTimedBlocks,
     anchorWeekday: weekAnchorWeekday,
     horizontalMode: weekHorizontalMode,
     nowMinute,
@@ -1159,20 +1211,15 @@ function ScheduleDateNavToolbar({
       </div>
 
       <div className="justify-self-center">
-        <div
-          className={cn(
-            "flex h-8 shrink-0 items-stretch overflow-hidden rounded-lg border border-[#E7E0D6] bg-white",
-            "shadow-[0_1px_2px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card dark:shadow-none",
-          )}
-        >
+        <div className="flex h-8 shrink-0 items-stretch gap-1">
           <button
             type="button"
             onClick={onStepPrev}
             aria-label="Previous"
             className={cn(
-              "flex w-7 items-center justify-center border-r border-[#E7E0D6] text-[#5F6B7A] transition",
-              "hover:bg-[#FAFAF8] hover:text-[#111827] active:bg-[#F3F0EA]/90",
-              "dark:border-border dark:text-muted-foreground dark:hover:bg-muted/45 dark:hover:text-foreground",
+              "flex w-7 items-center justify-center rounded-xl border border-[#E7E0D6] bg-white text-[#5F6B7A] transition",
+              "shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:bg-[#FAFAF8] hover:text-[#111827] active:bg-[#F3F0EA]/90",
+              "dark:border-border dark:bg-card dark:shadow-none dark:text-muted-foreground dark:hover:bg-muted/45 dark:hover:text-foreground",
             )}
           >
             <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
@@ -1182,9 +1229,9 @@ function ScheduleDateNavToolbar({
             onClick={onJumpToday}
             aria-label="Jump to today"
             className={cn(
-              "min-w-0 px-2 text-center text-[12px] font-medium tabular-nums leading-none text-[#5F6B7A] transition",
-              "border-r border-[#E7E0D6] hover:bg-[#FAFAF8] hover:text-[#111827] active:bg-[#F3F0EA]/90",
-              "dark:border-border dark:text-muted-foreground dark:hover:bg-muted/45 dark:hover:text-foreground",
+              "min-w-0 rounded-xl border border-[#E7E0D6] bg-white px-2.5 text-center text-[12px] font-medium tabular-nums leading-none text-[#5F6B7A] transition",
+              "shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:bg-[#FAFAF8] hover:text-[#111827] active:bg-[#F3F0EA]/90",
+              "dark:border-border dark:bg-card dark:shadow-none dark:text-muted-foreground dark:hover:bg-muted/45 dark:hover:text-foreground",
             )}
           >
             Today
@@ -1194,9 +1241,9 @@ function ScheduleDateNavToolbar({
             onClick={onStepNext}
             aria-label="Next"
             className={cn(
-              "flex w-7 items-center justify-center text-[#5F6B7A] transition",
-              "hover:bg-[#FAFAF8] hover:text-[#111827] active:bg-[#F3F0EA]/90",
-              "dark:text-muted-foreground dark:hover:bg-muted/45 dark:hover:text-foreground",
+              "flex w-7 items-center justify-center rounded-xl border border-[#E7E0D6] bg-white text-[#5F6B7A] transition",
+              "shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:bg-[#FAFAF8] hover:text-[#111827] active:bg-[#F3F0EA]/90",
+              "dark:border-border dark:bg-card dark:shadow-none dark:text-muted-foreground dark:hover:bg-muted/45 dark:hover:text-foreground",
             )}
           >
             <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
@@ -1236,8 +1283,4 @@ function rangeLabel(view: ViewKind, date: Date): string {
     return `${format(ws, "MMM d")} – ${format(we, "MMM d")}`;
   }
   return `${format(ws, "MMM d, yyyy")} – ${format(we, "MMM d, yyyy")}`;
-}
-
-function dateKey(d: Date): string {
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }

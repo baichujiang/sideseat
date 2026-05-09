@@ -6,6 +6,7 @@ import { createHash, randomBytes } from "crypto";
 import { addDays } from "date-fns";
 
 import { signAccessToken, verifyAccessToken } from "@/lib/auth/access-token";
+import { isDatabaseUnreachable, warnDatabaseUnreachableThrottled } from "@/lib/db/prisma-errors";
 import { prisma } from "@/lib/db/prisma";
 import {
   LEGACY_SESSION_COOKIE_NAME,
@@ -106,24 +107,32 @@ export async function destroySession() {
 }
 
 export async function getSessionUser() {
-  const fromCookie = await getUserFromRefreshCookie();
-  if (fromCookie) {
-    return fromCookie;
-  }
+  try {
+    const fromCookie = await getUserFromRefreshCookie();
+    if (fromCookie) {
+      return fromCookie;
+    }
 
-  const headerList = await headers();
-  const auth = headerList.get("authorization");
-  if (auth?.startsWith("Bearer ")) {
-    const sub = await verifyAccessToken(auth.slice(7).trim());
-    if (sub) {
-      const user = await prisma.user.findUnique({ where: { id: sub } });
-      if (user) {
-        return user;
+    const headerList = await headers();
+    const auth = headerList.get("authorization");
+    if (auth?.startsWith("Bearer ")) {
+      const sub = await verifyAccessToken(auth.slice(7).trim());
+      if (sub) {
+        const user = await prisma.user.findUnique({ where: { id: sub } });
+        if (user) {
+          return user;
+        }
       }
     }
-  }
 
-  return null;
+    return null;
+  } catch (cause) {
+    if (isDatabaseUnreachable(cause)) {
+      warnDatabaseUnreachableThrottled("getSessionUser");
+      return null;
+    }
+    throw cause;
+  }
 }
 
 export async function requireUser() {

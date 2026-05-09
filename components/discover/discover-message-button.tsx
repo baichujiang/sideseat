@@ -2,7 +2,7 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import { Loader2, MessageCircle } from "lucide-react";
+import { Loader2, MessageCircle, NotebookPen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -19,6 +19,8 @@ type Props = {
   label?: string;
   /** When false (no prior thread), default label becomes "Say hi". When true, becomes "Message". */
   hasExistingChat?: boolean;
+  /** `notes` — notebook icon (e.g. self-notes from post detail). */
+  icon?: "message" | "notes";
   className?: string;
 };
 
@@ -37,6 +39,7 @@ export function DiscoverMessageButton({
   tone = "soft",
   label,
   hasExistingChat = false,
+  icon = "message",
   className,
 }: Props) {
   const buttonLabel = label ?? (hasExistingChat ? "Message" : "Say hi");
@@ -92,15 +95,27 @@ export function DiscoverMessageButton({
         />
       ) : (
         <>
-          <MessageCircle
-            className={cn(
-              "shrink-0",
-              tone === "subtle" && "h-3.5 w-3.5 text-classmates-blue dark:text-blue-300",
-              tone === "soft" && "h-4 w-4 text-classmates-blue",
-              tone === "solid" && "h-4 w-4 text-white",
-            )}
-            strokeWidth={2.25}
-          />
+          {icon === "notes" ? (
+            <NotebookPen
+              className={cn(
+                "shrink-0",
+                tone === "subtle" && "h-3.5 w-3.5 text-classmates-blue dark:text-blue-300",
+                tone === "soft" && "h-4 w-4 text-classmates-blue",
+                tone === "solid" && "h-4 w-4 text-white",
+              )}
+              strokeWidth={2.25}
+            />
+          ) : (
+            <MessageCircle
+              className={cn(
+                "shrink-0",
+                tone === "subtle" && "h-3.5 w-3.5 text-classmates-blue dark:text-blue-300",
+                tone === "soft" && "h-4 w-4 text-classmates-blue",
+                tone === "solid" && "h-4 w-4 text-white",
+              )}
+              strokeWidth={2.25}
+            />
+          )}
           {buttonLabel}
         </>
       )}

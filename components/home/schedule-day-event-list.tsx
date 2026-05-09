@@ -7,15 +7,23 @@ import {
   inferScheduleEventToneKey,
   SCHEDULE_EVENT_TONE_STYLES,
 } from "@/lib/schedule-event-card-tone";
+import { isLongOrAllDayTimedMinutes } from "@/lib/calendar/long-calendar-block";
 import { cn } from "@/lib/utils";
 
-function formatRange(startMinute: number, endMinute: number) {
+function formatItemTimeRange(item: DayTimelineItem): string {
+  if (
+    item.kind === "study" &&
+    item.source === "calendar" &&
+    isLongOrAllDayTimedMinutes(item.startMinute, item.endMinute)
+  ) {
+    return "All day";
+  }
   const fmt = (total: number) => {
     const h = Math.floor(total / 60);
     const m = total % 60;
     return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
   };
-  return `${fmt(startMinute)}–${fmt(endMinute)}`;
+  return `${fmt(item.startMinute)}–${fmt(item.endMinute)}`;
 }
 
 /** Compact list of a single day’s events (for month view — no hour axis). */
@@ -73,7 +81,7 @@ export function ScheduleDayEventList({
                     tone.accentColor,
                   )}
                 >
-                  {formatRange(item.startMinute, item.endMinute)}
+                  {formatItemTimeRange(item)}
                 </span>
                 <span className={cn("mt-1 block text-sm font-semibold leading-snug", tone.title)}>
                   {item.title}

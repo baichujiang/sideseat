@@ -152,6 +152,8 @@ function horizontalStartIndexForDay(day: Weekday | undefined, visibleWeekDays: n
 
 export function WeekCalendar({
   blocks,
+  /** Full-day rows (holidays, etc.) — shown above the timed grid so they are not clipped above 08:00. */
+  allDayBlocks = [],
   anchorWeekday,
   horizontalMode = "workweek",
   nowMinute,
@@ -170,6 +172,7 @@ export function WeekCalendar({
   fillParent = false,
 }: {
   blocks: WeekCalendarBlock[];
+  allDayBlocks?: WeekCalendarBlock[];
   anchorWeekday?: Weekday;
   horizontalMode?: "workweek" | "include-anchor";
   nowMinute?: number;
@@ -193,9 +196,7 @@ export function WeekCalendar({
   const DEFAULT_VIEW_START = cfg.viewStart;
   const DEFAULT_VIEW_END = cfg.viewEnd;
 
-  const horizontalFrameRef = useRef<HTMLDivElement | null>(null);
-  /** Single vertical scroll for time axis + day grid (matches day-view timeline). */
-  const verticalScrollRef = useRef<HTMLDivElement | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const holdTimerRef = useRef<number | null>(null);
   const [frameWidth, setFrameWidth] = useState(0);
   const [selectedBlockKey, setSelectedBlockKey] = useState<string | null>(null);
@@ -263,7 +264,7 @@ export function WeekCalendar({
   // Measure before paint so the first hydrated frame does not use the 56px
   // fallback column width (narrow grid → wide grid flash).
   useLayoutEffect(() => {
-    const node = horizontalFrameRef.current;
+    const node = scrollContainerRef.current;
     if (!node) return;
 
     const update = () => setFrameWidth(node.clientWidth);
@@ -277,7 +278,7 @@ export function WeekCalendar({
   useEffect(() => {
     const scrollTop =
       (DEFAULT_VIEW_START - VISUAL_PADDING_MINUTES - visualStartMinute) * MINUTE_PX;
-    if (verticalScrollRef.current) verticalScrollRef.current.scrollTop = scrollTop;
+    if (scrollContainerRef.current) scrollContainerRef.current.scrollTop = scrollTop;
   }, [visualStartMinute, weekStartDate, focusDate, DEFAULT_VIEW_START, MINUTE_PX]);
 
   useEffect(() => {
@@ -341,7 +342,7 @@ export function WeekCalendar({
   const gridTemplateColumns = `repeat(${visibleDays.length}, minmax(${dayColumnWidth}px, ${dayColumnWidth}px))`;
 
   useLayoutEffect(() => {
-    const node = horizontalFrameRef.current;
+    const node = scrollContainerRef.current;
     if (!node || dayColumnWidth <= 0) return;
     const startIndex =
       horizontalMode === "include-anchor"
@@ -631,20 +632,18 @@ export function WeekCalendar({
         Only the block under the header scrolls vertically (time ticks + events).
       */}
       <div
-        ref={horizontalFrameRef}
+        ref={scrollContainerRef}
         className={cn(
-          "min-w-0 overscroll-x-contain",
-          fillParent ? "flex min-h-0 min-w-0 flex-1 flex-col overflow-x-auto" : "overflow-x-auto",
+          "min-w-0 overflow-auto overscroll-contain",
+          fillParent ? "min-h-0 min-w-0 flex-1" : null,
         )}
+        style={fillParent ? undefined : { height: `${WEEK_HEADER_HEIGHT_PX + viewportHeightPx}px` }}
       >
-        <div
-          className={cn("flex flex-col", fillParent && "h-full min-h-0")}
-          style={{ width: trackWidthPx }}
-        >
-          <div className="flex shrink-0">
+        <div style={{ width: trackWidthPx }}>
+          <div className="sticky top-0 z-30 flex shrink-0">
             <div
               className={cn(
-                "box-border flex shrink-0 cursor-default items-center justify-end border-b border-r bg-[#FAF9F6] px-0 py-0 pl-0 pr-0.5 font-semibold uppercase tracking-wide text-[#8A94A6]",
+                "sticky left-0 z-40 box-border flex shrink-0 cursor-default items-center justify-end border-b border-r bg-[#FAF9F6] px-0 py-0 pl-0 pr-0.5 font-semibold uppercase tracking-wide text-[#8A94A6]",
                 cfg.axisTimeClass,
                 WEEK_GRID_LINE,
                 "dark:bg-muted/25 dark:text-muted-foreground",
@@ -691,7 +690,7 @@ export function WeekCalendar({
                         className={cn(
                           "text-[11px] font-medium tabular-nums leading-none",
                           isToday
-                            ? "font-semibold text-[#111827] dark:text-foreground"
+                            ? "font-semibold text-[#E53935] dark:text-red-500"
                             : cn(
                                 "text-[#9CA3AF]",
                                 isWeekend && !isToday && "text-[#B8C0CC]",
@@ -703,11 +702,11 @@ export function WeekCalendar({
                       </span>
                       <span
                         className={cn(
-                          "shrink-0 items-center justify-center rounded-full tabular-nums leading-none",
+                          "inline-flex h-[18px] min-w-[1.125rem] shrink-0 items-center justify-center px-0.5 text-[10px] font-medium tabular-nums leading-none",
                           isToday
-                            ? "flex h-[22px] w-[22px] text-[10px] font-bold text-white bg-[#E53935] dark:bg-red-500"
+                            ? "font-semibold text-[#E53935] dark:text-red-500"
                             : cn(
-                                "inline-flex h-[18px] min-w-[1.125rem] items-center justify-center px-0.5 text-[10px] font-medium text-[#9CA3AF]",
+                                "text-[#9CA3AF]",
                                 isWeekend && !isToday && "text-[#B8C0CC]",
                                 anchorWeekday === day && !isToday && "text-[#5F6B7A] dark:text-muted-foreground",
                               ),
@@ -722,17 +721,94 @@ export function WeekCalendar({
             </div>
           </div>
 
-          <div
-            ref={verticalScrollRef}
-            className={cn(
-              "min-w-0 overflow-y-auto overscroll-y-contain",
-              fillParent ? "min-h-0 flex-1" : null,
-            )}
-            style={fillParent ? undefined : { height: `${viewportHeightPx}px` }}
-          >
-            <div className="flex">
+          {allDayBlocks.length > 0 ? (
+            <div className="flex shrink-0 border-b border-[#F0ECE6] bg-[#FAFAF8] dark:border-white/[0.08] dark:bg-muted/25">
               <div
-                className={cn("flex shrink-0 flex-col border-r bg-[#FAF9F6]", WEEK_GRID_LINE, "dark:bg-muted/25")}
+                className={cn(
+                  "sticky left-0 z-20 box-border flex shrink-0 items-start justify-end border-r bg-[#FAFAF8] px-1 py-2 pt-2.5 text-right",
+                  WEEK_GRID_LINE,
+                  "dark:bg-muted/25",
+                )}
+                style={{
+                  width: TIME_COLUMN_PX,
+                  minWidth: TIME_COLUMN_PX,
+                  maxWidth: TIME_COLUMN_PX,
+                }}
+              >
+                <span
+                  className={cn(
+                    "max-w-[2.75rem] font-medium leading-tight text-[#8A94A6] dark:text-muted-foreground",
+                    cfg.axisTimeClass,
+                  )}
+                >
+                  All day
+                </span>
+              </div>
+              <div
+                className="grid min-w-0 bg-white dark:bg-card"
+                style={{ width: dayTrackWidth, gridTemplateColumns }}
+              >
+                {visibleDays.map((day) => {
+                  const dayIndex = DAY_ORDER.indexOf(day);
+                  const occurrenceDate = addDays(weekStartDate, dayIndex);
+                  const isWeekend = day === "SAT" || day === "SUN";
+                  const dayBlocks = allDayBlocks.filter((b) => b.weekday === day);
+                  return (
+                    <div
+                      key={`allday-${day}`}
+                      className={cn(
+                        "box-border flex min-h-[2.25rem] flex-col gap-1 border-l px-1 py-1",
+                        WEEK_COL_DIVIDER,
+                        dayIndex === 0 && "border-l-0",
+                        isWeekend && "bg-[#FAF8F5] dark:bg-muted/35",
+                      )}
+                    >
+                      {dayBlocks.map((block, bi) => {
+                        const labelText = [block.courseCode, block.courseName]
+                          .filter(Boolean)
+                          .join(" ")
+                          .trim();
+                        const inferTitle = labelText || block.courseName || block.courseId;
+                        const toneKey = inferScheduleEventToneKey({
+                          kind: block.kind === "study" ? "study" : "class",
+                          title: inferTitle,
+                        });
+                        const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
+                        const catHex = block.categoryColor?.trim();
+                        const useCategory = Boolean(catHex);
+                        return (
+                          <button
+                            key={`${block.calendarEntryId ?? block.courseId}-allday-${bi}`}
+                            type="button"
+                            onClick={() => onOpenItem?.(block, occurrenceDate)}
+                            className={cn(
+                              "w-full truncate rounded-lg px-1.5 py-1 text-left text-[10px] font-semibold leading-tight transition",
+                              "hover:brightness-[0.98] active:brightness-95",
+                              !useCategory && tone.card,
+                              useCategory && "border border-black/10 shadow-sm dark:border-white/10",
+                            )}
+                            style={
+                              useCategory && catHex ? categoryBlockSurfaceStyle(catHex, false) : undefined
+                            }
+                          >
+                            <span className="block truncate">{block.courseName}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
+
+          <div className="flex">
+              <div
+                className={cn(
+                  "sticky left-0 z-20 flex shrink-0 flex-col border-r bg-[#FAF9F6]",
+                  WEEK_GRID_LINE,
+                  "dark:bg-muted/25",
+                )}
                 style={{
                   width: TIME_COLUMN_PX,
                   minWidth: TIME_COLUMN_PX,
@@ -776,12 +852,12 @@ export function WeekCalendar({
                   nowMinute >= 0 &&
                   nowMinute <= FULL_DAY_MINUTES ? (
                     <div
-                      className="pointer-events-none absolute inset-x-0 z-20 -translate-y-1/2 pl-0 pr-0.5 text-right tabular-nums"
+                      className="pointer-events-none absolute inset-x-0 z-20"
                       style={{ top: `${((nowMinute - visualStartMinute) / totalMinutes) * 100}%` }}
                     >
                       <span
                         className={cn(
-                          "inline-block rounded-full bg-[#E53935] px-1.5 py-0.5 font-semibold tabular-nums leading-none text-white shadow-sm dark:bg-red-500",
+                          "absolute right-0 top-0 inline-block -translate-y-1/2 rounded-full bg-[#E53935] px-1.5 py-px font-semibold tabular-nums leading-none text-white dark:bg-red-500",
                           cfg.axisTimeClass,
                         )}
                       >
@@ -806,18 +882,12 @@ export function WeekCalendar({
                     nowMinute >= 0 &&
                     nowMinute <= FULL_DAY_MINUTES ? (
                       <div
-                        className="pointer-events-none absolute inset-x-0 z-20"
+                        className="pointer-events-none absolute inset-x-0 z-10"
                         style={{
                           top: `${((nowMinute - visualStartMinute) / totalMinutes) * 100}%`,
                         }}
                       >
-                        <div className="relative h-0 w-full -translate-y-1/2">
-                          <span
-                            className="absolute left-0 top-1/2 -translate-y-1/2 border-y-[4px] border-y-transparent border-l-[6px] border-l-[#E53935] dark:border-l-red-400"
-                            aria-hidden
-                          />
-                          <div className="absolute left-2 right-0 top-1/2 h-px -translate-y-1/2 bg-[#E53935]/90 dark:bg-red-400/90" />
-                        </div>
+                        <div className="absolute inset-x-0 top-0 h-px -translate-y-1/2 bg-[#E53935]/90 dark:bg-red-400/90" />
                       </div>
                     ) : null}
 
@@ -1124,7 +1194,6 @@ export function WeekCalendar({
                 <div className="shrink-0" style={{ height: `${BOTTOM_SPACER_PX}px` }} aria-hidden />
               </div>
             </div>
-          </div>
         </div>
       </div>
     </div>

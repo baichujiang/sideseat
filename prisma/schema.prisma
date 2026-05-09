@@ -208,6 +208,12 @@ enum ClassmatePostStatus {
   EXPIRED
 }
 
+enum ProductFeedbackTopic {
+  BUG
+  IDEA
+  OTHER
+}
+
 model User {
   id                           String                   @id @default(cuid())
   username                     String                   @unique
@@ -277,6 +283,21 @@ model User {
   groupChatsCreated            GroupChat[]               @relation("GroupChatCreator")
   groupChatParticipants        GroupChatParticipant[]
   groupChatMessages            GroupChatMessage[]
+  productFeedback              ProductFeedback[]
+}
+
+model ProductFeedback {
+  id              String               @id @default(cuid())
+  userId          String
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic           ProductFeedbackTopic @default(OTHER)
+  message         String
+  emailSentAt     DateTime?
+  emailProviderId String?
+  createdAt       DateTime             @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
 }
 
 model UserLanguage {

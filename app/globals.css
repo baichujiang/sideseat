@@ -37,14 +37,18 @@ html {
     radial-gradient(circle at top, rgba(170, 214, 222, 0.18), transparent 38%),
     linear-gradient(180deg, rgba(255, 247, 236, 0.96) 0%, rgba(250, 248, 244, 1) 100%);
   scroll-behavior: smooth;
+  overflow-x: hidden;
   overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
 }
 
 body {
   color: hsl(var(--foreground));
   background: transparent;
   -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
   overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
 }
 
 /*
@@ -92,3 +96,4 @@ a {
     background-repeat: no-repeat;
   }
 }
+

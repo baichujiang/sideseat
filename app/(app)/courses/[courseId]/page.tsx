@@ -17,7 +17,6 @@ import { BackLink } from "@/components/nav/back-link";
 import { getSessionUser } from "@/lib/auth/session";
 import {
   DEFAULT_SCHOOL,
-  getSchoolByCode,
   getSchoolLabel,
   getSchoolMatchValues,
   normalizeSchoolCode,
@@ -26,10 +25,7 @@ import { prisma } from "@/lib/db/prisma";
 import { formatShortRelativeTime } from "@/lib/format/short-relative-time";
 import { safeReturnPath } from "@/lib/nav/back";
 import { inboxCourseUnreadCounts } from "@/lib/queries/inbox-unread-counts";
-import { profileSectionLabelClassName } from "@/lib/ui/profile-section-label";
 import { weeklyOverlapMinutes, type SessionBlock } from "@/lib/queries/schedule-overlap";
-import { cn } from "@/lib/utils";
-
 /** Course hub — matches enrolled / popular course cards: blue pill + border. */
 const courseCodeBadgeClassName =
   "inline-flex shrink-0 items-center rounded-full border border-[#BFDBFE] bg-[#EFF6FF] px-2 py-0.5 text-[11px] font-semibold tabular-nums tracking-wide text-[#2563EB] dark:border-blue-800/50 dark:bg-blue-950/40 dark:text-blue-300";
@@ -314,8 +310,6 @@ export default async function CourseDetailPage({
       ? `${courseChatUnread} unread message${courseChatUnread === 1 ? "" : "s"}`
       : courseChatLastActiveLabel;
 
-  const classmatesSchoolShort = getSchoolByCode(membership.course.school)?.shortLabel;
-
   return (
     <div className="space-y-5">
       {membership.inboxHiddenAt ? (
@@ -393,30 +387,23 @@ export default async function CourseDetailPage({
         ) : null}
       </header>
 
-      <section className="space-y-2 border-t border-classmates-hairline pt-5 dark:border-border/60">
-        <p className={cn(profileSectionLabelClassName, "!mb-0")}>Your week</p>
-        <CourseCalendarPanel
-          course={{
-            id: membership.course.id,
-            code: membership.course.code,
-            name: membership.course.name,
-          }}
-          intentions={[...membership.intentions]}
-          initialSessions={myCourseSessions.map((session) => ({
-            weekday: session.weekday,
-            start: formatHM(session.startMinute),
-            end: formatHM(session.endMinute),
-            location: session.location ?? "",
-          }))}
-          layout="inline"
-        />
-      </section>
-
-      <CourseMemberList
-        courseId={membership.course.id}
-        members={memberList}
-        schoolShortLabel={classmatesSchoolShort}
+      <CourseCalendarPanel
+        course={{
+          id: membership.course.id,
+          code: membership.course.code,
+          name: membership.course.name,
+        }}
+        intentions={[...membership.intentions]}
+        initialSessions={myCourseSessions.map((session) => ({
+          weekday: session.weekday,
+          start: formatHM(session.startMinute),
+          end: formatHM(session.endMinute),
+          location: session.location ?? "",
+        }))}
+        layout="inline"
       />
+
+      <CourseMemberList courseId={membership.course.id} members={memberList} />
 
       <CourseUnenrollFooter courseId={membership.course.id} courseName={membership.course.name} />
     </div>

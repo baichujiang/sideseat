@@ -1,37 +1,51 @@
 "use client";
 
 import { apiFetch } from "@/lib/auth/api-fetch";
+import type { LucideIcon } from "lucide-react";
 import { CalendarPlus, Clock3, ImagePlus, MapPin, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { PlanRequestModal } from "@/components/chat/plan-request-modal";
 import { ShareAvailabilityModal } from "@/components/chat/share-availability-modal";
 import { cn } from "@/lib/utils";
 
-function AttachmentIconButton({
+function AttachmentMenuTile({
+  icon: Icon,
   title,
   onClick,
   disabled,
-  children,
 }: {
+  icon: LucideIcon;
   title: string;
   onClick: () => void;
   disabled?: boolean;
-  children: React.ReactNode;
 }) {
   return (
     <button
       type="button"
+      role="menuitem"
       title={title}
       aria-label={title}
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition hover:bg-primary/15 active:bg-primary/20 disabled:pointer-events-none disabled:opacity-40",
+        "flex w-[4.75rem] shrink-0 flex-col items-center gap-1.5 rounded-xl py-2 transition outline-none",
+        "hover:bg-muted/80 active:bg-muted/95",
+        "focus-visible:bg-muted/80 focus-visible:ring-2 focus-visible:ring-ring/40",
+        "disabled:pointer-events-none disabled:opacity-40",
       )}
     >
-      {children}
+      <span
+        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary"
+        aria-hidden
+      >
+        <Icon className="h-7 w-7" strokeWidth={2} />
+      </span>
+      <span className="line-clamp-2 w-full px-0.5 text-center text-[11px] font-medium leading-tight text-foreground">
+        {title}
+      </span>
     </button>
   );
 }
@@ -45,6 +59,8 @@ export function ChatAttachmentMenu({
 }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const [menuPos, setMenuPos] = useState<{ left: number; bottom: number } | null>(null);
   const [open, setOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [planOpen, setPlanOpen] = useState(false);
@@ -139,9 +155,98 @@ export function ChatAttachmentMenu({
     );
   }
 
+  useLayoutEffect(() => {
+    if (!open) {
+      setMenuPos(null);
+      return;
+    }
+
+    const anchor = anchorRef.current;
+    if (!anchor) return;
+
+    const sync = () => {
+      const r = anchor.getBoundingClientRect();
+      const gap = 12;
+      const bottom = window.innerHeight - r.top + gap;
+      const panelMaxW = 352;
+      const margin = 12;
+      const left = Math.max(margin, Math.min(r.left, window.innerWidth - panelMaxW - margin));
+      setMenuPos({ left, bottom });
+    };
+
+    sync();
+    window.addEventListener("resize", sync);
+    window.visualViewport?.addEventListener("resize", sync);
+    window.visualViewport?.addEventListener("scroll", sync);
+    document.addEventListener("scroll", sync, true);
+    return () => {
+      window.removeEventListener("resize", sync);
+      window.visualViewport?.removeEventListener("resize", sync);
+      window.visualViewport?.removeEventListener("scroll", sync);
+      document.removeEventListener("scroll", sync, true);
+    };
+  }, [open]);
+
+  const menu =
+    open && menuPos && typeof document !== "undefined"
+      ? createPortal(
+          <div
+            role="menu"
+            aria-label="Attachments and actions"
+            className="fixed z-[60] w-[min(100vw-1.5rem,22rem)] rounded-2xl border border-border/70 bg-popover px-2 py-2 text-popover-foreground shadow-xl"
+            style={{ left: menuPos.left, bottom: menuPos.bottom }}
+          >
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = "";
+                if (f) void sendImageFile(f);
+              }}
+            />
+            <div className="flex flex-row flex-wrap justify-center gap-x-1 gap-y-1">
+              <AttachmentMenuTile
+                icon={ImagePlus}
+                title="Photo"
+                disabled={busy}
+                onClick={() => fileRef.current?.click()}
+              />
+              <AttachmentMenuTile icon={MapPin} title="Location" disabled={busy} onClick={sendLocation} />
+              <AttachmentMenuTile
+                icon={Clock3}
+                title="Availability"
+                disabled={busy}
+                onClick={() => {
+                  setOpen(false);
+                  setShareOpen(true);
+                }}
+              />
+              <AttachmentMenuTile
+                icon={CalendarPlus}
+                title="Plan"
+                disabled={busy}
+                onClick={() => {
+                  setOpen(false);
+                  setPlanOpen(true);
+                }}
+              />
+            </div>
+            {error ? (
+              <p className="mt-2 border-t border-border/60 px-2 pb-1 pt-2 text-[12px] leading-snug text-destructive">
+                {error}
+              </p>
+            ) : null}
+          </div>,
+          document.body,
+        )
+      : null;
+
   return (
     <>
-      <div className="relative">
+      <div className="relative" ref={anchorRef}>
         <button
           type="button"
           onClick={() => {
@@ -157,56 +262,9 @@ export function ChatAttachmentMenu({
             <Plus className="h-4.5 w-4.5" strokeWidth={2.25} />
           )}
         </button>
-
-        {open ? (
-          <div className="absolute bottom-[calc(100%+0.75rem)] left-0 z-20 min-w-[12.5rem] max-w-[min(100vw-1.5rem,20rem)] rounded-2xl border border-border/70 bg-background p-2 shadow-xl">
-            <div className="flex flex-wrap gap-1.5">
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  e.target.value = "";
-                  if (f) void sendImageFile(f);
-                }}
-              />
-              <AttachmentIconButton
-                title="Photo"
-                disabled={busy}
-                onClick={() => fileRef.current?.click()}
-              >
-                <ImagePlus className="h-5 w-5" strokeWidth={2.25} />
-              </AttachmentIconButton>
-              <AttachmentIconButton title="Location" disabled={busy} onClick={sendLocation}>
-                <MapPin className="h-5 w-5" strokeWidth={2.25} />
-              </AttachmentIconButton>
-              <AttachmentIconButton
-                title="Share availability"
-                disabled={busy}
-                onClick={() => {
-                  setOpen(false);
-                  setShareOpen(true);
-                }}
-              >
-                <Clock3 className="h-5 w-5" strokeWidth={2.25} />
-              </AttachmentIconButton>
-              <AttachmentIconButton
-                title="Suggest a plan"
-                disabled={busy}
-                onClick={() => {
-                  setOpen(false);
-                  setPlanOpen(true);
-                }}
-              >
-                <CalendarPlus className="h-5 w-5" strokeWidth={2.25} />
-              </AttachmentIconButton>
-            </div>
-            {error ? <p className="mt-2 max-w-[16rem] text-[11px] text-destructive">{error}</p> : null}
-          </div>
-        ) : null}
       </div>
+
+      {menu}
 
       <ShareAvailabilityModal
         open={shareOpen}

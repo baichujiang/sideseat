@@ -9,6 +9,7 @@ import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { DirectInboxRow } from "@/components/inbox/direct-inbox-row";
 import { CourseInboxRow } from "@/components/inbox/course-inbox-row";
 import { GroupInboxRow } from "@/components/inbox/group-inbox-row";
+import { inboxChatListUlClassName } from "@/components/inbox/inbox-conversation-tile";
 import { BackLink } from "@/components/nav/back-link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getSessionUser } from "@/lib/auth/session";
@@ -23,7 +24,7 @@ export default async function InboxUnreadPage() {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <BackLink href="/inbox" label="Back" />
-          <h1 className="page-screen-title">Unread</h1>
+          <h1 className="page-screen-title">New messages</h1>
         </div>
         <GuestAppCta returnTo="/inbox/unread" />
       </div>
@@ -62,9 +63,9 @@ export default async function InboxUnreadPage() {
       <div className="flex items-center gap-2 px-0.5">
         <BackLink href="/inbox" label="Back" />
         <div>
-          <h1 className="page-screen-title">Unread</h1>
+          <h1 className="page-screen-title">New messages</h1>
           <p className="page-screen-subtitle mt-0.5">
-            Chats waiting on you and plan invites to respond to
+            Threads with something new for you — same as the badges on your main chat list
           </p>
         </div>
       </div>
@@ -72,7 +73,7 @@ export default async function InboxUnreadPage() {
       {!hasListContent ? (
         <EmptyState
           title="You're all caught up"
-          description="No unread messages or pending plan invites right now."
+          description="No new messages or pending plan invites right now."
         />
       ) : (
         <div className="space-y-4">
@@ -116,9 +117,9 @@ export default async function InboxUnreadPage() {
           {unreadItems.length > 0 ? (
             <section className="space-y-2">
               <h2 className="px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Messages
+                Chats with new activity
               </h2>
-              <ul className={cn("space-y-2", pendingPlans.length > 0 ? "mt-1" : "")}>
+              <ul className={cn(inboxChatListUlClassName, pendingPlans.length > 0 ? "mt-1" : "")}>
                 {unreadItems.map((item) =>
                   item.kind === "direct" ? (
                     <DirectInboxRow
