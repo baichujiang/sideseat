@@ -1084,6 +1084,8 @@ export function ScheduleSurface({
               onClose={() => setWeekImmersiveOpen(false)}
               zClassName="z-[100]"
               ariaLabel="Week calendar expanded"
+              fullBleed
+              lockBodyScroll={false}
               panelClassName="h-full w-full max-w-none overflow-hidden border-0 bg-background shadow-none dark:shadow-none"
               backdropClassName="bg-background !backdrop-blur-none"
             >

@@ -35,6 +35,12 @@ type AppPushLayerProps = {
   backdropClassName?: string;
   /** Set `false` if the parent already locks body scroll */
   lockBodyScroll?: boolean;
+  /**
+   * When true, the sliding panel row spans the full viewport (`inset-0`).
+   * Use for true full-screen content; the default `right-0` + intrinsic width
+   * row collapses when the child is only `w-full` (no fixed width).
+   */
+  fullBleed?: boolean;
   /** Accessible name for the dialog root */
   ariaLabel?: string;
   /** Element id of the visible title (preferred over `ariaLabel` when set) */
@@ -53,6 +59,7 @@ export function AppPushLayer({
   panelClassName,
   backdropClassName,
   lockBodyScroll = true,
+  fullBleed = false,
   ariaLabel,
   ariaLabelledBy,
 }: AppPushLayerProps) {
@@ -162,10 +169,18 @@ export function AppPushLayer({
         )}
         style={{ transitionDuration: dur }}
       />
-      <div className="pointer-events-none absolute inset-y-0 right-0 flex min-h-0 max-h-full max-w-full">
+      <div
+        className={cn(
+          "pointer-events-none absolute flex min-h-0",
+          fullBleed
+            ? "inset-0 w-full min-w-0 flex-col"
+            : "inset-y-0 right-0 max-h-full max-w-full flex-col",
+        )}
+      >
         <div
           className={cn(
-            "pointer-events-auto flex h-full max-h-full min-h-0 w-[min(100vw,28rem)] flex-col overflow-hidden border-l border-border/60 bg-card shadow-[-12px_0_40px_-16px_rgba(15,23,42,0.22)] dark:shadow-[-12px_0_40px_-12px_rgba(0,0,0,0.5)]",
+            "pointer-events-auto flex h-full max-h-full min-h-0 flex-col overflow-hidden border-l border-border/60 bg-card shadow-[-12px_0_40px_-16px_rgba(15,23,42,0.22)] dark:shadow-[-12px_0_40px_-12px_rgba(0,0,0,0.5)]",
+            fullBleed ? "w-full min-w-0 flex-1" : "w-[min(100vw,28rem)]",
             "transition-transform ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform",
             entered ? "translate-x-0" : "translate-x-full",
             panelClassName,
