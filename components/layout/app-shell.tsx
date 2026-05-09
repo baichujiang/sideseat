@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { BookOpen, Calendar, Inbox, UsersRound, UserRound } from "lucide-react";
 
 import { EdgeSwipeBack } from "@/components/layout/edge-swipe-back";
@@ -135,7 +135,9 @@ export function AppShell({
         "h-dvh max-h-dvh overflow-hidden",
       )}
     >
-      <EdgeSwipeBack getBounds={swipeBounds} />
+      <Suspense fallback={null}>
+        <EdgeSwipeBack getBounds={swipeBounds} />
+      </Suspense>
       <main
         className={cn(
           "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden",
