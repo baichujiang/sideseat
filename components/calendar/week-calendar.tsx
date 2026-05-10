@@ -948,83 +948,134 @@ export function WeekCalendar({
                         const useCategory = block.source === "calendar" && Boolean(catHex);
                         const alldayKey = `allday:${day}:${bi}:${block.calendarEntryId ?? block.courseId}`;
                         const alldaySelected = selectedBlockKey === alldayKey;
+                        const alldayExpanded = alldaySelected;
+                        const alldayTitleLine =
+                          block.source === "course" && block.courseCode?.trim()
+                            ? block.courseName
+                            : labelText || block.courseName;
+                        const alldayMetaCls = cn(
+                          "break-words text-[10px] font-normal leading-snug",
+                          useCategory
+                            ? "text-white/85"
+                            : alldaySelected && toneKey !== "draftNew"
+                              ? "text-white/80"
+                              : "text-[#111827]/70 dark:text-zinc-400",
+                        );
                         return (
-                          <button
+                          <div
                             key={`${block.calendarEntryId ?? block.courseId}-allday-${bi}`}
-                            type="button"
-                            onPointerDown={(e) => attachTapSelectLongOpen(e, block, occurrenceDate, alldayKey)}
-                            onKeyDown={(ev) => {
-                              if (ev.key === "Enter" || ev.key === " ") {
-                                ev.preventDefault();
-                                onOpenItem?.(block, occurrenceDate);
-                              }
-                            }}
-                            className={cn(
-                              "w-full rounded-md p-0 text-left text-[10px] font-semibold leading-tight transition",
-                              "hover:brightness-[0.98] active:brightness-95",
-                              alldaySelected ? "z-[1] overflow-visible ring-2 ring-[#2563EB]/35 ring-offset-1 ring-offset-white dark:ring-blue-400/40 dark:ring-offset-card" : "truncate overflow-hidden",
-                              !useCategory && (alldaySelected ? tone.cardSelected : tone.card),
-                              useCategory && "border border-black/10 shadow-sm dark:border-white/10",
-                            )}
-                            style={
-                              useCategory && catHex ? categoryBlockSurfaceStyle(catHex, alldaySelected) : undefined
-                            }
+                            className={cn("relative w-full", alldaySelected && "z-[2]")}
                           >
-                            <span
+                            <button
+                              type="button"
+                              onPointerDown={(e) => attachTapSelectLongOpen(e, block, occurrenceDate, alldayKey)}
+                              onKeyDown={(ev) => {
+                                if (ev.key === "Enter" || ev.key === " ") {
+                                  ev.preventDefault();
+                                  onOpenItem?.(block, occurrenceDate);
+                                }
+                              }}
                               className={cn(
-                                "flex min-w-0 flex-row rounded-[inherit]",
-                                alldaySelected ? "overflow-visible" : "overflow-hidden",
+                                "relative z-[1] w-full rounded-sm p-0 text-left text-[10px] font-semibold leading-tight transition",
+                                "hover:brightness-[0.98] active:brightness-95",
+                                alldayExpanded
+                                  ? "ring-2 ring-[#2563EB]/35 ring-offset-1 ring-offset-white dark:ring-blue-400/40 dark:ring-offset-card"
+                                  : "truncate overflow-hidden",
+                                !useCategory && (alldaySelected ? tone.cardSelected : tone.card),
+                                useCategory && "border border-black/10 shadow-sm dark:border-white/10",
                               )}
+                              style={
+                                useCategory && catHex
+                                  ? categoryBlockSurfaceStyle(catHex, alldaySelected)
+                                  : undefined
+                              }
                             >
                               <span
-                                aria-hidden
                                 className={cn(
-                                  "w-1 shrink-0 self-stretch rounded-l-md",
-                                  !useCategory && (alldaySelected ? tone.railSelected : tone.rail),
-                                  useCategory && catHex && "bg-transparent",
+                                  "flex min-w-0 flex-row rounded-[inherit]",
+                                  !alldayExpanded && "overflow-hidden",
                                 )}
-                                style={
-                                  useCategory && catHex
-                                    ? { backgroundColor: categoryAccentColor(catHex) }
-                                    : undefined
-                                }
-                              />
-                              <span className="flex min-w-0 flex-1 flex-col gap-px px-1.5 py-1">
-                                {block.source === "course" && block.courseCode?.trim() ? (
-                                  <>
-                                    <span
-                                      className={cn(
-                                        "font-bold tabular-nums leading-tight text-classmates-blue dark:text-blue-200",
-                                        !alldaySelected && "truncate",
-                                        alldaySelected && "whitespace-normal break-words",
+                              >
+                                <span
+                                  aria-hidden
+                                  className={cn(
+                                    "w-1 shrink-0 self-stretch rounded-l-sm",
+                                    !useCategory && (alldaySelected ? tone.railSelected : tone.rail),
+                                    useCategory && catHex && "bg-transparent",
+                                  )}
+                                  style={
+                                    useCategory && catHex
+                                      ? { backgroundColor: categoryAccentColor(catHex) }
+                                      : undefined
+                                  }
+                                />
+                                <span className="flex min-w-0 flex-1 flex-col gap-px px-1.5 py-1">
+                                  {alldayExpanded ? (
+                                    <>
+                                      <span className={alldayMetaCls}>All day</span>
+                                      {block.source === "course" && block.courseCode?.trim() ? (
+                                        <>
+                                          <span className="break-words font-bold tabular-nums leading-snug text-classmates-blue dark:text-blue-200">
+                                            {block.courseCode.trim()}
+                                          </span>
+                                          <span
+                                            className={cn(
+                                              "break-words font-semibold leading-snug",
+                                              !useCategory && tone.titleSelected,
+                                              useCategory && "text-white",
+                                            )}
+                                          >
+                                            {block.courseName}
+                                          </span>
+                                        </>
+                                      ) : (
+                                        <span
+                                          className={cn(
+                                            "break-words font-semibold leading-snug",
+                                            !useCategory && tone.titleSelected,
+                                            useCategory && "text-white",
+                                          )}
+                                        >
+                                          {alldayTitleLine}
+                                        </span>
                                       )}
-                                    >
-                                      {block.courseCode.trim()}
+                                      {block.repeatLabel?.trim() ? (
+                                        <span className={cn("mt-0.5", alldayMetaCls)}>
+                                          {block.repeatLabel.trim()}
+                                        </span>
+                                      ) : null}
+                                      {block.location?.trim() ? (
+                                        <span className={cn("mt-0.5", alldayMetaCls)}>
+                                          {block.location.trim()}
+                                        </span>
+                                      ) : null}
+                                      {block.withLabel?.trim() ? (
+                                        <span className={cn("mt-0.5", alldayMetaCls)}>
+                                          {block.withLabel.trim()}
+                                        </span>
+                                      ) : null}
+                                      {block.note?.trim() ? (
+                                        <span className={cn("mt-0.5", alldayMetaCls)}>{block.note.trim()}</span>
+                                      ) : null}
+                                    </>
+                                  ) : block.source === "course" && block.courseCode?.trim() ? (
+                                    <>
+                                      <span className="truncate font-bold tabular-nums leading-tight text-classmates-blue dark:text-blue-200">
+                                        {block.courseCode.trim()}
+                                      </span>
+                                      <span className="min-w-0 truncate font-semibold leading-snug text-[#111827] dark:text-foreground">
+                                        {block.courseName}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <span className="min-w-0 truncate leading-snug">
+                                      {labelText || block.courseName}
                                     </span>
-                                    <span
-                                      className={cn(
-                                        "min-w-0 font-semibold leading-snug text-[#111827] dark:text-foreground",
-                                        !alldaySelected && "truncate",
-                                        alldaySelected && "whitespace-normal break-words",
-                                      )}
-                                    >
-                                      {block.courseName}
-                                    </span>
-                                  </>
-                                ) : (
-                                  <span
-                                    className={cn(
-                                      "min-w-0 leading-snug",
-                                      !alldaySelected && "truncate",
-                                      alldaySelected && "whitespace-normal break-words",
-                                    )}
-                                  >
-                                    {labelText || block.courseName}
-                                  </span>
-                                )}
+                                  )}
+                                </span>
                               </span>
-                            </span>
-                          </button>
+                            </button>
+                          </div>
                         );
                       })}
                     </div>
@@ -1239,15 +1290,19 @@ export function WeekCalendar({
                               dragOverride?.eventId && block.calendarEntryId === dragOverride.eventId,
                             );
                             const highlighted = selected || draggingThis;
+                            const expandedCard = selected && !draggingThis;
                             const shortOverlapGlass = Boolean(block.hasShortOverlap && !highlighted);
                             const catHex = block.categoryColor?.trim();
                             const useCategoryColor = block.source === "calendar" && Boolean(catHex);
                             const startMinuteShown = draggingThis
                               ? snapMinute(block.startMinute)
                               : block.startMinute;
+                            const endMinuteShown = draggingThis
+                              ? snapMinute(block.endMinute)
+                              : block.endMinute;
                             const className = cn(
-                              "absolute rounded-md p-0 text-left leading-tight transition hover:brightness-[0.98] active:brightness-95",
-                              highlighted ? "overflow-visible" : "overflow-hidden",
+                              "absolute rounded-sm p-0 text-left leading-tight transition hover:brightness-[0.98] active:brightness-95",
+                              "overflow-hidden",
                               draggingThis && "!transition-none",
                               !useCategoryColor &&
                                 (highlighted
@@ -1274,21 +1329,97 @@ export function WeekCalendar({
                                   ? "text-white/80"
                                   : "text-[#111827]/65 dark:text-muted-foreground",
                             );
+                            const expandedDetailCls = cn(
+                              "break-words text-[11px] font-normal leading-snug",
+                              useCategoryColor
+                                ? "text-white/85"
+                                : !isDraftNewTone
+                                  ? "text-white/80"
+                                  : "text-[#374151] dark:text-zinc-400",
+                            );
                             const titleLine =
                               block.source === "course" && block.courseCode?.trim()
                                 ? block.courseName
                                 : labelText || block.courseName || "Event";
-                            const showLocation = Boolean(block.location) && (highlighted || effectiveHeight > cfg.metaLocPct);
-                            const showWith = Boolean(block.withLabel) && (highlighted || effectiveHeight > cfg.metaWithPct);
-                            const showNote = Boolean(block.note?.trim()) && highlighted;
-                            const inner = (
+                            const showLocation =
+                              Boolean(block.location) && !highlighted && effectiveHeight > cfg.metaLocPct;
+                            const showWith =
+                              Boolean(block.withLabel) && !highlighted && effectiveHeight > cfg.metaWithPct;
+                            const innerNormal = (
                               <>
                                 {effectiveHeight > 0 ? (
                                   <p
                                     className={cn(
-                                      "text-left tabular-nums font-medium leading-none",
-                                      !highlighted && "truncate",
-                                      highlighted && "whitespace-normal",
+                                      "truncate text-left tabular-nums font-medium leading-none",
+                                      cfg.blockTimeClass,
+                                      !useCategoryColor && tone.accentColor,
+                                    )}
+                                    style={
+                                      useCategoryColor && catHex
+                                        ? { color: categoryAccentColor(catHex) }
+                                        : undefined
+                                    }
+                                  >
+                                    {formatTime(startMinuteShown)}
+                                  </p>
+                                ) : null}
+                                {block.source === "course" && block.courseCode?.trim() ? (
+                                  <div
+                                    className={cn(
+                                      "mt-px min-w-0 space-y-px",
+                                      effectiveHeight <= cfg.metaLocPct * 0.35 && "min-h-0",
+                                    )}
+                                  >
+                                    <p
+                                      className={cn(
+                                        "truncate text-left font-bold tabular-nums leading-none text-classmates-blue dark:text-blue-200",
+                                        cfg.blockTitleClass,
+                                      )}
+                                    >
+                                      {block.courseCode.trim()}
+                                    </p>
+                                    <p
+                                      className={cn(
+                                        "truncate text-left font-semibold leading-snug",
+                                        cfg.blockTitleClass,
+                                        !useCategoryColor && tone.title,
+                                      )}
+                                    >
+                                      {block.courseName}
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <p
+                                    className={cn(
+                                      "mt-px min-w-0 truncate text-left font-semibold leading-snug",
+                                      cfg.blockTitleClass,
+                                      !useCategoryColor && tone.title,
+                                      useCategoryColor &&
+                                        (shortOverlapGlass ? "" : "text-[#111827] dark:text-foreground"),
+                                    )}
+                                    style={
+                                      useCategoryColor && catHex && shortOverlapGlass
+                                        ? { color: categoryAccentColor(catHex) }
+                                        : undefined
+                                    }
+                                  >
+                                    {titleLine}
+                                  </p>
+                                )}
+                                {showLocation ? (
+                                  <p className={cn("mt-px truncate", metaCls)}>{block.location}</p>
+                                ) : null}
+                                {showWith ? (
+                                  <p className={cn("mt-px truncate", metaCls)}>{block.withLabel}</p>
+                                ) : null}
+                              </>
+                            );
+                            const innerCompact = (
+                              <>
+                                {effectiveHeight > 0 ? (
+                                  <p
+                                    className={cn(
+                                      "truncate text-left tabular-nums font-medium leading-none",
                                       cfg.blockTimeClass,
                                       !useCategoryColor &&
                                         (highlighted ? tone.accentColorSelected : tone.accentColor),
@@ -1303,17 +1434,10 @@ export function WeekCalendar({
                                   </p>
                                 ) : null}
                                 {block.source === "course" && block.courseCode?.trim() ? (
-                                  <div
-                                    className={cn(
-                                      "mt-px min-w-0 space-y-px",
-                                      effectiveHeight <= cfg.metaLocPct * 0.35 && !highlighted && "min-h-0",
-                                    )}
-                                  >
+                                  <div className="mt-px min-w-0 space-y-px">
                                     <p
                                       className={cn(
-                                        "text-left font-bold tabular-nums leading-none text-classmates-blue dark:text-blue-200",
-                                        !highlighted && "truncate",
-                                        highlighted && "whitespace-normal break-words",
+                                        "truncate text-left font-bold tabular-nums leading-none text-classmates-blue dark:text-blue-200",
                                         cfg.blockTitleClass,
                                       )}
                                     >
@@ -1321,9 +1445,7 @@ export function WeekCalendar({
                                     </p>
                                     <p
                                       className={cn(
-                                        "text-left font-semibold leading-snug",
-                                        !highlighted && "truncate",
-                                        highlighted && "whitespace-normal break-words",
+                                        "truncate text-left font-semibold leading-snug",
                                         cfg.blockTitleClass,
                                         !useCategoryColor && (highlighted ? tone.titleSelected : tone.title),
                                       )}
@@ -1334,10 +1456,8 @@ export function WeekCalendar({
                                 ) : (
                                   <p
                                     className={cn(
-                                      "mt-px min-w-0 text-left font-semibold leading-snug",
+                                      "mt-px min-w-0 truncate text-left font-semibold leading-snug",
                                       cfg.blockTitleClass,
-                                      !highlighted && "truncate",
-                                      highlighted && "whitespace-normal break-words",
                                       !useCategoryColor && (highlighted ? tone.titleSelected : tone.title),
                                       useCategoryColor &&
                                         (highlighted
@@ -1355,23 +1475,79 @@ export function WeekCalendar({
                                     {titleLine}
                                   </p>
                                 )}
-                                {showLocation ? (
-                                  <p className={cn("mt-px", metaCls, highlighted && "whitespace-normal break-words")}>
-                                    {block.location}
+                              </>
+                            );
+                            const innerExpanded = (
+                              <>
+                                <p
+                                  className={cn(
+                                    "break-words font-semibold tabular-nums leading-none",
+                                    cfg.blockTimeClass,
+                                    !useCategoryColor && tone.accentColorSelected,
+                                  )}
+                                  style={
+                                    useCategoryColor && catHex ? { color: "#ffffff" } : undefined
+                                  }
+                                >
+                                  {formatTime(startMinuteShown)} – {formatTime(endMinuteShown)}
+                                </p>
+                                {block.source === "course" && block.courseCode?.trim() ? (
+                                  <div className="mt-px min-w-0 space-y-px">
+                                    <p
+                                      className={cn(
+                                        "break-words font-bold tabular-nums leading-snug text-classmates-blue dark:text-blue-200",
+                                        cfg.blockTitleClass,
+                                      )}
+                                    >
+                                      {block.courseCode.trim()}
+                                    </p>
+                                    <p
+                                      className={cn(
+                                        "break-words font-semibold leading-snug",
+                                        cfg.blockTitleClass,
+                                        !useCategoryColor && tone.titleSelected,
+                                      )}
+                                    >
+                                      {block.courseName}
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <p
+                                    className={cn(
+                                      "mt-px min-w-0 break-words font-semibold leading-snug",
+                                      cfg.blockTitleClass,
+                                      !useCategoryColor && tone.titleSelected,
+                                      useCategoryColor && "text-white",
+                                    )}
+                                  >
+                                    {titleLine}
+                                  </p>
+                                )}
+                                {block.repeatLabel?.trim() ? (
+                                  <p className={cn("mt-1", expandedDetailCls)}>
+                                    {block.repeatLabel.trim()}
                                   </p>
                                 ) : null}
-                                {showWith ? (
-                                  <p className={cn("mt-px", metaCls, highlighted && "whitespace-normal break-words")}>
-                                    {block.withLabel}
+                                {block.location?.trim() ? (
+                                  <p className={cn("mt-0.5", expandedDetailCls)}>
+                                    {block.location.trim()}
                                   </p>
                                 ) : null}
-                                {showNote ? (
-                                  <p className={cn("mt-px", metaCls, "whitespace-normal break-words")}>
-                                    {block.note!.trim()}
+                                {block.withLabel?.trim() ? (
+                                  <p className={cn("mt-0.5", expandedDetailCls)}>
+                                    {block.withLabel.trim()}
                                   </p>
+                                ) : null}
+                                {block.note?.trim() ? (
+                                  <p className={cn("mt-0.5", expandedDetailCls)}>{block.note.trim()}</p>
                                 ) : null}
                               </>
                             );
+                            const innerSlot = draggingThis
+                              ? innerCompact
+                              : expandedCard
+                                ? innerExpanded
+                                : innerNormal;
                             const railStyle =
                               useCategoryColor && catHex
                                 ? { backgroundColor: categoryAccentColor(catHex) }
@@ -1379,7 +1555,7 @@ export function WeekCalendar({
                             const railClass = cn(
                               shortOverlapGlass
                                 ? "w-[7px] min-w-[7px] shrink-0 self-stretch rounded-full my-1 ml-1 mr-px"
-                                : "w-1 min-w-[4px] shrink-0 self-stretch rounded-l-md",
+                                : "w-1 min-w-[4px] shrink-0 self-stretch rounded-l-sm",
                               !useCategoryColor &&
                                 (highlighted
                                   ? tone.railSelected
@@ -1390,13 +1566,15 @@ export function WeekCalendar({
                             const innerWithRail = (
                               <div
                                 className={cn(
-                                  "flex h-full min-h-0 w-full flex-row rounded-[inherit]",
-                                  highlighted ? "overflow-visible" : "overflow-hidden",
+                                  "flex w-full flex-row overflow-hidden rounded-[inherit]",
+                                  expandedCard || draggingThis
+                                    ? "min-h-0 items-stretch"
+                                    : "h-full min-h-0",
                                 )}
                               >
                                 <div aria-hidden className={railClass} style={railStyle} />
                                 <div className="flex min-h-0 min-w-0 flex-1 flex-col items-start justify-start px-1.5 py-1">
-                                  {inner}
+                                  {innerSlot}
                                 </div>
                               </div>
                             );
@@ -1417,13 +1595,22 @@ export function WeekCalendar({
                                     Z_EVENT_CARD_DRAGGING - 1,
                                   )
                                 : eventStackZ;
-                            const positionStyle = {
-                              top: `${top}%`,
-                              height: `${effectiveHeight}%`,
-                              left: `calc(${block.columnIndex * columnWidth}% + ${stackInsetPx}px)`,
-                              width: `calc(${widthPct}% - ${stackInsetPx}px)`,
-                              zIndex: cardZ,
-                            };
+                            const positionStyle = expandedCard
+                              ? {
+                                  top: `${top}%`,
+                                  minHeight: `${effectiveHeight}%`,
+                                  height: "auto" as const,
+                                  left: `calc(${block.columnIndex * columnWidth}% + ${stackInsetPx}px)`,
+                                  width: `calc(${widthPct}% - ${stackInsetPx}px)`,
+                                  zIndex: cardZ,
+                                }
+                              : {
+                                  top: `${top}%`,
+                                  height: `${effectiveHeight}%`,
+                                  left: `calc(${block.columnIndex * columnWidth}% + ${stackInsetPx}px)`,
+                                  width: `calc(${widthPct}% - ${stackInsetPx}px)`,
+                                  zIndex: cardZ,
+                                };
                             const surfaceStyle =
                               useCategoryColor && catHex
                                 ? {
@@ -1449,43 +1636,78 @@ export function WeekCalendar({
                                   title={title}
                                   role="group"
                                 >
-                                  {/* Draggable body — fills the card */}
                                   <div
-                                    role="button"
-                                    tabIndex={0}
                                     className={cn(
-                                      "absolute inset-0 cursor-grab rounded-[inherit] active:cursor-grabbing",
-                                      highlighted ? "overflow-visible" : "overflow-hidden",
-                                      draggingThis && "cursor-grabbing",
+                                      "overflow-hidden rounded-[inherit]",
+                                      expandedCard && "relative",
                                     )}
-                                    style={{ zIndex: Z_EVENT_DRAG_INNER }}
-                                    onKeyDown={(ev) => {
-                                      if (ev.key === "Enter" || ev.key === " ") {
-                                        ev.preventDefault();
-                                        onOpenItem?.(block, occurrenceDate);
-                                      }
-                                    }}
-                                    onPointerDown={(ev) => {
-                                      ev.stopPropagation();
-                                      startCalendarPointerSession(
-                                        ev,
-                                        block,
-                                        "move",
-                                        day,
-                                        occurrenceDate,
-                                        key,
-                                        selected,
-                                      );
-                                    }}
                                   >
-                                    <div
-                                      className={cn(
-                                        "pointer-events-none h-full min-h-0 w-full rounded-[inherit]",
-                                        highlighted ? "overflow-visible" : "overflow-hidden",
-                                      )}
-                                    >
-                                      {innerWithRail}
-                                    </div>
+                                    {expandedCard ? (
+                                      <>
+                                        <div className="relative z-0 w-full rounded-[inherit]">
+                                          <div className="pointer-events-none">{innerWithRail}</div>
+                                        </div>
+                                        <div
+                                          role="button"
+                                          tabIndex={0}
+                                          className={cn(
+                                            "absolute inset-0 cursor-grab rounded-[inherit] active:cursor-grabbing",
+                                            draggingThis && "cursor-grabbing",
+                                          )}
+                                          style={{ zIndex: Z_EVENT_DRAG_INNER }}
+                                          onKeyDown={(ev) => {
+                                            if (ev.key === "Enter" || ev.key === " ") {
+                                              ev.preventDefault();
+                                              onOpenItem?.(block, occurrenceDate);
+                                            }
+                                          }}
+                                          onPointerDown={(ev) => {
+                                            ev.stopPropagation();
+                                            startCalendarPointerSession(
+                                              ev,
+                                              block,
+                                              "move",
+                                              day,
+                                              occurrenceDate,
+                                              key,
+                                              selected,
+                                            );
+                                          }}
+                                        />
+                                      </>
+                                    ) : (
+                                      <div
+                                        role="button"
+                                        tabIndex={0}
+                                        className={cn(
+                                          "absolute inset-0 cursor-grab overflow-hidden rounded-[inherit] active:cursor-grabbing",
+                                          draggingThis && "cursor-grabbing",
+                                        )}
+                                        style={{ zIndex: Z_EVENT_DRAG_INNER }}
+                                        onKeyDown={(ev) => {
+                                          if (ev.key === "Enter" || ev.key === " ") {
+                                            ev.preventDefault();
+                                            onOpenItem?.(block, occurrenceDate);
+                                          }
+                                        }}
+                                        onPointerDown={(ev) => {
+                                          ev.stopPropagation();
+                                          startCalendarPointerSession(
+                                            ev,
+                                            block,
+                                            "move",
+                                            day,
+                                            occurrenceDate,
+                                            key,
+                                            selected,
+                                          );
+                                        }}
+                                      >
+                                        <div className="pointer-events-none h-full min-h-0 w-full overflow-hidden rounded-[inherit]">
+                                          {innerWithRail}
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
                                   {/* Resize handles — only appear when card is selected */}
                                   {selected ? (
@@ -1513,7 +1735,7 @@ export function WeekCalendar({
                                         }}
                                       >
                                         <span
-                                          className="pointer-events-none block h-[6px] w-[6px] rounded-full border-[1.5px] border-[#E53935] bg-white shadow-[0_0_3px_rgba(15,23,42,0.2)] dark:border-red-400 dark:bg-card"
+                                          className="pointer-events-none block h-1 w-1 shrink-0 rounded-full bg-[#E53935] shadow-[0_0_0_1px_rgba(255,255,255,0.65)] dark:bg-red-400 dark:shadow-[0_0_0_1px_rgba(0,0,0,0.35)]"
                                           aria-hidden
                                         />
                                       </button>
@@ -1540,7 +1762,7 @@ export function WeekCalendar({
                                         }}
                                       >
                                         <span
-                                          className="pointer-events-none block h-[6px] w-[6px] rounded-full border-[1.5px] border-[#E53935] bg-white shadow-[0_0_3px_rgba(15,23,42,0.2)] dark:border-red-400 dark:bg-card"
+                                          className="pointer-events-none block h-1 w-1 shrink-0 rounded-full bg-[#E53935] shadow-[0_0_0_1px_rgba(255,255,255,0.65)] dark:bg-red-400 dark:shadow-[0_0_0_1px_rgba(0,0,0,0.35)]"
                                           aria-hidden
                                         />
                                       </button>
@@ -1551,26 +1773,36 @@ export function WeekCalendar({
                             }
 
                             return (
-                              <button
+                              <div
                                 key={key}
-                                type="button"
                                 className={className}
                                 style={surfaceStyle}
+                                role="group"
                                 title={title}
-                                onPointerDown={(e) => {
-                                  if (block.courseId === "__draft-preview__") return;
-                                  attachTapSelectLongOpen(e, block, occurrenceDate, key);
-                                }}
-                                onKeyDown={(ev) => {
-                                  if (ev.key === "Enter" || ev.key === " ") {
-                                    ev.preventDefault();
-                                    if (block.courseId === "__draft-preview__") return;
-                                    onOpenItem?.(block, occurrenceDate);
-                                  }
-                                }}
                               >
-                                {innerWithRail}
-                              </button>
+                                <button
+                                  type="button"
+                                  className={cn(
+                                    "z-[1] cursor-default rounded-[inherit] border-0 bg-transparent p-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/35 focus-visible:ring-offset-1 focus-visible:ring-offset-background dark:focus-visible:ring-blue-400/40",
+                                    expandedCard
+                                      ? "relative block min-h-0 w-full overflow-hidden"
+                                      : "absolute inset-0 overflow-hidden",
+                                  )}
+                                  onPointerDown={(e) => {
+                                    if (block.courseId === "__draft-preview__") return;
+                                    attachTapSelectLongOpen(e, block, occurrenceDate, key);
+                                  }}
+                                  onKeyDown={(ev) => {
+                                    if (ev.key === "Enter" || ev.key === " ") {
+                                      ev.preventDefault();
+                                      if (block.courseId === "__draft-preview__") return;
+                                      onOpenItem?.(block, occurrenceDate);
+                                    }
+                                  }}
+                                >
+                                  {innerWithRail}
+                                </button>
+                              </div>
                             );
                           })}
                         </div>

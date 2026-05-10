@@ -68,24 +68,16 @@ export default async function PeerUserProfilePage({
               ? courseName
               : access.sharedCourses[0]?.name ?? null
           }
+          belowDisplayName={
+            access.mode === "connection" ? (
+              <ContactRemarkEditor
+                connectionId={access.connectionId}
+                initialRemark={access.myContactRemark}
+                variant="underName"
+              />
+            ) : null
+          }
         />
-
-        {access.mode === "connection" ? (
-          <div className="mt-4 space-y-2 rounded-2xl border border-border/60 bg-card px-3 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Name in your chats
-            </p>
-            <p className="text-[11px] leading-snug text-muted-foreground">
-              Only you see this in your chat list and at the top of the thread. It does not change their public
-              profile.
-            </p>
-            <ContactRemarkEditor
-              connectionId={access.connectionId}
-              initialRemark={access.myContactRemark}
-              isSelfNotes={false}
-            />
-          </div>
-        ) : null}
 
         <div className="mt-4 space-y-2 rounded-2xl border border-border/60 bg-card px-3 py-3">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">

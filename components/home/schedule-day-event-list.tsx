@@ -114,7 +114,7 @@ export function ScheduleDayEventList({
         const catHex = item.source === "calendar" ? item.categoryColor?.trim() : undefined;
         const railStyle = catHex ? { backgroundColor: catHex } : undefined;
         const railClass = cn(
-          "w-1 shrink-0 self-stretch rounded-l-md",
+          "w-1 shrink-0 self-stretch rounded-l-sm",
           !catHex && tone.rail,
         );
         const rowSelected = selectedId === item.id;
@@ -138,7 +138,7 @@ export function ScheduleDayEventList({
                 }
               }}
               className={cn(
-                "flex w-full items-stretch rounded-md p-0 text-left transition",
+                "flex w-full items-stretch rounded-sm p-0 text-left transition",
                 rowSelected ? "z-[1] overflow-visible ring-2 ring-[#2563EB]/30 ring-offset-2 ring-offset-background dark:ring-blue-400/35" : "overflow-hidden",
                 tone.card,
                 rowSelected && tone.cardSelected,

@@ -208,6 +208,14 @@ export default async function ProfilePage({
           <ProfileIdentitySheets
             variant="summary"
             gender={user.gender}
+            belowDisplayName={
+              <ContactRemarkEditor
+                connectionId={selfNotesConnectionId}
+                initialRemark={selfNotesRemark}
+                isSelfNotes
+                variant="underName"
+              />
+            }
             sheetProfileFormKey={sheetProfileFormKey}
             sheetProfileInitialValues={{
               nickname: user.nickname ?? "",
@@ -238,18 +246,6 @@ export default async function ProfilePage({
             initialAvatarUrl={user.avatarUrl}
             initialBio={user.bio}
             initialNickname={user.nickname}
-          />
-        </MePageSection>
-
-        <MePageSection
-          id="me-self-notes-chat-heading"
-          title="Personal notes chat"
-          description="Optional title for your private thread — it appears in Chats and at the top of that conversation."
-        >
-          <ContactRemarkEditor
-            connectionId={selfNotesConnectionId}
-            initialRemark={selfNotesRemark}
-            isSelfNotes
           />
         </MePageSection>
 

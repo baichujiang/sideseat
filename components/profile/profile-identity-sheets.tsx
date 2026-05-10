@@ -5,6 +5,7 @@ import { apiFetch } from "@/lib/auth/api-fetch";
 /** Compact rows (onboarding), centered hero, or summary strip + sheets (Me /profile). */
 
 import type { UserGender } from "@prisma/client";
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -79,6 +80,7 @@ export function ProfileIdentitySheets({
   /** When set (Me /profile summary), the edit sheet uses one `ProfileForm` for card + academic fields. */
   sheetProfileInitialValues,
   sheetProfileFormKey,
+  belowDisplayName,
 }: {
   initialNickname: string | null;
   initialBio: string | null;
@@ -89,6 +91,8 @@ export function ProfileIdentitySheets({
   gender?: UserGender | null;
   sheetProfileInitialValues?: SheetProfileValues;
   sheetProfileFormKey?: string;
+  /** Me /profile summary only — e.g. private self-chat title under the display name. */
+  belowDisplayName?: ReactNode;
 }) {
   const router = useRouter();
   const avatarUploadInputRef = useRef<HTMLInputElement>(null);
@@ -333,6 +337,9 @@ export function ProfileIdentitySheets({
                 <p className="page-screen-title-ink truncate">{displayName}</p>
                 {gender ? <UserGenderProfileMark gender={gender} iconClassName="h-4 w-4" /> : null}
               </div>
+              {belowDisplayName ? (
+                <div className="mt-1.5 w-full min-w-0 max-w-full">{belowDisplayName}</div>
+              ) : null}
               {schoolLine ? (
                 <p className="mt-1.5 text-[14px] font-medium leading-snug text-classmates-sub dark:text-zinc-400">
                   {schoolLine}

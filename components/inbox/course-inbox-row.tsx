@@ -6,6 +6,7 @@ import { inboxConversationTileClassName } from "@/components/inbox/inbox-convers
 import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { InboxSwipeRow } from "@/components/inbox/inbox-swipe-row";
 import { CourseAvatar } from "@/components/ui/course-avatar";
+import { courseChatHeadline } from "@/lib/courses/course-code-label";
 import { formatShortRelativeTime } from "@/lib/format/short-relative-time";
 import { cn } from "@/lib/utils";
 import type { CourseRoomMessageWithSender } from "@/lib/queries/inbox-merge";
@@ -53,7 +54,7 @@ export function CourseInboxRow({
                 "min-w-0 truncate text-[15px] font-semibold leading-tight text-[#111827] dark:text-foreground",
               )}
             >
-              {course.name}
+              {courseChatHeadline(course.name, course.code)}
             </p>
           </div>
           <p

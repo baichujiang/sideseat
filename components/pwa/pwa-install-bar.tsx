@@ -10,7 +10,11 @@ import {
   runDeferredInstallPrompt,
   subscribeDeferredInstall,
 } from "@/lib/pwa/deferred-install";
-import { canIosShareForInstall, openIosShareForInstall } from "@/lib/pwa/ios-share-for-install";
+import {
+  canIosShareForInstall,
+  copyInstallPageUrl,
+  openIosShareForInstall,
+} from "@/lib/pwa/ios-share-for-install";
 import { isIosDevice, isStandalonePwa } from "@/lib/pwa/pwa-environment";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +22,7 @@ const DISMISS_KEY = "sideseat_pwa_install_bar_dismissed";
 
 /**
  * Chromium: captured `beforeinstallprompt` — primary Install button, short fallback copy below.
- * iOS: Web Share sheet when available — primary “Add via Share menu”, then manual copy / steps as fallback.
+ * iOS: one “Add to Home Screen” action — tries Web Share (multiple payloads), then copies the page link if Share is unavailable or fails.
  */
 export function PwaInstallBar({ className }: { className?: string }) {
   const [mounted, setMounted] = useState(false);
@@ -26,9 +30,16 @@ export function PwaInstallBar({ className }: { className?: string }) {
   const [barDismissed, setBarDismissed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [iosShareBusy, setIosShareBusy] = useState(false);
+  const [iosLinkCopied, setIosLinkCopied] = useState(false);
 
   useEffect(() => subscribeDeferredInstall(() => refresh((x) => x + 1)), []);
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (!iosLinkCopied) return;
+    const t = window.setTimeout(() => setIosLinkCopied(false), 4500);
+    return () => window.clearTimeout(t);
+  }, [iosLinkCopied]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -58,11 +69,16 @@ export function PwaInstallBar({ className }: { className?: string }) {
     }
   }, [dismiss]);
 
-  const onIosShareClick = useCallback(async () => {
+  const onIosAddToHomeScreen = useCallback(async () => {
     if (typeof window === "undefined") return;
+    setIosLinkCopied(false);
     setIosShareBusy(true);
     try {
-      await openIosShareForInstall(APP_NAME, window.location.href);
+      const url = window.location.href;
+      const result = await openIosShareForInstall(APP_NAME, url);
+      if (result === "shared" || result === "cancelled") return;
+      const ok = await copyInstallPageUrl(url);
+      if (ok) setIosLinkCopied(true);
     } finally {
       setIosShareBusy(false);
     }
@@ -74,7 +90,7 @@ export function PwaInstallBar({ className }: { className?: string }) {
   const deferred = getDeferredInstallPrompt();
   const showChromium = deferred !== null;
   const showIos = !showChromium && isIosDevice();
-  const iosCanShare = showIos && canIosShareForInstall();
+  const iosShareLikely = showIos && canIosShareForInstall();
 
   if (isStandalonePwa()) return null;
 
@@ -112,22 +128,25 @@ export function PwaInstallBar({ className }: { className?: string }) {
             </div>
           ) : showIos ? (
             <div className="flex min-w-0 flex-1 basis-[min(100%,10rem)] flex-col gap-1">
-              {iosCanShare ? (
-                <Button
-                  type="button"
-                  size="sm"
-                  className="h-9 w-full max-w-[220px] rounded-xl px-3 text-[12px] font-semibold sm:w-auto"
-                  disabled={iosShareBusy}
-                  onClick={() => void onIosShareClick()}
-                >
-                  {iosShareBusy ? "…" : "Add via Share menu"}
-                </Button>
-              ) : null}
+              <Button
+                type="button"
+                size="sm"
+                className="h-9 w-full max-w-[220px] rounded-xl px-3 text-[12px] font-semibold sm:w-auto"
+                disabled={iosShareBusy}
+                onClick={() => void onIosAddToHomeScreen()}
+              >
+                {iosShareBusy ? "…" : "Add to Home Screen"}
+              </Button>
               <p className="text-[11px] leading-snug text-muted-foreground">
-                {iosCanShare
-                  ? "Opens Share — choose Add to Home Screen. If it is missing, use Share □↑ or ⋯ → Add to Home Screen in Safari or Chrome."
-                  : "On iPhone: Share □↑ or ⋯ menu → Add to Home Screen (no install API in this browser)."}
+                {iosShareLikely
+                  ? "Opens Share — pick Add to Home Screen. If that fails, we copy the link so you can open it in Safari and try again."
+                  : "Copies this page’s link — open in Safari, then Share (□↑ or …) → Add to Home Screen."}
               </p>
+              {iosLinkCopied ? (
+                <p className="text-[11px] font-medium leading-snug text-emerald-700 dark:text-emerald-400">
+                  Link copied.
+                </p>
+              ) : null}
             </div>
           ) : null}
           <button

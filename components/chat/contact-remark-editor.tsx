@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiFetch } from "@/lib/auth/api-fetch";
 import { CONTACT_REMARK_MAX_LEN } from "@/lib/connections/contact-remark";
+
+const REMARK_PLACEHOLDER = "备注";
+
 export function ContactRemarkEditor({
   connectionId,
   initialRemark,
@@ -22,8 +25,9 @@ export function ContactRemarkEditor({
    * `profile` — one quiet row for user profile (default).
    * `minimal` — single row for Notes-to-self in chat (no profile to open).
    * `inline` — compact inline edit button + input for chat header.
+   * `underName` — Me /profile summary: no section label, sits under display name.
    */
-  variant?: "profile" | "minimal" | "inline";
+  variant?: "profile" | "minimal" | "inline" | "underName";
 }) {
   const router = useRouter();
   const [value, setValue] = useState(initialRemark ?? "");
@@ -62,12 +66,12 @@ export function ContactRemarkEditor({
     return (
       <div className="border-b border-border/60 bg-muted/15">
         <div className="flex items-center gap-2 px-3 py-1.5">
-          <span className="shrink-0 text-[11px] text-muted-foreground">Title</span>
           <Input
             value={value}
             onChange={(e) => setValue(e.target.value.slice(0, CONTACT_REMARK_MAX_LEN))}
             maxLength={CONTACT_REMARK_MAX_LEN}
-            placeholder="Custom title"
+            placeholder={REMARK_PLACEHOLDER}
+            aria-label={REMARK_PLACEHOLDER}
             className="h-8 min-w-0 flex-1 border-0 bg-transparent px-0 text-[13px] shadow-none focus-visible:ring-0"
           />
           <Button
@@ -86,6 +90,33 @@ export function ContactRemarkEditor({
     );
   }
 
+  if (variant === "underName") {
+    return (
+      <div className="w-full min-w-0">
+        <div className="flex gap-2">
+          <Input
+            value={value}
+            onChange={(e) => setValue(e.target.value.slice(0, CONTACT_REMARK_MAX_LEN))}
+            maxLength={CONTACT_REMARK_MAX_LEN}
+            placeholder={REMARK_PLACEHOLDER}
+            aria-label={REMARK_PLACEHOLDER}
+            className="h-8 min-w-0 flex-1 border-classmates-edge/80 bg-background/70 text-[13px] shadow-none dark:border-border dark:bg-background/50"
+          />
+          <Button
+            type="button"
+            size="sm"
+            className="h-8 shrink-0 px-3 text-[12px]"
+            disabled={saving || !dirty}
+            onClick={() => void save()}
+          >
+            {saving ? "…" : "Save"}
+          </Button>
+        </div>
+        {error ? <p className="mt-1 text-[11px] text-destructive">{error}</p> : null}
+      </div>
+    );
+  }
+
   if (variant === "inline") {
     if (!inlineEditing) {
       return (
@@ -96,8 +127,8 @@ export function ContactRemarkEditor({
             setInlineEditing(true);
           }}
           className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
-          aria-label="Edit remark"
-          title="Edit remark"
+          aria-label={REMARK_PLACEHOLDER}
+          title={REMARK_PLACEHOLDER}
         >
           <Pencil className="h-3.5 w-3.5" strokeWidth={2.25} />
         </button>
@@ -110,7 +141,7 @@ export function ContactRemarkEditor({
           value={value}
           onChange={(e) => setValue(e.target.value.slice(0, CONTACT_REMARK_MAX_LEN))}
           maxLength={CONTACT_REMARK_MAX_LEN}
-          placeholder="Remark"
+          placeholder={REMARK_PLACEHOLDER}
           className="h-7 w-28 rounded-full px-2.5 text-[11px]"
         />
         <button
@@ -118,7 +149,7 @@ export function ContactRemarkEditor({
           disabled={saving || !dirty}
           onClick={() => void save()}
           className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-emerald-600 transition hover:bg-emerald-50 disabled:opacity-35"
-          aria-label="Save remark"
+          aria-label="Save"
         >
           <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
         </button>
@@ -131,7 +162,7 @@ export function ContactRemarkEditor({
             setInlineEditing(false);
           }}
           className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted disabled:opacity-40"
-          aria-label="Cancel remark edit"
+          aria-label="Cancel"
         >
           <X className="h-3.5 w-3.5" strokeWidth={2.5} />
         </button>
@@ -142,15 +173,13 @@ export function ContactRemarkEditor({
 
   return (
     <div className="w-full">
-      <label className="text-[11px] font-medium text-muted-foreground">
-        {isSelfNotes ? "Title" : "Remark"}
-      </label>
-      <div className="mt-1 flex gap-2">
+      <div className="flex gap-2">
         <Input
           value={value}
           onChange={(e) => setValue(e.target.value.slice(0, CONTACT_REMARK_MAX_LEN))}
           maxLength={CONTACT_REMARK_MAX_LEN}
-          placeholder={isSelfNotes ? "Drafts" : "Optional"}
+          placeholder={REMARK_PLACEHOLDER}
+          aria-label={REMARK_PLACEHOLDER}
           className="h-9 min-w-0 flex-1 text-[13px]"
         />
         <Button

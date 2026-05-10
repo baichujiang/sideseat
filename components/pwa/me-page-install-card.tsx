@@ -10,7 +10,11 @@ import {
   runDeferredInstallPrompt,
   subscribeDeferredInstall,
 } from "@/lib/pwa/deferred-install";
-import { canIosShareForInstall, openIosShareForInstall } from "@/lib/pwa/ios-share-for-install";
+import {
+  canIosShareForInstall,
+  copyInstallPageUrl,
+  openIosShareForInstall,
+} from "@/lib/pwa/ios-share-for-install";
 import { isIosDevice, isStandalonePwa } from "@/lib/pwa/pwa-environment";
 import { cn } from "@/lib/utils";
 
@@ -19,8 +23,15 @@ export function MePageInstallCard({ compact = false }: { compact?: boolean }) {
   const [, refresh] = useState(0);
   const [busy, setBusy] = useState(false);
   const [iosShareBusy, setIosShareBusy] = useState(false);
+  const [iosLinkCopied, setIosLinkCopied] = useState(false);
 
   useEffect(() => subscribeDeferredInstall(() => refresh((x) => x + 1)), []);
+
+  useEffect(() => {
+    if (!iosLinkCopied) return;
+    const t = window.setTimeout(() => setIosLinkCopied(false), 4500);
+    return () => window.clearTimeout(t);
+  }, [iosLinkCopied]);
 
   const onInstall = useCallback(async () => {
     setBusy(true);
@@ -31,11 +42,16 @@ export function MePageInstallCard({ compact = false }: { compact?: boolean }) {
     }
   }, []);
 
-  const onIosShare = useCallback(async () => {
+  const onIosAddToHomeScreen = useCallback(async () => {
     if (typeof window === "undefined") return;
+    setIosLinkCopied(false);
     setIosShareBusy(true);
     try {
-      await openIosShareForInstall(APP_NAME, window.location.href);
+      const url = window.location.href;
+      const result = await openIosShareForInstall(APP_NAME, url);
+      if (result === "shared" || result === "cancelled") return;
+      const ok = await copyInstallPageUrl(url);
+      if (ok) setIosLinkCopied(true);
     } finally {
       setIosShareBusy(false);
     }
@@ -46,7 +62,7 @@ export function MePageInstallCard({ compact = false }: { compact?: boolean }) {
   const deferred = getDeferredInstallPrompt();
   const showInstall = deferred !== null;
   const showIos = !showInstall && isIosDevice();
-  const iosCanShare = showIos && canIosShareForInstall();
+  const iosShareLikely = showIos && canIosShareForInstall();
 
   const pad = compact ? "p-2.5" : "p-3";
 
@@ -75,21 +91,24 @@ export function MePageInstallCard({ compact = false }: { compact?: boolean }) {
           </>
         ) : showIos ? (
           <>
-            {iosCanShare ? (
-              <Button
-                type="button"
-                className={cn("h-8 w-full rounded-lg px-3 text-[12px] font-semibold", !compact && "h-9")}
-                disabled={iosShareBusy}
-                onClick={() => void onIosShare()}
-              >
-                {iosShareBusy ? "…" : "Add via Share menu"}
-              </Button>
-            ) : null}
+            <Button
+              type="button"
+              className={cn("h-8 w-full rounded-lg px-3 text-[12px] font-semibold", !compact && "h-9")}
+              disabled={iosShareBusy}
+              onClick={() => void onIosAddToHomeScreen()}
+            >
+              {iosShareBusy ? "…" : "Add to Home Screen"}
+            </Button>
             <p className="text-[11px] leading-snug text-muted-foreground">
-              {iosCanShare
-                ? "Opens the system Share sheet — choose Add to Home Screen. If it is missing, use the manual steps below."
-                : "iOS does not support one-tap install from the web. Use the manual steps below."}
+              {iosShareLikely
+                ? "Opens the system Share sheet — choose Add to Home Screen. If that fails, we copy the page link so you can paste it in Safari and try again."
+                : "Copies this page’s link. Open it in Safari, tap Share (□↑ or …), then Add to Home Screen — or use the steps below."}
             </p>
+            {iosLinkCopied ? (
+              <p className="text-[11px] font-medium leading-snug text-emerald-700 dark:text-emerald-400">
+                Link copied — open in Safari if needed, then Share → Add to Home Screen.
+              </p>
+            ) : null}
             <details className="rounded-lg border border-border/60 bg-muted/20 px-2 py-1.5 text-[11px] text-foreground">
               <summary className="cursor-pointer list-none font-medium text-classmates-azure outline-none">
                 Manual steps (if Share did not work)

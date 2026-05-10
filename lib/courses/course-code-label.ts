@@ -14,3 +14,10 @@ export function courseCodeBadgeLabel(name: string, rawCode: string | null): stri
   if (trimmed) return trimmed;
   return extractLegacyInCodesFromText(name).join(" · ");
 }
+
+/** Course chat inbox row + thread header: include catalog code when present so users can match the same class. */
+export function courseChatHeadline(name: string, rawCode: string | null | undefined): string {
+  const code = rawCode?.trim();
+  if (code) return `${code} · ${name}`;
+  return name;
+}

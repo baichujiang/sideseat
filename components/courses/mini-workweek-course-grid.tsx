@@ -591,7 +591,7 @@ export function MiniWorkweekCourseGrid({
                               }}
                             >
                               <span
-                                className="pointer-events-none block h-[6px] w-[6px] rounded-full border-[1.5px] border-[#E53935] bg-white shadow-[0_0_3px_rgba(15,23,42,0.2)] dark:border-red-400 dark:bg-card"
+                                className="pointer-events-none block h-1 w-1 shrink-0 rounded-full bg-[#E53935] shadow-[0_0_0_1px_rgba(255,255,255,0.65)] dark:bg-red-400 dark:shadow-[0_0_0_1px_rgba(0,0,0,0.35)]"
                                 aria-hidden
                               />
                             </button>
@@ -607,7 +607,7 @@ export function MiniWorkweekCourseGrid({
                               }}
                             >
                               <span
-                                className="pointer-events-none block h-[6px] w-[6px] rounded-full border-[1.5px] border-[#E53935] bg-white shadow-[0_0_3px_rgba(15,23,42,0.2)] dark:border-red-400 dark:bg-card"
+                                className="pointer-events-none block h-1 w-1 shrink-0 rounded-full bg-[#E53935] shadow-[0_0_0_1px_rgba(255,255,255,0.65)] dark:bg-red-400 dark:shadow-[0_0_0_1px_rgba(0,0,0,0.35)]"
                                 aria-hidden
                               />
                             </button>

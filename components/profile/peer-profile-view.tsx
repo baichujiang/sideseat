@@ -1,4 +1,5 @@
 import type { DegreeLevel, LanguageProficiency, LanguageTag, UserGender } from "@prisma/client";
+import type { ReactNode } from "react";
 
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { UserGenderProfileMark } from "@/components/ui/user-gender-icon";
@@ -30,9 +31,12 @@ export type PeerProfileFields = {
 export function PeerProfileView({
   peer,
   metVia,
+  belowDisplayName,
 }: {
   peer: PeerProfileFields;
   metVia: string | null;
+  /** Your private name for this contact — only when viewer has a connection. */
+  belowDisplayName?: ReactNode;
 }) {
   const name = peer.nickname?.trim() || "Student";
 
@@ -61,6 +65,9 @@ export function PeerProfileView({
                 status={peer.studentVerificationStatus}
               />
             </h1>
+            {belowDisplayName ? (
+              <div className="mt-1.5 w-full min-w-0 max-w-full">{belowDisplayName}</div>
+            ) : null}
             {degreeLabel ? (
               <p className="mt-1 text-sm text-muted-foreground">{degreeLabel}</p>
             ) : null}

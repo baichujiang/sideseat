@@ -14,6 +14,7 @@ import { requireCourseChatMember } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { cn } from "@/lib/utils";
 import { getSchoolLabel } from "@/lib/constants/schools";
+import { courseChatHeadline } from "@/lib/courses/course-code-label";
 import { safeReturnPath } from "@/lib/nav/back";
 
 function dayDividerLabel(d: Date): string {
@@ -88,7 +89,9 @@ export default async function CourseChatPage({
           href={`/courses/${courseId}`}
           className="flex min-w-0 flex-1 flex-col rounded-xl py-1 pl-1 pr-2 text-left transition hover:bg-muted/70 active:bg-muted"
         >
-          <p className="truncate text-sm font-semibold leading-tight">{course.name}</p>
+          <p className="truncate text-sm font-semibold leading-tight">
+            {courseChatHeadline(course.name, course.code)}
+          </p>
           <p className="truncate text-[11px] text-muted-foreground">
             Course chat · {memberCount} classmate{memberCount === 1 ? "" : "s"} ·{" "}
             {getSchoolLabel(course.school)}

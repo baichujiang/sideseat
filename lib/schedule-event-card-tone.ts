@@ -51,9 +51,9 @@ export function isDraftNewEventTitle(title: string): boolean {
 export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle> = {
   /** Creating / not yet named — dashed frame + wash (not a solid “saved” block). */
   draftNew: {
-    card: "rounded-md border border-dashed border-[#93C5FD] bg-[#EFF6FF]/60 dark:border-blue-400/50 dark:bg-blue-950/25",
+    card: "rounded-sm border border-dashed border-[#93C5FD] bg-[#EFF6FF]/60 dark:border-blue-400/50 dark:bg-blue-950/25",
     cardSelected:
-      "rounded-md border-2 border-dashed border-[#2563EB] bg-[#EFF6FF]/85 shadow-[0_2px_10px_rgba(37,99,235,0.14)] dark:border-blue-400 dark:bg-blue-950/40",
+      "rounded-sm border-2 border-dashed border-[#2563EB] bg-[#EFF6FF]/85 shadow-[0_2px_10px_rgba(37,99,235,0.14)] dark:border-blue-400 dark:bg-blue-950/40",
     accentColor: "text-[#2563EB] dark:text-blue-300",
     accentColorSelected: "text-[#1D4ED8] dark:text-blue-200",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
@@ -62,9 +62,9 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     railSelected: "bg-[#1D4ED8] dark:bg-blue-300",
   },
   study: {
-    card: "rounded-md border border-[#BFDBFE] bg-[#EFF6FF] shadow-[0_2px_8px_rgba(37,99,235,0.10)] dark:border-blue-500/40 dark:bg-blue-950/35",
+    card: "rounded-sm border border-[#BFDBFE] bg-[#EFF6FF] shadow-[0_2px_8px_rgba(37,99,235,0.10)] dark:border-blue-500/40 dark:bg-blue-950/35",
     cardSelected:
-      "rounded-md border border-[#1D4ED8] bg-[#2563EB] shadow-[0_4px_12px_rgba(37,99,235,0.22)] dark:border-blue-400 dark:bg-blue-600",
+      "rounded-sm border border-[#1D4ED8] bg-[#2563EB] shadow-[0_4px_12px_rgba(37,99,235,0.22)] dark:border-blue-400 dark:bg-blue-600",
     accentColor: "text-[#2563EB] dark:text-blue-300",
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
@@ -73,9 +73,9 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     railSelected: "bg-white/40",
   },
   enrolledCourse: {
-    card: "rounded-md border border-[#BFDBFE] bg-[#EFF6FF] shadow-[0_2px_8px_rgba(37,99,235,0.10)] dark:border-blue-500/40 dark:bg-blue-950/35",
+    card: "rounded-sm border border-[#BFDBFE] bg-[#EFF6FF] shadow-[0_2px_8px_rgba(37,99,235,0.10)] dark:border-blue-500/40 dark:bg-blue-950/35",
     cardSelected:
-      "rounded-md border border-[#1D4ED8] bg-[#2563EB] shadow-[0_4px_12px_rgba(37,99,235,0.22)] dark:border-blue-400 dark:bg-blue-600",
+      "rounded-sm border border-[#1D4ED8] bg-[#2563EB] shadow-[0_4px_12px_rgba(37,99,235,0.22)] dark:border-blue-400 dark:bg-blue-600",
     accentColor: "text-[#2563EB] dark:text-blue-300",
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
@@ -84,9 +84,9 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     railSelected: "bg-white/40",
   },
   meal: {
-    card: "rounded-md border border-[#FED7AA] bg-[#FFF7ED] shadow-[0_2px_8px_rgba(234,88,12,0.08)] dark:border-orange-500/35 dark:bg-orange-950/30",
+    card: "rounded-sm border border-[#FED7AA] bg-[#FFF7ED] shadow-[0_2px_8px_rgba(234,88,12,0.08)] dark:border-orange-500/35 dark:bg-orange-950/30",
     cardSelected:
-      "rounded-md border border-[#EA580C] bg-[#EA580C] shadow-[0_4px_12px_rgba(234,88,12,0.2)] dark:bg-orange-600",
+      "rounded-sm border border-[#EA580C] bg-[#EA580C] shadow-[0_4px_12px_rgba(234,88,12,0.2)] dark:bg-orange-600",
     accentColor: "text-[#EA580C] dark:text-orange-300",
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
@@ -95,9 +95,9 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     railSelected: "bg-white/40",
   },
   sports: {
-    card: "rounded-md border border-[#BBF7D0] bg-[#F0FDF4] shadow-[0_2px_8px_rgba(22,163,74,0.08)] dark:border-emerald-500/35 dark:bg-emerald-950/30",
+    card: "rounded-sm border border-[#BBF7D0] bg-[#F0FDF4] shadow-[0_2px_8px_rgba(22,163,74,0.08)] dark:border-emerald-500/35 dark:bg-emerald-950/30",
     cardSelected:
-      "rounded-md border border-[#16A34A] bg-[#16A34A] shadow-[0_4px_12px_rgba(22,163,74,0.2)] dark:bg-emerald-600",
+      "rounded-sm border border-[#16A34A] bg-[#16A34A] shadow-[0_4px_12px_rgba(22,163,74,0.2)] dark:bg-emerald-600",
     accentColor: "text-[#16A34A] dark:text-emerald-300",
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
@@ -106,9 +106,9 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     railSelected: "bg-white/40",
   },
   language: {
-    card: "rounded-md border border-[#99F6E4] bg-[#F0FDFA] shadow-[0_2px_8px_rgba(15,118,110,0.08)] dark:border-teal-500/35 dark:bg-teal-950/30",
+    card: "rounded-sm border border-[#99F6E4] bg-[#F0FDFA] shadow-[0_2px_8px_rgba(15,118,110,0.08)] dark:border-teal-500/35 dark:bg-teal-950/30",
     cardSelected:
-      "rounded-md border border-[#0F766E] bg-[#0F766E] shadow-[0_4px_12px_rgba(15,118,110,0.2)] dark:bg-teal-600",
+      "rounded-sm border border-[#0F766E] bg-[#0F766E] shadow-[0_4px_12px_rgba(15,118,110,0.2)] dark:bg-teal-600",
     accentColor: "text-[#0F766E] dark:text-teal-300",
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
@@ -117,9 +117,9 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     railSelected: "bg-white/40",
   },
   personal: {
-    card: "rounded-md border border-[#E5E7EB] bg-[#F3F4F6] shadow-[0_2px_8px_rgba(107,114,128,0.08)] dark:border-zinc-600 dark:bg-zinc-900/50",
+    card: "rounded-sm border border-[#E5E7EB] bg-[#F3F4F6] shadow-[0_2px_8px_rgba(107,114,128,0.08)] dark:border-zinc-600 dark:bg-zinc-900/50",
     cardSelected:
-      "rounded-md border border-[#6B7280] bg-[#6B7280] shadow-[0_4px_12px_rgba(75,85,99,0.2)] dark:bg-zinc-600",
+      "rounded-sm border border-[#6B7280] bg-[#6B7280] shadow-[0_4px_12px_rgba(75,85,99,0.2)] dark:bg-zinc-600",
     accentColor: "text-[#6B7280] dark:text-zinc-400",
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
@@ -128,9 +128,9 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     railSelected: "bg-white/35",
   },
   planPending: {
-    card: "rounded-md border border-[#FDE68A] bg-[#FEF3C7] shadow-[0_2px_8px_rgba(217,119,6,0.1)] dark:border-amber-500/35 dark:bg-amber-950/30",
+    card: "rounded-sm border border-[#FDE68A] bg-[#FEF3C7] shadow-[0_2px_8px_rgba(217,119,6,0.1)] dark:border-amber-500/35 dark:bg-amber-950/30",
     cardSelected:
-      "rounded-md border border-[#D97706] bg-[#D97706] shadow-[0_4px_12px_rgba(217,119,6,0.22)] dark:bg-amber-600",
+      "rounded-sm border border-[#D97706] bg-[#D97706] shadow-[0_4px_12px_rgba(217,119,6,0.22)] dark:bg-amber-600",
     accentColor: "text-[#D97706] dark:text-amber-300",
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
@@ -140,9 +140,9 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
   },
   /** SideSeat-ish: free / open slot */
   available: {
-    card: "rounded-md border border-[#5EEAD4] bg-[#ECFEFF] shadow-[0_2px_8px_rgba(13,148,136,0.1)] dark:border-cyan-500/35 dark:bg-cyan-950/30",
+    card: "rounded-sm border border-[#5EEAD4] bg-[#ECFEFF] shadow-[0_2px_8px_rgba(13,148,136,0.1)] dark:border-cyan-500/35 dark:bg-cyan-950/30",
     cardSelected:
-      "rounded-md border border-[#0D9488] bg-[#14B8A6] shadow-[0_4px_12px_rgba(13,148,136,0.22)] dark:bg-teal-600",
+      "rounded-sm border border-[#0D9488] bg-[#14B8A6] shadow-[0_4px_12px_rgba(13,148,136,0.22)] dark:bg-teal-600",
     accentColor: "text-[#0D9488] dark:text-cyan-300",
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
@@ -152,9 +152,9 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
   },
   /** SideSeat-ish: invitation / request pending */
   pendingRequest: {
-    card: "rounded-md border border-[#FDE68A] bg-[#FEF3C7] shadow-[0_2px_8px_rgba(217,119,6,0.1)] dark:border-amber-500/35 dark:bg-amber-950/30",
+    card: "rounded-sm border border-[#FDE68A] bg-[#FEF3C7] shadow-[0_2px_8px_rgba(217,119,6,0.1)] dark:border-amber-500/35 dark:bg-amber-950/30",
     cardSelected:
-      "rounded-md border border-[#CA8A04] bg-[#CA8A04] shadow-[0_4px_12px_rgba(202,138,4,0.22)] dark:bg-amber-600",
+      "rounded-sm border border-[#CA8A04] bg-[#CA8A04] shadow-[0_4px_12px_rgba(202,138,4,0.22)] dark:bg-amber-600",
     accentColor: "text-[#B45309] dark:text-amber-300",
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
@@ -164,9 +164,9 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
   },
   /** SideSeat-ish: busy / private */
   busy: {
-    card: "rounded-md border border-[#D1D5DB] bg-[#F3F4F6] shadow-[0_2px_8px_rgba(75,85,99,0.06)] dark:border-zinc-600 dark:bg-zinc-900/55",
+    card: "rounded-sm border border-[#D1D5DB] bg-[#F3F4F6] shadow-[0_2px_8px_rgba(75,85,99,0.06)] dark:border-zinc-600 dark:bg-zinc-900/55",
     cardSelected:
-      "rounded-md border border-[#4B5563] bg-[#4B5563] shadow-[0_4px_12px_rgba(55,65,81,0.2)] dark:bg-zinc-600",
+      "rounded-sm border border-[#4B5563] bg-[#4B5563] shadow-[0_4px_12px_rgba(55,65,81,0.2)] dark:bg-zinc-600",
     accentColor: "text-[#6B7280] dark:text-zinc-400",
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
@@ -176,9 +176,9 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
   },
   /** SideSeat-ish: declined / canceled */
   declined: {
-    card: "rounded-md border border-[#FECACA] bg-[#FEF2F2] shadow-[0_2px_8px_rgba(220,38,38,0.08)] dark:border-red-500/35 dark:bg-red-950/30",
+    card: "rounded-sm border border-[#FECACA] bg-[#FEF2F2] shadow-[0_2px_8px_rgba(220,38,38,0.08)] dark:border-red-500/35 dark:bg-red-950/30",
     cardSelected:
-      "rounded-md border border-[#DC2626] bg-[#DC2626] shadow-[0_4px_12px_rgba(220,38,38,0.2)] dark:bg-red-600",
+      "rounded-sm border border-[#DC2626] bg-[#DC2626] shadow-[0_4px_12px_rgba(220,38,38,0.2)] dark:bg-red-600",
     accentColor: "text-[#DC2626] dark:text-red-300",
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
@@ -188,9 +188,9 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
   },
   /** Default timetable class — same neutral family as Personal, distinct label in UI copy only */
   course: {
-    card: "rounded-md border border-[#E5E7EB] bg-[#F9FAFB] shadow-[0_2px_8px_rgba(71,85,105,0.07)] dark:border-slate-600 dark:bg-slate-900/45",
+    card: "rounded-sm border border-[#E5E7EB] bg-[#F9FAFB] shadow-[0_2px_8px_rgba(71,85,105,0.07)] dark:border-slate-600 dark:bg-slate-900/45",
     cardSelected:
-      "rounded-md border border-[#475569] bg-[#475569] shadow-[0_4px_12px_rgba(51,65,85,0.2)] dark:bg-slate-600",
+      "rounded-sm border border-[#475569] bg-[#475569] shadow-[0_4px_12px_rgba(51,65,85,0.2)] dark:bg-slate-600",
     accentColor: "text-[#475569] dark:text-slate-300",
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
