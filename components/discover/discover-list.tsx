@@ -34,6 +34,7 @@ import {
   ClassmatesPersonRow,
   CLASSMATES_PERSON_ROW_AVATAR_RING_DISCOVER,
 } from "@/components/classmates/classmates-person-row";
+import { ClassmatePostShareToXhsButton } from "@/components/discover/classmate-post-share-xhs-button";
 import { DiscoverMessageButton } from "@/components/discover/discover-message-button";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
@@ -1115,14 +1116,23 @@ function PostRow({
         </>
       }
       action={
-        <DiscoverMessageButton
-          peerId={post.userId}
-          returnTo={postPath}
-          tone="subtle"
-          hasExistingChat={false}
-          insightPostId={post.isOwn ? undefined : post.id}
-          className="w-full justify-center sm:w-auto"
-        />
+        post.isOwn ? (
+          <ClassmatePostShareToXhsButton
+            title={post.title}
+            body={post.body}
+            postPath={postPath}
+            variant="compact"
+          />
+        ) : (
+          <DiscoverMessageButton
+            peerId={post.userId}
+            returnTo={postPath}
+            tone="subtle"
+            hasExistingChat={false}
+            insightPostId={post.id}
+            className="h-10 w-full justify-center gap-2 px-6 text-[13px] sm:w-auto sm:min-w-[11.25rem]"
+          />
+        )
       }
     />
   );

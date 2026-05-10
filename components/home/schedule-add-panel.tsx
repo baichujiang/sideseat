@@ -58,7 +58,7 @@ function defaultDateOnly(date: Date) {
   return format(date, "yyyy-MM-dd");
 }
 
-/** Prefill for quick “add event” — user can save immediately or rename. */
+/** Used when the user saves without typing a title (placeholder is shown while editing). */
 function defaultNewEventTitle() {
   return "New event";
 }
@@ -76,6 +76,7 @@ export function ScheduleAddPanel({
   selectedDate,
   open,
   onClose,
+  onSaved,
   initialMode = "course",
   mode = "create",
   entryId,
@@ -95,6 +96,8 @@ export function ScheduleAddPanel({
   selectedDate: Date;
   open: boolean;
   onClose: () => void;
+  /** When set, successful save calls this instead of `onClose` (parent typically refreshes there). */
+  onSaved?: () => void;
   initialMode?: "course" | "event";
   mode?: "create" | "edit";
   entryId?: string;
@@ -146,7 +149,7 @@ export function ScheduleAddPanel({
         ? (initialTitle?.trim() ?? "")
         : initialTitle != null && initialTitle.trim() !== ""
           ? initialTitle.trim()
-          : defaultNewEventTitle(),
+          : "",
     );
     setLocation(initialLocation ?? "");
     setNote(initialNote ?? "");
@@ -185,7 +188,15 @@ export function ScheduleAddPanel({
     calendarCategories,
   ]);
 
-  const canSave = useMemo(() => Boolean(title.trim() && startAt && endAt), [endAt, startAt, title]);
+  const canSave = useMemo(
+    () =>
+      Boolean(
+        startAt &&
+          endAt &&
+          (mode === "edit" ? title.trim() : true),
+      ),
+    [endAt, mode, startAt, title],
+  );
   const hourChoices = useMemo(() => buildHourChoices(), []);
   const minuteChoices = useMemo(() => buildMinuteChoices(), []);
 
@@ -218,7 +229,7 @@ export function ScheduleAddPanel({
       method: mode === "edit" && entryId ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        title: title.trim(),
+        title: mode === "create" ? title.trim() || defaultNewEventTitle() : title.trim(),
         location: location.trim(),
         note: note.trim(),
         startAt: new Date(startAt).toISOString(),
@@ -243,8 +254,14 @@ export function ScheduleAddPanel({
       return;
     }
 
-    onClose();
-    router.refresh();
+    if (onSaved) {
+      onSaved();
+    } else {
+      onClose();
+    }
+    if (!onSaved) {
+      router.refresh();
+    }
   }
 
   function setTimeValue(target: "start" | "end", nextHour?: string, nextMinute?: string) {
@@ -334,8 +351,9 @@ export function ScheduleAddPanel({
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title"
-          className="h-11 rounded-2xl border-border/70 bg-muted/10 shadow-none"
+          placeholder={defaultNewEventTitle()}
+          aria-label="Event title"
+          className="h-11 rounded-2xl border-border/70 bg-muted/10 shadow-none placeholder:text-muted-foreground/80"
         />
 
         <Input
@@ -346,46 +364,11 @@ export function ScheduleAddPanel({
         />
 
         {calendarCategories.length > 0 ? (
-          <div className="rounded-2xl border border-border/70 bg-muted/[0.06] px-3 py-3">
-            <p className="mb-2 px-1 text-[12px] font-medium text-muted-foreground">Category</p>
-            <div className="flex max-h-32 flex-wrap gap-2 overflow-y-auto">
-              <button
-                type="button"
-                onClick={() => setCategoryId(null)}
-                className={cn(
-                  "rounded-full border px-3 py-1.5 text-[13px] transition",
-                  categoryId === null
-                    ? "border-primary font-medium ring-2 ring-primary/20"
-                    : "border-border/70 text-muted-foreground hover:bg-muted/50",
-                )}
-              >
-                None
-              </button>
-              {calendarCategories.map((c) => {
-                const active = categoryId === c.id;
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => setCategoryId(c.id)}
-                    className={cn(
-                      "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[13px] transition",
-                      active
-                        ? "border-primary font-medium ring-2 ring-primary/20"
-                        : "border-border/70 hover:bg-muted/50",
-                    )}
-                  >
-                    <span
-                      className="h-3 w-3 shrink-0 rounded-full border border-black/10 shadow-sm dark:border-white/15"
-                      style={{ backgroundColor: c.color }}
-                      aria-hidden
-                    />
-                    {c.name}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <CategoryPickerRow
+            categories={calendarCategories}
+            value={categoryId}
+            onChange={setCategoryId}
+          />
         ) : null}
 
         <div className="rounded-2xl border border-border/70 bg-muted/[0.06] px-4 py-1 text-foreground">
@@ -620,5 +603,92 @@ export function ScheduleAddPanel({
         </section>
       </div>
     </AppPushLayer>
+  );
+}
+
+function CategoryPickerRow({
+  categories,
+  value,
+  onChange,
+}: {
+  categories: CalendarCategoryOption[];
+  value: string | null;
+  onChange: (id: string | null) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = categories.find((c) => c.id === value);
+
+  return (
+    <div className="relative rounded-2xl border border-border/70 bg-muted/[0.06] px-4 py-1">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between py-3 text-[15px]"
+      >
+        <span className="font-medium text-foreground">Category</span>
+        <span className="inline-flex items-center gap-2 text-right">
+          {selected ? (
+            <>
+              <span
+                className="h-3 w-3 shrink-0 rounded-full border border-black/10 shadow-sm dark:border-white/15"
+                style={{ backgroundColor: selected.color }}
+                aria-hidden
+              />
+              <span className="text-foreground">{selected.name}</span>
+            </>
+          ) : (
+            <span className="text-muted-foreground">None</span>
+          )}
+        </span>
+      </button>
+
+      {open ? (
+        <div className="absolute right-0 top-full z-30 mt-2 w-[min(14rem,72vw)] overflow-hidden rounded-[1.75rem] border border-border/70 bg-popover p-2 text-popover-foreground shadow-xl">
+          <button
+            type="button"
+            onClick={() => {
+              onChange(null);
+              setOpen(false);
+            }}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-2xl px-4 py-2.5 text-left text-[14px] transition hover:bg-muted/70",
+              "border-b border-border/50",
+            )}
+          >
+            <span className="flex h-5 w-5 items-center justify-center">
+              {value === null ? <Check className="h-4 w-4 text-primary" strokeWidth={2.5} /> : null}
+            </span>
+            <span className="flex-1 text-muted-foreground">None</span>
+          </button>
+          {categories.map((c, i) => {
+            const active = value === c.id;
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => {
+                  onChange(c.id);
+                  setOpen(false);
+                }}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-2xl px-4 py-2.5 text-left text-[14px] transition hover:bg-muted/70",
+                  i !== categories.length - 1 && "border-b border-border/50",
+                )}
+              >
+                <span className="flex h-5 w-5 items-center justify-center">
+                  {active ? <Check className="h-4 w-4 text-primary" strokeWidth={2.5} /> : null}
+                </span>
+                <span
+                  className="h-3.5 w-3.5 shrink-0 rounded-full border border-black/10 shadow-sm dark:border-white/15"
+                  style={{ backgroundColor: c.color }}
+                  aria-hidden
+                />
+                <span className="flex-1">{c.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
   );
 }

@@ -31,12 +31,22 @@ export function categoryBlockSurfaceStyle(
 ): CSSProperties {
   const border = hex.trim();
   const short = Boolean(options?.shortOverlap && !selected);
-  const fillAlpha = selected ? 0.32 : short ? 0.08 : 0.14;
+
+  if (selected) {
+    return {
+      backgroundColor: border,
+      borderColor: border,
+      borderWidth: 2,
+      borderStyle: "solid",
+    };
+  }
+
+  const fillAlpha = short ? 0.08 : 0.14;
   const fill = rgbaFromHex(hex, fillAlpha) ?? "rgba(100,116,139,0.14)";
   return {
     backgroundColor: fill,
     borderColor: border,
-    borderWidth: selected ? 2 : 1,
+    borderWidth: 1,
     borderStyle: "solid",
     ...(short
       ? {

@@ -7,6 +7,7 @@ import { Calendar, ChevronRight, Link2, MapPin } from "lucide-react";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { ClassmatePostDetailViewBeacon } from "@/components/discover/classmate-post-detail-view-beacon";
+import { ClassmatePostShareToXhsButton } from "@/components/discover/classmate-post-share-xhs-button";
 import { DiscoverMessageButton } from "@/components/discover/discover-message-button";
 import { BackLink } from "@/components/nav/back-link";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
@@ -36,7 +37,7 @@ type AuthorDisplay = {
   studentVerificationStatus: React.ComponentProps<typeof VerifiedBadge>["status"];
 };
 
-/** Shared shell for post detail CTAs (peer message + author notes). */
+/** Shared shell for post detail CTAs (peer message or author “My posts” link). */
 const POST_DETAIL_ACTION_FOOTER =
   "border-t border-border/60 bg-gradient-to-b from-muted/20 via-muted/35 to-muted/45 px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-5 sm:px-6";
 
@@ -44,7 +45,7 @@ const POST_DETAIL_PRIMARY_CTA =
   "h-12 w-full min-w-0 flex-1 justify-center gap-2 rounded-2xl px-6 text-[14px] font-semibold shadow-[0_4px_14px_rgba(37,99,235,0.22)] sm:min-h-[3rem] dark:shadow-[0_4px_18px_rgba(37,99,235,0.18)]";
 
 const POST_DETAIL_SECONDARY_CTA =
-  "inline-flex h-12 w-full shrink-0 items-center justify-center rounded-2xl border-2 border-border bg-card px-5 text-[14px] font-semibold text-foreground transition-colors hover:bg-muted/70 active:bg-muted sm:w-auto sm:min-w-[10.5rem]";
+  "inline-flex h-12 w-full min-w-0 shrink-0 items-center justify-center gap-2 rounded-2xl border-2 border-border bg-card px-5 text-[14px] font-semibold text-foreground transition-colors hover:bg-muted/70 active:bg-muted sm:flex-1";
 
 export default async function DiscoverPostDetailPage({
   params,
@@ -199,26 +200,26 @@ export default async function DiscoverPostDetailPage({
         ) : isAuthor ? (
           <div className={POST_DETAIL_ACTION_FOOTER}>
             <p className="mb-4 max-w-prose text-[13px] leading-relaxed text-muted-foreground">
-              Open your private notes thread to jot things down — separate from classmate chats. Use{" "}
-              <span className="font-medium text-foreground/80">My posts</span> to edit this listing.
+              Edit this listing from <span className="font-medium text-foreground/80">My posts</span>. Share text
+              below to <span className="font-medium text-foreground/80">小红书</span> — paste into a new note.
             </p>
             <div className="flex flex-col gap-2.5 sm:flex-row sm:items-stretch sm:gap-3">
-              <DiscoverMessageButton
-                peerId={sessionUser.id}
-                returnTo={postPath}
-                tone="solid"
-                label="Notes"
-                icon="notes"
-                className={POST_DETAIL_PRIMARY_CTA}
-              />
               <Link
-                href={
-                  `/inbox/my-posts?returnTo=${encodeURIComponent(postPath)}` as Route
-                }
-                className={POST_DETAIL_SECONDARY_CTA}
+                href={`/inbox/my-posts?returnTo=${encodeURIComponent(postPath)}` as Route}
+                className={cn(
+                  POST_DETAIL_PRIMARY_CTA,
+                  "inline-flex items-center justify-center no-underline sm:min-w-0 sm:flex-1",
+                )}
               >
                 My posts
               </Link>
+              <ClassmatePostShareToXhsButton
+                title={post.title}
+                body={post.body}
+                postPath={postPath}
+                variant="detail"
+                className={POST_DETAIL_SECONDARY_CTA}
+              />
             </div>
           </div>
         ) : null}

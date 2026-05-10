@@ -16,30 +16,32 @@ export default function AboutPage() {
         <div>
           <h1 className="page-screen-title-ink">About</h1>
           <p className="page-screen-subtitle mt-0.5">
-            {APP_NAME} — courses, chats, and your schedule in one place.
+            {APP_NAME} helps you plan with classmates—courses, chats, and your calendar in one app.
           </p>
         </div>
       </header>
 
       <div className="space-y-3 rounded-2xl border border-classmates-edge bg-classmates-surface px-4 py-4 text-[14px] leading-relaxed text-foreground shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card dark:text-foreground">
         <p className="text-muted-foreground">
-          Tell us what you want from <strong className="text-foreground">Me</strong> (top-right message button) — the
-          team reads every note.
+          See what&apos;s on your schedule, stay in touch in course threads, and meet people in your program without
+          juggling a dozen tools.
+        </p>
+        <p className="text-muted-foreground">
+          Have a question or an idea? Go to{" "}
+          <Link href={"/profile" as Route} className="font-semibold text-classmates-azure underline-offset-2 hover:underline">
+            Profile
+          </Link>{" "}
+          and send <strong className="text-foreground">Feedback</strong>—we read every submission.
         </p>
         {email && mailto ? (
           <p className="text-muted-foreground">
-            Prefer email? Reach us at{" "}
+            You can also email us at{" "}
             <a className="font-semibold text-classmates-azure underline-offset-2 hover:underline" href={mailto}>
               {email}
             </a>
             .
           </p>
-        ) : (
-          <p className="text-[13px] text-muted-foreground">
-            To show a support address here, set <code className="rounded bg-muted px-1">NEXT_PUBLIC_SUPPORT_EMAIL</code>{" "}
-            in your environment.
-          </p>
-        )}
+        ) : null}
       </div>
 
       <p className="px-0.5 text-center text-[12px] text-muted-foreground">

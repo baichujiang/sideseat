@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { apiFetch } from "@/lib/auth/api-fetch";
 import { CONTACT_REMARK_MAX_LEN } from "@/lib/connections/contact-remark";
 
-const REMARK_PLACEHOLDER = "备注";
+const REMARK_PLACEHOLDER = "Private name or note";
 
 export function ContactRemarkEditor({
   connectionId,

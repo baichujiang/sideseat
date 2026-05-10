@@ -2,7 +2,7 @@
 import type { CalendarRepeatRule } from "@prisma/client";
 import { addMinutes } from "date-fns";
 import { BookOpen, CalendarClock, MapPin } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import {
   categoryAccentColor,
@@ -153,7 +153,6 @@ export function ScheduleDayTimeline({
   /** Long-press (~450ms): calendar → edit sheet from parent; course → detail. Tap selects only. */
   onLongPressItem?: (item: DayTimelineItem) => void;
 }) {
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const holdTimerRef = useRef<number | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const visualStartMinute = -VISUAL_PADDING_MINUTES;
@@ -250,7 +249,6 @@ export function ScheduleDayTimeline({
                     if (item.id === "__draft-preview__") return;
                     attachTimelineTapOrLongPress(
                       e,
-                      () => setSelectedItemId(item.id),
                       () => onLongPressItem?.(item),
                     );
                   }}
@@ -296,7 +294,6 @@ export function ScheduleDayTimeline({
           >
           <div
             className="relative cursor-default border-r border-[#F0ECE6] bg-[#FAF9F6] dark:border-white/[0.08] dark:bg-muted/25"
-            onClick={() => setSelectedItemId(null)}
           >
             {hourLabels.map((m) => {
               const hiddenByNow =
@@ -332,8 +329,7 @@ export function ScheduleDayTimeline({
             <button
               type="button"
               aria-label="Create event"
-              onClick={() => setSelectedItemId(null)}
-              onDoubleClick={(event) => {
+                onDoubleClick={(event) => {
                 createFromPointer(
                   event.clientY,
                   event.currentTarget.getBoundingClientRect(),
@@ -415,11 +411,6 @@ export function ScheduleDayTimeline({
                 hasShortOverlap={item.hasShortOverlap}
                 isToday={isToday}
                 nowMinute={nowMinute}
-                selected={selectedItemId === item.id}
-                onTapSelect={() => {
-                  if (item.id === "__draft-preview__") return;
-                  setSelectedItemId(item.id);
-                }}
                 onLongPress={() => {
                   if (item.id === "__draft-preview__") return;
                   onLongPressItem?.(item);
@@ -445,8 +436,6 @@ function TimelineBlock({
   hasShortOverlap,
   isToday,
   nowMinute,
-  selected,
-  onTapSelect,
   onLongPress,
 }: {
   item: DayTimelineItem;
@@ -458,8 +447,6 @@ function TimelineBlock({
   hasShortOverlap: boolean;
   isToday: boolean;
   nowMinute: number;
-  selected: boolean;
-  onTapSelect: () => void;
   onLongPress: () => void;
 }) {
   const top = ((item.startMinute - dayStart) / totalMinutes) * 100;
@@ -484,13 +471,11 @@ function TimelineBlock({
   const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
   const catHex = item.categoryColor?.trim();
   const useCategoryColor = item.source === "calendar" && Boolean(catHex);
-  const shortOverlapGlass = Boolean(hasShortOverlap && !selected);
-  const expandedCard = selected;
+  const shortOverlapGlass = Boolean(hasShortOverlap);
   const toneClassOuter = cn(
-    "pointer-events-none absolute rounded-sm transition",
-    expandedCard ? "z-20 overflow-hidden" : "z-[1] overflow-hidden",
+    "pointer-events-none absolute rounded-sm transition z-[1] overflow-hidden",
     !useCategoryColor &&
-      (selected ? tone.cardSelected : shortOverlapGlass ? SCHEDULE_SHORT_OVERLAP_GLASS : tone.card),
+      (shortOverlapGlass ? SCHEDULE_SHORT_OVERLAP_GLASS : tone.card),
     useCategoryColor &&
       (shortOverlapGlass
         ? "shadow-[0_8px_22px_-10px_rgba(15,23,42,0.2)] dark:shadow-[0_8px_26px_-12px_rgba(0,0,0,0.55)]"
@@ -506,18 +491,10 @@ function TimelineBlock({
   const minHeightPct = Math.min(4, height);
   const effectiveHeight = Math.max(height, minHeightPct);
   const showTimeRow = effectiveHeight > 0;
-  const showLocationRow = Boolean(item.location) && !expandedCard && effectiveHeight > 9;
-  const showWithRow = Boolean(item.withLabel) && !expandedCard && effectiveHeight > 11;
+  const showLocationRow = Boolean(item.location) && effectiveHeight > 9;
+  const showWithRow = Boolean(item.withLabel) && effectiveHeight > 11;
 
   const metaCls = cn("text-xs truncate text-[#111827]/65 dark:text-muted-foreground");
-  const expandedDetailCls = cn(
-    "break-words text-xs font-normal leading-snug",
-    useCategoryColor
-      ? "text-white/85"
-      : toneKey !== "draftNew"
-        ? "text-white/80"
-        : "text-[#374151] dark:text-zinc-400",
-  );
 
   const innerNormal = (
     <>
@@ -590,105 +567,24 @@ function TimelineBlock({
     </>
   );
 
-  const innerExpanded = (
-    <>
-      {showTimeRow ? (
-        <p
-          className={cn(
-            "break-words text-left text-[12px] font-semibold tabular-nums leading-none",
-            !useCategoryColor && tone.accentColorSelected,
-          )}
-          style={useCategoryColor && catHex ? { color: "#ffffff" } : undefined}
-        >
-          {formatHM(item.startMinute)} – {formatHM(item.endMinute)}
-        </p>
-      ) : null}
-      {item.source === "course" && item.courseCode?.trim() ? (
-        <div className="mt-0.5 min-w-0 space-y-0.5">
-          <p className="break-words text-left text-[12px] font-bold tabular-nums leading-snug text-classmates-blue dark:text-blue-200">
-            {item.courseCode.trim()}
-          </p>
-          <p
-            className={cn(
-              "break-words text-left text-[13px] font-bold leading-snug",
-              !useCategoryColor && tone.titleSelected,
-            )}
-          >
-            {item.courseName?.trim() || item.title}
-          </p>
-        </div>
-      ) : (
-        <div className="mt-0.5 flex min-h-0 items-start gap-1.5">
-          {item.source === "course" && item.courseShortLabel ? (
-            <span
-              className="inline-flex h-[1.125rem] min-w-[1.35rem] shrink-0 items-center justify-center rounded-md border border-white/50 bg-white/25 px-1 text-[10px] font-bold leading-none tracking-tight text-white shadow-none tabular-nums"
-              title="Course tag"
-            >
-              {item.courseShortLabel}
-            </span>
-          ) : (
-            <Icon
-              className={cn("mt-0.5 h-3.5 w-3.5 shrink-0", !useCategoryColor && tone.accentColorSelected)}
-              style={useCategoryColor && catHex ? { color: "#ffffff" } : undefined}
-              strokeWidth={2.25}
-            />
-          )}
-          <p
-            className={cn(
-              "min-w-0 flex-1 break-words text-left text-[13px] font-bold leading-snug",
-              !useCategoryColor && tone.titleSelected,
-              useCategoryColor && "text-white",
-            )}
-          >
-            {item.title}
-          </p>
-        </div>
-      )}
-      {item.repeatLabel?.trim() ? (
-        <p className={cn("mt-1", expandedDetailCls)}>{item.repeatLabel.trim()}</p>
-      ) : null}
-      {item.location?.trim() ? (
-        <div className={cn("mt-1 flex items-start gap-1", expandedDetailCls)}>
-          <MapPin className="mt-0.5 h-3 w-3 shrink-0 opacity-80" strokeWidth={2.25} />
-          <span className="min-w-0 break-words">{item.location.trim()}</span>
-        </div>
-      ) : null}
-      {item.withLabel?.trim() ? (
-        <p className={cn("mt-0.5", expandedDetailCls)}>{item.withLabel.trim()}</p>
-      ) : null}
-      {item.note?.trim() ? (
-        <p className={cn("mt-0.5", expandedDetailCls)}>{item.note!.trim()}</p>
-      ) : null}
-    </>
-  );
-
-  const innerSlot = expandedCard ? innerExpanded : innerNormal;
+  const innerSlot = innerNormal;
 
   const columnWidth = 100 / Math.max(columnCount, 1);
   const horizontalGapPct = columnCount > 1 ? 0.8 : 0;
   const widthPct = Math.max(8, columnWidth - horizontalGapPct);
   const stackInsetPx = hasShortOverlap ? Math.min(stackDepth * 8, 18) : 0;
-  const positionStyle = expandedCard
-    ? {
-        top: `${top}%`,
-        minHeight: `${effectiveHeight}%`,
-        height: "auto" as const,
-        left: `calc(${columnIndex * columnWidth}% + ${stackInsetPx}px)`,
-        width: `calc(${widthPct}% - ${stackInsetPx}px)`,
-        zIndex: selected ? 20 : columnIndex * 10 + stackDepth + 1,
-      }
-    : {
-        top: `${top}%`,
-        height: `${effectiveHeight}%`,
-        left: `calc(${columnIndex * columnWidth}% + ${stackInsetPx}px)`,
-        width: `calc(${widthPct}% - ${stackInsetPx}px)`,
-        zIndex: selected ? 20 : columnIndex * 10 + stackDepth + 1,
-      };
+  const positionStyle = {
+    top: `${top}%`,
+    height: `${effectiveHeight}%`,
+    left: `calc(${columnIndex * columnWidth}% + ${stackInsetPx}px)`,
+    width: `calc(${widthPct}% - ${stackInsetPx}px)`,
+    zIndex: columnIndex * 10 + stackDepth + 1,
+  };
   const surfaceStyle =
     useCategoryColor && catHex
       ? {
           ...positionStyle,
-          ...categoryBlockSurfaceStyle(catHex, selected, {
+          ...categoryBlockSurfaceStyle(catHex, false, {
             shortOverlap: shortOverlapGlass,
           }),
         }
@@ -704,28 +600,20 @@ function TimelineBlock({
       ? "w-[7px] min-w-[7px] shrink-0 self-stretch rounded-full my-1 ml-1 mr-px"
       : "w-1 min-w-[4px] shrink-0 self-stretch rounded-l-sm",
     !useCategoryColor &&
-      (selected
-        ? tone.railSelected
-        : shortOverlapGlass
-          ? scheduleShortOverlapRailClass(tone)
-          : tone.rail),
+      (shortOverlapGlass
+        ? scheduleShortOverlapRailClass(tone)
+        : tone.rail),
   );
 
   return (
     <div className={toneClassOuter} style={surfaceStyle}>
       <button
         type="button"
-        className={cn(
-          "z-[1] rounded-[inherit] bg-transparent p-0 text-left transition",
-          "hover:brightness-[0.98] active:brightness-95",
-          expandedCard
-            ? "pointer-events-auto relative block min-h-0 w-full overflow-hidden"
-            : "pointer-events-auto absolute inset-0 overflow-hidden",
-        )}
+        className="z-[1] rounded-[inherit] bg-transparent p-0 text-left transition hover:brightness-[0.98] active:brightness-95 pointer-events-auto absolute inset-0 overflow-hidden"
         title={title}
         onPointerDown={(e) => {
           if (item.id === "__draft-preview__") return;
-          attachTimelineTapOrLongPress(e, onTapSelect, onLongPress);
+          attachTimelineTapOrLongPress(e, onLongPress, onLongPress);
         }}
         onKeyDown={(ev) => {
           if (ev.key === "Enter" || ev.key === " ") {
@@ -735,12 +623,8 @@ function TimelineBlock({
           }
         }}
       >
-        <div
-          className={cn(
-            "flex w-full flex-row overflow-hidden rounded-[inherit]",
-            expandedCard ? "min-h-0 items-stretch" : "h-full min-h-0",
-          )}
-        >
+        <div className="flex w-full h-full min-h-0 flex-row overflow-hidden rounded-[inherit]">
+
           <div aria-hidden className={railClass} style={railStyle} />
           <div className="flex min-h-0 min-w-0 flex-1 flex-col items-start justify-start px-2 py-1.5">
             {innerSlot}

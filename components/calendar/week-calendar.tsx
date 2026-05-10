@@ -1,5 +1,6 @@
 import type { CalendarRepeatRule, Weekday } from "@prisma/client";
-import { addDays, addMinutes, isSameDay } from "date-fns";
+import { addDays, addMinutes, format, isSameDay } from "date-fns";
+import { MapPin, Repeat2 } from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -73,9 +74,8 @@ const WEEK_HEADER_HEIGHT_PX = 32;
  */
 const Z_DAY_CREATE_HIT = 0;
 const Z_DAY_HOUR_LINES = 1;
-const Z_DAY_NOW_LINE_SPAN = 2;
+const Z_DAY_NOW_LINE_SPAN = 33;
 const Z_EVENT_CARD_BASE = 3;
-const Z_EVENT_CARD_SELECTED = 8;
 /** Dragging + resize — must stay < Z_TIME_RAIL_BODY. */
 const Z_EVENT_CARD_DRAGGING = 35;
 const Z_EVENT_DRAG_INNER = 20;
@@ -89,7 +89,6 @@ const Z_TIME_RAIL_BODY = 45;
 /** Now pill / tick inside the left rail only (below rail chrome). */
 const Z_TIME_AXIS_INNER = 1;
 
-const LONG_PRESS_MS = 450;
 const POINTER_SLOP_PX = 14;
 const SNAP_MINUTES = 15;
 const MIN_EVENT_MINUTES = 15;
@@ -213,9 +212,9 @@ export function WeekCalendar({
   focusDate: Date;
   today?: Date;
   onCreateEvent?: (start: Date, end: Date) => void;
-  /** Long-press (~450ms): calendar → edit flow from parent; course → detail. Tap selects only. */
+  /** Open edit/detail from parent — timed events: detail sheet "编辑" (and keyboard Enter/Space); all-day: row edit. */
   onOpenItem?: (item: WeekCalendarBlock, occurrenceDate: Date) => void;
-  /** Long-press drag / resize calendar events (PATCH start/end only). */
+  /** Drag / resize calendar events (PATCH start/end only). */
   onPatchCalendarEventTimes?: (args: { eventId: string; startAt: Date; endAt: Date }) => Promise<boolean>;
   density?: WeekCalendarDensity;
   viewportBodyPx?: number;
@@ -232,7 +231,7 @@ export function WeekCalendar({
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const holdTimerRef = useRef<number | null>(null);
   const [frameWidth, setFrameWidth] = useState(0);
-  const [selectedBlockKey, setSelectedBlockKey] = useState<string | null>(null);
+  
   const [dragOverride, setDragOverride] = useState<{
     eventId: string;
     weekday: Weekday;
@@ -240,7 +239,6 @@ export function WeekCalendar({
     endMinute: number;
   } | null>(null);
   const dayBodyElRef = useRef<Map<Weekday, HTMLDivElement | null>>(new Map());
-  const suppressOpenClickRef = useRef(false);
   /** After PATCH success, keep `dragOverride` until `blocks` reflect new times (avoids one frame of old position). */
   const pendingDragClearRef = useRef<{
     eventId: string;
@@ -612,11 +610,11 @@ export function WeekCalendar({
     return { startAt, endAt };
   }
 
-  function attachTapSelectLongOpen(
+  /** Tap → open detail sheet via parent callback. */
+  function attachTapOpen(
     e: React.PointerEvent,
     block: WeekCalendarBlock,
     occurrenceDate: Date,
-    blockKey: string,
   ) {
     if (block.courseId === "__draft-preview__") return;
     if (e.pointerType === "mouse" && e.button !== 0) return;
@@ -624,24 +622,6 @@ export function WeekCalendar({
     const pointerId = e.pointerId;
     const x0 = e.clientX;
     const y0 = e.clientY;
-    let longPressFired = false;
-    let timer: number | null = window.setTimeout(() => {
-      timer = null;
-      if (!onOpenItem) return;
-      longPressFired = true;
-      suppressOpenClickRef.current = true;
-      window.setTimeout(() => {
-        suppressOpenClickRef.current = false;
-      }, 300);
-      onOpenItem(block, occurrenceDate);
-    }, LONG_PRESS_MS);
-
-    const clearTimer = () => {
-      if (timer != null) {
-        window.clearTimeout(timer);
-        timer = null;
-      }
-    };
 
     const detach = () => {
       document.removeEventListener("pointermove", onMove);
@@ -652,17 +632,15 @@ export function WeekCalendar({
     const onMove = (ev: PointerEvent) => {
       if (ev.pointerId !== pointerId) return;
       if (Math.hypot(ev.clientX - x0, ev.clientY - y0) > POINTER_SLOP_PX) {
-        clearTimer();
         detach();
       }
     };
 
     const onUp = (ev: PointerEvent) => {
       if (ev.pointerId !== pointerId) return;
-      clearTimer();
       detach();
-      if (!longPressFired) {
-        setSelectedBlockKey(blockKey);
+      if (Math.hypot(ev.clientX - x0, ev.clientY - y0) <= POINTER_SLOP_PX) {
+        onOpenItem?.(block, occurrenceDate);
       }
     };
 
@@ -710,8 +688,6 @@ export function WeekCalendar({
       mode === "move" ? rawMinuteFromClientYForDay(e.clientY, fromWeekday) - block.startMinute : 0;
 
     let activatedForDrag = immediateActivate;
-    let longPressTimer: number | null = null;
-    let longPressOpened = false;
     let didMove = false;
 
     const preventScroll = (ev: TouchEvent) => {
@@ -735,24 +711,7 @@ export function WeekCalendar({
       });
     } else if (mode === "move" && moveFromSelected) {
       /* Drag starts after pointer slop once the card is already selected. */
-    } else if (mode === "move" && onOpenItem) {
-      longPressTimer = window.setTimeout(() => {
-        longPressTimer = null;
-        longPressOpened = true;
-        suppressOpenClickRef.current = true;
-        window.setTimeout(() => {
-          suppressOpenClickRef.current = false;
-        }, 300);
-        onOpenItem(block, occurrenceDate);
-      }, LONG_PRESS_MS);
     }
-
-    const clearLongPress = () => {
-      if (longPressTimer != null) {
-        window.clearTimeout(longPressTimer);
-        longPressTimer = null;
-      }
-    };
 
     const detach = () => {
       document.removeEventListener("pointermove", onDocMove);
@@ -785,8 +744,8 @@ export function WeekCalendar({
           });
           return;
         }
-        if (longPressTimer != null && pastSlop) {
-          clearLongPress();
+        if (mode === "move" && !moveFromSelected && pastSlop) {
+          /* User is panning/scroll-gesturing — don't select on pointerup. */
           detach();
         }
         return;
@@ -818,22 +777,17 @@ export function WeekCalendar({
 
     const onDocUp = (ev: PointerEvent) => {
       if (ev.pointerId !== pointerId) return;
-      clearLongPress();
       detach();
 
       if (!activatedForDrag) {
-        if (mode === "move" && !moveFromSelected && !longPressOpened) {
-          setSelectedBlockKey(blockInteractionKey);
+        if (mode === "move" && !moveFromSelected) {
+          onOpenItem?.(block, occurrenceDate);
         }
         return;
       }
 
       if (!didMove && mode === "move") {
         setDragOverride(null);
-        suppressOpenClickRef.current = true;
-        window.setTimeout(() => {
-          suppressOpenClickRef.current = false;
-        }, 300);
         return;
       }
       try {
@@ -867,11 +821,6 @@ export function WeekCalendar({
         startMinute: snapStart,
         endMinute: snapEnd,
       });
-
-      suppressOpenClickRef.current = true;
-      window.setTimeout(() => {
-        suppressOpenClickRef.current = false;
-      }, 300);
 
       void (async () => {
         const patch = onPatchCalendarEventTimes;
@@ -925,7 +874,7 @@ export function WeekCalendar({
         )}
         style={fillParent ? undefined : { height: `${WEEK_HEADER_HEIGHT_PX + viewportHeightPx}px` }}
       >
-        <div style={{ width: trackWidthPx }}>
+        {frameWidth === 0 ? null : <div className="bg-white dark:bg-card" style={{ width: trackWidthPx }}>
           <div
             className="sticky top-0 flex shrink-0"
             style={{ zIndex: Z_WEEK_HEADER_STICKY }}
@@ -944,7 +893,6 @@ export function WeekCalendar({
                 height: `${WEEK_HEADER_HEIGHT_PX}px`,
                 minHeight: `${WEEK_HEADER_HEIGHT_PX}px`,
               }}
-              onClick={() => setSelectedBlockKey(null)}
             >
               Time
             </div>
@@ -957,7 +905,6 @@ export function WeekCalendar({
                 height: `${WEEK_HEADER_HEIGHT_PX}px`,
                 minHeight: `${WEEK_HEADER_HEIGHT_PX}px`,
               }}
-              onClick={() => setSelectedBlockKey(null)}
             >
               {visibleDays.map((day) => {
                 const dayIndex = DAY_ORDER.indexOf(day);
@@ -976,16 +923,16 @@ export function WeekCalendar({
                       isWeekend && "bg-muted/40",
                     )}
                   >
-                    <div className="flex max-h-full items-center justify-center gap-0.5">
+                    <div className="flex max-h-full flex-col items-center justify-center gap-px">
                       <span
                         className={cn(
-                          "text-[11px] font-medium tabular-nums leading-none",
+                          "text-[10px] tabular-nums leading-none",
                           isToday
-                            ? "font-semibold text-[#E53935] dark:text-red-500"
+                            ? "font-bold text-[#E53935] dark:text-red-400"
                             : cn(
-                                "text-[#9CA3AF]",
+                                "font-medium text-[#9CA3AF]",
                                 isWeekend && !isToday && "text-[#B8C0CC]",
-                                anchorWeekday === day && !isToday && "text-[#5F6B7A] dark:text-muted-foreground",
+                                anchorWeekday === day && !isToday && "font-semibold text-[#5F6B7A] dark:text-muted-foreground",
                               ),
                         )}
                       >
@@ -993,17 +940,17 @@ export function WeekCalendar({
                       </span>
                       <span
                         className={cn(
-                          "inline-flex h-[18px] min-w-[1.125rem] shrink-0 items-center justify-center px-0.5 text-[10px] font-medium tabular-nums leading-none",
+                          "inline-flex h-[20px] min-w-0 max-w-full shrink items-center justify-center whitespace-nowrap rounded-full px-1.5 text-[10px] font-semibold leading-none",
                           isToday
-                            ? "font-semibold text-[#E53935] dark:text-red-500"
+                            ? "bg-[#E53935] text-white shadow-sm dark:bg-red-500"
                             : cn(
-                                "text-[#9CA3AF]",
-                                isWeekend && !isToday && "text-[#B8C0CC]",
-                                anchorWeekday === day && !isToday && "text-[#5F6B7A] dark:text-muted-foreground",
+                                "font-medium text-[#6B7280]",
+                                isWeekend && !isToday && "text-[#9CA3AF]",
+                                anchorWeekday === day && !isToday && "font-semibold text-[#374151] dark:text-foreground",
                               ),
                         )}
                       >
-                        {date.getDate()}
+                        {format(date, "d MMM")}
                       </span>
                     </div>
                   </div>
@@ -1069,29 +1016,15 @@ export function WeekCalendar({
                         const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
                         const catHex = block.categoryColor?.trim();
                         const useCategory = block.source === "calendar" && Boolean(catHex);
-                        const alldayKey = `allday:${day}:${bi}:${block.calendarEntryId ?? block.courseId}`;
-                        const alldaySelected = selectedBlockKey === alldayKey;
-                        const alldayExpanded = alldaySelected;
-                        const alldayTitleLine =
-                          block.source === "course" && block.courseCode?.trim()
-                            ? block.courseName
-                            : labelText || block.courseName;
-                        const alldayMetaCls = cn(
-                          "break-words text-[10px] font-normal leading-snug",
-                          useCategory
-                            ? "text-white/85"
-                            : alldaySelected && toneKey !== "draftNew"
-                              ? "text-white/80"
-                              : "text-[#111827]/70 dark:text-zinc-400",
-                        );
                         return (
                           <div
                             key={`${block.calendarEntryId ?? block.courseId}-allday-${bi}`}
-                            className={cn("relative w-full", alldaySelected && "z-[2]")}
+                            className="relative w-full"
                           >
                             <button
                               type="button"
-                              onPointerDown={(e) => attachTapSelectLongOpen(e, block, occurrenceDate, alldayKey)}
+                              tabIndex={0}
+                              onPointerDown={(e) => attachTapOpen(e, block, occurrenceDate)}
                               onKeyDown={(ev) => {
                                 if (ev.key === "Enter" || ev.key === " ") {
                                   ev.preventDefault();
@@ -1099,31 +1032,24 @@ export function WeekCalendar({
                                 }
                               }}
                               className={cn(
-                                "relative z-[1] w-full rounded-sm p-0 text-left text-[10px] font-semibold leading-tight transition",
+                                "relative z-[1] w-full truncate overflow-hidden rounded-[2px] p-0 text-left text-[10px] font-semibold leading-tight transition outline-none",
                                 "hover:brightness-[0.98] active:brightness-95",
-                                alldayExpanded
-                                  ? "ring-2 ring-[#2563EB]/35 ring-offset-1 ring-offset-white dark:ring-blue-400/40 dark:ring-offset-card"
-                                  : "truncate overflow-hidden",
-                                !useCategory && (alldaySelected ? tone.cardSelected : tone.card),
+                                "focus-visible:ring-2 focus-visible:ring-[#2563EB]/35 focus-visible:ring-offset-1 focus-visible:ring-offset-background dark:focus-visible:ring-blue-400/40",
+                                !useCategory && tone.card,
                                 useCategory && "border border-black/10 shadow-sm dark:border-white/10",
                               )}
                               style={
                                 useCategory && catHex
-                                  ? categoryBlockSurfaceStyle(catHex, alldaySelected)
+                                  ? categoryBlockSurfaceStyle(catHex, false)
                                   : undefined
                               }
                             >
-                              <span
-                                className={cn(
-                                  "flex min-w-0 flex-row rounded-[inherit]",
-                                  !alldayExpanded && "overflow-hidden",
-                                )}
-                              >
+                              <span className="relative flex min-w-0 flex-row overflow-hidden rounded-[inherit]">
                                 <span
                                   aria-hidden
                                   className={cn(
-                                    "w-1 shrink-0 self-stretch rounded-l-sm",
-                                    !useCategory && (alldaySelected ? tone.railSelected : tone.rail),
+                                    "w-1 shrink-0 self-stretch rounded-l-[2px]",
+                                    !useCategory && tone.rail,
                                     useCategory && catHex && "bg-transparent",
                                   )}
                                   style={
@@ -1133,55 +1059,7 @@ export function WeekCalendar({
                                   }
                                 />
                                 <span className="flex min-w-0 flex-1 flex-col gap-px px-1.5 py-1">
-                                  {alldayExpanded ? (
-                                    <>
-                                      <span className={alldayMetaCls}>All day</span>
-                                      {block.source === "course" && block.courseCode?.trim() ? (
-                                        <>
-                                          <span className="break-words font-bold tabular-nums leading-snug text-classmates-blue dark:text-blue-200">
-                                            {block.courseCode.trim()}
-                                          </span>
-                                          <span
-                                            className={cn(
-                                              "break-words font-semibold leading-snug",
-                                              !useCategory && tone.titleSelected,
-                                              useCategory && "text-white",
-                                            )}
-                                          >
-                                            {block.courseName}
-                                          </span>
-                                        </>
-                                      ) : (
-                                        <span
-                                          className={cn(
-                                            "break-words font-semibold leading-snug",
-                                            !useCategory && tone.titleSelected,
-                                            useCategory && "text-white",
-                                          )}
-                                        >
-                                          {alldayTitleLine}
-                                        </span>
-                                      )}
-                                      {block.repeatLabel?.trim() ? (
-                                        <span className={cn("mt-0.5", alldayMetaCls)}>
-                                          {block.repeatLabel.trim()}
-                                        </span>
-                                      ) : null}
-                                      {block.location?.trim() ? (
-                                        <span className={cn("mt-0.5", alldayMetaCls)}>
-                                          {block.location.trim()}
-                                        </span>
-                                      ) : null}
-                                      {block.withLabel?.trim() ? (
-                                        <span className={cn("mt-0.5", alldayMetaCls)}>
-                                          {block.withLabel.trim()}
-                                        </span>
-                                      ) : null}
-                                      {block.note?.trim() ? (
-                                        <span className={cn("mt-0.5", alldayMetaCls)}>{block.note.trim()}</span>
-                                      ) : null}
-                                    </>
-                                  ) : block.source === "course" && block.courseCode?.trim() ? (
+                                  {block.source === "course" && block.courseCode?.trim() ? (
                                     <>
                                       <span className="truncate font-bold tabular-nums leading-tight text-classmates-blue dark:text-blue-200">
                                         {block.courseCode.trim()}
@@ -1196,6 +1074,22 @@ export function WeekCalendar({
                                     </span>
                                   )}
                                 </span>
+                                {block.repeatRule != null && block.repeatRule !== "NONE" && (
+                                  <Repeat2
+                                    aria-label="重复事件"
+                                    className={cn(
+                                      "pointer-events-none absolute right-0.5 top-0.5 h-2.5 w-2.5 shrink-0",
+                                      useCategory
+                                        ? "text-[#111827]/40 dark:text-white/40"
+                                        : "text-[#111827]/35 dark:text-muted-foreground/50",
+                                    )}
+                                    style={
+                                      useCategory && catHex
+                                        ? { color: catHex, opacity: 0.55 }
+                                        : undefined
+                                    }
+                                  />
+                                )}
                               </span>
                             </button>
                           </div>
@@ -1225,8 +1119,7 @@ export function WeekCalendar({
                 <div
                   className="relative cursor-default bg-[#FAF9F6] dark:bg-muted/25"
                   style={{ height: `${fullHeightPx}px` }}
-                  onClick={() => setSelectedBlockKey(null)}
-                >
+                    >
                   {hourLabels.map((m) => {
                     const hiddenByNow =
                       showNowLine &&
@@ -1345,8 +1238,7 @@ export function WeekCalendar({
                           <button
                             type="button"
                             aria-label={`Create event on ${DAY_LABEL[day]}`}
-                            onClick={() => setSelectedBlockKey(null)}
-                            onDoubleClick={(event) => {
+                                          onDoubleClick={(event) => {
                               createFromPointer(
                                 event.clientY,
                                 event.currentTarget.getBoundingClientRect(),
@@ -1392,7 +1284,7 @@ export function WeekCalendar({
                           {dayBlocks.map((block, index) => {
                             const top = ((block.startMinute - visualStartMinute) / totalMinutes) * 100;
                             const height = ((block.endMinute - block.startMinute) / totalMinutes) * 100;
-                            const effectiveHeight = Math.max(height, Math.min(4, height));
+                            const effectiveHeight = Math.max(4, height);
                             const isStudy = block.kind === "study";
                             const labelText = [block.courseCode, block.courseName]
                               .filter(Boolean)
@@ -1408,15 +1300,18 @@ export function WeekCalendar({
                             const isDraftNewTone = toneKey === "draftNew";
                             const key = block.id;
                             const occurrenceDate = addDays(weekStartDate, dayIndex);
-                            const selected = selectedBlockKey === key;
                             const draggingThis = Boolean(
                               dragOverride?.eventId && block.calendarEntryId === dragOverride.eventId,
                             );
-                            const highlighted = selected || draggingThis;
-                            const expandedCard = selected && !draggingThis;
+                            const highlighted = draggingThis;
                             const shortOverlapGlass = Boolean(block.hasShortOverlap && !highlighted);
                             const catHex = block.categoryColor?.trim();
                             const useCategoryColor = block.source === "calendar" && Boolean(catHex);
+                            const isDraggableCalendar =
+                              Boolean(onPatchCalendarEventTimes) &&
+                              block.source === "calendar" &&
+                              Boolean(block.calendarEntryId) &&
+                              block.courseId !== "__draft-preview__";
                             const startMinuteShown = draggingThis
                               ? snapMinute(block.startMinute)
                               : block.startMinute;
@@ -1424,8 +1319,7 @@ export function WeekCalendar({
                               ? snapMinute(block.endMinute)
                               : block.endMinute;
                             const className = cn(
-                              "absolute rounded-sm p-0 text-left leading-tight transition hover:brightness-[0.98] active:brightness-95",
-                              "overflow-hidden",
+                              "absolute overflow-hidden rounded-[2px] p-0 text-left leading-tight transition hover:brightness-[0.98] active:brightness-95",
                               draggingThis && "!transition-none",
                               !useCategoryColor &&
                                 (highlighted
@@ -1451,14 +1345,6 @@ export function WeekCalendar({
                                 : highlighted && !isDraftNewTone
                                   ? "text-white/80"
                                   : "text-[#111827]/65 dark:text-muted-foreground",
-                            );
-                            const expandedDetailCls = cn(
-                              "break-words text-[11px] font-normal leading-snug",
-                              useCategoryColor
-                                ? "text-white/85"
-                                : !isDraftNewTone
-                                  ? "text-white/80"
-                                  : "text-[#374151] dark:text-zinc-400",
                             );
                             const titleLine =
                               block.source === "course" && block.courseCode?.trim()
@@ -1530,7 +1416,10 @@ export function WeekCalendar({
                                   </p>
                                 )}
                                 {showLocation ? (
-                                  <p className={cn("mt-px truncate", metaCls)}>{block.location}</p>
+                                  <p className={cn("mt-px flex items-center gap-0.5 truncate", metaCls)}>
+                                    <MapPin className="h-2.5 w-2.5 shrink-0 opacity-70" strokeWidth={2.25} aria-hidden />
+                                    <span className="truncate">{block.location}</span>
+                                  </p>
                                 ) : null}
                                 {showWith ? (
                                   <p className={cn("mt-px truncate", metaCls)}>{block.withLabel}</p>
@@ -1600,77 +1489,9 @@ export function WeekCalendar({
                                 )}
                               </>
                             );
-                            const innerExpanded = (
-                              <>
-                                <p
-                                  className={cn(
-                                    "break-words font-semibold tabular-nums leading-none",
-                                    cfg.blockTimeClass,
-                                    !useCategoryColor && tone.accentColorSelected,
-                                  )}
-                                  style={
-                                    useCategoryColor && catHex ? { color: "#ffffff" } : undefined
-                                  }
-                                >
-                                  {formatTime(startMinuteShown)} – {formatTime(endMinuteShown)}
-                                </p>
-                                {block.source === "course" && block.courseCode?.trim() ? (
-                                  <div className="mt-px min-w-0 space-y-px">
-                                    <p
-                                      className={cn(
-                                        "break-words font-bold tabular-nums leading-snug text-classmates-blue dark:text-blue-200",
-                                        cfg.blockTitleClass,
-                                      )}
-                                    >
-                                      {block.courseCode.trim()}
-                                    </p>
-                                    <p
-                                      className={cn(
-                                        "break-words font-semibold leading-snug",
-                                        cfg.blockTitleClass,
-                                        !useCategoryColor && tone.titleSelected,
-                                      )}
-                                    >
-                                      {block.courseName}
-                                    </p>
-                                  </div>
-                                ) : (
-                                  <p
-                                    className={cn(
-                                      "mt-px min-w-0 break-words font-semibold leading-snug",
-                                      cfg.blockTitleClass,
-                                      !useCategoryColor && tone.titleSelected,
-                                      useCategoryColor && "text-white",
-                                    )}
-                                  >
-                                    {titleLine}
-                                  </p>
-                                )}
-                                {block.repeatLabel?.trim() ? (
-                                  <p className={cn("mt-1", expandedDetailCls)}>
-                                    {block.repeatLabel.trim()}
-                                  </p>
-                                ) : null}
-                                {block.location?.trim() ? (
-                                  <p className={cn("mt-0.5", expandedDetailCls)}>
-                                    {block.location.trim()}
-                                  </p>
-                                ) : null}
-                                {block.withLabel?.trim() ? (
-                                  <p className={cn("mt-0.5", expandedDetailCls)}>
-                                    {block.withLabel.trim()}
-                                  </p>
-                                ) : null}
-                                {block.note?.trim() ? (
-                                  <p className={cn("mt-0.5", expandedDetailCls)}>{block.note.trim()}</p>
-                                ) : null}
-                              </>
-                            );
                             const innerSlot = draggingThis
                               ? innerCompact
-                              : expandedCard
-                                ? innerExpanded
-                                : innerNormal;
+                              : innerNormal;
                             const railStyle =
                               useCategoryColor && catHex
                                 ? { backgroundColor: categoryAccentColor(catHex) }
@@ -1678,7 +1499,7 @@ export function WeekCalendar({
                             const railClass = cn(
                               shortOverlapGlass
                                 ? "w-[7px] min-w-[7px] shrink-0 self-stretch rounded-full my-1 ml-1 mr-px"
-                                : "w-1 min-w-[4px] shrink-0 self-stretch rounded-l-sm",
+                                : "w-1 min-w-[4px] shrink-0 self-stretch rounded-l-[2px]",
                               !useCategoryColor &&
                                 (highlighted
                                   ? tone.railSelected
@@ -1686,19 +1507,40 @@ export function WeekCalendar({
                                     ? scheduleShortOverlapRailClass(tone)
                                     : tone.rail),
                             );
+                            const hasRecurrence =
+                              block.repeatRule != null &&
+                              block.repeatRule !== "NONE";
                             const innerWithRail = (
                               <div
                                 className={cn(
-                                  "flex w-full flex-row overflow-hidden rounded-[inherit]",
-                                  expandedCard || draggingThis
+                                  "relative flex w-full flex-row overflow-hidden rounded-[inherit]",
+                                  draggingThis
                                     ? "min-h-0 items-stretch"
                                     : "h-full min-h-0",
                                 )}
                               >
                                 <div aria-hidden className={railClass} style={railStyle} />
-                                <div className="flex min-h-0 min-w-0 flex-1 flex-col items-start justify-start px-1.5 py-1">
+                                <div className="flex min-w-0 min-h-0 flex-1 flex-col items-start justify-start px-1.5 py-1">
                                   {innerSlot}
                                 </div>
+                                {hasRecurrence && (
+                                  <Repeat2
+                                    aria-label="重复事件"
+                                    className={cn(
+                                      "pointer-events-none absolute right-0.5 top-0.5 h-2.5 w-2.5 shrink-0",
+                                      useCategoryColor
+                                        ? "text-[#111827]/40 dark:text-white/40"
+                                        : highlighted
+                                          ? "text-white/60"
+                                          : "text-[#111827]/35 dark:text-muted-foreground/50",
+                                    )}
+                                    style={
+                                      useCategoryColor && catHex && !highlighted
+                                        ? { color: catHex, opacity: 0.55 }
+                                        : undefined
+                                    }
+                                  />
+                                )}
                               </div>
                             );
                             const title = `${block.courseName} · ${formatTime(startMinuteShown)}`;
@@ -1712,28 +1554,14 @@ export function WeekCalendar({
                             );
                             const cardZ = draggingThis
                               ? Z_EVENT_CARD_DRAGGING
-                              : selected
-                                ? Math.min(
-                                    Math.max(Z_EVENT_CARD_SELECTED, eventStackZ),
-                                    Z_EVENT_CARD_DRAGGING - 1,
-                                  )
-                                : eventStackZ;
-                            const positionStyle = expandedCard
-                              ? {
-                                  top: `${top}%`,
-                                  minHeight: `${effectiveHeight}%`,
-                                  height: "auto" as const,
-                                  left: `calc(${block.columnIndex * columnWidth}% + ${stackInsetPx}px)`,
-                                  width: `calc(${widthPct}% - ${stackInsetPx}px)`,
-                                  zIndex: cardZ,
-                                }
-                              : {
-                                  top: `${top}%`,
-                                  height: `${effectiveHeight}%`,
-                                  left: `calc(${block.columnIndex * columnWidth}% + ${stackInsetPx}px)`,
-                                  width: `calc(${widthPct}% - ${stackInsetPx}px)`,
-                                  zIndex: cardZ,
-                                };
+                              : eventStackZ;
+                            const positionStyle = {
+                              top: `${top}%`,
+                              height: `${effectiveHeight}%`,
+                              left: `calc(${block.columnIndex * columnWidth}% + ${stackInsetPx}px)`,
+                              width: `calc(${widthPct}% - ${stackInsetPx}px)`,
+                              zIndex: cardZ,
+                            };
                             const surfaceStyle =
                               useCategoryColor && catHex
                                 ? {
@@ -1744,12 +1572,6 @@ export function WeekCalendar({
                                   }
                                 : positionStyle;
 
-                            const isDraggableCalendar =
-                              Boolean(onPatchCalendarEventTimes) &&
-                              block.source === "calendar" &&
-                              Boolean(block.calendarEntryId) &&
-                              block.courseId !== "__draft-preview__";
-
                             if (isDraggableCalendar) {
                               return (
                                 <div
@@ -1759,46 +1581,7 @@ export function WeekCalendar({
                                   title={title}
                                   role="group"
                                 >
-                                  <div
-                                    className={cn(
-                                      "overflow-hidden rounded-[inherit]",
-                                      expandedCard && "relative",
-                                    )}
-                                  >
-                                    {expandedCard ? (
-                                      <>
-                                        <div className="relative z-0 w-full rounded-[inherit]">
-                                          <div className="pointer-events-none">{innerWithRail}</div>
-                                        </div>
-                                        <div
-                                          role="button"
-                                          tabIndex={0}
-                                          className={cn(
-                                            "absolute inset-0 cursor-grab rounded-[inherit] active:cursor-grabbing",
-                                            draggingThis && "cursor-grabbing",
-                                          )}
-                                          style={{ zIndex: Z_EVENT_DRAG_INNER }}
-                                          onKeyDown={(ev) => {
-                                            if (ev.key === "Enter" || ev.key === " ") {
-                                              ev.preventDefault();
-                                              onOpenItem?.(block, occurrenceDate);
-                                            }
-                                          }}
-                                          onPointerDown={(ev) => {
-                                            ev.stopPropagation();
-                                            startCalendarPointerSession(
-                                              ev,
-                                              block,
-                                              "move",
-                                              day,
-                                              occurrenceDate,
-                                              key,
-                                              selected,
-                                            );
-                                          }}
-                                        />
-                                      </>
-                                    ) : (
+                                  <div className="overflow-hidden rounded-[inherit]">
                                       <div
                                         role="button"
                                         tabIndex={0}
@@ -1822,7 +1605,7 @@ export function WeekCalendar({
                                             day,
                                             occurrenceDate,
                                             key,
-                                            selected,
+                                            false,
                                           );
                                         }}
                                       >
@@ -1830,10 +1613,8 @@ export function WeekCalendar({
                                           {innerWithRail}
                                         </div>
                                       </div>
-                                    )}
                                   </div>
-                                  {/* Resize handles — only appear when card is selected */}
-                                  {selected ? (
+                                  {!draggingThis ? (
                                     <>
                                       <button
                                         type="button"
@@ -1905,15 +1686,10 @@ export function WeekCalendar({
                               >
                                 <button
                                   type="button"
-                                  className={cn(
-                                    "z-[1] cursor-default rounded-[inherit] border-0 bg-transparent p-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/35 focus-visible:ring-offset-1 focus-visible:ring-offset-background dark:focus-visible:ring-blue-400/40",
-                                    expandedCard
-                                      ? "relative block min-h-0 w-full overflow-hidden"
-                                      : "absolute inset-0 overflow-hidden",
-                                  )}
+                                  className="z-[1] absolute inset-0 overflow-hidden cursor-default rounded-[inherit] border-0 bg-transparent p-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/35 focus-visible:ring-offset-1 focus-visible:ring-offset-background dark:focus-visible:ring-blue-400/40"
                                   onPointerDown={(e) => {
                                     if (block.courseId === "__draft-preview__") return;
-                                    attachTapSelectLongOpen(e, block, occurrenceDate, key);
+                                    attachTapOpen(e, block, occurrenceDate);
                                   }}
                                   onKeyDown={(ev) => {
                                     if (ev.key === "Enter" || ev.key === " ") {
@@ -1935,7 +1711,7 @@ export function WeekCalendar({
                 <div className="shrink-0" style={{ height: `${BOTTOM_SPACER_PX}px` }} aria-hidden />
               </div>
             </div>
-        </div>
+        </div>}
       </div>
     </div>
   );

@@ -43,13 +43,14 @@ export type ClassmatesPersonRowProps = {
   body?: ReactNode;
   /** Outside the main content link (intentions, large match cards, etc.). */
   footer?: ReactNode;
-  action: ReactNode;
+  /** Right column (e.g. message CTA). Omit when nothing should appear (e.g. your own post row). */
+  action?: ReactNode;
   className?: string;
 };
 
 /**
  * One layout for “person in a list” surfaces: course classmates, Discover categories, search.
- * Keeps avatar + profile entry, main text link, optional footer, and a single action column (full width on small screens).
+ * Keeps avatar + profile entry, main text link, optional footer, and an optional action column (full width on small screens).
  */
 export function ClassmatesPersonRow({
   avatarHref,
@@ -93,7 +94,9 @@ export function ClassmatesPersonRow({
               {footer}
             </div>
 
-            <div className="w-full shrink-0 sm:w-auto sm:pt-0.5">{action}</div>
+            {action != null ? (
+              <div className="w-full shrink-0 sm:w-auto sm:pt-0.5">{action}</div>
+            ) : null}
           </div>
         </div>
       </div>

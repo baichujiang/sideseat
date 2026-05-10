@@ -15,11 +15,33 @@ export const DEFAULT_USER_CALENDAR_PRESETS: ReadonlyArray<{
   { presetKey: "other", name: "Other", color: "#64748B", sortOrder: 5 },
 ];
 
+/**
+ * Retired built-in lists — removed from defaults; delete leftover rows so they
+ * no longer appear as immovable “preset” categories (`CalendarEntry.categoryId` → null).
+ */
+export const OBSOLETE_USER_CALENDAR_PRESET_KEYS = [
+  "publicHolidays",
+  "publicholidays",
+  "public_holidays",
+  "publicholiday",
+  "public_holiday",
+  "universityCalendar",
+  "universitycalendar",
+  "university_calendar",
+] as const;
+
 /** Idempotent: insert any missing preset categories for this user. */
 export async function ensureUserCalendarCategories(
   prisma: PrismaClient,
   userId: string,
 ): Promise<void> {
+  await prisma.userCalendarCategory.deleteMany({
+    where: {
+      userId,
+      presetKey: { in: [...OBSOLETE_USER_CALENDAR_PRESET_KEYS] },
+    },
+  });
+
   const existing = await prisma.userCalendarCategory.findMany({
     where: { userId, presetKey: { not: null } },
     select: { presetKey: true },

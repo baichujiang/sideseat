@@ -66,6 +66,11 @@ type AppPushLayerProps = {
   ariaLabel?: string;
   /** Element id of the visible title (preferred over `ariaLabel` when set) */
   ariaLabelledBy?: string;
+  /**
+   * When false, Escape does not dismiss this layer (use when another push layer is stacked above
+   * so only the top layer handles keyboard back).
+   */
+  listenForEscape?: boolean;
 };
 
 /**
@@ -83,6 +88,7 @@ export function AppPushLayer({
   fullBleed = false,
   ariaLabel,
   ariaLabelledBy,
+  listenForEscape = true,
 }: AppPushLayerProps) {
   const [mounted, setMounted] = useState(open);
   const [entered, setEntered] = useState(false);
@@ -131,13 +137,13 @@ export function AppPushLayer({
   );
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || !listenForEscape) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onCloseRef.current();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [mounted]);
+  }, [mounted, listenForEscape]);
 
   // Register in global layer stack so EdgeSwipeBack can dismiss us.
   // Depend only on `open`: parents often pass an inline `onClose` that changes every render; re-running
@@ -153,6 +159,24 @@ export function AppPushLayer({
       const idx = layerCloseStack.indexOf(closeFromEdgeGesture);
       if (idx !== -1) layerCloseStack.splice(idx, 1);
     };
+  }, [open]);
+
+  // Prevent "ghost clicks": when the sheet opens from a pointerup handler,
+  // the browser may synthesize a click that lands on the newly-rendered backdrop,
+  // immediately closing the sheet. Block backdrop clicks for a brief window.
+  const backdropClickableRef = useRef(false);
+  useEffect(() => {
+    if (!open) {
+      backdropClickableRef.current = false;
+      return;
+    }
+    backdropClickableRef.current = false;
+    // iOS/WebView can deliver the synthetic click later than one frame; keep backdrop
+    // inert briefly so sheets opened from touch (e.g. Share availability) don't instantly dismiss.
+    const id = window.setTimeout(() => {
+      backdropClickableRef.current = true;
+    }, 450);
+    return () => window.clearTimeout(id);
   }, [open]);
 
   useEffect(() => {
@@ -182,7 +206,9 @@ export function AppPushLayer({
       <button
         type="button"
         aria-label="Close"
-        onClick={onClose}
+        onClick={() => {
+          if (backdropClickableRef.current) onClose();
+        }}
         className={cn(
           "absolute inset-0 bg-foreground/20 backdrop-blur-[1px] transition-opacity ease-out",
           entered ? "opacity-100" : "opacity-0",

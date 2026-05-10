@@ -45,6 +45,7 @@ export function ScheduleItemDetailSheet({
   open,
   deleting = false,
   chatReturnTo = "/home",
+  listenForEscape = true,
   onClose,
   onEdit,
   onDelete,
@@ -55,6 +56,8 @@ export function ScheduleItemDetailSheet({
   deleting?: boolean;
   /** `returnTo` query when opening a chat thread from a participant chip. */
   chatReturnTo?: string;
+  /** Set false when a second push layer (e.g. edit) is stacked above so Escape only dismisses the top. */
+  listenForEscape?: boolean;
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -138,7 +141,13 @@ export function ScheduleItemDetailSheet({
   }
 
   return (
-    <AppPushLayer open={open} onClose={onClose} zClassName="z-[45]" panelClassName="w-[min(100vw,28rem)] border-0">
+    <AppPushLayer
+      open={open}
+      onClose={onClose}
+      zClassName="z-[45]"
+      panelClassName="w-[min(100vw,28rem)] border-0"
+      listenForEscape={listenForEscape}
+    >
       <div className="flex h-full min-h-0 flex-col bg-card pt-[env(safe-area-inset-top)]">
         <section className="flex min-h-0 flex-1 flex-col overflow-hidden border-border/60">
           <div className="flex items-start justify-between gap-3 border-b border-border/50 px-4 pb-3 pt-3">

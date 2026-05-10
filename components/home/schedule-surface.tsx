@@ -20,6 +20,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  FileUp,
+  Loader2,
   Maximize2,
   Minimize2,
   Upload,
@@ -607,12 +609,11 @@ export function ScheduleSurface({
     setAdding(true);
   }
 
-  /** Long-press on week grid: calendar → edit sheet; course → read-only detail. */
-  function handleWeekLongPress(item: WeekCalendarBlock, occurrenceDate: Date) {
+  /** Tap on week grid: always open detail sheet first; user edits from there. */
+  function handleWeekCardTap(item: WeekCalendarBlock, occurrenceDate: Date) {
     if (item.courseId === "__draft-preview__") return;
     const ti = weekBlockToDayTimelineItem(item);
-    if (ti.source === "calendar") openEditFromTimelineItem(ti, occurrenceDate);
-    else openDetailFromTimelineItem(ti, occurrenceDate);
+    openDetailFromTimelineItem(ti, occurrenceDate);
   }
 
   // Week view: classes repeat every week, so we can show them on any
@@ -723,7 +724,6 @@ export function ScheduleSurface({
     setDraftEventStart(format(new Date(detailItem.startISO), "yyyy-MM-dd'T'HH:mm"));
     setDraftEventEnd(format(new Date(detailItem.endISO), "yyyy-MM-dd'T'HH:mm"));
     setSelectedDate(new Date(detailItem.startISO));
-    setDetailItem(null);
     setAdding(true);
   }
 
@@ -886,7 +886,7 @@ export function ScheduleSurface({
     focusDate: selectedDate,
     today: now,
     onCreateEvent: openEventDraft,
-    onOpenItem: handleWeekLongPress,
+    onOpenItem: handleWeekCardTap,
     onPatchCalendarEventTimes: patchCalendarEventTimes,
   };
 
@@ -895,7 +895,11 @@ export function ScheduleSurface({
       <ScheduleAddPanel
         selectedDate={selectedDate}
         open={adding}
-        onClose={() => closeAddPanel({ refresh: true })}
+        onClose={() => closeAddPanel({ refresh: false })}
+        onSaved={() => {
+          setDetailItem(null);
+          closeAddPanel({ refresh: true });
+        }}
         mode={editingItem ? "edit" : "create"}
         entryId={editingItem?.id}
         initialTitle={editingItem?.title}
@@ -979,33 +983,51 @@ export function ScheduleSurface({
                   {icsMenuOpen ? (
                     <div
                       role="menu"
-                      className="absolute right-0 top-[calc(100%+0.35rem)] z-50 min-w-[10.5rem] overflow-hidden rounded-2xl border border-border/70 bg-popover py-1 text-popover-foreground shadow-lg"
+                      className="absolute right-0 top-[calc(100%+0.35rem)] z-50 w-[min(16rem,80vw)] overflow-hidden rounded-2xl border border-border/70 bg-popover p-2 text-popover-foreground shadow-xl"
                     >
                       <button
                         type="button"
                         role="menuitem"
-                        className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[13px] transition hover:bg-muted/70"
+                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-muted/70 disabled:opacity-50"
                         disabled={icsBusy !== null}
                         onClick={() => {
                           setIcsMenuOpen(false);
                           void exportIcsCalendar();
                         }}
                       >
-                        <Download className="h-4 w-4 shrink-0 opacity-80" strokeWidth={2} aria-hidden />
-                        {icsBusy === "export" ? "Exporting…" : "Export .ics"}
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[#2563EB] dark:bg-blue-950/50 dark:text-blue-300">
+                          {icsBusy === "export" ? (
+                            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
+                          ) : (
+                            <Download className="h-4 w-4" strokeWidth={2} />
+                          )}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[13px] font-medium text-foreground">Export calendar</p>
+                          <p className="text-[11px] leading-tight text-muted-foreground">Save as .ics file</p>
+                        </div>
                       </button>
                       <button
                         type="button"
                         role="menuitem"
-                        className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[13px] transition hover:bg-muted/70"
+                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-muted/70 disabled:opacity-50"
                         disabled={icsBusy !== null}
                         onClick={() => {
                           setIcsMenuOpen(false);
                           icsImportInputRef.current?.click();
                         }}
                       >
-                        <Upload className="h-4 w-4 shrink-0 opacity-80" strokeWidth={2} aria-hidden />
-                        {icsBusy === "import" ? "Importing…" : "Import .ics"}
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-300">
+                          {icsBusy === "import" ? (
+                            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
+                          ) : (
+                            <FileUp className="h-4 w-4" strokeWidth={2} />
+                          )}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[13px] font-medium text-foreground">Import events</p>
+                          <p className="text-[11px] leading-tight text-muted-foreground">From .ics file</p>
+                        </div>
                       </button>
                     </div>
                   ) : null}
@@ -1070,8 +1092,7 @@ export function ScheduleSurface({
             onCreateEvent={openEventDraft}
             onLongPressItem={(item) => {
               if (item.id === "__draft-preview__") return;
-              if (item.source === "calendar") openEditFromTimelineItem(item, selectedDate);
-              else openDetailFromTimelineItem(item, selectedDate);
+              openDetailFromTimelineItem(item, selectedDate);
             }}
           />
         ) : null}
@@ -1118,8 +1139,7 @@ export function ScheduleSurface({
               items={dayItems}
               onLongPressItem={(item) => {
                 if (item.id === "__draft-preview__") return;
-                if (item.source === "calendar") openEditFromTimelineItem(item, selectedDate);
-                else openDetailFromTimelineItem(item, selectedDate);
+                openDetailFromTimelineItem(item, selectedDate);
               }}
             />
           </div>
@@ -1131,6 +1151,7 @@ export function ScheduleSurface({
         open={Boolean(detailItem)}
         deleting={deletingItem}
         chatReturnTo="/home"
+        listenForEscape={!(adding && Boolean(detailItem))}
         onClose={() => setDetailItem(null)}
         onEdit={() => openEditSheetFromDetail(false)}
         onInvite={() => openEditSheetFromDetail(true)}
@@ -1261,6 +1282,13 @@ function ScheduleDateNavToolbar({
     view === "week" ? startOfWeek(selectedDate, { weekStartsOn: 1 }) : selectedDate;
   const weekNumber = getISOWeek(weekAnchor);
 
+  /** Shared chrome for prev / Today / next — distinct from ViewTabs’ filled segment. */
+  const dateNavControlClass = cn(
+    "border border-[#2563EB]/55 bg-white text-[#1D4ED8] shadow-sm transition",
+    "hover:bg-blue-50/90 hover:border-[#2563EB]/80 active:scale-95",
+    "dark:border-blue-500/60 dark:bg-card dark:text-blue-300 dark:hover:bg-blue-950/40",
+  );
+
   return (
     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-x-2">
       <div className="min-w-0 justify-self-start pr-1">
@@ -1273,27 +1301,25 @@ function ScheduleDateNavToolbar({
       </div>
 
       <div className="justify-self-center">
-        <div className="flex h-7 shrink-0 items-stretch gap-0.5">
+        <div className="flex shrink-0 items-center gap-1">
           <button
             type="button"
             onClick={onStepPrev}
             aria-label="Previous"
             className={cn(
-              "flex w-6 items-center justify-center rounded-lg border border-[#E7E0D6] bg-white text-[#5F6B7A] transition",
-              "shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:bg-[#FAFAF8] hover:text-[#111827] active:bg-[#F3F0EA]/90",
-              "dark:border-border dark:bg-card dark:shadow-none dark:text-muted-foreground dark:hover:bg-muted/45 dark:hover:text-foreground",
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+              dateNavControlClass,
             )}
           >
-            <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
+            <ChevronLeft className="h-4 w-4" strokeWidth={2.5} aria-hidden />
           </button>
           <button
             type="button"
             onClick={onJumpToday}
             aria-label="Jump to today"
             className={cn(
-              "min-w-0 rounded-lg border border-[#E7E0D6] bg-white px-2 text-center text-xs font-medium tabular-nums leading-none text-[#5F6B7A] transition",
-              "shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:bg-[#FAFAF8] hover:text-[#111827] active:bg-[#F3F0EA]/90",
-              "dark:border-border dark:bg-card dark:shadow-none dark:text-muted-foreground dark:hover:bg-muted/45 dark:hover:text-foreground",
+              "rounded-full px-3.5 py-1.5 text-[13px] font-semibold leading-none",
+              dateNavControlClass,
             )}
           >
             Today
@@ -1303,12 +1329,11 @@ function ScheduleDateNavToolbar({
             onClick={onStepNext}
             aria-label="Next"
             className={cn(
-              "flex w-6 items-center justify-center rounded-lg border border-[#E7E0D6] bg-white text-[#5F6B7A] transition",
-              "shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:bg-[#FAFAF8] hover:text-[#111827] active:bg-[#F3F0EA]/90",
-              "dark:border-border dark:bg-card dark:shadow-none dark:text-muted-foreground dark:hover:bg-muted/45 dark:hover:text-foreground",
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+              dateNavControlClass,
             )}
           >
-            <ChevronRight className="h-3 w-3" strokeWidth={2.25} aria-hidden />
+            <ChevronRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
           </button>
         </div>
       </div>

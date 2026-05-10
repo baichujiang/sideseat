@@ -230,6 +230,11 @@ export default async function ConnectionPage({
                       }
                     : { kind: "text" as const, body: message.body };
 
+              const bareImageChrome =
+                message.deletedAt == null &&
+                message.type === "IMAGE" &&
+                Boolean(message.imageUrl);
+
               return (
                 <div key={message.id}>
                   {dayStrip}
@@ -273,14 +278,20 @@ export default async function ConnectionPage({
                     >
                       <div
                         className={cn(
-                          "inline-block px-3.5 py-2 text-[15px] leading-snug text-left",
-                          isOwn
-                            ? "rounded-[1.25rem] rounded-br-md bg-primary text-primary-foreground"
-                            : "rounded-[1.25rem] rounded-bl-md bg-muted text-foreground",
+                          "inline-block text-left text-[15px] leading-snug",
+                          bareImageChrome
+                            ? "max-w-[min(100vw-4rem,20rem)] p-0 align-top"
+                            : cn(
+                                "px-3.5 py-2",
+                                isOwn
+                                  ? "rounded-[1.25rem] rounded-br-md bg-primary text-primary-foreground"
+                                  : "rounded-[1.25rem] rounded-bl-md bg-muted text-foreground",
+                              ),
                         )}
                       >
                         <MessageBubbleContent
                           isOwn={isOwn}
+                          surface={bareImageChrome ? "bareMedia" : "inBubble"}
                           payload={bubblePayload}
                           deleted={message.deletedAt != null}
                           reply={

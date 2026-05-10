@@ -2,6 +2,9 @@ import { CornerUpLeft, MapPin } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+/** `bareMedia` — image without outer chat tint; quote/caption read on page background. */
+export type MessageBubbleSurface = "inBubble" | "bareMedia";
+
 export type MessageBubblePayload =
   | { kind: "text"; body: string }
   | { kind: "image"; imageUrl: string; caption: string }
@@ -24,32 +27,47 @@ export function MessageBubbleContent({
   deleted,
   reply,
   isOwn,
+  surface = "inBubble",
 }: {
   payload: MessageBubblePayload;
   deleted: boolean;
   reply: { senderName: string | null; body: string; deleted: boolean } | null;
   isOwn: boolean;
+  /** When `bareMedia`, image is shown without outer bubble chrome (direct chats). */
+  surface?: MessageBubbleSurface;
 }) {
   if (deleted) {
     return (
       <p className="italic text-[13px] text-muted-foreground">Message deleted</p>
     );
   }
+  const bare = surface === "bareMedia" && payload.kind === "image";
   return (
     <div>
-      {reply ? <QuoteStrip reply={reply} isOwn={isOwn} /> : null}
+      {reply ? <QuoteStrip reply={reply} isOwn={isOwn} surface={surface} /> : null}
       {payload.kind === "text" ? (
         <p className="whitespace-pre-wrap break-words">{payload.body}</p>
       ) : payload.kind === "image" ? (
-        <div className="space-y-1.5">
+        <div className={cn("space-y-1.5", bare && "text-left")}>
           {/* eslint-disable-next-line @next/next/no-img-element -- user-uploaded / blob URL */}
           <img
             src={payload.imageUrl}
             alt=""
-            className="max-h-64 w-full max-w-[min(100vw-4rem,20rem)] rounded-xl object-cover"
+            className={cn(
+              "block max-h-64 w-full max-w-[min(100vw-4rem,20rem)] object-cover",
+              bare ? "rounded-2xl" : "rounded-xl",
+            )}
           />
           {payload.caption ? (
-            <p className="whitespace-pre-wrap break-words text-[15px] leading-snug">
+            <p
+              className={cn(
+                "whitespace-pre-wrap break-words text-[15px] leading-snug",
+                bare &&
+                  (isOwn
+                    ? "text-right text-foreground/85"
+                    : "text-left text-foreground/85"),
+              )}
+            >
               {payload.caption}
             </p>
           ) : null}
@@ -88,17 +106,22 @@ export function MessageBubbleContent({
 function QuoteStrip({
   reply,
   isOwn,
+  surface,
 }: {
   reply: { senderName: string | null; body: string; deleted: boolean };
   isOwn: boolean;
+  surface: MessageBubbleSurface;
 }) {
   const preview = reply.deleted ? "Message deleted" : reply.body;
+  const bare = surface === "bareMedia";
   return (
     <div
       className={cn(
         "mb-1.5 flex items-start gap-1.5 rounded-md border-l-2 px-2 py-1 text-[11.5px] leading-snug",
         isOwn
-          ? "border-primary-foreground/60 bg-primary-foreground/10 text-primary-foreground/90"
+          ? bare
+            ? "border-primary/40 bg-primary/10 text-foreground/90"
+            : "border-primary-foreground/60 bg-primary-foreground/10 text-primary-foreground/90"
           : "border-primary/60 bg-primary/5 text-foreground/80",
       )}
     >
@@ -107,7 +130,7 @@ function QuoteStrip({
         <p
           className={cn(
             "truncate text-[10.5px] font-semibold",
-            isOwn ? "text-primary-foreground" : "text-primary",
+            isOwn && !bare ? "text-primary-foreground" : "text-primary",
           )}
         >
           {reply.senderName?.trim() || "Student"}

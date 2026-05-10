@@ -161,20 +161,20 @@ export default async function ProfilePage({
   const schoolShort = schoolOptions.find((s) => s.value === schoolCode)?.shortLabel ?? schoolCode;
   const sheetProfileFormKey = `${user.id}-${user.updatedAt.getTime()}`;
 
+  const settingsSubtitle =
+    blockedCount === 0
+      ? "Notifications, blocked users, about, delete account"
+      : blockedCount === 1
+        ? "Notifications, 1 blocked user, about, delete account"
+        : `Notifications, ${blockedCount} blocked users, about, delete account`;
+
   return (
     <div className="space-y-3 pb-2">
       <header className="px-0.5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="page-screen-title">Me</h1>
-            <p className="page-screen-subtitle mt-0.5">
-              Your profile, school verification, and how classmates see you.
-            </p>
-          </div>
-          <div className="shrink-0 pt-0.5">
-            <FeedbackFormCard variant="header" />
-          </div>
-        </div>
+        <h1 className="page-screen-title">Me</h1>
+        <p className="page-screen-subtitle mt-0.5">
+          Your public card and verification first — install, tips, feedback, and account settings below.
+        </p>
       </header>
 
       {!user.onboardingComplete ? (
@@ -202,8 +202,8 @@ export default async function ProfilePage({
         </p>
       ) : null}
 
-      {/* Primary: profile + school verification */}
-      <div className="space-y-4">
+      {/* Identity + trust */}
+      <div className="space-y-6">
         <MePageSection id="me-profile-summary-heading" title="Profile">
           <ProfileIdentitySheets
             variant="summary"
@@ -261,8 +261,8 @@ export default async function ProfilePage({
         </MePageSection>
       </div>
 
-      {/* Secondary */}
-      <div className="space-y-2 border-t border-border/60 pt-3">
+      {/* App, support, account, sign out */}
+      <div className="space-y-3 border-t border-border/60 pt-4">
         {isAdmin ? (
           <div className="flex flex-wrap gap-1.5 rounded-lg border border-border/80 bg-muted/30 px-2.5 py-2">
             <span className="w-full text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Admin</span>
@@ -281,9 +281,18 @@ export default async function ProfilePage({
           </div>
         ) : null}
 
-        <MePageInstallCard compact />
-
-        <TipSupportCard enabled={tipsEnabled} compact />
+        <MePageSection
+          id="me-app-support-heading"
+          title="App & support"
+          description="Install the app, optional tip, and send product feedback."
+          density="compact"
+        >
+          <div className="space-y-2">
+            <MePageInstallCard compact />
+            <TipSupportCard enabled={tipsEnabled} compact />
+            <FeedbackFormCard compact />
+          </div>
+        </MePageSection>
 
         <div className="overflow-hidden rounded-xl border border-classmates-edge bg-classmates-surface shadow-[0_2px_10px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card">
           <MeDestRow
@@ -291,19 +300,21 @@ export default async function ProfilePage({
             href={'/profile/account' as Route}
             icon={Settings}
             title="Preferences & account"
-            subtitle="Notifications, discover, safety"
+            subtitle={settingsSubtitle}
           />
         </div>
 
-        <LogoutForm className="block">
-          <button
-            type="submit"
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-classmates-edge bg-classmates-surface px-3 py-2.5 text-[13px] font-semibold text-classmates-ink shadow-sm transition-colors active:bg-classmates-warm-alt dark:border-border dark:bg-card dark:text-foreground dark:active:bg-muted/40 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
-          >
-            <LogOut className="h-4 w-4 shrink-0 opacity-70" strokeWidth={2} aria-hidden />
-            Log out
-          </button>
-        </LogoutForm>
+        <div className="border-t border-border/50 pt-3">
+          <LogoutForm className="block">
+            <button
+              type="submit"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-classmates-edge bg-classmates-surface px-3 py-2.5 text-[13px] font-semibold text-classmates-ink shadow-sm transition-colors active:bg-classmates-warm-alt dark:border-border dark:bg-card dark:text-foreground dark:active:bg-muted/40 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
+            >
+              <LogOut className="h-4 w-4 shrink-0 opacity-70" strokeWidth={2} aria-hidden />
+              Log out
+            </button>
+          </LogoutForm>
+        </div>
       </div>
     </div>
   );

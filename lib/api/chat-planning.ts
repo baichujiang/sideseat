@@ -2,6 +2,8 @@
 
 import { PlanType } from "@prisma/client";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
+
 type JsonResult<T> = {
   success: boolean;
   data?: T;
@@ -49,7 +51,7 @@ const availabilityShareCache = new Map<string, AvailabilityShareData>();
 const availabilityShareInFlight = new Map<string, Promise<AvailabilityShareData>>();
 
 async function postJson<T>(url: string, body?: unknown): Promise<T> {
-  const response = await fetch(url, {
+  const response = await apiFetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: body ? JSON.stringify(body) : undefined,
@@ -62,7 +64,7 @@ async function postJson<T>(url: string, body?: unknown): Promise<T> {
 }
 
 async function getJson<T>(url: string): Promise<T> {
-  const response = await fetch(url);
+  const response = await apiFetch(url);
   const payload = (await response.json().catch(() => ({}))) as JsonResult<T>;
   if (!response.ok || !payload.success || !payload.data) {
     throw new Error(payload.error || "Request failed.");
