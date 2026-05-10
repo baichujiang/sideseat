@@ -1,6 +1,6 @@
 import type { CalendarRepeatRule, Weekday } from "@prisma/client";
 import { addDays, addMinutes, isSameDay } from "date-fns";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import {
   SCHEDULE_EVENT_TONE_STYLES,
@@ -250,9 +250,18 @@ export function WeekCalendar({
   } | null>(null);
   const dragClearFallbackTimerRef = useRef<number | null>(null);
 
-  /** Dominant-axis lock for the week grid’s 2D `overflow-auto` scroller (touch / pen / mouse drag). */
-  const scrollAxisGestureRef = useRef<{ pointerId: number; x0: number; y0: number } | null>(null);
-  const [scrollAxisLock, setScrollAxisLock] = useState<"free" | "h" | "v">("free");
+  /**
+   * Scroll-axis lock: after the first ~14 px of scroll delta, lock to
+   * horizontal OR vertical for the rest of the gesture. Implemented via a
+   * `scroll` event listener that snaps the non-dominant axis back each frame.
+   */
+  const scrollAxisRef = useRef<{
+    locked: "free" | "h" | "v";
+    originLeft: number;
+    originTop: number;
+    pointerDown: boolean;
+    rafId: number | null;
+  }>({ locked: "free", originLeft: 0, originTop: 0, pointerDown: false, rafId: null });
 
   function clearDragClearFallbackTimer() {
     if (dragClearFallbackTimerRef.current !== null) {
@@ -349,43 +358,52 @@ export function WeekCalendar({
   );
 
   useEffect(() => {
-    const end = (e: PointerEvent) => {
-      const g = scrollAxisGestureRef.current;
-      if (g && e.pointerId === g.pointerId) {
-        scrollAxisGestureRef.current = null;
-        setScrollAxisLock("free");
+    const node = scrollContainerRef.current;
+    if (!node) return;
+    const ax = scrollAxisRef.current;
+
+    const onPointerDown = () => {
+      ax.pointerDown = true;
+      ax.locked = "free";
+      ax.originLeft = node.scrollLeft;
+      ax.originTop = node.scrollTop;
+    };
+    const onPointerUp = () => {
+      ax.pointerDown = false;
+      ax.locked = "free";
+      if (ax.rafId !== null) {
+        cancelAnimationFrame(ax.rafId);
+        ax.rafId = null;
       }
     };
-    window.addEventListener("pointerup", end);
-    window.addEventListener("pointercancel", end);
+    const onScroll = () => {
+      if (!ax.pointerDown) return;
+      const dx = node.scrollLeft - ax.originLeft;
+      const dy = node.scrollTop - ax.originTop;
+      if (ax.locked === "free") {
+        const dist = dx * dx + dy * dy;
+        if (dist < AXIS_LOCK_THRESHOLD_PX * AXIS_LOCK_THRESHOLD_PX) return;
+        ax.locked = Math.abs(dx) > Math.abs(dy) ? "h" : "v";
+      }
+      if (ax.rafId !== null) return;
+      ax.rafId = requestAnimationFrame(() => {
+        ax.rafId = null;
+        if (ax.locked === "h") node.scrollTop = ax.originTop;
+        else if (ax.locked === "v") node.scrollLeft = ax.originLeft;
+      });
+    };
+
+    node.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
+    node.addEventListener("scroll", onScroll, { passive: true });
     return () => {
-      window.removeEventListener("pointerup", end);
-      window.removeEventListener("pointercancel", end);
+      node.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
+      node.removeEventListener("scroll", onScroll);
+      if (ax.rafId !== null) cancelAnimationFrame(ax.rafId);
     };
-  }, []);
-
-  const onScrollAxisPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (!e.isPrimary) return;
-    if (e.pointerType === "mouse" && e.button !== 0) return;
-    scrollAxisGestureRef.current = {
-      pointerId: e.pointerId,
-      x0: e.clientX,
-      y0: e.clientY,
-    };
-    setScrollAxisLock("free");
-  }, []);
-
-  const onScrollAxisPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    const g = scrollAxisGestureRef.current;
-    if (!g || e.pointerId !== g.pointerId) return;
-    setScrollAxisLock((lock) => {
-      if (lock !== "free") return lock;
-      const dx = e.clientX - g.x0;
-      const dy = e.clientY - g.y0;
-      const th = AXIS_LOCK_THRESHOLD_PX;
-      if (dx * dx + dy * dy < th * th) return lock;
-      return Math.abs(dx) > Math.abs(dy) ? "h" : "v";
-    });
   }, []);
 
   const blocksByDay = new Map<Weekday, WeekCalendarBlock[]>();
@@ -795,12 +813,8 @@ export function WeekCalendar({
         className={cn(
           "min-w-0 overflow-auto overscroll-contain",
           fillParent ? "min-h-0 min-w-0 flex-1" : null,
-          scrollAxisLock === "h" && "touch-pan-x",
-          scrollAxisLock === "v" && "touch-pan-y",
         )}
         style={fillParent ? undefined : { height: `${WEEK_HEADER_HEIGHT_PX + viewportHeightPx}px` }}
-        onPointerDown={onScrollAxisPointerDown}
-        onPointerMove={onScrollAxisPointerMove}
       >
         <div style={{ width: trackWidthPx }}>
           <div
