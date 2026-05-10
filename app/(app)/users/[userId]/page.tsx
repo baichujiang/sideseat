@@ -33,18 +33,9 @@ export default async function PeerUserProfilePage({
         <BackLink href={backHref} label="Back" />
         <div className="min-w-0 flex-1 pr-2">
           <p className="truncate text-sm font-semibold">Profile</p>
-          <div className="flex min-w-0 items-center gap-1">
-            <p className="truncate text-[11px] text-muted-foreground">
-              {peer.nickname?.trim() || "Student"}
-            </p>
-            {access.mode === "connection" ? (
-              <ContactRemarkEditor
-                connectionId={access.connectionId}
-                initialRemark={access.myContactRemark}
-                variant="inline"
-              />
-            ) : null}
-          </div>
+          <p className="truncate text-[11px] text-muted-foreground">
+            {peer.nickname?.trim() || "Student"}
+          </p>
         </div>
         <PeerProfileMenu
           peerUserId={peer.id}
@@ -78,6 +69,23 @@ export default async function PeerUserProfilePage({
               : access.sharedCourses[0]?.name ?? null
           }
         />
+
+        {access.mode === "connection" ? (
+          <div className="mt-4 space-y-2 rounded-2xl border border-border/60 bg-card px-3 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Name in your chats
+            </p>
+            <p className="text-[11px] leading-snug text-muted-foreground">
+              Only you see this in your chat list and at the top of the thread. It does not change their public
+              profile.
+            </p>
+            <ContactRemarkEditor
+              connectionId={access.connectionId}
+              initialRemark={access.myContactRemark}
+              isSelfNotes={false}
+            />
+          </div>
+        ) : null}
 
         <div className="mt-4 space-y-2 rounded-2xl border border-border/60 bg-card px-3 py-3">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">

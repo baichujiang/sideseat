@@ -2,13 +2,13 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CornerUpLeft, Plus, Send, X } from "lucide-react";
 
 import { FormMessage } from "@/components/forms/form-message";
 import { useChatReply } from "@/components/chat/chat-reply-context";
-import { ChatAttachmentMenu } from "@/components/chat/chat-attachment-menu";
+import { ChatAttachmentPlusButton, ChatAttachmentTray } from "@/components/chat/chat-attachment-menu";
 import { cn } from "@/lib/utils";
 
 export function ChatComposer({
@@ -24,9 +24,28 @@ export function ChatComposer({
   const router = useRouter();
   const { replyTo, setReplyTo } = useChatReply();
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const composerChromeRef = useRef<HTMLDivElement>(null);
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [attachOpen, setAttachOpen] = useState(false);
+
+  useEffect(() => {
+    if (!attachOpen) return;
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      const t = e.target;
+      if (!(t instanceof Node)) return;
+      if (composerChromeRef.current && !composerChromeRef.current.contains(t)) {
+        setAttachOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("touchstart", onDown, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("touchstart", onDown);
+    };
+  }, [attachOpen]);
 
   const submit = async () => {
     if (submitting) return;
@@ -72,60 +91,70 @@ export function ChatComposer({
           onCancel={() => setReplyTo(null)}
         />
       ) : null}
-      <div className="flex items-end gap-2">
-        {hideAttachments ? (
+      <div ref={composerChromeRef} className="flex min-w-0 flex-col">
+        <div className="flex items-end gap-2">
+          {hideAttachments ? (
+            <button
+              type="button"
+              disabled
+              aria-label="Attachments unavailable in self chat"
+              title="Attachments unavailable in self chat"
+              className={cn(
+                "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-dashed border-border/70 bg-muted/35 text-muted-foreground/60",
+                "cursor-not-allowed",
+              )}
+            >
+              <Plus className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />
+            </button>
+          ) : (
+            <ChatAttachmentPlusButton open={attachOpen} onToggle={() => setAttachOpen((o) => !o)} />
+          )}
+          <label className="sr-only" htmlFor={`chat-input-${connectionId}`}>
+            Message
+          </label>
+          <textarea
+            ref={inputRef}
+            id={`chat-input-${connectionId}`}
+            autoComplete="off"
+            enterKeyHint="send"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                void submit();
+              }
+            }}
+            rows={1}
+            placeholder={replyTo ? "Write your reply…" : "Write a message…"}
+            className={cn(
+              "min-h-[44px] max-h-32 flex-1 resize-none rounded-[1.25rem] border border-input bg-muted/40 px-3.5 py-2.5 text-[16px] leading-snug",
+              "placeholder:text-muted-foreground/70",
+              "outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
+            )}
+          />
           <button
             type="button"
-            disabled
-            aria-label="Attachments unavailable in self chat"
-            title="Attachments unavailable in self chat"
+            disabled={submitting || !body.trim()}
+            onClick={() => void submit()}
             className={cn(
-              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-dashed border-border/70 bg-muted/35 text-muted-foreground/60",
-              "cursor-not-allowed",
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition",
+              "hover:bg-primary/90",
+              "disabled:pointer-events-none disabled:opacity-35",
             )}
+            aria-label="Send"
           >
-            <Plus className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />
+            <Send className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />
           </button>
-        ) : (
-          <ChatAttachmentMenu connectionId={connectionId} peerName={peerName} />
-        )}
-        <label className="sr-only" htmlFor={`chat-input-${connectionId}`}>
-          Message
-        </label>
-        <textarea
-          ref={inputRef}
-          id={`chat-input-${connectionId}`}
-          autoComplete="off"
-          enterKeyHint="send"
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              void submit();
-            }
-          }}
-          rows={1}
-          placeholder={replyTo ? "Write your reply…" : "Write a message…"}
-          className={cn(
-            "min-h-[44px] max-h-32 flex-1 resize-none rounded-[1.25rem] border border-input bg-muted/40 px-3.5 py-2.5 text-[16px] leading-snug",
-            "placeholder:text-muted-foreground/70",
-            "outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
-          )}
-        />
-        <button
-          type="button"
-          disabled={submitting || !body.trim()}
-          onClick={() => void submit()}
-          className={cn(
-            "flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition",
-            "hover:bg-primary/90",
-            "disabled:pointer-events-none disabled:opacity-35",
-          )}
-          aria-label="Send"
-        >
-          <Send className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />
-        </button>
+        </div>
+        {!hideAttachments ? (
+          <ChatAttachmentTray
+            open={attachOpen}
+            onClose={() => setAttachOpen(false)}
+            connectionId={connectionId}
+            peerName={peerName}
+          />
+        ) : null}
       </div>
       {error ? (
         <div className="pb-0.5">

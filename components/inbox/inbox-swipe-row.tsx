@@ -12,7 +12,8 @@ const DRAG_THRESHOLD = 8;
 
 export type InboxSwipeTarget =
   | { type: "direct"; connectionId: string }
-  | { type: "course"; courseId: string };
+  | { type: "course"; courseId: string }
+  | { type: "group"; groupChatId: string };
 
 export function InboxSwipeRow({
   href,
@@ -93,11 +94,15 @@ export function InboxSwipeRow({
   const pinAction =
     swipeTarget.type === "direct"
       ? `/api/connections/${swipeTarget.connectionId}/pin`
-      : `/api/courses/${swipeTarget.courseId}/inbox-pin`;
+      : swipeTarget.type === "course"
+        ? `/api/courses/${swipeTarget.courseId}/inbox-pin`
+        : `/api/group-chats/${swipeTarget.groupChatId}/inbox-pin`;
   const removeAction =
     swipeTarget.type === "direct"
       ? `/api/connections/${swipeTarget.connectionId}/end`
-      : `/api/courses/${swipeTarget.courseId}/inbox-hide`;
+      : swipeTarget.type === "course"
+        ? `/api/courses/${swipeTarget.courseId}/inbox-hide`
+        : `/api/group-chats/${swipeTarget.groupChatId}/inbox-hide`;
   return (
     <div className="relative overflow-hidden">
       <div className="absolute inset-y-0 right-0 z-0 flex w-[152px] items-stretch justify-stretch">
@@ -117,7 +122,9 @@ export function InboxSwipeRow({
             title={
               swipeTarget.type === "course"
                 ? "Remove from Chats list only — you stay enrolled in the course."
-                : undefined
+                : swipeTarget.type === "group"
+                  ? "Remove from Chats list only — you stay in the group."
+                  : undefined
             }
             className="flex flex-1 items-center justify-center bg-[#94A3B8] px-2 text-center text-[11px] font-semibold uppercase tracking-wide text-white transition-colors hover:bg-[#64748B]"
           >

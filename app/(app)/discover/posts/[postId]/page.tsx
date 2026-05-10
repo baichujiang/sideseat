@@ -6,6 +6,7 @@ import { ClassmatePostCategory, ClassmatePostStatus } from "@prisma/client";
 import { Calendar, ChevronRight, Link2, MapPin } from "lucide-react";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
+import { ClassmatePostDetailViewBeacon } from "@/components/discover/classmate-post-detail-view-beacon";
 import { DiscoverMessageButton } from "@/components/discover/discover-message-button";
 import { BackLink } from "@/components/nav/back-link";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
@@ -147,6 +148,7 @@ export default async function DiscoverPostDetailPage({
 
   return (
     <div className="space-y-5 pb-6">
+      {!isAuthor ? <ClassmatePostDetailViewBeacon postId={post.id} /> : null}
       <header className="flex items-center gap-2">
         <BackLink href={backHref} label="Back" />
       </header>
@@ -189,6 +191,7 @@ export default async function DiscoverPostDetailPage({
                 peerId={author.id}
                 returnTo={postPath}
                 tone="solid"
+                insightPostId={post.id}
                 className={POST_DETAIL_PRIMARY_CTA}
               />
             </div>

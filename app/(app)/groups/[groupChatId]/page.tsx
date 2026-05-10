@@ -35,6 +35,7 @@ export default async function GroupChatPage({
   const query = (await searchParams) ?? {};
   const backHref = safeReturnPath(query.returnTo, "/inbox");
   const { groupChat, user } = await requireGroupChatParticipant(groupChatId);
+  const myMembership = groupChat.participants.find((p) => p.userId === user.id);
   const latestMessageId = groupChat.messages.at(-1)?.id ?? null;
   const title = groupChatDisplayTitle(
     groupChat.title,
@@ -81,6 +82,27 @@ export default async function GroupChatPage({
             </Link>
           </div>
         </header>
+
+        {myMembership?.inboxHiddenAt ? (
+          <div className="shrink-0 border-b border-amber-200/70 bg-amber-50/60 px-3 py-2 dark:border-amber-900/40 dark:bg-amber-950/25">
+            <form
+              action={`/api/group-chats/${groupChat.id}/inbox-restore`}
+              method="post"
+              className="flex flex-wrap items-center gap-2"
+            >
+              <input type="hidden" name="returnTo" value={groupThreadPath} />
+              <p className="min-w-0 flex-1 text-[11px] leading-snug text-foreground">
+                Hidden from Chats — restore the row anytime.
+              </p>
+              <button
+                type="submit"
+                className="shrink-0 rounded-full border border-border bg-background px-2.5 py-1 text-[10px] font-semibold shadow-sm"
+              >
+                Show in Chats
+              </button>
+            </form>
+          </div>
+        ) : null}
 
         <ChatScrollContainer messageCount={groupChat.messages.length}>
           {groupChat.messages.length === 0 ? (

@@ -1120,6 +1120,7 @@ function PostRow({
           returnTo={postPath}
           tone="subtle"
           hasExistingChat={false}
+          insightPostId={post.isOwn ? undefined : post.id}
           className="w-full justify-center sm:w-auto"
         />
       }

@@ -1,14 +1,14 @@
 import type { Route } from "next";
 import { ChevronRight } from "lucide-react";
 
-import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { inboxConversationTileClassName } from "@/components/inbox/inbox-conversation-tile";
+import { InboxSwipeRow } from "@/components/inbox/inbox-swipe-row";
+import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { GroupChatAvatarCollage } from "@/components/ui/group-chat-avatar-collage";
 import { formatShortRelativeTime } from "@/lib/format/short-relative-time";
 import { groupChatDisplayTitle } from "@/lib/group-chats/title";
 import type { InboxMerged } from "@/lib/queries/inbox-merge";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 
 type GroupInboxItem = Extract<InboxMerged, { kind: "group" }>;
 
@@ -21,7 +21,7 @@ export function GroupInboxRow({
   item: GroupInboxItem;
   returnTo?: string;
 }) {
-  const { groupChat, last, unreadCount } = item;
+  const { groupChat, last, unreadCount, inboxPinnedAt } = item;
   const title = groupChatDisplayTitle(
     groupChat.title,
     groupChat.participants.map((participant) => participant.user),
@@ -31,12 +31,16 @@ export function GroupInboxRow({
   const when = last?.createdAt ?? groupChat.updatedAt;
   const participantCount = groupChat.participants.length;
   const href = `/groups/${groupChat.id}?returnTo=${encodeURIComponent(returnTo)}` as Route;
+  const pinned = Boolean(inboxPinnedAt);
+  const isUnread = unreadCount > 0;
 
   return (
     <li className={inboxConversationTileClassName}>
-      <Link
+      <InboxSwipeRow
         href={href}
-        className="flex min-h-0 items-center gap-3 px-3 py-2.5 transition-colors active:bg-muted/40 [@media(hover:hover)]:hover:bg-muted/25"
+        returnTo={returnTo}
+        pinned={pinned}
+        swipeTarget={{ type: "group", groupChatId: groupChat.id }}
       >
         <GroupChatAvatarCollage
           participants={groupChat.participants.map((participant) => ({
@@ -52,7 +56,7 @@ export function GroupInboxRow({
           <p
             className={cn(
               "mt-0.5 truncate text-[13px] leading-snug text-[#5F6B7A] dark:text-zinc-400",
-              unreadCount > 0 && "font-semibold text-[#374151] dark:text-zinc-300",
+              isUnread && "font-semibold text-[#374151] dark:text-zinc-300",
             )}
           >
             {preview}
@@ -65,7 +69,7 @@ export function GroupInboxRow({
           <time className="shrink-0 text-xs tabular-nums text-[#8A94A6] dark:text-zinc-500" dateTime={when.toISOString()}>
             {formatShortRelativeTime(when)}
           </time>
-          {unreadCount > 0 ? (
+          {isUnread ? (
             unreadCount === 1 ? (
               <InboxUnreadBadge count={1} variant="dot" />
             ) : (
@@ -74,7 +78,7 @@ export function GroupInboxRow({
           ) : null}
           <ChevronRight className="h-4 w-4 shrink-0 text-[#A1A9B5] dark:text-zinc-500" strokeWidth={2} aria-hidden />
         </div>
-      </Link>
+      </InboxSwipeRow>
     </li>
   );
 }

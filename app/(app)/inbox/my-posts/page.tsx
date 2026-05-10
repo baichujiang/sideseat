@@ -8,8 +8,10 @@ import {
   ChevronRight,
   Clock,
   Dumbbell,
+  Eye,
   Languages,
   MapPin,
+  MessageCircle,
   NotebookPen,
   UtensilsCrossed,
 } from "lucide-react";
@@ -25,6 +27,10 @@ import {
   SCENE_LIST_ROW,
 } from "@/lib/discover/scene-palette";
 import { prisma } from "@/lib/db/prisma";
+import {
+  type ClassmatePostInsightCounts,
+  classmatePostInsightCountsByPostId,
+} from "@/lib/queries/classmate-post-insight-counts";
 import { cn } from "@/lib/utils";
 
 export default async function InboxMyPostsPage() {
@@ -51,6 +57,8 @@ export default async function InboxMyPostsPage() {
     take: 80,
   });
 
+  const insightByPostId = await classmatePostInsightCountsByPostId(posts.map((p) => p.id));
+
   const active = posts.filter((p) => p.status === ClassmatePostStatus.ACTIVE && p.expiresAt > new Date());
   const archived = posts.filter((p) => !(p.status === ClassmatePostStatus.ACTIVE && p.expiresAt > new Date()));
 
@@ -61,7 +69,8 @@ export default async function InboxMyPostsPage() {
         <div>
           <h1 className="page-screen-title">My posts</h1>
           <p className="text-[13px] leading-snug text-muted-foreground">
-            Discover posts you published — classmates see them on the Discover tab
+            Discover posts you published — classmates see them on the Discover tab. Views and message taps below
+            are unique classmates (only you see them).
           </p>
         </div>
       </div>
@@ -85,7 +94,11 @@ export default async function InboxMyPostsPage() {
               </h2>
               <ul className="space-y-2.5">
                 {active.map((post) => (
-                  <PostRow key={post.id} post={post} />
+                  <PostRow
+                    key={post.id}
+                    post={post}
+                    insights={insightByPostId.get(post.id) ?? { detailViews: 0, messageIntents: 0 }}
+                  />
                 ))}
               </ul>
             </section>
@@ -98,7 +111,12 @@ export default async function InboxMyPostsPage() {
               </h2>
               <ul className="space-y-2.5">
                 {archived.map((post) => (
-                  <PostRow key={post.id} post={post} muted />
+                  <PostRow
+                    key={post.id}
+                    post={post}
+                    muted
+                    insights={insightByPostId.get(post.id) ?? { detailViews: 0, messageIntents: 0 }}
+                  />
                 ))}
               </ul>
             </section>
@@ -128,6 +146,7 @@ function categoryIcon(c: ClassmatePostCategory) {
 function PostRow({
   post,
   muted = false,
+  insights,
 }: {
   post: {
     id: string;
@@ -141,6 +160,7 @@ function PostRow({
     updatedAt: Date;
   };
   muted?: boolean;
+  insights: ClassmatePostInsightCounts;
 }) {
   const postHref =
     `/discover/posts/${post.id}?returnTo=${encodeURIComponent("/inbox/my-posts")}` as Route;
@@ -239,6 +259,21 @@ function PostRow({
                   {format(post.updatedAt, "MMM d, yyyy")}
                 </>
               )}
+            </span>
+            <span
+              className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] tabular-nums text-muted-foreground"
+              aria-label={`${insights.detailViews} unique views, ${insights.messageIntents} started a chat from this post`}
+            >
+              <span className="inline-flex items-center gap-1">
+                <Eye className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
+                {insights.detailViews} {insights.detailViews === 1 ? "view" : "views"}
+              </span>
+              <span aria-hidden>·</span>
+              <span className="inline-flex items-center gap-1">
+                <MessageCircle className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
+                {insights.messageIntents}{" "}
+                {insights.messageIntents === 1 ? "chat started" : "chats started"}
+              </span>
             </span>
           </div>
         </div>

@@ -13,7 +13,6 @@ import {
   PlanConfirmedCardMessage,
   PlanRequestCardMessage,
 } from "@/components/chat/plan-request-card-message";
-import { ContactRemarkEditor } from "@/components/chat/contact-remark-editor";
 import { BackLink } from "@/components/nav/back-link";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { requireConnection } from "@/lib/auth/guards";
@@ -89,20 +88,12 @@ export default async function ConnectionPage({
             <PresetAvatar id={otherUser.avatarUrl} size={40} className="shrink-0" />
           </Link>
           <div className="min-w-0 flex-1">
-            <div className="flex min-w-0 items-center gap-1.5">
-              <Link
-                href={profileLinkHref}
-                className="min-w-0 rounded-md py-0.5 text-left transition hover:bg-muted/70 active:bg-muted"
-              >
-                <p className="truncate text-sm font-semibold leading-tight">{headerTitle}</p>
-              </Link>
-              <ContactRemarkEditor
-                connectionId={connection.id}
-                initialRemark={myRemark}
-                isSelfNotes={isSelfNotes}
-                variant="inline"
-              />
-            </div>
+            <Link
+              href={profileLinkHref}
+              className="min-w-0 rounded-md py-0.5 text-left transition hover:bg-muted/70 active:bg-muted"
+            >
+              <p className="truncate text-sm font-semibold leading-tight">{headerTitle}</p>
+            </Link>
             {showSelfBaseLine ? (
               <p className="truncate text-[11px] text-muted-foreground">{selfBaseLabel}</p>
             ) : null}
@@ -119,13 +110,11 @@ export default async function ConnectionPage({
         </div>
       </header>
 
-      {!isSelfNotes ? (
-        <div className="shrink-0 space-y-1 border-b border-border/70 bg-background/80 px-3 py-2">
-          {courseName ? (
-            <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground/85">
-              {courseName}
-            </span>
-          ) : null}
+      {!isSelfNotes && courseName ? (
+        <div className="shrink-0 border-b border-border/70 bg-background/80 px-3 py-2">
+          <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground/85">
+            {courseName}
+          </span>
         </div>
       ) : null}
 

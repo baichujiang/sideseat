@@ -141,7 +141,7 @@ export function ContactRemarkEditor({
   }
 
   return (
-    <div className="mt-3">
+    <div className="w-full">
       <label className="text-[11px] font-medium text-muted-foreground">
         {isSelfNotes ? "Title" : "Remark"}
       </label>

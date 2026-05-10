@@ -24,14 +24,26 @@ export function rgbaFromHex(color: string, alpha: number): string | null {
 }
 
 /** Inline styles for arbitrary user category color on schedule blocks. */
-export function categoryBlockSurfaceStyle(hex: string, selected: boolean): CSSProperties {
+export function categoryBlockSurfaceStyle(
+  hex: string,
+  selected: boolean,
+  options?: { shortOverlap?: boolean },
+): CSSProperties {
   const border = hex.trim();
-  const fill = rgbaFromHex(hex, selected ? 0.32 : 0.14) ?? "rgba(100,116,139,0.14)";
+  const short = Boolean(options?.shortOverlap && !selected);
+  const fillAlpha = selected ? 0.32 : short ? 0.08 : 0.14;
+  const fill = rgbaFromHex(hex, fillAlpha) ?? "rgba(100,116,139,0.14)";
   return {
     backgroundColor: fill,
     borderColor: border,
     borderWidth: selected ? 2 : 1,
     borderStyle: "solid",
+    ...(short
+      ? {
+          backdropFilter: "blur(10px) saturate(1.12)",
+          WebkitBackdropFilter: "blur(10px) saturate(1.12)",
+        }
+      : {}),
   };
 }
 

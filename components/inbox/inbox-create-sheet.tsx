@@ -31,6 +31,50 @@ type SearchHit = {
 
 type Mode = "contact" | "group";
 
+function contactDisplayName(c: { nickname: string | null; username: string }): string {
+  return (c.nickname?.trim() || c.username).trim();
+}
+
+function hitDisplayName(hit: SearchHit): string {
+  return (hit.nickname?.trim() || hit.username).trim();
+}
+
+/** Latin A–Z buckets; digits/symbols → "#"; CJK etc. → that character as section. */
+function sectionKeyFromDisplayName(name: string): string {
+  const t = name.trim();
+  if (!t) return "#";
+  const ch = t[0]!;
+  if (/[a-zA-Z]/.test(ch)) return ch.toUpperCase();
+  if (/[0-9]/.test(ch)) return "#";
+  return ch;
+}
+
+function compareSectionKeys(a: string, b: string): number {
+  const isAtoZ = (k: string) => /^[A-Z]$/.test(k);
+  if (isAtoZ(a) && isAtoZ(b)) return a.localeCompare(b);
+  if (isAtoZ(a)) return -1;
+  if (isAtoZ(b)) return 1;
+  if (a === "#") return 1;
+  if (b === "#") return -1;
+  return a.localeCompare(b, undefined, { sensitivity: "base", numeric: true });
+}
+
+function groupRowsBySection<T>(rows: T[], nameOf: (row: T) => string): { key: string; rows: T[] }[] {
+  const sorted = [...rows].sort((x, y) =>
+    nameOf(x).localeCompare(nameOf(y), undefined, { sensitivity: "base", numeric: true }),
+  );
+  const map = new Map<string, T[]>();
+  for (const row of sorted) {
+    const key = sectionKeyFromDisplayName(nameOf(row));
+    const list = map.get(key);
+    if (list) list.push(row);
+    else map.set(key, [row]);
+  }
+  return [...map.entries()]
+    .sort(([ka], [kb]) => compareSectionKeys(ka, kb))
+    .map(([key, r]) => ({ key, rows: r }));
+}
+
 export function InboxCreateSheet({
   initialContacts,
 }: {
@@ -95,6 +139,16 @@ export function InboxCreateSheet({
   const contactsByPeerId = useMemo(
     () => new Map(contacts.map((contact) => [contact.peerId, contact])),
     [contacts],
+  );
+
+  const groupedContacts = useMemo(
+    () => groupRowsBySection(contacts, contactDisplayName),
+    [contacts],
+  );
+
+  const groupedSearchHits = useMemo(
+    () => groupRowsBySection(searchHits, hitDisplayName),
+    [searchHits],
   );
 
   async function addContact(hit: SearchHit) {
@@ -192,10 +246,10 @@ export function InboxCreateSheet({
         <Plus className="h-5 w-5" strokeWidth={2.4} aria-hidden />
       </button>
 
-      <AppPushLayer open={open} onClose={close} zClassName="z-40" panelClassName="w-[min(100vw,28rem)] border-0">
+      <AppPushLayer open={open} onClose={close} zClassName="z-[60]" panelClassName="w-[min(100vw,28rem)] border-0">
         <div className="flex h-full min-h-0 flex-col bg-background pt-[env(safe-area-inset-top)]">
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
-            <div className="mb-3 flex items-start justify-between gap-3">
+            <div className="mb-3 flex shrink-0 items-start justify-between gap-3">
               <div>
                 <h3 className="text-[15px] font-semibold text-foreground">New chat</h3>
                 <p className="mt-1 text-[12px] leading-snug text-muted-foreground">
@@ -214,7 +268,7 @@ export function InboxCreateSheet({
 
             <div
               className={cn(
-                "mb-4 flex gap-0.5 rounded-2xl border border-classmates-blue-border/90 bg-classmates-blue-soft/70 p-1 shadow-inner",
+                "mb-4 flex shrink-0 gap-0.5 rounded-2xl border border-classmates-blue-border/90 bg-classmates-blue-soft/70 p-1 shadow-inner",
                 "dark:border-blue-800/55 dark:bg-blue-950/30",
               )}
             >
@@ -235,8 +289,8 @@ export function InboxCreateSheet({
             </div>
 
             {mode === "contact" ? (
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 rounded-[20px] border border-border/70 bg-card/50 px-4 py-3">
+              <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
+                <div className="flex shrink-0 items-center gap-3 rounded-[20px] border border-border/70 bg-card/50 px-4 py-3">
                   <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
                   <Input
                     value={query}
@@ -246,7 +300,7 @@ export function InboxCreateSheet({
                   />
                 </div>
 
-                <div className="max-h-[42dvh] space-y-3 overflow-y-auto pr-1">
+                <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain pr-1 pb-4 [scrollbar-gutter:stable]">
                   {query.trim().length >= 2 ? (
                     <section className="space-y-2">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
@@ -257,49 +311,61 @@ export function InboxCreateSheet({
                       ) : searchHits.length === 0 ? (
                         <p className="text-[13px] text-muted-foreground">No matching users yet.</p>
                       ) : (
-                        <ul className="space-y-2">
-                          {searchHits.map((hit) => {
-                            const existing = contactsByPeerId.get(hit.id);
-                            return (
-                              <li key={hit.id} className="flex items-center gap-3 rounded-2xl border border-border/70 bg-card/50 px-3 py-3">
-                                <PresetAvatar id={hit.avatarUrl} size={44} />
-                                <div className="min-w-0 flex-1">
-                                  <p className="truncate text-[14px] font-semibold text-foreground">
-                                    {hit.nickname?.trim() || hit.username}
-                                  </p>
-                                  <p className="truncate text-[12px] text-muted-foreground">
-                                    @{hit.username}
-                                    {hit.email ? ` · ${hit.email}` : ""}
-                                  </p>
-                                  <p className="truncate text-[11px] text-muted-foreground/90">ID: {hit.id}</p>
-                                </div>
-                                {existing || hit.activeConnectionId ? (
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className="rounded-full"
-                                    onClick={() =>
-                                      router.push(`/connections/${existing?.connectionId || hit.activeConnectionId}?returnTo=%2Finbox`)
-                                    }
-                                  >
-                                    Open
-                                  </Button>
-                                ) : (
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    className="rounded-full"
-                                    disabled={busyPeerId === hit.id}
-                                    onClick={() => void addContact(hit)}
-                                  >
-                                    {busyPeerId === hit.id ? "Adding…" : "Add"}
-                                  </Button>
-                                )}
-                              </li>
-                            );
-                          })}
-                        </ul>
+                        <div className="space-y-0">
+                          {groupedSearchHits.map(({ key, rows }) => (
+                            <div key={key}>
+                              <ContactSectionHeader label={key} />
+                              <ul className="divide-y divide-border/50 rounded-lg border border-border/60 bg-card/30">
+                                {rows.map((hit) => {
+                                  const existing = contactsByPeerId.get(hit.id);
+                                  return (
+                                    <li
+                                      key={hit.id}
+                                      className="flex items-center gap-2.5 px-2.5 py-2"
+                                      title={`ID: ${hit.id}`}
+                                    >
+                                      <PresetAvatar id={hit.avatarUrl} size={34} className="shrink-0" />
+                                      <div className="min-w-0 flex-1 leading-tight">
+                                        <p className="truncate text-[13px] font-medium text-foreground">
+                                          {hit.nickname?.trim() || hit.username}
+                                        </p>
+                                        <p className="truncate text-[11px] text-muted-foreground">
+                                          @{hit.username}
+                                          {hit.email ? ` · ${hit.email}` : ""}
+                                        </p>
+                                      </div>
+                                      {existing || hit.activeConnectionId ? (
+                                        <Button
+                                          type="button"
+                                          variant="outline"
+                                          size="sm"
+                                          className="h-8 shrink-0 rounded-full px-3 text-[12px]"
+                                          onClick={() =>
+                                            router.push(
+                                              `/connections/${existing?.connectionId || hit.activeConnectionId}?returnTo=%2Finbox`,
+                                            )
+                                          }
+                                        >
+                                          Open
+                                        </Button>
+                                      ) : (
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          className="h-8 shrink-0 rounded-full px-3 text-[12px]"
+                                          disabled={busyPeerId === hit.id}
+                                          onClick={() => void addContact(hit)}
+                                        >
+                                          {busyPeerId === hit.id ? "Adding…" : "Add"}
+                                        </Button>
+                                      )}
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
                       )}
                     </section>
                   ) : null}
@@ -311,37 +377,48 @@ export function InboxCreateSheet({
                     {contacts.length === 0 ? (
                       <p className="text-[13px] text-muted-foreground">No contacts yet.</p>
                     ) : (
-                      <ul className="space-y-2">
-                        {contacts.map((contact) => (
-                          <li key={contact.connectionId} className="flex items-center gap-3 rounded-2xl border border-border/70 bg-card/50 px-3 py-3">
-                            <PresetAvatar id={contact.avatarUrl} size={44} />
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-[14px] font-semibold text-foreground">
-                                {contact.nickname?.trim() || contact.username}
-                              </p>
-                              <p className="truncate text-[12px] text-muted-foreground">@{contact.username}</p>
-                            </div>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="rounded-full"
-                              onClick={() => router.push(`/connections/${contact.connectionId}?returnTo=%2Finbox`)}
-                            >
-                              Chat
-                            </Button>
-                          </li>
+                      <div className="space-y-2">
+                        {groupedContacts.map(({ key, rows }) => (
+                          <div key={key}>
+                            <ContactSectionHeader label={key} />
+                            <ul className="divide-y divide-border/50 rounded-lg border border-border/60 bg-card/30">
+                              {rows.map((contact) => (
+                                <li key={contact.connectionId} className="flex items-center gap-2.5 px-2.5 py-2">
+                                  <PresetAvatar id={contact.avatarUrl} size={34} className="shrink-0" />
+                                  <div className="min-w-0 flex-1 leading-tight">
+                                    <p className="truncate text-[13px] font-medium text-foreground">
+                                      {contact.nickname?.trim() || contact.username}
+                                    </p>
+                                    <p className="truncate text-[11px] text-muted-foreground">@{contact.username}</p>
+                                  </div>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 shrink-0 rounded-full px-3 text-[12px]"
+                                    onClick={() =>
+                                      router.push(`/connections/${contact.connectionId}?returnTo=%2Finbox`)
+                                    }
+                                  >
+                                    Chat
+                                  </Button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     )}
                   </section>
                 </div>
 
-                {searchError ? <p className="text-[12px] text-destructive">{searchError}</p> : null}
+                {searchError ? (
+                  <p className="shrink-0 text-[12px] text-destructive">{searchError}</p>
+                ) : null}
               </div>
             ) : (
-              <div className="space-y-3">
-                <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
+              <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
+                <div className="shrink-0 rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
                   <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">Optional group name</p>
                   <Input
                     value={groupTitle}
@@ -352,7 +429,7 @@ export function InboxCreateSheet({
                   />
                 </div>
 
-                <div className="flex items-center justify-between rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
+                <div className="flex shrink-0 items-center justify-between rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
                   <div className="flex items-center gap-2">
                     <UsersRound className="h-4 w-4 text-muted-foreground" />
                     <p className="text-[13px] font-medium text-foreground">Select contacts</p>
@@ -360,56 +437,64 @@ export function InboxCreateSheet({
                   <p className="text-[12px] text-muted-foreground">{selectedIds.length} selected</p>
                 </div>
 
-                <div className="max-h-[42dvh] space-y-2 overflow-y-auto pr-1">
+                <div className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-y-contain pr-1 pb-4 [scrollbar-gutter:stable]">
                   {contacts.length === 0 ? (
                     <p className="text-[13px] text-muted-foreground">Add contacts first, then you can create a group.</p>
                   ) : (
-                    contacts.map((contact) => {
-                      const selected = selectedIds.includes(contact.peerId);
-                      return (
-                        <button
-                          key={contact.connectionId}
-                          type="button"
-                          onClick={() =>
-                            setSelectedIds((current) =>
-                              current.includes(contact.peerId)
-                                ? current.filter((id) => id !== contact.peerId)
-                                : [...current, contact.peerId],
-                            )
-                          }
-                          className={cn(
-                            "flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition",
-                            selected
-                              ? "border-primary/60 bg-primary/5"
-                              : "border-border/70 bg-card/50 hover:bg-muted/30",
-                          )}
-                        >
-                          <PresetAvatar id={contact.avatarUrl} size={44} />
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-[14px] font-semibold text-foreground">
-                              {contact.nickname?.trim() || contact.username}
-                            </p>
-                            <p className="truncate text-[12px] text-muted-foreground">@{contact.username}</p>
-                          </div>
-                          <span
-                            className={cn(
-                              "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border",
-                              selected
-                                ? "border-primary bg-primary text-primary-foreground"
-                                : "border-border bg-background text-transparent",
-                            )}
-                          >
-                            <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
-                          </span>
-                        </button>
-                      );
-                    })
+                    groupedContacts.map(({ key, rows }) => (
+                      <div key={key}>
+                        <ContactSectionHeader label={key} />
+                        <ul className="divide-y divide-border/50 rounded-lg border border-border/60 bg-card/30">
+                          {rows.map((contact) => {
+                            const selected = selectedIds.includes(contact.peerId);
+                            return (
+                              <li key={contact.connectionId}>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setSelectedIds((current) =>
+                                      current.includes(contact.peerId)
+                                        ? current.filter((id) => id !== contact.peerId)
+                                        : [...current, contact.peerId],
+                                    )
+                                  }
+                                  className={cn(
+                                    "flex w-full items-center gap-2.5 px-2.5 py-2 text-left transition",
+                                    selected ? "bg-primary/6" : "hover:bg-muted/25",
+                                  )}
+                                >
+                                  <PresetAvatar id={contact.avatarUrl} size={34} className="shrink-0" />
+                                  <div className="min-w-0 flex-1 leading-tight">
+                                    <p className="truncate text-[13px] font-medium text-foreground">
+                                      {contact.nickname?.trim() || contact.username}
+                                    </p>
+                                    <p className="truncate text-[11px] text-muted-foreground">@{contact.username}</p>
+                                  </div>
+                                  <span
+                                    className={cn(
+                                      "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
+                                      selected
+                                        ? "border-primary bg-primary text-primary-foreground"
+                                        : "border-border bg-background text-transparent",
+                                    )}
+                                  >
+                                    <Check className="h-3 w-3" strokeWidth={2.5} />
+                                  </span>
+                                </button>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    ))
                   )}
                 </div>
 
-                {groupError ? <p className="text-[12px] text-destructive">{groupError}</p> : null}
+                {groupError ? (
+                  <p className="shrink-0 text-[12px] text-destructive">{groupError}</p>
+                ) : null}
 
-                <div className="flex gap-2">
+                <div className="flex shrink-0 gap-2">
                   <Button type="button" variant="ghost" className="h-11 flex-1 rounded-xl font-medium" onClick={close}>
                     Cancel
                   </Button>
@@ -432,6 +517,20 @@ export function InboxCreateSheet({
         </div>
       </AppPushLayer>
     </>
+  );
+}
+
+function ContactSectionHeader({ label }: { label: string }) {
+  const latin = /^[A-Z]$/.test(label);
+  return (
+    <div
+      className={cn(
+        "sticky top-0 z-[1] -mx-0.5 border-b border-border/45 bg-background/95 px-2 py-1.5 text-[10px] font-semibold text-muted-foreground backdrop-blur-sm",
+        latin && "uppercase tracking-[0.14em]",
+      )}
+    >
+      {label}
+    </div>
   );
 }
 

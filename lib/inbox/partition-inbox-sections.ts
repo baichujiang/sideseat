@@ -1,5 +1,5 @@
 import type { InboxMerged } from "@/lib/queries/inbox-merge";
-import { isConnectionPinned } from "@/lib/queries/inbox-order";
+import { inboxMergedPinned } from "@/lib/inbox/inbox-merged-pinned";
 
 export function inboxRowKey(item: InboxMerged): string {
   return item.kind === "direct"
@@ -10,11 +10,7 @@ export function inboxRowKey(item: InboxMerged): string {
 }
 
 export function itemPinned(item: InboxMerged, userId: string): boolean {
-  return item.kind === "direct"
-    ? isConnectionPinned(item.connection, userId)
-    : item.kind === "course"
-      ? Boolean(item.userCourse.inboxPinnedAt)
-      : false;
+  return inboxMergedPinned(item, userId);
 }
 
 /**

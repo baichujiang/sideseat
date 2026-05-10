@@ -7,10 +7,8 @@ import {
   inboxDirectUnreadCounts,
   inboxGroupUnreadCounts,
 } from "@/lib/queries/inbox-unread-counts";
-import {
-  compareConnectionsForInbox,
-  isConnectionPinned,
-} from "@/lib/queries/inbox-order";
+import { inboxMergedPinned } from "@/lib/inbox/inbox-merged-pinned";
+import { compareConnectionsForInbox } from "@/lib/queries/inbox-order";
 
 type ConnectionInbox = Awaited<
   ReturnType<
@@ -68,6 +66,8 @@ export type InboxMerged =
       kind: "group";
       sortAt: Date;
       groupChat: GroupChatInbox;
+      /** Current viewer's membership — drives pin/hide like {@link UserCourse.inboxPinnedAt}. */
+      inboxPinnedAt: Date | null;
       last: GroupChatMessageWithSender | undefined;
       unreadCount: number;
     };
@@ -95,7 +95,7 @@ export async function getInboxUnreadTotal(userId: string): Promise<number> {
       select: { courseId: true },
     }),
     prisma.groupChatParticipant.findMany({
-      where: { userId },
+      where: { userId, inboxHiddenAt: null },
       select: { groupChatId: true },
     }),
   ]);
@@ -148,7 +148,7 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
       include: { course: true },
     }),
     prisma.groupChatParticipant.findMany({
-      where: { userId },
+      where: { userId, inboxHiddenAt: null },
       include: {
         groupChat: {
           include: {
@@ -185,8 +185,7 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
     ]);
 
   const courseIds = userCourses.map((uc) => uc.courseId);
-  const groupChats = groupParticipants.map((participant) => participant.groupChat);
-  const groupChatIds = groupChats.map((groupChat) => groupChat.id);
+  const groupChatIds = groupParticipants.map((participant) => participant.groupChat.id);
   const courseMessages =
     courseIds.length > 0
       ? await prisma.courseRoomMessage.findMany({
@@ -235,26 +234,17 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
         last: lastCourseMessageByCourseId.get(uc.courseId),
         unreadCount: courseUnread.get(uc.courseId) ?? 0,
     })),
-    ...groupChats.map((groupChat) => ({
+    ...groupParticipants.map((participant) => ({
       kind: "group" as const,
-      sortAt: groupChat.messages[0]?.createdAt ?? groupChat.updatedAt,
-      groupChat,
-      last: groupChat.messages[0],
-      unreadCount: groupUnread.get(groupChat.id) ?? 0,
+      sortAt: participant.groupChat.messages[0]?.createdAt ?? participant.groupChat.updatedAt,
+      groupChat: participant.groupChat,
+      inboxPinnedAt: participant.inboxPinnedAt,
+      last: participant.groupChat.messages[0],
+      unreadCount: groupUnread.get(participant.groupChat.id) ?? 0,
     })),
   ].sort((a, b) => {
-    const aPinned =
-      a.kind === "direct"
-        ? isConnectionPinned(a.connection, userId)
-        : a.kind === "course"
-          ? Boolean(a.userCourse.inboxPinnedAt)
-          : false;
-    const bPinned =
-      b.kind === "direct"
-        ? isConnectionPinned(b.connection, userId)
-        : b.kind === "course"
-          ? Boolean(b.userCourse.inboxPinnedAt)
-          : false;
+    const aPinned = inboxMergedPinned(a, userId);
+    const bPinned = inboxMergedPinned(b, userId);
 
     if (aPinned !== bPinned) {
       return aPinned ? -1 : 1;

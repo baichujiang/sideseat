@@ -8,14 +8,73 @@ import {
   categoryAccentColor,
   categoryBlockSurfaceStyle,
 } from "@/lib/calendar/category-visual";
-import { computeEventOverlapLayout } from "@/lib/calendar/event-overlap-layout";
+import {
+  computeEventOverlapLayout,
+  SCHEDULE_SHORT_OVERLAP_GLASS,
+} from "@/lib/calendar/event-overlap-layout";
 import {
   inferScheduleEventToneKey,
   SCHEDULE_EVENT_TONE_STYLES,
+  scheduleShortOverlapRailClass,
   scheduleVisualToneKey,
 } from "@/lib/schedule-event-card-tone";
 import { isLongOrAllDayTimedMinutes } from "@/lib/calendar/long-calendar-block";
 import { cn } from "@/lib/utils";
+
+const TIMELINE_LONG_PRESS_MS = 450;
+const TIMELINE_POINTER_SLOP_PX = 14;
+
+function attachTimelineTapOrLongPress(
+  e: React.PointerEvent,
+  onTap: () => void,
+  onLongPress: () => void,
+) {
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+  e.stopPropagation();
+  const pointerId = e.pointerId;
+  const x0 = e.clientX;
+  const y0 = e.clientY;
+  let longPressFired = false;
+  let timer: number | null = window.setTimeout(() => {
+    timer = null;
+    longPressFired = true;
+    onLongPress();
+  }, TIMELINE_LONG_PRESS_MS);
+
+  const clearTimer = () => {
+    if (timer != null) {
+      window.clearTimeout(timer);
+      timer = null;
+    }
+  };
+
+  const detach = () => {
+    document.removeEventListener("pointermove", onMove);
+    document.removeEventListener("pointerup", onUp);
+    document.removeEventListener("pointercancel", onUp);
+  };
+
+  const onMove = (ev: PointerEvent) => {
+    if (ev.pointerId !== pointerId) return;
+    if (Math.hypot(ev.clientX - x0, ev.clientY - y0) > TIMELINE_POINTER_SLOP_PX) {
+      clearTimer();
+      detach();
+    }
+  };
+
+  const onUp = (ev: PointerEvent) => {
+    if (ev.pointerId !== pointerId) return;
+    clearTimer();
+    detach();
+    if (!longPressFired) {
+      onTap();
+    }
+  };
+
+  document.addEventListener("pointermove", onMove);
+  document.addEventListener("pointerup", onUp);
+  document.addEventListener("pointercancel", onUp);
+}
 
 /**
  * A single item on a day timeline. Same shape as the old list view so the
@@ -36,6 +95,8 @@ export type DayTimelineItem = {
   repeatUntilISO?: string | null;
   eventParticipants?: Array<{ userId: string | null; name: string }>;
   courseId?: string | null;
+  /** Enrolled class: official course code (e.g. IN0001) for two-line card layout. */
+  courseCode?: string | null;
   /** Enrolled course grid chip (two letters / code prefix). */
   courseShortLabel?: string;
   /** Class schedule: plain course name (title may still be "code · name" for search). */
@@ -81,7 +142,7 @@ export function ScheduleDayTimeline({
   nowMinute,
   date,
   onCreateEvent,
-  onOpenItem,
+  onLongPressItem,
 }: {
   items: DayTimelineItem[];
   /** Whether the day being viewed is "today" — gates now-line + state styling. */
@@ -89,7 +150,8 @@ export function ScheduleDayTimeline({
   nowMinute: number;
   date: Date;
   onCreateEvent?: (start: Date, end: Date) => void;
-  onOpenItem?: (item: DayTimelineItem) => void;
+  /** Long-press (~450ms): calendar → edit sheet from parent; course → detail. Tap selects only. */
+  onLongPressItem?: (item: DayTimelineItem) => void;
 }) {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const holdTimerRef = useRef<number | null>(null);
@@ -184,10 +246,20 @@ export function ScheduleDayTimeline({
                 <button
                   key={`${item.kind}-${item.id}`}
                   type="button"
-                  onClick={() => {
+                  onPointerDown={(e) => {
                     if (item.id === "__draft-preview__") return;
-                    setSelectedItemId(item.id);
-                    onOpenItem?.(item);
+                    attachTimelineTapOrLongPress(
+                      e,
+                      () => setSelectedItemId(item.id),
+                      () => onLongPressItem?.(item),
+                    );
+                  }}
+                  onKeyDown={(ev) => {
+                    if (ev.key === "Enter" || ev.key === " ") {
+                      ev.preventDefault();
+                      if (item.id === "__draft-preview__") return;
+                      onLongPressItem?.(item);
+                    }
                   }}
                   className={cn(
                     "max-w-full truncate rounded-lg p-0 text-left text-[12px] font-semibold leading-snug transition",
@@ -344,10 +416,13 @@ export function ScheduleDayTimeline({
                 isToday={isToday}
                 nowMinute={nowMinute}
                 selected={selectedItemId === item.id}
-                onSelect={() => {
+                onTapSelect={() => {
                   if (item.id === "__draft-preview__") return;
                   setSelectedItemId(item.id);
-                  onOpenItem?.(item);
+                }}
+                onLongPress={() => {
+                  if (item.id === "__draft-preview__") return;
+                  onLongPressItem?.(item);
                 }}
               />
             ))}
@@ -371,7 +446,8 @@ function TimelineBlock({
   isToday,
   nowMinute,
   selected,
-  onSelect,
+  onTapSelect,
+  onLongPress,
 }: {
   item: DayTimelineItem;
   dayStart: number;
@@ -383,7 +459,8 @@ function TimelineBlock({
   isToday: boolean;
   nowMinute: number;
   selected: boolean;
-  onSelect: () => void;
+  onTapSelect: () => void;
+  onLongPress: () => void;
 }) {
   const top = ((item.startMinute - dayStart) / totalMinutes) * 100;
   const height = ((item.endMinute - item.startMinute) / totalMinutes) * 100;
@@ -408,10 +485,16 @@ function TimelineBlock({
   const isDraftNewTone = toneKey === "draftNew";
   const catHex = item.categoryColor?.trim();
   const useCategoryColor = item.source === "calendar" && Boolean(catHex);
+  const shortOverlapGlass = Boolean(hasShortOverlap && !selected);
   const toneClass = cn(
-    "absolute overflow-hidden rounded-2xl p-0 text-left transition",
-    !useCategoryColor && (selected ? tone.cardSelected : tone.card),
-    useCategoryColor && "shadow-sm",
+    "absolute rounded-md p-0 text-left transition",
+    selected ? "z-20 overflow-visible" : "z-[1] overflow-hidden",
+    !useCategoryColor &&
+      (selected ? tone.cardSelected : shortOverlapGlass ? SCHEDULE_SHORT_OVERLAP_GLASS : tone.card),
+    useCategoryColor &&
+      (shortOverlapGlass
+        ? "shadow-[0_8px_22px_-10px_rgba(15,23,42,0.2)] dark:shadow-[0_8px_26px_-12px_rgba(0,0,0,0.55)]"
+        : "shadow-sm"),
     state === "past" ? "opacity-55" : undefined,
     state === "ongoing"
       ? "ring-2 ring-[#E53935]/30 ring-offset-1 ring-offset-background dark:ring-red-400/35"
@@ -424,11 +507,13 @@ function TimelineBlock({
   const minHeightPct = Math.min(4, height);
   const effectiveHeight = Math.max(height, minHeightPct);
   const showTimeRow = effectiveHeight > 0;
-  const showLocationRow = effectiveHeight > 9 && item.location;
-  const showWithRow = effectiveHeight > 11 && item.withLabel;
+  const showLocationRow = Boolean(item.location) && (selected || effectiveHeight > 9);
+  const showWithRow = Boolean(item.withLabel) && (selected || effectiveHeight > 11);
+  const showNoteRow = Boolean(item.note?.trim()) && selected;
 
   const metaCls = cn(
-    "truncate text-xs",
+    "text-xs",
+    !selected && "truncate",
     useCategoryColor
       ? selected
         ? "text-white/85"
@@ -443,7 +528,9 @@ function TimelineBlock({
       {showTimeRow ? (
         <p
           className={cn(
-            "truncate text-left text-[12px] font-medium tabular-nums leading-none",
+            "text-left text-[12px] font-medium tabular-nums leading-none",
+            !selected && "truncate",
+            selected && "whitespace-normal",
             !useCategoryColor && (selected ? tone.accentColorSelected : tone.accentColor),
           )}
           style={
@@ -455,51 +542,102 @@ function TimelineBlock({
           {formatHM(item.startMinute)}
         </p>
       ) : null}
-      <div className="mt-0.5 flex min-h-0 items-center gap-1.5">
-        {item.source === "course" && item.courseShortLabel ? (
-          <span
+      {item.source === "course" && item.courseCode?.trim() ? (
+        <div className="mt-0.5 min-w-0 space-y-0.5">
+          <p
             className={cn(
-              "inline-flex h-[1.125rem] min-w-[1.35rem] shrink-0 items-center justify-center rounded-md border border-blue-700/30 bg-white px-1 text-[10px] font-bold leading-none tracking-tight text-blue-900 shadow-sm tabular-nums",
-              "dark:border-blue-400/40 dark:bg-blue-950/70 dark:text-blue-100",
-              selected && "border-white/50 bg-white/25 text-white shadow-none",
+              "text-left text-[12px] font-bold tabular-nums leading-tight text-classmates-blue dark:text-blue-200",
+              !selected && "truncate",
+              selected && "whitespace-normal break-words",
             )}
-            title="Course tag"
           >
-            {item.courseShortLabel}
-          </span>
-        ) : (
-          <Icon
+            {item.courseCode.trim()}
+          </p>
+          <p
             className={cn(
-              "h-3.5 w-3.5 shrink-0",
-              !useCategoryColor && (selected ? tone.accentColorSelected : tone.accentColor),
+              "text-left text-[13px] font-bold leading-snug",
+              !selected && "truncate",
+              selected && "whitespace-normal break-words",
+              !useCategoryColor && (selected ? tone.titleSelected : tone.title),
+            )}
+          >
+            {item.courseName?.trim() || item.title}
+          </p>
+        </div>
+      ) : (
+        <div className="mt-0.5 flex min-h-0 items-center gap-1.5">
+          {item.source === "course" && item.courseShortLabel ? (
+            <span
+              className={cn(
+                "inline-flex h-[1.125rem] min-w-[1.35rem] shrink-0 items-center justify-center rounded-md border border-blue-700/30 bg-white px-1 text-[10px] font-bold leading-none tracking-tight text-blue-900 shadow-sm tabular-nums",
+                "dark:border-blue-400/40 dark:bg-blue-950/70 dark:text-blue-100",
+                selected && "border-white/50 bg-white/25 text-white shadow-none",
+              )}
+              title="Course tag"
+            >
+              {item.courseShortLabel}
+            </span>
+          ) : (
+            <Icon
+              className={cn(
+                "h-3.5 w-3.5 shrink-0",
+                !useCategoryColor && (selected ? tone.accentColorSelected : tone.accentColor),
+              )}
+              style={
+                useCategoryColor && catHex
+                  ? { color: selected ? "#ffffff" : categoryAccentColor(catHex) }
+                  : undefined
+              }
+              strokeWidth={2.25}
+            />
+          )}
+          <p
+            className={cn(
+              "min-w-0 flex-1 text-left text-[13px] font-bold leading-snug",
+              !selected && "truncate",
+              selected && "whitespace-normal break-words",
+              !useCategoryColor && (selected ? tone.titleSelected : tone.title),
+              useCategoryColor &&
+                (selected ? "text-white" : shortOverlapGlass ? "" : "text-[#111827] dark:text-foreground"),
             )}
             style={
-              useCategoryColor && catHex
-                ? { color: selected ? "#ffffff" : categoryAccentColor(catHex) }
+              useCategoryColor && catHex && shortOverlapGlass && !selected
+                ? { color: categoryAccentColor(catHex) }
                 : undefined
             }
-            strokeWidth={2.25}
-          />
-        )}
-        <p
+          >
+            {item.title}
+          </p>
+        </div>
+      )}
+      {showLocationRow ? (
+        <div
           className={cn(
-            "min-w-0 flex-1 truncate text-left text-[13px] font-bold leading-snug",
-            !useCategoryColor && (selected ? tone.titleSelected : tone.title),
-            useCategoryColor && (selected ? "text-white" : "text-[#111827] dark:text-foreground"),
+            "mt-1 flex items-start gap-1",
+            metaCls,
+            !selected && "truncate",
+            selected && "whitespace-normal break-words",
           )}
         >
-          {item.source === "course" && item.courseName?.trim()
-            ? item.courseName.trim()
-            : item.title}
-        </p>
-      </div>
-      {showLocationRow ? (
-        <div className={cn("mt-1 flex items-center gap-1 truncate", metaCls)}>
-          <MapPin className="h-3 w-3 shrink-0 opacity-80" strokeWidth={2.25} />
-          <span className="truncate">{item.location}</span>
+          <MapPin className="mt-0.5 h-3 w-3 shrink-0 opacity-80" strokeWidth={2.25} />
+          <span className={cn(!selected && "truncate")}>{item.location}</span>
         </div>
       ) : null}
-      {showWithRow ? <p className={cn("mt-0.5 truncate", metaCls)}>{item.withLabel}</p> : null}
+      {showWithRow ? (
+        <p
+          className={cn(
+            "mt-0.5",
+            metaCls,
+            !selected && "truncate",
+            selected && "whitespace-normal break-words",
+          )}
+        >
+          {item.withLabel}
+        </p>
+      ) : null}
+      {showNoteRow ? (
+        <p className={cn("mt-0.5 whitespace-normal break-words", metaCls)}>{item.note!.trim()}</p>
+      ) : null}
     </>
   );
 
@@ -512,11 +650,16 @@ function TimelineBlock({
     height: `${effectiveHeight}%`,
     left: `calc(${columnIndex * columnWidth}% + ${stackInsetPx}px)`,
     width: `calc(${widthPct}% - ${stackInsetPx}px)`,
-    zIndex: selected ? 4 : columnIndex * 10 + stackDepth + 1,
+    zIndex: selected ? 20 : columnIndex * 10 + stackDepth + 1,
   };
   const surfaceStyle =
     useCategoryColor && catHex
-      ? { ...positionStyle, ...categoryBlockSurfaceStyle(catHex, selected) }
+      ? {
+          ...positionStyle,
+          ...categoryBlockSurfaceStyle(catHex, selected, {
+            shortOverlap: shortOverlapGlass,
+          }),
+        }
       : positionStyle;
   const title = `${item.title} · ${formatHM(item.startMinute)}`;
 
@@ -525,26 +668,41 @@ function TimelineBlock({
       ? { backgroundColor: categoryAccentColor(catHex) }
       : undefined;
   const railClass = cn(
-    "w-1 shrink-0 self-stretch rounded-l-2xl",
-    !useCategoryColor && (selected ? tone.railSelected : tone.rail),
+    shortOverlapGlass
+      ? "w-[7px] min-w-[7px] shrink-0 self-stretch rounded-full my-1 ml-1 mr-px"
+      : "w-1 min-w-[4px] shrink-0 self-stretch rounded-l-md",
+    !useCategoryColor &&
+      (selected
+        ? tone.railSelected
+        : shortOverlapGlass
+          ? scheduleShortOverlapRailClass(tone)
+          : tone.rail),
   );
 
   return (
     <button
       type="button"
-      className={cn(
-        toneClass,
-        "z-[1]",
-        hasShortOverlap && !selected && "shadow-[0_12px_28px_-18px_rgba(15,23,42,0.45)]",
-      )}
+      className={toneClass}
       style={surfaceStyle}
       title={title}
-      onClick={(e) => {
-        e.stopPropagation();
-        onSelect();
+      onPointerDown={(e) => {
+        if (item.id === "__draft-preview__") return;
+        attachTimelineTapOrLongPress(e, onTapSelect, onLongPress);
+      }}
+      onKeyDown={(ev) => {
+        if (ev.key === "Enter" || ev.key === " ") {
+          ev.preventDefault();
+          if (item.id === "__draft-preview__") return;
+          onLongPress();
+        }
       }}
     >
-      <div className="flex h-full min-h-0 w-full flex-row overflow-hidden rounded-[inherit]">
+      <div
+        className={cn(
+          "flex h-full min-h-0 w-full flex-row rounded-[inherit]",
+          selected ? "overflow-visible" : "overflow-hidden",
+        )}
+      >
         <div aria-hidden className={railClass} style={railStyle} />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col items-start justify-start px-2 py-1.5">
           {inner}

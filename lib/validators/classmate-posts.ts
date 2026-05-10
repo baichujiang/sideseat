@@ -1,3 +1,4 @@
+import { ClassmatePostInsightKind } from "@prisma/client";
 import { z } from "zod";
 
 /** Keep in sync with `ClassmatePostCategory` in prisma/schema.prisma. */
@@ -34,3 +35,9 @@ export const createClassmatePostSchema = z
   );
 
 export type CreateClassmatePostInput = z.infer<typeof createClassmatePostSchema>;
+
+export const classmatePostInsightBodySchema = z.object({
+  kind: z.nativeEnum(ClassmatePostInsightKind),
+});
+
+export type ClassmatePostInsightBody = z.infer<typeof classmatePostInsightBodySchema>;

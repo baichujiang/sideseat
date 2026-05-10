@@ -208,6 +208,12 @@ enum ClassmatePostStatus {
   EXPIRED
 }
 
+/// Author-only analytics: one row per (post, viewer, kind); use createMany skipDuplicates.
+enum ClassmatePostInsightKind {
+  DETAIL_VIEW
+  MESSAGE_INTENT
+}
+
 enum ProductFeedbackTopic {
   BUG
   IDEA
@@ -279,6 +285,7 @@ model User {
   calendarEntryCompanionships  CalendarEntryCompanion[]
   userCalendarCategories       UserCalendarCategory[]
   classmatePosts               ClassmatePost[]
+  classmatePostInsights        ClassmatePostInsight[]
   userLanguages                UserLanguage[]
   groupChatsCreated            GroupChat[]               @relation("GroupChatCreator")
   groupChatParticipants        GroupChatParticipant[]
@@ -335,10 +342,24 @@ model ClassmatePost {
   updatedAt  DateTime              @updatedAt
   user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   courses    ClassmatePostCourse[]
+  insights   ClassmatePostInsight[]
 
   @@index([category, status, city, createdAt])
   @@index([userId, category, status])
   @@index([expiresAt])
+}
+
+model ClassmatePostInsight {
+  id        String                   @id @default(cuid())
+  postId    String
+  actorId   String
+  kind      ClassmatePostInsightKind
+  createdAt DateTime                 @default(now())
+  post      ClassmatePost            @relation(fields: [postId], references: [id], onDelete: Cascade)
+  actor     User                     @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, actorId, kind])
+  @@index([postId, kind])
 }
 
 /// Courses attached to a SHARED_COURSES post — "I'm looking for classmates in these courses".
@@ -656,6 +677,10 @@ model GroupChatParticipant {
   userId      String
   joinedAt    DateTime    @default(now())
   lastReadAt  DateTime?
+  /// When set, this group is sorted with pinned DMs and course chats in Contacts.
+  inboxPinnedAt DateTime?
+  /// When set, the group row is hidden from Contacts (membership unchanged). Clear via group chat or restore action.
+  inboxHiddenAt DateTime?
   groupChat   GroupChat   @relation(fields: [groupChatId], references: [id], onDelete: Cascade)
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 

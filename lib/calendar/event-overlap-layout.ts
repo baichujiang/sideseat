@@ -11,7 +11,14 @@ export type EventOverlapLayout = {
   hasShortOverlap: boolean;
 };
 
-const STRONG_OVERLAP_MINUTES = 30;
+export const STRONG_OVERLAP_MINUTES = 30;
+
+/**
+ * When overlap ≤ {@link STRONG_OVERLAP_MINUTES}, cards stack in one column — use glass so the rear block stays visible.
+ * Apply after tone `card` / category fill so tailwind-merge replaces opaque backgrounds.
+ */
+export const SCHEDULE_SHORT_OVERLAP_GLASS =
+  "border-black/12 bg-white/38 backdrop-blur-md backdrop-saturate-150 shadow-[0_8px_22px_-10px_rgba(15,23,42,0.2)] dark:border-white/14 dark:bg-zinc-950/44 dark:shadow-[0_8px_26px_-12px_rgba(0,0,0,0.55)]";
 
 function overlapMinutes(a: TimeboxedItem, b: TimeboxedItem) {
   return Math.max(0, Math.min(a.endMinute, b.endMinute) - Math.max(a.startMinute, b.startMinute));

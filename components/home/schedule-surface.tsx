@@ -50,6 +50,40 @@ import {
 import { courseCalendarShortLabel } from "@/lib/calendar/course-calendar-short-label";
 import { cn } from "@/lib/utils";
 
+function weekBlockToDayTimelineItem(block: WeekCalendarBlock): DayTimelineItem {
+  return {
+    id:
+      block.kind === "study"
+        ? block.courseId.replace(/^study-/, "")
+        : `${block.courseId}-${block.weekday}-${block.startMinute}`,
+    kind: block.kind === "study" ? "study" : "class",
+    source: block.source,
+    startMinute: block.startMinute,
+    endMinute: block.endMinute,
+    title: block.courseCode ? `${block.courseCode} · ${block.courseName}` : block.courseName,
+    location: block.location,
+    withLabel: block.withLabel ?? null,
+    note: block.note ?? null,
+    repeatLabel: block.repeatLabel ?? "No",
+    repeatRule: block.repeatRule ?? "NONE",
+    repeatUntilISO: block.repeatUntilISO ?? null,
+    eventParticipants: block.eventParticipants ?? [],
+    courseId: block.source === "course" ? block.courseId : null,
+    courseCode: block.source === "course" ? block.courseCode : null,
+    courseName: block.source === "course" ? block.courseName : null,
+    courseShortLabel:
+      block.source === "course"
+        ? courseCalendarShortLabel({
+            courseCode: block.courseCode,
+            courseName: block.courseName,
+          }) ?? undefined
+        : undefined,
+    categoryId: block.categoryId ?? null,
+    categoryName: block.categoryName ?? null,
+    categoryColor: block.categoryColor ?? null,
+  };
+}
+
 type ViewKind = "day" | "week" | "month";
 
 /** Recurring course block (weekday-indexed). */
@@ -425,6 +459,7 @@ export function ScheduleSurface({
         repeatUntilISO: null,
         eventParticipants: [],
         courseId: b.courseId,
+        courseCode: b.courseCode,
         courseName: b.courseName,
         courseShortLabel: courseCalendarShortLabel({
           courseCode: b.courseCode,
@@ -537,33 +572,47 @@ export function ScheduleSurface({
     });
   };
 
-  function handleWeekOpenItem(item: WeekCalendarBlock, occurrenceDate: Date) {
+  function openEditFromTimelineItem(item: DayTimelineItem, date: Date) {
+    if (item.id === "__draft-preview__") return;
+    if (item.source !== "calendar") {
+      openDetailFromTimelineItem(item, date);
+      return;
+    }
+    const start = new Date(date);
+    start.setHours(0, item.startMinute, 0, 0);
+    const end = new Date(date);
+    end.setHours(0, item.endMinute, 0, 0);
+    const detail: ScheduleDetailItem = {
+      id: item.id,
+      source: "calendar",
+      title: item.title,
+      startISO: start.toISOString(),
+      endISO: end.toISOString(),
+      location: item.location,
+      note: item.note ?? null,
+      repeatLabel: item.repeatLabel ?? "No",
+      repeatRule: item.repeatRule ?? "NONE",
+      repeatUntilISO: item.repeatUntilISO ?? null,
+      eventParticipants: item.eventParticipants ?? [],
+      categoryId: item.categoryId ?? null,
+      categoryName: item.categoryName ?? null,
+      categoryColor: item.categoryColor ?? null,
+    };
+    setInviteFlow(false);
+    setEditingItem(detail);
+    setDraftEventStart(format(start, "yyyy-MM-dd'T'HH:mm"));
+    setDraftEventEnd(format(end, "yyyy-MM-dd'T'HH:mm"));
+    setSelectedDate(date);
+    setDetailItem(null);
+    setAdding(true);
+  }
+
+  /** Long-press on week grid: calendar → edit sheet; course → read-only detail. */
+  function handleWeekLongPress(item: WeekCalendarBlock, occurrenceDate: Date) {
     if (item.courseId === "__draft-preview__") return;
-    openDetailFromTimelineItem(
-      {
-        id:
-          item.kind === "study"
-            ? item.courseId.replace(/^study-/, "")
-            : `${item.courseId}-${item.weekday}-${item.startMinute}`,
-        kind: item.kind === "study" ? "study" : "class",
-        source: item.source,
-        startMinute: item.startMinute,
-        endMinute: item.endMinute,
-        title: item.courseCode ? `${item.courseCode} · ${item.courseName}` : item.courseName,
-        location: item.location,
-        withLabel: item.withLabel ?? null,
-        note: item.note ?? null,
-        repeatLabel: item.repeatLabel ?? "No",
-        repeatRule: item.repeatRule ?? "NONE",
-        repeatUntilISO: item.repeatUntilISO ?? null,
-        eventParticipants: item.eventParticipants ?? [],
-        courseId: item.source === "course" ? item.courseId : null,
-        categoryId: item.categoryId ?? null,
-        categoryName: item.categoryName ?? null,
-        categoryColor: item.categoryColor ?? null,
-      },
-      occurrenceDate,
-    );
+    const ti = weekBlockToDayTimelineItem(item);
+    if (ti.source === "calendar") openEditFromTimelineItem(ti, occurrenceDate);
+    else openDetailFromTimelineItem(ti, occurrenceDate);
   }
 
   // Week view: classes repeat every week, so we can show them on any
@@ -720,8 +769,11 @@ export function ScheduleSurface({
     setSelectedDate((prev) => {
       if (view === "day") return addDays(prev, direction);
       if (view === "week") {
-        setWeekHorizontalMode("workweek");
-        return addDays(prev, direction * 7);
+        const next = addDays(prev, direction * 7);
+        // Default week grid only shows 5 columns wide; `include-anchor` scrolls so Sat/Sun stay in view.
+        // Never force workweek here — doing so hid Sunday whenever the user stepped weeks on a weekend.
+        setWeekHorizontalMode(isWeekendDay(next) ? "include-anchor" : "workweek");
+        return next;
       }
       return addMonths(prev, direction);
     });
@@ -834,7 +886,7 @@ export function ScheduleSurface({
     focusDate: selectedDate,
     today: now,
     onCreateEvent: openEventDraft,
-    onOpenItem: handleWeekOpenItem,
+    onOpenItem: handleWeekLongPress,
     onPatchCalendarEventTimes: patchCalendarEventTimes,
   };
 
@@ -872,7 +924,7 @@ export function ScheduleSurface({
         onClose={() => setCategoryManagerOpen(false)}
       />
 
-      <div className="space-y-1.5">
+      <div className="relative z-[5] space-y-1.5">
         <input
           ref={icsImportInputRef}
           type="file"
@@ -927,7 +979,7 @@ export function ScheduleSurface({
                   {icsMenuOpen ? (
                     <div
                       role="menu"
-                      className="absolute right-0 top-[calc(100%+0.35rem)] z-30 min-w-[10.5rem] overflow-hidden rounded-2xl border border-border/70 bg-popover py-1 text-popover-foreground shadow-lg"
+                      className="absolute right-0 top-[calc(100%+0.35rem)] z-50 min-w-[10.5rem] overflow-hidden rounded-2xl border border-border/70 bg-popover py-1 text-popover-foreground shadow-lg"
                     >
                       <button
                         type="button"
@@ -1008,7 +1060,7 @@ export function ScheduleSurface({
         </div>
       </div>
 
-      <div className="relative">
+      <div className="relative z-0">
         {view === "day" ? (
           <ScheduleDayTimeline
             items={dayItems}
@@ -1016,9 +1068,10 @@ export function ScheduleSurface({
             nowMinute={nowMinute}
             date={selectedDate}
             onCreateEvent={openEventDraft}
-            onOpenItem={(item) => {
+            onLongPressItem={(item) => {
               if (item.id === "__draft-preview__") return;
-              openDetailFromTimelineItem(item, selectedDate);
+              if (item.source === "calendar") openEditFromTimelineItem(item, selectedDate);
+              else openDetailFromTimelineItem(item, selectedDate);
             }}
           />
         ) : null}
@@ -1063,9 +1116,10 @@ export function ScheduleSurface({
             />
             <ScheduleDayEventList
               items={dayItems}
-              onOpenItem={(item) => {
+              onLongPressItem={(item) => {
                 if (item.id === "__draft-preview__") return;
-                openDetailFromTimelineItem(item, selectedDate);
+                if (item.source === "calendar") openEditFromTimelineItem(item, selectedDate);
+                else openDetailFromTimelineItem(item, selectedDate);
               }}
             />
           </div>

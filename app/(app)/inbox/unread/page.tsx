@@ -72,8 +72,8 @@ export default async function InboxUnreadPage() {
 
       {!hasListContent ? (
         <EmptyState
-          title="You're all caught up"
-          description="No new messages or pending plan invites right now."
+          title="No unread threads"
+          description="This list only shows conversations with unread messages and plan invites that need your reply. When there's nothing waiting, it stays empty. Open Chats to browse every thread."
         />
       ) : (
         <div className="space-y-4">

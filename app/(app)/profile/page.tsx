@@ -10,6 +10,7 @@ import { StudentVerificationForm } from "@/components/forms/student-verification
 import { MePageInstallCard } from "@/components/pwa/me-page-install-card";
 import { ProfileIdentitySheets } from "@/components/profile/profile-identity-sheets";
 import { MePageSection } from "@/components/profile/me-page-section";
+import { ContactRemarkEditor } from "@/components/chat/contact-remark-editor";
 import { FeedbackFormCard } from "@/components/profile/feedback-form-card";
 import { TipSupportCard } from "@/components/profile/tip-support-card";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,9 @@ import { isConfiguredAdmin } from "@/lib/constants/app";
 import { DEGREE_LEVEL_LABELS } from "@/lib/constants/majors";
 import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
 import { profileLanguagesFormDefault } from "@/lib/constants/languages";
+import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
 import { prisma } from "@/lib/db/prisma";
+import { findOrCreateSelfNotesConnection } from "@/lib/queries/self-notes-connection";
 import { cn } from "@/lib/utils";
 function MeDestRow({
   href,
@@ -136,6 +139,19 @@ export default async function ProfilePage({
   const blockedCount = await prisma.block.count({ where: { blockerId: user.id } });
   const isAdmin = isConfiguredAdmin(user);
 
+  const { connectionId: selfNotesConnectionId } = await findOrCreateSelfNotesConnection(user.id);
+  const selfNotesConnection = await prisma.connection.findUnique({
+    where: { id: selfNotesConnectionId },
+    select: {
+      userAId: true,
+      userBId: true,
+      contactRemarkByA: true,
+      contactRemarkByB: true,
+    },
+  });
+  const selfNotesRemark =
+    selfNotesConnection != null ? contactRemarkForViewer(selfNotesConnection, user.id) : null;
+
   const profileForSheet = await prisma.user.findUnique({
     where: { id: user.id },
     include: { userLanguages: true },
@@ -222,6 +238,18 @@ export default async function ProfilePage({
             initialAvatarUrl={user.avatarUrl}
             initialBio={user.bio}
             initialNickname={user.nickname}
+          />
+        </MePageSection>
+
+        <MePageSection
+          id="me-self-notes-chat-heading"
+          title="Personal notes chat"
+          description="Optional title for your private thread — it appears in Chats and at the top of that conversation."
+        >
+          <ContactRemarkEditor
+            connectionId={selfNotesConnectionId}
+            initialRemark={selfNotesRemark}
+            isSelfNotes
           />
         </MePageSection>
 

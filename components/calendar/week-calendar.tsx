@@ -4,14 +4,17 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 
 import {
   SCHEDULE_EVENT_TONE_STYLES,
+  scheduleShortOverlapRailClass,
   scheduleVisualToneKey,
 } from "@/lib/schedule-event-card-tone";
 import {
   categoryAccentColor,
   categoryBlockSurfaceStyle,
 } from "@/lib/calendar/category-visual";
-import { courseCalendarShortLabel } from "@/lib/calendar/course-calendar-short-label";
-import { computeEventOverlapLayout } from "@/lib/calendar/event-overlap-layout";
+import {
+  computeEventOverlapLayout,
+  SCHEDULE_SHORT_OVERLAP_GLASS,
+} from "@/lib/calendar/event-overlap-layout";
 import { cn } from "@/lib/utils";
 
 export type WeekCalendarBlock = {
@@ -60,6 +63,32 @@ const WEEK_COL_DIVIDER = "border-[#F3EFE8] dark:border-white/[0.07]";
 const VISUAL_PADDING_MINUTES = 30;
 const FULL_DAY_MINUTES = 24 * 60;
 const WEEK_HEADER_HEIGHT_PX = 32;
+
+/**
+ * Week grid stacking (low → high). Prevents events / drag shadows from painting over sticky rails or headers.
+ *
+ * - Sticky week header band sits above all day-body content (vertical scroll).
+ * - Left time rails sit above events in the day grid (horizontal scroll) but below the header band.
+ * - All event z-index values stay below `Z_TIME_RAIL_BODY` so they cannot cover the rails.
+ */
+const Z_DAY_CREATE_HIT = 0;
+const Z_DAY_HOUR_LINES = 1;
+const Z_DAY_NOW_LINE_SPAN = 2;
+const Z_EVENT_CARD_BASE = 3;
+const Z_EVENT_CARD_SELECTED = 8;
+/** Dragging + resize — must stay < Z_TIME_RAIL_BODY. */
+const Z_EVENT_CARD_DRAGGING = 35;
+const Z_EVENT_DRAG_INNER = 20;
+const Z_EVENT_RESIZE_HANDLE = 38;
+const Z_DAY_HEADER_CELL = 10;
+const Z_WEEK_HEADER_STICKY = 50;
+/** "Time" corner only — above day-of-week headers in the same sticky row when panning horizontally. */
+const Z_TIME_RAIL_HEADER = 55;
+/** Main + all-day left rails — above every card in the scrollable grid. */
+const Z_TIME_RAIL_BODY = 45;
+/** Now pill / tick inside the left rail only (below rail chrome). */
+const Z_TIME_AXIS_INNER = 1;
+
 const LONG_PRESS_MS = 450;
 const POINTER_SLOP_PX = 14;
 const SNAP_MINUTES = 15;
@@ -184,6 +213,7 @@ export function WeekCalendar({
   focusDate: Date;
   today?: Date;
   onCreateEvent?: (start: Date, end: Date) => void;
+  /** Long-press (~450ms): calendar → edit flow from parent; course → detail. Tap selects only. */
   onOpenItem?: (item: WeekCalendarBlock, occurrenceDate: Date) => void;
   /** Long-press drag / resize calendar events (PATCH start/end only). */
   onPatchCalendarEventTimes?: (args: { eventId: string; startAt: Date; endAt: Date }) => Promise<boolean>;
@@ -381,9 +411,11 @@ export function WeekCalendar({
     }),
   );
 
+  /** Width available for day columns in the scrollport (sticky time axis is not part of the day strip). */
+  const dayStripViewportPx = Math.max(frameWidth - TIME_COLUMN_PX, 1);
   const dayColumnWidth = useMemo(
-    () => Math.max(frameWidth / VISIBLE_WEEK_DAYS, 56),
-    [frameWidth, VISIBLE_WEEK_DAYS],
+    () => Math.max(dayStripViewportPx / VISIBLE_WEEK_DAYS, 56),
+    [dayStripViewportPx, VISIBLE_WEEK_DAYS],
   );
   const dayTrackWidth = dayColumnWidth * visibleDays.length;
   const gridTemplateColumns = `repeat(${visibleDays.length}, minmax(${dayColumnWidth}px, ${dayColumnWidth}px))`;
@@ -453,11 +485,73 @@ export function WeekCalendar({
     return { startAt, endAt };
   }
 
+  function attachTapSelectLongOpen(
+    e: React.PointerEvent,
+    block: WeekCalendarBlock,
+    occurrenceDate: Date,
+    blockKey: string,
+  ) {
+    if (block.courseId === "__draft-preview__") return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    e.stopPropagation();
+    const pointerId = e.pointerId;
+    const x0 = e.clientX;
+    const y0 = e.clientY;
+    let longPressFired = false;
+    let timer: number | null = window.setTimeout(() => {
+      timer = null;
+      if (!onOpenItem) return;
+      longPressFired = true;
+      suppressOpenClickRef.current = true;
+      window.setTimeout(() => {
+        suppressOpenClickRef.current = false;
+      }, 300);
+      onOpenItem(block, occurrenceDate);
+    }, LONG_PRESS_MS);
+
+    const clearTimer = () => {
+      if (timer != null) {
+        window.clearTimeout(timer);
+        timer = null;
+      }
+    };
+
+    const detach = () => {
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("pointercancel", onUp);
+    };
+
+    const onMove = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
+      if (Math.hypot(ev.clientX - x0, ev.clientY - y0) > POINTER_SLOP_PX) {
+        clearTimer();
+        detach();
+      }
+    };
+
+    const onUp = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
+      clearTimer();
+      detach();
+      if (!longPressFired) {
+        setSelectedBlockKey(blockKey);
+      }
+    };
+
+    document.addEventListener("pointermove", onMove);
+    document.addEventListener("pointerup", onUp);
+    document.addEventListener("pointercancel", onUp);
+  }
+
   function startCalendarPointerSession(
     e: React.PointerEvent,
     block: WeekCalendarBlock,
     mode: "move" | "resize-start" | "resize-end",
     fromWeekday: Weekday,
+    occurrenceDate: Date,
+    blockInteractionKey: string,
+    moveFromSelected: boolean,
   ) {
     if (!onPatchCalendarEventTimes || !block.calendarEntryId) return;
     if (block.courseId === "__draft-preview__") return;
@@ -465,9 +559,6 @@ export function WeekCalendar({
 
     const immediateActivate = mode === "resize-start" || mode === "resize-end";
 
-    // Only preventDefault for resize (deliberate action).
-    // For move: do NOT preventDefault — it would suppress click on WebKit,
-    // breaking "tap to open edit". We use suppressOpenClickRef instead.
     if (immediateActivate) {
       e.preventDefault();
     }
@@ -493,14 +584,21 @@ export function WeekCalendar({
 
     let activatedForDrag = immediateActivate;
     let longPressTimer: number | null = null;
+    let longPressOpened = false;
     let didMove = false;
 
-    const preventScroll = (ev: TouchEvent) => { ev.preventDefault(); };
+    const preventScroll = (ev: TouchEvent) => {
+      ev.preventDefault();
+    };
 
     if (immediateActivate) {
       lockBrowserTextSelectionForCalendarDrag();
       window.getSelection()?.removeAllRanges();
-      try { captureEl.setPointerCapture(pointerId); } catch { /* ignore */ }
+      try {
+        captureEl.setPointerCapture(pointerId);
+      } catch {
+        /* ignore */
+      }
       document.addEventListener("touchmove", preventScroll, { passive: false });
       setDragOverride({
         eventId,
@@ -508,22 +606,17 @@ export function WeekCalendar({
         startMinute: curStart,
         endMinute: curEnd,
       });
-    } else {
+    } else if (mode === "move" && moveFromSelected) {
+      /* Drag starts after pointer slop once the card is already selected. */
+    } else if (mode === "move" && onOpenItem) {
       longPressTimer = window.setTimeout(() => {
         longPressTimer = null;
-        activatedForDrag = true;
-        // Suppress the click that would fire on pointerup so edit window doesn't open
+        longPressOpened = true;
         suppressOpenClickRef.current = true;
-        lockBrowserTextSelectionForCalendarDrag();
-        window.getSelection()?.removeAllRanges();
-        try { captureEl.setPointerCapture(pointerId); } catch { /* ignore */ }
-        document.addEventListener("touchmove", preventScroll, { passive: false });
-        setDragOverride({
-          eventId,
-          weekday: curWeekday,
-          startMinute: curStart,
-          endMinute: curEnd,
-        });
+        window.setTimeout(() => {
+          suppressOpenClickRef.current = false;
+        }, 300);
+        onOpenItem(block, occurrenceDate);
       }, LONG_PRESS_MS);
     }
 
@@ -545,10 +638,27 @@ export function WeekCalendar({
     const onDocMove = (ev: PointerEvent) => {
       if (ev.pointerId !== pointerId) return;
       if (!activatedForDrag) {
-        if (
-          longPressTimer != null &&
-          Math.hypot(ev.clientX - x0, ev.clientY - y0) > POINTER_SLOP_PX
-        ) {
+        const pastSlop = Math.hypot(ev.clientX - x0, ev.clientY - y0) > POINTER_SLOP_PX;
+        if (mode === "move" && moveFromSelected && pastSlop) {
+          activatedForDrag = true;
+          didMove = true;
+          lockBrowserTextSelectionForCalendarDrag();
+          window.getSelection()?.removeAllRanges();
+          try {
+            captureEl.setPointerCapture(pointerId);
+          } catch {
+            /* ignore */
+          }
+          document.addEventListener("touchmove", preventScroll, { passive: false });
+          setDragOverride({
+            eventId,
+            weekday: curWeekday,
+            startMinute: curStart,
+            endMinute: curEnd,
+          });
+          return;
+        }
+        if (longPressTimer != null && pastSlop) {
           clearLongPress();
           detach();
         }
@@ -584,18 +694,19 @@ export function WeekCalendar({
       clearLongPress();
       detach();
 
-      // Quick tap (no drag activated): let click fire naturally → opens edit
-      if (!activatedForDrag) return;
+      if (!activatedForDrag) {
+        if (mode === "move" && !moveFromSelected && !longPressOpened) {
+          setSelectedBlockKey(blockInteractionKey);
+        }
+        return;
+      }
 
-      // Long-press activated but no movement: just select the card, suppress click
       if (!didMove && mode === "move") {
         setDragOverride(null);
-        const blockKey = block.calendarEntryId
-          ? `cal-${block.calendarEntryId}`
-          : `${block.courseId}-${block.startMinute}-${block.endMinute}`;
-        setSelectedBlockKey(blockKey);
         suppressOpenClickRef.current = true;
-        window.setTimeout(() => { suppressOpenClickRef.current = false; }, 300);
+        window.setTimeout(() => {
+          suppressOpenClickRef.current = false;
+        }, 300);
         return;
       }
       try {
@@ -630,9 +741,10 @@ export function WeekCalendar({
         endMinute: snapEnd,
       });
 
-      // Suppress click synchronously so the edit window doesn't open after drag
       suppressOpenClickRef.current = true;
-      window.setTimeout(() => { suppressOpenClickRef.current = false; }, 300);
+      window.setTimeout(() => {
+        suppressOpenClickRef.current = false;
+      }, 300);
 
       void (async () => {
         const patch = onPatchCalendarEventTimes;
@@ -691,15 +803,19 @@ export function WeekCalendar({
         onPointerMove={onScrollAxisPointerMove}
       >
         <div style={{ width: trackWidthPx }}>
-          <div className="sticky top-0 z-30 flex shrink-0">
+          <div
+            className="sticky top-0 flex shrink-0"
+            style={{ zIndex: Z_WEEK_HEADER_STICKY }}
+          >
             <div
               className={cn(
-                "sticky left-0 z-40 box-border flex shrink-0 cursor-default items-center justify-end border-b border-r bg-[#FAF9F6] px-0 py-0 pl-0 pr-0.5 font-semibold uppercase tracking-wide text-[#8A94A6]",
+                "sticky left-0 box-border flex shrink-0 cursor-default items-center justify-end border-b border-r bg-[#FAF9F6] px-0 py-0 pl-0 pr-0.5 font-semibold uppercase tracking-wide text-[#8A94A6]",
                 cfg.axisTimeClass,
                 WEEK_GRID_LINE,
                 "dark:bg-muted/25 dark:text-muted-foreground",
               )}
               style={{
+                zIndex: Z_TIME_RAIL_HEADER,
                 width: TIME_COLUMN_PX,
                 minWidth: TIME_COLUMN_PX,
                 height: `${WEEK_HEADER_HEIGHT_PX}px`,
@@ -710,8 +826,9 @@ export function WeekCalendar({
               Time
             </div>
             <div
-              className={cn("grid cursor-default box-border border-b bg-white dark:bg-card", WEEK_GRID_LINE)}
+              className={cn("relative grid cursor-default box-border border-b bg-white dark:bg-card", WEEK_GRID_LINE)}
               style={{
+                zIndex: Z_DAY_HEADER_CELL,
                 width: dayTrackWidth,
                 gridTemplateColumns,
                 height: `${WEEK_HEADER_HEIGHT_PX}px`,
@@ -776,11 +893,12 @@ export function WeekCalendar({
             <div className="flex shrink-0 border-b border-[#F0ECE6] bg-[#FAFAF8] dark:border-white/[0.08] dark:bg-muted/25">
               <div
                 className={cn(
-                  "sticky left-0 z-20 box-border flex shrink-0 items-start justify-end border-r bg-[#FAFAF8] px-1 py-2 pt-2.5 text-right",
+                  "sticky left-0 box-border flex shrink-0 items-start justify-end border-r bg-[#FAFAF8] px-1 py-2 pt-2.5 text-right",
                   WEEK_GRID_LINE,
                   "dark:bg-muted/25",
                 )}
                 style={{
+                  zIndex: Z_TIME_RAIL_BODY,
                   width: TIME_COLUMN_PX,
                   minWidth: TIME_COLUMN_PX,
                   maxWidth: TIME_COLUMN_PX,
@@ -828,34 +946,41 @@ export function WeekCalendar({
                         const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
                         const catHex = block.categoryColor?.trim();
                         const useCategory = block.source === "calendar" && Boolean(catHex);
-                        const courseChip =
-                          block.source === "course"
-                            ? courseCalendarShortLabel({
-                                courseCode: block.courseCode,
-                                courseName: block.courseName,
-                              })
-                            : null;
+                        const alldayKey = `allday:${day}:${bi}:${block.calendarEntryId ?? block.courseId}`;
+                        const alldaySelected = selectedBlockKey === alldayKey;
                         return (
                           <button
                             key={`${block.calendarEntryId ?? block.courseId}-allday-${bi}`}
                             type="button"
-                            onClick={() => onOpenItem?.(block, occurrenceDate)}
+                            onPointerDown={(e) => attachTapSelectLongOpen(e, block, occurrenceDate, alldayKey)}
+                            onKeyDown={(ev) => {
+                              if (ev.key === "Enter" || ev.key === " ") {
+                                ev.preventDefault();
+                                onOpenItem?.(block, occurrenceDate);
+                              }
+                            }}
                             className={cn(
-                              "w-full truncate rounded-lg p-0 text-left text-[10px] font-semibold leading-tight transition",
+                              "w-full rounded-md p-0 text-left text-[10px] font-semibold leading-tight transition",
                               "hover:brightness-[0.98] active:brightness-95",
-                              !useCategory && tone.card,
+                              alldaySelected ? "z-[1] overflow-visible ring-2 ring-[#2563EB]/35 ring-offset-1 ring-offset-white dark:ring-blue-400/40 dark:ring-offset-card" : "truncate overflow-hidden",
+                              !useCategory && (alldaySelected ? tone.cardSelected : tone.card),
                               useCategory && "border border-black/10 shadow-sm dark:border-white/10",
                             )}
                             style={
-                              useCategory && catHex ? categoryBlockSurfaceStyle(catHex, false) : undefined
+                              useCategory && catHex ? categoryBlockSurfaceStyle(catHex, alldaySelected) : undefined
                             }
                           >
-                            <span className="flex min-w-0 flex-row overflow-hidden rounded-[inherit]">
+                            <span
+                              className={cn(
+                                "flex min-w-0 flex-row rounded-[inherit]",
+                                alldaySelected ? "overflow-visible" : "overflow-hidden",
+                              )}
+                            >
                               <span
                                 aria-hidden
                                 className={cn(
-                                  "w-1 shrink-0 self-stretch rounded-l-lg",
-                                  !useCategory && tone.rail,
+                                  "w-1 shrink-0 self-stretch rounded-l-md",
+                                  !useCategory && (alldaySelected ? tone.railSelected : tone.rail),
                                   useCategory && catHex && "bg-transparent",
                                 )}
                                 style={
@@ -864,26 +989,39 @@ export function WeekCalendar({
                                     : undefined
                                 }
                               />
-                              <span className="flex min-w-0 flex-1 items-center gap-1 truncate px-1.5 py-1">
-                                {courseChip ? (
+                              <span className="flex min-w-0 flex-1 flex-col gap-px px-1.5 py-1">
+                                {block.source === "course" && block.courseCode?.trim() ? (
+                                  <>
+                                    <span
+                                      className={cn(
+                                        "font-bold tabular-nums leading-tight text-classmates-blue dark:text-blue-200",
+                                        !alldaySelected && "truncate",
+                                        alldaySelected && "whitespace-normal break-words",
+                                      )}
+                                    >
+                                      {block.courseCode.trim()}
+                                    </span>
+                                    <span
+                                      className={cn(
+                                        "min-w-0 font-semibold leading-snug text-[#111827] dark:text-foreground",
+                                        !alldaySelected && "truncate",
+                                        alldaySelected && "whitespace-normal break-words",
+                                      )}
+                                    >
+                                      {block.courseName}
+                                    </span>
+                                  </>
+                                ) : (
                                   <span
                                     className={cn(
-                                      "inline-flex shrink-0 items-center justify-center rounded border border-blue-700/35 bg-white/90 px-1 font-bold leading-none tracking-tight text-blue-900 shadow-sm tabular-nums",
-                                      "dark:border-blue-400/45 dark:bg-blue-950/75 dark:text-blue-100",
-                                      density === "immersive"
-                                        ? "h-4 min-w-[1.1rem] text-[8px]"
-                                        : "h-[18px] min-w-[1.35rem] text-[9px]",
+                                      "min-w-0 leading-snug",
+                                      !alldaySelected && "truncate",
+                                      alldaySelected && "whitespace-normal break-words",
                                     )}
-                                    title="Course tag"
                                   >
-                                    {courseChip}
+                                    {labelText || block.courseName}
                                   </span>
-                                ) : null}
-                                <span className="min-w-0 truncate">
-                                  {block.source === "course" && block.courseCode?.trim()
-                                    ? block.courseName
-                                    : labelText || block.courseName}
-                                </span>
+                                )}
                               </span>
                             </span>
                           </button>
@@ -896,14 +1034,15 @@ export function WeekCalendar({
             </div>
           ) : null}
 
-          <div className="flex">
+          <div className="relative z-0 flex">
               <div
                 className={cn(
-                  "sticky left-0 z-20 flex shrink-0 flex-col border-r bg-[#FAF9F6]",
+                  "sticky left-0 flex shrink-0 flex-col border-r bg-[#FAF9F6]",
                   WEEK_GRID_LINE,
                   "dark:bg-muted/25",
                 )}
                 style={{
+                  zIndex: Z_TIME_RAIL_BODY,
                   width: TIME_COLUMN_PX,
                   minWidth: TIME_COLUMN_PX,
                   maxWidth: TIME_COLUMN_PX,
@@ -946,8 +1085,11 @@ export function WeekCalendar({
                   nowMinute >= 0 &&
                   nowMinute <= FULL_DAY_MINUTES ? (
                     <div
-                      className="pointer-events-none absolute inset-x-0 z-20"
-                      style={{ top: `${((nowMinute - visualStartMinute) / totalMinutes) * 100}%` }}
+                      className="pointer-events-none absolute inset-x-0"
+                      style={{
+                        zIndex: Z_TIME_AXIS_INNER,
+                        top: `${((nowMinute - visualStartMinute) / totalMinutes) * 100}%`,
+                      }}
                     >
                       <span
                         className={cn(
@@ -963,7 +1105,10 @@ export function WeekCalendar({
                 <div className="shrink-0 bg-[#FAF9F6] dark:bg-muted/25" style={{ height: `${BOTTOM_SPACER_PX}px` }} aria-hidden />
               </div>
 
-              <div className="min-w-0 bg-white dark:bg-card" style={{ width: dayTrackWidth }}>
+              <div
+                className="relative isolate z-0 min-w-0 bg-white dark:bg-card"
+                style={{ width: dayTrackWidth }}
+              >
                 <div
                   className="relative grid"
                   style={{
@@ -976,8 +1121,9 @@ export function WeekCalendar({
                     nowMinute >= 0 &&
                     nowMinute <= FULL_DAY_MINUTES ? (
                       <div
-                        className="pointer-events-none absolute inset-x-0 z-10"
+                        className="pointer-events-none absolute inset-x-0"
                         style={{
+                          zIndex: Z_DAY_NOW_LINE_SPAN,
                           top: `${((nowMinute - visualStartMinute) / totalMinutes) * 100}%`,
                         }}
                       >
@@ -1051,7 +1197,8 @@ export function WeekCalendar({
                             }}
                             onMouseUp={clearHoldTimer}
                             onMouseLeave={clearHoldTimer}
-                            className="absolute inset-0 z-0 cursor-default"
+                            className="absolute inset-0 cursor-default"
+                            style={{ zIndex: Z_DAY_CREATE_HIT }}
                           />
 
                           {hourLabels.map((m) => {
@@ -1086,34 +1233,38 @@ export function WeekCalendar({
                             const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
                             const isDraftNewTone = toneKey === "draftNew";
                             const key = block.id;
+                            const occurrenceDate = addDays(weekStartDate, dayIndex);
                             const selected = selectedBlockKey === key;
                             const draggingThis = Boolean(
                               dragOverride?.eventId && block.calendarEntryId === dragOverride.eventId,
                             );
                             const highlighted = selected || draggingThis;
+                            const shortOverlapGlass = Boolean(block.hasShortOverlap && !highlighted);
                             const catHex = block.categoryColor?.trim();
                             const useCategoryColor = block.source === "calendar" && Boolean(catHex);
-                            const courseChip =
-                              block.source === "course"
-                                ? courseCalendarShortLabel({
-                                    courseCode: block.courseCode,
-                                    courseName: block.courseName,
-                                  })
-                                : null;
                             const startMinuteShown = draggingThis
                               ? snapMinute(block.startMinute)
                               : block.startMinute;
                             const className = cn(
-                              "absolute z-[1] overflow-hidden rounded-2xl p-0 text-left leading-tight transition hover:brightness-[0.98] active:brightness-95",
+                              "absolute rounded-md p-0 text-left leading-tight transition hover:brightness-[0.98] active:brightness-95",
+                              highlighted ? "overflow-visible" : "overflow-hidden",
                               draggingThis && "!transition-none",
-                              !useCategoryColor && (highlighted ? tone.cardSelected : tone.card),
-                              useCategoryColor && "shadow-sm",
-                              block.hasShortOverlap && !highlighted && "shadow-[0_12px_28px_-18px_rgba(15,23,42,0.45)]",
+                              !useCategoryColor &&
+                                (highlighted
+                                  ? tone.cardSelected
+                                  : shortOverlapGlass
+                                    ? SCHEDULE_SHORT_OVERLAP_GLASS
+                                    : tone.card),
+                              useCategoryColor &&
+                                (shortOverlapGlass
+                                  ? "shadow-[0_8px_22px_-10px_rgba(15,23,42,0.2)] dark:shadow-[0_8px_26px_-12px_rgba(0,0,0,0.55)]"
+                                  : "shadow-sm"),
                               draggingThis &&
-                                "z-[80] scale-[1.02] shadow-[0_16px_40px_-12px_rgba(15,23,42,0.35)] ring-2 ring-[#E53935]/55 ring-offset-2 ring-offset-white dark:ring-red-400/50 dark:ring-offset-card",
+                                "scale-[1.02] shadow-[0_16px_40px_-12px_rgba(15,23,42,0.35)] ring-2 ring-[#E53935]/55 ring-offset-2 ring-offset-white dark:ring-red-400/50 dark:ring-offset-card",
                             );
                             const metaCls = cn(
-                              "truncate leading-tight",
+                              "leading-tight",
+                              !highlighted && "truncate",
                               cfg.metaClass,
                               useCategoryColor
                                 ? highlighted
@@ -1127,12 +1278,17 @@ export function WeekCalendar({
                               block.source === "course" && block.courseCode?.trim()
                                 ? block.courseName
                                 : labelText || block.courseName || "Event";
+                            const showLocation = Boolean(block.location) && (highlighted || effectiveHeight > cfg.metaLocPct);
+                            const showWith = Boolean(block.withLabel) && (highlighted || effectiveHeight > cfg.metaWithPct);
+                            const showNote = Boolean(block.note?.trim()) && highlighted;
                             const inner = (
                               <>
                                 {effectiveHeight > 0 ? (
                                   <p
                                     className={cn(
-                                      "truncate text-left tabular-nums font-medium leading-none",
+                                      "text-left tabular-nums font-medium leading-none",
+                                      !highlighted && "truncate",
+                                      highlighted && "whitespace-normal",
                                       cfg.blockTimeClass,
                                       !useCategoryColor &&
                                         (highlighted ? tone.accentColorSelected : tone.accentColor),
@@ -1146,44 +1302,73 @@ export function WeekCalendar({
                                     {formatTime(startMinuteShown)}
                                   </p>
                                 ) : null}
-                                <div
-                                  className={cn(
-                                    "mt-px flex min-w-0 items-center gap-0.5",
-                                    effectiveHeight <= cfg.metaLocPct * 0.35 && "min-h-0",
-                                  )}
-                                >
-                                  {courseChip ? (
-                                    <span
+                                {block.source === "course" && block.courseCode?.trim() ? (
+                                  <div
+                                    className={cn(
+                                      "mt-px min-w-0 space-y-px",
+                                      effectiveHeight <= cfg.metaLocPct * 0.35 && !highlighted && "min-h-0",
+                                    )}
+                                  >
+                                    <p
                                       className={cn(
-                                        "inline-flex shrink-0 items-center justify-center rounded border border-blue-700/35 bg-white/90 px-1 font-bold leading-none tracking-tight text-blue-900 shadow-sm tabular-nums",
-                                        "dark:border-blue-400/45 dark:bg-blue-950/75 dark:text-blue-100",
-                                        highlighted && "border-white/45 bg-white/30 text-white",
-                                        density === "immersive"
-                                          ? "h-4 min-w-[1.1rem] text-[8px]"
-                                          : "h-[18px] min-w-[1.35rem] text-[9px]",
+                                        "text-left font-bold tabular-nums leading-none text-classmates-blue dark:text-blue-200",
+                                        !highlighted && "truncate",
+                                        highlighted && "whitespace-normal break-words",
+                                        cfg.blockTitleClass,
                                       )}
-                                      title="Course tag"
                                     >
-                                      {courseChip}
-                                    </span>
-                                  ) : null}
+                                      {block.courseCode.trim()}
+                                    </p>
+                                    <p
+                                      className={cn(
+                                        "text-left font-semibold leading-snug",
+                                        !highlighted && "truncate",
+                                        highlighted && "whitespace-normal break-words",
+                                        cfg.blockTitleClass,
+                                        !useCategoryColor && (highlighted ? tone.titleSelected : tone.title),
+                                      )}
+                                    >
+                                      {block.courseName}
+                                    </p>
+                                  </div>
+                                ) : (
                                   <p
                                     className={cn(
-                                      "min-w-0 flex-1 truncate text-left font-semibold leading-snug",
+                                      "mt-px min-w-0 text-left font-semibold leading-snug",
                                       cfg.blockTitleClass,
+                                      !highlighted && "truncate",
+                                      highlighted && "whitespace-normal break-words",
                                       !useCategoryColor && (highlighted ? tone.titleSelected : tone.title),
                                       useCategoryColor &&
-                                        (highlighted ? "text-white" : "text-[#111827] dark:text-foreground"),
+                                        (highlighted
+                                          ? "text-white"
+                                          : shortOverlapGlass
+                                            ? ""
+                                            : "text-[#111827] dark:text-foreground"),
                                     )}
+                                    style={
+                                      useCategoryColor && catHex && shortOverlapGlass && !highlighted
+                                        ? { color: categoryAccentColor(catHex) }
+                                        : undefined
+                                    }
                                   >
                                     {titleLine}
                                   </p>
-                                </div>
-                                {effectiveHeight > cfg.metaLocPct && block.location ? (
-                                  <p className={cn("mt-px", metaCls)}>{block.location}</p>
+                                )}
+                                {showLocation ? (
+                                  <p className={cn("mt-px", metaCls, highlighted && "whitespace-normal break-words")}>
+                                    {block.location}
+                                  </p>
                                 ) : null}
-                                {effectiveHeight > cfg.metaWithPct && block.withLabel ? (
-                                  <p className={cn("mt-px", metaCls)}>{block.withLabel}</p>
+                                {showWith ? (
+                                  <p className={cn("mt-px", metaCls, highlighted && "whitespace-normal break-words")}>
+                                    {block.withLabel}
+                                  </p>
+                                ) : null}
+                                {showNote ? (
+                                  <p className={cn("mt-px", metaCls, "whitespace-normal break-words")}>
+                                    {block.note!.trim()}
+                                  </p>
                                 ) : null}
                               </>
                             );
@@ -1192,11 +1377,23 @@ export function WeekCalendar({
                                 ? { backgroundColor: categoryAccentColor(catHex) }
                                 : undefined;
                             const railClass = cn(
-                              "w-1 shrink-0 self-stretch rounded-l-2xl",
-                              !useCategoryColor && (highlighted ? tone.railSelected : tone.rail),
+                              shortOverlapGlass
+                                ? "w-[7px] min-w-[7px] shrink-0 self-stretch rounded-full my-1 ml-1 mr-px"
+                                : "w-1 min-w-[4px] shrink-0 self-stretch rounded-l-md",
+                              !useCategoryColor &&
+                                (highlighted
+                                  ? tone.railSelected
+                                  : shortOverlapGlass
+                                    ? scheduleShortOverlapRailClass(tone)
+                                    : tone.rail),
                             );
                             const innerWithRail = (
-                              <div className="flex h-full min-h-0 w-full flex-row overflow-hidden rounded-[inherit]">
+                              <div
+                                className={cn(
+                                  "flex h-full min-h-0 w-full flex-row rounded-[inherit]",
+                                  highlighted ? "overflow-visible" : "overflow-hidden",
+                                )}
+                              >
                                 <div aria-hidden className={railClass} style={railStyle} />
                                 <div className="flex min-h-0 min-w-0 flex-1 flex-col items-start justify-start px-1.5 py-1">
                                   {inner}
@@ -1208,20 +1405,33 @@ export function WeekCalendar({
                             const horizontalGapPct = block.columnCount > 1 ? 0.8 : 0;
                             const widthPct = Math.max(8, columnWidth - horizontalGapPct);
                             const stackInsetPx = block.hasShortOverlap ? Math.min(block.stackDepth * 8, 18) : 0;
+                            const eventStackZ = Math.min(
+                              Z_EVENT_CARD_BASE + block.columnIndex * 10 + block.stackDepth,
+                              Z_EVENT_CARD_DRAGGING - 1,
+                            );
+                            const cardZ = draggingThis
+                              ? Z_EVENT_CARD_DRAGGING
+                              : selected
+                                ? Math.min(
+                                    Math.max(Z_EVENT_CARD_SELECTED, eventStackZ),
+                                    Z_EVENT_CARD_DRAGGING - 1,
+                                  )
+                                : eventStackZ;
                             const positionStyle = {
                               top: `${top}%`,
                               height: `${effectiveHeight}%`,
                               left: `calc(${block.columnIndex * columnWidth}% + ${stackInsetPx}px)`,
                               width: `calc(${widthPct}% - ${stackInsetPx}px)`,
-                              zIndex: draggingThis
-                                ? 80
-                                : selected
-                                  ? 4
-                                  : block.columnIndex * 10 + block.stackDepth + 1,
+                              zIndex: cardZ,
                             };
                             const surfaceStyle =
                               useCategoryColor && catHex
-                                ? { ...positionStyle, ...categoryBlockSurfaceStyle(catHex, highlighted) }
+                                ? {
+                                    ...positionStyle,
+                                    ...categoryBlockSurfaceStyle(catHex, highlighted, {
+                                      shortOverlap: shortOverlapGlass,
+                                    }),
+                                  }
                                 : positionStyle;
 
                             const isDraggableCalendar =
@@ -1234,10 +1444,7 @@ export function WeekCalendar({
                               return (
                                 <div
                                   key={key}
-                                  className={cn(
-                                    className,
-                                    "touch-none select-none overflow-visible",
-                                  )}
+                                  className={cn(className, "touch-none select-none")}
                                   style={surfaceStyle}
                                   title={title}
                                   role="group"
@@ -1247,29 +1454,37 @@ export function WeekCalendar({
                                     role="button"
                                     tabIndex={0}
                                     className={cn(
-                                      "absolute inset-0 z-20 cursor-grab overflow-hidden rounded-[inherit] active:cursor-grabbing",
+                                      "absolute inset-0 cursor-grab rounded-[inherit] active:cursor-grabbing",
+                                      highlighted ? "overflow-visible" : "overflow-hidden",
                                       draggingThis && "cursor-grabbing",
                                     )}
+                                    style={{ zIndex: Z_EVENT_DRAG_INNER }}
                                     onKeyDown={(ev) => {
                                       if (ev.key === "Enter" || ev.key === " ") {
                                         ev.preventDefault();
-                                        setSelectedBlockKey(key);
-                                        onOpenItem?.(block, addDays(weekStartDate, dayIndex));
+                                        onOpenItem?.(block, occurrenceDate);
                                       }
-                                    }}
-                                    onClick={(ev) => {
-                                      ev.stopPropagation();
-                                      if (suppressOpenClickRef.current) return;
-                                      setSelectedBlockKey(key);
-                                      onOpenItem?.(block, addDays(weekStartDate, dayIndex));
                                     }}
                                     onPointerDown={(ev) => {
                                       ev.stopPropagation();
-                                      startCalendarPointerSession(ev, block, "move", day);
+                                      startCalendarPointerSession(
+                                        ev,
+                                        block,
+                                        "move",
+                                        day,
+                                        occurrenceDate,
+                                        key,
+                                        selected,
+                                      );
                                     }}
                                   >
-                                    <div className="pointer-events-none flex h-full min-h-0 flex-col items-start justify-start overflow-hidden px-1 py-0.5">
-                                      {inner}
+                                    <div
+                                      className={cn(
+                                        "pointer-events-none h-full min-h-0 w-full rounded-[inherit]",
+                                        highlighted ? "overflow-visible" : "overflow-hidden",
+                                      )}
+                                    >
+                                      {innerWithRail}
                                     </div>
                                   </div>
                                   {/* Resize handles — only appear when card is selected */}
@@ -1277,12 +1492,24 @@ export function WeekCalendar({
                                     <>
                                       <button
                                         type="button"
-                                        className="absolute right-1 z-40 flex h-6 w-6 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
-                                        style={{ top: "-4px", transform: "translateY(-50%)" }}
+                                        className="absolute right-1 flex h-6 w-6 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
+                                        style={{
+                                          zIndex: Z_EVENT_RESIZE_HANDLE,
+                                          top: "-4px",
+                                          transform: "translateY(-50%)",
+                                        }}
                                         aria-label={`Drag anchor to change start time: ${titleLine}`}
                                         onPointerDown={(ev) => {
                                           ev.stopPropagation();
-                                          startCalendarPointerSession(ev, block, "resize-start", day);
+                                          startCalendarPointerSession(
+                                            ev,
+                                            block,
+                                            "resize-start",
+                                            day,
+                                            occurrenceDate,
+                                            key,
+                                            true,
+                                          );
                                         }}
                                       >
                                         <span
@@ -1292,12 +1519,24 @@ export function WeekCalendar({
                                       </button>
                                       <button
                                         type="button"
-                                        className="absolute left-1 z-40 flex h-6 w-6 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
-                                        style={{ bottom: "-4px", transform: "translateY(50%)" }}
+                                        className="absolute left-1 flex h-6 w-6 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
+                                        style={{
+                                          zIndex: Z_EVENT_RESIZE_HANDLE,
+                                          bottom: "-4px",
+                                          transform: "translateY(50%)",
+                                        }}
                                         aria-label={`Drag anchor to change end time: ${titleLine}`}
                                         onPointerDown={(ev) => {
                                           ev.stopPropagation();
-                                          startCalendarPointerSession(ev, block, "resize-end", day);
+                                          startCalendarPointerSession(
+                                            ev,
+                                            block,
+                                            "resize-end",
+                                            day,
+                                            occurrenceDate,
+                                            key,
+                                            true,
+                                          );
                                         }}
                                       >
                                         <span
@@ -1318,12 +1557,16 @@ export function WeekCalendar({
                                 className={className}
                                 style={surfaceStyle}
                                 title={title}
-                                onClick={(e) => {
-                                  e.stopPropagation();
+                                onPointerDown={(e) => {
                                   if (block.courseId === "__draft-preview__") return;
-                                  setSelectedBlockKey(key);
-                                  const occurrenceDate = addDays(weekStartDate, dayIndex);
-                                  onOpenItem?.(block, occurrenceDate);
+                                  attachTapSelectLongOpen(e, block, occurrenceDate, key);
+                                }}
+                                onKeyDown={(ev) => {
+                                  if (ev.key === "Enter" || ev.key === " ") {
+                                    ev.preventDefault();
+                                    if (block.courseId === "__draft-preview__") return;
+                                    onOpenItem?.(block, occurrenceDate);
+                                  }
                                 }}
                               >
                                 {innerWithRail}
