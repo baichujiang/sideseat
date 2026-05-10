@@ -190,14 +190,14 @@ export function ProfileForm({
   return (
     <form
       className={cn(
-        mePageStructure && !isSheet ? "space-y-8" : "space-y-5",
+        !isSheet && "space-y-5",
         isSheet &&
-          "space-y-0 rounded-2xl border border-classmates-edge bg-classmates-surface p-4 shadow-[0_4px_14px_rgba(15,23,42,0.04)] sm:p-5 dark:border-border dark:bg-card",
+          "space-y-0 rounded-2xl border border-classmates-edge bg-classmates-surface p-3 shadow-[0_4px_14px_rgba(15,23,42,0.04)] sm:p-4 dark:border-border dark:bg-card",
       )}
       onSubmit={onSubmit}
     >
       {isSheet ? (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <h2 id="profile-sheet-card-heading" className="sr-only">
             {"Profile photo and tagline"}
           </h2>
@@ -205,7 +205,7 @@ export function ProfileForm({
             <Input
               {...register("nickname")}
               placeholder="Display name"
-              className="h-[3.25rem] rounded-[20px] px-3.5 text-[14px] leading-tight"
+              className="h-11 min-h-11 rounded-[20px] px-3.5 text-[14px] leading-tight"
             />
           </AvatarPicker>
           <FormMessage message={errors.nickname?.message} />
@@ -214,7 +214,7 @@ export function ProfileForm({
               {...register("bio")}
               placeholder="Tagline — one short line"
               rows={2}
-              className="resize-none rounded-[20px] text-[14px] leading-relaxed"
+              className="resize-none rounded-[20px] py-2.5 text-[14px] leading-snug"
             />
             <FormMessage message={errors.bio?.message} />
           </div>
@@ -223,7 +223,7 @@ export function ProfileForm({
 
       <MeAcademicShell mePageStructure={mePageStructure && !isSheet}>
       {isSheet ? (
-        <div className="border-t border-classmates-hairline pt-5 dark:border-border/60" aria-hidden />
+        <div className="border-t border-classmates-hairline pt-3 dark:border-border/60" aria-hidden />
       ) : null}
       <div className={cn("space-y-2", isSheet && "space-y-0")}>
         <h2
@@ -238,18 +238,31 @@ export function ProfileForm({
         <section
           aria-labelledby="profile-school-program-heading"
           className={cn(
-            isCompactAcademic ? "space-y-3" : "space-y-5",
+            isCompactAcademic ? "space-y-2" : "space-y-5",
             sheetSectionSurface &&
-              "rounded-2xl border border-classmates-edge bg-classmates-surface p-4 shadow-[0_4px_14px_rgba(15,23,42,0.04)] sm:p-5 dark:border-border dark:bg-card",
+              cn(
+                "rounded-2xl border border-classmates-edge bg-classmates-surface shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card",
+                isCompactAcademic ? "p-3 sm:p-4" : "p-4 sm:p-5",
+              ),
             isSheet && "border-0 bg-transparent p-0 shadow-none",
           )}
         >
           {variant === "full" ? (
-            <p className="max-w-md border-b border-classmates-hairline pb-3 text-[13px] leading-snug text-classmates-sub dark:border-border/70 dark:text-zinc-400">
+            <p
+              className={cn(
+                "max-w-md border-b border-classmates-hairline text-[13px] leading-snug text-classmates-sub dark:border-border/70 dark:text-zinc-400",
+                isCompactAcademic ? "pb-2" : "pb-3",
+              )}
+            >
               Used to recommend classmates and courses.
             </p>
           ) : null}
-        <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+        <div
+          className={cn(
+            "grid grid-cols-2",
+            isCompactAcademic ? "gap-x-3 gap-y-2" : "gap-x-4 gap-y-3",
+          )}
+        >
           <div className="flex flex-col gap-1">
             <FieldLabel>School</FieldLabel>
             <div className="relative">
@@ -344,7 +357,7 @@ export function ProfileForm({
       </div>
 
       {isSheet ? (
-        <div className="border-t border-classmates-hairline pt-5 dark:border-border/60" aria-hidden />
+        <div className="border-t border-classmates-hairline pt-3 dark:border-border/60" aria-hidden />
       ) : null}
       <div className={cn("space-y-2", isCompactAcademic && !isSheet && "space-y-1", isSheet && "space-y-0")}>
         <h2
@@ -359,19 +372,24 @@ export function ProfileForm({
             sheetSectionSurface &&
               "rounded-2xl border border-classmates-edge bg-classmates-surface shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card",
             isCompactAcademic && !isSheet
-              ? "space-y-2 p-3"
+              ? "space-y-1.5 p-3"
               : !isSheet
                 ? "space-y-3 p-4 sm:p-5"
-                : "space-y-2 border-0 bg-transparent p-0 shadow-none",
+                : "space-y-1.5 border-0 bg-transparent p-0 shadow-none",
           )}
         >
           {variant === "full" ? (
-            <p className="border-b border-classmates-hairline pb-4 text-[13px] leading-snug text-classmates-sub dark:border-border/70 dark:text-zinc-400">
+            <p
+              className={cn(
+                "border-b border-classmates-hairline text-[13px] leading-snug text-classmates-sub dark:border-border/70 dark:text-zinc-400",
+                isCompactAcademic ? "pb-2" : "pb-3",
+              )}
+            >
               What you speak — helps match you with classmates.
             </p>
           ) : null}
 
-        <div className={cn("space-y-3 pt-1", isCompactAcademic && "space-y-2 pt-0")}>
+        <div className={cn("space-y-3 pt-1", isCompactAcademic && "space-y-1.5 pt-0", isSheet && "space-y-1.5")}>
           {sortedSelectedLanguages.length === 0 ? (
             <p
               className={cn(
@@ -537,7 +555,10 @@ export function ProfileForm({
           </h2>
           <section
             aria-labelledby="profile-verified-email-heading"
-            className="space-y-3 rounded-2xl border border-classmates-edge bg-classmates-surface p-4 shadow-[0_4px_14px_rgba(15,23,42,0.04)] sm:p-5 dark:border-border dark:bg-card"
+            className={cn(
+              "rounded-2xl border border-classmates-edge bg-classmates-surface shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card",
+              mePageStructure ? "space-y-2 p-3 sm:p-4" : "space-y-3 p-4 sm:p-5",
+            )}
           >
             {mePageStructure ? null : (
               <p className="border-b border-classmates-hairline pb-4 text-[13px] leading-snug text-classmates-sub dark:border-border/70 dark:text-zinc-400">
@@ -746,8 +767,9 @@ function MeAcademicShell({
       id="me-academic-heading"
       title="Academic profile"
       description="School, program, languages, and verified student email."
+      density="compact"
     >
-      <div className="space-y-5">{children}</div>
+      <div className="space-y-3">{children}</div>
     </MePageSection>
   );
 }

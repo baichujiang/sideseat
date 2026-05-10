@@ -23,6 +23,27 @@ export function dismissTopPushLayer(): boolean {
   return true;
 }
 
+/**
+ * While `open`, registers `onClose` on the same stack as {@link AppPushLayer} so edge-swipe-back
+ * dismisses this overlay before navigating away (e.g. bottom sheets that are not `AppPushLayer`).
+ */
+export function useRegisterDismissOnEdgeSwipe(open: boolean, onClose: () => void) {
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    if (!open) return;
+    const closeFromEdgeGesture = () => {
+      onCloseRef.current();
+    };
+    layerCloseStack.push(closeFromEdgeGesture);
+    return () => {
+      const idx = layerCloseStack.indexOf(closeFromEdgeGesture);
+      if (idx !== -1) layerCloseStack.splice(idx, 1);
+    };
+  }, [open]);
+}
+
 type AppPushLayerProps = {
   open: boolean;
   onClose: () => void;

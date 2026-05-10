@@ -6,31 +6,19 @@ import { MessageSquarePlus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-type Topic = "bug" | "idea" | "other";
-
-const TOPICS: { value: Topic; label: string; hint: string }[] = [
-  { value: "bug", label: "Bug", hint: "Something broken or confusing" },
-  { value: "idea", label: "Idea", hint: "A feature you would like" },
-  { value: "other", label: "Other", hint: "Anything else" },
-];
-
 export function FeedbackFormCard({
-  mailtoHref,
   compact = false,
   variant = "card",
 }: {
-  /** Optional mailto when users prefer email (shown alongside in-app submit). */
-  mailtoHref: string | null;
   compact?: boolean;
-  /** `header` — compact control for the Me page toolbar (opens the same dialog). */
+  /** `header` — icon control on the Me page toolbar (opens the same dialog). */
   variant?: "card" | "header";
 }) {
   const [open, setOpen] = useState(false);
-  const [topic, setTopic] = useState<Topic>("other");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -59,7 +47,7 @@ export function FeedbackFormCard({
   async function submit() {
     const trimmed = message.trim();
     if (trimmed.length < 10) {
-      setError("Please write at least 10 characters.");
+      setError("Please write at least 10 characters so we can understand.");
       return;
     }
 
@@ -69,11 +57,11 @@ export function FeedbackFormCard({
       const res = await apiFetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic, message: trimmed }),
+        body: JSON.stringify({ message: trimmed }),
       });
       const payload = (await res.json()) as { success?: boolean; error?: string };
       if (!res.ok || !payload.success) {
-        setError(typeof payload.error === "string" ? payload.error : "Could not send feedback.");
+        setError(typeof payload.error === "string" ? payload.error : "Could not send feedback. Try again later.");
         return;
       }
       setDone(true);
@@ -88,8 +76,6 @@ export function FeedbackFormCard({
       setBusy(false);
     }
   }
-
-  const showMailtoInDialog = variant === "header" && Boolean(mailtoHref);
 
   const modal =
     open && portalReady && typeof document !== "undefined"
@@ -121,33 +107,12 @@ export function FeedbackFormCard({
                 </button>
               </div>
               <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3">
-                <p className="text-[12px] leading-relaxed text-muted-foreground">
-                  Your message is saved for the team. If email is configured on the server, we also get a copy. The more
-                  detail you add, the easier it is for us to act on it.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {TOPICS.map((t) => (
-                    <button
-                      key={t.value}
-                      type="button"
-                      disabled={busy}
-                      onClick={() => setTopic(t.value)}
-                      className={cn(
-                        "rounded-full border px-3 py-1.5 text-left text-[12px] font-semibold transition",
-                        topic === t.value
-                          ? "border-classmates-azure bg-classmates-azure/12 text-classmates-azure"
-                          : "border-border/80 bg-muted/30 text-muted-foreground hover:bg-muted/50",
-                      )}
-                    >
-                      {t.label}
-                    </button>
-                  ))}
-                </div>
+                <p className="text-[13px] leading-relaxed text-muted-foreground">Tell us what you want.</p>
                 <Textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   disabled={busy}
-                  placeholder="For example: On Discover, when I filter by course…"
+                  placeholder="Anything you would like us to build or fix…"
                   rows={6}
                   maxLength={4000}
                 />
@@ -158,24 +123,8 @@ export function FeedbackFormCard({
                   </p>
                 ) : null}
               </div>
-              <div className="flex flex-col gap-2 border-t border-border/60 px-4 py-3 sm:flex-row">
-                {showMailtoInDialog && mailtoHref ? (
-                  <a
-                    href={mailtoHref}
-                    className={cn(
-                      buttonVariants({ variant: "outline" }),
-                      "inline-flex h-11 flex-1 items-center justify-center rounded-full text-center text-sm font-semibold",
-                    )}
-                  >
-                    Email us
-                  </a>
-                ) : null}
-                <Button
-                  type="button"
-                  className={cn(showMailtoInDialog ? "h-11 flex-1" : "w-full")}
-                  disabled={busy}
-                  onClick={() => void submit()}
-                >
+              <div className="border-t border-border/60 px-4 py-3">
+                <Button type="button" className="w-full" disabled={busy} onClick={() => void submit()}>
                   {busy ? "Sending…" : "Submit feedback"}
                 </Button>
               </div>
@@ -191,12 +140,18 @@ export function FeedbackFormCard({
         <Button
           type="button"
           variant="outline"
-          size="sm"
-          className="shrink-0 gap-1.5 rounded-full px-3.5 text-[13px] font-semibold"
+          size="icon"
+          className={cn(
+            "h-10 w-10 shrink-0 rounded-full border-sky-300/70 bg-sky-50 text-sky-800 shadow-sm",
+            "transition-colors active:scale-[0.97]",
+            "[@media(hover:hover)]:hover:border-sky-400 [@media(hover:hover)]:hover:bg-sky-100",
+            "dark:border-sky-700/60 dark:bg-sky-950/45 dark:text-sky-100",
+            "dark:[@media(hover:hover)]:hover:border-sky-600 dark:[@media(hover:hover)]:hover:bg-sky-950/70",
+          )}
           onClick={() => setOpen(true)}
+          aria-label="Send feedback"
         >
-          <MessageSquarePlus className="h-4 w-4" strokeWidth={2} aria-hidden />
-          Feedback
+          <MessageSquarePlus className="h-5 w-5" strokeWidth={2} aria-hidden />
         </Button>
         {modal}
       </>
@@ -225,35 +180,15 @@ export function FeedbackFormCard({
               Feedback
             </p>
             {!compact ? (
-              <p className="mt-1 text-[12px] leading-snug text-muted-foreground">
-                Tell us what is wrong or what you wish the app could do.
-              </p>
+              <p className="mt-1 text-[12px] leading-snug text-muted-foreground">Tell us what you want.</p>
             ) : null}
           </div>
         </div>
-        <div className={cn("flex flex-col gap-2 sm:flex-row", compact ? "mt-2" : "mt-3")}>
-          <Button type="button" className={cn("flex-1", compact && "h-9 text-[13px]")} onClick={() => setOpen(true)}>
+        <div className={cn("mt-3")}>
+          <Button type="button" className={cn("w-full", compact && "h-9 text-[13px]")} onClick={() => setOpen(true)}>
             Write feedback
           </Button>
-          {mailtoHref ? (
-            <a
-              href={mailtoHref}
-              className={cn(
-                buttonVariants({ variant: "outline" }),
-                "inline-flex flex-1 items-center justify-center rounded-full text-center font-semibold",
-                compact ? "h-9 text-[13px]" : "h-11 text-sm",
-              )}
-            >
-              Email us
-            </a>
-          ) : null}
         </div>
-        {!mailtoHref && !compact ? (
-          <p className="mt-2 text-[12px] leading-snug text-muted-foreground">
-            Optional: set <code className="rounded bg-muted px-1">NEXT_PUBLIC_SUPPORT_EMAIL</code> to show the email
-            button. With Resend and a feedback inbox configured, the team also gets messages by email.
-          </p>
-        ) : null}
       </div>
       {modal}
     </>

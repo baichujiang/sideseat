@@ -4,8 +4,8 @@ import { BookOpen, CalendarClock, MapPin } from "lucide-react";
 
 import type { DayTimelineItem } from "@/components/home/schedule-day-timeline";
 import {
-  inferScheduleEventToneKey,
   SCHEDULE_EVENT_TONE_STYLES,
+  scheduleVisualToneKey,
 } from "@/lib/schedule-event-card-tone";
 import { isLongOrAllDayTimedMinutes } from "@/lib/calendar/long-calendar-block";
 import { cn } from "@/lib/utils";
@@ -46,52 +46,70 @@ export function ScheduleDayEventList({
     <ul className="space-y-2">
       {items.map((item) => {
         const isStudy = item.kind === "study";
-        const toneKey = inferScheduleEventToneKey({
+        const toneKey = scheduleVisualToneKey({
+          source: item.source,
           kind: isStudy ? "study" : "class",
           title: item.title,
         });
         const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
         const Icon = isStudy ? CalendarClock : BookOpen;
-        const catHex = item.categoryColor?.trim();
+        const catHex = item.source === "calendar" ? item.categoryColor?.trim() : undefined;
+        const railStyle = catHex ? { backgroundColor: catHex } : undefined;
+        const railClass = cn(
+          "w-1 shrink-0 self-stretch rounded-l-2xl",
+          !catHex && tone.rail,
+        );
         return (
           <li key={`${item.kind}-${item.id}`}>
             <button
               type="button"
               onClick={() => onOpenItem(item)}
               className={cn(
-                "flex w-full items-start gap-2.5 px-3 py-2 text-left transition",
+                "flex w-full items-stretch overflow-hidden rounded-2xl p-0 text-left transition",
                 tone.card,
-                catHex && "border-l-[3px]",
                 "hover:brightness-[0.98] active:brightness-95",
               )}
-              style={catHex ? { borderLeftColor: catHex } : undefined}
             >
-              <span
-                className={cn(
-                  "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-current",
-                  tone.accentColor,
-                )}
-              >
-                <Icon className="h-4 w-4" strokeWidth={2.25} aria-hidden />
-              </span>
-              <span className="min-w-0 flex-1">
+              <span aria-hidden className={railClass} style={railStyle} />
+              <span className="flex min-w-0 flex-1 items-start gap-2.5 px-3 py-2">
                 <span
                   className={cn(
-                    "block text-xs font-medium tabular-nums leading-none",
+                    "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-current",
+                    item.source === "course"
+                      ? "border-2 border-blue-600/35 bg-classmates-blue-soft shadow-sm dark:border-blue-400/40 dark:bg-blue-950/50"
+                      : null,
                     tone.accentColor,
                   )}
                 >
-                  {formatItemTimeRange(item)}
+                  {item.source === "course" && item.courseShortLabel ? (
+                    <span className="text-[12px] font-bold tabular-nums leading-none text-classmates-blue dark:text-blue-200">
+                      {item.courseShortLabel}
+                    </span>
+                  ) : (
+                    <Icon className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+                  )}
                 </span>
-                <span className={cn("mt-1 block text-sm font-semibold leading-snug", tone.title)}>
-                  {item.title}
-                </span>
-                {item.location ? (
-                  <span className="mt-1 flex items-center gap-1 truncate text-xs text-[#111827]/65 dark:text-muted-foreground">
-                    <MapPin className="h-3 w-3 shrink-0 opacity-80" aria-hidden />
-                    <span className="truncate">{item.location}</span>
+                <span className="min-w-0 flex-1">
+                  <span
+                    className={cn(
+                      "block text-xs font-medium tabular-nums leading-none",
+                      tone.accentColor,
+                    )}
+                  >
+                    {formatItemTimeRange(item)}
                   </span>
-                ) : null}
+                  <span className={cn("mt-1 block text-sm font-semibold leading-snug", tone.title)}>
+                    {item.source === "course" && item.courseName?.trim()
+                      ? item.courseName.trim()
+                      : item.title}
+                  </span>
+                  {item.location ? (
+                    <span className="mt-1 flex items-center gap-1 truncate text-xs text-[#111827]/65 dark:text-muted-foreground">
+                      <MapPin className="h-3 w-3 shrink-0 opacity-80" aria-hidden />
+                      <span className="truncate">{item.location}</span>
+                    </span>
+                  ) : null}
+                </span>
               </span>
             </button>
           </li>

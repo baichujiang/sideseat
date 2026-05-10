@@ -41,12 +41,15 @@ export function AvatarCropEditor({
   className,
   onCancel,
   onConfirm,
+  /** When false, omit the centered title + hint (parent provides a nav header). */
+  showIntroText = true,
 }: {
   file: File;
   pending?: boolean;
   className?: string;
   onCancel: () => void;
   onConfirm: (file: File) => Promise<void> | void;
+  showIntroText?: boolean;
 }) {
   const [src, setSrc] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -148,10 +151,12 @@ export function AvatarCropEditor({
 
   return (
     <div className={cn("space-y-4", className)}>
-      <div className="space-y-1 text-center">
-        <p className="text-[15px] font-semibold text-foreground">Adjust photo</p>
-        <p className="text-[12px] text-muted-foreground">Drag to reposition, then zoom until it looks right in the circle.</p>
-      </div>
+      {showIntroText ? (
+        <div className="space-y-1 text-center">
+          <p className="text-[15px] font-semibold text-foreground">Adjust photo</p>
+          <p className="text-[12px] text-muted-foreground">Drag to reposition, then zoom until it looks right in the circle.</p>
+        </div>
+      ) : null}
 
       <div className="flex justify-center">
         <div className="relative h-[248px] w-[248px] overflow-hidden rounded-full bg-muted/55 ring-1 ring-border/70">

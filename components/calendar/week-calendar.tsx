@@ -3,13 +3,14 @@ import { addDays, addMinutes, isSameDay } from "date-fns";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import {
-  inferScheduleEventToneKey,
   SCHEDULE_EVENT_TONE_STYLES,
+  scheduleVisualToneKey,
 } from "@/lib/schedule-event-card-tone";
 import {
   categoryAccentColor,
   categoryBlockSurfaceStyle,
 } from "@/lib/calendar/category-visual";
+import { courseCalendarShortLabel } from "@/lib/calendar/course-calendar-short-label";
 import { computeEventOverlapLayout } from "@/lib/calendar/event-overlap-layout";
 import { cn } from "@/lib/utils";
 
@@ -819,20 +820,28 @@ export function WeekCalendar({
                           .join(" ")
                           .trim();
                         const inferTitle = labelText || block.courseName || block.courseId;
-                        const toneKey = inferScheduleEventToneKey({
+                        const toneKey = scheduleVisualToneKey({
+                          source: block.source,
                           kind: block.kind === "study" ? "study" : "class",
                           title: inferTitle,
                         });
                         const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
                         const catHex = block.categoryColor?.trim();
-                        const useCategory = Boolean(catHex);
+                        const useCategory = block.source === "calendar" && Boolean(catHex);
+                        const courseChip =
+                          block.source === "course"
+                            ? courseCalendarShortLabel({
+                                courseCode: block.courseCode,
+                                courseName: block.courseName,
+                              })
+                            : null;
                         return (
                           <button
                             key={`${block.calendarEntryId ?? block.courseId}-allday-${bi}`}
                             type="button"
                             onClick={() => onOpenItem?.(block, occurrenceDate)}
                             className={cn(
-                              "w-full truncate rounded-lg px-1.5 py-1 text-left text-[10px] font-semibold leading-tight transition",
+                              "w-full truncate rounded-lg p-0 text-left text-[10px] font-semibold leading-tight transition",
                               "hover:brightness-[0.98] active:brightness-95",
                               !useCategory && tone.card,
                               useCategory && "border border-black/10 shadow-sm dark:border-white/10",
@@ -841,7 +850,42 @@ export function WeekCalendar({
                               useCategory && catHex ? categoryBlockSurfaceStyle(catHex, false) : undefined
                             }
                           >
-                            <span className="block truncate">{block.courseName}</span>
+                            <span className="flex min-w-0 flex-row overflow-hidden rounded-[inherit]">
+                              <span
+                                aria-hidden
+                                className={cn(
+                                  "w-1 shrink-0 self-stretch rounded-l-lg",
+                                  !useCategory && tone.rail,
+                                  useCategory && catHex && "bg-transparent",
+                                )}
+                                style={
+                                  useCategory && catHex
+                                    ? { backgroundColor: categoryAccentColor(catHex) }
+                                    : undefined
+                                }
+                              />
+                              <span className="flex min-w-0 flex-1 items-center gap-1 truncate px-1.5 py-1">
+                                {courseChip ? (
+                                  <span
+                                    className={cn(
+                                      "inline-flex shrink-0 items-center justify-center rounded border border-blue-700/35 bg-white/90 px-1 font-bold leading-none tracking-tight text-blue-900 shadow-sm tabular-nums",
+                                      "dark:border-blue-400/45 dark:bg-blue-950/75 dark:text-blue-100",
+                                      density === "immersive"
+                                        ? "h-4 min-w-[1.1rem] text-[8px]"
+                                        : "h-[18px] min-w-[1.35rem] text-[9px]",
+                                    )}
+                                    title="Course tag"
+                                  >
+                                    {courseChip}
+                                  </span>
+                                ) : null}
+                                <span className="min-w-0 truncate">
+                                  {block.source === "course" && block.courseCode?.trim()
+                                    ? block.courseName
+                                    : labelText || block.courseName}
+                                </span>
+                              </span>
+                            </span>
                           </button>
                         );
                       })}
@@ -1034,7 +1078,8 @@ export function WeekCalendar({
                               .join(" ")
                               .trim();
                             const inferTitle = labelText || block.courseName || block.courseId;
-                            const toneKey = inferScheduleEventToneKey({
+                            const toneKey = scheduleVisualToneKey({
+                              source: block.source,
                               kind: isStudy ? "study" : "class",
                               title: inferTitle,
                             });
@@ -1047,12 +1092,19 @@ export function WeekCalendar({
                             );
                             const highlighted = selected || draggingThis;
                             const catHex = block.categoryColor?.trim();
-                            const useCategoryColor = Boolean(catHex);
+                            const useCategoryColor = block.source === "calendar" && Boolean(catHex);
+                            const courseChip =
+                              block.source === "course"
+                                ? courseCalendarShortLabel({
+                                    courseCode: block.courseCode,
+                                    courseName: block.courseName,
+                                  })
+                                : null;
                             const startMinuteShown = draggingThis
                               ? snapMinute(block.startMinute)
                               : block.startMinute;
                             const className = cn(
-                              "absolute z-[1] overflow-hidden rounded-2xl px-1.5 py-1 text-left leading-tight transition hover:brightness-[0.98] active:brightness-95",
+                              "absolute z-[1] overflow-hidden rounded-2xl p-0 text-left leading-tight transition hover:brightness-[0.98] active:brightness-95",
                               draggingThis && "!transition-none",
                               !useCategoryColor && (highlighted ? tone.cardSelected : tone.card),
                               useCategoryColor && "shadow-sm",
@@ -1071,7 +1123,10 @@ export function WeekCalendar({
                                   ? "text-white/80"
                                   : "text-[#111827]/65 dark:text-muted-foreground",
                             );
-                            const titleLine = labelText || block.courseName || "Event";
+                            const titleLine =
+                              block.source === "course" && block.courseCode?.trim()
+                                ? block.courseName
+                                : labelText || block.courseName || "Event";
                             const inner = (
                               <>
                                 {effectiveHeight > 0 ? (
@@ -1091,17 +1146,39 @@ export function WeekCalendar({
                                     {formatTime(startMinuteShown)}
                                   </p>
                                 ) : null}
-                                <p
+                                <div
                                   className={cn(
-                                    "mt-px truncate text-left font-semibold leading-snug",
-                                    cfg.blockTitleClass,
-                                    !useCategoryColor && (highlighted ? tone.titleSelected : tone.title),
-                                    useCategoryColor &&
-                                      (highlighted ? "text-white" : "text-[#111827] dark:text-foreground"),
+                                    "mt-px flex min-w-0 items-center gap-0.5",
+                                    effectiveHeight <= cfg.metaLocPct * 0.35 && "min-h-0",
                                   )}
                                 >
-                                  {titleLine}
-                                </p>
+                                  {courseChip ? (
+                                    <span
+                                      className={cn(
+                                        "inline-flex shrink-0 items-center justify-center rounded border border-blue-700/35 bg-white/90 px-1 font-bold leading-none tracking-tight text-blue-900 shadow-sm tabular-nums",
+                                        "dark:border-blue-400/45 dark:bg-blue-950/75 dark:text-blue-100",
+                                        highlighted && "border-white/45 bg-white/30 text-white",
+                                        density === "immersive"
+                                          ? "h-4 min-w-[1.1rem] text-[8px]"
+                                          : "h-[18px] min-w-[1.35rem] text-[9px]",
+                                      )}
+                                      title="Course tag"
+                                    >
+                                      {courseChip}
+                                    </span>
+                                  ) : null}
+                                  <p
+                                    className={cn(
+                                      "min-w-0 flex-1 truncate text-left font-semibold leading-snug",
+                                      cfg.blockTitleClass,
+                                      !useCategoryColor && (highlighted ? tone.titleSelected : tone.title),
+                                      useCategoryColor &&
+                                        (highlighted ? "text-white" : "text-[#111827] dark:text-foreground"),
+                                    )}
+                                  >
+                                    {titleLine}
+                                  </p>
+                                </div>
                                 {effectiveHeight > cfg.metaLocPct && block.location ? (
                                   <p className={cn("mt-px", metaCls)}>{block.location}</p>
                                 ) : null}
@@ -1109,6 +1186,22 @@ export function WeekCalendar({
                                   <p className={cn("mt-px", metaCls)}>{block.withLabel}</p>
                                 ) : null}
                               </>
+                            );
+                            const railStyle =
+                              useCategoryColor && catHex
+                                ? { backgroundColor: categoryAccentColor(catHex) }
+                                : undefined;
+                            const railClass = cn(
+                              "w-1 shrink-0 self-stretch rounded-l-2xl",
+                              !useCategoryColor && (highlighted ? tone.railSelected : tone.rail),
+                            );
+                            const innerWithRail = (
+                              <div className="flex h-full min-h-0 w-full flex-row overflow-hidden rounded-[inherit]">
+                                <div aria-hidden className={railClass} style={railStyle} />
+                                <div className="flex min-h-0 min-w-0 flex-1 flex-col items-start justify-start px-1.5 py-1">
+                                  {inner}
+                                </div>
+                              </div>
                             );
                             const title = `${block.courseName} · ${formatTime(startMinuteShown)}`;
                             const columnWidth = 100 / Math.max(block.columnCount, 1);
@@ -1233,7 +1326,7 @@ export function WeekCalendar({
                                   onOpenItem?.(block, occurrenceDate);
                                 }}
                               >
-                                <div className="flex h-full flex-col items-start justify-start">{inner}</div>
+                                {innerWithRail}
                               </button>
                             );
                           })}

@@ -1,4 +1,5 @@
 import { requireOnboardedUser } from "@/lib/auth/guards";
+import { isCalendarCourseMirrorRow } from "@/lib/calendar/calendar-course-mirror";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
 import { calendarEventSchema } from "@/lib/validators/calendar";
@@ -14,7 +15,7 @@ export async function PATCH(
 
     const existing = await prisma.calendarEntry.findFirst({
       where: { id: eventId, userId: user.id },
-      select: { id: true },
+      select: { id: true, source: true, courseScheduleMirrorKey: true },
     });
 
     if (!existing) {
@@ -50,7 +51,15 @@ export async function PATCH(
       return error("Some classmates can no longer be added to this event.", 400);
     }
 
-    if (values.categoryId) {
+    const mirrorCourse = isCalendarCourseMirrorRow(existing);
+    let resolvedCategoryId: string | null | undefined = undefined;
+    if (mirrorCourse) {
+      const courseCat = await prisma.userCalendarCategory.findFirst({
+        where: { userId: user.id, presetKey: "course" },
+        select: { id: true },
+      });
+      resolvedCategoryId = courseCat?.id ?? null;
+    } else if (values.categoryId) {
       const cat = await prisma.userCalendarCategory.findFirst({
         where: { id: values.categoryId, userId: user.id },
         select: { id: true },
@@ -58,6 +67,9 @@ export async function PATCH(
       if (!cat) {
         return error("Choose a valid calendar category.", 400);
       }
+      resolvedCategoryId = values.categoryId;
+    } else if (values.categoryId !== undefined) {
+      resolvedCategoryId = values.categoryId;
     }
 
     await prisma.calendarEntry.update({
@@ -66,7 +78,7 @@ export async function PATCH(
         title: values.title.trim(),
         location: values.location?.trim() || null,
         note: values.note?.trim() || null,
-        ...(values.categoryId !== undefined ? { categoryId: values.categoryId } : {}),
+        ...(resolvedCategoryId !== undefined ? { categoryId: resolvedCategoryId } : {}),
         repeatRule: values.repeat,
         repeatUntil: values.repeat === "NONE" ? null : values.repeatUntil ? new Date(values.repeatUntil) : null,
         startAt: new Date(values.startAt),

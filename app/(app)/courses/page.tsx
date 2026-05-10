@@ -369,6 +369,9 @@ function CoursesHeader({ selectedSchool }: { selectedSchool: SchoolCode }) {
     <div className="flex items-start justify-between gap-3">
       <header className="min-w-0">
         <h1 className="page-screen-title">Courses</h1>
+        <p className="page-screen-subtitle mt-0.5">
+          Browse popular classes, join your schedule, and bookmark courses to revisit later.
+        </p>
       </header>
 
       <div className="shrink-0 space-y-1">

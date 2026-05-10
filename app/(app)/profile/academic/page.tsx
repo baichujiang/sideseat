@@ -23,12 +23,14 @@ export default async function ProfileAcademicPage() {
   const schoolShort = schoolOptions.find((s) => s.value === schoolCode)?.shortLabel ?? schoolCode;
 
   return (
-    <div className="space-y-5 pb-2">
+    <div className="space-y-4 pb-2">
       <header className="flex items-center gap-2 px-0.5">
         <BackLink href="/profile" label="Back" />
         <div>
           <h1 className="page-screen-title">Edit profile</h1>
-          <p className="page-screen-subtitle mt-0.5">School, major, semester, languages, and verification.</p>
+          <p className="page-screen-subtitle mt-0.5 text-[13px] leading-snug">
+            School, major, semester, languages, and verification.
+          </p>
         </div>
       </header>
 

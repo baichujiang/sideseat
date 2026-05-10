@@ -12,6 +12,7 @@ import { computeEventOverlapLayout } from "@/lib/calendar/event-overlap-layout";
 import {
   inferScheduleEventToneKey,
   SCHEDULE_EVENT_TONE_STYLES,
+  scheduleVisualToneKey,
 } from "@/lib/schedule-event-card-tone";
 import { isLongOrAllDayTimedMinutes } from "@/lib/calendar/long-calendar-block";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,10 @@ export type DayTimelineItem = {
   repeatUntilISO?: string | null;
   eventParticipants?: Array<{ userId: string | null; name: string }>;
   courseId?: string | null;
+  /** Enrolled course grid chip (two letters / code prefix). */
+  courseShortLabel?: string;
+  /** Class schedule: plain course name (title may still be "code · name" for search). */
+  courseName?: string | null;
   categoryId?: string | null;
   categoryName?: string | null;
   categoryColor?: string | null;
@@ -167,6 +172,14 @@ export function ScheduleDayTimeline({
               const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
               const catHex = item.categoryColor?.trim();
               const useCategory = Boolean(catHex);
+              const allDayRailStyle =
+                useCategory && catHex
+                  ? { backgroundColor: categoryAccentColor(catHex) }
+                  : undefined;
+              const allDayRailClass = cn(
+                "w-1 shrink-0 self-stretch rounded-l-lg",
+                !useCategory && tone.rail,
+              );
               return (
                 <button
                   key={`${item.kind}-${item.id}`}
@@ -177,7 +190,7 @@ export function ScheduleDayTimeline({
                     onOpenItem?.(item);
                   }}
                   className={cn(
-                    "max-w-full truncate rounded-lg px-2.5 py-1.5 text-left text-[12px] font-semibold leading-snug transition",
+                    "max-w-full truncate rounded-lg p-0 text-left text-[12px] font-semibold leading-snug transition",
                     "hover:brightness-[0.98] active:brightness-95",
                     !useCategory && tone.card,
                     useCategory && "border border-black/10 shadow-sm dark:border-white/10",
@@ -186,7 +199,10 @@ export function ScheduleDayTimeline({
                     useCategory && catHex ? categoryBlockSurfaceStyle(catHex, false) : undefined
                   }
                 >
-                  {item.title}
+                  <span className="flex max-w-full flex-row overflow-hidden rounded-[inherit]">
+                    <span aria-hidden className={allDayRailClass} style={allDayRailStyle} />
+                    <span className="min-w-0 flex-1 truncate px-2.5 py-1.5">{item.title}</span>
+                  </span>
                 </button>
               );
             })}
@@ -383,16 +399,17 @@ function TimelineBlock({
   const isStudy = item.kind === "study";
   const Icon = isStudy ? CalendarClock : BookOpen;
 
-  const toneKey = inferScheduleEventToneKey({
+  const toneKey = scheduleVisualToneKey({
+    source: item.source,
     kind: isStudy ? "study" : "class",
     title: item.title,
   });
   const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
   const isDraftNewTone = toneKey === "draftNew";
   const catHex = item.categoryColor?.trim();
-  const useCategoryColor = Boolean(catHex);
+  const useCategoryColor = item.source === "calendar" && Boolean(catHex);
   const toneClass = cn(
-    "absolute overflow-hidden rounded-2xl px-2 py-1.5 text-left transition",
+    "absolute overflow-hidden rounded-2xl p-0 text-left transition",
     !useCategoryColor && (selected ? tone.cardSelected : tone.card),
     useCategoryColor && "shadow-sm",
     state === "past" ? "opacity-55" : undefined,
@@ -439,18 +456,31 @@ function TimelineBlock({
         </p>
       ) : null}
       <div className="mt-0.5 flex min-h-0 items-center gap-1.5">
-        <Icon
-          className={cn(
-            "h-3.5 w-3.5 shrink-0",
-            !useCategoryColor && (selected ? tone.accentColorSelected : tone.accentColor),
-          )}
-          style={
-            useCategoryColor && catHex
-              ? { color: selected ? "#ffffff" : categoryAccentColor(catHex) }
-              : undefined
-          }
-          strokeWidth={2.25}
-        />
+        {item.source === "course" && item.courseShortLabel ? (
+          <span
+            className={cn(
+              "inline-flex h-[1.125rem] min-w-[1.35rem] shrink-0 items-center justify-center rounded-md border border-blue-700/30 bg-white px-1 text-[10px] font-bold leading-none tracking-tight text-blue-900 shadow-sm tabular-nums",
+              "dark:border-blue-400/40 dark:bg-blue-950/70 dark:text-blue-100",
+              selected && "border-white/50 bg-white/25 text-white shadow-none",
+            )}
+            title="Course tag"
+          >
+            {item.courseShortLabel}
+          </span>
+        ) : (
+          <Icon
+            className={cn(
+              "h-3.5 w-3.5 shrink-0",
+              !useCategoryColor && (selected ? tone.accentColorSelected : tone.accentColor),
+            )}
+            style={
+              useCategoryColor && catHex
+                ? { color: selected ? "#ffffff" : categoryAccentColor(catHex) }
+                : undefined
+            }
+            strokeWidth={2.25}
+          />
+        )}
         <p
           className={cn(
             "min-w-0 flex-1 truncate text-left text-[13px] font-bold leading-snug",
@@ -458,7 +488,9 @@ function TimelineBlock({
             useCategoryColor && (selected ? "text-white" : "text-[#111827] dark:text-foreground"),
           )}
         >
-          {item.title}
+          {item.source === "course" && item.courseName?.trim()
+            ? item.courseName.trim()
+            : item.title}
         </p>
       </div>
       {showLocationRow ? (
@@ -488,6 +520,15 @@ function TimelineBlock({
       : positionStyle;
   const title = `${item.title} · ${formatHM(item.startMinute)}`;
 
+  const railStyle =
+    useCategoryColor && catHex
+      ? { backgroundColor: categoryAccentColor(catHex) }
+      : undefined;
+  const railClass = cn(
+    "w-1 shrink-0 self-stretch rounded-l-2xl",
+    !useCategoryColor && (selected ? tone.railSelected : tone.rail),
+  );
+
   return (
     <button
       type="button"
@@ -503,7 +544,12 @@ function TimelineBlock({
         onSelect();
       }}
     >
-      <div className="flex h-full flex-col items-start justify-start">{inner}</div>
+      <div className="flex h-full min-h-0 w-full flex-row overflow-hidden rounded-[inherit]">
+        <div aria-hidden className={railClass} style={railStyle} />
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col items-start justify-start px-2 py-1.5">
+          {inner}
+        </div>
+      </div>
     </button>
   );
 }

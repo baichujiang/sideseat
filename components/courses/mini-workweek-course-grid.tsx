@@ -667,52 +667,47 @@ export function MiniWorkweekCourseGrid({
 
       {!readOnly && selected && selectedIndex !== null && WORKDAYS.includes(selected.weekday) ? (
         <div className="rounded-xl border border-border/70 bg-card p-3">
-          {/* Header: back (left) / title (center) / confirm (right) */}
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              aria-label="Close"
-              onClick={() => setSelectedIndex(null)}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            </button>
-            <div className="text-center">
+          {/* Header: title (center) + single Done control (both previously duplicated close) */}
+          <div className="flex items-center gap-2">
+            <span className="h-7 w-7 shrink-0" aria-hidden />
+            <div className="min-w-0 flex-1 text-center">
               <p className="text-[11px] font-medium text-foreground">{DAY_SHORT[selected.weekday]}</p>
               <p className="line-clamp-1 text-[10px] text-muted-foreground">{courseTitle}</p>
             </div>
             <button
               type="button"
-              className="flex h-7 w-7 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/10"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/10"
               aria-label="Done"
               onClick={() => setSelectedIndex(null)}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </button>
           </div>
-          {/* Time inputs */}
-          <div className="mt-2.5 grid grid-cols-2 gap-2">
-            <div>
+          {/* Time inputs — compact: default Input chrome is tall/rounded for this narrow sheet */}
+          <div className="mt-2.5 mx-auto grid w-full max-w-[13rem] grid-cols-2 gap-x-2 gap-y-0.5">
+            <div className="min-w-0">
               <label className="text-[10px] text-muted-foreground">Start</label>
               <Input
                 type="time"
-                className="mt-0.5 h-9 text-[13px]"
+                step={300}
+                className="mt-0.5 h-8 w-full min-w-0 rounded-lg px-2 py-0 text-xs tabular-nums leading-8 [&::-webkit-datetime-edit-ampm-field]:hidden"
                 value={selected.start}
                 onChange={(e) => updateSession(selectedIndex, { start: e.target.value })}
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="text-[10px] text-muted-foreground">End</label>
               <Input
                 type="time"
-                className="mt-0.5 h-9 text-[13px]"
+                step={300}
+                className="mt-0.5 h-8 w-full min-w-0 rounded-lg px-2 py-0 text-xs tabular-nums leading-8 [&::-webkit-datetime-edit-ampm-field]:hidden"
                 value={selected.end}
                 onChange={(e) => updateSession(selectedIndex, { end: e.target.value })}
               />
             </div>
           </div>
           <Input
-            className="mt-2 h-9 text-[13px]"
+            className="mt-2 h-8 rounded-lg px-2.5 py-0 text-xs"
             placeholder="Location (optional)"
             value={selected.location}
             onChange={(e) => updateSession(selectedIndex, { location: e.target.value })}

@@ -1,9 +1,14 @@
-/** Optional user-facing support address; set `NEXT_PUBLIC_SUPPORT_EMAIL` to show on Me → Account. */
-export function getSupportMailto(): string | null {
+/** Optional public support address (same env powers {@link getSupportMailto}). */
+export function getPublicSupportEmail(): string | null {
   const raw = process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim();
-  if (!raw || !raw.includes("@")) {
-    return null;
-  }
+  if (!raw || !raw.includes("@")) return null;
+  return raw;
+}
+
+/** Optional `mailto:` for non-feedback surfaces (e.g. About). */
+export function getSupportMailto(): string | null {
+  const raw = getPublicSupportEmail();
+  if (!raw) return null;
   return `mailto:${raw}?subject=${encodeURIComponent("SideSeat support")}`;
 }
 

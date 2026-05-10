@@ -7,7 +7,7 @@ import { apiFetch } from "@/lib/auth/api-fetch";
 import type { UserGender } from "@prisma/client";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { z } from "zod";
 
 import { AvatarCropEditor } from "@/components/profile/avatar-crop-editor";
@@ -30,6 +30,29 @@ const ROW =
   "flex min-h-[3.25rem] w-full items-center justify-between gap-3 px-4 py-3 text-left active:bg-muted/70";
 
 const SAVE_RED = "bg-[#ff2442] text-white hover:bg-[#e61e3a]";
+
+/** Matches `BackLink` pill — sheets use a button instead of routing. */
+const SHEET_BACK_BTN_CLASS =
+  "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E7E0D6] bg-white text-foreground shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors hover:border-[#D4C9BA] hover:bg-[#FAF8F5] active:bg-[#F3EFE8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 dark:border-border dark:bg-card dark:shadow-none dark:hover:bg-muted/60 dark:active:bg-muted/80 dark:focus-visible:ring-blue-400/40";
+
+function SheetScreenHeader({
+  title,
+  onBack,
+  disabled,
+}: {
+  title: string;
+  onBack: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <header className="flex shrink-0 items-center gap-2 border-b border-border px-3 py-2.5">
+      <button type="button" aria-label="Back" disabled={disabled} onClick={onBack} className={SHEET_BACK_BTN_CLASS}>
+        <ChevronLeft className="h-5 w-5" strokeWidth={2.25} aria-hidden />
+      </button>
+      <h2 className="min-w-0 flex-1 truncate text-[15px] font-semibold leading-tight text-foreground">{title}</h2>
+    </header>
+  );
+}
 
 const heroCardClass =
   "relative overflow-hidden rounded-2xl border border-classmates-edge bg-classmates-surface shadow-[0_4px_16px_rgba(15,23,42,0.05)] dark:border-border dark:bg-card";
@@ -422,29 +445,44 @@ export function ProfileIdentitySheets({
             className="flex min-h-0 flex-1 flex-col overflow-hidden"
             style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
           >
-            {isCropOpen ? (
-              <div className="max-h-[min(82dvh,720px)] overflow-y-auto px-4 py-4">
-                <AvatarCropEditor
-                  file={avatarCropFile}
-                  pending={pending}
-                  onCancel={() => setAvatarCropFile(null)}
-                  onConfirm={async (nextFile) => {
-                    const mode = avatarUploadTargetRef.current;
-                    setAvatarCropFile(null);
-                    runAvatarUpload(nextFile, mode);
+            {isCropOpen && avatarCropFile ? (
+              <>
+                <SheetScreenHeader
+                  title="Adjust photo"
+                  disabled={pending}
+                  onBack={() => {
+                    if (!pending) setAvatarCropFile(null);
                   }}
                 />
-                {error ? <p className="mt-3 text-center text-[12px] text-destructive">{error}</p> : null}
-              </div>
+                <p className="px-4 pt-3 text-center text-[12px] text-muted-foreground">
+                  Drag to reposition, then zoom until it looks right in the circle.
+                </p>
+                <div className="max-h-[min(82dvh,720px)] overflow-y-auto px-4 pb-4 pt-2">
+                  <AvatarCropEditor
+                    file={avatarCropFile}
+                    pending={pending}
+                    showIntroText={false}
+                    onCancel={() => setAvatarCropFile(null)}
+                    onConfirm={async (nextFile) => {
+                      const mode = avatarUploadTargetRef.current;
+                      setAvatarCropFile(null);
+                      runAvatarUpload(nextFile, mode);
+                    }}
+                  />
+                  {error ? <p className="mt-3 text-center text-[12px] text-destructive">{error}</p> : null}
+                </div>
+              </>
             ) : null}
 
             {sheet === "edit" && !isCropOpen ? (
               <>
-                <div className="border-b border-border px-4 py-3 text-center text-[16px] font-semibold text-foreground">
-                  Edit profile
-                </div>
+                <SheetScreenHeader
+                  title="Edit profile"
+                  disabled={pending}
+                  onBack={() => setSheet(null)}
+                />
                 {sheetProfileInitialValues && sheetProfileFormKey ? (
-                  <div className="max-h-[min(85dvh,720px)] overflow-y-auto px-4 py-4">
+                  <div className="max-h-[min(85dvh,720px)] overflow-y-auto px-3 py-3">
                     <ProfileForm
                       key={sheetProfileFormKey}
                       variant="sheet"
@@ -458,7 +496,7 @@ export function ProfileIdentitySheets({
                     <Button
                       type="button"
                       variant="ghost"
-                      className="mt-3 h-10 w-full text-[14px] text-muted-foreground"
+                      className="mt-2 h-9 w-full text-[13px] text-muted-foreground"
                       onClick={() => setSheet(null)}
                     >
                       Cancel
@@ -546,9 +584,11 @@ export function ProfileIdentitySheets({
 
             {sheet === "avatar" && !isCropOpen ? (
               <>
-                <div className="border-b border-border px-4 py-3 text-center text-[16px] font-semibold text-foreground">
-                  Photo
-                </div>
+                <SheetScreenHeader
+                  title="Photo"
+                  disabled={pending}
+                  onBack={() => setSheet(avatarReturnToEdit ? "edit" : null)}
+                />
                 <div className="max-h-[52dvh] overflow-y-auto px-3 pb-2 pt-3">
                   <div className="mb-4 flex flex-col items-center gap-2">
                     <PresetAvatar
@@ -610,9 +650,11 @@ export function ProfileIdentitySheets({
 
             {sheet === "name" && !isCropOpen ? (
               <>
-                <div className="border-b border-border px-4 py-3 text-center text-[16px] font-semibold text-foreground">
-                  Name
-                </div>
+                <SheetScreenHeader
+                  title="Name"
+                  disabled={pending}
+                  onBack={() => setSheet(null)}
+                />
                 <div className="px-4 py-4">
                   <Input
                     value={draftName}
@@ -639,9 +681,11 @@ export function ProfileIdentitySheets({
 
             {sheet === "bio" && !isCropOpen ? (
               <>
-                <div className="border-b border-border px-4 py-3 text-center text-[16px] font-semibold text-foreground">
-                  Bio
-                </div>
+                <SheetScreenHeader
+                  title="Bio"
+                  disabled={pending}
+                  onBack={() => setSheet(null)}
+                />
                 <div className="px-4 py-4">
                   <Textarea
                     value={draftBio}

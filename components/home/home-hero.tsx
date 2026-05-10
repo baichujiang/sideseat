@@ -5,6 +5,37 @@ import { format } from "date-fns";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { cn } from "@/lib/utils";
 
+/** Compact desk-calendar visual for Home (date also exposed via `aria-label`). */
+function HomeCalendarVisual({ date }: { date: Date }) {
+  const month = format(date, "MMM");
+  const dayNum = format(date, "d");
+  const weekday = format(date, "EEE");
+  const label = format(date, "EEEE, MMMM d, yyyy");
+
+  return (
+    <div
+      className={cn(
+        "pointer-events-none flex w-[4.25rem] select-none flex-col overflow-hidden rounded-xl border border-blue-200/90 bg-white shadow-[0_2px_10px_rgba(37,99,235,0.12)]",
+        "dark:border-blue-800/55 dark:bg-card dark:shadow-[0_2px_12px_rgba(0,0,0,0.2)]",
+      )}
+      aria-label={label}
+      role="img"
+    >
+      <div className="bg-[#2563EB] px-1 py-1 text-center text-[10px] font-semibold uppercase tracking-wide text-white dark:bg-blue-500">
+        {month}
+      </div>
+      <div className="flex flex-col items-center justify-center py-1.5">
+        <span className="text-[22px] font-bold leading-none tabular-nums text-[#111827] dark:text-foreground">
+          {dayNum}
+        </span>
+        <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#8A94A6] dark:text-muted-foreground">
+          {weekday}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 /**
  * Home hero — contextual greeting + light hint toward the schedule below.
  *
@@ -22,41 +53,38 @@ export function HomeHero({
 }) {
   const name = nickname?.trim() || "Student";
   const greeting = greetingFor(nowDate.getHours());
-  const todayLine = format(nowDate, "EEEE, MMMM d");
 
   return (
     <header className="flex items-center justify-between gap-3">
-      <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-[#8A94A6] dark:text-muted-foreground/80">
-          {todayLine}
-        </p>
+      <div className="flex min-w-0 flex-1 items-center justify-start gap-1.5">
         <h1
           className={cn(
-            "mt-0.5 truncate text-[20px] font-bold leading-tight tracking-tight text-[#111827]",
+            "min-w-0 shrink truncate text-[20px] font-bold leading-tight tracking-tight text-[#111827]",
             "dark:text-foreground",
           )}
         >
           {greeting}, {name}
         </h1>
-      </div>
-      <Link
-        href={"/profile" as Route}
-        aria-label="Open profile"
-        className={cn(
-          "shrink-0 rounded-full p-1.5 -m-1.5 touch-manipulation transition hover:opacity-90 active:opacity-85",
-          "inline-flex items-center justify-center",
-        )}
-      >
-        <span
+        <Link
+          href={"/profile" as Route}
+          aria-label="Open profile"
           className={cn(
-            "inline-flex h-14 w-14 items-center justify-center overflow-hidden rounded-full",
-            "border border-[#E7E0D6] bg-white shadow-[0_2px_8px_rgba(15,23,42,0.08)]",
-            "dark:border-border dark:bg-card dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]",
+            "shrink-0 rounded-full p-1 -m-1 touch-manipulation transition hover:opacity-90 active:opacity-85",
+            "inline-flex items-center justify-center",
           )}
         >
-          <PresetAvatar id={avatarUrl} size={56} className="h-14 w-14" />
-        </span>
-      </Link>
+          <span
+            className={cn(
+              "inline-flex h-14 w-14 items-center justify-center overflow-hidden rounded-full",
+              "border border-[#E7E0D6] bg-white shadow-[0_2px_8px_rgba(15,23,42,0.08)]",
+              "dark:border-border dark:bg-card dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]",
+            )}
+          >
+            <PresetAvatar id={avatarUrl} size={56} className="h-14 w-14" />
+          </span>
+        </Link>
+      </div>
+      <HomeCalendarVisual date={nowDate} />
     </header>
   );
 }

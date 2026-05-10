@@ -47,6 +47,7 @@ import {
   berlinWeekdayFromInstant,
   scheduleDateKeyInBerlin,
 } from "@/lib/calendar/schedule-berlin";
+import { courseCalendarShortLabel } from "@/lib/calendar/course-calendar-short-label";
 import { cn } from "@/lib/utils";
 
 type ViewKind = "day" | "week" | "month";
@@ -60,7 +61,7 @@ export type ClassBlock = {
   startMinute: number;
   endMinute: number;
   location: string | null;
-  /** Tint from the user's "Course" preset category (if any). */
+  /** Only for calendar events; enrolled courses use fixed blue + short label in the UI. */
   categoryColor: string | null;
   categoryId: string | null;
   categoryName: string | null;
@@ -424,6 +425,11 @@ export function ScheduleSurface({
         repeatUntilISO: null,
         eventParticipants: [],
         courseId: b.courseId,
+        courseName: b.courseName,
+        courseShortLabel: courseCalendarShortLabel({
+          courseCode: b.courseCode,
+          courseName: b.courseName,
+        }),
         categoryId: b.categoryId,
         categoryName: b.categoryName,
         categoryColor: b.categoryColor,
@@ -1146,7 +1152,7 @@ function ViewTabs({
       role="tablist"
       aria-label="Schedule view"
       className={cn(
-        "mx-auto flex w-full max-w-[15rem] shrink-0 rounded-full border border-blue-200/90 bg-blue-50/90 p-0.5 sm:max-w-[16rem]",
+        "mx-auto flex w-full max-w-[16.5rem] shrink-0 rounded-full border border-blue-200/90 bg-blue-50/90 p-0.5 sm:max-w-[17.5rem]",
         "dark:border-blue-800/55 dark:bg-blue-950/45",
       )}
     >
@@ -1160,7 +1166,7 @@ function ViewTabs({
             aria-selected={active}
             onClick={() => onChange(t)}
             className={cn(
-              "min-w-0 flex-1 rounded-full px-1.5 py-0.5 text-center text-[11px] capitalize leading-tight transition sm:px-2 sm:py-1 sm:text-xs",
+              "min-h-8 min-w-0 flex-1 rounded-full px-2 py-1 text-center text-xs capitalize leading-tight transition sm:min-h-9 sm:px-2.5 sm:py-1.5 sm:text-[13px]",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/35 focus-visible:ring-offset-1 focus-visible:ring-offset-blue-50",
               "dark:focus-visible:ring-blue-400/45 dark:focus-visible:ring-offset-blue-950",
               active
@@ -1213,13 +1219,13 @@ function ScheduleDateNavToolbar({
       </div>
 
       <div className="justify-self-center">
-        <div className="flex h-8 shrink-0 items-stretch gap-1">
+        <div className="flex h-7 shrink-0 items-stretch gap-0.5">
           <button
             type="button"
             onClick={onStepPrev}
             aria-label="Previous"
             className={cn(
-              "flex w-7 items-center justify-center rounded-xl border border-[#E7E0D6] bg-white text-[#5F6B7A] transition",
+              "flex w-6 items-center justify-center rounded-lg border border-[#E7E0D6] bg-white text-[#5F6B7A] transition",
               "shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:bg-[#FAFAF8] hover:text-[#111827] active:bg-[#F3F0EA]/90",
               "dark:border-border dark:bg-card dark:shadow-none dark:text-muted-foreground dark:hover:bg-muted/45 dark:hover:text-foreground",
             )}
@@ -1231,7 +1237,7 @@ function ScheduleDateNavToolbar({
             onClick={onJumpToday}
             aria-label="Jump to today"
             className={cn(
-              "min-w-0 rounded-xl border border-[#E7E0D6] bg-white px-2.5 text-center text-[12px] font-medium tabular-nums leading-none text-[#5F6B7A] transition",
+              "min-w-0 rounded-lg border border-[#E7E0D6] bg-white px-2 text-center text-xs font-medium tabular-nums leading-none text-[#5F6B7A] transition",
               "shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:bg-[#FAFAF8] hover:text-[#111827] active:bg-[#F3F0EA]/90",
               "dark:border-border dark:bg-card dark:shadow-none dark:text-muted-foreground dark:hover:bg-muted/45 dark:hover:text-foreground",
             )}
@@ -1243,12 +1249,12 @@ function ScheduleDateNavToolbar({
             onClick={onStepNext}
             aria-label="Next"
             className={cn(
-              "flex w-7 items-center justify-center rounded-xl border border-[#E7E0D6] bg-white text-[#5F6B7A] transition",
+              "flex w-6 items-center justify-center rounded-lg border border-[#E7E0D6] bg-white text-[#5F6B7A] transition",
               "shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:bg-[#FAFAF8] hover:text-[#111827] active:bg-[#F3F0EA]/90",
               "dark:border-border dark:bg-card dark:shadow-none dark:text-muted-foreground dark:hover:bg-muted/45 dark:hover:text-foreground",
             )}
           >
-            <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
+            <ChevronRight className="h-3 w-3" strokeWidth={2.25} aria-hidden />
           </button>
         </div>
       </div>

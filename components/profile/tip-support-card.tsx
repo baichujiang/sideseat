@@ -45,25 +45,7 @@ export function TipSupportCard({ enabled, compact = false }: { enabled: boolean;
   }
 
   if (!enabled) {
-    return (
-      <div
-        className={cn(
-          "rounded-xl border border-dashed border-border/80 bg-muted/25 text-muted-foreground",
-          compact ? "px-3 py-2 text-[11px] leading-snug" : "px-4 py-3.5 text-[13px] leading-relaxed",
-        )}
-      >
-        {compact ? (
-          <>Tips off — set Stripe keys in deploy.</>
-        ) : (
-          <>
-            Tips are not enabled in this environment. Add{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">STRIPE_SECRET_KEY</code> and{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">NEXT_PUBLIC_APP_URL</code> in production to turn them
-            on.
-          </>
-        )}
-      </div>
-    );
+    return null;
   }
 
   return (

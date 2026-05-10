@@ -15,7 +15,6 @@ import { TipSupportCard } from "@/components/profile/tip-support-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { getSessionUser } from "@/lib/auth/session";
-import { getSupportMailto } from "@/lib/constants/support";
 import { isConfiguredAdmin } from "@/lib/constants/app";
 import { DEGREE_LEVEL_LABELS } from "@/lib/constants/majors";
 import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
@@ -148,9 +147,18 @@ export default async function ProfilePage({
 
   return (
     <div className="space-y-3 pb-2">
-      <header className="flex items-center justify-between gap-3 px-0.5">
-        <h1 className="page-screen-title min-w-0">Me</h1>
-        <FeedbackFormCard mailtoHref={getSupportMailto()} variant="header" />
+      <header className="px-0.5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="page-screen-title">Me</h1>
+            <p className="page-screen-subtitle mt-0.5">
+              Your profile, school verification, and how classmates see you.
+            </p>
+          </div>
+          <div className="shrink-0 pt-0.5">
+            <FeedbackFormCard variant="header" />
+          </div>
+        </div>
       </header>
 
       {!user.onboardingComplete ? (

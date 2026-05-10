@@ -12,7 +12,8 @@ import { AVATAR_IDS, isDisplayableCustomAvatarUrl, isValidAvatarId } from "@/lib
 import { uploadProfileAvatarPhoto } from "@/lib/profile/upload-avatar";
 import { cn } from "@/lib/utils";
 
-const AVATAR_SHEET_PX = "h-[3.25rem] w-[3.25rem]"; /* 52px */
+/** Me edit sheet: match `h-11` display name field for a tighter header row. */
+const AVATAR_SHEET_PX = "h-11 w-11";
 
 export function AvatarPicker({
   initialId,
@@ -80,10 +81,11 @@ export function AvatarPicker({
   };
 
   return (
-    <div className={cn("space-y-2", homepage && "space-y-2.5")}>
+    <div className={cn("space-y-2", homepage && "space-y-2.5", sheet && "space-y-1.5")}>
       <div
         className={cn(
           "flex gap-3",
+          sheet && "gap-2",
           homepage && !sheet ? "items-start" : "items-center",
         )}
       >
@@ -114,12 +116,13 @@ export function AvatarPicker({
           <PresetAvatar
             className={cn(sheet ? AVATAR_SHEET_PX : homepage ? "h-[3.25rem] w-[3.25rem]" : "h-12 w-12")}
             id={selected}
+            size={sheet ? 44 : homepage ? 52 : 48}
           />
         </button>
         <div
           className={cn(
             "min-w-0 flex-1",
-            sheet ? "flex min-h-[3.25rem] items-center" : "pt-px",
+            sheet ? "flex min-h-11 items-center" : "pt-px",
           )}
         >
           {children}

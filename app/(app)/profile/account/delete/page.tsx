@@ -15,7 +15,9 @@ export default async function DeleteAccountPage() {
         <BackLink href="/profile/account" label="Back" />
         <div>
           <h1 className="page-screen-title-ink">Delete account</h1>
-          <p className="page-screen-subtitle mt-0.5">注销账号 · Permanent and irreversible.</p>
+          <p className="page-screen-subtitle mt-0.5">
+            This permanently deletes your account and data. You cannot undo it.
+          </p>
         </div>
       </header>
 

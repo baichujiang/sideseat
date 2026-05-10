@@ -2,9 +2,9 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Plus, Search, UsersRound, X } from "lucide-react";
+import { Check, Plus, Search, UserPlus, UsersRound, X } from "lucide-react";
 
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
@@ -183,9 +183,13 @@ export function InboxCreateSheet({
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Add contact or create group chat"
-        className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-classmates-edge bg-classmates-surface text-foreground shadow-sm transition hover:bg-classmates-warm-alt active:scale-[0.98] dark:border-border dark:bg-card"
+        className={cn(
+          "inline-flex h-10 w-10 items-center justify-center rounded-full border border-classmates-blue-border bg-gradient-to-br from-classmates-blue-soft to-white text-classmates-blue shadow-[0_4px_16px_-6px_rgba(37,99,235,0.45)] transition",
+          "hover:border-classmates-blue/40 hover:shadow-[0_6px_20px_-6px_rgba(37,99,235,0.5)] active:scale-[0.97]",
+          "dark:border-blue-500/45 dark:from-blue-950/55 dark:to-blue-950/25 dark:text-blue-200 dark:shadow-[0_4px_20px_-8px_rgba(59,130,246,0.35)]",
+        )}
       >
-        <Plus className="h-5 w-5" strokeWidth={2.3} />
+        <Plus className="h-5 w-5" strokeWidth={2.4} aria-hidden />
       </button>
 
       <AppPushLayer open={open} onClose={close} zClassName="z-40" panelClassName="w-[min(100vw,28rem)] border-0">
@@ -208,11 +212,24 @@ export function InboxCreateSheet({
               </button>
             </div>
 
-            <div className="mb-4 flex rounded-full border border-border/70 bg-muted/30 p-1">
-              <Segment active={mode === "contact"} onClick={() => setMode("contact")}>
+            <div
+              className={cn(
+                "mb-4 flex gap-0.5 rounded-2xl border border-classmates-blue-border/90 bg-classmates-blue-soft/70 p-1 shadow-inner",
+                "dark:border-blue-800/55 dark:bg-blue-950/30",
+              )}
+            >
+              <Segment
+                active={mode === "contact"}
+                onClick={() => setMode("contact")}
+                icon={<UserPlus className="h-3.5 w-3.5 shrink-0 opacity-90" strokeWidth={2.25} aria-hidden />}
+              >
                 Add contact
               </Segment>
-              <Segment active={mode === "group"} onClick={() => setMode("group")}>
+              <Segment
+                active={mode === "group"}
+                onClick={() => setMode("group")}
+                icon={<UsersRound className="h-3.5 w-3.5 shrink-0 opacity-90" strokeWidth={2.25} aria-hidden />}
+              >
                 New group
               </Segment>
             </div>
@@ -393,14 +410,18 @@ export function InboxCreateSheet({
                 {groupError ? <p className="text-[12px] text-destructive">{groupError}</p> : null}
 
                 <div className="flex gap-2">
-                  <Button type="button" variant="ghost" className="h-11 flex-1 rounded-xl" onClick={close}>
+                  <Button type="button" variant="ghost" className="h-11 flex-1 rounded-xl font-medium" onClick={close}>
                     Cancel
                   </Button>
                   <Button
                     type="button"
-                    className="h-11 flex-1 rounded-xl"
                     disabled={groupSubmitting || selectedIds.length < 2}
                     onClick={() => void createGroup()}
+                    className={cn(
+                      "h-11 flex-1 rounded-xl font-semibold shadow-md transition",
+                      "bg-classmates-blue text-white hover:bg-classmates-blue/92 hover:shadow-lg",
+                      "disabled:opacity-45 disabled:shadow-none dark:bg-blue-600 dark:hover:bg-blue-600/90",
+                    )}
                   >
                     {groupSubmitting ? "Creating…" : "Create group"}
                   </Button>
@@ -417,22 +438,30 @@ export function InboxCreateSheet({
 function Segment({
   active,
   onClick,
+  icon,
   children,
 }: {
   active: boolean;
   onClick: () => void;
-  children: React.ReactNode;
+  icon?: ReactNode;
+  children: ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        "flex-1 rounded-full px-3 py-2 text-[13px] font-semibold transition",
-        active ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+        "flex flex-1 items-center justify-center gap-1.5 rounded-xl px-2 py-2.5 text-[13px] font-semibold transition sm:px-3",
+        active
+          ? cn(
+              "bg-white text-classmates-blue shadow-[0_2px_12px_-4px_rgba(37,99,235,0.35)] ring-1 ring-classmates-blue-border/80",
+              "dark:bg-card dark:text-blue-200 dark:ring-blue-500/30",
+            )
+          : "text-classmates-sub hover:bg-white/70 hover:text-foreground dark:text-zinc-400 dark:hover:bg-blue-950/40 dark:hover:text-zinc-200",
       )}
     >
-      {children}
+      {icon}
+      <span className="truncate">{children}</span>
     </button>
   );
 }

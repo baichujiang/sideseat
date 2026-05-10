@@ -99,7 +99,10 @@ export default async function AdminFeedbackPage({
       </form>
 
       {items.length === 0 ? (
-        <EmptyState title="No feedback yet" description="Submissions from Me → 意见与反馈 will appear here." />
+        <EmptyState
+          title="No feedback yet"
+          description="In-app submissions from Profile (Me), via the top-right feedback button, will appear here."
+        />
       ) : (
         <ul className="space-y-3">
           {items.map((row) => (

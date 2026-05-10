@@ -1,14 +1,12 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { redirect } from "next/navigation";
-import { LifeBuoy, LogOut, MessageSquarePlus, ShieldBan, UserX } from "lucide-react";
+import { Info, LogOut, ShieldBan, UserX } from "lucide-react";
 
 import { LogoutForm } from "@/components/auth/logout-form";
 import { BackLink } from "@/components/nav/back-link";
 import { PushNotificationsCard } from "@/components/profile/push-notifications-card";
-import { Button } from "@/components/ui/button";
 import { getSessionUser } from "@/lib/auth/session";
-import { getSupportMailto } from "@/lib/constants/support";
 import { prisma } from "@/lib/db/prisma";
 
 export default async function ProfileAccountPage() {
@@ -17,7 +15,6 @@ export default async function ProfileAccountPage() {
   if (!user.onboardingComplete) redirect('/onboarding');
 
   const blockedCount = await prisma.block.count({ where: { blockerId: user.id } });
-  const supportMailto = getSupportMailto();
 
   return (
     <div className="space-y-5 pb-2">
@@ -49,35 +46,19 @@ export default async function ProfileAccountPage() {
           </div>
         </Link>
         <Link
-          href={"/profile" as Route}
+          href={"/about" as Route}
           className="flex items-center justify-between gap-3 border-t border-classmates-hairline px-4 py-3.5 transition-colors active:bg-classmates-warm-alt dark:border-border/60 dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
         >
           <div className="flex min-w-0 items-center gap-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-              <MessageSquarePlus className="h-5 w-5" strokeWidth={2} aria-hidden />
+              <Info className="h-5 w-5" strokeWidth={2} aria-hidden />
             </span>
             <div className="min-w-0">
-              <p className="text-[14px] font-semibold leading-tight text-foreground">Send feedback</p>
-              <p className="mt-0.5 text-[12px] text-muted-foreground">Feedback button on Me (top right)</p>
+              <p className="text-[14px] font-semibold leading-tight text-foreground">About</p>
+              <p className="mt-0.5 text-[12px] text-muted-foreground">Product summary and how to reach us by email</p>
             </div>
           </div>
         </Link>
-        {supportMailto ? (
-          <a
-            href={supportMailto}
-            className="flex items-center justify-between gap-3 border-t border-classmates-hairline px-4 py-3.5 transition-colors active:bg-classmates-warm-alt dark:border-border/60 dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
-          >
-            <div className="flex min-w-0 items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                <LifeBuoy className="h-5 w-5" strokeWidth={2} aria-hidden />
-              </span>
-              <div className="min-w-0">
-                <p className="text-[14px] font-semibold leading-tight text-foreground">Help & email</p>
-                <p className="mt-0.5 text-[12px] text-muted-foreground">Email the team</p>
-              </div>
-            </div>
-          </a>
-        ) : null}
         <Link
           href="/profile/account/delete"
           className="flex items-center justify-between gap-3 border-t border-classmates-hairline px-4 py-3.5 transition-colors active:bg-classmates-warm-alt dark:border-border/60 dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
@@ -88,7 +69,9 @@ export default async function ProfileAccountPage() {
             </span>
             <div className="min-w-0">
               <p className="text-[14px] font-semibold leading-tight text-destructive">Delete account</p>
-              <p className="mt-0.5 text-[12px] text-muted-foreground">注销账号 · 永久删除数据</p>
+              <p className="mt-0.5 text-[12px] text-muted-foreground">
+                Permanently remove your profile, data, and access.
+              </p>
             </div>
           </div>
         </Link>

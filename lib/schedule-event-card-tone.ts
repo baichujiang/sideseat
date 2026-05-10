@@ -6,6 +6,8 @@
 export type ScheduleEventToneKey =
   | "draftNew"
   | "study"
+  /** Enrolled class sessions — same blue family as study, distinct from category-colored calendar events. */
+  | "enrolledCourse"
   | "course"
   | "meal"
   | "sports"
@@ -25,6 +27,9 @@ type ToneStyle = {
   accentColorSelected: string;
   title: string;
   titleSelected: string;
+  /** Full-height left accent strip (calendar / schedule cards). */
+  rail: string;
+  railSelected: string;
 };
 
 /** Default study title before the user names the event — reads as provisional on the grid. */
@@ -43,6 +48,8 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     accentColorSelected: "text-[#1D4ED8] dark:text-blue-200",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
     titleSelected: "truncate font-semibold text-[#111827] dark:text-foreground",
+    rail: "bg-[#2563EB] dark:bg-blue-400",
+    railSelected: "bg-[#1D4ED8] dark:bg-blue-300",
   },
   study: {
     card: "rounded-2xl border border-[#BFDBFE] bg-[#EFF6FF] shadow-[0_2px_8px_rgba(37,99,235,0.10)] dark:border-blue-500/40 dark:bg-blue-950/35",
@@ -52,6 +59,19 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
     titleSelected: "truncate font-semibold text-white",
+    rail: "bg-[#1D4ED8] dark:bg-blue-400",
+    railSelected: "bg-white/40",
+  },
+  enrolledCourse: {
+    card: "rounded-2xl border border-[#BFDBFE] bg-[#EFF6FF] shadow-[0_2px_8px_rgba(37,99,235,0.10)] dark:border-blue-500/40 dark:bg-blue-950/35",
+    cardSelected:
+      "rounded-2xl border border-[#1D4ED8] bg-[#2563EB] shadow-[0_4px_12px_rgba(37,99,235,0.22)] dark:border-blue-400 dark:bg-blue-600",
+    accentColor: "text-[#2563EB] dark:text-blue-300",
+    accentColorSelected: "text-white/90",
+    title: "truncate font-semibold text-[#111827] dark:text-foreground",
+    titleSelected: "truncate font-semibold text-white",
+    rail: "bg-[#1D4ED8] dark:bg-blue-400",
+    railSelected: "bg-white/40",
   },
   meal: {
     card: "rounded-2xl border border-[#FED7AA] bg-[#FFF7ED] shadow-[0_2px_8px_rgba(234,88,12,0.08)] dark:border-orange-500/35 dark:bg-orange-950/30",
@@ -61,6 +81,8 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
     titleSelected: "truncate font-semibold text-white",
+    rail: "bg-[#C2410C] dark:bg-orange-400",
+    railSelected: "bg-white/40",
   },
   sports: {
     card: "rounded-2xl border border-[#BBF7D0] bg-[#F0FDF4] shadow-[0_2px_8px_rgba(22,163,74,0.08)] dark:border-emerald-500/35 dark:bg-emerald-950/30",
@@ -70,6 +92,8 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
     titleSelected: "truncate font-semibold text-white",
+    rail: "bg-[#15803D] dark:bg-emerald-400",
+    railSelected: "bg-white/40",
   },
   language: {
     card: "rounded-2xl border border-[#99F6E4] bg-[#F0FDFA] shadow-[0_2px_8px_rgba(15,118,110,0.08)] dark:border-teal-500/35 dark:bg-teal-950/30",
@@ -79,6 +103,8 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
     titleSelected: "truncate font-semibold text-white",
+    rail: "bg-[#0D9488] dark:bg-teal-400",
+    railSelected: "bg-white/40",
   },
   personal: {
     card: "rounded-2xl border border-[#E5E7EB] bg-[#F3F4F6] shadow-[0_2px_8px_rgba(107,114,128,0.08)] dark:border-zinc-600 dark:bg-zinc-900/50",
@@ -88,6 +114,8 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
     titleSelected: "truncate font-semibold text-white",
+    rail: "bg-[#4B5563] dark:bg-zinc-500",
+    railSelected: "bg-white/35",
   },
   planPending: {
     card: "rounded-2xl border border-[#FDE68A] bg-[#FEF3C7] shadow-[0_2px_8px_rgba(217,119,6,0.1)] dark:border-amber-500/35 dark:bg-amber-950/30",
@@ -97,6 +125,8 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
     titleSelected: "truncate font-semibold text-white",
+    rail: "bg-[#B45309] dark:bg-amber-400",
+    railSelected: "bg-white/40",
   },
   /** SideSeat-ish: free / open slot */
   available: {
@@ -107,6 +137,8 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
     titleSelected: "truncate font-semibold text-white",
+    rail: "bg-[#0F766E] dark:bg-cyan-400",
+    railSelected: "bg-white/40",
   },
   /** SideSeat-ish: invitation / request pending */
   pendingRequest: {
@@ -117,6 +149,8 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
     titleSelected: "truncate font-semibold text-white",
+    rail: "bg-[#A16207] dark:bg-amber-400",
+    railSelected: "bg-white/40",
   },
   /** SideSeat-ish: busy / private */
   busy: {
@@ -127,6 +161,8 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
     titleSelected: "truncate font-semibold text-white",
+    rail: "bg-[#4B5563] dark:bg-zinc-500",
+    railSelected: "bg-white/35",
   },
   /** SideSeat-ish: declined / canceled */
   declined: {
@@ -137,6 +173,8 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
     titleSelected: "truncate font-semibold text-white",
+    rail: "bg-[#B91C1C] dark:bg-red-400",
+    railSelected: "bg-white/40",
   },
   /** Default timetable class — same neutral family as Personal, distinct label in UI copy only */
   course: {
@@ -147,6 +185,8 @@ export const SCHEDULE_EVENT_TONE_STYLES: Record<ScheduleEventToneKey, ToneStyle>
     accentColorSelected: "text-white/90",
     title: "truncate font-semibold text-[#111827] dark:text-foreground",
     titleSelected: "truncate font-semibold text-white",
+    rail: "bg-[#334155] dark:bg-slate-400",
+    railSelected: "bg-white/35",
   },
 };
 
@@ -202,4 +242,14 @@ export function inferScheduleEventToneKey(input: {
     return "study";
   }
   return "course";
+}
+
+/** Course enrollments use a fixed blue chrome; calendar entries keep category / inferred tones. */
+export function scheduleVisualToneKey(input: {
+  source: "course" | "calendar";
+  kind: "study" | "class";
+  title: string;
+}): ScheduleEventToneKey {
+  if (input.source === "course") return "enrolledCourse";
+  return inferScheduleEventToneKey({ kind: input.kind, title: input.title });
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { MessageCircle } from "lucide-react";
+import { UsersRound } from "lucide-react";
 import { ConnectionStatus } from "@prisma/client";
 
 import { CourseClassmatesCountChip } from "@/components/courses/course-classmates-count-chip";
@@ -26,6 +26,7 @@ import { formatShortRelativeTime } from "@/lib/format/short-relative-time";
 import { safeReturnPath } from "@/lib/nav/back";
 import { inboxCourseUnreadCounts } from "@/lib/queries/inbox-unread-counts";
 import { weeklyOverlapMinutes, type SessionBlock } from "@/lib/queries/schedule-overlap";
+import { cn } from "@/lib/utils";
 /** Course hub — matches enrolled / popular course cards: blue pill + border. */
 const courseCodeBadgeClassName =
   "inline-flex shrink-0 items-center rounded-full border border-[#BFDBFE] bg-[#EFF6FF] px-2 py-0.5 text-[11px] font-semibold tabular-nums tracking-wide text-[#2563EB] dark:border-blue-800/50 dark:bg-blue-950/40 dark:text-blue-300";
@@ -365,17 +366,25 @@ export default async function CourseDetailPage({
           )}
           <Link
             href={`/courses/${membership.course.id}/chat`}
-            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#2563EB] underline-offset-2 hover:underline dark:text-blue-400"
+            className={cn(
+              "inline-flex items-center gap-2 rounded-full border border-classmates-blue-border bg-classmates-blue-soft px-3 py-1.5 text-[13px] font-semibold text-classmates-blue shadow-sm transition",
+              "hover:border-classmates-blue/35 hover:bg-white hover:shadow-md active:scale-[0.98]",
+              "dark:border-blue-500/40 dark:bg-blue-950/40 dark:text-blue-200 dark:hover:border-blue-400/50 dark:hover:bg-blue-950/60",
+            )}
             title={
               courseChatUnread > 0 || courseChatMetaDetail
                 ? `${courseChatMetaBase}${courseChatMetaDetail ? ` · ${courseChatMetaDetail}` : ""}`
                 : "Open course group chat"
             }
           >
-            <MessageCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} aria-hidden />
-            Group chat
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-classmates-blue text-white shadow-inner dark:bg-blue-500">
+              <UsersRound className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
+            </span>
+            <span className="min-w-0">Group chat</span>
             {courseChatUnread > 0 ? (
-              <span className="tabular-nums text-[#2563EB] dark:text-blue-400">({courseChatUnread})</span>
+              <span className="rounded-full bg-classmates-blue px-1.5 py-px text-[10px] font-bold tabular-nums leading-none text-white dark:bg-blue-500">
+                {courseChatUnread}
+              </span>
             ) : null}
           </Link>
         </div>

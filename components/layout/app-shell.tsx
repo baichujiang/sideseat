@@ -20,36 +20,11 @@ const navItems = [
   { href: "/profile", label: "Me", icon: UserRound },
 ] satisfies Array<{ href: Route; label: string; icon: typeof Calendar }>;
 
-const navItemTone: Partial<
-  Record<
-    Route,
-    {
-      activeTab: string;
-      activeIcon: string;
-      activeLabel: string;
-      inactiveHover: string;
-      inactiveIcon: string;
-      inactiveLabel: string;
-    }
-  >
-> = {
-  "/courses": {
-    activeTab: "bg-[#FFF0D9] text-[#B45309] shadow-[0_1px_2px_rgba(180,83,9,0.10)]",
-    activeIcon: "text-[#D97706]",
-    activeLabel: "text-[#B45309]",
-    inactiveHover: "hover:bg-[#FFF7ED] hover:text-[#9A5B13]",
-    inactiveIcon: "text-[#D29B5A] group-hover:text-[#C27117]",
-    inactiveLabel: "text-[#9C7A4D] group-hover:text-[#9A5B13]",
-  },
-  "/discover": {
-    activeTab: "bg-classmates-blue-soft/90 text-classmates-blue shadow-[0_1px_2px_rgba(37,99,235,0.08)]",
-    activeIcon: "text-classmates-blue",
-    activeLabel: "text-classmates-blue",
-    inactiveHover: "hover:bg-[#EEF6FF] hover:text-[#2563EB]",
-    inactiveIcon: "text-[#72A7E8] group-hover:text-[#2563EB]",
-    inactiveLabel: "text-[#5E88B8] group-hover:text-[#2563EB]",
-  },
-};
+/** Flat bar: light tint only (no nested “card” / shadow), like native tab selection. */
+const navActiveTab =
+  "rounded-[0.65rem] bg-classmates-blue/10 text-classmates-ink dark:bg-blue-500/15 dark:text-foreground";
+const navInactiveTab =
+  "group rounded-[0.65rem] text-classmates-sub active:bg-black/[0.04] dark:active:bg-white/[0.06] [@media(hover:hover)]:hover:bg-black/[0.04] dark:[@media(hover:hover)]:hover:bg-white/[0.06] [@media(hover:hover)]:hover:text-classmates-ink";
 
 /** Mobile shell: bottom tab bar only (no top nav bar). */
 export function AppShell({
@@ -152,59 +127,53 @@ export function AppShell({
       {isChatThread ? null : <PwaInstallBar />}
       {isChatThread ? null : (
         <nav
-          className="fixed bottom-0 left-1/2 z-20 w-full max-w-md -translate-x-1/2 border-t border-classmates-edge bg-classmates-warm-alt/95 px-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl supports-[backdrop-filter]:bg-classmates-warm-alt/92"
+          className="fixed bottom-0 left-1/2 z-20 flex w-full max-w-md -translate-x-1/2 items-stretch border-t border-classmates-edge/80 bg-classmates-warm-alt/95 px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1.5 backdrop-blur-xl supports-[backdrop-filter]:bg-classmates-warm-alt/92 dark:border-border/50 dark:bg-background/92"
           aria-label="Main navigation"
         >
-          <div className="flex rounded-[1.5rem] border border-classmates-edge bg-classmates-warm-alt/95 px-1 py-1 shadow-soft backdrop-blur-xl supports-[backdrop-filter]:bg-classmates-warm-alt/90">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-              const tone = navItemTone[item.href];
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={isActive ? "page" : undefined}
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "flex min-h-[3rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-1 text-[10px] font-semibold leading-tight transition-[background-color,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  isActive ? navActiveTab : navInactiveTab,
+                )}
+              >
+                <span className="relative inline-flex shrink-0">
+                  <Icon
+                    className={cn(
+                      "h-5 w-5 transition-colors duration-200",
+                      isActive
+                        ? "text-classmates-blue dark:text-blue-400"
+                        : "text-classmates-sub group-hover:text-classmates-ink",
+                    )}
+                    strokeWidth={isActive ? 2.5 : 2}
+                    aria-hidden
+                  />
+                  {item.href === "/inbox" ? (
+                    <span className="pointer-events-none absolute -right-1 -top-1">
+                      <InboxUnreadBadge count={liveUnreadTotal} variant="countBrand" />
+                    </span>
+                  ) : null}
+                </span>
+                <span
                   className={cn(
-                    "flex min-h-[3rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-[20px] px-1.5 py-1.5 text-[11px] font-semibold leading-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                    "truncate transition-colors duration-200",
                     isActive
-                      ? tone?.activeTab ?? "bg-classmates-mint/85 text-classmates-ink shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
-                      : tone?.inactiveHover ?? "group text-classmates-sub hover:bg-classmates-mint/55 hover:text-classmates-ink",
-                    !isActive && !tone && "group text-classmates-sub hover:bg-classmates-mint/55 hover:text-classmates-ink",
+                      ? "font-semibold text-classmates-ink dark:text-foreground"
+                      : "text-classmates-sub group-hover:text-classmates-ink",
                   )}
                 >
-                  <span className="relative inline-flex shrink-0">
-                    <Icon
-                      className={cn(
-                        "h-5 w-5",
-                        isActive
-                          ? tone?.activeIcon ?? "text-classmates-ink"
-                          : tone?.inactiveIcon ?? "text-classmates-sub group-hover:text-classmates-ink",
-                      )}
-                      strokeWidth={isActive ? 2.25 : 2}
-                      aria-hidden
-                    />
-                    {item.href === "/inbox" ? (
-                      <span className="pointer-events-none absolute -right-1 -top-1">
-                        <InboxUnreadBadge count={liveUnreadTotal} variant="countBrand" />
-                      </span>
-                    ) : null}
-                  </span>
-                  <span
-                    className={cn(
-                      "truncate",
-                      isActive
-                        ? tone?.activeLabel ?? "text-classmates-ink"
-                        : tone?.inactiveLabel ?? "text-classmates-sub group-hover:text-classmates-ink",
-                    )}
-                  >
-                    {item.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
         </nav>
       )}
     </div>

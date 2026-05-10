@@ -75,7 +75,7 @@ export default async function GroupChatPage({
             </div>
             <Link
               href={infoHref}
-              className="rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground active:bg-muted/80"
+              className="shrink-0 rounded-full border border-border/80 bg-muted/40 px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm transition hover:border-classmates-blue-border hover:bg-classmates-blue-soft hover:text-classmates-blue active:scale-[0.98] dark:hover:border-blue-500/40 dark:hover:bg-blue-950/40 dark:hover:text-blue-200"
             >
               Info
             </Link>

@@ -87,9 +87,13 @@ export function GroupChatAddMembers({
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Add members to group chat"
-        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition hover:bg-muted active:scale-[0.98]"
+        className={cn(
+          "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue shadow-sm transition",
+          "hover:border-classmates-blue/40 hover:bg-white hover:shadow-md active:scale-[0.97]",
+          "dark:border-blue-500/45 dark:bg-blue-950/45 dark:text-blue-200 dark:hover:bg-blue-950/70",
+        )}
       >
-        <Plus className="h-5 w-5" strokeWidth={2.25} />
+        <Plus className="h-[1.15rem] w-[1.15rem]" strokeWidth={2.5} aria-hidden />
       </button>
 
       <AppPushLayer

@@ -10,6 +10,7 @@ import {
   type ClassBlock,
   type StudyEntry,
 } from "@/components/home/schedule-surface";
+import { isCalendarCourseMirrorRow } from "@/lib/calendar/calendar-course-mirror";
 import { ensureUserCalendarCategories } from "@/lib/calendar/default-user-calendar-categories";
 import { getClassScheduleDateRange } from "@/lib/constants/vorlesungszeit";
 import { getSessionUser } from "@/lib/auth/session";
@@ -136,7 +137,7 @@ export default async function HomePage() {
         startMinute: s.startMinute,
         endMinute: s.endMinute,
         location: s.location,
-        categoryColor: courseCategory?.color ?? null,
+        categoryColor: null,
         categoryId: courseCategory?.id ?? null,
         categoryName: courseCategory?.name ?? null,
       })),
@@ -144,24 +145,27 @@ export default async function HomePage() {
 
   // Dates don't serialize cleanly across the client boundary, so ship ISO
   // strings and rehydrate in the client.
-  const studyEntries: StudyEntry[] = calendarEntries.map((e) => ({
-    id: e.id,
-    title: e.title,
-    location: e.location,
-    note: e.note,
-    repeatRule: e.repeatRule,
-    repeatUntilISO: e.repeatUntil?.toISOString() ?? null,
-    startISO: e.startAt.toISOString(),
-    endISO: e.endAt.toISOString(),
-    withLabel: formatWithLabel(e.companions.map((companion) => companion.displayName)),
-    eventParticipants: e.companions.map((companion) => ({
-      userId: companion.userId,
-      name: companion.displayName,
-    })),
-    categoryId: e.categoryId,
-    categoryColor: e.category?.color ?? null,
-    categoryName: e.category?.name ?? null,
-  }));
+  const studyEntries: StudyEntry[] = calendarEntries.map((e) => {
+    const mirrorCourse = isCalendarCourseMirrorRow(e);
+    return {
+      id: e.id,
+      title: e.title,
+      location: e.location,
+      note: e.note,
+      repeatRule: e.repeatRule,
+      repeatUntilISO: e.repeatUntil?.toISOString() ?? null,
+      startISO: e.startAt.toISOString(),
+      endISO: e.endAt.toISOString(),
+      withLabel: formatWithLabel(e.companions.map((companion) => companion.displayName)),
+      eventParticipants: e.companions.map((companion) => ({
+        userId: companion.userId,
+        name: companion.displayName,
+      })),
+      categoryId: mirrorCourse ? (courseCategory?.id ?? null) : e.categoryId,
+      categoryColor: mirrorCourse ? null : (e.category?.color ?? null),
+      categoryName: mirrorCourse ? (courseCategory?.name ?? null) : (e.category?.name ?? null),
+    };
+  });
 
   const initialCalendarCategories = calendarCategories.map((c) => ({
     id: c.id,
