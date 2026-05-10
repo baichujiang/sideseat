@@ -250,18 +250,8 @@ export function WeekCalendar({
   } | null>(null);
   const dragClearFallbackTimerRef = useRef<number | null>(null);
 
-  /**
-   * Scroll-axis lock: after the first ~14 px of scroll delta, lock to
-   * horizontal OR vertical for the rest of the gesture. Implemented via a
-   * `scroll` event listener that snaps the non-dominant axis back each frame.
-   */
-  const scrollAxisRef = useRef<{
-    locked: "free" | "h" | "v";
-    originLeft: number;
-    originTop: number;
-    pointerDown: boolean;
-    rafId: number | null;
-  }>({ locked: "free", originLeft: 0, originTop: 0, pointerDown: false, rafId: null });
+  /** Momentum animation handle for touch-scroll inertia. */
+  const momentumRafRef = useRef<number | null>(null);
 
   function clearDragClearFallbackTimer() {
     if (dragClearFallbackTimerRef.current !== null) {
@@ -360,49 +350,168 @@ export function WeekCalendar({
   useEffect(() => {
     const node = scrollContainerRef.current;
     if (!node) return;
-    const ax = scrollAxisRef.current;
 
-    const onPointerDown = () => {
-      ax.pointerDown = true;
-      ax.locked = "free";
-      ax.originLeft = node.scrollLeft;
-      ax.originTop = node.scrollTop;
+    // ---- Mouse / trackpad: correct non-dominant axis via scroll events ----
+    let mouseDown = false;
+    let mouseOriginL = 0;
+    let mouseOriginT = 0;
+    let mouseLock: "free" | "h" | "v" = "free";
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.pointerType === "touch") return;
+      mouseDown = true;
+      mouseLock = "free";
+      mouseOriginL = node.scrollLeft;
+      mouseOriginT = node.scrollTop;
     };
-    const onPointerUp = () => {
-      ax.pointerDown = false;
-      ax.locked = "free";
-      if (ax.rafId !== null) {
-        cancelAnimationFrame(ax.rafId);
-        ax.rafId = null;
-      }
+    const onPointerUp = (e: PointerEvent) => {
+      if (e.pointerType === "touch") return;
+      mouseDown = false;
+      mouseLock = "free";
     };
     const onScroll = () => {
-      if (!ax.pointerDown) return;
-      const dx = node.scrollLeft - ax.originLeft;
-      const dy = node.scrollTop - ax.originTop;
-      if (ax.locked === "free") {
-        const dist = dx * dx + dy * dy;
-        if (dist < AXIS_LOCK_THRESHOLD_PX * AXIS_LOCK_THRESHOLD_PX) return;
-        ax.locked = Math.abs(dx) > Math.abs(dy) ? "h" : "v";
+      if (!mouseDown) return;
+      const dx = node.scrollLeft - mouseOriginL;
+      const dy = node.scrollTop - mouseOriginT;
+      if (mouseLock === "free") {
+        if (dx * dx + dy * dy < AXIS_LOCK_THRESHOLD_PX * AXIS_LOCK_THRESHOLD_PX) return;
+        mouseLock = Math.abs(dx) > Math.abs(dy) ? "h" : "v";
       }
-      if (ax.rafId !== null) return;
-      ax.rafId = requestAnimationFrame(() => {
-        ax.rafId = null;
-        if (ax.locked === "h") node.scrollTop = ax.originTop;
-        else if (ax.locked === "v") node.scrollLeft = ax.originLeft;
-      });
+      if (mouseLock === "h") node.scrollTop = mouseOriginT;
+      else if (mouseLock === "v") node.scrollLeft = mouseOriginL;
+    };
+
+    // ---- Touch: manual scroll with axis lock + inertia ----
+    // CSS `touch-action: none` on the container prevents the browser from
+    // performing native touch scroll; we replicate it here with axis locking
+    // and momentum.  Mouse / trackpad / wheel are unaffected by touch-action.
+    let tid: number | null = null;
+    let t0x = 0;
+    let t0y = 0;
+    let tx = 0;
+    let ty = 0;
+    let tt = 0;
+    let vx = 0;
+    let vy = 0;
+    let tLock: "free" | "h" | "v" = "free";
+
+    const stopMomentum = () => {
+      if (momentumRafRef.current !== null) {
+        cancelAnimationFrame(momentumRafRef.current);
+        momentumRafRef.current = null;
+      }
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (tid !== null) return;
+      stopMomentum();
+      const t = e.changedTouches[0];
+      tid = t.identifier;
+      t0x = tx = t.clientX;
+      t0y = ty = t.clientY;
+      tt = performance.now();
+      vx = vy = 0;
+      tLock = "free";
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (tid === null || calendarDragSelectLockDepth > 0) return;
+      let touch: Touch | undefined;
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === tid) {
+          touch = e.changedTouches[i];
+          break;
+        }
+      }
+      if (!touch) return;
+
+      const now = performance.now();
+      const dt = Math.max(now - tt, 1);
+      const dx = touch.clientX - tx;
+      const dy = touch.clientY - ty;
+
+      if (tLock === "free") {
+        const totalDx = touch.clientX - t0x;
+        const totalDy = touch.clientY - t0y;
+        if (
+          totalDx * totalDx + totalDy * totalDy >=
+          AXIS_LOCK_THRESHOLD_PX * AXIS_LOCK_THRESHOLD_PX
+        ) {
+          tLock = Math.abs(totalDx) > Math.abs(totalDy) ? "h" : "v";
+        }
+      }
+
+      if (tLock !== "v") node.scrollLeft -= dx;
+      if (tLock !== "h") node.scrollTop -= dy;
+
+      const a = 0.4;
+      vx = a * ((dx / dt) * 1000) + (1 - a) * vx;
+      vy = a * ((dy / dt) * 1000) + (1 - a) * vy;
+      tx = touch.clientX;
+      ty = touch.clientY;
+      tt = now;
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      let found = false;
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === tid) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) return;
+
+      const endLock = tLock;
+      tid = null;
+      tLock = "free";
+
+      let mvx = endLock === "v" ? 0 : -vx;
+      let mvy = endLock === "h" ? 0 : -vy;
+      const DECEL = 0.965;
+      const STOP_V = 30;
+      let prev = performance.now();
+
+      const tick = () => {
+        const now = performance.now();
+        const s = (now - prev) / 1000;
+        prev = now;
+        const f = Math.pow(DECEL, s * 60);
+        mvx *= f;
+        mvy *= f;
+        if (Math.abs(mvx) < STOP_V && Math.abs(mvy) < STOP_V) {
+          momentumRafRef.current = null;
+          return;
+        }
+        node.scrollLeft += mvx * s;
+        node.scrollTop += mvy * s;
+        momentumRafRef.current = requestAnimationFrame(tick);
+      };
+
+      if (Math.abs(mvx) > STOP_V || Math.abs(mvy) > STOP_V) {
+        momentumRafRef.current = requestAnimationFrame(tick);
+      }
     };
 
     node.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("pointerup", onPointerUp);
     window.addEventListener("pointercancel", onPointerUp);
     node.addEventListener("scroll", onScroll, { passive: true });
+    node.addEventListener("touchstart", onTouchStart, { passive: true });
+    node.addEventListener("touchmove", onTouchMove, { passive: true });
+    node.addEventListener("touchend", onTouchEnd, { passive: true });
+    node.addEventListener("touchcancel", onTouchEnd, { passive: true });
+
     return () => {
       node.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("pointercancel", onPointerUp);
       node.removeEventListener("scroll", onScroll);
-      if (ax.rafId !== null) cancelAnimationFrame(ax.rafId);
+      node.removeEventListener("touchstart", onTouchStart);
+      node.removeEventListener("touchmove", onTouchMove);
+      node.removeEventListener("touchend", onTouchEnd);
+      node.removeEventListener("touchcancel", onTouchEnd);
+      stopMomentum();
     };
   }, []);
 
@@ -811,7 +920,7 @@ export function WeekCalendar({
       <div
         ref={scrollContainerRef}
         className={cn(
-          "min-w-0 overflow-auto overscroll-contain",
+          "min-w-0 touch-none overflow-auto overscroll-contain",
           fillParent ? "min-h-0 min-w-0 flex-1" : null,
         )}
         style={fillParent ? undefined : { height: `${WEEK_HEADER_HEIGHT_PX + viewportHeightPx}px` }}
