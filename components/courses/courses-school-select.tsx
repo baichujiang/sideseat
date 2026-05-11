@@ -5,7 +5,9 @@ import type { Route } from "next";
 import { ChevronDown } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { useAppMessages } from "@/hooks/use-app-locale";
 import { schoolOptions, type SchoolCode } from "@/lib/constants/schools";
+import { formatMessage } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -20,6 +22,7 @@ type Props = {
  */
 export function CoursesSchoolSelect({ value, id = "courses-school-select", className }: Props) {
   const router = useRouter();
+  const { courses: co } = useAppMessages();
   const searchParams = useSearchParams();
   const detailsRef = useRef<HTMLDetailsElement | null>(null);
   const selected = schoolOptions.find((s) => s.value === value) ?? schoolOptions[0];
@@ -36,7 +39,7 @@ export function CoursesSchoolSelect({ value, id = "courses-school-select", class
     <details ref={detailsRef} className={cn("relative w-full max-w-[11.5rem] shrink-0", className)}>
       <summary
         id={id}
-        aria-label={`School filter: ${selected?.shortLabel ?? value}`}
+        aria-label={formatMessage(co.schoolFilterAria, { label: selected?.shortLabel ?? value })}
         className={cn(
           "inline-flex h-10 w-full cursor-pointer list-none select-none items-center justify-between gap-2 rounded-full border border-[#E7E0D6] bg-white px-3 text-[13px] font-semibold text-foreground shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] transition",
           "hover:border-[#D8D1C7] hover:bg-muted/35 active:bg-muted/50",

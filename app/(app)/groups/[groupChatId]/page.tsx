@@ -13,6 +13,8 @@ import { requireGroupChatParticipant } from "@/lib/auth/guards";
 import { groupChatDisplayTitle } from "@/lib/group-chats/title";
 import { safeReturnPath } from "@/lib/nav/back";
 import { cn } from "@/lib/utils";
+import { chatMessageDomId } from "@/lib/chat/chat-message-dom-id";
+import { indexPlainTextMessagesForSearch } from "@/lib/chat/thread-search-index";
 
 function dayDividerLabel(d: Date): string {
   if (isToday(d)) return "Today";
@@ -37,6 +39,7 @@ export default async function GroupChatPage({
   const { groupChat, user } = await requireGroupChatParticipant(groupChatId);
   const myMembership = groupChat.participants.find((p) => p.userId === user.id);
   const latestMessageId = groupChat.messages.at(-1)?.id ?? null;
+  const threadSearchEntries = indexPlainTextMessagesForSearch(groupChat.messages);
   const title = groupChatDisplayTitle(
     groupChat.title,
     groupChat.participants.map((participant) => participant.user),
@@ -123,7 +126,7 @@ export default async function GroupChatPage({
                   index === 0 || !isSameDay(message.createdAt, groupChat.messages[index - 1]!.createdAt);
 
                 return (
-                  <div key={message.id}>
+                  <div key={message.id} id={chatMessageDomId(message.id)}>
                     {showDay ? (
                       <div className="flex justify-center py-2">
                         <span className="rounded-full bg-muted px-3 py-1 text-[10px] font-medium text-muted-foreground">
@@ -200,7 +203,7 @@ export default async function GroupChatPage({
         </ChatScrollContainer>
 
         <div className="shrink-0 border-t border-border/80 bg-background/95 px-3 pt-2 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
-          <GroupChatComposer groupChatId={groupChat.id} />
+          <GroupChatComposer groupChatId={groupChat.id} threadSearchEntries={threadSearchEntries} />
         </div>
       </div>
     </>

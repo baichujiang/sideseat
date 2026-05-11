@@ -35,7 +35,10 @@ export function AvailabilityViewer({
   const [selectedSlot, setSelectedSlot] = useState<{ startTime: string; endTime: string } | null>(null);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setSelectedSlot(null);
+      return;
+    }
     setLoading(true);
     setError(null);
     setSelectedDate(null);
@@ -55,7 +58,13 @@ export function AvailabilityViewer({
 
   return (
     <>
-      <AppPushLayer open={open} onClose={onClose} zClassName="z-50" panelClassName="w-[min(100vw,28rem)] border-0">
+      <AppPushLayer
+        open={open}
+        onClose={onClose}
+        zClassName="z-50"
+        panelClassName="w-[min(100vw,28rem)] border-0"
+        listenForEscape={selectedSlot == null}
+      >
         <div className="flex h-full min-h-0 flex-col bg-background pt-[env(safe-area-inset-top)]">
           <div className="shrink-0 px-4 pb-3 pt-2">
             <div className="flex items-start justify-between gap-3">
@@ -119,6 +128,7 @@ export function AvailabilityViewer({
         mode={{ kind: "from-share", shareId }}
         peerName={peerName}
         slot={selectedSlot}
+        layerZClassName="z-[55]"
       />
     </>
   );

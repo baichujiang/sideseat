@@ -1,8 +1,10 @@
 "use client";
 
+import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useAppMessages } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
 
 const UPDATE_CHECK_MS = 60 * 60 * 1000;
@@ -16,6 +18,7 @@ const BUILD_STORAGE_KEY = "sideseat_client_build_id";
  * Multiple rapid deploys → one debounced bar pointing at the latest known build id.
  */
 export function PwaUpdatePrompt({ registration }: { registration: ServiceWorkerRegistration | null }) {
+  const u = useAppMessages().pwaUpdatePrompt;
   const [show, setShow] = useState(false);
   const reloadOnce = useRef(false);
   const pendingBuildIdRef = useRef<string | null>(null);
@@ -180,23 +183,32 @@ export function PwaUpdatePrompt({ registration }: { registration: ServiceWorkerR
   return (
     <div
       className={cn(
-        "pointer-events-auto fixed left-1/2 z-[22] w-full max-w-md -translate-x-1/2 px-3",
-        "bottom-[calc(6.5rem+env(safe-area-inset-bottom))]",
+        "pointer-events-auto fixed inset-x-0 z-[22] flex justify-center pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]",
+        "bottom-[calc(5.75rem+env(safe-area-inset-bottom))]",
       )}
       role="status"
       aria-live="polite"
     >
-      <div className="flex items-center gap-2 rounded-2xl border border-border/80 bg-card/95 px-3 py-2.5 shadow-lg backdrop-blur-md supports-[backdrop-filter]:bg-card/90">
-        <p className="min-w-0 flex-1 text-[12px] font-medium leading-snug text-foreground">
-          A new version is available.
-        </p>
+      <div
+        className={cn(
+          "flex w-full max-w-md items-center gap-3 overflow-hidden rounded-xl border border-classmates-edge bg-classmates-surface/98 p-3 shadow-[0_2px_10px_rgba(15,23,42,0.06)] ring-1 ring-black/[0.03] backdrop-blur-md supports-[backdrop-filter]:bg-classmates-surface/95",
+          "dark:border-border dark:bg-card/98 dark:shadow-[0_10px_40px_rgba(0,0,0,0.45)] dark:ring-white/[0.06]",
+        )}
+      >
+        <span
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.65rem] bg-amber-500/12 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400"
+          aria-hidden
+        >
+          <RefreshCw className="h-4 w-4" strokeWidth={2.25} />
+        </span>
+        <p className="min-w-0 flex-1 text-[13px] font-semibold leading-snug tracking-tight text-foreground">{u.message}</p>
         <Button
           type="button"
-          size="sm"
-          className="h-9 shrink-0 rounded-xl px-3 text-[12px] font-semibold"
+          variant="default"
+          className="h-9 shrink-0 rounded-[0.65rem] px-3.5 text-[13px] font-semibold shadow-sm"
           onClick={() => void applyUpdate()}
         >
-          Update now
+          {u.updateNow}
         </Button>
       </div>
     </div>

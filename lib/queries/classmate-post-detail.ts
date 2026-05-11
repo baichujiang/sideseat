@@ -3,9 +3,8 @@ import "server-only";
 import type { LanguageProficiency, LanguageTag } from "@prisma/client";
 import { ClassmatePostCategory, ClassmatePostStatus } from "@prisma/client";
 
+import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
 import { prisma } from "@/lib/db/prisma";
-
-const DISCOVER_POST_CITY = "Munich";
 
 export type ClassmatePostDetailAuthor = {
   id: string;
@@ -145,7 +144,7 @@ export async function getClassmatePostDetailForViewer(
   if (post.status !== ClassmatePostStatus.ACTIVE || post.expiresAt <= now) {
     return { ok: false };
   }
-  if (post.city !== DISCOVER_POST_CITY) {
+  if (post.city !== DEFAULT_DISCOVER_SERVED_CITY) {
     return { ok: false };
   }
 

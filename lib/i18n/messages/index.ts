@@ -1,3 +1,8 @@
+/**
+ * App UI strings (see `AppMessages` in `./types`). Tab shell + primary surfaces are wired;
+ * deeper drill-ins (admin tools copy, some form validators) may still be English-only.
+ * Course titles/codes from the API are intentionally not translated here — render DB values as-is.
+ */
 import type { AppLocale } from "../app-locale";
 import { enMessages } from "./en";
 import type { AppMessages } from "./types";
@@ -8,7 +13,7 @@ const byLocale: Record<AppLocale, AppMessages> = {
   "zh-CN": zhCnMessages,
 };
 
-export type { AppMessages } from "./types";
+export type { AppMessages, CoursesMessages } from "./types";
 
 export function getMessages(locale: AppLocale): AppMessages {
   return byLocale[locale] ?? enMessages;

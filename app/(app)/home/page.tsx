@@ -4,7 +4,6 @@ import type { Weekday } from "@prisma/client";
 import { addDays, subDays } from "date-fns";
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
-import { HomeHero } from "@/components/home/home-hero";
 import {
   ScheduleSurface,
   type ClassBlock,
@@ -16,6 +15,8 @@ import { loadIcsSubscriptionStudyEntries } from "@/lib/calendar/load-ics-subscri
 import { getClassScheduleDateRange } from "@/lib/constants/vorlesungszeit";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
+import { getMessages } from "@/lib/i18n/messages";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
 
 const WEEKDAY_BY_JS: Record<number, Weekday> = {
   0: "SUN",
@@ -33,28 +34,24 @@ const CALENDAR_WINDOW_FUTURE_DAYS = 180;
 
 export default async function HomePage() {
   const sessionUser = await getSessionUser();
+  const locale = await getServerAppLocale();
+  const ui = getMessages(locale);
   if (!sessionUser) {
     const now = new Date();
     const semesterRange = getClassScheduleDateRange({ school: null, now });
     return (
-      <div className="flex min-h-0 flex-1 flex-col">
-        <HomeHero nickname={null} avatarUrl={null} nowDate={now} />
-        <div className="mt-3 flex min-h-0 flex-1 flex-col gap-3">
-          <ScheduleSurface
-            classBlocks={[]}
-            studyEntries={[]}
-            companionOptions={[]}
-            initialCalendarCategories={[]}
-            nowISO={now.toISOString()}
-            semesterStartISO={semesterRange.start.toISOString()}
-            semesterEndISO={semesterRange.end.toISOString()}
-          />
-          <GuestAppCta
-            returnTo="/home"
-            headline="Sign in to build your schedule"
-            body="Add courses and study blocks — they sync once you have an account."
-          />
-        </div>
+      <div className="flex min-h-0 flex-1 flex-col gap-3">
+        <ScheduleSurface
+          classBlocks={[]}
+          studyEntries={[]}
+          companionOptions={[]}
+          initialCalendarCategories={[]}
+          nowISO={now.toISOString()}
+          semesterStartISO={semesterRange.start.toISOString()}
+          semesterEndISO={semesterRange.end.toISOString()}
+          homeGreeting={{ nickname: null, avatarUrl: null }}
+        />
+        <GuestAppCta returnTo="/home" headline={ui.guest.homeHeadline} body={ui.guest.homeBody} />
       </div>
     );
   }
@@ -208,39 +205,35 @@ export default async function HomePage() {
   const hasAnyCourse = memberships.length > 0;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <HomeHero nickname={user.nickname} avatarUrl={user.avatarUrl} nowDate={now} />
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <ScheduleSurface
+        classBlocks={classBlocks}
+        studyEntries={studyEntries}
+        companionOptions={companionOptions}
+        initialCalendarCategories={initialCalendarCategories}
+        nowISO={now.toISOString()}
+        semesterStartISO={semesterRange.start.toISOString()}
+        semesterEndISO={semesterRange.end.toISOString()}
+        homeGreeting={{ nickname: user.nickname, avatarUrl: user.avatarUrl }}
+        homeBelowHeaderSlot={
+          !user.onboardingComplete ? (
+            <OnboardingContinueCta title={ui.onboarding.homeTitle} body={ui.onboarding.homeBody} />
+          ) : null
+        }
+      />
 
-      <div className="mt-3 flex min-h-0 flex-1 flex-col gap-3">
-        {!user.onboardingComplete ? (
-          <OnboardingContinueCta
-            title="Finish setup to personalize Home"
-            body="Your schedule already works. Completing your profile helps us tailor recommendations and class matching."
-          />
-        ) : null}
-        <ScheduleSurface
-          classBlocks={classBlocks}
-          studyEntries={studyEntries}
-          companionOptions={companionOptions}
-          initialCalendarCategories={initialCalendarCategories}
-          nowISO={now.toISOString()}
-          semesterStartISO={semesterRange.start.toISOString()}
-          semesterEndISO={semesterRange.end.toISOString()}
-        />
-
-        {!hasAnyCourse ? (
-          <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-5 text-center text-sm text-[#5F6B7A] shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:border-border dark:bg-card dark:text-muted-foreground dark:shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
-            Your schedule is empty.{" "}
-            <Link
-              href={"/courses/add" as Route}
-              className="font-semibold text-[#2563EB] underline-offset-2 hover:underline dark:text-blue-400"
-            >
-              Add your first course
-            </Link>
-            .
-          </div>
-        ) : null}
-      </div>
+      {!hasAnyCourse ? (
+        <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-5 text-center text-sm text-[#5F6B7A] shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:border-border dark:bg-card dark:text-muted-foreground dark:shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
+          {ui.home.emptyScheduleBefore}{" "}
+          <Link
+            href={"/courses/add" as Route}
+            className="font-semibold text-[#2563EB] underline-offset-2 hover:underline dark:text-blue-400"
+          >
+            {ui.home.emptyScheduleCta}
+          </Link>
+          {ui.home.emptyScheduleAfter}
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -1,38 +1,56 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import type { Route } from "next";
-import { format } from "date-fns";
-import {
-  BookUser,
-  Calendar,
-  Clock,
-  Dumbbell,
-  Eye,
-  Languages,
-  MapPin,
-  MessageCircle,
-  NotebookPen,
-  UtensilsCrossed,
-} from "lucide-react";
-import { ClassmatePostCategory, ClassmatePostStatus } from "@prisma/client";
+import { ClassmatePostStatus, type Prisma } from "@prisma/client";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
-import { ClassmatePostDetailShareMenu } from "@/components/discover/classmate-post-detail-share-menu";
+import { MyPostsDiscoverPostCard } from "@/components/inbox/my-posts-discover-post-card";
 import { MyPostsHeaderShareMenu } from "@/components/inbox/my-posts-header-share-menu";
 import { BackLink } from "@/components/nav/back-link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LinkButton } from "@/components/ui/link-button";
 import { getSessionUser } from "@/lib/auth/session";
-import {
-  classmatePostCategoryToPalette,
-  SCENE_LIST_ROW,
-} from "@/lib/discover/scene-palette";
+import { buildViewerCourseMatchIndex } from "@/lib/discover/viewer-course-match";
+import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
 import { prisma } from "@/lib/db/prisma";
-import {
-  type ClassmatePostInsightCounts,
-  classmatePostInsightCountsByPostId,
-} from "@/lib/queries/classmate-post-insight-counts";
-import { cn } from "@/lib/utils";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
+import { classmatePostInsightCountsByPostId } from "@/lib/queries/classmate-post-insight-counts";
+
+const myPostsInclude = {
+  courses: { include: { course: { select: { id: true, code: true, name: true } } } },
+  user: { include: { userLanguages: true } },
+} satisfies Prisma.ClassmatePostInclude;
+
+type PostWithAuthorCourses = Prisma.ClassmatePostGetPayload<{ include: typeof myPostsInclude }>;
+
+function toDiscoverPostRow(post: PostWithAuthorCourses, currentUserId: string): DiscoverPostRow {
+  return {
+    id: post.id,
+    category: post.category,
+    city: post.city,
+    title: post.title,
+    body: post.body,
+    expiresAt: post.expiresAt,
+    isOwn: post.userId === currentUserId,
+    userId: post.user.id,
+    nickname: post.user.nickname ?? post.user.username,
+    gender: post.user.gender,
+    avatarUrl: post.user.avatarUrl,
+    major: post.user.major,
+    semester: post.user.semester,
+    school: post.user.school,
+    languages: post.user.userLanguages.map((r) => ({
+      tag: r.tag,
+      proficiency: r.proficiency,
+    })),
+    verifiedStudent: post.user.verifiedStudent,
+    studentVerificationStatus: post.user.studentVerificationStatus,
+    linkedCourses: post.courses.map((pc) => ({
+      id: pc.course.id,
+      code: pc.course.code,
+      name: pc.course.name,
+    })),
+  };
+}
 
 export default async function InboxMyPostsPage() {
   const sessionUser = await getSessionUser();
@@ -51,12 +69,24 @@ export default async function InboxMyPostsPage() {
     redirect("/onboarding");
   }
   const user = sessionUser;
+  const locale = await getServerAppLocale();
 
-  const posts = await prisma.classmatePost.findMany({
-    where: { userId: user.id },
-    orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
-    take: 80,
-  });
+  const [posts, myEnrolledCourses] = await Promise.all([
+    prisma.classmatePost.findMany({
+      where: { userId: user.id },
+      orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
+      take: 80,
+      include: myPostsInclude,
+    }),
+    prisma.userCourse.findMany({
+      where: { userId: user.id },
+      select: { course: { select: { id: true, code: true, name: true } } },
+    }),
+  ]);
+
+  const viewerCourseMatchIndex = buildViewerCourseMatchIndex(
+    myEnrolledCourses.map((uc) => ({ id: uc.course.id, code: uc.course.code })),
+  );
 
   const insightByPostId = await classmatePostInsightCountsByPostId(posts.map((p) => p.id));
 
@@ -96,10 +126,16 @@ export default async function InboxMyPostsPage() {
               </h2>
               <ul className="space-y-2.5">
                 {active.map((post) => (
-                  <PostRow
+                  <MyPostsDiscoverPostCard
                     key={post.id}
-                    post={post}
+                    locale={locale}
+                    post={toDiscoverPostRow(post, user.id)}
+                    viewerCourseMatchIndex={viewerCourseMatchIndex}
+                    status={post.status}
+                    createdAt={post.createdAt}
+                    updatedAt={post.updatedAt}
                     insights={insightByPostId.get(post.id) ?? { detailViews: 0, messageIntents: 0 }}
+                    muted={false}
                   />
                 ))}
               </ul>
@@ -113,11 +149,16 @@ export default async function InboxMyPostsPage() {
               </h2>
               <ul className="space-y-2.5">
                 {archived.map((post) => (
-                  <PostRow
+                  <MyPostsDiscoverPostCard
                     key={post.id}
-                    post={post}
-                    muted
+                    locale={locale}
+                    post={toDiscoverPostRow(post, user.id)}
+                    viewerCourseMatchIndex={viewerCourseMatchIndex}
+                    status={post.status}
+                    createdAt={post.createdAt}
+                    updatedAt={post.updatedAt}
                     insights={insightByPostId.get(post.id) ?? { detailViews: 0, messageIntents: 0 }}
+                    muted
                   />
                 ))}
               </ul>
@@ -127,180 +168,4 @@ export default async function InboxMyPostsPage() {
       )}
     </div>
   );
-}
-
-function categoryIcon(c: ClassmatePostCategory) {
-  const cls = "h-[18px] w-[18px] shrink-0";
-  switch (c) {
-    case ClassmatePostCategory.SHARED_COURSES:
-      return <BookUser className={cls} strokeWidth={1.85} aria-hidden />;
-    case ClassmatePostCategory.MEALS:
-      return <UtensilsCrossed className={cls} strokeWidth={1.85} aria-hidden />;
-    case ClassmatePostCategory.LANGUAGE:
-      return <Languages className={cls} strokeWidth={1.85} aria-hidden />;
-    case ClassmatePostCategory.SPORTS:
-      return <Dumbbell className={cls} strokeWidth={1.85} aria-hidden />;
-    case ClassmatePostCategory.STUDY:
-      return <NotebookPen className={cls} strokeWidth={1.85} aria-hidden />;
-  }
-}
-
-function PostRow({
-  post,
-  muted = false,
-  insights,
-}: {
-  post: {
-    id: string;
-    category: ClassmatePostCategory;
-    city: string;
-    title: string;
-    body: string | null;
-    status: ClassmatePostStatus;
-    expiresAt: Date;
-    createdAt: Date;
-    updatedAt: Date;
-  };
-  muted?: boolean;
-  insights: ClassmatePostInsightCounts;
-}) {
-  const postPath = `/discover/posts/${post.id}`;
-  const postHref = `${postPath}?returnTo=${encodeURIComponent("/inbox/my-posts")}` as Route;
-  const live = post.status === ClassmatePostStatus.ACTIVE && post.expiresAt > new Date();
-  const statusLabel = !live
-    ? post.status === ClassmatePostStatus.CLOSED
-      ? "Closed"
-      : post.expiresAt <= new Date()
-        ? "Expired"
-        : "Ended"
-    : null;
-  const wasEdited = post.updatedAt.getTime() - post.createdAt.getTime() > 60_000;
-
-  const palette = classmatePostCategoryToPalette(post.category);
-  const row = SCENE_LIST_ROW[palette];
-
-  return (
-    <li className="relative">
-      <Link
-        href={postHref}
-        className={cn(
-          "flex items-start gap-3.5 rounded-[1.25rem] border p-4 pr-14 transition-all duration-200 ease-out active:bg-black/[0.03] dark:active:bg-white/[0.04]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-classmates-azure/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-          row.card,
-          row.cardHover,
-          muted && "opacity-[0.88] saturate-[0.9]",
-        )}
-      >
-        <span
-          className={cn(
-            "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border",
-            row.iconWrap,
-            muted && "opacity-90",
-          )}
-        >
-          {muted ? (
-            <Calendar className="h-[18px] w-[18px] shrink-0 opacity-85" strokeWidth={1.85} aria-hidden />
-          ) : (
-            categoryIcon(post.category)
-          )}
-        </span>
-        <div className="min-w-0 flex-1 pt-0.5">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span
-              className={cn("rounded-full border px-2 py-0.5 text-[10px]", row.categoryChip)}
-            >
-              {labelCategory(post.category)}
-            </span>
-            {live ? (
-              <span className="rounded-full border border-emerald-500/35 bg-emerald-500/12 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 dark:text-emerald-300">
-                Active
-              </span>
-            ) : statusLabel ? (
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                {statusLabel}
-              </span>
-            ) : null}
-          </div>
-          <p className="mt-2 text-[15px] font-semibold leading-snug tracking-tight text-foreground">
-            {post.title}
-          </p>
-          {post.body ? (
-            <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-muted-foreground">
-              {post.body}
-            </p>
-          ) : null}
-          <div className="mt-2 flex flex-col gap-1.5 text-[11px] leading-snug text-muted-foreground">
-            <span className="inline-flex flex-wrap items-center gap-1.5">
-              <Clock className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
-              <span className="font-medium text-foreground/75">Posted</span>
-              <time dateTime={post.createdAt.toISOString()}>
-                {format(post.createdAt, "MMM d, yyyy · h:mm a")}
-              </time>
-            </span>
-            {wasEdited ? (
-              <span className="inline-flex flex-wrap items-center gap-1.5 pl-[1.125rem] sm:pl-0">
-                <span className="font-medium text-foreground/75">Last edited</span>
-                <time dateTime={post.updatedAt.toISOString()}>
-                  {format(post.updatedAt, "MMM d, yyyy · h:mm a")}
-                </time>
-              </span>
-            ) : null}
-            <span className="inline-flex flex-wrap items-center gap-x-1 gap-y-0.5">
-              <MapPin className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
-              {post.city}
-              <span aria-hidden>·</span>
-              {live ? (
-                <>
-                  <span className="sr-only">Listing expires</span>
-                  Until {format(post.expiresAt, "MMM d, yyyy")}
-                </>
-              ) : (
-                <>
-                  {statusLabel ? `${statusLabel} · ` : null}
-                  <span className="sr-only">Last update</span>
-                  {format(post.updatedAt, "MMM d, yyyy")}
-                </>
-              )}
-            </span>
-            <span
-              className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] tabular-nums text-muted-foreground"
-              aria-label={`${insights.detailViews} unique views, ${insights.messageIntents} started a chat from this post`}
-            >
-              <span className="inline-flex items-center gap-1">
-                <Eye className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
-                {insights.detailViews} {insights.detailViews === 1 ? "view" : "views"}
-              </span>
-              <span aria-hidden>·</span>
-              <span className="inline-flex items-center gap-1">
-                <MessageCircle className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
-                {insights.messageIntents}{" "}
-                {insights.messageIntents === 1 ? "chat started" : "chats started"}
-              </span>
-            </span>
-          </div>
-        </div>
-      </Link>
-      <ClassmatePostDetailShareMenu
-        title={post.title}
-        body={post.body}
-        postPath={postPath}
-        className="absolute right-3 top-3 z-10"
-      />
-    </li>
-  );
-}
-
-function labelCategory(c: ClassmatePostCategory) {
-  switch (c) {
-    case ClassmatePostCategory.SHARED_COURSES:
-      return "Shared courses";
-    case ClassmatePostCategory.MEALS:
-      return "Meals";
-    case ClassmatePostCategory.LANGUAGE:
-      return "Language";
-    case ClassmatePostCategory.SPORTS:
-      return "Sports";
-    case ClassmatePostCategory.STUDY:
-      return "Study";
-  }
 }

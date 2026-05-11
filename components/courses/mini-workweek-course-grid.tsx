@@ -1,16 +1,19 @@
 "use client";
 
 import type { Weekday } from "@prisma/client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { Button } from "@/components/ui/button";
+import { HomeCalendarVisual } from "@/components/home/home-hero";
 import { Input } from "@/components/ui/input";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage } from "@/lib/i18n/messages";
 import { formatMinutes, parseTimeToMinutes } from "@/lib/validators/course";
 import { cn } from "@/lib/utils";
 
 const WORKDAYS: Weekday[] = ["MON", "TUE", "WED", "THU", "FRI"];
-const DAY_SHORT: Record<Weekday, string> = {
+const DAY_SHORT_FALLBACK: Record<Weekday, string> = {
   MON: "Mon",
   TUE: "Tue",
   WED: "Wed",
@@ -105,6 +108,9 @@ export function MiniWorkweekCourseGrid({
   courseTitle,
   readOnly = false,
 }: Props) {
+  const { courses: co, common, weekCalendarEditToolbar: wk } = useAppMessages();
+  const calendarPeekDate = useMemo(() => new Date(), []);
+  const dayShort = (d: Weekday) => co.weekdayShort[d] ?? DAY_SHORT_FALLBACK[d];
   /** Edit panel open for this index (triggered by tap). */
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   /** Drag-ready mode: card deepens, anchors visible (triggered by long-press). */
@@ -416,23 +422,21 @@ export function MiniWorkweekCourseGrid({
 
   return (
     <div className="space-y-3">
-      {readOnly ? (
-        <p className="text-[11px] leading-snug text-muted-foreground">
-          <span className="font-medium text-foreground">Edit</span> to add or change times.
-        </p>
-      ) : (
-        <p className="text-[11px] leading-snug text-muted-foreground">
-          <span className="font-medium text-foreground">Tap</span> empty slot → add 1h 30m.{" "}
-          <span className="font-medium text-foreground">Tap</span> a block → edit.{" "}
-          <span className="font-medium text-foreground">Long-press</span> → select (dots appear) → drag to move or
-          resize.
-        </p>
-      )}
+      <div className="flex min-w-0 items-start gap-2 sm:gap-3">
+        <div className="min-w-0 flex-1 pt-0.5">
+          {readOnly ? (
+            <p className="text-[11px] leading-snug text-muted-foreground">{co.miniHintReadOnly}</p>
+          ) : (
+            <p className="text-[11px] leading-snug text-muted-foreground">{co.miniHintEditing}</p>
+          )}
+        </div>
+        <HomeCalendarVisual date={calendarPeekDate} className="h-16 w-16 shrink-0 sm:h-20 sm:w-20" />
+      </div>
 
       <div
         className={cn(
-          "max-h-[min(420px,70vh)] w-full min-w-0 overflow-y-auto overflow-x-hidden rounded-xl border border-border/80 bg-muted/15 touch-pan-y",
-          readOnly && "bg-muted/10",
+          "max-h-[min(420px,70vh)] w-full min-w-0 overflow-y-auto overflow-x-hidden rounded-xl border border-blue-200/90 bg-white shadow-[0_2px_10px_rgba(37,99,235,0.12)] touch-pan-y dark:border-blue-800/55 dark:bg-card dark:shadow-[0_2px_10px_rgba(0,0,0,0.2)]",
+          readOnly && "bg-muted/15 dark:bg-muted/10",
         )}
       >
         <div className="flex w-full min-w-0 items-stretch">
@@ -465,7 +469,7 @@ export function MiniWorkweekCourseGrid({
                 className="relative flex min-w-0 flex-1 flex-col border-r border-border/40 last:border-r-0"
               >
                 <div className={cn(HEADER_ROW_CLASS, "justify-center text-[10px] font-semibold text-foreground")}>
-                  {DAY_SHORT[weekday]}
+                  {dayShort(weekday)}
                 </div>
 
                 <div
@@ -483,7 +487,11 @@ export function MiniWorkweekCourseGrid({
                         ) : (
                           <button
                             type="button"
-                            aria-label={`Add ${courseTitle} ${DAY_SHORT[weekday]} ${formatMinutes(slotStart)}`}
+                            aria-label={formatMessage(co.miniAddSlotAria, {
+                              courseTitle,
+                              weekday: dayShort(weekday),
+                              time: formatMinutes(slotStart),
+                            })}
                             className="absolute inset-0 z-0 transition hover:bg-primary/5"
                             onClick={() => {
                               if (dragSelectedIndex !== null) {
@@ -533,7 +541,11 @@ export function MiniWorkweekCourseGrid({
                         {readOnly ? (
                           <div
                             className="absolute inset-0 z-10 select-none overflow-hidden rounded-[inherit] px-1 py-0.5"
-                            aria-label={`${courseTitle} ${DAY_SHORT[weekday]} ${timeLabel}`}
+                            aria-label={formatMessage(co.miniBlockAria, {
+                              courseTitle,
+                              weekday: dayShort(weekday),
+                              time: timeLabel,
+                            })}
                           >
                             <span className="line-clamp-2 text-[9px] font-semibold leading-tight text-foreground">
                               {courseTitle}
@@ -583,7 +595,7 @@ export function MiniWorkweekCourseGrid({
                               type="button"
                               className="absolute right-1 z-50 flex h-6 w-6 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
                               style={{ top: "-4px", transform: "translateY(-50%)" }}
-                              aria-label={`Adjust start time for ${courseTitle}`}
+                              aria-label={formatMessage(co.miniAdjustStartAria, { courseTitle })}
                               onPointerDown={(e) => {
                                 e.stopPropagation();
                                 setToolbarIndex(null);
@@ -599,7 +611,7 @@ export function MiniWorkweekCourseGrid({
                               type="button"
                               className="absolute left-1 z-50 flex h-6 w-6 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
                               style={{ bottom: "-4px", transform: "translateY(50%)" }}
-                              aria-label={`Adjust end time for ${courseTitle}`}
+                              aria-label={formatMessage(co.miniAdjustEndAria, { courseTitle })}
                               onPointerDown={(e) => {
                                 e.stopPropagation();
                                 setToolbarIndex(null);
@@ -671,13 +683,13 @@ export function MiniWorkweekCourseGrid({
           <div className="flex items-center gap-2">
             <span className="h-7 w-7 shrink-0" aria-hidden />
             <div className="min-w-0 flex-1 text-center">
-              <p className="text-[11px] font-medium text-foreground">{DAY_SHORT[selected.weekday]}</p>
+              <p className="text-[11px] font-medium text-foreground">{dayShort(selected.weekday)}</p>
               <p className="line-clamp-1 text-[10px] text-muted-foreground">{courseTitle}</p>
             </div>
             <button
               type="button"
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/10"
-              aria-label="Done"
+              aria-label={common.done}
               onClick={() => setSelectedIndex(null)}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -686,7 +698,7 @@ export function MiniWorkweekCourseGrid({
           {/* Time inputs — compact: default Input chrome is tall/rounded for this narrow sheet */}
           <div className="mt-2.5 mx-auto grid w-full max-w-[13rem] grid-cols-2 gap-x-2 gap-y-0.5">
             <div className="min-w-0">
-              <label className="text-[10px] text-muted-foreground">Start</label>
+              <label className="text-[10px] text-muted-foreground">{co.miniSessionStartLabel}</label>
               <Input
                 type="time"
                 step={300}
@@ -696,7 +708,7 @@ export function MiniWorkweekCourseGrid({
               />
             </div>
             <div className="min-w-0">
-              <label className="text-[10px] text-muted-foreground">End</label>
+              <label className="text-[10px] text-muted-foreground">{co.miniSessionEndLabel}</label>
               <Input
                 type="time"
                 step={300}
@@ -708,7 +720,7 @@ export function MiniWorkweekCourseGrid({
           </div>
           <Input
             className="mt-2 h-8 rounded-lg px-2.5 py-0 text-xs"
-            placeholder="Location (optional)"
+            placeholder={co.miniLocationPlaceholder}
             value={selected.location}
             onChange={(e) => updateSession(selectedIndex, { location: e.target.value })}
           />
@@ -720,7 +732,7 @@ export function MiniWorkweekCourseGrid({
             className="mt-3 h-8 w-full text-[12px] text-destructive hover:bg-destructive/10 hover:text-destructive"
             onClick={() => removeSession(selectedIndex)}
           >
-            Delete
+            {co.miniSessionDelete}
           </Button>
         </div>
       ) : null}
@@ -748,7 +760,7 @@ export function MiniWorkweekCourseGrid({
                   setToolbarIndex(null);
                 }}
               >
-                Cut
+                {wk.cut}
               </button>
               <button
                 type="button"
@@ -759,7 +771,7 @@ export function MiniWorkweekCourseGrid({
                   setToolbarIndex(null);
                 }}
               >
-                Copy
+                {wk.copy}
               </button>
               <button
                 type="button"
@@ -769,7 +781,7 @@ export function MiniWorkweekCourseGrid({
                   setToolbarIndex(null);
                 }}
               >
-                Delete
+                {wk.delete}
               </button>
               <button
                 type="button"
@@ -783,7 +795,7 @@ export function MiniWorkweekCourseGrid({
                   setDragSelectedIndex(null);
                 }}
               >
-                Duplicate
+                {wk.duplicate}
               </button>
             </div>,
             document.body,

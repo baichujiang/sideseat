@@ -7,6 +7,7 @@ import { MoreHorizontal, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { FormMessage } from "@/components/forms/form-message";
+import { useAppMessages } from "@/hooks/use-app-locale";
 
 export function CoursePageMenu({
   courseId,
@@ -14,6 +15,7 @@ export function CoursePageMenu({
   courseId: string;
 }) {
   const router = useRouter();
+  const { courses: co } = useAppMessages();
   const menuRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
@@ -43,7 +45,7 @@ export function CoursePageMenu({
   }, [open]);
 
   async function removeCourse() {
-    if (!window.confirm("Remove this course from your courses?")) {
+    if (!window.confirm(co.menuRemoveConfirm)) {
       return;
     }
 
@@ -54,7 +56,7 @@ export function CoursePageMenu({
     setPending(false);
 
     if (!response.ok) {
-      setError(typeof payload.error === "string" ? payload.error : "Could not remove this course.");
+      setError(typeof payload.error === "string" ? payload.error : co.menuCouldNotRemove);
       return;
     }
 
@@ -66,7 +68,7 @@ export function CoursePageMenu({
     <div className="relative" ref={menuRef}>
       <button
         type="button"
-        aria-label="More actions"
+        aria-label={co.menuMoreAria}
         onClick={() => setOpen((value) => !value)}
         className="inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
       >
@@ -83,7 +85,7 @@ export function CoursePageMenu({
             className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] text-destructive transition hover:bg-muted active:bg-muted/70 disabled:pointer-events-none disabled:opacity-60"
           >
             <Trash2 className="h-4 w-4" strokeWidth={2} />
-            {pending ? "Removing..." : "Remove from my courses"}
+            {pending ? co.menuRemoving : co.menuRemoveFromCourses}
           </button>
         </div>
       ) : null}

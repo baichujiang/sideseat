@@ -1,11 +1,8 @@
 "use client";
 
-import type { Route } from "next";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 
 import { dismissTopPushLayer } from "@/components/ui/app-push-layer";
-import { isTabRootPath, resolveSwipeBackHref } from "@/lib/nav/swipe-back-target";
 
 const EDGE_PX = 28;
 const MIN_DX = 72;
@@ -15,11 +12,12 @@ type EdgeSwipeBackProps = {
   getBounds?: () => DOMRect | null;
 };
 
+/**
+ * Left-edge swipe closes the top overlay on the global push-layer stack (see
+ * {@link AppPushLayer} / {@link useRegisterDismissOnEdgeSwipe} and {@link dismissTopPushLayer}).
+ * Does not call `router.back()` or replace routes when the stack is empty.
+ */
 export function EdgeSwipeBack({ getBounds }: EdgeSwipeBackProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
   const sessionRef = useRef<{
     pointerId: number;
     x0: number;
@@ -37,19 +35,9 @@ export function EdgeSwipeBack({ getBounds }: EdgeSwipeBackProps) {
     [getBounds],
   );
 
-  const goBack = useCallback(() => {
-    if (dismissTopPushLayer()) return;
-
-    if (isTabRootPath(pathname) || pathname === "/onboarding") return;
-
-    const href = resolveSwipeBackHref(pathname, searchParams);
-    if (href != null) {
-      router.replace(href as Route);
-      return;
-    }
-
-    router.back();
-  }, [router, pathname, searchParams]);
+  const dismissFromEdgeGesture = useCallback(() => {
+    dismissTopPushLayer();
+  }, []);
 
   useEffect(() => {
     const onDown = (e: PointerEvent) => {
@@ -87,7 +75,7 @@ export function EdgeSwipeBack({ getBounds }: EdgeSwipeBackProps) {
       if (dx < MIN_DX) return;
       if (Math.abs(dy) > dx * 0.85) return;
 
-      goBack();
+      dismissFromEdgeGesture();
     };
 
     window.addEventListener("pointerdown", onDown, { capture: true });
@@ -101,7 +89,7 @@ export function EdgeSwipeBack({ getBounds }: EdgeSwipeBackProps) {
       window.removeEventListener("pointerup", end, { capture: true });
       window.removeEventListener("pointercancel", end, { capture: true });
     };
-  }, [getBounds, inEdgeZone, goBack]);
+  }, [getBounds, inEdgeZone, dismissFromEdgeGesture]);
 
   return null;
 }

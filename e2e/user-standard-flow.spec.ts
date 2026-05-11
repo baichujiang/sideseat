@@ -17,7 +17,7 @@ function logStep(name: string) {
   console.log(`\n[e2e] ${name}`);
 }
 
-/** First-run tab tutorial (AppPushLayer); dismiss so main-nav clicks are not blocked. */
+/** First-run tab tutorial (bottom coach panel); dismiss so main-nav clicks are not blocked. */
 async function dismissProductTutorialIfPresent(page: import("@playwright/test").Page) {
   const dialog = page.locator('[role="dialog"]').filter({ has: page.locator("#product-tutorial-title") });
   const closeBtn = dialog.getByRole("button", { name: "Close" });
@@ -68,9 +68,9 @@ test.describe("Standard user flow (login + tabs + drill-ins)", () => {
     await page.goto("/courses/add");
     await expect(page.getByRole("heading", { name: "Add course" })).toBeVisible();
 
-    logStep("Tab: Classmates (Discover)");
-    await goMainTab(page, "Classmates", /\/discover$/);
-    await expect(page.getByRole("heading", { name: "Classmates" })).toBeVisible();
+    logStep("Tab: Discover");
+    await goMainTab(page, "Discover", /\/discover$/);
+    await expect(page.getByRole("heading", { name: "Discover" })).toBeVisible();
 
     logStep("Tab: Chats");
     await goMainTab(page, "Chats", /\/inbox$/);

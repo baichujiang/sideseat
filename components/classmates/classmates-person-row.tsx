@@ -39,10 +39,14 @@ export type ClassmatesPersonRowProps = {
   avatarLinkClassName?: string;
   profileAriaLabel: string;
   name: string;
+  /** Merged onto the name span (e.g. post cards: `font-bold`). */
+  nameClassName?: string;
   titleAdornment?: ReactNode;
   body?: ReactNode;
   /** Outside the main content link (intentions, large match cards, etc.). */
   footer?: ReactNode;
+  /** Full-width row below the avatar + text flex (e.g. Discover post expiry + secondary CTA). */
+  cardFooter?: ReactNode;
   /** Right column (e.g. message CTA). Omit when nothing should appear (e.g. your own post row). */
   action?: ReactNode;
   className?: string;
@@ -60,9 +64,11 @@ export function ClassmatesPersonRow({
   avatarLinkClassName,
   profileAriaLabel,
   name,
+  nameClassName,
   titleAdornment,
   body,
   footer,
+  cardFooter,
   action,
   className,
 }: ClassmatesPersonRowProps) {
@@ -70,7 +76,7 @@ export function ClassmatesPersonRow({
 
   return (
     <article className={cn(CLASSMATES_PERSON_ROW_CLASS, className)}>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+      <div className="flex flex-row items-start gap-3 sm:gap-4">
         <Link
           href={avatarHref}
           className={cn(avatarLinkClass, avatarLinkClassName)}
@@ -84,7 +90,12 @@ export function ClassmatesPersonRow({
             <div className="min-w-0 flex-1 space-y-1">
               <Link href={mainHref} className={contentLinkClass}>
                 <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-                  <span className="min-w-0 max-w-full text-[15px] font-semibold leading-tight tracking-tight text-classmates-ink dark:text-foreground">
+                  <span
+                    className={cn(
+                      "min-w-0 max-w-full text-[15px] font-semibold leading-tight tracking-tight text-classmates-ink dark:text-foreground",
+                      nameClassName,
+                    )}
+                  >
                     {name}
                   </span>
                   {titleAdornment}
@@ -100,6 +111,7 @@ export function ClassmatesPersonRow({
           </div>
         </div>
       </div>
+      {cardFooter}
     </article>
   );
 }

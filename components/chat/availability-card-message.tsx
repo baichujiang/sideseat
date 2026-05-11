@@ -28,7 +28,7 @@ export function AvailabilityCardMessage({
   const [preview, setPreview] = useState<Array<{ startTime: string; endTime: string }>>(
     cached ? cached.days.flatMap((day) => day.slots).slice(0, 2) : [],
   );
-  const [status, setStatus] = useState<"loading" | "active" | "revoked" | "expired">(
+  const [status, setStatus] = useState<"loading" | "active" | "revoked" | "expired" | "error">(
     cached?.status ?? "loading",
   );
   const [revoking, setRevoking] = useState(false);
@@ -43,7 +43,10 @@ export function AvailabilityCardMessage({
         setPreview(next);
       })
       .catch(() => {
-        if (!cancelled) setStatus("expired");
+        if (!cancelled) {
+          setStatus("error");
+          setPreview([]);
+        }
       });
     return () => {
       cancelled = true;
@@ -53,6 +56,7 @@ export function AvailabilityCardMessage({
   const statusLine = useMemo(() => {
     if (status === "revoked") return "This availability is no longer available.";
     if (status === "expired") return "This availability has expired.";
+    if (status === "error") return "Could not load availability. Pull to refresh or open the thread again.";
     return `Pick a time to plan something with ${ownerName}.`;
   }, [ownerName, status]);
 

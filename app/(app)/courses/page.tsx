@@ -24,6 +24,8 @@ import {
 } from "@/lib/constants/schools";
 import { getCurrentSemesterLabel } from "@/lib/constants/semester";
 import { prisma } from "@/lib/db/prisma";
+import { formatMessage, getMessages, type CoursesMessages } from "@/lib/i18n/messages";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { cn } from "@/lib/utils";
 
 type CoursesTab = "popular-courses" | "my-courses" | "my-bookmarked-courses";
@@ -79,6 +81,9 @@ export default async function CoursesPage({
 }: {
   searchParams?: Promise<{ school?: string; tab?: string; q?: string }>;
 }) {
+  const locale = await getServerAppLocale();
+  const ui = getMessages(locale);
+  const c = ui.courses;
   const sessionUser = await getSessionUser();
   const query = (await searchParams) ?? {};
   const selectedSchool: SchoolCode =
@@ -103,7 +108,7 @@ export default async function CoursesPage({
   };
 
   let popularRows: CourseRow[];
-  let popularSourceLabel = "Popular in your school";
+  let popularSourceLabel = c.popularSubtitlePopularInSchool;
 
   if (rawCourseQuery) {
     const rows = await prisma.course.findMany({
@@ -119,7 +124,7 @@ export default async function CoursesPage({
       instructorSummary: course.instructorSummary,
       memberCount: memberCountMap.get(course.id) ?? 0,
     }));
-    popularSourceLabel = `Results for "${rawCourseQuery}"`;
+    popularSourceLabel = formatMessage(c.popularSubtitleResultsFor, { query: rawCourseQuery });
   } else {
     const seededCodes = CURATED_REQUIRED_CODES[selectedSchool] ?? [];
     const seededRowsRaw = seededCodes.length
@@ -154,7 +159,7 @@ export default async function CoursesPage({
         instructorSummary: course.instructorSummary,
         memberCount: memberCountMap.get(course.id) ?? 0,
       }));
-      popularSourceLabel = "Required/core courses";
+      popularSourceLabel = c.popularSubtitleRequiredCore;
     } else {
       const topMembershipCounts = await prisma.userCourse.groupBy({
         by: ["courseId"],
@@ -201,25 +206,25 @@ export default async function CoursesPage({
   if (!sessionUser) {
     return (
       <div className="space-y-3 pb-4">
-        <CoursesHeader selectedSchool={selectedSchool} />
-        <CoursesEntryTabs activeTab={activeTab} selectedSchool={selectedSchool} query={rawCourseQuery} />
+        <CoursesHeader selectedSchool={selectedSchool} courses={c} />
+        <CoursesEntryTabs activeTab={activeTab} selectedSchool={selectedSchool} query={rawCourseQuery} courses={c} />
 
         {activeTab === "popular-courses" ? (
           <>
-            <PopularCoursesSearchBar selectedSchool={selectedSchool} query={rawCourseQuery} />
-            <PopularCoursesMeta subtitle={popularSourceLabel} count={popularRows.length} />
-            <CourseRowsList rows={popularRows} query={rawCourseQuery} emptyText="No courses found." />
+            <PopularCoursesSearchBar selectedSchool={selectedSchool} query={rawCourseQuery} courses={c} />
+            <PopularCoursesMeta subtitle={popularSourceLabel} count={popularRows.length} courses={c} />
+            <CourseRowsList rows={popularRows} query={rawCourseQuery} emptyText={c.emptyNoCourses} courses={c} />
             <GuestAppCta
               returnTo="/courses"
-              headline="Sign in to manage your courses"
-              body="You can browse courses now. Sign in to add and bookmark them."
+              headline={c.guestManageHeadline}
+              body={c.guestManageBodyPopular}
             />
           </>
         ) : (
           <GuestAppCta
             returnTo={coursesTabHref(activeTab, selectedSchool, rawCourseQuery)}
-            headline="Sign in to manage your courses"
-            body="My courses and bookmarks are available after sign in."
+            headline={c.guestManageHeadline}
+            body={c.guestManageBodyBookmarksTabs}
           />
         )}
       </div>
@@ -282,19 +287,16 @@ export default async function CoursesPage({
   return (
     <div className="space-y-3 pb-4">
       {!user.onboardingComplete ? (
-        <OnboardingContinueCta
-          title="Finish setup to get the most from Courses"
-          body="You can explore courses already. Completing your profile helps with saved views, classmates, and recommendations."
-        />
+        <OnboardingContinueCta title={c.onboardingCoursesTitle} body={c.onboardingCoursesBody} />
       ) : null}
-      <CoursesHeader selectedSchool={selectedSchool} />
-      <CoursesEntryTabs activeTab={activeTab} selectedSchool={selectedSchool} query={rawCourseQuery} />
+      <CoursesHeader selectedSchool={selectedSchool} courses={c} />
+      <CoursesEntryTabs activeTab={activeTab} selectedSchool={selectedSchool} query={rawCourseQuery} courses={c} />
 
       {activeTab === "popular-courses" ? (
         <>
-          <PopularCoursesSearchBar selectedSchool={selectedSchool} query={rawCourseQuery} />
-          <PopularCoursesMeta subtitle={popularSourceLabel} count={popularRows.length} />
-          <CourseRowsList rows={popularRowsForViewer} query={rawCourseQuery} emptyText="No courses found." />
+          <PopularCoursesSearchBar selectedSchool={selectedSchool} query={rawCourseQuery} courses={c} />
+          <PopularCoursesMeta subtitle={popularSourceLabel} count={popularRows.length} courses={c} />
+          <CourseRowsList rows={popularRowsForViewer} query={rawCourseQuery} emptyText={c.emptyNoCourses} courses={c} />
         </>
       ) : null}
 
@@ -307,10 +309,10 @@ export default async function CoursesPage({
             )}
           >
             <h3 className="text-lg font-semibold tracking-tight text-[#111827] dark:text-foreground">
-              No courses on your schedule yet
+              {c.myCoursesEmptyTitle}
             </h3>
             <p className="mx-auto mt-2 max-w-[22rem] text-[14px] leading-relaxed text-[#5F6B7A] dark:text-muted-foreground">
-              Go to Popular courses, then add your first course.
+              {c.myCoursesEmptyBody}
             </p>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
               <Link
@@ -320,10 +322,10 @@ export default async function CoursesPage({
                   "hover:bg-[#DBEAFE] dark:border-blue-500/40 dark:bg-blue-950/35 dark:text-blue-300",
                 )}
               >
-                Browse popular courses
+                {c.browsePopularCourses}
               </Link>
               <LinkButton href={"/courses/add" as Route} variant="outline" size="sm" className="rounded-full">
-                Add with form
+                {c.addWithForm}
               </LinkButton>
             </div>
           </div>
@@ -340,6 +342,7 @@ export default async function CoursesPage({
                 <li key={membership.id} className="list-none">
                   <EnrolledCourseCard
                     variant="compact"
+                    courses={c}
                     course={{
                       id: membership.course.id,
                       name: membership.course.name,
@@ -363,25 +366,27 @@ export default async function CoursesPage({
   );
 }
 
-function CoursesHeader({ selectedSchool }: { selectedSchool: SchoolCode }) {
+function CoursesHeader({
+  selectedSchool,
+  courses,
+}: {
+  selectedSchool: SchoolCode;
+  courses: CoursesMessages;
+}) {
   const schoolLabel = getSchoolLabel(selectedSchool);
   return (
     <div className="flex items-start justify-between gap-3">
       <header className="min-w-0">
-        <h1 className="page-screen-title">Courses</h1>
-        <p className="page-screen-subtitle mt-0.5">
-          Browse popular classes, join your schedule, and bookmark courses to revisit later.
-        </p>
+        <h1 className="page-screen-title">{courses.screenTitle}</h1>
+        <p className="page-screen-subtitle mt-0.5">{courses.screenSubtitle}</p>
       </header>
 
       <div className="shrink-0 space-y-1">
         <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8A94A6] dark:text-muted-foreground">
-          School
+          {courses.schoolHeading}
         </p>
         <CoursesSchoolSelect value={selectedSchool} className="w-auto max-w-[11.5rem]" />
-        <p className="sr-only">
-          Enrolled and saved courses follow the school you select: {schoolLabel}.
-        </p>
+        <p className="sr-only">{formatMessage(courses.schoolSelectSrSuffix, { school: schoolLabel })}</p>
       </div>
     </div>
   );
@@ -391,10 +396,12 @@ function CoursesEntryTabs({
   activeTab,
   selectedSchool,
   query,
+  courses,
 }: {
   activeTab: CoursesTab;
   selectedSchool: SchoolCode;
   query: string;
+  courses: CoursesMessages;
 }) {
   const base =
     "inline-flex h-9 w-full items-center justify-center rounded-full border px-2 text-[12px] font-semibold transition";
@@ -408,18 +415,18 @@ function CoursesEntryTabs({
     );
 
   return (
-    <nav aria-label="Course entry points" className="grid grid-cols-3 items-center gap-2">
+    <nav aria-label={courses.tabsNavAria} className="grid grid-cols-3 items-center gap-2">
       <Link href={coursesTabHref("popular-courses", selectedSchool, query)} className={tabClass("popular-courses")}>
-        Popular
+        {courses.tabPopular}
       </Link>
       <Link href={coursesTabHref("my-courses", selectedSchool, query)} className={tabClass("my-courses")}>
-        My courses
+        {courses.tabMyCourses}
       </Link>
       <Link
         href={coursesTabHref("my-bookmarked-courses", selectedSchool, query)}
         className={tabClass("my-bookmarked-courses")}
       >
-        Bookmarks
+        {courses.tabBookmarks}
       </Link>
     </nav>
   );
@@ -428,9 +435,11 @@ function CoursesEntryTabs({
 function PopularCoursesSearchBar({
   selectedSchool,
   query,
+  courses,
 }: {
   selectedSchool: SchoolCode;
   query: string;
+  courses: CoursesMessages;
 }) {
   return (
     <form
@@ -446,32 +455,40 @@ function PopularCoursesSearchBar({
       <input
         name="q"
         defaultValue={query}
-        placeholder="Search courses (e.g. IN2064)"
+        placeholder={courses.searchPlaceholder}
         className="h-9 flex-1 rounded-xl border border-[#E7E0D6] bg-background px-3 text-[14px] outline-none focus-visible:border-[#2563EB]/55 dark:border-border"
       />
       <button
         type="submit"
         className="inline-flex h-9 shrink-0 items-center justify-center rounded-full border border-[#D8D1C7] bg-white px-3 text-[12px] font-semibold text-[#111827] transition hover:bg-[#F8F6F1] dark:border-border dark:bg-card dark:text-foreground"
       >
-        Search
+        {courses.searchSubmit}
       </button>
       {query ? (
         <Link
           href={coursesTabHref("popular-courses", selectedSchool)}
           className="inline-flex h-9 shrink-0 items-center justify-center rounded-full border border-transparent px-2.5 text-[12px] font-medium text-muted-foreground transition hover:bg-muted/40 hover:text-foreground"
         >
-          Clear
+          {courses.searchClear}
         </Link>
       ) : null}
     </form>
   );
 }
 
-function PopularCoursesMeta({ subtitle, count }: { subtitle: string; count: number }) {
+function PopularCoursesMeta({
+  subtitle,
+  count,
+  courses,
+}: {
+  subtitle: string;
+  count: number;
+  courses: CoursesMessages;
+}) {
   return (
     <div className="flex items-center justify-between px-1 text-[12px] text-[#5F6B7A] dark:text-muted-foreground">
       <span>{subtitle}</span>
-      <span>{count} courses</span>
+      <span>{formatMessage(courses.metaCourseCount, { count })}</span>
     </div>
   );
 }
@@ -480,10 +497,12 @@ function CourseRowsList({
   rows,
   query,
   emptyText,
+  courses,
 }: {
   rows: CourseRow[];
   query: string;
   emptyText: string;
+  courses: CoursesMessages;
 }) {
   if (rows.length === 0) {
     return (
@@ -494,7 +513,7 @@ function CourseRowsList({
         )}
       >
         <p className="text-[14px] font-medium text-[#111827] dark:text-foreground">
-          {query ? `No courses match "${query}".` : emptyText}
+          {query ? formatMessage(courses.emptyNoMatchQuery, { query }) : emptyText}
         </p>
       </div>
     );
@@ -506,6 +525,7 @@ function CourseRowsList({
         <li key={row.id} className="list-none">
           <PopularCourseCard
             variant="compact"
+            courses={courses}
             course={{
               id: row.id,
               name: row.name,

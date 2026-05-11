@@ -23,6 +23,8 @@ import {
 } from "@/lib/constants/schools";
 import { prisma } from "@/lib/db/prisma";
 import { formatShortRelativeTime } from "@/lib/format/short-relative-time";
+import { formatMessage, getMessages } from "@/lib/i18n/messages";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { safeReturnPath } from "@/lib/nav/back";
 import { inboxCourseUnreadCounts } from "@/lib/queries/inbox-unread-counts";
 import { weeklyOverlapMinutes, type SessionBlock } from "@/lib/queries/schedule-overlap";
@@ -41,6 +43,9 @@ export default async function CourseDetailPage({
   const { courseId } = await params;
   const query = (await searchParams) ?? {};
   const backHref = safeReturnPath(query.returnTo, "/courses");
+  const locale = await getServerAppLocale();
+  const ui = getMessages(locale);
+  const c = ui.courses;
   const [sessionUser, course, totalMembers] = await Promise.all([
     getSessionUser(),
     prisma.course.findUnique({
@@ -65,7 +70,7 @@ export default async function CourseDetailPage({
     return (
       <div className="space-y-5">
         <div className="flex items-center justify-between gap-2">
-          <BackLink href={backHref} label="Back to courses" className="-ml-2" />
+          <BackLink href={backHref} label={c.backToCourses} className="-ml-2" />
           <CourseShareLinkAction courseId={course.id} memberCount={totalMembers} variant="icon" />
         </div>
 
@@ -82,26 +87,20 @@ export default async function CourseDetailPage({
 
           <div className="flex items-center gap-3">
             {totalMembers <= 0 ? (
-              <CourseClassmatesCountChip
-                label="No one yet"
-                title="No students have enrolled in this course yet"
-              />
+              <CourseClassmatesCountChip label={c.chipNoOneYet} title={c.chipNoOneYetTitle} />
             ) : totalMembers === 1 ? (
-              <CourseClassmatesCountChip
-                label="1 classmate"
-                title="One student is enrolled in this course"
-              />
+              <CourseClassmatesCountChip label={c.chipOneClassmate} title={c.chipOneClassmateTitle} />
             ) : (
               <CourseClassmatesCountChip
-                label={`${totalMembers} classmates`}
-                title={`${totalMembers} students are enrolled in this course`}
+                label={formatMessage(c.chipManyClassmates, { count: totalMembers })}
+                title={formatMessage(c.chipManyClassmatesTitle, { count: totalMembers })}
                 compactHeadline={String(totalMembers)}
               />
             )}
           </div>
 
           <p className="text-[13px] leading-snug text-classmates-sub dark:text-zinc-400">
-            Sign in to join this course, open chat, and view member details.
+            {c.detailGuestPrompt}
           </p>
         </header>
       </div>
@@ -152,7 +151,7 @@ export default async function CourseDetailPage({
     return (
       <div className="space-y-5">
         <div className="flex items-center justify-between gap-2">
-          <BackLink href={backHref} label="Back to courses" className="-ml-2" />
+          <BackLink href={backHref} label={c.backToCourses} className="-ml-2" />
           <CourseShareLinkAction courseId={course.id} memberCount={totalMembers} variant="icon" />
         </div>
 
@@ -169,19 +168,13 @@ export default async function CourseDetailPage({
 
           <div className="flex items-center gap-3">
             {totalMembers <= 0 ? (
-              <CourseClassmatesCountChip
-                label="No one yet"
-                title="No students have enrolled in this course yet"
-              />
+              <CourseClassmatesCountChip label={c.chipNoOneYet} title={c.chipNoOneYetTitle} />
             ) : totalMembers === 1 ? (
-              <CourseClassmatesCountChip
-                label="1 classmate"
-                title="One student is enrolled in this course"
-              />
+              <CourseClassmatesCountChip label={c.chipOneClassmate} title={c.chipOneClassmateTitle} />
             ) : (
               <CourseClassmatesCountChip
-                label={`${totalMembers} classmates`}
-                title={`${totalMembers} students are enrolled in this course`}
+                label={formatMessage(c.chipManyClassmates, { count: totalMembers })}
+                title={formatMessage(c.chipManyClassmatesTitle, { count: totalMembers })}
                 compactHeadline={String(totalMembers)}
               />
             )}
@@ -189,10 +182,10 @@ export default async function CourseDetailPage({
 
           <p className="text-[13px] leading-snug text-classmates-sub dark:text-zinc-400">
             {totalMembers <= 0
-              ? "No one has enrolled yet \u2014 be the first or share the course link."
+              ? c.detailInviteBodyNone
               : totalMembers === 1
-                ? "One person is in this course \u2014 enroll to connect."
-                : "Enroll to join the hub, group chat, and your weekly schedule for this class."}
+                ? c.detailInviteBodyOne
+                : c.detailInviteBodyMany}
           </p>
         </header>
 
@@ -260,7 +253,7 @@ export default async function CourseDetailPage({
     return {
       membershipId: m.id,
       userId: m.userId,
-      nickname: m.user.nickname ?? "Student",
+      nickname: m.user.nickname ?? ui.common.studentFallback,
       gender: m.user.gender,
       avatarUrl: m.user.avatarUrl,
       major: m.user.major,
@@ -302,13 +295,16 @@ export default async function CourseDetailPage({
     courseChatLastAt &&
     (() => {
       const short = formatShortRelativeTime(courseChatLastAt);
-      return short === "<1m" ? "Last active just now" : `Last active ${short} ago`;
+      return short === "<1m" ? c.lastActiveJustNow : formatMessage(c.lastActiveAgo, { time: short });
     })();
 
-  const courseChatMetaBase = `${enrolledTotal} member${enrolledTotal === 1 ? "" : "s"}`;
+  const courseChatMetaBase =
+    enrolledTotal === 1 ? c.groupChatMetaMembersOne : formatMessage(c.groupChatMetaMembersMany, { count: enrolledTotal });
   const courseChatMetaDetail =
     courseChatUnread > 0
-      ? `${courseChatUnread} unread message${courseChatUnread === 1 ? "" : "s"}`
+      ? courseChatUnread === 1
+        ? c.groupChatMetaUnreadOne
+        : formatMessage(c.groupChatMetaUnreadMany, { count: courseChatUnread })
       : courseChatLastActiveLabel;
 
   return (
@@ -321,20 +317,18 @@ export default async function CourseDetailPage({
             className="flex flex-wrap items-center gap-2"
           >
             <input type="hidden" name="returnTo" value={`/courses/${membership.course.id}`} />
-            <p className="min-w-0 flex-1 text-[12px] leading-snug text-foreground">
-              This course chat is hidden from Chats. You can still open it from Group chat next to the member count.
-            </p>
+            <p className="min-w-0 flex-1 text-[12px] leading-snug text-foreground">{c.inboxHiddenNotice}</p>
             <button
               type="submit"
               className="shrink-0 rounded-full border border-border bg-background px-3 py-1.5 text-[11px] font-semibold text-foreground shadow-sm transition hover:bg-muted/60"
             >
-              Show in Chats
+              {c.showInChats}
             </button>
           </form>
         </div>
       ) : null}
       <div className="flex items-center justify-between gap-2">
-        <BackLink href={backHref} label="Back to courses" className="-ml-2" />
+        <BackLink href={backHref} label={c.backToCourses} className="-ml-2" />
         <CourseShareLinkAction courseId={membership.course.id} memberCount={enrolledTotal} variant="icon" />
       </div>
 
@@ -353,14 +347,17 @@ export default async function CourseDetailPage({
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           {enrolledOthers <= 0 ? (
+            <CourseClassmatesCountChip label={c.chipJustYou} title={c.chipJustYouTitle} />
+          ) : enrolledOthers === 1 ? (
             <CourseClassmatesCountChip
-              label="Just you"
-              title="You’re the only enrolled student in this course so far"
+              label={c.chipOtherClassmatesOne}
+              title={c.chipOtherClassmatesOneTitle}
+              compactHeadline={String(enrolledOthers)}
             />
           ) : (
             <CourseClassmatesCountChip
-              label={`${enrolledOthers} classmate${enrolledOthers === 1 ? "" : "s"}`}
-              title={`${enrolledOthers} other student${enrolledOthers === 1 ? "" : "s"} enrolled in this course with you`}
+              label={formatMessage(c.chipOtherClassmatesMany, { count: enrolledOthers })}
+              title={formatMessage(c.chipOtherClassmatesManyTitle, { count: enrolledOthers })}
               compactHeadline={String(enrolledOthers)}
             />
           )}
@@ -374,13 +371,13 @@ export default async function CourseDetailPage({
             title={
               courseChatUnread > 0 || courseChatMetaDetail
                 ? `${courseChatMetaBase}${courseChatMetaDetail ? ` · ${courseChatMetaDetail}` : ""}`
-                : "Open course group chat"
+                : c.groupChatOpenTitle
             }
           >
             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-classmates-blue text-white shadow-inner dark:bg-blue-500">
               <UsersRound className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
             </span>
-            <span className="min-w-0">Group chat</span>
+            <span className="min-w-0">{c.groupChat}</span>
             {courseChatUnread > 0 ? (
               <span className="rounded-full bg-classmates-blue px-1.5 py-px text-[10px] font-bold tabular-nums leading-none text-white dark:bg-blue-500">
                 {courseChatUnread}
@@ -390,9 +387,7 @@ export default async function CourseDetailPage({
         </div>
 
         {enrolledOthers === 0 ? (
-          <p className="text-[13px] leading-snug text-classmates-sub dark:text-zinc-400">
-            No classmates yet — share the link so people can join.
-          </p>
+          <p className="text-[13px] leading-snug text-classmates-sub dark:text-zinc-400">{c.noClassmatesShareHint}</p>
         ) : null}
       </header>
 

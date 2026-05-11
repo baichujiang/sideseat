@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { MoreHorizontal, ShieldBan, UserRoundX } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage } from "@/lib/i18n/messages";
 
 export function PeerProfileMenu({
   peerUserId,
@@ -17,9 +19,10 @@ export function PeerProfileMenu({
   returnTo: string;
   connectionId?: string;
 }) {
+  const { common, userProfile: up } = useAppMessages();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const name = peerNickname ?? "Student";
+  const name = peerNickname ?? common.studentFallback;
 
   useEffect(() => {
     if (!open) return;
@@ -48,7 +51,7 @@ export function PeerProfileMenu({
     <div className="relative" ref={menuRef}>
       <button
         type="button"
-        aria-label="More actions"
+        aria-label={up.menuMoreActions}
         onClick={() => setOpen((value) => !value)}
         className="inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
       >
@@ -65,7 +68,7 @@ export function PeerProfileMenu({
               <input type="hidden" name="returnTo" value={returnTo} />
               <MenuAction
                 icon={UserRoundX}
-                label={`Delete ${name}`}
+                label={formatMessage(up.menuDeleteContact, { name })}
                 destructive
                 onSelect={() => setOpen(false)}
               />
@@ -77,7 +80,7 @@ export function PeerProfileMenu({
             {connectionId ? <input name="connectionId" type="hidden" value={connectionId} /> : null}
             <MenuAction
               icon={ShieldBan}
-              label={`Block ${name}`}
+              label={formatMessage(up.menuBlockUser, { name })}
               destructive
               onSelect={() => setOpen(false)}
             />

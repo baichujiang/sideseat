@@ -7,6 +7,8 @@ import { ProfileMessageButton } from "@/components/profile/profile-message-butto
 import { PeerProfileView } from "@/components/profile/peer-profile-view";
 import { BackLink } from "@/components/nav/back-link";
 import { requirePublicProfileAccess } from "@/lib/auth/guards";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
+import { formatMessage, getMessages } from "@/lib/i18n/messages";
 import { safeReturnPath } from "@/lib/nav/back";
 
 export default async function PeerUserProfilePage({
@@ -19,7 +21,10 @@ export default async function PeerUserProfilePage({
   const { userId } = await params;
   const query = (await searchParams) ?? {};
   const access = await requirePublicProfileAccess(userId);
-  const { user, peer, courseName } = access;
+  const { peer, courseName } = access;
+  const locale = await getServerAppLocale();
+  const ui = getMessages(locale);
+  const up = ui.userProfile;
   const backHref = safeReturnPath(query.returnTo, "/discover");
 
   const friendLinkReturnTo =
@@ -30,11 +35,11 @@ export default async function PeerUserProfilePage({
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-background">
       <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
-        <BackLink href={backHref} label="Back" />
+        <BackLink href={backHref} label={ui.common.back} />
         <div className="min-w-0 flex-1 pr-2">
-          <p className="truncate text-sm font-semibold">Profile</p>
+          <p className="truncate text-sm font-semibold">{up.screenTitle}</p>
           <p className="truncate text-[11px] text-muted-foreground">
-            {peer.nickname?.trim() || "Student"}
+            {peer.nickname?.trim() || ui.common.studentFallback}
           </p>
         </div>
         <PeerProfileMenu
@@ -68,12 +73,20 @@ export default async function PeerUserProfilePage({
               ? courseName
               : access.sharedCourses[0]?.name ?? null
           }
+          labels={{
+            studentFallback: ui.common.studentFallback,
+            aboutSection: up.aboutSection,
+            languagesSection: up.languagesSection,
+            emptyBio: up.emptyBio,
+          }}
           belowDisplayName={
             access.mode === "connection" ? (
               <ContactRemarkEditor
                 connectionId={access.connectionId}
                 initialRemark={access.myContactRemark}
                 variant="underName"
+                remarkPlaceholder={up.contactRemarkPlaceholder}
+                remarkMicroLabel={up.contactRemarkMicroLabel}
               />
             ) : null
           }
@@ -81,10 +94,10 @@ export default async function PeerUserProfilePage({
 
         <div className="mt-4 space-y-2 rounded-2xl border border-border/60 bg-card px-3 py-3">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-            Courses
+            {up.coursesSection}
           </p>
           {access.peerCourses.length === 0 ? (
-            <p className="text-xs text-muted-foreground">No courses on their profile yet.</p>
+            <p className="text-xs text-muted-foreground">{up.coursesEmpty}</p>
           ) : (
             <>
               <ul className="flex flex-wrap gap-1.5">
@@ -112,11 +125,12 @@ export default async function PeerUserProfilePage({
               </ul>
               {access.sharedCourses.length > 0 ? (
                 <p className="text-[11px] text-primary/90">
-                  {access.sharedCourses.length} shared{" "}
-                  {access.sharedCourses.length === 1 ? "course" : "courses"}
+                  {access.sharedCourses.length === 1
+                    ? up.sharedCoursesOne
+                    : formatMessage(up.sharedCoursesMany, { count: access.sharedCourses.length })}
                 </p>
               ) : (
-                <p className="text-[11px] text-muted-foreground">No overlap with your courses.</p>
+                <p className="text-[11px] text-muted-foreground">{up.noCourseOverlap}</p>
               )}
             </>
           )}
@@ -128,7 +142,7 @@ export default async function PeerUserProfilePage({
               href={`/connections/${access.connectionId}?returnTo=${encodeURIComponent(friendLinkReturnTo)}`}
               className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
             >
-              Open chat
+              {up.openChat}
             </Link>
           ) : (
             <ProfileMessageButton

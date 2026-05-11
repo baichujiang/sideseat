@@ -8,20 +8,28 @@ import { CornerUpLeft, Plus, Send, X } from "lucide-react";
 
 import { FormMessage } from "@/components/forms/form-message";
 import { useChatReply } from "@/components/chat/chat-reply-context";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage } from "@/lib/i18n/messages";
 import { ChatAttachmentPlusButton, ChatAttachmentTray } from "@/components/chat/chat-attachment-menu";
+import { ChatThreadSearchButton } from "@/components/chat/chat-thread-search-button";
+import type { ThreadSearchEntry } from "@/lib/chat/thread-search-index";
 import { cn } from "@/lib/utils";
 
 export function ChatComposer({
   connectionId,
   peerName,
   hideAttachments = false,
+  threadSearchEntries = [],
 }: {
   connectionId: string;
   peerName: string;
   /** Hide share-availability / plan (+) — used for notes-to-self threads. */
   hideAttachments?: boolean;
+  /** Server-built index for in-thread search (scroll-to message). */
+  threadSearchEntries?: ThreadSearchEntry[];
 }) {
   const router = useRouter();
+  const { chat: c, common } = useAppMessages();
   const { replyTo, setReplyTo } = useChatReply();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const composerChromeRef = useRef<HTMLDivElement>(null);
@@ -66,7 +74,7 @@ export function ChatComposer({
 
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
-      setError(typeof payload.error === "string" ? payload.error : "Unable to send.");
+      setError(typeof payload.error === "string" ? payload.error : c.unableToSend);
       setSubmitting(false);
       return;
     }
@@ -91,16 +99,24 @@ export function ChatComposer({
           onCancel={() => setReplyTo(null)}
         />
       ) : null}
-      <div ref={composerChromeRef} className="flex min-w-0 flex-col">
-        <div className="flex items-end gap-2">
+      <div
+        ref={composerChromeRef}
+        className={cn(
+          "flex min-w-0 flex-col overflow-hidden rounded-[1.25rem]",
+          "border border-input bg-muted/40",
+          "shadow-none ring-offset-background",
+        )}
+      >
+        <div className="flex min-h-0 items-end gap-2 px-2.5 py-2">
+          <ChatThreadSearchButton entries={threadSearchEntries} />
           {hideAttachments ? (
             <button
               type="button"
               disabled
-              aria-label="Attachments unavailable in self chat"
-              title="Attachments unavailable in self chat"
+              aria-label={c.attachmentsUnavailableAria}
+              title={c.attachmentsUnavailableTitle}
               className={cn(
-                "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-dashed border-border/70 bg-muted/35 text-muted-foreground/60",
+                "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-dashed border-border/70 bg-background/40 text-muted-foreground/60",
                 "cursor-not-allowed",
               )}
             >
@@ -110,7 +126,7 @@ export function ChatComposer({
             <ChatAttachmentPlusButton open={attachOpen} onToggle={() => setAttachOpen((o) => !o)} />
           )}
           <label className="sr-only" htmlFor={`chat-input-${connectionId}`}>
-            Message
+            {c.messageInputLabel}
           </label>
           <textarea
             ref={inputRef}
@@ -126,11 +142,11 @@ export function ChatComposer({
               }
             }}
             rows={1}
-            placeholder={replyTo ? "Write your reply…" : "Write a message…"}
+            placeholder={replyTo ? c.placeholderReply : c.placeholderWrite}
             className={cn(
-              "min-h-[44px] max-h-32 flex-1 resize-none rounded-[1.25rem] border border-input bg-muted/40 px-3.5 py-2.5 text-[16px] leading-snug",
+              "min-h-[44px] max-h-32 flex-1 resize-none rounded-xl border-0 bg-background/45 px-3 py-2.5 text-[16px] leading-snug",
               "placeholder:text-muted-foreground/70",
-              "outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
+              "outline-none focus-visible:ring-2 focus-visible:ring-ring/35",
             )}
           />
           <button
@@ -138,11 +154,11 @@ export function ChatComposer({
             disabled={submitting || !body.trim()}
             onClick={() => void submit()}
             className={cn(
-              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition",
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition",
               "hover:bg-primary/90",
               "disabled:pointer-events-none disabled:opacity-35",
             )}
-            aria-label="Send"
+            aria-label={c.sendAria}
           >
             <Send className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />
           </button>
@@ -174,19 +190,20 @@ export function ReplyPreview({
   body: string;
   onCancel: () => void;
 }) {
+  const { chat: c, common } = useAppMessages();
   return (
     <div className="flex items-center gap-2 rounded-xl border border-border/50 bg-muted/30 px-3 py-1.5">
       <CornerUpLeft className="h-3.5 w-3.5 shrink-0 text-muted-foreground" strokeWidth={2.25} />
       <div className="min-w-0 flex-1 border-l-2 border-primary/60 pl-2">
         <p className="truncate text-[11px] font-semibold text-primary">
-          Replying to {senderName?.trim() || "Student"}
+          {formatMessage(c.replyingTo, { name: senderName?.trim() || common.studentFallback })}
         </p>
         <p className="truncate text-[11.5px] text-muted-foreground">{body}</p>
       </div>
       <button
         type="button"
         onClick={onCancel}
-        aria-label="Cancel reply"
+        aria-label={c.cancelReplyAria}
         className="inline-flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground/80 hover:bg-muted hover:text-foreground"
       >
         <X className="h-3.5 w-3.5" strokeWidth={2.25} />

@@ -10,6 +10,8 @@ import { Bookmark, Users, X } from "lucide-react";
 
 import { QuickEnrollButton } from "@/components/courses/quick-enroll-button";
 import { inboxChatListUlClassName } from "@/components/inbox/inbox-conversation-tile";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 export type SavedRow = {
@@ -37,6 +39,7 @@ export function SavedCoursesPanel({
   school?: string;
 }) {
   const router = useRouter();
+  const { courses: co } = useAppMessages();
   const [rows, setRows] = useState<SavedRow[]>(initialSaved);
 
   useEffect(() => {
@@ -66,10 +69,14 @@ export function SavedCoursesPanel({
     <section className="space-y-2">
       <div className="flex items-baseline justify-between gap-3 px-0.5">
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5F6B7A] dark:text-muted-foreground">
-          Saved
+          {co.savedSectionTitle}
         </h2>
         <span className="text-[13px] tabular-nums text-[#8A94A6] dark:text-muted-foreground">
-          {hasRows ? `${rows.length} ${rows.length === 1 ? "course" : "courses"}` : "Saved"}
+          {hasRows
+            ? rows.length === 1
+              ? co.savedCountCoursesOne
+              : formatMessage(co.savedCountCoursesMany, { count: rows.length })
+            : co.savedCountFallback}
         </span>
       </div>
 
@@ -91,7 +98,9 @@ export function SavedCoursesPanel({
                 <p className="mt-0.5 flex items-center gap-1 text-[13px] leading-snug text-[#5F6B7A] dark:text-zinc-400">
                   <Users className="h-3.5 w-3.5 shrink-0 opacity-90" strokeWidth={2.25} aria-hidden />
                   <span>
-                    {row.memberCount} {row.memberCount === 1 ? "classmate" : "classmates"} enrolled
+                    {row.memberCount === 1
+                      ? co.classmatesEnrolledOne
+                      : formatMessage(co.classmatesEnrolledMany, { count: row.memberCount })}
                   </span>
                 </p>
               </Link>
@@ -101,7 +110,7 @@ export function SavedCoursesPanel({
               <button
                 type="button"
                 onClick={() => void unsave(row)}
-                aria-label={`Remove ${row.code ?? row.name}`}
+                aria-label={formatMessage(co.savedRemoveAria, { label: row.code ?? row.name })}
                 className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#8A94A6] transition hover:bg-[#F3F0EA] hover:text-[#111827] dark:hover:bg-muted"
               >
                 <X className="h-3.5 w-3.5" strokeWidth={2.25} />
@@ -126,10 +135,10 @@ export function SavedCoursesPanel({
             />
             <div className="min-w-0">
               <p className="text-[14px] font-semibold leading-snug text-[#111827] dark:text-foreground">
-                No saved courses yet
+                {co.savedEmptyTitle}
               </p>
               <p className="mt-1 text-[12px] leading-relaxed text-[#5F6B7A] dark:text-muted-foreground">
-                Bookmarks from search show here.
+                {co.savedEmptyBody}
               </p>
             </div>
           </div>
@@ -140,7 +149,7 @@ export function SavedCoursesPanel({
               "hover:bg-[#DBEAFE] dark:border-blue-500/40 dark:bg-blue-950/35 dark:text-blue-300 dark:hover:bg-blue-950/50",
             )}
           >
-            Search courses
+            {co.savedSearchCourses}
           </Link>
         </div>
       )}

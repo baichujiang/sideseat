@@ -5,7 +5,7 @@ import { Info, LogOut, ShieldBan, Sparkles, UserX } from "lucide-react";
 
 import { LogoutForm } from "@/components/auth/logout-form";
 import { BackLink } from "@/components/nav/back-link";
-import { PushNotificationsCard } from "@/components/profile/push-notifications-card";
+import { meSettingsRowLogoutIconShellLargeClass } from "@/components/profile/me-settings-row";
 import { LanguagePreferenceCard } from "@/components/settings/language-preference-card";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
@@ -38,8 +38,6 @@ export default async function ProfileAccountPage() {
       </header>
 
       <LanguagePreferenceCard />
-
-      <PushNotificationsCard />
 
       <div className="overflow-hidden rounded-2xl border border-classmates-edge bg-classmates-surface shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card">
         <Link
@@ -99,17 +97,21 @@ export default async function ProfileAccountPage() {
             </div>
           </div>
         </Link>
+        <LogoutForm className="block">
+          <button
+            type="submit"
+            className="flex w-full items-center gap-3 border-t border-classmates-hairline px-4 py-3.5 text-left transition-colors active:bg-classmates-warm-alt dark:border-border/60 dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
+          >
+            <span className={meSettingsRowLogoutIconShellLargeClass}>
+              <LogOut className="h-5 w-5" strokeWidth={2} aria-hidden />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[14px] font-semibold leading-tight text-foreground">{m.account.logOut}</p>
+              <p className="mt-0.5 text-[12px] text-muted-foreground">{m.me.logOutRowSubtitle}</p>
+            </div>
+          </button>
+        </LogoutForm>
       </div>
-
-      <LogoutForm className="block">
-        <button
-          type="submit"
-          className="flex w-full items-center justify-center gap-2 rounded-full border border-classmates-edge bg-classmates-surface px-4 py-3 text-[14px] font-semibold text-classmates-ink shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors active:bg-classmates-warm-alt dark:border-border dark:bg-card dark:text-foreground dark:active:bg-muted/40 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
-        >
-          <LogOut className="h-4 w-4 shrink-0 opacity-70" strokeWidth={2} aria-hidden />
-          {m.account.logOut}
-        </button>
-      </LogoutForm>
     </div>
   );
 }

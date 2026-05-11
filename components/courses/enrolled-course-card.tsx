@@ -6,9 +6,10 @@ import { ChevronRight, MapPin, Users } from "lucide-react";
 import { SaveBookmarkButton } from "@/components/courses/save-bookmark-button";
 import { CourseAvatar } from "@/components/ui/course-avatar";
 import { courseCodeBadgeLabel } from "@/lib/courses/course-code-label";
+import { formatMessage, type CoursesMessages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
-const WEEKDAY_SHORT: Record<Weekday, string> = {
+const WEEKDAY_SHORT_FALLBACK: Record<Weekday, string> = {
   MON: "Mon",
   TUE: "Tue",
   WED: "Wed",
@@ -17,6 +18,15 @@ const WEEKDAY_SHORT: Record<Weekday, string> = {
   SAT: "Sat",
   SUN: "Sun",
 };
+
+function weekdayShort(courses: CoursesMessages | undefined, d: Weekday): string {
+  return courses?.weekdayShort[d] ?? WEEKDAY_SHORT_FALLBACK[d];
+}
+
+function classmatesLine(c: CoursesMessages | undefined, n: number) {
+  if (!c) return `${n} ${n === 1 ? "classmate" : "classmates"}`;
+  return n === 1 ? c.classmatesCountOne : formatMessage(c.classmatesCountMany, { count: n });
+}
 
 function formatHM(minutes: number): string {
   const h = Math.floor(minutes / 60).toString().padStart(2, "0");
@@ -53,6 +63,7 @@ export function EnrolledCourseCard({
   sessions,
   memberCount,
   variant = "card",
+  courses,
 }: {
   course: {
     id: string;
@@ -63,6 +74,7 @@ export function EnrolledCourseCard({
   sessions: EnrolledSession[];
   memberCount: number;
   variant?: "card" | "compact";
+  courses?: CoursesMessages;
 }) {
   const sortedSessions = [...sessions].sort((a, b) => {
     const weekdayOrder: Weekday[] = [
@@ -85,23 +97,37 @@ export function EnrolledCourseCard({
   const instructorLabel = course.instructorSummary?.trim() || extractInstructorHint(course.name);
   const isCompact = variant === "compact";
 
+  const c = courses;
+  const moreSlots =
+    sortedSessions.length > 2
+      ? c
+        ? formatMessage(c.enrolledMoreSlotsCount, { n: sortedSessions.length - 2 })
+        : `+${sortedSessions.length - 2} more`
+      : null;
   const sessionLine =
     sortedSessions.length === 0
-      ? "No weekly times on Home"
+      ? c?.enrolledNoWeeklyTimes ?? "No weekly times on Home"
       : [
           ...sortedSessions.slice(0, 2).map(
-            (s) => `${WEEKDAY_SHORT[s.weekday]} ${formatHM(s.startMinute)}–${formatHM(s.endMinute)}`,
+            (s) => `${weekdayShort(c, s.weekday)} ${formatHM(s.startMinute)}–${formatHM(s.endMinute)}`,
           ),
-          sortedSessions.length > 2 ? `+${sortedSessions.length - 2} more` : null,
+          moreSlots,
         ]
           .filter(Boolean)
           .join(" · ");
 
+  const instructorDisplay =
+    instructorLabel && c
+      ? `${c.instructorPrefix} ${instructorLabel}`
+      : instructorLabel
+        ? `Instructor: ${instructorLabel}`
+        : null;
+
   const compactMetaParts = [
     sessionLine,
-    instructorLabel ? `Instructor: ${instructorLabel}` : null,
+    instructorDisplay,
     location ?? null,
-    `${memberCount} ${memberCount === 1 ? "classmate" : "classmates"}`,
+    classmatesLine(c, memberCount),
   ].filter(Boolean);
 
   return (
@@ -190,7 +216,7 @@ export function EnrolledCourseCard({
 
             {instructorLabel ? (
               <p className="mt-1 text-[12px] text-[#5F6B7A] dark:text-muted-foreground sm:text-[13px]">
-                Instructor: {instructorLabel}
+                {c ? `${c.instructorPrefix} ${instructorLabel}` : `Instructor: ${instructorLabel}`}
               </p>
             ) : null}
 
@@ -199,7 +225,7 @@ export function EnrolledCourseCard({
                 {sortedSessions.slice(0, 2).map((s, i) => (
                   <li key={`${s.weekday}-${s.startMinute}-${i}`} className="tabular-nums">
                     <span className="inline-block w-8 font-medium text-[#111827]/88 dark:text-foreground/88 sm:w-9">
-                      {WEEKDAY_SHORT[s.weekday]}
+                      {weekdayShort(c, s.weekday)}
                     </span>
                     <span>
                       {formatHM(s.startMinute)}–{formatHM(s.endMinute)}
@@ -208,13 +234,15 @@ export function EnrolledCourseCard({
                 ))}
                 {sortedSessions.length > 2 ? (
                   <li className="text-[11px] text-[#8A94A6] dark:text-muted-foreground/90">
-                    +{sortedSessions.length - 2} more
+                    {c
+                      ? formatMessage(c.enrolledMoreSlotsCount, { n: sortedSessions.length - 2 })
+                      : `+${sortedSessions.length - 2} more`}
                   </li>
                 ) : null}
               </ul>
             ) : (
               <p className="mt-1 text-[12px] leading-5 text-[#5F6B7A] dark:text-muted-foreground sm:text-[13px]">
-                No weekly times on Home · Open this course to add them
+                {c?.enrolledNoWeeklyTimesCard ?? "No weekly times on Home · Open this course to add them"}
               </p>
             )}
 
@@ -232,7 +260,7 @@ export function EnrolledCourseCard({
               )}
             >
               <Users className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} aria-hidden />
-              {memberCount} {memberCount === 1 ? "classmate" : "classmates"}
+              {classmatesLine(c, memberCount)}
             </span>
           </>
         )}

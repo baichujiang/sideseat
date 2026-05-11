@@ -27,12 +27,24 @@ type Props = {
   className?: string;
 };
 
+/** High-contrast CTA (post detail footer, etc.): matches `buttonVariants` default height/padding, full-width on small screens. */
+export const discoverPrimarySolidCtaClassName =
+  "inline-flex h-11 w-full min-w-[min(100%,10.5rem)] max-w-full touch-manipulation items-center justify-center gap-2 rounded-xl bg-classmates-blue px-5 text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-classmates-blue/90 active:bg-classmates-blue/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-70 sm:w-auto sm:min-w-[12rem] dark:text-white";
+
+/**
+ * Subtle pill surface for Discover list secondary actions (Say hi subtle tone, My posts link).
+ * Pair with `h-10` (or `h-8`) + width classes at the callsite so tap targets stay comfortable on cards.
+ */
+export const discoverSubtleSecondaryCtaSurfaceClassName = cn(
+  "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full border border-classmates-blue-border bg-classmates-blue-soft px-4 py-2 text-sm font-medium text-classmates-blue no-underline transition-colors hover:bg-classmates-blue-border/45 active:bg-classmates-blue-border/65 disabled:opacity-70",
+  "touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+  "dark:border-blue-500/30 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950/55 dark:active:bg-blue-950/70",
+);
+
 const toneClasses = {
   soft: "inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full bg-classmates-blue-soft px-3 text-[12px] font-semibold text-classmates-blue transition-colors hover:bg-classmates-blue-border/50 active:bg-classmates-blue-border/70 disabled:opacity-70 dark:border dark:border-blue-500/30 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950/55",
-  subtle:
-    "inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-full border border-classmates-blue-border bg-classmates-blue-soft px-4 py-2 text-sm font-medium text-classmates-blue transition-colors hover:bg-classmates-blue-border/45 active:bg-classmates-blue-border/65 disabled:opacity-70 dark:border-blue-500/30 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950/55 dark:active:bg-blue-950/70",
-  solid:
-    "inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-full bg-classmates-blue px-4 text-[13px] font-semibold text-white shadow-sm transition-colors hover:bg-classmates-blue/90 active:bg-classmates-blue/95 disabled:opacity-70 dark:text-white",
+  subtle: cn(discoverSubtleSecondaryCtaSurfaceClassName, "h-8"),
+  solid: discoverPrimarySolidCtaClassName,
 } as const;
 
 export function DiscoverMessageButton({

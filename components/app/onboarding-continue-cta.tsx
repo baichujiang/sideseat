@@ -1,15 +1,22 @@
+"use client";
+
 import { Sparkles } from "lucide-react";
 
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/link-button";
+import { useAppMessages } from "@/hooks/use-app-locale";
 
 export function OnboardingContinueCta({
-  title = "Finish your setup",
-  body = "You can already browse the app. Complete your profile anytime to unlock the full experience.",
+  title,
+  body,
 }: {
   title?: string;
   body?: string;
 }) {
+  const m = useAppMessages();
+  const t = title?.trim() ? title : m.onboarding.genericTitle;
+  const d = body?.trim() ? body : m.onboarding.genericBody;
+
   return (
     <Card className="rounded-2xl border-classmates-edge bg-classmates-surface p-4 shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card">
       <div className="flex items-start gap-3">
@@ -17,10 +24,10 @@ export function OnboardingContinueCta({
           <Sparkles className="h-5 w-5" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <CardTitle className="text-[15px]">{title}</CardTitle>
-          <CardDescription className="mt-1 text-[13px] leading-snug">{body}</CardDescription>
+          <CardTitle className="text-[15px]">{t}</CardTitle>
+          <CardDescription className="mt-1 text-[13px] leading-snug">{d}</CardDescription>
           <LinkButton href="/onboarding" size="sm" className="mt-3 rounded-full">
-            Continue setup
+            {m.onboarding.continueSetup}
           </LinkButton>
         </div>
       </div>

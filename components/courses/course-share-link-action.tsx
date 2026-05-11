@@ -3,6 +3,8 @@
 import { Check, Share2 } from "lucide-react";
 import { useCallback, useState } from "react";
 
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 /** At or below this enrolled count, nudge growth with “Invite classmates”. */
@@ -33,17 +35,16 @@ export function CourseShareLinkAction({
   className?: string;
   labelOverride?: string;
 }) {
+  const { courses: co } = useAppMessages();
   const [copied, setCopied] = useState(false);
   const inviteMode = memberCount <= INVITE_CLASSMATE_THRESHOLD;
 
   const share = useCallback(async () => {
     const path = `/courses/${courseId}`;
     const url = `${window.location.origin}${path}`;
-    const title = "SideSeat course";
+    const title = co.shareSideSeatCourseTitle;
     const invite = memberCount <= INVITE_CLASSMATE_THRESHOLD;
-    const text = invite
-      ? `Want to join this course on SideSeat? Here’s the link: ${url}`
-      : url;
+    const text = invite ? formatMessage(co.shareInviteText, { url }) : url;
 
     if (typeof navigator.share === "function") {
       try {
@@ -59,17 +60,17 @@ export function CourseShareLinkAction({
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      window.prompt("Copy this link:", url);
+      window.prompt(co.sharePromptCopy, url);
     }
-  }, [courseId, memberCount]);
+  }, [courseId, memberCount, co]);
 
-  const defaultLabel = inviteMode ? "Invite classmates" : "Share course link";
-  const label = copied ? "Link copied" : (labelOverride ?? defaultLabel);
+  const defaultLabel = inviteMode ? co.shareInviteClassmates : co.shareCourseLink;
+  const label = copied ? co.shareLinkCopied : (labelOverride ?? defaultLabel);
   const iconAriaLabel = copied
-    ? "Link copied"
+    ? co.shareLinkCopied
     : inviteMode
-      ? "Invite classmates — share course link"
-      : "Share course link";
+      ? co.shareAriaInvite
+      : co.shareAriaShare;
 
   if (variant === "icon") {
     return (

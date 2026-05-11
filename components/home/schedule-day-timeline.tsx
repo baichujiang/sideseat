@@ -115,9 +115,10 @@ function isAllDayStyleTimelineItem(item: DayTimelineItem): boolean {
 }
 
 const MINUTE_PX = 0.72;
-const VISUAL_PADDING_MINUTES = 30;
+const VISUAL_PADDING_TOP_MINUTES = 30;
+const VISUAL_PADDING_BOTTOM_MINUTES = 12;
 const FULL_DAY_MINUTES = 24 * 60;
-/** Initial scroll window: 08:00–20:00 (content still spans −0:30…24:30 for label clearance). */
+/** Initial scroll window: 08:00–20:00 (content spans −0:30…24:12 for axis label clearance). */
 const DEFAULT_VIEW_START = 8 * 60;
 const DEFAULT_VIEW_END = 20 * 60;
 const TIME_COL_PX = 60;
@@ -155,8 +156,8 @@ export function ScheduleDayTimeline({
 }) {
   const holdTimerRef = useRef<number | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const visualStartMinute = -VISUAL_PADDING_MINUTES;
-  const visualEndMinute = FULL_DAY_MINUTES + VISUAL_PADDING_MINUTES;
+  const visualStartMinute = -VISUAL_PADDING_TOP_MINUTES;
+  const visualEndMinute = FULL_DAY_MINUTES + VISUAL_PADDING_BOTTOM_MINUTES;
   const totalMinutes = visualEndMinute - visualStartMinute;
 
   const hourLabels: number[] = [];
@@ -164,13 +165,17 @@ export function ScheduleDayTimeline({
 
   const fullHeight = totalMinutes * MINUTE_PX;
   const viewportHeight =
-    (DEFAULT_VIEW_END - DEFAULT_VIEW_START + VISUAL_PADDING_MINUTES * 2) * MINUTE_PX;
+    (DEFAULT_VIEW_END -
+      DEFAULT_VIEW_START +
+      VISUAL_PADDING_TOP_MINUTES +
+      VISUAL_PADDING_BOTTOM_MINUTES) *
+    MINUTE_PX;
 
   useEffect(() => {
     const node = scrollRef.current;
     if (!node) return;
     node.scrollTop =
-      (DEFAULT_VIEW_START - VISUAL_PADDING_MINUTES - visualStartMinute) * MINUTE_PX;
+      (DEFAULT_VIEW_START - VISUAL_PADDING_TOP_MINUTES - visualStartMinute) * MINUTE_PX;
   }, [date, visualStartMinute]);
 
   const hasNowLine =
@@ -214,7 +219,7 @@ export function ScheduleDayTimeline({
   return (
     <div
       className={cn(
-        "mt-4 overflow-hidden rounded-2xl border border-[#E7E0D6] bg-white p-2 shadow-[0_8px_24px_rgba(15,23,42,0.05)]",
+        "mt-0 overflow-hidden rounded-2xl border border-[#E7E0D6] bg-white p-2 shadow-[0_8px_24px_rgba(15,23,42,0.05)]",
         "dark:border-border dark:bg-card dark:shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
       )}
     >
@@ -420,7 +425,7 @@ export function ScheduleDayTimeline({
             ))}
           </div>
         </div>
-        <div className="h-24 shrink-0" aria-hidden />
+        <div className="h-5 shrink-0" aria-hidden />
         </>
       </div>
     </div>

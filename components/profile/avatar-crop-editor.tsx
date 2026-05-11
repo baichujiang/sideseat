@@ -4,6 +4,7 @@ import type { PointerEvent as ReactPointerEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useAppMessages } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
 
 const PREVIEW_SIZE = 248;
@@ -15,22 +16,22 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
-async function loadImageElement(src: string): Promise<HTMLImageElement> {
+async function loadImageElement(src: string, readError: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Could not read that image."));
+    img.onerror = () => reject(new Error(readError));
     img.src = src;
   });
 }
 
-async function canvasToFile(canvas: HTMLCanvasElement, name: string): Promise<File> {
+async function canvasToFile(canvas: HTMLCanvasElement, name: string, prepareError: string): Promise<File> {
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.92));
   if (blob) return new File([blob], name.replace(/\.[^.]+$/, "") + ".webp", { type: "image/webp" });
 
   const pngBlob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
   if (!pngBlob) {
-    throw new Error("Could not prepare that image.");
+    throw new Error(prepareError);
   }
   return new File([pngBlob], name.replace(/\.[^.]+$/, "") + ".png", { type: "image/png" });
 }
@@ -51,6 +52,7 @@ export function AvatarCropEditor({
   onConfirm: (file: File) => Promise<void> | void;
   showIntroText?: boolean;
 }) {
+  const { meAvatarCrop: c, common } = useAppMessages();
   const [src, setSrc] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [zoom, setZoom] = useState(1);
@@ -65,17 +67,17 @@ export function AvatarCropEditor({
     setZoom(1);
     setOffset({ x: 0, y: 0 });
 
-    loadImageElement(nextSrc)
+    loadImageElement(nextSrc, c.errorReadImage)
       .then((img) => {
         setImageSize({ width: img.naturalWidth, height: img.naturalHeight });
       })
       .catch((cause) => {
         setImageSize(null);
-        setError(cause instanceof Error ? cause.message : "Could not read that image.");
+        setError(cause instanceof Error ? cause.message : c.errorReadImage);
       });
 
     return () => URL.revokeObjectURL(nextSrc);
-  }, [file]);
+  }, [file, c.errorReadImage]);
 
   const geometry = useMemo(() => {
     if (!imageSize) return null;
@@ -123,13 +125,13 @@ export function AvatarCropEditor({
 
   const handleConfirm = async () => {
     if (!src || !imageSize || !geometry) {
-      setError("Could not prepare that image.");
+      setError(c.errorPrepareImage);
       return;
     }
 
     try {
       setError("");
-      const image = await loadImageElement(src);
+      const image = await loadImageElement(src, c.errorReadImage);
       const scale = geometry.fit * zoom;
       const sourceSize = PREVIEW_SIZE / scale;
       const sourceX = clamp((imageSize.width - sourceSize) / 2 - offset.x / scale, 0, imageSize.width - sourceSize);
@@ -138,14 +140,14 @@ export function AvatarCropEditor({
       canvas.width = OUTPUT_SIZE;
       canvas.height = OUTPUT_SIZE;
       const context = canvas.getContext("2d");
-      if (!context) throw new Error("Could not prepare that image.");
+      if (!context) throw new Error(c.errorPrepareImage);
       context.imageSmoothingEnabled = true;
       context.imageSmoothingQuality = "high";
       context.drawImage(image, sourceX, sourceY, sourceSize, sourceSize, 0, 0, OUTPUT_SIZE, OUTPUT_SIZE);
-      const nextFile = await canvasToFile(canvas, file.name);
+      const nextFile = await canvasToFile(canvas, file.name, c.errorPrepareImage);
       await onConfirm(nextFile);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not prepare that image.");
+      setError(cause instanceof Error ? cause.message : c.errorPrepareImage);
     }
   };
 
@@ -153,8 +155,8 @@ export function AvatarCropEditor({
     <div className={cn("space-y-4", className)}>
       {showIntroText ? (
         <div className="space-y-1 text-center">
-          <p className="text-[15px] font-semibold text-foreground">Adjust photo</p>
-          <p className="text-[12px] text-muted-foreground">Drag to reposition, then zoom until it looks right in the circle.</p>
+          <p className="text-[15px] font-semibold text-foreground">{c.adjustTitle}</p>
+          <p className="text-[12px] text-muted-foreground">{c.adjustHint}</p>
         </div>
       ) : null}
 
@@ -188,7 +190,7 @@ export function AvatarCropEditor({
 
       <label className="block space-y-2 px-1">
         <div className="flex items-center justify-between text-[12px] font-medium text-muted-foreground">
-          <span>Zoom</span>
+          <span>{c.zoomLabel}</span>
           <span>{zoom.toFixed(2)}x</span>
         </div>
         <input
@@ -207,7 +209,7 @@ export function AvatarCropEditor({
 
       <div className="flex gap-2">
         <Button type="button" variant="ghost" className="h-10 flex-1 rounded-full" disabled={pending} onClick={onCancel}>
-          Cancel
+          {common.cancel}
         </Button>
         <Button
           type="button"
@@ -215,7 +217,7 @@ export function AvatarCropEditor({
           disabled={pending || !geometry}
           onClick={handleConfirm}
         >
-          {pending ? "Uploading..." : "Use photo"}
+          {pending ? c.uploading : c.usePhoto}
         </Button>
       </div>
     </div>

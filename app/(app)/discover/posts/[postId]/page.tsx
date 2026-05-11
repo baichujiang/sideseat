@@ -2,25 +2,35 @@ import type { ComponentProps, ReactNode } from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import { redirect, notFound } from "next/navigation";
-import { format } from "date-fns";
 import { ClassmatePostCategory, ClassmatePostStatus } from "@prisma/client";
 import { Calendar, ChevronRight, Link2, MapPin } from "lucide-react";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { ClassmatePostDetailViewBeacon } from "@/components/discover/classmate-post-detail-view-beacon";
 import { ClassmatePostDetailShareMenu } from "@/components/discover/classmate-post-detail-share-menu";
-import { DiscoverMessageButton } from "@/components/discover/discover-message-button";
+import {
+  DiscoverMessageButton,
+  discoverPrimarySolidCtaClassName,
+} from "@/components/discover/discover-message-button";
 import { BackLink } from "@/components/nav/back-link";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { safeReturnPath } from "@/lib/nav/back";
+import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
+import { getDiscoverCityDisplayLabel } from "@/lib/discover/discover-city-display";
 import {
   buildViewerCourseMatchIndex,
   courseMatchesViewer,
   type ViewerCourseMatchIndex,
 } from "@/lib/discover/viewer-course-match";
+import type { AppLocale } from "@/lib/i18n/app-locale";
+import {
+  formatClassmatePostExpiryFullDate,
+} from "@/lib/i18n/format-classmate-post-expiry";
+import { formatMessage, getMessages } from "@/lib/i18n/messages";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { getClassmatePostDetailForViewer } from "@/lib/queries/classmate-post-detail";
 import { cn } from "@/lib/utils";
 
@@ -42,8 +52,9 @@ type AuthorDisplay = {
 const POST_DETAIL_ACTION_FOOTER =
   "border-t border-border/60 bg-gradient-to-b from-muted/20 via-muted/35 to-muted/45 px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-5 sm:px-6";
 
-const POST_DETAIL_PRIMARY_CTA =
-  "h-12 w-full min-w-0 flex-1 justify-center gap-2 rounded-2xl px-6 text-[14px] font-semibold shadow-[0_4px_14px_rgba(37,99,235,0.22)] sm:min-h-[3rem] dark:shadow-[0_4px_18px_rgba(37,99,235,0.18)]";
+/** Extra elevation on top of `discoverPrimarySolidCtaClassName`. */
+const POST_DETAIL_PRIMARY_CTA_SHADOW =
+  "shadow-[0_4px_14px_rgba(37,99,235,0.22)] dark:shadow-[0_4px_18px_rgba(37,99,235,0.18)]";
 
 export default async function DiscoverPostDetailPage({
   params,
@@ -54,6 +65,8 @@ export default async function DiscoverPostDetailPage({
 }) {
   const { postId } = await params;
   const query = (await searchParams) ?? {};
+  const locale = await getServerAppLocale();
+  const ui = getMessages(locale);
   const sessionUser = await getSessionUser();
   const backHref = safeReturnPath(query.returnTo, "/discover");
   const postPath = `/discover/posts/${postId}`;
@@ -74,6 +87,7 @@ export default async function DiscoverPostDetailPage({
       code: pc.course.code,
       name: pc.course.name,
     }));
+    const cityLabel = getDiscoverCityDisplayLabel(post.city, ui.discover.cityNames);
 
     return (
       <div className="space-y-5 pb-6">
@@ -95,11 +109,12 @@ export default async function DiscoverPostDetailPage({
           />
 
           <PostContentSection
+            locale={locale}
             category={post.category}
             status={post.status}
             title={post.title}
             body={post.body}
-            city={post.city}
+            cityLabel={cityLabel}
             live={live}
             expiresAt={post.expiresAt}
             updatedAt={post.updatedAt}
@@ -145,6 +160,7 @@ export default async function DiscoverPostDetailPage({
   const viewerCourseMatchIndex = buildViewerCourseMatchIndex(
     myEnrolled.map((uc) => ({ id: uc.course.id, code: uc.course.code })),
   );
+  const cityLabel = getDiscoverCityDisplayLabel(post.city, ui.discover.cityNames);
 
   return (
     <div className="space-y-5 pb-6">
@@ -175,11 +191,12 @@ export default async function DiscoverPostDetailPage({
         />
 
         <PostContentSection
+          locale={locale}
           category={post.category}
           status={post.status}
           title={post.title}
           body={post.body}
-          city={post.city}
+          cityLabel={cityLabel}
           live={live}
           expiresAt={post.expiresAt}
           updatedAt={post.updatedAt}
@@ -201,7 +218,7 @@ export default async function DiscoverPostDetailPage({
                 returnTo={postPath}
                 tone="solid"
                 insightPostId={post.id}
-                className={POST_DETAIL_PRIMARY_CTA}
+                className={POST_DETAIL_PRIMARY_CTA_SHADOW}
               />
             </div>
           </div>
@@ -211,8 +228,9 @@ export default async function DiscoverPostDetailPage({
               <Link
                 href={`/inbox/my-posts?returnTo=${encodeURIComponent(postPath)}` as Route}
                 className={cn(
-                  POST_DETAIL_PRIMARY_CTA,
-                  "inline-flex items-center justify-center no-underline sm:min-w-0 sm:w-full",
+                  discoverPrimarySolidCtaClassName,
+                  POST_DETAIL_PRIMARY_CTA_SHADOW,
+                  "text-center no-underline active:scale-[0.98]",
                 )}
               >
                 My posts
@@ -269,18 +287,19 @@ function PostAuthorSection({
           </Link>
           <p className="mt-1 text-[13px] text-muted-foreground">{subtitle}</p>
         </div>
-        {topEnd}
+        {topEnd ? <div className="shrink-0 self-start">{topEnd}</div> : null}
       </div>
     </div>
   );
 }
 
 function PostContentSection({
+  locale,
   category,
   status,
   title,
   body,
-  city,
+  cityLabel,
   live,
   expiresAt,
   updatedAt,
@@ -290,11 +309,12 @@ function PostContentSection({
   highlightViewerCourses,
   viewerCourseMatchIndex,
 }: {
+  locale: AppLocale;
   category: ClassmatePostCategory;
   status: ClassmatePostStatus;
   title: string;
   body: string | null;
-  city: string;
+  cityLabel: string;
   live: boolean;
   expiresAt: Date;
   updatedAt: Date;
@@ -305,11 +325,18 @@ function PostContentSection({
   highlightViewerCourses: boolean;
   viewerCourseMatchIndex: ViewerCourseMatchIndex | null;
 }) {
+  const dl = getMessages(locale).discoverList;
   const dateLabel = live
-    ? `Active until ${format(expiresAt, "MMM d, yyyy")}`
+    ? formatMessage(dl.postActiveUntil, {
+        date: formatClassmatePostExpiryFullDate(expiresAt, locale),
+      })
     : status === ClassmatePostStatus.CLOSED
-      ? `Closed · updated ${format(updatedAt, "MMM d, yyyy")}`
-      : `Expired · updated ${format(updatedAt, "MMM d, yyyy")}`;
+      ? formatMessage(dl.postDetailClosedUpdated, {
+          date: formatClassmatePostExpiryFullDate(updatedAt, locale),
+        })
+      : formatMessage(dl.postDetailExpiredUpdated, {
+          date: formatClassmatePostExpiryFullDate(updatedAt, locale),
+        });
   const dateValue = live ? expiresAt.toISOString() : updatedAt.toISOString();
 
   return (
@@ -398,7 +425,7 @@ function PostContentSection({
       <div className="flex flex-col gap-2 border-t border-border/50 pt-4 text-[13px] text-muted-foreground sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5">
         <span className="inline-flex items-center gap-1.5">
           <MapPin className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
-          {city}
+          {cityLabel}
         </span>
         <time
           dateTime={dateValue}
@@ -416,7 +443,7 @@ async function getClassmatePostDetailForGuest(postId: string, now: Date) {
   return prisma.classmatePost.findFirst({
     where: {
       id: postId,
-      city: "Munich",
+      city: DEFAULT_DISCOVER_SERVED_CITY,
       OR: [{ status: "ACTIVE" }, { status: "CLOSED" }],
       expiresAt: { gt: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 7) },
       user: {

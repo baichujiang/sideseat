@@ -38,12 +38,15 @@ export function PlanRequestModal({
   mode,
   peerName,
   slot,
+  layerZClassName = "z-50",
 }: {
   open: boolean;
   onClose: () => void;
   mode: Mode;
   peerName: string;
   slot?: { startTime: string; endTime: string } | null;
+  /** Stack above another push layer (e.g. availability viewer at z-50). */
+  layerZClassName?: string;
 }) {
   const router = useRouter();
   const defaults = useMemo(() => computeDefaults(slot), [slot]);
@@ -96,7 +99,12 @@ export function PlanRequestModal({
   }
 
   return (
-    <AppPushLayer open={open} onClose={onClose} zClassName="z-50" panelClassName="w-[min(100vw,28rem)] border-0">
+    <AppPushLayer
+      open={open}
+      onClose={onClose}
+      zClassName={layerZClassName}
+      panelClassName="w-[min(100vw,28rem)] border-0"
+    >
       <div className="flex h-full min-h-0 flex-col bg-background pt-[env(safe-area-inset-top)]">
         <div className="shrink-0 px-4 pb-3 pt-2">
           <div className="flex items-start justify-between gap-3">

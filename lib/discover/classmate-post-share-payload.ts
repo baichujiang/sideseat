@@ -22,8 +22,9 @@ function clipBody(raw: string | null, maxChars: number): string {
 }
 
 /**
- * Plain text for pasting into Xiaohongshu (小红书) notes. There is no stable public
- * web→app deep link; users paste in the app after copy or system share.
+ * Plain text for pasting into Xiaohongshu (小红书) notes. Mobile share also tries
+ * `xhsdiscover://` / Android intent to **open the app** (see `mobile-native-share-kick.ts`);
+ * there is still no reliable public web URL to open the **publish** sheet with this text.
  */
 export function buildClassmatePostXhsShareText(args: {
   title: string;
@@ -43,7 +44,8 @@ export function buildClassmatePostXhsShareText(args: {
 }
 
 /**
- * Compact plain text for WeChat (paste into chat / Notes). No JS-SDK in typical web/PWA.
+ * Compact plain text for WeChat (paste into chat / Notes). Mobile share tries `weixin://`
+ * / Android intent to open the app when the OS allows; see `mobile-native-share-kick.ts`.
  */
 export function buildClassmatePostWeChatShareText(args: {
   title: string;

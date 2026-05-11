@@ -31,18 +31,26 @@ function schoolBadgeLabel(school?: string | null) {
  * verification uses a smaller amber chip (not chat “request sent”). Unverified
  * users get a neutral badge so trust state stays explicit.
  */
+const brandBlueVerifiedTone = cn(
+  "border border-classmates-blue-border/85 bg-classmates-blue-soft text-classmates-blue",
+  "dark:border-blue-500/35 dark:bg-blue-950/50 dark:text-blue-200",
+);
+
 export function VerifiedBadge({
   size = "sm",
   className,
   school,
   verifiedStudent = false,
   status,
+  /** Discover post cards — school chip matches blue badge row (sample design). */
+  tone = "default",
 }: {
   size?: "sm" | "xs";
   className?: string;
   school?: string | null;
   verifiedStudent?: boolean;
   status?: VerificationStatus | null;
+  tone?: "default" | "brandBlue";
 }) {
   const schoolSizing =
     size === "xs"
@@ -67,7 +75,7 @@ export function VerifiedBadge({
           title: school
             ? `Verified ${schoolBadgeLabel(school)} student`
             : "Verified student",
-          className: schoolBadgeTone(school),
+          className: tone === "brandBlue" ? brandBlueVerifiedTone : schoolBadgeTone(school),
           sizing: schoolSizing,
         }
       : effectiveStatus === "EMAIL_PENDING"

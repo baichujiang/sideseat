@@ -12,6 +12,8 @@ import { ClassmatesPersonRow, CLASSMATES_PERSON_ROW_CLASS } from "@/components/c
 import { Input } from "@/components/ui/input";
 import { UserGenderCardIcon } from "@/components/ui/user-gender-icon";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage, type CoursesMessages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 export type CourseMember = {
@@ -43,14 +45,6 @@ export type CourseMember = {
     | { kind: "ACTIVE"; connectionId: string };
 };
 
-/** How this person wants to connect — title case, same meanings as course intent picker. */
-const MEMBER_INTENT_LABEL: Record<CourseIntent, string> = {
-  STUDY_TOGETHER: "Study together",
-  EXAM_PREP: "Exam prep",
-  GO_TO_CLASS_TOGETHER: "Go together",
-  EAT_AFTER_CLASS: "Get coffee",
-};
-
 const intentChipClass =
   "rounded-full bg-[#F0FDFA] px-3 py-1 text-xs font-semibold text-[#0F766E] dark:border dark:border-teal-800/40 dark:bg-teal-950/45 dark:text-teal-100";
 
@@ -80,6 +74,13 @@ export function CourseMemberList({
   courseId: string;
   members: CourseMember[];
 }) {
+  const { courses: co } = useAppMessages();
+  const intentLabel: Record<CourseIntent, string> = {
+    STUDY_TOGETHER: co.intentStudyTogether,
+    EXAM_PREP: co.intentExamPrep,
+    GO_TO_CLASS_TOGETHER: co.intentGoTogether,
+    EAT_AFTER_CLASS: co.intentGetCoffee,
+  };
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -102,22 +103,22 @@ export function CourseMemberList({
         id="course-classmates-heading"
         className="px-0.5 text-base font-semibold leading-tight tracking-tight text-classmates-ink dark:text-foreground"
       >
-        Classmates
+        {co.memberListHeading}
       </h3>
 
       {n > 0 ? (
         <Input
-          placeholder={`Search ${members.length} classmate${members.length === 1 ? "" : "s"}`}
+          placeholder={formatMessage(co.memberSearchPlaceholder, { count: members.length })}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="h-9 rounded-xl border-classmates-edge/90 px-3 py-1.5 text-[13px] leading-tight shadow-none ring-offset-0 focus-visible:ring-1 focus-visible:ring-classmates-azure/40 focus-visible:ring-offset-0 dark:border-border/80"
-          aria-label="Search classmates in this course"
+          aria-label={co.memberSearchAria}
         />
       ) : null}
 
       {n === 0 ? (
         <p className="px-1 text-center text-[12px] leading-snug text-classmates-hint dark:text-zinc-500">
-          No classmates to show yet — check back after others join this course.
+          {co.memberEmpty}
         </p>
       ) : (
         <div className="flex flex-col gap-2.5">
@@ -128,10 +129,12 @@ export function CourseMemberList({
                 "py-8 text-center text-sm text-muted-foreground dark:text-zinc-400",
               )}
             >
-              No match for &ldquo;{query.trim()}&rdquo;
+              {formatMessage(co.memberNoMatch, { query: query.trim() })}
             </div>
           ) : (
-            filtered.map((m) => <MemberRow key={m.membershipId} member={m} courseId={courseId} />)
+            filtered.map((m) => (
+              <MemberRow key={m.membershipId} member={m} courseId={courseId} intentLabel={intentLabel} copy={co} />
+            ))
           )}
         </div>
       )}
@@ -139,7 +142,17 @@ export function CourseMemberList({
   );
 }
 
-function MemberRow({ member, courseId }: { member: CourseMember; courseId: string }) {
+function MemberRow({
+  member,
+  courseId,
+  intentLabel,
+  copy,
+}: {
+  member: CourseMember;
+  courseId: string;
+  intentLabel: Record<CourseIntent, string>;
+  copy: CoursesMessages;
+}) {
   const router = useRouter();
   const [opening, setOpening] = useState(false);
   const overlap = formatOverlapShort(member.overlapMinutes);
@@ -148,7 +161,11 @@ function MemberRow({ member, courseId }: { member: CourseMember; courseId: strin
   const schoolInBadge =
     member.studentVerificationStatus === "VERIFIED" && member.verifiedStudent;
   const schoolMeta = !schoolInBadge && member.school?.trim() ? member.school.trim() : null;
-  const metaLine = [member.major, member.semester ? `sem ${member.semester}` : null, schoolMeta]
+  const metaLine = [
+    member.major,
+    member.semester ? formatMessage(copy.memberSemesterChip, { semester: member.semester }) : null,
+    schoolMeta,
+  ]
     .filter(Boolean)
     .join(" · ");
 
@@ -185,7 +202,7 @@ function MemberRow({ member, courseId }: { member: CourseMember; courseId: strin
         }
         className={memberOpenChatLinkClass}
       >
-        Open chat
+        {copy.memberOpenChat}
       </Link>
     ) : (
       <button
@@ -194,7 +211,7 @@ function MemberRow({ member, courseId }: { member: CourseMember; courseId: strin
         disabled={opening}
         className={cn(memberMessageButtonClass, opening && "pointer-events-none opacity-60")}
       >
-        {opening ? "Opening…" : "Message"}
+        {opening ? copy.memberOpening : copy.memberMessage}
       </button>
     );
 
@@ -202,7 +219,7 @@ function MemberRow({ member, courseId }: { member: CourseMember; courseId: strin
     <ClassmatesPersonRow
       avatarHref={profileHref}
       avatarUrl={member.avatarUrl}
-      profileAriaLabel={`View ${member.nickname}'s profile`}
+      profileAriaLabel={formatMessage(copy.memberViewProfileAria, { name: member.nickname })}
       name={member.nickname}
       titleAdornment={
         <>
@@ -222,7 +239,7 @@ function MemberRow({ member, courseId }: { member: CourseMember; courseId: strin
           ) : null}
           {overlap ? (
             <p className="mt-1 text-[11px] font-semibold leading-snug text-[#0F766E] dark:text-teal-300">
-              {overlap} weekly overlap with your schedule
+              {formatMessage(copy.memberOverlapLine, { overlap })}
             </p>
           ) : null}
           {member.bio ? (
@@ -233,10 +250,12 @@ function MemberRow({ member, courseId }: { member: CourseMember; courseId: strin
       footer={
         member.intentions.length ? (
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5 pt-1">
-            <span className="shrink-0 text-[12px] font-semibold text-classmates-sub dark:text-zinc-400">Wants to:</span>
+            <span className="shrink-0 text-[12px] font-semibold text-classmates-sub dark:text-zinc-400">
+              {copy.memberWantsTo}
+            </span>
             {member.intentions.map((intent) => (
               <span key={intent} className={intentChipClass}>
-                {MEMBER_INTENT_LABEL[intent]}
+                {intentLabel[intent]}
               </span>
             ))}
           </div>

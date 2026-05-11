@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import type { Route } from "next";
 import { CalendarClock, Sparkles, SquarePen } from "lucide-react";
 
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 function CountBadge({ count }: { count: number }) {
@@ -27,12 +31,18 @@ export function InboxQuickChips({
   plansNeedingYourAction: number;
   activePostCount: number;
 }) {
+  const m = useAppMessages();
+  const newAria =
+    unreadTotal > 0
+      ? formatMessage(m.inbox.chipNewAriaWithUnread, { count: unreadTotal })
+      : m.inbox.chipNewAria;
+
   return (
     <section className="grid grid-cols-3 gap-2">
       <Link
         href={"/inbox/unread" as Route}
-        title="Chats with new messages and plan invites to respond to"
-        aria-label={`New messages${unreadTotal > 0 ? `, ${unreadTotal} total` : ""}. Open filtered list.`}
+        title={m.inbox.chipNewLinkTitle}
+        aria-label={newAria}
         className={cn(
           "inline-flex h-10 w-full items-center justify-between gap-1.5 rounded-full border border-classmates-blue-border/80 bg-classmates-blue-soft px-3 py-2 text-sm font-semibold text-classmates-blue-body transition-opacity active:opacity-80",
           "[@media(hover:hover)]:hover:opacity-90 dark:border-blue-800/50 dark:bg-blue-950/35 dark:text-blue-100",
@@ -40,7 +50,7 @@ export function InboxQuickChips({
       >
         <span className="inline-flex items-center gap-1.5">
           <Sparkles className="h-[18px] w-[18px] shrink-0 text-[#2563EB]" strokeWidth={2} aria-hidden />
-          <span className="whitespace-nowrap">New</span>
+          <span className="whitespace-nowrap">{m.inbox.chipNew}</span>
         </span>
         <CountBadge count={unreadTotal} />
       </Link>
@@ -54,7 +64,7 @@ export function InboxQuickChips({
       >
         <span className="inline-flex items-center gap-1.5">
           <CalendarClock className="h-[18px] w-[18px] shrink-0 text-[#0F766E]" strokeWidth={2} aria-hidden />
-          <span className="whitespace-nowrap">Plans</span>
+          <span className="whitespace-nowrap">{m.inbox.chipPlans}</span>
         </span>
         <CountText count={plansNeedingYourAction} />
       </Link>
@@ -68,7 +78,7 @@ export function InboxQuickChips({
       >
         <span className="inline-flex items-center gap-1.5">
           <SquarePen className="h-[18px] w-[18px] shrink-0 text-[#D97706]" strokeWidth={2} aria-hidden />
-          <span className="whitespace-nowrap">Posts</span>
+          <span className="whitespace-nowrap">{m.inbox.chipPosts}</span>
         </span>
         <CountText count={activePostCount} />
       </Link>

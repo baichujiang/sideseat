@@ -13,6 +13,16 @@ const usernameSchema = z
     message: "This username is reserved.",
   });
 
+const emailFieldSchema = z
+  .string()
+  .trim()
+  .min(3, "Enter your email.")
+  .max(254)
+  .transform((s) => s.toLowerCase())
+  .refine((s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s), {
+    message: "Enter a valid email address.",
+  });
+
 export const signupSchema = z
   .object({
     username: usernameSchema,
@@ -24,8 +34,39 @@ export const signupSchema = z
     path: ["confirmPassword"],
   });
 
+export const signupEmailSchema = z
+  .object({
+    email: emailFieldSchema,
+    password: z.string().min(8, "Password must be at least 8 characters."),
+    confirmPassword: z.string().min(1, "Confirm your password."),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
+
+export const signupPhoneSchema = z
+  .object({
+    phone: z.string().trim().min(1, "Enter your phone number."),
+    code: z
+      .string()
+      .trim()
+      .regex(/^\d{6}$/, "Enter the 6-digit verification code."),
+    password: z.string().min(8, "Password must be at least 8 characters."),
+    confirmPassword: z.string().min(1, "Confirm your password."),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
+
+export const phoneSendOtpSchema = z.object({
+  phone: z.string().trim().min(1, "Enter your phone number."),
+  purpose: z.enum(["signup"]),
+});
+
 export const loginSchema = z.object({
-  identifier: z.string().min(1, "Enter your username or email."),
+  identifier: z.string().min(1, "Enter your username, email, or phone."),
   password: z.string().min(1, "Enter your password."),
 });
 

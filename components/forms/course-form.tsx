@@ -3,35 +3,28 @@
 import { apiFetch } from "@/lib/auth/api-fetch";
 
 import { CourseIntent, Weekday } from "@prisma/client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { SaveBookmarkButton } from "@/components/courses/save-bookmark-button";
+import { HomeCalendarVisual } from "@/components/home/home-hero";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { FormMessage } from "@/components/forms/form-message";
 import { courseSchema } from "@/lib/validators/course";
 import { getCurrentSemesterLabel } from "@/lib/constants/semester";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 type CourseValues = z.infer<typeof courseSchema>;
 
 const intentions = Object.values(CourseIntent);
 const currentSemester = getCurrentSemesterLabel();
-
-const WEEKDAY_OPTIONS: { value: Weekday; label: string }[] = [
-  { value: "MON", label: "Mon" },
-  { value: "TUE", label: "Tue" },
-  { value: "WED", label: "Wed" },
-  { value: "THU", label: "Thu" },
-  { value: "FRI", label: "Fri" },
-  { value: "SAT", label: "Sat" },
-  { value: "SUN", label: "Sun" },
-];
 
 type CourseHit = {
   id: string;
@@ -56,6 +49,21 @@ export function CourseForm({
   prefillCourseId?: string | null;
 }) {
   const router = useRouter();
+  const { courses: co, common } = useAppMessages();
+  const weekdayOptions = useMemo(
+    () =>
+      (["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as Weekday[]).map((value) => ({
+        value,
+        label: co.weekdayShort[value],
+      })),
+    [co],
+  );
+  const intentionLabel: Record<CourseIntent, string> = {
+    STUDY_TOGETHER: co.intentStudyTogether,
+    EXAM_PREP: co.intentExamPrep,
+    GO_TO_CLASS_TOGETHER: co.intentGoTogether,
+    EAT_AFTER_CLASS: co.intentGetCoffee,
+  };
   const [serverError, setServerError] = useState("");
 
   // Course identity UI state: either "search" (typing to find/create) or
@@ -72,6 +80,7 @@ export function CourseForm({
   const [usedVariantFingerprint, setUsedVariantFingerprint] = useState<string | null>(null);
   const sessionsAutoFilled = useRef(false);
   const prefillLoaded = useRef(false);
+  const scheduleVisualDate = useMemo(() => new Date(), []);
 
   const {
     register,
@@ -262,7 +271,7 @@ export function CourseForm({
     });
     const payload = await response.json();
     if (!response.ok) {
-      setServerError(payload.error ?? "Unable to add course.");
+      setServerError(payload.error ?? co.formUnableAdd);
       return;
     }
     const courseId = payload.data?.courseId as string | undefined;
@@ -288,7 +297,7 @@ export function CourseForm({
       {/* --- Course identity ------------------------------------------ */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">Course</label>
+          <label className="text-sm font-medium">{co.formCourseLabel}</label>
           <span className="text-[11px] text-muted-foreground">{currentSemester}</span>
         </div>
 
@@ -307,7 +316,7 @@ export function CourseForm({
               onClick={clearPicked}
               className="shrink-0 text-xs font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
             >
-              Change
+              {co.formChange}
             </button>
           </div>
         ) : (
@@ -315,13 +324,13 @@ export function CourseForm({
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Course code or name — e.g. IN2064 or Machine Learning"
+              placeholder={co.formSearchPlaceholder}
               autoFocus
             />
             {query.trim().length >= 2 ? (
               <div className="overflow-hidden rounded-2xl border border-border bg-card">
                 {searchLoading && hits.length === 0 ? (
-                  <div className="px-3 py-2 text-xs text-muted-foreground">Searching...</div>
+                  <div className="px-3 py-2 text-xs text-muted-foreground">{co.formSearching}</div>
                 ) : null}
 
                 {hits.map((hit) => (
@@ -376,14 +385,14 @@ export function CourseForm({
                   }}
                   className="flex w-full items-center justify-between gap-2 border-t border-border bg-muted/40 px-3 py-2 text-left text-xs font-medium text-muted-foreground hover:bg-muted"
                 >
-                  <span>+ Add "{query.trim()}" as new course</span>
+                  <span>{formatMessage(co.formAddAsNew, { query: query.trim() })}</span>
                 </button>
               </div>
             ) : null}
 
             {manualOpen ? (
               <div className="space-y-2 rounded-2xl border border-border bg-muted/30 p-3">
-                <p className="text-xs font-medium text-muted-foreground">New course</p>
+                <p className="text-xs font-medium text-muted-foreground">{co.formNewCourse}</p>
                 <div className="grid grid-cols-[minmax(0,6rem)_1fr] gap-2">
                   <Input {...register("code")} placeholder="IN2064" autoCapitalize="characters" />
                   <Input {...register("name")} placeholder="Machine Learning" />
@@ -391,14 +400,14 @@ export function CourseForm({
                 <FormMessage message={errors.code?.message ?? errors.name?.message} />
                 <div className="flex gap-2">
                   <Button type="button" size="sm" onClick={commitManual}>
-                    Use this course
+                    {co.formUseThisCourse}
                   </Button>
                   <button
                     type="button"
                     onClick={() => setManualOpen(false)}
                     className="text-xs text-muted-foreground hover:text-foreground"
                   >
-                    Cancel
+                    {common.cancel}
                   </button>
                 </div>
               </div>
@@ -412,7 +421,9 @@ export function CourseForm({
           {variants.length > 0 ? (
             <div className="space-y-2 rounded-2xl border border-border bg-muted/30 p-3">
               <p className="text-xs font-medium text-muted-foreground">
-                {`${variants.length} schedule${variants.length === 1 ? "" : "s"} used by other students`}
+                {variants.length === 1
+                  ? co.formSchedulesOthersOne
+                  : formatMessage(co.formSchedulesOthersMany, { count: variants.length })}
               </p>
               <div className="space-y-1.5">
                 {variants.map((variant) => {
@@ -441,7 +452,7 @@ export function CourseForm({
                           .join(" · ")}
                       </span>
                       <span className="shrink-0 text-[11px] font-medium">
-                        {isUsed ? "Using" : "Use"}
+                        {isUsed ? co.formUsing : co.formUse}
                       </span>
                     </button>
                   );
@@ -451,34 +462,40 @@ export function CourseForm({
           ) : null}
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Room (default)</label>
+            <label className="text-sm font-medium">{co.formRoomDefault}</label>
             <Input {...register("location")} placeholder="MI HS 1" />
           </div>
 
-          <div className="space-y-3 rounded-3xl border border-border bg-card p-4">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-sm font-medium">Weekly times for Home</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  These repeat on your Home week view after you enroll — only your personal schedule.
-                </p>
+          <div
+            className={cn(
+              "space-y-3 overflow-hidden rounded-[1.125rem] border border-blue-200/85 bg-card shadow-[0_2px_12px_-4px_rgba(37,99,235,0.14)] dark:border-blue-900/45 dark:shadow-[0_2px_12px_-4px_rgba(0,0,0,0.28)]",
+            )}
+          >
+            <div className="flex min-w-0 items-start gap-2 border-b border-border/45 bg-gradient-to-br from-card via-card to-muted/25 px-3 py-2.5 sm:gap-3 sm:px-4">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{co.formWeeklyTimesTitle}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{co.formWeeklyTimesHint}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      append({ weekday: "MON" as Weekday, start: "10:00", end: "12:00", location: "" });
+                      setUsedVariantFingerprint(null);
+                    }}
+                    className="shrink-0 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition hover:bg-muted"
+                  >
+                    {co.formAddWeeklyRow}
+                  </button>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  append({ weekday: "MON" as Weekday, start: "10:00", end: "12:00", location: "" });
-                  setUsedVariantFingerprint(null);
-                }}
-                className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition hover:bg-muted"
-              >
-                + Add
-              </button>
+              <HomeCalendarVisual date={scheduleVisualDate} className="h-[4.25rem] w-[4.25rem] shrink-0 sm:h-20 sm:w-20" />
             </div>
 
+            <div className="space-y-2 p-4 pt-3">
             {fields.length === 0 ? (
-              <p className="text-xs text-muted-foreground">
-                Add at least one weekly slot so this course appears on your Home schedule.
-              </p>
+              <p className="text-xs text-muted-foreground">{co.formNeedWeeklySlot}</p>
             ) : null}
 
             <div className="space-y-2">
@@ -497,7 +514,7 @@ export function CourseForm({
                     }}
                     className="h-9 rounded-md border border-border bg-background px-2 text-sm"
                   >
-                    {WEEKDAY_OPTIONS.map((opt) => (
+                    {weekdayOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>
                         {opt.label}
                       </option>
@@ -524,7 +541,7 @@ export function CourseForm({
                       remove(index);
                       setUsedVariantFingerprint(null);
                     }}
-                    aria-label="Remove session"
+                    aria-label={co.formRemoveSessionAria}
                     className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground"
                   >
                     ×
@@ -539,23 +556,24 @@ export function CourseForm({
                   Array.isArray(errors.sessions)
                     ? (errors.sessions.find(Boolean)?.start?.message ??
                         errors.sessions.find(Boolean)?.end?.message ??
-                        "Check session times.")
-                    : (errors.sessions as { message?: string })?.message
+                        co.formCheckSessionTimes)
+                    : ((errors.sessions as { message?: string })?.message ?? co.formCheckSessionTimes)
                 }
               />
             ) : null}
 
+            </div>
           </div>
 
           <div className="space-y-3 rounded-3xl border border-border bg-card p-4">
-            <p className="text-sm font-medium">Open to</p>
+            <p className="text-sm font-medium">{co.formOpenTo}</p>
             <div className="space-y-3">
               {intentions.map((intention) => (
                 <Checkbox
                   key={intention}
                   checked={selectedIntentions.includes(intention)}
                   onChange={() => toggleIntention(intention)}
-                  label={intention.toLowerCase().replaceAll("_", " ")}
+                  label={intentionLabel[intention]}
                 />
               ))}
             </div>
@@ -566,7 +584,7 @@ export function CourseForm({
       <FormMessage message={serverError || (errors.intentions?.message as string | undefined)} />
 
       <Button className="w-full" disabled={isSubmitting || !canSubmit} type="submit">
-        {isSubmitting ? "Adding..." : "Add course"}
+        {isSubmitting ? co.formSubmitting : co.formSubmit}
       </Button>
     </form>
   );

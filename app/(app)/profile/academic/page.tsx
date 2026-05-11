@@ -6,10 +6,14 @@ import { BackLink } from "@/components/nav/back-link";
 import { getSessionUser } from "@/lib/auth/session";
 import { profileLanguagesFormDefault } from "@/lib/constants/languages";
 import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
+import { getMessages } from "@/lib/i18n/messages";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { prisma } from "@/lib/db/prisma";
 
 export default async function ProfileAcademicPage() {
   const user = await getSessionUser();
+  const locale = await getServerAppLocale();
+  const ui = getMessages(locale);
   if (!user) redirect('/login');
   if (!user.onboardingComplete) redirect('/onboarding');
 
@@ -36,7 +40,7 @@ export default async function ProfileAcademicPage() {
 
       <ProfileForm
         key={formKey}
-        submitLabel="Save changes"
+        submitLabel={ui.profileForm.saveChanges}
         variant="academicOnly"
         requireDirtyToSubmit
         mePageStructure

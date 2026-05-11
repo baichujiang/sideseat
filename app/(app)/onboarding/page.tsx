@@ -9,10 +9,14 @@ import { Button } from "@/components/ui/button";
 import { requireUser } from "@/lib/auth/session";
 import { profileLanguagesFormDefault } from "@/lib/constants/languages";
 import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
+import { getMessages } from "@/lib/i18n/messages";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { prisma } from "@/lib/db/prisma";
 
 export default async function OnboardingPage() {
   const user = await requireUser();
+  const locale = await getServerAppLocale();
+  const ui = getMessages(locale);
   const profileUser = await prisma.user.findUnique({
     where: { id: user.id },
     include: { userLanguages: true },
@@ -57,7 +61,7 @@ export default async function OnboardingPage() {
         </h2>
         <ProfileForm
           key={formKey}
-          submitLabel="Save profile and continue"
+          submitLabel={ui.profileForm.saveProfileAndContinue}
           variant="academicOnly"
           requireDirtyToSubmit={false}
           avatarId={user.avatarUrl}

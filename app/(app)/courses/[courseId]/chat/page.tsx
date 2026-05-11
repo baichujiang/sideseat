@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { format, isSameDay, isToday, isYesterday } from "date-fns";
+import { enUS, zhCN } from "date-fns/locale";
 
 import { CourseChatComposer } from "@/components/chat/course-chat-composer";
 import { ChatReplyProvider } from "@/components/chat/chat-reply-context";
@@ -15,17 +16,11 @@ import { prisma } from "@/lib/db/prisma";
 import { cn } from "@/lib/utils";
 import { getSchoolLabel } from "@/lib/constants/schools";
 import { courseChatHeadline } from "@/lib/courses/course-code-label";
+import { formatMessage, getMessages } from "@/lib/i18n/messages";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { safeReturnPath } from "@/lib/nav/back";
-
-function dayDividerLabel(d: Date): string {
-  if (isToday(d)) return "Today";
-  if (isYesterday(d)) return "Yesterday";
-  return format(d, "MMM d, yyyy");
-}
-
-function timeLabel(d: Date): string {
-  return format(d, "HH:mm");
-}
+import { chatMessageDomId } from "@/lib/chat/chat-message-dom-id";
+import { indexPlainTextMessagesForSearch } from "@/lib/chat/thread-search-index";
 
 export default async function CourseChatPage({
   params,
@@ -37,7 +32,21 @@ export default async function CourseChatPage({
   const { courseId } = await params;
   const query = (await searchParams) ?? {};
   const backHref = safeReturnPath(query.returnTo, `/courses/${courseId}`);
+  const locale = await getServerAppLocale();
+  const ui = getMessages(locale);
+  const c = ui.courses;
+  const dateLocale = locale === "zh-CN" ? zhCN : enUS;
   const { user, course, userCourse } = await requireCourseChatMember(courseId);
+
+  function dayDividerLabel(d: Date): string {
+    if (isToday(d)) return ui.chat.today;
+    if (isYesterday(d)) return ui.chat.yesterday;
+    return format(d, "PPP", { locale: dateLocale });
+  }
+
+  function timeLabel(d: Date): string {
+    return format(d, "HH:mm");
+  }
 
   /**
    * Hide messages from anyone:
@@ -77,14 +86,22 @@ export default async function CourseChatPage({
   ]);
 
   const visibleMessages = messages.filter((m) => !hiddenIds.has(m.senderId));
+  const threadSearchEntries = indexPlainTextMessagesForSearch(visibleMessages);
   const latestMessageId = visibleMessages.at(-1)?.id ?? null;
+
+  const membersFragment =
+    memberCount === 1 ? c.chatClassmatesOne : formatMessage(c.chatClassmatesMany, { count: memberCount });
+  const chatSubtitle = formatMessage(c.courseChatSubtitle, {
+    membersFragment,
+    school: getSchoolLabel(course.school),
+  });
 
   return (
     <ChatReplyProvider>
     <ChatRealtimeRefresh kind="course" courseId={courseId} latestMessageId={latestMessageId} />
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background">
       <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
-        <BackLink href={backHref} label="Back" />
+        <BackLink href={backHref} />
         <Link
           href={`/courses/${courseId}`}
           className="flex min-w-0 flex-1 flex-col rounded-xl py-1 pl-1 pr-2 text-left transition hover:bg-muted/70 active:bg-muted"
@@ -92,10 +109,7 @@ export default async function CourseChatPage({
           <p className="truncate text-sm font-semibold leading-tight">
             {courseChatHeadline(course.name, course.code)}
           </p>
-          <p className="truncate text-[11px] text-muted-foreground">
-            Course chat · {memberCount} classmate{memberCount === 1 ? "" : "s"} ·{" "}
-            {getSchoolLabel(course.school)}
-          </p>
+          <p className="truncate text-[11px] text-muted-foreground">{chatSubtitle}</p>
         </Link>
       </header>
 
@@ -111,14 +125,12 @@ export default async function CourseChatPage({
               name="returnTo"
               value={`/courses/${courseId}/chat`}
             />
-            <p className="min-w-0 flex-1 text-[11px] leading-snug text-foreground">
-              Hidden from Chats — restore the row anytime.
-            </p>
+            <p className="min-w-0 flex-1 text-[11px] leading-snug text-foreground">{c.chatHiddenBanner}</p>
             <button
               type="submit"
               className="shrink-0 rounded-full border border-border bg-background px-2.5 py-1 text-[10px] font-semibold shadow-sm"
             >
-              Show in Chats
+              {c.showInChats}
             </button>
           </form>
         </div>
@@ -127,11 +139,8 @@ export default async function CourseChatPage({
       <ChatScrollContainer messageCount={visibleMessages.length}>
         {visibleMessages.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
-            <p className="text-sm font-medium text-foreground">No messages yet</p>
-            <p className="mt-1 max-w-[18rem] text-xs leading-relaxed text-muted-foreground">
-              Say hi, ask about assignments, or find study partners — everyone enrolled in this course
-              can see this chat.
-            </p>
+            <p className="text-sm font-medium text-foreground">{c.chatEmptyTitle}</p>
+            <p className="mt-1 max-w-[18rem] text-xs leading-relaxed text-muted-foreground">{c.chatEmptyBody}</p>
           </div>
         ) : (
           <div className="space-y-3 pb-2">
@@ -143,7 +152,7 @@ export default async function CourseChatPage({
                 `/users/${message.senderId}?returnTo=${encodeURIComponent(`/courses/${courseId}/chat`)}` as Route;
 
               return (
-                <div key={message.id}>
+                <div key={message.id} id={chatMessageDomId(message.id)}>
                   {showDay ? (
                     <div className="flex justify-center py-2">
                       <span className="rounded-full bg-muted px-3 py-1 text-[10px] font-medium text-muted-foreground">
@@ -162,7 +171,9 @@ export default async function CourseChatPage({
                       <Link
                         href={peerHref}
                         className="mt-5 shrink-0 rounded-full transition hover:opacity-90 active:opacity-80"
-                        aria-label={`View ${message.sender.nickname ?? "student"}'s profile`}
+                        aria-label={formatMessage(c.memberViewProfileAria, {
+                          name: message.sender.nickname ?? ui.common.studentFallback,
+                        })}
                       >
                         <PresetAvatar id={message.sender.avatarUrl} size={32} />
                       </Link>
@@ -192,14 +203,14 @@ export default async function CourseChatPage({
                     >
                       {isOwn ? (
                         <p className="mb-0.5 truncate pr-0.5 text-[11px] font-medium text-muted-foreground">
-                          You
+                          {c.chatBubbleYou}
                         </p>
                       ) : (
                         <Link
                           href={peerHref}
                           className="mb-0.5 block truncate pl-0.5 text-[11px] font-medium text-muted-foreground transition hover:text-foreground"
                         >
-                          {message.sender.nickname ?? "Student"}
+                          {message.sender.nickname ?? ui.common.studentFallback}
                         </Link>
                       )}
                       <div
@@ -256,7 +267,7 @@ export default async function CourseChatPage({
                       <Link
                         href={"/me" as Route}
                         className="mt-5 shrink-0 rounded-full transition hover:opacity-90 active:opacity-80"
-                        aria-label="View your profile"
+                        aria-label={c.chatViewYourProfileAria}
                       >
                         <PresetAvatar id={user.avatarUrl} size={32} />
                       </Link>
@@ -270,7 +281,7 @@ export default async function CourseChatPage({
       </ChatScrollContainer>
 
       <div className="shrink-0 border-t border-border/80 bg-background/95 px-3 pt-2 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
-        <CourseChatComposer courseId={courseId} />
+        <CourseChatComposer courseId={courseId} threadSearchEntries={threadSearchEntries} />
       </div>
     </div>
     </ChatReplyProvider>

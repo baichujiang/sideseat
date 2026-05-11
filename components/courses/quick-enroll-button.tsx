@@ -6,6 +6,7 @@ import { Check, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useAppMessages } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
 
 /**
@@ -40,6 +41,7 @@ export function QuickEnrollButton({
   onError?: (message: string) => void;
 }) {
   const router = useRouter();
+  const { courses: co } = useAppMessages();
   const [state, setState] = useState<"idle" | "pending" | "done">("idle");
 
   async function enroll(event: React.MouseEvent<HTMLButtonElement>) {
@@ -54,7 +56,7 @@ export function QuickEnrollButton({
       );
       if (!res.ok) {
         setState("idle");
-        onError?.("Couldn't enroll, please try again.");
+        onError?.(co.errorCouldNotEnroll);
         return;
       }
       setState("done");
@@ -66,7 +68,7 @@ export function QuickEnrollButton({
       }, 350);
     } catch {
       setState("idle");
-      onError?.("Network error, please try again.");
+      onError?.(co.errorNetworkEnroll);
     }
   }
 
@@ -80,7 +82,7 @@ export function QuickEnrollButton({
       type="button"
       onClick={enroll}
       disabled={state !== "idle"}
-      aria-label="Enroll in this course"
+      aria-label={co.enrollAria}
       className={cn(
         variant === "block" ? block : pill,
         state === "done"
@@ -103,7 +105,7 @@ export function QuickEnrollButton({
           strokeWidth={2.5}
         />
       ) : null}
-      {state === "done" ? "Enrolled" : "Enroll"}
+      {state === "done" ? co.enrolledCta : co.enrollCta}
     </button>
   );
 }

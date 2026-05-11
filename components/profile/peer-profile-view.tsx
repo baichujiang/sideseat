@@ -32,13 +32,20 @@ export function PeerProfileView({
   peer,
   metVia,
   belowDisplayName,
+  labels,
 }: {
   peer: PeerProfileFields;
   metVia: string | null;
   /** Your private name for this contact — only when viewer has a connection. */
   belowDisplayName?: ReactNode;
+  labels: {
+    studentFallback: string;
+    aboutSection: string;
+    languagesSection: string;
+    emptyBio: string;
+  };
 }) {
-  const name = peer.nickname?.trim() || "Student";
+  const name = peer.nickname?.trim() || labels.studentFallback;
 
   const degreeLabel =
     peer.degreeLevel != null && peer.degreeLevel in DEGREE_LEVEL_LABELS
@@ -88,20 +95,20 @@ export function PeerProfileView({
         {peer.bio?.trim() ? (
           <div className="rounded-xl border border-border bg-card px-3 py-2.5">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              About
+              {labels.aboutSection}
             </p>
             <p className="mt-1.5 leading-relaxed text-foreground/90">{peer.bio.trim()}</p>
           </div>
         ) : (
           <div className="rounded-xl border border-dashed border-border bg-muted/20 px-3 py-2 text-xs italic text-muted-foreground">
-            No tagline yet.
+            {labels.emptyBio}
           </div>
         )}
 
         {peer.languages.length > 0 ? (
           <div className="rounded-xl border border-border bg-card px-3 py-2.5">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Languages
+              {labels.languagesSection}
             </p>
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {peer.languages.map((row) => (

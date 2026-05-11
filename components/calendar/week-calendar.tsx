@@ -1,8 +1,16 @@
+"use client";
+
 import type { CalendarRepeatRule, Weekday } from "@prisma/client";
 import { addDays, addMinutes, format, isSameDay } from "date-fns";
 import { MapPin, Repeat2 } from "lucide-react";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
+import {
+  WeekEventEditToolbar,
+  type WeekEventEditToolbarLabels,
+} from "@/components/calendar/week-event-edit-toolbar";
+import { useLocaleContext } from "@/components/i18n/locale-provider";
+import { formatMessage } from "@/lib/i18n/messages";
 import {
   SCHEDULE_EVENT_TONE_STYLES,
   scheduleShortOverlapRailClass,
@@ -16,7 +24,74 @@ import {
   computeEventOverlapLayout,
   SCHEDULE_SHORT_OVERLAP_GLASS,
 } from "@/lib/calendar/event-overlap-layout";
+import {
+  buildClipboardSessionFromBlock,
+  writeCalendarClipboardSession,
+} from "@/lib/calendar/calendar-clipboard";
 import { cn } from "@/lib/utils";
+
+/** Anchor (resize handle) accent fallback when an event has no category color. */
+const DEFAULT_ANCHOR_ACCENT = "#E53935";
+
+const DEFAULT_EDIT_TOOLBAR_LABELS: WeekEventEditToolbarLabels = {
+  cut: "Cut",
+  copy: "Copy",
+  duplicate: "Duplicate",
+  delete: "Delete",
+  toolbarAriaLabel: "Event actions",
+};
+
+/** Multiline summary used when the consumer does not provide a richer copy hook. */
+function defaultClipboardTextForBlock(
+  block: WeekCalendarBlock,
+  occurrenceDate: Date,
+): string {
+  const fmt = (m: number) => {
+    const h = Math.floor(m / 60).toString().padStart(2, "0");
+    const mm = (m % 60).toString().padStart(2, "0");
+    return `${h}:${mm}`;
+  };
+  const date = format(occurrenceDate, "yyyy-MM-dd");
+  const titleLine = [block.courseCode, block.courseName]
+    .filter(Boolean)
+    .join(" ")
+    .trim() ||
+    block.courseName ||
+    "Event";
+  const lines = [
+    titleLine,
+    `${date} ${fmt(block.startMinute)} – ${fmt(block.endMinute)}`,
+  ];
+  if (block.location?.trim()) lines.push(block.location.trim());
+  if (block.note?.trim()) lines.push("", block.note.trim());
+  return lines.join("\n");
+}
+
+async function writeTextToClipboard(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    /* fall through to manual fallback */
+  }
+  /** Legacy fallback for older WebKit / non-secure contexts. */
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    ta.style.pointerEvents = "none";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
+}
 
 export type WeekCalendarBlock = {
   courseId: string;
@@ -43,25 +118,18 @@ export type WeekCalendarBlock = {
 };
 
 const DAY_ORDER: Weekday[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
-const DAY_LABEL: Record<Weekday, string> = {
-  MON: "Mon",
-  TUE: "Tue",
-  WED: "Wed",
-  THU: "Thu",
-  FRI: "Fri",
-  SAT: "Sat",
-  SUN: "Sun",
-};
 
 /** Warm card chrome — outer frame + soft inner grid (not spreadsheet-heavy). */
 const WEEK_CALENDAR_CARD = cn(
-  "mt-4 overflow-hidden rounded-2xl border border-[#E7E0D6] bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)]",
+  "mt-0 overflow-hidden rounded-2xl border border-[#E7E0D6] bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)]",
   "dark:border-border dark:bg-card dark:shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
 );
 const WEEK_GRID_LINE = "border-[#F0ECE6] dark:border-white/[0.08]";
 const WEEK_COL_DIVIDER = "border-[#F3EFE8] dark:border-white/[0.07]";
 
-const VISUAL_PADDING_MINUTES = 30;
+/** Past-midnight axis padding — keep smaller than top so scrolling past 24:00 does not leave a tall dead band. */
+const VISUAL_PADDING_TOP_MINUTES = 30;
+const VISUAL_PADDING_BOTTOM_MINUTES = 12;
 const FULL_DAY_MINUTES = 24 * 60;
 const WEEK_HEADER_HEIGHT_PX = 32;
 
@@ -90,10 +158,12 @@ const Z_TIME_RAIL_BODY = 45;
 const Z_TIME_AXIS_INNER = 1;
 
 const POINTER_SLOP_PX = 14;
+/** Hold still on a calendar card body, then drag (same 450ms idea as the mini workweek course grid). */
+const CALENDAR_MOVE_LONG_PRESS_MS = 450;
 const SNAP_MINUTES = 15;
 const MIN_EVENT_MINUTES = 15;
 /** After this many px of movement, lock 2D scroll to horizontal OR vertical for the rest of the gesture. */
-const AXIS_LOCK_THRESHOLD_PX = 14;
+const AXIS_LOCK_THRESHOLD_PX = 24;
 
 /** Nested calendar drags — only clear body `user-select` when outermost ends. */
 let calendarDragSelectLockDepth = 0;
@@ -140,7 +210,7 @@ const DENSITY_LAYOUT: Record<
   default: {
     timeColumnPx: 44,
     minutePx: 0.72,
-    bottomSpacerPx: 96,
+    bottomSpacerPx: 20,
     visibleWeekDays: 5,
     viewStart: 8 * 60,
     viewEnd: 20 * 60,
@@ -154,7 +224,7 @@ const DENSITY_LAYOUT: Record<
   immersive: {
     timeColumnPx: 52,
     minutePx: 0.59,
-    bottomSpacerPx: 28,
+    bottomSpacerPx: 18,
     visibleWeekDays: 7,
     viewStart: 8 * 60,
     viewEnd: 20 * 60,
@@ -196,6 +266,10 @@ export function WeekCalendar({
   onCreateEvent,
   onOpenItem,
   onPatchCalendarEventTimes,
+  onDeleteCalendarEvent,
+  onDuplicateCalendarEvent,
+  onCopyCalendarEvent,
+  editToolbarLabels,
   density = "default",
   /** When set (e.g. fullscreen), overrides the scroll viewport height in px. */
   viewportBodyPx,
@@ -216,10 +290,54 @@ export function WeekCalendar({
   onOpenItem?: (item: WeekCalendarBlock, occurrenceDate: Date) => void;
   /** Drag / resize calendar events (PATCH start/end only). */
   onPatchCalendarEventTimes?: (args: { eventId: string; startAt: Date; endAt: Date }) => Promise<boolean>;
+  /**
+   * Delete an editable calendar entry. When omitted (or returns false), the
+   * delete action is hidden from the floating edit toolbar.
+   */
+  onDeleteCalendarEvent?: (args: { eventId: string }) => Promise<boolean> | boolean;
+  /**
+   * Duplicate an editable calendar entry. `block` is the selected block; the
+   * parent decides the new start/end (typically `endAt` + duration).
+   */
+  onDuplicateCalendarEvent?: (args: {
+    block: WeekCalendarBlock;
+    occurrenceDate: Date;
+  }) => Promise<boolean> | boolean;
+  /**
+   * Optional copy hook (so the parent can include fields not visible here, e.g.
+   * note + participants). When omitted, we fall back to copying a readable
+   * summary based on the WeekCalendarBlock.
+   */
+  /**
+   * Rich copy: write to the system clipboard inside this hook, then return
+   * `{ summaryText }` (same string) so we can mirror it into sessionStorage.
+   * If omitted, we copy `defaultClipboardTextForBlock` and still store session.
+   */
+  onCopyCalendarEvent?: (args: {
+    block: WeekCalendarBlock;
+    occurrenceDate: Date;
+  }) => Promise<{ summaryText: string } | void> | { summaryText: string } | void;
+  /** Localized labels for the floating edit toolbar. When omitted, English defaults are used. */
+  editToolbarLabels?: WeekEventEditToolbarLabels;
   density?: WeekCalendarDensity;
   viewportBodyPx?: number;
   fillParent?: boolean;
 }) {
+  const { locale, messages: appMessages } = useLocaleContext();
+  const sch = appMessages.schedule;
+  const dayColWeekdayFmt = useMemo(
+    () => new Intl.DateTimeFormat(locale, { weekday: "short" }),
+    [locale],
+  );
+  const dayColDayMonthFmt = useMemo(
+    () => new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" }),
+    [locale],
+  );
+  const createEventWhenFmt = useMemo(
+    () => new Intl.DateTimeFormat(locale, { weekday: "short", month: "short", day: "numeric" }),
+    [locale],
+  );
+
   const cfg = DENSITY_LAYOUT[density];
   const TIME_COLUMN_PX = cfg.timeColumnPx;
   const MINUTE_PX = cfg.minutePx;
@@ -231,7 +349,16 @@ export function WeekCalendar({
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const holdTimerRef = useRef<number | null>(null);
   const [frameWidth, setFrameWidth] = useState(0);
-  
+
+  /**
+   * Currently selected calendar entry. Long-press on an event body selects it
+   * and shows the edit toolbar + resize anchors; move/resize drag is only
+   * allowed while selected. Single tap opens the detail sheet.
+   */
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  /** Per-eventId DOM node ref so the toolbar can anchor to the visible block. */
+  const eventCardElsRef = useRef<Map<string, HTMLDivElement | null>>(new Map());
+
   const [dragOverride, setDragOverride] = useState<{
     eventId: string;
     weekday: Weekday;
@@ -283,8 +410,8 @@ export function WeekCalendar({
   }, [blocks, dragOverride]);
 
   const visibleDays = DAY_ORDER;
-  const visualStartMinute = -VISUAL_PADDING_MINUTES;
-  const visualEndMinute = FULL_DAY_MINUTES + VISUAL_PADDING_MINUTES;
+  const visualStartMinute = -VISUAL_PADDING_TOP_MINUTES;
+  const visualEndMinute = FULL_DAY_MINUTES + VISUAL_PADDING_BOTTOM_MINUTES;
   const totalMinutes = visualEndMinute - visualStartMinute;
   const hourLabels: number[] = [];
   for (let m = 0; m <= FULL_DAY_MINUTES; m += 60) hourLabels.push(m);
@@ -292,7 +419,11 @@ export function WeekCalendar({
   const fullHeightPx = totalMinutes * MINUTE_PX;
   /** Visible window height — same formula as {@link ScheduleDayTimeline} (header scrolls inside content). */
   const computedViewportBodyPx =
-    (DEFAULT_VIEW_END - DEFAULT_VIEW_START + VISUAL_PADDING_MINUTES * 2) * MINUTE_PX;
+    (DEFAULT_VIEW_END -
+      DEFAULT_VIEW_START +
+      VISUAL_PADDING_TOP_MINUTES +
+      VISUAL_PADDING_BOTTOM_MINUTES) *
+    MINUTE_PX;
   const viewportHeightPx = viewportBodyPx ?? computedViewportBodyPx;
 
   // Measure before paint so the first hydrated frame does not use the 56px
@@ -311,7 +442,7 @@ export function WeekCalendar({
 
   useEffect(() => {
     const scrollTop =
-      (DEFAULT_VIEW_START - VISUAL_PADDING_MINUTES - visualStartMinute) * MINUTE_PX;
+      (DEFAULT_VIEW_START - VISUAL_PADDING_TOP_MINUTES - visualStartMinute) * MINUTE_PX;
     if (scrollContainerRef.current) scrollContainerRef.current.scrollTop = scrollTop;
   }, [visualStartMinute, weekStartDate, focusDate, DEFAULT_VIEW_START, MINUTE_PX]);
 
@@ -331,6 +462,23 @@ export function WeekCalendar({
       setDragOverride(null);
     }
   }, [blocks]);
+
+  /** Selection: clear when the week changes (selection is per-week-view ephemeral). */
+  useEffect(() => {
+    setSelectedEventId(null);
+  }, [weekStartDate, focusDate]);
+
+  /**
+   * Selection: drop when the underlying event disappears from the rendered set
+   * (deleted, moved out of the current window, navigated away).
+   */
+  useEffect(() => {
+    if (!selectedEventId) return;
+    const stillThere = blocks.some(
+      (b) => b.calendarEntryId === selectedEventId && b.source === "calendar",
+    );
+    if (!stillThere) setSelectedEventId(null);
+  }, [blocks, selectedEventId]);
 
   useEffect(() => () => clearDragClearFallbackTimer(), []);
 
@@ -383,9 +531,16 @@ export function WeekCalendar({
     // CSS `touch-action: none` on the container prevents the browser from
     // performing native touch scroll; we replicate it here with axis locking
     // and momentum.  Mouse / trackpad / wheel are unaffected by touch-action.
+    //
+    // Important: while the axis is still "free", we must not apply both
+    // scrollLeft and scrollTop deltas — that diagonal coupling reads as jitter
+    // at gesture start.  We stay in a movement deadzone (no scroll) until the
+    // threshold, then map position from touch origin on a single axis only.
     let tid: number | null = null;
     let t0x = 0;
     let t0y = 0;
+    let scrollL0 = 0;
+    let scrollT0 = 0;
     let tx = 0;
     let ty = 0;
     let tt = 0;
@@ -402,11 +557,21 @@ export function WeekCalendar({
 
     const onTouchStart = (e: TouchEvent) => {
       if (tid !== null) return;
+      const rawTarget = e.target;
+      if (
+        rawTarget instanceof Element &&
+        rawTarget.closest("[data-week-calendar-drag-root]")
+      ) {
+        /* Draggable event pills use pointer + long-press; do not bind this touch to axis-scroll. */
+        return;
+      }
       stopMomentum();
       const t = e.changedTouches[0];
       tid = t.identifier;
       t0x = tx = t.clientX;
       t0y = ty = t.clientY;
+      scrollL0 = node.scrollLeft;
+      scrollT0 = node.scrollTop;
       tt = performance.now();
       vx = vy = 0;
       tLock = "free";
@@ -427,20 +592,32 @@ export function WeekCalendar({
       const dt = Math.max(now - tt, 1);
       const dx = touch.clientX - tx;
       const dy = touch.clientY - ty;
+      const totalDx = touch.clientX - t0x;
+      const totalDy = touch.clientY - t0y;
+      const totalDist2 = totalDx * totalDx + totalDy * totalDy;
 
       if (tLock === "free") {
-        const totalDx = touch.clientX - t0x;
-        const totalDy = touch.clientY - t0y;
-        if (
-          totalDx * totalDx + totalDy * totalDy >=
-          AXIS_LOCK_THRESHOLD_PX * AXIS_LOCK_THRESHOLD_PX
-        ) {
-          tLock = Math.abs(totalDx) > Math.abs(totalDy) ? "h" : "v";
+        if (totalDist2 < AXIS_LOCK_THRESHOLD_PX * AXIS_LOCK_THRESHOLD_PX) {
+          const a = 0.4;
+          vx = a * ((dx / dt) * 1000) + (1 - a) * vx;
+          vy = a * ((dy / dt) * 1000) + (1 - a) * vy;
+          tx = touch.clientX;
+          ty = touch.clientY;
+          tt = now;
+          return;
         }
+        tLock = Math.abs(totalDx) > Math.abs(totalDy) ? "h" : "v";
       }
 
-      if (tLock !== "v") node.scrollLeft -= dx;
-      if (tLock !== "h") node.scrollTop -= dy;
+      const maxL = Math.max(0, node.scrollWidth - node.clientWidth);
+      const maxT = Math.max(0, node.scrollHeight - node.clientHeight);
+      if (tLock === "h") {
+        node.scrollTop = scrollT0;
+        node.scrollLeft = Math.max(0, Math.min(maxL, scrollL0 - totalDx));
+      } else {
+        node.scrollLeft = scrollL0;
+        node.scrollTop = Math.max(0, Math.min(maxT, scrollT0 - totalDy));
+      }
 
       const a = 0.4;
       vx = a * ((dx / dt) * 1000) + (1 - a) * vx;
@@ -662,11 +839,7 @@ export function WeekCalendar({
     if (block.courseId === "__draft-preview__") return;
     if (e.pointerType === "mouse" && e.button !== 0) return;
 
-    const immediateActivate = mode === "resize-start" || mode === "resize-end";
-
-    if (immediateActivate) {
-      e.preventDefault();
-    }
+    const isResizeMode = mode === "resize-start" || mode === "resize-end";
 
     if (dragOverride && dragOverride.eventId !== block.calendarEntryId) {
       pendingDragClearRef.current = null;
@@ -687,14 +860,47 @@ export function WeekCalendar({
     const grabOffsetMove =
       mode === "move" ? rawMinuteFromClientYForDay(e.clientY, fromWeekday) - block.startMinute : 0;
 
-    let activatedForDrag = immediateActivate;
+    /** Resize uses the same slop gate as body move so the first committed intent is stable. */
+    let activatedForDrag = false;
     let didMove = false;
+    /** True once this gesture may move-drag: started selected, or long-press just selected this block. */
+    let canDragMove = moveFromSelected;
+    /** Long-press on body arms **selection** (toolbar + anchors), not an immediate drag. */
+    let selectHoldTimer: number | null = null;
+    let longPressDidSelect = false;
 
     const preventScroll = (ev: TouchEvent) => {
       ev.preventDefault();
     };
 
-    if (immediateActivate) {
+    const clearSelectHoldTimer = () => {
+      if (selectHoldTimer != null) {
+        window.clearTimeout(selectHoldTimer);
+        selectHoldTimer = null;
+      }
+    };
+
+    if (mode === "move" && !moveFromSelected) {
+      selectHoldTimer = window.setTimeout(() => {
+        selectHoldTimer = null;
+        longPressDidSelect = true;
+        canDragMove = true;
+        setSelectedEventId(eventId);
+      }, CALENDAR_MOVE_LONG_PRESS_MS);
+    }
+
+    const detach = () => {
+      clearSelectHoldTimer();
+      document.removeEventListener("pointermove", onDocMove);
+      document.removeEventListener("pointerup", onDocUp);
+      document.removeEventListener("pointercancel", onDocUp);
+      document.removeEventListener("touchmove", preventScroll);
+      unlockBrowserTextSelectionForCalendarDrag();
+    };
+
+    const activateCalendarDrag = () => {
+      activatedForDrag = true;
+      didMove = true;
       lockBrowserTextSelectionForCalendarDrag();
       window.getSelection()?.removeAllRanges();
       try {
@@ -709,53 +915,41 @@ export function WeekCalendar({
         startMinute: curStart,
         endMinute: curEnd,
       });
-    } else if (mode === "move" && moveFromSelected) {
-      /* Drag starts after pointer slop once the card is already selected. */
-    }
-
-    const detach = () => {
-      document.removeEventListener("pointermove", onDocMove);
-      document.removeEventListener("pointerup", onDocUp);
-      document.removeEventListener("pointercancel", onDocUp);
-      document.removeEventListener("touchmove", preventScroll);
-      unlockBrowserTextSelectionForCalendarDrag();
     };
 
     const onDocMove = (ev: PointerEvent) => {
       if (ev.pointerId !== pointerId) return;
       if (!activatedForDrag) {
         const pastSlop = Math.hypot(ev.clientX - x0, ev.clientY - y0) > POINTER_SLOP_PX;
-        if (mode === "move" && moveFromSelected && pastSlop) {
-          activatedForDrag = true;
-          didMove = true;
-          lockBrowserTextSelectionForCalendarDrag();
-          window.getSelection()?.removeAllRanges();
-          try {
-            captureEl.setPointerCapture(pointerId);
-          } catch {
-            /* ignore */
-          }
-          document.addEventListener("touchmove", preventScroll, { passive: false });
-          setDragOverride({
-            eventId,
-            weekday: curWeekday,
-            startMinute: curStart,
-            endMinute: curEnd,
-          });
+        if (selectHoldTimer != null && pastSlop) {
+          /* Moved before long-press — cancel selection arm (e.g. week pan / scroll). */
+          clearSelectHoldTimer();
+          detach();
           return;
         }
-        if (mode === "move" && !moveFromSelected && pastSlop) {
-          /* User is panning/scroll-gesturing — don't select on pointerup. */
-          detach();
+        if (isResizeMode && pastSlop) {
+          /* Handle hit: commit to resize only — weekday stays on the starting column for the whole gesture. */
+          curWeekday = fromWeekday;
+          activateCalendarDrag();
+          return;
+        }
+        if (mode === "move" && pastSlop && canDragMove) {
+          /* Body move-drag only after this event is selected (or long-press selected it this gesture). */
+          activateCalendarDrag();
+          return;
         }
         return;
       }
       if (!didMove && Math.hypot(ev.clientX - x0, ev.clientY - y0) > POINTER_SLOP_PX) {
         didMove = true;
       }
-      const hit = weekdayFromClientXY(ev.clientX, ev.clientY);
-      if (hit) curWeekday = hit;
-      const m = rawMinuteFromClientYForDay(ev.clientY, curWeekday);
+      if (mode === "move") {
+        const hit = weekdayFromClientXY(ev.clientX, ev.clientY);
+        if (hit) curWeekday = hit;
+      }
+      /* Resize: never follow the pointer into adjacent day columns — that read as a combined move + resize. */
+      const minuteDay: Weekday = mode === "move" ? curWeekday : fromWeekday;
+      const m = rawMinuteFromClientYForDay(ev.clientY, minuteDay);
       if (mode === "move") {
         let ns = m - grabOffsetMove;
         ns = Math.max(0, Math.min(FULL_DAY_MINUTES - originDuration, ns));
@@ -780,8 +974,18 @@ export function WeekCalendar({
       detach();
 
       if (!activatedForDrag) {
-        if (mode === "move" && !moveFromSelected) {
-          onOpenItem?.(block, occurrenceDate);
+        if (mode === "move") {
+          if (longPressDidSelect) {
+            /* Long-press ended selection only — do not open detail. */
+            return;
+          }
+          const withinTapSlop =
+            Math.hypot(ev.clientX - x0, ev.clientY - y0) <= POINTER_SLOP_PX;
+          if (withinTapSlop) {
+            /* Short tap (no drag, no long-press): open detail / edit sheet; clear selection. */
+            onOpenItem?.(block, occurrenceDate);
+            setSelectedEventId(null);
+          }
         }
         return;
       }
@@ -853,6 +1057,120 @@ export function WeekCalendar({
     document.addEventListener("pointercancel", onDocUp);
   }
 
+  /**
+   * Currently selected (toolbar-visible) block — looked up live from the rendered
+   * `effectiveBlocks` so dragOverride positions / new categories follow without a
+   * second pass.
+   */
+  const selectedBlock = useMemo<WeekCalendarBlock | null>(() => {
+    if (!selectedEventId) return null;
+    return (
+      effectiveBlocks.find(
+        (b) => b.source === "calendar" && b.calendarEntryId === selectedEventId,
+      ) ?? null
+    );
+  }, [effectiveBlocks, selectedEventId]);
+
+  const selectedOccurrenceDate = useMemo<Date | null>(() => {
+    if (!selectedBlock) return null;
+    const dayIndex = DAY_ORDER.indexOf(selectedBlock.weekday);
+    if (dayIndex < 0) return null;
+    return addDays(weekStartDate, dayIndex);
+  }, [selectedBlock, weekStartDate]);
+
+  /**
+   * Live DOM anchor for the toolbar (null while dragging or unselected). We
+   * re-read the ref map on every render because `blocks` reflowing can replace
+   * the underlying DOM node; depending on a stable ref ID is unreliable here.
+   */
+  const selectedAnchorEl =
+    selectedEventId && !dragOverride
+      ? eventCardElsRef.current.get(selectedEventId) ?? null
+      : null;
+
+  const resolvedToolbarLabels = editToolbarLabels ?? DEFAULT_EDIT_TOOLBAR_LABELS;
+
+  const dismissSelection = useCallback(() => {
+    setSelectedEventId(null);
+  }, []);
+
+  const persistCalendarCopyToClipboardAndSession = useCallback(
+    async (
+      kind: "copy" | "cut",
+      snapshot?: { block: WeekCalendarBlock; occurrenceDate: Date },
+    ) => {
+      const block = snapshot?.block ?? selectedBlock;
+      const occurrenceDate = snapshot?.occurrenceDate ?? selectedOccurrenceDate;
+      if (!block || !occurrenceDate) return;
+      let summaryText: string;
+      if (onCopyCalendarEvent) {
+        const ret = await onCopyCalendarEvent({ block, occurrenceDate });
+        summaryText =
+          ret && typeof ret === "object" && typeof ret.summaryText === "string"
+            ? ret.summaryText
+            : defaultClipboardTextForBlock(block, occurrenceDate);
+      } else {
+        summaryText = defaultClipboardTextForBlock(block, occurrenceDate);
+        await writeTextToClipboard(summaryText);
+      }
+      writeCalendarClipboardSession(
+        buildClipboardSessionFromBlock(block, occurrenceDate, kind, summaryText),
+      );
+    },
+    [onCopyCalendarEvent, selectedBlock, selectedOccurrenceDate],
+  );
+
+  const handleCopySelection = useCallback(async () => {
+    if (!selectedBlock || !selectedOccurrenceDate) return;
+    await persistCalendarCopyToClipboardAndSession("copy");
+    setSelectedEventId(null);
+  }, [persistCalendarCopyToClipboardAndSession, selectedBlock, selectedOccurrenceDate]);
+
+  const handleCutSelection = useCallback(async () => {
+    if (!selectedBlock || !selectedOccurrenceDate || !selectedEventId) return;
+    const eventId = selectedEventId;
+    const snapshot = { block: selectedBlock, occurrenceDate: selectedOccurrenceDate };
+    /** Same as delete: dismiss toolbar immediately so no follow-up tap lands on the card while work is in flight. */
+    setSelectedEventId(null);
+    // Copy first so the user keeps a system-clipboard reference if delete fails.
+    await persistCalendarCopyToClipboardAndSession("cut", snapshot);
+    if (!onDeleteCalendarEvent) return;
+    const ok = await onDeleteCalendarEvent({ eventId });
+    if (!ok) setSelectedEventId(eventId);
+  }, [
+    onDeleteCalendarEvent,
+    persistCalendarCopyToClipboardAndSession,
+    selectedBlock,
+    selectedOccurrenceDate,
+    selectedEventId,
+  ]);
+
+  const handleDuplicateSelection = useCallback(async () => {
+    if (!selectedBlock || !selectedOccurrenceDate) return;
+    if (!onDuplicateCalendarEvent) {
+      setSelectedEventId(null);
+      return;
+    }
+    const ok = await onDuplicateCalendarEvent({
+      block: selectedBlock,
+      occurrenceDate: selectedOccurrenceDate,
+    });
+    if (ok) setSelectedEventId(null);
+  }, [onDuplicateCalendarEvent, selectedBlock, selectedOccurrenceDate]);
+
+  const handleDeleteSelection = useCallback(async () => {
+    if (!selectedEventId) return;
+    if (!onDeleteCalendarEvent) {
+      setSelectedEventId(null);
+      return;
+    }
+    const eventId = selectedEventId;
+    /** Close toolbar immediately so no follow-up click lands on the card while DELETE is in flight. */
+    setSelectedEventId(null);
+    const ok = await onDeleteCalendarEvent({ eventId });
+    if (!ok) setSelectedEventId(eventId);
+  }, [onDeleteCalendarEvent, selectedEventId]);
+
   return (
     <div
       className={cn(
@@ -894,7 +1212,7 @@ export function WeekCalendar({
                 minHeight: `${WEEK_HEADER_HEIGHT_PX}px`,
               }}
             >
-              Time
+              {sch.timeColumnLabel}
             </div>
             <div
               className={cn("relative grid cursor-default box-border border-b bg-white dark:bg-card", WEEK_GRID_LINE)}
@@ -936,7 +1254,7 @@ export function WeekCalendar({
                               ),
                         )}
                       >
-                        {DAY_LABEL[day]}
+                        {dayColWeekdayFmt.format(date)}
                       </span>
                       <span
                         className={cn(
@@ -950,7 +1268,7 @@ export function WeekCalendar({
                               ),
                         )}
                       >
-                        {format(date, "d MMM")}
+                        {dayColDayMonthFmt.format(date)}
                       </span>
                     </div>
                   </div>
@@ -980,7 +1298,7 @@ export function WeekCalendar({
                     cfg.axisTimeClass,
                   )}
                 >
-                  All day
+                  {sch.allDayRowLabel}
                 </span>
               </div>
               <div
@@ -1203,6 +1521,7 @@ export function WeekCalendar({
                       const isAnchor = anchorWeekday === day;
                       const isWeekend = day === "SAT" || day === "SUN";
                       const dayIndex = DAY_ORDER.indexOf(day);
+                      const occurrenceDate = addDays(weekStartDate, dayIndex);
 
                       const createFromPointer = (clientY: number, rect: DOMRect) => {
                         if (!onCreateEvent) return;
@@ -1237,8 +1556,10 @@ export function WeekCalendar({
                         >
                           <button
                             type="button"
-                            aria-label={`Create event on ${DAY_LABEL[day]}`}
-                                          onDoubleClick={(event) => {
+                            aria-label={formatMessage(sch.createEventOnDayAria, {
+                              when: createEventWhenFmt.format(occurrenceDate),
+                            })}
+                            onDoubleClick={(event) => {
                               createFromPointer(
                                 event.clientY,
                                 event.currentTarget.getBoundingClientRect(),
@@ -1303,6 +1624,7 @@ export function WeekCalendar({
                             const draggingThis = Boolean(
                               dragOverride?.eventId && block.calendarEntryId === dragOverride.eventId,
                             );
+                            /** Saturated fill / compact type — only while `dragOverride` is active, not toolbar selection. */
                             const highlighted = draggingThis;
                             const shortOverlapGlass = Boolean(block.hasShortOverlap && !highlighted);
                             const catHex = block.categoryColor?.trim();
@@ -1312,15 +1634,24 @@ export function WeekCalendar({
                               block.source === "calendar" &&
                               Boolean(block.calendarEntryId) &&
                               block.courseId !== "__draft-preview__";
+                            /** Toolbar + resize anchors — distinct from `draggingThis` visuals (see interaction chrome below). */
+                            const isSelectedForEdit =
+                              isDraggableCalendar &&
+                              Boolean(block.calendarEntryId) &&
+                              selectedEventId === block.calendarEntryId;
                             const startMinuteShown = draggingThis
                               ? snapMinute(block.startMinute)
                               : block.startMinute;
                             const endMinuteShown = draggingThis
                               ? snapMinute(block.endMinute)
                               : block.endMinute;
-                            const className = cn(
-                              "absolute overflow-hidden rounded-[2px] p-0 text-left leading-tight transition hover:brightness-[0.98] active:brightness-95",
+                            const eventCardVisualClassName = cn(
+                              "absolute rounded-[2px] p-0 text-left leading-tight transition",
                               draggingThis && "!transition-none",
+                              /* Pressed-state dim reads like “dragging” while the finger is still down after long-press select. */
+                              isSelectedForEdit && !draggingThis
+                                ? "hover:brightness-[0.99]"
+                                : "hover:brightness-[0.98] active:brightness-95",
                               !useCategoryColor &&
                                 (highlighted
                                   ? tone.cardSelected
@@ -1331,9 +1662,13 @@ export function WeekCalendar({
                                 (shortOverlapGlass
                                   ? "shadow-[0_8px_22px_-10px_rgba(15,23,42,0.2)] dark:shadow-[0_8px_26px_-12px_rgba(0,0,0,0.55)]"
                                   : "shadow-sm"),
+                              isSelectedForEdit &&
+                                !draggingThis &&
+                                "scale-[1.01] ring-2 ring-[#2563EB]/40 ring-offset-2 ring-offset-white dark:ring-blue-400/45 dark:ring-offset-card",
                               draggingThis &&
                                 "scale-[1.02] shadow-[0_16px_40px_-12px_rgba(15,23,42,0.35)] ring-2 ring-[#E53935]/55 ring-offset-2 ring-offset-white dark:ring-red-400/50 dark:ring-offset-card",
                             );
+                            const className = cn(eventCardVisualClassName, "overflow-hidden");
                             const metaCls = cn(
                               "leading-tight",
                               !highlighted && "truncate",
@@ -1513,10 +1848,7 @@ export function WeekCalendar({
                             const innerWithRail = (
                               <div
                                 className={cn(
-                                  "relative flex w-full flex-row overflow-hidden rounded-[inherit]",
-                                  draggingThis
-                                    ? "min-h-0 items-stretch"
-                                    : "h-full min-h-0",
+                                  "relative flex h-full min-h-0 w-full flex-row items-stretch overflow-hidden rounded-[inherit]",
                                 )}
                               >
                                 <div aria-hidden className={railClass} style={railStyle} />
@@ -1573,56 +1905,78 @@ export function WeekCalendar({
                                 : positionStyle;
 
                             if (isDraggableCalendar) {
+                              const anchorAccent =
+                                (useCategoryColor && catHex) ? catHex : DEFAULT_ANCHOR_ACCENT;
                               return (
                                 <div
                                   key={key}
-                                  className={cn(className, "touch-none select-none")}
+                                  ref={(node) => {
+                                    if (!block.calendarEntryId) return;
+                                    if (node) {
+                                      eventCardElsRef.current.set(block.calendarEntryId, node);
+                                    } else {
+                                      eventCardElsRef.current.delete(block.calendarEntryId);
+                                    }
+                                  }}
+                                  data-week-calendar-drag-root
+                                  data-event-id={block.calendarEntryId ?? undefined}
+                                  className={cn(
+                                    eventCardVisualClassName,
+                                    /* Root must not clip resize hit areas that sit slightly outside the card. */
+                                    "touch-none select-none overflow-visible",
+                                  )}
                                   style={surfaceStyle}
                                   title={title}
                                   role="group"
+                                  aria-selected={isSelectedForEdit || undefined}
                                 >
-                                  <div className="overflow-hidden rounded-[inherit]">
-                                      <div
-                                        role="button"
-                                        tabIndex={0}
-                                        className={cn(
-                                          "absolute inset-0 cursor-grab overflow-hidden rounded-[inherit] active:cursor-grabbing",
-                                          draggingThis && "cursor-grabbing",
-                                        )}
-                                        style={{ zIndex: Z_EVENT_DRAG_INNER }}
-                                        onKeyDown={(ev) => {
-                                          if (ev.key === "Enter" || ev.key === " ") {
-                                            ev.preventDefault();
-                                            onOpenItem?.(block, occurrenceDate);
-                                          }
-                                        }}
-                                        onPointerDown={(ev) => {
-                                          ev.stopPropagation();
-                                          startCalendarPointerSession(
-                                            ev,
-                                            block,
-                                            "move",
-                                            day,
-                                            occurrenceDate,
-                                            key,
-                                            false,
-                                          );
-                                        }}
-                                      >
-                                        <div className="pointer-events-none h-full min-h-0 w-full overflow-hidden rounded-[inherit]">
-                                          {innerWithRail}
-                                        </div>
+                                  <div className="relative h-full min-h-0 w-full overflow-hidden rounded-[inherit]">
+                                    <div
+                                      role="button"
+                                      tabIndex={0}
+                                      className={cn(
+                                        "absolute inset-0 cursor-grab overflow-hidden rounded-[inherit] active:cursor-grabbing",
+                                        draggingThis && "cursor-grabbing",
+                                      )}
+                                      style={{ zIndex: Z_EVENT_DRAG_INNER }}
+                                      onKeyDown={(ev) => {
+                                        if (ev.key === "Enter" || ev.key === " ") {
+                                          ev.preventDefault();
+                                          onOpenItem?.(block, occurrenceDate);
+                                        }
+                                      }}
+                                      onPointerDown={(ev) => {
+                                        ev.stopPropagation();
+                                        startCalendarPointerSession(
+                                          ev,
+                                          block,
+                                          "move",
+                                          day,
+                                          occurrenceDate,
+                                          key,
+                                          selectedEventId === block.calendarEntryId,
+                                        );
+                                      }}
+                                    >
+                                      <div className="pointer-events-none h-full min-h-0 w-full overflow-hidden rounded-[inherit]">
+                                        {innerWithRail}
                                       </div>
+                                    </div>
                                   </div>
-                                  {!draggingThis ? (
+                                  {isSelectedForEdit ? (
                                     <>
+                                      {/*
+                                        Resize anchors — only while selected (same gate as move drag).
+                                        White-filled circles with a thin colored ring; large hit targets.
+                                      */}
                                       <button
                                         type="button"
-                                        className="absolute right-1 flex h-6 w-6 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
+                                        className="absolute flex h-8 w-10 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
                                         style={{
                                           zIndex: Z_EVENT_RESIZE_HANDLE,
-                                          top: "-4px",
-                                          transform: "translateY(-50%)",
+                                          top: 0,
+                                          right: 0,
+                                          transform: "translate(50%, -50%)",
                                         }}
                                         aria-label={`Drag anchor to change start time: ${titleLine}`}
                                         onPointerDown={(ev) => {
@@ -1639,17 +1993,21 @@ export function WeekCalendar({
                                         }}
                                       >
                                         <span
-                                          className="pointer-events-none block h-1 w-1 shrink-0 rounded-full bg-[#E53935] shadow-[0_0_0_1px_rgba(255,255,255,0.65)] dark:bg-red-400 dark:shadow-[0_0_0_1px_rgba(0,0,0,0.35)]"
+                                          className="pointer-events-none block h-[11px] w-[11px] shrink-0 rounded-full bg-white shadow-[0_1px_2px_rgba(15,23,42,0.18)] dark:bg-white"
+                                          style={{
+                                            border: `1.5px solid ${anchorAccent}`,
+                                          }}
                                           aria-hidden
                                         />
                                       </button>
                                       <button
                                         type="button"
-                                        className="absolute left-1 flex h-6 w-6 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
+                                        className="absolute flex h-8 w-10 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
                                         style={{
                                           zIndex: Z_EVENT_RESIZE_HANDLE,
-                                          bottom: "-4px",
-                                          transform: "translateY(50%)",
+                                          bottom: 0,
+                                          left: 0,
+                                          transform: "translate(-50%, 50%)",
                                         }}
                                         aria-label={`Drag anchor to change end time: ${titleLine}`}
                                         onPointerDown={(ev) => {
@@ -1666,7 +2024,10 @@ export function WeekCalendar({
                                         }}
                                       >
                                         <span
-                                          className="pointer-events-none block h-1 w-1 shrink-0 rounded-full bg-[#E53935] shadow-[0_0_0_1px_rgba(255,255,255,0.65)] dark:bg-red-400 dark:shadow-[0_0_0_1px_rgba(0,0,0,0.35)]"
+                                          className="pointer-events-none block h-[11px] w-[11px] shrink-0 rounded-full bg-white shadow-[0_1px_2px_rgba(15,23,42,0.18)] dark:bg-white"
+                                          style={{
+                                            border: `1.5px solid ${anchorAccent}`,
+                                          }}
                                           aria-hidden
                                         />
                                       </button>
@@ -1713,6 +2074,21 @@ export function WeekCalendar({
             </div>
         </div>}
       </div>
+      {/*
+        Floating edit toolbar (Cut / Copy / Duplicate / Delete) — portal'd to
+        <body> so it can render above scroll clip ancestors and the sticky
+        header band. Hidden while a drag is active so it does not lag behind a
+        moving block.
+      */}
+      <WeekEventEditToolbar
+        anchorEl={selectedAnchorEl}
+        labels={resolvedToolbarLabels}
+        onCut={() => void handleCutSelection()}
+        onCopy={() => void handleCopySelection()}
+        onDuplicate={() => void handleDuplicateSelection()}
+        onDelete={() => void handleDeleteSelection()}
+        onDismiss={dismissSelection}
+      />
     </div>
   );
 }

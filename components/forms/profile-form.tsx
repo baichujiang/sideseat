@@ -31,6 +31,8 @@ import { profileSchema } from "@/lib/validators/profile";
 import { MePageSection } from "@/components/profile/me-page-section";
 import { profileSectionLabelClassName } from "@/lib/ui/profile-section-label";
 import { profileSettingsControlClassName } from "@/lib/ui/profile-settings-control";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 type ProfileValues = z.infer<typeof profileSchema>;
@@ -67,6 +69,7 @@ export function ProfileForm({
   requireDirtyToSubmit?: boolean;
   mePageStructure?: boolean;
 }) {
+  const { profileForm: pf, common: c } = useAppMessages();
   const router = useRouter();
   const [serverError, setServerError] = useState("");
   const [languagePickerOpen, setLanguagePickerOpen] = useState(false);
@@ -112,7 +115,7 @@ export function ProfileForm({
     const payload = await response.json();
 
     if (!response.ok) {
-      setServerError(payload.error ?? "Unable to save profile.");
+      setServerError(payload.error ?? pf.unableToSave);
       return;
     }
 
@@ -126,11 +129,11 @@ export function ProfileForm({
   const saveDisabled =
     isSubmitting || justSaved || (requireDirtyToSubmit && !isDirty);
   const saveButtonLabel = isSubmitting
-    ? "Saving…"
+    ? pf.saving
     : justSaved
-      ? "Saved"
+      ? pf.saved
       : requireDirtyToSubmit && !isDirty
-        ? "No changes to save"
+        ? pf.noChangesToSave
         : submitLabel;
 
   const degreeLevel = watch("degreeLevel");
@@ -145,15 +148,22 @@ export function ProfileForm({
   );
 
   useEffect(() => {
-    if (!languagePickerOpen) {
-      setLanguageSearch("");
-      return;
-    }
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    if (!languagePickerOpen) setLanguageSearch("");
   }, [languagePickerOpen]);
+
+  // Nested inside `ProfileIdentitySheets` AppPushLayer (`variant="sheet"`): Escape must dismiss
+  // only this picker — parent layer's document key listener runs first in bubble order and would
+  // close the whole sheet. Capture here so outer handlers never see Escape while open.
+  useEffect(() => {
+    if (!isSheet || !languagePickerOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.stopImmediatePropagation();
+      setLanguagePickerOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown, true);
+    return () => document.removeEventListener("keydown", onKeyDown, true);
+  }, [isSheet, languagePickerOpen]);
 
   // Build the major list for the selected degree level. Preserve any legacy
   // free-text major so old rows don't silently get reset to empty.
@@ -198,12 +208,12 @@ export function ProfileForm({
       {isSheet ? (
         <div className="space-y-2">
           <h2 id="profile-sheet-card-heading" className="sr-only">
-            {"Profile photo and tagline"}
+            {pf.sheetCardHeadingSr}
           </h2>
           <AvatarPicker initialId={avatarId} sheet>
             <Input
               {...register("nickname")}
-              placeholder="Display name"
+              placeholder={pf.sheetDisplayNamePlaceholder}
               className="h-11 min-h-11 rounded-[20px] px-3.5 text-[14px] leading-tight"
             />
           </AvatarPicker>
@@ -211,7 +221,7 @@ export function ProfileForm({
           <div className="space-y-1">
             <Textarea
               {...register("bio")}
-              placeholder="Tagline — one short line"
+              placeholder={pf.sheetTaglinePlaceholder}
               rows={2}
               className="resize-none rounded-[20px] py-2.5 text-[14px] leading-snug"
             />
@@ -232,7 +242,7 @@ export function ProfileForm({
             (mePageStructure && !isSheet) || isSheet ? "sr-only" : "",
           )}
         >
-          {"School & Program"}
+          {pf.schoolProgramHeading}
         </h2>
         <section
           aria-labelledby="profile-school-program-heading"
@@ -253,7 +263,7 @@ export function ProfileForm({
                 isCompactAcademic ? "pb-2" : "pb-3",
               )}
             >
-              Used to recommend classmates and courses.
+              {pf.recommendClassmatesBlurb}
             </p>
           ) : null}
         <div
@@ -263,7 +273,7 @@ export function ProfileForm({
           )}
         >
           <div className="flex flex-col gap-1">
-            <FieldLabel>School</FieldLabel>
+            <FieldLabel>{pf.labelSchool}</FieldLabel>
             <div className="relative">
               <select className={settingsSelectClass} {...register("school")}>
                 {schoolOptions.map((school) => (
@@ -281,7 +291,7 @@ export function ProfileForm({
             <FormMessage message={errors.school?.message} />
           </div>
           <div className="flex flex-col gap-1">
-            <FieldLabel>Degree</FieldLabel>
+            <FieldLabel>{pf.labelDegree}</FieldLabel>
             <div className="relative">
               <select className={settingsSelectClass} {...register("degreeLevel")}>
                 {DEGREE_LEVELS.map((level) => (
@@ -299,12 +309,12 @@ export function ProfileForm({
             <FormMessage message={errors.degreeLevel?.message} />
           </div>
           <div className="flex flex-col gap-1">
-            <FieldLabel>Major</FieldLabel>
+            <FieldLabel>{pf.labelMajor}</FieldLabel>
             <Input
               list="profile-major-suggestions"
               autoComplete="off"
               spellCheck={false}
-              placeholder="Your major"
+              placeholder={pf.majorPlaceholder}
               className={settingsControlClass}
               {...register("major")}
             />
@@ -314,12 +324,12 @@ export function ProfileForm({
               ))}
             </datalist>
             {variant === "full" ? (
-              <p className="text-[11px] leading-snug text-classmates-hint dark:text-zinc-500">Free text is okay.</p>
+              <p className="text-[11px] leading-snug text-classmates-hint dark:text-zinc-500">{pf.majorFreeTextOk}</p>
             ) : null}
             <FormMessage message={errors.major?.message} />
           </div>
           <div className="flex flex-col gap-1">
-            <FieldLabel>Semester</FieldLabel>
+            <FieldLabel>{pf.labelSemester}</FieldLabel>
             <div className="relative">
               <select className={settingsSelectClass} {...register("semester", { valueAsNumber: true })}>
                 {semesterChoices.map((n) => (
@@ -341,9 +351,9 @@ export function ProfileForm({
         <input type="hidden" {...register("gender")} />
         <label className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-background/60 px-3 py-2.5">
           <span className="min-w-0">
-            <span className="block text-[13px] font-medium text-foreground">Hide me in course classmates</span>
+            <span className="block text-[13px] font-medium text-foreground">{pf.hideInCourseTitle}</span>
             <span className="mt-0.5 block text-[11px] text-muted-foreground">
-              Others won&apos;t see you in course member lists.
+              {pf.hideInCourseSubtitle}
             </span>
           </span>
           <input
@@ -358,12 +368,19 @@ export function ProfileForm({
       {isSheet ? (
         <div className="border-t border-classmates-hairline pt-3 dark:border-border/60" aria-hidden />
       ) : null}
-      <div className={cn("space-y-2", isCompactAcademic && !isSheet && "space-y-1", isSheet && "space-y-0")}>
+      <div
+        className={cn(
+          "space-y-2",
+          isCompactAcademic && !isSheet && "space-y-1",
+          isSheet && "space-y-0",
+          isSheet && "mb-6",
+        )}
+      >
         <h2
           id="profile-languages-heading"
           className={cn(profileSectionLabelClassName, (isCompactAcademic || isSheet) && "sr-only")}
         >
-          Languages
+          {pf.languagesHeading}
         </h2>
         <section
           aria-labelledby="profile-languages-heading"
@@ -384,7 +401,7 @@ export function ProfileForm({
                 isCompactAcademic ? "pb-2" : "pb-3",
               )}
             >
-              What you speak — helps match you with classmates.
+              {pf.languagesIntroBlurb}
             </p>
           ) : null}
 
@@ -396,7 +413,7 @@ export function ProfileForm({
                 isCompactAcademic ? "text-[12px] leading-snug" : "text-[13px]",
               )}
             >
-              {isCompactAcademic ? "Add at least one language." : "Add at least one language to continue."}
+              {isCompactAcademic ? pf.addLanguagePrompt : pf.addLanguagePromptContinue}
             </p>
           ) : (
             <ul className={cn(isCompactAcademic ? "space-y-1.5" : "space-y-3")}>
@@ -416,7 +433,7 @@ export function ProfileForm({
                         <select
                           className={cn(settingsSelectClass, "h-8 text-[11px] pr-8")}
                           value={entry.proficiency}
-                          aria-label={`${label} proficiency`}
+                          aria-label={formatMessage(pf.proficiencyAria, { label })}
                           onChange={(e) => {
                             const nextProf = e.target.value as LanguageProficiency;
                             setValue(
@@ -443,8 +460,12 @@ export function ProfileForm({
                       <button
                         type="button"
                         disabled={!canRemove}
-                        title={canRemove ? "Remove this language" : "Keep at least one language"}
-                        aria-label={canRemove ? `Remove ${label}` : "Cannot remove last language"}
+                        title={canRemove ? pf.removeLanguageTitle : pf.removeLanguageKeepOneTitle}
+                        aria-label={
+                          canRemove
+                            ? formatMessage(pf.removeLanguageAria, { label })
+                            : pf.cannotRemoveLastLanguageAria
+                        }
                         onClick={() => {
                           if (!canRemove) return;
                           setValue(
@@ -468,7 +489,7 @@ export function ProfileForm({
                         <select
                           className={cn(settingsSelectClass, "h-9 text-[12px]")}
                           value={entry.proficiency}
-                          aria-label={`${label} proficiency`}
+                          aria-label={formatMessage(pf.proficiencyAria, { label })}
                           onChange={(e) => {
                             const nextProf = e.target.value as LanguageProficiency;
                             setValue(
@@ -497,7 +518,12 @@ export function ProfileForm({
                       <button
                         type="button"
                         disabled={!canRemove}
-                        title={canRemove ? "Remove this language" : "Keep at least one language"}
+                        title={canRemove ? pf.removeLanguageTitle : pf.removeLanguageKeepOneTitle}
+                        aria-label={
+                          canRemove
+                            ? formatMessage(pf.removeLanguageAria, { label })
+                            : pf.cannotRemoveLastLanguageAria
+                        }
                         onClick={() => {
                           if (!canRemove) return;
                           setValue(
@@ -509,7 +535,7 @@ export function ProfileForm({
                         className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline disabled:pointer-events-none disabled:opacity-40"
                       >
                         <X className="h-3 w-3" aria-hidden />
-                        Remove
+                        {pf.removeLanguage}
                       </button>
                     </div>
                   </li>
@@ -535,7 +561,7 @@ export function ProfileForm({
                 className={isCompactAcademic ? "mr-1.5 h-3.5 w-3.5" : "mr-2 h-4 w-4"}
                 aria-hidden
               />
-              Add language
+              {pf.addLanguage}
             </Button>
           ) : null}
         </div>
@@ -550,7 +576,7 @@ export function ProfileForm({
             id="profile-verified-email-heading"
             className={cn(profileSectionLabelClassName, mePageStructure && "sr-only")}
           >
-            {"Verified Email"}
+            {pf.verifiedEmailHeading}
           </h2>
           <section
             aria-labelledby="profile-verified-email-heading"
@@ -561,7 +587,7 @@ export function ProfileForm({
           >
             {mePageStructure ? null : (
               <p className="border-b border-classmates-hairline pb-4 text-[13px] leading-snug text-classmates-sub dark:border-border/70 dark:text-zinc-400">
-                Your school inbox — unlocks invitations and shows classmates you&apos;re verified.
+                {pf.verifiedEmailBlurb}
               </p>
             )}
             <div className={cn(mePageStructure ? "" : "pt-1")}>{verificationSlot}</div>
@@ -577,6 +603,8 @@ export function ProfileForm({
         panelClassName="w-[min(100vw,28rem)] border-0 bg-background shadow-none dark:shadow-none"
         backdropClassName="bg-black/45 !backdrop-blur-none"
         ariaLabelledBy="language-picker-title"
+        lockBodyScroll={!isSheet}
+        listenForEscape={!isSheet}
       >
         <div
           className="flex h-full min-h-0 max-h-[88dvh] flex-col overflow-hidden sm:max-h-none"
@@ -585,15 +613,15 @@ export function ProfileForm({
           <div className="mx-auto mt-2 h-1 w-9 shrink-0 rounded-full bg-muted" aria-hidden />
           <div className="shrink-0 border-b border-border px-4 py-3 text-center">
             <h2 id="language-picker-title" className="text-[16px] font-semibold text-foreground">
-              Add language
+              {pf.languagePickerTitle}
             </h2>
-            <p className="mt-1 text-[12px] text-muted-foreground">Search and tap to add. You can set level on the form.</p>
+            <p className="mt-1 text-[12px] text-muted-foreground">{pf.languagePickerHint}</p>
           </div>
           <div className="shrink-0 px-4 pt-3">
             <Input
               value={languageSearch}
               onChange={(e) => setLanguageSearch(e.target.value)}
-              placeholder="Search languages…"
+              placeholder={pf.searchLanguagesPlaceholder}
               autoComplete="off"
               className="h-11 rounded-[20px] border-border bg-muted/40 text-[15px]"
               autoFocus
@@ -601,7 +629,7 @@ export function ProfileForm({
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2 pt-2">
               {unselectedMain.length === 0 && !unselectedOtherVisible ? (
-                <p className="px-2 py-6 text-center text-[13px] text-muted-foreground">No matches.</p>
+                <p className="px-2 py-6 text-center text-[13px] text-muted-foreground">{pf.noLanguageMatches}</p>
               ) : (
                 <>
                   <ul className="space-y-0.5">
@@ -629,7 +657,7 @@ export function ProfileForm({
                   {unselectedOtherVisible && unselectedOther ? (
                     <div className="mt-3 border-t border-border/60 pt-3">
                       <p className="px-3 pb-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                        Other
+                        {pf.otherLanguagesLabel}
                       </p>
                       <label className="flex cursor-pointer items-center gap-3 rounded-[20px] border border-dashed border-border/70 bg-muted/20 px-3 py-2.5 text-[14px] active:bg-muted/50">
                         <input
@@ -651,7 +679,7 @@ export function ProfileForm({
                         <span className="font-medium text-foreground">{unselectedOther.label}</span>
                       </label>
                       <p className="mt-1.5 px-3 text-[11px] leading-snug text-muted-foreground">
-                        Use when your language is not listed above.
+                        {pf.otherLanguageFootnote}
                       </p>
                     </div>
                   ) : null}
@@ -660,7 +688,7 @@ export function ProfileForm({
             </div>
           <div className="shrink-0 border-t border-border px-4 pt-3">
             <Button type="button" className="w-full rounded-full" onClick={() => setLanguagePickerOpen(false)}>
-              Done
+              {c.done}
             </Button>
           </div>
         </div>
@@ -681,14 +709,14 @@ export function ProfileForm({
       ) : (
         <div className="space-y-2">
           <h2 id="profile-contact-heading" className={profileSectionLabelClassName}>
-            {"Contact (optional)"}
+            {pf.contactHeading}
           </h2>
           <section
             aria-labelledby="profile-contact-heading"
             className="rounded-2xl border border-classmates-edge bg-classmates-surface p-3 shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card"
           >
             <p className="mb-3 border-b border-classmates-hairline pb-3 text-[12px] text-classmates-sub dark:border-border/70">
-              Shown only if you opt in elsewhere in the app.
+              {pf.contactBlurb}
             </p>
             <div className="grid grid-cols-2 gap-2">
               <Input {...register("wechatHandle")} placeholder="WeChat" />
@@ -708,23 +736,23 @@ export function ProfileForm({
       ) : isSheet ? null : (
         <div className="space-y-2">
           <h2 id="profile-home-heading" className={profileSectionLabelClassName}>
-            {"Home & profile"}
+            {pf.homeProfileHeading}
           </h2>
           <section
             aria-labelledby="profile-home-heading"
             className="space-y-3 rounded-2xl border border-classmates-edge bg-classmates-surface p-3 shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card"
           >
             <p className="border-b border-classmates-hairline pb-3 text-[12px] text-classmates-sub dark:border-border/70">
-              Avatar, name, and tagline — also shown to classmates.
+              {pf.homeProfileBlurb}
             </p>
             <AvatarPicker initialId={avatarId}>
-              <Input {...register("nickname")} placeholder="Nickname" />
+              <Input {...register("nickname")} placeholder={pf.nicknamePlaceholder} />
               <FormMessage message={errors.nickname?.message} />
             </AvatarPicker>
             <div className="space-y-1">
               <Textarea
                 {...register("bio")}
-                placeholder="Tagline — one short line, like a status or signature"
+                placeholder={pf.taglinePlaceholderLong}
                 rows={2}
               />
               <FormMessage message={errors.bio?.message} />
@@ -758,14 +786,15 @@ function MeAcademicShell({
   mePageStructure: boolean;
   children: React.ReactNode;
 }) {
+  const { profileForm: pf } = useAppMessages();
   if (!mePageStructure) {
     return <>{children}</>;
   }
   return (
     <MePageSection
       id="me-academic-heading"
-      title="Academic profile"
-      description="School, program, languages, and verified student email."
+      title={pf.academicSectionTitle}
+      description={pf.academicSectionDescription}
       density="compact"
     >
       <div className="space-y-3">{children}</div>

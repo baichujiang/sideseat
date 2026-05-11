@@ -8,11 +8,14 @@ import { CourseInboxRow } from "@/components/inbox/course-inbox-row";
 import { GroupInboxRow } from "@/components/inbox/group-inbox-row";
 import { inboxChatListUlClassName } from "@/components/inbox/inbox-conversation-tile";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage } from "@/lib/i18n/messages";
 import { inboxChatMatchesQuery } from "@/lib/inbox/inbox-chat-search";
 import { inboxRowKey, partitionInboxSections } from "@/lib/inbox/partition-inbox-sections";
 import type { InboxMerged } from "@/lib/queries/inbox-merge";
 
 export function InboxChatsView({ userId, merged }: { userId: string; merged: InboxMerged[] }) {
+  const m = useAppMessages();
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
 
@@ -37,24 +40,23 @@ export function InboxChatsView({ userId, merged }: { userId: string; merged: Inb
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search chats"
+          placeholder={m.inbox.searchPlaceholder}
           autoComplete="off"
           autoCorrect="off"
           spellCheck={false}
-          aria-label="Search chats"
+          aria-label={m.inbox.searchAria}
           className="min-w-0 flex-1 bg-transparent text-[15px] text-foreground outline-none placeholder:text-[#8A94A6] dark:placeholder:text-muted-foreground"
         />
       </div>
 
       {merged.length === 0 ? (
-        <EmptyState
-          title="No conversations yet"
-          description="Join a course, add a contact, or start a group chat to see conversations here."
-        />
+        <EmptyState title={m.inbox.emptyNoConversationsTitle} description={m.inbox.emptyNoConversationsDesc} />
       ) : filtered.length === 0 ? (
         <EmptyState
-          title="No matches"
-          description={hasQuery ? `Nothing matches “${query.trim()}”. Try another name or course.` : undefined}
+          title={m.inbox.emptyNoMatchesTitle}
+          description={
+            hasQuery ? formatMessage(m.inbox.emptyNoMatchesDesc, { query: query.trim() }) : undefined
+          }
         />
       ) : (
         <ul className={inboxChatListUlClassName}>

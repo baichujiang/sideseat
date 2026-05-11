@@ -16,9 +16,16 @@ import {
   withDate,
   withTime,
 } from "@/components/schedule/event-datetime-pickers";
+import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Input } from "@/components/ui/input";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
+import {
+  clearCalendarClipboardSession,
+  readCalendarClipboardSession,
+  type CalendarClipboardSessionV1,
+} from "@/lib/calendar/calendar-clipboard";
+import { isValidCategoryHex } from "@/lib/calendar/category-visual";
 import { cn } from "@/lib/utils";
 
 type RepeatRule = "NONE" | "DAILY" | "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "YEARLY";
@@ -61,6 +68,12 @@ function defaultDateOnly(date: Date) {
 /** Used when the user saves without typing a title (placeholder is shown while editing). */
 function defaultNewEventTitle() {
   return "New event";
+}
+
+function truncateClipboardPreview(text: string, maxChars: number) {
+  const single = text.replace(/\s+/g, " ").trim();
+  if (single.length <= maxChars) return single;
+  return `${single.slice(0, Math.max(0, maxChars - 1))}…`;
 }
 
 const REPEAT_OPTIONS: Array<{ value: RepeatRule; label: string }> = [
@@ -116,6 +129,8 @@ export function ScheduleAddPanel({
   companionOptions: CompanionOption[];
 }) {
   const router = useRouter();
+  const { messages } = useLocaleContext();
+  const sch = messages.schedule;
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -137,6 +152,15 @@ export function ScheduleAddPanel({
   const [withDraft, setWithDraft] = useState("");
   const [showCompanionList, setShowCompanionList] = useState(false);
   const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [clipboardSession, setClipboardSession] = useState<CalendarClipboardSessionV1 | null>(null);
+
+  useEffect(() => {
+    if (!open || mode !== "create") {
+      setClipboardSession(null);
+      return;
+    }
+    setClipboardSession(readCalendarClipboardSession());
+  }, [open, mode]);
 
   useEffect(() => {
     if (!open) return;
@@ -221,6 +245,12 @@ export function ScheduleAddPanel({
     if (repeat === "MONTHLY") return "Every month";
     return "Every year";
   }, [repeat]);
+
+  const clipboardBannerAccentHex = useMemo(() => {
+    const raw = clipboardSession?.categoryColor?.trim();
+    if (!raw || !isValidCategoryHex(raw)) return null;
+    return raw;
+  }, [clipboardSession]);
 
   async function submitEntry() {
     setSaving(true);
@@ -355,6 +385,49 @@ export function ScheduleAddPanel({
           aria-label="Event title"
           className="h-11 rounded-2xl border-border/70 bg-muted/10 shadow-none placeholder:text-muted-foreground/80"
         />
+
+        {clipboardSession ? (
+          <div
+            className={cn(
+              "rounded-2xl border border-border/60 bg-muted/[0.12] px-3 py-2.5 text-[12px] text-muted-foreground",
+              clipboardBannerAccentHex && "border-l-[4px]",
+            )}
+            style={
+              clipboardBannerAccentHex
+                ? { borderLeftColor: clipboardBannerAccentHex }
+                : undefined
+            }
+            role="status"
+          >
+            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/90">
+              {sch.calendarClipboardBannerTitle}
+            </p>
+            <p className="mt-1 line-clamp-3 whitespace-pre-wrap break-words text-[12px] leading-snug text-muted-foreground">
+              {truncateClipboardPreview(clipboardSession.summaryText, 140)}
+            </p>
+            <div className="mt-2 flex flex-wrap items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  clearCalendarClipboardSession();
+                  setClipboardSession(null);
+                }}
+                className="rounded-full px-3 py-1 text-[11px] font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+              >
+                {sch.calendarClipboardDismiss}
+              </button>
+              {clipboardSession.title?.trim() ? (
+                <button
+                  type="button"
+                  onClick={() => setTitle(clipboardSession.title!.trim())}
+                  className="rounded-full border border-border/70 bg-background px-3 py-1 text-[11px] font-medium text-foreground transition hover:bg-muted/60"
+                >
+                  {sch.calendarClipboardApplyTitle}
+                </button>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
 
         <Input
           value={location}

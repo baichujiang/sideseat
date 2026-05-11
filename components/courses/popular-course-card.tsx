@@ -5,7 +5,12 @@ import { ChevronRight, Users } from "lucide-react";
 import { SaveBookmarkButton } from "@/components/courses/save-bookmark-button";
 import { CourseAvatar } from "@/components/ui/course-avatar";
 import { courseCodeBadgeLabel } from "@/lib/courses/course-code-label";
+import { formatMessage, type CoursesMessages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
+
+function classmatesLine(c: CoursesMessages, n: number) {
+  return n === 1 ? c.classmatesCountOne : formatMessage(c.classmatesCountMany, { count: n });
+}
 
 function extractInstructorHint(name: string): string | null {
   const match = name.match(/\(([^()]+)\)\s*$/);
@@ -26,6 +31,7 @@ export function PopularCourseCard({
   memberCount,
   viewer,
   variant = "card",
+  courses,
 }: {
   course: {
     id: string;
@@ -37,16 +43,19 @@ export function PopularCourseCard({
   /** When set (signed-in Popular list), bookmark is shown on the card. */
   viewer?: { saved: boolean; enrolled: boolean } | null;
   variant?: "card" | "compact";
+  /** When omitted, English-only fallbacks are used (e.g. discover embeds). */
+  courses?: CoursesMessages;
 }) {
   const codeLabel = courseCodeBadgeLabel(course.name, course.code);
   const instructorLabel = course.instructorSummary?.trim() || extractInstructorHint(course.name);
   const bookmark = viewer ?? null;
   const isCompact = variant === "compact";
+  const c = courses;
+  const instructorDisplay =
+    instructorLabel && c ? `${c.instructorPrefix} ${instructorLabel}` : instructorLabel ? `Instructor: ${instructorLabel}` : null;
+  const classmateLine = c ? classmatesLine(c, memberCount) : `${memberCount} ${memberCount === 1 ? "classmate" : "classmates"}`;
 
-  const compactMetaParts = [
-    instructorLabel ? `Instructor: ${instructorLabel}` : null,
-    `${memberCount} ${memberCount === 1 ? "classmate" : "classmates"}`,
-  ].filter(Boolean);
+  const compactMetaParts = [instructorDisplay, classmateLine].filter(Boolean);
 
   return (
     <div
@@ -138,7 +147,7 @@ export function PopularCourseCard({
 
               {instructorLabel ? (
                 <p className="mt-1 text-[12px] text-[#5F6B7A] dark:text-muted-foreground">
-                  Instructor: {instructorLabel}
+                  {c ? `${c.instructorPrefix} ${instructorLabel}` : `Instructor: ${instructorLabel}`}
                 </p>
               ) : null}
 
@@ -149,7 +158,7 @@ export function PopularCourseCard({
                 )}
               >
                 <Users className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} aria-hidden />
-                {memberCount} {memberCount === 1 ? "classmate" : "classmates"}
+                {classmateLine}
               </span>
             </>
           )}

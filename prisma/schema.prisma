@@ -224,6 +224,8 @@ model User {
   id                           String                   @id @default(cuid())
   username                     String                   @unique
   email                        String?                  @unique
+  /// E.164, e.g. +8613800138000 — used for login when set.
+  phone                        String?                  @unique
   isGuest                      Boolean                  @default(false)
   hashedPassword               String
   nickname                     String?
@@ -293,6 +295,18 @@ model User {
   groupChatParticipants        GroupChatParticipant[]
   groupChatMessages            GroupChatMessage[]
   productFeedback              ProductFeedback[]
+}
+
+/// Short-lived SMS OTP for phone signup (and future phone login without password).
+model PhoneOtpChallenge {
+  id        String   @id @default(cuid())
+  phone     String
+  codeHash  String
+  purpose   String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([phone, purpose, createdAt])
 }
 
 model ProductFeedback {

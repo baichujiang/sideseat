@@ -107,8 +107,15 @@ See [prisma/schema.prisma](prisma/schema.prisma) for the full schema.
 
 ### Auth
 
-- `POST /api/auth/signup`
-- `POST /api/auth/login`
+- `POST /api/auth/signup-email` — register with **email + password** (internal `username` is auto-allocated)
+- `POST /api/auth/phone/send-otp` — send SMS signup code (`{ "phone": "…", "purpose": "signup" }`)
+- `POST /api/auth/signup-phone` — register with **phone + SMS code + password**
+- `POST /api/auth/signup` — legacy **username + password** signup (still supported for scripts / old clients)
+- `POST /api/auth/login` — **username, email, or phone** + password
+
+**SMS (production):** set `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_FROM_NUMBER`.  
+If Twilio is not configured, **development** builds log the 6-digit code to the server console; **production** returns an error until Twilio is configured.
+
 - `POST /api/auth/logout`
 - `POST /api/student-verification/request`
 - `GET /api/student-verification/verify?token=...`

@@ -6,6 +6,7 @@ import { Bookmark } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { useAppMessages } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
 
 /**
@@ -41,6 +42,7 @@ export function SaveBookmarkButton({
   onChange?: (saved: boolean) => void;
 }) {
   const router = useRouter();
+  const { courses: co } = useAppMessages();
   const [saved, setSaved] = useState(initialSaved);
   const [pending, setPending] = useState(false);
 
@@ -57,8 +59,8 @@ export function SaveBookmarkButton({
         <button
           type="button"
           disabled
-          aria-label="On your schedule"
-          title="On your schedule"
+          aria-label={co.bookmarkOnScheduleAria}
+          title={co.bookmarkOnScheduleTitle}
           className={cn(
             "inline-flex h-8 w-8 shrink-0 cursor-default items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary opacity-95",
             className,
@@ -73,15 +75,15 @@ export function SaveBookmarkButton({
         <button
           type="button"
           disabled
-          aria-label="On your schedule"
-          title="On your schedule"
+          aria-label={co.bookmarkOnScheduleAria}
+          title={co.bookmarkOnScheduleTitle}
           className={cn(
             "inline-flex shrink-0 cursor-default items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary opacity-95",
             className,
           )}
         >
           <Bookmark className="h-3 w-3 fill-primary" strokeWidth={2.25} />
-          On schedule
+          {co.bookmarkOnScheduleChip}
         </button>
       );
     }
@@ -89,15 +91,15 @@ export function SaveBookmarkButton({
       <button
         type="button"
         disabled
-        aria-label="On your schedule"
-        title="On your schedule"
+        aria-label={co.bookmarkOnScheduleAria}
+        title={co.bookmarkOnScheduleTitle}
         className={cn(
           "flex w-full cursor-default items-center justify-center gap-2 rounded-2xl border border-primary/25 bg-primary/5 px-4 py-2.5 text-sm font-medium text-foreground opacity-95",
           className,
         )}
       >
         <Bookmark className="h-4 w-4 fill-primary text-primary" strokeWidth={2.25} />
-        On your schedule
+        {co.bookmarkOnScheduleBlock}
       </button>
     );
   }
@@ -132,8 +134,8 @@ export function SaveBookmarkButton({
     }
   }
 
-  const label = saved ? "Saved" : "Save";
-  const ariaLabel = saved ? "Remove from saved" : "Save";
+  const label = saved ? co.bookmarkSaved : co.bookmarkSave;
+  const ariaLabel = saved ? co.bookmarkRemoveAria : co.bookmarkSaveAria;
 
   if (variant === "icon") {
     return (
@@ -203,7 +205,7 @@ export function SaveBookmarkButton({
         className={cn("h-4 w-4", saved ? "fill-primary text-primary" : undefined)}
         strokeWidth={2.25}
       />
-      {saved ? "Saved — tap to remove" : "Save"}
+      {saved ? co.bookmarkSavedTapRemove : co.bookmarkSave}
     </button>
   );
 }

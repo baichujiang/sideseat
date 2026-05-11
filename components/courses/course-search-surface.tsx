@@ -10,6 +10,8 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { QuickEnrollButton } from "@/components/courses/quick-enroll-button";
 import { SaveBookmarkButton } from "@/components/courses/save-bookmark-button";
 import { Input } from "@/components/ui/input";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage, type CoursesMessages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 type SearchHit = {
@@ -52,6 +54,7 @@ export function CourseSearchSurface({
   guestMode?: boolean;
   school?: string;
 }) {
+  const { courses: co } = useAppMessages();
   const [q, setQ] = useState("");
   const [hits, setHits] = useState<SearchHit[]>([]);
   const [searching, setSearching] = useState(false);
@@ -96,6 +99,7 @@ export function CourseSearchSurface({
         inputRef={inputRef}
         value={q}
         onChange={setQ}
+        copy={co}
         onClear={() => {
           setQ("");
           inputRef.current?.focus();
@@ -103,12 +107,7 @@ export function CourseSearchSurface({
       />
 
       {active ? (
-        <ResultsList
-          query={trimmed}
-          hits={hits}
-          searching={searching}
-          guestMode={guestMode}
-        />
+        <ResultsList query={trimmed} hits={hits} searching={searching} guestMode={guestMode} copy={co} />
       ) : (
         children
       )}
@@ -122,6 +121,7 @@ type SearchBarProps = {
   value: string;
   onChange: (v: string) => void;
   onClear: () => void;
+  copy: CoursesMessages;
 };
 
 function SearchBar({
@@ -130,6 +130,7 @@ function SearchBar({
   value,
   onChange,
   onClear,
+  copy,
 }: SearchBarProps) {
   return (
     <div
@@ -147,7 +148,7 @@ function SearchBar({
         enterKeyHint="search"
         autoComplete="off"
         spellCheck={false}
-        placeholder="Search by code or course name"
+        placeholder={copy.catalogSearchPlaceholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className={cn(
@@ -159,7 +160,7 @@ function SearchBar({
         <button
           type="button"
           onClick={onClear}
-          aria-label="Clear search"
+          aria-label={copy.catalogClearSearchAria}
           className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#8A94A6] transition hover:bg-[#F3F0EA] hover:text-[#111827] dark:hover:bg-muted"
         >
           <X className="h-4 w-4" strokeWidth={2.25} />
@@ -174,16 +175,18 @@ function ResultsList({
   hits,
   searching,
   guestMode,
+  copy,
 }: {
   query: string;
   hits: SearchHit[];
   searching: boolean;
   guestMode: boolean;
+  copy: CoursesMessages;
 }) {
   if (searching && hits.length === 0) {
     return (
       <div className="rounded-2xl border border-border/60 bg-card px-4 py-6 text-center text-[12.5px] text-muted-foreground">
-        Searching…
+        {copy.catalogSearching}
       </div>
     );
   }
@@ -192,11 +195,9 @@ function ResultsList({
     return (
       <div className="rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-8 text-center">
         <p className="text-[13.5px] font-medium text-foreground">
-          No courses match &ldquo;{query}&rdquo;
+          {formatMessage(copy.catalogNoMatchTitle, { query })}
         </p>
-        <p className="mt-1 text-[11.5px] text-muted-foreground">
-          Try a course code (e.g. IN2064) or part of the name.
-        </p>
+        <p className="mt-1 text-[11.5px] text-muted-foreground">{copy.catalogNoMatchHint}</p>
       </div>
     );
   }
@@ -204,11 +205,13 @@ function ResultsList({
   return (
     <div className="space-y-2">
       <p className="px-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-        {hits.length} {hits.length === 1 ? "result" : "results"}
+        {hits.length === 1
+          ? copy.catalogResultsOne
+          : formatMessage(copy.catalogResultsMany, { count: hits.length })}
       </p>
       <ul className="divide-y divide-border/50 overflow-hidden rounded-[1.25rem] border border-border/60 bg-card shadow-[0_2px_14px_-3px_rgba(15,23,42,0.06)]">
         {hits.map((hit) => (
-          <SearchHitRow key={hit.id} hit={hit} guestMode={guestMode} />
+          <SearchHitRow key={hit.id} hit={hit} guestMode={guestMode} copy={copy} />
         ))}
       </ul>
     </div>
@@ -218,9 +221,11 @@ function ResultsList({
 function SearchHitRow({
   hit,
   guestMode,
+  copy,
 }: {
   hit: SearchHit;
   guestMode: boolean;
+  copy: CoursesMessages;
 }) {
   return (
     <li className="flex items-center gap-3 px-4 py-3.5 sm:px-4 sm:py-4">
@@ -237,15 +242,16 @@ function SearchHitRow({
         <p className="mt-1 flex items-center gap-1 text-[12px] text-muted-foreground">
           <Users className="h-3.5 w-3.5 shrink-0 opacity-90" strokeWidth={2.25} />
           <span>
-            {hit.memberCount}{" "}
-            {hit.memberCount === 1 ? "classmate" : "classmates"}
+            {hit.memberCount === 1
+              ? copy.chatClassmatesOne
+              : formatMessage(copy.chatClassmatesMany, { count: hit.memberCount })}
           </span>
         </p>
       </Link>
 
       {guestMode ? null : hit.enrolled ? (
         <span className="shrink-0 rounded-full bg-muted px-2.5 py-1 text-[10.5px] font-semibold text-muted-foreground">
-          Enrolled
+          {copy.catalogEnrolledBadge}
         </span>
       ) : (
         <div className="flex shrink-0 items-center gap-1.5">

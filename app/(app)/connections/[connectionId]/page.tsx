@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { format, isSameDay, isToday, isYesterday } from "date-fns";
+import { enUS, zhCN } from "date-fns/locale";
 
 import { AvailabilityCardMessage } from "@/components/chat/availability-card-message";
 import { ChatComposer } from "@/components/chat/chat-composer";
@@ -20,12 +21,16 @@ import { directMessageActionSnippet } from "@/lib/chat/direct-message-preview";
 import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
 import { selfNotesDisplayTitle } from "@/lib/connections/self-notes-title";
 import { safeReturnPath } from "@/lib/nav/back";
+import { formatMessage, getMessages, type AppMessages } from "@/lib/i18n/messages";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
+import { chatMessageDomId } from "@/lib/chat/chat-message-dom-id";
+import { indexConnectionMessagesForSearch } from "@/lib/chat/thread-search-index";
 import { cn } from "@/lib/utils";
 
-function dayDividerLabel(d: Date): string {
-  if (isToday(d)) return "Today";
-  if (isYesterday(d)) return "Yesterday";
-  return format(d, "MMM d, yyyy");
+function dayDividerLabel(d: Date, chat: AppMessages["chat"], dfLocale: typeof enUS): string {
+  if (isToday(d)) return chat.today;
+  if (isYesterday(d)) return chat.yesterday;
+  return format(d, "MMM d, yyyy", { locale: dfLocale });
 }
 
 function timeLabel(d: Date): string {
@@ -43,6 +48,9 @@ export default async function ConnectionPage({
   const query = (await searchParams) ?? {};
   const backHref = safeReturnPath(query.returnTo, "/inbox");
   const { connection, user } = await requireConnection(connectionId);
+  const locale = await getServerAppLocale();
+  const ui = getMessages(locale);
+  const dfLocale = locale === "zh-CN" ? zhCN : enUS;
   const isSelfNotes = connection.userAId === connection.userBId;
   const otherUser = connection.userAId === user.id ? connection.userB : connection.userA;
 
@@ -58,6 +66,7 @@ export default async function ConnectionPage({
   const showPeerUsernameLine = !isSelfNotes && Boolean(myRemark) && !peerNickname.length;
   const showSelfBaseLine = isSelfNotes && Boolean(myRemark) && headerTitle !== selfBaseLabel;
   const messages = connection.messages;
+  const threadSearchEntries = indexConnectionMessagesForSearch(messages);
   const latestMessageId = messages.at(-1)?.id ?? null;
   const profileLinkHref = isSelfNotes
     ? (`/profile?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route)
@@ -74,15 +83,17 @@ export default async function ConnectionPage({
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background">
       {/* Chat app bar */}
       <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
-        <BackLink href={backHref} label="Back" />
+        <BackLink href={backHref} label={ui.chat.back} />
         <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl py-1 pl-1 pr-2">
           <Link
             href={profileLinkHref}
             className="shrink-0 rounded-full transition hover:opacity-90 active:opacity-80"
             aria-label={
               isSelfNotes
-                ? "Open your profile"
-                : `View ${peerNickname || otherUser.username}'s profile`
+                ? ui.chat.openYourProfileAria
+                : formatMessage(ui.chat.openPeerProfileAria, {
+                    name: peerNickname || otherUser.username,
+                  })
             }
           >
             <PresetAvatar id={otherUser.avatarUrl} size={40} className="shrink-0" />
@@ -121,7 +132,7 @@ export default async function ConnectionPage({
       <ChatScrollContainer messageCount={messages.length}>
         {messages.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
-            <p className="text-sm font-medium text-foreground">No messages yet</p>
+            <p className="text-sm font-medium text-foreground">{ui.chat.noMessagesYet}</p>
           </div>
         ) : (
           <div className="space-y-3 pb-2">
@@ -133,14 +144,14 @@ export default async function ConnectionPage({
               const dayStrip = showDay ? (
                 <div className="flex justify-center py-2">
                   <span className="rounded-full bg-muted px-3 py-1 text-[10px] font-medium text-muted-foreground">
-                    {dayDividerLabel(message.createdAt)}
+                    {dayDividerLabel(message.createdAt, ui.chat, dfLocale)}
                   </span>
                 </div>
               ) : null;
 
               if (message.type === "AVAILABILITY_CARD" && message.availabilityShare) {
                 return (
-                  <div key={message.id}>
+                  <div key={message.id} id={chatMessageDomId(message.id)}>
                     {dayStrip}
                     <AvailabilityCardMessage
                       shareId={message.availabilityShare.id}
@@ -154,10 +165,23 @@ export default async function ConnectionPage({
                 );
               }
 
+              if (message.type === "AVAILABILITY_CARD") {
+                return (
+                  <div key={message.id} id={chatMessageDomId(message.id)}>
+                    {dayStrip}
+                    <div className="flex justify-center py-2">
+                      <span className="max-w-sm rounded-full bg-muted px-3 py-1.5 text-center text-[11px] text-muted-foreground">
+                        {ui.chat.availabilityOrphan}
+                      </span>
+                    </div>
+                  </div>
+                );
+              }
+
               if (message.type === "PLAN_REQUEST_CARD" && message.planRequest) {
                 const request = message.planRequest;
                 return (
-                  <div key={message.id}>
+                  <div key={message.id} id={chatMessageDomId(message.id)}>
                     {dayStrip}
                     <PlanRequestCardMessage
                       requestId={request.id}
@@ -181,7 +205,7 @@ export default async function ConnectionPage({
               if (message.type === "PLAN_CONFIRMED_CARD" && message.planRequest) {
                 const request = message.planRequest;
                 return (
-                  <div key={message.id}>
+                  <div key={message.id} id={chatMessageDomId(message.id)}>
                     {dayStrip}
                     <PlanConfirmedCardMessage
                       title={request.title}
@@ -194,7 +218,7 @@ export default async function ConnectionPage({
 
               if (message.type === "SYSTEM") {
                 return (
-                  <div key={message.id}>
+                  <div key={message.id} id={chatMessageDomId(message.id)}>
                     {dayStrip}
                     <div className="flex justify-center py-1">
                       <span className="rounded-full bg-muted px-3 py-1 text-[11px] text-muted-foreground">
@@ -236,7 +260,7 @@ export default async function ConnectionPage({
                 Boolean(message.imageUrl);
 
               return (
-                <div key={message.id}>
+                <div key={message.id} id={chatMessageDomId(message.id)}>
                   {dayStrip}
                   <div
                     className={cn(
@@ -248,7 +272,9 @@ export default async function ConnectionPage({
                       <Link
                         href={peerHref}
                         className="mt-0.5 shrink-0 self-end rounded-full transition hover:opacity-90 active:opacity-80"
-                        aria-label={`View ${otherUser.nickname?.trim() || "Student"}'s profile`}
+                        aria-label={formatMessage(ui.chat.openPeerProfileAria, {
+                          name: otherUser.nickname?.trim() || ui.common.studentFallback,
+                        })}
                       >
                         <PresetAvatar id={message.sender.avatarUrl} size={32} />
                       </Link>
@@ -349,6 +375,7 @@ export default async function ConnectionPage({
           connectionId={connection.id}
           peerName={otherUser.nickname ?? "Student"}
           hideAttachments={isSelfNotes}
+          threadSearchEntries={threadSearchEntries}
         />
       </div>
     </div>

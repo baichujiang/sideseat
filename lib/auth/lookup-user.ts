@@ -1,5 +1,6 @@
 import "server-only";
 
+import { normalizePhone } from "@/lib/auth/phone";
 import { prisma } from "@/lib/db/prisma";
 
 export function identifierLooksLikeEmail(identifier: string) {
@@ -7,7 +8,7 @@ export function identifierLooksLikeEmail(identifier: string) {
 }
 
 /**
- * Login identifier: email (unique) or username (stored lowercase).
+ * Login identifier: email, E.164 phone, or username (stored lowercase).
  */
 export async function findUserForLogin(identifier: string) {
   const trimmed = identifier.trim();
@@ -19,6 +20,14 @@ export async function findUserForLogin(identifier: string) {
     return prisma.user.findUnique({
       where: { email: trimmed.toLowerCase() },
     });
+  }
+
+  const phone = normalizePhone(trimmed);
+  if (phone) {
+    const byPhone = await prisma.user.findUnique({ where: { phone } });
+    if (byPhone) {
+      return byPhone;
+    }
   }
 
   return prisma.user.findUnique({

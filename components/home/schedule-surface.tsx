@@ -31,6 +31,8 @@ import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
 import { WeekCalendar, type WeekCalendarBlock } from "@/components/calendar/week-calendar";
+import type { WeekEventEditToolbarLabels } from "@/components/calendar/week-event-edit-toolbar";
+import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { ScheduleAddPanel } from "@/components/home/schedule-add-panel";
 import { ScheduleCalendarCategoryManager } from "@/components/home/schedule-calendar-category-manager";
 import {
@@ -43,6 +45,7 @@ import {
   type DayTimelineItem,
 } from "@/components/home/schedule-day-timeline";
 import { ScheduleMonthView } from "@/components/home/schedule-month-view";
+import { HomeCalendarVisual, HomeGreetingHeading } from "@/components/home/home-hero";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import {
   berlinClockMinutes,
@@ -51,9 +54,28 @@ import {
 } from "@/lib/calendar/schedule-berlin";
 import { courseCalendarShortLabel } from "@/lib/calendar/course-calendar-short-label";
 import { isIcsFeedStudyEntryId } from "@/lib/calendar/ics-feed-event-id";
+import type { AppLocale } from "@/lib/i18n/app-locale";
+import { formatMessage, type AppMessages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
-function weekBlockToDayTimelineItem(block: WeekCalendarBlock): DayTimelineItem {
+function formatRepeatLabel(rule: CalendarRepeatRule, s: AppMessages["schedule"]): string {
+  switch (rule) {
+    case "DAILY":
+      return s.repeatDaily;
+    case "WEEKLY":
+      return s.repeatWeekly;
+    case "BIWEEKLY":
+      return s.repeatBiweekly;
+    case "MONTHLY":
+      return s.repeatMonthly;
+    case "YEARLY":
+      return s.repeatYearly;
+    default:
+      return s.repeatNone;
+  }
+}
+
+function weekBlockToDayTimelineItem(block: WeekCalendarBlock, repeatNoneLabel: string): DayTimelineItem {
   return {
     id:
       block.kind === "study"
@@ -67,7 +89,7 @@ function weekBlockToDayTimelineItem(block: WeekCalendarBlock): DayTimelineItem {
     location: block.location,
     withLabel: block.withLabel ?? null,
     note: block.note ?? null,
-    repeatLabel: block.repeatLabel ?? "No",
+    repeatLabel: block.repeatLabel ?? repeatNoneLabel,
     repeatRule: block.repeatRule ?? "NONE",
     repeatUntilISO: block.repeatUntilISO ?? null,
     eventParticipants: block.eventParticipants ?? [],
@@ -142,23 +164,6 @@ function isWeekendDay(date: Date) {
   return day === 0 || day === 6;
 }
 
-function formatRepeatLabel(rule: CalendarRepeatRule) {
-  switch (rule) {
-    case "DAILY":
-      return "Every day";
-    case "WEEKLY":
-      return "Every week";
-    case "BIWEEKLY":
-      return "Every 2 weeks";
-    case "MONTHLY":
-      return "Every month";
-    case "YEARLY":
-      return "Every year";
-    default:
-      return "No";
-  }
-}
-
 const WEEKDAY_BY_JS: Record<number, Weekday> = {
   0: "SUN",
   1: "MON",
@@ -175,7 +180,11 @@ type IcsSaveOutcome = "saved" | "cancelled" | "fallback";
  * Prefer the File System Access save picker when available so we can tell save vs cancel.
  * Fallback `<a download>` cannot detect cancellation — do not show a false “success” for that path.
  */
-async function saveIcsBlobWithPickerOrDownload(blob: Blob, filename: string): Promise<IcsSaveOutcome> {
+async function saveIcsBlobWithPickerOrDownload(
+  blob: Blob,
+  filename: string,
+  calendarFileTypeDescription: string,
+): Promise<IcsSaveOutcome> {
   const g = globalThis as typeof globalThis & {
     showSaveFilePicker?: (options?: {
       suggestedName?: string;
@@ -187,7 +196,7 @@ async function saveIcsBlobWithPickerOrDownload(blob: Blob, filename: string): Pr
     try {
       const handle = await g.showSaveFilePicker({
         suggestedName: filename,
-        types: [{ description: "iCalendar", accept: { "text/calendar": [".ics"] } }],
+        types: [{ description: calendarFileTypeDescription, accept: { "text/calendar": [".ics"] } }],
       });
       const writable = await handle.createWritable();
       await writable.write(blob);
@@ -234,6 +243,8 @@ export function ScheduleSurface({
   nowISO,
   semesterStartISO,
   semesterEndISO,
+  homeGreeting,
+  homeBelowHeaderSlot,
 }: {
   classBlocks: ClassBlock[];
   studyEntries: StudyEntry[];
@@ -243,8 +254,13 @@ export function ScheduleSurface({
   nowISO: string;
   semesterStartISO: string;
   semesterEndISO: string;
+  /** When set, greeting + view tabs share a column with calendar + toolbar on the right (Home). */
+  homeGreeting?: { nickname: string | null; avatarUrl: string | null } | null;
+  /** Inserted between the home header row and the date navigation (e.g. onboarding CTA). */
+  homeBelowHeaderSlot?: ReactNode;
 }) {
   const router = useRouter();
+  const { messages, locale } = useLocaleContext();
   const [view, setView] = useState<ViewKind>("week");
   const [now, setNow] = useState(() => new Date(nowISO));
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date(nowISO));
@@ -463,7 +479,7 @@ export function ScheduleSurface({
         title: b.courseCode ? `${b.courseCode} · ${b.courseName}` : b.courseName,
         location: b.location,
         note: null,
-        repeatLabel: "Every week",
+        repeatLabel: messages.schedule.repeatWeekly,
         repeatRule: "WEEKLY",
         repeatUntilISO: null,
         eventParticipants: [],
@@ -491,7 +507,7 @@ export function ScheduleSurface({
         location: s.location,
         withLabel: s.withLabel,
         note: s.note,
-        repeatLabel: formatRepeatLabel(s.repeatRule),
+        repeatLabel: formatRepeatLabel(s.repeatRule, messages.schedule),
         repeatRule: s.repeatRule,
         repeatUntilISO: s.repeatUntilISO,
         eventParticipants: s.eventParticipants,
@@ -521,11 +537,11 @@ export function ScheduleSurface({
       source: "calendar",
       startMinute: draftStart.getHours() * 60 + draftStart.getMinutes(),
       endMinute: draftEnd.getHours() * 60 + draftEnd.getMinutes(),
-      title: "New event",
+      title: messages.schedule.newEvent,
       location: null,
       withLabel: null,
       note: null,
-      repeatLabel: "No",
+      repeatLabel: messages.schedule.repeatNone,
       repeatRule: "NONE",
       repeatUntilISO: null,
       eventParticipants: [],
@@ -546,6 +562,7 @@ export function ScheduleSurface({
     draftEventStart,
     draftEventEnd,
     draftCategoryMeta,
+    messages.schedule,
   ]);
 
   const openEventDraft = (start: Date, end: Date) => {
@@ -571,7 +588,7 @@ export function ScheduleSurface({
       endISO: end.toISOString(),
       location: item.location,
       note: item.note ?? null,
-      repeatLabel: item.repeatLabel ?? "No",
+      repeatLabel: item.repeatLabel ?? messages.schedule.repeatNone,
       repeatRule: item.repeatRule ?? "NONE",
       repeatUntilISO: item.repeatUntilISO ?? null,
       eventParticipants: item.eventParticipants ?? [],
@@ -599,7 +616,7 @@ export function ScheduleSurface({
       endISO: end.toISOString(),
       location: item.location,
       note: item.note ?? null,
-      repeatLabel: item.repeatLabel ?? "No",
+      repeatLabel: item.repeatLabel ?? messages.schedule.repeatNone,
       repeatRule: item.repeatRule ?? "NONE",
       repeatUntilISO: item.repeatUntilISO ?? null,
       eventParticipants: item.eventParticipants ?? [],
@@ -619,7 +636,7 @@ export function ScheduleSurface({
   /** Tap on week grid: always open detail sheet first; user edits from there. */
   function handleWeekCardTap(item: WeekCalendarBlock, occurrenceDate: Date) {
     if (item.courseId === "__draft-preview__") return;
-    const ti = weekBlockToDayTimelineItem(item);
+    const ti = weekBlockToDayTimelineItem(item, messages.schedule.repeatNone);
     openDetailFromTimelineItem(ti, occurrenceDate);
   }
 
@@ -640,7 +657,7 @@ export function ScheduleSurface({
         location: s.location,
         withLabel: s.withLabel,
         note: s.note,
-        repeatLabel: formatRepeatLabel(s.repeatRule),
+        repeatLabel: formatRepeatLabel(s.repeatRule, messages.schedule),
         repeatRule: s.repeatRule,
         repeatUntilISO: s.repeatUntilISO,
         eventParticipants: s.eventParticipants,
@@ -655,7 +672,7 @@ export function ScheduleSurface({
           ...block,
           source: "course" as const,
           note: null,
-          repeatLabel: "Every week",
+          repeatLabel: messages.schedule.repeatWeekly,
           repeatRule: "WEEKLY" as const,
           repeatUntilISO: null,
           eventParticipants: [],
@@ -675,7 +692,7 @@ export function ScheduleSurface({
       ) {
         const draftBlock: WeekCalendarBlock = {
           courseId: "__draft-preview__",
-          courseName: "New event",
+          courseName: messages.schedule.newEvent,
           courseCode: null,
           source: "calendar" as const,
           weekday: WEEKDAY_BY_JS[draftStart.getDay()],
@@ -684,7 +701,7 @@ export function ScheduleSurface({
           location: null,
           withLabel: null,
           note: null,
-          repeatLabel: "No",
+          repeatLabel: messages.schedule.repeatNone,
           repeatRule: "NONE" as const,
           repeatUntilISO: null,
           eventParticipants: [],
@@ -711,12 +728,13 @@ export function ScheduleSurface({
     draftEventStart,
     draftEventEnd,
     draftCategoryMeta,
+    messages.schedule,
   ]);
 
   async function deleteDetailItem() {
     if (!detailItem || detailItem.source !== "calendar") return;
     if (isIcsFeedStudyEntryId(detailItem.id)) return;
-    if (!window.confirm("Delete this schedule item?")) return;
+    if (!window.confirm(messages.weekCalendarEditToolbar.deleteConfirm)) return;
     setDeletingItem(true);
     const response = await apiFetch(`/api/calendar/events/${detailItem.id}`, { method: "DELETE" });
     setDeletingItem(false);
@@ -798,17 +816,21 @@ export function ScheduleSurface({
         const errText = await res.text();
         setIcsNotice({
           tone: "err",
-          message: errText.trim().slice(0, 160) || "Could not export calendar.",
+          message: errText.trim().slice(0, 160) || messages.schedule.exportError,
         });
         return;
       }
       const blob = await res.blob();
-      const outcome = await saveIcsBlobWithPickerOrDownload(blob, "sideseat-schedule.ics");
+      const outcome = await saveIcsBlobWithPickerOrDownload(
+        blob,
+        "sideseat-schedule.ics",
+        messages.schedule.icsCalendarPickerDescription,
+      );
       if (outcome === "saved") {
-        setIcsNotice({ tone: "ok", message: "Calendar saved." });
+        setIcsNotice({ tone: "ok", message: messages.schedule.exportSaved });
       }
     } catch {
-      setIcsNotice({ tone: "err", message: "Could not export calendar." });
+      setIcsNotice({ tone: "err", message: messages.schedule.exportError });
     } finally {
       setIcsBusy(null);
     }
@@ -830,18 +852,23 @@ export function ScheduleSurface({
         data?: { imported?: number; skipped?: number };
       };
       if (!res.ok || !json.success) {
-        setIcsNotice({ tone: "err", message: json.error ?? "Import failed." });
+        setIcsNotice({ tone: "err", message: json.error ?? messages.schedule.importFailed });
         return;
       }
       const imported = json.data?.imported ?? 0;
       const skipped = json.data?.skipped ?? 0;
+      const base =
+        imported === 1
+          ? messages.schedule.importSuccessOne
+          : formatMessage(messages.schedule.importSuccessMany, { imported });
+      const suffix = skipped > 0 ? ` ${formatMessage(messages.schedule.importSuccessSkipped, { skipped })}` : "";
       setIcsNotice({
         tone: "ok",
-        message: `Imported ${imported} event${imported === 1 ? "" : "s"}.${skipped > 0 ? ` Skipped ${skipped}.` : ""}`,
+        message: `${base}${suffix}`,
       });
       router.refresh();
     } catch {
-      setIcsNotice({ tone: "err", message: "Could not import calendar." });
+      setIcsNotice({ tone: "err", message: messages.schedule.importErrorGeneric });
     } finally {
       setIcsBusy(null);
     }
@@ -885,6 +912,131 @@ export function ScheduleSurface({
     [studyEntries, router],
   );
 
+  /**
+   * Delete an editable calendar entry from the floating week-grid toolbar.
+   * Returns `false` for synthetic ICS rows (read-only) so the toolbar can keep
+   * the selection visible and let the user pick a different action.
+   */
+  const deleteCalendarEvent = useCallback(
+    async ({ eventId }: { eventId: string }): Promise<boolean> => {
+      if (isIcsFeedStudyEntryId(eventId)) return false;
+      const res = await apiFetch(`/api/calendar/events/${eventId}`, { method: "DELETE" });
+      if (!res.ok) return false;
+      router.refresh();
+      return true;
+    },
+    [router],
+  );
+
+  /**
+   * Duplicate an editable calendar entry. The new occurrence is placed in the
+   * same week at the original's `endAt` — i.e. immediately after the source
+   * event — which mirrors how iOS Calendar's “Duplicate” keeps the dupe close
+   * to the original without colliding with it. Recurring events become a
+   * single one-off (`repeat: "NONE"`) to avoid silently fanning out a series.
+   */
+  const duplicateCalendarEvent = useCallback(
+    async ({ block, occurrenceDate }: { block: WeekCalendarBlock; occurrenceDate: Date }): Promise<boolean> => {
+      if (block.source !== "calendar" || !block.calendarEntryId) return false;
+      if (isIcsFeedStudyEntryId(block.calendarEntryId)) return false;
+
+      const entry = studyEntries.find((s) => s.id === block.calendarEntryId);
+      if (!entry) return false;
+
+      const durationMs = Math.max(15 * 60_000, block.endMinute - block.startMinute) * 60_000;
+      const occurrenceMidnight = new Date(occurrenceDate);
+      occurrenceMidnight.setHours(0, 0, 0, 0);
+      const newStart = new Date(occurrenceMidnight.getTime() + block.endMinute * 60_000);
+      const newEnd = new Date(newStart.getTime() + durationMs);
+
+      const withUserIds = entry.eventParticipants
+        .map((p) => p.userId)
+        .filter((id): id is string => Boolean(id));
+
+      const res = await apiFetch("/api/calendar/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: entry.title,
+          location: entry.location?.trim() ?? "",
+          note: entry.note?.trim() ?? "",
+          startAt: newStart.toISOString(),
+          endAt: newEnd.toISOString(),
+          withUserIds,
+          /** Always one-off — duplicating a recurring series would otherwise create a parallel infinite series. */
+          repeat: "NONE",
+          repeatUntil: "",
+          categoryId: entry.categoryId,
+        }),
+      });
+      if (!res.ok) return false;
+      router.refresh();
+      return true;
+    },
+    [studyEntries, router],
+  );
+
+  /**
+   * Rich copy hook — falls back to the WeekCalendar's default text summary
+   * when not provided. We add participants + repeat rule so the clipboard
+   * snapshot is complete enough to paste into a note or email.
+   */
+  const copyCalendarEvent = useCallback(
+    async ({
+      block,
+      occurrenceDate,
+    }: {
+      block: WeekCalendarBlock;
+      occurrenceDate: Date;
+    }): Promise<{ summaryText: string }> => {
+      const fmt = (m: number) => {
+        const h = Math.floor(m / 60).toString().padStart(2, "0");
+        const mm = (m % 60).toString().padStart(2, "0");
+        return `${h}:${mm}`;
+      };
+      const date = format(occurrenceDate, "yyyy-MM-dd");
+      const title = block.courseName?.trim() || "Event";
+      const lines = [title, `${date} ${fmt(block.startMinute)} – ${fmt(block.endMinute)}`];
+      if (block.location?.trim()) lines.push(block.location.trim());
+      if (block.withLabel?.trim()) lines.push(block.withLabel.trim());
+      if (block.repeatLabel && block.repeatRule && block.repeatRule !== "NONE") {
+        lines.push(block.repeatLabel);
+      }
+      if (block.note?.trim()) lines.push("", block.note.trim());
+      const text = lines.join("\n");
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+          return { summaryText: text };
+        }
+      } catch {
+        /* fall through to manual copy */
+      }
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      ta.style.pointerEvents = "none";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      return { summaryText: text };
+    },
+    [],
+  );
+
+  const editToolbarLabels: WeekEventEditToolbarLabels = useMemo(
+    () => ({
+      cut: messages.weekCalendarEditToolbar.cut,
+      copy: messages.weekCalendarEditToolbar.copy,
+      duplicate: messages.weekCalendarEditToolbar.duplicate,
+      delete: messages.weekCalendarEditToolbar.delete,
+      toolbarAriaLabel: messages.weekCalendarEditToolbar.toolbarAriaLabel,
+    }),
+    [messages],
+  );
+
   const weekCalendarProps = {
     blocks: weekTimedBlocks,
     anchorWeekday: weekAnchorWeekday,
@@ -897,10 +1049,145 @@ export function ScheduleSurface({
     onCreateEvent: openEventDraft,
     onOpenItem: handleWeekCardTap,
     onPatchCalendarEventTimes: patchCalendarEventTimes,
+    onDeleteCalendarEvent: deleteCalendarEvent,
+    onDuplicateCalendarEvent: duplicateCalendarEvent,
+    onCopyCalendarEvent: copyCalendarEvent,
+    editToolbarLabels,
+  };
+
+  const useCompactHomeHeader = homeGreeting != null;
+
+  const iconBtnSm = "h-8 w-8 sm:h-9 sm:w-9";
+  const iconGlyphSm = "h-3.5 w-3.5 sm:h-4 sm:w-4";
+
+  const toolbarActions = (
+    <>
+      <div ref={icsMenuRef} className="relative">
+        <button
+          type="button"
+          aria-label={messages.schedule.icsMenuAria}
+          aria-expanded={icsMenuOpen}
+          aria-haspopup="menu"
+          disabled={icsBusy !== null}
+          onClick={() => setIcsMenuOpen((o) => !o)}
+          className={cn(
+            "flex shrink-0 items-center justify-center rounded-full border border-blue-200 bg-white text-[#2563EB] shadow-sm transition",
+            iconBtnSm,
+            "hover:bg-blue-50 active:scale-[0.98] disabled:opacity-50",
+            "dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950/70",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/35",
+          )}
+        >
+          <Archive className={cn("shrink-0", iconGlyphSm)} strokeWidth={2} aria-hidden />
+        </button>
+        {icsMenuOpen ? (
+          <div
+            role="menu"
+            className="absolute right-0 top-[calc(100%+0.35rem)] z-50 w-[min(16rem,80vw)] overflow-hidden rounded-2xl border border-border/70 bg-popover p-2 text-popover-foreground shadow-xl"
+          >
+            <button
+              type="button"
+              role="menuitem"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-muted/70 disabled:opacity-50"
+              disabled={icsBusy !== null}
+              onClick={() => {
+                setIcsMenuOpen(false);
+                void exportIcsCalendar();
+              }}
+            >
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[#2563EB] dark:bg-blue-950/50 dark:text-blue-300">
+                {icsBusy === "export" ? (
+                  <Loader2 className={cn(iconGlyphSm, "animate-spin")} strokeWidth={2} />
+                ) : (
+                  <Download className={iconGlyphSm} strokeWidth={2} />
+                )}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-medium text-foreground">{messages.schedule.exportCalendar}</p>
+                <p className="text-[11px] leading-tight text-muted-foreground">
+                  {messages.schedule.exportCalendarHint}
+                </p>
+              </div>
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-muted/70 disabled:opacity-50"
+              disabled={icsBusy !== null}
+              onClick={() => {
+                setIcsMenuOpen(false);
+                icsImportInputRef.current?.click();
+              }}
+            >
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-300">
+                {icsBusy === "import" ? (
+                  <Loader2 className={cn(iconGlyphSm, "animate-spin")} strokeWidth={2} />
+                ) : (
+                  <FileUp className={iconGlyphSm} strokeWidth={2} />
+                )}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-medium text-foreground">{messages.schedule.importEvents}</p>
+                <p className="text-[11px] leading-tight text-muted-foreground">
+                  {messages.schedule.importEventsHint}
+                </p>
+              </div>
+            </button>
+          </div>
+        ) : null}
+      </div>
+      {initialCalendarCategories.length > 0 ? (
+        <button
+          type="button"
+          aria-label={messages.schedule.manageCalendarsAria}
+          className={cn(
+            "flex shrink-0 items-center justify-center rounded-full border border-violet-200 bg-white text-violet-700 shadow-sm transition",
+            iconBtnSm,
+            "hover:bg-violet-50 active:scale-[0.98]",
+            "dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300 dark:hover:bg-violet-950/70",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/35",
+          )}
+          onClick={() => setCategoryManagerOpen(true)}
+        >
+          <Calendar className={cn("shrink-0", iconGlyphSm)} strokeWidth={2} aria-hidden />
+        </button>
+      ) : null}
+      {!detailItem ? (
+        <button
+          type="button"
+          onClick={handleAddToolbarClick}
+          aria-label={
+            adding ? messages.schedule.addToScheduleCloseAria : messages.schedule.addToScheduleOpenAria
+          }
+          title={adding ? messages.schedule.addToScheduleCloseTitle : undefined}
+          className={cn(
+            "flex shrink-0 items-center justify-center rounded-full border border-[#E7E0D6] bg-white text-[#111827] shadow-sm transition",
+            iconBtnSm,
+            "text-base leading-none hover:bg-[#FAFAF8] active:scale-[0.97] sm:text-lg",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+            "dark:border-border dark:bg-card dark:text-foreground dark:hover:bg-muted/40",
+          )}
+        >
+          <span aria-hidden className="translate-y-[-0.5px]">
+            ➕
+          </span>
+        </button>
+      ) : null}
+    </>
+  );
+
+  const viewTabsOnChange = (next: ViewKind) => {
+    if (next === "week") {
+      setWeekHorizontalMode(
+        isSameDay(selectedDate, now) && isWeekendDay(now) ? "include-anchor" : "workweek",
+      );
+    }
+    setView(next);
   };
 
   return (
-    <section className="space-y-2.5 pb-8">
+    <section className="pb-2">
+      <div className="space-y-2.5">
       <ScheduleAddPanel
         selectedDate={selectedDate}
         open={adding}
@@ -947,142 +1234,61 @@ export function ScheduleSurface({
           onChange={onIcsImportPicked}
         />
         <div className="flex flex-col gap-1">
-          <div className="flex justify-center px-1">
-            <ViewTabs
-              value={view}
-              onChange={(next) => {
-                if (next === "week") {
-                  setWeekHorizontalMode(
-                    isSameDay(selectedDate, now) && isWeekendDay(now) ? "include-anchor" : "workweek",
-                  );
-                }
-                setView(next);
-              }}
-            />
-          </div>
+          {useCompactHomeHeader && homeGreeting ? (
+            <div className="flex min-w-0 items-start gap-x-2 sm:gap-x-3">
+              <div className="min-w-0 flex-1">
+                <HomeGreetingHeading
+                  nickname={homeGreeting.nickname}
+                  avatarUrl={homeGreeting.avatarUrl}
+                  nowDate={now}
+                />
+                <div className="mt-0.5 -ml-1 pr-1 sm:-ml-1.5">
+                  <ViewTabs
+                    value={view}
+                    onChange={viewTabsOnChange}
+                    tabAlign="start"
+                    scheduleSch={messages.schedule}
+                  />
+                </div>
+              </div>
+              <HomeCalendarVisual date={now} className="h-24 w-24 shrink-0 self-start" />
+            </div>
+          ) : (
+            <div className="flex justify-center px-1">
+              <ViewTabs
+                value={view}
+                onChange={viewTabsOnChange}
+                tabAlign="center"
+                scheduleSch={messages.schedule}
+              />
+            </div>
+          )}
 
+          {homeBelowHeaderSlot ? <div className="mt-2 min-w-0">{homeBelowHeaderSlot}</div> : null}
+        </div>
+      </div>
+      </div>
+
+      <div className="relative z-0 mt-1 space-y-1">
+        <div className="relative z-[5]">
           <ScheduleDateNavToolbar
             view={view}
             selectedDate={selectedDate}
+            locale={locale}
             onStepPrev={() => step(-1)}
             onStepNext={() => step(1)}
             onJumpToday={() => {
               setWeekHorizontalMode(isWeekendDay(now) ? "include-anchor" : "workweek");
               setSelectedDate(new Date(now));
             }}
-            toolbarRight={
-              <>
-                <div ref={icsMenuRef} className="relative">
-                  <button
-                    type="button"
-                    aria-label="Import or export ICS calendar"
-                    aria-expanded={icsMenuOpen}
-                    aria-haspopup="menu"
-                    disabled={icsBusy !== null}
-                    onClick={() => setIcsMenuOpen((o) => !o)}
-                    className={cn(
-                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-blue-200 bg-white text-[#2563EB] shadow-sm transition",
-                      "hover:bg-blue-50 active:scale-[0.98] disabled:opacity-50",
-                      "dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950/70",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/35",
-                    )}
-                  >
-                    <Archive className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
-                  </button>
-                  {icsMenuOpen ? (
-                    <div
-                      role="menu"
-                      className="absolute right-0 top-[calc(100%+0.35rem)] z-50 w-[min(16rem,80vw)] overflow-hidden rounded-2xl border border-border/70 bg-popover p-2 text-popover-foreground shadow-xl"
-                    >
-                      <button
-                        type="button"
-                        role="menuitem"
-                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-muted/70 disabled:opacity-50"
-                        disabled={icsBusy !== null}
-                        onClick={() => {
-                          setIcsMenuOpen(false);
-                          void exportIcsCalendar();
-                        }}
-                      >
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[#2563EB] dark:bg-blue-950/50 dark:text-blue-300">
-                          {icsBusy === "export" ? (
-                            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
-                          ) : (
-                            <Download className="h-4 w-4" strokeWidth={2} />
-                          )}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[13px] font-medium text-foreground">Export calendar</p>
-                          <p className="text-[11px] leading-tight text-muted-foreground">Save as .ics file</p>
-                        </div>
-                      </button>
-                      <button
-                        type="button"
-                        role="menuitem"
-                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-muted/70 disabled:opacity-50"
-                        disabled={icsBusy !== null}
-                        onClick={() => {
-                          setIcsMenuOpen(false);
-                          icsImportInputRef.current?.click();
-                        }}
-                      >
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-300">
-                          {icsBusy === "import" ? (
-                            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
-                          ) : (
-                            <FileUp className="h-4 w-4" strokeWidth={2} />
-                          )}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[13px] font-medium text-foreground">Import events</p>
-                          <p className="text-[11px] leading-tight text-muted-foreground">From .ics file</p>
-                        </div>
-                      </button>
-                    </div>
-                  ) : null}
-                </div>
-                {initialCalendarCategories.length > 0 ? (
-                  <button
-                    type="button"
-                    aria-label="Manage calendars"
-                    className={cn(
-                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-violet-200 bg-white text-violet-700 shadow-sm transition",
-                      "hover:bg-violet-50 active:scale-[0.98]",
-                      "dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300 dark:hover:bg-violet-950/70",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/35",
-                    )}
-                    onClick={() => setCategoryManagerOpen(true)}
-                  >
-                    <Calendar className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
-                  </button>
-                ) : null}
-                {!detailItem ? (
-                  <button
-                    type="button"
-                    onClick={handleAddToolbarClick}
-                    aria-label={adding ? "Close add to schedule" : "Add to schedule"}
-                    title={adding ? "Close" : undefined}
-                    className={cn(
-                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#E7E0D6] bg-white text-[#111827] shadow-sm transition",
-                      "text-lg leading-none hover:bg-[#FAFAF8] active:scale-[0.97]",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                      "dark:border-border dark:bg-card dark:text-foreground dark:hover:bg-muted/40",
-                    )}
-                  >
-                    <span aria-hidden className="translate-y-[-0.5px]">
-                      ➕
-                    </span>
-                  </button>
-                ) : null}
-              </>
-            }
+            toolbarRight={toolbarActions}
+            scheduleSch={messages.schedule}
           />
-
           {icsNotice ? (
             <p
               role="status"
               className={cn(
-                "max-w-sm px-2 text-center text-[11px] leading-snug",
+                "max-w-sm px-2 pt-0.5 text-center text-[11px] leading-snug",
                 icsNotice.tone === "ok" ? "text-emerald-700 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
               )}
             >
@@ -1090,9 +1296,6 @@ export function ScheduleSurface({
             </p>
           ) : null}
         </div>
-      </div>
-
-      <div className="relative z-0">
         {view === "day" ? (
           <ScheduleDayTimeline
             items={dayItems}
@@ -1112,7 +1315,7 @@ export function ScheduleSurface({
         {view === "week" && !weekImmersiveOpen && !adding ? (
           <button
             type="button"
-            aria-label="Expand week calendar"
+            aria-label={messages.schedule.expandWeekCalendarAria}
             onClick={() => {
               const orient = screen.orientation as ScreenOrientation & {
                 lock?: (type: string) => Promise<void>;
@@ -1174,7 +1377,7 @@ export function ScheduleSurface({
               open={weekImmersiveOpen}
               onClose={() => setWeekImmersiveOpen(false)}
               zClassName="z-[100]"
-              ariaLabel="Week calendar expanded"
+              ariaLabel={messages.schedule.weekCalendarExpandedLayerAria}
               fullBleed
               lockBodyScroll={false}
               panelClassName="h-full w-full max-w-none overflow-hidden border-0 bg-background shadow-none dark:shadow-none"
@@ -1195,7 +1398,7 @@ export function ScheduleSurface({
                 */}
                 <button
                   type="button"
-                  aria-label="Close expanded calendar"
+                  aria-label={messages.schedule.closeExpandedWeekAria}
                   onClick={() => setWeekImmersiveOpen(false)}
                   className={cn(
                     "absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-[max(0.75rem,env(safe-area-inset-right))] z-[110]",
@@ -1224,21 +1427,33 @@ export function ScheduleSurface({
   );
 }
 
+function viewTabLabel(kind: ViewKind, sch: AppMessages["schedule"]) {
+  if (kind === "day") return sch.viewTabDay;
+  if (kind === "week") return sch.viewTabWeek;
+  return sch.viewTabMonth;
+}
+
 function ViewTabs({
   value,
   onChange,
+  tabAlign = "center",
+  scheduleSch,
 }: {
   value: ViewKind;
   onChange: (next: ViewKind) => void;
+  tabAlign?: "center" | "start";
+  scheduleSch: AppMessages["schedule"];
 }) {
   const tabs: ViewKind[] = ["day", "week", "month"];
   return (
     <div
       role="tablist"
-      aria-label="Schedule view"
+      aria-label={scheduleSch.viewTablistAria}
       className={cn(
-        "mx-auto flex w-full max-w-[16.5rem] shrink-0 rounded-full border border-blue-200/90 bg-blue-50/90 p-0.5 sm:max-w-[17.5rem]",
+        "flex w-full max-w-[16.5rem] shrink-0 rounded-full border border-blue-200/90 bg-blue-50/90 p-[3px] sm:max-w-[17.5rem] mt-2 mb-2",
         "dark:border-blue-800/55 dark:bg-blue-950/45",
+        tabAlign === "center" && "mx-auto",
+        tabAlign === "start" && "mr-auto",
       )}
     >
       {tabs.map((t) => {
@@ -1251,7 +1466,7 @@ function ViewTabs({
             aria-selected={active}
             onClick={() => onChange(t)}
             className={cn(
-              "min-h-8 min-w-0 flex-1 rounded-full px-2 py-1 text-center text-xs capitalize leading-tight transition sm:min-h-9 sm:px-2.5 sm:py-1.5 sm:text-[13px]",
+              "min-h-7 min-w-0 flex-1 rounded-full px-2 py-0.5 text-center text-xs capitalize leading-tight transition sm:min-h-8 sm:px-2.5 sm:py-1 sm:text-[13px]",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/35 focus-visible:ring-offset-1 focus-visible:ring-offset-blue-50",
               "dark:focus-visible:ring-blue-400/45 dark:focus-visible:ring-offset-blue-950",
               active
@@ -1265,7 +1480,7 @@ function ViewTabs({
                   ),
             )}
           >
-            {t}
+            {viewTabLabel(t, scheduleSch)}
           </button>
         );
       })}
@@ -1276,17 +1491,21 @@ function ViewTabs({
 function ScheduleDateNavToolbar({
   view,
   selectedDate,
+  locale,
   onStepPrev,
   onStepNext,
   onJumpToday,
   toolbarRight,
+  scheduleSch,
 }: {
   view: ViewKind;
   selectedDate: Date;
+  locale: AppLocale;
   onStepPrev: () => void;
   onStepNext: () => void;
   onJumpToday: () => void;
   toolbarRight: ReactNode;
+  scheduleSch: AppMessages["schedule"];
 }) {
   const weekAnchor =
     view === "week" ? startOfWeek(selectedDate, { weekStartsOn: 1 }) : selectedDate;
@@ -1300,22 +1519,28 @@ function ScheduleDateNavToolbar({
   );
 
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-x-2">
-      <div className="min-w-0 justify-self-start pr-1">
+    <div
+      className={cn(
+        "grid min-w-0 items-center gap-x-1.5 gap-y-0 sm:gap-x-2",
+        /** One horizontal band on phone + desktop: month/week | prev·Today·next | actions */
+        "grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]",
+      )}
+    >
+      <div className="min-w-0 justify-self-start pr-0.5 sm:pr-1">
         <h2 className="truncate text-base font-bold leading-tight text-[#111827] dark:text-foreground">
-          {rangeLabel(view, selectedDate)}
+          {calendarRangeTitle(view, selectedDate, locale)}
         </h2>
         <p className="mt-0.5 text-[11px] leading-tight text-[#8A94A6] dark:text-muted-foreground">
-          Week {weekNumber}
+          {formatMessage(scheduleSch.weekNumberLine, { week: weekNumber })}
         </p>
       </div>
 
-      <div className="justify-self-center">
-        <div className="flex shrink-0 items-center gap-1">
+      <div className="flex min-w-0 justify-center justify-self-center">
+        <div className="flex items-center gap-0.5 sm:gap-1">
           <button
             type="button"
             onClick={onStepPrev}
-            aria-label="Previous"
+            aria-label={scheduleSch.prevDateAria}
             className={cn(
               "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
               dateNavControlClass,
@@ -1326,18 +1551,18 @@ function ScheduleDateNavToolbar({
           <button
             type="button"
             onClick={onJumpToday}
-            aria-label="Jump to today"
+            aria-label={scheduleSch.jumpToTodayAria}
             className={cn(
-              "rounded-full px-3.5 py-1.5 text-[13px] font-semibold leading-none",
+              "shrink-0 rounded-full px-2.5 py-1.5 text-[12px] font-semibold leading-none sm:px-3.5 sm:text-[13px]",
               dateNavControlClass,
             )}
           >
-            Today
+            {scheduleSch.today}
           </button>
           <button
             type="button"
             onClick={onStepNext}
-            aria-label="Next"
+            aria-label={scheduleSch.nextDateAria}
             className={cn(
               "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
               dateNavControlClass,
@@ -1348,7 +1573,7 @@ function ScheduleDateNavToolbar({
         </div>
       </div>
 
-      <div className="flex min-w-0 shrink-0 items-center justify-end gap-1.5 justify-self-end pl-1">
+      <div className="flex min-w-0 shrink-0 items-center justify-end justify-self-end gap-1.5 pl-0.5 sm:pl-1">
         {toolbarRight}
       </div>
     </div>
@@ -1356,28 +1581,29 @@ function ScheduleDateNavToolbar({
 }
 
 /**
- * Human-readable title for the current view:
- *  - day   : "Wed, Apr 22"
- *  - week  : "Apr 21 – 27"          (omit year when same year)
- *  - month : "April 2026"
+ * Human-readable title for the current view (localized via `Intl`).
+ * Week view matches prior behavior: single month+year when the week is
+ * within one calendar month; otherwise a split month label.
  */
-function rangeLabel(view: ViewKind, date: Date): string {
-  if (view === "day") return format(date, "EEE, MMM d");
-  if (view === "month") return format(date, "MMMM yyyy");
+function calendarRangeTitle(view: ViewKind, date: Date, locale: AppLocale): string {
   const ws = startOfWeek(date, { weekStartsOn: 1 });
   const we = endOfWeek(date, { weekStartsOn: 1 });
-  if (view === "week") {
-    if (isSameMonth(ws, we)) return format(ws, "MMMM yyyy");
-    if (isSameYear(ws, we)) {
-      return `${format(ws, "MMM")} / ${format(we, "MMM yyyy")}`;
-    }
-    return `${format(ws, "MMM yyyy")} / ${format(we, "MMM yyyy")}`;
+
+  if (view === "day") {
+    return new Intl.DateTimeFormat(locale, { weekday: "short", month: "short", day: "numeric" }).format(date);
+  }
+  if (view === "month") {
+    return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(date);
   }
   if (isSameMonth(ws, we)) {
-    return `${format(ws, "MMM d")} – ${format(we, "d")}`;
+    return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(ws);
   }
   if (isSameYear(ws, we)) {
-    return `${format(ws, "MMM d")} – ${format(we, "MMM d")}`;
+    const left = new Intl.DateTimeFormat(locale, { month: "short" }).format(ws);
+    const right = new Intl.DateTimeFormat(locale, { month: "short", year: "numeric" }).format(we);
+    return `${left} / ${right}`;
   }
-  return `${format(ws, "MMM d, yyyy")} – ${format(we, "MMM d, yyyy")}`;
+  const left = new Intl.DateTimeFormat(locale, { month: "short", year: "numeric" }).format(ws);
+  const right = new Intl.DateTimeFormat(locale, { month: "short", year: "numeric" }).format(we);
+  return `${left} / ${right}`;
 }

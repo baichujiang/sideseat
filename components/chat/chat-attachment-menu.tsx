@@ -67,7 +67,7 @@ export function ChatAttachmentPlusButton({
       onClick={onToggle}
       aria-label={open ? "Close attachment menu" : "Open attachment menu"}
       aria-expanded={open}
-      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-input bg-background text-foreground shadow-sm transition hover:bg-muted/40"
+      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-input bg-background/80 text-foreground transition hover:bg-muted/50"
     >
       {open ? <X className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} /> : <Plus className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />}
     </button>
@@ -196,74 +196,72 @@ export function ChatAttachmentTray({
     <>
       <div
         className={cn(
-          "w-full min-w-0 overflow-hidden transition-[max-height] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
-          open ? "max-h-[min(320px,52dvh)]" : "max-h-0",
+          "grid w-full min-w-0 transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
+          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
         )}
         aria-hidden={!open}
       >
-        <div
-          className={cn(
-            "border-t border-border/60 bg-muted/20 px-0 pb-1 pt-2 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] dark:bg-muted/15",
-            open ? "translate-y-0" : "translate-y-full",
-          )}
-          role="region"
-          aria-label="Attachments: Photo, Location, Availability, Plan"
-        >
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              e.target.value = "";
-              if (f) void sendImageFile(f);
-            }}
-          />
-          <div
-            role="menu"
-            className="grid w-full min-w-0 grid-cols-4 gap-0 px-3 pb-1 pt-0.5"
-          >
-            <AttachmentMenuTile
-              icon={Image}
-              caption="Photo"
-              ariaLabel="Send photo"
-              disabled={busy}
-              onClick={() => fileRef.current?.click()}
-            />
-            <AttachmentMenuTile
-              icon={MapPin}
-              caption="Location"
-              ariaLabel="Send location"
-              disabled={busy}
-              onClick={sendLocation}
-            />
-            <AttachmentMenuTile
-              icon={CalendarRange}
-              caption="Availability"
-              ariaLabel="Share availability"
-              disabled={busy}
-              onClick={() => {
-                onClose();
-                setShareOpen(true);
+        <div className="min-h-0 overflow-hidden">
+          <div className="max-h-[min(320px,52dvh)] overflow-x-hidden overflow-y-auto overscroll-y-contain">
+            <div
+              className="border-t border-border/50 bg-transparent px-0 pb-1.5 pt-1.5"
+              role="region"
+              aria-label="Attachments: Photo, Location, Availability, Plan"
+            >
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = "";
+                if (f) void sendImageFile(f);
               }}
             />
-            <AttachmentMenuTile
-              icon={CalendarClock}
-              caption="Plan"
-              ariaLabel="Plan together"
-              disabled={busy}
-              onClick={() => {
-                onClose();
-                setPlanOpen(true);
-              }}
-            />
+            <div role="menu" className="grid w-full min-w-0 grid-cols-4 gap-0 px-2.5 pb-0.5 pt-0">
+              <AttachmentMenuTile
+                icon={Image}
+                caption="Photo"
+                ariaLabel="Send photo"
+                disabled={busy}
+                onClick={() => fileRef.current?.click()}
+              />
+              <AttachmentMenuTile
+                icon={MapPin}
+                caption="Location"
+                ariaLabel="Send location"
+                disabled={busy}
+                onClick={sendLocation}
+              />
+              <AttachmentMenuTile
+                icon={CalendarRange}
+                caption="Availability"
+                ariaLabel="Share availability"
+                disabled={busy}
+                onClick={() => {
+                  onClose();
+                  queueMicrotask(() => setShareOpen(true));
+                }}
+              />
+              <AttachmentMenuTile
+                icon={CalendarClock}
+                caption="Plan"
+                ariaLabel="Plan together"
+                disabled={busy}
+                onClick={() => {
+                  onClose();
+                  queueMicrotask(() => setPlanOpen(true));
+                }}
+              />
+            </div>
+            {error ? (
+              <p className="mx-2.5 mt-1 rounded-md border border-destructive/30 bg-destructive/5 px-2.5 py-1.5 text-[11px] leading-snug text-destructive">
+                {error}
+              </p>
+            ) : null}
+            </div>
           </div>
-          {error ? (
-            <p className="mx-3 mt-1.5 rounded-lg border border-destructive/30 bg-destructive/5 px-2.5 py-1.5 text-[11px] leading-snug text-destructive">
-              {error}
-            </p>
-          ) : null}
         </div>
       </div>
 

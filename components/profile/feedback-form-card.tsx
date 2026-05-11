@@ -2,16 +2,23 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import { ChevronRight, MessageSquarePlus, X } from "lucide-react";
+import { ChevronRight, MessageSquareText, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
+import {
+  MeSettingsRowLabel,
+  meSettingsRowButtonClass,
+  meSettingsRowChevronClass,
+  meSettingsRowFeedbackIconShellClass,
+  meSettingsRowFeedbackIconShellLargeClass,
+  meSettingsRowFeedbackIconSurfaceClass,
+  meSettingsRowLeadClass,
+} from "@/components/profile/me-settings-row";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useAppMessages } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
-
-const listRowButtonClasses =
-  "flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors active:bg-classmates-warm-alt dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25";
 
 export function FeedbackFormCard({
   compact = false,
@@ -21,6 +28,7 @@ export function FeedbackFormCard({
   /** `header` — icon control on the Me page toolbar (opens the same dialog). `listRow` — full-width row in a divided list. */
   variant?: "card" | "header" | "listRow";
 }) {
+  const { meFeedback: f, common: c } = useAppMessages();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -50,7 +58,7 @@ export function FeedbackFormCard({
   async function submit() {
     const trimmed = message.trim();
     if (trimmed.length < 10) {
-      setError("Please write at least 10 characters so we can understand.");
+      setError(f.errorMinLength);
       return;
     }
 
@@ -64,7 +72,7 @@ export function FeedbackFormCard({
       });
       const payload = (await res.json()) as { success?: boolean; error?: string };
       if (!res.ok || !payload.success) {
-        setError(typeof payload.error === "string" ? payload.error : "Could not send feedback. Try again later.");
+        setError(typeof payload.error === "string" ? payload.error : f.errorSendFailed);
         return;
       }
       setDone(true);
@@ -74,7 +82,7 @@ export function FeedbackFormCard({
         setDone(false);
       }, 1400);
     } catch {
-      setError("Network error. Please try again.");
+      setError(f.errorNetwork);
     } finally {
       setBusy(false);
     }
@@ -92,43 +100,41 @@ export function FeedbackFormCard({
             <button
               type="button"
               className="absolute inset-0 bg-black/45 backdrop-blur-[2px]"
-              aria-label="Close"
+              aria-label={c.close}
               onClick={() => setOpen(false)}
             />
             <div className="relative z-[71] flex max-h-[min(92dvh,640px)] w-full max-w-lg flex-col rounded-t-3xl border border-border/80 bg-background shadow-2xl sm:rounded-3xl">
               <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
                 <h2 id="feedback-dialog-title" className="text-base font-semibold text-foreground">
-                  Feedback
+                  {f.dialogTitle}
                 </h2>
                 <button
                   type="button"
                   className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted"
                   onClick={() => setOpen(false)}
-                  aria-label="Close"
+                  aria-label={c.close}
                 >
                   <X className="h-5 w-5" strokeWidth={2} />
                 </button>
               </div>
               <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3">
-                <p className="text-[13px] leading-relaxed text-muted-foreground">Tell us what you want.</p>
+                <p className="text-[13px] leading-relaxed text-muted-foreground">{f.intro}</p>
                 <Textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   disabled={busy}
-                  placeholder="Anything you would like us to build or fix…"
+                  placeholder={f.placeholder}
                   rows={6}
                   maxLength={4000}
                 />
                 {error ? <p className="text-[12px] text-destructive">{error}</p> : null}
                 {done ? (
-                  <p className="text-[13px] font-medium text-emerald-700 dark:text-emerald-400">
-                    Submitted — thank you.
-                  </p>
+                  <p className="text-[13px] font-medium text-emerald-700 dark:text-emerald-400">{f.successLine}</p>
                 ) : null}
               </div>
               <div className="border-t border-border/60 px-4 py-3">
                 <Button type="button" className="w-full" disabled={busy} onClick={() => void submit()}>
-                  {busy ? "Sending…" : "Submit feedback"}
+                  {busy ? f.submitBusy : f.submit}
                 </Button>
               </div>
             </div>
@@ -142,19 +148,17 @@ export function FeedbackFormCard({
       <>
         <Button
           type="button"
-          variant="outline"
+          variant="ghost"
           size="icon"
           className={cn(
-            "h-10 w-10 shrink-0 rounded-full border-sky-300/70 bg-sky-50 text-sky-800 shadow-sm",
-            "transition-colors active:scale-[0.97]",
-            "[@media(hover:hover)]:hover:border-sky-400 [@media(hover:hover)]:hover:bg-sky-100",
-            "dark:border-sky-700/60 dark:bg-sky-950/45 dark:text-sky-100",
-            "dark:[@media(hover:hover)]:hover:border-sky-600 dark:[@media(hover:hover)]:hover:bg-sky-950/70",
+            meSettingsRowFeedbackIconShellLargeClass,
+            "transition-[filter,transform] hover:bg-transparent dark:hover:bg-transparent active:scale-[0.97]",
+            "[@media(hover:hover)]:brightness-[1.04] dark:[@media(hover:hover)]:brightness-[1.07]",
           )}
           onClick={() => setOpen(true)}
-          aria-label="Send feedback"
+          aria-label={f.sendFeedbackAria}
         >
-          <MessageSquarePlus className="h-5 w-5" strokeWidth={2} aria-hidden />
+          <MessageSquareText className="h-5 w-5" strokeWidth={2} aria-hidden />
         </Button>
         {modal}
       </>
@@ -164,17 +168,14 @@ export function FeedbackFormCard({
   if (variant === "listRow") {
     return (
       <div className="contents">
-        <button type="button" className={listRowButtonClasses} onClick={() => setOpen(true)}>
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-500/12 text-sky-700 dark:text-sky-400">
-              <MessageSquarePlus className="h-5 w-5" strokeWidth={2} aria-hidden />
+        <button type="button" className={meSettingsRowButtonClass} onClick={() => setOpen(true)}>
+          <div className={meSettingsRowLeadClass}>
+            <span className={meSettingsRowFeedbackIconShellClass}>
+              <MessageSquareText className="h-4 w-4" strokeWidth={2.25} aria-hidden />
             </span>
-            <div className="min-w-0">
-              <p className="text-[14px] font-semibold leading-tight text-foreground">Feedback</p>
-              <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">Tell us what you want</p>
-            </div>
+            <MeSettingsRowLabel title={f.listRowTitle} subtitle={f.listRowSubtitle} />
           </div>
-          <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground/50" strokeWidth={2} aria-hidden />
+          <ChevronRight className={meSettingsRowChevronClass} strokeWidth={2} aria-hidden />
         </button>
         {modal}
       </div>
@@ -192,24 +193,29 @@ export function FeedbackFormCard({
         <div className="flex items-center gap-2.5">
           <span
             className={cn(
-              "flex shrink-0 items-center justify-center rounded-lg bg-sky-500/12 text-sky-700 dark:text-sky-400",
-              compact ? "h-8 w-8" : "h-11 w-11 rounded-xl",
+              "flex shrink-0 items-center justify-center rounded-full",
+              meSettingsRowFeedbackIconSurfaceClass,
+              compact ? "h-8 w-8" : "h-11 w-11",
             )}
           >
-            <MessageSquarePlus className={compact ? "h-4 w-4" : "h-5 w-5"} strokeWidth={2} aria-hidden />
+            <MessageSquareText
+              className={compact ? "h-4 w-4" : "h-5 w-5"}
+              strokeWidth={compact ? 2.25 : 2}
+              aria-hidden
+            />
           </span>
           <div className="min-w-0 flex-1">
             <p className={cn("font-semibold leading-tight text-foreground", compact ? "text-[13px]" : "text-[14px]")}>
-              Feedback
+              {f.cardTitle}
             </p>
             {!compact ? (
-              <p className="mt-1 text-[12px] leading-snug text-muted-foreground">Tell us what you want.</p>
+              <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{f.cardSubtitle}</p>
             ) : null}
           </div>
         </div>
         <div className={cn("mt-3")}>
           <Button type="button" className={cn("w-full", compact && "h-9 text-[13px]")} onClick={() => setOpen(true)}>
-            Write feedback
+            {f.writeButton}
           </Button>
         </div>
       </div>

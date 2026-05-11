@@ -7,9 +7,17 @@ import { useRouter } from "next/navigation";
 import { Send } from "lucide-react";
 
 import { FormMessage } from "@/components/forms/form-message";
+import { ChatThreadSearchButton } from "@/components/chat/chat-thread-search-button";
+import type { ThreadSearchEntry } from "@/lib/chat/thread-search-index";
 import { cn } from "@/lib/utils";
 
-export function GroupChatComposer({ groupChatId }: { groupChatId: string }) {
+export function GroupChatComposer({
+  groupChatId,
+  threadSearchEntries = [],
+}: {
+  groupChatId: string;
+  threadSearchEntries?: ThreadSearchEntry[];
+}) {
   const router = useRouter();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [body, setBody] = useState("");
@@ -50,6 +58,7 @@ export function GroupChatComposer({ groupChatId }: { groupChatId: string }) {
   return (
     <div className="relative space-y-2">
       <div className="flex items-end gap-2">
+        <ChatThreadSearchButton entries={threadSearchEntries} />
         <label className="sr-only" htmlFor={`group-chat-input-${groupChatId}`}>
           Message
         </label>

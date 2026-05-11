@@ -5,8 +5,17 @@ import { useCallback, useEffect, useState } from "react";
 import { ChevronDown, Smartphone } from "lucide-react";
 
 import { PwaIosInstallSteps } from "@/components/pwa/pwa-ios-install-steps";
+import {
+  MeSettingsRowLabel,
+  meSettingsRowChevronDownClass,
+  meSettingsRowDetailsSummaryClass,
+  meSettingsRowInstallIconShellClass,
+  meSettingsRowLeadClass,
+} from "@/components/profile/me-settings-row";
 import { Button } from "@/components/ui/button";
 import { APP_NAME } from "@/lib/constants/app";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage } from "@/lib/i18n/messages";
 import {
   getDeferredInstallPrompt,
   runDeferredInstallPrompt,
@@ -20,9 +29,6 @@ import {
 import { isIosDevice, isStandalonePwa } from "@/lib/pwa/pwa-environment";
 import { cn } from "@/lib/utils";
 
-const listRowSummaryClasses =
-  "flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 transition-colors active:bg-classmates-warm-alt dark:active:bg-muted/30 [&::-webkit-details-marker]:hidden [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25";
-
 /** Persistent Me-tab entry for install / Add to Home Screen (survives floating bar dismiss). */
 export function MePageInstallCard({
   compact = false,
@@ -32,11 +38,14 @@ export function MePageInstallCard({
   /** Renders as an expandable row inside a divided list (no outer card). */
   inList?: boolean;
 }) {
+  const i = useAppMessages().meInstall;
+  const [mounted, setMounted] = useState(false);
   const [, refresh] = useState(0);
   const [busy, setBusy] = useState(false);
   const [iosShareBusy, setIosShareBusy] = useState(false);
   const [iosLinkCopied, setIosLinkCopied] = useState(false);
 
+  useEffect(() => setMounted(true), []);
   useEffect(() => subscribeDeferredInstall(() => refresh((x) => x + 1)), []);
 
   useEffect(() => {
@@ -69,6 +78,21 @@ export function MePageInstallCard({
     }
   }, []);
 
+  /** Avoid SSR/client mismatch: `isStandalonePwa()` used to return true without `window`. */
+  if (!mounted) {
+    if (!inList) return null;
+    return (
+      <div className="flex animate-pulse items-center gap-3 px-4 py-3.5" aria-hidden>
+        <div className={meSettingsRowInstallIconShellClass} />
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="h-3.5 w-36 rounded-md bg-muted/50" />
+          <div className="h-3 w-44 rounded-md bg-muted/40" />
+        </div>
+        <div className="h-5 w-5 shrink-0 rounded bg-muted/30" />
+      </div>
+    );
+  }
+
   if (isStandalonePwa()) return null;
 
   const deferred = getDeferredInstallPrompt();
@@ -79,16 +103,16 @@ export function MePageInstallCard({
   const pad = compact ? "p-2.5" : "p-3";
 
   const installRowLabel = showInstall
-    ? `Install ${APP_NAME}`
+    ? formatMessage(i.rowInstallApp, { appName: APP_NAME })
     : showIos
-      ? "Add to Home Screen"
-      : "Install on this device";
+      ? i.rowAddToHome
+      : i.rowGenericInstall;
 
   const installRowSubtitle = showInstall
-    ? "Quick install · browser menu if needed"
+    ? i.subtitleDeferred
     : showIos
-      ? "Share sheet · Add to Home Screen"
-      : "Try Chrome, Edge, or Safari";
+      ? i.subtitleIos
+      : i.subtitleNoPrompt;
 
   const body = (
     <div className="space-y-2">
@@ -100,11 +124,9 @@ export function MePageInstallCard({
             disabled={busy}
             onClick={() => void onInstall()}
           >
-            {busy ? "…" : `Install ${APP_NAME}`}
+            {busy ? i.ctaBusy : formatMessage(i.ctaInstallApp, { appName: APP_NAME })}
           </Button>
-          <p className="text-[11px] leading-snug text-muted-foreground">
-            If no dialog appears, use your browser menu and choose Install app or Add to Home Screen.
-          </p>
+          <p className="text-[11px] leading-snug text-muted-foreground">{i.helpBrowserMenu}</p>
         </>
       ) : showIos ? (
         <>
@@ -114,21 +136,19 @@ export function MePageInstallCard({
             disabled={iosShareBusy}
             onClick={() => void onIosAddToHomeScreen()}
           >
-            {iosShareBusy ? "…" : "Add to Home Screen"}
+            {iosShareBusy ? i.ctaBusy : i.ctaAddToHome}
           </Button>
           <p className="text-[11px] leading-snug text-muted-foreground">
-            {iosShareLikely
-              ? "Opens the system Share sheet — choose Add to Home Screen. If that fails, we copy the page link so you can paste it in Safari and try again."
-              : "Copies this page’s link. Open it in Safari, tap Share (□↑ or …), then Add to Home Screen — or use the steps below."}
+            {iosShareLikely ? i.iosHelpShareLikely : i.iosHelpCopyFallback}
           </p>
           {iosLinkCopied ? (
             <p className="text-[11px] font-medium leading-snug text-emerald-700 dark:text-emerald-400">
-              Link copied — open in Safari if needed, then Share → Add to Home Screen.
+              {i.linkCopiedFollowUp}
             </p>
           ) : null}
           <details className="rounded-lg border border-border/60 bg-muted/20 px-2 py-1.5 text-[11px] text-foreground">
             <summary className="cursor-pointer list-none font-medium text-classmates-azure outline-none">
-              Manual steps (if Share did not work)
+              {i.manualStepsSummary}
             </summary>
             <div className="mt-2 border-t border-border/50 pt-2">
               <PwaIosInstallSteps />
@@ -136,9 +156,7 @@ export function MePageInstallCard({
           </details>
         </>
       ) : (
-        <p className="text-[11px] leading-snug text-muted-foreground">
-          Install prompt not available on this browser. Try Chrome or Edge on Android, or Safari on iPhone.
-        </p>
+        <p className="text-[11px] leading-snug text-muted-foreground">{i.noPromptBody}</p>
       )}
     </div>
   );
@@ -146,23 +164,18 @@ export function MePageInstallCard({
   if (inList) {
     return (
       <details className="group">
-        <summary className={listRowSummaryClasses}>
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted/80 text-muted-foreground">
-              <Smartphone className="h-5 w-5" strokeWidth={2} aria-hidden />
+        <summary className={meSettingsRowDetailsSummaryClass}>
+          <div className={meSettingsRowLeadClass}>
+            <span className={meSettingsRowInstallIconShellClass}>
+              <Smartphone className="h-4 w-4" strokeWidth={2} aria-hidden />
             </span>
-            <div className="min-w-0 text-left">
-              <p className="text-[14px] font-semibold leading-tight text-foreground">{installRowLabel}</p>
-              <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">{installRowSubtitle}</p>
-            </div>
+            <MeSettingsRowLabel title={installRowLabel} subtitle={installRowSubtitle} />
           </div>
-          <ChevronDown
-            className="h-5 w-5 shrink-0 text-muted-foreground/50 transition-transform duration-200 group-open:rotate-180"
-            strokeWidth={2}
-            aria-hidden
-          />
+          <ChevronDown className={meSettingsRowChevronDownClass} strokeWidth={2} aria-hidden />
         </summary>
-        <div className="border-t border-classmates-hairline bg-muted/15 px-4 py-3 dark:border-border/60">{body}</div>
+        <div className="border-t border-classmates-hairline bg-muted/15 px-3 py-2.5 dark:border-border/60">
+          {body}
+        </div>
       </details>
     );
   }

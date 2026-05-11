@@ -20,6 +20,8 @@ export function ContactRemarkEditor({
   initialRemark,
   isSelfNotes,
   variant = "profile",
+  remarkPlaceholder,
+  remarkMicroLabel,
 }: {
   connectionId: string;
   initialRemark: string | null;
@@ -32,8 +34,13 @@ export function ContactRemarkEditor({
    * `underName` — Me /profile summary: no section label, sits under display name.
    */
   variant?: "profile" | "minimal" | "inline" | "underName";
+  /** Overrides default placeholder for the remark field (e.g. peer profile locale). */
+  remarkPlaceholder?: string;
+  /** Overrides “Private note” micro label (`underName` variant, non–self-notes). */
+  remarkMicroLabel?: string;
 }) {
   const router = useRouter();
+  const remarkPh = remarkPlaceholder ?? REMARK_PLACEHOLDER;
   const [value, setValue] = useState(initialRemark ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -74,8 +81,8 @@ export function ContactRemarkEditor({
             value={value}
             onChange={(e) => setValue(e.target.value.slice(0, CONTACT_REMARK_MAX_LEN))}
             maxLength={CONTACT_REMARK_MAX_LEN}
-            placeholder={REMARK_PLACEHOLDER}
-            aria-label={REMARK_PLACEHOLDER}
+            placeholder={remarkPh}
+            aria-label={remarkPh}
             className="h-8 min-w-0 flex-1 border-0 bg-transparent px-0 text-[13px] shadow-none focus-visible:ring-0"
           />
           <Button
@@ -95,7 +102,7 @@ export function ContactRemarkEditor({
   }
 
   if (variant === "underName") {
-    const label = isSelfNotes ? "Notes chat title" : "Private note";
+    const label = isSelfNotes ? "Notes chat title" : (remarkMicroLabel ?? "Private note");
     return (
       <div className="w-full min-w-0">
         <span className={profileFieldMicroLabelClassName}>{label}</span>
@@ -104,8 +111,8 @@ export function ContactRemarkEditor({
             value={value}
             onChange={(e) => setValue(e.target.value.slice(0, CONTACT_REMARK_MAX_LEN))}
             maxLength={CONTACT_REMARK_MAX_LEN}
-            placeholder={REMARK_PLACEHOLDER}
-            aria-label={REMARK_PLACEHOLDER}
+            placeholder={remarkPh}
+            aria-label={remarkPh}
             className={profileSettingsInputClassName("min-w-0 flex-1 shadow-none")}
           />
           <Button
@@ -133,8 +140,8 @@ export function ContactRemarkEditor({
             setInlineEditing(true);
           }}
           className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
-          aria-label={REMARK_PLACEHOLDER}
-          title={REMARK_PLACEHOLDER}
+          aria-label={remarkPh}
+          title={remarkPh}
         >
           <Pencil className="h-3.5 w-3.5" strokeWidth={2.25} />
         </button>
@@ -147,7 +154,7 @@ export function ContactRemarkEditor({
           value={value}
           onChange={(e) => setValue(e.target.value.slice(0, CONTACT_REMARK_MAX_LEN))}
           maxLength={CONTACT_REMARK_MAX_LEN}
-          placeholder={REMARK_PLACEHOLDER}
+          placeholder={remarkPh}
           className="h-7 w-28 rounded-full px-2.5 text-[11px]"
         />
         <button
@@ -184,8 +191,8 @@ export function ContactRemarkEditor({
           value={value}
           onChange={(e) => setValue(e.target.value.slice(0, CONTACT_REMARK_MAX_LEN))}
           maxLength={CONTACT_REMARK_MAX_LEN}
-          placeholder={REMARK_PLACEHOLDER}
-          aria-label={REMARK_PLACEHOLDER}
+          placeholder={remarkPh}
+          aria-label={remarkPh}
           className="h-9 min-w-0 flex-1 text-[13px]"
         />
         <Button

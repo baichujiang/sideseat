@@ -35,7 +35,7 @@ export function AppShell({
   const navItems = [
     { href: "/home", label: m.nav.home, icon: Calendar },
     { href: "/courses", label: m.nav.courses, icon: BookOpen },
-    { href: "/discover", label: m.nav.classmates, icon: UsersRound },
+    { href: "/discover", label: m.nav.discoverTab, icon: UsersRound },
     { href: "/inbox", label: m.nav.chats, icon: Inbox },
     { href: "/profile", label: m.nav.me, icon: UserRound },
   ] satisfies Array<{ href: Route; label: string; icon: typeof Calendar }>;
@@ -120,6 +120,7 @@ export function AppShell({
       </Suspense>
       <ProductTutorialGate context={productTutorialContext} />
       <main
+        data-app-shell-scroll
         className={cn(
           "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden",
           shellSurface,

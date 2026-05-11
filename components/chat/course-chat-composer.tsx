@@ -8,11 +8,21 @@ import { Plus, Send } from "lucide-react";
 
 import { FormMessage } from "@/components/forms/form-message";
 import { ReplyPreview } from "@/components/chat/chat-composer";
+import { ChatThreadSearchButton } from "@/components/chat/chat-thread-search-button";
 import { useChatReply } from "@/components/chat/chat-reply-context";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import type { ThreadSearchEntry } from "@/lib/chat/thread-search-index";
 import { cn } from "@/lib/utils";
 
-export function CourseChatComposer({ courseId }: { courseId: string }) {
+export function CourseChatComposer({
+  courseId,
+  threadSearchEntries = [],
+}: {
+  courseId: string;
+  threadSearchEntries?: ThreadSearchEntry[];
+}) {
   const router = useRouter();
+  const { courses: co, chat: ch } = useAppMessages();
   const { replyTo, setReplyTo } = useChatReply();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [body, setBody] = useState("");
@@ -38,7 +48,7 @@ export function CourseChatComposer({ courseId }: { courseId: string }) {
 
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
-      setError(typeof payload.error === "string" ? payload.error : "Unable to send.");
+      setError(typeof payload.error === "string" ? payload.error : ch.unableToSend);
       setSubmitting(false);
       return;
     }
@@ -64,11 +74,12 @@ export function CourseChatComposer({ courseId }: { courseId: string }) {
         />
       ) : null}
       <div className="flex items-end gap-2">
+        <ChatThreadSearchButton entries={threadSearchEntries} />
         <button
           type="button"
           disabled
-          aria-label="Attachments unavailable in course chat"
-          title="Attachments unavailable in course chat"
+          aria-label={co.courseChatAttachmentsUnavailableAria}
+          title={co.courseChatAttachmentsUnavailableTitle}
           className={cn(
             "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-dashed border-border/70 bg-muted/35 text-muted-foreground/60",
             "cursor-not-allowed",
@@ -77,7 +88,7 @@ export function CourseChatComposer({ courseId }: { courseId: string }) {
           <Plus className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />
         </button>
         <label className="sr-only" htmlFor={`course-chat-input-${courseId}`}>
-          Message
+          {co.courseChatComposerInputLabel}
         </label>
         <textarea
           ref={inputRef}
@@ -93,7 +104,7 @@ export function CourseChatComposer({ courseId }: { courseId: string }) {
             }
           }}
           rows={1}
-          placeholder={replyTo ? "Reply…" : "Message the class…"}
+          placeholder={replyTo ? ch.placeholderReply : co.courseChatComposerPlaceholder}
           className={cn(
             "min-h-[44px] max-h-32 flex-1 resize-none rounded-[1.25rem] border border-input bg-muted/40 px-3.5 py-2.5 text-[16px] leading-snug",
             "placeholder:text-muted-foreground/70",
@@ -109,7 +120,7 @@ export function CourseChatComposer({ courseId }: { courseId: string }) {
             "hover:bg-primary/90",
             "disabled:pointer-events-none disabled:opacity-35",
           )}
-          aria-label="Send"
+          aria-label={ch.sendAria}
         >
           <Send className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />
         </button>

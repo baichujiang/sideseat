@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  addDays,
   eachDayOfInterval,
   endOfMonth,
   endOfWeek,
@@ -9,7 +10,10 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
+import { useMemo } from "react";
 
+import { useLocaleContext } from "@/components/i18n/locale-provider";
+import { formatMessage } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 /**
@@ -39,6 +43,7 @@ export function ScheduleMonthView({
   /** Fired when a user taps a cell; parent updates selection (e.g. shows that day below). */
   onSelectDate: (date: Date) => void;
 }) {
+  const { locale, messages } = useLocaleContext();
   const monthStart = startOfMonth(anchorDate);
   const monthEnd = endOfMonth(anchorDate);
 
@@ -47,16 +52,31 @@ export function ScheduleMonthView({
   const gridEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
 
+  const weekdayLabels = useMemo(() => {
+    const fmt = new Intl.DateTimeFormat(locale, { weekday: "short" });
+    return Array.from({ length: 7 }, (_, i) => fmt.format(addDays(gridStart, i)));
+  }, [locale, gridStart.getTime()]);
+
+  const dayLongFmt = useMemo(
+    () => new Intl.DateTimeFormat(locale, { dateStyle: "long" }),
+    [locale],
+  );
+
   return (
     <div
       className={cn(
-        "mt-2 overflow-hidden rounded-2xl border border-[#E7E0D6] bg-white p-2 shadow-[0_8px_24px_rgba(15,23,42,0.05)]",
+        "mt-0 overflow-hidden rounded-2xl border border-[#E7E0D6] bg-white p-2 shadow-[0_8px_24px_rgba(15,23,42,0.05)]",
         "dark:border-border dark:bg-card dark:shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
       )}
     >
-      <div className="grid grid-cols-7 text-center text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-        {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
-          <div key={d} className="py-1">
+      <div
+        className={cn(
+          "grid grid-cols-7 text-center text-[10px] font-medium tracking-wider text-muted-foreground",
+          locale === "zh-CN" ? "normal-case" : "uppercase",
+        )}
+      >
+        {weekdayLabels.map((d, i) => (
+          <div key={`${d}-${i}`} className="py-1">
             {d}
           </div>
         ))}
@@ -68,6 +88,13 @@ export function ScheduleMonthView({
           const isSelected = isSameDay(date, selectedDate);
           const isWeekend = date.getDay() === 0 || date.getDay() === 6;
           const density = getDensityForDate(date);
+          const when = dayLongFmt.format(date);
+          const ariaLabel =
+            density === 0
+              ? formatMessage(messages.schedule.monthCellAriaNone, { when })
+              : density === 1
+                ? formatMessage(messages.schedule.monthCellAriaOne, { when })
+                : formatMessage(messages.schedule.monthCellAriaMany, { when, count: density });
           const baseCellBg = isWeekend ? "bg-[#FAF8F5] dark:bg-muted/35" : "bg-white";
           const cellState = isToday
             ? "border-[#F0ECE6] text-foreground dark:border-white/12"
@@ -81,7 +108,7 @@ export function ScheduleMonthView({
               type="button"
               onClick={() => onSelectDate(date)}
               aria-pressed={isSelected}
-              aria-label={`${date.toDateString()} — ${density} ${density === 1 ? "event" : "events"}`}
+              aria-label={ariaLabel}
               className={cn(
                 "flex aspect-square flex-col items-center justify-center rounded-xl border text-[13px] transition",
                 baseCellBg,

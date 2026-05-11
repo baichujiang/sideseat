@@ -7,6 +7,8 @@ import { useState } from "react";
 
 import { FormMessage } from "@/components/forms/form-message";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 /**
@@ -21,6 +23,7 @@ export function CourseUnenrollFooter({
   courseName: string;
 }) {
   const router = useRouter();
+  const { courses: co, common } = useAppMessages();
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -38,7 +41,7 @@ export function CourseUnenrollFooter({
     setPending(false);
 
     if (!response.ok) {
-      setError(typeof payload.error === "string" ? payload.error : "Could not unenroll.");
+      setError(typeof payload.error === "string" ? payload.error : co.couldNotUnenroll);
       return;
     }
 
@@ -59,7 +62,7 @@ export function CourseUnenrollFooter({
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
             )}
           >
-            Unenroll from this course
+            {co.unenrollLink}
           </button>
         </div>
       </footer>
@@ -82,11 +85,10 @@ export function CourseUnenrollFooter({
               id="course-unenroll-title"
               className="text-base font-semibold leading-snug tracking-tight text-classmates-ink dark:text-foreground"
             >
-              Unenroll from {courseName}?
+              {formatMessage(co.unenrollDialogTitle, { courseName })}
             </h2>
             <p className="mt-3 text-[13px] leading-relaxed text-classmates-sub dark:text-zinc-400">
-              You&apos;ll leave this course and it will be removed from your enrolled courses. Your existing chats
-              won&apos;t be deleted.
+              {co.unenrollDialogBody}
             </p>
             {error ? (
               <div className="mt-3">
@@ -103,7 +105,7 @@ export function CourseUnenrollFooter({
                 }}
                 className="inline-flex h-11 w-full items-center justify-center rounded-full border border-[#E7E0D6] bg-classmates-surface px-4 text-sm font-semibold text-classmates-ink transition hover:bg-classmates-warm-alt active:bg-classmates-warm-alt/80 disabled:opacity-50 dark:border-border dark:bg-muted/30 dark:text-foreground dark:hover:bg-muted/50 sm:w-auto sm:min-w-[7.5rem]"
               >
-                Cancel
+                {common.cancel}
               </button>
               <button
                 type="button"
@@ -111,7 +113,7 @@ export function CourseUnenrollFooter({
                 onClick={() => void performUnenroll()}
                 className="inline-flex h-11 w-full items-center justify-center rounded-full border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 shadow-sm transition hover:bg-red-100 active:bg-red-100/90 disabled:opacity-50 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200 dark:hover:bg-red-950/60 sm:w-auto sm:min-w-[7.5rem]"
               >
-                {pending ? "Unenrolling…" : "Unenroll"}
+                {pending ? co.unenrolling : co.unenrollConfirm}
               </button>
             </div>
           </div>

@@ -14,11 +14,31 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import type { SchoolCode } from "@/lib/constants/schools";
 import { getSchoolLogoPath } from "@/lib/constants/schools";
 import { cn } from "@/lib/utils";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage } from "@/lib/i18n/messages";
+import type { AppMessages } from "@/lib/i18n/messages/types";
 
 const verifiedChipClass =
   "shrink-0 rounded-md px-2 py-0.5 text-[11px] font-semibold leading-none text-classmates-success bg-classmates-success-soft";
 
 type DeliveryKind = "sent" | "failed" | "skipped" | "manual";
+
+function verificationStatusLabel(status: StudentVerificationStatus, t: AppMessages["studentVerification"]): string {
+  switch (status) {
+    case StudentVerificationStatus.UNVERIFIED:
+      return t.statusUnverified;
+    case StudentVerificationStatus.EMAIL_PENDING:
+      return t.statusEmailPending;
+    case StudentVerificationStatus.VERIFIED:
+      return t.statusVerified;
+    case StudentVerificationStatus.MANUAL_REVIEW_REQUIRED:
+      return t.statusManualReviewRequired;
+    case StudentVerificationStatus.REJECTED:
+      return t.statusRejected;
+    default:
+      return t.statusUnverified;
+  }
+}
 
 function statusTone(status: StudentVerificationStatus) {
   if (status === StudentVerificationStatus.VERIFIED) return "calm";
@@ -45,6 +65,7 @@ export function StudentVerificationForm({
   notes?: string | null;
   hasProofUploaded?: boolean;
 }) {
+  const { studentVerification: v, common } = useAppMessages();
   const router = useRouter();
   const [input, setInput] = useState(email ?? "");
   const [message, setMessage] = useState("");
@@ -88,7 +109,7 @@ export function StudentVerificationForm({
       const payload = await response.json();
 
       if (!response.ok) {
-        setMessage(payload.error ?? "Unable to request verification.");
+        setMessage(payload.error ?? v.errorRequestFailed);
         return;
       }
 
@@ -104,7 +125,7 @@ export function StudentVerificationForm({
       setManualMessage("");
 
       if (!selectedFile) {
-        setManualError("Attach your enrollment certificate.");
+        setManualError(v.errorAttachCertificate);
         return;
       }
 
@@ -120,11 +141,11 @@ export function StudentVerificationForm({
       const payload = await response.json();
 
       if (!response.ok) {
-        setManualError(payload.error ?? "Unable to submit for review.");
+        setManualError(payload.error ?? v.errorManualSubmitFailed);
         return;
       }
 
-      setManualMessage(payload.data?.message ?? "Submitted for review.");
+      setManualMessage(payload.data?.message ?? v.submittedForReviewFallback);
       setSelectedFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       router.refresh();
@@ -147,24 +168,28 @@ export function StudentVerificationForm({
   const verificationDomains = schoolConfig?.verificationDomains ?? [];
   const emailPlaceholder =
     verificationDomains.length === 0
-      ? "School email"
-      : verificationDomains.map((d) => `name@${d}`).join(" or ");
+      ? v.emailPlaceholderGeneric
+      : verificationDomains.map((d) => `name@${d}`).join(" / ");
   const manualEmailPlaceholder =
     verificationDomains.length === 0
-      ? "School email (optional)"
-      : `Optional · ${verificationDomains.map((d) => `name@${d}`).join(" or ")}`;
+      ? v.manualEmailOptionalGeneric
+      : formatMessage(v.manualEmailOptionalWithDomain, {
+          examples: verificationDomains.map((d) => `name@${d}`).join(" / "),
+        });
 
   if (isVerified) {
     const displayEmail = email?.trim() || "—";
-    const logoAlt = schoolShortLabel ? `${schoolShortLabel} logo` : "University logo";
+    const logoAlt = schoolShortLabel
+      ? formatMessage(v.logoAltWithSchool, { school: schoolShortLabel })
+      : v.logoAltUniversity;
     return (
       <div
         className="rounded-[20px] border border-[#D1FAE5] bg-[#FAFFFE] px-2.5 py-2 dark:border-emerald-900/40 dark:bg-emerald-950/20"
         role="status"
         aria-label={
           schoolShortLabel
-            ? `Verified ${schoolShortLabel} school email: ${displayEmail}`
-            : `Verified university email: ${displayEmail}`
+            ? formatMessage(v.verifiedAriaWithSchool, { school: schoolShortLabel, email: displayEmail })
+            : formatMessage(v.verifiedAriaGeneric, { email: displayEmail })
         }
       >
         <div className="flex gap-3">
@@ -182,18 +207,18 @@ export function StudentVerificationForm({
           ) : null}
           <div className="min-w-0 flex-1 space-y-1.5">
             <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              University email
+              {v.universityEmailLabel}
             </p>
             {schoolShortLabel ? (
               <p className="text-[12px] font-semibold leading-tight text-classmates-success dark:text-emerald-400">
-                Verified {schoolShortLabel} email
+                {formatMessage(v.verifiedLineWithSchool, { school: schoolShortLabel })}
               </p>
             ) : null}
             <div className="flex min-h-[1.75rem] items-center justify-between gap-2">
               <p className="min-w-0 truncate text-[13px] font-medium tabular-nums text-foreground">
                 {displayEmail}
               </p>
-              <span className={verifiedChipClass}>Verified</span>
+              <span className={verifiedChipClass}>{v.verifiedChip}</span>
             </div>
           </div>
         </div>
@@ -208,17 +233,17 @@ export function StudentVerificationForm({
           {schoolLogoSrc ? (
             <img
               src={schoolLogoSrc}
-              alt={schoolShortLabel ? `${schoolShortLabel} logo` : ""}
+              alt={schoolShortLabel ? formatMessage(v.logoAltWithSchool, { school: schoolShortLabel }) : ""}
               className="h-7 w-auto max-w-[4.5rem] shrink-0 object-contain opacity-90 dark:opacity-95"
               width={72}
               height={28}
               decoding="async"
             />
           ) : null}
-          <p className="text-xs font-medium text-muted-foreground">Student verification</p>
+          <p className="text-xs font-medium text-muted-foreground">{v.heading}</p>
         </div>
         <StatusBadge tone={statusTone(currentStatus)}>
-          {currentStatus.toLowerCase().replaceAll("_", " ")}
+          {verificationStatusLabel(currentStatus, v)}
         </StatusBadge>
       </div>
       <div className="flex gap-2">
@@ -230,7 +255,7 @@ export function StudentVerificationForm({
           value={input}
         />
         <Button disabled={isPending} onClick={submit} type="button">
-          {isPending ? "Sending…" : "Verify"}
+          {isPending ? v.sending : v.verifyCta}
         </Button>
       </div>
 
@@ -239,14 +264,14 @@ export function StudentVerificationForm({
 
       {verifyUrl ? (
         <div className="space-y-2 rounded-[24px] border border-border bg-[#faf7f1] p-3 text-xs">
-          <p className="font-medium">Verification link</p>
+          <p className="font-medium">{v.verificationLinkHeading}</p>
           <div className="flex flex-col gap-2 sm:flex-row">
             <a
               className={cn(buttonVariants({ size: "sm" }), "sm:flex-1")}
               href={verifyUrl}
               rel="noreferrer"
             >
-              Open link
+              {v.openLink}
             </a>
             <Button
               className="sm:flex-1"
@@ -255,7 +280,7 @@ export function StudentVerificationForm({
               type="button"
               variant="outline"
             >
-              {copied ? "Copied" : "Copy"}
+              {copied ? v.copied : v.copy}
             </Button>
           </div>
           <a className="block break-all text-[11px] text-muted-foreground underline" href={verifyUrl}>
@@ -266,9 +291,9 @@ export function StudentVerificationForm({
 
       {showManual ? (
         <div className="space-y-2 rounded-[24px] border border-border bg-[#faf7f1] p-3 text-xs">
-          <p className="font-medium">Manual review</p>
+          <p className="font-medium">{v.manualReviewHeading}</p>
           <p className="text-[11px] text-muted-foreground">
-            Upload your official {schoolShortLabel ?? "school"} enrollment certificate. PDF or image, up to 5 MB.
+            {formatMessage(v.manualReviewBody, { school: schoolShortLabel ?? v.schoolWord })}
           </p>
           <Input
             ref={fileInputRef}
@@ -292,7 +317,7 @@ export function StudentVerificationForm({
               size="sm"
               type="button"
             >
-              {isUploading ? "Uploading…" : hasProofUploaded ? "Resubmit" : "Submit for review"}
+              {isUploading ? v.uploading : hasProofUploaded ? v.resubmit : v.submitForReview}
             </Button>
             <Button
               onClick={() => setShowManual(false)}
@@ -300,7 +325,7 @@ export function StudentVerificationForm({
               type="button"
               variant="ghost"
             >
-              Cancel
+              {common.cancel}
             </Button>
           </div>
           {manualError ? (
@@ -310,9 +335,7 @@ export function StudentVerificationForm({
             <p className="text-[11px] text-[#1f5d47]">{manualMessage}</p>
           ) : null}
           {hasProofUploaded && !manualMessage ? (
-            <p className="text-[11px] text-muted-foreground">
-              An enrollment certificate is on file and pending review.
-            </p>
+            <p className="text-[11px] text-muted-foreground">{v.pendingFileNote}</p>
           ) : null}
         </div>
       ) : (
@@ -321,7 +344,7 @@ export function StudentVerificationForm({
           onClick={() => setShowManual(true)}
           type="button"
         >
-          Can&apos;t receive the email? Upload enrollment certificate instead
+          {v.cantEmailUploadLink}
         </button>
       )}
     </div>

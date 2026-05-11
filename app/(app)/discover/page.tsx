@@ -5,14 +5,16 @@ import { cn } from "@/lib/utils";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
-import {
-  DiscoverList,
-  type DiscoverPostRow,
-  type DiscoverRow,
-} from "@/components/discover/discover-list";
+import { DiscoverList, type DiscoverRow } from "@/components/discover/discover-list";
+import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { getDiscoverPeople } from "@/lib/queries/discovery";
+import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
+import { getDiscoverCityDisplayLabel } from "@/lib/discover/discover-city-display";
+import type { AppMessages } from "@/lib/i18n/messages";
+import { formatMessage, getMessages } from "@/lib/i18n/messages";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
 
 /**
  * Classmates is the people-first surface: everyone here already shares at
@@ -22,15 +24,17 @@ import { getDiscoverPeople } from "@/lib/queries/discovery";
  */
 export default async function DiscoverPage() {
   const sessionUser = await getSessionUser();
+  const locale = await getServerAppLocale();
+  const ui = getMessages(locale);
   if (!sessionUser) {
     return (
       <div className="space-y-3">
-        <PageHeader />
+        <DiscoverPageHeader ui={ui} />
         <DiscoverList rows={[]} posts={[]} allowSearch={false} />
         <GuestAppCta
           returnTo="/discover"
-          headline="Sign in to find classmates"
-          body="Search people at your school and see who shares your courses."
+          headline={ui.guest.discoverHeadline}
+          body={ui.guest.discoverBody}
         />
       </div>
     );
@@ -63,7 +67,7 @@ export default async function DiscoverPage() {
       where: {
         status: ClassmatePostStatus.ACTIVE,
         expiresAt: { gt: new Date() },
-        city: "Munich",
+        city: DEFAULT_DISCOVER_SERVED_CITY,
         user: {
           moderationBlocks: { none: { isActive: true } },
           blocksReceived: { none: { blockerId: user.id } },
@@ -143,30 +147,29 @@ export default async function DiscoverPage() {
 
   return (
     <div className="space-y-3">
-      <PageHeader />
+      <DiscoverPageHeader ui={ui} />
       {!user.onboardingComplete ? (
-        <OnboardingContinueCta
-          title="Finish setup for better classmate matches"
-          body="You can browse people now. Completing your profile sharpens course overlap, language, and program suggestions."
-        />
+        <OnboardingContinueCta title={ui.onboarding.discoverTitle} body={ui.onboarding.discoverBody} />
       ) : null}
       <DiscoverList rows={rows} posts={posts} savedCourseCount={savedCount} enrolledCourses={enrolledCourses} />
     </div>
   );
 }
 
-function PageHeader() {
+function DiscoverPageHeader({ ui }: { ui: AppMessages }) {
+  const areaCityLabel = getDiscoverCityDisplayLabel(DEFAULT_DISCOVER_SERVED_CITY, ui.discover.cityNames);
+  const areaFilterAria = formatMessage(ui.discover.areaFilterAria, { city: areaCityLabel });
+  const areaComingSoon = formatMessage(ui.discover.areaComingSoon, { city: areaCityLabel });
+
   return (
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0 space-y-0.5">
-        <h1 className="page-screen-title">Classmates</h1>
-        <p className="page-screen-subtitle mt-0.5">
-          Find classmates through shared courses and social plans.
-        </p>
+        <h1 className="page-screen-title">{ui.discover.screenTitle}</h1>
+        <p className="page-screen-subtitle mt-0.5">{ui.discover.screenSubtitle}</p>
       </div>
       <details className="group/details relative shrink-0">
         <summary
-          aria-label="Area filter: Munich. Open to see options."
+          aria-label={areaFilterAria}
           className={cn(
             "inline-flex h-10 cursor-pointer list-none select-none items-center gap-1.5 rounded-full border border-[#E7E0D6] bg-white px-3 pr-2.5 text-[13px] font-medium text-foreground shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] transition-colors",
             "hover:border-border hover:bg-muted/35 active:bg-muted/50",
@@ -174,7 +177,7 @@ function PageHeader() {
           )}
         >
           <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={2.25} aria-hidden />
-          <span className="shrink-0">Munich</span>
+          <span className="shrink-0">{areaCityLabel}</span>
           <ChevronDown
             className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200 group-open/details:rotate-180"
             strokeWidth={2.25}
@@ -186,11 +189,11 @@ function PageHeader() {
             className="px-3 py-2 text-[13px] font-medium text-foreground"
             role="status"
           >
-            <span className="text-muted-foreground">Area · </span>
-            Munich
+            <span className="text-muted-foreground">{ui.discover.areaStatusPrefix} </span>
+            {areaCityLabel}
           </div>
           <p className="border-t border-border px-3 py-2 text-[11px] leading-snug text-muted-foreground">
-            More cities and radius filters are on the way. Everything here is scoped to Munich for now.
+            {areaComingSoon}
           </p>
         </div>
       </details>

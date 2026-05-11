@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { isCompleteMiniSession, MiniWorkweekCourseGrid } from "@/components/courses/mini-workweek-course-grid";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import type { CoursesMessages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 type CourseRef = {
@@ -37,9 +39,10 @@ async function persistCourseSetup(args: {
   course: CourseRef;
   intentions: CourseIntent[];
   sessions: SessionDraft[];
+  copy: CoursesMessages;
 }) {
   if (!args.course.code) {
-    return { ok: false, error: "This course is missing a course code." as const };
+    return { ok: false, error: args.copy.setupErrorMissingCode };
   }
 
   const response = await apiFetch("/api/courses", {
@@ -58,7 +61,7 @@ async function persistCourseSetup(args: {
   if (!response.ok) {
     return {
       ok: false,
-      error: typeof payload.error === "string" ? payload.error : "Unable to save course.",
+      error: typeof payload.error === "string" ? payload.error : args.copy.setupUnableSaveGeneric,
     };
   }
 
@@ -99,6 +102,7 @@ export function CourseCalendarPanel({
   layout?: "card" | "inline";
 }) {
   const router = useRouter();
+  const { courses: co, common } = useAppMessages();
   const [isEditing, setIsEditing] = useState(false);
   const [sessions, setSessions] = useState<SessionDraft[]>(initialSessions);
   const [saving, setSaving] = useState(false);
@@ -129,13 +133,13 @@ export function CourseCalendarPanel({
 
   async function saveEdits() {
     if (sessions.length > 0 && !sessions.every(isCompleteMiniSession)) {
-      setError("Fix every block so end time is after start time.");
+      setError(co.setupErrorFixBlocks);
       return;
     }
 
     setSaving(true);
     setError("");
-    const result = await persistCourseSetup({ course, intentions, sessions });
+    const result = await persistCourseSetup({ course, intentions, sessions, copy: co });
     if (!result.ok) {
       setSaving(false);
       setError(result.error);
@@ -151,8 +155,8 @@ export function CourseCalendarPanel({
       router.refresh();
       setError(
         typeof mirrorPayload.error === "string"
-          ? `Class times saved. Calendar sync failed: ${mirrorPayload.error}`
-          : "Class times saved. Calendar didn’t update — tap “Sync to calendar” to retry.",
+          ? `${co.setupErrorSaveCalendarPrefix}${mirrorPayload.error}`
+          : co.setupErrorSaveCalendarRetry,
       );
       return;
     }
@@ -170,7 +174,9 @@ export function CourseCalendarPanel({
     const mirrorPayload = await mirrorRes.json().catch(() => ({}));
     setSyncingCalendar(false);
     if (!mirrorRes.ok) {
-      setError(typeof mirrorPayload.error === "string" ? mirrorPayload.error : "Could not sync calendar.");
+      setError(
+        typeof mirrorPayload.error === "string" ? mirrorPayload.error : co.setupSyncCalendarFailedGeneric,
+      );
       return;
     }
     router.refresh();
@@ -178,7 +184,7 @@ export function CourseCalendarPanel({
 
   function clearDraftSessions() {
     if (sessions.length === 0) return;
-    if (!window.confirm("Clear all class time blocks in this editor?")) return;
+    if (!window.confirm(co.setupClearAllConfirm)) return;
     setSessions([]);
     setError("");
   }
@@ -210,10 +216,10 @@ export function CourseCalendarPanel({
                 onClick={clearDraftSessions}
                 disabled={saving || sessions.length === 0}
               >
-                Clear all blocks
+                {co.setupClearAllBlocks}
               </Button>
               <Button type="button" variant="ghost" className="min-w-0 flex-1" onClick={cancelEdit} disabled={saving}>
-                Cancel
+                {common.cancel}
               </Button>
               <Button
                 type="button"
@@ -221,7 +227,7 @@ export function CourseCalendarPanel({
                 onClick={() => void saveEdits()}
                 disabled={saving || !sessionEditsPending}
               >
-                {saving ? "Saving…" : "Save"}
+                {saving ? co.setupSaving : common.save}
               </Button>
             </div>
           </>
@@ -237,7 +243,7 @@ export function CourseCalendarPanel({
             {error ? <p className="text-[12px] text-destructive">{error}</p> : null}
             <div className="flex gap-2">
               <Button type="button" variant="outline" className="min-w-0 flex-1" onClick={enterEdit} disabled={saving}>
-                {hasCalendarSetup ? "Edit" : "Add times"}
+                {hasCalendarSetup ? co.setupEdit : co.setupAddTimes}
               </Button>
               <Button
                 type="button"
@@ -245,7 +251,7 @@ export function CourseCalendarPanel({
                 onClick={() => void syncCalendarOnly()}
                 disabled={saving || syncingCalendar || !canSyncCalendar}
               >
-                {syncingCalendar ? "Syncing…" : "Sync to calendar"}
+                {syncingCalendar ? co.setupSyncing : co.setupSyncCalendar}
               </Button>
             </div>
           </>

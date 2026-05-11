@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useAppMessages } from "@/hooks/use-app-locale";
 
 /**
  * Profile-level message entrypoint.
@@ -27,6 +28,7 @@ export function ProfileMessageButton({
   fullWidth?: boolean;
 }) {
   const router = useRouter();
+  const { userProfile: up } = useAppMessages();
   const [opening, setOpening] = useState(false);
   const [errorText, setErrorText] = useState("");
 
@@ -46,14 +48,14 @@ export function ProfileMessageButton({
         setErrorText(
           typeof payload?.error === "string"
             ? payload.error
-            : "Unable to open chat.",
+            : up.messageUnableOpen,
         );
         return;
       }
       const data = payload?.data as { connectionId?: string } | undefined;
       if (!data?.connectionId) {
         setOpening(false);
-        setErrorText("Unexpected server response.");
+        setErrorText(up.messageUnexpectedResponse);
         return;
       }
 
@@ -61,7 +63,7 @@ export function ProfileMessageButton({
       router.push(`/connections/${data.connectionId}${suffix}`);
     } catch {
       setOpening(false);
-      setErrorText("Network error. Try again.");
+      setErrorText(up.messageNetworkError);
     }
   }
 
@@ -78,7 +80,7 @@ export function ProfileMessageButton({
         ) : (
           <MessageCircle className="mr-1 h-4 w-4" />
         )}
-        {opening ? "Opening…" : "Message"}
+        {opening ? up.messageOpening : up.messageButton}
       </Button>
       {errorText ? <p className="text-xs text-rose-600">{errorText}</p> : null}
     </div>

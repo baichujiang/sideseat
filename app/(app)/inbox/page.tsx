@@ -6,23 +6,21 @@ import { InboxRealtimeRefresh } from "@/components/inbox/inbox-realtime-refresh"
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { getSessionUser } from "@/lib/auth/session";
 import { getInboxMergeBundle } from "@/lib/queries/inbox-merge";
+import { getMessages } from "@/lib/i18n/messages";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
 
 export default async function InboxPage() {
   const sessionUser = await getSessionUser();
+  const locale = await getServerAppLocale();
+  const ui = getMessages(locale);
   if (!sessionUser) {
     return (
       <div className="space-y-3">
         <header className="px-0.5">
-          <h1 className="page-screen-title">Chats</h1>
-          <p className="page-screen-subtitle mt-0.5">
-            Course chats and direct conversations
-          </p>
+          <h1 className="page-screen-title">{ui.inbox.screenTitle}</h1>
+          <p className="page-screen-subtitle mt-0.5">{ui.inbox.screenSubtitleGuest}</p>
         </header>
-        <GuestAppCta
-          returnTo="/inbox"
-          headline="Sign in to see your chats"
-          body="Your inbox syncs across devices once you log in."
-        />
+        <GuestAppCta returnTo="/inbox" headline={ui.inbox.guestHeadline} body={ui.inbox.guestBody} />
       </div>
     );
   }
@@ -82,20 +80,15 @@ export default async function InboxPage() {
       <header className="px-0.5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="page-screen-title">Chats</h1>
-            <p className="page-screen-subtitle mt-0.5">
-              Course chats, contacts, and group conversations
-            </p>
+            <h1 className="page-screen-title">{ui.inbox.screenTitle}</h1>
+            <p className="page-screen-subtitle mt-0.5">{ui.inbox.screenSubtitle}</p>
           </div>
           {user.onboardingComplete ? <InboxCreateSheet initialContacts={directContacts} /> : null}
         </div>
       </header>
 
       {!user.onboardingComplete ? (
-        <OnboardingContinueCta
-          title="Finish setup when you're ready"
-          body="Your inbox is already available. Completing your profile helps classmates recognize you more easily."
-        />
+        <OnboardingContinueCta title={ui.inbox.onboardingTitle} body={ui.inbox.onboardingBody} />
       ) : null}
 
       <InboxQuickChips

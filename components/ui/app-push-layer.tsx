@@ -10,12 +10,12 @@ export const APP_PUSH_TRANSITION_MS = 340;
 
 /**
  * Global stack of open push-layer close callbacks.
- * EdgeSwipeBack checks this before navigating — if non-empty, the top layer
- * is closed instead of triggering page navigation.
+ * {@link EdgeSwipeBack} invokes the top callback when the user completes a left-edge swipe;
+ * there is no route navigation when the stack is empty.
  */
 const layerCloseStack: Array<() => void> = [];
 
-/** Called by EdgeSwipeBack: returns true if a layer was closed, false if navigation should proceed. */
+/** Called by EdgeSwipeBack: returns true if a layer was closed, false if the stack was empty. */
 export function dismissTopPushLayer(): boolean {
   if (layerCloseStack.length === 0) return false;
   const top = layerCloseStack[layerCloseStack.length - 1];
@@ -24,8 +24,8 @@ export function dismissTopPushLayer(): boolean {
 }
 
 /**
- * While `open`, registers `onClose` on the same stack as {@link AppPushLayer} so edge-swipe-back
- * dismisses this overlay before navigating away (e.g. bottom sheets that are not `AppPushLayer`).
+ * While `open`, registers `onClose` on the same stack as {@link AppPushLayer} so a left-edge swipe
+ * dismisses this overlay (e.g. menus or lightboxes that are not `AppPushLayer`).
  */
 export function useRegisterDismissOnEdgeSwipe(open: boolean, onClose: () => void) {
   const onCloseRef = useRef(onClose);
@@ -154,8 +154,7 @@ export function AppPushLayer({
 
   // Register in global layer stack so EdgeSwipeBack can dismiss us.
   // Depend only on `open`: parents often pass an inline `onClose` that changes every render; re-running
-  // this effect would remove then re-add the layer and briefly leave the stack empty so a swipe
-  // falls through to `router.back()` (wrong: feels like switching tabs). Latest `onClose` via ref.
+  // this effect would remove then re-add the layer and briefly leave the stack empty. Latest `onClose` via ref.
   useEffect(() => {
     if (!open) return;
     const closeFromEdgeGesture = () => {

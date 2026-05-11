@@ -22,6 +22,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { AVATAR_IDS, isDisplayableCustomAvatarUrl, isValidAvatarId } from "@/lib/constants/avatars";
 import { uploadProfileAvatarPhoto } from "@/lib/profile/upload-avatar";
 import { cn } from "@/lib/utils";
+import { formatMessage } from "@/lib/i18n/messages";
+import { useAppMessages } from "@/hooks/use-app-locale";
 import { homeProfileQuickSchema, profileSchema } from "@/lib/validators/profile";
 
 type Sheet = null | "edit" | "avatar" | "name" | "bio";
@@ -40,14 +42,16 @@ function SheetScreenHeader({
   title,
   onBack,
   disabled,
+  backAriaLabel,
 }: {
   title: string;
   onBack: () => void;
   disabled?: boolean;
+  backAriaLabel: string;
 }) {
   return (
     <header className="flex shrink-0 items-center gap-2 border-b border-border px-3 py-2.5">
-      <button type="button" aria-label="Back" disabled={disabled} onClick={onBack} className={SHEET_BACK_BTN_CLASS}>
+      <button type="button" aria-label={backAriaLabel} disabled={disabled} onClick={onBack} className={SHEET_BACK_BTN_CLASS}>
         <ChevronLeft className="h-5 w-5" strokeWidth={2.25} aria-hidden />
       </button>
       <h2 className="min-w-0 flex-1 truncate text-[15px] font-semibold leading-tight text-foreground">{title}</h2>
@@ -65,9 +69,10 @@ export type ProfileSchoolSummary = {
   semester: number;
 };
 
-function buildSchoolSubtitle(summary: ProfileSchoolSummary): string {
+function buildSchoolSubtitle(summary: ProfileSchoolSummary, semesterLabel: string): string {
   const majorOrDegree = summary.major.trim() || summary.degreeLabel;
-  return [summary.schoolShort, majorOrDegree, `Sem ${summary.semester}`].join(" · ");
+  const sem = formatMessage(semesterLabel, { semester: String(summary.semester) });
+  return [summary.schoolShort, majorOrDegree, sem].join(" · ");
 }
 
 export function ProfileIdentitySheets({
@@ -94,6 +99,10 @@ export function ProfileIdentitySheets({
   /** Me /profile summary only — e.g. private self-chat title under the display name. */
   belowDisplayName?: ReactNode;
 }) {
+  const t = useAppMessages().meIdentity;
+  const crop = useAppMessages().meAvatarCrop;
+  const common = useAppMessages().common;
+  const pf = useAppMessages().profileForm;
   const router = useRouter();
   const avatarUploadInputRef = useRef<HTMLInputElement>(null);
   const avatarUploadTargetRef = useRef<"edit" | "sheet">("sheet");
@@ -148,10 +157,10 @@ export function ProfileIdentitySheets({
     });
     const payload = await res.json().catch(() => ({}));
     if (!res.ok || !payload.success) {
-      throw new Error(typeof payload.error === "string" ? payload.error : "Could not save.");
+      throw new Error(typeof payload.error === "string" ? payload.error : t.errorCouldNotSave);
     }
     router.refresh();
-  }, [router]);
+  }, [router, t]);
 
   const postAvatar = useCallback(async (id: string) => {
     const res = await apiFetch("/api/profile/avatar", {
@@ -161,9 +170,9 @@ export function ProfileIdentitySheets({
     });
     const payload = await res.json().catch(() => ({}));
     if (!res.ok || !payload.success) {
-      throw new Error(typeof payload.error === "string" ? payload.error : "Could not update photo.");
+      throw new Error(typeof payload.error === "string" ? payload.error : t.errorCouldNotUpload);
     }
-  }, []);
+  }, [t]);
 
   const runAvatarUpload = useCallback(
     (file: File, mode: "edit" | "sheet") => {
@@ -179,18 +188,18 @@ export function ProfileIdentitySheets({
           if (mode === "sheet") setSheet(null);
           router.refresh();
         } catch (e) {
-          setError(e instanceof Error ? e.message : "Could not upload photo.");
+          setError(e instanceof Error ? e.message : t.errorCouldNotUpload);
         }
       });
     },
-    [router],
+    [router, t],
   );
 
   const saveName = () => {
     setError("");
     const parsed = homeProfileQuickSchema.shape.nickname.safeParse(draftName.trim());
     if (!parsed.success) {
-      setError(parsed.error.errors[0]?.message ?? "Invalid name.");
+      setError(parsed.error.errors[0]?.message ?? t.errorInvalidName);
       return;
     }
     startTransition(async () => {
@@ -199,7 +208,7 @@ export function ProfileIdentitySheets({
         setNickname(parsed.data);
         setSheet(null);
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Could not save.");
+        setError(e instanceof Error ? e.message : t.errorCouldNotSave);
       }
     });
   };
@@ -208,7 +217,7 @@ export function ProfileIdentitySheets({
     setError("");
     const parsed = homeProfileQuickSchema.shape.bio.safeParse(draftBio.trim() === "" ? "" : draftBio.trim());
     if (!parsed.success) {
-      setError(parsed.error.errors[0]?.message ?? "Invalid bio.");
+      setError(parsed.error.errors[0]?.message ?? t.errorInvalidBio);
       return;
     }
     startTransition(async () => {
@@ -218,7 +227,7 @@ export function ProfileIdentitySheets({
         setBio(nextBio);
         setSheet(null);
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Could not save.");
+        setError(e instanceof Error ? e.message : t.errorCouldNotSave);
       }
     });
   };
@@ -227,21 +236,21 @@ export function ProfileIdentitySheets({
     setError("");
     const parsedName = homeProfileQuickSchema.shape.nickname.safeParse(draftName.trim());
     if (!parsedName.success) {
-      setError(parsedName.error.errors[0]?.message ?? "Invalid name.");
+      setError(parsedName.error.errors[0]?.message ?? t.errorInvalidName);
       return;
     }
     const parsedBio = homeProfileQuickSchema.shape.bio.safeParse(draftBio.trim() === "" ? "" : draftBio.trim());
     if (!parsedBio.success) {
-      setError(parsedBio.error.errors[0]?.message ?? "Invalid bio.");
+      setError(parsedBio.error.errors[0]?.message ?? t.errorInvalidBio);
       return;
     }
     const nextAvatar = draftAvatarId ?? avatarId ?? AVATAR_IDS[0];
     if (!nextAvatar) {
-      setError("Choose a profile photo.");
+      setError(t.errorChoosePhoto);
       return;
     }
     if (!isValidAvatarId(nextAvatar) && !isDisplayableCustomAvatarUrl(nextAvatar)) {
-      setError("Choose a profile photo.");
+      setError(t.errorChoosePhoto);
       return;
     }
 
@@ -261,7 +270,7 @@ export function ProfileIdentitySheets({
         setSheet(null);
         router.refresh();
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Could not save.");
+        setError(e instanceof Error ? e.message : t.errorCouldNotSave);
       }
     });
   };
@@ -281,7 +290,7 @@ export function ProfileIdentitySheets({
       });
       const payload = await res.json().catch(() => ({}));
       if (!res.ok || !payload.success) {
-        setError(typeof payload.error === "string" ? payload.error : "Could not update.");
+        setError(typeof payload.error === "string" ? payload.error : t.errorCouldNotUpdate);
         return;
       }
       setAvatarId(id);
@@ -290,9 +299,9 @@ export function ProfileIdentitySheets({
     });
   };
 
-  const displayName = nickname.trim() || "Your name";
-  const bioDisplay = bio.trim() ? bio.trim() : "No tagline yet";
-  const schoolLine = schoolSummary ? buildSchoolSubtitle(schoolSummary) : null;
+  const displayName = nickname.trim() || t.displayNamePlaceholder;
+  const bioDisplay = bio.trim() ? bio.trim() : t.taglineEmpty;
+  const schoolLine = schoolSummary ? buildSchoolSubtitle(schoolSummary, t.schoolLineSemester) : null;
   const isCropOpen = avatarCropFile !== null;
 
   const dismissOverlay = useCallback(() => {
@@ -317,10 +326,10 @@ export function ProfileIdentitySheets({
             variant="ghost"
             size="sm"
             onClick={openEditProfile}
-            aria-label="Edit profile"
+            aria-label={t.editProfileAria}
             className="absolute right-2 top-2 z-[1] rounded-full border border-classmates-edge/70 bg-classmates-surface/90 px-3 py-1.5 text-[12px] font-semibold text-classmates-sub shadow-none backdrop-blur-sm hover:border-classmates-edge hover:bg-classmates-blue-soft/60 hover:text-classmates-blue sm:right-3 sm:top-3 sm:px-3.5 dark:border-border dark:bg-card/90 dark:text-zinc-300 dark:hover:text-classmates-blue"
           >
-            Edit profile
+            {t.editProfile}
           </Button>
 
           <div className="flex gap-3 px-3 pb-4 pt-4 pr-[5.25rem] sm:gap-4 sm:px-4 sm:pb-5 sm:pt-5 sm:pr-24">
@@ -330,7 +339,7 @@ export function ProfileIdentitySheets({
                 size={84}
                 className="ring-[4px] ring-classmates-warm-alt shadow-[0_8px_24px_-6px_rgba(15,23,42,0.15)] dark:ring-background"
               />
-              <figcaption className="sr-only">Your profile photo</figcaption>
+              <figcaption className="sr-only">{t.profilePhotoCaption}</figcaption>
             </figure>
             <div className="min-w-0 flex-1 text-left">
               <div className="flex flex-wrap items-center gap-2">
@@ -358,9 +367,10 @@ export function ProfileIdentitySheets({
             variant="outline"
             size="sm"
             onClick={openEditProfile}
+            aria-label={t.editProfileAria}
             className="absolute right-4 top-4 z-[1] rounded-full border-classmates-edge bg-classmates-surface/95 px-3.5 text-[13px] font-semibold text-classmates-blue shadow-sm backdrop-blur-sm dark:border-border dark:bg-card/95"
           >
-            Edit profile
+            {t.editProfile}
           </Button>
 
           <div className="flex flex-col items-center px-4 pb-6 pt-10 text-center sm:px-6 sm:pb-8 sm:pt-12">
@@ -370,7 +380,7 @@ export function ProfileIdentitySheets({
                 size={116}
                 className="ring-[6px] ring-classmates-warm-alt shadow-[0_12px_32px_-8px_rgba(15,23,42,0.18)] dark:ring-background"
               />
-              <figcaption className="sr-only">Your profile photo</figcaption>
+              <figcaption className="sr-only">{t.profilePhotoCaption}</figcaption>
             </figure>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
               <p className="page-screen-title-ink max-w-[18rem] truncate sm:max-w-md">{displayName}</p>
@@ -387,7 +397,7 @@ export function ProfileIdentitySheets({
           </div>
         </div>
       ) : (
-        <nav className="divide-y divide-border" aria-label="Profile">
+        <nav className="divide-y divide-border" aria-label={t.profileRowsNavAria}>
           <button
             type="button"
             className={ROW}
@@ -396,14 +406,14 @@ export function ProfileIdentitySheets({
               setSheet("avatar");
             }}
           >
-            <span className="shrink-0 text-[15px] font-medium text-foreground">Photo</span>
+            <span className="shrink-0 text-[15px] font-medium text-foreground">{t.rowPhoto}</span>
             <span className="flex min-w-0 items-center gap-2">
               <PresetAvatar className="h-11 w-11" id={avatarId} />
               <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50" aria-hidden />
             </span>
           </button>
           <button type="button" className={ROW} onClick={openName}>
-            <span className="shrink-0 text-[15px] font-medium text-foreground">Name</span>
+            <span className="shrink-0 text-[15px] font-medium text-foreground">{t.rowName}</span>
             <span className="flex min-w-0 max-w-[62%] items-center gap-1">
               <span className="truncate text-right text-[14px] text-muted-foreground">
                 {nickname.trim() || "—"}
@@ -412,7 +422,7 @@ export function ProfileIdentitySheets({
             </span>
           </button>
           <button type="button" className={ROW} onClick={openBio}>
-            <span className="shrink-0 text-[15px] font-medium text-foreground">Bio</span>
+            <span className="shrink-0 text-[15px] font-medium text-foreground">{t.rowBio}</span>
             <span className="flex min-w-0 max-w-[62%] items-center gap-1">
               <span className="truncate text-right text-[14px] text-muted-foreground">
                 {bio.trim() ? bio.trim() : "—"}
@@ -442,7 +452,7 @@ export function ProfileIdentitySheets({
               e.target.value = "";
               if (!file || pending) return;
               if (!file.type.startsWith("image/")) {
-                setError("Choose an image file.");
+                setError(t.chooseImageFile);
                 return;
               }
               setAvatarCropFile(file);
@@ -455,15 +465,14 @@ export function ProfileIdentitySheets({
             {isCropOpen && avatarCropFile ? (
               <>
                 <SheetScreenHeader
-                  title="Adjust photo"
+                  title={crop.adjustTitle}
+                  backAriaLabel={t.backAria}
                   disabled={pending}
                   onBack={() => {
                     if (!pending) setAvatarCropFile(null);
                   }}
                 />
-                <p className="px-4 pt-3 text-center text-[12px] text-muted-foreground">
-                  Drag to reposition, then zoom until it looks right in the circle.
-                </p>
+                <p className="px-4 pt-3 text-center text-[12px] text-muted-foreground">{crop.adjustHint}</p>
                 <div className="max-h-[min(82dvh,720px)] overflow-y-auto px-4 pb-4 pt-2">
                   <AvatarCropEditor
                     file={avatarCropFile}
@@ -484,7 +493,8 @@ export function ProfileIdentitySheets({
             {sheet === "edit" && !isCropOpen ? (
               <>
                 <SheetScreenHeader
-                  title="Edit profile"
+                  title={t.editProfileSheetTitle}
+                  backAriaLabel={t.backAria}
                   disabled={pending}
                   onBack={() => setSheet(null)}
                 />
@@ -495,7 +505,7 @@ export function ProfileIdentitySheets({
                       variant="sheet"
                       initialValues={sheetProfileInitialValues}
                       avatarId={avatarId}
-                      submitLabel="Save changes"
+                      submitLabel={pf.saveChanges}
                       onSaved={() => setSheet(null)}
                       requireDirtyToSubmit
                       mePageStructure={false}
@@ -506,14 +516,14 @@ export function ProfileIdentitySheets({
                       className="mt-2 h-9 w-full text-[13px] text-muted-foreground"
                       onClick={() => setSheet(null)}
                     >
-                      Cancel
+                      {common.cancel}
                     </Button>
                   </div>
                 ) : (
                   <>
                     <div className="max-h-[min(70dvh,520px)] overflow-y-auto px-4 py-4">
                       <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                        Photo
+                        {t.photoSectionLabel}
                       </p>
                       <div className="mb-3 flex flex-col items-center gap-2">
                         <button
@@ -524,7 +534,7 @@ export function ProfileIdentitySheets({
                             setSheet("avatar");
                           }}
                           className="group relative rounded-full transition active:scale-[0.98] disabled:opacity-60"
-                          aria-label="Choose profile photo"
+                          aria-label={t.uploadPhoto}
                         >
                           <PresetAvatar
                             id={draftAvatarId}
@@ -534,32 +544,30 @@ export function ProfileIdentitySheets({
                           <span className="absolute inset-0 rounded-full bg-black/0 transition group-hover:bg-black/10" aria-hidden />
                         </button>
                         {isDisplayableCustomAvatarUrl(draftAvatarId) ? (
-                          <p className="text-center text-[11px] text-muted-foreground">Using your uploaded photo</p>
+                          <p className="text-center text-[11px] text-muted-foreground">{t.usingUploadedPhoto}</p>
                         ) : null}
-                        <p className="text-center text-[11px] text-muted-foreground">
-                          Tap avatar to upload or choose a default.
-                        </p>
+                        <p className="text-center text-[11px] text-muted-foreground">{t.tapAvatarHint}</p>
                       </div>
                       <p className="mb-1 mt-5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                        Display name
+                        {t.displayNameLabel}
                       </p>
                       <Input
                         value={draftName}
                         onChange={(e) => setDraftName(e.target.value)}
                         maxLength={32}
-                        placeholder="2–32 characters"
+                        placeholder={t.nameFieldPlaceholder}
                         className="h-11 rounded-[20px] border-classmates-edge bg-muted/40 text-[15px] outline-none transition focus-visible:border-classmates-azure focus-visible:ring-2 focus-visible:ring-classmates-azure/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:border-border"
                       />
                       <p className="mt-1 text-right text-[11px] text-muted-foreground tabular-nums">{draftName.length}/32</p>
                       <p className="mb-1 mt-4 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                        Bio
+                        {t.bioSectionLabel}
                       </p>
                       <Textarea
                         value={draftBio}
                         onChange={(e) => setDraftBio(e.target.value)}
                         maxLength={120}
                         rows={4}
-                        placeholder="Short line about you"
+                        placeholder={t.bioFieldPlaceholder}
                         className="resize-none rounded-[20px] border-classmates-edge bg-muted/40 text-[15px] leading-relaxed outline-none transition focus-visible:border-classmates-azure focus-visible:ring-2 focus-visible:ring-classmates-azure/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:border-border"
                       />
                       <p className="mt-1 text-right text-[11px] text-muted-foreground tabular-nums">{draftBio.length}/120</p>
@@ -572,7 +580,7 @@ export function ProfileIdentitySheets({
                         disabled={pending}
                         onClick={saveEditProfile}
                       >
-                        {pending ? "Saving…" : "Save"}
+                        {pending ? t.saving : t.save}
                       </Button>
                       <Button
                         type="button"
@@ -581,7 +589,7 @@ export function ProfileIdentitySheets({
                         disabled={pending}
                         onClick={() => setSheet(null)}
                       >
-                        Cancel
+                        {common.cancel}
                       </Button>
                     </div>
                   </>
@@ -592,7 +600,8 @@ export function ProfileIdentitySheets({
             {sheet === "avatar" && !isCropOpen ? (
               <>
                 <SheetScreenHeader
-                  title="Photo"
+                  title={t.photoSheetTitle}
+                  backAriaLabel={t.backAria}
                   disabled={pending}
                   onBack={() => setSheet(avatarReturnToEdit ? "edit" : null)}
                 />
@@ -604,7 +613,7 @@ export function ProfileIdentitySheets({
                       className="ring-[3px] ring-classmates-edge ring-offset-2 ring-offset-background dark:ring-border"
                     />
                     {isDisplayableCustomAvatarUrl(avatarId) ? (
-                      <p className="text-center text-[11px] text-muted-foreground">Your uploaded photo</p>
+                      <p className="text-center text-[11px] text-muted-foreground">{t.yourUploadedPhoto}</p>
                     ) : null}
                     <Button
                       type="button"
@@ -616,9 +625,9 @@ export function ProfileIdentitySheets({
                         avatarUploadInputRef.current?.click();
                       }}
                     >
-                      Upload photo
+                      {t.uploadPhoto}
                     </Button>
-                    <p className="text-center text-[10px] text-muted-foreground">Any image format · saved as a square avatar</p>
+                    <p className="text-center text-[10px] text-muted-foreground">{t.avatarFormatsHint}</p>
                   </div>
                   <div className="grid grid-cols-5 gap-3">
                     {AVATAR_IDS.map((id) => (
@@ -633,7 +642,7 @@ export function ProfileIdentitySheets({
                             id === avatarId &&
                             "ring-2 ring-[#ff2442] ring-offset-2 ring-offset-background",
                         )}
-                        aria-label={`Avatar ${id}`}
+                        aria-label={formatMessage(t.avatarPresetAria, { id })}
                         aria-pressed={isValidAvatarId(avatarId) && id === avatarId}
                       >
                         <PresetAvatar className="h-12 w-12" id={id} />
@@ -649,7 +658,7 @@ export function ProfileIdentitySheets({
                     disabled={pending}
                     onClick={() => setSheet(avatarReturnToEdit ? "edit" : null)}
                   >
-                    Cancel
+                    {common.cancel}
                   </Button>
                 </div>
               </>
@@ -658,7 +667,8 @@ export function ProfileIdentitySheets({
             {sheet === "name" && !isCropOpen ? (
               <>
                 <SheetScreenHeader
-                  title="Name"
+                  title={t.rowName}
+                  backAriaLabel={t.backAria}
                   disabled={pending}
                   onBack={() => setSheet(null)}
                 />
@@ -667,7 +677,7 @@ export function ProfileIdentitySheets({
                     value={draftName}
                     onChange={(e) => setDraftName(e.target.value)}
                     maxLength={32}
-                    placeholder="2–32 characters"
+                    placeholder={t.nameFieldPlaceholder}
                     className="h-12 rounded-[20px] border-border bg-muted/40 text-[15px] focus-visible:border-[#ff2442] focus-visible:ring-[#ff2442]/25"
                   />
                   <p className="mt-2 text-right text-[11px] text-muted-foreground tabular-nums">{draftName.length}/32</p>
@@ -680,7 +690,7 @@ export function ProfileIdentitySheets({
                     disabled={pending}
                     onClick={saveName}
                   >
-                    {pending ? "Saving…" : "Save"}
+                    {pending ? t.saving : t.save}
                   </Button>
                 </div>
               </>
@@ -689,7 +699,8 @@ export function ProfileIdentitySheets({
             {sheet === "bio" && !isCropOpen ? (
               <>
                 <SheetScreenHeader
-                  title="Bio"
+                  title={t.rowBio}
+                  backAriaLabel={t.backAria}
                   disabled={pending}
                   onBack={() => setSheet(null)}
                 />
@@ -699,7 +710,7 @@ export function ProfileIdentitySheets({
                     onChange={(e) => setDraftBio(e.target.value)}
                     maxLength={120}
                     rows={5}
-                    placeholder="Short line about you"
+                    placeholder={t.bioFieldPlaceholder}
                     className="min-h-[8rem] resize-none rounded-[20px] border-border bg-muted/40 text-[15px] leading-relaxed focus-visible:border-[#ff2442] focus-visible:ring-[#ff2442]/25"
                   />
                   <p className="mt-2 text-right text-[11px] text-muted-foreground tabular-nums">{draftBio.length}/120</p>
@@ -712,7 +723,7 @@ export function ProfileIdentitySheets({
                     disabled={pending}
                     onClick={saveBio}
                   >
-                    {pending ? "Saving…" : "Save"}
+                    {pending ? t.saving : t.save}
                   </Button>
                 </div>
               </>

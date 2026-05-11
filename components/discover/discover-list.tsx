@@ -2,10 +2,9 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import Link from "next/link";
 import type { Route } from "next";
 import type { RefObject } from "react";
-import { addDays, format } from "date-fns";
+import { addDays } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import {
   BookUser,
@@ -13,7 +12,6 @@ import {
   Edit3,
   Dumbbell,
   Languages,
-  Link2,
   Loader2,
   NotebookPen,
   Plus,
@@ -34,6 +32,7 @@ import {
   ClassmatesPersonRow,
   CLASSMATES_PERSON_ROW_AVATAR_RING_DISCOVER,
 } from "@/components/classmates/classmates-person-row";
+import { DiscoverPostCard } from "@/components/discover/discover-post-card";
 import { DiscoverMessageButton } from "@/components/discover/discover-message-button";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
@@ -41,16 +40,23 @@ import { Input } from "@/components/ui/input";
 import { LinkButton } from "@/components/ui/link-button";
 import { UserGenderCardIcon } from "@/components/ui/user-gender-icon";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
+import type { DiscoverPostCardScene, DiscoverPostRow } from "@/lib/discover/discover-post-row";
 import { LANGUAGE_TAG_LABEL } from "@/lib/constants/languages";
 import {
   buildViewerCourseMatchIndex,
-  courseMatchesViewer,
   type ViewerCourseMatchIndex,
 } from "@/lib/discover/viewer-course-match";
+import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
 import { SCENE_TAB_PALETTE, type SceneTabPalette } from "@/lib/discover/scene-palette";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage, type AppMessages } from "@/lib/i18n/messages";
+import {
+  CLASSMATE_POST_BODY_MAX_LEN,
+  CLASSMATE_POST_TITLE_MAX_LEN,
+} from "@/lib/validators/classmate-posts";
 import { cn } from "@/lib/utils";
 
-type SceneKind = "shared" | "study" | "meals" | "language" | "sports";
+type SceneKind = DiscoverPostCardScene;
 type PostExpiryPreset = "3d" | "1w" | "1m" | "never";
 
 type CourseRef = {
@@ -86,31 +92,7 @@ export type DiscoverRow = {
   connectionId: string | null;
 };
 
-export type DiscoverPostRow = {
-  id: string;
-  category: ClassmatePostCategory;
-  city: string;
-  title: string;
-  body: string | null;
-  expiresAt: Date;
-  isOwn: boolean;
-  userId: string;
-  nickname: string;
-  gender: UserGender;
-  avatarUrl: string | null;
-  major: string | null;
-  semester: number | null;
-  school: string | null;
-  languages: Array<{ tag: LanguageTag; proficiency: LanguageProficiency }>;
-  verifiedStudent: boolean;
-  studentVerificationStatus:
-    | "UNVERIFIED"
-    | "EMAIL_PENDING"
-    | "VERIFIED"
-    | "MANUAL_REVIEW_REQUIRED"
-    | "REJECTED";
-  linkedCourses?: Array<{ id: string; code: string | null; name: string }>;
-};
+export type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
 
 export type EnrolledCourseOption = { id: string; code: string | null; name: string };
 
@@ -176,6 +158,9 @@ export function DiscoverList({
   const [semesterFilter, setSemesterFilter] = useState<string>("All");
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const m = useAppMessages();
+  const dl = m.discoverList;
+  const common = m.common;
   const [postOpen, setPostOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const viewerCourseMatchIndex = buildViewerCourseMatchIndex(enrolledCourses);
@@ -240,14 +225,14 @@ export function DiscoverList({
     schoolFilter !== "All" ? schoolFilter : null,
     majorFilter !== "All" ? majorFilter : null,
     languageFilter !== "All" ? languageFilter : null,
-    semesterFilter !== "All" ? `Sem ${semesterFilter}` : null,
+    semesterFilter !== "All" ? formatMessage(dl.semesterChip, { semester: semesterFilter }) : null,
     statusFilter !== "All" ? statusFilter : null,
   ].filter((value): value is string => Boolean(value));
 
   if (!allowSearch) {
     return (
       <p className="rounded-2xl border border-dashed border-classmates-teal-border/60 bg-classmates-teal-soft/60 px-4 py-6 text-center text-[13px] text-classmates-teal">
-        Sign in to search classmates by name or @handle.
+        {dl.signInToSearch}
       </p>
     );
   }
@@ -256,35 +241,35 @@ export function DiscoverList({
     <div className="space-y-3">
       <div className="grid grid-cols-5 gap-2">
         <SceneTab
-          label="Shared courses"
+          label={dl.sceneTabShared}
           icon={<BookUser className="h-[1.45rem] w-[1.45rem] sm:h-6 sm:w-6" strokeWidth={1.9} aria-hidden />}
           palette="teal"
           active={scene === "shared"}
           onClick={() => setScene("shared")}
         />
         <SceneTab
-          label="Study"
+          label={dl.sceneTabStudy}
           icon={<NotebookPen className="h-[1.45rem] w-[1.45rem] sm:h-6 sm:w-6" strokeWidth={1.9} aria-hidden />}
           palette="indigo"
           active={scene === "study"}
           onClick={() => setScene("study")}
         />
         <SceneTab
-          label="Meals"
+          label={dl.sceneTabMeals}
           icon={<UtensilsCrossed className="h-[1.45rem] w-[1.45rem] sm:h-6 sm:w-6" strokeWidth={1.9} aria-hidden />}
           palette="amber"
           active={scene === "meals"}
           onClick={() => setScene("meals")}
         />
         <SceneTab
-          label="Language"
+          label={dl.sceneTabLanguage}
           icon={<Languages className="h-[1.45rem] w-[1.45rem] sm:h-6 sm:w-6" strokeWidth={1.9} aria-hidden />}
           palette="violet"
           active={scene === "language"}
           onClick={() => setScene("language")}
         />
         <SceneTab
-          label="Sports"
+          label={dl.sceneTabSports}
           icon={<Dumbbell className="h-[1.45rem] w-[1.45rem] sm:h-6 sm:w-6" strokeWidth={1.9} aria-hidden />}
           palette="rose"
           active={scene === "sports"}
@@ -314,6 +299,7 @@ export function DiscoverList({
         }}
         inputRef={inputRef}
         onOpenFilters={() => setFiltersOpen(true)}
+        discoverList={dl}
       />
 
       {searchActive ? (
@@ -326,6 +312,7 @@ export function DiscoverList({
           onOpenPost={() => setPostOpen(true)}
           savedCourseCount={savedCourseCount}
           viewerCourseMatchIndex={viewerCourseMatchIndex}
+          discoverList={dl}
         />
       )}
 
@@ -339,7 +326,7 @@ export function DiscoverList({
           <div className="shrink-0">
             <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border/80" />
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-[15px] font-semibold text-foreground">Filter classmates</h3>
+              <h3 className="text-[15px] font-semibold text-foreground">{dl.filterClassmatesTitle}</h3>
               <button
                 type="button"
                 onClick={() => {
@@ -351,44 +338,54 @@ export function DiscoverList({
                 }}
                 className="text-[12px] font-medium text-classmates-blue hover:text-classmates-blue/80"
               >
-                Reset
+                {common.reset}
               </button>
             </div>
           </div>
 
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto">
             <FilterSection
-              label="School"
+              label={dl.filterSchool}
               options={["All", ...schoolOptions]}
               value={schoolFilter}
               onChange={setSchoolFilter}
+              renderLabel={(v) => (v === "All" ? dl.all : v)}
             />
             <FilterSection
-              label="Major"
+              label={dl.filterMajor}
               options={["All", ...majorOptions]}
               value={majorFilter}
               onChange={setMajorFilter}
+              renderLabel={(v) => (v === "All" ? dl.all : v)}
             />
             <FilterSection
-              label="Language"
+              label={dl.filterLanguage}
               options={["All", ...languageOptions]}
               value={languageFilter}
               onChange={setLanguageFilter}
-              renderLabel={(v) => (v === "All" ? "All" : LANGUAGE_TAG_LABEL[v as LanguageTag] ?? v)}
+              renderLabel={(v) => (v === "All" ? dl.all : LANGUAGE_TAG_LABEL[v as LanguageTag] ?? v)}
             />
             <FilterSection
-              label="Semester"
+              label={dl.filterSemester}
               options={["All", ...semesterOptions.map((value) => String(value))]}
               value={semesterFilter}
               onChange={setSemesterFilter}
-              renderLabel={(value) => (value === "All" ? "All" : `Sem ${value}`)}
+              renderLabel={(value) =>
+                value === "All" ? dl.all : formatMessage(dl.semesterChip, { semester: value })
+              }
             />
             <FilterSection
-              label="Status"
+              label={dl.filterStatus}
               options={["All", "Verified", "Pending", "Unverified"]}
               value={statusFilter}
               onChange={setStatusFilter}
-              renderLabel={(v) => (v === "Pending" ? "Verifying" : v)}
+              renderLabel={(v) => {
+                if (v === "All") return dl.all;
+                if (v === "Verified") return dl.statusVerified;
+                if (v === "Pending") return dl.statusVerifyingLabel;
+                if (v === "Unverified") return dl.statusUnverified;
+                return v;
+              }}
             />
           </div>
 
@@ -397,7 +394,7 @@ export function DiscoverList({
             onClick={() => setFiltersOpen(false)}
             className="mt-auto shrink-0 inline-flex h-11 w-full items-center justify-center rounded-full bg-classmates-blue text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-classmates-blue/90 active:bg-classmates-blue/95"
           >
-            Done
+            {common.done}
           </button>
         </div>
       </AppPushLayer>
@@ -559,12 +556,14 @@ function SearchBar({
   onClear,
   inputRef,
   onOpenFilters,
+  discoverList,
 }: {
   value: string;
   onChange: (v: string) => void;
   onClear: () => void;
   inputRef: RefObject<HTMLInputElement | null>;
   onOpenFilters: () => void;
+  discoverList: AppMessages["discoverList"];
 }) {
   const hasValue = value.length > 0;
   return (
@@ -576,7 +575,7 @@ function SearchBar({
       />
       <Input
         ref={inputRef}
-        placeholder="Search classmates"
+        placeholder={discoverList.searchPlaceholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className={cn(
@@ -592,7 +591,7 @@ function SearchBar({
             <button
               type="button"
               onClick={onClear}
-              aria-label="Clear search"
+              aria-label={discoverList.clearSearchAria}
               className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
               <X className="h-4 w-4" strokeWidth={2.25} />
@@ -602,7 +601,7 @@ function SearchBar({
           <button
             type="button"
             onClick={onOpenFilters}
-            aria-label="Filter classmates"
+            aria-label={discoverList.filterClassmatesAria}
             className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             <SlidersHorizontal className="h-[18px] w-[18px]" strokeWidth={2.25} aria-hidden />
@@ -620,6 +619,7 @@ function RecommendationSurface({
   onOpenPost,
   savedCourseCount,
   viewerCourseMatchIndex,
+  discoverList,
 }: {
   rows: DiscoverRow[];
   posts: DiscoverPostRow[];
@@ -627,6 +627,7 @@ function RecommendationSurface({
   onOpenPost: () => void;
   savedCourseCount?: number;
   viewerCourseMatchIndex: ViewerCourseMatchIndex;
+  discoverList: AppMessages["discoverList"];
 }) {
   const showingShared = scene === "shared";
   const hasItems = showingShared ? rows.length > 0 || posts.length > 0 : posts.length > 0;
@@ -634,15 +635,13 @@ function RecommendationSurface({
   if (!hasItems) {
     return (
       <div className="space-y-3">
-        <SceneHeader scene={scene} onOpenPost={onOpenPost} />
+        <SceneHeader scene={scene} onOpenPost={onOpenPost} discoverList={discoverList} />
         <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-6 text-center text-[13px] text-muted-foreground shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
-          {showingShared
-            ? "No recommendations or posts yet. Tap Post to say what you're looking for in shared courses, or check back as more classmates join."
-            : "No posts in this category yet. Be the first to share what you're looking for."}
+          {showingShared ? discoverList.emptyShared : discoverList.emptyCategory}
           {showingShared && savedCourseCount === 0 ? (
             <div className="mt-4 flex justify-center">
               <LinkButton href={"/courses/add" as Route} size="sm">
-                Add a course
+                {discoverList.addCourse}
               </LinkButton>
             </div>
           ) : null}
@@ -653,7 +652,7 @@ function RecommendationSurface({
 
   return (
     <div className="space-y-3">
-      <SceneHeader scene={scene} onOpenPost={onOpenPost} />
+      <SceneHeader scene={scene} onOpenPost={onOpenPost} discoverList={discoverList} />
 
       <div className="space-y-2.5">
         {showingShared ? (
@@ -688,18 +687,20 @@ function RecommendationSurface({
 function SceneHeader({
   scene,
   onOpenPost,
+  discoverList,
 }: {
   scene: SceneKind;
   onOpenPost?: () => void;
+  discoverList: AppMessages["discoverList"];
 }) {
   return (
     <div className="flex items-start justify-between gap-3 px-1">
       <div className="space-y-1">
         <h3 className="text-sm font-semibold tracking-tight text-foreground">
-          {sceneHeading(scene)}
+          {sceneHeading(scene, discoverList)}
         </h3>
         <p className="text-[12px] leading-snug text-muted-foreground">
-          {sceneDescription(scene)}
+          {sceneDescription(scene, discoverList)}
         </p>
       </div>
       {onOpenPost ? (
@@ -709,40 +710,40 @@ function SceneHeader({
           className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-classmates-blue px-4 text-[13px] font-semibold text-white shadow-[0_4px_14px_-3px_rgba(37,99,235,0.35)] transition-all hover:scale-[1.03] hover:shadow-[0_6px_20px_-3px_rgba(37,99,235,0.4)] active:scale-[0.97]"
         >
           <Plus className="h-[18px] w-[18px]" strokeWidth={2.5} />
-          Post
+          {discoverList.postCta}
         </button>
       ) : null}
     </div>
   );
 }
 
-function sceneHeading(scene: SceneKind) {
+function sceneHeading(scene: SceneKind, dl: AppMessages["discoverList"]) {
   switch (scene) {
     case "shared":
-      return "Shared courses";
+      return dl.sceneHeadingShared;
     case "study":
-      return "Study together";
+      return dl.sceneHeadingStudy;
     case "meals":
-      return "Meals and coffee";
+      return dl.sceneHeadingMeals;
     case "language":
-      return "Language exchange";
+      return dl.sceneHeadingLanguage;
     case "sports":
-      return "Sports";
+      return dl.sceneHeadingSports;
   }
 }
 
-function sceneDescription(scene: SceneKind) {
+function sceneDescription(scene: SceneKind, dl: AppMessages["discoverList"]) {
   switch (scene) {
     case "shared":
-      return "Post what you want in courses you share, plus people ranked by same-class overlap.";
+      return dl.sceneDescShared;
     case "study":
-      return "Posts from students actively looking for study partners and review sessions.";
+      return dl.sceneDescStudy;
     case "meals":
-      return "Students posting about lunch, coffee, or a quick break after class.";
+      return dl.sceneDescMeals;
     case "language":
-      return "Students looking for language exchange or conversation practice.";
+      return dl.sceneDescLanguage;
     case "sports":
-      return "Posts about sports, gym buddies, and active meetups around campus.";
+      return dl.sceneDescSports;
   }
 }
 
@@ -752,6 +753,8 @@ function sceneDescription(scene: SceneKind) {
  * networks and avoids stale results racing fresh ones.
  */
 function UserSearchResults({ query }: { query: string }) {
+  const m = useAppMessages();
+  const dl = m.discoverList;
   const [hits, setHits] = useState<UserSearchHit[]>([]);
   const [searching, setSearching] = useState(false);
 
@@ -787,7 +790,7 @@ function UserSearchResults({ query }: { query: string }) {
   if (searching && hits.length === 0) {
     return (
       <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-6 text-center text-[13px] text-muted-foreground shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
-        Searching…
+        {dl.searching}
       </div>
     );
   }
@@ -795,7 +798,7 @@ function UserSearchResults({ query }: { query: string }) {
   if (!searching && hits.length === 0) {
     return (
       <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-6 text-center text-[13px] text-muted-foreground shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
-        No one matches &ldquo;{query}&rdquo; at your school.
+        {formatMessage(dl.noSearchResults, { query })}
       </div>
     );
   }
@@ -1037,101 +1040,11 @@ function PostRow({
   scene: SceneKind;
   viewerCourseMatchIndex: ViewerCourseMatchIndex;
 }) {
-  const meta = [post.major, post.semester ? `sem ${post.semester}` : null]
-    .filter(Boolean)
-    .join(" · ");
-  const postPath = `/discover/posts/${post.id}`;
-  const returnTo = scene === "shared" ? "/discover" : `/discover?tab=${scene}`;
-  const postDetailHref =
-    `${postPath}?returnTo=${encodeURIComponent(returnTo)}` as Route;
-
   return (
-    <ClassmatesPersonRow
-      avatarHref={postDetailHref}
-      contentHref={postDetailHref}
-      avatarUrl={post.avatarUrl}
-      profileAriaLabel={
-        post.isOwn ? "View your post" : `View ${post.nickname}'s post`
-      }
-      name={post.nickname}
-      titleAdornment={
-        <>
-          <VerifiedBadge
-            size="xs"
-            school={post.school}
-            verifiedStudent={post.verifiedStudent}
-            status={post.studentVerificationStatus}
-          />
-          <UserGenderCardIcon gender={post.gender} className="shrink-0" />
-          {post.isOwn ? (
-            <span className="shrink-0 rounded-full border border-classmates-blue-border/80 bg-classmates-blue-soft px-2 py-0.5 text-[10px] font-semibold text-classmates-blue">
-              your post
-            </span>
-          ) : null}
-        </>
-      }
-      body={
-        <>
-          {meta ? (
-            <p className="mt-1 truncate text-[12px] leading-snug text-muted-foreground">{meta}</p>
-          ) : null}
-          <div className="mt-2 rounded-2xl border border-border/70 bg-muted/30 px-3 py-2.5">
-            <p className="text-[12.5px] font-semibold leading-snug text-foreground/95">
-              {post.title}
-            </p>
-            {post.body ? (
-              <p className="mt-1 line-clamp-2 text-[12px] leading-snug text-foreground/75">
-                {post.body}
-              </p>
-            ) : null}
-          </div>
-          {post.linkedCourses && post.linkedCourses.length > 0 ? (
-            <div className="mt-1.5 flex flex-wrap gap-1">
-              {post.linkedCourses.map((c) => {
-                const matchesViewer = courseMatchesViewer(c, viewerCourseMatchIndex);
-                return (
-                  <span
-                    key={c.id}
-                    className={cn(
-                      "inline-flex max-w-[11rem] items-center gap-1 truncate rounded-full px-2 py-0.5 text-[10px] tabular-nums",
-                      matchesViewer
-                        ? "border-2 border-dashed border-classmates-teal-border bg-classmates-teal-soft/70 font-semibold text-classmates-teal dark:border-teal-500/55 dark:bg-teal-950/35 dark:text-teal-200"
-                        : "border border-classmates-blue-border/60 bg-classmates-blue-soft/50 font-medium text-classmates-blue",
-                    )}
-                    title={
-                      matchesViewer
-                        ? `${c.name} — same course as yours (code or enrollment)`
-                        : c.name
-                    }
-                  >
-                    {matchesViewer ? (
-                      <Link2 className="h-3 w-3 shrink-0 opacity-90" aria-hidden />
-                    ) : null}
-                    <span className="truncate">{c.code ?? c.name}</span>
-                  </span>
-                );
-              })}
-            </div>
-          ) : null}
-          <p className="mt-1 text-[10.5px] text-muted-foreground">
-            {isNeverExpiry(post.expiresAt)
-              ? "No expiry"
-              : `Active until ${format(new Date(post.expiresAt), "MMM d")}`}
-          </p>
-        </>
-      }
-      action={
-        post.isOwn ? undefined : (
-          <DiscoverMessageButton
-            peerId={post.userId}
-            returnTo={postPath}
-            tone="subtle"
-            hasExistingChat={false}
-            insightPostId={post.id}
-            className="h-10 w-full justify-center gap-2 px-6 text-[13px] sm:w-auto sm:min-w-[11.25rem]"
-          />
-        )
-      }
+    <DiscoverPostCard
+      post={post}
+      scene={scene}
+      viewerCourseMatchIndex={viewerCourseMatchIndex}
     />
   );
 }
@@ -1199,6 +1112,14 @@ function passesFilters(
   return true;
 }
 
+function postFieldCharCountClassName(current: number, max: number) {
+  if (current > max) return "text-destructive";
+  const remaining = max - current;
+  const warnThreshold = Math.max(1, Math.ceil(max * 0.12));
+  if (remaining <= warnThreshold) return "text-amber-600 dark:text-amber-400";
+  return "text-muted-foreground";
+}
+
 function CreatePostSheet({
   open,
   scene,
@@ -1212,6 +1133,9 @@ function CreatePostSheet({
   onClose: () => void;
   onCreated: () => void;
 }) {
+  const m = useAppMessages();
+  const dl = m.discoverList;
+  const common = m.common;
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [expiryPreset, setExpiryPreset] = useState<PostExpiryPreset>("1w");
@@ -1245,12 +1169,21 @@ function CreatePostSheet({
   async function submit() {
     if (submitting) return;
     const trimmedTitle = title.trim();
+    const trimmedBody = body.trim();
     if (isSharedScene && selectedCourseIds.size === 0) {
-      setError("Select at least one course to share.");
+      setError(dl.postErrorSelectCourse);
       return;
     }
     if (!trimmedTitle) {
-      setError("Add a short title so classmates know what you’re looking for.");
+      setError(dl.postErrorNeedTitle);
+      return;
+    }
+    if (trimmedTitle.length > CLASSMATE_POST_TITLE_MAX_LEN) {
+      setError(formatMessage(dl.postErrorTitleTooLong, { max: CLASSMATE_POST_TITLE_MAX_LEN }));
+      return;
+    }
+    if (trimmedBody.length > CLASSMATE_POST_BODY_MAX_LEN) {
+      setError(formatMessage(dl.postErrorBodyTooLong, { max: CLASSMATE_POST_BODY_MAX_LEN }));
       return;
     }
     setSubmitting(true);
@@ -1260,10 +1193,10 @@ function CreatePostSheet({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          city: "Munich",
+          city: DEFAULT_DISCOVER_SERVED_CITY,
           category: sceneToCategory(scene),
           title: trimmedTitle,
-          body: body.trim(),
+          body: trimmedBody,
           expiresAt: expiryPresetToDate(expiryPreset).toISOString(),
           ...(isSharedScene && selectedCourseIds.size > 0
             ? { courseIds: [...selectedCourseIds] }
@@ -1277,7 +1210,7 @@ function CreatePostSheet({
       setSubmitting(false);
       onCreated();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to create post.");
+      setError(err instanceof Error ? err.message : dl.postErrorCreateFailed);
       setSubmitting(false);
     }
   }
@@ -1293,16 +1226,16 @@ function CreatePostSheet({
         <div className="mx-auto mb-3 h-1.5 w-12 shrink-0 rounded-full bg-border/80" />
         <div className="mb-3 flex shrink-0 items-start justify-between gap-3">
           <div>
-            <h3 className="text-[15px] font-semibold text-foreground">Post in {sceneHeading(scene)}</h3>
-            <p className="mt-1 text-[12px] leading-snug text-muted-foreground">
-              Share a short note about who or what you&apos;re looking for.
-            </p>
+            <h3 className="text-[15px] font-semibold text-foreground">
+              {dl.postSheetTitlePrefix} {sceneHeading(scene, dl)}
+            </h3>
+            <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{dl.postSheetSubtitle}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
-            aria-label="Close"
+            aria-label={common.close}
           >
             <X className="h-4 w-4" strokeWidth={2.25} />
           </button>
@@ -1313,14 +1246,17 @@ function CreatePostSheet({
             <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
               <div className="mb-1.5 flex items-center justify-between">
                 <p className="text-[11px] font-medium text-muted-foreground">
-                  Which courses? ({selectedCourseIds.size}/{enrolledCourses.length})
+                  {formatMessage(dl.postSheetCoursePicker, {
+                    selected: selectedCourseIds.size,
+                    total: enrolledCourses.length,
+                  })}
                 </p>
                 <button
                   type="button"
                   className="text-[11px] font-medium text-classmates-blue hover:text-classmates-blue/80"
                   onClick={selectedCourseIds.size === enrolledCourses.length ? () => setSelectedCourseIds(new Set()) : selectAllCourses}
                 >
-                  {selectedCourseIds.size === enrolledCourses.length ? "Deselect all" : "Select all"}
+                  {selectedCourseIds.size === enrolledCourses.length ? dl.postSheetDeselectAll : dl.postSheetSelectAll}
                 </button>
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -1346,50 +1282,92 @@ function CreatePostSheet({
             </div>
           ) : isSharedScene && enrolledCourses.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-amber-200/80 bg-amber-50/40 px-3 py-3 text-center text-[12px] text-muted-foreground">
-              You need to enroll in at least one course before posting here.
+              {dl.postSheetNeedEnroll}
             </div>
           ) : null}
 
           <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
-            <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">What are you looking for?</p>
+            <div className="mb-1.5 flex items-start justify-between gap-2">
+              <p className="text-[11px] font-medium text-muted-foreground">{dl.postSheetTitleQuestion}</p>
+              <p
+                className={cn(
+                  "shrink-0 text-[11px] font-normal tabular-nums leading-snug",
+                  postFieldCharCountClassName(title.trim().length, CLASSMATE_POST_TITLE_MAX_LEN),
+                )}
+                aria-label={
+                  title.trim().length <= CLASSMATE_POST_TITLE_MAX_LEN
+                    ? formatMessage(dl.postCharCountRemaining, {
+                        count: CLASSMATE_POST_TITLE_MAX_LEN - title.trim().length,
+                      })
+                    : undefined
+                }
+              >
+                {formatMessage(dl.postCharCountCurrentMax, {
+                  current: title.trim().length,
+                  max: CLASSMATE_POST_TITLE_MAX_LEN,
+                })}
+              </p>
+            </div>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={postPlaceholder(scene)}
+              placeholder={postPlaceholder(scene, dl)}
+              maxLength={CLASSMATE_POST_TITLE_MAX_LEN}
               className="h-11 rounded-xl border-border/70 text-[14px]"
             />
           </div>
 
           <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
-            <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">Optional details</p>
+            <div className="mb-1.5 flex items-start justify-between gap-2">
+              <p className="text-[11px] font-medium text-muted-foreground">{dl.postSheetDetailsLabel}</p>
+              <p
+                className={cn(
+                  "shrink-0 text-[11px] font-normal tabular-nums leading-snug",
+                  postFieldCharCountClassName(body.trim().length, CLASSMATE_POST_BODY_MAX_LEN),
+                )}
+                aria-label={
+                  body.trim().length <= CLASSMATE_POST_BODY_MAX_LEN
+                    ? formatMessage(dl.postCharCountRemaining, {
+                        count: CLASSMATE_POST_BODY_MAX_LEN - body.trim().length,
+                      })
+                    : undefined
+                }
+              >
+                {formatMessage(dl.postCharCountCurrentMax, {
+                  current: body.trim().length,
+                  max: CLASSMATE_POST_BODY_MAX_LEN,
+                })}
+              </p>
+            </div>
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              placeholder="Add a little context if helpful."
+              placeholder={dl.postSheetDetailsPlaceholder}
+              maxLength={CLASSMATE_POST_BODY_MAX_LEN}
               className="min-h-24 w-full resize-none rounded-xl border border-input bg-background px-3 py-2.5 text-[14px] outline-none transition focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
             />
           </div>
 
           <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
-            <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">Expires</p>
+            <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">{dl.postSheetExpiresLabel}</p>
             <div className="flex flex-wrap gap-2">
               <ExpiryOption
-                label="3 days"
+                label={dl.postExpiry3d}
                 active={expiryPreset === "3d"}
                 onClick={() => setExpiryPreset("3d")}
               />
               <ExpiryOption
-                label="1 week"
+                label={dl.postExpiry1w}
                 active={expiryPreset === "1w"}
                 onClick={() => setExpiryPreset("1w")}
               />
               <ExpiryOption
-                label="1 month"
+                label={dl.postExpiry1m}
                 active={expiryPreset === "1m"}
                 onClick={() => setExpiryPreset("1m")}
               />
               <ExpiryOption
-                label="Never"
+                label={dl.postExpiryNever}
                 active={expiryPreset === "never"}
                 onClick={() => setExpiryPreset("never")}
               />
@@ -1401,23 +1379,29 @@ function CreatePostSheet({
 
         <div className="mt-4 flex shrink-0 gap-2">
           <Button type="button" variant="ghost" className="h-11 flex-1 rounded-xl" onClick={onClose}>
-            Cancel
+            {common.cancel}
           </Button>
           <Button
             type="button"
             className="h-11 flex-1 rounded-xl"
             onClick={() => void submit()}
-            disabled={submitting || !title.trim() || (isSharedScene && selectedCourseIds.size === 0)}
+            disabled={
+              submitting ||
+              !title.trim() ||
+              (isSharedScene && selectedCourseIds.size === 0) ||
+              title.trim().length > CLASSMATE_POST_TITLE_MAX_LEN ||
+              body.trim().length > CLASSMATE_POST_BODY_MAX_LEN
+            }
           >
             {submitting ? (
               <>
                 <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                Posting…
+                {dl.postSubmitting}
               </>
             ) : (
               <>
                 <Edit3 className="mr-1.5 h-4 w-4" />
-                Post
+                {dl.postSubmitButton}
               </>
             )}
           </Button>
@@ -1427,18 +1411,18 @@ function CreatePostSheet({
   );
 }
 
-function postPlaceholder(scene: SceneKind) {
+function postPlaceholder(scene: SceneKind, dl: AppMessages["discoverList"]) {
   switch (scene) {
     case "shared":
-      return "Looking for a study partner in Linear Algebra (MA0902)";
+      return dl.postPlaceholderShared;
     case "study":
-      return "Looking for someone to review IN2064 this week";
+      return dl.postPlaceholderStudy;
     case "meals":
-      return "Anyone up for lunch after class near Garching?";
+      return dl.postPlaceholderMeals;
     case "language":
-      return "Want to practice German over coffee";
+      return dl.postPlaceholderLanguage;
     case "sports":
-      return "Looking for a basketball buddy this weekend";
+      return dl.postPlaceholderSports;
   }
 }
 
@@ -1484,8 +1468,4 @@ function endOfDay(date: Date) {
   const next = new Date(date);
   next.setHours(23, 59, 59, 999);
   return next;
-}
-
-function isNeverExpiry(value: Date) {
-  return new Date(value).getUTCFullYear() >= 2099;
 }
