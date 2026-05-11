@@ -1,47 +1,73 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { redirect } from "next/navigation";
-import { Info, LogOut, ShieldBan, UserX } from "lucide-react";
+import { Info, LogOut, ShieldBan, Sparkles, UserX } from "lucide-react";
 
 import { LogoutForm } from "@/components/auth/logout-form";
 import { BackLink } from "@/components/nav/back-link";
 import { PushNotificationsCard } from "@/components/profile/push-notifications-card";
+import { LanguagePreferenceCard } from "@/components/settings/language-preference-card";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
+import { formatMessage, getMessages } from "@/lib/i18n/messages";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
 
 export default async function ProfileAccountPage() {
   const user = await getSessionUser();
   if (!user) redirect('/login');
   if (!user.onboardingComplete) redirect('/onboarding');
 
+  const locale = await getServerAppLocale();
+  const m = getMessages(locale);
   const blockedCount = await prisma.block.count({ where: { blockerId: user.id } });
+  const blockedMeta =
+    blockedCount === 0
+      ? m.account.blockedNone
+      : blockedCount === 1
+        ? m.account.blockedOne
+        : formatMessage(m.account.blockedMany, { count: blockedCount });
 
   return (
     <div className="space-y-5 pb-2">
       <header className="flex items-center gap-2 px-0.5">
-        <BackLink href="/profile" label="Back" />
+        <BackLink href="/profile" label={m.account.back} />
         <div>
-          <h1 className="page-screen-title-ink">Preferences & account</h1>
-          <p className="page-screen-subtitle mt-0.5">Notifications, safety, and support.</p>
+          <h1 className="page-screen-title-ink">{m.account.title}</h1>
+          <p className="page-screen-subtitle mt-0.5">{m.account.subtitle}</p>
         </div>
       </header>
+
+      <LanguagePreferenceCard />
 
       <PushNotificationsCard />
 
       <div className="overflow-hidden rounded-2xl border border-classmates-edge bg-classmates-surface shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card">
         <Link
-          href="/profile/blocked"
+          href="/profile/account?replayTutorial=1"
+          scroll={false}
           className="flex items-center justify-between gap-3 px-4 py-3.5 transition-colors active:bg-classmates-warm-alt dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
+        >
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+              <Sparkles className="h-5 w-5" strokeWidth={2} aria-hidden />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[14px] font-semibold leading-tight text-foreground">{m.account.replayTutorialTitle}</p>
+              <p className="mt-0.5 text-[12px] text-muted-foreground">{m.account.replayTutorialSubtitle}</p>
+            </div>
+          </div>
+        </Link>
+        <Link
+          href="/profile/blocked"
+          className="flex items-center justify-between gap-3 border-t border-classmates-hairline px-4 py-3.5 transition-colors active:bg-classmates-warm-alt dark:border-border/60 dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
         >
           <div className="flex min-w-0 items-center gap-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
               <ShieldBan className="h-5 w-5" strokeWidth={2} aria-hidden />
             </span>
             <div className="min-w-0">
-              <p className="text-[14px] font-semibold leading-tight text-foreground">Blocked users</p>
-              <p className="mt-1 text-[12px] font-medium tabular-nums text-muted-foreground">
-                {blockedCount === 0 ? "None" : `${blockedCount} blocked`}
-              </p>
+              <p className="text-[14px] font-semibold leading-tight text-foreground">{m.account.blockedTitle}</p>
+              <p className="mt-1 text-[12px] font-medium tabular-nums text-muted-foreground">{blockedMeta}</p>
             </div>
           </div>
         </Link>
@@ -54,8 +80,8 @@ export default async function ProfileAccountPage() {
               <Info className="h-5 w-5" strokeWidth={2} aria-hidden />
             </span>
             <div className="min-w-0">
-              <p className="text-[14px] font-semibold leading-tight text-foreground">About</p>
-              <p className="mt-0.5 text-[12px] text-muted-foreground">Product summary and how to reach us by email</p>
+              <p className="text-[14px] font-semibold leading-tight text-foreground">{m.account.aboutTitle}</p>
+              <p className="mt-0.5 text-[12px] text-muted-foreground">{m.account.aboutSubtitle}</p>
             </div>
           </div>
         </Link>
@@ -68,10 +94,8 @@ export default async function ProfileAccountPage() {
               <UserX className="h-5 w-5" strokeWidth={2} aria-hidden />
             </span>
             <div className="min-w-0">
-              <p className="text-[14px] font-semibold leading-tight text-destructive">Delete account</p>
-              <p className="mt-0.5 text-[12px] text-muted-foreground">
-                Permanently remove your profile, data, and access.
-              </p>
+              <p className="text-[14px] font-semibold leading-tight text-destructive">{m.account.deleteTitle}</p>
+              <p className="mt-0.5 text-[12px] text-muted-foreground">{m.account.deleteSubtitle}</p>
             </div>
           </div>
         </Link>
@@ -83,7 +107,7 @@ export default async function ProfileAccountPage() {
           className="flex w-full items-center justify-center gap-2 rounded-full border border-classmates-edge bg-classmates-surface px-4 py-3 text-[14px] font-semibold text-classmates-ink shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors active:bg-classmates-warm-alt dark:border-border dark:bg-card dark:text-foreground dark:active:bg-muted/40 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
         >
           <LogOut className="h-4 w-4 shrink-0 opacity-70" strokeWidth={2} aria-hidden />
-          Log out
+          {m.account.logOut}
         </button>
       </LogoutForm>
     </div>

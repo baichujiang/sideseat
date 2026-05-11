@@ -34,7 +34,6 @@ import {
   ClassmatesPersonRow,
   CLASSMATES_PERSON_ROW_AVATAR_RING_DISCOVER,
 } from "@/components/classmates/classmates-person-row";
-import { ClassmatePostShareToXhsButton } from "@/components/discover/classmate-post-share-xhs-button";
 import { DiscoverMessageButton } from "@/components/discover/discover-message-button";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
@@ -1076,10 +1075,16 @@ function PostRow({
           {meta ? (
             <p className="mt-1 truncate text-[12px] leading-snug text-muted-foreground">{meta}</p>
           ) : null}
-          <p className="mt-1 text-[12px] font-medium leading-snug text-foreground/90">{post.title}</p>
-          {post.body ? (
-            <p className="mt-0.5 text-[12px] leading-snug text-foreground/75">{post.body}</p>
-          ) : null}
+          <div className="mt-2 rounded-2xl border border-border/70 bg-muted/30 px-3 py-2.5">
+            <p className="text-[12.5px] font-semibold leading-snug text-foreground/95">
+              {post.title}
+            </p>
+            {post.body ? (
+              <p className="mt-1 line-clamp-2 text-[12px] leading-snug text-foreground/75">
+                {post.body}
+              </p>
+            ) : null}
+          </div>
           {post.linkedCourses && post.linkedCourses.length > 0 ? (
             <div className="mt-1.5 flex flex-wrap gap-1">
               {post.linkedCourses.map((c) => {
@@ -1116,14 +1121,7 @@ function PostRow({
         </>
       }
       action={
-        post.isOwn ? (
-          <ClassmatePostShareToXhsButton
-            title={post.title}
-            body={post.body}
-            postPath={postPath}
-            variant="compact"
-          />
-        ) : (
+        post.isOwn ? undefined : (
           <DiscoverMessageButton
             peerId={post.userId}
             returnTo={postPath}

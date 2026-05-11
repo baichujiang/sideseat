@@ -6,19 +6,13 @@ import { usePathname } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { BookOpen, Calendar, Inbox, UsersRound, UserRound } from "lucide-react";
 
+import { ProductTutorialGate, type ProductTutorialGateContext } from "@/components/app/product-tutorial-gate";
 import { EdgeSwipeBack } from "@/components/layout/edge-swipe-back";
 import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
+import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { PwaInstallBar } from "@/components/pwa/pwa-install-bar";
 import { apiFetch } from "@/lib/auth/api-fetch";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { href: "/home", label: "Home", icon: Calendar },
-  { href: "/courses", label: "Courses", icon: BookOpen },
-  { href: "/discover", label: "Classmates", icon: UsersRound },
-  { href: "/inbox", label: "Chats", icon: Inbox },
-  { href: "/profile", label: "Me", icon: UserRound },
-] satisfies Array<{ href: Route; label: string; icon: typeof Calendar }>;
 
 /** Flat bar: light tint only (no nested “card” / shadow), like native tab selection. */
 const navActiveTab =
@@ -30,11 +24,22 @@ const navInactiveTab =
 export function AppShell({
   children,
   inboxUnreadTotal = 0,
+  productTutorialContext = null,
 }: {
   children: React.ReactNode;
   /** Total unread DM + course-room messages (same as inbox bundle). */
   inboxUnreadTotal?: number;
+  productTutorialContext?: ProductTutorialGateContext | null;
 }) {
+  const { messages: m } = useLocaleContext();
+  const navItems = [
+    { href: "/home", label: m.nav.home, icon: Calendar },
+    { href: "/courses", label: m.nav.courses, icon: BookOpen },
+    { href: "/discover", label: m.nav.classmates, icon: UsersRound },
+    { href: "/inbox", label: m.nav.chats, icon: Inbox },
+    { href: "/profile", label: m.nav.me, icon: UserRound },
+  ] satisfies Array<{ href: Route; label: string; icon: typeof Calendar }>;
+
   const pathname = usePathname();
   const shellRef = useRef<HTMLDivElement>(null);
   const swipeBounds = useCallback(() => shellRef.current?.getBoundingClientRect() ?? null, []);
@@ -113,6 +118,7 @@ export function AppShell({
       <Suspense fallback={null}>
         <EdgeSwipeBack getBounds={swipeBounds} />
       </Suspense>
+      <ProductTutorialGate context={productTutorialContext} />
       <main
         className={cn(
           "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden",
@@ -128,7 +134,7 @@ export function AppShell({
       {isChatThread ? null : (
         <nav
           className="fixed bottom-0 left-1/2 z-20 flex w-full max-w-md -translate-x-1/2 items-stretch border-t border-classmates-edge/80 bg-classmates-warm-alt/95 px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1.5 backdrop-blur-xl supports-[backdrop-filter]:bg-classmates-warm-alt/92 dark:border-border/50 dark:bg-background/92"
-          aria-label="Main navigation"
+          aria-label={m.nav.mainNavAria}
         >
           {navItems.map((item) => {
             const Icon = item.icon;

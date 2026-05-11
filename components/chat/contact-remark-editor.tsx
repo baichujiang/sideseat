@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiFetch } from "@/lib/auth/api-fetch";
 import { CONTACT_REMARK_MAX_LEN } from "@/lib/connections/contact-remark";
+import {
+  profileFieldMicroLabelClassName,
+  profileSettingsInputClassName,
+} from "@/lib/ui/profile-settings-control";
 
 const REMARK_PLACEHOLDER = "Private name or note";
 
@@ -91,28 +95,30 @@ export function ContactRemarkEditor({
   }
 
   if (variant === "underName") {
+    const label = isSelfNotes ? "Notes chat title" : "Private note";
     return (
       <div className="w-full min-w-0">
-        <div className="flex gap-2">
+        <span className={profileFieldMicroLabelClassName}>{label}</span>
+        <div className="flex w-full min-w-0 items-stretch gap-2">
           <Input
             value={value}
             onChange={(e) => setValue(e.target.value.slice(0, CONTACT_REMARK_MAX_LEN))}
             maxLength={CONTACT_REMARK_MAX_LEN}
             placeholder={REMARK_PLACEHOLDER}
             aria-label={REMARK_PLACEHOLDER}
-            className="h-8 min-w-0 flex-1 border-classmates-edge/80 bg-background/70 text-[13px] shadow-none dark:border-border dark:bg-background/50"
+            className={profileSettingsInputClassName("min-w-0 flex-1 shadow-none")}
           />
           <Button
             type="button"
-            size="sm"
-            className="h-8 shrink-0 px-3 text-[12px]"
+            variant="outline"
+            className="h-11 shrink-0 rounded-[20px] border-classmates-edge px-4 text-[13px] font-semibold dark:border-border"
             disabled={saving || !dirty}
             onClick={() => void save()}
           >
             {saving ? "…" : "Save"}
           </Button>
         </div>
-        {error ? <p className="mt-1 text-[11px] text-destructive">{error}</p> : null}
+        {error ? <p className="mt-1.5 text-[12px] text-destructive">{error}</p> : null}
       </div>
     );
   }

@@ -625,7 +625,7 @@ function CategoryPickerRow({
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between py-3 text-[15px]"
       >
-        <span className="font-medium text-foreground">Category</span>
+        <span className="font-medium text-foreground">Calendar</span>
         <span className="inline-flex items-center gap-2 text-right">
           {selected ? (
             <>

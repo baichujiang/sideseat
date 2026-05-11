@@ -1,3 +1,4 @@
+import type { ComponentProps, ReactNode } from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import { redirect, notFound } from "next/navigation";
@@ -7,7 +8,7 @@ import { Calendar, ChevronRight, Link2, MapPin } from "lucide-react";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { ClassmatePostDetailViewBeacon } from "@/components/discover/classmate-post-detail-view-beacon";
-import { ClassmatePostShareToXhsButton } from "@/components/discover/classmate-post-share-xhs-button";
+import { ClassmatePostDetailShareMenu } from "@/components/discover/classmate-post-detail-share-menu";
 import { DiscoverMessageButton } from "@/components/discover/discover-message-button";
 import { BackLink } from "@/components/nav/back-link";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
@@ -34,7 +35,7 @@ type AuthorDisplay = {
   semester: number | null;
   school: string | null;
   verifiedStudent: boolean;
-  studentVerificationStatus: React.ComponentProps<typeof VerifiedBadge>["status"];
+  studentVerificationStatus: ComponentProps<typeof VerifiedBadge>["status"];
 };
 
 /** Shared shell for post detail CTAs (peer message or author “My posts” link). */
@@ -43,9 +44,6 @@ const POST_DETAIL_ACTION_FOOTER =
 
 const POST_DETAIL_PRIMARY_CTA =
   "h-12 w-full min-w-0 flex-1 justify-center gap-2 rounded-2xl px-6 text-[14px] font-semibold shadow-[0_4px_14px_rgba(37,99,235,0.22)] sm:min-h-[3rem] dark:shadow-[0_4px_18px_rgba(37,99,235,0.18)]";
-
-const POST_DETAIL_SECONDARY_CTA =
-  "inline-flex h-12 w-full min-w-0 shrink-0 items-center justify-center gap-2 rounded-2xl border-2 border-border bg-card px-5 text-[14px] font-semibold text-foreground transition-colors hover:bg-muted/70 active:bg-muted sm:flex-1";
 
 export default async function DiscoverPostDetailPage({
   params,
@@ -93,6 +91,7 @@ export default async function DiscoverPostDetailPage({
             author={author}
             profileHref={profilePeerHref}
             showProfileCue
+            topEnd={null}
           />
 
           <PostContentSection
@@ -164,6 +163,15 @@ export default async function DiscoverPostDetailPage({
           author={author}
           profileHref={profilePeerHref}
           showProfileCue={!isAuthor}
+          topEnd={
+            isAuthor ? (
+              <ClassmatePostDetailShareMenu
+                title={post.title}
+                body={post.body}
+                postPath={postPath}
+              />
+            ) : null
+          }
         />
 
         <PostContentSection
@@ -199,27 +207,16 @@ export default async function DiscoverPostDetailPage({
           </div>
         ) : isAuthor ? (
           <div className={POST_DETAIL_ACTION_FOOTER}>
-            <p className="mb-4 max-w-prose text-[13px] leading-relaxed text-muted-foreground">
-              Edit this listing from <span className="font-medium text-foreground/80">My posts</span>. Share text
-              below to <span className="font-medium text-foreground/80">小红书</span> — paste into a new note.
-            </p>
             <div className="flex flex-col gap-2.5 sm:flex-row sm:items-stretch sm:gap-3">
               <Link
                 href={`/inbox/my-posts?returnTo=${encodeURIComponent(postPath)}` as Route}
                 className={cn(
                   POST_DETAIL_PRIMARY_CTA,
-                  "inline-flex items-center justify-center no-underline sm:min-w-0 sm:flex-1",
+                  "inline-flex items-center justify-center no-underline sm:min-w-0 sm:w-full",
                 )}
               >
                 My posts
               </Link>
-              <ClassmatePostShareToXhsButton
-                title={post.title}
-                body={post.body}
-                postPath={postPath}
-                variant="detail"
-                className={POST_DETAIL_SECONDARY_CTA}
-              />
             </div>
           </div>
         ) : null}
@@ -232,10 +229,12 @@ function PostAuthorSection({
   author,
   profileHref,
   showProfileCue,
+  topEnd,
 }: {
   author: AuthorDisplay;
   profileHref: Route;
   showProfileCue: boolean;
+  topEnd: ReactNode;
 }) {
   const displayName = author.nickname ?? author.username;
   const subtitle =
@@ -244,7 +243,7 @@ function PostAuthorSection({
       .join(" · ") || "Student";
 
   return (
-    <div className="border-b border-border/60 px-4 py-4 sm:px-5 sm:py-5">
+    <div className="border-b border-border/70 bg-muted/20 px-4 py-4 sm:px-5 sm:py-5">
       <div className="flex items-start gap-3.5">
         <Link href={profileHref} className="shrink-0 rounded-full ring-2 ring-background">
           <PresetAvatar id={author.avatarUrl} size={56} />
@@ -270,6 +269,7 @@ function PostAuthorSection({
           </Link>
           <p className="mt-1 text-[13px] text-muted-foreground">{subtitle}</p>
         </div>
+        {topEnd}
       </div>
     </div>
   );
@@ -334,7 +334,7 @@ function PostContentSection({
         )}
       </div>
 
-      <div>
+      <div className="rounded-2xl border border-border/70 bg-muted/30 px-3.5 py-3.5 sm:px-4 sm:py-4">
         <h1 className="text-xl font-semibold leading-snug tracking-tight text-foreground">
           {title}
         </h1>

@@ -10,69 +10,45 @@ import { StudentVerificationForm } from "@/components/forms/student-verification
 import { MePageInstallCard } from "@/components/pwa/me-page-install-card";
 import { ProfileIdentitySheets } from "@/components/profile/profile-identity-sheets";
 import { MePageSection } from "@/components/profile/me-page-section";
-import { ContactRemarkEditor } from "@/components/chat/contact-remark-editor";
 import { FeedbackFormCard } from "@/components/profile/feedback-form-card";
 import { TipSupportCard } from "@/components/profile/tip-support-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { getSessionUser } from "@/lib/auth/session";
 import { isConfiguredAdmin } from "@/lib/constants/app";
+import { formatMessage, getMessages } from "@/lib/i18n/messages";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { DEGREE_LEVEL_LABELS } from "@/lib/constants/majors";
 import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
 import { profileLanguagesFormDefault } from "@/lib/constants/languages";
-import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
 import { prisma } from "@/lib/db/prisma";
-import { findOrCreateSelfNotesConnection } from "@/lib/queries/self-notes-connection";
-import { cn } from "@/lib/utils";
+
 function MeDestRow({
   href,
   icon: Icon,
   title,
   subtitle,
-  compact = false,
 }: {
   href: Route;
   icon: LucideIcon;
   title: string;
   subtitle: string;
-  compact?: boolean;
 }) {
   return (
     <Link
       href={href}
-      className={cn(
-        "flex items-center justify-between gap-3 transition-colors active:bg-classmates-warm-alt dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25",
-        compact ? "px-3 py-2.5" : "px-4 py-3.5",
-      )}
+      className="flex items-center justify-between gap-3 px-4 py-3.5 transition-colors active:bg-classmates-warm-alt dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
     >
-      <div className={cn("flex min-w-0 items-center", compact ? "gap-2.5" : "gap-3")}>
-        <span
-          className={cn(
-            "flex shrink-0 items-center justify-center rounded-full bg-muted/80 text-muted-foreground",
-            compact ? "h-8 w-8" : "h-10 w-10",
-          )}
-        >
-          <Icon className={compact ? "h-4 w-4" : "h-5 w-5"} strokeWidth={2} aria-hidden />
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted/80 text-muted-foreground">
+          <Icon className="h-5 w-5" strokeWidth={2} aria-hidden />
         </span>
         <div className="min-w-0">
-          <p className={cn("font-semibold leading-tight text-foreground", compact ? "text-[13px]" : "text-[14px]")}>
-            {title}
-          </p>
-          <p
-            className={cn(
-              "leading-snug text-muted-foreground",
-              compact ? "mt-0.5 text-[11px]" : "mt-0.5 text-[12px]",
-            )}
-          >
-            {subtitle}
-          </p>
+          <p className="text-[14px] font-semibold leading-tight text-foreground">{title}</p>
+          <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">{subtitle}</p>
         </div>
       </div>
-      <ChevronRight
-        className={cn("shrink-0 text-muted-foreground/50", compact ? "h-4 w-4" : "h-5 w-5")}
-        strokeWidth={2}
-        aria-hidden
-      />
+      <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground/50" strokeWidth={2} aria-hidden />
     </Link>
   );
 }
@@ -138,19 +114,8 @@ export default async function ProfilePage({
 
   const blockedCount = await prisma.block.count({ where: { blockerId: user.id } });
   const isAdmin = isConfiguredAdmin(user);
-
-  const { connectionId: selfNotesConnectionId } = await findOrCreateSelfNotesConnection(user.id);
-  const selfNotesConnection = await prisma.connection.findUnique({
-    where: { id: selfNotesConnectionId },
-    select: {
-      userAId: true,
-      userBId: true,
-      contactRemarkByA: true,
-      contactRemarkByB: true,
-    },
-  });
-  const selfNotesRemark =
-    selfNotesConnection != null ? contactRemarkForViewer(selfNotesConnection, user.id) : null;
+  const locale = await getServerAppLocale();
+  const ui = getMessages(locale);
 
   const profileForSheet = await prisma.user.findUnique({
     where: { id: user.id },
@@ -163,17 +128,37 @@ export default async function ProfilePage({
 
   const settingsSubtitle =
     blockedCount === 0
-      ? "Notifications, blocked users, about, delete account"
+      ? ui.profile.preferencesSubtitleNone
       : blockedCount === 1
-        ? "Notifications, 1 blocked user, about, delete account"
-        : `Notifications, ${blockedCount} blocked users, about, delete account`;
+        ? ui.profile.preferencesSubtitleOne
+        : formatMessage(ui.profile.preferencesSubtitleMany, { count: blockedCount });
 
   return (
     <div className="space-y-3 pb-2">
       <header className="px-0.5">
+        {isAdmin ? (
+          <nav
+            className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-border/60 pb-2"
+            aria-label="Admin tools"
+          >
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Admin</span>
+            <Link className="rounded-full bg-[#e5f1ee] px-2 py-0.5 text-[11px] font-semibold text-[#20524d]" href="/admin/reports">
+              Reports
+            </Link>
+            <Link className="rounded-full bg-[#f4ede0] px-2 py-0.5 text-[11px] font-semibold text-[#6f4d1c]" href="/admin/verifications">
+              Verify
+            </Link>
+            <Link className="rounded-full bg-[#eceaf5] px-2 py-0.5 text-[11px] font-semibold text-[#3f3473]" href="/admin/users">
+              Users
+            </Link>
+            <Link className="rounded-full bg-[#e8f4fc] px-2 py-0.5 text-[11px] font-semibold text-[#1e4976]" href="/admin/feedback">
+              Feedback
+            </Link>
+          </nav>
+        ) : null}
         <h1 className="page-screen-title">Me</h1>
         <p className="page-screen-subtitle mt-0.5">
-          Your public card and verification first — install, tips, feedback, and account settings below.
+          Your public card and verification first — then app install, support, and account in a compact list below.
         </p>
       </header>
 
@@ -192,13 +177,13 @@ export default async function ProfilePage({
 
       {query.tip === "success" ? (
         <p className="rounded-xl border border-[#d5e9df] bg-[#eef8f2] px-3 py-2 text-[13px] text-foreground">
-          Payment completed — thank you for your support.
+          Thank you — that really helps. Your tip went through.
         </p>
       ) : null}
 
       {query.tip === "cancel" ? (
         <p className="rounded-xl border border-border/70 bg-muted/40 px-3 py-2 text-[13px] text-muted-foreground">
-          Checkout was cancelled. No charge was made.
+          No worries — you left checkout before paying, so nothing was charged.
         </p>
       ) : null}
 
@@ -208,14 +193,6 @@ export default async function ProfilePage({
           <ProfileIdentitySheets
             variant="summary"
             gender={user.gender}
-            belowDisplayName={
-              <ContactRemarkEditor
-                connectionId={selfNotesConnectionId}
-                initialRemark={selfNotesRemark}
-                isSelfNotes
-                variant="underName"
-              />
-            }
             sheetProfileFormKey={sheetProfileFormKey}
             sheetProfileInitialValues={{
               nickname: user.nickname ?? "",
@@ -263,57 +240,32 @@ export default async function ProfilePage({
 
       {/* App, support, account, sign out */}
       <div className="space-y-3 border-t border-border/60 pt-4">
-        {isAdmin ? (
-          <div className="flex flex-wrap gap-1.5 rounded-lg border border-border/80 bg-muted/30 px-2.5 py-2">
-            <span className="w-full text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Admin</span>
-            <Link className="rounded-full bg-[#e5f1ee] px-2.5 py-1 text-[11px] font-semibold text-[#20524d]" href="/admin/reports">
-              Reports
-            </Link>
-            <Link className="rounded-full bg-[#f4ede0] px-2.5 py-1 text-[11px] font-semibold text-[#6f4d1c]" href="/admin/verifications">
-              Verify
-            </Link>
-            <Link className="rounded-full bg-[#eceaf5] px-2.5 py-1 text-[11px] font-semibold text-[#3f3473]" href="/admin/users">
-              Users
-            </Link>
-            <Link className="rounded-full bg-[#e8f4fc] px-2.5 py-1 text-[11px] font-semibold text-[#1e4976]" href="/admin/feedback">
-              Feedback
-            </Link>
-          </div>
-        ) : null}
-
-        <MePageSection
-          id="me-app-support-heading"
-          title="App & support"
-          description="Install the app, optional tip, and send product feedback."
-          density="compact"
-        >
-          <div className="space-y-2">
-            <MePageInstallCard compact />
-            <TipSupportCard enabled={tipsEnabled} compact />
-            <FeedbackFormCard compact />
-          </div>
-        </MePageSection>
-
         <div className="overflow-hidden rounded-xl border border-classmates-edge bg-classmates-surface shadow-[0_2px_10px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card">
-          <MeDestRow
-            compact
-            href={'/profile/account' as Route}
-            icon={Settings}
-            title="Preferences & account"
-            subtitle={settingsSubtitle}
-          />
-        </div>
-
-        <div className="border-t border-border/50 pt-3">
-          <LogoutForm className="block">
-            <button
-              type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-classmates-edge bg-classmates-surface px-3 py-2.5 text-[13px] font-semibold text-classmates-ink shadow-sm transition-colors active:bg-classmates-warm-alt dark:border-border dark:bg-card dark:text-foreground dark:active:bg-muted/40 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
-            >
-              <LogOut className="h-4 w-4 shrink-0 opacity-70" strokeWidth={2} aria-hidden />
-              Log out
-            </button>
-          </LogoutForm>
+          <div className="divide-y divide-classmates-hairline dark:divide-border/60">
+            <MePageInstallCard inList />
+            {tipsEnabled ? <TipSupportCard enabled inList /> : null}
+            <FeedbackFormCard variant="listRow" />
+            <MeDestRow
+              href={'/profile/account' as Route}
+              icon={Settings}
+              title={ui.profile.preferencesTitle}
+              subtitle={settingsSubtitle}
+            />
+            <LogoutForm className="block">
+              <button
+                type="submit"
+                className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors active:bg-classmates-warm-alt dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted/80 text-muted-foreground">
+                  <LogOut className="h-5 w-5 opacity-80" strokeWidth={2} aria-hidden />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] font-semibold leading-tight text-foreground">Log out</p>
+                  <p className="mt-0.5 text-[12px] text-muted-foreground">Sign out on this device</p>
+                </div>
+              </button>
+            </LogoutForm>
+          </div>
         </div>
       </div>
     </div>

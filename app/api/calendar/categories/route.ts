@@ -1,5 +1,9 @@
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { ensureUserCalendarCategories } from "@/lib/calendar/default-user-calendar-categories";
+import {
+  assertPublicHttpUrlForIcsFetch,
+  normalizeCalendarSubscriptionUrl,
+} from "@/lib/calendar/subscription-url";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
 import { calendarCategoryCreateSchema } from "@/lib/validators/calendar";
@@ -17,12 +21,13 @@ export async function GET() {
         color: true,
         sortOrder: true,
         presetKey: true,
+        icsSubscriptionUrl: true,
       },
     });
     return ok(rows);
   } catch (cause) {
     console.error(cause);
-    return error("Could not load calendar categories.");
+    return error("Could not load calendars.");
   }
 }
 
@@ -30,6 +35,15 @@ export async function POST(request: Request) {
   try {
     const user = await requireOnboardedUser();
     const body = await parseJson(request, calendarCategoryCreateSchema);
+    const rawSub = body.icsSubscriptionUrl?.trim();
+    const icsSubscriptionUrl = rawSub ? normalizeCalendarSubscriptionUrl(rawSub) : undefined;
+    if (icsSubscriptionUrl) {
+      try {
+        assertPublicHttpUrlForIcsFetch(icsSubscriptionUrl);
+      } catch (e) {
+        return error(e instanceof Error ? e.message : "Invalid calendar URL.");
+      }
+    }
     const last = await prisma.userCalendarCategory.findFirst({
       where: { userId: user.id },
       orderBy: { sortOrder: "desc" },
@@ -43,6 +57,7 @@ export async function POST(request: Request) {
         color: body.color,
         sortOrder,
         presetKey: null,
+        ...(icsSubscriptionUrl ? { icsSubscriptionUrl } : {}),
       },
       select: {
         id: true,
@@ -50,11 +65,12 @@ export async function POST(request: Request) {
         color: true,
         sortOrder: true,
         presetKey: true,
+        icsSubscriptionUrl: true,
       },
     });
     return ok(row, { status: 201 });
   } catch (cause) {
     console.error(cause);
-    return error("Could not create calendar category.");
+    return error("Could not create calendar.");
   }
 }

@@ -2,11 +2,12 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CornerUpLeft, Copy, Flag, Trash2, MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useChatReply } from "@/components/chat/chat-reply-context";
 import { cn } from "@/lib/utils";
 
@@ -38,13 +39,8 @@ const REPORT_REASONS = [
  *  - click on the "…" affordance that shows next to the bubble on hover
  *    (desktop / touch-as-mouse)
  *
- * The menu renders as a compact popover anchored to the triggering bubble's
- * alignment edge. Positioning is viewport-clamped so it never overflows.
- *
- * Items depend on ownership:
- *  - Reply, Copy  → everyone
- *  - Delete       → message sender only
- *  - Report       → everyone except the sender
+ * Content is portaled with Radix collision handling so it stays within the
+ * viewport and is not clipped by the chat scroll container.
  */
 export function MessageActionMenu({
   anchorClassName,
@@ -60,42 +56,21 @@ export function MessageActionMenu({
 }) {
   const router = useRouter();
   const { setReplyTo } = useChatReply();
-  const [open, setOpen] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const sheetRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open && !reportOpen) return;
-    const onDoc = (e: MouseEvent | TouchEvent) => {
-      const el = sheetRef.current;
-      if (el && e.target instanceof Node && !el.contains(e.target)) {
-        setOpen(false);
-        setReportOpen(false);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpen(false);
-        setReportOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onDoc);
-    document.addEventListener("touchstart", onDoc, { passive: true });
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDoc);
-      document.removeEventListener("touchstart", onDoc);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open, reportOpen]);
+  const handleOpenChange = (next: boolean) => {
+    setPopoverOpen(next);
+    if (!next) {
+      setReportOpen(false);
+      setErr(null);
+    }
+  };
 
   const close = () => {
-    setOpen(false);
-    setReportOpen(false);
-    setErr(null);
+    handleOpenChange(false);
   };
 
   const copy = async () => {
@@ -163,71 +138,78 @@ export function MessageActionMenu({
   };
 
   return (
-    <div
-      className="relative inline-flex self-center"
-      onContextMenu={(e) => {
-        e.preventDefault();
-        setOpen(true);
-      }}
-    >
-      <button
-        ref={triggerRef}
-        type="button"
-        aria-label="Message actions"
-        onClick={() => setOpen((v) => !v)}
-        className={cn(
-          "inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground/70 opacity-0 transition hover:bg-muted hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100 active:opacity-100 sm:group-hover:opacity-100",
-          anchorClassName,
-        )}
+    <Popover open={popoverOpen} onOpenChange={handleOpenChange} modal>
+      <div
+        className="inline-flex self-center"
+        onContextMenu={(e) => {
+          e.preventDefault();
+          setReportOpen(false);
+          setErr(null);
+          setPopoverOpen(true);
+        }}
       >
-        <MoreHorizontal className="h-4 w-4" strokeWidth={2} />
-      </button>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            aria-label="Message actions"
+            aria-expanded={popoverOpen}
+            className={cn(
+              "inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground/70 opacity-0 transition hover:bg-muted hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100 active:opacity-100 sm:group-hover:opacity-100",
+              anchorClassName,
+            )}
+          >
+            <MoreHorizontal className="h-4 w-4" strokeWidth={2} />
+          </button>
+        </PopoverTrigger>
+      </div>
 
-      {open && !reportOpen ? (
-        <div
-          ref={sheetRef}
-          role="menu"
-          className={cn(
-            "absolute bottom-8 z-20 min-w-[160px] rounded-xl border border-border bg-popover p-1 text-sm shadow-lg",
-            isOwn ? "right-0" : "left-0",
-          )}
-        >
-          <MenuItem icon={CornerUpLeft} label="Reply" onClick={doReply} />
-          <MenuItem icon={Copy} label="Copy" onClick={copy} />
-          {isOwn ? (
-            <MenuItem
-              icon={Trash2}
-              label={busy ? "Deleting…" : "Delete"}
-              onClick={remove}
-              destructive
-            />
-          ) : (
-            <MenuItem
-              icon={Flag}
-              label="Report message"
-              onClick={() => setReportOpen(true)}
-              destructive
-            />
-          )}
-          {err ? (
-            <p className="px-2.5 py-1.5 text-[11px] text-destructive">{err}</p>
-          ) : null}
-        </div>
-      ) : null}
-
-      {reportOpen ? (
-        <ReportForm
-          sheetRef={sheetRef}
-          isOwn={isOwn}
-          busy={busy}
-          err={err}
-          onSubmit={(reason, details) => {
-            void report(reason, details);
-          }}
-          onCancel={close}
-        />
-      ) : null}
-    </div>
+      <PopoverContent
+        side="top"
+        sideOffset={8}
+        align={isOwn ? "end" : "start"}
+        collisionPadding={16}
+        avoidCollisions
+        className={cn(
+          "max-h-[min(22rem,calc(100dvh-1.5rem))] overflow-y-auto p-1 text-sm",
+          reportOpen ? "w-[min(100vw-2rem,240px)] p-2.5" : "min-w-[160px]",
+        )}
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
+        {!reportOpen ? (
+          <div role="menu">
+            <MenuItem icon={CornerUpLeft} label="Reply" onClick={doReply} />
+            <MenuItem icon={Copy} label="Copy" onClick={copy} />
+            {isOwn ? (
+              <MenuItem
+                icon={Trash2}
+                label={busy ? "Deleting…" : "Delete"}
+                onClick={remove}
+                destructive
+              />
+            ) : (
+              <MenuItem
+                icon={Flag}
+                label="Report message"
+                onClick={() => setReportOpen(true)}
+                destructive
+              />
+            )}
+            {err ? (
+              <p className="px-2.5 py-1.5 text-[11px] text-destructive">{err}</p>
+            ) : null}
+          </div>
+        ) : (
+          <ReportForm
+            busy={busy}
+            err={err}
+            onSubmit={(reason, details) => {
+              void report(reason, details);
+            }}
+            onCancel={close}
+          />
+        )}
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -259,15 +241,11 @@ function MenuItem({
 }
 
 function ReportForm({
-  sheetRef,
-  isOwn,
   busy,
   err,
   onSubmit,
   onCancel,
 }: {
-  sheetRef: React.RefObject<HTMLDivElement | null>;
-  isOwn: boolean;
   busy: boolean;
   err: string | null;
   onSubmit: (reason: string, details: string) => void;
@@ -276,15 +254,7 @@ function ReportForm({
   const [reason, setReason] = useState<string>(REPORT_REASONS[0].value);
   const [details, setDetails] = useState("");
   return (
-    <div
-      ref={sheetRef}
-      role="dialog"
-      aria-label="Report message"
-      className={cn(
-        "absolute bottom-8 z-20 w-[240px] rounded-xl border border-border bg-popover p-2.5 text-sm shadow-lg",
-        isOwn ? "right-0" : "left-0",
-      )}
-    >
+    <div role="dialog" aria-label="Report message">
       <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
         Report message
       </p>

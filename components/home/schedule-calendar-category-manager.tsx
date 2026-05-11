@@ -2,11 +2,13 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import { Check, Loader2, Plus, Trash2, X } from "lucide-react";
+import { Check, Link2, Loader2, Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { CalendarCategoryColorPopover } from "@/components/home/calendar-category-color-popover";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
+import { normalizeCalendarCategoryHex } from "@/lib/calendar/calendar-category-colors";
 import { cn } from "@/lib/utils";
 
 export type CalendarCategoryRow = {
@@ -14,13 +16,8 @@ export type CalendarCategoryRow = {
   name: string;
   color: string;
   presetKey: string | null;
+  icsSubscriptionUrl: string | null;
 };
-
-function normalizeHex(color: string): string {
-  const t = color.trim();
-  if (/^#[0-9A-Fa-f]{6}$/.test(t)) return t;
-  return "#64748B";
-}
 
 export function ScheduleCalendarCategoryManager({
   categories,
@@ -37,7 +34,12 @@ export function ScheduleCalendarCategoryManager({
   const [newName, setNewName] = useState("");
   const [newColor, setNewColor] = useState("#64748B");
   const [showNewRow, setShowNewRow] = useState(false);
+  const [showSubscriptionRow, setShowSubscriptionRow] = useState(false);
+  const [subName, setSubName] = useState("");
+  const [subColor, setSubColor] = useState("#64748B");
+  const [subUrl, setSubUrl] = useState("");
   const newNameRef = useRef<HTMLInputElement>(null);
+  const subNameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -46,11 +48,19 @@ export function ScheduleCalendarCategoryManager({
     setBusyId(null);
     setAdding(false);
     setShowNewRow(false);
+    setShowSubscriptionRow(false);
+    setSubName("");
+    setSubColor("#64748B");
+    setSubUrl("");
   }, [open]);
 
   useEffect(() => {
     if (showNewRow) newNameRef.current?.focus();
   }, [showNewRow]);
+
+  useEffect(() => {
+    if (showSubscriptionRow) subNameRef.current?.focus();
+  }, [showSubscriptionRow]);
 
   async function patchRow(id: string, body: { name?: string; color?: string }) {
     setBusyId(id);
@@ -68,8 +78,29 @@ export function ScheduleCalendarCategoryManager({
     router.refresh();
   }
 
+  async function patchSubscriptionUrl(id: string, icsSubscriptionUrl: string | null) {
+    setBusyId(id);
+    const res = await apiFetch(`/api/calendar/categories/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ icsSubscriptionUrl }),
+    });
+    setBusyId(null);
+    if (!res.ok) {
+      const t = await res.text();
+      window.alert(t.trim().slice(0, 200) || "Could not update feed URL.");
+      return;
+    }
+    router.refresh();
+  }
+
   async function removeRow(id: string) {
-    if (!window.confirm("Delete this category? Events using it will become uncategorized.")) return;
+    if (
+      !window.confirm(
+        "Delete this calendar? Events that used it will no longer be linked to this calendar.",
+      )
+    )
+      return;
     setBusyId(id);
     const res = await apiFetch(`/api/calendar/categories/${id}`, { method: "DELETE" });
     setBusyId(null);
@@ -88,7 +119,7 @@ export function ScheduleCalendarCategoryManager({
     const res = await apiFetch("/api/calendar/categories", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, color: normalizeHex(newColor) }),
+      body: JSON.stringify({ name, color: normalizeCalendarCategoryHex(newColor) }),
     });
     setAdding(false);
     if (!res.ok) {
@@ -99,6 +130,33 @@ export function ScheduleCalendarCategoryManager({
     setNewName("");
     setNewColor("#64748B");
     setShowNewRow(false);
+    router.refresh();
+  }
+
+  async function addSubscriptionRow() {
+    const name = subName.trim();
+    const url = subUrl.trim();
+    if (!name || !url) return;
+    setAdding(true);
+    const res = await apiFetch("/api/calendar/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        color: normalizeCalendarCategoryHex(subColor),
+        icsSubscriptionUrl: url,
+      }),
+    });
+    setAdding(false);
+    if (!res.ok) {
+      const t = await res.text();
+      window.alert(t.trim().slice(0, 200) || "Could not add subscription.");
+      return;
+    }
+    setSubName("");
+    setSubColor("#64748B");
+    setSubUrl("");
+    setShowSubscriptionRow(false);
     router.refresh();
   }
 
@@ -114,7 +172,7 @@ export function ScheduleCalendarCategoryManager({
           <span className="h-1 w-10 rounded-full bg-muted-foreground/20" />
         </div>
         <div className="flex items-center justify-between gap-3 border-b border-border/50 px-4 pb-3 pt-2">
-          <h2 className="text-[15px] font-semibold text-foreground">Categories</h2>
+          <h2 className="text-[15px] font-semibold text-foreground">Calendars</h2>
           <button
             type="button"
             onClick={onClose}
@@ -133,26 +191,76 @@ export function ScheduleCalendarCategoryManager({
                 row={row}
                 busy={busyId === row.id}
                 onPatch={(body) => void patchRow(row.id, body)}
+                onPatchSubscriptionUrl={(url) => void patchSubscriptionUrl(row.id, url)}
                 onDelete={row.presetKey ? undefined : () => void removeRow(row.id)}
               />
             ))}
           </div>
 
-          {showNewRow ? (
-            <div className="mt-2 flex items-center gap-2 rounded-xl border border-border/60 bg-muted/10 px-2 py-1.5">
-              <label className="relative flex shrink-0 cursor-pointer items-center">
+          {showSubscriptionRow ? (
+            <div className="mt-2 space-y-2 rounded-xl border border-border/60 bg-muted/10 px-2 py-2">
+              <p className="px-1 text-[12px] font-medium text-muted-foreground">Subscription calendar</p>
+              <div className="flex items-center gap-2">
+                <CalendarCategoryColorPopover
+                  value={subColor}
+                  onChange={setSubColor}
+                  disabled={adding}
+                  ariaLabel="Pick subscription calendar color"
+                  triggerClassName="-ml-1"
+                />
                 <input
-                  type="color"
-                  value={normalizeHex(newColor)}
-                  onChange={(e) => setNewColor(normalizeHex(e.target.value))}
-                  className="absolute inset-0 cursor-pointer opacity-0"
-                  aria-label="Pick color"
+                  ref={subNameRef}
+                  value={subName}
+                  onChange={(e) => setSubName(e.target.value)}
+                  placeholder="Calendar name"
+                  className="min-w-0 flex-1 rounded-lg border border-border/50 bg-background px-2 py-1.5 text-[13px] text-foreground outline-none placeholder:text-muted-foreground/60"
                 />
-                <span
-                  className="block h-5 w-5 rounded-full border border-black/10 shadow-sm dark:border-white/15"
-                  style={{ backgroundColor: normalizeHex(newColor) }}
-                />
-              </label>
+              </div>
+              <input
+                value={subUrl}
+                onChange={(e) => setSubUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void addSubscriptionRow();
+                  if (e.key === "Escape") setShowSubscriptionRow(false);
+                }}
+                placeholder="https://… or webcal://… (ICS feed)"
+                className="w-full rounded-lg border border-border/50 bg-background px-2 py-1.5 text-[13px] text-foreground outline-none placeholder:text-muted-foreground/60"
+                autoComplete="off"
+                spellCheck={false}
+              />
+              <div className="flex items-center justify-end gap-1">
+                <button
+                  type="button"
+                  disabled={adding || !subName.trim() || !subUrl.trim()}
+                  onClick={() => void addSubscriptionRow()}
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-primary transition hover:bg-primary/10 disabled:opacity-40"
+                  aria-label="Save subscription calendar"
+                >
+                  {adding ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Check className="h-4 w-4" strokeWidth={2.5} />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowSubscriptionRow(false)}
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted"
+                  aria-label="Cancel"
+                >
+                  <X className="h-3.5 w-3.5" strokeWidth={2.25} />
+                </button>
+              </div>
+            </div>
+          ) : showNewRow ? (
+            <div className="mt-2 flex items-center gap-2 rounded-xl border border-border/60 bg-muted/10 px-2 py-1.5">
+              <CalendarCategoryColorPopover
+                value={newColor}
+                onChange={setNewColor}
+                disabled={adding}
+                ariaLabel="Pick new calendar color"
+                triggerClassName="-ml-1"
+              />
               <input
                 ref={newNameRef}
                 value={newName}
@@ -161,7 +269,7 @@ export function ScheduleCalendarCategoryManager({
                   if (e.key === "Enter") void addRow();
                   if (e.key === "Escape") setShowNewRow(false);
                 }}
-                placeholder="Category name"
+                placeholder="Calendar name"
                 className="min-w-0 flex-1 border-0 bg-transparent py-0.5 text-[13px] text-foreground outline-none placeholder:text-muted-foreground/60"
               />
               <button
@@ -169,6 +277,7 @@ export function ScheduleCalendarCategoryManager({
                 disabled={adding || !newName.trim()}
                 onClick={() => void addRow()}
                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-primary transition hover:bg-primary/10 disabled:opacity-40"
+                aria-label="Save calendar"
               >
                 {adding ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -180,19 +289,36 @@ export function ScheduleCalendarCategoryManager({
                 type="button"
                 onClick={() => setShowNewRow(false)}
                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted"
+                aria-label="Cancel"
               >
                 <X className="h-3.5 w-3.5" strokeWidth={2.25} />
               </button>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={() => setShowNewRow(true)}
-              className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-[13px] text-muted-foreground transition hover:bg-muted/50"
-            >
-              <Plus className="h-4 w-4" strokeWidth={2} />
-              New category
-            </button>
+            <div className="mt-2 flex flex-col gap-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSubscriptionRow(false);
+                  setShowNewRow(true);
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-[13px] text-muted-foreground transition hover:bg-muted/50"
+              >
+                <Plus className="h-4 w-4" strokeWidth={2} />
+                New calendar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowNewRow(false);
+                  setShowSubscriptionRow(true);
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-[13px] text-muted-foreground transition hover:bg-muted/50"
+              >
+                <Link2 className="h-4 w-4" strokeWidth={2} />
+                Add subscription calendar
+              </button>
+            </div>
           )}
         </div>
       </section>
@@ -204,20 +330,33 @@ function CompactCategoryRow({
   row,
   busy,
   onPatch,
+  onPatchSubscriptionUrl,
   onDelete,
 }: {
   row: CalendarCategoryRow;
   busy: boolean;
   onPatch: (body: { name?: string; color?: string }) => void;
+  onPatchSubscriptionUrl: (url: string | null) => void;
   onDelete?: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(row.name);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [urlDraft, setUrlDraft] = useState(row.icsSubscriptionUrl ?? "");
+  const [feedExpanded, setFeedExpanded] = useState(false);
 
   useEffect(() => {
     setName(row.name);
   }, [row.name]);
+
+  useEffect(() => {
+    setUrlDraft(row.icsSubscriptionUrl ?? "");
+  }, [row.icsSubscriptionUrl]);
+
+  useEffect(() => {
+    if (row.icsSubscriptionUrl) setFeedExpanded(true);
+  }, [row.icsSubscriptionUrl]);
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (editing) inputRef.current?.focus();
@@ -233,63 +372,94 @@ function CompactCategoryRow({
     if (trimmed !== row.name) onPatch({ name: trimmed });
   }
 
+  function commitUrl() {
+    const trimmed = urlDraft.trim();
+    const next = trimmed ? trimmed : null;
+    const prev = row.icsSubscriptionUrl;
+    if (next === prev) return;
+    onPatchSubscriptionUrl(next);
+  }
+
+  const canEditFeed = !row.presetKey;
+
   return (
-    <div className="flex items-center gap-2.5 px-3 py-2">
-      <label className="relative flex shrink-0 cursor-pointer items-center">
-        <input
-          type="color"
-          value={normalizeHex(row.color)}
+    <div className="px-3 py-2">
+      <div className="flex items-center gap-2.5">
+        <CalendarCategoryColorPopover
+          value={row.color}
+          onChange={(hex) => onPatch({ color: normalizeCalendarCategoryHex(hex) })}
           disabled={busy}
-          onChange={(e) => onPatch({ color: normalizeHex(e.target.value) })}
-          className="absolute inset-0 cursor-pointer opacity-0 disabled:cursor-default"
-          aria-label={`Color for ${row.name}`}
+          ariaLabel={`Color for ${row.name}`}
+          triggerClassName={cn(busy && "pointer-events-none opacity-50")}
         />
-        <span
-          className={cn(
-            "block h-5 w-5 rounded-full border border-black/10 shadow-sm transition dark:border-white/15",
-            busy && "opacity-50",
+
+        {editing ? (
+          <input
+            ref={inputRef}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onBlur={commitName}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitName();
+              if (e.key === "Escape") {
+                setName(row.name);
+                setEditing(false);
+              }
+            }}
+            className="min-w-0 flex-1 border-0 bg-transparent py-0.5 text-[13px] font-medium text-foreground outline-none"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            disabled={busy}
+            className="min-w-0 flex-1 truncate py-0.5 text-left text-[13px] font-medium text-foreground disabled:opacity-60"
+          >
+            {row.name}
+          </button>
+        )}
+
+        {busy ? (
+          <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-muted-foreground" />
+        ) : onDelete ? (
+          <button
+            type="button"
+            onClick={onDelete}
+            aria-label="Delete"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground/50 transition hover:bg-destructive/10 hover:text-destructive"
+          >
+            <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
+          </button>
+        ) : null}
+      </div>
+
+      {canEditFeed ? (
+        <div className="mt-1.5 pl-[1.85rem]">
+          {row.icsSubscriptionUrl !== null || feedExpanded ? (
+            <input
+              value={urlDraft}
+              onChange={(e) => setUrlDraft(e.target.value)}
+              onBlur={commitUrl}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+              }}
+              placeholder="ICS or WebCal URL (optional)"
+              disabled={busy}
+              className="w-full rounded-lg border border-border/40 bg-muted/20 px-2 py-1 text-[11px] text-foreground outline-none placeholder:text-muted-foreground/55 disabled:opacity-50"
+              autoComplete="off"
+              spellCheck={false}
+            />
+          ) : (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setFeedExpanded(true)}
+              className="text-[11px] font-medium text-primary hover:underline disabled:opacity-50"
+            >
+              Add subscription URL
+            </button>
           )}
-          style={{ backgroundColor: normalizeHex(row.color) }}
-        />
-      </label>
-
-      {editing ? (
-        <input
-          ref={inputRef}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onBlur={commitName}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") commitName();
-            if (e.key === "Escape") {
-              setName(row.name);
-              setEditing(false);
-            }
-          }}
-          className="min-w-0 flex-1 border-0 bg-transparent py-0.5 text-[13px] font-medium text-foreground outline-none"
-        />
-      ) : (
-        <button
-          type="button"
-          onClick={() => setEditing(true)}
-          disabled={busy}
-          className="min-w-0 flex-1 truncate py-0.5 text-left text-[13px] font-medium text-foreground disabled:opacity-60"
-        >
-          {row.name}
-        </button>
-      )}
-
-      {busy ? (
-        <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-muted-foreground" />
-      ) : onDelete ? (
-        <button
-          type="button"
-          onClick={onDelete}
-          aria-label="Delete"
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground/50 transition hover:bg-destructive/10 hover:text-destructive"
-        >
-          <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
-        </button>
+        </div>
       ) : null}
     </div>
   );

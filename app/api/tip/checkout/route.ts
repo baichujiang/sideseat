@@ -20,12 +20,12 @@ export async function POST(request: Request) {
   try {
     const stripe = getStripe();
     if (!stripe) {
-      return error("Card tips are not enabled on this server.", 503);
+      return error("Tips aren’t turned on for this environment yet — thanks for understanding.", 503);
     }
 
     const user = await requireUser();
     if (user.isGuest) {
-      return error("Tips require a full account.", 403);
+      return error("Please sign in with a full account (not guest) to leave a tip.", 403);
     }
 
     let raw: unknown;
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     const amountEur = parsed.data.amountEur;
     const unitAmount = Math.round(amountEur * 100);
     if (unitAmount < 50 || unitAmount > 20_000) {
-      return error("Amount must be between €0.50 and €200.", 400);
+      return error("Pick an amount between €0.50 and €200.", 400);
     }
 
     const origin = requestAppOrigin(request);
@@ -57,8 +57,8 @@ export async function POST(request: Request) {
             currency: "eur",
             unit_amount: unitAmount,
             product_data: {
-              name: `${APP_NAME} — thank you`,
-              description: "Voluntary tip (no goods or services).",
+              name: `${APP_NAME} — optional thanks`,
+              description: "Voluntary support — not payment for goods or services.",
             },
           },
         },
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     });
 
     if (!session.url) {
-      return error("Could not start checkout.", 500);
+      return error("We couldn’t open checkout — please try again.", 500);
     }
 
     return ok({ url: session.url });
@@ -88,6 +88,6 @@ export async function POST(request: Request) {
       throw cause;
     }
     console.error(cause);
-    return error("Could not start payment. Try again later.");
+    return error("We couldn’t start payment — please try again in a moment.");
   }
 }

@@ -48,6 +48,8 @@ type AppPushLayerProps = {
   open: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  /** Panel/backdrop transition length. Use `0` when `prefers-reduced-motion: reduce` to skip slide animation. */
+  transitionDurationMs?: number;
   /** Root z-index, e.g. `z-50` or `z-[100]` */
   zClassName?: string;
   /** Extra classes on the sliding panel (width, border, etc.) */
@@ -81,6 +83,7 @@ export function AppPushLayer({
   open,
   onClose,
   children,
+  transitionDurationMs = APP_PUSH_TRANSITION_MS,
   zClassName = "z-50",
   panelClassName,
   backdropClassName,
@@ -99,20 +102,24 @@ export function AppPushLayer({
   useEffect(() => {
     if (open) {
       setMounted(true);
+      if (transitionDurationMs === 0) {
+        setEntered(true);
+        return;
+      }
       const id = requestAnimationFrame(() => {
         requestAnimationFrame(() => setEntered(true));
       });
       return () => cancelAnimationFrame(id);
     }
     setEntered(false);
-  }, [open]);
+  }, [open, transitionDurationMs]);
 
   useEffect(() => {
     if (!open && mounted) {
       closeTimerRef.current = window.setTimeout(() => {
         closeTimerRef.current = null;
         setMounted(false);
-      }, APP_PUSH_TRANSITION_MS + 120);
+      }, transitionDurationMs + 120);
       return () => {
         if (closeTimerRef.current !== null) {
           window.clearTimeout(closeTimerRef.current);
@@ -120,7 +127,7 @@ export function AppPushLayer({
         }
       };
     }
-  }, [open, mounted]);
+  }, [open, mounted, transitionDurationMs]);
 
   const onPanelTransitionEnd = useCallback(
     (e: React.TransitionEvent<HTMLDivElement>) => {
@@ -190,7 +197,7 @@ export function AppPushLayer({
 
   if (!mounted || typeof document === "undefined") return null;
 
-  const dur = `${APP_PUSH_TRANSITION_MS}ms`;
+  const dur = `${transitionDurationMs}ms`;
 
   return createPortal(
     <div

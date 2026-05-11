@@ -11,14 +11,16 @@ import { ShareAvailabilityModal } from "@/components/chat/share-availability-mod
 import { useRegisterDismissOnEdgeSwipe } from "@/components/ui/app-push-layer";
 import { cn } from "@/lib/utils";
 
-/** Icon-only actions — labels are for accessibility only (no on-screen captions). */
-function AttachmentIconAction({
+/** Square icon + one-word caption; `aria-label` carries the fuller action text. */
+function AttachmentMenuTile({
   icon: Icon,
+  caption,
   ariaLabel,
   onClick,
   disabled,
 }: {
   icon: LucideIcon;
+  caption: string;
   ariaLabel: string;
   onClick: () => void;
   disabled?: boolean;
@@ -31,13 +33,23 @@ function AttachmentIconAction({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary transition outline-none",
-        "hover:bg-primary/18 active:bg-primary/22",
+        "flex min-h-[44px] w-full min-w-0 flex-col items-center justify-start gap-0.5 rounded-xl px-0.5 py-1 text-center outline-none transition",
+        "hover:bg-primary/10 active:bg-primary/14",
         "focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         "disabled:pointer-events-none disabled:opacity-40",
       )}
     >
-      <Icon className="h-[1.35rem] w-[1.35rem]" strokeWidth={2} aria-hidden />
+      <span
+        className={cn(
+          "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/12 text-primary",
+        )}
+        aria-hidden
+      >
+        <Icon className="h-[1.35rem] w-[1.35rem]" strokeWidth={2} />
+      </span>
+      <span className="w-full max-w-full px-0.5 text-[10px] font-medium leading-tight text-foreground/90 line-clamp-2 break-words sm:text-[11px]">
+        {caption}
+      </span>
     </button>
   );
 }
@@ -185,17 +197,17 @@ export function ChatAttachmentTray({
       <div
         className={cn(
           "w-full min-w-0 overflow-hidden transition-[max-height] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
-          open ? "max-h-[min(240px,42dvh)]" : "max-h-0",
+          open ? "max-h-[min(320px,52dvh)]" : "max-h-0",
         )}
         aria-hidden={!open}
       >
         <div
           className={cn(
-            "border-t border-border/60 bg-muted/20 px-1 pb-1 pt-2 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] dark:bg-muted/15",
+            "border-t border-border/60 bg-muted/20 px-0 pb-1 pt-2 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] dark:bg-muted/15",
             open ? "translate-y-0" : "translate-y-full",
           )}
           role="region"
-          aria-label="Photo, location, availability, plan"
+          aria-label="Attachments: Photo, Location, Availability, Plan"
         >
           <input
             ref={fileRef}
@@ -210,22 +222,25 @@ export function ChatAttachmentTray({
           />
           <div
             role="menu"
-            className="flex flex-row items-center justify-between gap-2 px-2 pb-0.5 pt-0.5 sm:justify-evenly sm:px-4"
+            className="grid w-full min-w-0 grid-cols-4 gap-0 px-3 pb-1 pt-0.5"
           >
-            <AttachmentIconAction
+            <AttachmentMenuTile
               icon={Image}
+              caption="Photo"
               ariaLabel="Send photo"
               disabled={busy}
               onClick={() => fileRef.current?.click()}
             />
-            <AttachmentIconAction
+            <AttachmentMenuTile
               icon={MapPin}
+              caption="Location"
               ariaLabel="Send location"
               disabled={busy}
               onClick={sendLocation}
             />
-            <AttachmentIconAction
+            <AttachmentMenuTile
               icon={CalendarRange}
+              caption="Availability"
               ariaLabel="Share availability"
               disabled={busy}
               onClick={() => {
@@ -233,8 +248,9 @@ export function ChatAttachmentTray({
                 setShareOpen(true);
               }}
             />
-            <AttachmentIconAction
+            <AttachmentMenuTile
               icon={CalendarClock}
+              caption="Plan"
               ariaLabel="Plan together"
               disabled={busy}
               onClick={() => {
@@ -244,7 +260,7 @@ export function ChatAttachmentTray({
             />
           </div>
           {error ? (
-            <p className="mx-1 mt-1.5 rounded-lg border border-destructive/30 bg-destructive/5 px-2.5 py-1.5 text-[11px] leading-snug text-destructive">
+            <p className="mx-3 mt-1.5 rounded-lg border border-destructive/30 bg-destructive/5 px-2.5 py-1.5 text-[11px] leading-snug text-destructive">
               {error}
             </p>
           ) : null}

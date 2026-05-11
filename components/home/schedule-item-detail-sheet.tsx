@@ -21,6 +21,7 @@ import { useEffect, useState } from "react";
 
 import { AppPushLayer, APP_PUSH_TRANSITION_MS } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
+import { isIcsFeedStudyEntryId } from "@/lib/calendar/ics-feed-event-id";
 import { cn } from "@/lib/utils";
 
 export type ScheduleDetailItem = {
@@ -92,7 +93,8 @@ export function ScheduleItemDetailSheet({
   const start = new Date(displayItem.startISO);
   const end = new Date(displayItem.endISO);
   const timeLabel = `${format(start, "EEE, d MMM · HH:mm")} - ${format(end, "HH:mm")}`;
-  const canEdit = displayItem.source === "calendar";
+  const canEdit = displayItem.source === "calendar" && !isIcsFeedStudyEntryId(displayItem.id);
+  const fromSubscribedCalendar = isIcsFeedStudyEntryId(displayItem.id);
   const locationValue = displayItem.location?.trim() ? displayItem.location : "No location";
   const repeatValue = displayItem.repeatLabel;
   const noteValue = displayItem.note?.trim() ? displayItem.note : "No notes";
@@ -153,6 +155,11 @@ export function ScheduleItemDetailSheet({
           <div className="flex items-start justify-between gap-3 border-b border-border/50 px-4 pb-3 pt-3">
               <div className="min-w-0 flex-1">
                 <p className="text-[17px] font-semibold leading-tight text-foreground">{displayItem.title}</p>
+                {fromSubscribedCalendar ? (
+                  <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
+                    From a subscribed calendar (read-only).
+                  </p>
+                ) : null}
                 <div className="mt-2 inline-flex max-w-full items-center gap-2 rounded-full bg-muted/[0.4] px-3 py-1.5 text-[12px] text-muted-foreground">
                   <Clock3 className="h-3.5 w-3.5 shrink-0" strokeWidth={2.1} />
                   <span className="truncate">{timeLabel}</span>
@@ -174,7 +181,7 @@ export function ScheduleItemDetailSheet({
                   {categoryLabel ? (
                     <DetailRow
                       icon={<Palette className="h-4 w-4" strokeWidth={2.1} />}
-                      label="Category"
+                      label="Calendar"
                       value={
                         <span className="inline-flex items-center gap-2">
                           {displayItem.categoryColor ? (

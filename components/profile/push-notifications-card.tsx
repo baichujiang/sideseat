@@ -2,6 +2,7 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
+import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { useCallback, useEffect, useId, useState } from "react";
 import { Bell, BellOff, Loader2 } from "lucide-react";
 
@@ -64,6 +65,7 @@ const settingCardClass =
   "rounded-2xl border border-classmates-edge bg-classmates-surface px-4 py-4 shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card";
 
 export function PushNotificationsCard() {
+  const { messages: m } = useLocaleContext();
   const titleId = useId();
   const [phase, setPhase] = useState<"loading" | "ready">("loading");
   const [supported, setSupported] = useState(false);
@@ -112,7 +114,7 @@ export function PushNotificationsCard() {
     try {
       const perm = await Notification.requestPermission();
       if (perm !== "granted") {
-        setHint("Notifications are off — allow them in browser settings, then try again.");
+        setHint(m.push.hintPermissionDenied);
         setBusy(false);
         return;
       }
@@ -127,7 +129,7 @@ export function PushNotificationsCard() {
       });
       const j = sub.toJSON();
       if (!j.endpoint || !j.keys?.p256dh || !j.keys?.auth) {
-        setHint("Could not read subscription keys from the browser.");
+        setHint(m.push.hintBadKeys);
         setBusy(false);
         return;
       }
@@ -142,13 +144,13 @@ export function PushNotificationsCard() {
       });
       const out = await readJson<ApiOk<{ saved: boolean }>>(res);
       if (!("success" in out) || !out.success) {
-        setHint("error" in out ? out.error : "Could not save subscription.");
+        setHint("error" in out ? out.error : m.push.hintSaveFailed);
         setBusy(false);
         return;
       }
       setSubscribed(true);
     } catch {
-      setHint("Something went wrong while enabling push.");
+      setHint(m.push.hintEnableFailed);
     }
     setBusy(false);
   };
@@ -173,7 +175,7 @@ export function PushNotificationsCard() {
       }
       setSubscribed(false);
     } catch {
-      setHint("Could not turn off push on this device.");
+      setHint(m.push.hintDisableFailed);
     }
     setBusy(false);
   };
@@ -187,11 +189,11 @@ export function PushNotificationsCard() {
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
             <p id={titleId} className="text-[15px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
-              Notifications
+              {m.push.title}
             </p>
             <span className="h-[31px] w-[51px] shrink-0 rounded-full bg-muted/60 dark:bg-muted" aria-hidden />
           </div>
-          <p className="mt-1 text-[13px] leading-snug text-classmates-sub dark:text-zinc-400">Loading…</p>
+          <p className="mt-1 text-[13px] leading-snug text-classmates-sub dark:text-zinc-400">{m.push.loading}</p>
         </div>
       </div>
     );
@@ -206,12 +208,12 @@ export function PushNotificationsCard() {
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
             <p id={titleId} className="text-[15px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
-              Notifications
+              {m.push.title}
             </p>
-            <span className="shrink-0 text-[12px] font-medium text-muted-foreground">Unavailable</span>
+            <span className="shrink-0 text-[12px] font-medium text-muted-foreground">{m.push.unavailable}</span>
           </div>
           <p className="mt-1 text-[13px] leading-snug text-classmates-sub dark:text-zinc-400">
-            Not available in this browser. Use Safari / Chrome or an installed app to get alerts.
+            {m.push.unavailableBody}
           </p>
         </div>
       </div>
@@ -232,12 +234,14 @@ export function PushNotificationsCard() {
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
             <p id={titleId} className="text-[15px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
-              Notifications
+              {m.push.title}
             </p>
-            <span className="shrink-0 text-[12px] font-medium text-amber-900/80 dark:text-amber-200/90">Setup</span>
+            <span className="shrink-0 text-[12px] font-medium text-amber-900/80 dark:text-amber-200/90">{m.push.setup}</span>
           </div>
           <p className="mt-1 text-[13px] leading-snug text-classmates-sub dark:text-zinc-400">
-            Server is missing VAPID keys — see <code className="rounded bg-background/80 px-1 text-[12px]">.env.example</code>.
+            {m.push.setupBodyBefore}
+            <code className="rounded bg-background/80 px-1 text-[12px]">.env.example</code>
+            {m.push.setupBodyAfter}
           </p>
         </div>
       </div>
@@ -253,7 +257,7 @@ export function PushNotificationsCard() {
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
             <p id={titleId} className="text-[15px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
-              Notifications
+              {m.push.title}
             </p>
             <IosStyleSwitch
               labelledBy={titleId}
@@ -267,7 +271,7 @@ export function PushNotificationsCard() {
             />
           </div>
           <p className="mt-1 pr-1 text-[12px] leading-snug text-classmates-sub dark:text-zinc-400">
-            Messages and plans on this device.
+            {m.push.subtitle}
           </p>
         </div>
       </div>

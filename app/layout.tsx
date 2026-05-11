@@ -3,8 +3,10 @@ import { Inter } from "next/font/google";
 
 import "./globals.css";
 import { AuthBootstrap } from "@/components/auth/auth-bootstrap";
+import { LocaleProvider } from "@/components/i18n/locale-provider";
 import { PwaRegister } from "@/components/pwa/pwa-register";
 import { APP_NAME } from "@/lib/constants/app";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -47,17 +49,22 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getServerAppLocale();
+  const htmlLang = locale === "zh-CN" ? "zh-CN" : "en";
+
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang={htmlLang} className={inter.variable} suppressHydrationWarning>
       <body className="min-h-dvh bg-transparent font-sans text-[15px] leading-relaxed antialiased text-foreground">
-        {children}
-        <AuthBootstrap />
-        <PwaRegister />
+        <LocaleProvider initialLocale={locale}>
+          {children}
+          <AuthBootstrap />
+          <PwaRegister />
+        </LocaleProvider>
       </body>
     </html>
   );

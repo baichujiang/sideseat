@@ -241,6 +241,8 @@ model User {
   contactInfoOptIn             Boolean                  @default(false)
   hideFromCourseMembers        Boolean                  @default(false)
   onboardingComplete           Boolean                  @default(false)
+  /// First-run product tutorial (tab overview); set when user dismisses; optional cross-device sync.
+  productTutorialDismissedAt   DateTime?
   verifiedStudent              Boolean                  @default(false)
   studentVerificationStatus    StudentVerificationStatus @default(UNVERIFIED)
   emailVerifiedAt              DateTime?
@@ -881,6 +883,8 @@ model UserCalendarCategory {
   sortOrder Int      @default(0)
   /// Built-in template key (course, study, …). Null = user-created; only one row per user per key when set.
   presetKey String?
+  /// Optional ICS/WebCal feed URL; events are merged on Home (server-fetched, not copied to DB).
+  icsSubscriptionUrl String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   entries   CalendarEntry[]

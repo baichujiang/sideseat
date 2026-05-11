@@ -63,11 +63,14 @@ export type CalendarCourseAddInput = z.infer<typeof calendarCourseAddSchema>;
 export const calendarCategoryCreateSchema = z.object({
   name: z.string().trim().min(1).max(40),
   color: hexColor,
+  /** Raw pasted URL; server normalizes webcal:// and validates. */
+  icsSubscriptionUrl: z.string().max(2048).optional(),
 });
 
 export const calendarCategoryPatchSchema = z.object({
   name: z.string().trim().min(1).max(40).optional(),
   color: hexColor.optional(),
+  icsSubscriptionUrl: z.union([z.string().trim().max(2048), z.null()]).optional(),
 });
 export type CalendarCourseSessionInput = {
   weekday: Weekday;

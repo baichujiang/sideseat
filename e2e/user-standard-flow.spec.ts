@@ -17,6 +17,17 @@ function logStep(name: string) {
   console.log(`\n[e2e] ${name}`);
 }
 
+/** First-run tab tutorial (AppPushLayer); dismiss so main-nav clicks are not blocked. */
+async function dismissProductTutorialIfPresent(page: import("@playwright/test").Page) {
+  const dialog = page.locator('[role="dialog"]').filter({ has: page.locator("#product-tutorial-title") });
+  const closeBtn = dialog.getByRole("button", { name: "Close" });
+  try {
+    await closeBtn.click({ timeout: 4000 });
+  } catch {
+    /* not shown or already dismissed */
+  }
+}
+
 async function loginWithPassword(page: import("@playwright/test").Page) {
   await page.goto("/login");
   await expect(page.getByRole("heading", { name: /log in/i })).toBeVisible();
@@ -30,6 +41,7 @@ async function loginWithPassword(page: import("@playwright/test").Page) {
     );
   }
   await expect(page).toHaveURL(/\/home/);
+  await dismissProductTutorialIfPresent(page);
 }
 
 async function goMainTab(page: import("@playwright/test").Page, label: string, urlRe: RegExp) {

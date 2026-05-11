@@ -12,6 +12,7 @@ import {
 } from "@/components/home/schedule-surface";
 import { isCalendarCourseMirrorRow } from "@/lib/calendar/calendar-course-mirror";
 import { ensureUserCalendarCategories } from "@/lib/calendar/default-user-calendar-categories";
+import { loadIcsSubscriptionStudyEntries } from "@/lib/calendar/load-ics-subscription-entries";
 import { getClassScheduleDateRange } from "@/lib/constants/vorlesungszeit";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
@@ -91,7 +92,14 @@ export default async function HomePage() {
     prisma.userCalendarCategory.findMany({
       where: { userId: user.id },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-      select: { id: true, name: true, color: true, presetKey: true, sortOrder: true },
+      select: {
+        id: true,
+        name: true,
+        color: true,
+        presetKey: true,
+        sortOrder: true,
+        icsSubscriptionUrl: true,
+      },
     }),
     prisma.calendarEntry.findMany({
       where: { userId: user.id, courseScheduleMirrorKey: { not: null } },
@@ -145,7 +153,7 @@ export default async function HomePage() {
 
   // Dates don't serialize cleanly across the client boundary, so ship ISO
   // strings and rehydrate in the client.
-  const studyEntries: StudyEntry[] = calendarEntries.map((e) => {
+  const dbStudyEntries: StudyEntry[] = calendarEntries.map((e) => {
     const mirrorCourse = isCalendarCourseMirrorRow(e);
     return {
       id: e.id,
@@ -167,11 +175,25 @@ export default async function HomePage() {
     };
   });
 
+  const subscriptionStudyEntries = await loadIcsSubscriptionStudyEntries({
+    categories: calendarCategories.map((c) => ({
+      id: c.id,
+      name: c.name,
+      color: c.color,
+      icsSubscriptionUrl: c.icsSubscriptionUrl,
+    })),
+    windowStart,
+    windowEnd,
+  });
+
+  const studyEntries: StudyEntry[] = [...dbStudyEntries, ...subscriptionStudyEntries];
+
   const initialCalendarCategories = calendarCategories.map((c) => ({
     id: c.id,
     name: c.name,
     color: c.color,
     presetKey: c.presetKey,
+    icsSubscriptionUrl: c.icsSubscriptionUrl,
   }));
 
   const companionOptions = connections.map((connection) => {

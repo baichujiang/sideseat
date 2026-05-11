@@ -30,6 +30,7 @@ import {
 import { profileSchema } from "@/lib/validators/profile";
 import { MePageSection } from "@/components/profile/me-page-section";
 import { profileSectionLabelClassName } from "@/lib/ui/profile-section-label";
+import { profileSettingsControlClassName } from "@/lib/ui/profile-settings-control";
 import { cn } from "@/lib/utils";
 
 type ProfileValues = z.infer<typeof profileSchema>;
@@ -39,9 +40,7 @@ function languageTagOrderIndex(tag: LanguageTag): number {
   return i === -1 ? 999 : i;
 }
 
-/** School/program row controls — soft border, warm fill, blue focus ring. */
-const settingsControlClass =
-  "box-border h-11 min-h-11 w-full rounded-[20px] border border-classmates-edge bg-classmates-warm-alt px-3.5 py-0 text-[14px] leading-snug text-foreground shadow-none transition-[border-color,box-shadow,background-color] placeholder:text-muted-foreground/60 focus:border-classmates-azure focus:bg-classmates-surface focus:outline-none focus:ring-[3px] focus:ring-classmates-azure/25 focus-visible:border-classmates-azure focus-visible:bg-classmates-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-classmates-azure/25 dark:border-border dark:bg-background/70 dark:focus:bg-card dark:focus-visible:bg-card";
+const settingsControlClass = profileSettingsControlClassName;
 
 const settingsSelectClass = cn(settingsControlClass, "cursor-pointer appearance-none pr-10");
 

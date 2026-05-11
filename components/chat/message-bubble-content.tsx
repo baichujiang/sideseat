@@ -1,5 +1,7 @@
-import { CornerUpLeft, MapPin } from "lucide-react";
+import { CornerUpLeft } from "lucide-react";
 
+import { ChatLocationLinkPreview } from "@/components/chat/chat-location-link-preview";
+import { ChatMessageImage } from "@/components/chat/chat-message-image";
 import { cn } from "@/lib/utils";
 
 /** `bareMedia` — image without outer chat tint; quote/caption read on page background. */
@@ -49,10 +51,8 @@ export function MessageBubbleContent({
         <p className="whitespace-pre-wrap break-words">{payload.body}</p>
       ) : payload.kind === "image" ? (
         <div className={cn("space-y-1.5", bare && "text-left")}>
-          {/* eslint-disable-next-line @next/next/no-img-element -- user-uploaded / blob URL */}
-          <img
-            src={payload.imageUrl}
-            alt=""
+          <ChatMessageImage
+            imageUrl={payload.imageUrl}
             className={cn(
               "block max-h-64 w-full max-w-[min(100vw-4rem,20rem)] object-cover",
               bare ? "rounded-2xl" : "rounded-xl",
@@ -74,24 +74,12 @@ export function MessageBubbleContent({
         </div>
       ) : (
         <div className="space-y-1.5 text-left">
-          <a
-            href={`https://www.google.com/maps?q=${payload.lat},${payload.lng}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-start gap-2 text-left font-medium underline-offset-2 hover:underline"
-          >
-            <MapPin
-              className="mt-0.5 h-[18px] w-[18px] shrink-0 opacity-90"
-              strokeWidth={2.25}
-              aria-hidden
-            />
-            <span className="min-w-0">
-              {payload.name?.trim() || "Shared location"}
-              <span className="mt-0.5 block text-[11px] font-normal opacity-80">
-                Open in Maps
-              </span>
-            </span>
-          </a>
+          <ChatLocationLinkPreview
+            lat={payload.lat}
+            lng={payload.lng}
+            name={payload.name}
+            staticPreviewEnabled={Boolean(process.env.GOOGLE_MAPS_STATIC_API_KEY?.trim())}
+          />
           {payload.caption ? (
             <p className="whitespace-pre-wrap break-words text-[15px] leading-snug">
               {payload.caption}

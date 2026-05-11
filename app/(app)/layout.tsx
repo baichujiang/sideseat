@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { getSessionUser } from "@/lib/auth/session";
+import { isConfiguredAdmin } from "@/lib/constants/app";
 import { getInboxUnreadTotal } from "@/lib/queries/inbox-merge";
 
 export default async function AppLayout({
@@ -10,5 +11,19 @@ export default async function AppLayout({
   const sessionUser = await getSessionUser();
   const inboxUnreadTotal = sessionUser ? await getInboxUnreadTotal(sessionUser.id) : 0;
 
-  return <AppShell inboxUnreadTotal={inboxUnreadTotal}>{children}</AppShell>;
+  const productTutorialContext = sessionUser
+    ? {
+        userId: sessionUser.id,
+        isGuest: sessionUser.isGuest,
+        onboardingComplete: sessionUser.onboardingComplete,
+        dbDismissed: sessionUser.productTutorialDismissedAt != null,
+        skipAsAdmin: isConfiguredAdmin(sessionUser),
+      }
+    : null;
+
+  return (
+    <AppShell inboxUnreadTotal={inboxUnreadTotal} productTutorialContext={productTutorialContext}>
+      {children}
+    </AppShell>
+  );
 }

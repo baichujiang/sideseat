@@ -1,19 +1,52 @@
-const BODY_CLIP = 600;
+import {
+  buildClassmatePostPageUrl,
+  buildClassmatePostXhsShareText,
+} from "@/lib/discover/classmate-post-share-payload";
+
+export { buildClassmatePostXhsShareText } from "@/lib/discover/classmate-post-share-payload";
+
+export type ShareClassmatePostToXhsResult =
+  | "navigator"
+  | "clipboard"
+  | "prompt"
+  | "aborted";
 
 /**
- * Plain text for pasting into Xiaohongshu (小红书) notes. There is no stable public
- * web→app deep link; users paste in the app after copy or system share.
+ * Uses Web Share when available, otherwise clipboard, otherwise a prompt fallback.
  */
-export function buildClassmatePostXhsShareText(args: {
+export async function shareClassmatePostToXhs(args: {
   title: string;
   body: string | null;
-  pageUrl: string;
-}): string {
-  const title = args.title.trim() || "SideSeat post";
-  const raw = args.body?.trim() ?? "";
-  const bodyBlock =
-    raw.length === 0
-      ? ""
-      : `\n\n${raw.length > BODY_CLIP ? `${raw.slice(0, BODY_CLIP)}…` : raw}`;
-  return `${title}${bodyBlock}\n\n${args.pageUrl}\n\n— SideSeat · classmate post`;
+  /** Absolute path, e.g. `/discover/posts/…` or `/inbox/my-posts` */
+  postPath: string;
+  footer?: string;
+}): Promise<ShareClassmatePostToXhsResult> {
+  const pageUrl = buildClassmatePostPageUrl(args.postPath, window.location.origin);
+  const text = buildClassmatePostXhsShareText({
+    title: args.title,
+    body: args.body,
+    pageUrl,
+    footer: args.footer,
+  });
+
+  if (typeof navigator.share === "function") {
+    try {
+      await navigator.share({
+        title: args.title.slice(0, 120),
+        text,
+        url: pageUrl,
+      });
+      return "navigator";
+    } catch (e) {
+      if ((e as { name?: string }).name === "AbortError") return "aborted";
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(text);
+    return "clipboard";
+  } catch {
+    window.prompt("Copy for 小红书 — select all, then copy:", text);
+    return "prompt";
+  }
 }

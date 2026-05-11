@@ -5,7 +5,6 @@ import { format } from "date-fns";
 import {
   BookUser,
   Calendar,
-  ChevronRight,
   Clock,
   Dumbbell,
   Eye,
@@ -18,6 +17,8 @@ import {
 import { ClassmatePostCategory, ClassmatePostStatus } from "@prisma/client";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
+import { ClassmatePostDetailShareMenu } from "@/components/discover/classmate-post-detail-share-menu";
+import { MyPostsHeaderShareMenu } from "@/components/inbox/my-posts-header-share-menu";
 import { BackLink } from "@/components/nav/back-link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LinkButton } from "@/components/ui/link-button";
@@ -64,15 +65,16 @@ export default async function InboxMyPostsPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-2 px-0.5">
-        <BackLink href="/inbox" label="Back" />
-        <div>
+      <div className="flex items-start gap-2 px-0.5">
+        <BackLink href="/inbox" label="Back" className="mt-0.5" />
+        <div className="min-w-0 flex-1">
           <h1 className="page-screen-title">My posts</h1>
           <p className="text-[13px] leading-snug text-muted-foreground">
             Discover posts you published — classmates see them on the Discover tab. Views and message taps below
             are unique classmates (only you see them).
           </p>
         </div>
+        <MyPostsHeaderShareMenu />
       </div>
 
       {!posts.length ? (
@@ -162,8 +164,8 @@ function PostRow({
   muted?: boolean;
   insights: ClassmatePostInsightCounts;
 }) {
-  const postHref =
-    `/discover/posts/${post.id}?returnTo=${encodeURIComponent("/inbox/my-posts")}` as Route;
+  const postPath = `/discover/posts/${post.id}`;
+  const postHref = `${postPath}?returnTo=${encodeURIComponent("/inbox/my-posts")}` as Route;
   const live = post.status === ClassmatePostStatus.ACTIVE && post.expiresAt > new Date();
   const statusLabel = !live
     ? post.status === ClassmatePostStatus.CLOSED
@@ -178,11 +180,11 @@ function PostRow({
   const row = SCENE_LIST_ROW[palette];
 
   return (
-    <li>
+    <li className="relative">
       <Link
         href={postHref}
         className={cn(
-          "flex items-start gap-3.5 rounded-[1.25rem] border p-4 transition-all duration-200 ease-out active:bg-black/[0.03] dark:active:bg-white/[0.04]",
+          "flex items-start gap-3.5 rounded-[1.25rem] border p-4 pr-14 transition-all duration-200 ease-out active:bg-black/[0.03] dark:active:bg-white/[0.04]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-classmates-azure/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
           row.card,
           row.cardHover,
@@ -277,12 +279,13 @@ function PostRow({
             </span>
           </div>
         </div>
-        <ChevronRight
-          className="mt-2 h-4 w-4 shrink-0 text-muted-foreground/40"
-          strokeWidth={2}
-          aria-hidden
-        />
       </Link>
+      <ClassmatePostDetailShareMenu
+        title={post.title}
+        body={post.body}
+        postPath={postPath}
+        className="absolute right-3 top-3 z-10"
+      />
     </li>
   );
 }

@@ -50,6 +50,7 @@ import {
   scheduleDateKeyInBerlin,
 } from "@/lib/calendar/schedule-berlin";
 import { courseCalendarShortLabel } from "@/lib/calendar/course-calendar-short-label";
+import { isIcsFeedStudyEntryId } from "@/lib/calendar/ics-feed-event-id";
 import { cn } from "@/lib/utils";
 
 function weekBlockToDayTimelineItem(block: WeekCalendarBlock): DayTimelineItem {
@@ -127,6 +128,7 @@ export type CalendarCategoryLite = {
   name: string;
   color: string;
   presetKey: string | null;
+  icsSubscriptionUrl: string | null;
 };
 
 export type CompanionOption = {
@@ -282,7 +284,12 @@ export function ScheduleSurface({
     if (refresh) router.refresh();
   };
 
-  const toggleAddPanel = () => {
+  /** Toolbar + : open fresh add panel, or close when already open (keeps control visible). */
+  const handleAddToolbarClick = () => {
+    if (adding) {
+      closeAddPanel({ refresh: false });
+      return;
+    }
     resetAddDraft();
     setAdding(true);
   };
@@ -641,7 +648,7 @@ export function ScheduleSurface({
         categoryId: s.categoryId,
         categoryName: s.categoryName,
         categoryColor: s.categoryColor,
-        calendarEntryId: s.id,
+        calendarEntryId: isIcsFeedStudyEntryId(s.id) ? undefined : s.id,
       }));
     const courseBlocks = includeClasses
       ? classBlocks.map((block) => ({
@@ -708,6 +715,7 @@ export function ScheduleSurface({
 
   async function deleteDetailItem() {
     if (!detailItem || detailItem.source !== "calendar") return;
+    if (isIcsFeedStudyEntryId(detailItem.id)) return;
     if (!window.confirm("Delete this schedule item?")) return;
     setDeletingItem(true);
     const response = await apiFetch(`/api/calendar/events/${detailItem.id}`, { method: "DELETE" });
@@ -719,6 +727,7 @@ export function ScheduleSurface({
 
   function openEditSheetFromDetail(inviteOnly = false) {
     if (!detailItem || detailItem.source !== "calendar") return;
+    if (isIcsFeedStudyEntryId(detailItem.id)) return;
     setInviteFlow(inviteOnly);
     setEditingItem(detailItem);
     setDraftEventStart(format(new Date(detailItem.startISO), "yyyy-MM-dd'T'HH:mm"));
@@ -847,7 +856,7 @@ export function ScheduleSurface({
   const patchCalendarEventTimes = useCallback(
     async (args: { eventId: string; startAt: Date; endAt: Date }): Promise<boolean> => {
       const entry = studyEntries.find((s) => s.id === args.eventId);
-      if (!entry) return false;
+      if (!entry || isIcsFeedStudyEntryId(entry.id)) return false;
       const withUserIds = entry.eventParticipants.map((p) => p.userId).filter((id): id is string => Boolean(id));
       const res = await apiFetch(`/api/calendar/events/${args.eventId}`, {
         method: "PATCH",
@@ -1035,7 +1044,7 @@ export function ScheduleSurface({
                 {initialCalendarCategories.length > 0 ? (
                   <button
                     type="button"
-                    aria-label="Manage calendar categories"
+                    aria-label="Manage calendars"
                     className={cn(
                       "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-violet-200 bg-white text-violet-700 shadow-sm transition",
                       "hover:bg-violet-50 active:scale-[0.98]",
@@ -1047,11 +1056,12 @@ export function ScheduleSurface({
                     <Calendar className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
                   </button>
                 ) : null}
-                {!adding && !detailItem ? (
+                {!detailItem ? (
                   <button
                     type="button"
-                    onClick={toggleAddPanel}
-                    aria-label="Add to schedule"
+                    onClick={handleAddToolbarClick}
+                    aria-label={adding ? "Close add to schedule" : "Add to schedule"}
+                    title={adding ? "Close" : undefined}
                     className={cn(
                       "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#E7E0D6] bg-white text-[#111827] shadow-sm transition",
                       "text-lg leading-none hover:bg-[#FAFAF8] active:scale-[0.97]",

@@ -15,20 +15,20 @@ function HomeCalendarVisual({ date }: { date: Date }) {
   return (
     <div
       className={cn(
-        "pointer-events-none flex w-[4.25rem] select-none flex-col overflow-hidden rounded-xl border border-blue-200/90 bg-white shadow-[0_2px_10px_rgba(37,99,235,0.12)]",
-        "dark:border-blue-800/55 dark:bg-card dark:shadow-[0_2px_12px_rgba(0,0,0,0.2)]",
+        "pointer-events-none flex w-[5.375rem] shrink-0 select-none flex-col overflow-hidden rounded-2xl border border-blue-200/90 bg-white shadow-[0_3px_14px_rgba(37,99,235,0.14)]",
+        "dark:border-blue-800/55 dark:bg-card dark:shadow-[0_3px_14px_rgba(0,0,0,0.22)]",
       )}
       aria-label={label}
       role="img"
     >
-      <div className="bg-[#2563EB] px-1 py-1 text-center text-[10px] font-semibold uppercase tracking-wide text-white dark:bg-blue-500">
+      <div className="bg-[#2563EB] px-1.5 py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-white dark:bg-blue-500">
         {month}
       </div>
-      <div className="flex flex-col items-center justify-center py-1.5">
-        <span className="text-[22px] font-bold leading-none tabular-nums text-[#111827] dark:text-foreground">
+      <div className="flex flex-col items-center justify-center py-2">
+        <span className="text-[26px] font-bold leading-none tabular-nums text-[#111827] dark:text-foreground">
           {dayNum}
         </span>
-        <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#8A94A6] dark:text-muted-foreground">
+        <span className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-[#8A94A6] dark:text-muted-foreground">
           {weekday}
         </span>
       </div>

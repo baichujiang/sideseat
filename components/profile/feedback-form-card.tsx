@@ -2,7 +2,7 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import { MessageSquarePlus, X } from "lucide-react";
+import { ChevronRight, MessageSquarePlus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -10,13 +10,16 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
+const listRowButtonClasses =
+  "flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors active:bg-classmates-warm-alt dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25";
+
 export function FeedbackFormCard({
   compact = false,
   variant = "card",
 }: {
   compact?: boolean;
-  /** `header` — icon control on the Me page toolbar (opens the same dialog). */
-  variant?: "card" | "header";
+  /** `header` — icon control on the Me page toolbar (opens the same dialog). `listRow` — full-width row in a divided list. */
+  variant?: "card" | "header" | "listRow";
 }) {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
@@ -155,6 +158,26 @@ export function FeedbackFormCard({
         </Button>
         {modal}
       </>
+    );
+  }
+
+  if (variant === "listRow") {
+    return (
+      <div className="contents">
+        <button type="button" className={listRowButtonClasses} onClick={() => setOpen(true)}>
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-500/12 text-sky-700 dark:text-sky-400">
+              <MessageSquarePlus className="h-5 w-5" strokeWidth={2} aria-hidden />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[14px] font-semibold leading-tight text-foreground">Feedback</p>
+              <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">Tell us what you want</p>
+            </div>
+          </div>
+          <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground/50" strokeWidth={2} aria-hidden />
+        </button>
+        {modal}
+      </div>
     );
   }
 
