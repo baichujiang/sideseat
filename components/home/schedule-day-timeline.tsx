@@ -250,6 +250,7 @@ export function ScheduleDayTimeline({
                     attachTimelineTapOrLongPress(
                       e,
                       () => onLongPressItem?.(item),
+                      () => onLongPressItem?.(item),
                     );
                   }}
                   onKeyDown={(ev) => {
