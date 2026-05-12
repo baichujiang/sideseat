@@ -11,7 +11,7 @@ import { MePageInstallCard } from "@/components/pwa/me-page-install-card";
 import {
   MeSettingsRowLabel,
   meSettingsRowChevronClass,
-  meSettingsRowAccountIconShellClass,
+  meSettingsRowMutedIconShellClass,
   meSettingsRowLeadClass,
   meSettingsRowLinkClass,
 } from "@/components/profile/me-settings-row";
@@ -45,7 +45,7 @@ function MeDestRow({
   return (
     <Link href={href} className={meSettingsRowLinkClass}>
       <div className={meSettingsRowLeadClass}>
-        <span className={meSettingsRowAccountIconShellClass}>
+        <span className={meSettingsRowMutedIconShellClass}>
           <Icon className="h-4 w-4" strokeWidth={2} aria-hidden />
         </span>
         <MeSettingsRowLabel title={title} subtitle={subtitle} />

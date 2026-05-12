@@ -4,7 +4,16 @@ import type { LanguageProficiency, LanguageTag } from "@prisma/client";
 import { ClassmatePostCategory, ClassmatePostStatus } from "@prisma/client";
 
 import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
-import { mapPrismaStudyToDiscoverRow, type DiscoverPostRowStudyMeta } from "@/lib/discover/discover-post-row";
+import {
+  mapPrismaLanguageToDiscoverRow,
+  mapPrismaMealsToDiscoverRow,
+  mapPrismaSportToDiscoverRow,
+  mapPrismaStudyToDiscoverRow,
+  type DiscoverPostRowLanguageMeta,
+  type DiscoverPostRowMealsMeta,
+  type DiscoverPostRowSportMeta,
+  type DiscoverPostRowStudyMeta,
+} from "@/lib/discover/discover-post-row";
 import { prisma } from "@/lib/db/prisma";
 
 export type ClassmatePostDetailAuthor = {
@@ -38,6 +47,9 @@ export type ClassmatePostDetail = {
   updatedAt: Date;
   linkedCourses: Array<{ id: string; code: string | null; name: string }>;
   studyMeta?: DiscoverPostRowStudyMeta;
+  mealsMeta?: DiscoverPostRowMealsMeta;
+  languageMeta?: DiscoverPostRowLanguageMeta;
+  sportMeta?: DiscoverPostRowSportMeta;
 };
 
 export type ClassmatePostDetailView =
@@ -106,6 +118,9 @@ export async function getClassmatePostDetailForViewer(
       },
       courses: { include: { course: { select: { id: true, code: true, name: true } } } },
       study: true,
+      meals: true,
+      language: true,
+      sport: true,
     },
   });
 
@@ -121,6 +136,9 @@ export async function getClassmatePostDetailForViewer(
     name: pc.course.name,
   }));
   const studyMeta = mapPrismaStudyToDiscoverRow(post.study);
+  const mealsMeta = mapPrismaMealsToDiscoverRow(post.meals);
+  const languageMeta = mapPrismaLanguageToDiscoverRow(post.language);
+  const sportMeta = mapPrismaSportToDiscoverRow(post.sport);
 
   if (post.userId === viewerId) {
     return {
@@ -138,6 +156,9 @@ export async function getClassmatePostDetailForViewer(
         updatedAt: post.updatedAt,
         linkedCourses,
         studyMeta,
+        mealsMeta,
+        languageMeta,
+        sportMeta,
       },
       author,
       isAuthor: true,
@@ -188,6 +209,9 @@ export async function getClassmatePostDetailForViewer(
       updatedAt: post.updatedAt,
       linkedCourses,
       studyMeta,
+      mealsMeta,
+      languageMeta,
+      sportMeta,
     },
     author,
     isAuthor: false,

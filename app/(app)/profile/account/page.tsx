@@ -1,11 +1,12 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { redirect } from "next/navigation";
-import { Info, LogOut, ShieldBan, Sparkles, UserX } from "lucide-react";
+import { Info, LogOut, ShieldBan, UserX } from "lucide-react";
 
 import { LogoutForm } from "@/components/auth/logout-form";
 import { BackLink } from "@/components/nav/back-link";
-import { meSettingsRowLogoutIconShellLargeClass } from "@/components/profile/me-settings-row";
+import { meSettingsRowListIconShellLargeClass } from "@/components/profile/me-settings-row";
+import { ReplayTutorialAccountRow } from "@/components/profile/replay-tutorial-account-row";
 import { LanguagePreferenceCard } from "@/components/settings/language-preference-card";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
@@ -40,27 +41,13 @@ export default async function ProfileAccountPage() {
       <LanguagePreferenceCard />
 
       <div className="overflow-hidden rounded-2xl border border-classmates-edge bg-classmates-surface shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card">
-        <Link
-          href="/profile/account?replayTutorial=1"
-          scroll={false}
-          className="flex items-center justify-between gap-3 px-4 py-3.5 transition-colors active:bg-classmates-warm-alt dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
-        >
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-              <Sparkles className="h-5 w-5" strokeWidth={2} aria-hidden />
-            </span>
-            <div className="min-w-0">
-              <p className="text-[14px] font-semibold leading-tight text-foreground">{m.account.replayTutorialTitle}</p>
-              <p className="mt-0.5 text-[12px] text-muted-foreground">{m.account.replayTutorialSubtitle}</p>
-            </div>
-          </div>
-        </Link>
+        <ReplayTutorialAccountRow />
         <Link
           href="/profile/blocked"
           className="flex items-center justify-between gap-3 border-t border-classmates-hairline px-4 py-3.5 transition-colors active:bg-classmates-warm-alt dark:border-border/60 dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
         >
           <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+            <span className={meSettingsRowListIconShellLargeClass}>
               <ShieldBan className="h-5 w-5" strokeWidth={2} aria-hidden />
             </span>
             <div className="min-w-0">
@@ -74,7 +61,7 @@ export default async function ProfileAccountPage() {
           className="flex items-center justify-between gap-3 border-t border-classmates-hairline px-4 py-3.5 transition-colors active:bg-classmates-warm-alt dark:border-border/60 dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
         >
           <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+            <span className={meSettingsRowListIconShellLargeClass}>
               <Info className="h-5 w-5" strokeWidth={2} aria-hidden />
             </span>
             <div className="min-w-0">
@@ -102,7 +89,7 @@ export default async function ProfileAccountPage() {
             type="submit"
             className="flex w-full items-center gap-3 border-t border-classmates-hairline px-4 py-3.5 text-left transition-colors active:bg-classmates-warm-alt dark:border-border/60 dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
           >
-            <span className={meSettingsRowLogoutIconShellLargeClass}>
+            <span className={meSettingsRowListIconShellLargeClass}>
               <LogOut className="h-5 w-5" strokeWidth={2} aria-hidden />
             </span>
             <div className="min-w-0">

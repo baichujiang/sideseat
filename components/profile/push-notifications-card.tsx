@@ -183,7 +183,7 @@ export function PushNotificationsCard() {
   if (phase === "loading") {
     return (
       <div className={cn(settingCardClass, "flex items-start gap-3")}>
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] bg-muted/50 text-muted-foreground">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted/50 text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
@@ -202,7 +202,7 @@ export function PushNotificationsCard() {
   if (!supported) {
     return (
       <div className={cn(settingCardClass, "flex items-start gap-3")}>
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] bg-muted/45 text-muted-foreground">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted/45 text-muted-foreground">
           <BellOff className="h-5 w-5" strokeWidth={2} aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
@@ -228,7 +228,7 @@ export function PushNotificationsCard() {
           "flex items-start gap-3 border-amber-200/80 bg-amber-50/40 dark:border-amber-900/45 dark:bg-amber-950/25",
         )}
       >
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-800 dark:text-amber-200">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
           <Bell className="h-5 w-5" strokeWidth={2} aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
@@ -251,7 +251,7 @@ export function PushNotificationsCard() {
   return (
     <div className="space-y-2">
       <div className={cn(settingCardClass, "flex items-start gap-3")}>
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] bg-classmates-blue-soft text-classmates-blue">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
           <Bell className="h-5 w-5" strokeWidth={2} aria-hidden />
         </span>
         <div className="min-w-0 flex-1">

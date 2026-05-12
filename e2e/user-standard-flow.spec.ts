@@ -17,12 +17,11 @@ function logStep(name: string) {
   console.log(`\n[e2e] ${name}`);
 }
 
-/** First-run tab tutorial (bottom coach panel); dismiss so main-nav clicks are not blocked. */
+/** First-run tab tutorial (floating coach); dismiss so main-nav clicks are not blocked. */
 async function dismissProductTutorialIfPresent(page: import("@playwright/test").Page) {
-  const dialog = page.locator('[role="dialog"]').filter({ has: page.locator("#product-tutorial-title") });
-  const closeBtn = dialog.getByRole("button", { name: "Close" });
+  const root = page.locator('[data-testid="product-tutorial"]');
   try {
-    await closeBtn.click({ timeout: 4000 });
+    await root.getByRole("button", { name: "Close" }).click({ timeout: 4000 });
   } catch {
     /* not shown or already dismissed */
   }
@@ -105,10 +104,10 @@ test.describe("Standard user flow (login + tabs + drill-ins)", () => {
     logStep("Profile: school verification block");
     await expect(page.locator("#me-verification-heading")).toBeVisible();
 
-    logStep("Drill-in: Preferences & account");
-    await page.getByRole("link", { name: /preferences & account/i }).click();
+    logStep("Drill-in: Settings & account");
+    await page.getByRole("link", { name: /settings & account/i }).click();
     await expect(page).toHaveURL(/\/profile\/account$/);
-    await expect(page.getByRole("heading", { name: "Preferences & account" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Settings & account" })).toBeVisible();
     await page.getByRole("link", { name: "Back", exact: true }).click();
     await expect(page).toHaveURL(/\/profile$/);
 

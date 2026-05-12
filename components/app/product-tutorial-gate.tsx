@@ -4,13 +4,12 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import type { Route } from "next";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChevronUp, X } from "lucide-react";
+import { X } from "lucide-react";
 
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { useRegisterDismissOnEdgeSwipe } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/auth/api-fetch";
-import { APP_NAME } from "@/lib/constants/app";
 import { formatMessage } from "@/lib/i18n/messages";
 import {
   clearProductTutorialDismissedLocally,
@@ -40,6 +39,8 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  /** Primitive so the replay effect re-runs when only the query string changes (ReadonlyURLSearchParams identity can be stable). */
+  const replayTutorialFlag = searchParams.get("replayTutorial");
   const { messages: m } = useLocaleContext();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
@@ -107,7 +108,7 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
   useEffect(() => {
     if (!shouldMountTutorialUi) return;
 
-    if (searchParams.get("replayTutorial") === "1") {
+    if (replayTutorialFlag === "1") {
       didAutoShowRef.current = true;
       clearProductTutorialDismissedLocally(context.userId);
       clearProductTutorialStepSession(context.userId);
@@ -128,7 +129,15 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
     const restored = readProductTutorialStepSession(context.userId);
     setStep(restored != null && restored >= 0 && restored < steps.length ? restored : 0);
     setOpen(true);
-  }, [context.dbDismissed, context.userId, pathname, router, searchParams, shouldMountTutorialUi, steps.length]);
+  }, [
+    context.dbDismissed,
+    context.userId,
+    pathname,
+    replayTutorialFlag,
+    router,
+    shouldMountTutorialUi,
+    steps.length,
+  ]);
 
   useEffect(() => {
     if (!open || !shouldMountTutorialUi) return;
@@ -167,7 +176,7 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
     }
     const id = window.setTimeout(() => {
       backdropClickableRef.current = true;
-    }, 450);
+    }, 320);
     return () => window.clearTimeout(id);
   }, [open]);
 
@@ -184,17 +193,23 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
 
   const total = steps.length;
   const isLast = step >= total - 1;
-  const transitionMs = reducedMotion ? 0 : 220;
+  const transitionMs = reducedMotion ? 0 : 200;
   const dur = `${transitionMs}ms`;
+  const stepCopy = steps[step];
+  const textShadowTitle = "0 2px 14px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.45)";
+  const textShadowBody = "0 1px 10px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.4)";
 
   const panel = (
-    <div className={cn("pointer-events-none fixed inset-0 z-[70] flex flex-col justify-end", !reducedMotion && "duration-200")}>
+    <div
+      data-testid="product-tutorial"
+      className={cn("fixed inset-0 z-[70]", !reducedMotion && "transition-opacity duration-200")}
+    >
       <button
         type="button"
         aria-hidden="true"
         tabIndex={-1}
         className={cn(
-          "pointer-events-auto absolute inset-0 bg-black/40 transition-opacity ease-out",
+          "absolute inset-0 bg-black/25 transition-opacity ease-out dark:bg-black/35",
           entered ? "opacity-100" : "opacity-0",
         )}
         style={{ transitionDuration: dur }}
@@ -203,95 +218,133 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
         }}
       />
 
-      <div className="pointer-events-none relative flex max-h-[min(40vh,320px)] min-h-0 w-full max-w-md justify-center justify-self-center sm:mx-auto">
+      {/* Bottom read legibility: soft wash only (not a card). */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[min(48vh,320px)] bg-gradient-to-t from-black/58 via-black/28 to-transparent dark:from-black/65 dark:via-black/32"
+        aria-hidden
+      />
+
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-x-0 bottom-0 flex justify-center",
+          "pb-[calc(5.25rem+env(safe-area-inset-bottom))]",
+        )}
+      >
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby="product-tutorial-title"
           className={cn(
-            "pointer-events-auto relative mb-0 flex w-full min-h-0 max-w-md flex-col rounded-t-2xl border border-border/60 bg-card shadow-[0_-8px_40px_-12px_rgba(15,23,42,0.25)] dark:shadow-[0_-8px_40px_-12px_rgba(0,0,0,0.45)]",
-            "transition-[transform,opacity] ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform",
-            entered ? "translate-y-0 opacity-100" : "translate-y-full opacity-0",
+            "pointer-events-auto w-full max-w-md px-4",
+            "transition-opacity ease-out",
+            entered ? "opacity-100" : "opacity-0",
           )}
           style={{ transitionDuration: dur }}
         >
-          <div
-            className="pointer-events-none absolute -top-[11px] left-1/2 z-10 -translate-x-1/2 text-card"
-            aria-hidden
-          >
-            <ChevronUp className="h-6 w-10 drop-shadow-sm" strokeWidth={2.25} />
+          <div className="mb-3 flex items-center justify-end gap-1">
+            <button
+              type="button"
+              className="rounded-full px-3 py-1.5 text-[12px] font-semibold text-white/85 transition-colors [text-shadow:0_1px_6px_rgba(0,0,0,0.5)] hover:bg-white/10 hover:text-white"
+              onClick={() => void closeTutorial()}
+            >
+              {m.tutorial.skip}
+            </button>
+            <button
+              type="button"
+              className="rounded-full p-2 text-white/90 transition-colors [text-shadow:0_1px_6px_rgba(0,0,0,0.5)] hover:bg-white/10 hover:text-white"
+              aria-label={m.common.close}
+              onClick={() => void closeTutorial()}
+            >
+              <X className="h-5 w-5" strokeWidth={2} aria-hidden />
+            </button>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-2xl">
-            <div className="flex items-start justify-between gap-2 border-b border-border/60 px-4 pb-2 pt-3">
-              <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  {formatMessage(m.tutorial.stepLabel, { current: step + 1, total })}
-                </p>
-                <h2 id="product-tutorial-title" className="mt-0.5 text-base font-semibold leading-snug text-foreground">
-                  {formatMessage(m.tutorial.welcomeTitle, { appName: APP_NAME })}
-                </h2>
-                <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">{m.tutorial.coachSubtitle}</p>
-              </div>
-              <div className="flex shrink-0 items-center gap-1">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 rounded-full px-2 text-[12px] text-muted-foreground"
-                  onClick={() => void closeTutorial()}
-                >
-                  {m.tutorial.skip}
-                </Button>
-                <button
-                  type="button"
-                  className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                  aria-label="Close"
-                  onClick={() => void closeTutorial()}
-                >
-                  <X className="h-5 w-5" strokeWidth={2} aria-hidden />
-                </button>
-              </div>
-            </div>
-
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
-              <div
-                className={cn(
-                  "rounded-xl border border-classmates-edge bg-classmates-warm-alt/80 p-3 dark:border-border dark:bg-muted/30",
-                  !reducedMotion && "transition-opacity duration-200 ease-out",
-                )}
+          <div
+            className={cn(!reducedMotion && "transition-opacity duration-150")}
+            key={step}
+            aria-live="polite"
+          >
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/70 [text-shadow:0_1px_6px_rgba(0,0,0,0.45)]">
+              {formatMessage(m.tutorial.stepLabel, { current: step + 1, total })}
+            </p>
+            <h2
+              id="product-tutorial-title"
+              className="mt-1 text-[1.4rem] font-semibold leading-snug tracking-tight text-white"
+              style={{ textShadow: textShadowTitle }}
+            >
+              {stepCopy?.title}
+            </h2>
+            <p
+              className="mt-2 max-w-prose text-[15px] font-normal leading-relaxed text-white/95"
+              style={{ textShadow: textShadowBody }}
+            >
+              {stepCopy?.body}
+            </p>
+            {step === 0 ? (
+              <p
+                className="mt-2 max-w-prose text-[12px] leading-snug text-white/80"
+                style={{ textShadow: textShadowBody }}
               >
-                <p className="text-[15px] font-semibold text-foreground">{steps[step]?.title}</p>
-                <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{steps[step]?.body}</p>
-              </div>
-              <p className="mt-3 text-[11px] leading-snug text-muted-foreground">{m.tutorial.replayHint}</p>
-            </div>
+                {m.tutorial.subtitle}
+              </p>
+            ) : isLast ? (
+              <p
+                className="mt-2 max-w-prose text-[12px] leading-snug text-white/75"
+                style={{ textShadow: textShadowBody }}
+              >
+                {m.tutorial.replayHint}
+              </p>
+            ) : (
+              <p
+                className="mt-2 max-w-prose text-[12px] leading-snug text-white/75"
+                style={{ textShadow: textShadowBody }}
+              >
+                {m.tutorial.coachSubtitle}
+              </p>
+            )}
+          </div>
 
-            <div className="border-t border-border/60 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-              <div className="flex items-center gap-2">
-                {step > 0 ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1 rounded-full"
-                    onClick={() => setStep((s) => Math.max(0, s - 1))}
-                  >
-                    {m.tutorial.back}
-                  </Button>
-                ) : (
-                  <span className="flex-1" />
+          <div className="mt-4 flex items-center gap-1.5" aria-hidden>
+            {steps.map((_, i) => (
+              <span
+                key={i}
+                className={cn(
+                  "h-1.5 rounded-full transition-all duration-200",
+                  i === step ? "w-5 bg-white" : "w-1.5 bg-white/35",
                 )}
-                {!isLast ? (
-                  <Button type="button" className="flex-1 rounded-full" onClick={() => setStep((s) => Math.min(total - 1, s + 1))}>
-                    {m.tutorial.next}
-                  </Button>
-                ) : (
-                  <Button type="button" className="flex-1 rounded-full" onClick={() => void closeTutorial()}>
-                    {m.tutorial.getStarted}
-                  </Button>
-                )}
-              </div>
-            </div>
+              />
+            ))}
+          </div>
+
+          <div className="mt-5 flex items-center gap-2 pb-1">
+            {step > 0 ? (
+              <button
+                type="button"
+                className="flex-1 rounded-full py-2.5 text-center text-[13px] font-semibold text-white/90 transition-colors [text-shadow:0_1px_8px_rgba(0,0,0,0.45)] hover:bg-white/5 hover:text-white"
+                onClick={() => setStep((s) => Math.max(0, s - 1))}
+              >
+                {m.tutorial.back}
+              </button>
+            ) : (
+              <span className="flex-1" />
+            )}
+            {!isLast ? (
+              <Button
+                type="button"
+                className="flex-1 rounded-full bg-white text-[13px] font-semibold text-neutral-900 shadow-[0_2px_14px_rgba(0,0,0,0.28)] hover:bg-white/95"
+                onClick={() => setStep((s) => Math.min(total - 1, s + 1))}
+              >
+                {m.tutorial.next}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                className="flex-1 rounded-full bg-white text-[13px] font-semibold text-neutral-900 shadow-[0_2px_14px_rgba(0,0,0,0.28)] hover:bg-white/95"
+                onClick={() => void closeTutorial()}
+              >
+                {m.tutorial.getStarted}
+              </Button>
+            )}
           </div>
         </div>
       </div>

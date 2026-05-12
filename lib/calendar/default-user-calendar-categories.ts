@@ -13,8 +13,8 @@ import { normalizeCalendarCategoryHex } from "@/lib/calendar/calendar-category-c
  * approximate Tailwind `*-600` stroke used by Lucide icons there (light mode). Slight deviation is
  * normal between Tailwind tokens and sRGB rounding.
  *
- * Personal / Work are neutral/office tones (no matching scene tab); values are chosen to read
- * clearly next to the saturated activity colors.
+ * Personal is a warm accent (not grey — it is the most-used preset); Work is a deep navy blue,
+ * clearly separate from Course teal. Both are tuned for white/light label text on chips.
  */
 export const DEFAULT_USER_CALENDAR_PRESETS: ReadonlyArray<{
   presetKey: string;
@@ -22,8 +22,8 @@ export const DEFAULT_USER_CALENDAR_PRESETS: ReadonlyArray<{
   color: string;
   sortOrder: number;
 }> = [
-  { presetKey: "personal", name: "Personal", color: "#6B7280", sortOrder: 0 },
-  { presetKey: "work", name: "Work", color: "#1E40AF", sortOrder: 1 },
+  { presetKey: "personal", name: "Personal", color: "#EA580C", sortOrder: 0 },
+  { presetKey: "work", name: "Work", color: "#1E3A8A", sortOrder: 1 },
   /** 课程 — aligned with Discover “Shared courses” tab (teal icon ≈ teal-600). */
   { presetKey: "course", name: "Course", color: "#0D9488", sortOrder: 2 },
   /** 学习 — Discover Study tab (indigo-600). */
@@ -37,14 +37,19 @@ export const DEFAULT_USER_CALENDAR_PRESETS: ReadonlyArray<{
   { presetKey: "other", name: "Other", color: "#64748B", sortOrder: 7 },
 ];
 
-/** Shipped defaults before 2026-05 — upgrade color only when the row still matches (user-customized colors preserved). */
-const LEGACY_PRESET_COLOR_BY_KEY: Readonly<Record<string, string>> = {
-  course: "#2563EB",
-  study: "#7C3AED",
-  personal: "#EA580C",
-  meal: "#D97706",
-  sports: "#16A34A",
-  other: "#64748B",
+/**
+ * Shipped defaults before 2026-05 — upgrade color only when the row still matches one of these
+ * legacy hexes (user-customized colors preserved). Multiple entries per key support successive
+ * default changes (e.g. Personal grey era → warm default).
+ */
+const LEGACY_PRESET_COLORS_BY_KEY: Readonly<Record<string, readonly string[]>> = {
+  personal: ["#6B7280"],
+  work: ["#1E40AF"],
+  course: ["#2563EB"],
+  study: ["#7C3AED"],
+  meal: ["#D97706"],
+  sports: ["#16A34A"],
+  other: ["#64748B"],
 };
 
 /**
@@ -73,19 +78,23 @@ async function syncPresetSortOrders(prisma: PrismaClient, userId: string): Promi
   );
 }
 
-/** If a preset row still uses a legacy shipped hex, move it to the current default (see LEGACY_PRESET_COLOR_BY_KEY). */
+/** If a preset row still matches any legacy shipped hex, move it to the current default (see LEGACY_PRESET_COLORS_BY_KEY). */
 async function upgradeLegacyPresetColors(prisma: PrismaClient, userId: string): Promise<void> {
-  for (const p of DEFAULT_USER_CALENDAR_PRESETS) {
-    const legacy = LEGACY_PRESET_COLOR_BY_KEY[p.presetKey];
-    if (!legacy) continue;
-    const legacyNorm = normalizeCalendarCategoryHex(legacy);
-    const nextNorm = normalizeCalendarCategoryHex(p.color);
-    if (legacyNorm === nextNorm) continue;
-    const legacyColorMatch = [legacyNorm, legacyNorm.toLowerCase()];
-    await prisma.userCalendarCategory.updateMany({
-      where: { userId, presetKey: p.presetKey, color: { in: legacyColorMatch } },
-      data: { color: nextNorm },
-    });
+  const nextNormByKey = Object.fromEntries(
+    DEFAULT_USER_CALENDAR_PRESETS.map((p) => [p.presetKey, normalizeCalendarCategoryHex(p.color)]),
+  );
+  for (const [presetKey, legacyHexes] of Object.entries(LEGACY_PRESET_COLORS_BY_KEY)) {
+    const nextNorm = nextNormByKey[presetKey];
+    if (!nextNorm) continue;
+    for (const legacy of legacyHexes) {
+      const legacyNorm = normalizeCalendarCategoryHex(legacy);
+      if (legacyNorm === nextNorm) continue;
+      const legacyColorMatch = [legacyNorm, legacyNorm.toLowerCase()];
+      await prisma.userCalendarCategory.updateMany({
+        where: { userId, presetKey, color: { in: legacyColorMatch } },
+        data: { color: nextNorm },
+      });
+    }
   }
 }
 

@@ -87,13 +87,21 @@ export function SharePlatformMenu({
               className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] text-foreground transition hover:bg-muted active:bg-muted/70"
               onClick={() => {
                 void (async () => {
-                  const out = await action.run();
-                  if (out?.copied) {
-                    setCopiedFlash(action.copiedAriaLabel ?? copiedAriaLabel);
-                    window.setTimeout(() => setCopiedFlash(null), 2600);
+                  try {
+                    const out = await action.run();
+                    if (out?.copied) {
+                      setCopiedFlash(action.copiedAriaLabel ?? copiedAriaLabel);
+                      window.setTimeout(() => setCopiedFlash(null), 2600);
+                    }
+                  } catch (err) {
+                    console.error("[SharePlatformMenu]", action.id, err);
+                  } finally {
+                    setOpen(false);
                   }
+                })().catch((err) => {
+                  console.error("[SharePlatformMenu]", action.id, err);
                   setOpen(false);
-                })();
+                });
               }}
             >
               <action.icon className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />

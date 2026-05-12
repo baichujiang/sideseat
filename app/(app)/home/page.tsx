@@ -1,5 +1,3 @@
-import Link from "next/link";
-import type { Route } from "next";
 import type { Weekday } from "@prisma/client";
 import { addDays, subDays } from "date-fns";
 import { GuestAppCta } from "@/components/app/guest-app-cta";
@@ -202,8 +200,6 @@ export default async function HomePage() {
     };
   });
 
-  const hasAnyCourse = memberships.length > 0;
-
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       <ScheduleSurface
@@ -221,19 +217,6 @@ export default async function HomePage() {
           ) : null
         }
       />
-
-      {!hasAnyCourse ? (
-        <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-5 text-center text-sm text-[#5F6B7A] shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:border-border dark:bg-card dark:text-muted-foreground dark:shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
-          {ui.home.emptyScheduleBefore}{" "}
-          <Link
-            href={"/courses/add" as Route}
-            className="font-semibold text-[#2563EB] underline-offset-2 hover:underline dark:text-blue-400"
-          >
-            {ui.home.emptyScheduleCta}
-          </Link>
-          {ui.home.emptyScheduleAfter}
-        </div>
-      ) : null}
     </div>
   );
 }

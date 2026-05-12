@@ -21,11 +21,24 @@ import { safeReturnPath } from "@/lib/nav/back";
 import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
 import { getDiscoverCityDisplayLabel } from "@/lib/discover/discover-city-display";
 import {
+  languageProficiencyLabel,
+  languageTagLabel,
+  mealVenueLabel,
+  sportTagLabel,
   studyPurposeLabel,
   studyTimeSlotLabel,
   studyVenueLabel,
 } from "@/lib/discover/study-meta-labels";
-import { mapPrismaStudyToDiscoverRow, type DiscoverPostRowStudyMeta } from "@/lib/discover/discover-post-row";
+import {
+  mapPrismaLanguageToDiscoverRow,
+  mapPrismaMealsToDiscoverRow,
+  mapPrismaSportToDiscoverRow,
+  mapPrismaStudyToDiscoverRow,
+  type DiscoverPostRowLanguageMeta,
+  type DiscoverPostRowMealsMeta,
+  type DiscoverPostRowSportMeta,
+  type DiscoverPostRowStudyMeta,
+} from "@/lib/discover/discover-post-row";
 import {
   buildViewerCourseMatchIndex,
   courseMatchesViewer,
@@ -94,6 +107,9 @@ export default async function DiscoverPostDetailPage({
       name: pc.course.name,
     }));
     const studyMeta = mapPrismaStudyToDiscoverRow(post.study);
+    const mealsMeta = mapPrismaMealsToDiscoverRow(post.meals);
+    const languageMeta = mapPrismaLanguageToDiscoverRow(post.language);
+    const sportMeta = mapPrismaSportToDiscoverRow(post.sport);
     const cityLabel = getDiscoverCityDisplayLabel(post.city, ui.discover.cityNames);
 
     return (
@@ -127,6 +143,9 @@ export default async function DiscoverPostDetailPage({
             updatedAt={post.updatedAt}
             courses={courses}
             studyMeta={studyMeta}
+            mealsMeta={mealsMeta}
+            languageMeta={languageMeta}
+            sportMeta={sportMeta}
             courseLinkBase={null}
             isAuthor={false}
             highlightViewerCourses={false}
@@ -210,6 +229,9 @@ export default async function DiscoverPostDetailPage({
           updatedAt={post.updatedAt}
           courses={post.linkedCourses}
           studyMeta={post.studyMeta}
+          mealsMeta={post.mealsMeta}
+          languageMeta={post.languageMeta}
+          sportMeta={post.sportMeta}
           courseLinkBase="/courses"
           isAuthor={isAuthor}
           highlightViewerCourses
@@ -314,6 +336,9 @@ function PostContentSection({
   updatedAt,
   courses,
   studyMeta,
+  mealsMeta,
+  languageMeta,
+  sportMeta,
   courseLinkBase,
   isAuthor,
   highlightViewerCourses,
@@ -330,6 +355,9 @@ function PostContentSection({
   updatedAt: Date;
   courses: CourseChip[];
   studyMeta?: DiscoverPostRowStudyMeta | null;
+  mealsMeta?: DiscoverPostRowMealsMeta | null;
+  languageMeta?: DiscoverPostRowLanguageMeta | null;
+  sportMeta?: DiscoverPostRowSportMeta | null;
   courseLinkBase: "/courses" | null;
   isAuthor: boolean;
   /** When false (e.g. guest), chips stay neutral. */
@@ -448,6 +476,102 @@ function PostContentSection({
         </div>
       ) : null}
 
+      {mealsMeta &&
+      (mealsMeta.venueTags.length > 0 || Boolean(mealsMeta.venueOtherNote?.trim())) ? (
+        <div className="space-y-2.5" aria-label={dl.postCardMealsMetaAria}>
+          {mealsMeta.venueTags.length > 0 ? (
+            <div>
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                {dl.postCardMealsVenuesLabel}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {mealsMeta.venueTags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex max-w-full truncate rounded-full border border-amber-200/85 bg-amber-50/90 px-2 py-0.5 text-[10px] font-medium text-amber-950 dark:border-amber-500/35 dark:bg-amber-950/40 dark:text-amber-100"
+                  >
+                    {mealVenueLabel(tag, dl)}
+                  </span>
+                ))}
+              </div>
+              {mealsMeta.venueTags.includes("OTHER") && mealsMeta.venueOtherNote?.trim() ? (
+                <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
+                  {mealsMeta.venueOtherNote.trim()}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      {languageMeta &&
+      (languageMeta.offers.length > 0 || languageMeta.targets.length > 0) ? (
+        <div className="space-y-2.5" aria-label={dl.postCardLanguageMetaAria}>
+          {languageMeta.offers.length > 0 ? (
+            <div>
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                {dl.postCardLanguageOffersLabel}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {languageMeta.offers.map((offer) => (
+                  <span
+                    key={offer.tag}
+                    className="inline-flex max-w-full truncate rounded-full border border-violet-200/85 bg-violet-50/90 px-2 py-0.5 text-[10px] font-medium text-violet-950 dark:border-violet-500/35 dark:bg-violet-950/40 dark:text-violet-100"
+                  >
+                    {languageTagLabel(offer.tag, dl)} · {languageProficiencyLabel(offer.proficiency, dl)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {languageMeta.targets.length > 0 ? (
+            <div>
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                {dl.postCardLanguageTargetsLabel}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {languageMeta.targets.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex max-w-full truncate rounded-full border border-fuchsia-200/85 bg-fuchsia-50/90 px-2 py-0.5 text-[10px] font-medium text-fuchsia-950 dark:border-fuchsia-500/35 dark:bg-fuchsia-950/40 dark:text-fuchsia-100"
+                  >
+                    {languageTagLabel(tag, dl)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      {sportMeta &&
+      (sportMeta.sportTags.length > 0 || Boolean(sportMeta.sportOtherNote?.trim())) ? (
+        <div className="space-y-2.5" aria-label={dl.postCardSportsMetaAria}>
+          {sportMeta.sportTags.length > 0 ? (
+            <div>
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                {dl.postCardSportsTagsLabel}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {sportMeta.sportTags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex max-w-full truncate rounded-full border border-rose-200/85 bg-rose-50/90 px-2 py-0.5 text-[10px] font-medium text-rose-950 dark:border-rose-500/35 dark:bg-rose-950/40 dark:text-rose-100"
+                  >
+                    {sportTagLabel(tag, dl)}
+                  </span>
+                ))}
+              </div>
+              {sportMeta.sportTags.includes("OTHER") && sportMeta.sportOtherNote?.trim() ? (
+                <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
+                  {sportMeta.sportOtherNote.trim()}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       {courses.length > 0 ? (
         <div className="flex flex-wrap gap-1.5">
           {courses.map((c) => {
@@ -551,6 +675,9 @@ async function getClassmatePostDetailForGuest(postId: string, now: Date) {
       },
       courses: { select: { course: { select: { id: true, code: true, name: true } } } },
       study: true,
+      meals: true,
+      language: true,
+      sport: true,
     },
   });
 }

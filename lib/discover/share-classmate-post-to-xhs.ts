@@ -3,7 +3,7 @@ import {
   buildClassmatePostXhsShareText,
 } from "@/lib/discover/classmate-post-share-payload";
 import {
-  copyPlainTextForShareGesture,
+  copyPlainTextSyncExecCommand,
   isHandheldMobileUserAgent,
   kickXhsAppOpenBestEffort,
 } from "@/lib/discover/mobile-native-share-kick";
@@ -39,23 +39,43 @@ export async function shareClassmatePostToXhs(args: {
   });
 
   if (isHandheldMobileUserAgent()) {
-    const copied = await copyPlainTextForShareGesture(text);
+    // Sync copy + app kick must run before any `await` — otherwise iOS Safari drops
+    // user activation and scheme opens / share sheet / prompt can silently do nothing.
+    const copiedSync = copyPlainTextSyncExecCommand(text);
     kickXhsAppOpenBestEffort();
-    if (copied) return "clipboard";
+    if (copiedSync) {
+      void navigator.clipboard.writeText(text).catch(() => {});
+      return "clipboard";
+    }
+
+    let sharePromise: Promise<void> | undefined;
     if (typeof navigator.share === "function") {
       try {
-        await navigator.share({
+        sharePromise = navigator.share({
           title: args.title.slice(0, 120),
           text,
           url: pageUrl,
         });
+      } catch {
+        sharePromise = undefined;
+      }
+    }
+    if (sharePromise) {
+      try {
+        await sharePromise;
         return "navigator";
       } catch (e) {
         if ((e as { name?: string }).name === "AbortError") return "aborted";
       }
     }
-    window.prompt("Copy for 小红书 — select all, then copy:", text);
-    return "prompt";
+
+    try {
+      await navigator.clipboard.writeText(text);
+      return "clipboard";
+    } catch {
+      window.prompt("Copy for 小红书 — select all, then copy:", text);
+      return "prompt";
+    }
   }
 
   if (typeof navigator.share === "function") {

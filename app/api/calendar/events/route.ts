@@ -67,6 +67,8 @@ export async function POST(request: Request) {
       endAt: Date;
     }> = [];
 
+    const recurrenceGroupId = values.repeat !== "NONE" ? crypto.randomUUID() : null;
+
     let cursor = new Date(startAt);
     let count = 0;
     while (count < 120) {
@@ -106,6 +108,7 @@ export async function POST(request: Request) {
             categoryId,
             repeatRule: values.repeat,
             repeatUntil,
+            recurrenceGroupId,
             startAt: entry.startAt,
             endAt: entry.endAt,
             companions: companions.length

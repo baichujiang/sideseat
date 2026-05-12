@@ -1,12 +1,18 @@
-import { ClassmatePostStatus } from "@prisma/client";
+import { ClassmatePostStatus, type Prisma } from "@prisma/client";
 
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { MAX_ACTIVE_CLASSMATE_POSTS_PER_CATEGORY } from "@/lib/constants/app";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseBody } from "@/lib/http";
 import {
+  classmatePostLanguagePayloadHasData,
+  classmatePostMealsPayloadHasData,
+  classmatePostSportPayloadHasData,
   classmatePostStudyPayloadHasData,
   createClassmatePostSchema,
+  languagePayloadSchema,
+  mealsPayloadSchema,
+  sportPayloadSchema,
   studyPayloadSchema,
 } from "@/lib/validators/classmate-posts";
 
@@ -91,6 +97,45 @@ export async function POST(request: Request) {
               timeSlots: s.timeSlots,
               venues: s.venues,
               venueOtherNote: s.venueOtherNote ?? null,
+            },
+          });
+        }
+      }
+
+      if (values.category === "MEALS" && values.meals) {
+        const meals = mealsPayloadSchema.parse(values.meals);
+        if (classmatePostMealsPayloadHasData(meals)) {
+          await tx.classmatePostMeals.create({
+            data: {
+              postId: created.id,
+              venueTags: meals.venueTags,
+              venueOtherNote: meals.venueOtherNote ?? null,
+            },
+          });
+        }
+      }
+
+      if (values.category === "LANGUAGE") {
+        const language = languagePayloadSchema.parse(values.language);
+        if (classmatePostLanguagePayloadHasData(language)) {
+          await tx.classmatePostLanguage.create({
+            data: {
+              postId: created.id,
+              offers: language.offers as Prisma.InputJsonValue,
+              targets: language.targets,
+            },
+          });
+        }
+      }
+
+      if (values.category === "SPORTS" && values.sport) {
+        const sport = sportPayloadSchema.parse(values.sport);
+        if (classmatePostSportPayloadHasData(sport)) {
+          await tx.classmatePostSport.create({
+            data: {
+              postId: created.id,
+              sportTags: sport.sportTags,
+              sportOtherNote: sport.sportOtherNote ?? null,
             },
           });
         }
