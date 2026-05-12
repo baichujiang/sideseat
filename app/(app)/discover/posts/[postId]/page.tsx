@@ -21,6 +21,12 @@ import { safeReturnPath } from "@/lib/nav/back";
 import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
 import { getDiscoverCityDisplayLabel } from "@/lib/discover/discover-city-display";
 import {
+  studyPurposeLabel,
+  studyTimeSlotLabel,
+  studyVenueLabel,
+} from "@/lib/discover/study-meta-labels";
+import { mapPrismaStudyToDiscoverRow, type DiscoverPostRowStudyMeta } from "@/lib/discover/discover-post-row";
+import {
   buildViewerCourseMatchIndex,
   courseMatchesViewer,
   type ViewerCourseMatchIndex,
@@ -87,6 +93,7 @@ export default async function DiscoverPostDetailPage({
       code: pc.course.code,
       name: pc.course.name,
     }));
+    const studyMeta = mapPrismaStudyToDiscoverRow(post.study);
     const cityLabel = getDiscoverCityDisplayLabel(post.city, ui.discover.cityNames);
 
     return (
@@ -119,6 +126,7 @@ export default async function DiscoverPostDetailPage({
             expiresAt={post.expiresAt}
             updatedAt={post.updatedAt}
             courses={courses}
+            studyMeta={studyMeta}
             courseLinkBase={null}
             isAuthor={false}
             highlightViewerCourses={false}
@@ -201,6 +209,7 @@ export default async function DiscoverPostDetailPage({
           expiresAt={post.expiresAt}
           updatedAt={post.updatedAt}
           courses={post.linkedCourses}
+          studyMeta={post.studyMeta}
           courseLinkBase="/courses"
           isAuthor={isAuthor}
           highlightViewerCourses
@@ -304,6 +313,7 @@ function PostContentSection({
   expiresAt,
   updatedAt,
   courses,
+  studyMeta,
   courseLinkBase,
   isAuthor,
   highlightViewerCourses,
@@ -319,6 +329,7 @@ function PostContentSection({
   expiresAt: Date;
   updatedAt: Date;
   courses: CourseChip[];
+  studyMeta?: DiscoverPostRowStudyMeta | null;
   courseLinkBase: "/courses" | null;
   isAuthor: boolean;
   /** When false (e.g. guest), chips stay neutral. */
@@ -371,6 +382,71 @@ function PostContentSection({
           </p>
         ) : null}
       </div>
+
+      {studyMeta &&
+      (studyMeta.purposes.length > 0 ||
+        studyMeta.timeSlots.length > 0 ||
+        studyMeta.venues.length > 0 ||
+        Boolean(studyMeta.venueOtherNote?.trim())) ? (
+        <div className="space-y-2.5" aria-label={dl.postCardStudyMetaAria}>
+          {studyMeta.purposes.length > 0 ? (
+            <div>
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                {dl.postCardStudyPurposesLabel}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {studyMeta.purposes.map((p) => (
+                  <span
+                    key={p}
+                    className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
+                  >
+                    {studyPurposeLabel(p, dl)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {studyMeta.timeSlots.length > 0 ? (
+            <div>
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                {dl.postCardStudyTimeLabel}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {studyMeta.timeSlots.map((t) => (
+                  <span
+                    key={t}
+                    className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
+                  >
+                    {studyTimeSlotLabel(t, dl)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {studyMeta.venues.length > 0 ? (
+            <div>
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                {dl.postCardStudyVenuesLabel}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {studyMeta.venues.map((v) => (
+                  <span
+                    key={v}
+                    className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
+                  >
+                    {studyVenueLabel(v, dl)}
+                  </span>
+                ))}
+              </div>
+              {studyMeta.venues.includes("OTHER") && studyMeta.venueOtherNote?.trim() ? (
+                <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
+                  {studyMeta.venueOtherNote.trim()}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {courses.length > 0 ? (
         <div className="flex flex-wrap gap-1.5">
@@ -474,6 +550,7 @@ async function getClassmatePostDetailForGuest(postId: string, now: Date) {
         },
       },
       courses: { select: { course: { select: { id: true, code: true, name: true } } } },
+      study: true,
     },
   });
 }

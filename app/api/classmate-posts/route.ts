@@ -4,7 +4,11 @@ import { requireOnboardedUser } from "@/lib/auth/guards";
 import { MAX_ACTIVE_CLASSMATE_POSTS_PER_CATEGORY } from "@/lib/constants/app";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseBody } from "@/lib/http";
-import { createClassmatePostSchema } from "@/lib/validators/classmate-posts";
+import {
+  classmatePostStudyPayloadHasData,
+  createClassmatePostSchema,
+  studyPayloadSchema,
+} from "@/lib/validators/classmate-posts";
 
 export async function POST(request: Request) {
   try {
@@ -75,6 +79,21 @@ export async function POST(request: Request) {
             courseId,
           })),
         });
+      }
+
+      if (values.category === "STUDY" && values.study) {
+        const s = studyPayloadSchema.parse(values.study);
+        if (classmatePostStudyPayloadHasData(s)) {
+          await tx.classmatePostStudy.create({
+            data: {
+              postId: created.id,
+              purposes: s.purposes,
+              timeSlots: s.timeSlots,
+              venues: s.venues,
+              venueOtherNote: s.venueOtherNote ?? null,
+            },
+          });
+        }
       }
 
       return created;

@@ -51,9 +51,6 @@ export type AppMessages = {
     meBody: string;
   };
   home: {
-    emptyScheduleBefore: string;
-    emptyScheduleCta: string;
-    emptyScheduleAfter: string;
     greetingNight: string;
     greetingMorning: string;
     greetingAfternoon: string;
@@ -163,6 +160,29 @@ export type AppMessages = {
     postCardSportsBlurb: string;
     /** `aria-label` for the linked-course chip row on SHARED_COURSES posts. */
     postCardLinkedCoursesAria: string;
+    /** Study post structured preferences — section `aria-label`. */
+    postCardStudyMetaAria: string;
+    postCardStudyPurposesLabel: string;
+    postCardStudyTimeLabel: string;
+    postCardStudyVenuesLabel: string;
+    studyPurposeDailySelfStudy: string;
+    studyPurposeExamPrep: string;
+    studyPurposeSprint: string;
+    studyTimeMorning: string;
+    studyTimeAfternoon: string;
+    studyTimeEvening: string;
+    studyVenueMainLibrary: string;
+    studyVenueGarchingMi: string;
+    studyVenueOlympiaPark: string;
+    studyVenueOther: string;
+    postSheetStudyPurposeLabel: string;
+    postSheetStudyTimeLabel: string;
+    postSheetStudyVenueLabel: string;
+    postSheetVenueOtherPlaceholder: string;
+    postErrorStudyVenueOtherNote: string;
+    postErrorStudyVenueOtherRequiresOther: string;
+    /** `{max}` — study “other place” note length. */
+    postErrorStudyVenueNoteTooLong: string;
   };
   inbox: {
     screenTitle: string;
@@ -326,6 +346,13 @@ export type AppMessages = {
     calendarClipboardDismiss: string;
     /** Fills the title field from structured clipboard payload. */
     calendarClipboardApplyTitle: string;
+    recurringDeleteDialogTitle: string;
+    /** `{title}` */
+    recurringDeleteDialogBody: string;
+    recurringDeleteThisOccurrence: string;
+    recurringDeleteAllFuture: string;
+    recurringDeleteEntireSeries: string;
+    recurringDeleteAriaLabel: string;
   };
   account: {
     back: string;

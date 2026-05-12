@@ -23,6 +23,9 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ClassmatePostCategory,
+  StudyPurpose,
+  StudyTimeSlot,
+  StudyVenue,
   type LanguageProficiency,
   type LanguageTag,
   type UserGender,
@@ -53,7 +56,16 @@ import { formatMessage, type AppMessages } from "@/lib/i18n/messages";
 import {
   CLASSMATE_POST_BODY_MAX_LEN,
   CLASSMATE_POST_TITLE_MAX_LEN,
+  CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX,
+  STUDY_PURPOSE_VALUES,
+  STUDY_TIME_SLOT_VALUES,
+  STUDY_VENUE_VALUES,
 } from "@/lib/validators/classmate-posts";
+import {
+  studyPurposeLabel,
+  studyTimeSlotLabel,
+  studyVenueLabel,
+} from "@/lib/discover/study-meta-labels";
 import { cn } from "@/lib/utils";
 
 type SceneKind = DiscoverPostCardScene;
@@ -1140,9 +1152,14 @@ function CreatePostSheet({
   const [body, setBody] = useState("");
   const [expiryPreset, setExpiryPreset] = useState<PostExpiryPreset>("1w");
   const [selectedCourseIds, setSelectedCourseIds] = useState<Set<string>>(new Set());
+  const [studyPurposes, setStudyPurposes] = useState<Set<StudyPurpose>>(new Set());
+  const [studyTimeSlots, setStudyTimeSlots] = useState<Set<StudyTimeSlot>>(new Set());
+  const [studyVenues, setStudyVenues] = useState<Set<StudyVenue>>(new Set());
+  const [studyVenueOtherNote, setStudyVenueOtherNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isSharedScene = scene === "shared";
+  const isStudyScene = scene === "study";
 
   useEffect(() => {
     if (!open) return;
@@ -1151,6 +1168,10 @@ function CreatePostSheet({
     setError(null);
     setExpiryPreset("1w");
     setSelectedCourseIds(new Set());
+    setStudyPurposes(new Set());
+    setStudyTimeSlots(new Set());
+    setStudyVenues(new Set());
+    setStudyVenueOtherNote("");
   }, [open, scene]);
 
   function toggleCourse(id: string) {
@@ -1164,6 +1185,33 @@ function CreatePostSheet({
 
   function selectAllCourses() {
     setSelectedCourseIds(new Set(enrolledCourses.map((c) => c.id)));
+  }
+
+  function toggleStudyPurpose(p: StudyPurpose) {
+    setStudyPurposes((prev) => {
+      const next = new Set(prev);
+      if (next.has(p)) next.delete(p);
+      else next.add(p);
+      return next;
+    });
+  }
+
+  function toggleStudyTimeSlot(t: StudyTimeSlot) {
+    setStudyTimeSlots((prev) => {
+      const next = new Set(prev);
+      if (next.has(t)) next.delete(t);
+      else next.add(t);
+      return next;
+    });
+  }
+
+  function toggleStudyVenue(v: StudyVenue) {
+    setStudyVenues((prev) => {
+      const next = new Set(prev);
+      if (next.has(v)) next.delete(v);
+      else next.add(v);
+      return next;
+    });
   }
 
   async function submit() {
@@ -1186,9 +1234,41 @@ function CreatePostSheet({
       setError(formatMessage(dl.postErrorBodyTooLong, { max: CLASSMATE_POST_BODY_MAX_LEN }));
       return;
     }
+    if (isStudyScene && studyVenues.has("OTHER") && !studyVenueOtherNote.trim()) {
+      setError(dl.postErrorStudyVenueOtherNote);
+      return;
+    }
+    if (isStudyScene && studyVenueOtherNote.trim() && !studyVenues.has("OTHER")) {
+      setError(dl.postErrorStudyVenueOtherRequiresOther);
+      return;
+    }
+    if (isStudyScene && studyVenueOtherNote.trim().length > CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX) {
+      setError(
+        formatMessage(dl.postErrorStudyVenueNoteTooLong, {
+          max: CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX,
+        }),
+      );
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
+      const studyPayload =
+        isStudyScene &&
+        (studyPurposes.size > 0 ||
+          studyTimeSlots.size > 0 ||
+          studyVenues.size > 0 ||
+          (studyVenues.has("OTHER") && studyVenueOtherNote.trim().length > 0))
+          ? {
+              purposes: [...studyPurposes],
+              timeSlots: [...studyTimeSlots],
+              venues: [...studyVenues],
+              ...(studyVenues.has("OTHER") && studyVenueOtherNote.trim()
+                ? { venueOtherNote: studyVenueOtherNote.trim() }
+                : {}),
+            }
+          : undefined;
+
       const res = await apiFetch("/api/classmate-posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1201,6 +1281,7 @@ function CreatePostSheet({
           ...(isSharedScene && selectedCourseIds.size > 0
             ? { courseIds: [...selectedCourseIds] }
             : {}),
+          ...(studyPayload ? { study: studyPayload } : {}),
         }),
       });
       const payload = await res.json().catch(() => ({}));
@@ -1283,6 +1364,95 @@ function CreatePostSheet({
           ) : isSharedScene && enrolledCourses.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-amber-200/80 bg-amber-50/40 px-3 py-3 text-center text-[12px] text-muted-foreground">
               {dl.postSheetNeedEnroll}
+            </div>
+          ) : null}
+
+          {isStudyScene ? (
+            <div className="space-y-3 rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
+              <div>
+                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
+                  {dl.postSheetStudyPurposeLabel}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {STUDY_PURPOSE_VALUES.map((p) => {
+                    const active = studyPurposes.has(p);
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => toggleStudyPurpose(p)}
+                        className={cn(
+                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
+                          active
+                            ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
+                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
+                        )}
+                      >
+                        {studyPurposeLabel(p, dl)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
+                  {dl.postSheetStudyTimeLabel}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {STUDY_TIME_SLOT_VALUES.map((t) => {
+                    const active = studyTimeSlots.has(t);
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => toggleStudyTimeSlot(t)}
+                        className={cn(
+                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
+                          active
+                            ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
+                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
+                        )}
+                      >
+                        {studyTimeSlotLabel(t, dl)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
+                  {dl.postSheetStudyVenueLabel}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {STUDY_VENUE_VALUES.map((v) => {
+                    const active = studyVenues.has(v);
+                    return (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => toggleStudyVenue(v)}
+                        className={cn(
+                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
+                          active
+                            ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
+                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
+                        )}
+                      >
+                        {studyVenueLabel(v, dl)}
+                      </button>
+                    );
+                  })}
+                </div>
+                {studyVenues.has("OTHER") ? (
+                  <Input
+                    value={studyVenueOtherNote}
+                    onChange={(e) => setStudyVenueOtherNote(e.target.value)}
+                    placeholder={dl.postSheetVenueOtherPlaceholder}
+                    maxLength={CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX}
+                    className="mt-2 h-9 rounded-xl border-border/70 text-[13px]"
+                  />
+                ) : null}
+              </div>
             </div>
           ) : null}
 

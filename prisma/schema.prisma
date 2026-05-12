@@ -214,6 +214,26 @@ enum ClassmatePostInsightKind {
   MESSAGE_INTENT
 }
 
+/// Discover STUDY post — learning intent (orthogonal to `CourseIntent` on enrollments).
+enum StudyPurpose {
+  DAILY_SELF_STUDY
+  EXAM_PREP
+  SPRINT
+}
+
+enum StudyTimeSlot {
+  MORNING
+  AFTERNOON
+  EVENING
+}
+
+enum StudyVenue {
+  MAIN_LIBRARY
+  GARCHING_MI_LIBRARY
+  OLYMPIA_PARK_LIBRARY
+  OTHER
+}
+
 enum ProductFeedbackTopic {
   BUG
   IDEA
@@ -359,6 +379,7 @@ model ClassmatePost {
   user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   courses    ClassmatePostCourse[]
   insights   ClassmatePostInsight[]
+  study      ClassmatePostStudy?
 
   @@index([category, status, city, createdAt])
   @@index([userId, category, status])
@@ -376,6 +397,17 @@ model ClassmatePostInsight {
 
   @@unique([postId, actorId, kind])
   @@index([postId, kind])
+}
+
+/// Structured preferences on a STUDY Discover post (1:1).
+model ClassmatePostStudy {
+  postId           String          @id
+  purposes         StudyPurpose[]
+  timeSlots        StudyTimeSlot[]
+  venues           StudyVenue[]
+  /// Required when `venues` contains OTHER; max length enforced in API (Zod).
+  venueOtherNote   String?         @db.VarChar(60)
+  post             ClassmatePost   @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
 /// Courses attached to a SHARED_COURSES post — "I'm looking for classmates in these courses".
@@ -919,6 +951,8 @@ model CalendarEntry {
   note       String?
   repeatRule CalendarRepeatRule @default(NONE)
   repeatUntil DateTime?
+  /// Shared id for rows created in one recurring POST — used for delete-all / delete-future.
+  recurrenceGroupId String?
   startAt    DateTime
   endAt      DateTime
   /// When set, the 15-minute-before-start Web Push reminder was already sent.
@@ -939,6 +973,7 @@ model CalendarEntry {
   @@index([userId, startAt])
   @@index([categoryId])
   @@index([userId, courseScheduleMirrorKey])
+  @@index([userId, recurrenceGroupId])
 }
 
 model CalendarEntryCompanion {

@@ -24,6 +24,11 @@ import {
   LANGUAGE_TAG_LABEL,
 } from "@/lib/constants/languages";
 import {
+  studyPurposeLabel,
+  studyTimeSlotLabel,
+  studyVenueLabel,
+} from "@/lib/discover/study-meta-labels";
+import {
   classmatePostCategoryToPalette,
   SCENE_LIST_ROW,
 } from "@/lib/discover/scene-palette";
@@ -186,6 +191,14 @@ export function DiscoverPostCard({
     post.linkedCourses &&
     post.linkedCourses.length > 0;
 
+  const showStudyMeta =
+    post.category === ClassmatePostCategory.STUDY &&
+    post.studyMeta &&
+    (post.studyMeta.purposes.length > 0 ||
+      post.studyMeta.timeSlots.length > 0 ||
+      post.studyMeta.venues.length > 0 ||
+      Boolean(post.studyMeta.venueOtherNote?.trim()));
+
   const showLanguageMeta =
     post.category === ClassmatePostCategory.LANGUAGE && post.languages.length > 0;
 
@@ -266,6 +279,66 @@ export function DiscoverPostCard({
               <p className="mt-1 line-clamp-2 text-[12px] leading-snug text-muted-foreground">
                 {post.body}
               </p>
+            ) : null}
+            {showStudyMeta ? (
+              <div className="mt-2.5 space-y-2" aria-label={dl.postCardStudyMetaAria}>
+                {post.studyMeta!.purposes.length > 0 ? (
+                  <div>
+                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                      {dl.postCardStudyPurposesLabel}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {post.studyMeta!.purposes.map((p) => (
+                        <span
+                          key={p}
+                          className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
+                        >
+                          {studyPurposeLabel(p, dl)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                {post.studyMeta!.timeSlots.length > 0 ? (
+                  <div>
+                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                      {dl.postCardStudyTimeLabel}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {post.studyMeta!.timeSlots.map((t) => (
+                        <span
+                          key={t}
+                          className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
+                        >
+                          {studyTimeSlotLabel(t, dl)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                {post.studyMeta!.venues.length > 0 ? (
+                  <div>
+                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                      {dl.postCardStudyVenuesLabel}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {post.studyMeta!.venues.map((v) => (
+                        <span
+                          key={v}
+                          className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
+                        >
+                          {studyVenueLabel(v, dl)}
+                        </span>
+                      ))}
+                    </div>
+                    {post.studyMeta!.venues.includes("OTHER") && post.studyMeta!.venueOtherNote?.trim() ? (
+                      <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-muted-foreground">
+                        {post.studyMeta!.venueOtherNote.trim()}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
             ) : null}
             {showSportsMeta ? (
               <p className="mt-2 text-[11px] leading-snug text-muted-foreground">

@@ -4,6 +4,7 @@ import type { LanguageProficiency, LanguageTag } from "@prisma/client";
 import { ClassmatePostCategory, ClassmatePostStatus } from "@prisma/client";
 
 import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
+import { mapPrismaStudyToDiscoverRow, type DiscoverPostRowStudyMeta } from "@/lib/discover/discover-post-row";
 import { prisma } from "@/lib/db/prisma";
 
 export type ClassmatePostDetailAuthor = {
@@ -36,6 +37,7 @@ export type ClassmatePostDetail = {
   createdAt: Date;
   updatedAt: Date;
   linkedCourses: Array<{ id: string; code: string | null; name: string }>;
+  studyMeta?: DiscoverPostRowStudyMeta;
 };
 
 export type ClassmatePostDetailView =
@@ -103,6 +105,7 @@ export async function getClassmatePostDetailForViewer(
         },
       },
       courses: { include: { course: { select: { id: true, code: true, name: true } } } },
+      study: true,
     },
   });
 
@@ -117,6 +120,7 @@ export async function getClassmatePostDetailForViewer(
     code: pc.course.code,
     name: pc.course.name,
   }));
+  const studyMeta = mapPrismaStudyToDiscoverRow(post.study);
 
   if (post.userId === viewerId) {
     return {
@@ -133,6 +137,7 @@ export async function getClassmatePostDetailForViewer(
         createdAt: post.createdAt,
         updatedAt: post.updatedAt,
         linkedCourses,
+        studyMeta,
       },
       author,
       isAuthor: true,
@@ -182,6 +187,7 @@ export async function getClassmatePostDetailForViewer(
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       linkedCourses,
+      studyMeta,
     },
     author,
     isAuthor: false,

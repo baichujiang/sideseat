@@ -1,10 +1,24 @@
-import { ClassmatePostCategory } from "@prisma/client";
-import type { LanguageProficiency, LanguageTag, UserGender } from "@prisma/client";
+import {
+  ClassmatePostCategory,
+  type LanguageProficiency,
+  type LanguageTag,
+  type StudyPurpose,
+  type StudyTimeSlot,
+  type StudyVenue,
+  type UserGender,
+} from "@prisma/client";
 
 export type DiscoverPostRowCourse = {
   id: string;
   code: string | null;
   name: string;
+};
+
+export type DiscoverPostRowStudyMeta = {
+  purposes: StudyPurpose[];
+  timeSlots: StudyTimeSlot[];
+  venues: StudyVenue[];
+  venueOtherNote: string | null;
 };
 
 export type DiscoverPostRow = {
@@ -31,6 +45,7 @@ export type DiscoverPostRow = {
     | "MANUAL_REVIEW_REQUIRED"
     | "REJECTED";
   linkedCourses?: DiscoverPostRowCourse[];
+  studyMeta?: DiscoverPostRowStudyMeta;
 };
 
 /** Discover tabs / create-post scene — matches `DiscoverList` scene state. */
@@ -49,4 +64,28 @@ export function discoverSceneForPostCategory(category: ClassmatePostCategory): D
     case ClassmatePostCategory.SPORTS:
       return "sports";
   }
+}
+
+/** Map optional `ClassmatePost.study` relation into a card row field (omit when empty). */
+export function mapPrismaStudyToDiscoverRow(
+  study: {
+    purposes: StudyPurpose[];
+    timeSlots: StudyTimeSlot[];
+    venues: StudyVenue[];
+    venueOtherNote: string | null;
+  } | null,
+): DiscoverPostRowStudyMeta | undefined {
+  if (!study) return undefined;
+  const has =
+    study.purposes.length > 0 ||
+    study.timeSlots.length > 0 ||
+    study.venues.length > 0 ||
+    Boolean(study.venueOtherNote?.trim());
+  if (!has) return undefined;
+  return {
+    purposes: [...study.purposes],
+    timeSlots: [...study.timeSlots],
+    venues: [...study.venues],
+    venueOtherNote: study.venueOtherNote,
+  };
 }
