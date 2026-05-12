@@ -20,9 +20,14 @@ import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { UserGenderCardIcon } from "@/components/ui/user-gender-icon";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import {
-  LANGUAGE_PROFICIENCY_LABEL,
-  LANGUAGE_TAG_LABEL,
-} from "@/lib/constants/languages";
+  languageProficiencyLabel,
+  languageTagLabel,
+  mealVenueLabel,
+  sportTagLabel,
+  studyPurposeLabel,
+  studyTimeSlotLabel,
+  studyVenueLabel,
+} from "@/lib/discover/study-meta-labels";
 import {
   classmatePostCategoryToPalette,
   SCENE_LIST_ROW,
@@ -186,10 +191,28 @@ export function DiscoverPostCard({
     post.linkedCourses &&
     post.linkedCourses.length > 0;
 
-  const showLanguageMeta =
-    post.category === ClassmatePostCategory.LANGUAGE && post.languages.length > 0;
+  const showStudyMeta =
+    post.category === ClassmatePostCategory.STUDY &&
+    post.studyMeta &&
+    (post.studyMeta.purposes.length > 0 ||
+      post.studyMeta.timeSlots.length > 0 ||
+      post.studyMeta.venues.length > 0 ||
+      Boolean(post.studyMeta.venueOtherNote?.trim()));
 
-  const showSportsMeta = post.category === ClassmatePostCategory.SPORTS;
+  const showMealsMeta =
+    post.category === ClassmatePostCategory.MEALS &&
+    post.mealsMeta &&
+    (post.mealsMeta.venueTags.length > 0 || Boolean(post.mealsMeta.venueOtherNote?.trim()));
+
+  const showLanguageMeta =
+    post.category === ClassmatePostCategory.LANGUAGE &&
+    post.languageMeta &&
+    (post.languageMeta.offers.length > 0 || post.languageMeta.targets.length > 0);
+
+  const showSportsMeta =
+    post.category === ClassmatePostCategory.SPORTS &&
+    post.sportMeta &&
+    (post.sportMeta.sportTags.length > 0 || Boolean(post.sportMeta.sportOtherNote?.trim()));
 
   const defaultFooter = (
     <div
@@ -267,27 +290,154 @@ export function DiscoverPostCard({
                 {post.body}
               </p>
             ) : null}
+            {showStudyMeta ? (
+              <div className="mt-2.5 space-y-2" aria-label={dl.postCardStudyMetaAria}>
+                {post.studyMeta!.purposes.length > 0 ? (
+                  <div>
+                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                      {dl.postCardStudyPurposesLabel}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {post.studyMeta!.purposes.map((p) => (
+                        <span
+                          key={p}
+                          className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
+                        >
+                          {studyPurposeLabel(p, dl)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                {post.studyMeta!.timeSlots.length > 0 ? (
+                  <div>
+                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                      {dl.postCardStudyTimeLabel}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {post.studyMeta!.timeSlots.map((t) => (
+                        <span
+                          key={t}
+                          className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
+                        >
+                          {studyTimeSlotLabel(t, dl)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                {post.studyMeta!.venues.length > 0 ? (
+                  <div>
+                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                      {dl.postCardStudyVenuesLabel}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {post.studyMeta!.venues.map((v) => (
+                        <span
+                          key={v}
+                          className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
+                        >
+                          {studyVenueLabel(v, dl)}
+                        </span>
+                      ))}
+                    </div>
+                    {post.studyMeta!.venues.includes("OTHER") && post.studyMeta!.venueOtherNote?.trim() ? (
+                      <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-muted-foreground">
+                        {post.studyMeta!.venueOtherNote.trim()}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+            {showMealsMeta ? (
+              <div className="mt-2.5 space-y-2" aria-label={dl.postCardMealsMetaAria}>
+                <div>
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                    {dl.postCardMealsVenuesLabel}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {post.mealsMeta!.venueTags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex max-w-full truncate rounded-full border border-amber-200/85 bg-amber-50/90 px-2 py-0.5 text-[10px] font-medium text-amber-950 dark:border-amber-500/35 dark:bg-amber-950/40 dark:text-amber-100"
+                      >
+                        {mealVenueLabel(tag, dl)}
+                      </span>
+                    ))}
+                  </div>
+                  {post.mealsMeta!.venueTags.includes("OTHER") &&
+                  post.mealsMeta!.venueOtherNote?.trim() ? (
+                    <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-muted-foreground">
+                      {post.mealsMeta!.venueOtherNote.trim()}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
             {showSportsMeta ? (
-              <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
-                {dl.postCardSportsBlurb}
-              </p>
+              <div className="mt-2.5 space-y-2" aria-label={dl.postCardSportsMetaAria}>
+                <div>
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                    {dl.postCardSportsTagsLabel}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {post.sportMeta!.sportTags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex max-w-full truncate rounded-full border border-rose-200/85 bg-rose-50/90 px-2 py-0.5 text-[10px] font-medium text-rose-950 dark:border-rose-500/35 dark:bg-rose-950/40 dark:text-rose-100"
+                      >
+                        {sportTagLabel(tag, dl)}
+                      </span>
+                    ))}
+                  </div>
+                  {post.sportMeta!.sportTags.includes("OTHER") &&
+                  post.sportMeta!.sportOtherNote?.trim() ? (
+                    <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-muted-foreground">
+                      {post.sportMeta!.sportOtherNote.trim()}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
             ) : null}
             {showLanguageMeta ? (
-              <div className="mt-2.5" aria-label={dl.postCardSpeaksLabel}>
-                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-                  {dl.postCardSpeaksLabel}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {post.languages.map((row) => (
-                    <span
-                      key={row.tag}
-                      title={LANGUAGE_PROFICIENCY_LABEL[row.proficiency]}
-                      className="inline-flex max-w-full truncate rounded-full border border-violet-200/80 bg-violet-50/90 px-2 py-0.5 text-[10px] font-medium text-violet-950 dark:border-violet-500/35 dark:bg-violet-950/40 dark:text-violet-100"
-                    >
-                      {LANGUAGE_TAG_LABEL[row.tag]} · {LANGUAGE_PROFICIENCY_LABEL[row.proficiency]}
-                    </span>
-                  ))}
-                </div>
+              <div className="mt-2.5 space-y-2" aria-label={dl.postCardLanguageMetaAria}>
+                {post.languageMeta!.offers.length > 0 ? (
+                  <div>
+                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                      {dl.postCardLanguageOffersLabel}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {post.languageMeta!.offers.map((offer) => (
+                        <span
+                          key={offer.tag}
+                          title={languageProficiencyLabel(offer.proficiency, dl)}
+                          className="inline-flex max-w-full truncate rounded-full border border-violet-200/80 bg-violet-50/90 px-2 py-0.5 text-[10px] font-medium text-violet-950 dark:border-violet-500/35 dark:bg-violet-950/40 dark:text-violet-100"
+                        >
+                          {languageTagLabel(offer.tag, dl)} ·{" "}
+                          {languageProficiencyLabel(offer.proficiency, dl)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                {post.languageMeta!.targets.length > 0 ? (
+                  <div>
+                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                      {dl.postCardLanguageTargetsLabel}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {post.languageMeta!.targets.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex max-w-full truncate rounded-full border border-fuchsia-200/80 bg-fuchsia-50/90 px-2 py-0.5 text-[10px] font-medium text-fuchsia-950 dark:border-fuchsia-500/35 dark:bg-fuchsia-950/40 dark:text-fuchsia-100"
+                        >
+                          {languageTagLabel(tag, dl)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </div>
             ) : null}
             {showSharedCourseChips ? (

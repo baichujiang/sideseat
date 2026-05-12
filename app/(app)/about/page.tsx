@@ -4,8 +4,12 @@ import type { Route } from "next";
 import { BackLink } from "@/components/nav/back-link";
 import { APP_NAME } from "@/lib/constants/app";
 import { getPublicSupportEmail, getSupportMailto } from "@/lib/constants/support";
+import { getMessages } from "@/lib/i18n/messages";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const locale = await getServerAppLocale();
+  const m = getMessages(locale);
   const email = getPublicSupportEmail();
   const mailto = getSupportMailto();
 
@@ -46,7 +50,7 @@ export default function AboutPage() {
 
       <p className="px-0.5 text-center text-[12px] text-muted-foreground">
         <Link href={"/profile/account" as Route} className="underline-offset-2 hover:underline">
-          Preferences & account
+          {m.account.title}
         </Link>
       </p>
     </div>

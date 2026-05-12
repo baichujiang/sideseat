@@ -20,6 +20,10 @@ export function getMessages(locale: AppLocale): AppMessages {
 }
 
 /** Replace `{count}`-style placeholders in a string. */
-export function formatMessage(template: string, vars: Record<string, string | number>): string {
+export function formatMessage(
+  template: string | undefined | null,
+  vars: Record<string, string | number>,
+): string {
+  if (typeof template !== "string") return "";
   return template.replace(/\{(\w+)\}/g, (_, key: string) => String(vars[key] ?? ""));
 }

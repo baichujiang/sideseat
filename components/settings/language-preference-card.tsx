@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Languages } from "lucide-react";
 
 import { useLocaleContext } from "@/components/i18n/locale-provider";
+import { meSettingsRowListIconShellLargeClass } from "@/components/profile/me-settings-row";
 import { cn } from "@/lib/utils";
 import type { AppLocale } from "@/lib/i18n/app-locale";
 
@@ -27,7 +28,7 @@ export function LanguagePreferenceCard() {
   return (
     <div className={cn(cardClass, "space-y-3")}>
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] bg-muted/70 text-muted-foreground">
+        <span className={meSettingsRowListIconShellLargeClass}>
           <Languages className="h-5 w-5" strokeWidth={2} aria-hidden />
         </span>
         <div className="min-w-0 flex-1 space-y-1">

@@ -50,24 +50,15 @@ export const meSettingsRowFeedbackIconShellLargeClass = cn(
   meSettingsRowFeedbackIconSurfaceClass,
 );
 
-export const meSettingsRowAccountIconShellClass = cn(
+/** Me list / settings entry: neutral icon (e.g. row linking to Settings & account). */
+export const meSettingsRowMutedIconShellClass = cn(
   meSettingsRowIconShellClass,
-  "bg-gradient-to-br from-violet-400/20 to-indigo-400/20 text-violet-700 dark:from-violet-400/15 dark:to-indigo-400/15 dark:text-violet-400",
+  "bg-muted text-muted-foreground",
 );
 
-export const meSettingsRowLogoutIconSurfaceClass =
-  "bg-gradient-to-br from-rose-400/20 to-orange-400/18 text-rose-700 dark:from-rose-400/15 dark:to-orange-400/12 dark:text-rose-400";
-
-export const meSettingsRowLogoutIconShellClass = cn(
-  meSettingsRowIconShellClass,
-  meSettingsRowLogoutIconSurfaceClass,
-);
-
-/** Preferences screen row (matches other account list icons at h-10). */
-export const meSettingsRowLogoutIconShellLargeClass = cn(
-  "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
-  meSettingsRowLogoutIconSurfaceClass,
-);
+/** Settings & account screen list rows: circular neutral icon (h-10). */
+export const meSettingsRowListIconShellLargeClass =
+  "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground";
 
 export const meSettingsRowTitleClass =
   "truncate text-[13px] font-semibold leading-tight text-foreground";

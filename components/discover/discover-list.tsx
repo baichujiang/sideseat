@@ -23,8 +23,13 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ClassmatePostCategory,
+  type MealVenueTag,
+  StudyPurpose,
+  StudyTimeSlot,
+  StudyVenue,
   type LanguageProficiency,
   type LanguageTag,
+  type SportTag,
   type UserGender,
 } from "@prisma/client";
 
@@ -52,12 +57,32 @@ import { useAppMessages } from "@/hooks/use-app-locale";
 import { formatMessage, type AppMessages } from "@/lib/i18n/messages";
 import {
   CLASSMATE_POST_BODY_MAX_LEN,
+  CLASSMATE_POST_MEALS_VENUE_OTHER_NOTE_MAX,
+  CLASSMATE_POST_SPORT_OTHER_NOTE_MAX,
   CLASSMATE_POST_TITLE_MAX_LEN,
+  CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX,
+  LANGUAGE_PROFICIENCY_VALUES,
+  LANGUAGE_TAG_VALUES,
+  MEAL_VENUE_VALUES,
+  SPORT_TAG_VALUES,
+  STUDY_PURPOSE_VALUES,
+  STUDY_TIME_SLOT_VALUES,
+  STUDY_VENUE_VALUES,
 } from "@/lib/validators/classmate-posts";
+import {
+  languageProficiencyLabel,
+  languageTagLabel,
+  mealVenueLabel,
+  sportTagLabel,
+  studyPurposeLabel,
+  studyTimeSlotLabel,
+  studyVenueLabel,
+} from "@/lib/discover/study-meta-labels";
 import { cn } from "@/lib/utils";
 
 type SceneKind = DiscoverPostCardScene;
 type PostExpiryPreset = "3d" | "1w" | "1m" | "never";
+const DEFAULT_LANGUAGE_OFFER_PROFICIENCY: LanguageProficiency = "CONVERSATIONAL";
 
 type CourseRef = {
   id: string;
@@ -1140,9 +1165,26 @@ function CreatePostSheet({
   const [body, setBody] = useState("");
   const [expiryPreset, setExpiryPreset] = useState<PostExpiryPreset>("1w");
   const [selectedCourseIds, setSelectedCourseIds] = useState<Set<string>>(new Set());
+  const [studyPurposes, setStudyPurposes] = useState<Set<StudyPurpose>>(new Set());
+  const [studyTimeSlots, setStudyTimeSlots] = useState<Set<StudyTimeSlot>>(new Set());
+  const [studyVenues, setStudyVenues] = useState<Set<StudyVenue>>(new Set());
+  const [studyVenueOtherNote, setStudyVenueOtherNote] = useState("");
+  const [mealVenueTags, setMealVenueTags] = useState<Set<MealVenueTag>>(new Set());
+  const [mealVenueOtherNote, setMealVenueOtherNote] = useState("");
+  const [languageOfferTags, setLanguageOfferTags] = useState<Set<LanguageTag>>(new Set());
+  const [languageOfferLevels, setLanguageOfferLevels] = useState<
+    Partial<Record<LanguageTag, LanguageProficiency>>
+  >({});
+  const [languageTargets, setLanguageTargets] = useState<Set<LanguageTag>>(new Set());
+  const [sportTags, setSportTags] = useState<Set<SportTag>>(new Set());
+  const [sportOtherNote, setSportOtherNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isSharedScene = scene === "shared";
+  const isStudyScene = scene === "study";
+  const isMealsScene = scene === "meals";
+  const isLanguageScene = scene === "language";
+  const isSportsScene = scene === "sports";
 
   useEffect(() => {
     if (!open) return;
@@ -1151,6 +1193,17 @@ function CreatePostSheet({
     setError(null);
     setExpiryPreset("1w");
     setSelectedCourseIds(new Set());
+    setStudyPurposes(new Set());
+    setStudyTimeSlots(new Set());
+    setStudyVenues(new Set());
+    setStudyVenueOtherNote("");
+    setMealVenueTags(new Set());
+    setMealVenueOtherNote("");
+    setLanguageOfferTags(new Set());
+    setLanguageOfferLevels({});
+    setLanguageTargets(new Set());
+    setSportTags(new Set());
+    setSportOtherNote("");
   }, [open, scene]);
 
   function toggleCourse(id: string) {
@@ -1164,6 +1217,81 @@ function CreatePostSheet({
 
   function selectAllCourses() {
     setSelectedCourseIds(new Set(enrolledCourses.map((c) => c.id)));
+  }
+
+  function toggleStudyPurpose(p: StudyPurpose) {
+    setStudyPurposes((prev) => {
+      const next = new Set(prev);
+      if (next.has(p)) next.delete(p);
+      else next.add(p);
+      return next;
+    });
+  }
+
+  function toggleStudyTimeSlot(t: StudyTimeSlot) {
+    setStudyTimeSlots((prev) => {
+      const next = new Set(prev);
+      if (next.has(t)) next.delete(t);
+      else next.add(t);
+      return next;
+    });
+  }
+
+  function toggleStudyVenue(v: StudyVenue) {
+    setStudyVenues((prev) => {
+      const next = new Set(prev);
+      if (next.has(v)) next.delete(v);
+      else next.add(v);
+      return next;
+    });
+  }
+
+  function toggleMealVenue(tag: MealVenueTag) {
+    setMealVenueTags((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) next.delete(tag);
+      else next.add(tag);
+      return next;
+    });
+  }
+
+  function toggleLanguageOffer(tag: LanguageTag) {
+    setLanguageOfferTags((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) next.delete(tag);
+      else next.add(tag);
+      return next;
+    });
+    setLanguageOfferLevels((prev) => {
+      if (tag in prev) {
+        const next = { ...prev };
+        delete next[tag];
+        return next;
+      }
+      return { ...prev, [tag]: DEFAULT_LANGUAGE_OFFER_PROFICIENCY };
+    });
+  }
+
+  function setLanguageOfferLevel(tag: LanguageTag, proficiency: LanguageProficiency) {
+    setLanguageOfferLevels((prev) => ({ ...prev, [tag]: proficiency }));
+  }
+
+  function toggleLanguageTarget(tag: LanguageTag) {
+    setLanguageTargets((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) next.delete(tag);
+      else next.add(tag);
+      return next;
+    });
+  }
+
+  function toggleSportTag(tag: SportTag) {
+    setSportTags((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) next.delete(tag);
+      else next.add(tag);
+      return next;
+    });
   }
 
   async function submit() {
@@ -1186,9 +1314,107 @@ function CreatePostSheet({
       setError(formatMessage(dl.postErrorBodyTooLong, { max: CLASSMATE_POST_BODY_MAX_LEN }));
       return;
     }
+    if (isStudyScene && studyVenues.has("OTHER") && !studyVenueOtherNote.trim()) {
+      setError(dl.postErrorStudyVenueOtherNote);
+      return;
+    }
+    if (isStudyScene && studyVenueOtherNote.trim() && !studyVenues.has("OTHER")) {
+      setError(dl.postErrorStudyVenueOtherRequiresOther);
+      return;
+    }
+    if (isStudyScene && studyVenueOtherNote.trim().length > CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX) {
+      setError(
+        formatMessage(dl.postErrorStudyVenueNoteTooLong, {
+          max: CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX,
+        }),
+      );
+      return;
+    }
+    if (isMealsScene && mealVenueTags.has("OTHER") && !mealVenueOtherNote.trim()) {
+      setError(dl.postErrorMealsVenueOtherNote);
+      return;
+    }
+    if (isMealsScene && mealVenueOtherNote.trim() && !mealVenueTags.has("OTHER")) {
+      setError(dl.postErrorMealsVenueOtherRequiresOther);
+      return;
+    }
+    if (isMealsScene && mealVenueOtherNote.trim().length > CLASSMATE_POST_MEALS_VENUE_OTHER_NOTE_MAX) {
+      setError(
+        formatMessage(dl.postErrorMealsVenueNoteTooLong, {
+          max: CLASSMATE_POST_MEALS_VENUE_OTHER_NOTE_MAX,
+        }),
+      );
+      return;
+    }
+    if (isLanguageScene && languageOfferTags.size === 0 && languageTargets.size === 0) {
+      setError(dl.postErrorLanguageNeedMeta);
+      return;
+    }
+    if (isSportsScene && sportTags.has("OTHER") && !sportOtherNote.trim()) {
+      setError(dl.postErrorSportsOtherNote);
+      return;
+    }
+    if (isSportsScene && sportOtherNote.trim() && !sportTags.has("OTHER")) {
+      setError(dl.postErrorSportsOtherRequiresOther);
+      return;
+    }
+    if (isSportsScene && sportOtherNote.trim().length > CLASSMATE_POST_SPORT_OTHER_NOTE_MAX) {
+      setError(
+        formatMessage(dl.postErrorSportsNoteTooLong, {
+          max: CLASSMATE_POST_SPORT_OTHER_NOTE_MAX,
+        }),
+      );
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
+      const studyPayload =
+        isStudyScene &&
+        (studyPurposes.size > 0 ||
+          studyTimeSlots.size > 0 ||
+          studyVenues.size > 0 ||
+          (studyVenues.has("OTHER") && studyVenueOtherNote.trim().length > 0))
+          ? {
+              purposes: [...studyPurposes],
+              timeSlots: [...studyTimeSlots],
+              venues: [...studyVenues],
+              ...(studyVenues.has("OTHER") && studyVenueOtherNote.trim()
+                ? { venueOtherNote: studyVenueOtherNote.trim() }
+                : {}),
+            }
+          : undefined;
+      const mealsPayload =
+        isMealsScene &&
+        (mealVenueTags.size > 0 || (mealVenueTags.has("OTHER") && mealVenueOtherNote.trim().length > 0))
+          ? {
+              venueTags: [...mealVenueTags],
+              ...(mealVenueTags.has("OTHER") && mealVenueOtherNote.trim()
+                ? { venueOtherNote: mealVenueOtherNote.trim() }
+                : {}),
+            }
+          : undefined;
+      const languagePayload =
+        isLanguageScene && (languageOfferTags.size > 0 || languageTargets.size > 0)
+          ? {
+              offers: [...languageOfferTags].map((tag) => ({
+                tag,
+                proficiency: languageOfferLevels[tag] ?? DEFAULT_LANGUAGE_OFFER_PROFICIENCY,
+              })),
+              targets: [...languageTargets],
+            }
+          : undefined;
+      const sportPayload =
+        isSportsScene &&
+        (sportTags.size > 0 || (sportTags.has("OTHER") && sportOtherNote.trim().length > 0))
+          ? {
+              sportTags: [...sportTags],
+              ...(sportTags.has("OTHER") && sportOtherNote.trim()
+                ? { sportOtherNote: sportOtherNote.trim() }
+                : {}),
+            }
+          : undefined;
+
       const res = await apiFetch("/api/classmate-posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1201,6 +1427,10 @@ function CreatePostSheet({
           ...(isSharedScene && selectedCourseIds.size > 0
             ? { courseIds: [...selectedCourseIds] }
             : {}),
+          ...(studyPayload ? { study: studyPayload } : {}),
+          ...(mealsPayload ? { meals: mealsPayload } : {}),
+          ...(languagePayload ? { language: languagePayload } : {}),
+          ...(sportPayload ? { sport: sportPayload } : {}),
         }),
       });
       const payload = await res.json().catch(() => ({}));
@@ -1283,6 +1513,258 @@ function CreatePostSheet({
           ) : isSharedScene && enrolledCourses.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-amber-200/80 bg-amber-50/40 px-3 py-3 text-center text-[12px] text-muted-foreground">
               {dl.postSheetNeedEnroll}
+            </div>
+          ) : null}
+
+          {isStudyScene ? (
+            <div className="space-y-3 rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
+              <div>
+                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
+                  {dl.postSheetStudyPurposeLabel}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {STUDY_PURPOSE_VALUES.map((p) => {
+                    const active = studyPurposes.has(p);
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => toggleStudyPurpose(p)}
+                        className={cn(
+                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
+                          active
+                            ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
+                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
+                        )}
+                      >
+                        {studyPurposeLabel(p, dl)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
+                  {dl.postSheetStudyTimeLabel}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {STUDY_TIME_SLOT_VALUES.map((t) => {
+                    const active = studyTimeSlots.has(t);
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => toggleStudyTimeSlot(t)}
+                        className={cn(
+                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
+                          active
+                            ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
+                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
+                        )}
+                      >
+                        {studyTimeSlotLabel(t, dl)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
+                  {dl.postSheetStudyVenueLabel}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {STUDY_VENUE_VALUES.map((v) => {
+                    const active = studyVenues.has(v);
+                    return (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => toggleStudyVenue(v)}
+                        className={cn(
+                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
+                          active
+                            ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
+                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
+                        )}
+                      >
+                        {studyVenueLabel(v, dl)}
+                      </button>
+                    );
+                  })}
+                </div>
+                {studyVenues.has("OTHER") ? (
+                  <Input
+                    value={studyVenueOtherNote}
+                    onChange={(e) => setStudyVenueOtherNote(e.target.value)}
+                    placeholder={dl.postSheetVenueOtherPlaceholder}
+                    maxLength={CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX}
+                    className="mt-2 h-9 rounded-xl border-border/70 text-[13px]"
+                  />
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+
+          {isMealsScene ? (
+            <div className="space-y-3 rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
+              <div>
+                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
+                  {dl.postSheetMealsVenueLabel}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {MEAL_VENUE_VALUES.map((tag) => {
+                    const active = mealVenueTags.has(tag);
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => toggleMealVenue(tag)}
+                        className={cn(
+                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
+                          active
+                            ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
+                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
+                        )}
+                      >
+                        {mealVenueLabel(tag, dl)}
+                      </button>
+                    );
+                  })}
+                </div>
+                {mealVenueTags.has("OTHER") ? (
+                  <Input
+                    value={mealVenueOtherNote}
+                    onChange={(e) => setMealVenueOtherNote(e.target.value)}
+                    placeholder={dl.postSheetVenueOtherPlaceholder}
+                    maxLength={CLASSMATE_POST_MEALS_VENUE_OTHER_NOTE_MAX}
+                    className="mt-2 h-9 rounded-xl border-border/70 text-[13px]"
+                  />
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+
+          {isLanguageScene ? (
+            <div className="space-y-3 rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
+              <div>
+                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
+                  {dl.postSheetLanguageOffersLabel}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {LANGUAGE_TAG_VALUES.map((tag) => {
+                    const active = languageOfferTags.has(tag);
+                    return (
+                      <button
+                        key={`offer-${tag}`}
+                        type="button"
+                        onClick={() => toggleLanguageOffer(tag)}
+                        className={cn(
+                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
+                          active
+                            ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
+                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
+                        )}
+                      >
+                        {languageTagLabel(tag, dl)}
+                      </button>
+                    );
+                  })}
+                </div>
+                {languageOfferTags.size > 0 ? (
+                  <div className="mt-2 space-y-2">
+                    {[...languageOfferTags].map((tag) => (
+                      <label
+                        key={`level-${tag}`}
+                        className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-background px-3 py-2"
+                      >
+                        <span className="min-w-0 truncate text-[12px] font-medium text-foreground">
+                          {languageTagLabel(tag, dl)}
+                        </span>
+                        <span className="sr-only">
+                          {languageTagLabel(tag, dl)} {dl.postSheetLanguageOfferLevelLabel}
+                        </span>
+                        <select
+                          value={languageOfferLevels[tag] ?? DEFAULT_LANGUAGE_OFFER_PROFICIENCY}
+                          onChange={(e) =>
+                            setLanguageOfferLevel(tag, e.target.value as LanguageProficiency)
+                          }
+                          className="h-9 rounded-lg border border-input bg-background px-2 text-[12px]"
+                        >
+                          {LANGUAGE_PROFICIENCY_VALUES.map((value) => (
+                            <option key={value} value={value}>
+                              {languageProficiencyLabel(value, dl)}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+              <div>
+                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
+                  {dl.postSheetLanguageTargetsLabel}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {LANGUAGE_TAG_VALUES.map((tag) => {
+                    const active = languageTargets.has(tag);
+                    return (
+                      <button
+                        key={`target-${tag}`}
+                        type="button"
+                        onClick={() => toggleLanguageTarget(tag)}
+                        className={cn(
+                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
+                          active
+                            ? "border-violet-300 bg-violet-50 text-violet-700 dark:border-violet-500/40 dark:bg-violet-950/45 dark:text-violet-200"
+                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
+                        )}
+                      >
+                        {languageTagLabel(tag, dl)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {isSportsScene ? (
+            <div className="space-y-3 rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
+              <div>
+                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
+                  {dl.postSheetSportsLabel}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {SPORT_TAG_VALUES.map((tag) => {
+                    const active = sportTags.has(tag);
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => toggleSportTag(tag)}
+                        className={cn(
+                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
+                          active
+                            ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
+                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
+                        )}
+                      >
+                        {sportTagLabel(tag, dl)}
+                      </button>
+                    );
+                  })}
+                </div>
+                {sportTags.has("OTHER") ? (
+                  <Input
+                    value={sportOtherNote}
+                    onChange={(e) => setSportOtherNote(e.target.value)}
+                    placeholder={dl.postSheetVenueOtherPlaceholder}
+                    maxLength={CLASSMATE_POST_SPORT_OTHER_NOTE_MAX}
+                    className="mt-2 h-9 rounded-xl border-border/70 text-[13px]"
+                  />
+                ) : null}
+              </div>
             </div>
           ) : null}
 
@@ -1389,6 +1871,7 @@ function CreatePostSheet({
               submitting ||
               !title.trim() ||
               (isSharedScene && selectedCourseIds.size === 0) ||
+              (isLanguageScene && languageOfferTags.size === 0 && languageTargets.size === 0) ||
               title.trim().length > CLASSMATE_POST_TITLE_MAX_LEN ||
               body.trim().length > CLASSMATE_POST_BODY_MAX_LEN
             }

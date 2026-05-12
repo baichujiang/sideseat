@@ -10,7 +10,13 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { LinkButton } from "@/components/ui/link-button";
 import { getSessionUser } from "@/lib/auth/session";
 import { buildViewerCourseMatchIndex } from "@/lib/discover/viewer-course-match";
-import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
+import {
+  mapPrismaLanguageToDiscoverRow,
+  mapPrismaMealsToDiscoverRow,
+  mapPrismaSportToDiscoverRow,
+  mapPrismaStudyToDiscoverRow,
+  type DiscoverPostRow,
+} from "@/lib/discover/discover-post-row";
 import { prisma } from "@/lib/db/prisma";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { classmatePostInsightCountsByPostId } from "@/lib/queries/classmate-post-insight-counts";
@@ -18,6 +24,10 @@ import { classmatePostInsightCountsByPostId } from "@/lib/queries/classmate-post
 const myPostsInclude = {
   courses: { include: { course: { select: { id: true, code: true, name: true } } } },
   user: { include: { userLanguages: true } },
+  study: true,
+  meals: true,
+  language: true,
+  sport: true,
 } satisfies Prisma.ClassmatePostInclude;
 
 type PostWithAuthorCourses = Prisma.ClassmatePostGetPayload<{ include: typeof myPostsInclude }>;
@@ -49,6 +59,10 @@ function toDiscoverPostRow(post: PostWithAuthorCourses, currentUserId: string): 
       code: pc.course.code,
       name: pc.course.name,
     })),
+    studyMeta: mapPrismaStudyToDiscoverRow(post.study),
+    mealsMeta: mapPrismaMealsToDiscoverRow(post.meals),
+    languageMeta: mapPrismaLanguageToDiscoverRow(post.language),
+    sportMeta: mapPrismaSportToDiscoverRow(post.sport),
   };
 }
 

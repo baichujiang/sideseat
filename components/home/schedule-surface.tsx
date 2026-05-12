@@ -30,7 +30,15 @@ import { type ChangeEvent, type ReactNode, useCallback, useEffect, useMemo, useR
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
-import { WeekCalendar, type WeekCalendarBlock } from "@/components/calendar/week-calendar";
+import {
+  WeekCalendar,
+  WEEK_CALENDAR_MINUTE_SCALE_DEFAULT,
+  WEEK_CALENDAR_VISIBLE_DAY_MAX,
+  WEEK_CALENDAR_VISIBLE_DAY_MIN,
+  clampWeekCalendarMinuteScale,
+  clampWeekCalendarVisibleDayCount,
+  type WeekCalendarBlock,
+} from "@/components/calendar/week-calendar";
 import type { WeekEventEditToolbarLabels } from "@/components/calendar/week-event-edit-toolbar";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { ScheduleAddPanel } from "@/components/home/schedule-add-panel";
@@ -110,6 +118,26 @@ function weekBlockToDayTimelineItem(block: WeekCalendarBlock, repeatNoneLabel: s
 }
 
 type ViewKind = "day" | "week" | "month";
+
+type CalendarEventDeleteScope = "this" | "future" | "all";
+
+const HOME_CALENDAR_VISIBLE_DAYS_DEFAULT = 5;
+const HOME_CALENDAR_VISIBLE_DAYS_STORAGE_KEY = "homeCalendarVisibleDays";
+const HOME_CALENDAR_MINUTE_SCALE_STORAGE_KEY = "homeCalendarMinuteScale";
+
+function parseStoredHomeCalendarVisibleDays(rawValue: string | null): number | null {
+  if (!rawValue) return null;
+  const parsed = Number.parseInt(rawValue, 10);
+  if (Number.isNaN(parsed)) return null;
+  return clampWeekCalendarVisibleDayCount(parsed);
+}
+
+function parseStoredHomeCalendarMinuteScale(rawValue: string | null): number | null {
+  if (!rawValue) return null;
+  const parsed = Number.parseFloat(rawValue);
+  if (Number.isNaN(parsed)) return null;
+  return clampWeekCalendarMinuteScale(parsed);
+}
 
 /** Recurring course block (weekday-indexed). */
 export type ClassBlock = {
@@ -264,6 +292,8 @@ export function ScheduleSurface({
   const [view, setView] = useState<ViewKind>("week");
   const [now, setNow] = useState(() => new Date(nowISO));
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date(nowISO));
+  const [visibleDayCount, setVisibleDayCount] = useState(HOME_CALENDAR_VISIBLE_DAYS_DEFAULT);
+  const [weekMinuteScale, setWeekMinuteScale] = useState(WEEK_CALENDAR_MINUTE_SCALE_DEFAULT);
   const [weekHorizontalMode, setWeekHorizontalMode] = useState<"workweek" | "include-anchor">(() =>
     isWeekendDay(new Date(nowISO)) ? "include-anchor" : "workweek",
   );
@@ -283,7 +313,14 @@ export function ScheduleSurface({
   const [icsNotice, setIcsNotice] = useState<{ tone: "ok" | "err"; message: string } | null>(null);
   const [icsMenuOpen, setIcsMenuOpen] = useState(false);
   const icsMenuRef = useRef<HTMLDivElement | null>(null);
+  const weekImmersiveShellRef = useRef<HTMLDivElement | null>(null);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
+  const recurringDeletePayloadRef = useRef<{ eventId: string } | null>(null);
+  const recurringDeleteResolverRef = useRef<((ok: boolean) => void) | null>(null);
+  const [recurringDeleteDialog, setRecurringDeleteDialog] = useState<{ eventId: string; title: string } | null>(
+    null,
+  );
+  const [recurringDeleteBusy, setRecurringDeleteBusy] = useState(false);
   const semesterStart = new Date(semesterStartISO);
   const semesterEnd = new Date(semesterEndISO);
 
@@ -320,6 +357,36 @@ export function ScheduleSurface({
   }, [nowISO]);
 
   useEffect(() => {
+    const storedValue = parseStoredHomeCalendarVisibleDays(
+      window.localStorage.getItem(HOME_CALENDAR_VISIBLE_DAYS_STORAGE_KEY),
+    );
+    if (storedValue == null) return;
+    setVisibleDayCount(storedValue);
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(HOME_CALENDAR_VISIBLE_DAYS_STORAGE_KEY, String(visibleDayCount));
+  }, [visibleDayCount]);
+
+  useEffect(() => {
+    const storedValue = parseStoredHomeCalendarMinuteScale(
+      window.localStorage.getItem(HOME_CALENDAR_MINUTE_SCALE_STORAGE_KEY),
+    );
+    if (storedValue == null) return;
+    setWeekMinuteScale(storedValue);
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      window.localStorage.setItem(
+        HOME_CALENDAR_MINUTE_SCALE_STORAGE_KEY,
+        String(weekMinuteScale),
+      );
+    }, 180);
+    return () => window.clearTimeout(timeoutId);
+  }, [weekMinuteScale]);
+
+  useEffect(() => {
     if (view !== "week") setWeekImmersiveOpen(false);
   }, [view]);
 
@@ -349,6 +416,19 @@ export function ScheduleSurface({
       document.body.style.overflow = prevOverflow;
       window.removeEventListener("keydown", onKey);
     };
+  }, [weekImmersiveOpen]);
+
+  useEffect(() => {
+    if (!weekImmersiveOpen) return;
+    const node = weekImmersiveShellRef.current;
+    if (!node) return;
+    const onSelectStart = (e: Event) => {
+      const t = e.target as HTMLElement | null;
+      if (t?.closest?.("input, textarea, select, option, [contenteditable='true']")) return;
+      e.preventDefault();
+    };
+    node.addEventListener("selectstart", onSelectStart);
+    return () => node.removeEventListener("selectstart", onSelectStart);
   }, [weekImmersiveOpen]);
 
   useEffect(() => {
@@ -731,16 +811,68 @@ export function ScheduleSurface({
     messages.schedule,
   ]);
 
+  const dismissRecurringDeleteDialog = useCallback(() => {
+    if (recurringDeleteBusy) return;
+    setRecurringDeleteDialog(null);
+    recurringDeletePayloadRef.current = null;
+    const resolve = recurringDeleteResolverRef.current;
+    recurringDeleteResolverRef.current = null;
+    resolve?.(false);
+  }, [recurringDeleteBusy]);
+
+  const applyRecurringDeleteScope = useCallback(
+    async (scope: CalendarEventDeleteScope) => {
+      const payload = recurringDeletePayloadRef.current;
+      const resolve = recurringDeleteResolverRef.current;
+      if (!payload || !resolve) return;
+      setRecurringDeleteBusy(true);
+      const res = await apiFetch(
+        `/api/calendar/events/${encodeURIComponent(payload.eventId)}?scope=${scope}`,
+        { method: "DELETE" },
+      );
+      setRecurringDeleteBusy(false);
+      if (!res.ok) {
+        setRecurringDeleteDialog(null);
+        recurringDeletePayloadRef.current = null;
+        recurringDeleteResolverRef.current = null;
+        resolve(false);
+        return;
+      }
+      recurringDeletePayloadRef.current = null;
+      recurringDeleteResolverRef.current = null;
+      setRecurringDeleteDialog(null);
+      resolve(true);
+      router.refresh();
+    },
+    [router],
+  );
+
   async function deleteDetailItem() {
     if (!detailItem || detailItem.source !== "calendar") return;
     if (isIcsFeedStudyEntryId(detailItem.id)) return;
-    if (!window.confirm(messages.weekCalendarEditToolbar.deleteConfirm)) return;
-    setDeletingItem(true);
-    const response = await apiFetch(`/api/calendar/events/${detailItem.id}`, { method: "DELETE" });
-    setDeletingItem(false);
-    if (!response.ok) return;
+    if (detailItem.repeatRule === "NONE") {
+      if (!window.confirm(messages.weekCalendarEditToolbar.deleteConfirm)) return;
+      setDeletingItem(true);
+      const response = await apiFetch(
+        `/api/calendar/events/${encodeURIComponent(detailItem.id)}?scope=this`,
+        { method: "DELETE" },
+      );
+      setDeletingItem(false);
+      if (!response.ok) return;
+      setDetailItem(null);
+      router.refresh();
+      return;
+    }
+    recurringDeletePayloadRef.current = { eventId: detailItem.id };
+    const ok = await new Promise<boolean>((resolve) => {
+      recurringDeleteResolverRef.current = resolve;
+      setRecurringDeleteDialog({
+        eventId: detailItem.id,
+        title: detailItem.title.trim() || messages.schedule.newEvent,
+      });
+    });
+    if (!ok) return;
     setDetailItem(null);
-    router.refresh();
   }
 
   function openEditSheetFromDetail(inviteOnly = false) {
@@ -880,6 +1012,9 @@ export function ScheduleSurface({
   const weekAnchorWeekday =
     weekStart <= now && now <= weekEnd ? WEEKDAY_BY_JS[now.getDay()] : WEEKDAY_BY_JS[selectedDate.getDay()];
 
+  const effectiveWeekHorizontalMode =
+    visibleDayCount < HOME_CALENDAR_VISIBLE_DAYS_DEFAULT ? "include-anchor" : weekHorizontalMode;
+
   const patchCalendarEventTimes = useCallback(
     async (args: { eventId: string; startAt: Date; endAt: Date }): Promise<boolean> => {
       const entry = studyEntries.find((s) => s.id === args.eventId);
@@ -918,14 +1053,28 @@ export function ScheduleSurface({
    * the selection visible and let the user pick a different action.
    */
   const deleteCalendarEvent = useCallback(
-    async ({ eventId }: { eventId: string }): Promise<boolean> => {
+    async ({ eventId, repeatRule }: { eventId: string; repeatRule: CalendarRepeatRule }): Promise<boolean> => {
       if (isIcsFeedStudyEntryId(eventId)) return false;
-      const res = await apiFetch(`/api/calendar/events/${eventId}`, { method: "DELETE" });
-      if (!res.ok) return false;
-      router.refresh();
-      return true;
+      if (repeatRule === "NONE") {
+        const res = await apiFetch(
+          `/api/calendar/events/${encodeURIComponent(eventId)}?scope=this`,
+          { method: "DELETE" },
+        );
+        if (!res.ok) return false;
+        router.refresh();
+        return true;
+      }
+      recurringDeletePayloadRef.current = { eventId };
+      return new Promise<boolean>((resolve) => {
+        recurringDeleteResolverRef.current = resolve;
+        const entry = studyEntries.find((s) => s.id === eventId);
+        setRecurringDeleteDialog({
+          eventId,
+          title: entry?.title?.trim() || messages.schedule.newEvent,
+        });
+      });
     },
-    [router],
+    [router, studyEntries, messages.schedule.newEvent],
   );
 
   /**
@@ -1040,12 +1189,15 @@ export function ScheduleSurface({
   const weekCalendarProps = {
     blocks: weekTimedBlocks,
     anchorWeekday: weekAnchorWeekday,
-    horizontalMode: weekHorizontalMode,
+    horizontalMode: effectiveWeekHorizontalMode,
     nowMinute,
     showNowLine: weekStart <= now && now <= weekEnd,
     weekStartDate: weekStart,
     focusDate: selectedDate,
     today: now,
+    visibleDayCount,
+    minuteScale: weekMinuteScale,
+    onMinuteScaleChange: setWeekMinuteScale,
     onCreateEvent: openEventDraft,
     onOpenItem: handleWeekCardTap,
     onPatchCalendarEventTimes: patchCalendarEventTimes,
@@ -1062,7 +1214,7 @@ export function ScheduleSurface({
 
   const toolbarActions = (
     <>
-      <div ref={icsMenuRef} className="relative">
+      <div ref={icsMenuRef} className="relative z-[1] isolate">
         <button
           type="button"
           aria-label={messages.schedule.icsMenuAria}
@@ -1083,7 +1235,7 @@ export function ScheduleSurface({
         {icsMenuOpen ? (
           <div
             role="menu"
-            className="absolute right-0 top-[calc(100%+0.35rem)] z-50 w-[min(16rem,80vw)] overflow-hidden rounded-2xl border border-border/70 bg-popover p-2 text-popover-foreground shadow-xl"
+            className="absolute right-0 top-[calc(100%+0.35rem)] z-[70] w-[min(16rem,80vw)] overflow-hidden rounded-2xl border border-border/70 bg-popover p-2 text-popover-foreground shadow-xl"
           >
             <button
               type="button"
@@ -1270,7 +1422,7 @@ export function ScheduleSurface({
       </div>
 
       <div className="relative z-0 mt-1 space-y-1">
-        <div className="relative z-[5]">
+        <div className="relative z-[60]">
           <ScheduleDateNavToolbar
             view={view}
             selectedDate={selectedDate}
@@ -1311,6 +1463,15 @@ export function ScheduleSurface({
         ) : null}
 
         {view === "week" && !weekImmersiveOpen ? <WeekCalendar {...weekCalendarProps} /> : null}
+
+        {view === "week" && !weekImmersiveOpen ? (
+          <WeekVisibleDaysBar
+            value={visibleDayCount}
+            onChange={setVisibleDayCount}
+            scheduleSch={messages.schedule}
+            locale={locale}
+          />
+        ) : null}
 
         {view === "week" && !weekImmersiveOpen && !adding ? (
           <button
@@ -1362,14 +1523,81 @@ export function ScheduleSurface({
       <ScheduleItemDetailSheet
         item={detailItem}
         open={Boolean(detailItem)}
-        deleting={deletingItem}
+        deleting={deletingItem || recurringDeleteBusy}
         chatReturnTo="/home"
-        listenForEscape={!(adding && Boolean(detailItem))}
+        listenForEscape={!(adding && Boolean(detailItem)) && !recurringDeleteDialog}
         onClose={() => setDetailItem(null)}
         onEdit={() => openEditSheetFromDetail(false)}
         onInvite={() => openEditSheetFromDetail(true)}
         onDelete={() => void deleteDetailItem()}
       />
+
+      <AppPushLayer
+        open={Boolean(recurringDeleteDialog)}
+        onClose={dismissRecurringDeleteDialog}
+        zClassName="z-[120]"
+        ariaLabelledBy="recurring-delete-title"
+        backdropClassName="bg-black/45 dark:bg-black/60 !backdrop-blur-none"
+        panelClassName="w-[min(100vw,28rem)] border-0 bg-transparent shadow-none dark:shadow-none"
+      >
+        {recurringDeleteDialog ? (
+          <div className="flex h-full min-h-0 flex-col justify-center p-4 sm:p-6">
+            <div className="rounded-[24px] border border-[#E7E0D6] bg-white p-5 shadow-[0_16px_48px_rgba(15,23,42,0.14)] dark:border-border dark:bg-card dark:shadow-[0_16px_48px_rgba(0,0,0,0.45)]">
+              <h2
+                id="recurring-delete-title"
+                className="text-base font-semibold leading-snug tracking-tight text-classmates-ink dark:text-foreground"
+              >
+                {messages.schedule.recurringDeleteDialogTitle}
+              </h2>
+              <p className="mt-3 text-[13px] leading-relaxed text-classmates-sub dark:text-zinc-400">
+                {formatMessage(messages.schedule.recurringDeleteDialogBody, {
+                  title: recurringDeleteDialog.title,
+                })}
+              </p>
+              <div className="mt-6 flex flex-col gap-2">
+                <button
+                  type="button"
+                  disabled={recurringDeleteBusy}
+                  onClick={() => void applyRecurringDeleteScope("this")}
+                  className={cn(
+                    "inline-flex h-11 w-full items-center justify-center rounded-full border border-[#E7E0D6] bg-classmates-surface px-4 text-sm font-semibold text-classmates-ink transition hover:bg-classmates-warm-alt active:bg-classmates-warm-alt/80 disabled:opacity-50 dark:border-border dark:bg-muted/30 dark:text-foreground dark:hover:bg-muted/50",
+                  )}
+                >
+                  {messages.schedule.recurringDeleteThisOccurrence}
+                </button>
+                <button
+                  type="button"
+                  disabled={recurringDeleteBusy}
+                  onClick={() => void applyRecurringDeleteScope("future")}
+                  className={cn(
+                    "inline-flex h-11 w-full items-center justify-center rounded-full border border-[#E7E0D6] bg-classmates-surface px-4 text-sm font-semibold text-classmates-ink transition hover:bg-classmates-warm-alt active:bg-classmates-warm-alt/80 disabled:opacity-50 dark:border-border dark:bg-muted/30 dark:text-foreground dark:hover:bg-muted/50",
+                  )}
+                >
+                  {messages.schedule.recurringDeleteAllFuture}
+                </button>
+                <button
+                  type="button"
+                  disabled={recurringDeleteBusy}
+                  onClick={() => void applyRecurringDeleteScope("all")}
+                  className={cn(
+                    "inline-flex h-11 w-full items-center justify-center rounded-full border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 shadow-sm transition hover:bg-red-100 active:bg-red-100/90 disabled:opacity-50 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200 dark:hover:bg-red-950/60",
+                  )}
+                >
+                  {messages.schedule.recurringDeleteEntireSeries}
+                </button>
+                <button
+                  type="button"
+                  disabled={recurringDeleteBusy}
+                  onClick={dismissRecurringDeleteDialog}
+                  className="inline-flex h-11 w-full items-center justify-center rounded-full border border-transparent px-4 text-sm font-semibold text-muted-foreground transition hover:text-foreground disabled:opacity-50"
+                >
+                  {messages.common.cancel}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </AppPushLayer>
 
       {portalReady
         ? createPortal(
@@ -1384,8 +1612,10 @@ export function ScheduleSurface({
               backdropClassName="bg-background !backdrop-blur-none"
             >
               <div
+                ref={weekImmersiveShellRef}
                 className={cn(
                   "relative flex h-full min-h-0 flex-col bg-background",
+                  "select-none [-webkit-user-select:none] [-webkit-touch-callout:none]",
                   immersiveLayout.rotatePortrait
                     ? "absolute left-1/2 top-1/2 box-border h-[100dvw] w-[100dvh] max-h-[100vw] max-w-[100vh] -translate-x-1/2 -translate-y-1/2 rotate-90"
                     : "w-full",
@@ -1410,12 +1640,13 @@ export function ScheduleSurface({
                 >
                   <Minimize2 className="h-5 w-5" strokeWidth={2} aria-hidden />
                 </button>
-                <div className="min-h-0 flex-1 overflow-hidden px-[2px] pb-3 pt-[max(0.625rem,calc(env(safe-area-inset-top)+6px))]">
+                <div className="min-h-0 flex-1 overflow-hidden px-[2px] pb-3 pt-[max(0.625rem,calc(env(safe-area-inset-top)+6px))] select-none [-webkit-user-select:none]">
                   <WeekCalendar
                     {...weekCalendarProps}
                     density="immersive"
                     viewportBodyPx={immersiveLayout.bodyPx}
                     fillParent
+                    touchGestureRotateCw90={immersiveLayout.rotatePortrait}
                   />
                 </div>
               </div>
@@ -1606,4 +1837,47 @@ function calendarRangeTitle(view: ViewKind, date: Date, locale: AppLocale): stri
   const left = new Intl.DateTimeFormat(locale, { month: "short", year: "numeric" }).format(ws);
   const right = new Intl.DateTimeFormat(locale, { month: "short", year: "numeric" }).format(we);
   return `${left} / ${right}`;
+}
+
+function WeekVisibleDaysBar({
+  value,
+  onChange,
+  scheduleSch,
+  locale,
+}: {
+  value: number;
+  onChange: (next: number) => void;
+  scheduleSch: AppMessages["schedule"];
+  locale: AppLocale;
+}) {
+  const safeValue = clampWeekCalendarVisibleDayCount(value);
+  const valueTemplate =
+    scheduleSch.visibleDaysValue ?? (locale === "zh-CN" ? "{count} 天" : "{count} days");
+  const valueText = formatMessage(valueTemplate, { count: safeValue });
+
+  return (
+    <div
+      className={cn(
+        "rounded-xl border border-[#E7E0D6] bg-white px-2 py-1.5 shadow-[0_4px_14px_rgba(15,23,42,0.04)]",
+        "dark:border-border dark:bg-card dark:shadow-[0_4px_14px_rgba(0,0,0,0.12)]",
+      )}
+    >
+      <input
+        type="range"
+        min={WEEK_CALENDAR_VISIBLE_DAY_MIN}
+        max={WEEK_CALENDAR_VISIBLE_DAY_MAX}
+        step={1}
+        value={safeValue}
+        aria-label={
+          scheduleSch.visibleDaysAria ??
+          (locale === "zh-CN" ? "周视图显示天数" : "Visible days in week calendar")
+        }
+        aria-valuetext={valueText}
+        onChange={(event) => {
+          onChange(clampWeekCalendarVisibleDayCount(Number(event.target.value)));
+        }}
+        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-blue-100 accent-[#2563EB] dark:bg-blue-950/40"
+      />
+    </div>
+  );
 }

@@ -1,10 +1,49 @@
-import { ClassmatePostCategory } from "@prisma/client";
-import type { LanguageProficiency, LanguageTag, UserGender } from "@prisma/client";
+import {
+  ClassmatePostCategory,
+  type MealVenueTag,
+  type Prisma,
+  type LanguageProficiency,
+  type LanguageTag,
+  type SportTag,
+  type StudyPurpose,
+  type StudyTimeSlot,
+  type StudyVenue,
+  type UserGender,
+} from "@prisma/client";
+
+import { classmatePostLanguageOffersSchema } from "@/lib/validators/classmate-posts";
 
 export type DiscoverPostRowCourse = {
   id: string;
   code: string | null;
   name: string;
+};
+
+export type DiscoverPostRowStudyMeta = {
+  purposes: StudyPurpose[];
+  timeSlots: StudyTimeSlot[];
+  venues: StudyVenue[];
+  venueOtherNote: string | null;
+};
+
+export type DiscoverPostRowMealsMeta = {
+  venueTags: MealVenueTag[];
+  venueOtherNote: string | null;
+};
+
+export type DiscoverPostRowLanguageOffer = {
+  tag: LanguageTag;
+  proficiency: LanguageProficiency;
+};
+
+export type DiscoverPostRowLanguageMeta = {
+  offers: DiscoverPostRowLanguageOffer[];
+  targets: LanguageTag[];
+};
+
+export type DiscoverPostRowSportMeta = {
+  sportTags: SportTag[];
+  sportOtherNote: string | null;
 };
 
 export type DiscoverPostRow = {
@@ -31,6 +70,10 @@ export type DiscoverPostRow = {
     | "MANUAL_REVIEW_REQUIRED"
     | "REJECTED";
   linkedCourses?: DiscoverPostRowCourse[];
+  studyMeta?: DiscoverPostRowStudyMeta;
+  mealsMeta?: DiscoverPostRowMealsMeta;
+  languageMeta?: DiscoverPostRowLanguageMeta;
+  sportMeta?: DiscoverPostRowSportMeta;
 };
 
 /** Discover tabs / create-post scene — matches `DiscoverList` scene state. */
@@ -49,4 +92,78 @@ export function discoverSceneForPostCategory(category: ClassmatePostCategory): D
     case ClassmatePostCategory.SPORTS:
       return "sports";
   }
+}
+
+/** Map optional `ClassmatePost.study` relation into a card row field (omit when empty). */
+export function mapPrismaStudyToDiscoverRow(
+  study: {
+    purposes: StudyPurpose[];
+    timeSlots: StudyTimeSlot[];
+    venues: StudyVenue[];
+    venueOtherNote: string | null;
+  } | null,
+): DiscoverPostRowStudyMeta | undefined {
+  if (!study) return undefined;
+  const has =
+    study.purposes.length > 0 ||
+    study.timeSlots.length > 0 ||
+    study.venues.length > 0 ||
+    Boolean(study.venueOtherNote?.trim());
+  if (!has) return undefined;
+  return {
+    purposes: [...study.purposes],
+    timeSlots: [...study.timeSlots],
+    venues: [...study.venues],
+    venueOtherNote: study.venueOtherNote,
+  };
+}
+
+export function mapPrismaMealsToDiscoverRow(
+  meals: {
+    venueTags: MealVenueTag[];
+    venueOtherNote: string | null;
+  } | null,
+): DiscoverPostRowMealsMeta | undefined {
+  if (!meals) return undefined;
+  const has = meals.venueTags.length > 0 || Boolean(meals.venueOtherNote?.trim());
+  if (!has) return undefined;
+  return {
+    venueTags: [...meals.venueTags],
+    venueOtherNote: meals.venueOtherNote,
+  };
+}
+
+export function mapPrismaLanguageToDiscoverRow(
+  language: {
+    offers: Prisma.JsonValue;
+    targets: LanguageTag[];
+  } | null,
+): DiscoverPostRowLanguageMeta | undefined {
+  if (!language) return undefined;
+  const parsedOffers = classmatePostLanguageOffersSchema.safeParse(language.offers);
+  const offers = parsedOffers.success ? parsedOffers.data : [];
+  const targets = [...language.targets];
+  if (offers.length === 0 && targets.length === 0) return undefined;
+  return {
+    offers: offers.map((offer) => ({
+      tag: offer.tag,
+      proficiency: offer.proficiency,
+    })),
+    targets,
+  };
+}
+
+export function mapPrismaSportToDiscoverRow(
+  sport: {
+    sportTags: SportTag[];
+    sportOtherNote: string | null;
+  } | null,
+): DiscoverPostRowSportMeta | undefined {
+  if (!sport) return undefined;
+  const has = sport.sportTags.length > 0 || Boolean(sport.sportOtherNote?.trim());
+  if (!has) return undefined;
+  return {
+    sportTags: [...sport.sportTags],
+    sportOtherNote: sport.sportOtherNote,
+  };
 }

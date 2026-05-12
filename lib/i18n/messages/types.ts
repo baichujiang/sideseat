@@ -51,9 +51,6 @@ export type AppMessages = {
     meBody: string;
   };
   home: {
-    emptyScheduleBefore: string;
-    emptyScheduleCta: string;
-    emptyScheduleAfter: string;
     greetingNight: string;
     greetingMorning: string;
     greetingAfternoon: string;
@@ -163,6 +160,86 @@ export type AppMessages = {
     postCardSportsBlurb: string;
     /** `aria-label` for the linked-course chip row on SHARED_COURSES posts. */
     postCardLinkedCoursesAria: string;
+    postCardMealsMetaAria: string;
+    postCardMealsVenuesLabel: string;
+    postCardLanguageMetaAria: string;
+    postCardLanguageOffersLabel: string;
+    postCardLanguageTargetsLabel: string;
+    postCardSportsMetaAria: string;
+    postCardSportsTagsLabel: string;
+    /** Study post structured preferences — section `aria-label`. */
+    postCardStudyMetaAria: string;
+    postCardStudyPurposesLabel: string;
+    postCardStudyTimeLabel: string;
+    postCardStudyVenuesLabel: string;
+    studyPurposeDailySelfStudy: string;
+    studyPurposeExamPrep: string;
+    studyPurposeSprint: string;
+    studyTimeMorning: string;
+    studyTimeAfternoon: string;
+    studyTimeEvening: string;
+    studyVenueMainLibrary: string;
+    studyVenueGarchingMi: string;
+    studyVenueOlympiaPark: string;
+    studyVenueOther: string;
+    mealVenueMainCampusMensa: string;
+    mealVenueGarchingMensa: string;
+    mealVenueGarchingCafe: string;
+    mealVenueLeopoldstrasseMensa: string;
+    mealVenueLothstrasseMensa: string;
+    mealVenueMartinsriedMensa: string;
+    mealVenueWeihenstephanMensa: string;
+    mealVenueOutside: string;
+    mealVenueOther: string;
+    languageTagChinese: string;
+    languageTagEnglish: string;
+    languageTagGerman: string;
+    languageTagFrench: string;
+    languageTagHindi: string;
+    languageTagSpanish: string;
+    languageTagOther: string;
+    languageProficiencyNative: string;
+    languageProficiencyFluent: string;
+    languageProficiencyConversational: string;
+    languageProficiencyBasic: string;
+    languageProficiencyLearning: string;
+    sportTagBasketball: string;
+    sportTagBadminton: string;
+    sportTagTableTennis: string;
+    sportTagFootball: string;
+    sportTagVolleyball: string;
+    sportTagTennis: string;
+    sportTagGym: string;
+    sportTagRunning: string;
+    sportTagHiking: string;
+    sportTagCycling: string;
+    sportTagSwimming: string;
+    sportTagSkiing: string;
+    sportTagClimbing: string;
+    sportTagYoga: string;
+    sportTagOther: string;
+    postSheetStudyPurposeLabel: string;
+    postSheetStudyTimeLabel: string;
+    postSheetStudyVenueLabel: string;
+    postSheetMealsVenueLabel: string;
+    postSheetLanguageOffersLabel: string;
+    postSheetLanguageTargetsLabel: string;
+    postSheetLanguageOfferLevelLabel: string;
+    postSheetSportsLabel: string;
+    postSheetVenueOtherPlaceholder: string;
+    postErrorStudyVenueOtherNote: string;
+    postErrorStudyVenueOtherRequiresOther: string;
+    /** `{max}` — study “other place” note length. */
+    postErrorStudyVenueNoteTooLong: string;
+    postErrorMealsVenueOtherNote: string;
+    postErrorMealsVenueOtherRequiresOther: string;
+    /** `{max}` — meals “other place” note length. */
+    postErrorMealsVenueNoteTooLong: string;
+    postErrorLanguageNeedMeta: string;
+    postErrorSportsOtherNote: string;
+    postErrorSportsOtherRequiresOther: string;
+    /** `{max}` — sports “other” note length. */
+    postErrorSportsNoteTooLong: string;
   };
   inbox: {
     screenTitle: string;
@@ -305,6 +382,10 @@ export type AppMessages = {
     jumpToTodayAria: string;
     prevDateAria: string;
     nextDateAria: string;
+    visibleDaysLabel: string;
+    visibleDaysAria: string;
+    /** `{count}` — visible day columns in the Home week view. */
+    visibleDaysValue: string;
     /** `{week}` — ISO week number */
     weekNumberLine: string;
     expandWeekCalendarAria: string;
@@ -326,6 +407,13 @@ export type AppMessages = {
     calendarClipboardDismiss: string;
     /** Fills the title field from structured clipboard payload. */
     calendarClipboardApplyTitle: string;
+    recurringDeleteDialogTitle: string;
+    /** `{title}` */
+    recurringDeleteDialogBody: string;
+    recurringDeleteThisOccurrence: string;
+    recurringDeleteAllFuture: string;
+    recurringDeleteEntireSeries: string;
+    recurringDeleteAriaLabel: string;
   };
   account: {
     back: string;

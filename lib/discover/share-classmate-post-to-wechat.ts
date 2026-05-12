@@ -3,7 +3,7 @@ import {
   buildClassmatePostWeChatShareText,
 } from "@/lib/discover/classmate-post-share-payload";
 import {
-  copyPlainTextForShareGesture,
+  copyPlainTextSyncExecCommand,
   isHandheldMobileUserAgent,
   kickWeChatAppOpenBestEffort,
 } from "@/lib/discover/mobile-native-share-kick";
@@ -37,23 +37,41 @@ export async function shareClassmatePostToWeChat(args: {
   });
 
   if (isHandheldMobileUserAgent()) {
-    const copied = await copyPlainTextForShareGesture(text);
+    const copiedSync = copyPlainTextSyncExecCommand(text);
     kickWeChatAppOpenBestEffort();
-    if (copied) return "clipboard";
+    if (copiedSync) {
+      void navigator.clipboard.writeText(text).catch(() => {});
+      return "clipboard";
+    }
+
+    let sharePromise: Promise<void> | undefined;
     if (typeof navigator.share === "function") {
       try {
-        await navigator.share({
+        sharePromise = navigator.share({
           title: args.title.slice(0, 120),
           text,
           url: pageUrl,
         });
+      } catch {
+        sharePromise = undefined;
+      }
+    }
+    if (sharePromise) {
+      try {
+        await sharePromise;
         return "navigator";
       } catch (e) {
         if ((e as { name?: string }).name === "AbortError") return "aborted";
       }
     }
-    window.prompt("Copy for 微信 — select all, then copy:", text);
-    return "prompt";
+
+    try {
+      await navigator.clipboard.writeText(text);
+      return "clipboard";
+    } catch {
+      window.prompt("Copy for 微信 — select all, then copy:", text);
+      return "prompt";
+    }
   }
 
   if (typeof navigator.share === "function") {

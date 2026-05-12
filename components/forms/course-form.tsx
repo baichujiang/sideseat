@@ -10,7 +10,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { SaveBookmarkButton } from "@/components/courses/save-bookmark-button";
-import { HomeCalendarVisual } from "@/components/home/home-hero";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -80,7 +79,6 @@ export function CourseForm({
   const [usedVariantFingerprint, setUsedVariantFingerprint] = useState<string | null>(null);
   const sessionsAutoFilled = useRef(false);
   const prefillLoaded = useRef(false);
-  const scheduleVisualDate = useMemo(() => new Date(), []);
 
   const {
     register,
@@ -471,26 +469,23 @@ export function CourseForm({
               "space-y-3 overflow-hidden rounded-[1.125rem] border border-blue-200/85 bg-card shadow-[0_2px_12px_-4px_rgba(37,99,235,0.14)] dark:border-blue-900/45 dark:shadow-[0_2px_12px_-4px_rgba(0,0,0,0.28)]",
             )}
           >
-            <div className="flex min-w-0 items-start gap-2 border-b border-border/45 bg-gradient-to-br from-card via-card to-muted/25 px-3 py-2.5 sm:gap-3 sm:px-4">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium">{co.formWeeklyTimesTitle}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{co.formWeeklyTimesHint}</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      append({ weekday: "MON" as Weekday, start: "10:00", end: "12:00", location: "" });
-                      setUsedVariantFingerprint(null);
-                    }}
-                    className="shrink-0 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition hover:bg-muted"
-                  >
-                    {co.formAddWeeklyRow}
-                  </button>
+            <div className="min-w-0 border-b border-border/45 bg-gradient-to-br from-card via-card to-muted/25 px-3 py-2.5 sm:px-4">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{co.formWeeklyTimesTitle}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{co.formWeeklyTimesHint}</p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    append({ weekday: "MON" as Weekday, start: "10:00", end: "12:00", location: "" });
+                    setUsedVariantFingerprint(null);
+                  }}
+                  className="shrink-0 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition hover:bg-muted"
+                >
+                  {co.formAddWeeklyRow}
+                </button>
               </div>
-              <HomeCalendarVisual date={scheduleVisualDate} className="h-[4.25rem] w-[4.25rem] shrink-0 sm:h-20 sm:w-20" />
             </div>
 
             <div className="space-y-2 p-4 pt-3">

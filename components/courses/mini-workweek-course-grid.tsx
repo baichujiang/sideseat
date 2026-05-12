@@ -1,11 +1,10 @@
 "use client";
 
 import type { Weekday } from "@prisma/client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { Button } from "@/components/ui/button";
-import { HomeCalendarVisual } from "@/components/home/home-hero";
 import { Input } from "@/components/ui/input";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { formatMessage } from "@/lib/i18n/messages";
@@ -54,14 +53,18 @@ function lockMiniDragSelect() {
   miniDragSelectLockDepth += 1;
   if (miniDragSelectLockDepth === 1) {
     document.body.style.userSelect = "none";
+    document.body.style.setProperty("-webkit-user-select", "none");
     document.documentElement.style.userSelect = "none";
+    document.documentElement.style.setProperty("-webkit-user-select", "none");
   }
 }
 function unlockMiniDragSelect() {
   miniDragSelectLockDepth = Math.max(0, miniDragSelectLockDepth - 1);
   if (miniDragSelectLockDepth === 0) {
     document.body.style.userSelect = "";
+    document.body.style.removeProperty("-webkit-user-select");
     document.documentElement.style.userSelect = "";
+    document.documentElement.style.removeProperty("-webkit-user-select");
   }
 }
 
@@ -109,7 +112,6 @@ export function MiniWorkweekCourseGrid({
   readOnly = false,
 }: Props) {
   const { courses: co, common, weekCalendarEditToolbar: wk } = useAppMessages();
-  const calendarPeekDate = useMemo(() => new Date(), []);
   const dayShort = (d: Weekday) => co.weekdayShort[d] ?? DAY_SHORT_FALLBACK[d];
   /** Edit panel open for this index (triggered by tap). */
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -138,6 +140,17 @@ export function MiniWorkweekCourseGrid({
   const [portalReady, setPortalReady] = useState(false);
 
   useEffect(() => { setPortalReady(true); }, []);
+
+  const gridShellRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = gridShellRef.current;
+    if (!el) return;
+    const onSelectStart = (e: Event) => {
+      e.preventDefault();
+    };
+    el.addEventListener("selectstart", onSelectStart);
+    return () => el.removeEventListener("selectstart", onSelectStart);
+  }, []);
 
   const updateToolbarPos = useCallback((idx: number) => {
     const el = blockElRefs.current.get(idx);
@@ -255,9 +268,20 @@ export function MiniWorkweekCourseGrid({
     e.stopPropagation();
 
     const pointerId = e.pointerId;
+    const captureEl = e.currentTarget as HTMLElement;
     const x0 = e.clientX;
     const y0 = e.clientY;
-    const captureEl = e.currentTarget as HTMLElement;
+
+    /** Lock selection for move as soon as the finger goes down — otherwise Safari/WebKit selects table text during the long-press wait. */
+    if (!immediateActivate) {
+      lockMiniDragSelect();
+      window.getSelection()?.removeAllRanges();
+      try {
+        captureEl.setPointerCapture(pointerId);
+      } catch {
+        /* ignore */
+      }
+    }
 
     let curWeekday: Weekday = row.weekday;
     let curStart = b0.start;
@@ -297,9 +321,7 @@ export function MiniWorkweekCourseGrid({
         setSelectedIndex(null);
         setDragSelectedIndex(index);
         setToolbarIndex(index);
-        lockMiniDragSelect();
         window.getSelection()?.removeAllRanges();
-        try { captureEl.setPointerCapture(pointerId); } catch { /* ignore */ }
         document.addEventListener("touchmove", preventScroll, { passive: false });
         applyLive();
         suppressClickRef.current = true;
@@ -318,6 +340,11 @@ export function MiniWorkweekCourseGrid({
       document.removeEventListener("pointerup", onDocUp);
       document.removeEventListener("pointercancel", onDocUp);
       document.removeEventListener("touchmove", preventScroll);
+      try {
+        captureEl.releasePointerCapture(pointerId);
+      } catch {
+        /* ignore */
+      }
       unlockMiniDragSelect();
     };
 
@@ -373,8 +400,6 @@ export function MiniWorkweekCourseGrid({
         return;
       }
 
-      try { captureEl.releasePointerCapture(pointerId); } catch { /* ignore */ }
-
       if (!didMove) {
         // Long-press without movement: stay in drag-selected state (anchors visible)
         setLiveBlock(null);
@@ -422,26 +447,22 @@ export function MiniWorkweekCourseGrid({
 
   return (
     <div className="space-y-3">
-      <div className="flex min-w-0 items-start gap-2 sm:gap-3">
-        <div className="min-w-0 flex-1 pt-0.5">
-          {readOnly ? (
-            <p className="text-[11px] leading-snug text-muted-foreground">{co.miniHintReadOnly}</p>
-          ) : (
-            <p className="text-[11px] leading-snug text-muted-foreground">{co.miniHintEditing}</p>
-          )}
-        </div>
-        <HomeCalendarVisual date={calendarPeekDate} className="h-16 w-16 shrink-0 sm:h-20 sm:w-20" />
-      </div>
+      {readOnly ? (
+        <p className="text-[11px] leading-snug text-muted-foreground">{co.miniHintReadOnly}</p>
+      ) : (
+        <p className="text-[11px] leading-snug text-muted-foreground">{co.miniHintEditing}</p>
+      )}
 
       <div
+        ref={gridShellRef}
         className={cn(
-          "max-h-[min(420px,70vh)] w-full min-w-0 overflow-y-auto overflow-x-hidden rounded-xl border border-blue-200/90 bg-white shadow-[0_2px_10px_rgba(37,99,235,0.12)] touch-pan-y dark:border-blue-800/55 dark:bg-card dark:shadow-[0_2px_10px_rgba(0,0,0,0.2)]",
+          "max-h-[min(420px,70vh)] w-full min-w-0 select-none overflow-y-auto overflow-x-hidden rounded-xl border border-blue-200/90 bg-white shadow-[0_2px_10px_rgba(37,99,235,0.12)] touch-pan-y [-webkit-user-select:none] dark:border-blue-800/55 dark:bg-card dark:shadow-[0_2px_10px_rgba(0,0,0,0.2)]",
           readOnly && "bg-muted/15 dark:bg-muted/10",
         )}
       >
-        <div className="flex w-full min-w-0 items-stretch">
+        <div className="flex w-full min-w-0 select-none items-stretch [-webkit-user-select:none]">
           <div
-            className="flex shrink-0 flex-col border-r border-border/60 bg-muted/25"
+            className="flex shrink-0 flex-col border-r border-border/60 bg-muted/25 select-none [-webkit-user-select:none]"
             style={{ width: TIME_COL_PX }}
           >
             <div className={cn(HEADER_ROW_CLASS, "justify-end pr-1")} aria-hidden />
@@ -492,7 +513,7 @@ export function MiniWorkweekCourseGrid({
                               weekday: dayShort(weekday),
                               time: formatMinutes(slotStart),
                             })}
-                            className="absolute inset-0 z-0 transition hover:bg-primary/5"
+                            className="absolute inset-0 z-0 select-none transition hover:bg-primary/5 [-webkit-user-select:none]"
                             onClick={() => {
                               if (dragSelectedIndex !== null) {
                                 setDragSelectedIndex(null);
@@ -540,7 +561,7 @@ export function MiniWorkweekCourseGrid({
                       >
                         {readOnly ? (
                           <div
-                            className="absolute inset-0 z-10 select-none overflow-hidden rounded-[inherit] px-1 py-0.5"
+                            className="absolute inset-0 z-10 select-none overflow-hidden rounded-[inherit] px-1 py-0.5 [-webkit-user-select:none]"
                             aria-label={formatMessage(co.miniBlockAria, {
                               courseTitle,
                               weekday: dayShort(weekday),
@@ -559,7 +580,7 @@ export function MiniWorkweekCourseGrid({
                               role="button"
                               tabIndex={0}
                               className={cn(
-                                "absolute inset-0 z-10 cursor-grab select-none overflow-hidden rounded-[inherit] px-1 py-0.5 active:cursor-grabbing",
+                                "absolute inset-0 z-10 cursor-grab select-none overflow-hidden rounded-[inherit] px-1 py-0.5 [-webkit-user-select:none] active:cursor-grabbing",
                                 isDragSelected && "touch-none",
                               )}
                               onKeyDown={(ev) => {
@@ -654,7 +675,7 @@ export function MiniWorkweekCourseGrid({
               return (
                 <div
                   key="drag-overlay"
-                  className="pointer-events-none absolute z-40 overflow-visible rounded-sm border border-primary/60 bg-primary/30 shadow-lg"
+                  className="pointer-events-none absolute z-40 select-none overflow-visible rounded-sm border border-primary/60 bg-primary/30 shadow-lg [-webkit-user-select:none]"
                   style={{
                     top: headerH + (topPct / 100) * bodyHeight,
                     height: Math.max((heightPct / 100) * bodyHeight, 18),

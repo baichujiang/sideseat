@@ -6,7 +6,13 @@ import { cn } from "@/lib/utils";
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
 import { DiscoverList, type DiscoverRow } from "@/components/discover/discover-list";
-import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
+import {
+  mapPrismaLanguageToDiscoverRow,
+  mapPrismaMealsToDiscoverRow,
+  mapPrismaSportToDiscoverRow,
+  mapPrismaStudyToDiscoverRow,
+  type DiscoverPostRow,
+} from "@/lib/discover/discover-post-row";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { getDiscoverPeople } from "@/lib/queries/discovery";
@@ -77,6 +83,10 @@ export default async function DiscoverPage() {
       include: {
         user: { include: { userLanguages: true } },
         courses: { include: { course: { select: { id: true, code: true, name: true } } } },
+        study: true,
+        meals: true,
+        language: true,
+        sport: true,
       },
       orderBy: { createdAt: "desc" },
       take: 120,
@@ -137,6 +147,10 @@ export default async function DiscoverPage() {
       code: pc.course.code,
       name: pc.course.name,
     })),
+    studyMeta: mapPrismaStudyToDiscoverRow(post.study),
+    mealsMeta: mapPrismaMealsToDiscoverRow(post.meals),
+    languageMeta: mapPrismaLanguageToDiscoverRow(post.language),
+    sportMeta: mapPrismaSportToDiscoverRow(post.sport),
   }));
 
   const enrolledCourses = myEnrolledCourses.map((uc) => ({

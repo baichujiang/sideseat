@@ -266,7 +266,7 @@ export function ScheduleDayTimeline({
                     }
                   }}
                   className={cn(
-                    "max-w-full truncate rounded-lg p-0 text-left text-[12px] font-semibold leading-snug transition",
+                    "max-w-full rounded-lg p-0 text-left text-[12px] font-semibold leading-snug transition",
                     "hover:brightness-[0.98] active:brightness-95",
                     !useCategory && tone.card,
                     useCategory && "border border-black/10 shadow-sm dark:border-white/10",
@@ -277,7 +277,9 @@ export function ScheduleDayTimeline({
                 >
                   <span className="flex max-w-full flex-row overflow-hidden rounded-[inherit]">
                     <span aria-hidden className={allDayRailClass} style={allDayRailStyle} />
-                    <span className="min-w-0 flex-1 truncate px-2.5 py-1.5">{item.title}</span>
+                    <span className="min-w-0 flex-1 whitespace-normal break-words px-2.5 py-1.5 text-left [overflow-wrap:anywhere] line-clamp-2">
+                      {item.title}
+                    </span>
                   </span>
                 </button>
               );
@@ -432,6 +434,17 @@ export function ScheduleDayTimeline({
   );
 }
 
+/** `%` height of a timed block — taller blocks wrap event titles; short slots stay one line. */
+function dayTimelineEventTitleLayoutClass(effectiveHeightPct: number): string {
+  if (effectiveHeightPct >= 14) {
+    return "whitespace-normal break-words [overflow-wrap:anywhere] text-left";
+  }
+  if (effectiveHeightPct >= 8) {
+    return "line-clamp-2 whitespace-normal break-words [overflow-wrap:anywhere] text-left";
+  }
+  return "truncate text-left";
+}
+
 function TimelineBlock({
   item,
   dayStart,
@@ -496,6 +509,7 @@ function TimelineBlock({
   // We cap at what fits instead of overflowing.
   const minHeightPct = Math.min(4, height);
   const effectiveHeight = Math.max(height, minHeightPct);
+  const titleLayout = dayTimelineEventTitleLayoutClass(effectiveHeight);
   const showTimeRow = effectiveHeight > 0;
   const showLocationRow = Boolean(item.location) && effectiveHeight > 9;
   const showWithRow = Boolean(item.withLabel) && effectiveHeight > 11;
@@ -522,7 +536,8 @@ function TimelineBlock({
           </p>
           <p
             className={cn(
-              "truncate text-left text-[13px] font-bold leading-snug",
+              titleLayout,
+              "text-[13px] font-bold leading-snug",
               !useCategoryColor && tone.title,
             )}
           >
@@ -530,7 +545,7 @@ function TimelineBlock({
           </p>
         </div>
       ) : (
-        <div className="mt-0.5 flex min-h-0 items-center gap-1.5">
+        <div className="mt-0.5 flex min-h-0 items-start gap-1.5">
           {item.source === "course" && item.courseShortLabel ? (
             <span
               className="inline-flex h-[1.125rem] min-w-[1.35rem] shrink-0 items-center justify-center rounded-md border border-blue-700/30 bg-white px-1 text-[10px] font-bold leading-none tracking-tight text-blue-900 shadow-sm tabular-nums dark:border-blue-400/40 dark:bg-blue-950/70 dark:text-blue-100"
@@ -547,7 +562,8 @@ function TimelineBlock({
           )}
           <p
             className={cn(
-              "min-w-0 flex-1 truncate text-left text-[13px] font-bold leading-snug",
+              "min-w-0 flex-1 text-[13px] font-bold leading-snug",
+              titleLayout,
               !useCategoryColor && tone.title,
               useCategoryColor && (shortOverlapGlass ? "" : "text-[#111827] dark:text-foreground"),
             )}
@@ -632,7 +648,7 @@ function TimelineBlock({
         <div className="flex w-full h-full min-h-0 flex-row overflow-hidden rounded-[inherit]">
 
           <div aria-hidden className={railClass} style={railStyle} />
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col items-start justify-start px-2 py-1.5">
+          <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col items-start justify-start px-2 py-1.5">
             {innerSlot}
           </div>
         </div>

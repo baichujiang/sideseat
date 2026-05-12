@@ -165,6 +165,9 @@ const MIN_EVENT_MINUTES = 15;
 /** After this many px of movement, lock 2D scroll to horizontal OR vertical for the rest of the gesture. */
 const AXIS_LOCK_THRESHOLD_PX = 24;
 
+export const WEEK_CALENDAR_VISIBLE_DAY_MIN = 2;
+export const WEEK_CALENDAR_VISIBLE_DAY_MAX = 7;
+
 /** Nested calendar drags — only clear body `user-select` when outermost ends. */
 let calendarDragSelectLockDepth = 0;
 function lockBrowserTextSelectionForCalendarDrag() {
@@ -188,7 +191,27 @@ function snapMinute(m: number): number {
   return Math.max(0, Math.min(FULL_DAY_MINUTES - 1, s));
 }
 
+export function clampWeekCalendarVisibleDayCount(value: number): number {
+  if (!Number.isFinite(value)) return DENSITY_LAYOUT.default.visibleWeekDays;
+  return Math.max(
+    WEEK_CALENDAR_VISIBLE_DAY_MIN,
+    Math.min(WEEK_CALENDAR_VISIBLE_DAY_MAX, Math.round(value)),
+  );
+}
+
 export type WeekCalendarDensity = "default" | "immersive";
+export const WEEK_CALENDAR_MINUTE_SCALE_DEFAULT = 1;
+export const WEEK_CALENDAR_MINUTE_SCALE_MIN = 0.8;
+export const WEEK_CALENDAR_MINUTE_SCALE_MAX = 1.4;
+
+export function clampWeekCalendarMinuteScale(value: number): number {
+  if (!Number.isFinite(value)) return WEEK_CALENDAR_MINUTE_SCALE_DEFAULT;
+  const clamped = Math.max(
+    WEEK_CALENDAR_MINUTE_SCALE_MIN,
+    Math.min(WEEK_CALENDAR_MINUTE_SCALE_MAX, value),
+  );
+  return Math.round(clamped * 1000) / 1000;
+}
 
 const DENSITY_LAYOUT: Record<
   WeekCalendarDensity,
@@ -251,6 +274,17 @@ function horizontalStartIndexForDay(day: Weekday | undefined, visibleWeekDays: n
   return Math.min(Math.max(dayIndex - (visibleWeekDays - 1), 0), maxStartIndex);
 }
 
+/** `%` height of a timed block within the visible day window — drives title wrap vs single-line. */
+function scheduleEventTitleLayoutClass(effectiveHeightPct: number): string {
+  if (effectiveHeightPct >= 14) {
+    return "whitespace-normal break-words [overflow-wrap:anywhere] text-left";
+  }
+  if (effectiveHeightPct >= 8) {
+    return "line-clamp-2 whitespace-normal break-words [overflow-wrap:anywhere] text-left";
+  }
+  return "truncate text-left";
+}
+
 export function WeekCalendar({
   blocks,
   /** Full-day rows (holidays, etc.) — shown above the timed grid so they are not clipped above 08:00. */
@@ -271,10 +305,19 @@ export function WeekCalendar({
   onCopyCalendarEvent,
   editToolbarLabels,
   density = "default",
+  minuteScale = WEEK_CALENDAR_MINUTE_SCALE_DEFAULT,
+  onMinuteScaleChange,
+  visibleDayCount,
   /** When set (e.g. fullscreen), overrides the scroll viewport height in px. */
   viewportBodyPx,
   /** Remove outer top margin — use inside a flex fill container. */
   fillParent = false,
+  /**
+   * When the week grid sits inside a parent `rotate(90deg)` (portrait phone → logical landscape),
+   * screen-space touch deltas must be rotated to match the un-transformed scroll box, or axis-lock
+   * picks the wrong axis and vertical time scroll feels broken.
+   */
+  touchGestureRotateCw90 = false,
 }: {
   blocks: WeekCalendarBlock[];
   allDayBlocks?: WeekCalendarBlock[];
@@ -294,7 +337,10 @@ export function WeekCalendar({
    * Delete an editable calendar entry. When omitted (or returns false), the
    * delete action is hidden from the floating edit toolbar.
    */
-  onDeleteCalendarEvent?: (args: { eventId: string }) => Promise<boolean> | boolean;
+  onDeleteCalendarEvent?: (args: {
+    eventId: string;
+    repeatRule: CalendarRepeatRule;
+  }) => Promise<boolean> | boolean;
   /**
    * Duplicate an editable calendar entry. `block` is the selected block; the
    * parent decides the new start/end (typically `endAt` + duration).
@@ -320,8 +366,12 @@ export function WeekCalendar({
   /** Localized labels for the floating edit toolbar. When omitted, English defaults are used. */
   editToolbarLabels?: WeekEventEditToolbarLabels;
   density?: WeekCalendarDensity;
+  minuteScale?: number;
+  onMinuteScaleChange?: (nextScale: number) => void;
+  visibleDayCount?: number;
   viewportBodyPx?: number;
   fillParent?: boolean;
+  touchGestureRotateCw90?: boolean;
 }) {
   const { locale, messages: appMessages } = useLocaleContext();
   const sch = appMessages.schedule;
@@ -339,16 +389,24 @@ export function WeekCalendar({
   );
 
   const cfg = DENSITY_LAYOUT[density];
+  const resolvedMinuteScale = clampWeekCalendarMinuteScale(minuteScale);
   const TIME_COLUMN_PX = cfg.timeColumnPx;
-  const MINUTE_PX = cfg.minutePx;
+  const MINUTE_PX = cfg.minutePx * resolvedMinuteScale;
   const BOTTOM_SPACER_PX = cfg.bottomSpacerPx;
-  const VISIBLE_WEEK_DAYS = cfg.visibleWeekDays;
+  const VISIBLE_WEEK_DAYS = visibleDayCount
+    ? clampWeekCalendarVisibleDayCount(visibleDayCount)
+    : cfg.visibleWeekDays;
   const DEFAULT_VIEW_START = cfg.viewStart;
   const DEFAULT_VIEW_END = cfg.viewEnd;
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const holdTimerRef = useRef<number | null>(null);
   const [frameWidth, setFrameWidth] = useState(0);
+  const previousMinutePxRef = useRef(MINUTE_PX);
+  const minutePxRef = useRef(MINUTE_PX);
+  const minuteScaleRef = useRef(resolvedMinuteScale);
+  const onMinuteScaleChangeRef = useRef(onMinuteScaleChange);
+  const minuteScaleAnchorRef = useRef<{ minute: number; offsetY: number } | null>(null);
 
   /**
    * Currently selected calendar entry. Long-press on an event body selects it
@@ -440,11 +498,46 @@ export function WeekCalendar({
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
+  /**
+   * Snap the timed grid so 08:00 is the first visible window (same window as portrait default density).
+   * useLayoutEffect + `frameWidth`: inner track is gated until width is measured; an early useEffect could
+   * clamp scrollTop before content height exists and never re-run.
+   */
+  useLayoutEffect(() => {
     const scrollTop =
       (DEFAULT_VIEW_START - VISUAL_PADDING_TOP_MINUTES - visualStartMinute) * MINUTE_PX;
-    if (scrollContainerRef.current) scrollContainerRef.current.scrollTop = scrollTop;
-  }, [visualStartMinute, weekStartDate, focusDate, DEFAULT_VIEW_START, MINUTE_PX]);
+    const node = scrollContainerRef.current;
+    if (node && frameWidth > 0) {
+      node.scrollTop = scrollTop;
+      previousMinutePxRef.current = MINUTE_PX;
+      minuteScaleAnchorRef.current = null;
+    }
+  }, [visualStartMinute, weekStartDate, focusDate, DEFAULT_VIEW_START, density, frameWidth]);
+
+  useLayoutEffect(() => {
+    const node = scrollContainerRef.current;
+    const prevMinutePx = previousMinutePxRef.current;
+    if (!node || frameWidth <= 0 || Math.abs(prevMinutePx - MINUTE_PX) < 0.0001) {
+      previousMinutePxRef.current = MINUTE_PX;
+      return;
+    }
+
+    const anchor = minuteScaleAnchorRef.current;
+    const topMinute = visualStartMinute + node.scrollTop / prevMinutePx;
+    const nextScrollTop = anchor
+      ? (anchor.minute - visualStartMinute) * MINUTE_PX - anchor.offsetY
+      : (topMinute - visualStartMinute) * MINUTE_PX;
+    const maxScrollTop = Math.max(0, node.scrollHeight - node.clientHeight);
+    node.scrollTop = Math.max(0, Math.min(maxScrollTop, nextScrollTop));
+    previousMinutePxRef.current = MINUTE_PX;
+    minuteScaleAnchorRef.current = null;
+  }, [MINUTE_PX, visualStartMinute, frameWidth]);
+
+  useEffect(() => {
+    minutePxRef.current = MINUTE_PX;
+    minuteScaleRef.current = resolvedMinuteScale;
+    onMinuteScaleChangeRef.current = onMinuteScaleChange;
+  }, [MINUTE_PX, resolvedMinuteScale, onMinuteScaleChange]);
 
   useEffect(() => {
     const pending = pendingDragClearRef.current;
@@ -547,6 +640,11 @@ export function WeekCalendar({
     let vx = 0;
     let vy = 0;
     let tLock: "free" | "h" | "v" = "free";
+    let pinchTouchIds: [number, number] | null = null;
+    let pinchStartDistance = 0;
+    let pinchStartScale = minuteScaleRef.current;
+    let pinchLastScale = minuteScaleRef.current;
+    let pinchMoveAttached = false;
 
     const stopMomentum = () => {
       if (momentumRafRef.current !== null) {
@@ -555,7 +653,93 @@ export function WeekCalendar({
       }
     };
 
+    const findTrackedTouch = (touches: TouchList, identifier: number) => {
+      for (let i = 0; i < touches.length; i++) {
+        if (touches[i].identifier === identifier) return touches[i];
+      }
+      return null;
+    };
+
+    const pinchTouchesFromList = (touches: TouchList): [Touch, Touch] | null => {
+      if (pinchTouchIds) {
+        const first = findTrackedTouch(touches, pinchTouchIds[0]);
+        const second = findTrackedTouch(touches, pinchTouchIds[1]);
+        return first && second ? [first, second] : null;
+      }
+      if (touches.length < 2) return null;
+      return [touches[0], touches[1]];
+    };
+
+    const pinchDistance = (first: Touch, second: Touch) =>
+      Math.hypot(second.clientX - first.clientX, second.clientY - first.clientY);
+
+    const updatePinchAnchorAndScale = (nextScale: number, anchorClientY: number) => {
+      const next = clampWeekCalendarMinuteScale(nextScale);
+      if (Math.abs(next - pinchLastScale) < 0.01) return;
+
+      const rect = node.getBoundingClientRect();
+      const anchorOffsetY = Math.max(0, Math.min(node.clientHeight, anchorClientY - rect.top));
+      const currentMinute =
+        visualStartMinute + (node.scrollTop + anchorOffsetY) / minutePxRef.current;
+      minuteScaleAnchorRef.current = {
+        minute: currentMinute,
+        offsetY: anchorOffsetY,
+      };
+      pinchLastScale = next;
+      onMinuteScaleChangeRef.current?.(next);
+    };
+
+    const removePinchMoveListener = () => {
+      if (!pinchMoveAttached) return;
+      node.removeEventListener("touchmove", onPinchTouchMove);
+      pinchMoveAttached = false;
+    };
+
+    const endPinch = () => {
+      pinchTouchIds = null;
+      pinchStartDistance = 0;
+      pinchStartScale = minuteScaleRef.current;
+      pinchLastScale = minuteScaleRef.current;
+      removePinchMoveListener();
+    };
+
+    const beginPinch = (touches: TouchList) => {
+      const pair = pinchTouchesFromList(touches);
+      if (!pair) return;
+      stopMomentum();
+      tid = null;
+      tLock = "free";
+      vx = 0;
+      vy = 0;
+      pinchTouchIds = [pair[0].identifier, pair[1].identifier];
+      pinchStartDistance = pinchDistance(pair[0], pair[1]);
+      pinchStartScale = minuteScaleRef.current;
+      pinchLastScale = minuteScaleRef.current;
+      if (!pinchMoveAttached) {
+        node.addEventListener("touchmove", onPinchTouchMove, { passive: false });
+        pinchMoveAttached = true;
+      }
+    };
+
+    function onPinchTouchMove(e: TouchEvent) {
+      if (!pinchTouchIds) return;
+      const pair = pinchTouchesFromList(e.touches);
+      if (!pair || pinchStartDistance <= 0) return;
+      e.preventDefault();
+      const currentDistance = pinchDistance(pair[0], pair[1]);
+      if (currentDistance <= 0) return;
+      const rawRatio = currentDistance / pinchStartDistance;
+      const dampedRatio = 1 + (rawRatio - 1) * 0.85;
+      const anchorY = (pair[0].clientY + pair[1].clientY) / 2;
+      updatePinchAnchorAndScale(pinchStartScale * dampedRatio, anchorY);
+    }
+
     const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length >= 2 && onMinuteScaleChangeRef.current) {
+        beginPinch(e.touches);
+        return;
+      }
+      if (pinchTouchIds) return;
       if (tid !== null) return;
       const rawTarget = e.target;
       if (
@@ -578,6 +762,7 @@ export function WeekCalendar({
     };
 
     const onTouchMove = (e: TouchEvent) => {
+      if (pinchTouchIds) return;
       if (tid === null || calendarDragSelectLockDepth > 0) return;
       let touch: Touch | undefined;
       for (let i = 0; i < e.changedTouches.length; i++) {
@@ -590,10 +775,14 @@ export function WeekCalendar({
 
       const now = performance.now();
       const dt = Math.max(now - tt, 1);
-      const dx = touch.clientX - tx;
-      const dy = touch.clientY - ty;
-      const totalDx = touch.clientX - t0x;
-      const totalDy = touch.clientY - t0y;
+      const rawIncDx = touch.clientX - tx;
+      const rawIncDy = touch.clientY - ty;
+      const rawTotalDx = touch.clientX - t0x;
+      const rawTotalDy = touch.clientY - t0y;
+      const totalDx = touchGestureRotateCw90 ? rawTotalDy : rawTotalDx;
+      const totalDy = touchGestureRotateCw90 ? -rawTotalDx : rawTotalDy;
+      const dx = touchGestureRotateCw90 ? rawIncDy : rawIncDx;
+      const dy = touchGestureRotateCw90 ? -rawIncDx : rawIncDy;
       const totalDist2 = totalDx * totalDx + totalDy * totalDy;
 
       if (tLock === "free") {
@@ -628,6 +817,11 @@ export function WeekCalendar({
     };
 
     const onTouchEnd = (e: TouchEvent) => {
+      if (pinchTouchIds) {
+        const pair = pinchTouchesFromList(e.touches);
+        if (!pair) endPinch();
+        return;
+      }
       let found = false;
       for (let i = 0; i < e.changedTouches.length; i++) {
         if (e.changedTouches[i].identifier === tid) {
@@ -686,9 +880,10 @@ export function WeekCalendar({
       node.removeEventListener("touchmove", onTouchMove);
       node.removeEventListener("touchend", onTouchEnd);
       node.removeEventListener("touchcancel", onTouchEnd);
+      removePinchMoveListener();
       stopMomentum();
     };
-  }, []);
+  }, [touchGestureRotateCw90, visualStartMinute]);
 
   const blocksByDay = new Map<Weekday, WeekCalendarBlock[]>();
   for (const block of effectiveBlocks) {
@@ -1129,13 +1324,14 @@ export function WeekCalendar({
   const handleCutSelection = useCallback(async () => {
     if (!selectedBlock || !selectedOccurrenceDate || !selectedEventId) return;
     const eventId = selectedEventId;
+    const repeatRule = selectedBlock.repeatRule ?? "NONE";
     const snapshot = { block: selectedBlock, occurrenceDate: selectedOccurrenceDate };
     /** Same as delete: dismiss toolbar immediately so no follow-up tap lands on the card while work is in flight. */
     setSelectedEventId(null);
     // Copy first so the user keeps a system-clipboard reference if delete fails.
     await persistCalendarCopyToClipboardAndSession("cut", snapshot);
     if (!onDeleteCalendarEvent) return;
-    const ok = await onDeleteCalendarEvent({ eventId });
+    const ok = await onDeleteCalendarEvent({ eventId, repeatRule });
     if (!ok) setSelectedEventId(eventId);
   }, [
     onDeleteCalendarEvent,
@@ -1164,17 +1360,35 @@ export function WeekCalendar({
       setSelectedEventId(null);
       return;
     }
+    if (!selectedBlock) {
+      setSelectedEventId(null);
+      return;
+    }
     const eventId = selectedEventId;
+    const repeatRule = selectedBlock.repeatRule ?? "NONE";
     /** Close toolbar immediately so no follow-up click lands on the card while DELETE is in flight. */
     setSelectedEventId(null);
-    const ok = await onDeleteCalendarEvent({ eventId });
+    const ok = await onDeleteCalendarEvent({ eventId, repeatRule });
     if (!ok) setSelectedEventId(eventId);
-  }, [onDeleteCalendarEvent, selectedEventId]);
+  }, [onDeleteCalendarEvent, selectedEventId, selectedBlock]);
+
+  const suppressNativeSelectUnlessFormField = useCallback((e: Event) => {
+    const t = e.target as HTMLElement | null;
+    if (t?.closest?.("input, textarea, select, option, [contenteditable='true']")) return;
+    e.preventDefault();
+  }, []);
+
+  useEffect(() => {
+    const node = scrollContainerRef.current;
+    if (!node) return;
+    node.addEventListener("selectstart", suppressNativeSelectUnlessFormField);
+    return () => node.removeEventListener("selectstart", suppressNativeSelectUnlessFormField);
+  }, [suppressNativeSelectUnlessFormField]);
 
   return (
     <div
       className={cn(
-        "select-none [-webkit-touch-callout:none]",
+        "select-none [-webkit-user-select:none] [-webkit-touch-callout:none]",
         fillParent
           ? "mt-0 flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-[#E7E0D6] bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:border-border dark:bg-card dark:shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
           : cn(WEEK_CALENDAR_CARD, "flex flex-col overflow-hidden"),
@@ -1187,7 +1401,8 @@ export function WeekCalendar({
       <div
         ref={scrollContainerRef}
         className={cn(
-          "min-w-0 touch-none overflow-auto overscroll-contain",
+          "min-w-0 touch-none select-none overflow-auto overscroll-contain [-webkit-user-select:none]",
+          "[&_input]:select-auto [&_textarea]:select-text [&_select]:select-auto",
           fillParent ? "min-h-0 min-w-0 flex-1" : null,
         )}
         style={fillParent ? undefined : { height: `${WEEK_HEADER_HEIGHT_PX + viewportHeightPx}px` }}
@@ -1241,7 +1456,7 @@ export function WeekCalendar({
                       isWeekend && "bg-muted/40",
                     )}
                   >
-                    <div className="flex max-h-full flex-col items-center justify-center gap-px">
+                    <div className="flex max-h-full flex-col items-center mt-1 mb-1 justify-center gap-px">
                       <span
                         className={cn(
                           "text-[10px] tabular-nums leading-none",
@@ -1350,7 +1565,7 @@ export function WeekCalendar({
                                 }
                               }}
                               className={cn(
-                                "relative z-[1] w-full truncate overflow-hidden rounded-[2px] p-0 text-left text-[10px] font-semibold leading-tight transition outline-none",
+                                "relative z-[1] w-full overflow-hidden rounded-[2px] p-0 text-left text-[10px] font-semibold leading-tight transition outline-none",
                                 "hover:brightness-[0.98] active:brightness-95",
                                 "focus-visible:ring-2 focus-visible:ring-[#2563EB]/35 focus-visible:ring-offset-1 focus-visible:ring-offset-background dark:focus-visible:ring-blue-400/40",
                                 !useCategory && tone.card,
@@ -1382,12 +1597,22 @@ export function WeekCalendar({
                                       <span className="truncate font-bold tabular-nums leading-tight text-classmates-blue dark:text-blue-200">
                                         {block.courseCode.trim()}
                                       </span>
-                                      <span className="min-w-0 truncate font-semibold leading-snug text-[#111827] dark:text-foreground">
+                                      <span
+                                        className={cn(
+                                          "min-w-0 font-semibold leading-snug text-[#111827] dark:text-foreground",
+                                          "line-clamp-2 whitespace-normal break-words [overflow-wrap:anywhere] text-left",
+                                        )}
+                                      >
                                         {block.courseName}
                                       </span>
                                     </>
                                   ) : (
-                                    <span className="min-w-0 truncate leading-snug">
+                                    <span
+                                      className={cn(
+                                        "min-w-0 leading-snug",
+                                        "line-clamp-2 whitespace-normal break-words [overflow-wrap:anywhere] text-left",
+                                      )}
+                                    >
                                       {labelText || block.courseName}
                                     </span>
                                   )}
@@ -1681,6 +1906,7 @@ export function WeekCalendar({
                                   ? "text-white/80"
                                   : "text-[#111827]/65 dark:text-muted-foreground",
                             );
+                            const titleLayout = scheduleEventTitleLayoutClass(effectiveHeight);
                             const titleLine =
                               block.source === "course" && block.courseCode?.trim()
                                 ? block.courseName
@@ -1724,7 +1950,8 @@ export function WeekCalendar({
                                     </p>
                                     <p
                                       className={cn(
-                                        "truncate text-left font-semibold leading-snug",
+                                        titleLayout,
+                                        "font-semibold leading-snug",
                                         cfg.blockTitleClass,
                                         !useCategoryColor && tone.title,
                                       )}
@@ -1735,7 +1962,8 @@ export function WeekCalendar({
                                 ) : (
                                   <p
                                     className={cn(
-                                      "mt-px min-w-0 truncate text-left font-semibold leading-snug",
+                                      "mt-px min-w-0 font-semibold leading-snug",
+                                      titleLayout,
                                       cfg.blockTitleClass,
                                       !useCategoryColor && tone.title,
                                       useCategoryColor &&
@@ -1792,7 +2020,8 @@ export function WeekCalendar({
                                     </p>
                                     <p
                                       className={cn(
-                                        "truncate text-left font-semibold leading-snug",
+                                        titleLayout,
+                                        "font-semibold leading-snug",
                                         cfg.blockTitleClass,
                                         !useCategoryColor && (highlighted ? tone.titleSelected : tone.title),
                                       )}
@@ -1803,7 +2032,8 @@ export function WeekCalendar({
                                 ) : (
                                   <p
                                     className={cn(
-                                      "mt-px min-w-0 truncate text-left font-semibold leading-snug",
+                                      "mt-px min-w-0 font-semibold leading-snug",
+                                      titleLayout,
                                       cfg.blockTitleClass,
                                       !useCategoryColor && (highlighted ? tone.titleSelected : tone.title),
                                       useCategoryColor &&
@@ -1852,7 +2082,7 @@ export function WeekCalendar({
                                 )}
                               >
                                 <div aria-hidden className={railClass} style={railStyle} />
-                                <div className="flex min-w-0 min-h-0 flex-1 flex-col items-start justify-start px-1.5 py-1">
+                                <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col items-start justify-start px-1.5 py-1">
                                   {innerSlot}
                                 </div>
                                 {hasRecurrence && (

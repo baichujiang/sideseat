@@ -1,8 +1,17 @@
+import type { Prisma } from "@prisma/client";
+
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { isCalendarCourseMirrorRow } from "@/lib/calendar/calendar-course-mirror";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
 import { calendarEventSchema } from "@/lib/validators/calendar";
+
+type CalendarDeleteScope = "this" | "future" | "all";
+
+function parseDeleteScope(raw: string | null): CalendarDeleteScope {
+  if (raw === "future" || raw === "all") return raw;
+  return "this";
+}
 
 export async function PATCH(
   request: Request,
@@ -98,24 +107,64 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ eventId: string }> },
 ) {
   try {
     const user = await requireOnboardedUser();
     const { eventId } = await params;
+    const scope = parseDeleteScope(new URL(request.url).searchParams.get("scope"));
 
     const existing = await prisma.calendarEntry.findFirst({
       where: { id: eventId, userId: user.id },
-      select: { id: true },
+      select: {
+        id: true,
+        title: true,
+        repeatRule: true,
+        repeatUntil: true,
+        startAt: true,
+        recurrenceGroupId: true,
+        categoryId: true,
+      },
     });
 
     if (!existing) {
       return error("Schedule item not found.", 404);
     }
 
-    await prisma.calendarEntry.delete({
-      where: { id: existing.id },
+    const isRecurringSeries =
+      existing.repeatRule !== "NONE" || Boolean(existing.recurrenceGroupId?.trim());
+
+    if (!isRecurringSeries || scope === "this") {
+      await prisma.calendarEntry.delete({
+        where: { id: existing.id },
+      });
+      return ok({ ok: true });
+    }
+
+    const seriesWhere: Prisma.CalendarEntryWhereInput = existing.recurrenceGroupId
+      ? { userId: user.id, recurrenceGroupId: existing.recurrenceGroupId }
+      : existing.repeatRule !== "NONE"
+        ? {
+            userId: user.id,
+            title: existing.title,
+            repeatRule: existing.repeatRule,
+            repeatUntil: existing.repeatUntil,
+            categoryId: existing.categoryId,
+          }
+        : { userId: user.id, id: existing.id };
+
+    if (scope === "all") {
+      await prisma.calendarEntry.deleteMany({ where: seriesWhere });
+      return ok({ ok: true });
+    }
+
+    /** `future` — this occurrence and later instances in the same series. */
+    await prisma.calendarEntry.deleteMany({
+      where: {
+        ...seriesWhere,
+        startAt: { gte: existing.startAt },
+      },
     });
 
     return ok({ ok: true });
