@@ -6,12 +6,12 @@ import { useCallback, useMemo } from "react";
 import { SharePlatformMenu, type SharePlatformMenuAction } from "@/components/discover/share-platform-menu";
 import { shareClassmatePostToXhs } from "@/lib/discover/share-classmate-post-to-xhs";
 
-const MY_POSTS_PATH = "/inbox/my-posts";
+const MY_POSTS_PATH = "/profile/my-posts";
 
 /**
  * My posts is a **list** (no single selected post). Header share therefore targets this
  * **listings page URL** (plus title/blurb for 小红书), not one Discover post. Peers cannot
- * open `/inbox/my-posts` without your account — the flow is for the author to copy/share
+ * open `/profile/my-posts` without your account — the flow is for the author to copy/share
  * a reminder link or paste text into 小红书 themselves.
  */
 export function MyPostsHeaderShareMenu({ className }: { className?: string }) {

@@ -3,27 +3,19 @@
 import { apiFetch } from "@/lib/auth/api-fetch";
 
 import type { Route } from "next";
-import type { RefObject } from "react";
 import { addDays } from "date-fns";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BookUser,
   Clock,
   Edit3,
-  Dumbbell,
-  Languages,
   Loader2,
-  NotebookPen,
   Plus,
-  Search,
-  SlidersHorizontal,
-  UtensilsCrossed,
   X,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ClassmatePostCategory,
-  type MealVenueTag,
   StudyPurpose,
   StudyTimeSlot,
   StudyVenue,
@@ -37,7 +29,17 @@ import {
   ClassmatesPersonRow,
   CLASSMATES_PERSON_ROW_AVATAR_RING_DISCOVER,
 } from "@/components/classmates/classmates-person-row";
-import { DiscoverPostCard } from "@/components/discover/discover-post-card";
+import { DiscoverFeed } from "@/components/discover/discover-feed";
+import { DiscoverFeedTabs } from "@/components/discover/discover-feed-tabs";
+import {
+  applyBuddyFeedClientFilters,
+  DiscoverFilterSheet,
+  DiscoverFilterTriggerButton,
+  type BuddyFeedTimeFilter,
+} from "@/components/discover/discover-filter-sheet";
+import { ClassmatePostCreateImageRow } from "@/components/discover/classmate-post-create-image-row";
+import { LanguageExchangePostFields } from "@/components/discover/language-exchange-post-fields";
+import { SportsPostFieldCombobox } from "@/components/discover/sports-post-field-combobox";
 import { DiscoverMessageButton } from "@/components/discover/discover-message-button";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
@@ -45,14 +47,15 @@ import { Input } from "@/components/ui/input";
 import { LinkButton } from "@/components/ui/link-button";
 import { UserGenderCardIcon } from "@/components/ui/user-gender-icon";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
-import type { DiscoverPostCardScene, DiscoverPostRow } from "@/lib/discover/discover-post-row";
-import { LANGUAGE_TAG_LABEL } from "@/lib/constants/languages";
+import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
 import {
-  buildViewerCourseMatchIndex,
-  type ViewerCourseMatchIndex,
-} from "@/lib/discover/viewer-course-match";
+  discoverFeedKindToParam,
+  filterDiscoverFeedPosts,
+  parseDiscoverFeedKind,
+  type DiscoverFeedKind,
+} from "@/lib/discover/discover-feed-kind";
+import { ALL_BUDDY_CATEGORIES, buddyTypeLabel } from "@/lib/discover/buddy-type-labels";
 import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
-import { SCENE_TAB_PALETTE, type SceneTabPalette } from "@/lib/discover/scene-palette";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { formatMessage, type AppMessages } from "@/lib/i18n/messages";
 import {
@@ -61,26 +64,13 @@ import {
   CLASSMATE_POST_SPORT_OTHER_NOTE_MAX,
   CLASSMATE_POST_TITLE_MAX_LEN,
   CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX,
-  LANGUAGE_PROFICIENCY_VALUES,
-  LANGUAGE_TAG_VALUES,
-  MEAL_VENUE_VALUES,
-  SPORT_TAG_VALUES,
   STUDY_PURPOSE_VALUES,
   STUDY_TIME_SLOT_VALUES,
   STUDY_VENUE_VALUES,
 } from "@/lib/validators/classmate-posts";
-import {
-  languageProficiencyLabel,
-  languageTagLabel,
-  mealVenueLabel,
-  sportTagLabel,
-  studyPurposeLabel,
-  studyTimeSlotLabel,
-  studyVenueLabel,
-} from "@/lib/discover/study-meta-labels";
+import { studyPurposeLabel, studyTimeSlotLabel, studyVenueLabel } from "@/lib/discover/study-meta-labels";
 import { cn } from "@/lib/utils";
 
-type SceneKind = DiscoverPostCardScene;
 type PostExpiryPreset = "3d" | "1w" | "1m" | "never";
 const DEFAULT_LANGUAGE_OFFER_PROFICIENCY: LanguageProficiency = "CONVERSATIONAL";
 
@@ -121,312 +111,127 @@ export type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
 
 export type EnrolledCourseOption = { id: string; code: string | null; name: string };
 
-type UserSearchHit = {
-  id: string;
-  username: string;
-  nickname: string | null;
-  gender: UserGender;
-  avatarUrl: string | null;
-  major: string | null;
-  semester: number | null;
-  school: string | null;
-  languages?: LanguageTag[];
-  verifiedStudent: boolean;
-  studentVerificationStatus:
-    | "UNVERIFIED"
-    | "EMAIL_PENDING"
-    | "VERIFIED"
-    | "MANUAL_REVIEW_REQUIRED"
-    | "REJECTED";
-  sharedCourseCount: number;
-  hasActiveConnection: boolean;
-};
-
 export function DiscoverList({
   rows,
   posts,
-  allowSearch = true,
   savedCourseCount,
   enrolledCourses = [],
 }: {
   rows: DiscoverRow[];
   posts: DiscoverPostRow[];
-  /** When false (logged-out Discover tab), hide people search — the API requires a signed-in student context. */
-  allowSearch?: boolean;
-  /** Saved courses count — used to suggest “Add a course” when the shared tab is empty. */
+  /** Saved courses count — used to suggest “Add a course” when the feed is empty. */
   savedCourseCount?: number;
   enrolledCourses?: EnrolledCourseOption[];
 }) {
-  const [query, setQuery] = useState("");
-  const searchParams = useSearchParams();
-  const validScenes: SceneKind[] = ["shared", "study", "meals", "language", "sports"];
-  const paramScene = searchParams.get("tab") as SceneKind | null;
-  const [scene, setSceneState] = useState<SceneKind>(
-    paramScene && validScenes.includes(paramScene) ? paramScene : "shared",
-  );
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const m = useAppMessages();
+  const dl = m.discoverList;
+  const buddy = m.discoverBuddy;
 
-  const setScene = (s: SceneKind) => {
-    setSceneState(s);
+  const [feed, setFeed] = useState<DiscoverFeedKind>(() => parseDiscoverFeedKind(searchParams.get("feed")));
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filters, setFilters] = useState<{
+    categories: ClassmatePostCategory[] | null;
+    time: BuddyFeedTimeFilter;
+    openOnly: boolean;
+  }>({ categories: null, time: "any", openOnly: false });
+  const [postOpen, setPostOpen] = useState(false);
+
+  useEffect(() => {
+    setFeed(parseDiscoverFeedKind(searchParams.get("feed")));
+  }, [searchParams]);
+
+  const setFeedKind = (kind: DiscoverFeedKind) => {
+    setFeed(kind);
     const url = new URL(window.location.href);
-    if (s === "shared") {
-      url.searchParams.delete("tab");
+    if (kind === "for-you") {
+      url.searchParams.delete("feed");
     } else {
-      url.searchParams.set("tab", s);
+      url.searchParams.set("feed", discoverFeedKindToParam(kind));
     }
+    url.searchParams.delete("tab");
     window.history.replaceState(null, "", url.toString());
   };
 
-  const [schoolFilter, setSchoolFilter] = useState<string>("All");
-  const [majorFilter, setMajorFilter] = useState<string>("All");
-  const [languageFilter, setLanguageFilter] = useState<string>("All");
-  const [semesterFilter, setSemesterFilter] = useState<string>("All");
-  const [statusFilter, setStatusFilter] = useState<string>("All");
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const m = useAppMessages();
-  const dl = m.discoverList;
-  const common = m.common;
-  const [postOpen, setPostOpen] = useState(false);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const viewerCourseMatchIndex = buildViewerCourseMatchIndex(enrolledCourses);
+  const filteredByFeed = filterDiscoverFeedPosts(posts, feed);
+  const filteredBySheet = applyBuddyFeedClientFilters(filteredByFeed, filters);
+  const q = searchQuery.trim().toLowerCase();
+  const filteredPosts =
+    q.length < 2
+      ? filteredBySheet
+      : filteredBySheet.filter((p) => {
+          const courseBlob = (p.linkedCourses ?? []).map((c) => `${c.code ?? ""} ${c.name}`).join(" ");
+          const blob = [p.title, p.body ?? "", p.nickname, buddyTypeLabel(p.category, buddy), courseBlob]
+            .join(" ")
+            .toLowerCase();
+          return blob.includes(q);
+        });
 
-  const trimmed = query.trim();
-  const searchActive = allowSearch && trimmed.length >= 2;
-  const filterPeople = rows
-    .map((row) => ({
-      school: row.school,
-      major: row.major,
-      languageTags: row.languages.map((l) => l.tag),
-      semester: row.semester,
-      studentVerificationStatus: row.studentVerificationStatus,
-    }))
-    .concat(
-      posts.map((post) => ({
-        school: post.school,
-        major: post.major,
-        languageTags: post.languages.map((l) => l.tag),
-        semester: post.semester,
-        studentVerificationStatus: post.studentVerificationStatus,
-      })),
-    );
-  const schoolOptions = Array.from(
-    new Set(filterPeople.map((row) => row.school).filter((school): school is string => Boolean(school))),
-  ).sort();
-  const majorOptions = Array.from(
-    new Set(filterPeople.map((row) => row.major).filter((major): major is string => Boolean(major))),
-  ).sort();
-  const languageOptions = Array.from(
-    new Set(
-      filterPeople.flatMap((row) => row.languageTags).filter((language): language is LanguageTag => Boolean(language)),
-    ),
-  ).sort();
-  const semesterOptions = Array.from(
-    new Set(filterPeople.map((row) => row.semester).filter((semester): semester is number => Boolean(semester))),
-  ).sort((a, b) => a - b);
+  const filterActive =
+    Boolean(filters.categories?.length) || filters.time !== "any" || filters.openOnly;
 
-  const filteredRows = rows.filter((row) => passesFilters(row, {
-    schoolFilter,
-    majorFilter,
-    languageFilter,
-    semesterFilter,
-    statusFilter,
-  }));
-  const filteredPosts = posts.filter((post) => passesFilters(post, {
-    schoolFilter,
-    majorFilter,
-    languageFilter,
-    semesterFilter,
-    statusFilter,
-  }));
-  const sceneRows = filteredRows.filter((row) => matchesScene(row, scene));
-  const scenePosts = filteredPosts
-    .filter((post) => matchesPostScene(post, scene))
-    .sort((a, b) => {
-      if (a.isOwn !== b.isOwn) return a.isOwn ? -1 : 1;
-      return new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime();
-    });
-
-  const activeChips = [
-    schoolFilter !== "All" ? schoolFilter : null,
-    majorFilter !== "All" ? majorFilter : null,
-    languageFilter !== "All" ? languageFilter : null,
-    semesterFilter !== "All" ? formatMessage(dl.semesterChip, { semester: semesterFilter }) : null,
-    statusFilter !== "All" ? statusFilter : null,
-  ].filter((value): value is string => Boolean(value));
-
-  if (!allowSearch) {
-    return (
-      <p className="rounded-2xl border border-dashed border-classmates-teal-border/60 bg-classmates-teal-soft/60 px-4 py-6 text-center text-[13px] text-classmates-teal">
-        {dl.signInToSearch}
-      </p>
-    );
-  }
+  const emptyCopy = feed === "today" ? buddy.emptyFeedToday : buddy.emptyFeed;
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-5 gap-2">
-        <SceneTab
-          label={dl.sceneTabShared}
-          icon={<BookUser className="h-[1.45rem] w-[1.45rem] sm:h-6 sm:w-6" strokeWidth={1.9} aria-hidden />}
-          palette="teal"
-          active={scene === "shared"}
-          onClick={() => setScene("shared")}
-        />
-        <SceneTab
-          label={dl.sceneTabStudy}
-          icon={<NotebookPen className="h-[1.45rem] w-[1.45rem] sm:h-6 sm:w-6" strokeWidth={1.9} aria-hidden />}
-          palette="indigo"
-          active={scene === "study"}
-          onClick={() => setScene("study")}
-        />
-        <SceneTab
-          label={dl.sceneTabMeals}
-          icon={<UtensilsCrossed className="h-[1.45rem] w-[1.45rem] sm:h-6 sm:w-6" strokeWidth={1.9} aria-hidden />}
-          palette="amber"
-          active={scene === "meals"}
-          onClick={() => setScene("meals")}
-        />
-        <SceneTab
-          label={dl.sceneTabLanguage}
-          icon={<Languages className="h-[1.45rem] w-[1.45rem] sm:h-6 sm:w-6" strokeWidth={1.9} aria-hidden />}
-          palette="violet"
-          active={scene === "language"}
-          onClick={() => setScene("language")}
-        />
-        <SceneTab
-          label={dl.sceneTabSports}
-          icon={<Dumbbell className="h-[1.45rem] w-[1.45rem] sm:h-6 sm:w-6" strokeWidth={1.9} aria-hidden />}
-          palette="rose"
-          active={scene === "sports"}
-          onClick={() => setScene("sports")}
-        />
-      </div>
-
-      {activeChips.length > 0 ? (
-        <div className="flex flex-wrap gap-1.5">
-          {activeChips.map((chip) => (
-            <span
-              key={chip}
-              className="inline-flex items-center rounded-full border border-classmates-teal-border/70 bg-classmates-teal-soft px-2.5 py-1 text-[11px] font-medium text-classmates-teal"
-            >
-              {chip}
-            </span>
-          ))}
-        </div>
-      ) : null}
-
-      <SearchBar
-        value={query}
-        onChange={setQuery}
-        onClear={() => {
-          setQuery("");
-          inputRef.current?.focus();
-        }}
-        inputRef={inputRef}
-        onOpenFilters={() => setFiltersOpen(true)}
-        discoverList={dl}
-      />
-
-      {searchActive ? (
-        <UserSearchResults query={trimmed} />
-      ) : (
-        <RecommendationSurface
-          rows={sceneRows}
-          posts={scenePosts}
-          scene={scene}
-          onOpenPost={() => setPostOpen(true)}
-          savedCourseCount={savedCourseCount}
-          viewerCourseMatchIndex={viewerCourseMatchIndex}
-          discoverList={dl}
-        />
-      )}
-
-      <AppPushLayer
-        open={filtersOpen}
-        onClose={() => setFiltersOpen(false)}
-        zClassName="z-40"
-        panelClassName="w-[min(100vw,28rem)] border-0 bg-classmates-warm-alt shadow-none dark:shadow-none"
-      >
-        <div className="flex h-full min-h-0 flex-col px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))]">
-          <div className="shrink-0">
-            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border/80" />
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-[15px] font-semibold text-foreground">{dl.filterClassmatesTitle}</h3>
-              <button
-                type="button"
-                onClick={() => {
-                  setSchoolFilter("All");
-                  setMajorFilter("All");
-                  setLanguageFilter("All");
-                  setSemesterFilter("All");
-                  setStatusFilter("All");
-                }}
-                className="text-[12px] font-medium text-classmates-blue hover:text-classmates-blue/80"
-              >
-                {common.reset}
-              </button>
-            </div>
-          </div>
-
-          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto">
-            <FilterSection
-              label={dl.filterSchool}
-              options={["All", ...schoolOptions]}
-              value={schoolFilter}
-              onChange={setSchoolFilter}
-              renderLabel={(v) => (v === "All" ? dl.all : v)}
-            />
-            <FilterSection
-              label={dl.filterMajor}
-              options={["All", ...majorOptions]}
-              value={majorFilter}
-              onChange={setMajorFilter}
-              renderLabel={(v) => (v === "All" ? dl.all : v)}
-            />
-            <FilterSection
-              label={dl.filterLanguage}
-              options={["All", ...languageOptions]}
-              value={languageFilter}
-              onChange={setLanguageFilter}
-              renderLabel={(v) => (v === "All" ? dl.all : LANGUAGE_TAG_LABEL[v as LanguageTag] ?? v)}
-            />
-            <FilterSection
-              label={dl.filterSemester}
-              options={["All", ...semesterOptions.map((value) => String(value))]}
-              value={semesterFilter}
-              onChange={setSemesterFilter}
-              renderLabel={(value) =>
-                value === "All" ? dl.all : formatMessage(dl.semesterChip, { semester: value })
-              }
-            />
-            <FilterSection
-              label={dl.filterStatus}
-              options={["All", "Verified", "Pending", "Unverified"]}
-              value={statusFilter}
-              onChange={setStatusFilter}
-              renderLabel={(v) => {
-                if (v === "All") return dl.all;
-                if (v === "Verified") return dl.statusVerified;
-                if (v === "Pending") return dl.statusVerifyingLabel;
-                if (v === "Unverified") return dl.statusUnverified;
-                return v;
-              }}
-            />
-          </div>
-
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-2">
+          <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={buddy.searchPlaceholder}
+            aria-label={buddy.searchAria}
+            className="h-10 min-w-0 flex-1 rounded-full border-border/80 bg-white px-3.5 text-[13px] shadow-sm dark:bg-card"
+          />
+          <DiscoverFilterTriggerButton
+            onClick={() => setFilterOpen(true)}
+            ariaLabel={buddy.filterOpenAria}
+            active={filterActive}
+          />
           <button
             type="button"
-            onClick={() => setFiltersOpen(false)}
-            className="mt-auto shrink-0 inline-flex h-11 w-full items-center justify-center rounded-full bg-classmates-blue text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-classmates-blue/90 active:bg-classmates-blue/95"
+            onClick={() => setPostOpen(true)}
+            aria-label={buddy.createRequestCtaAria}
+            className="inline-flex h-10 shrink-0 items-center gap-1 rounded-full bg-classmates-blue px-3.5 text-[13px] font-semibold text-white shadow-sm transition hover:bg-classmates-blue/90"
           >
-            {common.done}
+            <Plus className="h-4 w-4" aria-hidden />
+            <span className="hidden sm:inline">{buddy.createRequestCta}</span>
           </button>
         </div>
-      </AppPushLayer>
+        <DiscoverFeedTabs active={feed} onChange={setFeedKind} labels={buddy} />
+      </div>
+
+      {feed === "for-you" && rows.length > 0 ? (
+        <DiscoverPeopleRail rows={rows} title={buddy.peopleStripTitle} />
+      ) : null}
+
+      <DiscoverFilterSheet
+        open={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        initial={filters}
+        buddy={buddy}
+        onApply={(next) => setFilters(next)}
+      />
+
+      {filteredPosts.length === 0 ? (
+        <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-6 text-center text-[13px] text-muted-foreground shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
+          {emptyCopy}
+          {rows.length === 0 && savedCourseCount === 0 ? (
+            <div className="mt-4 flex justify-center">
+              <LinkButton href={"/courses/add" as Route} size="sm">
+                {dl.addCourse}
+              </LinkButton>
+            </div>
+          ) : null}
+        </div>
+      ) : (
+        <DiscoverFeed posts={filteredPosts} cityNameKey={DEFAULT_DISCOVER_SERVED_CITY} />
+      )}
 
       <CreatePostSheet
         open={postOpen}
-        scene={scene}
         enrolledCourses={enrolledCourses}
         onClose={() => setPostOpen(false)}
         onCreated={() => {
@@ -438,457 +243,18 @@ export function DiscoverList({
   );
 }
 
-function SceneTab({
-  label,
-  icon,
-  palette,
-  active,
-  onClick,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  palette: SceneTabPalette;
-  active: boolean;
-  onClick: () => void;
-}) {
-  const p = SCENE_TAB_PALETTE[palette];
-
+function DiscoverPeopleRail({ rows, title }: { rows: DiscoverRow[]; title: string }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        "relative flex h-[4.35rem] min-w-0 flex-col items-center justify-center overflow-hidden rounded-xl border px-0.5 pb-1 pt-0.5 text-center text-[9px] font-medium leading-tight transition-all duration-200 ease-out sm:h-[4.5rem] sm:rounded-[1rem] sm:text-[10px]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-classmates-azure/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        "active:scale-[0.97]",
-        active ? p.surfaceActive : p.surface,
-      )}
-    >
-      <span
-        className={cn(
-          "pointer-events-none absolute inset-x-0 top-0.5 bottom-[1.45rem] inline-flex items-center justify-center transition-colors duration-200 sm:bottom-[1.5rem]",
-          active ? p.iconActive : p.icon,
-        )}
-      >
-        {icon}
-      </span>
-      <span
-        className={cn(
-          "relative z-[1] mt-auto block max-w-[100%] whitespace-normal px-0.5 text-center leading-[1.12] transition-colors duration-200",
-          active ? cn("font-semibold", p.labelActive) : p.label,
-        )}
-      >
-        {label}
-      </span>
-    </button>
-  );
-}
-
-function matchesScene(row: DiscoverRow, scene: SceneKind) {
-  const bio = row.bio?.toLowerCase() ?? "";
-  const reasons = row.primaryReason.toLowerCase();
-  const languages = row.languages.map((l) => l.tag.toUpperCase());
-
-  if (scene === "shared") {
-    return true;
-  }
-
-  if (scene === "study") {
-    return (
-      reasons.includes("study") ||
-      reasons.includes("exam") ||
-      bio.includes("study") ||
-      bio.includes("exam") ||
-      bio.includes("paper") ||
-      bio.includes("whiteboard") ||
-      bio.includes("library")
-    );
-  }
-
-  if (scene === "meals") {
-    return (
-      reasons.includes("eat") ||
-      bio.includes("coffee") ||
-      bio.includes("lunch") ||
-      bio.includes("meal") ||
-      bio.includes("after class")
-    );
-  }
-
-  if (scene === "language") {
-    return languages.length >= 2 || bio.includes("language");
-  }
-
-  return (
-    bio.includes("basketball") ||
-    bio.includes("football") ||
-    bio.includes("soccer") ||
-    bio.includes("running") ||
-    bio.includes("gym") ||
-    bio.includes("hiking") ||
-    bio.includes("sport")
-  );
-}
-
-function matchesPostScene(post: DiscoverPostRow, scene: SceneKind) {
-  return post.category === sceneToCategory(scene);
-}
-
-function FilterSection({
-  label,
-  options,
-  value,
-  onChange,
-  renderLabel,
-}: {
-  label: string;
-  options: string[];
-  value: string;
-  onChange: (value: string) => void;
-  renderLabel?: (value: string) => string;
-}) {
-  return (
-    <div className="space-y-2 py-2.5">
-      <p className="text-[12px] font-medium text-muted-foreground">{label}</p>
-      <div className="flex flex-wrap gap-2">
-        {options.map((option) => {
-          const active = option === value;
-          return (
-            <button
-              key={option}
-              type="button"
-              onClick={() => onChange(option)}
-              className={cn(
-                "inline-flex h-9 items-center rounded-full border px-3 text-[12px] font-medium transition-colors",
-                active
-                  ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
-                  : "border-[#E7E0D6]/90 bg-white text-foreground/80",
-              )}
-            >
-              {renderLabel ? renderLabel(option) : option}
-            </button>
-          );
-        })}
+    <div className="space-y-2">
+      <p className="text-[12px] font-semibold tracking-tight text-foreground">{title}</p>
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {rows.map((r) => (
+          <div key={r.userId} className="w-[min(100%,19rem)] shrink-0">
+            <RecommendationRow row={r} />
+          </div>
+        ))}
       </div>
     </div>
-  );
-}
-
-function SearchBar({
-  value,
-  onChange,
-  onClear,
-  inputRef,
-  onOpenFilters,
-  discoverList,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  onClear: () => void;
-  inputRef: RefObject<HTMLInputElement | null>;
-  onOpenFilters: () => void;
-  discoverList: AppMessages["discoverList"];
-}) {
-  const hasValue = value.length > 0;
-  return (
-    <div className="relative min-w-0">
-      <Search
-        className="pointer-events-none absolute left-3.5 top-1/2 z-10 h-[18px] w-[18px] -translate-y-1/2 text-muted-foreground"
-        strokeWidth={2.25}
-        aria-hidden
-      />
-      <Input
-        ref={inputRef}
-        placeholder={discoverList.searchPlaceholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={cn(
-          "h-11 w-full rounded-2xl border-[#E7E0D6]/90 bg-white pl-11 text-[15px] shadow-sm",
-          hasValue ? "pr-[5.25rem]" : "pr-14",
-        )}
-        inputMode="search"
-        autoComplete="off"
-      />
-      <div className="pointer-events-none absolute inset-y-0 right-1.5 z-10 flex items-center gap-1">
-        <div className="pointer-events-auto flex items-center gap-1">
-          {hasValue ? (
-            <button
-              type="button"
-              onClick={onClear}
-              aria-label={discoverList.clearSearchAria}
-              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
-            >
-              <X className="h-4 w-4" strokeWidth={2.25} />
-            </button>
-          ) : null}
-          <span className="h-5 w-px shrink-0 bg-border/55" aria-hidden />
-          <button
-            type="button"
-            onClick={onOpenFilters}
-            aria-label={discoverList.filterClassmatesAria}
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
-          >
-            <SlidersHorizontal className="h-[18px] w-[18px]" strokeWidth={2.25} aria-hidden />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RecommendationSurface({
-  rows,
-  posts,
-  scene,
-  onOpenPost,
-  savedCourseCount,
-  viewerCourseMatchIndex,
-  discoverList,
-}: {
-  rows: DiscoverRow[];
-  posts: DiscoverPostRow[];
-  scene: SceneKind;
-  onOpenPost: () => void;
-  savedCourseCount?: number;
-  viewerCourseMatchIndex: ViewerCourseMatchIndex;
-  discoverList: AppMessages["discoverList"];
-}) {
-  const showingShared = scene === "shared";
-  const hasItems = showingShared ? rows.length > 0 || posts.length > 0 : posts.length > 0;
-
-  if (!hasItems) {
-    return (
-      <div className="space-y-3">
-        <SceneHeader scene={scene} onOpenPost={onOpenPost} discoverList={discoverList} />
-        <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-6 text-center text-[13px] text-muted-foreground shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
-          {showingShared ? discoverList.emptyShared : discoverList.emptyCategory}
-          {showingShared && savedCourseCount === 0 ? (
-            <div className="mt-4 flex justify-center">
-              <LinkButton href={"/courses/add" as Route} size="sm">
-                {discoverList.addCourse}
-              </LinkButton>
-            </div>
-          ) : null}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-3">
-      <SceneHeader scene={scene} onOpenPost={onOpenPost} discoverList={discoverList} />
-
-      <div className="space-y-2.5">
-        {showingShared ? (
-          <>
-            {posts.map((post) => (
-              <PostRow
-                key={post.id}
-                post={post}
-                scene={scene}
-                viewerCourseMatchIndex={viewerCourseMatchIndex}
-              />
-            ))}
-            {rows.map((r) => (
-              <RecommendationRow key={r.userId} row={r} scene={scene} />
-            ))}
-          </>
-        ) : (
-          posts.map((post) => (
-            <PostRow
-              key={post.id}
-              post={post}
-              scene={scene}
-              viewerCourseMatchIndex={viewerCourseMatchIndex}
-            />
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
-
-function SceneHeader({
-  scene,
-  onOpenPost,
-  discoverList,
-}: {
-  scene: SceneKind;
-  onOpenPost?: () => void;
-  discoverList: AppMessages["discoverList"];
-}) {
-  return (
-    <div className="flex items-start justify-between gap-3 px-1">
-      <div className="space-y-1">
-        <h3 className="text-sm font-semibold tracking-tight text-foreground">
-          {sceneHeading(scene, discoverList)}
-        </h3>
-        <p className="text-[12px] leading-snug text-muted-foreground">
-          {sceneDescription(scene, discoverList)}
-        </p>
-      </div>
-      {onOpenPost ? (
-        <button
-          type="button"
-          onClick={onOpenPost}
-          className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-classmates-blue px-4 text-[13px] font-semibold text-white shadow-[0_4px_14px_-3px_rgba(37,99,235,0.35)] transition-all hover:scale-[1.03] hover:shadow-[0_6px_20px_-3px_rgba(37,99,235,0.4)] active:scale-[0.97]"
-        >
-          <Plus className="h-[18px] w-[18px]" strokeWidth={2.5} />
-          {discoverList.postCta}
-        </button>
-      ) : null}
-    </div>
-  );
-}
-
-function sceneHeading(scene: SceneKind, dl: AppMessages["discoverList"]) {
-  switch (scene) {
-    case "shared":
-      return dl.sceneHeadingShared;
-    case "study":
-      return dl.sceneHeadingStudy;
-    case "meals":
-      return dl.sceneHeadingMeals;
-    case "language":
-      return dl.sceneHeadingLanguage;
-    case "sports":
-      return dl.sceneHeadingSports;
-  }
-}
-
-function sceneDescription(scene: SceneKind, dl: AppMessages["discoverList"]) {
-  switch (scene) {
-    case "shared":
-      return dl.sceneDescShared;
-    case "study":
-      return dl.sceneDescStudy;
-    case "meals":
-      return dl.sceneDescMeals;
-    case "language":
-      return dl.sceneDescLanguage;
-    case "sports":
-      return dl.sceneDescSports;
-  }
-}
-
-/**
- * Free-text user search. Debounced ~200ms and aborts in-flight requests when
- * the user types again — keeps keystrokes feeling immediate even on slower
- * networks and avoids stale results racing fresh ones.
- */
-function UserSearchResults({ query }: { query: string }) {
-  const m = useAppMessages();
-  const dl = m.discoverList;
-  const [hits, setHits] = useState<UserSearchHit[]>([]);
-  const [searching, setSearching] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    const ac = new AbortController();
-    const timer = window.setTimeout(() => {
-      setSearching(true);
-      apiFetch(`/api/users/search?q=${encodeURIComponent(query)}`, {
-        signal: ac.signal,
-      })
-        .then((r) => (r.ok ? r.json() : null))
-        .then((payload) => {
-          if (!active) return;
-          const list = (payload?.data?.hits ?? []) as UserSearchHit[];
-          setHits(list);
-        })
-        .catch(() => {
-          /* swallow aborts */
-        })
-        .finally(() => {
-          if (active) setSearching(false);
-        });
-    }, 200);
-
-    return () => {
-      active = false;
-      ac.abort();
-      window.clearTimeout(timer);
-    };
-  }, [query]);
-
-  if (searching && hits.length === 0) {
-    return (
-      <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-6 text-center text-[13px] text-muted-foreground shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
-        {dl.searching}
-      </div>
-    );
-  }
-
-  if (!searching && hits.length === 0) {
-    return (
-      <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-6 text-center text-[13px] text-muted-foreground shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
-        {formatMessage(dl.noSearchResults, { query })}
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-2.5">
-      {hits.map((hit) => (
-        <UserSearchRow key={hit.id} hit={hit} />
-      ))}
-    </div>
-  );
-}
-
-function UserSearchRow({ hit }: { hit: UserSearchHit }) {
-  const name = hit.nickname?.trim() || hit.username;
-  const meta = [hit.major, hit.semester ? `sem ${hit.semester}` : null]
-    .filter(Boolean)
-    .join(" · ");
-  const profileHref = `/users/${hit.id}?returnTo=%2Fdiscover` as Route;
-
-  return (
-    <ClassmatesPersonRow
-      avatarHref={profileHref}
-      avatarUrl={hit.avatarUrl}
-      profileAriaLabel={`View ${name}'s profile`}
-      name={name}
-      titleAdornment={
-        <>
-          <VerifiedBadge
-            size="xs"
-            school={hit.school}
-            verifiedStudent={hit.verifiedStudent}
-            status={hit.studentVerificationStatus}
-          />
-          <UserGenderCardIcon gender={hit.gender} className="shrink-0" />
-          {hit.hasActiveConnection ? (
-            <span className="shrink-0 rounded-full border border-classmates-teal-border/80 bg-classmates-teal-soft px-2 py-0.5 text-[10px] font-semibold text-classmates-teal">
-              chatting
-            </span>
-          ) : null}
-        </>
-      }
-      body={
-        <>
-          <p className="mt-1 truncate text-[12px] leading-snug text-muted-foreground">
-            @{hit.username}
-            {meta ? <span> · {meta}</span> : null}
-          </p>
-          {hit.sharedCourseCount > 0 ? (
-            <p className="mt-1 text-[11px] font-medium text-classmates-blue">
-              {hit.sharedCourseCount}{" "}
-              {hit.sharedCourseCount === 1 ? "shared course" : "shared courses"}
-            </p>
-          ) : null}
-        </>
-      }
-      action={
-        <DiscoverMessageButton
-          peerId={hit.id}
-          tone="subtle"
-          hasExistingChat={hit.hasActiveConnection}
-          className="w-full justify-center sm:w-auto"
-        />
-      }
-    />
   );
 }
 
@@ -936,14 +302,13 @@ function SharedCourseChipForRow({
   );
 }
 
-function RecommendationRow({ row, scene }: { row: DiscoverRow; scene: SceneKind }) {
+function RecommendationRow({ row }: { row: DiscoverRow }) {
   const meta = [row.major, row.semester ? `sem ${row.semester}` : null]
     .filter(Boolean)
     .join(" · ");
   const sharedCount = row.sharedCourses.length;
   const profileHref = `/users/${row.userId}?returnTo=%2Fdiscover` as Route;
-  const isSharedScene = scene === "shared";
-  const hasSharedCourses = isSharedScene && sharedCount > 0;
+  const hasSharedCourses = sharedCount > 0;
 
   /** Primary course when not listing shared chips — style as enrollment-only hint. */
   function PrimaryCourseHintChip({ code, name }: { code: string | null; name: string }) {
@@ -958,14 +323,16 @@ function RecommendationRow({ row, scene }: { row: DiscoverRow; scene: SceneKind 
       avatarLinkClassName={CLASSMATES_PERSON_ROW_AVATAR_RING_DISCOVER}
       profileAriaLabel={`View ${row.nickname}'s profile`}
       name={row.nickname}
+      nameRowAdornment={
+        <VerifiedBadge
+          size="xs"
+          school={row.school}
+          verifiedStudent={row.verifiedStudent}
+          status={row.studentVerificationStatus}
+        />
+      }
       titleAdornment={
         <>
-          <VerifiedBadge
-            size="xs"
-            school={row.school}
-            verifiedStudent={row.verifiedStudent}
-            status={row.studentVerificationStatus}
-          />
           <UserGenderCardIcon gender={row.gender} className="shrink-0" />
           {row.connectionId ? (
             <span className="shrink-0 rounded-full border border-classmates-teal-border/80 bg-classmates-teal-soft px-2 py-0.5 text-[10px] font-semibold text-classmates-teal dark:bg-teal-950/40 dark:text-teal-200">
@@ -1017,8 +384,8 @@ function RecommendationRow({ row, scene }: { row: DiscoverRow; scene: SceneKind 
                 </span>
               ) : null}
             </div>
-          ) : isSharedScene ? (
-            /* In shared scene but no confirmed shared courses — show primary course */
+          ) : (
+            /* No mutual courses — show primary course as nearby hint */
             <div className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1.5">
               <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.07em] text-muted-foreground/70 dark:text-zinc-500">
                 Nearby
@@ -1033,108 +400,27 @@ function RecommendationRow({ row, scene }: { row: DiscoverRow; scene: SceneKind 
                 {row.primaryCourse.name}
               </span>
             </div>
-          ) : null}
+          )}
         </>
       }
+      titleRowAction={
+        <DiscoverMessageButton
+          peerId={row.userId}
+          courseId={row.primaryCourse.id}
+          tone={hasSharedCourses ? "soft" : "subtle"}
+          hasExistingChat={Boolean(row.connectionId)}
+          className="h-9 min-h-9 max-w-full shrink-0 touch-manipulation justify-center gap-1.5 px-3.5 text-[12px] sm:max-w-none"
+        />
+      }
       action={
-        <div className="flex w-full flex-col items-stretch gap-1.5 sm:items-end">
-          {hasSharedCourses ? (
-            <p className="text-center text-[10px] font-semibold tabular-nums text-classmates-teal dark:text-teal-300 sm:text-right">
-              {sharedCount === 1 ? "1 course in common" : `${sharedCount} courses in common`}
-            </p>
-          ) : null}
-          <DiscoverMessageButton
-            peerId={row.userId}
-            courseId={row.primaryCourse.id}
-            tone={hasSharedCourses ? "soft" : "subtle"}
-            hasExistingChat={Boolean(row.connectionId)}
-            className="w-full justify-center sm:w-auto"
-          />
-        </div>
+        hasSharedCourses ? (
+          <p className="text-center text-[10px] font-semibold tabular-nums text-classmates-teal dark:text-teal-300 sm:text-right">
+            {sharedCount === 1 ? "1 course in common" : `${sharedCount} courses in common`}
+          </p>
+        ) : undefined
       }
     />
   );
-}
-
-function PostRow({
-  post,
-  scene,
-  viewerCourseMatchIndex,
-}: {
-  post: DiscoverPostRow;
-  scene: SceneKind;
-  viewerCourseMatchIndex: ViewerCourseMatchIndex;
-}) {
-  return (
-    <DiscoverPostCard
-      post={post}
-      scene={scene}
-      viewerCourseMatchIndex={viewerCourseMatchIndex}
-    />
-  );
-}
-
-function sceneToCategory(scene: SceneKind): ClassmatePostCategory {
-  switch (scene) {
-    case "shared":
-      return ClassmatePostCategory.SHARED_COURSES;
-    case "study":
-      return ClassmatePostCategory.STUDY;
-    case "meals":
-      return ClassmatePostCategory.MEALS;
-    case "language":
-      return ClassmatePostCategory.LANGUAGE;
-    case "sports":
-      return ClassmatePostCategory.SPORTS;
-  }
-}
-
-function passesFilters(
-  value: {
-    school: string | null;
-    major: string | null;
-    languages: Array<{ tag: LanguageTag; proficiency: LanguageProficiency }>;
-    semester: number | null;
-    studentVerificationStatus:
-      | "UNVERIFIED"
-      | "EMAIL_PENDING"
-      | "VERIFIED"
-      | "MANUAL_REVIEW_REQUIRED"
-      | "REJECTED";
-  },
-  filters: {
-    schoolFilter: string;
-    majorFilter: string;
-    languageFilter: string;
-    semesterFilter: string;
-    statusFilter: string;
-  },
-) {
-  if (filters.schoolFilter !== "All" && value.school !== filters.schoolFilter) return false;
-  if (filters.majorFilter !== "All" && value.major !== filters.majorFilter) return false;
-  if (
-    filters.languageFilter !== "All" &&
-    !value.languages.some((l) => l.tag === filters.languageFilter)
-  ) {
-    return false;
-  }
-  if (filters.semesterFilter !== "All" && value.semester !== Number(filters.semesterFilter)) return false;
-  if (filters.statusFilter === "Verified" && value.studentVerificationStatus !== "VERIFIED") return false;
-  if (
-    filters.statusFilter === "Pending" &&
-    value.studentVerificationStatus !== "EMAIL_PENDING" &&
-    value.studentVerificationStatus !== "MANUAL_REVIEW_REQUIRED"
-  ) {
-    return false;
-  }
-  if (
-    filters.statusFilter === "Unverified" &&
-    value.studentVerificationStatus !== "UNVERIFIED" &&
-    value.studentVerificationStatus !== "REJECTED"
-  ) {
-    return false;
-  }
-  return true;
 }
 
 function postFieldCharCountClassName(current: number, max: number) {
@@ -1147,20 +433,20 @@ function postFieldCharCountClassName(current: number, max: number) {
 
 function CreatePostSheet({
   open,
-  scene,
   enrolledCourses = [],
   onClose,
   onCreated,
 }: {
   open: boolean;
-  scene: SceneKind;
   enrolledCourses?: EnrolledCourseOption[];
   onClose: () => void;
   onCreated: () => void;
 }) {
   const m = useAppMessages();
   const dl = m.discoverList;
+  const buddy = m.discoverBuddy;
   const common = m.common;
+  const [category, setCategory] = useState<ClassmatePostCategory>(ClassmatePostCategory.STUDY);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [expiryPreset, setExpiryPreset] = useState<PostExpiryPreset>("1w");
@@ -1169,7 +455,6 @@ function CreatePostSheet({
   const [studyTimeSlots, setStudyTimeSlots] = useState<Set<StudyTimeSlot>>(new Set());
   const [studyVenues, setStudyVenues] = useState<Set<StudyVenue>>(new Set());
   const [studyVenueOtherNote, setStudyVenueOtherNote] = useState("");
-  const [mealVenueTags, setMealVenueTags] = useState<Set<MealVenueTag>>(new Set());
   const [mealVenueOtherNote, setMealVenueOtherNote] = useState("");
   const [languageOfferTags, setLanguageOfferTags] = useState<Set<LanguageTag>>(new Set());
   const [languageOfferLevels, setLanguageOfferLevels] = useState<
@@ -1178,16 +463,18 @@ function CreatePostSheet({
   const [languageTargets, setLanguageTargets] = useState<Set<LanguageTag>>(new Set());
   const [sportTags, setSportTags] = useState<Set<SportTag>>(new Set());
   const [sportOtherNote, setSportOtherNote] = useState("");
+  const [postImageUrls, setPostImageUrls] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const isSharedScene = scene === "shared";
-  const isStudyScene = scene === "study";
-  const isMealsScene = scene === "meals";
-  const isLanguageScene = scene === "language";
-  const isSportsScene = scene === "sports";
+  const isShared = category === ClassmatePostCategory.SHARED_COURSES;
+  const isStudy = category === ClassmatePostCategory.STUDY;
+  const isMeals = category === ClassmatePostCategory.MEALS;
+  const isLanguage = category === ClassmatePostCategory.LANGUAGE;
+  const isSports = category === ClassmatePostCategory.SPORTS;
 
   useEffect(() => {
     if (!open) return;
+    setCategory(ClassmatePostCategory.STUDY);
     setTitle("");
     setBody("");
     setError(null);
@@ -1197,14 +484,14 @@ function CreatePostSheet({
     setStudyTimeSlots(new Set());
     setStudyVenues(new Set());
     setStudyVenueOtherNote("");
-    setMealVenueTags(new Set());
     setMealVenueOtherNote("");
     setLanguageOfferTags(new Set());
     setLanguageOfferLevels({});
     setLanguageTargets(new Set());
     setSportTags(new Set());
     setSportOtherNote("");
-  }, [open, scene]);
+    setPostImageUrls([]);
+  }, [open]);
 
   function toggleCourse(id: string) {
     setSelectedCourseIds((prev) => {
@@ -1246,15 +533,6 @@ function CreatePostSheet({
     });
   }
 
-  function toggleMealVenue(tag: MealVenueTag) {
-    setMealVenueTags((prev) => {
-      const next = new Set(prev);
-      if (next.has(tag)) next.delete(tag);
-      else next.add(tag);
-      return next;
-    });
-  }
-
   function toggleLanguageOffer(tag: LanguageTag) {
     setLanguageOfferTags((prev) => {
       const next = new Set(prev);
@@ -1285,11 +563,19 @@ function CreatePostSheet({
     });
   }
 
-  function toggleSportTag(tag: SportTag) {
+  function addSportPresetTag(tag: SportTag) {
+    if (tag === "OTHER") return;
     setSportTags((prev) => {
       const next = new Set(prev);
-      if (next.has(tag)) next.delete(tag);
-      else next.add(tag);
+      next.add(tag);
+      return next;
+    });
+  }
+
+  function removeSportPresetTag(tag: SportTag) {
+    setSportTags((prev) => {
+      const next = new Set(prev);
+      next.delete(tag);
       return next;
     });
   }
@@ -1298,7 +584,7 @@ function CreatePostSheet({
     if (submitting) return;
     const trimmedTitle = title.trim();
     const trimmedBody = body.trim();
-    if (isSharedScene && selectedCourseIds.size === 0) {
+    if (isShared && selectedCourseIds.size === 0) {
       setError(dl.postErrorSelectCourse);
       return;
     }
@@ -1314,15 +600,15 @@ function CreatePostSheet({
       setError(formatMessage(dl.postErrorBodyTooLong, { max: CLASSMATE_POST_BODY_MAX_LEN }));
       return;
     }
-    if (isStudyScene && studyVenues.has("OTHER") && !studyVenueOtherNote.trim()) {
+    if (isStudy && studyVenues.has("OTHER") && !studyVenueOtherNote.trim()) {
       setError(dl.postErrorStudyVenueOtherNote);
       return;
     }
-    if (isStudyScene && studyVenueOtherNote.trim() && !studyVenues.has("OTHER")) {
+    if (isStudy && studyVenueOtherNote.trim() && !studyVenues.has("OTHER")) {
       setError(dl.postErrorStudyVenueOtherRequiresOther);
       return;
     }
-    if (isStudyScene && studyVenueOtherNote.trim().length > CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX) {
+    if (isStudy && studyVenueOtherNote.trim().length > CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX) {
       setError(
         formatMessage(dl.postErrorStudyVenueNoteTooLong, {
           max: CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX,
@@ -1330,15 +616,7 @@ function CreatePostSheet({
       );
       return;
     }
-    if (isMealsScene && mealVenueTags.has("OTHER") && !mealVenueOtherNote.trim()) {
-      setError(dl.postErrorMealsVenueOtherNote);
-      return;
-    }
-    if (isMealsScene && mealVenueOtherNote.trim() && !mealVenueTags.has("OTHER")) {
-      setError(dl.postErrorMealsVenueOtherRequiresOther);
-      return;
-    }
-    if (isMealsScene && mealVenueOtherNote.trim().length > CLASSMATE_POST_MEALS_VENUE_OTHER_NOTE_MAX) {
+    if (isMeals && mealVenueOtherNote.trim().length > CLASSMATE_POST_MEALS_VENUE_OTHER_NOTE_MAX) {
       setError(
         formatMessage(dl.postErrorMealsVenueNoteTooLong, {
           max: CLASSMATE_POST_MEALS_VENUE_OTHER_NOTE_MAX,
@@ -1346,19 +624,15 @@ function CreatePostSheet({
       );
       return;
     }
-    if (isLanguageScene && languageOfferTags.size === 0 && languageTargets.size === 0) {
+    if (isLanguage && languageOfferTags.size === 0 && languageTargets.size === 0) {
       setError(dl.postErrorLanguageNeedMeta);
       return;
     }
-    if (isSportsScene && sportTags.has("OTHER") && !sportOtherNote.trim()) {
+    if (isSports && sportTags.has("OTHER") && !sportOtherNote.trim()) {
       setError(dl.postErrorSportsOtherNote);
       return;
     }
-    if (isSportsScene && sportOtherNote.trim() && !sportTags.has("OTHER")) {
-      setError(dl.postErrorSportsOtherRequiresOther);
-      return;
-    }
-    if (isSportsScene && sportOtherNote.trim().length > CLASSMATE_POST_SPORT_OTHER_NOTE_MAX) {
+    if (isSports && sportOtherNote.trim().length > CLASSMATE_POST_SPORT_OTHER_NOTE_MAX) {
       setError(
         formatMessage(dl.postErrorSportsNoteTooLong, {
           max: CLASSMATE_POST_SPORT_OTHER_NOTE_MAX,
@@ -1370,7 +644,7 @@ function CreatePostSheet({
     setError(null);
     try {
       const studyPayload =
-        isStudyScene &&
+        isStudy &&
         (studyPurposes.size > 0 ||
           studyTimeSlots.size > 0 ||
           studyVenues.size > 0 ||
@@ -1385,17 +659,11 @@ function CreatePostSheet({
             }
           : undefined;
       const mealsPayload =
-        isMealsScene &&
-        (mealVenueTags.size > 0 || (mealVenueTags.has("OTHER") && mealVenueOtherNote.trim().length > 0))
-          ? {
-              venueTags: [...mealVenueTags],
-              ...(mealVenueTags.has("OTHER") && mealVenueOtherNote.trim()
-                ? { venueOtherNote: mealVenueOtherNote.trim() }
-                : {}),
-            }
+        isMeals && mealVenueOtherNote.trim().length > 0
+          ? { venueOtherNote: mealVenueOtherNote.trim() }
           : undefined;
       const languagePayload =
-        isLanguageScene && (languageOfferTags.size > 0 || languageTargets.size > 0)
+        isLanguage && (languageOfferTags.size > 0 || languageTargets.size > 0)
           ? {
               offers: [...languageOfferTags].map((tag) => ({
                 tag,
@@ -1405,13 +673,10 @@ function CreatePostSheet({
             }
           : undefined;
       const sportPayload =
-        isSportsScene &&
-        (sportTags.size > 0 || (sportTags.has("OTHER") && sportOtherNote.trim().length > 0))
+        isSports && (sportTags.size > 0 || sportOtherNote.trim().length > 0)
           ? {
               sportTags: [...sportTags],
-              ...(sportTags.has("OTHER") && sportOtherNote.trim()
-                ? { sportOtherNote: sportOtherNote.trim() }
-                : {}),
+              ...(sportOtherNote.trim() ? { sportOtherNote: sportOtherNote.trim() } : {}),
             }
           : undefined;
 
@@ -1420,17 +685,18 @@ function CreatePostSheet({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           city: DEFAULT_DISCOVER_SERVED_CITY,
-          category: sceneToCategory(scene),
+          category,
           title: trimmedTitle,
           body: trimmedBody,
           expiresAt: expiryPresetToDate(expiryPreset).toISOString(),
-          ...(isSharedScene && selectedCourseIds.size > 0
+          ...(isShared && selectedCourseIds.size > 0
             ? { courseIds: [...selectedCourseIds] }
             : {}),
           ...(studyPayload ? { study: studyPayload } : {}),
           ...(mealsPayload ? { meals: mealsPayload } : {}),
           ...(languagePayload ? { language: languagePayload } : {}),
           ...(sportPayload ? { sport: sportPayload } : {}),
+          ...(postImageUrls.length > 0 ? { imageUrls: postImageUrls } : {}),
         }),
       });
       const payload = await res.json().catch(() => ({}));
@@ -1457,7 +723,7 @@ function CreatePostSheet({
         <div className="mb-3 flex shrink-0 items-start justify-between gap-3">
           <div>
             <h3 className="text-[15px] font-semibold text-foreground">
-              {dl.postSheetTitlePrefix} {sceneHeading(scene, dl)}
+              {buddy.sheetTitlePrefix} {buddyTypeLabel(category, buddy)}
             </h3>
             <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{dl.postSheetSubtitle}</p>
           </div>
@@ -1472,7 +738,31 @@ function CreatePostSheet({
         </div>
 
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto">
-          {isSharedScene && enrolledCourses.length > 0 ? (
+          <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
+            <p className="mb-2 text-[11px] font-medium text-muted-foreground">{buddy.sheetChooseBuddyType}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {ALL_BUDDY_CATEGORIES.map((c) => {
+                const active = c === category;
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setCategory(c)}
+                    className={cn(
+                      "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
+                      active
+                        ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
+                        : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
+                    )}
+                  >
+                    {buddyTypeLabel(c, buddy)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {isShared && enrolledCourses.length > 0 ? (
             <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
               <div className="mb-1.5 flex items-center justify-between">
                 <p className="text-[11px] font-medium text-muted-foreground">
@@ -1510,13 +800,13 @@ function CreatePostSheet({
                 })}
               </div>
             </div>
-          ) : isSharedScene && enrolledCourses.length === 0 ? (
+          ) : isShared && enrolledCourses.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-amber-200/80 bg-amber-50/40 px-3 py-3 text-center text-[12px] text-muted-foreground">
               {dl.postSheetNeedEnroll}
             </div>
           ) : null}
 
-          {isStudyScene ? (
+          {isStudy ? (
             <div className="space-y-3 rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
               <div>
                 <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
@@ -1605,167 +895,53 @@ function CreatePostSheet({
             </div>
           ) : null}
 
-          {isMealsScene ? (
+          {isMeals ? (
             <div className="space-y-3 rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
               <div>
                 <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
                   {dl.postSheetMealsVenueLabel}
                 </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {MEAL_VENUE_VALUES.map((tag) => {
-                    const active = mealVenueTags.has(tag);
-                    return (
-                      <button
-                        key={tag}
-                        type="button"
-                        onClick={() => toggleMealVenue(tag)}
-                        className={cn(
-                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
-                          active
-                            ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
-                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
-                        )}
-                      >
-                        {mealVenueLabel(tag, dl)}
-                      </button>
-                    );
-                  })}
-                </div>
-                {mealVenueTags.has("OTHER") ? (
-                  <Input
-                    value={mealVenueOtherNote}
-                    onChange={(e) => setMealVenueOtherNote(e.target.value)}
-                    placeholder={dl.postSheetVenueOtherPlaceholder}
-                    maxLength={CLASSMATE_POST_MEALS_VENUE_OTHER_NOTE_MAX}
-                    className="mt-2 h-9 rounded-xl border-border/70 text-[13px]"
-                  />
-                ) : null}
+                <Input
+                  value={mealVenueOtherNote}
+                  onChange={(e) => setMealVenueOtherNote(e.target.value)}
+                  placeholder={dl.postSheetMealsLocationPlaceholder}
+                  maxLength={CLASSMATE_POST_MEALS_VENUE_OTHER_NOTE_MAX}
+                  className="h-9 rounded-xl border-border/70 text-[13px]"
+                  aria-describedby="discover-meals-location-hint"
+                />
+                <p
+                  id="discover-meals-location-hint"
+                  className="mt-1.5 text-[11px] leading-snug text-muted-foreground"
+                >
+                  {dl.postSheetMealsLocationHint}
+                </p>
               </div>
             </div>
           ) : null}
 
-          {isLanguageScene ? (
-            <div className="space-y-3 rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
-              <div>
-                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
-                  {dl.postSheetLanguageOffersLabel}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {LANGUAGE_TAG_VALUES.map((tag) => {
-                    const active = languageOfferTags.has(tag);
-                    return (
-                      <button
-                        key={`offer-${tag}`}
-                        type="button"
-                        onClick={() => toggleLanguageOffer(tag)}
-                        className={cn(
-                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
-                          active
-                            ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
-                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
-                        )}
-                      >
-                        {languageTagLabel(tag, dl)}
-                      </button>
-                    );
-                  })}
-                </div>
-                {languageOfferTags.size > 0 ? (
-                  <div className="mt-2 space-y-2">
-                    {[...languageOfferTags].map((tag) => (
-                      <label
-                        key={`level-${tag}`}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-background px-3 py-2"
-                      >
-                        <span className="min-w-0 truncate text-[12px] font-medium text-foreground">
-                          {languageTagLabel(tag, dl)}
-                        </span>
-                        <span className="sr-only">
-                          {languageTagLabel(tag, dl)} {dl.postSheetLanguageOfferLevelLabel}
-                        </span>
-                        <select
-                          value={languageOfferLevels[tag] ?? DEFAULT_LANGUAGE_OFFER_PROFICIENCY}
-                          onChange={(e) =>
-                            setLanguageOfferLevel(tag, e.target.value as LanguageProficiency)
-                          }
-                          className="h-9 rounded-lg border border-input bg-background px-2 text-[12px]"
-                        >
-                          {LANGUAGE_PROFICIENCY_VALUES.map((value) => (
-                            <option key={value} value={value}>
-                              {languageProficiencyLabel(value, dl)}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-              <div>
-                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
-                  {dl.postSheetLanguageTargetsLabel}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {LANGUAGE_TAG_VALUES.map((tag) => {
-                    const active = languageTargets.has(tag);
-                    return (
-                      <button
-                        key={`target-${tag}`}
-                        type="button"
-                        onClick={() => toggleLanguageTarget(tag)}
-                        className={cn(
-                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
-                          active
-                            ? "border-violet-300 bg-violet-50 text-violet-700 dark:border-violet-500/40 dark:bg-violet-950/45 dark:text-violet-200"
-                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
-                        )}
-                      >
-                        {languageTagLabel(tag, dl)}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+          {isLanguage ? (
+            <LanguageExchangePostFields
+              dl={dl}
+              languageOfferTags={languageOfferTags}
+              languageOfferLevels={languageOfferLevels}
+              languageTargets={languageTargets}
+              defaultOfferProficiency={DEFAULT_LANGUAGE_OFFER_PROFICIENCY}
+              toggleLanguageOffer={toggleLanguageOffer}
+              setLanguageOfferLevel={setLanguageOfferLevel}
+              toggleLanguageTarget={toggleLanguageTarget}
+            />
           ) : null}
 
-          {isSportsScene ? (
-            <div className="space-y-3 rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
-              <div>
-                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
-                  {dl.postSheetSportsLabel}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {SPORT_TAG_VALUES.map((tag) => {
-                    const active = sportTags.has(tag);
-                    return (
-                      <button
-                        key={tag}
-                        type="button"
-                        onClick={() => toggleSportTag(tag)}
-                        className={cn(
-                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
-                          active
-                            ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
-                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
-                        )}
-                      >
-                        {sportTagLabel(tag, dl)}
-                      </button>
-                    );
-                  })}
-                </div>
-                {sportTags.has("OTHER") ? (
-                  <Input
-                    value={sportOtherNote}
-                    onChange={(e) => setSportOtherNote(e.target.value)}
-                    placeholder={dl.postSheetVenueOtherPlaceholder}
-                    maxLength={CLASSMATE_POST_SPORT_OTHER_NOTE_MAX}
-                    className="mt-2 h-9 rounded-xl border-border/70 text-[13px]"
-                  />
-                ) : null}
-              </div>
-            </div>
+          {isSports ? (
+            <SportsPostFieldCombobox
+              dl={dl}
+              sportTags={sportTags}
+              sportOtherNote={sportOtherNote}
+              onAddPresetTag={addSportPresetTag}
+              onRemovePresetTag={removeSportPresetTag}
+              onSetCustomNote={(note) => setSportOtherNote(note)}
+              onClearCustomNote={() => setSportOtherNote("")}
+            />
           ) : null}
 
           <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
@@ -1793,7 +969,7 @@ function CreatePostSheet({
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={postPlaceholder(scene, dl)}
+              placeholder={postPlaceholderForCategory(category, dl)}
               maxLength={CLASSMATE_POST_TITLE_MAX_LEN}
               className="h-11 rounded-xl border-border/70 text-[14px]"
             />
@@ -1829,6 +1005,13 @@ function CreatePostSheet({
               className="min-h-24 w-full resize-none rounded-xl border border-input bg-background px-3 py-2.5 text-[14px] outline-none transition focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
             />
           </div>
+
+          <ClassmatePostCreateImageRow
+            urls={postImageUrls}
+            onUrlsChange={setPostImageUrls}
+            disabled={submitting}
+            onError={setError}
+          />
 
           <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
             <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">{dl.postSheetExpiresLabel}</p>
@@ -1870,8 +1053,8 @@ function CreatePostSheet({
             disabled={
               submitting ||
               !title.trim() ||
-              (isSharedScene && selectedCourseIds.size === 0) ||
-              (isLanguageScene && languageOfferTags.size === 0 && languageTargets.size === 0) ||
+              (isShared && selectedCourseIds.size === 0) ||
+              (isLanguage && languageOfferTags.size === 0 && languageTargets.size === 0) ||
               title.trim().length > CLASSMATE_POST_TITLE_MAX_LEN ||
               body.trim().length > CLASSMATE_POST_BODY_MAX_LEN
             }
@@ -1894,18 +1077,20 @@ function CreatePostSheet({
   );
 }
 
-function postPlaceholder(scene: SceneKind, dl: AppMessages["discoverList"]) {
-  switch (scene) {
-    case "shared":
+function postPlaceholderForCategory(category: ClassmatePostCategory, dl: AppMessages["discoverList"]) {
+  switch (category) {
+    case ClassmatePostCategory.SHARED_COURSES:
       return dl.postPlaceholderShared;
-    case "study":
+    case ClassmatePostCategory.STUDY:
       return dl.postPlaceholderStudy;
-    case "meals":
+    case ClassmatePostCategory.MEALS:
       return dl.postPlaceholderMeals;
-    case "language":
+    case ClassmatePostCategory.LANGUAGE:
       return dl.postPlaceholderLanguage;
-    case "sports":
+    case ClassmatePostCategory.SPORTS:
       return dl.postPlaceholderSports;
+    default:
+      return dl.postPlaceholderStudy;
   }
 }
 

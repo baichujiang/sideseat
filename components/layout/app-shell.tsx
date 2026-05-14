@@ -20,6 +20,19 @@ const navActiveTab =
 const navInactiveTab =
   "group rounded-[0.65rem] text-classmates-sub active:bg-black/[0.04] dark:active:bg-white/[0.06] [@media(hover:hover)]:hover:bg-black/[0.04] dark:[@media(hover:hover)]:hover:bg-white/[0.06] [@media(hover:hover)]:hover:text-classmates-ink";
 
+/**
+ * Bottom-tab "root" routes. Left-edge swipe-back is a no-op on these paths
+ * (iOS behaviour at the root of a navigation stack — no parent screen to pop).
+ * Must stay in sync with `navItems` below.
+ */
+const TAB_ROOT_PATHS = [
+  "/home",
+  "/courses",
+  "/discover",
+  "/inbox",
+  "/profile",
+] as const satisfies ReadonlyArray<Route>;
+
 /** Mobile shell: bottom tab bar only (no top nav bar). */
 export function AppShell({
   children,
@@ -116,7 +129,7 @@ export function AppShell({
       )}
     >
       <Suspense fallback={null}>
-        <EdgeSwipeBack getBounds={swipeBounds} />
+        <EdgeSwipeBack getBounds={swipeBounds} noBackPaths={TAB_ROOT_PATHS} />
       </Suspense>
       <ProductTutorialGate context={productTutorialContext} />
       <main

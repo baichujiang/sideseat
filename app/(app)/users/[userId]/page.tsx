@@ -86,7 +86,6 @@ export default async function PeerUserProfilePage({
                 initialRemark={access.myContactRemark}
                 variant="underName"
                 remarkPlaceholder={up.contactRemarkPlaceholder}
-                remarkMicroLabel={up.contactRemarkMicroLabel}
               />
             ) : null
           }

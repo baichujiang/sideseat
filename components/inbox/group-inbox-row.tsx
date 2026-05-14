@@ -2,10 +2,10 @@ import type { Route } from "next";
 import { ChevronRight } from "lucide-react";
 
 import { inboxConversationTileClassName } from "@/components/inbox/inbox-conversation-tile";
+import { InboxRowTimestamp } from "@/components/inbox/inbox-row-timestamp";
 import { InboxSwipeRow } from "@/components/inbox/inbox-swipe-row";
 import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { GroupChatAvatarCollage } from "@/components/ui/group-chat-avatar-collage";
-import { formatShortRelativeTime } from "@/lib/format/short-relative-time";
 import { groupChatDisplayTitle } from "@/lib/group-chats/title";
 import type { InboxMerged } from "@/lib/queries/inbox-merge";
 import { cn } from "@/lib/utils";
@@ -66,9 +66,7 @@ export function GroupInboxRow({
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1.5 self-center">
-          <time className="shrink-0 text-xs tabular-nums text-[#8A94A6] dark:text-zinc-500" dateTime={when.toISOString()}>
-            {formatShortRelativeTime(when)}
-          </time>
+          <InboxRowTimestamp at={when} />
           {isUnread ? (
             unreadCount === 1 ? (
               <InboxUnreadBadge count={1} variant="dot" />

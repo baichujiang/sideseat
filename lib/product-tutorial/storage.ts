@@ -1,5 +1,5 @@
 /** Bump if tutorial content changes enough to warrant a re-show for everyone. */
-export const PRODUCT_TUTORIAL_STORAGE_VERSION = "v1";
+export const PRODUCT_TUTORIAL_STORAGE_VERSION = "v2";
 
 export function productTutorialLocalStorageKey(userId: string) {
   return `classlink:productTutorial:${PRODUCT_TUTORIAL_STORAGE_VERSION}:${userId}`;

@@ -8,6 +8,7 @@ import {
   Dumbbell,
   Languages,
   Link2,
+  MapPin,
   NotebookPen,
   UtensilsCrossed,
 } from "lucide-react";
@@ -15,24 +16,29 @@ import { ClassmatePostCategory } from "@prisma/client";
 import type { ReactNode } from "react";
 
 import { ClassmatesPersonRow } from "@/components/classmates/classmates-person-row";
+import { ClassmatePostImagesGallery } from "@/components/discover/classmate-post-images-gallery";
+import { ClassmatePostSaveButton } from "@/components/discover/classmate-post-save-button";
 import { DiscoverMessageButton } from "@/components/discover/discover-message-button";
+import { DiscoverPostPostedTime } from "@/components/discover/discover-post-posted-time";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { UserGenderCardIcon } from "@/components/ui/user-gender-icon";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import {
   languageProficiencyLabel,
   languageTagLabel,
-  mealVenueLabel,
   sportTagLabel,
   studyPurposeLabel,
   studyTimeSlotLabel,
-  studyVenueLabel,
 } from "@/lib/discover/study-meta-labels";
 import {
   classmatePostCategoryToPalette,
   SCENE_LIST_ROW,
 } from "@/lib/discover/scene-palette";
-import type { DiscoverPostCardScene, DiscoverPostRow } from "@/lib/discover/discover-post-row";
+import type {
+  DiscoverPostCardScene,
+  DiscoverPostRow,
+} from "@/lib/discover/discover-post-row";
+import { formatMealsVenueLine, formatStudyVenueLine } from "@/lib/discover/format-post-venue-line";
 import {
   courseMatchesViewer,
   type ViewerCourseMatchIndex,
@@ -43,11 +49,46 @@ import { useAppMessages } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
 
 export const DISCOVER_POST_CARD_SHELL_CLASS = cn(
-  "rounded-[26px] border-classmates-edge px-5 py-4 shadow-[0_6px_26px_-12px_rgba(15,23,42,0.11)] sm:rounded-[28px] sm:px-6 sm:py-5",
+  "rounded-3xl border border-border/55 bg-white px-5 py-4 shadow-[0_8px_30px_-14px_rgba(15,23,42,0.12)] sm:px-6 sm:py-5",
   "dark:border-border dark:bg-card dark:shadow-[0_14px_44px_-18px_rgba(0,0,0,0.52)]",
-  "[@media(hover:hover)]:hover:shadow-[0_8px_32px_-14px_rgba(15,23,42,0.14)]",
+  "[@media(hover:hover)]:hover:shadow-[0_10px_34px_-14px_rgba(15,23,42,0.14)]",
   "dark:[@media(hover:hover)]:hover:shadow-[0_16px_48px_-14px_rgba(0,0,0,0.58)]",
 );
+
+/**
+ * Bleed the tinted well to ~10px from the white card edges while the shell keeps px-5 sm:px-6
+ * on the article. When a save control reserves `pr-11` on the header row, pull the well
+ * further right so its width matches the full-width footer band.
+ */
+function discoverPostInnerPanelClass(showSaveCorner: boolean) {
+  return cn(
+    "w-full min-w-0 rounded-2xl border border-violet-100/75 bg-violet-50/80 py-3.5 dark:border-violet-500/22 dark:bg-violet-950/28",
+    "-ml-[calc(theme(spacing.5)+3.5rem+theme(spacing.3)-0.625rem)]",
+    showSaveCorner
+      ? "mr-[calc(0.625rem-theme(spacing.5)-2.75rem)]"
+      : "mr-[calc(0.625rem-theme(spacing.5))]",
+    "sm:-ml-[calc(theme(spacing.6)+3.5rem+theme(spacing.4)-0.625rem)]",
+    showSaveCorner
+      ? "sm:mr-[calc(0.625rem-theme(spacing.6)-3rem)]"
+      : "sm:mr-[calc(0.625rem-theme(spacing.6))]",
+  );
+}
+
+const DISCOVER_POST_INNER_PANEL_BODY_CLASS =
+  "w-full min-w-0 max-w-none px-3 sm:px-3.5";
+
+function PostCardPinLocationRow({ text, ariaLabel }: { text: string; ariaLabel: string }) {
+  if (!text.trim()) return null;
+  return (
+    <p
+      className="mt-2 flex min-w-0 items-start gap-1.5 rounded-lg bg-muted/30 px-1.5 py-1.5 text-[12px] leading-snug text-muted-foreground dark:bg-muted/20"
+      aria-label={ariaLabel}
+    >
+      <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 opacity-75" strokeWidth={2} aria-hidden />
+      <span className="min-w-0 flex-1 break-words">{text}</span>
+    </p>
+  );
+}
 
 const DISCOVER_POST_MY_POSTS_PILL_CLASS = cn(
   "inline-flex shrink-0 items-center rounded-full border border-classmates-blue-border/85 bg-classmates-blue-soft px-3 py-1.5 text-[12px] font-medium text-classmates-blue no-underline transition-colors",
@@ -103,7 +144,10 @@ function categoryIconNode(c: ClassmatePostCategory) {
   }
 }
 
-function categoryTabLabel(c: ClassmatePostCategory, dl: AppMessages["discoverList"]) {
+function categoryTabLabel(
+  c: ClassmatePostCategory,
+  dl: AppMessages["discoverList"],
+) {
   switch (c) {
     case ClassmatePostCategory.SHARED_COURSES:
       return dl.sceneTabShared;
@@ -118,7 +162,11 @@ function categoryTabLabel(c: ClassmatePostCategory, dl: AppMessages["discoverLis
   }
 }
 
-function DiscoverPostCategoryBadge({ category }: { category: ClassmatePostCategory }) {
+function DiscoverPostCategoryBadge({
+  category,
+}: {
+  category: ClassmatePostCategory;
+}) {
   const m = useAppMessages();
   const dl = m.discoverList;
   const palette = classmatePostCategoryToPalette(category);
@@ -171,19 +219,25 @@ export function DiscoverPostCard({
     .filter(Boolean)
     .join(" · ");
   const postPath = `/discover/posts/${post.id}`;
-  const returnTo =
-    listReturnTo ?? (scene === "shared" ? "/discover" : `/discover?tab=${scene}`);
+  const returnTo = listReturnTo ?? "/discover";
   const postDetailHref =
     `${postPath}?returnTo=${encodeURIComponent(returnTo)}` as Route;
-  const myPostsHref =
-    `/inbox/my-posts?returnTo=${encodeURIComponent(postPath)}` as Route;
+  const myPostsManageHref =
+    `/profile/my-posts?returnTo=${encodeURIComponent(postPath)}&highlight=${encodeURIComponent(post.id)}` as Route;
+  const isDevExample = Boolean(post.isDevExample);
+  const showSaveCorner = post.savedByViewer !== undefined && !isDevExample;
+  /** Satisfies `Route` when `disableNavigation`; href is unused. */
+  const noopPersonRowHref = "/discover" as Route;
 
   const showYourPostTitlePill = post.isOwn && yourPostBadge !== false;
 
   const expiryLabel = isNeverExpiry(post.expiresAt)
     ? dl.postNoExpiry
     : formatMessage(dl.postActiveUntil, {
-        date: formatClassmatePostExpiryMonthDay(new Date(post.expiresAt), locale),
+        date: formatClassmatePostExpiryMonthDay(
+          new Date(post.expiresAt),
+          locale,
+        ),
       });
 
   const showSharedCourseChips =
@@ -191,282 +245,309 @@ export function DiscoverPostCard({
     post.linkedCourses &&
     post.linkedCourses.length > 0;
 
-  const showStudyMeta =
+  const showStudyPurposeTime =
     post.category === ClassmatePostCategory.STUDY &&
     post.studyMeta &&
-    (post.studyMeta.purposes.length > 0 ||
-      post.studyMeta.timeSlots.length > 0 ||
-      post.studyMeta.venues.length > 0 ||
-      Boolean(post.studyMeta.venueOtherNote?.trim()));
+    (post.studyMeta.purposes.length > 0 || post.studyMeta.timeSlots.length > 0);
 
-  const showMealsMeta =
-    post.category === ClassmatePostCategory.MEALS &&
-    post.mealsMeta &&
-    (post.mealsMeta.venueTags.length > 0 || Boolean(post.mealsMeta.venueOtherNote?.trim()));
+  const mealsVenueLine =
+    post.category === ClassmatePostCategory.MEALS && post.mealsMeta
+      ? formatMealsVenueLine(post.mealsMeta, dl)
+      : "";
+  const showMealsPinRow = Boolean(mealsVenueLine.trim());
+
+  const studyVenueLine =
+    post.category === ClassmatePostCategory.STUDY && post.studyMeta
+      ? formatStudyVenueLine(post.studyMeta, dl)
+      : "";
+  const showStudyPinRow = Boolean(studyVenueLine.trim());
 
   const showLanguageMeta =
     post.category === ClassmatePostCategory.LANGUAGE &&
     post.languageMeta &&
-    (post.languageMeta.offers.length > 0 || post.languageMeta.targets.length > 0);
+    (post.languageMeta.offers.length > 0 ||
+      post.languageMeta.targets.length > 0);
 
   const showSportsMeta =
     post.category === ClassmatePostCategory.SPORTS &&
     post.sportMeta &&
-    (post.sportMeta.sportTags.length > 0 || Boolean(post.sportMeta.sportOtherNote?.trim()));
+    (post.sportMeta.sportTags.length > 0 ||
+      Boolean(post.sportMeta.sportOtherNote?.trim()));
 
   const defaultFooter = (
-    <div
-      className={cn(
-        "mt-3 flex w-full min-w-0 items-center gap-2 border-t border-border/45 pt-3 dark:border-border/50",
-        post.isOwn ? "justify-between" : "justify-start",
-      )}
-    >
-      <span className="inline-flex min-w-0 flex-1 items-center gap-1.5 text-[11px] leading-snug text-muted-foreground">
-        <Calendar className="h-3.5 w-3.5 shrink-0 opacity-80" strokeWidth={2} aria-hidden />
-        <span className="min-w-0 truncate">{expiryLabel}</span>
-      </span>
-      {post.isOwn ? (
+    <div className="mt-3 flex w-full min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-border/55 pt-3 dark:border-border/50">
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2.5 gap-y-1 sm:flex-none sm:max-w-[min(100%,26rem)]">
+        <span className="inline-flex min-w-0 items-center gap-1.5 text-[11px] leading-snug text-muted-foreground">
+          <Calendar
+            className="h-3.5 w-3.5 shrink-0 opacity-80"
+            strokeWidth={2}
+            aria-hidden
+          />
+          <span className="min-w-0 truncate">{expiryLabel}</span>
+        </span>
+        <span className="hidden shrink-0 text-[11px] text-muted-foreground/55 sm:inline" aria-hidden>
+          ·
+        </span>
+        <DiscoverPostPostedTime
+          at={post.createdAt}
+          className="text-[11px] leading-snug text-muted-foreground"
+        />
+      </div>
+      {post.isOwn && !isDevExample ? (
         <Link
-          href={myPostsHref}
-          aria-label={dl.myPostsListCtaAria}
+          href={myPostsManageHref}
+          aria-label={dl.postCardOwnPostManageCtaAria}
           className={DISCOVER_POST_MY_POSTS_PILL_CLASS}
         >
-          {dl.myPostsListCta}
+          {dl.postCardOwnPostManageCta}
         </Link>
-      ) : null}
+      ) : isDevExample ? (
+        <span
+          className="inline-flex min-h-10 min-w-[6.5rem] items-center justify-center rounded-full border border-dashed border-muted-foreground/35 bg-muted/20 px-3 text-center text-[11px] font-medium text-muted-foreground"
+          title="Dev-only example card"
+        >
+          示例展示
+        </span>
+      ) : (
+        <DiscoverMessageButton
+          peerId={post.userId}
+          returnTo={postPath}
+          tone="outline"
+          hasExistingChat={false}
+          insightPostId={post.id}
+          className="min-h-10 min-w-[6.5rem] justify-center"
+        />
+      )}
     </div>
   );
 
   return (
     <ClassmatesPersonRow
       className={cn(DISCOVER_POST_CARD_SHELL_CLASS, className)}
-      avatarHref={postDetailHref}
-      contentHref={postDetailHref}
+      avatarHref={isDevExample ? noopPersonRowHref : postDetailHref}
+      contentHref={isDevExample ? noopPersonRowHref : postDetailHref}
+      disableNavigation={isDevExample}
       avatarUrl={post.avatarUrl}
       profileAriaLabel={
         post.isOwn ? "View your post" : `View ${post.nickname}'s post`
       }
       name={post.nickname}
-      nameClassName="font-bold"
-      titleAdornment={
-        <>
-          <VerifiedBadge
-            size="xs"
-            tone="brandBlue"
-            school={post.school}
-            verifiedStudent={post.verifiedStudent}
-            status={post.studentVerificationStatus}
-          />
-          <UserGenderCardIcon gender={post.gender} className="shrink-0" />
-          {titleTrailing}
-          {showYourPostTitlePill ? (
-            <span
-              className={cn(
-                "shrink-0 rounded-full border border-classmates-blue-border/85 bg-classmates-blue-soft px-2 py-0.5 text-[10px] font-semibold text-classmates-blue",
-                "dark:border-blue-500/35 dark:bg-blue-950/50 dark:text-blue-200",
-              )}
-            >
-              {dl.postCardYourPostBadge}
-            </span>
-          ) : null}
-        </>
+      nameClassName="text-[17px] font-bold leading-snug tracking-tight text-classmates-ink dark:text-foreground"
+      nameRowAdornment={
+        <VerifiedBadge
+          size="xs"
+          tone="brandBlue"
+          school={post.school}
+          verifiedStudent={post.verifiedStudent}
+          status={post.studentVerificationStatus}
+        />
       }
       body={
         <>
           {meta ? (
-            <p className="mt-0.5 truncate text-[12px] leading-snug text-muted-foreground">
+            <p className="mt-1 truncate text-[13px] leading-snug text-muted-foreground">
               {meta}
             </p>
           ) : null}
-          <div className="mt-2 rounded-2xl border border-border/55 bg-muted/50 px-3.5 py-3 dark:border-border/55 dark:bg-muted/20">
-            <div className="mb-2 flex flex-wrap gap-1.5">
-              <DiscoverPostCategoryBadge category={post.category} />
-            </div>
-            <p className="text-[13px] font-bold leading-snug tracking-tight text-foreground">
-              {post.title}
-            </p>
-            {post.body ? (
-              <p className="mt-1 line-clamp-2 text-[12px] leading-snug text-muted-foreground">
-                {post.body}
-              </p>
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1">
+            <UserGenderCardIcon gender={post.gender} className="shrink-0" />
+            {titleTrailing}
+            {showYourPostTitlePill ? (
+              <span
+                className={cn(
+                  "shrink-0 rounded-full border border-classmates-blue-border/85 bg-classmates-blue-soft px-2 py-0.5 text-[10px] font-semibold text-classmates-blue",
+                  "dark:border-blue-500/35 dark:bg-blue-950/50 dark:text-blue-200",
+                )}
+              >
+                {dl.postCardYourPostBadge}
+              </span>
             ) : null}
-            {showStudyMeta ? (
-              <div className="mt-2.5 space-y-2" aria-label={dl.postCardStudyMetaAria}>
-                {post.studyMeta!.purposes.length > 0 ? (
-                  <div>
-                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-                      {dl.postCardStudyPurposesLabel}
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {post.studyMeta!.purposes.map((p) => (
-                        <span
-                          key={p}
-                          className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
-                        >
-                          {studyPurposeLabel(p, dl)}
-                        </span>
-                      ))}
+          </div>
+          <div className={cn("mt-3", discoverPostInnerPanelClass(showSaveCorner))}>
+            <div className={DISCOVER_POST_INNER_PANEL_BODY_CLASS}>
+              <div className="mb-2 flex w-full min-w-0 flex-wrap gap-1.5">
+                <DiscoverPostCategoryBadge category={post.category} />
+              </div>
+              <p className="w-full min-w-0 max-w-none break-words text-lg font-bold leading-snug tracking-tight text-foreground sm:text-xl">
+                {post.title}
+              </p>
+              {post.body ? (
+                <p className="mt-2 line-clamp-2 w-full min-w-0 max-w-none break-words text-[13px] leading-snug text-muted-foreground sm:line-clamp-3">
+                  {post.body}
+                </p>
+              ) : null}
+              {showMealsPinRow ? (
+                <PostCardPinLocationRow
+                  text={mealsVenueLine}
+                  ariaLabel={`${dl.postCardLocationLabel}: ${mealsVenueLine}`}
+                />
+              ) : null}
+              {showStudyPinRow ? (
+                <PostCardPinLocationRow
+                  text={studyVenueLine}
+                  ariaLabel={`${dl.postCardLocationLabel}: ${studyVenueLine}`}
+                />
+              ) : null}
+              {post.imageUrls && post.imageUrls.length > 0 ? (
+                <ClassmatePostImagesGallery
+                  urls={post.imageUrls}
+                  variant="card"
+                  ariaLabel={dl.postCardImagesAria}
+                />
+              ) : null}
+              {showStudyPurposeTime ? (
+                <div
+                  className="mt-2.5 space-y-2"
+                  aria-label={dl.postCardStudyMetaAria}
+                >
+                  {post.studyMeta!.purposes.length > 0 ? (
+                    <div>
+                      <p className="mb-1 text-[10px] font-medium leading-snug text-muted-foreground">
+                        {dl.postCardStudyPurposesLabel}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {post.studyMeta!.purposes.map((p) => (
+                          <span
+                            key={p}
+                            className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
+                          >
+                            {studyPurposeLabel(p, dl)}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ) : null}
-                {post.studyMeta!.timeSlots.length > 0 ? (
-                  <div>
-                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-                      {dl.postCardStudyTimeLabel}
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {post.studyMeta!.timeSlots.map((t) => (
-                        <span
-                          key={t}
-                          className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
-                        >
-                          {studyTimeSlotLabel(t, dl)}
-                        </span>
-                      ))}
+                  ) : null}
+                  {post.studyMeta!.timeSlots.length > 0 ? (
+                    <div>
+                      <p className="mb-1 text-[10px] font-medium leading-snug text-muted-foreground">
+                        {dl.postCardStudyTimeLabel}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {post.studyMeta!.timeSlots.map((t) => (
+                          <span
+                            key={t}
+                            className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
+                          >
+                            {studyTimeSlotLabel(t, dl)}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ) : null}
-                {post.studyMeta!.venues.length > 0 ? (
+                  ) : null}
+                </div>
+              ) : null}
+              {showSportsMeta ? (
+                <div
+                  className="mt-2.5 space-y-2"
+                  aria-label={dl.postCardSportsMetaAria}
+                >
                   <div>
-                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-                      {dl.postCardStudyVenuesLabel}
+                    <p className="mb-1 text-[10px] font-medium leading-snug text-muted-foreground">
+                      {dl.postCardSportsTagsLabel}
                     </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {post.studyMeta!.venues.map((v) => (
-                        <span
-                          key={v}
-                          className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
-                        >
-                          {studyVenueLabel(v, dl)}
-                        </span>
-                      ))}
-                    </div>
-                    {post.studyMeta!.venues.includes("OTHER") && post.studyMeta!.venueOtherNote?.trim() ? (
-                      <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-muted-foreground">
-                        {post.studyMeta!.venueOtherNote.trim()}
+                    {post.sportMeta!.sportTags.length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {post.sportMeta!.sportTags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="inline-flex max-w-full truncate rounded-full border border-rose-200/85 bg-rose-50/90 px-2 py-0.5 text-[10px] font-medium text-rose-950 dark:border-rose-500/35 dark:bg-rose-950/40 dark:text-rose-100"
+                          >
+                            {sportTagLabel(tag, dl)}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                    {post.sportMeta!.sportOtherNote?.trim() ? (
+                      <p
+                        className={cn(
+                          "line-clamp-2 text-[11px] leading-snug text-muted-foreground",
+                          post.sportMeta!.sportTags.length > 0
+                            ? "mt-1"
+                            : undefined,
+                        )}
+                      >
+                        {post.sportMeta!.sportOtherNote.trim()}
                       </p>
                     ) : null}
                   </div>
-                ) : null}
-              </div>
-            ) : null}
-            {showMealsMeta ? (
-              <div className="mt-2.5 space-y-2" aria-label={dl.postCardMealsMetaAria}>
-                <div>
-                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-                    {dl.postCardMealsVenuesLabel}
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {post.mealsMeta!.venueTags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex max-w-full truncate rounded-full border border-amber-200/85 bg-amber-50/90 px-2 py-0.5 text-[10px] font-medium text-amber-950 dark:border-amber-500/35 dark:bg-amber-950/40 dark:text-amber-100"
-                      >
-                        {mealVenueLabel(tag, dl)}
-                      </span>
-                    ))}
-                  </div>
-                  {post.mealsMeta!.venueTags.includes("OTHER") &&
-                  post.mealsMeta!.venueOtherNote?.trim() ? (
-                    <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-muted-foreground">
-                      {post.mealsMeta!.venueOtherNote.trim()}
-                    </p>
+                </div>
+              ) : null}
+              {showLanguageMeta ? (
+                <div
+                  className="mt-2.5 space-y-2"
+                  aria-label={dl.postCardLanguageMetaAria}
+                >
+                  {post.languageMeta!.offers.length > 0 ? (
+                    <div>
+                      <p className="mb-1 text-[10px] font-medium leading-snug text-muted-foreground">
+                        {dl.postCardLanguageOffersLabel}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {post.languageMeta!.offers.map((offer) => (
+                          <span
+                            key={offer.tag}
+                            title={languageProficiencyLabel(
+                              offer.proficiency,
+                              dl,
+                            )}
+                            className="inline-flex max-w-full truncate rounded-full border border-violet-200/80 bg-violet-50/90 px-2 py-0.5 text-[10px] font-medium text-violet-950 dark:border-violet-500/35 dark:bg-violet-950/40 dark:text-violet-100"
+                          >
+                            {languageTagLabel(offer.tag, dl)} ·{" "}
+                            {languageProficiencyLabel(offer.proficiency, dl)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                  {post.languageMeta!.targets.length > 0 ? (
+                    <div>
+                      <p className="mb-1 text-[10px] font-medium leading-snug text-muted-foreground">
+                        {dl.postCardLanguageTargetsLabel}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {post.languageMeta!.targets.map((tag) => (
+                          <span
+                            key={tag}
+                            className="inline-flex max-w-full truncate rounded-full border border-fuchsia-200/80 bg-fuchsia-50/90 px-2 py-0.5 text-[10px] font-medium text-fuchsia-950 dark:border-fuchsia-500/35 dark:bg-fuchsia-950/40 dark:text-fuchsia-100"
+                          >
+                            {languageTagLabel(tag, dl)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   ) : null}
                 </div>
-              </div>
-            ) : null}
-            {showSportsMeta ? (
-              <div className="mt-2.5 space-y-2" aria-label={dl.postCardSportsMetaAria}>
-                <div>
-                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-                    {dl.postCardSportsTagsLabel}
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {post.sportMeta!.sportTags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex max-w-full truncate rounded-full border border-rose-200/85 bg-rose-50/90 px-2 py-0.5 text-[10px] font-medium text-rose-950 dark:border-rose-500/35 dark:bg-rose-950/40 dark:text-rose-100"
-                      >
-                        {sportTagLabel(tag, dl)}
-                      </span>
-                    ))}
-                  </div>
-                  {post.sportMeta!.sportTags.includes("OTHER") &&
-                  post.sportMeta!.sportOtherNote?.trim() ? (
-                    <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-muted-foreground">
-                      {post.sportMeta!.sportOtherNote.trim()}
-                    </p>
-                  ) : null}
+              ) : null}
+              {showSharedCourseChips ? (
+                <div
+                  className="mt-2.5 flex flex-wrap gap-1.5"
+                  aria-label={dl.postCardLinkedCoursesAria}
+                >
+                  {post.linkedCourses!.map((c) => (
+                    <DiscoverPostLinkedCourseChip
+                      key={c.id}
+                      code={c.code}
+                      name={c.name}
+                      matchesViewer={courseMatchesViewer(
+                        c,
+                        viewerCourseMatchIndex,
+                      )}
+                    />
+                  ))}
                 </div>
-              </div>
-            ) : null}
-            {showLanguageMeta ? (
-              <div className="mt-2.5 space-y-2" aria-label={dl.postCardLanguageMetaAria}>
-                {post.languageMeta!.offers.length > 0 ? (
-                  <div>
-                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-                      {dl.postCardLanguageOffersLabel}
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {post.languageMeta!.offers.map((offer) => (
-                        <span
-                          key={offer.tag}
-                          title={languageProficiencyLabel(offer.proficiency, dl)}
-                          className="inline-flex max-w-full truncate rounded-full border border-violet-200/80 bg-violet-50/90 px-2 py-0.5 text-[10px] font-medium text-violet-950 dark:border-violet-500/35 dark:bg-violet-950/40 dark:text-violet-100"
-                        >
-                          {languageTagLabel(offer.tag, dl)} ·{" "}
-                          {languageProficiencyLabel(offer.proficiency, dl)}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-                {post.languageMeta!.targets.length > 0 ? (
-                  <div>
-                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-                      {dl.postCardLanguageTargetsLabel}
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {post.languageMeta!.targets.map((tag) => (
-                        <span
-                          key={tag}
-                          className="inline-flex max-w-full truncate rounded-full border border-fuchsia-200/80 bg-fuchsia-50/90 px-2 py-0.5 text-[10px] font-medium text-fuchsia-950 dark:border-fuchsia-500/35 dark:bg-fuchsia-950/40 dark:text-fuchsia-100"
-                        >
-                          {languageTagLabel(tag, dl)}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-            {showSharedCourseChips ? (
-              <div className="mt-2.5 flex flex-wrap gap-1.5" aria-label={dl.postCardLinkedCoursesAria}>
-                {post.linkedCourses!.map((c) => (
-                  <DiscoverPostLinkedCourseChip
-                    key={c.id}
-                    code={c.code}
-                    name={c.name}
-                    matchesViewer={courseMatchesViewer(c, viewerCourseMatchIndex)}
-                  />
-                ))}
-              </div>
-            ) : null}
+              ) : null}
+            </div>
           </div>
         </>
       }
       cardFooter={cardFooter ?? defaultFooter}
-      action={
-        post.isOwn ? undefined : (
-          <DiscoverMessageButton
-            peerId={post.userId}
-            returnTo={postPath}
-            tone="subtle"
-            hasExistingChat={false}
-            insightPostId={post.id}
-            className="h-9 min-h-9 w-full justify-center gap-1.5 px-4 text-[12px] sm:w-auto sm:min-w-[9.5rem]"
+      cardTopRightAction={
+        showSaveCorner ? (
+          <ClassmatePostSaveButton
+            postId={post.id}
+            initialSaved={Boolean(post.savedByViewer)}
           />
-        )
+        ) : undefined
       }
     />
   );

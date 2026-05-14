@@ -26,7 +26,7 @@ export type ShareClassmatePostToXhsResult =
 export async function shareClassmatePostToXhs(args: {
   title: string;
   body: string | null;
-  /** Absolute path, e.g. `/discover/posts/…` or `/inbox/my-posts` */
+  /** Absolute path, e.g. `/discover/posts/…` or `/profile/my-posts` */
   postPath: string;
   footer?: string;
 }): Promise<ShareClassmatePostToXhsResult> {

@@ -1,19 +1,16 @@
 import type {
   LanguageProficiency,
   LanguageTag,
+  MealVenueTag,
   StudyPurpose,
   StudyTimeSlot,
   StudyVenue,
 } from "@prisma/client";
 
 import type { AppMessages } from "@/lib/i18n/messages";
-import type {
-  MealsPayloadNormalized,
-  SportPayloadNormalized,
-} from "@/lib/validators/classmate-posts";
+import type { SportPayloadNormalized } from "@/lib/validators/classmate-posts";
 
 type DiscoverListMessages = AppMessages["discoverList"];
-type MealVenueTag = MealsPayloadNormalized["venueTags"][number];
 type SportTag = SportPayloadNormalized["sportTags"][number];
 
 export function studyPurposeLabel(p: StudyPurpose, dl: DiscoverListMessages): string {

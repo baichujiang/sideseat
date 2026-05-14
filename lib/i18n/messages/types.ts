@@ -20,6 +20,16 @@ export type AppMessages = {
     reset: string;
     /** Generic display when a name is missing (UI chrome only). */
     studentFallback: string;
+    /** Chat list / compact timestamps — `{count}` in minute/hour templates. */
+    listRelativeTime: {
+      justNow: string;
+      /** `{count}` minutes, ≥ 1 */
+      minutesAgo: string;
+      hoursAgoOne: string;
+      /** `{count}` hours, ≥ 2 */
+      hoursAgoMany: string;
+      yesterday: string;
+    };
   };
   guest: {
     /** When a page does not pass a specific headline/body. */
@@ -68,29 +78,82 @@ export type AppMessages = {
     /** Keys match stored `ClassmatePost.city` English names; UI labels only. */
     cityNames: Record<DiscoverCityNameKey, string>;
   };
+  /** Discover — buddy-finding feed (tabs, search, filters, card chrome). */
+  discoverBuddy: {
+    feedTabForYou: string;
+    feedTabToday: string;
+    feedTabNearby: string;
+    feedTabLatest: string;
+    searchPlaceholder: string;
+    searchAria: string;
+    filterOpenAria: string;
+    filterSheetTitle: string;
+    filterBuddyTypeSection: string;
+    filterTimeSection: string;
+    filterTimeAny: string;
+    filterTimeToday: string;
+    filterTimeTomorrow: string;
+    filterTimeThisWeek: string;
+    filterOpenOnly: string;
+    filterApply: string;
+    filterReset: string;
+    createRequestCta: string;
+    createRequestCtaAria: string;
+    sheetChooseBuddyType: string;
+    sheetTitlePrefix: string;
+    buddyTypeCourse: string;
+    buddyTypeStudy: string;
+    buddyTypeMeal: string;
+    buddyTypeLanguage: string;
+    buddyTypeSports: string;
+    emptyFeed: string;
+    emptyFeedToday: string;
+    peopleStripTitle: string;
+    buddyCardMessage: string;
+    buddyCardMessageAria: string;
+    buddyCardOpen: string;
+    buddyCardTimeTbd: string;
+    /** `{city}` — city label on compact card */
+    buddyCardCityLine: string;
+  };
+  /** Buddy request detail / Discover post drill-in — request-first copy. */
+  discoverBuddyDetail: {
+    planDetailsTitle: string;
+    rowWhen: string;
+    rowPreferredTime: string;
+    rowWhere: string;
+    rowStatus: string;
+    rowAvailability: string;
+    rowCity: string;
+    notSpecified: string;
+    statusOpen: string;
+    statusExpired: string;
+    statusClosed: string;
+    /** `{date}` — open request expiry */
+    availabilityActiveUntil: string;
+    /** `{date}` — expired at */
+    availabilityExpiredOn: string;
+    /** `{date}` — closed updated */
+    availabilityClosedOn: string;
+    yourRequestBadge: string;
+    manageRequestCta: string;
+    manageRequestAria: string;
+    messageAuthorCta: string;
+    messageAuthorAria: string;
+    signInToMessageCta: string;
+    signInToMessageAria: string;
+    viewProfileCta: string;
+    viewProfileAria: string;
+    shareRequestAria: string;
+    guestIntro: string;
+    bottomBarRequestExpired: string;
+    bottomBarRequestClosed: string;
+    bottomBarMessagingUnavailable: string;
+  };
   discoverList: {
-    signInToSearch: string;
     emptyShared: string;
     emptyCategory: string;
-    /** Use `{query}` placeholder. */
-    noSearchResults: string;
     addCourse: string;
-    searching: string;
-    filterClassmatesTitle: string;
-    filterSchool: string;
-    filterMajor: string;
-    filterLanguage: string;
-    filterSemester: string;
-    filterStatus: string;
-    all: string;
-    semesterChip: string;
-    statusVerified: string;
-    statusPending: string;
-    statusUnverified: string;
-    statusVerifyingLabel: string;
-    searchPlaceholder: string;
-    clearSearchAria: string;
-    filterClassmatesAria: string;
     sceneTabShared: string;
     sceneTabStudy: string;
     sceneTabMeals: string;
@@ -109,6 +172,8 @@ export type AppMessages = {
     postNoExpiry: string;
     /** `{date}` — short formatted end date */
     postActiveUntil: string;
+    /** `{time}` — accessible label for posted-at (relative / short date); visible line is icon + time only. */
+    postPostedAria: string;
     /** `{date}` — post detail when closed */
     postDetailClosedUpdated: string;
     /** `{date}` — post detail when expired */
@@ -129,6 +194,15 @@ export type AppMessages = {
     postCharCountRemaining: string;
     postSheetDetailsLabel: string;
     postSheetDetailsPlaceholder: string;
+    postSheetPhotosLabel: string;
+    /** `{max}` — max images per post. */
+    postSheetPhotosHint: string;
+    postSheetAddPhoto: string;
+    postSheetPhotosUploading: string;
+    /** `{index}` — 1-based photo index for a11y. */
+    postSheetPhotoRemoveAria: string;
+    postSheetPhotoMoveLeftAria: string;
+    postSheetPhotoMoveRightAria: string;
     postSheetExpiresLabel: string;
     postExpiry3d: string;
     postExpiry1w: string;
@@ -143,6 +217,9 @@ export type AppMessages = {
     /** `{max}` — body exceeds server max (trimmed). */
     postErrorBodyTooLong: string;
     postErrorCreateFailed: string;
+    postErrorImageUpload: string;
+    /** `{max}` — too many photos. */
+    postErrorImageMax: string;
     postPlaceholderShared: string;
     postPlaceholderStudy: string;
     postPlaceholderMeals: string;
@@ -152,6 +229,9 @@ export type AppMessages = {
     myPostsListCta: string;
     /** Accessible label for the My posts card CTA (navigates to list). */
     myPostsListCtaAria: string;
+    /** Author-only footer CTA on Discover post cards (Manage / my-posts). */
+    postCardOwnPostManageCta: string;
+    postCardOwnPostManageCtaAria: string;
     /** Discover post card — pill next to the author name when the viewer owns the post. */
     postCardYourPostBadge: string;
     /** Inner panel — heading above the author’s language tags on LANGUAGE posts. */
@@ -160,8 +240,12 @@ export type AppMessages = {
     postCardSportsBlurb: string;
     /** `aria-label` for the linked-course chip row on SHARED_COURSES posts. */
     postCardLinkedCoursesAria: string;
+    /** `aria-label` for optional post images on cards and detail. */
+    postCardImagesAria: string;
     postCardMealsMetaAria: string;
     postCardMealsVenuesLabel: string;
+    /** Short prefix for map-pin location row (card + detail). */
+    postCardLocationLabel: string;
     postCardLanguageMetaAria: string;
     postCardLanguageOffersLabel: string;
     postCardLanguageTargetsLabel: string;
@@ -222,18 +306,27 @@ export type AppMessages = {
     postSheetStudyTimeLabel: string;
     postSheetStudyVenueLabel: string;
     postSheetMealsVenueLabel: string;
+    postSheetMealsLocationPlaceholder: string;
+    postSheetMealsLocationHint: string;
     postSheetLanguageOffersLabel: string;
     postSheetLanguageTargetsLabel: string;
     postSheetLanguageOfferLevelLabel: string;
+    postSheetLanguageComboboxPlaceholder: string;
+    postSheetLanguageComboboxEmpty: string;
+    postSheetLanguageOpenPickerAria: string;
+    /** `{label}` — language display name. */
+    postSheetLanguageRemoveTagAria: string;
     postSheetSportsLabel: string;
+    postSheetSportsComboboxPlaceholder: string;
+    postSheetSportsComboboxEmpty: string;
+    postSheetSportsOpenPickerAria: string;
+    postSheetSportsComboboxHint: string;
     postSheetVenueOtherPlaceholder: string;
     postErrorStudyVenueOtherNote: string;
     postErrorStudyVenueOtherRequiresOther: string;
     /** `{max}` — study “other place” note length. */
     postErrorStudyVenueNoteTooLong: string;
-    postErrorMealsVenueOtherNote: string;
-    postErrorMealsVenueOtherRequiresOther: string;
-    /** `{max}` — meals “other place” note length. */
+    /** `{max}` — meals “where to eat” text length. */
     postErrorMealsVenueNoteTooLong: string;
     postErrorLanguageNeedMeta: string;
     postErrorSportsOtherNote: string;
@@ -256,6 +349,14 @@ export type AppMessages = {
     chipNewAria: string;
     /** `{count}` — total unread for the chip aria-label. */
     chipNewAriaWithUnread: string;
+    /** Collapsed search — opens the chat search field. */
+    headerSearchOpenAria: string;
+    /** When search field is visible — hide field (icon toggles). */
+    headerSearchCloseAria: string;
+    headerMoreMenuAria: string;
+    headerMenuMyPlan: string;
+    headerMenuMyPosts: string;
+    headerMenuSavedPosts: string;
     searchPlaceholder: string;
     searchAria: string;
     emptyNoConversationsTitle: string;
@@ -326,6 +427,11 @@ export type AppMessages = {
     logInTitle: string;
     signupWithEmail: string;
     signupWithPhone: string;
+    signupDisplayNameLabel: string;
+    signupDisplayNamePlaceholder: string;
+    signupDisplayNameTooShort: string;
+    signupDisplayNameTooLong: string;
+    signupDisplayNameNotEmail: string;
     usernameLabel: string;
     usernamePlaceholder: string;
     emailLabel: string;
@@ -437,6 +543,8 @@ export type AppMessages = {
     stepLabel: string;
     homeTitle: string;
     homeBody: string;
+    coursesTitle: string;
+    coursesBody: string;
     discoverTabTitle: string;
     discoverTabBody: string;
     chatsTitle: string;
@@ -462,6 +570,46 @@ export type AppMessages = {
     preferencesSubtitleNone: string;
     preferencesSubtitleOne: string;
     preferencesSubtitleMany: string;
+    savedPostsRowTitle: string;
+    savedPostsRowSubtitle: string;
+    myPlanRowTitle: string;
+    myPlanRowSubtitle: string;
+    myPostsRowTitle: string;
+    myPostsRowSubtitle: string;
+    myPlanPageTitle: string;
+    myPlanPageSubtitle: string;
+    myPlanEmptyTitle: string;
+    myPlanEmptyDesc: string;
+    myPlanPendingHeading: string;
+    myPlanUpcomingHeading: string;
+    myPlanPeerFallback: string;
+    /** `{name}` */
+    myPlanStatusInvitedYou: string;
+    /** `{name}` */
+    myPlanStatusWaitingOn: string;
+    myPlanTypeMeal: string;
+    myPlanTypeSports: string;
+    myPlanTypeLanguage: string;
+    myPlanTypeCustom: string;
+    myPlanTypeStudy: string;
+    myPostsPageTitle: string;
+    myPostsPageSubtitle: string;
+    myPostsEmptyTitle: string;
+    myPostsEmptyDesc: string;
+    myPostsOpenDiscover: string;
+    myPostsSectionLive: string;
+    myPostsSectionPast: string;
+  };
+  savedClassmatePosts: {
+    screenTitle: string;
+    screenSubtitle: string;
+    emptyTitle: string;
+    emptyDescription: string;
+    emptyCta: string;
+    saveAria: string;
+    unsaveAria: string;
+    nextPage: string;
+    prevPage: string;
   };
   /** Me tab — feedback dialog & list row (`FeedbackFormCard`). */
   meFeedback: {
@@ -731,8 +879,6 @@ export type AppMessages = {
     /** `{name}` */
     menuBlockUser: string;
     contactRemarkPlaceholder: string;
-    /** Micro label above remark field when viewing a connected peer. */
-    contactRemarkMicroLabel: string;
   };
   courses: CoursesMessages;
 };
@@ -822,8 +968,8 @@ export type CoursesMessages = {
   groupChatMetaUnreadMany: string;
   groupChatMetaUnreadOne: string;
   lastActiveJustNow: string;
-  /** `{time}` — short relative duration, not translated. */
-  lastActiveAgo: string;
+  /** `{when}` — localized relative phrase from `common.listRelativeTime` (e.g. “3 min ago”, “昨天”). */
+  lastActiveWhen: string;
   noClassmatesShareHint: string;
   /** `{membersFragment}` already localized; `{school}` from school labels. */
   courseChatSubtitle: string;

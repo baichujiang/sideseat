@@ -2,6 +2,7 @@ import { ClassmatePostStatus, type Prisma } from "@prisma/client";
 
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { MAX_ACTIVE_CLASSMATE_POSTS_PER_CATEGORY } from "@/lib/constants/app";
+import { isAllowedClassmatePostImageUrl } from "@/lib/constants/classmate-post-media";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseBody } from "@/lib/http";
 import {
@@ -65,6 +66,15 @@ export async function POST(request: Request) {
       );
     }
 
+    const imageUrls = values.imageUrls;
+    if (imageUrls?.length) {
+      for (const url of imageUrls) {
+        if (!isAllowedClassmatePostImageUrl(user.id, url)) {
+          return error("Add photos using the in-app uploader only.", 400);
+        }
+      }
+    }
+
     const post = await prisma.$transaction(async (tx) => {
       const created = await tx.classmatePost.create({
         data: {
@@ -108,7 +118,7 @@ export async function POST(request: Request) {
           await tx.classmatePostMeals.create({
             data: {
               postId: created.id,
-              venueTags: meals.venueTags,
+              venueTags: [],
               venueOtherNote: meals.venueOtherNote ?? null,
             },
           });
@@ -139,6 +149,16 @@ export async function POST(request: Request) {
             },
           });
         }
+      }
+
+      if (imageUrls?.length) {
+        await tx.classmatePostImage.createMany({
+          data: imageUrls.map((url, sortOrder) => ({
+            postId: created.id,
+            url,
+            sortOrder,
+          })),
+        });
       }
 
       return created;

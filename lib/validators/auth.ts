@@ -23,6 +23,62 @@ const emailFieldSchema = z
     message: "Enter a valid email address.",
   });
 
+const emailAddressShape = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export type SignupDisplayNameMessages = {
+  tooShort: string;
+  tooLong: string;
+  notEmailLike: string;
+};
+
+/** English copy for API routes (`parseBody`). Client forms pass localized strings from `authForm`. */
+export const SIGNUP_DISPLAY_NAME_MESSAGES_EN: SignupDisplayNameMessages = {
+  tooShort: "Display name must be at least 2 characters.",
+  tooLong: "Display name must be at most 32 characters.",
+  notEmailLike: "Use a name, not an email address.",
+};
+
+export function signupDisplayNameField(messages: SignupDisplayNameMessages) {
+  return z
+    .string()
+    .trim()
+    .min(2, messages.tooShort)
+    .max(32, messages.tooLong)
+    .refine((s) => !emailAddressShape.test(s), { message: messages.notEmailLike });
+}
+
+export function createSignupEmailSchema(displayNameMessages: SignupDisplayNameMessages) {
+  return z
+    .object({
+      email: emailFieldSchema,
+      displayName: signupDisplayNameField(displayNameMessages),
+      password: z.string().min(8, "Password must be at least 8 characters."),
+      confirmPassword: z.string().min(1, "Confirm your password."),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: "Passwords do not match.",
+      path: ["confirmPassword"],
+    });
+}
+
+export function createSignupPhoneSchema(displayNameMessages: SignupDisplayNameMessages) {
+  return z
+    .object({
+      phone: z.string().trim().min(1, "Enter your phone number."),
+      code: z
+        .string()
+        .trim()
+        .regex(/^\d{6}$/, "Enter the 6-digit verification code."),
+      displayName: signupDisplayNameField(displayNameMessages),
+      password: z.string().min(8, "Password must be at least 8 characters."),
+      confirmPassword: z.string().min(1, "Confirm your password."),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: "Passwords do not match.",
+      path: ["confirmPassword"],
+    });
+}
+
 export const signupSchema = z
   .object({
     username: usernameSchema,
@@ -34,31 +90,9 @@ export const signupSchema = z
     path: ["confirmPassword"],
   });
 
-export const signupEmailSchema = z
-  .object({
-    email: emailFieldSchema,
-    password: z.string().min(8, "Password must be at least 8 characters."),
-    confirmPassword: z.string().min(1, "Confirm your password."),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match.",
-    path: ["confirmPassword"],
-  });
+export const signupEmailSchema = createSignupEmailSchema(SIGNUP_DISPLAY_NAME_MESSAGES_EN);
 
-export const signupPhoneSchema = z
-  .object({
-    phone: z.string().trim().min(1, "Enter your phone number."),
-    code: z
-      .string()
-      .trim()
-      .regex(/^\d{6}$/, "Enter the 6-digit verification code."),
-    password: z.string().min(8, "Password must be at least 8 characters."),
-    confirmPassword: z.string().min(1, "Confirm your password."),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match.",
-    path: ["confirmPassword"],
-  });
+export const signupPhoneSchema = createSignupPhoneSchema(SIGNUP_DISPLAY_NAME_MESSAGES_EN);
 
 export const phoneSendOtpSchema = z.object({
   phone: z.string().trim().min(1, "Enter your phone number."),

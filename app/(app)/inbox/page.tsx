@@ -1,7 +1,5 @@
 import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
-import { InboxChatsView } from "@/components/inbox/inbox-chats-view";
-import { InboxCreateSheet } from "@/components/inbox/inbox-create-sheet";
-import { InboxQuickChips } from "@/components/inbox/inbox-quick-chips";
+import { InboxChatsShell } from "@/components/inbox/inbox-quick-chips";
 import { InboxRealtimeRefresh } from "@/components/inbox/inbox-realtime-refresh";
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { getSessionUser } from "@/lib/auth/session";
@@ -77,27 +75,20 @@ export default async function InboxPage() {
   return (
     <div className="space-y-3">
       <InboxRealtimeRefresh version={inboxVersion} />
-      <header className="px-0.5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="page-screen-title">{ui.inbox.screenTitle}</h1>
-            <p className="page-screen-subtitle mt-0.5">{ui.inbox.screenSubtitle}</p>
-          </div>
-          {user.onboardingComplete ? <InboxCreateSheet initialContacts={directContacts} /> : null}
-        </div>
-      </header>
-
       {!user.onboardingComplete ? (
         <OnboardingContinueCta title={ui.inbox.onboardingTitle} body={ui.inbox.onboardingBody} />
       ) : null}
-
-      <InboxQuickChips
+      <InboxChatsShell
+        title={ui.inbox.screenTitle}
+        subtitle={ui.inbox.screenSubtitle}
+        userId={user.id}
+        merged={merged}
         unreadTotal={unreadTotal}
         plansNeedingYourAction={plansNeedingYourAction}
         activePostCount={activePostCount}
+        initialContacts={directContacts}
+        showCreateSheet={user.onboardingComplete}
       />
-
-      <InboxChatsView userId={user.id} merged={merged} />
     </div>
   );
 }

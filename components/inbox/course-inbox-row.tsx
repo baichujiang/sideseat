@@ -3,11 +3,11 @@ import type { Course } from "@prisma/client";
 import { ChevronRight } from "lucide-react";
 
 import { inboxConversationTileClassName } from "@/components/inbox/inbox-conversation-tile";
+import { InboxRowTimestamp } from "@/components/inbox/inbox-row-timestamp";
 import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { InboxSwipeRow } from "@/components/inbox/inbox-swipe-row";
 import { CourseAvatar } from "@/components/ui/course-avatar";
 import { courseChatHeadline } from "@/lib/courses/course-code-label";
-import { formatShortRelativeTime } from "@/lib/format/short-relative-time";
 import { cn } from "@/lib/utils";
 import type { CourseRoomMessageWithSender } from "@/lib/queries/inbox-merge";
 
@@ -67,9 +67,7 @@ export function CourseInboxRow({
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1.5 self-center">
-          <time className="shrink-0 text-xs tabular-nums text-[#8A94A6] dark:text-zinc-500" dateTime={when.toISOString()}>
-            {formatShortRelativeTime(when)}
-          </time>
+          <InboxRowTimestamp at={when} />
           {isUnread ? (
             unreadCount === 1 ? (
               <InboxUnreadBadge count={1} variant="dot" />

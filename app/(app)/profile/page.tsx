@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Route } from "next";
-import { ChevronRight, Settings } from "lucide-react";
+import { Bookmark, CalendarClock, ChevronRight, Settings, SquarePen } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
@@ -245,6 +245,24 @@ export default async function ProfilePage({
       <div className="space-y-3 border-t border-border/60 pt-4">
         <div className="overflow-hidden rounded-xl border border-classmates-edge bg-classmates-surface shadow-[0_2px_10px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card">
           <div className="divide-y divide-classmates-hairline dark:divide-border/60">
+            <MeDestRow
+              href={'/profile/my-posts' as Route}
+              icon={SquarePen}
+              title={ui.profile.myPostsRowTitle}
+              subtitle={ui.profile.myPostsRowSubtitle}
+            />
+            <MeDestRow
+              href={'/profile/saved-posts' as Route}
+              icon={Bookmark}
+              title={ui.profile.savedPostsRowTitle}
+              subtitle={ui.profile.savedPostsRowSubtitle}
+            />
+            <MeDestRow
+              href={'/profile/my-plan' as Route}
+              icon={CalendarClock}
+              title={ui.profile.myPlanRowTitle}
+              subtitle={ui.profile.myPlanRowSubtitle}
+            />
             <MePageInstallCard inList />
             <FeedbackFormCard variant="listRow" />
             <MeDestRow

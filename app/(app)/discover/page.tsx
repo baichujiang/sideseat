@@ -7,12 +7,11 @@ import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
 import { DiscoverList, type DiscoverRow } from "@/components/discover/discover-list";
 import {
-  mapPrismaLanguageToDiscoverRow,
-  mapPrismaMealsToDiscoverRow,
-  mapPrismaSportToDiscoverRow,
-  mapPrismaStudyToDiscoverRow,
-  type DiscoverPostRow,
-} from "@/lib/discover/discover-post-row";
+  classmatePostForDiscoverInclude,
+  prismaClassmatePostToDiscoverRow,
+} from "@/lib/discover/prisma-classmate-post-for-discover";
+import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
+import { getDevExampleDiscoverPosts } from "@/lib/discover/dev-example-classmate-posts";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { getDiscoverPeople } from "@/lib/queries/discovery";
@@ -36,7 +35,7 @@ export default async function DiscoverPage() {
     return (
       <div className="space-y-3">
         <DiscoverPageHeader ui={ui} />
-        <DiscoverList rows={[]} posts={[]} allowSearch={false} />
+        <DiscoverList rows={[]} posts={[]} />
         <GuestAppCta
           returnTo="/discover"
           headline={ui.guest.discoverHeadline}
@@ -68,7 +67,7 @@ export default async function DiscoverPage() {
     activeConnections.map((c) => (c.userAId === user.id ? c.userBId : c.userAId)),
   );
 
-  const [activePosts, myEnrolledCourses] = await Promise.all([
+  const [activePosts, myEnrolledCourses, savedRows] = await Promise.all([
     prisma.classmatePost.findMany({
       where: {
         status: ClassmatePostStatus.ACTIVE,
@@ -80,14 +79,7 @@ export default async function DiscoverPage() {
           blocksInitiated: { none: { blockedId: user.id } },
         },
       },
-      include: {
-        user: { include: { userLanguages: true } },
-        courses: { include: { course: { select: { id: true, code: true, name: true } } } },
-        study: true,
-        meals: true,
-        language: true,
-        sport: true,
-      },
+      include: classmatePostForDiscoverInclude,
       orderBy: { createdAt: "desc" },
       take: 120,
     }),
@@ -95,12 +87,18 @@ export default async function DiscoverPage() {
       where: { userId: user.id },
       select: { courseId: true, course: { select: { id: true, code: true, name: true } } },
     }),
+    prisma.classmatePostSave.findMany({
+      where: { userId: user.id },
+      select: { classmatePostId: true },
+    }),
   ]);
 
   const freshHits = freshHitsBase.filter((h) => !connectedUserIds.has(h.userId));
   const freshPosts = activePosts.filter(
     (post) => post.userId === user.id || !connectedUserIds.has(post.userId),
   );
+
+  const savedPostIdSet = new Set(savedRows.map((r) => r.classmatePostId));
 
   const rows: DiscoverRow[] = freshHits.map((h) => ({
     userId: h.userId,
@@ -121,37 +119,21 @@ export default async function DiscoverPage() {
     connectionId: null,
   }));
 
-  const posts: DiscoverPostRow[] = freshPosts.map((post) => ({
-    id: post.id,
-    category: post.category,
-    city: post.city,
-    title: post.title,
-    body: post.body,
-    expiresAt: post.expiresAt,
-    isOwn: post.user.id === user.id,
-    userId: post.user.id,
-    nickname: post.user.nickname ?? post.user.username,
-    gender: post.user.gender,
-    avatarUrl: post.user.avatarUrl,
-    major: post.user.major,
-    semester: post.user.semester,
-    school: post.user.school,
-    languages: post.user.userLanguages.map((r) => ({
-      tag: r.tag,
-      proficiency: r.proficiency,
-    })),
-    verifiedStudent: post.user.verifiedStudent,
-    studentVerificationStatus: post.user.studentVerificationStatus,
-    linkedCourses: post.courses.map((pc) => ({
-      id: pc.course.id,
-      code: pc.course.code,
-      name: pc.course.name,
-    })),
-    studyMeta: mapPrismaStudyToDiscoverRow(post.study),
-    mealsMeta: mapPrismaMealsToDiscoverRow(post.meals),
-    languageMeta: mapPrismaLanguageToDiscoverRow(post.language),
-    sportMeta: mapPrismaSportToDiscoverRow(post.sport),
-  }));
+  const postsFromDb: DiscoverPostRow[] = freshPosts.map((post) =>
+    prismaClassmatePostToDiscoverRow(post, user.id, {
+      savedByViewer: savedPostIdSet.has(post.id),
+    }),
+  );
+
+  /**
+   * When `NEXT_PUBLIC_DISCOVER_DEV_EXAMPLE_POSTS=1`, prepend UI-only example cards (with images)
+   * for layout testing — no DB rows; cards are non-navigating (`isDevExample` on each row).
+   * Default off in production builds unless the env is set.
+   */
+  const posts: DiscoverPostRow[] =
+    process.env.NEXT_PUBLIC_DISCOVER_DEV_EXAMPLE_POSTS === "1"
+      ? [...getDevExampleDiscoverPosts(), ...postsFromDb]
+      : postsFromDb;
 
   const enrolledCourses = myEnrolledCourses.map((uc) => ({
     id: uc.course.id,

@@ -121,11 +121,13 @@ test.describe("Optional signup smoke", () => {
 
     const username = `e2e_${Date.now()}`;
     const password = "Password123!";
+    const displayName = `E2E ${username.slice(-6)}`;
 
     await context.clearCookies();
     await page.goto("/signup");
     await expect(page.getByRole("heading", { name: /create account/i })).toBeVisible();
-    await page.getByPlaceholder(/letters, numbers/i).fill(username);
+    await page.getByPlaceholder(/how others see you/i).fill(displayName);
+    await page.getByPlaceholder(/you@school\.edu/i).fill(`${username}@example.com`);
     const pwInputs = page.locator('input[type="password"]');
     await pwInputs.nth(0).fill(password);
     await pwInputs.nth(1).fill(password);

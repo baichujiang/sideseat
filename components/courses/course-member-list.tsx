@@ -221,17 +221,15 @@ function MemberRow({
       avatarUrl={member.avatarUrl}
       profileAriaLabel={formatMessage(copy.memberViewProfileAria, { name: member.nickname })}
       name={member.nickname}
-      titleAdornment={
-        <>
-          <VerifiedBadge
-            size="xs"
-            school={member.school}
-            verifiedStudent={member.verifiedStudent}
-            status={member.studentVerificationStatus}
-          />
-          <UserGenderCardIcon gender={member.gender} className="shrink-0" />
-        </>
+      nameRowAdornment={
+        <VerifiedBadge
+          size="xs"
+          school={member.school}
+          verifiedStudent={member.verifiedStudent}
+          status={member.studentVerificationStatus}
+        />
       }
+      titleAdornment={<UserGenderCardIcon gender={member.gender} className="shrink-0" />}
       body={
         <>
           {metaLine ? (

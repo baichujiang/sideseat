@@ -43,7 +43,7 @@ export async function POST(request: Request) {
         phone,
         hashedPassword: await hashPassword(values.password),
         avatarUrl: randomAvatarId(),
-        nickname: "Student",
+        nickname: values.displayName,
         school: SIGNUP_DEFAULT_PROFILE.school,
         userLanguages: {
           create: [{ tag: LanguageTag.ENGLISH, proficiency: LanguageProficiency.FLUENT }],

@@ -29,7 +29,7 @@ export type ProductTutorialGateContext = {
   skipAsAdmin: boolean;
 };
 
-const STEP_ROUTES = ["/home", "/discover", "/inbox", "/profile"] as const satisfies readonly Route[];
+const STEP_ROUTES = ["/home", "/courses", "/discover", "/inbox", "/profile"] as const satisfies readonly Route[];
 
 function pathMatchesTutorialRoute(route: (typeof STEP_ROUTES)[number], pathname: string) {
   return pathname === route || pathname.startsWith(`${route}/`);
@@ -52,6 +52,7 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
   const steps = useMemo(
     () => [
       { title: m.tutorial.homeTitle, body: m.tutorial.homeBody },
+      { title: m.tutorial.coursesTitle, body: m.tutorial.coursesBody },
       { title: m.tutorial.discoverTabTitle, body: m.tutorial.discoverTabBody },
       { title: m.tutorial.chatsTitle, body: m.tutorial.chatsBody },
       { title: m.tutorial.meTitle, body: m.tutorial.meBody },

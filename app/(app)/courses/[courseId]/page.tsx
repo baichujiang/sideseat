@@ -22,7 +22,7 @@ import {
   normalizeSchoolCode,
 } from "@/lib/constants/schools";
 import { prisma } from "@/lib/db/prisma";
-import { formatShortRelativeTime } from "@/lib/format/short-relative-time";
+import { formatListRelativeTime, isListRelativeJustNow } from "@/lib/format/list-relative-time";
 import { formatMessage, getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { safeReturnPath } from "@/lib/nav/back";
@@ -294,8 +294,11 @@ export default async function CourseDetailPage({
   const courseChatLastActiveLabel =
     courseChatLastAt &&
     (() => {
-      const short = formatShortRelativeTime(courseChatLastAt);
-      return short === "<1m" ? c.lastActiveJustNow : formatMessage(c.lastActiveAgo, { time: short });
+      if (isListRelativeJustNow(courseChatLastAt)) {
+        return c.lastActiveJustNow;
+      }
+      const when = formatListRelativeTime(courseChatLastAt, locale, ui.common.listRelativeTime);
+      return formatMessage(c.lastActiveWhen, { when });
     })();
 
   const courseChatMetaBase =

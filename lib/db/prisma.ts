@@ -13,15 +13,23 @@ function createPrismaClient() {
 /**
  * In dev, Next keeps `globalThis.prisma` across hot reloads. After `prisma generate`
  * adds new models, the cached instance is still the old class shape — new delegates
- * (e.g. `courseRoomMessage`) are undefined until we construct a fresh client.
+ * are undefined until we construct a fresh client.
+ *
+ * Do not cache the client in a module-level `const prisma = getPrisma()`: Fast Refresh
+ * often reloads route modules without re-running this file, so that const would keep
+ * pointing at a stale client forever. Resolve through `getPrisma()` on every access.
  */
 function getPrisma(): PrismaClient {
   const existing = globalForPrisma.prisma;
+  const delegates = existing as unknown as {
+    courseRoomMessage?: unknown;
+    classmatePostSave?: unknown;
+  } | undefined;
   const staleDevSingleton =
     process.env.NODE_ENV !== "production" &&
     Boolean(existing) &&
-    typeof (existing as unknown as { courseRoomMessage?: unknown }).courseRoomMessage ===
-      "undefined";
+    (typeof delegates?.courseRoomMessage === "undefined" ||
+      typeof delegates?.classmatePostSave === "undefined");
 
   if (existing && !staleDevSingleton) {
     return existing;
@@ -40,4 +48,14 @@ function getPrisma(): PrismaClient {
   return client;
 }
 
-export const prisma = getPrisma();
+function createPrismaProxy(): PrismaClient {
+  return new Proxy({} as PrismaClient, {
+    get(_target, prop, receiver) {
+      const client = getPrisma();
+      const value = Reflect.get(client, prop, receiver) as unknown;
+      return typeof value === "function" ? (value as (...args: unknown[]) => unknown).bind(client) : value;
+    },
+  });
+}
+
+export const prisma = createPrismaProxy();

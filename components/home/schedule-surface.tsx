@@ -26,12 +26,22 @@ import {
   Minimize2,
   Upload,
 } from "lucide-react";
-import { type ChangeEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ChangeEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
 import {
   WeekCalendar,
+  WEEK_CALENDAR_HEADER_HEIGHT_PX,
   WEEK_CALENDAR_MINUTE_SCALE_DEFAULT,
   WEEK_CALENDAR_VISIBLE_DAY_MAX,
   WEEK_CALENDAR_VISIBLE_DAY_MIN,
@@ -314,6 +324,9 @@ export function ScheduleSurface({
   const [icsMenuOpen, setIcsMenuOpen] = useState(false);
   const icsMenuRef = useRef<HTMLDivElement | null>(null);
   const weekImmersiveShellRef = useRef<HTMLDivElement | null>(null);
+  /** Caps inline week grid height so pinch-zoom cannot push controls off-screen (see `maxViewportBodyPx`). */
+  const weekHomeLayoutRef = useRef<HTMLDivElement | null>(null);
+  const [weekHomeMaxViewportBodyPx, setWeekHomeMaxViewportBodyPx] = useState<number | null>(null);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
   const recurringDeletePayloadRef = useRef<{ eventId: string } | null>(null);
   const recurringDeleteResolverRef = useRef<((ok: boolean) => void) | null>(null);
@@ -1209,6 +1222,50 @@ export function ScheduleSurface({
 
   const useCompactHomeHeader = homeGreeting != null;
 
+  useLayoutEffect(() => {
+    if (view !== "week" || weekImmersiveOpen) {
+      setWeekHomeMaxViewportBodyPx(null);
+      return;
+    }
+    const wrap = weekHomeLayoutRef.current;
+    if (!wrap) return;
+
+    const measure = () => {
+      const vv = window.visualViewport;
+      const vh = (vv?.height ?? window.innerHeight) + (vv?.offsetTop ?? 0);
+      const top = wrap.getBoundingClientRect().top;
+      /** Visible-days slider + gap; keeps cap from eating the bar. */
+      const reserveBelowCalendarPx = 56;
+      const cushionPx = 8;
+      const maxOuterPx = vh - top - reserveBelowCalendarPx - cushionPx;
+      const maxBodyPx = maxOuterPx - WEEK_CALENDAR_HEADER_HEIGHT_PX;
+      setWeekHomeMaxViewportBodyPx(
+        Number.isFinite(maxBodyPx) ? Math.max(140, Math.floor(maxBodyPx)) : null,
+      );
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(wrap);
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", measure);
+    vv?.addEventListener("scroll", measure);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      vv?.removeEventListener("resize", measure);
+      vv?.removeEventListener("scroll", measure);
+      window.removeEventListener("resize", measure);
+    };
+  }, [
+    view,
+    weekImmersiveOpen,
+    useCompactHomeHeader,
+    homeBelowHeaderSlot,
+    adding,
+    visibleDayCount,
+  ]);
+
   const iconBtnSm = "h-8 w-8 sm:h-9 sm:w-9";
   const iconGlyphSm = "h-3.5 w-3.5 sm:h-4 sm:w-4";
 
@@ -1462,15 +1519,19 @@ export function ScheduleSurface({
           />
         ) : null}
 
-        {view === "week" && !weekImmersiveOpen ? <WeekCalendar {...weekCalendarProps} /> : null}
-
         {view === "week" && !weekImmersiveOpen ? (
-          <WeekVisibleDaysBar
-            value={visibleDayCount}
-            onChange={setVisibleDayCount}
-            scheduleSch={messages.schedule}
-            locale={locale}
-          />
+          <div ref={weekHomeLayoutRef} className="flex min-h-0 flex-col gap-1">
+            <WeekCalendar
+              {...weekCalendarProps}
+              maxViewportBodyPx={weekHomeMaxViewportBodyPx ?? undefined}
+            />
+            <WeekVisibleDaysBar
+              value={visibleDayCount}
+              onChange={setVisibleDayCount}
+              scheduleSch={messages.schedule}
+              locale={locale}
+            />
+          </div>
         ) : null}
 
         {view === "week" && !weekImmersiveOpen && !adding ? (
@@ -1858,26 +1919,30 @@ function WeekVisibleDaysBar({
   return (
     <div
       className={cn(
-        "rounded-xl border border-[#E7E0D6] bg-white px-2 py-1.5 shadow-[0_4px_14px_rgba(15,23,42,0.04)]",
+        "sticky bottom-0 z-[5] shrink-0 rounded-xl border border-[#E7E0D6] bg-white px-2 py-1.5 shadow-[0_4px_14px_rgba(15,23,42,0.04)]",
         "dark:border-border dark:bg-card dark:shadow-[0_4px_14px_rgba(0,0,0,0.12)]",
       )}
     >
-      <input
-        type="range"
-        min={WEEK_CALENDAR_VISIBLE_DAY_MIN}
-        max={WEEK_CALENDAR_VISIBLE_DAY_MAX}
-        step={1}
-        value={safeValue}
-        aria-label={
-          scheduleSch.visibleDaysAria ??
-          (locale === "zh-CN" ? "周视图显示天数" : "Visible days in week calendar")
-        }
-        aria-valuetext={valueText}
-        onChange={(event) => {
-          onChange(clampWeekCalendarVisibleDayCount(Number(event.target.value)));
-        }}
-        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-blue-100 accent-[#2563EB] dark:bg-blue-950/40"
-      />
+      {/* Mirror horizontally so low/high day counts map to the opposite screen side
+          without changing min/max/value (keeps SR + aria-valuetext aligned to real count). */}
+      <div className="w-full -scale-x-100" dir="ltr">
+        <input
+          type="range"
+          min={WEEK_CALENDAR_VISIBLE_DAY_MIN}
+          max={WEEK_CALENDAR_VISIBLE_DAY_MAX}
+          step={1}
+          value={safeValue}
+          aria-label={
+            scheduleSch.visibleDaysAria ??
+            (locale === "zh-CN" ? "周视图显示天数" : "Visible days in week calendar")
+          }
+          aria-valuetext={valueText}
+          onChange={(event) => {
+            onChange(clampWeekCalendarVisibleDayCount(Number(event.target.value)));
+          }}
+          className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-blue-100 accent-[#2563EB] dark:bg-blue-950/40"
+        />
+      </div>
     </div>
   );
 }

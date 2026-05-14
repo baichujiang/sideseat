@@ -9,6 +9,7 @@ import {
   mapPrismaMealsToDiscoverRow,
   mapPrismaSportToDiscoverRow,
   mapPrismaStudyToDiscoverRow,
+  mapPrismaClassmatePostImagesToUrls,
   type DiscoverPostRowLanguageMeta,
   type DiscoverPostRowMealsMeta,
   type DiscoverPostRowSportMeta,
@@ -50,6 +51,7 @@ export type ClassmatePostDetail = {
   mealsMeta?: DiscoverPostRowMealsMeta;
   languageMeta?: DiscoverPostRowLanguageMeta;
   sportMeta?: DiscoverPostRowSportMeta;
+  imageUrls: string[];
 };
 
 export type ClassmatePostDetailView =
@@ -121,6 +123,7 @@ export async function getClassmatePostDetailForViewer(
       meals: true,
       language: true,
       sport: true,
+      images: { select: { url: true, sortOrder: true } },
     },
   });
 
@@ -139,6 +142,7 @@ export async function getClassmatePostDetailForViewer(
   const mealsMeta = mapPrismaMealsToDiscoverRow(post.meals);
   const languageMeta = mapPrismaLanguageToDiscoverRow(post.language);
   const sportMeta = mapPrismaSportToDiscoverRow(post.sport);
+  const imageUrls = mapPrismaClassmatePostImagesToUrls(post.images) ?? [];
 
   if (post.userId === viewerId) {
     return {
@@ -159,6 +163,7 @@ export async function getClassmatePostDetailForViewer(
         mealsMeta,
         languageMeta,
         sportMeta,
+        imageUrls,
       },
       author,
       isAuthor: true,
@@ -212,6 +217,7 @@ export async function getClassmatePostDetailForViewer(
       mealsMeta,
       languageMeta,
       sportMeta,
+      imageUrls,
     },
     author,
     isAuthor: false,

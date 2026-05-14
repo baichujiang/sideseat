@@ -1,4 +1,6 @@
 import {
+  ClassmatePostCategory,
+  ClassmatePostStatus,
   ConnectionStatus,
   ContactExchangeStatus,
   CourseIntent,
@@ -9,22 +11,34 @@ import {
   ReportActionType,
   ReportReason,
   ReportStatus,
+  SportTag,
   StudentVerificationStatus,
+  StudyPurpose,
+  StudyTimeSlot,
+  StudyVenue,
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 import { getCurrentSemesterLabel } from "@/lib/constants/semester";
 import { prisma } from "@/lib/db/prisma";
+import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
 
 const minutesAgo = (m: number) => new Date(Date.now() - m * 60 * 1000);
 const hoursAgo = (h: number) => new Date(Date.now() - h * 60 * 60 * 1000);
 const daysAgo = (d: number) => new Date(Date.now() - d * 24 * 60 * 60 * 1000);
+const daysFromNow = (d: number) => new Date(Date.now() + d * 24 * 60 * 60 * 1000);
+
+/** Matches `isAllowedClassmatePostImageUrl` seed allowlist (`picsum.photos/seed/…`). */
+function seedDiscoverPicsumImage(seed: string, w = 800, h = 600): string {
+  return `https://picsum.photos/seed/${seed}/${w}/${h}`;
+}
 
 const seedLangs = (...tags: LanguageTag[]) => ({
   create: tags.map((tag) => ({ tag, proficiency: LanguageProficiency.FLUENT })),
 });
 
 async function main() {
+  // Clears core app data (users, courses, chats, …). Use only on local/dev databases — not production.
   await prisma.reportAction.deleteMany();
   await prisma.moderationBlock.deleteMany();
   await prisma.report.deleteMany();
@@ -551,6 +565,122 @@ async function main() {
     ],
   });
 
+  // --- Discover: example classmate posts (dev seed only; script wipes the DB) ---
+  const discoverExpiresAt = daysFromNow(14);
+  await prisma.$transaction([
+    prisma.classmatePost.create({
+      data: {
+        userId: lin.id,
+        city: DEFAULT_DISCOVER_SERVED_CITY,
+        category: ClassmatePostCategory.STUDY,
+        title: "期末图书馆组队 · Library study for finals",
+        body: "想找 1–2 个同学晚上在主图书馆安静刷题。I prefer quiet tables near windows.",
+        status: ClassmatePostStatus.ACTIVE,
+        expiresAt: discoverExpiresAt,
+        study: {
+          create: {
+            purposes: [StudyPurpose.EXAM_PREP],
+            timeSlots: [StudyTimeSlot.EVENING],
+            venues: [StudyVenue.MAIN_LIBRARY],
+          },
+        },
+        images: {
+          create: [
+            { url: seedDiscoverPicsumImage("classlink-seed-study-a"), sortOrder: 0 },
+            { url: seedDiscoverPicsumImage("classlink-seed-study-b"), sortOrder: 1 },
+          ],
+        },
+      },
+    }),
+    prisma.classmatePost.create({
+      data: {
+        userId: amira.id,
+        city: DEFAULT_DISCOVER_SERVED_CITY,
+        category: ClassmatePostCategory.MEALS,
+        title: "Garching 食堂午餐搭子 · Mensa lunch buddy",
+        body: "周三中午 Garching MI Mensa？AA 随意，主要是聊天练德语。",
+        status: ClassmatePostStatus.ACTIVE,
+        expiresAt: discoverExpiresAt,
+        meals: {
+          create: {
+            venueTags: [],
+            venueOtherNote: "Garching MI Mensa, Wed ~12:15",
+          },
+        },
+        images: {
+          create: [{ url: seedDiscoverPicsumImage("classlink-seed-meals-1"), sortOrder: 0 }],
+        },
+      },
+    }),
+    prisma.classmatePost.create({
+      data: {
+        userId: sofia.id,
+        city: DEFAULT_DISCOVER_SERVED_CITY,
+        category: ClassmatePostCategory.LANGUAGE,
+        title: "中英语伴 · Chinese–English exchange",
+        body: "中文母语，想练口语 English；可咖啡或线上语音 30min。",
+        status: ClassmatePostStatus.ACTIVE,
+        expiresAt: discoverExpiresAt,
+        language: {
+          create: {
+            offers: [
+              { tag: LanguageTag.CHINESE, proficiency: LanguageProficiency.NATIVE },
+              { tag: LanguageTag.ENGLISH, proficiency: LanguageProficiency.CONVERSATIONAL },
+            ],
+            targets: [LanguageTag.ENGLISH, LanguageTag.GERMAN],
+          },
+        },
+        images: {
+          create: [
+            { url: seedDiscoverPicsumImage("classlink-seed-lang-1"), sortOrder: 0 },
+            { url: seedDiscoverPicsumImage("classlink-seed-lang-2"), sortOrder: 1 },
+            { url: seedDiscoverPicsumImage("classlink-seed-lang-3"), sortOrder: 2 },
+          ],
+        },
+      },
+    }),
+    prisma.classmatePost.create({
+      data: {
+        userId: jonas.id,
+        city: DEFAULT_DISCOVER_SERVED_CITY,
+        category: ClassmatePostCategory.SPORTS,
+        title: "Olympiapark 慢跑 · Easy evening run",
+        body: "6–7km 轻松跑，配速随意。Beginners welcome / 新手欢迎。",
+        status: ClassmatePostStatus.ACTIVE,
+        expiresAt: discoverExpiresAt,
+        sport: {
+          create: {
+            sportTags: [SportTag.RUNNING],
+            sportOtherNote: "Meet at Olympiapark south gate",
+          },
+        },
+        images: {
+          create: [{ url: seedDiscoverPicsumImage("classlink-seed-sport-1"), sortOrder: 0 }],
+        },
+      },
+    }),
+    prisma.classmatePost.create({
+      data: {
+        userId: nina.id,
+        city: DEFAULT_DISCOVER_SERVED_CITY,
+        category: ClassmatePostCategory.SHARED_COURSES,
+        title: "IN2064 课友 · ML study partners wanted",
+        body: "Looking for 1–2 people for weekly problem-set discussions. 中文/EN 都行。",
+        status: ClassmatePostStatus.ACTIVE,
+        expiresAt: discoverExpiresAt,
+        courses: {
+          create: [{ courseId: ml.id }],
+        },
+        images: {
+          create: [
+            { url: seedDiscoverPicsumImage("classlink-seed-shared-a"), sortOrder: 0 },
+            { url: seedDiscoverPicsumImage("classlink-seed-shared-b"), sortOrder: 1 },
+          ],
+        },
+      },
+    }),
+  ]);
+
   const report = await prisma.report.create({
     data: {
       reporterId: lin.id,
@@ -578,6 +708,9 @@ async function main() {
   );
   console.log("Chats: 5 (Amira unread, Jonas unread, Nina read, Sofia read, Marco empty)");
   console.log("Contacts: 3 accepted (Amira, Sofia, Jonas); Marco has pending friend request from Lin");
+  console.log(
+    "Discover: 5 seeded classmate posts (study/meals/language/sports/shared) with Lorem Picsum `/seed/…` image URLs — dev seed only; this script wipes the database.",
+  );
 }
 
 main()

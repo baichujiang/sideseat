@@ -1,12 +1,26 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import type { Route } from "next";
-import { CalendarClock, Sparkles, SquarePen } from "lucide-react";
+import { MoreHorizontal, Search, Sparkles } from "lucide-react";
 
+import { InboxChatsView } from "@/components/inbox/inbox-chats-view";
+import { InboxCreateSheet } from "@/components/inbox/inbox-create-sheet";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { formatMessage } from "@/lib/i18n/messages";
+import type { InboxMerged } from "@/lib/queries/inbox-merge";
 import { cn } from "@/lib/utils";
+
+type ContactRow = {
+  peerId: string;
+  connectionId: string;
+  nickname: string | null;
+  username: string;
+  avatarUrl: string | null;
+};
 
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
@@ -18,70 +32,144 @@ function CountBadge({ count }: { count: number }) {
   );
 }
 
-function CountText({ count }: { count: number }) {
-  return <span className="text-[12px] font-semibold text-current/80">{count}</span>;
-}
-
-export function InboxQuickChips({
+export function InboxChatsShell({
+  title,
+  subtitle,
+  userId,
+  merged,
   unreadTotal,
   plansNeedingYourAction,
   activePostCount,
+  initialContacts,
+  showCreateSheet,
 }: {
+  title: string;
+  subtitle: string;
+  userId: string;
+  merged: InboxMerged[];
   unreadTotal: number;
   plansNeedingYourAction: number;
   activePostCount: number;
+  initialContacts: ContactRow[];
+  showCreateSheet: boolean;
 }) {
   const m = useAppMessages();
-  const newAria =
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  const unreadAria =
     unreadTotal > 0
       ? formatMessage(m.inbox.chipNewAriaWithUnread, { count: unreadTotal })
       : m.inbox.chipNewAria;
 
   return (
-    <section className="grid grid-cols-3 gap-2">
-      <Link
-        href={"/inbox/unread" as Route}
-        title={m.inbox.chipNewLinkTitle}
-        aria-label={newAria}
-        className={cn(
-          "inline-flex h-10 w-full items-center justify-between gap-1.5 rounded-full border border-classmates-blue-border/80 bg-classmates-blue-soft px-3 py-2 text-sm font-semibold text-classmates-blue-body transition-opacity active:opacity-80",
-          "[@media(hover:hover)]:hover:opacity-90 dark:border-blue-800/50 dark:bg-blue-950/35 dark:text-blue-100",
-        )}
-      >
-        <span className="inline-flex items-center gap-1.5">
-          <Sparkles className="h-[18px] w-[18px] shrink-0 text-[#2563EB]" strokeWidth={2} aria-hidden />
-          <span className="whitespace-nowrap">{m.inbox.chipNew}</span>
-        </span>
-        <CountBadge count={unreadTotal} />
-      </Link>
+    <div className="space-y-3">
+      <header className="px-0.5">
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+          <div className="min-w-0">
+            <h1 className="page-screen-title">{title}</h1>
+            <p className="page-screen-subtitle mt-0.5">{subtitle}</p>
+          </div>
+          <div className="flex flex-wrap items-center justify-start gap-2 sm:justify-end">
+            <Link
+              href={"/inbox/unread" as Route}
+              title={m.inbox.chipNewLinkTitle}
+              aria-label={unreadAria}
+              className={cn(
+                "inline-flex h-9 max-w-full items-center gap-1.5 rounded-full border border-classmates-blue-border/80 bg-classmates-blue-soft px-3 py-1.5 text-[13px] font-semibold text-classmates-blue-body transition-opacity active:opacity-80",
+                "[@media(hover:hover)]:hover:opacity-90 dark:border-blue-800/50 dark:bg-blue-950/35 dark:text-blue-100",
+              )}
+            >
+              <Sparkles className="h-4 w-4 shrink-0 text-[#2563EB]" strokeWidth={2} aria-hidden />
+              <span className="truncate">{m.inbox.chipNew}</span>
+              <CountBadge count={unreadTotal} />
+            </Link>
 
-      <Link
-        href={"/inbox/plans" as Route}
-        className={cn(
-          "inline-flex h-10 w-full items-center justify-between gap-1.5 rounded-full border border-classmates-teal-border/70 bg-classmates-teal-soft px-3 py-2 text-sm font-semibold text-classmates-teal transition-colors active:bg-teal-50/90",
-          "[@media(hover:hover)]:hover:bg-teal-50 dark:border-teal-800/60 dark:bg-teal-950/40 dark:text-teal-100 dark:active:bg-teal-950/55 [@media(hover:hover)]:dark:hover:bg-teal-950/50",
-        )}
-      >
-        <span className="inline-flex items-center gap-1.5">
-          <CalendarClock className="h-[18px] w-[18px] shrink-0 text-[#0F766E]" strokeWidth={2} aria-hidden />
-          <span className="whitespace-nowrap">{m.inbox.chipPlans}</span>
-        </span>
-        <CountText count={plansNeedingYourAction} />
-      </Link>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              aria-label={searchOpen ? m.inbox.headerSearchCloseAria : m.inbox.headerSearchOpenAria}
+              aria-pressed={searchOpen}
+              className="h-9 w-9 shrink-0 rounded-full border-border"
+              onClick={() => setSearchOpen((v) => !v)}
+            >
+              <Search className="h-4 w-4" strokeWidth={2} aria-hidden />
+            </Button>
 
-      <Link
-        href={"/inbox/my-posts" as Route}
-        className={cn(
-          "inline-flex h-10 w-full items-center justify-between gap-1.5 rounded-full border border-[#E7E0D6] bg-white px-3 py-2 text-sm font-semibold text-[#5F6B7A] transition-colors active:bg-[#FAF9F6]",
-          "[@media(hover:hover)]:hover:bg-[#FAF9F6] dark:border-border dark:bg-card dark:text-zinc-300 dark:active:bg-muted/40 [@media(hover:hover)]:dark:hover:bg-muted/30",
-        )}
-      >
-        <span className="inline-flex items-center gap-1.5">
-          <SquarePen className="h-[18px] w-[18px] shrink-0 text-[#D97706]" strokeWidth={2} aria-hidden />
-          <span className="whitespace-nowrap">{m.inbox.chipPosts}</span>
-        </span>
-        <CountText count={activePostCount} />
-      </Link>
-    </section>
+            <Popover open={moreOpen} onOpenChange={setMoreOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label={m.inbox.headerMoreMenuAria}
+                  className="h-9 w-9 shrink-0 rounded-full border-border"
+                >
+                  <MoreHorizontal className="h-4 w-4" strokeWidth={2} aria-hidden />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-56 p-1.5">
+                <nav className="flex flex-col gap-0.5" aria-label={m.inbox.headerMoreMenuAria}>
+                  <MenuCountLink
+                    href={"/profile/my-plan" as Route}
+                    label={m.inbox.headerMenuMyPlan}
+                    count={plansNeedingYourAction}
+                    onNavigate={() => setMoreOpen(false)}
+                  />
+                  <MenuCountLink
+                    href={"/profile/my-posts" as Route}
+                    label={m.inbox.headerMenuMyPosts}
+                    count={activePostCount}
+                    onNavigate={() => setMoreOpen(false)}
+                  />
+                  <MenuCountLink
+                    href={"/profile/saved-posts" as Route}
+                    label={m.inbox.headerMenuSavedPosts}
+                    onNavigate={() => setMoreOpen(false)}
+                  />
+                </nav>
+              </PopoverContent>
+            </Popover>
+
+            {showCreateSheet ? <InboxCreateSheet initialContacts={initialContacts} /> : null}
+          </div>
+        </div>
+      </header>
+
+      <InboxChatsView
+        userId={userId}
+        merged={merged}
+        query={query}
+        onQueryChange={setQuery}
+        showSearchField={searchOpen}
+      />
+    </div>
+  );
+}
+
+function MenuCountLink({
+  href,
+  label,
+  count,
+  onNavigate,
+}: {
+  href: Route;
+  label: string;
+  count?: number;
+  onNavigate: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onNavigate}
+      className="flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors active:bg-muted [@media(hover:hover)]:hover:bg-muted/80"
+    >
+      <span>{label}</span>
+      {typeof count === "number" && count > 0 ? (
+        <span className="tabular-nums text-[12px] text-muted-foreground">{count > 99 ? "99+" : count}</span>
+      ) : null}
+    </Link>
   );
 }

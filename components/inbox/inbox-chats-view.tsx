@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useMemo } from "react";
 import { Search } from "lucide-react";
 
 import { DirectInboxRow } from "@/components/inbox/direct-inbox-row";
@@ -14,9 +14,20 @@ import { inboxChatMatchesQuery } from "@/lib/inbox/inbox-chat-search";
 import { inboxRowKey, partitionInboxSections } from "@/lib/inbox/partition-inbox-sections";
 import type { InboxMerged } from "@/lib/queries/inbox-merge";
 
-export function InboxChatsView({ userId, merged }: { userId: string; merged: InboxMerged[] }) {
+export function InboxChatsView({
+  userId,
+  merged,
+  query,
+  onQueryChange,
+  showSearchField,
+}: {
+  userId: string;
+  merged: InboxMerged[];
+  query: string;
+  onQueryChange: (value: string) => void;
+  showSearchField: boolean;
+}) {
   const m = useAppMessages();
-  const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
 
   const filtered = useMemo(
@@ -31,23 +42,25 @@ export function InboxChatsView({ userId, merged }: { userId: string; merged: Inb
 
   return (
     <div className="space-y-5">
-      <div
-        className="mt-5 flex items-center gap-3 rounded-[24px] border border-[#E7E0D6] bg-white px-5 py-3 dark:border-border dark:bg-card"
-        role="search"
-      >
-        <Search size={20} className="shrink-0 text-[#8A94A6] dark:text-muted-foreground" aria-hidden />
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={m.inbox.searchPlaceholder}
-          autoComplete="off"
-          autoCorrect="off"
-          spellCheck={false}
-          aria-label={m.inbox.searchAria}
-          className="min-w-0 flex-1 bg-transparent text-[15px] text-foreground outline-none placeholder:text-[#8A94A6] dark:placeholder:text-muted-foreground"
-        />
-      </div>
+      {showSearchField ? (
+        <div
+          className="flex items-center gap-3 rounded-[24px] border border-[#E7E0D6] bg-white px-5 py-3 dark:border-border dark:bg-card"
+          role="search"
+        >
+          <Search size={20} className="shrink-0 text-[#8A94A6] dark:text-muted-foreground" aria-hidden />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+            placeholder={m.inbox.searchPlaceholder}
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+            aria-label={m.inbox.searchAria}
+            className="min-w-0 flex-1 bg-transparent text-[15px] text-foreground outline-none placeholder:text-[#8A94A6] dark:placeholder:text-muted-foreground"
+          />
+        </div>
+      ) : null}
 
       {merged.length === 0 ? (
         <EmptyState title={m.inbox.emptyNoConversationsTitle} description={m.inbox.emptyNoConversationsDesc} />

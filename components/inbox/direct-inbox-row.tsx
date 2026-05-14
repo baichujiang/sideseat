@@ -3,12 +3,12 @@ import type { Course, Invitation, Message, PlanRequest, User } from "@prisma/cli
 import { ChevronRight } from "lucide-react";
 
 import { inboxConversationTileClassName } from "@/components/inbox/inbox-conversation-tile";
+import { InboxRowTimestamp } from "@/components/inbox/inbox-row-timestamp";
 import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { InboxSwipeRow } from "@/components/inbox/inbox-swipe-row";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { selfNotesDisplayTitle } from "@/lib/connections/self-notes-title";
 import { directMessageActionSnippet } from "@/lib/chat/direct-message-preview";
-import { formatShortRelativeTime } from "@/lib/format/short-relative-time";
 import { cn } from "@/lib/utils";
 
 export type DirectInboxConnection = {
@@ -121,9 +121,7 @@ export function DirectInboxRow({
           ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-1.5 self-center">
-          <time className="shrink-0 text-xs tabular-nums text-[#8A94A6] dark:text-zinc-500" dateTime={when.toISOString()}>
-            {formatShortRelativeTime(when)}
-          </time>
+          <InboxRowTimestamp at={when} />
           {isUnread ? (
             unreadCount === 1 ? (
               <InboxUnreadBadge count={1} variant="dot" />

@@ -14,8 +14,8 @@ type Props = {
   courseId?: string;
   /** Path to return to after opening chat (e.g. `/discover` or `/discover/posts/xyz`). */
   returnTo?: string;
-  /** `soft` — list chip; `subtle` — light brand pill (discover rows); `solid` — high-contrast CTA (e.g. post detail). */
-  tone?: "soft" | "subtle" | "solid";
+  /** `soft` — list chip; `subtle` — light brand pill (discover rows); `outline` — bordered pill (post card footer); `solid` — high-contrast CTA (e.g. post detail). */
+  tone?: "soft" | "subtle" | "solid" | "outline";
   /** Override button label. Defaults to "Say hi" when `hasExistingChat` is false, "Message" when true. */
   label?: string;
   /** When false (no prior thread), default label becomes "Say hi". When true, becomes "Message". */
@@ -45,6 +45,11 @@ const toneClasses = {
   soft: "inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full bg-classmates-blue-soft px-3 text-[12px] font-semibold text-classmates-blue transition-colors hover:bg-classmates-blue-border/50 active:bg-classmates-blue-border/70 disabled:opacity-70 dark:border dark:border-blue-500/30 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950/55",
   subtle: cn(discoverSubtleSecondaryCtaSurfaceClassName, "h-8"),
   solid: discoverPrimarySolidCtaClassName,
+  outline: cn(
+    "inline-flex h-10 min-h-10 shrink-0 touch-manipulation items-center justify-center gap-1.5 rounded-full border border-classmates-blue-border bg-white/90 px-4 text-[13px] font-semibold text-classmates-blue shadow-none transition-colors hover:bg-classmates-blue-soft/90 active:bg-classmates-blue-border/35 disabled:opacity-70",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    "dark:border-blue-500/40 dark:bg-zinc-950/60 dark:text-blue-200 dark:hover:bg-blue-950/45 dark:active:bg-blue-950/60",
+  ),
 } as const;
 
 export function DiscoverMessageButton({
@@ -111,8 +116,8 @@ export function DiscoverMessageButton({
             "h-4 w-4 shrink-0 animate-spin",
             tone === "solid"
               ? "text-white"
-              : tone === "subtle"
-                ? "text-classmates-blue"
+              : tone === "subtle" || tone === "outline"
+                ? "text-classmates-blue dark:text-blue-300"
                 : "text-classmates-blue",
           )}
         />
@@ -122,7 +127,7 @@ export function DiscoverMessageButton({
             <NotebookPen
               className={cn(
                 "shrink-0",
-                tone === "subtle" && "h-3.5 w-3.5 text-classmates-blue dark:text-blue-300",
+                (tone === "subtle" || tone === "outline") && "h-3.5 w-3.5 text-classmates-blue dark:text-blue-300",
                 tone === "soft" && "h-4 w-4 text-classmates-blue",
                 tone === "solid" && "h-4 w-4 text-white",
               )}
@@ -132,7 +137,7 @@ export function DiscoverMessageButton({
             <MessageCircle
               className={cn(
                 "shrink-0",
-                tone === "subtle" && "h-3.5 w-3.5 text-classmates-blue dark:text-blue-300",
+                (tone === "subtle" || tone === "outline") && "h-3.5 w-3.5 text-classmates-blue dark:text-blue-300",
                 tone === "soft" && "h-4 w-4 text-classmates-blue",
                 tone === "solid" && "h-4 w-4 text-white",
               )}

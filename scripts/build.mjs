@@ -85,4 +85,6 @@ if (process.env.VERCEL) {
 }
 
 migrateDeployWithRetries();
+// Ensure generated client matches schema even if install/postinstall was skipped or cached oddly.
+run("npx", ["prisma", "generate"]);
 run("npx", ["next", "build"]);

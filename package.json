@@ -2,6 +2,9 @@
   "name": "sideseat",
   "version": "0.1.0",
   "private": true,
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "scripts": {
     "dev": "next dev",
     "dev:clean": "sh -c 'chmod -R u+w .next 2>/dev/null || true; rm -rf .next'",

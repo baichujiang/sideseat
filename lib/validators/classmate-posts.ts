@@ -22,18 +22,6 @@ export const STUDY_VENUE_VALUES = [
   "OLYMPIA_PARK_LIBRARY",
   "OTHER",
 ] as const;
-/** Keep in sync with `MealVenueTag` in prisma/schema.prisma. */
-export const MEAL_VENUE_VALUES = [
-  "MAIN_CAMPUS_MENSA",
-  "GARCHING_MENSA",
-  "GARCHING_CAFE",
-  "LEOPOLDSTRASSE_MENSA",
-  "LOTHSTRASSE_MENSA",
-  "MARTINSRIED_MENSA",
-  "WEIHENSTEPHAN_MENSA",
-  "OUTSIDE",
-  "OTHER",
-] as const;
 /** Keep in sync with `LanguageTag` in prisma/schema.prisma. */
 export const LANGUAGE_TAG_VALUES = [
   "CHINESE",
@@ -132,11 +120,10 @@ export function classmatePostStudyPayloadHasData(study: StudyPayloadNormalized):
 
 export const mealsPayloadSchema = z
   .object({
-    venueTags: z.array(z.enum(MEAL_VENUE_VALUES)).max(MEAL_VENUE_VALUES.length).optional(),
+    /** Free-text “where to eat”; persisted as `ClassmatePostMeals.venueOtherNote` with empty `venueTags`. */
     venueOtherNote: otherNoteSchema,
   })
   .transform((row) => ({
-    venueTags: dedupePreserveOrder(row.venueTags ?? []),
     venueOtherNote:
       typeof row.venueOtherNote === "string" && row.venueOtherNote.trim().length > 0
         ? row.venueOtherNote.trim()
@@ -146,7 +133,7 @@ export const mealsPayloadSchema = z
 export type MealsPayloadNormalized = z.infer<typeof mealsPayloadSchema>;
 
 export function classmatePostMealsPayloadHasData(meals: MealsPayloadNormalized): boolean {
-  return meals.venueTags.length > 0 || Boolean(meals.venueOtherNote);
+  return Boolean(meals.venueOtherNote);
 }
 
 export const classmatePostLanguageOfferSchema = z.object({
@@ -203,6 +190,32 @@ const classmatePostCategorySchema = z.enum([
   "SHARED_COURSES",
 ]);
 
+/** Max images per Discover post (`ClassmatePostImage.sortOrder` is 0..2). */
+export const CLASSMATE_POST_MAX_IMAGES = 3;
+
+function dedupeImageUrlsPreserveOrder(urls: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const u of urls) {
+    if (seen.has(u)) continue;
+    seen.add(u);
+    out.push(u);
+    if (out.length >= CLASSMATE_POST_MAX_IMAGES) break;
+  }
+  return out;
+}
+
+/** Optional image URLs for `POST /api/classmate-posts` (validated again server-side for origin). */
+export const classmatePostImageUrlsSchema = z
+  .array(z.string().min(1).max(4_000_000))
+  .max(CLASSMATE_POST_MAX_IMAGES)
+  .optional()
+  .transform((arr) => {
+    if (!arr?.length) return undefined;
+    const next = dedupeImageUrlsPreserveOrder(arr);
+    return next.length ? next : undefined;
+  });
+
 export const createClassmatePostSchema = z
   .object({
     city: z.string().trim().min(1).max(CLASSMATE_POST_CITY_MAX_LEN).default("Munich"),
@@ -224,6 +237,7 @@ export const createClassmatePostSchema = z
     meals: mealsPayloadSchema.optional(),
     language: languagePayloadSchema.optional(),
     sport: sportPayloadSchema.optional(),
+    imageUrls: classmatePostImageUrlsSchema,
   })
   .refine(
     (data) =>
@@ -267,27 +281,6 @@ export const createClassmatePostSchema = z
         path: ["meals"],
       });
     }
-    if (data.category === "MEALS" && data.meals != null && data.meals.venueTags.includes("OTHER")) {
-      if (!data.meals.venueOtherNote?.trim()) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Add a short note when you choose Other place.",
-          path: ["meals", "venueOtherNote"],
-        });
-      }
-    }
-    if (
-      data.category === "MEALS" &&
-      data.meals != null &&
-      data.meals.venueOtherNote &&
-      !data.meals.venueTags.includes("OTHER")
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Add a note only when Other place is selected.",
-        path: ["meals", "venueOtherNote"],
-      });
-    }
     if (data.language != null && data.category !== "LANGUAGE") {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -317,18 +310,6 @@ export const createClassmatePostSchema = z
           path: ["sport", "sportOtherNote"],
         });
       }
-    }
-    if (
-      data.category === "SPORTS" &&
-      data.sport != null &&
-      data.sport.sportOtherNote &&
-      !data.sport.sportTags.includes("OTHER")
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Add a note only when Other sport is selected.",
-        path: ["sport", "sportOtherNote"],
-      });
     }
   });
 

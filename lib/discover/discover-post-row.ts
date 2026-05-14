@@ -52,6 +52,7 @@ export type DiscoverPostRow = {
   city: string;
   title: string;
   body: string | null;
+  createdAt: Date;
   expiresAt: Date;
   isOwn: boolean;
   userId: string;
@@ -74,6 +75,15 @@ export type DiscoverPostRow = {
   mealsMeta?: DiscoverPostRowMealsMeta;
   languageMeta?: DiscoverPostRowLanguageMeta;
   sportMeta?: DiscoverPostRowSportMeta;
+  /** Up to 3 image URLs in display order (Vercel Blob, inline data URLs, or `picsum.photos/seed/…`). */
+  imageUrls?: string[];
+  /** When set, Discover post cards show the save/bookmark control for the signed-in viewer. */
+  savedByViewer?: boolean;
+  /**
+   * Client-only / UI-injected rows (e.g. `NEXT_PUBLIC_DISCOVER_DEV_EXAMPLE_POSTS=1`).
+   * Disables post detail navigation, save, and peer messaging on the card.
+   */
+  isDevExample?: boolean;
 };
 
 /** Discover tabs / create-post scene — matches `DiscoverList` scene state. */
@@ -166,4 +176,12 @@ export function mapPrismaSportToDiscoverRow(
     sportTags: [...sport.sportTags],
     sportOtherNote: sport.sportOtherNote,
   };
+}
+
+export function mapPrismaClassmatePostImagesToUrls(
+  images: { url: string; sortOrder: number }[] | null | undefined,
+): string[] | undefined {
+  if (!images?.length) return undefined;
+  const sorted = [...images].sort((a, b) => a.sortOrder - b.sortOrder);
+  return sorted.map((r) => r.url);
 }

@@ -131,7 +131,8 @@ const WEEK_COL_DIVIDER = "border-[#F3EFE8] dark:border-white/[0.07]";
 const VISUAL_PADDING_TOP_MINUTES = 30;
 const VISUAL_PADDING_BOTTOM_MINUTES = 12;
 const FULL_DAY_MINUTES = 24 * 60;
-const WEEK_HEADER_HEIGHT_PX = 32;
+/** Sticky week header band height — used by consumers that cap the scroll viewport to the shell. */
+export const WEEK_CALENDAR_HEADER_HEIGHT_PX = 32;
 
 /**
  * Week grid stacking (low → high). Prevents events / drag shadows from painting over sticky rails or headers.
@@ -274,15 +275,9 @@ function horizontalStartIndexForDay(day: Weekday | undefined, visibleWeekDays: n
   return Math.min(Math.max(dayIndex - (visibleWeekDays - 1), 0), maxStartIndex);
 }
 
-/** `%` height of a timed block within the visible day window — drives title wrap vs single-line. */
-function scheduleEventTitleLayoutClass(effectiveHeightPct: number): string {
-  if (effectiveHeightPct >= 14) {
-    return "whitespace-normal break-words [overflow-wrap:anywhere] text-left";
-  }
-  if (effectiveHeightPct >= 8) {
-    return "line-clamp-2 whitespace-normal break-words [overflow-wrap:anywhere] text-left";
-  }
-  return "truncate text-left";
+/** Timed week-grid event titles: up to two lines, word wrap, tight leading. */
+function scheduleEventTitleLayoutClass(): string {
+  return "line-clamp-2 min-w-0 whitespace-normal break-words leading-tight [overflow-wrap:anywhere] text-left";
 }
 
 export function WeekCalendar({
@@ -310,6 +305,11 @@ export function WeekCalendar({
   visibleDayCount,
   /** When set (e.g. fullscreen), overrides the scroll viewport height in px. */
   viewportBodyPx,
+  /**
+   * When set (e.g. Home shell), caps the scroll viewport body height so the card
+   * never grows past the visible viewport — inner grid scrolls instead.
+   */
+  maxViewportBodyPx,
   /** Remove outer top margin — use inside a flex fill container. */
   fillParent = false,
   /**
@@ -370,6 +370,7 @@ export function WeekCalendar({
   onMinuteScaleChange?: (nextScale: number) => void;
   visibleDayCount?: number;
   viewportBodyPx?: number;
+  maxViewportBodyPx?: number;
   fillParent?: boolean;
   touchGestureRotateCw90?: boolean;
 }) {
@@ -482,7 +483,11 @@ export function WeekCalendar({
       VISUAL_PADDING_TOP_MINUTES +
       VISUAL_PADDING_BOTTOM_MINUTES) *
     MINUTE_PX;
-  const viewportHeightPx = viewportBodyPx ?? computedViewportBodyPx;
+  const rawViewportBodyPx = viewportBodyPx ?? computedViewportBodyPx;
+  const viewportHeightPx =
+    maxViewportBodyPx != null && Number.isFinite(maxViewportBodyPx)
+      ? Math.min(rawViewportBodyPx, maxViewportBodyPx)
+      : rawViewportBodyPx;
 
   // Measure before paint so the first hydrated frame does not use the 56px
   // fallback column width (narrow grid → wide grid flash).
@@ -1405,7 +1410,9 @@ export function WeekCalendar({
           "[&_input]:select-auto [&_textarea]:select-text [&_select]:select-auto",
           fillParent ? "min-h-0 min-w-0 flex-1" : null,
         )}
-        style={fillParent ? undefined : { height: `${WEEK_HEADER_HEIGHT_PX + viewportHeightPx}px` }}
+        style={
+          fillParent ? undefined : { height: `${WEEK_CALENDAR_HEADER_HEIGHT_PX + viewportHeightPx}px` }
+        }
       >
         {frameWidth === 0 ? null : <div className="bg-white dark:bg-card" style={{ width: trackWidthPx }}>
           <div
@@ -1423,8 +1430,8 @@ export function WeekCalendar({
                 zIndex: Z_TIME_RAIL_HEADER,
                 width: TIME_COLUMN_PX,
                 minWidth: TIME_COLUMN_PX,
-                height: `${WEEK_HEADER_HEIGHT_PX}px`,
-                minHeight: `${WEEK_HEADER_HEIGHT_PX}px`,
+                height: `${WEEK_CALENDAR_HEADER_HEIGHT_PX}px`,
+                minHeight: `${WEEK_CALENDAR_HEADER_HEIGHT_PX}px`,
               }}
             >
               {sch.timeColumnLabel}
@@ -1435,8 +1442,8 @@ export function WeekCalendar({
                 zIndex: Z_DAY_HEADER_CELL,
                 width: dayTrackWidth,
                 gridTemplateColumns,
-                height: `${WEEK_HEADER_HEIGHT_PX}px`,
-                minHeight: `${WEEK_HEADER_HEIGHT_PX}px`,
+                height: `${WEEK_CALENDAR_HEADER_HEIGHT_PX}px`,
+                minHeight: `${WEEK_CALENDAR_HEADER_HEIGHT_PX}px`,
               }}
             >
               {visibleDays.map((day) => {
@@ -1906,7 +1913,7 @@ export function WeekCalendar({
                                   ? "text-white/80"
                                   : "text-[#111827]/65 dark:text-muted-foreground",
                             );
-                            const titleLayout = scheduleEventTitleLayoutClass(effectiveHeight);
+                            const titleLayout = scheduleEventTitleLayoutClass();
                             const titleLine =
                               block.source === "course" && block.courseCode?.trim()
                                 ? block.courseName
@@ -1951,7 +1958,7 @@ export function WeekCalendar({
                                     <p
                                       className={cn(
                                         titleLayout,
-                                        "font-semibold leading-snug",
+                                        "font-semibold",
                                         cfg.blockTitleClass,
                                         !useCategoryColor && tone.title,
                                       )}
@@ -1962,7 +1969,7 @@ export function WeekCalendar({
                                 ) : (
                                   <p
                                     className={cn(
-                                      "mt-px min-w-0 font-semibold leading-snug",
+                                      "mt-px min-w-0 font-semibold",
                                       titleLayout,
                                       cfg.blockTitleClass,
                                       !useCategoryColor && tone.title,
@@ -2021,7 +2028,7 @@ export function WeekCalendar({
                                     <p
                                       className={cn(
                                         titleLayout,
-                                        "font-semibold leading-snug",
+                                        "font-semibold",
                                         cfg.blockTitleClass,
                                         !useCategoryColor && (highlighted ? tone.titleSelected : tone.title),
                                       )}
@@ -2032,7 +2039,7 @@ export function WeekCalendar({
                                 ) : (
                                   <p
                                     className={cn(
-                                      "mt-px min-w-0 font-semibold leading-snug",
+                                      "mt-px min-w-0 font-semibold",
                                       titleLayout,
                                       cfg.blockTitleClass,
                                       !useCategoryColor && (highlighted ? tone.titleSelected : tone.title),

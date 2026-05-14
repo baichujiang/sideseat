@@ -9,14 +9,6 @@ export function defaultNicknameFromUsername(username: string): string {
   return cleaned.replace(/\b\w/g, (ch) => ch.toUpperCase());
 }
 
-/** Display name from login email local-part (before @). */
-export function defaultNicknameFromEmail(email: string): string {
-  const local = email.split("@")[0]?.replace(/[._-]+/g, " ").trim() ?? "";
-  if (local.length < 2) return "Student";
-  const word = local.slice(0, 32);
-  return word.replace(/\b\w/g, (ch) => ch.toUpperCase());
-}
-
 /** Matches profileSchema / discover defaults so users can use the app immediately. */
 export const SIGNUP_DEFAULT_PROFILE = {
   school: DEFAULT_SCHOOL,

@@ -12,11 +12,14 @@ export function ClassmatePostDetailShareMenu({
   body,
   postPath,
   className,
+  idleAriaLabel = "Share post",
 }: {
   title: string;
   body: string | null;
   postPath: string;
   className?: string;
+  /** Override default "Share post" for buddy-request surfaces. */
+  idleAriaLabel?: string;
 }) {
   const runXhsShare = useCallback(async () => {
     const result = await shareClassmatePostToXhs({ title, body, postPath });
@@ -57,7 +60,7 @@ export function ClassmatePostDetailShareMenu({
   return (
     <SharePlatformMenu
       actions={actions}
-      idleAriaLabel="Share post"
+      idleAriaLabel={idleAriaLabel}
       copiedAriaLabel="Copied"
       className={className}
     />

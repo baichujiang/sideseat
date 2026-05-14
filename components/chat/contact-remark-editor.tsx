@@ -8,24 +8,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiFetch } from "@/lib/auth/api-fetch";
 import { CONTACT_REMARK_MAX_LEN } from "@/lib/connections/contact-remark";
-import {
-  profileFieldMicroLabelClassName,
-  profileSettingsInputClassName,
-} from "@/lib/ui/profile-settings-control";
+import { profileSettingsInputClassName } from "@/lib/ui/profile-settings-control";
 
 const REMARK_PLACEHOLDER = "Private name or note";
 
 export function ContactRemarkEditor({
   connectionId,
   initialRemark,
-  isSelfNotes,
   variant = "profile",
   remarkPlaceholder,
-  remarkMicroLabel,
 }: {
   connectionId: string;
   initialRemark: string | null;
-  /** Self-DM: optional custom title; default is your nickname + (self). */
+  /** Reserved for self-DM / future UI; not used when the field has a placeholder. */
   isSelfNotes?: boolean;
   /**
    * `profile` — one quiet row for user profile (default).
@@ -36,8 +31,6 @@ export function ContactRemarkEditor({
   variant?: "profile" | "minimal" | "inline" | "underName";
   /** Overrides default placeholder for the remark field (e.g. peer profile locale). */
   remarkPlaceholder?: string;
-  /** Overrides “Private note” micro label (`underName` variant, non–self-notes). */
-  remarkMicroLabel?: string;
 }) {
   const router = useRouter();
   const remarkPh = remarkPlaceholder ?? REMARK_PLACEHOLDER;
@@ -102,10 +95,8 @@ export function ContactRemarkEditor({
   }
 
   if (variant === "underName") {
-    const label = isSelfNotes ? "Notes chat title" : (remarkMicroLabel ?? "Private note");
     return (
       <div className="w-full min-w-0">
-        <span className={profileFieldMicroLabelClassName}>{label}</span>
         <div className="flex w-full min-w-0 items-stretch gap-2">
           <Input
             value={value}

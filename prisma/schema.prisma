@@ -340,6 +340,7 @@ model User {
   userCalendarCategories       UserCalendarCategory[]
   classmatePosts               ClassmatePost[]
   classmatePostInsights        ClassmatePostInsight[]
+  classmatePostSaves           ClassmatePostSave[]
   userLanguages                UserLanguage[]
   groupChatsCreated            GroupChat[]               @relation("GroupChatCreator")
   groupChatParticipants        GroupChatParticipant[]
@@ -409,10 +410,12 @@ model ClassmatePost {
   user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   courses    ClassmatePostCourse[]
   insights   ClassmatePostInsight[]
+  saves      ClassmatePostSave[]
   study      ClassmatePostStudy?
   meals      ClassmatePostMeals?
   language   ClassmatePostLanguage?
   sport      ClassmatePostSport?
+  images     ClassmatePostImage[]
 
   @@index([category, status, city, createdAt])
   @@index([userId, category, status])
@@ -432,6 +435,19 @@ model ClassmatePostInsight {
   @@index([postId, kind])
 }
 
+/// User-saved Discover posts (bookmarks).
+model ClassmatePostSave {
+  id              String        @id @default(cuid())
+  userId          String
+  classmatePostId String
+  createdAt       DateTime      @default(now())
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classmatePost   ClassmatePost @relation(fields: [classmatePostId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, classmatePostId])
+  @@index([userId, createdAt])
+}
+
 /// Structured preferences on a STUDY Discover post (1:1).
 model ClassmatePostStudy {
   postId           String          @id
@@ -446,8 +462,9 @@ model ClassmatePostStudy {
 /// Structured preferences on a MEALS Discover post (1:1).
 model ClassmatePostMeals {
   postId           String         @id
+  /// Legacy preset chips; new posts use an empty array and store free text in `venueOtherNote`.
   venueTags        MealVenueTag[]
-  /// Required when `venueTags` contains OTHER; max length enforced in API (Zod).
+  /// Free-text “where to eat” for new posts; legacy rows may pair with `venueTags` (e.g. OTHER).
   venueOtherNote   String?        @db.VarChar(60)
   post             ClassmatePost  @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
@@ -480,6 +497,19 @@ model ClassmatePostCourse {
 
   @@unique([postId, courseId])
   @@index([courseId])
+}
+
+/// Optional photos on a Discover post (max 3 per post; `sortOrder` 0..2).
+model ClassmatePostImage {
+  id        String        @id @default(cuid())
+  postId    String
+  url       String
+  sortOrder Int
+  createdAt DateTime      @default(now())
+  post      ClassmatePost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, sortOrder])
+  @@index([postId])
 }
 
 model SchoolEmailVerification {

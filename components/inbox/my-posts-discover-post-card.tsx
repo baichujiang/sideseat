@@ -122,7 +122,7 @@ export function MyPostsDiscoverPostCard({
         post={post}
         scene={scene}
         viewerCourseMatchIndex={viewerCourseMatchIndex}
-        listReturnTo="/inbox/my-posts"
+        listReturnTo="/profile/my-posts"
         cardFooter={cardFooter}
         titleTrailing={titleTrailing}
         yourPostBadge={false}
