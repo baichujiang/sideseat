@@ -19,6 +19,7 @@ import type { DiscoverCityNameKey } from "@/lib/discover/discover-city-name-keys
 import { formatMessage, type AppMessages } from "@/lib/i18n/messages";
 import { ClassmatePostStatus } from "@prisma/client";
 import { useAppMessages } from "@/hooks/use-app-locale";
+import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { cn } from "@/lib/utils";
 
 function buddyTimeLine(post: DiscoverPostRow, dl: AppMessages["discoverList"], buddy: AppMessages["discoverBuddy"]) {
@@ -51,10 +52,15 @@ function buddyLocationLine(
 
 function MiniAvatar({ url, name }: { url: string | null; name: string }) {
   const initial = name.trim().charAt(0) || "?";
-  if (url) {
+  const trimmed = url?.trim();
+  /** Preset ids (`p01`–`p20`) and blob URLs — same resolution as {@link PresetAvatar}. */
+  if (trimmed) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element -- small list avatar
-      <img src={url} alt="" className="h-7 w-7 shrink-0 rounded-full border border-border/50 object-cover" />
+      <PresetAvatar
+        id={trimmed}
+        size={28}
+        className="h-7 w-7 shrink-0 border border-border/50"
+      />
     );
   }
   return (

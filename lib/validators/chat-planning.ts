@@ -33,17 +33,12 @@ export const availabilityShareSchema = z
       return;
     }
 
-    let startMs: number;
-    let endMs: number;
-
     if (hasPick) {
       const parsed = value.includedDates!.map((ds) => new Date(`${ds}T12:00:00`));
       if (parsed.some((d) => Number.isNaN(d.getTime()))) {
         ctx.addIssue({ code: "custom", path: ["includedDates"], message: "Invalid date in selection." });
         return;
       }
-      startMs = Math.min(...parsed.map((d) => d.getTime()));
-      endMs = Math.max(...parsed.map((d) => d.getTime()));
     } else {
       const start = new Date(value.rangeStart!);
       const end = new Date(value.rangeEnd!);
@@ -59,21 +54,14 @@ export const availabilityShareSchema = z
         ctx.addIssue({ code: "custom", path: ["rangeEnd"], message: "End must be after start." });
         return;
       }
-      startMs = start.getTime();
-      endMs = end.getTime();
     }
 
-    const expiresAt = value.expiresAt ? new Date(value.expiresAt) : null;
+    const expiresAt = value.expiresAt?.trim() ? new Date(value.expiresAt) : null;
     if (expiresAt && Number.isNaN(expiresAt.getTime())) {
       ctx.addIssue({ code: "custom", path: ["expiresAt"], message: "Choose a valid expiry time." });
     }
-    if (expiresAt && expiresAt.getTime() <= startMs) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["expiresAt"],
-        message: "Expiry must be after the start of the shared range.",
-      });
-    }
+    // Expiry vs shared window is enforced in the route (clamp defaults like "+7 days" when the
+    // picked range starts later).
   });
 
 export const planRequestCreateSchema = z

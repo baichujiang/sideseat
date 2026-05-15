@@ -3,7 +3,7 @@ import { ConnectionStatus } from "@prisma/client";
 
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
-import { error, ok, parseJson } from "@/lib/http";
+import { error, ok, parseBody } from "@/lib/http";
 import { availabilityShareSchema } from "@/lib/validators/chat-planning";
 
 export async function POST(
@@ -13,7 +13,16 @@ export async function POST(
   try {
     const user = await requireOnboardedUser();
     const { connectionId } = await params;
-    const values = await parseJson(request, availabilityShareSchema);
+
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return error("Invalid JSON body.", 400);
+    }
+    const parsed = parseBody(body, availabilityShareSchema);
+    if (!parsed.ok) return error(parsed.error, 400);
+    const values = parsed.data;
 
     const connection = await prisma.connection.findFirst({
       where: {
@@ -47,7 +56,22 @@ export async function POST(
       includedDates = undefined;
     }
 
-    const expiresAt = values.expiresAt ? new Date(values.expiresAt) : addDays(new Date(), 7);
+    let expiresAtDate = values.expiresAt?.trim()
+      ? new Date(values.expiresAt)
+      : addDays(new Date(), 7);
+    if (Number.isNaN(expiresAtDate.getTime())) {
+      expiresAtDate = addDays(new Date(), 7);
+    }
+
+    const nowMs = Date.now();
+    if (expiresAtDate.getTime() <= nowMs) {
+      return error("Expiry must be in the future.", 400);
+    }
+
+    const windowStartMs = rangeStart.getTime();
+    if (expiresAtDate.getTime() <= windowStartMs) {
+      expiresAtDate = addDays(rangeEnd, 1);
+    }
 
     const result = await prisma.$transaction(async (tx) => {
       const share = await tx.availabilityShare.create({
@@ -58,7 +82,7 @@ export async function POST(
           rangeStart,
           rangeEnd,
           includedDates: includedDates ?? undefined,
-          expiresAt,
+          expiresAt: expiresAtDate,
         },
       });
 

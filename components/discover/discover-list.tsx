@@ -11,6 +11,7 @@ import {
   Edit3,
   Loader2,
   Plus,
+  Search,
   X,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -29,6 +30,7 @@ import {
   ClassmatesPersonRow,
   CLASSMATES_PERSON_ROW_AVATAR_RING_DISCOVER,
 } from "@/components/classmates/classmates-person-row";
+import { DiscoverAreaFilter } from "@/components/discover/discover-area-filter";
 import { DiscoverFeed } from "@/components/discover/discover-feed";
 import { DiscoverFeedTabs } from "@/components/discover/discover-feed-tabs";
 import {
@@ -138,6 +140,7 @@ export function DiscoverList({
     openOnly: boolean;
   }>({ categories: null, time: "any", openOnly: false });
   const [postOpen, setPostOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     setFeed(parseDiscoverFeedKind(searchParams.get("feed")));
@@ -176,15 +179,25 @@ export function DiscoverList({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-col gap-2">
-        <div className="flex gap-2">
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={buddy.searchPlaceholder}
+      <div className="sticky top-0 z-20 -mx-3 border-b border-classmates-edge/50 bg-classmates-warm/95 px-3 pb-2 pt-0 backdrop-blur-md supports-[backdrop-filter]:bg-classmates-warm/90 dark:border-border/40 dark:bg-background/90">
+        <div className="flex items-center gap-1.5">
+          <div className="min-w-0 flex-1">
+            <DiscoverFeedTabs active={feed} onChange={setFeedKind} labels={buddy} />
+          </div>
+          <DiscoverAreaFilter ui={m} />
+          <button
+            type="button"
+            onClick={() => setSearchOpen((open) => !open)}
             aria-label={buddy.searchAria}
-            className="h-10 min-w-0 flex-1 rounded-full border-border/80 bg-white px-3.5 text-[13px] shadow-sm dark:bg-card"
-          />
+            aria-expanded={searchOpen}
+            className={cn(
+              "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#E7E0D6] bg-white text-foreground shadow-sm transition",
+              "hover:bg-muted/40 active:bg-muted/60",
+              searchOpen && "border-classmates-blue/40 bg-classmates-blue/10 text-classmates-blue",
+            )}
+          >
+            <Search className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+          </button>
           <DiscoverFilterTriggerButton
             onClick={() => setFilterOpen(true)}
             ariaLabel={buddy.filterOpenAria}
@@ -194,13 +207,34 @@ export function DiscoverList({
             type="button"
             onClick={() => setPostOpen(true)}
             aria-label={buddy.createRequestCtaAria}
-            className="inline-flex h-10 shrink-0 items-center gap-1 rounded-full bg-classmates-blue px-3.5 text-[13px] font-semibold text-white shadow-sm transition hover:bg-classmates-blue/90"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-classmates-blue text-white shadow-sm transition hover:bg-classmates-blue/90"
           >
-            <Plus className="h-4 w-4" aria-hidden />
-            <span className="hidden sm:inline">{buddy.createRequestCta}</span>
+            <Plus className="h-4 w-4" strokeWidth={2.5} aria-hidden />
           </button>
         </div>
-        <DiscoverFeedTabs active={feed} onChange={setFeedKind} labels={buddy} />
+        {searchOpen ? (
+          <div className="mt-2 flex gap-2">
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={buddy.searchPlaceholder}
+              aria-label={buddy.searchAria}
+              autoFocus
+              className="h-9 min-w-0 flex-1 rounded-full border-border/80 bg-white px-3.5 text-[13px] shadow-sm dark:bg-card"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setSearchOpen(false);
+                setSearchQuery("");
+              }}
+              aria-label={m.common.close}
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 bg-white text-muted-foreground shadow-sm hover:text-foreground"
+            >
+              <X className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {feed === "for-you" && rows.length > 0 ? (

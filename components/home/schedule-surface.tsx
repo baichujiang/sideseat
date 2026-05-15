@@ -1234,9 +1234,9 @@ export function ScheduleSurface({
       const vv = window.visualViewport;
       const vh = (vv?.height ?? window.innerHeight) + (vv?.offsetTop ?? 0);
       const top = wrap.getBoundingClientRect().top;
-      /** Visible-days slider + gap; keeps cap from eating the bar. */
-      const reserveBelowCalendarPx = 56;
-      const cushionPx = 8;
+      /** Visible-days slider + gap; keeps cap from eating the bar (non-sticky, in-flow). */
+      const reserveBelowCalendarPx = 40;
+      const cushionPx = 6;
       const maxOuterPx = vh - top - reserveBelowCalendarPx - cushionPx;
       const maxBodyPx = maxOuterPx - WEEK_CALENDAR_HEADER_HEIGHT_PX;
       setWeekHomeMaxViewportBodyPx(
@@ -1919,8 +1919,8 @@ function WeekVisibleDaysBar({
   return (
     <div
       className={cn(
-        "sticky bottom-0 z-[5] shrink-0 rounded-xl border border-[#E7E0D6] bg-white px-2 py-1.5 shadow-[0_4px_14px_rgba(15,23,42,0.04)]",
-        "dark:border-border dark:bg-card dark:shadow-[0_4px_14px_rgba(0,0,0,0.12)]",
+        "shrink-0 rounded-xl border border-[#E7E0D6] bg-white px-2 py-1 shadow-[0_2px_8px_rgba(15,23,42,0.03)]",
+        "dark:border-border dark:bg-card dark:shadow-[0_2px_8px_rgba(0,0,0,0.1)]",
       )}
     >
       {/* Mirror horizontally so low/high day counts map to the opposite screen side

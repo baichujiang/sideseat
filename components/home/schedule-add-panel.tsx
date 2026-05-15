@@ -26,6 +26,7 @@ import {
   type CalendarClipboardSessionV1,
 } from "@/lib/calendar/calendar-clipboard";
 import { isValidCategoryHex } from "@/lib/calendar/category-visual";
+import type { AppMessages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 type RepeatRule = "NONE" | "DAILY" | "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "YEARLY";
@@ -65,25 +66,11 @@ function defaultDateOnly(date: Date) {
   return format(date, "yyyy-MM-dd");
 }
 
-/** Used when the user saves without typing a title (placeholder is shown while editing). */
-function defaultNewEventTitle() {
-  return "New event";
-}
-
 function truncateClipboardPreview(text: string, maxChars: number) {
   const single = text.replace(/\s+/g, " ").trim();
   if (single.length <= maxChars) return single;
   return `${single.slice(0, Math.max(0, maxChars - 1))}…`;
 }
-
-const REPEAT_OPTIONS: Array<{ value: RepeatRule; label: string }> = [
-  { value: "NONE", label: "No" },
-  { value: "DAILY", label: "Every day" },
-  { value: "WEEKLY", label: "Every week" },
-  { value: "BIWEEKLY", label: "Every 2 weeks" },
-  { value: "MONTHLY", label: "Every month" },
-  { value: "YEARLY", label: "Every year" },
-];
 
 export function ScheduleAddPanel({
   selectedDate,
@@ -237,14 +224,21 @@ export function ScheduleAddPanel({
     );
   }, [companionOptions, withDraft, withUserIds]);
 
+  const repeatOptions = useMemo(
+    (): Array<{ value: RepeatRule; label: string }> => [
+      { value: "NONE", label: sch.repeatNone },
+      { value: "DAILY", label: sch.repeatDaily },
+      { value: "WEEKLY", label: sch.repeatWeekly },
+      { value: "BIWEEKLY", label: sch.repeatBiweekly },
+      { value: "MONTHLY", label: sch.repeatMonthly },
+      { value: "YEARLY", label: sch.repeatYearly },
+    ],
+    [sch],
+  );
+
   const repeatLabel = useMemo(() => {
-    if (repeat === "NONE") return "No";
-    if (repeat === "DAILY") return "Every day";
-    if (repeat === "WEEKLY") return "Every week";
-    if (repeat === "BIWEEKLY") return "Every 2 weeks";
-    if (repeat === "MONTHLY") return "Every month";
-    return "Every year";
-  }, [repeat]);
+    return repeatOptions.find((o) => o.value === repeat)?.label ?? sch.repeatNone;
+  }, [repeat, repeatOptions, sch.repeatNone]);
 
   const clipboardBannerAccentHex = useMemo(() => {
     const raw = clipboardSession?.categoryColor?.trim();
@@ -259,7 +253,7 @@ export function ScheduleAddPanel({
       method: mode === "edit" && entryId ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        title: mode === "create" ? title.trim() || defaultNewEventTitle() : title.trim(),
+        title: mode === "create" ? title.trim() || sch.newEvent : title.trim(),
         location: location.trim(),
         note: note.trim(),
         startAt: new Date(startAt).toISOString(),
@@ -278,8 +272,8 @@ export function ScheduleAddPanel({
         typeof payload.error === "string"
           ? payload.error
           : mode === "edit"
-            ? "Could not update schedule item."
-            : "Could not add schedule item.",
+            ? sch.addPanelSaveErrorEdit
+            : sch.addPanelSaveErrorCreate,
       );
       return;
     }
@@ -349,18 +343,18 @@ export function ScheduleAddPanel({
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="Close"
+                aria-label={sch.addPanelCloseAria}
                 className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border/70 bg-background text-muted-foreground transition hover:bg-muted hover:text-foreground"
               >
                 <X className="h-5 w-5" strokeWidth={2.25} />
               </button>
-              <h2 className="pointer-events-none text-center text-[16px] font-semibold text-foreground">
-                {mode === "edit" ? "Edit schedule item" : "Add to Calendar"}
+              <h2 className="pointer-events-none text-center text-[15px] font-semibold text-foreground">
+                {mode === "edit" ? sch.addPanelTitleEdit : sch.addPanelTitle}
               </h2>
               <button
                 type="button"
-                aria-label={mode === "edit" ? "Save changes" : "Add event"}
-                title={saving ? (mode === "edit" ? "Saving…" : "Adding…") : mode === "edit" ? "Save" : "Add"}
+                aria-label={mode === "edit" ? sch.addPanelSaveAria : sch.addPanelAddAria}
+                title={mode === "edit" ? sch.addPanelSaveAria : sch.addPanelAddAria}
                 onClick={() => void submitEntry()}
                 disabled={!canSave || saving}
                 className={cn(
@@ -376,21 +370,21 @@ export function ScheduleAddPanel({
               </button>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
-              <div className="space-y-2.5">
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2.5">
+              <div className="space-y-2">
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder={defaultNewEventTitle()}
-          aria-label="Event title"
-          className="h-11 rounded-2xl border-border/70 bg-muted/10 shadow-none placeholder:text-muted-foreground/80"
+          placeholder={sch.newEvent}
+          aria-label={sch.addPanelTitleAria}
+          className="h-10 rounded-xl border-border/70 bg-muted/10 text-[15px] shadow-none placeholder:text-muted-foreground/80"
         />
 
         {clipboardSession ? (
           <div
             className={cn(
-              "rounded-2xl border border-border/60 bg-muted/[0.12] px-3 py-2.5 text-[12px] text-muted-foreground",
-              clipboardBannerAccentHex && "border-l-[4px]",
+              "flex items-center gap-2 rounded-xl border border-border/60 bg-muted/[0.08] px-2.5 py-2",
+              clipboardBannerAccentHex && "border-l-[3px]",
             )}
             style={
               clipboardBannerAccentHex
@@ -398,42 +392,38 @@ export function ScheduleAddPanel({
                 : undefined
             }
             role="status"
+            aria-label={sch.calendarClipboardBannerTitle}
           >
-            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/90">
-              {sch.calendarClipboardBannerTitle}
+            <p className="min-w-0 flex-1 truncate text-[12px] text-muted-foreground">
+              {truncateClipboardPreview(clipboardSession.summaryText, 56)}
             </p>
-            <p className="mt-1 line-clamp-3 whitespace-pre-wrap break-words text-[12px] leading-snug text-muted-foreground">
-              {truncateClipboardPreview(clipboardSession.summaryText, 140)}
-            </p>
-            <div className="mt-2 flex flex-wrap items-center justify-end gap-2">
+            {clipboardSession.title?.trim() ? (
               <button
                 type="button"
-                onClick={() => {
-                  clearCalendarClipboardSession();
-                  setClipboardSession(null);
-                }}
-                className="rounded-full px-3 py-1 text-[11px] font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                onClick={() => setTitle(clipboardSession.title!.trim())}
+                className="shrink-0 rounded-full border border-border/70 bg-background px-2.5 py-0.5 text-[11px] font-medium text-foreground"
               >
-                {sch.calendarClipboardDismiss}
+                {sch.calendarClipboardApplyTitle}
               </button>
-              {clipboardSession.title?.trim() ? (
-                <button
-                  type="button"
-                  onClick={() => setTitle(clipboardSession.title!.trim())}
-                  className="rounded-full border border-border/70 bg-background px-3 py-1 text-[11px] font-medium text-foreground transition hover:bg-muted/60"
-                >
-                  {sch.calendarClipboardApplyTitle}
-                </button>
-              ) : null}
-            </div>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => {
+                clearCalendarClipboardSession();
+                setClipboardSession(null);
+              }}
+              className="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground hover:text-foreground"
+            >
+              {sch.calendarClipboardDismiss}
+            </button>
           </div>
         ) : null}
 
         <Input
           value={location}
           onChange={(e) => setLocation(e.target.value)}
-          placeholder="Location (optional)"
-          className="h-11 rounded-2xl border-border/70 bg-muted/10 shadow-none"
+          placeholder={sch.addPanelLocationPlaceholder}
+          className="h-10 rounded-xl border-border/70 bg-muted/10 text-[15px] shadow-none"
         />
 
         {calendarCategories.length > 0 ? (
@@ -441,12 +431,13 @@ export function ScheduleAddPanel({
             categories={calendarCategories}
             value={categoryId}
             onChange={setCategoryId}
+            labels={sch}
           />
         ) : null}
 
-        <div className="rounded-2xl border border-border/70 bg-muted/[0.06] px-4 py-1 text-foreground">
+        <div className="rounded-xl border border-border/70 bg-muted/[0.06] px-3 py-0.5 text-foreground">
           <EventDateTimeRow
-            label="Start"
+            label={sch.addPanelStart}
             dateValue={formatDisplayDate(startAt)}
             timeValue={timePart(startAt)}
             hasDivider
@@ -473,7 +464,7 @@ export function ScheduleAddPanel({
           ) : null}
 
           <EventDateTimeRow
-            label="End"
+            label={sch.addPanelEnd}
             dateValue={formatDisplayDate(endAt)}
             timeValue={timePart(endAt)}
             activeDate={activeDateDialog === "end"}
@@ -515,7 +506,7 @@ export function ScheduleAddPanel({
           ) : null}
         </div>
 
-        <div className="relative rounded-2xl border border-border/70 bg-muted/[0.06] px-4 py-1">
+        <div className="relative rounded-xl border border-border/70 bg-muted/[0.06] px-3 py-0.5">
           <button
             type="button"
             onClick={() => {
@@ -523,15 +514,15 @@ export function ScheduleAddPanel({
               setActiveDateDialog(null);
               setActiveTimePicker(null);
             }}
-            className="flex w-full items-center justify-between py-3 text-[15px] text-foreground"
+            className="flex w-full items-center justify-between py-2.5 text-[14px] text-foreground"
           >
-            <span className="font-medium text-foreground">Repeat</span>
-            <span className="truncate text-right">{repeatLabel}</span>
+            <span className="font-medium text-foreground">{sch.addPanelRepeat}</span>
+            <span className="truncate text-right text-muted-foreground">{repeatLabel}</span>
           </button>
 
           {repeat !== "NONE" ? (
-            <div className="flex items-center justify-between border-t border-border/50 py-3 text-[14px]">
-              <span className="font-medium text-foreground">Repeat until</span>
+            <div className="flex items-center justify-between border-t border-border/50 py-2.5 text-[13px]">
+              <span className="font-medium text-foreground">{sch.addPanelRepeatUntil}</span>
               <Input
                 type="date"
                 value={repeatUntil}
@@ -543,7 +534,7 @@ export function ScheduleAddPanel({
 
           {showRepeatEditor ? (
             <div className="absolute right-0 top-full z-30 mt-2 w-[min(13.5rem,72vw)] overflow-hidden rounded-[1.75rem] border border-border/70 bg-popover p-2 text-popover-foreground shadow-xl">
-              {REPEAT_OPTIONS.map((option, index) => {
+              {repeatOptions.map((option, index) => {
                 const active = option.value === repeat;
                 return (
                   <button
@@ -555,7 +546,7 @@ export function ScheduleAddPanel({
                     }}
                     className={cn(
                       "flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[15px] transition hover:bg-muted/70",
-                      index !== REPEAT_OPTIONS.length - 1 && "border-b border-border/50",
+                      index !== repeatOptions.length - 1 && "border-b border-border/50",
                     )}
                   >
                     <span className="flex h-5 w-5 items-center justify-center">
@@ -569,9 +560,8 @@ export function ScheduleAddPanel({
           ) : null}
         </div>
 
-        <div className="relative rounded-2xl border border-border/70 bg-muted/[0.06] px-4 py-1">
-          <div className="flex min-h-11 flex-wrap items-center gap-2 py-2.5 pr-14">
-            <span className="shrink-0 text-[15px] font-medium text-foreground">Invite classmates</span>
+        <div className="relative rounded-xl border border-border/70 bg-muted/[0.06] px-3 py-1">
+          <div className="flex min-h-10 flex-wrap items-center gap-1.5 py-2 pr-11">
             {selectedCompanions.map((person) => (
               <button
                 key={person.id}
@@ -597,15 +587,15 @@ export function ScheduleAddPanel({
                   addWithUser(filteredCompanions[0].id);
                 }
               }}
-              placeholder="Add people"
-              className="min-w-[7rem] flex-1 bg-transparent text-[13px] text-foreground outline-none placeholder:text-muted-foreground"
+              placeholder={sch.addPanelWithPlaceholder}
+              className="min-w-[6rem] flex-1 bg-transparent text-[13px] text-foreground outline-none placeholder:text-muted-foreground"
             />
           </div>
 
           <button
             type="button"
             onClick={() => setShowCompanionList((current) => !current)}
-            aria-label="Choose classmates"
+            aria-label={sch.addPanelChooseClassmatesAria}
             className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             <Plus className="h-4 w-4" strokeWidth={2.25} />
@@ -624,7 +614,7 @@ export function ScheduleAddPanel({
                     <PresetAvatar id={person.avatarUrl} size={28} className="shrink-0" />
                     <span className="truncate">{person.name}</span>
                   </span>
-                  <span className="text-[11px] text-muted-foreground">Add</span>
+                  <span className="text-[11px] text-muted-foreground">{sch.addPanelAddPerson}</span>
                 </button>
               ))}
             </div>
@@ -650,7 +640,7 @@ export function ScheduleAddPanel({
                       <PresetAvatar id={person.avatarUrl} size={30} className="shrink-0" />
                       <span className="truncate">{person.name}</span>
                     </span>
-                    <span className="text-[11px] opacity-80">{active ? "Added" : "Select"}</span>
+                    <span className="text-[11px] opacity-80">{active ? sch.addPanelAdded : sch.addPanelSelect}</span>
                   </button>
                 );
               })}
@@ -658,16 +648,14 @@ export function ScheduleAddPanel({
           ) : null}
         </div>
 
-        <div className="rounded-2xl border border-border/70 bg-muted/[0.05] px-4 py-2">
-          <div className="flex min-h-11 items-start">
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Notes"
-              rows={3}
-              className="min-h-[3.25rem] flex-1 resize-none bg-transparent text-[13px] text-foreground outline-none placeholder:text-muted-foreground"
-            />
-          </div>
+        <div className="rounded-xl border border-border/70 bg-muted/[0.05] px-3 py-2">
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder={sch.addPanelNotesPlaceholder}
+            rows={2}
+            className="min-h-[2.5rem] w-full resize-none bg-transparent text-[13px] text-foreground outline-none placeholder:text-muted-foreground"
+          />
         </div>
 
         {error ? <p className="text-[12px] text-destructive">{error}</p> : null}
@@ -683,22 +671,24 @@ function CategoryPickerRow({
   categories,
   value,
   onChange,
+  labels,
 }: {
   categories: CalendarCategoryOption[];
   value: string | null;
   onChange: (id: string | null) => void;
+  labels: AppMessages["schedule"];
 }) {
   const [open, setOpen] = useState(false);
   const selected = categories.find((c) => c.id === value);
 
   return (
-    <div className="relative rounded-2xl border border-border/70 bg-muted/[0.06] px-4 py-1">
+    <div className="relative rounded-xl border border-border/70 bg-muted/[0.06] px-3 py-0.5">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between py-3 text-[15px]"
+        className="flex w-full items-center justify-between py-2.5 text-[14px]"
       >
-        <span className="font-medium text-foreground">Calendar</span>
+        <span className="font-medium text-foreground">{labels.addPanelCalendar}</span>
         <span className="inline-flex items-center gap-2 text-right">
           {selected ? (
             <>
@@ -710,7 +700,7 @@ function CategoryPickerRow({
               <span className="text-foreground">{selected.name}</span>
             </>
           ) : (
-            <span className="text-muted-foreground">None</span>
+            <span className="text-muted-foreground">{labels.addPanelNone}</span>
           )}
         </span>
       </button>
@@ -731,7 +721,7 @@ function CategoryPickerRow({
             <span className="flex h-5 w-5 items-center justify-center">
               {value === null ? <Check className="h-4 w-4 text-primary" strokeWidth={2.5} /> : null}
             </span>
-            <span className="flex-1 text-muted-foreground">None</span>
+            <span className="flex-1 text-muted-foreground">{labels.addPanelNone}</span>
           </button>
           {categories.map((c, i) => {
             const active = value === c.id;

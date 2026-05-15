@@ -243,7 +243,7 @@ export function DiscoverFilterTriggerButton({
       aria-label={ariaLabel}
       aria-pressed={active}
       className={cn(
-        "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E7E0D6] bg-white text-muted-foreground shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] transition-colors",
+        "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#E7E0D6] bg-white text-muted-foreground shadow-sm transition-colors",
         "hover:border-border hover:bg-muted/35 hover:text-foreground",
         active && "border-classmates-blue-border text-classmates-blue",
       )}
