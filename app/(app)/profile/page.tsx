@@ -9,11 +9,14 @@ import { LogoutForm } from "@/components/auth/logout-form";
 import { StudentVerificationForm } from "@/components/forms/student-verification-form";
 import { MePageInstallCard } from "@/components/pwa/me-page-install-card";
 import {
-  MeSettingsRowLabel,
-  meSettingsRowChevronClass,
-  meSettingsRowMutedIconShellClass,
-  meSettingsRowLeadClass,
-  meSettingsRowLinkClass,
+  MePageSettingsRowLabel,
+  mePageCardClass,
+  mePageChevronClass,
+  mePageIconMutedClass,
+  mePageIconShellClass,
+  mePageListDivideClass,
+  mePageRowInteractiveClass,
+  mePageRowLeadClass,
 } from "@/components/profile/me-settings-row";
 import { ProfileIdentitySheets } from "@/components/profile/profile-identity-sheets";
 import { MePageSection } from "@/components/profile/me-page-section";
@@ -30,6 +33,7 @@ import { DEGREE_LEVEL_LABELS } from "@/lib/constants/majors";
 import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
 import { profileLanguagesFormDefault } from "@/lib/constants/languages";
 import { prisma } from "@/lib/db/prisma";
+import { getServerDiscoverServedCity } from "@/lib/discover/discover-city-preference";
 
 function MeDestRow({
   href,
@@ -43,14 +47,14 @@ function MeDestRow({
   subtitle: string;
 }) {
   return (
-    <Link href={href} className={meSettingsRowLinkClass}>
-      <div className={meSettingsRowLeadClass}>
-        <span className={meSettingsRowMutedIconShellClass}>
-          <Icon className="h-4 w-4" strokeWidth={2} aria-hidden />
+    <Link href={href} className={mePageRowInteractiveClass}>
+      <div className={mePageRowLeadClass}>
+        <span className={mePageIconShellClass}>
+          <Icon className={mePageIconMutedClass} strokeWidth={2} aria-hidden />
         </span>
-        <MeSettingsRowLabel title={title} subtitle={subtitle} />
+        <MePageSettingsRowLabel title={title} subtitle={subtitle} />
       </div>
-      <ChevronRight className={meSettingsRowChevronClass} strokeWidth={2} aria-hidden />
+      <ChevronRight className={mePageChevronClass} strokeWidth={2} aria-hidden />
     </Link>
   );
 }
@@ -110,7 +114,10 @@ export default async function ProfilePage({
     );
   }
 
-  const blockedCount = await prisma.block.count({ where: { blockerId: user.id } });
+  const [blockedCount, servedCity] = await Promise.all([
+    prisma.block.count({ where: { blockerId: user.id } }),
+    getServerDiscoverServedCity(),
+  ]);
   const isAdmin = isConfiguredAdmin(user);
 
   const profileForSheet = await prisma.user.findUnique({
@@ -130,11 +137,10 @@ export default async function ProfilePage({
         : formatMessage(ui.profile.preferencesSubtitleMany, { count: blockedCount });
 
   return (
-    <div className="space-y-3 pb-2">
-      <header className="px-0.5">
-        {isAdmin ? (
+    <div className="-mx-3 space-y-5 bg-classmates-warm-alt px-5 pb-2 pt-1 dark:bg-background">
+      {isAdmin ? (
           <nav
-            className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-border/60 pb-2"
+            className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-border/60 px-0.5 pb-2"
             aria-label={ui.me.adminNavAria}
           >
             <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -153,10 +159,7 @@ export default async function ProfilePage({
               {ui.me.adminFeedback}
             </Link>
           </nav>
-        ) : null}
-        <h1 className="page-screen-title">{ui.me.screenTitle}</h1>
-        <p className="page-screen-subtitle mt-0.5">{ui.me.screenSubtitle}</p>
-      </header>
+      ) : null}
 
       {!user.onboardingComplete ? (
         <OnboardingContinueCta title={ui.onboarding.meTitle} body={ui.onboarding.meBody} />
@@ -180,14 +183,11 @@ export default async function ProfilePage({
         </p>
       ) : null}
 
-      {/* Identity + trust */}
-      <div className="space-y-6">
-        <MePageSection id="me-profile-summary-heading" title={ui.me.profileSectionTitle}>
-          <ProfileIdentitySheets
-            variant="summary"
-            gender={user.gender}
-            sheetProfileFormKey={sheetProfileFormKey}
-            sheetProfileInitialValues={{
+      <ProfileIdentitySheets
+        variant="summary"
+        gender={user.gender}
+        sheetProfileFormKey={sheetProfileFormKey}
+        sheetProfileInitialValues={{
               nickname: user.nickname ?? "",
               gender: user.gender,
               school: schoolCode,
@@ -215,12 +215,35 @@ export default async function ProfilePage({
             }}
             initialAvatarUrl={user.avatarUrl}
             initialBio={user.bio}
-            initialNickname={user.nickname}
-          />
-        </MePageSection>
+        initialNickname={user.nickname}
+        discoverCity={servedCity}
+      />
 
-        <MePageSection id="me-verification-heading" title={ui.me.verificationSectionTitle}>
-          <StudentVerificationForm
+      <div className={mePageCardClass}>
+        <div className={mePageListDivideClass}>
+          <MeDestRow
+            href={'/profile/my-posts' as Route}
+            icon={SquarePen}
+            title={ui.profile.myPostsRowTitle}
+            subtitle={ui.profile.myPostsRowSubtitle}
+          />
+          <MeDestRow
+            href={'/profile/saved-posts' as Route}
+            icon={Bookmark}
+            title={ui.profile.savedPostsRowTitle}
+            subtitle={ui.profile.savedPostsRowSubtitle}
+          />
+          <MeDestRow
+            href={'/profile/my-plan' as Route}
+            icon={CalendarClock}
+            title={ui.profile.myPlanRowTitle}
+            subtitle={ui.profile.myPlanRowSubtitle}
+          />
+        </div>
+      </div>
+
+      <MePageSection id="me-verification-heading" title={ui.me.verificationSectionTitle}>
+        <StudentVerificationForm
             currentStatus={user.studentVerificationStatus}
             schoolCode={schoolCode}
             schoolShortLabel={schoolShort}
@@ -228,52 +251,31 @@ export default async function ProfilePage({
             email={user.email}
             hasProofUploaded={Boolean(user.manualReviewProofUrl)}
           />
-        </MePageSection>
+      </MePageSection>
 
-        <MePageSection id="me-push-heading" density="compact">
-          <PushNotificationsCard />
-        </MePageSection>
+      <MePageSection id="me-push-heading" density="compact">
+        <PushNotificationsCard />
+      </MePageSection>
 
-        {tipsEnabled ? (
-          <MePageSection id="me-tip-heading" density="compact">
-            <TipSupportCard enabled t={ui.tip} />
-          </MePageSection>
-        ) : null}
-      </div>
-
-      {/* App, support, account */}
-      <div className="space-y-3 border-t border-border/60 pt-4">
-        <div className="overflow-hidden rounded-xl border border-classmates-edge bg-classmates-surface shadow-[0_2px_10px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card">
-          <div className="divide-y divide-classmates-hairline dark:divide-border/60">
-            <MeDestRow
-              href={'/profile/my-posts' as Route}
-              icon={SquarePen}
-              title={ui.profile.myPostsRowTitle}
-              subtitle={ui.profile.myPostsRowSubtitle}
-            />
-            <MeDestRow
-              href={'/profile/saved-posts' as Route}
-              icon={Bookmark}
-              title={ui.profile.savedPostsRowTitle}
-              subtitle={ui.profile.savedPostsRowSubtitle}
-            />
-            <MeDestRow
-              href={'/profile/my-plan' as Route}
-              icon={CalendarClock}
-              title={ui.profile.myPlanRowTitle}
-              subtitle={ui.profile.myPlanRowSubtitle}
-            />
-            <MePageInstallCard inList />
-            <FeedbackFormCard variant="listRow" />
-            <MeDestRow
-              href={'/profile/account' as Route}
-              icon={Settings}
-              title={ui.profile.preferencesTitle}
-              subtitle={settingsSubtitle}
-            />
-          </div>
+      <div className={mePageCardClass}>
+        <div className={mePageListDivideClass}>
+          <MePageInstallCard inList />
+          <FeedbackFormCard variant="listRow" />
+          <MeDestRow
+            href={'/profile/account' as Route}
+            icon={Settings}
+            title={ui.profile.preferencesTitle}
+            subtitle={settingsSubtitle}
+          />
         </div>
       </div>
+
+      {tipsEnabled ? (
+        <MePageSection id="me-tip-heading" density="compact">
+          <TipSupportCard enabled t={ui.tip} />
+        </MePageSection>
+      ) : null}
+
     </div>
   );
 }

@@ -30,15 +30,13 @@ import {
   ClassmatesPersonRow,
   CLASSMATES_PERSON_ROW_AVATAR_RING_DISCOVER,
 } from "@/components/classmates/classmates-person-row";
-import { DiscoverAreaFilter } from "@/components/discover/discover-area-filter";
+import {
+  DiscoverBuddyTypeChips,
+  type BuddyTypeChipValue,
+} from "@/components/discover/discover-buddy-type-chips";
 import { DiscoverFeed } from "@/components/discover/discover-feed";
 import { DiscoverFeedTabs } from "@/components/discover/discover-feed-tabs";
-import {
-  applyBuddyFeedClientFilters,
-  DiscoverFilterSheet,
-  DiscoverFilterTriggerButton,
-  type BuddyFeedTimeFilter,
-} from "@/components/discover/discover-filter-sheet";
+import { applyBuddyFeedClientFilters } from "@/components/discover/discover-filter-sheet";
 import { ClassmatePostCreateImageRow } from "@/components/discover/classmate-post-create-image-row";
 import { LanguageExchangePostFields } from "@/components/discover/language-exchange-post-fields";
 import { SportsPostFieldCombobox } from "@/components/discover/sports-post-field-combobox";
@@ -57,7 +55,10 @@ import {
   type DiscoverFeedKind,
 } from "@/lib/discover/discover-feed-kind";
 import { ALL_BUDDY_CATEGORIES, buddyTypeLabel } from "@/lib/discover/buddy-type-labels";
-import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
+import {
+  DEFAULT_DISCOVER_SERVED_CITY,
+  type DiscoverCityNameKey,
+} from "@/lib/discover/discover-city-name-keys";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { formatMessage, type AppMessages } from "@/lib/i18n/messages";
 import {
@@ -118,12 +119,15 @@ export function DiscoverList({
   posts,
   savedCourseCount,
   enrolledCourses = [],
+  servedCity,
 }: {
   rows: DiscoverRow[];
   posts: DiscoverPostRow[];
   /** Saved courses count — used to suggest “Add a course” when the feed is empty. */
   savedCourseCount?: number;
   enrolledCourses?: EnrolledCourseOption[];
+  /** Metro scope from Me → city preference (cookie). */
+  servedCity?: DiscoverCityNameKey;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -133,14 +137,8 @@ export function DiscoverList({
 
   const [feed, setFeed] = useState<DiscoverFeedKind>(() => parseDiscoverFeedKind(searchParams.get("feed")));
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [filters, setFilters] = useState<{
-    categories: ClassmatePostCategory[] | null;
-    time: BuddyFeedTimeFilter;
-    openOnly: boolean;
-  }>({ categories: null, time: "any", openOnly: false });
+  const [typeChip, setTypeChip] = useState<BuddyTypeChipValue>("all");
   const [postOpen, setPostOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     setFeed(parseDiscoverFeedKind(searchParams.get("feed")));
@@ -159,12 +157,13 @@ export function DiscoverList({
   };
 
   const filteredByFeed = filterDiscoverFeedPosts(posts, feed);
-  const filteredBySheet = applyBuddyFeedClientFilters(filteredByFeed, filters);
+  const categoriesFilter = typeChip === "all" ? null : [typeChip];
+  const filteredByType = applyBuddyFeedClientFilters(filteredByFeed, categoriesFilter);
   const q = searchQuery.trim().toLowerCase();
   const filteredPosts =
     q.length < 2
-      ? filteredBySheet
-      : filteredBySheet.filter((p) => {
+      ? filteredByType
+      : filteredByType.filter((p) => {
           const courseBlob = (p.linkedCourses ?? []).map((c) => `${c.code ?? ""} ${c.name}`).join(" ");
           const blob = [p.title, p.body ?? "", p.nickname, buddyTypeLabel(p.category, buddy), courseBlob]
             .join(" ")
@@ -172,37 +171,38 @@ export function DiscoverList({
           return blob.includes(q);
         });
 
-  const filterActive =
-    Boolean(filters.categories?.length) || filters.time !== "any" || filters.openOnly;
-
   const emptyCopy = feed === "today" ? buddy.emptyFeedToday : buddy.emptyFeed;
+  const cityNameKey = servedCity ?? DEFAULT_DISCOVER_SERVED_CITY;
 
   return (
     <div className="space-y-3">
-      <div className="sticky top-0 z-20 -mx-3 border-b border-classmates-edge/50 bg-classmates-warm/95 px-3 pb-2 pt-0 backdrop-blur-md supports-[backdrop-filter]:bg-classmates-warm/90 dark:border-border/40 dark:bg-background/90">
-        <div className="flex items-center gap-1.5">
-          <div className="min-w-0 flex-1">
-            <DiscoverFeedTabs active={feed} onChange={setFeedKind} labels={buddy} />
+      <div className="sticky top-0 z-20 -mx-3 space-y-1.5 border-b border-classmates-edge/50 bg-classmates-warm/95 px-3 pb-2 pt-0 backdrop-blur-md supports-[backdrop-filter]:bg-classmates-warm/90 dark:border-border/40 dark:bg-background/90">
+        <div className="flex items-center gap-2">
+          <h1 className="page-screen-title shrink-0 text-[17px] leading-tight">{m.discover.screenTitle}</h1>
+          <div className="relative min-w-0 flex-1">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              strokeWidth={2.25}
+              aria-hidden
+            />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={buddy.searchPlaceholder}
+              aria-label={buddy.searchAria}
+              className="h-9 min-w-0 w-full rounded-full border-border/80 bg-white py-0 pl-9 pr-9 text-[13px] shadow-sm dark:bg-card"
+            />
+            {searchQuery.trim().length > 0 ? (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                aria-label={m.common.close}
+                className="absolute right-1 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
+              </button>
+            ) : null}
           </div>
-          <DiscoverAreaFilter ui={m} />
-          <button
-            type="button"
-            onClick={() => setSearchOpen((open) => !open)}
-            aria-label={buddy.searchAria}
-            aria-expanded={searchOpen}
-            className={cn(
-              "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#E7E0D6] bg-white text-foreground shadow-sm transition",
-              "hover:bg-muted/40 active:bg-muted/60",
-              searchOpen && "border-classmates-blue/40 bg-classmates-blue/10 text-classmates-blue",
-            )}
-          >
-            <Search className="h-4 w-4" strokeWidth={2.25} aria-hidden />
-          </button>
-          <DiscoverFilterTriggerButton
-            onClick={() => setFilterOpen(true)}
-            ariaLabel={buddy.filterOpenAria}
-            active={filterActive}
-          />
           <button
             type="button"
             onClick={() => setPostOpen(true)}
@@ -212,42 +212,13 @@ export function DiscoverList({
             <Plus className="h-4 w-4" strokeWidth={2.5} aria-hidden />
           </button>
         </div>
-        {searchOpen ? (
-          <div className="mt-2 flex gap-2">
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={buddy.searchPlaceholder}
-              aria-label={buddy.searchAria}
-              autoFocus
-              className="h-9 min-w-0 flex-1 rounded-full border-border/80 bg-white px-3.5 text-[13px] shadow-sm dark:bg-card"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                setSearchOpen(false);
-                setSearchQuery("");
-              }}
-              aria-label={m.common.close}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 bg-white text-muted-foreground shadow-sm hover:text-foreground"
-            >
-              <X className="h-4 w-4" strokeWidth={2.25} aria-hidden />
-            </button>
-          </div>
-        ) : null}
+        <DiscoverFeedTabs active={feed} onChange={setFeedKind} labels={buddy} />
+        <DiscoverBuddyTypeChips value={typeChip} onChange={setTypeChip} labels={buddy} />
       </div>
 
       {feed === "for-you" && rows.length > 0 ? (
         <DiscoverPeopleRail rows={rows} title={buddy.peopleStripTitle} />
       ) : null}
-
-      <DiscoverFilterSheet
-        open={filterOpen}
-        onClose={() => setFilterOpen(false)}
-        initial={filters}
-        buddy={buddy}
-        onApply={(next) => setFilters(next)}
-      />
 
       {filteredPosts.length === 0 ? (
         <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-6 text-center text-[13px] text-muted-foreground shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
@@ -261,11 +232,12 @@ export function DiscoverList({
           ) : null}
         </div>
       ) : (
-        <DiscoverFeed posts={filteredPosts} cityNameKey={DEFAULT_DISCOVER_SERVED_CITY} />
+        <DiscoverFeed posts={filteredPosts} cityNameKey={cityNameKey as DiscoverCityNameKey} />
       )}
 
       <CreatePostSheet
         open={postOpen}
+        servedCity={cityNameKey}
         enrolledCourses={enrolledCourses}
         onClose={() => setPostOpen(false)}
         onCreated={() => {
@@ -467,11 +439,13 @@ function postFieldCharCountClassName(current: number, max: number) {
 
 function CreatePostSheet({
   open,
+  servedCity,
   enrolledCourses = [],
   onClose,
   onCreated,
 }: {
   open: boolean;
+  servedCity: DiscoverCityNameKey;
   enrolledCourses?: EnrolledCourseOption[];
   onClose: () => void;
   onCreated: () => void;
@@ -718,7 +692,7 @@ function CreatePostSheet({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          city: DEFAULT_DISCOVER_SERVED_CITY,
+          city: servedCity,
           category,
           title: trimmedTitle,
           body: trimmedBody,

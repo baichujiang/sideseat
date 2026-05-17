@@ -21,8 +21,6 @@ import {
   Download,
   FileUp,
   Loader2,
-  Maximize2,
-  Minimize2,
   Plus,
   Share2,
   Upload,
@@ -38,7 +36,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
 import {
@@ -137,6 +134,25 @@ type CalendarEventDeleteScope = "this" | "future" | "all";
 const HOME_CALENDAR_VISIBLE_DAYS_DEFAULT = 5;
 const HOME_CALENDAR_VISIBLE_DAYS_STORAGE_KEY = "homeCalendarVisibleDays";
 const HOME_CALENDAR_MINUTE_SCALE_STORAGE_KEY = "homeCalendarMinuteScale";
+
+/** Same offset as the week-view share FAB — keeps the visible-days slider above the tab bar. */
+const HOME_WEEK_FLOATING_CONTROLS_BOTTOM_REM = 5.75;
+
+function measureSafeAreaInsetBottom(): number {
+  if (typeof document === "undefined") return 0;
+  const probe = document.createElement("div");
+  probe.style.cssText =
+    "position:fixed;left:0;bottom:0;visibility:hidden;pointer-events:none;padding-bottom:env(safe-area-inset-bottom)";
+  document.body.appendChild(probe);
+  const px = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
+  document.body.removeChild(probe);
+  return px;
+}
+
+function homeWeekFloatingControlsBottomPx(): number {
+  const root = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  return HOME_WEEK_FLOATING_CONTROLS_BOTTOM_REM * root + measureSafeAreaInsetBottom();
+}
 
 function parseStoredHomeCalendarVisibleDays(rawValue: string | null): number | null {
   if (!rawValue) return null;
@@ -319,18 +335,14 @@ export function ScheduleSurface({
   const [detailItem, setDetailItem] = useState<ScheduleDetailItem | null>(null);
   const [inviteFlow, setInviteFlow] = useState(false);
   const [deletingItem, setDeletingItem] = useState(false);
-  const [weekImmersiveOpen, setWeekImmersiveOpen] = useState(false);
-  /** Fullscreen week: body scroll height + whether we CSS-rotate portrait → effective landscape. */
-  const [immersiveLayout, setImmersiveLayout] = useState({ bodyPx: 520, rotatePortrait: false });
-  const [portalReady, setPortalReady] = useState(false);
   const icsImportInputRef = useRef<HTMLInputElement | null>(null);
   const [icsBusy, setIcsBusy] = useState<"export" | "import" | null>(null);
   const [icsNotice, setIcsNotice] = useState<{ tone: "ok" | "err"; message: string } | null>(null);
   const [icsMenuOpen, setIcsMenuOpen] = useState(false);
   const icsMenuRef = useRef<HTMLDivElement | null>(null);
-  const weekImmersiveShellRef = useRef<HTMLDivElement | null>(null);
   /** Caps inline week grid height so pinch-zoom cannot push controls off-screen (see `maxViewportBodyPx`). */
   const weekHomeLayoutRef = useRef<HTMLDivElement | null>(null);
+  const weekVisibleDaysBarRef = useRef<HTMLDivElement | null>(null);
   const [weekHomeMaxViewportBodyPx, setWeekHomeMaxViewportBodyPx] = useState<number | null>(null);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
   const [scheduleShareOpen, setScheduleShareOpen] = useState(false);
@@ -368,10 +380,6 @@ export function ScheduleSurface({
   };
 
   useEffect(() => {
-    setPortalReady(true);
-  }, []);
-
-  useEffect(() => {
     const serverNow = new Date(nowISO);
     setNow(serverNow);
   }, [nowISO]);
@@ -407,10 +415,6 @@ export function ScheduleSurface({
   }, [weekMinuteScale]);
 
   useEffect(() => {
-    if (view !== "week") setWeekImmersiveOpen(false);
-  }, [view]);
-
-  useEffect(() => {
     if (!icsMenuOpen) return;
     const close = (e: MouseEvent) => {
       if (icsMenuRef.current?.contains(e.target as Node)) return;
@@ -419,88 +423,6 @@ export function ScheduleSurface({
     document.addEventListener("mousedown", close);
     return () => document.removeEventListener("mousedown", close);
   }, [icsMenuOpen]);
-
-  useEffect(() => {
-    if (adding) setWeekImmersiveOpen(false);
-  }, [adding]);
-
-  useEffect(() => {
-    if (!weekImmersiveOpen) return;
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setWeekImmersiveOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prevOverflow;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [weekImmersiveOpen]);
-
-  useEffect(() => {
-    if (!weekImmersiveOpen) return;
-    const node = weekImmersiveShellRef.current;
-    if (!node) return;
-    const onSelectStart = (e: Event) => {
-      const t = e.target as HTMLElement | null;
-      if (t?.closest?.("input, textarea, select, option, [contenteditable='true']")) return;
-      e.preventDefault();
-    };
-    node.addEventListener("selectstart", onSelectStart);
-    return () => node.removeEventListener("selectstart", onSelectStart);
-  }, [weekImmersiveOpen]);
-
-  useEffect(() => {
-    if (!weekImmersiveOpen) return;
-    /** No title bar — only edge padding + floating close. */
-    const padPx = 4;
-
-    const measure = () => {
-      const iw = window.innerWidth;
-      const ih = window.innerHeight;
-      const portrait = ih > iw;
-      const vv = window.visualViewport;
-      const vw = vv?.width ?? iw;
-      const vh = vv?.height ?? ih;
-
-      if (portrait) {
-        // Rotated shell: week columns use physical height; vertical grid uses physical width.
-        setImmersiveLayout({
-          rotatePortrait: true,
-          bodyPx: Math.max(240, vw - padPx * 2),
-        });
-      } else {
-        setImmersiveLayout({
-          rotatePortrait: false,
-          bodyPx: Math.max(300, vh - padPx * 2),
-        });
-      }
-    };
-
-    measure();
-    window.addEventListener("resize", measure);
-    window.visualViewport?.addEventListener("resize", measure);
-
-    return () => {
-      window.removeEventListener("resize", measure);
-      window.visualViewport?.removeEventListener("resize", measure);
-    };
-  }, [weekImmersiveOpen]);
-
-  useEffect(() => {
-    if (!weekImmersiveOpen) return;
-    const orient = screen.orientation as ScreenOrientation & {
-      unlock?: () => void;
-    };
-    return () => {
-      try {
-        orient?.unlock?.();
-      } catch {
-        /* */
-      }
-    };
-  }, [weekImmersiveOpen]);
 
   useEffect(() => {
     let intervalId: number | null = null;
@@ -1269,26 +1191,32 @@ export function ScheduleSurface({
     onDuplicateCalendarEvent: duplicateCalendarEvent,
     onCopyCalendarEvent: copyCalendarEvent,
     editToolbarLabels,
+    showTimeColumnLabel: false,
   };
 
   const useCompactHomeHeader = homeGreeting != null;
 
   useLayoutEffect(() => {
-    if (view !== "week" || weekImmersiveOpen) {
+    if (view !== "week") {
       setWeekHomeMaxViewportBodyPx(null);
       return;
     }
     const wrap = weekHomeLayoutRef.current;
-    if (!wrap) return;
+    const bar = weekVisibleDaysBarRef.current;
+    if (!wrap || !bar) return;
 
     const measure = () => {
       const vv = window.visualViewport;
       const vh = (vv?.height ?? window.innerHeight) + (vv?.offsetTop ?? 0);
       const top = wrap.getBoundingClientRect().top;
-      /** Visible-days slider + gap; keeps cap from eating the bar (non-sticky, in-flow). */
-      const reserveBelowCalendarPx = 40;
-      const cushionPx = 6;
-      const maxOuterPx = vh - top - reserveBelowCalendarPx - cushionPx;
+      const barHeightPx = bar.getBoundingClientRect().height;
+      const gapAboveBarPx = 4;
+      const bottomStackPx = homeWeekFloatingControlsBottomPx();
+      const cushionPx = 4;
+      // Cap calendar growth so this block (calendar + bar) ends above the tab bar;
+      // the bar sits in document flow directly under the calendar.
+      const maxOuterPx =
+        vh - top - barHeightPx - gapAboveBarPx - bottomStackPx - cushionPx;
       const maxBodyPx = maxOuterPx - WEEK_CALENDAR_HEADER_HEIGHT_PX;
       setWeekHomeMaxViewportBodyPx(
         Number.isFinite(maxBodyPx) ? Math.max(140, Math.floor(maxBodyPx)) : null,
@@ -1308,34 +1236,13 @@ export function ScheduleSurface({
       vv?.removeEventListener("scroll", measure);
       window.removeEventListener("resize", measure);
     };
-  }, [
-    view,
-    weekImmersiveOpen,
-    useCompactHomeHeader,
-    homeBelowHeaderSlot,
-    adding,
-    visibleDayCount,
-  ]);
+  }, [view, useCompactHomeHeader, homeBelowHeaderSlot, adding, visibleDayCount, weekMinuteScale]);
 
   const iconBtnSm = "h-8 w-8 sm:h-9 sm:w-9";
   const iconGlyphSm = "h-3.5 w-3.5 sm:h-4 sm:w-4";
 
   const toolbarActions = (
     <>
-      <button
-        type="button"
-        aria-label={messages.schedule.shareScheduleOpenAria}
-        className={cn(
-          "flex shrink-0 items-center justify-center rounded-full border border-sky-200 bg-white text-sky-700 shadow-sm transition",
-          iconBtnSm,
-          "hover:bg-sky-50 active:scale-[0.98]",
-          "dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-300 dark:hover:bg-sky-950/70",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/35",
-        )}
-        onClick={() => setScheduleShareOpen(true)}
-      >
-        <Share2 className={cn("shrink-0", iconGlyphSm)} strokeWidth={2} aria-hidden />
-      </button>
       <div ref={icsMenuRef} className="relative z-[1] isolate">
         <button
           type="button"
@@ -1599,43 +1506,42 @@ export function ScheduleSurface({
           />
         ) : null}
 
-        {view === "week" && !weekImmersiveOpen ? (
-          <div ref={weekHomeLayoutRef} className="flex min-h-0 flex-col gap-1">
-            <WeekCalendar
-              {...weekCalendarProps}
-              maxViewportBodyPx={weekHomeMaxViewportBodyPx ?? undefined}
-            />
-            <WeekVisibleDaysBar
-              value={visibleDayCount}
-              onChange={setVisibleDayCount}
-              scheduleSch={messages.schedule}
-              locale={locale}
-            />
-          </div>
+        {view === "week" ? (
+          <>
+            <div ref={weekHomeLayoutRef} className="flex min-h-0 flex-col gap-1">
+              <WeekCalendar
+                {...weekCalendarProps}
+                maxViewportBodyPx={weekHomeMaxViewportBodyPx ?? undefined}
+              />
+              <div
+                ref={weekVisibleDaysBarRef}
+                className="shrink-0 px-0.5"
+              >
+                <WeekVisibleDaysBar
+                  value={visibleDayCount}
+                  onChange={setVisibleDayCount}
+                  scheduleSch={messages.schedule}
+                  locale={locale}
+                />
+              </div>
+            </div>
+          </>
         ) : null}
 
-        {view === "week" && !weekImmersiveOpen && !adding ? (
+        {view === "week" && !adding ? (
           <button
             type="button"
-            aria-label={messages.schedule.expandWeekCalendarAria}
-            onClick={() => {
-              const orient = screen.orientation as ScreenOrientation & {
-                lock?: (type: string) => Promise<void>;
-              };
-              void orient?.lock?.("landscape").catch(() => {
-                /* CSS rotate fallback still gives landscape layout on portrait phones */
-              });
-              setWeekImmersiveOpen(true);
-            }}
+            aria-label={messages.schedule.shareScheduleOpenAria}
+            onClick={() => setScheduleShareOpen(true)}
             className={cn(
-              "fixed z-40 flex h-11 w-11 items-center justify-center rounded-full border border-[#E7E0D6] bg-white text-[#111827] shadow-[0_6px_20px_rgba(15,23,42,0.14)] transition",
+              "fixed z-40 flex h-11 w-11 items-center justify-center rounded-full border border-sky-200 bg-white text-sky-700 shadow-[0_6px_20px_rgba(15,23,42,0.14)] transition",
               "bottom-[calc(5.75rem+env(safe-area-inset-bottom))] right-3",
-              "hover:bg-[#FAFAF8] active:scale-[0.97]",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-              "dark:border-border dark:bg-card dark:text-foreground dark:shadow-[0_6px_20px_rgba(0,0,0,0.35)]",
+              "hover:bg-sky-50 active:scale-[0.97]",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+              "dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-300 dark:shadow-[0_6px_20px_rgba(0,0,0,0.35)] dark:hover:bg-sky-950/70",
             )}
           >
-            <Maximize2 className="h-5 w-5" strokeWidth={2} aria-hidden />
+            <Share2 className="h-5 w-5" strokeWidth={2} aria-hidden />
           </button>
         ) : null}
 
@@ -1739,62 +1645,6 @@ export function ScheduleSurface({
           </div>
         ) : null}
       </AppPushLayer>
-
-      {portalReady
-        ? createPortal(
-            <AppPushLayer
-              open={weekImmersiveOpen}
-              onClose={() => setWeekImmersiveOpen(false)}
-              zClassName="z-[100]"
-              ariaLabel={messages.schedule.weekCalendarExpandedLayerAria}
-              fullBleed
-              lockBodyScroll={false}
-              panelClassName="h-full w-full max-w-none overflow-hidden border-0 bg-background shadow-none dark:shadow-none"
-              backdropClassName="bg-background !backdrop-blur-none"
-            >
-              <div
-                ref={weekImmersiveShellRef}
-                className={cn(
-                  "relative flex h-full min-h-0 flex-col bg-background",
-                  "select-none [-webkit-user-select:none] [-webkit-touch-callout:none]",
-                  immersiveLayout.rotatePortrait
-                    ? "absolute left-1/2 top-1/2 box-border h-[100dvw] w-[100dvh] max-h-[100vw] max-w-[100vh] -translate-x-1/2 -translate-y-1/2 rotate-90"
-                    : "w-full",
-                )}
-              >
-                {/*
-                  Close sits inside the (possibly rotated) shell so “bottom-right” is
-                  landscape-oriented — same corner as the calendar’s logical BR, not the
-                  portrait viewport’s fixed corner.
-                */}
-                <button
-                  type="button"
-                  aria-label={messages.schedule.closeExpandedWeekAria}
-                  onClick={() => setWeekImmersiveOpen(false)}
-                  className={cn(
-                    "absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-[max(0.75rem,env(safe-area-inset-right))] z-[110]",
-                    "flex h-11 w-11 items-center justify-center rounded-full border border-[#E7E0D6] bg-white/95 text-[#5F6B7A] shadow-[0_4px_16px_rgba(15,23,42,0.12)] backdrop-blur-sm transition",
-                    "hover:bg-white hover:text-foreground active:scale-[0.97]",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/35",
-                    "dark:border-border dark:bg-card/95 dark:text-muted-foreground dark:shadow-[0_4px_16px_rgba(0,0,0,0.35)]",
-                  )}
-                >
-                  <Minimize2 className="h-5 w-5" strokeWidth={2} aria-hidden />
-                </button>
-                <div className="min-h-0 flex-1 overflow-hidden px-[2px] pb-3 pt-[max(0.625rem,calc(env(safe-area-inset-top)+6px))] select-none [-webkit-user-select:none]">
-                  <WeekCalendar
-                    {...weekCalendarProps}
-                    density="immersive"
-                    viewportBodyPx={immersiveLayout.bodyPx}
-                    fillParent
-                    touchGestureRotateCw90={immersiveLayout.rotatePortrait}
-                  />
-                </div>
-              </div>
-            </AppPushLayer>,
-            document.body,
-          )
-        : null}
     </section>
   );
 }

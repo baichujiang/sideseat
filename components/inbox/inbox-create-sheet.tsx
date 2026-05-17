@@ -238,12 +238,12 @@ export function InboxCreateSheet({
         onClick={() => setOpen(true)}
         aria-label="Add contact or create group chat"
         className={cn(
-          "inline-flex h-10 w-10 items-center justify-center rounded-full border border-classmates-blue-border bg-gradient-to-br from-classmates-blue-soft to-white text-classmates-blue shadow-[0_4px_16px_-6px_rgba(37,99,235,0.45)] transition",
+          "inline-flex h-9 w-9 items-center justify-center rounded-full border border-classmates-blue-border bg-gradient-to-br from-classmates-blue-soft to-white text-classmates-blue shadow-[0_4px_16px_-6px_rgba(37,99,235,0.45)] transition",
           "hover:border-classmates-blue/40 hover:shadow-[0_6px_20px_-6px_rgba(37,99,235,0.5)] active:scale-[0.97]",
           "dark:border-blue-500/45 dark:from-blue-950/55 dark:to-blue-950/25 dark:text-blue-200 dark:shadow-[0_4px_20px_-8px_rgba(59,130,246,0.35)]",
         )}
       >
-        <Plus className="h-5 w-5" strokeWidth={2.4} aria-hidden />
+        <Plus className="h-4 w-4" strokeWidth={2.5} aria-hidden />
       </button>
 
       <AppPushLayer open={open} onClose={close} zClassName="z-[60]" panelClassName="w-[min(100vw,28rem)] border-0">

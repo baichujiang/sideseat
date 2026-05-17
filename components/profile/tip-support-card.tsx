@@ -8,12 +8,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  MeSettingsRowLabel,
-  meSettingsRowCardSummaryClass,
-  meSettingsRowChevronDownClass,
-  meSettingsRowDetailsSummaryClass,
-  meSettingsRowLeadClass,
-  meSettingsRowTipIconShellClass,
+  MePageSettingsRowLabel,
+  mePageCardClass,
+  mePageChevronDownClass,
+  mePageIconTipShellClass,
+  mePageRowCardSummaryClass,
+  mePageRowDetailsSummaryClass,
+  mePageRowLeadClass,
 } from "@/components/profile/me-settings-row";
 import type { AppMessages } from "@/lib/i18n/messages/types";
 import { cn } from "@/lib/utils";
@@ -230,20 +231,20 @@ export function TipSupportCard({
 
   const summaryRow = (
     <>
-      <div className={meSettingsRowLeadClass}>
-        <span className={meSettingsRowTipIconShellClass}>
-          <Heart className="h-4 w-4" strokeWidth={2} aria-hidden />
+      <div className={mePageRowLeadClass}>
+        <span className={mePageIconTipShellClass}>
+          <Heart className="h-5 w-5 text-orange-500" strokeWidth={2} aria-hidden />
         </span>
-        <MeSettingsRowLabel title={t.listTitle} subtitle={t.listSubtitle} />
+        <MePageSettingsRowLabel title={t.listTitle} subtitle={t.listSubtitle} />
       </div>
-      <ChevronDown className={meSettingsRowChevronDownClass} strokeWidth={2} aria-hidden />
+      <ChevronDown className={mePageChevronDownClass} strokeWidth={2} aria-hidden />
     </>
   );
 
   if (inList) {
     return (
       <details className="group">
-        <summary className={meSettingsRowDetailsSummaryClass}>
+        <summary className={mePageRowDetailsSummaryClass}>
           {summaryRow}
         </summary>
         {expandedPanel}
@@ -252,13 +253,8 @@ export function TipSupportCard({
   }
 
   return (
-    <details
-      className={cn(
-        "group overflow-hidden rounded-xl border border-classmates-edge bg-classmates-surface shadow-[0_1px_6px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card",
-        compact && "rounded-lg",
-      )}
-    >
-      <summary className={cn(meSettingsRowCardSummaryClass, compact && "py-2")}>{summaryRow}</summary>
+    <details className={cn("group", mePageCardClass, compact && "rounded-lg")}>
+      <summary className={cn(mePageRowCardSummaryClass, compact && "min-h-[64px]")}>{summaryRow}</summary>
       {expandedPanel}
     </details>
   );

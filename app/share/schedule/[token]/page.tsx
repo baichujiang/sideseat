@@ -9,6 +9,7 @@ import { buildPublicScheduleShareSnapshotForActiveLink } from "@/lib/schedule-sh
 import { buildSharePublicHeadline } from "@/lib/schedule-share/format-share-public-headline";
 import { findScheduleShareLinkByPlainToken } from "@/lib/schedule-share/resolve-link";
 import { scheduleShareOwnerDisplayLabel } from "@/lib/schedule-share/build-schedule-share-snapshot";
+import { loadViewerProposalFromPlan } from "@/lib/schedule-share/create-plan-from-guest-proposal";
 import { serializeViewerProposal } from "@/lib/schedule-share/viewer-proposal";
 
 export async function generateMetadata({
@@ -67,24 +68,45 @@ export default async function ShareSchedulePage({
 
   let initialMyProposal = null;
   if (sessionUser?.onboardingComplete) {
-    const row = await prisma.scheduleShareGuestProposal.findFirst({
+    const plan = await prisma.planRequest.findFirst({
       where: {
         scheduleShareLinkId: resolved.link.id,
         proposerUserId: sessionUser.id,
         status: { in: ["PENDING", "ACCEPTED"] },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { updatedAt: "desc" },
       select: {
         id: true,
         title: true,
-        note: true,
+        message: true,
         location: true,
         startTime: true,
         endTime: true,
         status: true,
       },
     });
-    initialMyProposal = row ? serializeViewerProposal(row) : null;
+    if (plan) {
+      initialMyProposal = loadViewerProposalFromPlan(plan);
+    } else {
+      const row = await prisma.scheduleShareGuestProposal.findFirst({
+        where: {
+          scheduleShareLinkId: resolved.link.id,
+          proposerUserId: sessionUser.id,
+          status: { in: ["PENDING", "ACCEPTED"] },
+        },
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          title: true,
+          note: true,
+          location: true,
+          startTime: true,
+          endTime: true,
+          status: true,
+        },
+      });
+      initialMyProposal = row ? serializeViewerProposal(row) : null;
+    }
   }
 
   return (

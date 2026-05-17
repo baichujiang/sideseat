@@ -16,9 +16,9 @@ import { cn } from "@/lib/utils";
 
 /** Flat bar: light tint only (no nested “card” / shadow), like native tab selection. */
 const navActiveTab =
-  "rounded-[0.65rem] bg-classmates-blue/10 text-classmates-ink dark:bg-blue-500/15 dark:text-foreground";
+  "rounded-2xl bg-classmates-blue-soft text-classmates-blue dark:bg-blue-500/15 dark:text-blue-400";
 const navInactiveTab =
-  "group rounded-[0.65rem] text-classmates-sub active:bg-black/[0.04] dark:active:bg-white/[0.06] [@media(hover:hover)]:hover:bg-black/[0.04] dark:[@media(hover:hover)]:hover:bg-white/[0.06] [@media(hover:hover)]:hover:text-classmates-ink";
+  "group rounded-2xl text-[#6B7280] active:bg-black/[0.04] dark:text-muted-foreground dark:active:bg-white/[0.06] [@media(hover:hover)]:hover:bg-black/[0.04] dark:[@media(hover:hover)]:hover:bg-white/[0.06]";
 
 /**
  * Bottom-tab "root" routes. Left-edge swipe-back is a no-op on these paths
@@ -170,9 +170,9 @@ export function AppShell({
                       "h-5 w-5 transition-colors duration-200",
                       isActive
                         ? "text-classmates-blue dark:text-blue-400"
-                        : "text-classmates-sub group-hover:text-classmates-ink",
+                        : "text-[#6B7280] group-hover:text-classmates-ink dark:text-muted-foreground",
                     )}
-                    strokeWidth={isActive ? 2.5 : 2}
+                    strokeWidth={2}
                     aria-hidden
                   />
                   {item.href === "/inbox" ? (
@@ -185,8 +185,8 @@ export function AppShell({
                   className={cn(
                     "truncate transition-colors duration-200",
                     isActive
-                      ? "font-semibold text-classmates-ink dark:text-foreground"
-                      : "text-classmates-sub group-hover:text-classmates-ink",
+                      ? "font-semibold text-classmates-blue dark:text-blue-400"
+                      : "text-[#6B7280] group-hover:text-classmates-ink dark:text-muted-foreground",
                   )}
                 >
                   {item.label}

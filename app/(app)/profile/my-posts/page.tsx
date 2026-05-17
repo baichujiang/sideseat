@@ -3,13 +3,16 @@ import type { Route } from "next";
 import { ClassmatePostStatus, type Prisma } from "@prisma/client";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
-import { MyPostsDiscoverPostCard } from "@/components/inbox/my-posts-discover-post-card";
 import { MyPostsHeaderShareMenu } from "@/components/inbox/my-posts-header-share-menu";
+import { MyPostBuddyCard } from "@/components/profile/my-post-buddy-card";
+import {
+  DiscoverPostsMasonry,
+  DiscoverPostsMasonryItem,
+} from "@/components/profile/discover-posts-masonry";
 import { BackLink } from "@/components/nav/back-link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LinkButton } from "@/components/ui/link-button";
 import { getSessionUser } from "@/lib/auth/session";
-import { buildViewerCourseMatchIndex } from "@/lib/discover/viewer-course-match";
 import {
   mapPrismaLanguageToDiscoverRow,
   mapPrismaMealsToDiscoverRow,
@@ -93,22 +96,12 @@ export default async function ProfileMyPostsPage() {
   }
   const user = sessionUser;
 
-  const [posts, myEnrolledCourses] = await Promise.all([
-    prisma.classmatePost.findMany({
-      where: { userId: user.id },
-      orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
-      take: 80,
-      include: myPostsInclude,
-    }),
-    prisma.userCourse.findMany({
-      where: { userId: user.id },
-      select: { course: { select: { id: true, code: true, name: true } } },
-    }),
-  ]);
-
-  const viewerCourseMatchIndex = buildViewerCourseMatchIndex(
-    myEnrolledCourses.map((uc) => ({ id: uc.course.id, code: uc.course.code })),
-  );
+  const posts = await prisma.classmatePost.findMany({
+    where: { userId: user.id },
+    orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
+    take: 80,
+    include: myPostsInclude,
+  });
 
   const insightByPostId = await classmatePostInsightCountsByPostId(posts.map((p) => p.id));
 
@@ -143,21 +136,20 @@ export default async function ProfileMyPostsPage() {
               <h2 className="px-0.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-classmates-teal dark:text-teal-300">
                 {ui.profile.myPostsSectionLive}
               </h2>
-              <ul className="space-y-2.5">
+              <DiscoverPostsMasonry>
                 {active.map((post) => (
-                  <MyPostsDiscoverPostCard
-                    key={post.id}
-                    locale={locale}
-                    post={toDiscoverPostRow(post, user.id)}
-                    viewerCourseMatchIndex={viewerCourseMatchIndex}
-                    status={post.status}
-                    createdAt={post.createdAt}
-                    updatedAt={post.updatedAt}
-                    insights={insightByPostId.get(post.id) ?? { detailViews: 0, messageIntents: 0 }}
-                    muted={false}
-                  />
+                  <DiscoverPostsMasonryItem key={post.id}>
+                    <MyPostBuddyCard
+                      post={toDiscoverPostRow(post, user.id)}
+                      status={post.status}
+                      createdAt={post.createdAt}
+                      updatedAt={post.updatedAt}
+                      insights={insightByPostId.get(post.id) ?? { detailViews: 0, messageIntents: 0 }}
+                      muted={false}
+                    />
+                  </DiscoverPostsMasonryItem>
                 ))}
-              </ul>
+              </DiscoverPostsMasonry>
             </section>
           ) : null}
 
@@ -166,21 +158,20 @@ export default async function ProfileMyPostsPage() {
               <h2 className="px-0.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                 {ui.profile.myPostsSectionPast}
               </h2>
-              <ul className="space-y-2.5">
+              <DiscoverPostsMasonry>
                 {archived.map((post) => (
-                  <MyPostsDiscoverPostCard
-                    key={post.id}
-                    locale={locale}
-                    post={toDiscoverPostRow(post, user.id)}
-                    viewerCourseMatchIndex={viewerCourseMatchIndex}
-                    status={post.status}
-                    createdAt={post.createdAt}
-                    updatedAt={post.updatedAt}
-                    insights={insightByPostId.get(post.id) ?? { detailViews: 0, messageIntents: 0 }}
-                    muted
-                  />
+                  <DiscoverPostsMasonryItem key={post.id}>
+                    <MyPostBuddyCard
+                      post={toDiscoverPostRow(post, user.id)}
+                      status={post.status}
+                      createdAt={post.createdAt}
+                      updatedAt={post.updatedAt}
+                      insights={insightByPostId.get(post.id) ?? { detailViews: 0, messageIntents: 0 }}
+                      muted
+                    />
+                  </DiscoverPostsMasonryItem>
                 ))}
-              </ul>
+              </DiscoverPostsMasonry>
             </section>
           ) : null}
         </div>

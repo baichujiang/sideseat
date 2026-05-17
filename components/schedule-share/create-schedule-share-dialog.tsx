@@ -14,9 +14,9 @@ import {
 } from "@/lib/schedule-share/format-share-create-summary";
 import { formatMessage } from "@/lib/i18n/messages";
 import { REVEAL_PRESET_KEYS_ALLOWLIST, type RevealPresetKeyAllowlisted } from "@/lib/schedule-share/reveal-config";
+import type { ScheduleShareUsageLimitInput } from "@/lib/schedule-share/usage-limit";
 import {
   defaultShareExpiresAt,
-  isDefaultShareExpiry,
   shareRangeForPreset,
   type ShareRangePreset,
 } from "@/lib/schedule-share/share-range-presets";
@@ -106,8 +106,8 @@ export function CreateScheduleShareDialog({
   const [rangePreset, setRangePreset] = useState<ShareRangePreset>("next_week");
   const [rangeStartInput, setRangeStartInput] = useState("");
   const [rangeEndInput, setRangeEndInput] = useState("");
+  const [usageLimit, setUsageLimit] = useState<ScheduleShareUsageLimitInput>("UNLIMITED");
   const [expiresInput, setExpiresInput] = useState("");
-  const [showExpiryEditor, setShowExpiryEditor] = useState(false);
   const [presetKeys, setPresetKeys] = useState<RevealPresetKeyAllowlisted[]>([]);
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [allowGuestProposals, setAllowGuestProposals] = useState(true);
@@ -129,8 +129,8 @@ export function CreateScheduleShareDialog({
     setBaseNow(now);
     applyRangePreset("next_week", now);
     setRangePreset("next_week");
+    setUsageLimit("UNLIMITED");
     setExpiresInput(toDatetimeLocalValue(defaultShareExpiresAt(now)));
-    setShowExpiryEditor(false);
     setPresetKeys([]);
     setCategoryIds([]);
     setAllowGuestProposals(true);
@@ -196,12 +196,11 @@ export function CreateScheduleShareDialog({
   const expirySummary = useMemo(() => {
     const exp = new Date(expiresInput);
     if (Number.isNaN(exp.getTime())) return "";
-    const policy = isDefaultShareExpiry(exp, baseNow)
-      ? s.linkExpiryPolicyDefault
-      : s.linkExpiryPolicyCustom;
+    const usage =
+      usageLimit === "SINGLE_USE" ? s.linkUsageSingleUse : s.linkUsageUnlimited;
     const when = formatShareExpirySummary(exp, locale);
-    return formatMessage(s.linkExpirySummary, { policy, when });
-  }, [expiresInput, baseNow, locale, s]);
+    return formatMessage(s.linkExpirySummary, { usage, when });
+  }, [expiresInput, usageLimit, locale, s]);
 
   const hasRevealSelection = presetKeys.length > 0 || categoryIds.length > 0;
   const customCalendars = useMemo(() => categories.filter((c) => !c.presetKey), [categories]);
@@ -246,6 +245,7 @@ export function CreateScheduleShareDialog({
         rangeEnd: rangeEnd.toISOString(),
         revealConfig: { categoryIds, presetKeys },
         allowGuestProposals,
+        usageLimit,
         expiresAt,
       };
 
@@ -444,37 +444,37 @@ export function CreateScheduleShareDialog({
               </div>
 
               <Section title={s.linkExpiryLabel} hint={s.linkExpiryHelper} error={expiryError}>
-                {!showExpiryEditor ? (
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="min-w-0 flex-1 text-[12px] leading-snug text-foreground">{expirySummary}</p>
-                    <button
-                      type="button"
-                      onClick={() => setShowExpiryEditor(true)}
-                      className="shrink-0 text-[13px] font-semibold text-[#2563EB] hover:underline dark:text-blue-300"
-                    >
-                      {s.linkExpiryChange}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <input
-                      type="datetime-local"
-                      className={FIELD_INPUT}
-                      value={expiresInput}
-                      onChange={(e) => {
-                        setExpiresInput(e.target.value);
-                        setExpiryError(null);
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowExpiryEditor(false)}
-                      className="text-[13px] font-semibold text-[#2563EB] hover:underline dark:text-blue-300"
-                    >
-                      {s.linkExpiryDone}
-                    </button>
-                  </div>
-                )}
+                <Subheading>{s.linkUsageLabel}</Subheading>
+                <div className={CHIP_ROW_CLASS}>
+                  <RangeChip
+                    active={usageLimit === "SINGLE_USE"}
+                    onClick={() => setUsageLimit("SINGLE_USE")}
+                  >
+                    {s.linkUsageSingleUse}
+                  </RangeChip>
+                  <RangeChip
+                    active={usageLimit === "UNLIMITED"}
+                    onClick={() => setUsageLimit("UNLIMITED")}
+                  >
+                    {s.linkUsageUnlimited}
+                  </RangeChip>
+                </div>
+                {usageLimit === "SINGLE_USE" ? (
+                  <p className="text-[11px] leading-snug text-muted-foreground">{s.linkUsageSingleUseHint}</p>
+                ) : null}
+                <Subheading>{s.linkExpiresAtLabel}</Subheading>
+                <input
+                  type="datetime-local"
+                  className={FIELD_INPUT}
+                  value={expiresInput}
+                  onChange={(e) => {
+                    setExpiresInput(e.target.value);
+                    setExpiryError(null);
+                  }}
+                />
+                {expirySummary ? (
+                  <p className="text-[12px] leading-snug text-muted-foreground">{expirySummary}</p>
+                ) : null}
               </Section>
             </>
           )}

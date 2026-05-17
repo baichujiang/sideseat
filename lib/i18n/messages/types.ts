@@ -75,6 +75,8 @@ export type AppMessages = {
     areaStatusPrefix: string;
     /** Use `{city}` — localized label for the default Discover metro. */
     areaComingSoon: string;
+    /** Use `{city}` — static single-city context, e.g. "Munich only". */
+    cityContextOnly: string;
     /** Keys match stored `ClassmatePost.city` English names; UI labels only. */
     cityNames: Record<DiscoverCityNameKey, string>;
   };
@@ -84,6 +86,8 @@ export type AppMessages = {
     feedTabToday: string;
     feedTabNearby: string;
     feedTabLatest: string;
+    typeChipAll: string;
+    typeChipsAria: string;
     searchPlaceholder: string;
     searchAria: string;
     filterOpenAria: string;
@@ -347,6 +351,26 @@ export type AppMessages = {
     chipPlansLinkTitle: string;
     chipPlansAria: string;
     chipPlansAriaWithCount: string;
+    chipUpcomingPlan: string;
+    chipUpcomingPlanLinkTitle: string;
+    chipUpcomingPlanAria: string;
+    chipUpcomingPlanAriaWithCount: string;
+    chipStudyGroup: string;
+    chipStudyGroupLinkTitle: string;
+    chipStudyGroupAria: string;
+    chipStudyGroupAriaWithUnread: string;
+    chipCourseChats: string;
+    chipCourseChatsLinkTitle: string;
+    chipCourseChatsAria: string;
+    chipCourseChatsAriaWithUnread: string;
+    studyGroupsPageTitle: string;
+    studyGroupsPageSubtitle: string;
+    studyGroupsEmptyTitle: string;
+    studyGroupsEmptyDesc: string;
+    courseChatsPageTitle: string;
+    courseChatsPageSubtitle: string;
+    courseChatsEmptyTitle: string;
+    courseChatsEmptyDesc: string;
     chipScheduleRequests: string;
     chipScheduleRequestsLinkTitle: string;
     chipScheduleRequestsAria: string;
@@ -362,6 +386,12 @@ export type AppMessages = {
     chipNewAria: string;
     /** `{count}` — total unread for the chip aria-label. */
     chipNewAriaWithUnread: string;
+    /** Unread filter active — chip aria when clearing the filter. */
+    chipNewAriaFilterOn: string;
+    /** `{count}` — unread filter on with badge count. */
+    chipNewAriaFilterOnWithUnread: string;
+    emptyUnreadFilterTitle: string;
+    emptyUnreadFilterDesc: string;
     /** Collapsed search — opens the chat search field. */
     headerSearchOpenAria: string;
     /** When search field is visible — hide field (icon toggles). */
@@ -411,6 +441,8 @@ export type AppMessages = {
     yesterday: string;
     noMessagesYet: string;
     availabilityOrphan: string;
+    /** Subtitle on plan request cards that originated from a schedule share link. */
+    planFromScheduleShare: string;
     messageInputLabel: string;
     placeholderWrite: string;
     placeholderReply: string;
@@ -576,11 +608,16 @@ export type AppMessages = {
     allowProposals: string;
     allowProposalsHelper: string;
     linkExpiryLabel: string;
+    linkUsageLabel: string;
+    linkUsageSingleUse: string;
+    linkUsageUnlimited: string;
+    linkUsageSingleUseHint: string;
+    linkExpiresAtLabel: string;
     linkExpiryChange: string;
     linkExpiryDone: string;
     linkExpiryPolicyDefault: string;
     linkExpiryPolicyCustom: string;
-    /** `{policy}` `{when}` */
+    /** `{usage}` `{when}` */
     linkExpirySummary: string;
     linkExpiryHelper: string;
     privacyPreviewNone: string;
@@ -658,6 +695,8 @@ export type AppMessages = {
     back: string;
     title: string;
     subtitle: string;
+    discoverCityTitle: string;
+    discoverCityHint: string;
     blockedTitle: string;
     blockedNone: string;
     blockedOne: string;
@@ -707,6 +746,9 @@ export type AppMessages = {
     savedPostsRowSubtitle: string;
     myPlanRowTitle: string;
     myPlanRowSubtitle: string;
+    discoverCityRowTitle: string;
+    discoverCityRowSubtitle: string;
+    discoverCitySelectAria: string;
     myPostsRowTitle: string;
     myPostsRowSubtitle: string;
     myPlanPageTitle: string;

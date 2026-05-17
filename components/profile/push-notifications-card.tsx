@@ -6,6 +6,7 @@ import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { useCallback, useEffect, useId, useState } from "react";
 import { Bell, BellOff, Loader2 } from "lucide-react";
 
+import { mePageCardClass, mePageIconMutedClass, mePageIconShellClass } from "@/components/profile/me-settings-row";
 import { urlBase64ToUint8Array } from "@/lib/push/url-base64";
 import { cn } from "@/lib/utils";
 
@@ -39,16 +40,16 @@ function IosStyleSwitch({
       disabled={disabled || busy}
       onClick={onToggle}
       className={cn(
-        "relative h-[31px] w-[51px] shrink-0 rounded-full transition-colors duration-200 ease-out",
+        "relative h-7 w-12 shrink-0 rounded-full transition-colors duration-200 ease-out",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-classmates-blue focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         "disabled:opacity-45",
-        on ? "bg-[#34C759]" : "bg-[#E5E5EA] dark:bg-zinc-600",
+        on ? "bg-classmates-blue" : "bg-[#E5E7EB] dark:bg-zinc-600",
       )}
     >
       <span
         className={cn(
-          "pointer-events-none absolute top-[2px] h-[27px] w-[27px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2),0_1px_1px_rgba(0,0,0,0.06)] transition-[left] duration-200 ease-out",
-          on ? "left-[calc(100%-29px)]" : "left-[2px]",
+          "pointer-events-none absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-sm transition-[left] duration-200 ease-out",
+          on ? "left-[calc(100%-1.625rem)]" : "left-0.5",
         )}
       />
       {busy ? (
@@ -61,8 +62,7 @@ function IosStyleSwitch({
   );
 }
 
-const settingCardClass =
-  "rounded-2xl border border-classmates-edge bg-classmates-surface px-4 py-4 shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card";
+const settingCardClass = cn(mePageCardClass, "px-5 py-0");
 
 export function PushNotificationsCard() {
   const { messages: m } = useLocaleContext();
@@ -250,13 +250,13 @@ export function PushNotificationsCard() {
 
   return (
     <div className="space-y-2">
-      <div className={cn(settingCardClass, "flex items-start gap-3")}>
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <Bell className="h-5 w-5" strokeWidth={2} aria-hidden />
+      <div className={cn(settingCardClass, "flex min-h-[72px] items-center gap-3")}>
+        <span className={mePageIconShellClass}>
+          <Bell className={mePageIconMutedClass} strokeWidth={2} aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
-            <p id={titleId} className="text-[15px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
+            <p id={titleId} className="text-base font-semibold leading-tight text-classmates-ink dark:text-foreground">
               {m.push.title}
             </p>
             <IosStyleSwitch

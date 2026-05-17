@@ -32,7 +32,7 @@ export function ChatComposer({
   const { chat: c, common } = useAppMessages();
   const { replyTo, setReplyTo } = useChatReply();
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const composerChromeRef = useRef<HTMLDivElement>(null);
+  const composerRootRef = useRef<HTMLDivElement>(null);
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -43,7 +43,7 @@ export function ChatComposer({
     const onDown = (e: MouseEvent | TouchEvent) => {
       const t = e.target;
       if (!(t instanceof Node)) return;
-      if (composerChromeRef.current && !composerChromeRef.current.contains(t)) {
+      if (composerRootRef.current && !composerRootRef.current.contains(t)) {
         setAttachOpen(false);
       }
     };
@@ -91,7 +91,7 @@ export function ChatComposer({
   };
 
   return (
-    <div className="relative space-y-2">
+    <div ref={composerRootRef} className="relative space-y-2">
       {replyTo ? (
         <ReplyPreview
           senderName={replyTo.senderName}
@@ -99,15 +99,7 @@ export function ChatComposer({
           onCancel={() => setReplyTo(null)}
         />
       ) : null}
-      <div
-        ref={composerChromeRef}
-        className={cn(
-          "flex min-w-0 flex-col overflow-hidden rounded-[1.25rem]",
-          "border border-input bg-muted/40",
-          "shadow-none ring-offset-background",
-        )}
-      >
-        <div className="flex min-h-0 items-end gap-2 px-2.5 py-2">
+      <div className="flex min-h-0 items-end gap-2">
           <ChatThreadSearchButton entries={threadSearchEntries} />
           {hideAttachments ? (
             <button
@@ -116,7 +108,7 @@ export function ChatComposer({
               aria-label={c.attachmentsUnavailableAria}
               title={c.attachmentsUnavailableTitle}
               className={cn(
-                "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-dashed border-border/70 bg-background/40 text-muted-foreground/60",
+                "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-dashed border-border/70 bg-muted/35 text-muted-foreground/60",
                 "cursor-not-allowed",
               )}
             >
@@ -144,9 +136,9 @@ export function ChatComposer({
             rows={1}
             placeholder={replyTo ? c.placeholderReply : c.placeholderWrite}
             className={cn(
-              "min-h-[44px] max-h-32 flex-1 resize-none rounded-xl border-0 bg-background/45 px-3 py-2.5 text-[16px] leading-snug",
+              "min-h-[44px] max-h-32 flex-1 resize-none rounded-[1.25rem] border border-input bg-muted/40 px-3.5 py-2.5 text-[16px] leading-snug",
               "placeholder:text-muted-foreground/70",
-              "outline-none focus-visible:ring-2 focus-visible:ring-ring/35",
+              "outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
             )}
           />
           <button
@@ -154,7 +146,7 @@ export function ChatComposer({
             disabled={submitting || !body.trim()}
             onClick={() => void submit()}
             className={cn(
-              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition",
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition",
               "hover:bg-primary/90",
               "disabled:pointer-events-none disabled:opacity-35",
             )}
@@ -171,7 +163,6 @@ export function ChatComposer({
             peerName={peerName}
           />
         ) : null}
-      </div>
       {error ? (
         <div className="pb-0.5">
           <FormMessage message={error} />

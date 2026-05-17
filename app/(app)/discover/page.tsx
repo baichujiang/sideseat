@@ -12,7 +12,7 @@ import { getDevExampleDiscoverPosts } from "@/lib/discover/dev-example-classmate
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { getDiscoverPeople } from "@/lib/queries/discovery";
-import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
+import { getServerDiscoverServedCity } from "@/lib/discover/discover-city-preference";
 import { getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 
@@ -39,6 +39,7 @@ export default async function DiscoverPage() {
     );
   }
   const user = sessionUser;
+  const servedCity = await getServerDiscoverServedCity();
 
   const hits = await getDiscoverPeople(user.id);
   const freshHitsBase = hits;
@@ -66,7 +67,7 @@ export default async function DiscoverPage() {
       where: {
         status: ClassmatePostStatus.ACTIVE,
         expiresAt: { gt: new Date() },
-        city: DEFAULT_DISCOVER_SERVED_CITY,
+        city: servedCity,
         user: {
           moderationBlocks: { none: { isActive: true } },
           blocksReceived: { none: { blockerId: user.id } },
@@ -140,7 +141,13 @@ export default async function DiscoverPage() {
       {!user.onboardingComplete ? (
         <OnboardingContinueCta title={ui.onboarding.discoverTitle} body={ui.onboarding.discoverBody} />
       ) : null}
-      <DiscoverList rows={rows} posts={posts} savedCourseCount={savedCount} enrolledCourses={enrolledCourses} />
+      <DiscoverList
+        rows={rows}
+        posts={posts}
+        savedCourseCount={savedCount}
+        enrolledCourses={enrolledCourses}
+        servedCity={servedCity}
+      />
     </div>
   );
 }

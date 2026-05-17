@@ -1,6 +1,10 @@
 "use client";
 
 import { BuddyRequestCard } from "@/components/discover/buddy-request-card";
+import {
+  DiscoverPostsMasonry,
+  DiscoverPostsMasonryItem,
+} from "@/components/profile/discover-posts-masonry";
 import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
 import type { DiscoverCityNameKey } from "@/lib/discover/discover-city-name-keys";
 
@@ -14,12 +18,12 @@ export function DiscoverFeed({
   if (posts.length === 0) return null;
 
   return (
-    <div className="columns-2 gap-2.5 sm:gap-3 [column-fill:balance]">
+    <DiscoverPostsMasonry>
       {posts.map((post) => (
-        <div key={post.id} className="mb-2.5 break-inside-avoid sm:mb-3">
+        <DiscoverPostsMasonryItem key={post.id}>
           <BuddyRequestCard post={post} cityNameKey={cityNameKey} />
-        </div>
+        </DiscoverPostsMasonryItem>
       ))}
-    </div>
+    </DiscoverPostsMasonry>
   );
 }

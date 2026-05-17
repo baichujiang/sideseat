@@ -14,7 +14,7 @@ export default async function InboxPage() {
   if (!sessionUser) {
     return (
       <div className="space-y-3">
-        <header className="px-0.5">
+        <header className="px-0.5 text-center">
           <h1 className="page-screen-title">{ui.inbox.screenTitle}</h1>
           <p className="page-screen-subtitle mt-0.5">{ui.inbox.screenSubtitleGuest}</p>
         </header>
@@ -24,8 +24,7 @@ export default async function InboxPage() {
   }
   const user = sessionUser;
 
-  const { merged, unreadTotal, plansNeedingYourAction, scheduleShareProposalsPending, activePostCount } =
-    await getInboxMergeBundle(user.id);
+  const { merged, plansNeedingYourAction } = await getInboxMergeBundle(user.id);
   const directContacts = merged
     .filter((item): item is Extract<(typeof merged)[number], { kind: "direct" }> => item.kind === "direct")
     .filter((item) => item.connection.userAId !== item.connection.userBId)
@@ -39,7 +38,7 @@ export default async function InboxPage() {
         avatarUrl: peer.avatarUrl,
       };
     });
-  const inboxVersion = merged
+  const listVersion = merged
     .map((item) => {
       if (item.kind === "direct") {
         return [
@@ -70,6 +69,7 @@ export default async function InboxPage() {
       ].join(":");
     })
     .join("|");
+  const inboxVersion = `${listVersion}|plans:${plansNeedingYourAction}`;
 
   return (
     <div className="space-y-3">
@@ -78,14 +78,9 @@ export default async function InboxPage() {
         <OnboardingContinueCta title={ui.inbox.onboardingTitle} body={ui.inbox.onboardingBody} />
       ) : null}
       <InboxChatsShell
-        title={ui.inbox.screenTitle}
-        subtitle={ui.inbox.screenSubtitle}
         userId={user.id}
         merged={merged}
-        unreadTotal={unreadTotal}
         plansNeedingYourAction={plansNeedingYourAction}
-        scheduleShareProposalsPending={scheduleShareProposalsPending}
-        activePostCount={activePostCount}
         initialContacts={directContacts}
         showCreateSheet={user.onboardingComplete}
       />

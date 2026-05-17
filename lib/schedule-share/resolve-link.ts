@@ -1,5 +1,6 @@
 import type { Prisma, PrismaClient, ScheduleShareLink, User } from "@prisma/client";
 
+import { isScheduleShareSingleUseConsumed } from "@/lib/schedule-share/usage-limit";
 import { hashScheduleShareToken } from "@/lib/schedule-share/token";
 
 type Db = PrismaClient | Prisma.TransactionClient;
@@ -9,6 +10,7 @@ export type ScheduleShareLinkWithOwner = ScheduleShareLink & { owner: User };
 export async function findScheduleShareLinkByPlainToken(
   db: Db,
   plaintextToken: string,
+  options?: { viewerUserId?: string | null },
 ): Promise<
   | { ok: true; link: ScheduleShareLinkWithOwner }
   | { ok: false; reason: "not_found" | "revoked" | "expired" }
@@ -22,5 +24,8 @@ export async function findScheduleShareLinkByPlainToken(
   const now = new Date();
   if (link.revokedAt) return { ok: false, reason: "revoked" };
   if (link.expiresAt.getTime() <= now.getTime()) return { ok: false, reason: "expired" };
+  if (isScheduleShareSingleUseConsumed(link, options?.viewerUserId, link.ownerUserId)) {
+    return { ok: false, reason: "expired" };
+  }
   return { ok: true, link };
 }

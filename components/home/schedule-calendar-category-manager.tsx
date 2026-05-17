@@ -167,23 +167,23 @@ export function ScheduleCalendarCategoryManager({
       zClassName="z-50"
       panelClassName="w-[min(100vw,28rem)] border-0 bg-card shadow-none dark:shadow-none"
     >
-      <section className="flex h-full min-h-0 flex-col overflow-hidden px-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-[max(0.5rem,env(safe-area-inset-top))]">
-        <div className="flex justify-center pt-2">
+      <section className="flex h-full min-h-0 flex-col overflow-hidden px-1.5 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-[max(0.25rem,env(safe-area-inset-top))]">
+        <div className="flex justify-center pt-1">
           <span className="h-1 w-10 rounded-full bg-muted-foreground/20" />
         </div>
-        <div className="flex items-center justify-between gap-3 border-b border-border/50 px-4 pb-3 pt-2">
-          <h2 className="text-[15px] font-semibold text-foreground">Calendars</h2>
+        <div className="flex items-center justify-between gap-2 border-b border-border/50 px-3 pb-2 pt-1">
+          <h2 className="text-[15px] font-semibold leading-tight text-foreground">Calendars</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             <X className="h-4 w-4" strokeWidth={2.25} />
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-1 py-2">
+        <div className="min-h-0 flex-1 overflow-y-auto px-0.5 py-1">
           <div className="divide-y divide-border/40">
             {categories.map((row) => (
               <CompactCategoryRow
@@ -198,22 +198,22 @@ export function ScheduleCalendarCategoryManager({
           </div>
 
           {showSubscriptionRow ? (
-            <div className="mt-2 space-y-2 rounded-xl border border-border/60 bg-muted/10 px-2 py-2">
-              <p className="px-1 text-[12px] font-medium text-muted-foreground">Subscription calendar</p>
+            <div className="mt-1 space-y-1.5 rounded-lg border border-border/60 bg-muted/10 px-2 py-1.5">
+              <p className="px-0.5 text-[12px] font-medium leading-tight text-muted-foreground">Subscription calendar</p>
               <div className="flex items-center gap-2">
                 <CalendarCategoryColorPopover
                   value={subColor}
                   onChange={setSubColor}
                   disabled={adding}
                   ariaLabel="Pick subscription calendar color"
-                  triggerClassName="-ml-1"
+                  triggerClassName="min-h-10 min-w-10 -ml-0.5"
                 />
                 <input
                   ref={subNameRef}
                   value={subName}
                   onChange={(e) => setSubName(e.target.value)}
                   placeholder="Calendar name"
-                  className="min-w-0 flex-1 rounded-lg border border-border/50 bg-background px-2 py-1.5 text-[13px] text-foreground outline-none placeholder:text-muted-foreground/60"
+                  className="min-w-0 flex-1 rounded-lg border border-border/50 bg-background px-2 py-1 text-[13px] text-foreground outline-none placeholder:text-muted-foreground/60"
                 />
               </div>
               <input
@@ -224,11 +224,11 @@ export function ScheduleCalendarCategoryManager({
                   if (e.key === "Escape") setShowSubscriptionRow(false);
                 }}
                 placeholder="https://… or webcal://… (ICS feed)"
-                className="w-full rounded-lg border border-border/50 bg-background px-2 py-1.5 text-[13px] text-foreground outline-none placeholder:text-muted-foreground/60"
+                className="w-full rounded-lg border border-border/50 bg-background px-2 py-1 text-[13px] text-foreground outline-none placeholder:text-muted-foreground/60"
                 autoComplete="off"
                 spellCheck={false}
               />
-              <div className="flex items-center justify-end gap-1">
+              <div className="flex items-center justify-end gap-0.5">
                 <button
                   type="button"
                   disabled={adding || !subName.trim() || !subUrl.trim()}
@@ -253,13 +253,13 @@ export function ScheduleCalendarCategoryManager({
               </div>
             </div>
           ) : showNewRow ? (
-            <div className="mt-2 flex items-center gap-2 rounded-xl border border-border/60 bg-muted/10 px-2 py-1.5">
+            <div className="mt-1 flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/10 px-2 py-1">
               <CalendarCategoryColorPopover
                 value={newColor}
                 onChange={setNewColor}
                 disabled={adding}
                 ariaLabel="Pick new calendar color"
-                triggerClassName="-ml-1"
+                triggerClassName="min-h-10 min-w-10 -ml-0.5"
               />
               <input
                 ref={newNameRef}
@@ -295,14 +295,14 @@ export function ScheduleCalendarCategoryManager({
               </button>
             </div>
           ) : (
-            <div className="mt-2 flex flex-col gap-1">
+            <div className="mt-1 flex flex-col gap-0.5">
               <button
                 type="button"
                 onClick={() => {
                   setShowSubscriptionRow(false);
                   setShowNewRow(true);
                 }}
-                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-[13px] text-muted-foreground transition hover:bg-muted/50"
+                className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-[13px] text-muted-foreground transition hover:bg-muted/50"
               >
                 <Plus className="h-4 w-4" strokeWidth={2} />
                 New calendar
@@ -313,7 +313,7 @@ export function ScheduleCalendarCategoryManager({
                   setShowNewRow(false);
                   setShowSubscriptionRow(true);
                 }}
-                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-[13px] text-muted-foreground transition hover:bg-muted/50"
+                className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-[13px] text-muted-foreground transition hover:bg-muted/50"
               >
                 <Link2 className="h-4 w-4" strokeWidth={2} />
                 Add subscription calendar
@@ -383,14 +383,14 @@ function CompactCategoryRow({
   const canEditFeed = !row.presetKey;
 
   return (
-    <div className="px-3 py-2">
-      <div className="flex items-center gap-2.5">
+    <div className="px-2 py-1">
+      <div className="flex items-center gap-2">
         <CalendarCategoryColorPopover
           value={row.color}
           onChange={(hex) => onPatch({ color: normalizeCalendarCategoryHex(hex) })}
           disabled={busy}
           ariaLabel={`Color for ${row.name}`}
-          triggerClassName={cn(busy && "pointer-events-none opacity-50")}
+          triggerClassName={cn("min-h-10 min-w-10 -ml-0.5", busy && "pointer-events-none opacity-50")}
         />
 
         {editing ? (
@@ -426,7 +426,7 @@ function CompactCategoryRow({
             type="button"
             onClick={onDelete}
             aria-label="Delete"
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground/50 transition hover:bg-destructive/10 hover:text-destructive"
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-muted-foreground/50 transition hover:bg-destructive/10 hover:text-destructive"
           >
             <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
           </button>
@@ -434,7 +434,7 @@ function CompactCategoryRow({
       </div>
 
       {canEditFeed ? (
-        <div className="mt-1.5 pl-[1.85rem]">
+        <div className="mt-1 pl-10">
           {row.icsSubscriptionUrl !== null || feedExpanded ? (
             <input
               value={urlDraft}
@@ -445,7 +445,7 @@ function CompactCategoryRow({
               }}
               placeholder="ICS or WebCal URL (optional)"
               disabled={busy}
-              className="w-full rounded-lg border border-border/40 bg-muted/20 px-2 py-1 text-[11px] text-foreground outline-none placeholder:text-muted-foreground/55 disabled:opacity-50"
+              className="w-full rounded-md border border-border/40 bg-muted/20 px-2 py-0.5 text-[11px] text-foreground outline-none placeholder:text-muted-foreground/55 disabled:opacity-50"
               autoComplete="off"
               spellCheck={false}
             />

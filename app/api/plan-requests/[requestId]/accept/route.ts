@@ -8,6 +8,9 @@ import {
   normalizeAvailabilityIncludedDates,
   rangeFitsAvailability,
 } from "@/lib/queries/chat-planning";
+import { rangeFitsScheduleShareSnapshot } from "@/lib/schedule-share/build-schedule-share-snapshot";
+import { syncScheduleShareGuestProposalStatus } from "@/lib/schedule-share/create-plan-from-guest-proposal";
+import { PUBLIC_SCHEDULE_TIME_UNAVAILABLE } from "@/lib/schedule-share/public-errors";
 
 export async function POST(
   _request: Request,
@@ -27,6 +30,7 @@ export async function POST(
       },
       include: {
         availabilityShare: true,
+        scheduleShareLink: true,
         proposer: {
           select: { id: true, nickname: true, username: true },
         },
@@ -46,7 +50,19 @@ export async function POST(
       return error("This request is no longer pending.", 409);
     }
 
-    if (planRequest.availabilityShareId && planRequest.availabilityShare) {
+    if (planRequest.scheduleShareLinkId && planRequest.scheduleShareLink) {
+      const link = planRequest.scheduleShareLink;
+      const fits = await rangeFitsScheduleShareSnapshot(prisma, {
+        ownerUserId: link.ownerUserId,
+        rangeStart: link.rangeStart,
+        rangeEnd: link.rangeEnd,
+        proposalStart: planRequest.startTime,
+        proposalEnd: planRequest.endTime,
+      });
+      if (!fits) {
+        return error(PUBLIC_SCHEDULE_TIME_UNAVAILABLE, 409);
+      }
+    } else if (planRequest.availabilityShareId && planRequest.availabilityShare) {
       if (!isAvailabilityShareActive(planRequest.availabilityShare)) {
         return error("This time is no longer available. Please choose another slot.", 409);
       }
@@ -92,6 +108,12 @@ export async function POST(
         startTime: planRequest.startTime,
         endTime: planRequest.endTime,
       });
+
+      await syncScheduleShareGuestProposalStatus(
+        tx,
+        planRequest.scheduleShareGuestProposalId,
+        "ACCEPTED",
+      );
 
       const confirmation = await tx.message.create({
         data: {

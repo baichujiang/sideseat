@@ -21,6 +21,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { AVATAR_IDS, isDisplayableCustomAvatarUrl, isValidAvatarId } from "@/lib/constants/avatars";
 import { uploadProfileAvatarPhoto } from "@/lib/profile/upload-avatar";
+import { mePageCardClass } from "@/components/profile/me-settings-row";
+import type { DiscoverCityNameKey } from "@/lib/discover/discover-city-name-keys";
 import { cn } from "@/lib/utils";
 import { formatMessage } from "@/lib/i18n/messages";
 import { useAppMessages } from "@/hooks/use-app-locale";
@@ -86,6 +88,7 @@ export function ProfileIdentitySheets({
   sheetProfileInitialValues,
   sheetProfileFormKey,
   belowDisplayName,
+  discoverCity,
 }: {
   initialNickname: string | null;
   initialBio: string | null;
@@ -98,6 +101,7 @@ export function ProfileIdentitySheets({
   sheetProfileFormKey?: string;
   /** Me /profile summary only — e.g. private self-chat title under the display name. */
   belowDisplayName?: ReactNode;
+  discoverCity?: DiscoverCityNameKey;
 }) {
   const t = useAppMessages().meIdentity;
   const crop = useAppMessages().meAvatarCrop;
@@ -320,41 +324,43 @@ export function ProfileIdentitySheets({
   return (
     <>
       {variant === "summary" ? (
-        <div className={cn(heroCardClass, "bg-gradient-to-b from-classmates-warm-alt/35 to-classmates-surface dark:from-card dark:to-card")}>
+        <div className={cn(mePageCardClass, "relative bg-gradient-to-b from-classmates-warm-alt/50 to-classmates-surface dark:from-card dark:to-card")}>
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={openEditProfile}
             aria-label={t.editProfileAria}
-            className="absolute right-2 top-2 z-[1] rounded-full border border-classmates-edge/70 bg-classmates-surface/90 px-3 py-1.5 text-[12px] font-semibold text-classmates-sub shadow-none backdrop-blur-sm hover:border-classmates-edge hover:bg-classmates-blue-soft/60 hover:text-classmates-blue sm:right-3 sm:top-3 sm:px-3.5 dark:border-border dark:bg-card/90 dark:text-zinc-300 dark:hover:text-classmates-blue"
+            className="absolute right-3 top-3 z-[1] h-9 rounded-full border border-classmates-edge bg-white/95 px-3.5 text-[13px] font-semibold text-[#374151] shadow-none hover:border-classmates-edge hover:bg-classmates-warm-alt dark:border-border dark:bg-card/95 dark:text-foreground"
           >
             {t.editProfile}
           </Button>
 
-          <div className="flex gap-3 px-3 pb-4 pt-4 pr-[5.25rem] sm:gap-4 sm:px-4 sm:pb-5 sm:pt-5 sm:pr-24">
+          <div className="flex gap-4 px-5 py-4 pr-[7.5rem] sm:pr-28">
             <figure className="m-0 shrink-0 self-start">
               <PresetAvatar
                 id={avatarId}
-                size={84}
-                className="ring-[4px] ring-classmates-warm-alt shadow-[0_8px_24px_-6px_rgba(15,23,42,0.15)] dark:ring-background"
+                size={72}
+                className="ring-2 ring-[#F3F4F6] shadow-[0_4px_12px_-4px_rgba(15,23,42,0.12)] dark:ring-border"
               />
               <figcaption className="sr-only">{t.profilePhotoCaption}</figcaption>
             </figure>
             <div className="min-w-0 flex-1 text-left">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="page-screen-title-ink truncate">{displayName}</p>
+                <p className="truncate text-[22px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
+                  {displayName}
+                </p>
                 {gender ? <UserGenderProfileMark gender={gender} iconClassName="h-4 w-4" /> : null}
               </div>
               {belowDisplayName ? (
                 <div className="mt-1.5 w-full min-w-0 max-w-full">{belowDisplayName}</div>
               ) : null}
               {schoolLine ? (
-                <p className="mt-1.5 text-[14px] font-medium leading-snug text-classmates-sub dark:text-zinc-400">
+                <p className="mt-1 text-[15px] font-medium leading-snug text-classmates-sub dark:text-muted-foreground">
                   {schoolLine}
                 </p>
               ) : null}
-              <p className="mt-2.5 text-pretty text-[14px] leading-relaxed text-classmates-sub dark:text-zinc-400 sm:text-[15px] line-clamp-4">
+              <p className="mt-1.5 line-clamp-4 text-pretty text-[15px] leading-snug text-classmates-sub dark:text-muted-foreground">
                 {bioDisplay}
               </p>
             </div>
@@ -505,6 +511,7 @@ export function ProfileIdentitySheets({
                       variant="sheet"
                       initialValues={sheetProfileInitialValues}
                       avatarId={avatarId}
+                      discoverCity={discoverCity}
                       submitLabel={pf.saveChanges}
                       onSaved={() => setSheet(null)}
                       requireDirtyToSubmit

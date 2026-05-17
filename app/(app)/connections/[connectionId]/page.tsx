@@ -197,6 +197,7 @@ export default async function ConnectionPage({
                       startTimeISO={request.startTime.toISOString()}
                       endTimeISO={request.endTime.toISOString()}
                       status={request.status}
+                      fromScheduleShare={Boolean(request.scheduleShareLinkId)}
                     />
                   </div>
                 );

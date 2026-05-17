@@ -19,7 +19,7 @@ import { formatMessage } from "@/lib/i18n/messages";
 import type { AppMessages } from "@/lib/i18n/messages/types";
 
 const verifiedChipClass =
-  "shrink-0 rounded-md px-2 py-0.5 text-[11px] font-semibold leading-none text-classmates-success bg-classmates-success-soft";
+  "shrink-0 self-center rounded-full bg-[#D1FAE5] px-2.5 py-1 text-xs font-semibold leading-none text-[#047857] dark:bg-emerald-900/40 dark:text-emerald-300";
 
 type DeliveryKind = "sent" | "failed" | "skipped" | "manual";
 
@@ -184,7 +184,7 @@ export function StudentVerificationForm({
       : v.logoAltUniversity;
     return (
       <div
-        className="rounded-[20px] border border-[#D1FAE5] bg-[#FAFFFE] px-2.5 py-2 dark:border-emerald-900/40 dark:bg-emerald-950/20"
+        className="rounded-[20px] border border-emerald-200 bg-emerald-50/50 px-4 py-3.5 dark:border-emerald-900/40 dark:bg-emerald-950/25"
         role="status"
         aria-label={
           schoolShortLabel
@@ -192,9 +192,9 @@ export function StudentVerificationForm({
             : formatMessage(v.verifiedAriaGeneric, { email: displayEmail })
         }
       >
-        <div className="flex gap-3">
+        <div className="flex items-center gap-3">
           {schoolLogoSrc ? (
-            <div className="flex h-11 shrink-0 items-center justify-center self-start rounded-xl border border-emerald-200/80 bg-white px-2 py-1 shadow-[0_1px_2px_rgba(15,23,42,0.06)] dark:border-emerald-800/50 dark:bg-emerald-950/40">
+            <div className="flex h-11 shrink-0 items-center justify-center rounded-xl border border-emerald-200/80 bg-white px-2 py-1 shadow-[0_1px_2px_rgba(15,23,42,0.06)] dark:border-emerald-800/50 dark:bg-emerald-950/40">
               <img
                 src={schoolLogoSrc}
                 alt={logoAlt}
@@ -205,22 +205,20 @@ export function StudentVerificationForm({
               />
             </div>
           ) : null}
-          <div className="min-w-0 flex-1 space-y-1.5">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="min-w-0 flex-1 space-y-0.5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-classmates-sub">
               {v.universityEmailLabel}
             </p>
             {schoolShortLabel ? (
-              <p className="text-[12px] font-semibold leading-tight text-classmates-success dark:text-emerald-400">
+              <p className="text-sm font-semibold leading-tight text-classmates-success dark:text-emerald-400">
                 {formatMessage(v.verifiedLineWithSchool, { school: schoolShortLabel })}
               </p>
             ) : null}
-            <div className="flex min-h-[1.75rem] items-center justify-between gap-2">
-              <p className="min-w-0 truncate text-[13px] font-medium tabular-nums text-foreground">
-                {displayEmail}
-              </p>
-              <span className={verifiedChipClass}>{v.verifiedChip}</span>
-            </div>
+            <p className="truncate text-sm font-medium tabular-nums text-classmates-ink dark:text-foreground">
+              {displayEmail}
+            </p>
           </div>
+          <span className={verifiedChipClass}>{v.verifiedChip}</span>
         </div>
       </div>
     );

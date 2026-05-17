@@ -3,30 +3,39 @@ import Link from "next/link";
 import type { Route } from "next";
 import { format, formatDistanceToNowStrict } from "date-fns";
 import { CalendarClock, ChevronRight } from "lucide-react";
-import { ConnectionStatus, PlanRequestStatus, PlanType, ScheduleShareGuestProposalStatus } from "@prisma/client";
+import { ConnectionStatus, PlanRequestStatus, PlanType } from "@prisma/client";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { BackLink } from "@/components/nav/back-link";
-import { ScheduleShareGuestProposalRow } from "@/components/schedule-share/schedule-share-guest-proposal-row";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { formatMessage, getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
+import { safeReturnPath } from "@/lib/nav/back";
 import { cn } from "@/lib/utils";
 
-const RETURN_TO_PLAN = encodeURIComponent("/profile/my-plan");
-
-export default async function ProfileMyPlanPage() {
+export default async function ProfileMyPlanPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ returnTo?: string }>;
+}) {
   const sessionUser = await getSessionUser();
   const locale = await getServerAppLocale();
   const ui = getMessages(locale);
+  const query = (await searchParams) ?? {};
+  const backHref = safeReturnPath(query.returnTo, "/profile") as Route;
+  const planPageReturnTo = encodeURIComponent(
+    query.returnTo
+      ? `/profile/my-plan?returnTo=${encodeURIComponent(query.returnTo)}`
+      : "/profile/my-plan",
+  );
 
   if (!sessionUser) {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <BackLink href="/profile" label={ui.common.back} />
+          <BackLink href={backHref} label={ui.common.back} />
           <h1 className="page-screen-title">{ui.profile.myPlanPageTitle}</h1>
         </div>
         <GuestAppCta returnTo="/profile/my-plan" />
@@ -38,24 +47,6 @@ export default async function ProfileMyPlanPage() {
   }
   const user = sessionUser;
   const now = new Date();
-
-  const scheduleGuestProposals = await prisma.scheduleShareGuestProposal.findMany({
-    where: {
-      scheduleShareLink: { ownerUserId: user.id },
-      status: ScheduleShareGuestProposalStatus.PENDING,
-    },
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      guestDisplayName: true,
-      guestContact: true,
-      title: true,
-      note: true,
-      location: true,
-      startTime: true,
-      endTime: true,
-    },
-  });
 
   const planRequests = await prisma.planRequest.findMany({
     where: {
@@ -87,49 +78,22 @@ export default async function ProfileMyPlanPage() {
     .filter((r) => r.status === PlanRequestStatus.ACCEPTED)
     .sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
 
-  const hasScheduleShares = scheduleGuestProposals.length > 0;
   const hasPlans = planRequests.length > 0;
 
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-2 px-0.5">
-        <BackLink href="/profile" label={ui.common.back} />
+        <BackLink href={backHref} label={ui.common.back} />
         <div>
           <h1 className="page-screen-title">{ui.profile.myPlanPageTitle}</h1>
           <p className="text-[13px] leading-snug text-muted-foreground">{ui.profile.myPlanPageSubtitle}</p>
         </div>
       </div>
 
-      {!hasPlans && !hasScheduleShares ? (
+      {!hasPlans ? (
         <EmptyState title={ui.profile.myPlanEmptyTitle} description={ui.profile.myPlanEmptyDesc} />
       ) : (
         <div className="space-y-5">
-          {hasScheduleShares ? (
-            <section className="space-y-2">
-              <h2 className="px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                {ui.scheduleShare.myPlanScheduleShareHeading}
-              </h2>
-              <ul className="overflow-hidden rounded-[1.125rem] border border-border/60 bg-card shadow-[0_2px_16px_-4px_rgba(15,23,42,0.06)]">
-                {scheduleGuestProposals.map((p, i) => (
-                  <ScheduleShareGuestProposalRow
-                    key={p.id}
-                    isLast={i === scheduleGuestProposals.length - 1}
-                    proposal={{
-                      id: p.id,
-                      guestDisplayName: p.guestDisplayName,
-                      guestContact: p.guestContact,
-                      title: p.title,
-                      note: p.note,
-                      location: p.location,
-                      startTime: p.startTime.toISOString(),
-                      endTime: p.endTime.toISOString(),
-                    }}
-                  />
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
           {pending.length > 0 ? (
             <section className="space-y-2">
               <h2 className="px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -143,6 +107,7 @@ export default async function ProfileMyPlanPage() {
                     userId={user.id}
                     isLast={i === pending.length - 1}
                     planLabels={ui.profile}
+                    planPageReturnTo={planPageReturnTo}
                   />
                 ))}
               </ul>
@@ -163,6 +128,7 @@ export default async function ProfileMyPlanPage() {
                     isLast={i === upcoming.length - 1}
                     variant="upcoming"
                     planLabels={ui.profile}
+                    planPageReturnTo={planPageReturnTo}
                   />
                 ))}
               </ul>
@@ -180,6 +146,7 @@ function PlanRequestRow({
   isLast,
   variant = "pending",
   planLabels,
+  planPageReturnTo,
 }: {
   req: {
     id: string;
@@ -199,8 +166,9 @@ function PlanRequestRow({
   isLast: boolean;
   variant?: "pending" | "upcoming";
   planLabels: ReturnType<typeof getMessages>["profile"];
+  planPageReturnTo: string;
 }) {
-  const href = `/connections/${req.connectionId}?returnTo=${RETURN_TO_PLAN}` as Route;
+  const href = `/connections/${req.connectionId}?returnTo=${planPageReturnTo}` as Route;
   const imReceiver = req.receiverUserId === userId;
   const peer = imReceiver ? req.proposer : req.receiver;
   const peerName = peer.nickname?.trim() || planLabels.myPlanPeerFallback;

@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   value: SchoolCode;
+  /** When set, only these schools appear (scoped by Discover metro). */
+  allowedSchools?: SchoolCode[];
   id?: string;
   className?: string;
 };
@@ -20,12 +22,21 @@ type Props = {
  * School scope for /courses.
  * Closed state shows short label (e.g. TUM); expanded list shows full labels.
  */
-export function CoursesSchoolSelect({ value, id = "courses-school-select", className }: Props) {
+export function CoursesSchoolSelect({
+  value,
+  allowedSchools,
+  id = "courses-school-select",
+  className,
+}: Props) {
   const router = useRouter();
   const { courses: co } = useAppMessages();
   const searchParams = useSearchParams();
   const detailsRef = useRef<HTMLDetailsElement | null>(null);
-  const selected = schoolOptions.find((s) => s.value === value) ?? schoolOptions[0];
+  const options =
+    allowedSchools?.length ?
+      schoolOptions.filter((s) => allowedSchools.includes(s.value))
+    : schoolOptions;
+  const selected = options.find((s) => s.value === value) ?? options[0];
 
   function navigate(next: SchoolCode) {
     detailsRef.current?.removeAttribute("open");
@@ -52,7 +63,7 @@ export function CoursesSchoolSelect({ value, id = "courses-school-select", class
       </summary>
 
       <div className="absolute right-0 z-30 mt-1.5 min-w-[16rem] overflow-hidden rounded-xl border border-[#E7E0D6] bg-white py-1 shadow-lg dark:border-border dark:bg-card">
-        {schoolOptions.map((school) => (
+        {options.map((school) => (
           <button
             key={school.value}
             type="button"

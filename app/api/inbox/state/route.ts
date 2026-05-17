@@ -7,10 +7,9 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const user = await requireUser();
-    const { merged, unreadTotal, plansNeedingYourAction, scheduleShareProposalsPending, activePostCount } =
-      await getInboxMergeBundle(user.id);
+    const { merged, unreadTotal, plansNeedingYourAction } = await getInboxMergeBundle(user.id);
 
-    const version = merged
+    const listVersion = merged
       .map((item) => {
         if (item.kind === "direct") {
           return [
@@ -41,13 +40,12 @@ export async function GET() {
         ].join(":");
       })
       .join("|");
+    const version = `${listVersion}|plans:${plansNeedingYourAction}`;
 
     return ok({
       version,
       unreadTotal,
       plansNeedingYourAction,
-      scheduleShareProposalsPending,
-      activePostCount,
     });
   } catch (cause) {
     console.error(cause);

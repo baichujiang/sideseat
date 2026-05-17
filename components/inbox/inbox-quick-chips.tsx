@@ -1,14 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import type { Route } from "next";
-import { CalendarClock, MoreHorizontal, Search, Sparkles } from "lucide-react";
+import { BookOpen, CalendarClock, Search, UsersRound, X } from "lucide-react";
 
 import { InboxChatsView } from "@/components/inbox/inbox-chats-view";
 import { InboxCreateSheet } from "@/components/inbox/inbox-create-sheet";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { formatMessage } from "@/lib/i18n/messages";
 import type { InboxMerged } from "@/lib/queries/inbox-merge";
@@ -26,200 +25,221 @@ function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   const label = count > 99 ? "99+" : String(count);
   return (
-    <span className="flex min-h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-[#F43F5E] px-1.5 text-[11px] font-semibold leading-none text-white">
+    <span className="pointer-events-none absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#F43F5E] px-1 text-[10px] font-bold leading-none text-white shadow-sm ring-2 ring-background">
       {label}
     </span>
   );
 }
 
-export function InboxChatsShell({
-  title,
-  subtitle,
-  userId,
-  merged,
-  unreadTotal,
-  plansNeedingYourAction,
-  scheduleShareProposalsPending,
-  activePostCount,
-  initialContacts,
-  showCreateSheet,
-}: {
-  title: string;
-  subtitle: string;
-  userId: string;
-  merged: InboxMerged[];
-  unreadTotal: number;
-  plansNeedingYourAction: number;
-  scheduleShareProposalsPending: number;
-  activePostCount: number;
-  initialContacts: ContactRow[];
-  showCreateSheet: boolean;
-}) {
-  const m = useAppMessages();
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [moreOpen, setMoreOpen] = useState(false);
+const chipPillBaseClass =
+  "relative inline-flex h-11 min-h-[44px] shrink-0 items-center gap-2 rounded-full border px-3.5 shadow-[0_1px_3px_rgba(15,23,42,0.04)] transition-[box-shadow,transform,opacity] active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:shadow-[0_2px_8px_rgba(15,23,42,0.08)]";
 
-  const unreadAria =
-    unreadTotal > 0
-      ? formatMessage(m.inbox.chipNewAriaWithUnread, { count: unreadTotal })
-      : m.inbox.chipNewAria;
+const chipPillPrimaryClass =
+  "border-[#E8E1D8] bg-[#EFF6FF] text-[#2563EB] dark:border-blue-800/40 dark:bg-blue-950/35 dark:text-blue-300";
 
-  const scheduleRequestsAria =
-    scheduleShareProposalsPending > 0
-      ? formatMessage(m.inbox.chipScheduleRequestsAriaWithCount, {
-          count: scheduleShareProposalsPending,
-        })
-      : m.inbox.chipScheduleRequestsAria;
+const chipPillMutedClass =
+  "border-[#E8E1D8] bg-white text-[#6B7280] dark:border-border dark:bg-card dark:text-muted-foreground";
 
-  return (
-    <div className="space-y-3">
-      <header className="px-0.5">
-        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-          <div className="min-w-0">
-            <h1 className="page-screen-title">{title}</h1>
-            <p className="page-screen-subtitle mt-0.5">{subtitle}</p>
-          </div>
-          <div className="flex flex-wrap items-center justify-start gap-2 sm:justify-end">
-            <Link
-              href={"/inbox/unread" as Route}
-              title={m.inbox.chipNewLinkTitle}
-              aria-label={unreadAria}
-              className={cn(
-                "inline-flex h-9 max-w-full items-center gap-1.5 rounded-full border border-classmates-blue-border/80 bg-classmates-blue-soft px-3 py-1.5 text-[13px] font-semibold text-classmates-blue-body transition-opacity active:opacity-80",
-                "[@media(hover:hover)]:hover:opacity-90 dark:border-blue-800/50 dark:bg-blue-950/35 dark:text-blue-100",
-              )}
-            >
-              <Sparkles className="h-4 w-4 shrink-0 text-[#2563EB]" strokeWidth={2} aria-hidden />
-              <span className="truncate">{m.inbox.chipNew}</span>
-              <CountBadge count={unreadTotal} />
-            </Link>
+const inboxHeaderIconBtnClass =
+  "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/80 bg-white text-muted-foreground shadow-sm transition hover:bg-muted/50 hover:text-foreground dark:bg-card";
 
-            {scheduleShareProposalsPending > 0 ? (
-              <Link
-                href={"/inbox/schedule-requests" as Route}
-                title={m.inbox.chipScheduleRequestsLinkTitle}
-                aria-label={scheduleRequestsAria}
-                className={cn(
-                  "inline-flex h-9 max-w-full items-center gap-1.5 rounded-full border border-amber-200/90 bg-amber-50 px-3 py-1.5 text-[13px] font-semibold text-amber-950 transition-opacity active:opacity-80",
-                  "[@media(hover:hover)]:hover:opacity-90 dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-100",
-                )}
-              >
-                <CalendarClock className="h-4 w-4 shrink-0 text-amber-700 dark:text-amber-300" strokeWidth={2} aria-hidden />
-                <span className="truncate">{m.inbox.chipScheduleRequests}</span>
-                <CountBadge count={scheduleShareProposalsPending} />
-              </Link>
-            ) : null}
-
-            {plansNeedingYourAction > 0 ? (
-              <Link
-                href={"/profile/my-plan" as Route}
-                title={m.inbox.chipPlansLinkTitle}
-                aria-label={
-                  plansNeedingYourAction > 0
-                    ? formatMessage(m.inbox.chipPlansAriaWithCount, { count: plansNeedingYourAction })
-                    : m.inbox.chipPlansAria
-                }
-                className={cn(
-                  "inline-flex h-9 max-w-full items-center gap-1.5 rounded-full border border-border/80 bg-muted/50 px-3 py-1.5 text-[13px] font-semibold text-foreground transition-opacity active:opacity-80",
-                  "[@media(hover:hover)]:hover:opacity-90",
-                )}
-              >
-                <span className="truncate">{m.inbox.chipPlans}</span>
-                <CountBadge count={plansNeedingYourAction} />
-              </Link>
-            ) : null}
-
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              aria-label={searchOpen ? m.inbox.headerSearchCloseAria : m.inbox.headerSearchOpenAria}
-              aria-pressed={searchOpen}
-              className="h-9 w-9 shrink-0 rounded-full border-border"
-              onClick={() => setSearchOpen((v) => !v)}
-            >
-              <Search className="h-4 w-4" strokeWidth={2} aria-hidden />
-            </Button>
-
-            <Popover open={moreOpen} onOpenChange={setMoreOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  aria-label={m.inbox.headerMoreMenuAria}
-                  className="h-9 w-9 shrink-0 rounded-full border-border"
-                >
-                  <MoreHorizontal className="h-4 w-4" strokeWidth={2} aria-hidden />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-56 p-1.5">
-                <nav className="flex flex-col gap-0.5" aria-label={m.inbox.headerMoreMenuAria}>
-                  <MenuCountLink
-                    href={"/inbox/schedule-requests" as Route}
-                    label={m.inbox.headerMenuScheduleRequests}
-                    count={scheduleShareProposalsPending}
-                    onNavigate={() => setMoreOpen(false)}
-                  />
-                  <MenuCountLink
-                    href={"/profile/my-plan" as Route}
-                    label={m.inbox.headerMenuMyPlan}
-                    count={plansNeedingYourAction}
-                    onNavigate={() => setMoreOpen(false)}
-                  />
-                  <MenuCountLink
-                    href={"/profile/my-posts" as Route}
-                    label={m.inbox.headerMenuMyPosts}
-                    count={activePostCount}
-                    onNavigate={() => setMoreOpen(false)}
-                  />
-                  <MenuCountLink
-                    href={"/profile/saved-posts" as Route}
-                    label={m.inbox.headerMenuSavedPosts}
-                    onNavigate={() => setMoreOpen(false)}
-                  />
-                </nav>
-              </PopoverContent>
-            </Popover>
-
-            {showCreateSheet ? <InboxCreateSheet initialContacts={initialContacts} /> : null}
-          </div>
-        </div>
-      </header>
-
-      <InboxChatsView
-        userId={userId}
-        merged={merged}
-        query={query}
-        onQueryChange={setQuery}
-        showSearchField={searchOpen}
-      />
-    </div>
-  );
-}
-
-function MenuCountLink({
+function InboxNavChip({
   href,
   label,
+  title,
+  ariaLabel,
   count,
-  onNavigate,
+  icon,
+  variant = "muted",
 }: {
   href: Route;
   label: string;
+  title?: string;
+  ariaLabel: string;
   count?: number;
-  onNavigate: () => void;
+  icon: ReactNode;
+  variant?: "primary" | "muted";
 }) {
   return (
     <Link
       href={href}
-      onClick={onNavigate}
-      className="flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors active:bg-muted [@media(hover:hover)]:hover:bg-muted/80"
+      title={title}
+      aria-label={ariaLabel}
+      className={cn(
+        chipPillBaseClass,
+        variant === "primary" ? chipPillPrimaryClass : chipPillMutedClass,
+        typeof count === "number" && count > 0 ? "pr-4" : null,
+      )}
     >
-      <span>{label}</span>
-      {typeof count === "number" && count > 0 ? (
-        <span className="tabular-nums text-[12px] text-muted-foreground">{count > 99 ? "99+" : count}</span>
-      ) : null}
+      {typeof count === "number" ? <CountBadge count={count} /> : null}
+      <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center [&_svg]:h-[18px] [&_svg]:w-[18px]">
+        {icon}
+      </span>
+      <span className="whitespace-nowrap text-[14px] font-semibold leading-none">{label}</span>
     </Link>
+  );
+}
+
+export function InboxChatsShell({
+  userId,
+  merged,
+  plansNeedingYourAction,
+  initialContacts,
+  showCreateSheet,
+}: {
+  userId: string;
+  merged: InboxMerged[];
+  plansNeedingYourAction: number;
+  initialContacts: ContactRow[];
+  showCreateSheet: boolean;
+}) {
+  const m = useAppMessages();
+  const [query, setQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  const groupUnread = useMemo(
+    () => merged.filter((i) => i.kind === "group").reduce((sum, i) => sum + i.unreadCount, 0),
+    [merged],
+  );
+  const courseUnread = useMemo(
+    () => merged.filter((i) => i.kind === "course").reduce((sum, i) => sum + i.unreadCount, 0),
+    [merged],
+  );
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    const id = window.requestAnimationFrame(() => {
+      document.querySelector<HTMLInputElement>("#inbox-chats-search-input")?.focus({
+        preventScroll: true,
+      });
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [searchOpen]);
+
+  const closeSearch = () => {
+    setSearchOpen(false);
+    setQuery("");
+  };
+
+  const toggleSearch = () => {
+    if (searchOpen) {
+      closeSearch();
+      return;
+    }
+    setSearchOpen(true);
+  };
+
+  const upcomingPlanAria =
+    plansNeedingYourAction > 0
+      ? formatMessage(m.inbox.chipUpcomingPlanAriaWithCount, { count: plansNeedingYourAction })
+      : m.inbox.chipUpcomingPlanAria;
+
+  const studyGroupAria =
+    groupUnread > 0
+      ? formatMessage(m.inbox.chipStudyGroupAriaWithUnread, { count: groupUnread })
+      : m.inbox.chipStudyGroupAria;
+
+  const courseChatsAria =
+    courseUnread > 0
+      ? formatMessage(m.inbox.chipCourseChatsAriaWithUnread, { count: courseUnread })
+      : m.inbox.chipCourseChatsAria;
+
+  return (
+    <div className="space-y-3">
+      <header className="space-y-2 px-0.5">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          <div
+            className="pointer-events-none invisible flex items-center justify-start gap-1.5"
+            aria-hidden
+          >
+            <span className="inline-flex h-9 w-9 shrink-0" />
+            {showCreateSheet ? <span className="inline-flex h-9 w-9 shrink-0" /> : null}
+          </div>
+          <h1 className="page-screen-title min-w-0 truncate text-center">{m.inbox.screenTitle}</h1>
+          <div className="flex shrink-0 items-center justify-end gap-1.5">
+            <button
+              type="button"
+              onClick={toggleSearch}
+              aria-label={m.inbox.searchAria}
+              aria-pressed={searchOpen}
+              className={cn(
+                inboxHeaderIconBtnClass,
+                searchOpen && "border-classmates-blue-border text-classmates-blue",
+              )}
+            >
+              <Search className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+            </button>
+            {showCreateSheet ? <InboxCreateSheet initialContacts={initialContacts} /> : null}
+          </div>
+        </div>
+
+        {searchOpen ? (
+          <div className="relative min-w-0">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              strokeWidth={2}
+              aria-hidden
+            />
+            <Input
+              id="inbox-chats-search-input"
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={m.inbox.searchPlaceholder}
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              aria-label={m.inbox.searchAria}
+              className="h-9 min-w-0 w-full rounded-full border-border/80 bg-white py-0 pl-9 pr-9 text-[13px] shadow-sm dark:bg-card"
+            />
+            {query.trim().length > 0 ? (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label={m.inbox.headerSearchCloseAria}
+                className="absolute right-1 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+
+        <nav
+          className="-mx-0.5 flex gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          aria-label={m.inbox.screenTitle}
+        >
+          <InboxNavChip
+            href={`/profile/my-plan?returnTo=${encodeURIComponent("/inbox")}` as Route}
+            label={m.inbox.chipUpcomingPlan}
+            title={m.inbox.chipUpcomingPlanLinkTitle}
+            ariaLabel={upcomingPlanAria}
+            count={plansNeedingYourAction}
+            variant={plansNeedingYourAction > 0 ? "primary" : "muted"}
+            icon={<CalendarClock strokeWidth={2} aria-hidden />}
+          />
+          <InboxNavChip
+            href={"/inbox/study-groups" as Route}
+            label={m.inbox.chipStudyGroup}
+            title={m.inbox.chipStudyGroupLinkTitle}
+            ariaLabel={studyGroupAria}
+            count={groupUnread}
+            variant="muted"
+            icon={<UsersRound strokeWidth={2} aria-hidden />}
+          />
+          <InboxNavChip
+            href={"/inbox/course-chats" as Route}
+            label={m.inbox.chipCourseChats}
+            title={m.inbox.chipCourseChatsLinkTitle}
+            ariaLabel={courseChatsAria}
+            count={courseUnread}
+            variant="muted"
+            icon={<BookOpen strokeWidth={2} aria-hidden />}
+          />
+        </nav>
+      </header>
+
+      <InboxChatsView userId={userId} merged={merged} query={searchOpen ? query : ""} />
+    </div>
   );
 }

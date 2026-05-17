@@ -3,19 +3,20 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getSessionUser } from "@/lib/auth/session";
 import { parseBody, error } from "@/lib/http";
+import { publicErrorForScheduleShareConnection } from "@/lib/schedule-share/connection-errors";
+import { submitScheduleSharePlanProposal } from "@/lib/schedule-share/create-plan-from-guest-proposal";
 import {
   PUBLIC_SCHEDULE_LINK_UNAVAILABLE,
-  PUBLIC_SCHEDULE_PROPOSAL_ALREADY_ACCEPTED,
   PUBLIC_SCHEDULE_RATE_LIMIT,
   PUBLIC_SCHEDULE_SIGN_IN_REQUIRED,
   PUBLIC_SCHEDULE_TIME_UNAVAILABLE,
 } from "@/lib/schedule-share/public-errors";
 import { assertScheduleShareProposalRateLimit, getClientIp, maybeHashIp } from "@/lib/schedule-share/rate-limit";
 import { findScheduleShareLinkByPlainToken } from "@/lib/schedule-share/resolve-link";
+import { consumeScheduleShareLinkForVisitor } from "@/lib/schedule-share/usage-limit";
 import { rangeFitsScheduleShareSnapshot } from "@/lib/schedule-share/build-schedule-share-snapshot";
 import { createScheduleShareProposalSchema } from "@/lib/schedule-share/validation";
 import { scheduleShareProposerDisplayName } from "@/lib/schedule-share/proposer-display-name";
-import { serializeViewerProposal } from "@/lib/schedule-share/viewer-proposal";
 
 export async function POST(
   request: Request,
@@ -32,7 +33,9 @@ export async function POST(
   const { token } = await params;
   const decoded = decodeURIComponent(token);
 
-  const resolved = await findScheduleShareLinkByPlainToken(prisma, decoded);
+  const resolved = await findScheduleShareLinkByPlainToken(prisma, decoded, {
+    viewerUserId: session.id,
+  });
   if (!resolved.ok) {
     return NextResponse.json(
       { success: false, error: PUBLIC_SCHEDULE_LINK_UNAVAILABLE },
@@ -41,6 +44,14 @@ export async function POST(
   }
 
   const link = resolved.link;
+
+  const consumed = await consumeScheduleShareLinkForVisitor(prisma, link, session.id);
+  if (!consumed) {
+    return NextResponse.json(
+      { success: false, error: PUBLIC_SCHEDULE_LINK_UNAVAILABLE },
+      { status: 404 },
+    );
+  }
 
   if (!link.allowGuestProposals) {
     return error("Guest proposals are disabled for this link.", 403);
@@ -61,21 +72,6 @@ export async function POST(
 
   if (startTime.getTime() < link.rangeStart.getTime() || endTime.getTime() > link.rangeEnd.getTime()) {
     return error("Proposal times must fall within the shared schedule range.", 400);
-  }
-
-  const accepted = await prisma.scheduleShareGuestProposal.findFirst({
-    where: {
-      scheduleShareLinkId: link.id,
-      proposerUserId: session.id,
-      status: "ACCEPTED",
-    },
-    select: { id: true },
-  });
-  if (accepted) {
-    return NextResponse.json(
-      { success: false, error: PUBLIC_SCHEDULE_PROPOSAL_ALREADY_ACCEPTED },
-      { status: 409 },
-    );
   }
 
   const fits = await rangeFitsScheduleShareSnapshot(prisma, {
@@ -101,76 +97,36 @@ export async function POST(
   }
 
   const guestDisplayName = scheduleShareProposerDisplayName(session);
-
   const ua = request.headers.get("user-agent") ?? "";
 
-  const proposalData = {
+  const result = await submitScheduleSharePlanProposal(prisma, {
+    scheduleShareLinkId: link.id,
+    ownerUserId: link.ownerUserId,
     proposerUserId: session.id,
-    guestDisplayName,
-    guestContact: null,
     title: parsed.data.title.trim(),
     note: parsed.data.note?.trim() || null,
     location: parsed.data.location?.trim() || null,
     startTime,
     endTime,
+    guestDisplayName,
     createdFromIp: ipFingerprint,
-    userAgent: ua.slice(0, 512),
-  };
-
-  const pending = await prisma.scheduleShareGuestProposal.findFirst({
-    where: {
-      scheduleShareLinkId: link.id,
-      proposerUserId: session.id,
-      status: "PENDING",
-    },
-    select: {
-      id: true,
-      title: true,
-      note: true,
-      location: true,
-      startTime: true,
-      endTime: true,
-      status: true,
-    },
+    userAgent: ua,
   });
 
-  const saved = pending
-    ? await prisma.scheduleShareGuestProposal.update({
-        where: { id: pending.id },
-        data: proposalData,
-        select: {
-          id: true,
-          title: true,
-          note: true,
-          location: true,
-          startTime: true,
-          endTime: true,
-          status: true,
-        },
-      })
-    : await prisma.scheduleShareGuestProposal.create({
-        data: {
-          scheduleShareLinkId: link.id,
-          ...proposalData,
-        },
-        select: {
-          id: true,
-          title: true,
-          note: true,
-          location: true,
-          startTime: true,
-          endTime: true,
-          status: true,
-        },
-      });
-
-  const proposal = serializeViewerProposal(saved);
-  if (!proposal) {
-    return error("Could not save proposal.", 500);
+  if (!result.ok) {
+    const err = publicErrorForScheduleShareConnection(result.reason);
+    return NextResponse.json({ success: false, error: err.message }, { status: err.status });
   }
 
   return NextResponse.json(
-    { success: true, data: { submitted: true, updated: Boolean(pending), proposal } },
-    { status: pending ? 200 : 201 },
+    {
+      success: true,
+      data: {
+        submitted: true,
+        updated: result.updated,
+        proposal: result.proposal,
+      },
+    },
+    { status: result.updated ? 200 : 201 },
   );
 }

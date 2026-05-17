@@ -334,6 +334,8 @@ export function WeekCalendar({
    * picks the wrong axis and vertical time scroll feels broken.
    */
   touchGestureRotateCw90 = false,
+  /** Home week view hides the visible “Time” corner label; layout cell is kept. */
+  showTimeColumnLabel = true,
 }: {
   blocks: WeekCalendarBlock[];
   allDayBlocks?: WeekCalendarBlock[];
@@ -393,6 +395,7 @@ export function WeekCalendar({
   defaultTapSlotDurationMinutes?: number;
   fillParent?: boolean;
   touchGestureRotateCw90?: boolean;
+  showTimeColumnLabel?: boolean;
 }) {
   const { locale, messages: appMessages } = useLocaleContext();
   const sch = appMessages.schedule;
@@ -995,13 +998,25 @@ export function WeekCalendar({
     const captureEl = e.currentTarget as HTMLElement;
     let anchorMinute = minuteFromClientYInRect(y0, rect);
     let currentMinute = anchorMinute;
-    let activated = false;
+    /** Long-press completed — same gate as day timeline / course grid. */
+    let createArmed = false;
+    /** User dragged to paint a custom range after long-press. */
+    let rangeDragActive = false;
+    let longPressTimer: number | null = null;
 
     const preventScroll = (ev: TouchEvent) => {
       ev.preventDefault();
     };
 
+    const clearLongPress = () => {
+      if (longPressTimer != null) {
+        window.clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    };
+
     const detach = () => {
+      clearLongPress();
       document.removeEventListener("pointermove", onDocMove);
       document.removeEventListener("pointerup", onDocUp);
       document.removeEventListener("pointercancel", onDocUp);
@@ -1009,11 +1024,27 @@ export function WeekCalendar({
       unlockBrowserTextSelectionForCalendarDrag();
     };
 
+    const armCreate = () => {
+      createArmed = true;
+      emitCreateRangePreview(weekday, anchorMinute, anchorMinute + MIN_EVENT_MINUTES);
+    };
+
+    longPressTimer = window.setTimeout(() => {
+      longPressTimer = null;
+      armCreate();
+    }, CALENDAR_MOVE_LONG_PRESS_MS);
+
     const onDocMove = (ev: PointerEvent) => {
       if (ev.pointerId !== pointerId) return;
       const pastSlop = Math.hypot(ev.clientX - x0, ev.clientY - y0) > CREATE_DRAG_SLOP_PX;
-      if (!activated && pastSlop) {
-        activated = true;
+      if (!createArmed && pastSlop) {
+        clearLongPress();
+        detach();
+        return;
+      }
+      if (!createArmed) return;
+      if (!rangeDragActive && pastSlop) {
+        rangeDragActive = true;
         lockBrowserTextSelectionForCalendarDrag();
         try {
           captureEl.setPointerCapture(pointerId);
@@ -1022,7 +1053,7 @@ export function WeekCalendar({
         }
         document.addEventListener("touchmove", preventScroll, { passive: false });
       }
-      if (!activated) return;
+      if (!rangeDragActive) return;
       currentMinute = minuteFromClientYInRect(ev.clientY, rect);
       emitCreateRangePreview(weekday, anchorMinute, currentMinute);
     };
@@ -1036,7 +1067,12 @@ export function WeekCalendar({
         /* ignore */
       }
 
-      if (activated) {
+      if (!createArmed) {
+        onCreateRangePreview?.(null);
+        return;
+      }
+
+      if (rangeDragActive) {
         const { start, end } = createRangeFromMinutes(weekday, anchorMinute, currentMinute);
         onCreateRangePreview?.(null);
         onCreateEvent(start, end);
@@ -1053,13 +1089,13 @@ export function WeekCalendar({
         start.setDate(weekStartDate.getDate() + dayIndex);
         start.setHours(0, snapped, 0, 0);
         const end = addMinutes(start, 60);
+        onCreateRangePreview?.(null);
         onCreateEvent(start, end);
       } else {
         onCreateRangePreview?.(null);
       }
     };
 
-    emitCreateRangePreview(weekday, anchorMinute, anchorMinute + MIN_EVENT_MINUTES);
     document.addEventListener("pointermove", onDocMove);
     document.addEventListener("pointerup", onDocUp);
     document.addEventListener("pointercancel", onDocUp);
@@ -1566,8 +1602,9 @@ export function WeekCalendar({
                 height: `${WEEK_CALENDAR_HEADER_HEIGHT_PX}px`,
                 minHeight: `${WEEK_CALENDAR_HEADER_HEIGHT_PX}px`,
               }}
+              aria-label={showTimeColumnLabel ? undefined : sch.timeColumnLabel}
             >
-              {sch.timeColumnLabel}
+              {showTimeColumnLabel ? sch.timeColumnLabel : null}
             </div>
             <div
               className={cn("relative grid cursor-default box-border border-b bg-white dark:bg-card", WEEK_GRID_LINE)}

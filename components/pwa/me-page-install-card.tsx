@@ -6,11 +6,12 @@ import { ChevronDown, Smartphone } from "lucide-react";
 
 import { PwaIosInstallSteps } from "@/components/pwa/pwa-ios-install-steps";
 import {
-  MeSettingsRowLabel,
-  meSettingsRowChevronDownClass,
-  meSettingsRowDetailsSummaryClass,
-  meSettingsRowInstallIconShellClass,
-  meSettingsRowLeadClass,
+  MePageSettingsRowLabel,
+  mePageChevronDownClass,
+  mePageIconInstallClass,
+  mePageIconShellClass,
+  mePageRowDetailsSummaryClass,
+  mePageRowLeadClass,
 } from "@/components/profile/me-settings-row";
 import { Button } from "@/components/ui/button";
 import { APP_NAME } from "@/lib/constants/app";
@@ -83,7 +84,7 @@ export function MePageInstallCard({
     if (!inList) return null;
     return (
       <div className="flex animate-pulse items-center gap-3 px-4 py-3.5" aria-hidden>
-        <div className={meSettingsRowInstallIconShellClass} />
+        <div className={mePageIconShellClass} />
         <div className="min-w-0 flex-1 space-y-2">
           <div className="h-3.5 w-36 rounded-md bg-muted/50" />
           <div className="h-3 w-44 rounded-md bg-muted/40" />
@@ -164,14 +165,14 @@ export function MePageInstallCard({
   if (inList) {
     return (
       <details className="group">
-        <summary className={meSettingsRowDetailsSummaryClass}>
-          <div className={meSettingsRowLeadClass}>
-            <span className={meSettingsRowInstallIconShellClass}>
-              <Smartphone className="h-4 w-4" strokeWidth={2} aria-hidden />
+        <summary className={mePageRowDetailsSummaryClass}>
+          <div className={mePageRowLeadClass}>
+            <span className={mePageIconShellClass}>
+              <Smartphone className={mePageIconInstallClass} strokeWidth={2} aria-hidden />
             </span>
-            <MeSettingsRowLabel title={installRowLabel} subtitle={installRowSubtitle} />
+            <MePageSettingsRowLabel title={installRowLabel} subtitle={installRowSubtitle} />
           </div>
-          <ChevronDown className={meSettingsRowChevronDownClass} strokeWidth={2} aria-hidden />
+          <ChevronDown className={mePageChevronDownClass} strokeWidth={2} aria-hidden />
         </summary>
         <div className="border-t border-classmates-hairline bg-muted/15 px-3 py-2.5 dark:border-border/60">
           {body}

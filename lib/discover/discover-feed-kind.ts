@@ -9,6 +9,7 @@ const FEED_PARAM_VALUES: DiscoverFeedKind[] = ["for-you", "today", "nearby", "la
 
 export function parseDiscoverFeedKind(raw: string | null): DiscoverFeedKind {
   const v = (raw ?? "").toLowerCase();
+  if (v === "nearby") return "for-you";
   return FEED_PARAM_VALUES.includes(v as DiscoverFeedKind) ? (v as DiscoverFeedKind) : "for-you";
 }
 

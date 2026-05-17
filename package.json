@@ -20,6 +20,7 @@
     "e2e:course-id": "tsx scripts/print-e2e-course-id.ts",
     "sync:course-instructors": "tsx scripts/sync-course-instructors.ts",
     "sync:tum-exam-catalog": "tsx scripts/sync-tum-exam-catalog.ts",
+    "sync:lmu-lsf-catalog": "tsx scripts/sync-lmu-lsf-catalog.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts"

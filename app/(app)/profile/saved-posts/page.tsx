@@ -2,12 +2,11 @@ import type { Route } from "next";
 import type { Prisma } from "@prisma/client";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
-import { SavedPostsDiscoverList } from "@/components/profile/saved-posts-discover-list";
+import { SavedPostsBuddyFeed } from "@/components/profile/saved-posts-buddy-feed";
 import { BackLink } from "@/components/nav/back-link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LinkButton } from "@/components/ui/link-button";
 import { getSessionUser } from "@/lib/auth/session";
-import { buildViewerCourseMatchIndex } from "@/lib/discover/viewer-course-match";
 import {
   mapPrismaLanguageToDiscoverRow,
   mapPrismaMealsToDiscoverRow,
@@ -88,22 +87,12 @@ export default async function ProfileSavedPostsPage() {
 
   const user = sessionUser;
 
-  const [saves, myEnrolledCourses] = await Promise.all([
-    prisma.classmatePostSave.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: "desc" },
-      take: 80,
-      include: { classmatePost: { include: savedPostInclude } },
-    }),
-    prisma.userCourse.findMany({
-      where: { userId: user.id },
-      select: { course: { select: { id: true, code: true, name: true } } },
-    }),
-  ]);
-
-  const viewerCourseMatchIndex = buildViewerCourseMatchIndex(
-    myEnrolledCourses.map((uc) => ({ id: uc.course.id, code: uc.course.code })),
-  );
+  const saves = await prisma.classmatePostSave.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: "desc" },
+    take: 80,
+    include: { classmatePost: { include: savedPostInclude } },
+  });
 
   const rows = saves.map((s) => toDiscoverPostRow(s.classmatePost, user.id));
 
@@ -128,7 +117,7 @@ export default async function ProfileSavedPostsPage() {
           }
         />
       ) : (
-        <SavedPostsDiscoverList posts={rows} viewerCourseMatchIndex={viewerCourseMatchIndex} />
+        <SavedPostsBuddyFeed posts={rows} />
       )}
     </div>
   );

@@ -81,3 +81,56 @@ export function MeSettingsRowLabel({ title, subtitle }: { title: string; subtitl
     </div>
   );
 }
+
+/** Me `/profile` screen — polished list/card tokens (do not use on account sub-pages). */
+export const mePageCardClass =
+  "overflow-hidden rounded-[20px] border border-classmates-edge bg-classmates-surface shadow-[0_1px_3px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card dark:shadow-none";
+
+export const mePageListDivideClass = "divide-y divide-[#F1F1F1] dark:divide-border/60";
+
+export const mePageRowInteractiveClass =
+  "flex min-h-[72px] items-center justify-between gap-3 px-5 transition-colors active:bg-classmates-warm-alt/80 dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt/60 dark:[@media(hover:hover)]:hover:bg-muted/25";
+
+export const mePageRowDetailsSummaryClass =
+  "flex min-h-[72px] cursor-pointer list-none items-center justify-between gap-3 px-5 transition-colors active:bg-classmates-warm-alt/80 dark:active:bg-muted/30 [&::-webkit-details-marker]:hidden [@media(hover:hover)]:hover:bg-classmates-warm-alt/60 dark:[@media(hover:hover)]:hover:bg-muted/25";
+
+export const mePageRowCardSummaryClass =
+  "flex min-h-[72px] cursor-pointer list-none items-center justify-between gap-3 px-5 transition-colors active:bg-classmates-warm-alt/70 dark:active:bg-muted/30 [&::-webkit-details-marker]:hidden [@media(hover:hover)]:hover:bg-classmates-warm-alt/50 dark:[@media(hover:hover)]:hover:bg-muted/20";
+
+export const mePageRowButtonClass =
+  "flex min-h-[72px] w-full cursor-pointer items-center justify-between gap-3 px-5 text-left transition-colors active:bg-classmates-warm-alt/80 dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt/60 dark:[@media(hover:hover)]:hover:bg-muted/25";
+
+export const mePageRowLeadClass = "flex min-w-0 flex-1 items-center gap-3";
+
+export const mePageIconShellClass =
+  "flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#F3F4F6] dark:bg-muted";
+
+export const mePageIconMutedClass = "h-5 w-5 text-[#6B7280] dark:text-muted-foreground";
+
+export const mePageIconTipShellClass = cn(
+  mePageIconShellClass,
+  "bg-orange-50 text-orange-500 dark:bg-orange-950/35 dark:text-orange-400",
+);
+
+export const mePageIconInstallClass = cn(mePageIconMutedClass, "text-classmates-success");
+
+export const mePageTitleClass = "truncate text-base font-semibold text-classmates-ink dark:text-foreground";
+
+export const mePageSubtitleClass =
+  "truncate text-sm font-normal text-classmates-sub dark:text-muted-foreground";
+
+export const mePageChevronClass = "h-5 w-5 shrink-0 text-[#9CA3AF] dark:text-muted-foreground/70";
+
+export const mePageChevronDownClass =
+  "h-5 w-5 shrink-0 text-[#9CA3AF] transition-transform duration-200 group-open:rotate-180 dark:text-muted-foreground/70";
+
+export function MePageSettingsRowLabel({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <div className="min-w-0 flex-1 text-left">
+      <p className={mePageTitleClass}>{title}</p>
+      {subtitle != null && subtitle.trim() ? (
+        <p className={mePageSubtitleClass}>{subtitle}</p>
+      ) : null}
+    </div>
+  );
+}

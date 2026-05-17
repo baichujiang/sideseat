@@ -18,6 +18,7 @@ import { getDiscoverCityDisplayLabel } from "@/lib/discover/discover-city-displa
 import type { DiscoverCityNameKey } from "@/lib/discover/discover-city-name-keys";
 import { formatMessage, type AppMessages } from "@/lib/i18n/messages";
 import { ClassmatePostStatus } from "@prisma/client";
+import type { ReactNode } from "react";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { cn } from "@/lib/utils";
@@ -72,23 +73,38 @@ function MiniAvatar({ url, name }: { url: string | null; name: string }) {
 
 export function BuddyRequestCard({
   post,
-  cityNameKey,
+  cityNameKey: cityNameKeyProp,
+  returnTo = "/discover",
+  customFooter,
+  headerOverlay,
+  articleClassName,
+  hideAuthorRow = false,
+  listingStatus,
 }: {
   post: DiscoverPostRow;
-  cityNameKey: DiscoverCityNameKey;
+  cityNameKey?: DiscoverCityNameKey;
+  returnTo?: string;
+  /** When set, replaces the default message + save footer. */
+  customFooter?: ReactNode;
+  headerOverlay?: ReactNode;
+  articleClassName?: string;
+  hideAuthorRow?: boolean;
+  listingStatus?: ClassmatePostStatus;
 }) {
   const m = useAppMessages();
   const { locale } = useLocaleContext();
   const dl = m.discoverList;
   const buddy = m.discoverBuddy;
+  const cityNameKey = (cityNameKeyProp ?? post.city) as DiscoverCityNameKey;
   const cityLabel = getDiscoverCityDisplayLabel(cityNameKey, m.discover.cityNames);
-  const detailHref = (`/discover/posts/${post.id}?returnTo=%2Fdiscover` as Route) satisfies Route;
+  const detailHref =
+    `/discover/posts/${post.id}?returnTo=${encodeURIComponent(returnTo)}` as Route;
   const images = post.imageUrls ?? [];
   const typeLabel = buddyTypeLabel(post.category, buddy);
   const timeLine = buddyTimeLine(post, dl, buddy);
   const locLine = buddyLocationLine(post, dl, cityLabel, buddy);
   const displayStatus = getBuddyRequestDisplayStatus({
-    status: ClassmatePostStatus.ACTIVE,
+    status: listingStatus ?? ClassmatePostStatus.ACTIVE,
     expiresAt: new Date(post.expiresAt),
     now: new Date(),
   });
@@ -104,9 +120,19 @@ export function BuddyRequestCard({
 
   const linkedCourseId = post.linkedCourses?.[0]?.id;
 
+  const articleSurfaceClassName = cn(
+    "break-inside-avoid overflow-hidden rounded-2xl border border-border/55 bg-white shadow-[0_4px_18px_-10px_rgba(15,23,42,0.12)] dark:border-border dark:bg-card",
+    articleClassName,
+  );
+
   const mainBlock = (
     <>
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted/50">
+        {headerOverlay ? (
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 p-2 [&>*]:pointer-events-auto">
+            {headerOverlay}
+          </div>
+        ) : null}
         {images.length > 0 ? (
           <ClassmatePostImagesGallery
             urls={images}
@@ -152,15 +178,17 @@ export function BuddyRequestCard({
           <span className="min-w-0 line-clamp-2 leading-snug">{locLine}</span>
         </div>
 
-        <div className="flex items-center gap-2 pt-0.5">
-          <MiniAvatar url={post.avatarUrl} name={post.nickname} />
+        {!hideAuthorRow ? (
+          <div className="flex items-center gap-2 pt-0.5">
+            <MiniAvatar url={post.avatarUrl} name={post.nickname} />
           <div className="min-w-0 flex-1">
             <p className="truncate text-[11px] font-medium text-foreground">{post.nickname}</p>
             {post.school ? (
               <p className="truncate text-[10px] text-muted-foreground">{post.school}</p>
             ) : null}
+            </div>
           </div>
-        </div>
+        ) : null}
 
         <div className="flex items-center gap-1 border-t border-border/50 pt-2 text-[10px] text-muted-foreground">
           <Calendar className="h-3 w-3 shrink-0 opacity-80" aria-hidden />
@@ -170,28 +198,15 @@ export function BuddyRequestCard({
     </>
   );
 
-  if (post.isDevExample) {
-    return (
-      <article className="break-inside-avoid overflow-hidden rounded-2xl border border-border/55 bg-white shadow-[0_4px_18px_-10px_rgba(15,23,42,0.12)] dark:border-border dark:bg-card">
-        {mainBlock}
-        <p className="px-2.5 pb-2 text-center text-[10px] text-muted-foreground">Demo</p>
-      </article>
-    );
-  }
-
-  return (
-    <article className="break-inside-avoid overflow-hidden rounded-2xl border border-border/55 bg-white shadow-[0_4px_18px_-10px_rgba(15,23,42,0.12)] dark:border-border dark:bg-card">
-      <Link
-        href={detailHref}
-        className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-      >
-        {mainBlock}
-      </Link>
+  const actionFooter =
+    customFooter !== undefined ? (
+      customFooter
+    ) : (
       <div className="flex items-center justify-between gap-2 border-t border-border/50 px-2.5 pb-2.5 pt-2">
         <DiscoverMessageButton
           peerId={post.userId}
           courseId={linkedCourseId}
-          returnTo="/discover"
+          returnTo={returnTo}
           tone="outline"
           hasExistingChat={false}
           className="h-8 min-h-8 flex-1 touch-manipulation px-2 text-[11px]"
@@ -202,6 +217,26 @@ export function BuddyRequestCard({
           <ClassmatePostSaveButton postId={post.id} initialSaved={Boolean(post.savedByViewer)} />
         ) : null}
       </div>
+    );
+
+  if (post.isDevExample) {
+    return (
+      <article className={articleSurfaceClassName}>
+        {mainBlock}
+        <p className="px-2.5 pb-2 text-center text-[10px] text-muted-foreground">Demo</p>
+      </article>
+    );
+  }
+
+  return (
+    <article className={articleSurfaceClassName}>
+      <Link
+        href={detailHref}
+        className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      >
+        {mainBlock}
+      </Link>
+      {actionFooter}
     </article>
   );
 }

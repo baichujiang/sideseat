@@ -21,6 +21,7 @@ export const createScheduleShareSchema = z
     rangeEnd: isoDate,
     revealConfig: revealConfigSchema,
     allowGuestProposals: z.boolean().optional(),
+    usageLimit: z.enum(["SINGLE_USE", "UNLIMITED"]).optional(),
     expiresAt: isoDate.optional(),
   })
   .superRefine((value, ctx) => {

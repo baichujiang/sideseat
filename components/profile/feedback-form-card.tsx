@@ -7,13 +7,14 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 import {
-  MeSettingsRowLabel,
-  meSettingsRowButtonClass,
-  meSettingsRowChevronClass,
-  meSettingsRowFeedbackIconShellClass,
+  MePageSettingsRowLabel,
+  mePageChevronClass,
+  mePageIconMutedClass,
+  mePageIconShellClass,
+  mePageRowButtonClass,
+  mePageRowLeadClass,
   meSettingsRowFeedbackIconShellLargeClass,
   meSettingsRowFeedbackIconSurfaceClass,
-  meSettingsRowLeadClass,
 } from "@/components/profile/me-settings-row";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -168,14 +169,14 @@ export function FeedbackFormCard({
   if (variant === "listRow") {
     return (
       <div className="contents">
-        <button type="button" className={meSettingsRowButtonClass} onClick={() => setOpen(true)}>
-          <div className={meSettingsRowLeadClass}>
-            <span className={meSettingsRowFeedbackIconShellClass}>
-              <MessageSquareText className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+        <button type="button" className={mePageRowButtonClass} onClick={() => setOpen(true)}>
+          <div className={mePageRowLeadClass}>
+            <span className={mePageIconShellClass}>
+              <MessageSquareText className={mePageIconMutedClass} strokeWidth={2} aria-hidden />
             </span>
-            <MeSettingsRowLabel title={f.listRowTitle} subtitle={f.listRowSubtitle} />
+            <MePageSettingsRowLabel title={f.listRowTitle} subtitle={f.listRowSubtitle} />
           </div>
-          <ChevronRight className={meSettingsRowChevronClass} strokeWidth={2} aria-hidden />
+          <ChevronRight className={mePageChevronClass} strokeWidth={2} aria-hidden />
         </button>
         {modal}
       </div>

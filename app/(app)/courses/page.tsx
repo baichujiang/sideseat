@@ -25,6 +25,8 @@ import {
 import { getCurrentSemesterLabel } from "@/lib/constants/semester";
 import { prisma } from "@/lib/db/prisma";
 import { formatMessage, getMessages, type CoursesMessages } from "@/lib/i18n/messages";
+import { schoolCodesForDiscoverCity } from "@/lib/discover/city-school-scope";
+import { getServerDiscoverServedCity } from "@/lib/discover/discover-city-preference";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { cn } from "@/lib/utils";
 
@@ -86,10 +88,18 @@ export default async function CoursesPage({
   const c = ui.courses;
   const sessionUser = await getSessionUser();
   const query = (await searchParams) ?? {};
-  const selectedSchool: SchoolCode =
+  const servedCity = await getServerDiscoverServedCity();
+  const allowedSchools = schoolCodesForDiscoverCity(servedCity);
+  const schoolFallback =
+    allowedSchools.includes(DEFAULT_SCHOOL) ? DEFAULT_SCHOOL : (allowedSchools[0] ?? DEFAULT_SCHOOL);
+  const requestedSchool =
     normalizeSchoolCode(query.school) ??
     (sessionUser?.onboardingComplete ? normalizeSchoolCode(sessionUser.school) : null) ??
-    DEFAULT_SCHOOL;
+    schoolFallback;
+  const selectedSchool: SchoolCode =
+    allowedSchools.length > 0 && !allowedSchools.includes(requestedSchool) ?
+      schoolFallback
+    : requestedSchool;
   const activeTab = normalizeTab(query.tab);
   const semesterLabel = getCurrentSemesterLabel();
   const rawCourseQuery = query.q?.trim() ?? "";
@@ -206,7 +216,11 @@ export default async function CoursesPage({
   if (!sessionUser) {
     return (
       <div className="space-y-3 pb-4">
-        <CoursesHeader selectedSchool={selectedSchool} courses={c} />
+        <CoursesHeader
+          selectedSchool={selectedSchool}
+          allowedSchools={allowedSchools}
+          courses={c}
+        />
         <CoursesEntryTabs activeTab={activeTab} selectedSchool={selectedSchool} query={rawCourseQuery} courses={c} />
 
         {activeTab === "popular-courses" ? (
@@ -289,7 +303,11 @@ export default async function CoursesPage({
       {!user.onboardingComplete ? (
         <OnboardingContinueCta title={c.onboardingCoursesTitle} body={c.onboardingCoursesBody} />
       ) : null}
-      <CoursesHeader selectedSchool={selectedSchool} courses={c} />
+      <CoursesHeader
+        selectedSchool={selectedSchool}
+        allowedSchools={allowedSchools}
+        courses={c}
+      />
       <CoursesEntryTabs activeTab={activeTab} selectedSchool={selectedSchool} query={rawCourseQuery} courses={c} />
 
       {activeTab === "popular-courses" ? (
@@ -368,9 +386,11 @@ export default async function CoursesPage({
 
 function CoursesHeader({
   selectedSchool,
+  allowedSchools,
   courses,
 }: {
   selectedSchool: SchoolCode;
+  allowedSchools: SchoolCode[];
   courses: CoursesMessages;
 }) {
   const schoolLabel = getSchoolLabel(selectedSchool);
@@ -385,7 +405,11 @@ function CoursesHeader({
         <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8A94A6] dark:text-muted-foreground">
           {courses.schoolHeading}
         </p>
-        <CoursesSchoolSelect value={selectedSchool} className="w-auto max-w-[11.5rem]" />
+        <CoursesSchoolSelect
+          value={selectedSchool}
+          allowedSchools={allowedSchools.length > 0 ? allowedSchools : undefined}
+          className="w-auto max-w-[11.5rem]"
+        />
         <p className="sr-only">{formatMessage(courses.schoolSelectSrSuffix, { school: schoolLabel })}</p>
       </div>
     </div>

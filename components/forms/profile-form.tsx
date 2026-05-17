@@ -28,7 +28,9 @@ import {
   LANGUAGE_TAG_OPTIONS,
 } from "@/lib/constants/languages";
 import { profileSchema } from "@/lib/validators/profile";
+import { MeDiscoverCitySelect } from "@/components/profile/me-discover-city-select";
 import { MePageSection } from "@/components/profile/me-page-section";
+import type { DiscoverCityNameKey } from "@/lib/discover/discover-city-name-keys";
 import { profileSectionLabelClassName } from "@/lib/ui/profile-section-label";
 import { profileSettingsControlClassName } from "@/lib/ui/profile-settings-control";
 import { useAppMessages } from "@/hooks/use-app-locale";
@@ -58,10 +60,13 @@ export function ProfileForm({
   requireDirtyToSubmit = true,
   /** Me (`/profile`) layout: grouped sections + push + discover in one form. */
   mePageStructure = false,
+  discoverCity,
 }: {
   initialValues: ProfileValues;
   submitLabel: string;
   avatarId: string | null;
+  /** Discover metro (cookie); shown in Me edit-profile sheet only. */
+  discoverCity?: DiscoverCityNameKey;
   /** When set, rendered in its own “Verified email” card after Languages (Me /profile). */
   verificationSlot?: React.ReactNode;
   onSaved?: () => void;
@@ -69,7 +74,7 @@ export function ProfileForm({
   requireDirtyToSubmit?: boolean;
   mePageStructure?: boolean;
 }) {
-  const { profileForm: pf, common: c } = useAppMessages();
+  const { profileForm: pf, profile: pr, common: c } = useAppMessages();
   const router = useRouter();
   const [serverError, setServerError] = useState("");
   const [languagePickerOpen, setLanguagePickerOpen] = useState(false);
@@ -266,6 +271,19 @@ export function ProfileForm({
               {pf.recommendClassmatesBlurb}
             </p>
           ) : null}
+        {isSheet && discoverCity ? (
+          <div className="mb-3 flex flex-col gap-1.5">
+            <FieldLabel>{pr.discoverCityRowTitle}</FieldLabel>
+            <p className="text-[11px] leading-snug text-classmates-hint dark:text-zinc-500">
+              {pr.discoverCityRowSubtitle}
+            </p>
+            <MeDiscoverCitySelect
+              value={discoverCity}
+              variant="control"
+              className="w-full [&>summary]:w-full [&>summary]:justify-between"
+            />
+          </div>
+        ) : null}
         <div
           className={cn(
             "grid grid-cols-2",

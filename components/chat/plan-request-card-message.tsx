@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { PlanRequestModal } from "@/components/chat/plan-request-modal";
+import { useAppMessages } from "@/hooks/use-app-locale";
 import { acceptPlanRequest, declinePlanRequest } from "@/lib/api/chat-planning";
 
 export function PlanRequestCardMessage({
@@ -24,6 +25,7 @@ export function PlanRequestCardMessage({
   startTimeISO,
   endTimeISO,
   status,
+  fromScheduleShare = false,
 }: {
   requestId: string;
   proposerName: string;
@@ -38,8 +40,10 @@ export function PlanRequestCardMessage({
   startTimeISO: string;
   endTimeISO: string;
   status: PlanRequestStatus;
+  fromScheduleShare?: boolean;
 }) {
   const router = useRouter();
+  const m = useAppMessages();
   const [busyAction, setBusyAction] = useState<"accept" | "decline" | null>(null);
   const [counterOpen, setCounterOpen] = useState(false);
   const isReceiver = viewerUserId === receiverUserId;
@@ -81,6 +85,11 @@ export function PlanRequestCardMessage({
                   ? "Plan confirmed"
                   : `${proposerName} suggested a plan`}
               </p>
+              {fromScheduleShare && status === "PENDING" ? (
+                <p className="mt-0.5 text-[11px] font-medium text-amber-800/90 dark:text-amber-200/90">
+                  {m.chat.planFromScheduleShare}
+                </p>
+              ) : null}
               <p className="mt-1 text-[15px] font-semibold text-foreground">{title}</p>
               <p className="mt-1 text-[13px] font-medium text-foreground/85">{formatWhen(start, end)}</p>
               {location ? (

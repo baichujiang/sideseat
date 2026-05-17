@@ -1,6 +1,7 @@
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok } from "@/lib/http";
+import { syncScheduleShareGuestProposalStatus } from "@/lib/schedule-share/create-plan-from-guest-proposal";
 
 export async function POST(
   _request: Request,
@@ -35,6 +36,12 @@ export async function POST(
         where: { id: planRequest.id },
         data: { status: "DECLINED" },
       });
+
+      await syncScheduleShareGuestProposalStatus(
+        tx,
+        planRequest.scheduleShareGuestProposalId,
+        "DECLINED",
+      );
 
       await tx.message.create({
         data: {

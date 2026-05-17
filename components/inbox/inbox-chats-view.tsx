@@ -1,8 +1,6 @@
 "use client";
 
 import { useDeferredValue, useMemo } from "react";
-import { Search } from "lucide-react";
-
 import { DirectInboxRow } from "@/components/inbox/direct-inbox-row";
 import { CourseInboxRow } from "@/components/inbox/course-inbox-row";
 import { GroupInboxRow } from "@/components/inbox/group-inbox-row";
@@ -14,56 +12,51 @@ import { inboxChatMatchesQuery } from "@/lib/inbox/inbox-chat-search";
 import { inboxRowKey, partitionInboxSections } from "@/lib/inbox/partition-inbox-sections";
 import type { InboxMerged } from "@/lib/queries/inbox-merge";
 
+export type InboxChatsEmptyKind = "group" | "course";
+
 export function InboxChatsView({
   userId,
   merged,
   query,
-  onQueryChange,
-  showSearchField,
+  emptyKind,
+  returnTo = "/inbox",
 }: {
   userId: string;
   merged: InboxMerged[];
   query: string;
-  onQueryChange: (value: string) => void;
-  showSearchField: boolean;
+  /** When the list is pre-filtered to one kind, use dedicated empty copy. */
+  emptyKind?: InboxChatsEmptyKind;
+  returnTo?: string;
 }) {
   const m = useAppMessages();
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
 
-  const filtered = useMemo(
-    () =>
-      deferredQuery ? merged.filter((item) => inboxChatMatchesQuery(item, userId, deferredQuery)) : merged,
-    [merged, userId, deferredQuery],
-  );
+  const filtered = useMemo(() => {
+    if (!deferredQuery) return merged;
+    return merged.filter((item) => inboxChatMatchesQuery(item, userId, deferredQuery));
+  }, [merged, userId, deferredQuery]);
 
   const { pinned, recent } = useMemo(() => partitionInboxSections(filtered, userId), [filtered, userId]);
 
   const hasQuery = query.trim().length > 0;
 
+  const emptyTitle =
+    emptyKind === "group"
+      ? m.inbox.studyGroupsEmptyTitle
+      : emptyKind === "course"
+        ? m.inbox.courseChatsEmptyTitle
+        : m.inbox.emptyNoConversationsTitle;
+  const emptyDesc =
+    emptyKind === "group"
+      ? m.inbox.studyGroupsEmptyDesc
+      : emptyKind === "course"
+        ? m.inbox.courseChatsEmptyDesc
+        : m.inbox.emptyNoConversationsDesc;
+
   return (
     <div className="space-y-5">
-      {showSearchField ? (
-        <div
-          className="flex items-center gap-3 rounded-[24px] border border-[#E7E0D6] bg-white px-5 py-3 dark:border-border dark:bg-card"
-          role="search"
-        >
-          <Search size={20} className="shrink-0 text-[#8A94A6] dark:text-muted-foreground" aria-hidden />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
-            placeholder={m.inbox.searchPlaceholder}
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
-            aria-label={m.inbox.searchAria}
-            className="min-w-0 flex-1 bg-transparent text-[15px] text-foreground outline-none placeholder:text-[#8A94A6] dark:placeholder:text-muted-foreground"
-          />
-        </div>
-      ) : null}
-
       {merged.length === 0 ? (
-        <EmptyState title={m.inbox.emptyNoConversationsTitle} description={m.inbox.emptyNoConversationsDesc} />
+        <EmptyState title={emptyTitle} description={emptyDesc} />
       ) : filtered.length === 0 ? (
         <EmptyState
           title={m.inbox.emptyNoMatchesTitle}
@@ -74,10 +67,10 @@ export function InboxChatsView({
       ) : (
         <ul className={inboxChatListUlClassName}>
           {pinned.map((item) => (
-            <InboxMergedRow key={inboxRowKey(item)} userId={userId} item={item} />
+            <InboxMergedRow key={inboxRowKey(item)} userId={userId} item={item} returnTo={returnTo} />
           ))}
           {recent.map((item) => (
-            <InboxMergedRow key={inboxRowKey(item)} userId={userId} item={item} />
+            <InboxMergedRow key={inboxRowKey(item)} userId={userId} item={item} returnTo={returnTo} />
           ))}
         </ul>
       )}
@@ -85,9 +78,22 @@ export function InboxChatsView({
   );
 }
 
-function InboxMergedRow({ userId, item }: { userId: string; item: InboxMerged }) {
+function InboxMergedRow({
+  userId,
+  item,
+  returnTo,
+}: {
+  userId: string;
+  item: InboxMerged;
+  returnTo: string;
+}) {
   return item.kind === "direct" ? (
-    <DirectInboxRow userId={userId} connection={item.connection} unreadCount={item.unreadCount} />
+    <DirectInboxRow
+      userId={userId}
+      connection={item.connection}
+      unreadCount={item.unreadCount}
+      returnTo={returnTo}
+    />
   ) : item.kind === "course" ? (
     <CourseInboxRow
       userId={userId}
@@ -95,8 +101,9 @@ function InboxMergedRow({ userId, item }: { userId: string; item: InboxMerged })
       userCourse={item.userCourse}
       last={item.last}
       unreadCount={item.unreadCount}
+      returnTo={returnTo}
     />
   ) : (
-    <GroupInboxRow userId={userId} item={item} />
+    <GroupInboxRow userId={userId} item={item} returnTo={returnTo} />
   );
 }

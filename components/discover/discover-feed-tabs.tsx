@@ -16,7 +16,6 @@ export function DiscoverFeedTabs({
   const tabs: { kind: DiscoverFeedKind; label: string }[] = [
     { kind: "for-you", label: labels.feedTabForYou },
     { kind: "today", label: labels.feedTabToday },
-    { kind: "nearby", label: labels.feedTabNearby },
     { kind: "latest", label: labels.feedTabLatest },
   ];
 

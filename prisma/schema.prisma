@@ -752,6 +752,11 @@ model AvailabilityShare {
   @@index([expiresAt])
 }
 
+enum ScheduleShareUsageLimit {
+  SINGLE_USE
+  UNLIMITED
+}
+
 model ScheduleShareLink {
   id                  String                     @id @default(cuid())
   ownerUserId         String
@@ -761,11 +766,15 @@ model ScheduleShareLink {
   rangeEnd            DateTime
   revealConfig        Json
   allowGuestProposals Boolean                    @default(true)
+  usageLimit          ScheduleShareUsageLimit    @default(UNLIMITED)
+  consumedAt          DateTime?
+  consumedByUserId    String?
   expiresAt           DateTime
   revokedAt           DateTime?
   createdAt           DateTime                   @default(now())
   updatedAt           DateTime                   @updatedAt
   proposals           ScheduleShareGuestProposal[]
+  planRequests        PlanRequest[]
 
   @@index([ownerUserId])
   @@index([expiresAt])
@@ -790,6 +799,7 @@ model ScheduleShareGuestProposal {
   userAgent               String?
   createdAt               DateTime                         @default(now())
   updatedAt               DateTime                         @updatedAt
+  planRequest             PlanRequest?
 
   @@index([scheduleShareLinkId])
   @@index([proposerUserId])
@@ -798,32 +808,37 @@ model ScheduleShareGuestProposal {
 }
 
 model PlanRequest {
-  id                 String            @id @default(cuid())
-  connectionId       String
-  availabilityShareId String?
-  counterOfId        String?
-  proposerUserId     String
-  receiverUserId     String
-  planType           PlanType
-  title              String
-  location           String?
-  message            String?
-  startTime          DateTime
-  endTime            DateTime
-  status             PlanRequestStatus @default(PENDING)
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
-  connection         Connection        @relation(fields: [connectionId], references: [id], onDelete: Cascade)
-  availabilityShare  AvailabilityShare? @relation(fields: [availabilityShareId], references: [id], onDelete: SetNull)
-  counterOf          PlanRequest?      @relation("PlanRequestCounter", fields: [counterOfId], references: [id], onDelete: SetNull)
-  counters           PlanRequest[]     @relation("PlanRequestCounter")
-  proposer           User              @relation("PlanRequestProposer", fields: [proposerUserId], references: [id], onDelete: Cascade)
-  receiver           User              @relation("PlanRequestReceiver", fields: [receiverUserId], references: [id], onDelete: Cascade)
-  messages           Message[]
-  calendarEntries    CalendarEntry[]
+  id                            String            @id @default(cuid())
+  connectionId                  String
+  availabilityShareId           String?
+  scheduleShareLinkId           String?
+  scheduleShareGuestProposalId  String?           @unique
+  counterOfId                   String?
+  proposerUserId                String
+  receiverUserId                String
+  planType                      PlanType
+  title                         String
+  location                      String?
+  message                       String?
+  startTime                     DateTime
+  endTime                       DateTime
+  status                        PlanRequestStatus @default(PENDING)
+  createdAt                     DateTime          @default(now())
+  updatedAt                     DateTime          @updatedAt
+  connection                    Connection        @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  availabilityShare             AvailabilityShare? @relation(fields: [availabilityShareId], references: [id], onDelete: SetNull)
+  scheduleShareLink             ScheduleShareLink? @relation(fields: [scheduleShareLinkId], references: [id], onDelete: SetNull)
+  scheduleShareGuestProposal    ScheduleShareGuestProposal? @relation(fields: [scheduleShareGuestProposalId], references: [id], onDelete: SetNull)
+  counterOf                     PlanRequest?      @relation("PlanRequestCounter", fields: [counterOfId], references: [id], onDelete: SetNull)
+  counters                      PlanRequest[]     @relation("PlanRequestCounter")
+  proposer                      User              @relation("PlanRequestProposer", fields: [proposerUserId], references: [id], onDelete: Cascade)
+  receiver                      User              @relation("PlanRequestReceiver", fields: [receiverUserId], references: [id], onDelete: Cascade)
+  messages                      Message[]
+  calendarEntries               CalendarEntry[]
 
   @@index([connectionId, createdAt])
   @@index([availabilityShareId, createdAt])
+  @@index([scheduleShareLinkId, createdAt])
   @@index([proposerUserId, createdAt])
   @@index([receiverUserId, createdAt])
   @@index([status, startTime])

@@ -19,10 +19,12 @@ export async function GET() {
   const rows = await prisma.scheduleShareLink.findMany({
     where: { ownerUserId: auth.user.id },
     orderBy: { createdAt: "desc" },
-    select: {
+      select: {
       id: true,
       rangeStart: true,
       rangeEnd: true,
+      usageLimit: true,
+      consumedAt: true,
       expiresAt: true,
       revokedAt: true,
       createdAt: true,
@@ -96,6 +98,7 @@ export async function POST(request: Request) {
         rangeEnd,
         revealConfig: normalizedReveal as Prisma.InputJsonValue,
         allowGuestProposals: parsed.data.allowGuestProposals ?? true,
+        usageLimit: parsed.data.usageLimit ?? "UNLIMITED",
         expiresAt,
       },
     });
