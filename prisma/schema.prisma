@@ -185,6 +185,13 @@ enum PlanType {
   CUSTOM
 }
 
+enum ScheduleShareGuestProposalStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
 enum PlanRequestStatus {
   PENDING
   ACCEPTED
@@ -346,6 +353,8 @@ model User {
   groupChatParticipants        GroupChatParticipant[]
   groupChatMessages            GroupChatMessage[]
   productFeedback              ProductFeedback[]
+  scheduleShareLinksOwned      ScheduleShareLink[]              @relation("ScheduleShareLinkOwner")
+  scheduleShareProposalsAsProposer ScheduleShareGuestProposal[] @relation("ScheduleShareProposalProposer")
 }
 
 /// Short-lived SMS OTP for phone signup (and future phone login without password).
@@ -741,6 +750,51 @@ model AvailabilityShare {
   @@index([connectionId, createdAt])
   @@index([ownerUserId, createdAt])
   @@index([expiresAt])
+}
+
+model ScheduleShareLink {
+  id                  String                     @id @default(cuid())
+  ownerUserId         String
+  owner               User                       @relation("ScheduleShareLinkOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  tokenHash           String                     @unique
+  rangeStart          DateTime
+  rangeEnd            DateTime
+  revealConfig        Json
+  allowGuestProposals Boolean                    @default(true)
+  expiresAt           DateTime
+  revokedAt           DateTime?
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
+  proposals           ScheduleShareGuestProposal[]
+
+  @@index([ownerUserId])
+  @@index([expiresAt])
+}
+
+model ScheduleShareGuestProposal {
+  id                      String                           @id @default(cuid())
+  scheduleShareLinkId     String
+  scheduleShareLink       ScheduleShareLink                @relation(fields: [scheduleShareLinkId], references: [id], onDelete: Cascade)
+  proposerUserId          String?
+  proposerUser            User?                            @relation("ScheduleShareProposalProposer", fields: [proposerUserId], references: [id], onDelete: SetNull)
+  guestDisplayName        String
+  guestContact            String?
+  title                   String
+  note                    String?
+  location                String?
+  startTime               DateTime
+  endTime                 DateTime
+  status                  ScheduleShareGuestProposalStatus @default(PENDING)
+  acceptedCalendarEntryId String?
+  createdFromIp           String?
+  userAgent               String?
+  createdAt               DateTime                         @default(now())
+  updatedAt               DateTime                         @updatedAt
+
+  @@index([scheduleShareLinkId])
+  @@index([proposerUserId])
+  @@index([status])
+  @@index([startTime])
 }
 
 model PlanRequest {

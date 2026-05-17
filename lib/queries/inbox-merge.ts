@@ -1,5 +1,10 @@
 import type { Course, CourseRoomMessage, GroupChat, GroupChatMessage, User } from "@prisma/client";
-import { ClassmatePostStatus, ConnectionStatus, PlanRequestStatus } from "@prisma/client";
+import {
+  ClassmatePostStatus,
+  ConnectionStatus,
+  PlanRequestStatus,
+  ScheduleShareGuestProposalStatus,
+} from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
 import {
@@ -77,6 +82,8 @@ export type InboxMergeBundle = {
   unreadTotal: number;
   /** Plan requests where you are the receiver and must accept / decline / counter. */
   plansNeedingYourAction: number;
+  /** Pending meeting times proposed via schedule share links you created. */
+  scheduleShareProposalsPending: number;
   activePostCount: number;
 };
 
@@ -117,8 +124,14 @@ export async function getInboxUnreadTotal(userId: string): Promise<number> {
 }
 
 export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBundle> {
-  const [connections, userCourses, groupParticipants, activePostCount, plansNeedingYourAction] =
-    await Promise.all([
+  const [
+    connections,
+    userCourses,
+    groupParticipants,
+    activePostCount,
+    plansNeedingYourAction,
+    scheduleShareProposalsPending,
+  ] = await Promise.all([
     prisma.connection.findMany({
       where: {
         status: ConnectionStatus.ACTIVE,
@@ -182,7 +195,13 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
         status: PlanRequestStatus.PENDING,
       },
     }),
-    ]);
+    prisma.scheduleShareGuestProposal.count({
+      where: {
+        scheduleShareLink: { ownerUserId: userId },
+        status: ScheduleShareGuestProposalStatus.PENDING,
+      },
+    }),
+  ]);
 
   const courseIds = userCourses.map((uc) => uc.courseId);
   const groupChatIds = groupParticipants.map((participant) => participant.groupChat.id);
@@ -262,6 +281,7 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
     merged,
     unreadTotal,
     plansNeedingYourAction,
+    scheduleShareProposalsPending,
     activePostCount,
   };
 }

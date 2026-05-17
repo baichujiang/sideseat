@@ -6,7 +6,7 @@ import { ConnectionStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
 import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
-import { requireUser } from "@/lib/auth/session";
+import { getSessionUser, requireUser } from "@/lib/auth/session";
 import { isConfiguredAdmin } from "@/lib/constants/app";
 import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
 
@@ -16,6 +16,35 @@ import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
 // plenty for "recently active" semantics.
 const ACTIVE_AT_THROTTLE_MS = 5 * 60 * 1000;
 
+function bumpLastActiveIfStale(user: User) {
+  const now = Date.now();
+  const last = user.lastActiveAt ? user.lastActiveAt.getTime() : 0;
+  if (now - last <= ACTIVE_AT_THROTTLE_MS) return;
+
+  const nowDate = new Date(now);
+  user.lastActiveAt = nowDate;
+  prisma.user
+    .update({ where: { id: user.id }, data: { lastActiveAt: nowDate } })
+    .catch((err) => {
+      console.error("Failed to bump lastActiveAt", err);
+    });
+}
+
+/** Auth for Route Handlers that must return JSON — never calls `redirect()`. */
+export async function resolveOnboardedUserForApi(): Promise<
+  { ok: true; user: User } | { ok: false; status: 401 | 403; error: string }
+> {
+  const user = await getSessionUser();
+  if (!user) {
+    return { ok: false, status: 401, error: "Sign in required." };
+  }
+  if (!user.onboardingComplete) {
+    return { ok: false, status: 403, error: "Finish onboarding before continuing." };
+  }
+  bumpLastActiveIfStale(user);
+  return { ok: true, user };
+}
+
 export async function requireOnboardedUser() {
   const user = await requireUser();
 
@@ -23,20 +52,7 @@ export async function requireOnboardedUser() {
     redirect("/onboarding");
   }
 
-  const now = Date.now();
-  const last = user.lastActiveAt ? user.lastActiveAt.getTime() : 0;
-  if (now - last > ACTIVE_AT_THROTTLE_MS) {
-    // Fire-and-forget: a missed write is harmless, we don't want to block the
-    // request on it. The updated value is mirrored back onto `user` so callers
-    // in the same request see the fresh timestamp.
-    const nowDate = new Date(now);
-    user.lastActiveAt = nowDate;
-    prisma.user
-      .update({ where: { id: user.id }, data: { lastActiveAt: nowDate } })
-      .catch((err) => {
-        console.error("Failed to bump lastActiveAt", err);
-      });
-  }
+  bumpLastActiveIfStale(user);
 
   return user;
 }

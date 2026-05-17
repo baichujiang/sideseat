@@ -1,5 +1,6 @@
 import type { Weekday } from "@prisma/client";
-import { formatInTimeZone } from "date-fns-tz";
+import { endOfWeek, startOfWeek } from "date-fns";
+import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 
 /** Home schedule uses German wall time for class recurrence alignment and ICS-friendly dates. */
 export const SCHEDULE_DISPLAY_TZ = "Europe/Berlin";
@@ -28,4 +29,16 @@ export function berlinClockMinutes(d: Date): number {
 export function berlinWeekdayFromInstant(d: Date): Weekday {
   const i = Number(formatInTimeZone(d, SCHEDULE_DISPLAY_TZ, "i"));
   return ISO_DOW_TO_WEEKDAY[i] ?? "MON";
+}
+
+/** Monday 00:00 in Europe/Berlin for the week containing `instant`. */
+export function berlinStartOfWeek(instant: Date): Date {
+  const zoned = toZonedTime(instant, SCHEDULE_DISPLAY_TZ);
+  return startOfWeek(zoned, { weekStartsOn: 1 });
+}
+
+/** Sunday 23:59:59.999 in Europe/Berlin for the week containing `instant`. */
+export function berlinEndOfWeek(instant: Date): Date {
+  const zoned = toZonedTime(instant, SCHEDULE_DISPLAY_TZ);
+  return endOfWeek(zoned, { weekStartsOn: 1 });
 }

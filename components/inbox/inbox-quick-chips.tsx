@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { Route } from "next";
-import { MoreHorizontal, Search, Sparkles } from "lucide-react";
+import { CalendarClock, MoreHorizontal, Search, Sparkles } from "lucide-react";
 
 import { InboxChatsView } from "@/components/inbox/inbox-chats-view";
 import { InboxCreateSheet } from "@/components/inbox/inbox-create-sheet";
@@ -39,6 +39,7 @@ export function InboxChatsShell({
   merged,
   unreadTotal,
   plansNeedingYourAction,
+  scheduleShareProposalsPending,
   activePostCount,
   initialContacts,
   showCreateSheet,
@@ -49,6 +50,7 @@ export function InboxChatsShell({
   merged: InboxMerged[];
   unreadTotal: number;
   plansNeedingYourAction: number;
+  scheduleShareProposalsPending: number;
   activePostCount: number;
   initialContacts: ContactRow[];
   showCreateSheet: boolean;
@@ -62,6 +64,13 @@ export function InboxChatsShell({
     unreadTotal > 0
       ? formatMessage(m.inbox.chipNewAriaWithUnread, { count: unreadTotal })
       : m.inbox.chipNewAria;
+
+  const scheduleRequestsAria =
+    scheduleShareProposalsPending > 0
+      ? formatMessage(m.inbox.chipScheduleRequestsAriaWithCount, {
+          count: scheduleShareProposalsPending,
+        })
+      : m.inbox.chipScheduleRequestsAria;
 
   return (
     <div className="space-y-3">
@@ -85,6 +94,41 @@ export function InboxChatsShell({
               <span className="truncate">{m.inbox.chipNew}</span>
               <CountBadge count={unreadTotal} />
             </Link>
+
+            {scheduleShareProposalsPending > 0 ? (
+              <Link
+                href={"/inbox/schedule-requests" as Route}
+                title={m.inbox.chipScheduleRequestsLinkTitle}
+                aria-label={scheduleRequestsAria}
+                className={cn(
+                  "inline-flex h-9 max-w-full items-center gap-1.5 rounded-full border border-amber-200/90 bg-amber-50 px-3 py-1.5 text-[13px] font-semibold text-amber-950 transition-opacity active:opacity-80",
+                  "[@media(hover:hover)]:hover:opacity-90 dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-100",
+                )}
+              >
+                <CalendarClock className="h-4 w-4 shrink-0 text-amber-700 dark:text-amber-300" strokeWidth={2} aria-hidden />
+                <span className="truncate">{m.inbox.chipScheduleRequests}</span>
+                <CountBadge count={scheduleShareProposalsPending} />
+              </Link>
+            ) : null}
+
+            {plansNeedingYourAction > 0 ? (
+              <Link
+                href={"/profile/my-plan" as Route}
+                title={m.inbox.chipPlansLinkTitle}
+                aria-label={
+                  plansNeedingYourAction > 0
+                    ? formatMessage(m.inbox.chipPlansAriaWithCount, { count: plansNeedingYourAction })
+                    : m.inbox.chipPlansAria
+                }
+                className={cn(
+                  "inline-flex h-9 max-w-full items-center gap-1.5 rounded-full border border-border/80 bg-muted/50 px-3 py-1.5 text-[13px] font-semibold text-foreground transition-opacity active:opacity-80",
+                  "[@media(hover:hover)]:hover:opacity-90",
+                )}
+              >
+                <span className="truncate">{m.inbox.chipPlans}</span>
+                <CountBadge count={plansNeedingYourAction} />
+              </Link>
+            ) : null}
 
             <Button
               type="button"
@@ -112,6 +156,12 @@ export function InboxChatsShell({
               </PopoverTrigger>
               <PopoverContent align="end" className="w-56 p-1.5">
                 <nav className="flex flex-col gap-0.5" aria-label={m.inbox.headerMoreMenuAria}>
+                  <MenuCountLink
+                    href={"/inbox/schedule-requests" as Route}
+                    label={m.inbox.headerMenuScheduleRequests}
+                    count={scheduleShareProposalsPending}
+                    onNavigate={() => setMoreOpen(false)}
+                  />
                   <MenuCountLink
                     href={"/profile/my-plan" as Route}
                     label={m.inbox.headerMenuMyPlan}

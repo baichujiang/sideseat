@@ -4,10 +4,16 @@ import type { Weekday } from "@prisma/client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+import {
+  WEEK_CALENDAR_CARD,
+  WEEK_COL_DIVIDER,
+  WEEK_GRID_LINE,
+} from "@/components/calendar/week-calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { formatMessage } from "@/lib/i18n/messages";
+import { SCHEDULE_EVENT_TONE_STYLES } from "@/lib/schedule-event-card-tone";
 import { formatMinutes, parseTimeToMinutes } from "@/lib/validators/course";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +36,8 @@ const SLOT_MINUTES = 30;
 const TIME_COL_PX = 38;
 /** Shared body height — time column and day columns use the same flex row layout so rows stay aligned */
 const GRID_BODY_HEIGHT_PX = 360;
-const HEADER_ROW_CLASS = "flex h-7 shrink-0 items-center border-b border-border/50";
+const HEADER_ROW_CLASS = cn("flex h-7 shrink-0 items-center border-b", WEEK_GRID_LINE);
+const COURSE_BLOCK_TONE = SCHEDULE_EVENT_TONE_STYLES.enrolledCourse;
 
 const SLOT_ROW_STARTS: number[] = (() => {
   const rows: number[] = [];
@@ -456,7 +463,8 @@ export function MiniWorkweekCourseGrid({
       <div
         ref={gridShellRef}
         className={cn(
-          "max-h-[min(420px,70vh)] w-full min-w-0 select-none overflow-y-auto overflow-x-hidden rounded-xl border border-blue-200/90 bg-white shadow-[0_2px_10px_rgba(37,99,235,0.12)] touch-pan-y [-webkit-user-select:none] dark:border-blue-800/55 dark:bg-card dark:shadow-[0_2px_10px_rgba(0,0,0,0.2)]",
+          WEEK_CALENDAR_CARD,
+          "max-h-[min(420px,70vh)] w-full min-w-0 select-none overflow-y-auto overflow-x-hidden touch-pan-y [-webkit-user-select:none]",
           readOnly && "bg-muted/15 dark:bg-muted/10",
         )}
       >
@@ -470,7 +478,10 @@ export function MiniWorkweekCourseGrid({
               {SLOT_ROW_STARTS.map((m) => (
                 <div
                   key={m}
-                  className="flex min-h-0 flex-1 items-start justify-end border-b border-dashed border-border/20 pr-1 pt-0.5 text-[9px] tabular-nums text-muted-foreground"
+                  className={cn(
+                    "flex min-h-0 flex-1 items-start justify-end border-b border-dashed pr-1 pt-0.5 text-[9px] tabular-nums text-muted-foreground",
+                    WEEK_GRID_LINE,
+                  )}
                 >
                   {m % 60 === 0 ? formatMinutes(m).replace(/^0/, "") : ""}
                 </div>
@@ -487,7 +498,10 @@ export function MiniWorkweekCourseGrid({
             {WORKDAYS.map((weekday) => (
               <div
                 key={weekday}
-                className="relative flex min-w-0 flex-1 flex-col border-r border-border/40 last:border-r-0"
+                className={cn(
+                  "relative flex min-w-0 flex-1 flex-col border-r last:border-r-0",
+                  WEEK_COL_DIVIDER,
+                )}
               >
                 <div className={cn(HEADER_ROW_CLASS, "justify-center text-[10px] font-semibold text-foreground")}>
                   {dayShort(weekday)}
@@ -502,7 +516,7 @@ export function MiniWorkweekCourseGrid({
                 >
                   <div className="absolute inset-0 flex flex-col">
                     {SLOT_ROW_STARTS.map((slotStart) => (
-                      <div key={slotStart} className="relative min-h-0 flex-1 border-b border-dashed border-border/25">
+                      <div key={slotStart} className={cn("relative min-h-0 flex-1 border-b border-dashed", WEEK_GRID_LINE)}>
                         {readOnly ? (
                           <span className="absolute inset-0 z-0" aria-hidden />
                         ) : (
@@ -541,18 +555,32 @@ export function MiniWorkweekCourseGrid({
                     const isEditing = selectedIndex === index;
                     const isDragSelected = dragSelectedIndex === index;
                     const dragging = liveBlock?.index === index;
+                    const blockHighlighted =
+                      !readOnly && (isEditing || isDragSelected || dragging);
+                    const titleClass = blockHighlighted
+                      ? COURSE_BLOCK_TONE.titleSelected
+                      : COURSE_BLOCK_TONE.title;
+                    const timeClass = blockHighlighted
+                      ? COURSE_BLOCK_TONE.accentColorSelected
+                      : COURSE_BLOCK_TONE.accentColor;
                     const timeLabel = `${formatMinutes(disp.start)}–${formatMinutes(disp.end)}`;
                     return (
                       <div
                         key={`block-${index}`}
                         ref={(el) => { blockElRefs.current.set(index, el); }}
                         className={cn(
-                          "absolute left-0.5 right-0.5 z-10 overflow-visible rounded-sm border shadow-sm",
-                          readOnly ? "border-border/50 bg-muted/40" : "border-primary/35 bg-primary/15",
-                          !readOnly && isEditing && "z-20 ring-2 ring-primary ring-offset-1 ring-offset-background",
-                          !readOnly && isDragSelected && !dragging && "z-20 border-primary/60 bg-primary/30",
-                          !readOnly && dragging && "z-30 scale-[1.02] border-primary/60 bg-primary/30 ring-2 ring-primary/60",
-                          !readOnly && (dragging ? "transition-none" : "transition-[box-shadow,transform,background-color]"),
+                          "absolute left-0.5 right-0.5 z-10 overflow-visible rounded-[2px] p-0 text-left leading-tight",
+                          readOnly
+                            ? COURSE_BLOCK_TONE.card
+                            : isEditing || isDragSelected || dragging
+                              ? COURSE_BLOCK_TONE.cardSelected
+                              : COURSE_BLOCK_TONE.card,
+                          !readOnly && isEditing && "z-20",
+                          !readOnly && isDragSelected && !dragging && "z-20",
+                          !readOnly && dragging && "z-30 scale-[1.02] !transition-none",
+                          !readOnly &&
+                            !dragging &&
+                            "transition-[box-shadow,transform,background-color] hover:brightness-[0.98] active:brightness-95",
                         )}
                         style={{
                           top: `${topPct}%`,
@@ -568,10 +596,10 @@ export function MiniWorkweekCourseGrid({
                               time: timeLabel,
                             })}
                           >
-                            <span className="line-clamp-2 text-[9px] font-semibold leading-tight text-foreground">
+                            <span className={cn("line-clamp-2 text-[9px] leading-tight", titleClass)}>
                               {courseTitle}
                             </span>
-                            <span className="block text-[8px] tabular-nums text-muted-foreground">{timeLabel}</span>
+                            <span className={cn("block text-[8px] tabular-nums", timeClass)}>{timeLabel}</span>
                           </div>
                         ) : (
                           <>
@@ -599,10 +627,10 @@ export function MiniWorkweekCourseGrid({
                               }}
                               onPointerDown={(e) => startGridPointerSession(e, index, "move")}
                             >
-                              <span className="line-clamp-2 text-[9px] font-semibold leading-tight text-foreground">
+                              <span className={cn("line-clamp-2 text-[9px] leading-tight", titleClass)}>
                                 {courseTitle}
                               </span>
-                              <span className="block text-[8px] tabular-nums text-muted-foreground">
+                              <span className={cn("block text-[8px] tabular-nums", timeClass)}>
                                 {timeLabel}
                               </span>
                             </div>
@@ -675,7 +703,10 @@ export function MiniWorkweekCourseGrid({
               return (
                 <div
                   key="drag-overlay"
-                  className="pointer-events-none absolute z-40 select-none overflow-visible rounded-sm border border-primary/60 bg-primary/30 shadow-lg [-webkit-user-select:none]"
+                  className={cn(
+                    "pointer-events-none absolute z-40 select-none overflow-visible rounded-[2px] shadow-lg [-webkit-user-select:none]",
+                    COURSE_BLOCK_TONE.cardSelected,
+                  )}
                   style={{
                     top: headerH + (topPct / 100) * bodyHeight,
                     height: Math.max((heightPct / 100) * bodyHeight, 18),
@@ -684,10 +715,20 @@ export function MiniWorkweekCourseGrid({
                   }}
                 >
                   <div className="overflow-hidden px-1 py-0.5">
-                    <span className="line-clamp-2 text-[9px] font-semibold leading-tight text-foreground">
+                    <span
+                      className={cn(
+                        "line-clamp-2 text-[9px] leading-tight",
+                        COURSE_BLOCK_TONE.titleSelected,
+                      )}
+                    >
                       {courseTitle}
                     </span>
-                    <span className="block text-[8px] tabular-nums text-muted-foreground">
+                    <span
+                      className={cn(
+                        "block text-[8px] tabular-nums",
+                        COURSE_BLOCK_TONE.accentColorSelected,
+                      )}
+                    >
                       {timeLabel}
                     </span>
                   </div>

@@ -6,9 +6,21 @@ export function isDatabaseUnreachable(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
   const e = error as Record<string, unknown>;
   if (e.name === "PrismaClientInitializationError") return true;
-  if (e.code === "P1001" || e.code === "P1000") return true;
-  if (typeof e.message === "string" && e.message.includes("Can't reach database server")) {
+  if (
+    e.code === "P1000" ||
+    e.code === "P1001" ||
+    e.code === "P1008" ||
+    e.code === "P1017" ||
+    e.code === "P2024"
+  ) {
     return true;
+  }
+  if (typeof e.message === "string") {
+    const msg = e.message;
+    if (msg.includes("Can't reach database server")) return true;
+    if (msg.includes("Connection terminated")) return true;
+    if (msg.includes("Server has closed the connection")) return true;
+    if (msg.includes("PostgreSQL connection") && msg.includes("Closed")) return true;
   }
   return false;
 }

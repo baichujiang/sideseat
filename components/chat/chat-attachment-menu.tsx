@@ -2,12 +2,12 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 import type { LucideIcon } from "lucide-react";
-import { CalendarClock, CalendarRange, Image, MapPin, Plus, X } from "lucide-react";
+import { CalendarClock, Image, MapPin, Plus, Share2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { PlanRequestModal } from "@/components/chat/plan-request-modal";
-import { ShareAvailabilityModal } from "@/components/chat/share-availability-modal";
+import { CreateScheduleShareDialog } from "@/components/schedule-share/create-schedule-share-dialog";
 import { useRegisterDismissOnEdgeSwipe } from "@/components/ui/app-push-layer";
 import { cn } from "@/lib/utils";
 
@@ -206,7 +206,7 @@ export function ChatAttachmentTray({
             <div
               className="border-t border-border/50 bg-transparent px-0 pb-1.5 pt-1.5"
               role="region"
-              aria-label="Attachments: Photo, Location, Availability, Plan"
+              aria-label="Attachments: Photo, Location, Share schedule, Plan"
             >
             <input
               ref={fileRef}
@@ -235,9 +235,9 @@ export function ChatAttachmentTray({
                 onClick={sendLocation}
               />
               <AttachmentMenuTile
-                icon={CalendarRange}
-                caption="Availability"
-                ariaLabel="Share availability"
+                icon={Share2}
+                caption="Schedule"
+                ariaLabel="Share schedule link"
                 disabled={busy}
                 onClick={() => {
                   onClose();
@@ -265,11 +265,7 @@ export function ChatAttachmentTray({
         </div>
       </div>
 
-      <ShareAvailabilityModal
-        open={shareOpen}
-        connectionId={connectionId}
-        onClose={() => setShareOpen(false)}
-      />
+      <CreateScheduleShareDialog open={shareOpen} onClose={() => setShareOpen(false)} />
 
       <PlanRequestModal
         open={planOpen}

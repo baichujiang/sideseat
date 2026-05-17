@@ -24,9 +24,8 @@ export default async function InboxPage() {
   }
   const user = sessionUser;
 
-  const { merged, unreadTotal, plansNeedingYourAction, activePostCount } = await getInboxMergeBundle(
-    user.id,
-  );
+  const { merged, unreadTotal, plansNeedingYourAction, scheduleShareProposalsPending, activePostCount } =
+    await getInboxMergeBundle(user.id);
   const directContacts = merged
     .filter((item): item is Extract<(typeof merged)[number], { kind: "direct" }> => item.kind === "direct")
     .filter((item) => item.connection.userAId !== item.connection.userBId)
@@ -85,6 +84,7 @@ export default async function InboxPage() {
         merged={merged}
         unreadTotal={unreadTotal}
         plansNeedingYourAction={plansNeedingYourAction}
+        scheduleShareProposalsPending={scheduleShareProposalsPending}
         activePostCount={activePostCount}
         initialContacts={directContacts}
         showCreateSheet={user.onboardingComplete}

@@ -28,6 +28,8 @@ import {
   buildClipboardSessionFromBlock,
   writeCalendarClipboardSession,
 } from "@/lib/calendar/calendar-clipboard";
+import { calendarTodayChrome } from "@/lib/calendar/today-chrome";
+import { isDraftPreviewCourseId } from "@/lib/calendar/draft-preview-block";
 import { cn } from "@/lib/utils";
 
 /** Anchor (resize handle) accent fallback when an event has no category color. */
@@ -120,12 +122,12 @@ export type WeekCalendarBlock = {
 const DAY_ORDER: Weekday[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
 /** Warm card chrome — outer frame + soft inner grid (not spreadsheet-heavy). */
-const WEEK_CALENDAR_CARD = cn(
+export const WEEK_CALENDAR_CARD = cn(
   "mt-0 overflow-hidden rounded-2xl border border-[#E7E0D6] bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)]",
   "dark:border-border dark:bg-card dark:shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
 );
-const WEEK_GRID_LINE = "border-[#F0ECE6] dark:border-white/[0.08]";
-const WEEK_COL_DIVIDER = "border-[#F3EFE8] dark:border-white/[0.07]";
+export const WEEK_GRID_LINE = "border-[#F0ECE6] dark:border-white/[0.08]";
+export const WEEK_COL_DIVIDER = "border-[#F3EFE8] dark:border-white/[0.07]";
 
 /** Past-midnight axis padding — keep smaller than top so scrolling past 24:00 does not leave a tall dead band. */
 const VISUAL_PADDING_TOP_MINUTES = 30;
@@ -159,9 +161,12 @@ const Z_TIME_RAIL_BODY = 45;
 const Z_TIME_AXIS_INNER = 1;
 
 const POINTER_SLOP_PX = 14;
+/** Empty-grid drag-to-create: arm after this much movement (px). */
+const CREATE_DRAG_SLOP_PX = 8;
 /** Hold still on a calendar card body, then drag (same 450ms idea as the mini workweek course grid). */
 const CALENDAR_MOVE_LONG_PRESS_MS = 450;
 const SNAP_MINUTES = 15;
+const TAP_SLOT_SNAP_MINUTES = 30;
 const MIN_EVENT_MINUTES = 15;
 /** After this many px of movement, lock 2D scroll to horizontal OR vertical for the rest of the gesture. */
 const AXIS_LOCK_THRESHOLD_PX = 24;
@@ -293,6 +298,10 @@ export function WeekCalendar({
   focusDate,
   today,
   onCreateEvent,
+  /** Live range while dragging on empty grid (null clears preview). */
+  onCreateRangePreview,
+  /** Move / resize in-grid draft preview (`__draft-preview__` blocks). */
+  onDraftPreviewTimesChange,
   onOpenItem,
   onPatchCalendarEventTimes,
   onDeleteCalendarEvent,
@@ -310,6 +319,13 @@ export function WeekCalendar({
    * never grows past the visible viewport — inner grid scrolls instead.
    */
   maxViewportBodyPx,
+  /**
+   * How empty grid cells create events: Home uses drag-to-select; course / share
+   * proposal pickers use a single tap with a fixed default duration.
+   */
+  createEventMode = "drag",
+  /** Length for `createEventMode="tap-slot"` (default 90, same as course mini grid). */
+  defaultTapSlotDurationMinutes = 90,
   /** Remove outer top margin — use inside a flex fill container. */
   fillParent = false,
   /**
@@ -329,6 +345,8 @@ export function WeekCalendar({
   focusDate: Date;
   today?: Date;
   onCreateEvent?: (start: Date, end: Date) => void;
+  onCreateRangePreview?: (range: { start: Date; end: Date } | null) => void;
+  onDraftPreviewTimesChange?: (range: { start: Date; end: Date }) => void;
   /** Open edit/detail from parent — timed events: detail sheet "编辑" (and keyboard Enter/Space); all-day: row edit. */
   onOpenItem?: (item: WeekCalendarBlock, occurrenceDate: Date) => void;
   /** Drag / resize calendar events (PATCH start/end only). */
@@ -371,6 +389,8 @@ export function WeekCalendar({
   visibleDayCount?: number;
   viewportBodyPx?: number;
   maxViewportBodyPx?: number;
+  createEventMode?: "drag" | "tap-slot";
+  defaultTapSlotDurationMinutes?: number;
   fillParent?: boolean;
   touchGestureRotateCw90?: boolean;
 }) {
@@ -401,7 +421,6 @@ export function WeekCalendar({
   const DEFAULT_VIEW_END = cfg.viewEnd;
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const holdTimerRef = useRef<number | null>(null);
   const [frameWidth, setFrameWidth] = useState(0);
   const previousMinutePxRef = useRef(MINUTE_PX);
   const minutePxRef = useRef(MINUTE_PX);
@@ -456,7 +475,8 @@ export function WeekCalendar({
   const effectiveBlocks = useMemo(() => {
     if (!dragOverride) return blocks;
     return blocks.map((b) => {
-      if (b.calendarEntryId && b.calendarEntryId === dragOverride.eventId) {
+      const dragKey = b.calendarEntryId ?? (isDraftPreviewCourseId(b.courseId) ? b.courseId : null);
+      if (dragKey && dragKey === dragOverride.eventId) {
         return {
           ...b,
           weekday: dragOverride.weekday,
@@ -932,20 +952,117 @@ export function WeekCalendar({
     node.scrollLeft = startIndex * dayColumnWidth;
   }, [anchorWeekday, dayColumnWidth, horizontalMode, weekStartDate, VISIBLE_WEEK_DAYS]);
 
-  function clearHoldTimer() {
-    if (holdTimerRef.current !== null) {
-      window.clearTimeout(holdTimerRef.current);
-      holdTimerRef.current = null;
-    }
+  function minuteFromClientYInRect(clientY: number, rect: DOMRect): number {
+    const y = clientY - rect.top;
+    const rawMinute = visualStartMinute + (y / rect.height) * totalMinutes;
+    return snapMinute(
+      Math.max(visualStartMinute, Math.min(visualStartMinute + totalMinutes - 1, rawMinute)),
+    );
   }
 
-  function startMouseHold(create: () => void) {
+  function createRangeFromMinutes(
+    weekday: Weekday,
+    startMinute: number,
+    endMinute: number,
+  ): { start: Date; end: Date } {
+    let sm = Math.min(startMinute, endMinute);
+    let em = Math.max(startMinute, endMinute);
+    if (em - sm < MIN_EVENT_MINUTES) {
+      em = Math.min(FULL_DAY_MINUTES, sm + MIN_EVENT_MINUTES);
+    }
+    const { startAt, endAt } = buildStartEndAt(weekday, sm, em);
+    return { start: startAt, end: endAt };
+  }
+
+  function emitCreateRangePreview(weekday: Weekday, startMinute: number, endMinute: number) {
+    if (!onCreateRangePreview) return;
+    onCreateRangePreview(createRangeFromMinutes(weekday, startMinute, endMinute));
+  }
+
+  function startCreatePointerSession(
+    e: React.PointerEvent,
+    weekday: Weekday,
+    dayIndex: number,
+    rect: DOMRect,
+  ) {
     if (!onCreateEvent) return;
-    clearHoldTimer();
-    holdTimerRef.current = window.setTimeout(() => {
-      create();
-      holdTimerRef.current = null;
-    }, 380);
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    e.stopPropagation();
+
+    const pointerId = e.pointerId;
+    const x0 = e.clientX;
+    const y0 = e.clientY;
+    const captureEl = e.currentTarget as HTMLElement;
+    let anchorMinute = minuteFromClientYInRect(y0, rect);
+    let currentMinute = anchorMinute;
+    let activated = false;
+
+    const preventScroll = (ev: TouchEvent) => {
+      ev.preventDefault();
+    };
+
+    const detach = () => {
+      document.removeEventListener("pointermove", onDocMove);
+      document.removeEventListener("pointerup", onDocUp);
+      document.removeEventListener("pointercancel", onDocUp);
+      document.removeEventListener("touchmove", preventScroll);
+      unlockBrowserTextSelectionForCalendarDrag();
+    };
+
+    const onDocMove = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
+      const pastSlop = Math.hypot(ev.clientX - x0, ev.clientY - y0) > CREATE_DRAG_SLOP_PX;
+      if (!activated && pastSlop) {
+        activated = true;
+        lockBrowserTextSelectionForCalendarDrag();
+        try {
+          captureEl.setPointerCapture(pointerId);
+        } catch {
+          /* ignore */
+        }
+        document.addEventListener("touchmove", preventScroll, { passive: false });
+      }
+      if (!activated) return;
+      currentMinute = minuteFromClientYInRect(ev.clientY, rect);
+      emitCreateRangePreview(weekday, anchorMinute, currentMinute);
+    };
+
+    const onDocUp = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
+      detach();
+      try {
+        captureEl.releasePointerCapture(pointerId);
+      } catch {
+        /* ignore */
+      }
+
+      if (activated) {
+        const { start, end } = createRangeFromMinutes(weekday, anchorMinute, currentMinute);
+        onCreateRangePreview?.(null);
+        onCreateEvent(start, end);
+        return;
+      }
+
+      const withinTapSlop = Math.hypot(ev.clientX - x0, ev.clientY - y0) <= CREATE_DRAG_SLOP_PX;
+      if (withinTapSlop) {
+        const snapped = Math.max(
+          0,
+          Math.min(FULL_DAY_MINUTES - 60, Math.round(anchorMinute / 60) * 60),
+        );
+        const start = new Date(weekStartDate);
+        start.setDate(weekStartDate.getDate() + dayIndex);
+        start.setHours(0, snapped, 0, 0);
+        const end = addMinutes(start, 60);
+        onCreateEvent(start, end);
+      } else {
+        onCreateRangePreview?.(null);
+      }
+    };
+
+    emitCreateRangePreview(weekday, anchorMinute, anchorMinute + MIN_EVENT_MINUTES);
+    document.addEventListener("pointermove", onDocMove);
+    document.addEventListener("pointerup", onDocUp);
+    document.addEventListener("pointercancel", onDocUp);
   }
 
   const trackWidthPx = TIME_COLUMN_PX + dayTrackWidth;
@@ -993,7 +1110,7 @@ export function WeekCalendar({
     block: WeekCalendarBlock,
     occurrenceDate: Date,
   ) {
-    if (block.courseId === "__draft-preview__") return;
+    if (isDraftPreviewCourseId(block.courseId)) return;
     if (e.pointerType === "mouse" && e.button !== 0) return;
     e.stopPropagation();
     const pointerId = e.pointerId;
@@ -1035,19 +1152,22 @@ export function WeekCalendar({
     blockInteractionKey: string,
     moveFromSelected: boolean,
   ) {
-    if (!onPatchCalendarEventTimes || !block.calendarEntryId) return;
-    if (block.courseId === "__draft-preview__") return;
+    const isDraftPreview = isDraftPreviewCourseId(block.courseId);
+    if (isDraftPreview) {
+      if (!onDraftPreviewTimesChange) return;
+    } else if (!onPatchCalendarEventTimes || !block.calendarEntryId) {
+      return;
+    }
     if (e.pointerType === "mouse" && e.button !== 0) return;
 
     const isResizeMode = mode === "resize-start" || mode === "resize-end";
 
-    if (dragOverride && dragOverride.eventId !== block.calendarEntryId) {
+    const eventId = block.calendarEntryId ?? block.courseId;
+    if (dragOverride && dragOverride.eventId !== eventId) {
       pendingDragClearRef.current = null;
       clearDragClearFallbackTimer();
       setDragOverride(null);
     }
-
-    const eventId = block.calendarEntryId;
     const pointerId = e.pointerId;
     const x0 = e.clientX;
     const y0 = e.clientY;
@@ -1227,10 +1347,23 @@ export function WeekCalendar({
       });
 
       void (async () => {
-        const patch = onPatchCalendarEventTimes;
         const { startAt, endAt } = buildStartEndAt(curWeekday, snapStart, snapEnd);
-        if (patch && endAt > startAt) {
-          const ok = await patch({ eventId, startAt, endAt });
+        if (endAt <= startAt) {
+          pendingDragClearRef.current = null;
+          clearDragClearFallbackTimer();
+          setDragOverride(null);
+          return;
+        }
+        if (isDraftPreview) {
+          onDraftPreviewTimesChange?.({ start: startAt, end: endAt });
+          pendingDragClearRef.current = null;
+          clearDragClearFallbackTimer();
+          setDragOverride(null);
+          return;
+        }
+        const patch = onPatchCalendarEventTimes;
+        if (patch && block.calendarEntryId) {
+          const ok = await patch({ eventId: block.calendarEntryId, startAt, endAt });
           if (!ok) {
             pendingDragClearRef.current = null;
             clearDragClearFallbackTimer();
@@ -1238,7 +1371,7 @@ export function WeekCalendar({
             return;
           }
           pendingDragClearRef.current = {
-            eventId,
+            eventId: block.calendarEntryId,
             weekday: curWeekday,
             startMinute: snapStart,
             endMinute: snapEnd,
@@ -1468,7 +1601,7 @@ export function WeekCalendar({
                         className={cn(
                           "text-[10px] tabular-nums leading-none",
                           isToday
-                            ? "font-bold text-[#E53935] dark:text-red-400"
+                            ? calendarTodayChrome.weekdayLabel
                             : cn(
                                 "font-medium text-[#9CA3AF]",
                                 isWeekend && !isToday && "text-[#B8C0CC]",
@@ -1482,7 +1615,7 @@ export function WeekCalendar({
                         className={cn(
                           "inline-flex h-[20px] min-w-0 max-w-full shrink items-center justify-center whitespace-nowrap rounded-full px-1.5 text-[10px] font-semibold leading-none",
                           isToday
-                            ? "bg-[#E53935] text-white shadow-sm dark:bg-red-500"
+                            ? calendarTodayChrome.dayPill
                             : cn(
                                 "font-medium text-[#6B7280]",
                                 isWeekend && !isToday && "text-[#9CA3AF]",
@@ -1552,6 +1685,7 @@ export function WeekCalendar({
                           source: block.source,
                           kind: block.kind === "study" ? "study" : "class",
                           title: inferTitle,
+                          courseId: block.courseId,
                         });
                         const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
                         const catHex = block.categoryColor?.trim();
@@ -1757,17 +1891,36 @@ export function WeekCalendar({
 
                       const createFromPointer = (clientY: number, rect: DOMRect) => {
                         if (!onCreateEvent) return;
-                        const y = clientY - rect.top;
-                        const rawMinute = visualStartMinute + (y / rect.height) * totalMinutes;
                         const snappedMinute = Math.max(
                           0,
-                          Math.min(FULL_DAY_MINUTES - 60, Math.round(rawMinute / 60) * 60),
+                          Math.min(
+                            FULL_DAY_MINUTES - 60,
+                            Math.round(minuteFromClientYInRect(clientY, rect) / 60) * 60,
+                          ),
                         );
                         const start = new Date(weekStartDate);
                         start.setDate(weekStartDate.getDate() + dayIndex);
                         start.setHours(0, snappedMinute, 0, 0);
                         const end = addMinutes(start, 60);
-                        onCreateEvent?.(start, end);
+                        onCreateEvent(start, end);
+                      };
+
+                      const createFromTapSlot = (clientY: number, rect: DOMRect) => {
+                        if (!onCreateEvent) return;
+                        const rawMinute = minuteFromClientYInRect(clientY, rect);
+                        const slotStart = Math.max(
+                          0,
+                          Math.min(
+                            FULL_DAY_MINUTES - defaultTapSlotDurationMinutes,
+                            Math.floor(rawMinute / TAP_SLOT_SNAP_MINUTES) * TAP_SLOT_SNAP_MINUTES,
+                          ),
+                        );
+                        const { start, end } = createRangeFromMinutes(
+                          day,
+                          slotStart,
+                          slotStart + defaultTapSlotDurationMinutes,
+                        );
+                        onCreateEvent(start, end);
                       };
 
                       return (
@@ -1791,32 +1944,39 @@ export function WeekCalendar({
                             aria-label={formatMessage(sch.createEventOnDayAria, {
                               when: createEventWhenFmt.format(occurrenceDate),
                             })}
-                            onDoubleClick={(event) => {
-                              createFromPointer(
-                                event.clientY,
-                                event.currentTarget.getBoundingClientRect(),
-                              );
-                            }}
-                            onTouchStart={(event) => {
-                              if (!onCreateEvent) return;
-                              const touch = event.touches[0];
-                              const rect = event.currentTarget.getBoundingClientRect();
-                              clearHoldTimer();
-                              holdTimerRef.current = window.setTimeout(() => {
-                                createFromPointer(touch.clientY, rect);
-                                holdTimerRef.current = null;
-                              }, 380);
-                            }}
-                            onTouchMove={clearHoldTimer}
-                            onTouchEnd={clearHoldTimer}
-                            onTouchCancel={clearHoldTimer}
-                            onMouseDown={(event) => {
-                              const rect = event.currentTarget.getBoundingClientRect();
-                              startMouseHold(() => createFromPointer(event.clientY, rect));
-                            }}
-                            onMouseUp={clearHoldTimer}
-                            onMouseLeave={clearHoldTimer}
-                            className="absolute inset-0 cursor-default"
+                            onDoubleClick={
+                              createEventMode === "drag"
+                                ? (event) => {
+                                    createFromPointer(
+                                      event.clientY,
+                                      event.currentTarget.getBoundingClientRect(),
+                                    );
+                                  }
+                                : undefined
+                            }
+                            onClick={
+                              createEventMode === "tap-slot"
+                                ? (event) => {
+                                    createFromTapSlot(
+                                      event.clientY,
+                                      event.currentTarget.getBoundingClientRect(),
+                                    );
+                                  }
+                                : undefined
+                            }
+                            onPointerDown={
+                              createEventMode === "drag"
+                                ? (event) => {
+                                    startCreatePointerSession(
+                                      event,
+                                      day,
+                                      dayIndex,
+                                      event.currentTarget.getBoundingClientRect(),
+                                    );
+                                  }
+                                : undefined
+                            }
+                            className="absolute inset-0 cursor-crosshair"
                             style={{ zIndex: Z_DAY_CREATE_HIT }}
                           />
 
@@ -1848,29 +2008,36 @@ export function WeekCalendar({
                               source: block.source,
                               kind: isStudy ? "study" : "class",
                               title: inferTitle,
+                              courseId: block.courseId,
                             });
                             const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
                             const isDraftNewTone = toneKey === "draftNew";
                             const key = block.id;
                             const occurrenceDate = addDays(weekStartDate, dayIndex);
+                            const isDraftPreviewBlock = isDraftPreviewCourseId(block.courseId);
+                            const isDraftPreviewEditable =
+                              isDraftPreviewBlock && Boolean(onDraftPreviewTimesChange);
+                            const isDraggableCalendar =
+                              Boolean(onPatchCalendarEventTimes) &&
+                              block.source === "calendar" &&
+                              Boolean(block.calendarEntryId) &&
+                              !isDraftPreviewBlock;
+                            const isEventBodyDraggable = isDraggableCalendar || isDraftPreviewEditable;
+                            const draftDragKey = block.calendarEntryId ?? block.courseId;
                             const draggingThis = Boolean(
-                              dragOverride?.eventId && block.calendarEntryId === dragOverride.eventId,
+                              dragOverride?.eventId && draftDragKey === dragOverride.eventId,
                             );
                             /** Saturated fill / compact type — only while `dragOverride` is active, not toolbar selection. */
                             const highlighted = draggingThis;
                             const shortOverlapGlass = Boolean(block.hasShortOverlap && !highlighted);
                             const catHex = block.categoryColor?.trim();
                             const useCategoryColor = block.source === "calendar" && Boolean(catHex);
-                            const isDraggableCalendar =
-                              Boolean(onPatchCalendarEventTimes) &&
-                              block.source === "calendar" &&
-                              Boolean(block.calendarEntryId) &&
-                              block.courseId !== "__draft-preview__";
                             /** Toolbar + resize anchors — distinct from `draggingThis` visuals (see interaction chrome below). */
                             const isSelectedForEdit =
                               isDraggableCalendar &&
                               Boolean(block.calendarEntryId) &&
                               selectedEventId === block.calendarEntryId;
+                            const showDraftResizeHandles = isDraftPreviewEditable;
                             const startMinuteShown = draggingThis
                               ? snapMinute(block.startMinute)
                               : block.startMinute;
@@ -2183,6 +2350,7 @@ export function WeekCalendar({
                                         }
                                       }}
                                       onPointerDown={(ev) => {
+                                        if (!isEventBodyDraggable) return;
                                         ev.stopPropagation();
                                         startCalendarPointerSession(
                                           ev,
@@ -2191,7 +2359,8 @@ export function WeekCalendar({
                                           day,
                                           occurrenceDate,
                                           key,
-                                          selectedEventId === block.calendarEntryId,
+                                          isDraftPreviewEditable ||
+                                            selectedEventId === block.calendarEntryId,
                                         );
                                       }}
                                     >
@@ -2200,7 +2369,7 @@ export function WeekCalendar({
                                       </div>
                                     </div>
                                   </div>
-                                  {isSelectedForEdit ? (
+                                  {isSelectedForEdit || showDraftResizeHandles ? (
                                     <>
                                       {/*
                                         Resize anchors — only while selected (same gate as move drag).
@@ -2286,13 +2455,13 @@ export function WeekCalendar({
                                   type="button"
                                   className="z-[1] absolute inset-0 overflow-hidden cursor-default rounded-[inherit] border-0 bg-transparent p-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/35 focus-visible:ring-offset-1 focus-visible:ring-offset-background dark:focus-visible:ring-blue-400/40"
                                   onPointerDown={(e) => {
-                                    if (block.courseId === "__draft-preview__") return;
+                                    if (isDraftPreviewCourseId(block.courseId)) return;
                                     attachTapOpen(e, block, occurrenceDate);
                                   }}
                                   onKeyDown={(ev) => {
                                     if (ev.key === "Enter" || ev.key === " ") {
                                       ev.preventDefault();
-                                      if (block.courseId === "__draft-preview__") return;
+                                      if (isDraftPreviewCourseId(block.courseId)) return;
                                       onOpenItem?.(block, occurrenceDate);
                                     }
                                   }}

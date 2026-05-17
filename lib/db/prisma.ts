@@ -24,12 +24,14 @@ function getPrisma(): PrismaClient {
   const delegates = existing as unknown as {
     courseRoomMessage?: unknown;
     classmatePostSave?: unknown;
+    scheduleShareLink?: unknown;
   } | undefined;
   const staleDevSingleton =
     process.env.NODE_ENV !== "production" &&
     Boolean(existing) &&
     (typeof delegates?.courseRoomMessage === "undefined" ||
-      typeof delegates?.classmatePostSave === "undefined");
+      typeof delegates?.classmatePostSave === "undefined" ||
+      typeof delegates?.scheduleShareLink === "undefined");
 
   if (existing && !staleDevSingleton) {
     return existing;

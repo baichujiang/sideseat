@@ -3,10 +3,11 @@ import Link from "next/link";
 import type { Route } from "next";
 import { format, formatDistanceToNowStrict } from "date-fns";
 import { CalendarClock, ChevronRight } from "lucide-react";
-import { ConnectionStatus, PlanRequestStatus, PlanType } from "@prisma/client";
+import { ConnectionStatus, PlanRequestStatus, PlanType, ScheduleShareGuestProposalStatus } from "@prisma/client";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { BackLink } from "@/components/nav/back-link";
+import { ScheduleShareGuestProposalRow } from "@/components/schedule-share/schedule-share-guest-proposal-row";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
@@ -38,6 +39,24 @@ export default async function ProfileMyPlanPage() {
   const user = sessionUser;
   const now = new Date();
 
+  const scheduleGuestProposals = await prisma.scheduleShareGuestProposal.findMany({
+    where: {
+      scheduleShareLink: { ownerUserId: user.id },
+      status: ScheduleShareGuestProposalStatus.PENDING,
+    },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      guestDisplayName: true,
+      guestContact: true,
+      title: true,
+      note: true,
+      location: true,
+      startTime: true,
+      endTime: true,
+    },
+  });
+
   const planRequests = await prisma.planRequest.findMany({
     where: {
       connection: {
@@ -68,6 +87,9 @@ export default async function ProfileMyPlanPage() {
     .filter((r) => r.status === PlanRequestStatus.ACCEPTED)
     .sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
 
+  const hasScheduleShares = scheduleGuestProposals.length > 0;
+  const hasPlans = planRequests.length > 0;
+
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-2 px-0.5">
@@ -78,10 +100,36 @@ export default async function ProfileMyPlanPage() {
         </div>
       </div>
 
-      {!planRequests.length ? (
+      {!hasPlans && !hasScheduleShares ? (
         <EmptyState title={ui.profile.myPlanEmptyTitle} description={ui.profile.myPlanEmptyDesc} />
       ) : (
         <div className="space-y-5">
+          {hasScheduleShares ? (
+            <section className="space-y-2">
+              <h2 className="px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                {ui.scheduleShare.myPlanScheduleShareHeading}
+              </h2>
+              <ul className="overflow-hidden rounded-[1.125rem] border border-border/60 bg-card shadow-[0_2px_16px_-4px_rgba(15,23,42,0.06)]">
+                {scheduleGuestProposals.map((p, i) => (
+                  <ScheduleShareGuestProposalRow
+                    key={p.id}
+                    isLast={i === scheduleGuestProposals.length - 1}
+                    proposal={{
+                      id: p.id,
+                      guestDisplayName: p.guestDisplayName,
+                      guestContact: p.guestContact,
+                      title: p.title,
+                      note: p.note,
+                      location: p.location,
+                      startTime: p.startTime.toISOString(),
+                      endTime: p.endTime.toISOString(),
+                    }}
+                  />
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
           {pending.length > 0 ? (
             <section className="space-y-2">
               <h2 className="px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">

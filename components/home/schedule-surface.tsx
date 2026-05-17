@@ -8,7 +8,6 @@ import {
   addMonths,
   endOfWeek,
   format,
-  getISOWeek,
   isSameDay,
   isSameMonth,
   isSameYear,
@@ -24,7 +23,10 @@ import {
   Loader2,
   Maximize2,
   Minimize2,
+  Plus,
+  Share2,
   Upload,
+  X,
 } from "lucide-react";
 import {
   type ChangeEvent,
@@ -53,6 +55,7 @@ import type { WeekEventEditToolbarLabels } from "@/components/calendar/week-even
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { ScheduleAddPanel } from "@/components/home/schedule-add-panel";
 import { ScheduleCalendarCategoryManager } from "@/components/home/schedule-calendar-category-manager";
+import { CreateScheduleShareDialog } from "@/components/schedule-share/create-schedule-share-dialog";
 import {
   ScheduleItemDetailSheet,
   type ScheduleDetailItem,
@@ -308,6 +311,8 @@ export function ScheduleSurface({
     isWeekendDay(new Date(nowISO)) ? "include-anchor" : "workweek",
   );
   const [adding, setAdding] = useState(false);
+  /** In-grid draft visible while dragging on empty week cells (before add panel opens). */
+  const [gridCreatePreview, setGridCreatePreview] = useState(false);
   const [draftEventStart, setDraftEventStart] = useState<string | undefined>(undefined);
   const [draftEventEnd, setDraftEventEnd] = useState<string | undefined>(undefined);
   const [editingItem, setEditingItem] = useState<ScheduleDetailItem | null>(null);
@@ -328,6 +333,7 @@ export function ScheduleSurface({
   const weekHomeLayoutRef = useRef<HTMLDivElement | null>(null);
   const [weekHomeMaxViewportBodyPx, setWeekHomeMaxViewportBodyPx] = useState<number | null>(null);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
+  const [scheduleShareOpen, setScheduleShareOpen] = useState(false);
   const recurringDeletePayloadRef = useRef<{ eventId: string } | null>(null);
   const recurringDeleteResolverRef = useRef<((ok: boolean) => void) | null>(null);
   const [recurringDeleteDialog, setRecurringDeleteDialog] = useState<{ eventId: string; title: string } | null>(
@@ -338,6 +344,7 @@ export function ScheduleSurface({
   const semesterEnd = new Date(semesterEndISO);
 
   const resetAddDraft = () => {
+    setGridCreatePreview(false);
     setDraftEventStart(undefined);
     setDraftEventEnd(undefined);
     setEditingItem(null);
@@ -619,7 +626,7 @@ export function ScheduleSurface({
 
   const dayItems = useMemo(() => {
     const base = itemsForDate(selectedDate);
-    if (!adding || editingItem || !draftEventStart || !draftEventEnd) return base;
+    if ((!adding && !gridCreatePreview) || editingItem || !draftEventStart || !draftEventEnd) return base;
     const draftStart = new Date(draftEventStart);
     const draftEnd = new Date(draftEventEnd);
     if (Number.isNaN(draftStart.getTime()) || Number.isNaN(draftEnd.getTime())) return base;
@@ -651,6 +658,7 @@ export function ScheduleSurface({
     semesterStart,
     semesterEnd,
     adding,
+    gridCreatePreview,
     editingItem,
     draftEventStart,
     draftEventEnd,
@@ -658,12 +666,42 @@ export function ScheduleSurface({
     messages.schedule,
   ]);
 
+  const applyGridDraftRange = useCallback((start: Date, end: Date) => {
+    setDraftEventStart(format(start, "yyyy-MM-dd'T'HH:mm"));
+    setDraftEventEnd(format(end, "yyyy-MM-dd'T'HH:mm"));
+    setGridCreatePreview(true);
+  }, []);
+
+  const handleCreateRangePreview = useCallback(
+    (range: { start: Date; end: Date } | null) => {
+      if (!range) {
+        if (!adding) {
+          setGridCreatePreview(false);
+          setDraftEventStart(undefined);
+          setDraftEventEnd(undefined);
+        }
+        return;
+      }
+      applyGridDraftRange(range.start, range.end);
+    },
+    [adding, applyGridDraftRange],
+  );
+
+  const handleDraftPreviewTimesChange = useCallback(
+    (range: { start: Date; end: Date }) => {
+      applyGridDraftRange(range.start, range.end);
+    },
+    [applyGridDraftRange],
+  );
+
   const openEventDraft = (start: Date, end: Date) => {
-    resetAddDraft();
+    setGridCreatePreview(false);
     setDraftEventStart(format(start, "yyyy-MM-dd'T'HH:mm"));
     setDraftEventEnd(format(end, "yyyy-MM-dd'T'HH:mm"));
     setSelectedDate(start);
     setDetailItem(null);
+    setEditingItem(null);
+    setInviteFlow(false);
     setAdding(true);
   };
 
@@ -774,7 +812,7 @@ export function ScheduleSurface({
 
     const timedMerged: WeekCalendarBlock[] = [...courseBlocks, ...studyBlocks];
 
-    if (adding && !editingItem && draftEventStart && draftEventEnd) {
+    if ((adding || gridCreatePreview) && !editingItem && draftEventStart && draftEventEnd) {
       const draftStart = new Date(draftEventStart);
       const draftEnd = new Date(draftEventEnd);
       if (
@@ -801,7 +839,7 @@ export function ScheduleSurface({
           kind: "study" as const,
           categoryId: draftCategoryMeta.id,
           categoryName: draftCategoryMeta.name,
-          categoryColor: draftCategoryMeta.color,
+          categoryColor: null,
         };
         timedMerged.push(draftBlock);
       }
@@ -817,6 +855,7 @@ export function ScheduleSurface({
     semesterStart,
     semesterEnd,
     adding,
+    gridCreatePreview,
     editingItem,
     draftEventStart,
     draftEventEnd,
@@ -922,7 +961,7 @@ export function ScheduleSurface({
       const weekday = WEEKDAY_BY_JS[d.getDay()];
       const classDensity = d >= semesterStart && d <= semesterEnd ? classCountByWeekday[weekday] : 0;
       let n = classDensity + (studyCountByDateKey.get(scheduleDateKeyInBerlin(d)) ?? 0);
-      if (adding && !editingItem && draftEventStart && draftEventEnd) {
+      if ((adding || gridCreatePreview) && !editingItem && draftEventStart && draftEventEnd) {
         const draftStart = new Date(draftEventStart);
         if (
           !Number.isNaN(draftStart.getTime()) &&
@@ -933,7 +972,17 @@ export function ScheduleSurface({
       }
       return n;
     };
-  }, [classBlocks, studies, semesterStart, semesterEnd, adding, editingItem, draftEventStart, draftEventEnd]);
+  }, [
+    classBlocks,
+    studies,
+    semesterStart,
+    semesterEnd,
+    adding,
+    gridCreatePreview,
+    editingItem,
+    draftEventStart,
+    draftEventEnd,
+  ]);
 
   // Navigation handlers. Day: ±1 day; Week: ±7 days; Month: ±1 month.
   // "Today" snaps `selectedDate` back without leaving the current view.
@@ -1212,6 +1261,8 @@ export function ScheduleSurface({
     minuteScale: weekMinuteScale,
     onMinuteScaleChange: setWeekMinuteScale,
     onCreateEvent: openEventDraft,
+    onCreateRangePreview: handleCreateRangePreview,
+    onDraftPreviewTimesChange: handleDraftPreviewTimesChange,
     onOpenItem: handleWeekCardTap,
     onPatchCalendarEventTimes: patchCalendarEventTimes,
     onDeleteCalendarEvent: deleteCalendarEvent,
@@ -1271,6 +1322,20 @@ export function ScheduleSurface({
 
   const toolbarActions = (
     <>
+      <button
+        type="button"
+        aria-label={messages.schedule.shareScheduleOpenAria}
+        className={cn(
+          "flex shrink-0 items-center justify-center rounded-full border border-sky-200 bg-white text-sky-700 shadow-sm transition",
+          iconBtnSm,
+          "hover:bg-sky-50 active:scale-[0.98]",
+          "dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-300 dark:hover:bg-sky-950/70",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/35",
+        )}
+        onClick={() => setScheduleShareOpen(true)}
+      >
+        <Share2 className={cn("shrink-0", iconGlyphSm)} strokeWidth={2} aria-hidden />
+      </button>
       <div ref={icsMenuRef} className="relative z-[1] isolate">
         <button
           type="button"
@@ -1368,18 +1433,23 @@ export function ScheduleSurface({
           aria-label={
             adding ? messages.schedule.addToScheduleCloseAria : messages.schedule.addToScheduleOpenAria
           }
+          aria-pressed={adding}
           title={adding ? messages.schedule.addToScheduleCloseTitle : undefined}
           className={cn(
-            "flex shrink-0 items-center justify-center rounded-full border border-[#E7E0D6] bg-white text-[#111827] shadow-sm transition",
+            "flex shrink-0 items-center justify-center rounded-full border shadow-sm transition",
             iconBtnSm,
-            "text-base leading-none hover:bg-[#FAFAF8] active:scale-[0.97] sm:text-lg",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-            "dark:border-border dark:bg-card dark:text-foreground dark:hover:bg-muted/40",
+            "active:scale-[0.98]",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+            adding
+              ? "border-[#2563EB]/60 bg-[#2563EB] text-white shadow-[0_1px_6px_rgba(37,99,235,0.28)] hover:bg-[#1D4ED8] dark:border-blue-400/50 dark:bg-blue-500 dark:hover:bg-blue-400"
+              : "border-blue-200 bg-white text-[#2563EB] hover:bg-blue-50/90 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950/70",
           )}
         >
-          <span aria-hidden className="translate-y-[-0.5px]">
-            ➕
-          </span>
+          {adding ? (
+            <X className={cn("shrink-0", iconGlyphSm)} strokeWidth={2.5} aria-hidden />
+          ) : (
+            <Plus className={cn("shrink-0", iconGlyphSm)} strokeWidth={2.25} aria-hidden />
+          )}
         </button>
       ) : null}
     </>
@@ -1431,6 +1501,16 @@ export function ScheduleSurface({
         categories={initialCalendarCategories}
         open={categoryManagerOpen}
         onClose={() => setCategoryManagerOpen(false)}
+      />
+
+      <CreateScheduleShareDialog
+        open={scheduleShareOpen}
+        onClose={() => setScheduleShareOpen(false)}
+        calendarCategories={initialCalendarCategories.map((c) => ({
+          id: c.id,
+          name: c.name,
+          presetKey: c.presetKey,
+        }))}
       />
 
       <div className="relative z-[5] space-y-1.5">
@@ -1799,10 +1879,6 @@ function ScheduleDateNavToolbar({
   toolbarRight: ReactNode;
   scheduleSch: AppMessages["schedule"];
 }) {
-  const weekAnchor =
-    view === "week" ? startOfWeek(selectedDate, { weekStartsOn: 1 }) : selectedDate;
-  const weekNumber = getISOWeek(weekAnchor);
-
   /** Shared chrome for prev / Today / next — distinct from ViewTabs’ filled segment. */
   const dateNavControlClass = cn(
     "border border-[#2563EB]/55 bg-white text-[#1D4ED8] shadow-sm transition",
@@ -1822,9 +1898,6 @@ function ScheduleDateNavToolbar({
         <h2 className="truncate text-base font-bold leading-tight text-[#111827] dark:text-foreground">
           {calendarRangeTitle(view, selectedDate, locale)}
         </h2>
-        <p className="mt-0.5 text-[11px] leading-tight text-[#8A94A6] dark:text-muted-foreground">
-          {formatMessage(scheduleSch.weekNumberLine, { week: weekNumber })}
-        </p>
       </div>
 
       <div className="flex min-w-0 justify-center justify-self-center">

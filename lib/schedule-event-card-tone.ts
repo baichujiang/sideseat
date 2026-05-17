@@ -259,7 +259,9 @@ export function scheduleVisualToneKey(input: {
   source: "course" | "calendar";
   kind: "study" | "class";
   title: string;
+  courseId?: string;
 }): ScheduleEventToneKey {
+  if (input.courseId === "__draft-preview__") return "draftNew";
   if (input.source === "course") return "enrolledCourse";
   return inferScheduleEventToneKey({ kind: input.kind, title: input.title });
 }

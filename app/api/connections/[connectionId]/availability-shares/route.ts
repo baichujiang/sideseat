@@ -1,8 +1,12 @@
-import { addDays, endOfDay, max, min, startOfDay } from "date-fns";
+/**
+ * @deprecated Prefer Schedule Share (`/api/schedule-shares`) for new availability-style sharing.
+ * Kept for historical messages and existing clients until dependency audit completes.
+ */
+import { addDays, addMinutes, endOfDay, max, min, startOfDay } from "date-fns";
 import { ConnectionStatus } from "@prisma/client";
 
-import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
+import { resolveOnboardedUserForApi } from "@/lib/auth/guards";
 import { error, ok, parseBody } from "@/lib/http";
 import { availabilityShareSchema } from "@/lib/validators/chat-planning";
 
@@ -10,8 +14,13 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ connectionId: string }> },
 ) {
+  const auth = await resolveOnboardedUserForApi();
+  if (!auth.ok) {
+    return error(auth.error, auth.status);
+  }
+  const user = auth.user;
+
   try {
-    const user = await requireOnboardedUser();
     const { connectionId } = await params;
 
     let body: unknown;
@@ -63,9 +72,11 @@ export async function POST(
       expiresAtDate = addDays(new Date(), 7);
     }
 
-    const nowMs = Date.now();
-    if (expiresAtDate.getTime() <= nowMs) {
-      return error("Expiry must be in the future.", 400);
+    // Never reject solely because the client clock skews earlier than the server (or the user
+    // picked an expiry that already passed): fall back to a sane default.
+    const minExpiry = addMinutes(new Date(), 5);
+    if (expiresAtDate.getTime() <= minExpiry.getTime()) {
+      expiresAtDate = addDays(new Date(), 7);
     }
 
     const windowStartMs = rangeStart.getTime();
@@ -102,6 +113,6 @@ export async function POST(
     return ok(result, { status: 201 });
   } catch (cause) {
     console.error(cause);
-    return error("Unable to share availability.");
+    return error("Unable to share availability.", 500);
   }
 }

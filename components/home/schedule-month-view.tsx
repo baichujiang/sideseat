@@ -13,6 +13,7 @@ import {
 import { useMemo } from "react";
 
 import { useLocaleContext } from "@/components/i18n/locale-provider";
+import { calendarTodayChrome } from "@/lib/calendar/today-chrome";
 import { formatMessage } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
@@ -95,12 +96,26 @@ export function ScheduleMonthView({
               : density === 1
                 ? formatMessage(messages.schedule.monthCellAriaOne, { when })
                 : formatMessage(messages.schedule.monthCellAriaMany, { when, count: density });
-          const baseCellBg = isWeekend ? "bg-[#FAF8F5] dark:bg-muted/35" : "bg-white";
-          const cellState = isToday
-            ? "border-[#F0ECE6] text-foreground dark:border-white/12"
-            : isSelected
-              ? "border-[#E7E0D6] text-foreground ring-1 ring-[#E7E0D6]/50 dark:border-border dark:ring-border/40"
+          const baseCellBg =
+            isSelected
+              ? "bg-[#EFF6FF] dark:bg-blue-950/55"
+              : isWeekend
+                ? "bg-[#FAF8F5] dark:bg-muted/35"
+                : "bg-white dark:bg-card";
+          const cellState = isSelected
+            ? "border-[#2563EB]/55 text-foreground shadow-[inset_0_0_0_1px_rgba(37,99,235,0.12)] ring-2 ring-[#2563EB]/45 dark:border-blue-400/50 dark:ring-blue-400/40"
+            : isToday
+              ? "border-[#E53935]/25 text-foreground dark:border-red-400/30"
               : "border-[#F0ECE6] text-foreground hover:bg-[#FAFAF8] dark:border-white/12 dark:hover:bg-muted/15";
+
+          const dayNumberClass = isToday
+            ? cn(
+                "inline-flex h-7 min-w-7 items-center justify-center whitespace-nowrap rounded-full px-1.5 text-sm font-semibold tabular-nums leading-none",
+                calendarTodayChrome.dayPill,
+              )
+            : isSelected
+              ? "inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-[#2563EB] px-1.5 text-sm font-bold text-white shadow-[0_1px_4px_rgba(37,99,235,0.35)] dark:bg-[#2563EB]"
+              : "font-semibold tabular-nums leading-none";
 
           return (
             <button
@@ -116,18 +131,10 @@ export function ScheduleMonthView({
                 !inMonth && !isSelected && !isToday ? "opacity-40" : undefined,
               )}
             >
-              <span
-                className={cn(
-                  "font-semibold tabular-nums leading-none",
-                  isToday &&
-                    "inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-[#2563EB] px-1.5 text-sm font-bold text-white dark:bg-[#2563EB]",
-                )}
-              >
-                {date.getDate()}
-              </span>
+              <span className={dayNumberClass}>{date.getDate()}</span>
               <DensityDots
                 count={density}
-                tone={isToday ? "primary" : isSelected ? "inverse" : "default"}
+                tone={isToday ? "today" : isSelected ? "selected" : "default"}
               />
             </button>
           );
@@ -146,17 +153,17 @@ function DensityDots({
   tone,
 }: {
   count: number;
-  tone: "default" | "primary" | "inverse";
+  tone: "default" | "today" | "selected";
 }) {
   if (count <= 0) {
     return <span className="mt-1 h-1 w-1" aria-hidden />;
   }
   const dotCount = Math.min(count, 3);
   const color =
-    tone === "inverse"
-      ? "bg-background/70"
-      : tone === "primary"
-        ? "bg-[#2563EB]"
+    tone === "today"
+      ? calendarTodayChrome.densityDot
+      : tone === "selected"
+        ? "bg-[#2563EB] dark:bg-blue-400"
         : "bg-foreground/50";
   return (
     <span className="mt-1 flex gap-0.5" aria-hidden>

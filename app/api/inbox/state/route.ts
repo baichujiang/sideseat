@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const user = await requireUser();
-    const { merged, unreadTotal, plansNeedingYourAction, activePostCount } =
+    const { merged, unreadTotal, plansNeedingYourAction, scheduleShareProposalsPending, activePostCount } =
       await getInboxMergeBundle(user.id);
 
     const version = merged
@@ -46,6 +46,7 @@ export async function GET() {
       version,
       unreadTotal,
       plansNeedingYourAction,
+      scheduleShareProposalsPending,
       activePostCount,
     });
   } catch (cause) {

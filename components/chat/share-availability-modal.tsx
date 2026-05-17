@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * @deprecated Use Schedule Share from Home or Chat (`create-schedule-share-dialog`) instead.
+ * Retained so older AvailabilityShare flows keep working until fully migrated.
+ */
+
 import {
   addDays,
   addMonths,
