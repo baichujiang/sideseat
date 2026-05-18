@@ -20,7 +20,7 @@ export function GroupChatComposer({
   threadSearchEntries?: ThreadSearchEntry[];
 }) {
   const router = useRouter();
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
