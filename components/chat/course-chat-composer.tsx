@@ -8,6 +8,7 @@ import { Plus, Send } from "lucide-react";
 
 import { FormMessage } from "@/components/forms/form-message";
 import { ReplyPreview } from "@/components/chat/chat-composer";
+import { ChatMessageInput } from "@/components/chat/chat-message-input";
 import { ChatThreadSearchButton } from "@/components/chat/chat-thread-search-button";
 import { useChatReply } from "@/components/chat/chat-reply-context";
 import { useAppMessages } from "@/hooks/use-app-locale";
@@ -24,7 +25,7 @@ export function CourseChatComposer({
   const router = useRouter();
   const { courses: co, chat: ch } = useAppMessages();
   const { replyTo, setReplyTo } = useChatReply();
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -90,26 +91,13 @@ export function CourseChatComposer({
         <label className="sr-only" htmlFor={`course-chat-input-${courseId}`}>
           {co.courseChatComposerInputLabel}
         </label>
-        <textarea
+        <ChatMessageInput
           ref={inputRef}
           id={`course-chat-input-${courseId}`}
-          autoComplete="off"
-          enterKeyHint="send"
           value={body}
-          onChange={(e) => setBody(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              void submit();
-            }
-          }}
-          rows={1}
+          onChange={(e) => setBody(e.target.value.replace(/[\r\n]+/g, " "))}
+          onSend={() => void submit()}
           placeholder={replyTo ? ch.placeholderReply : co.courseChatComposerPlaceholder}
-          className={cn(
-            "min-h-[44px] max-h-32 flex-1 resize-none rounded-[1.25rem] border border-input bg-muted/40 px-3.5 py-2.5 text-[16px] leading-snug",
-            "placeholder:text-muted-foreground/70",
-            "outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
-          )}
         />
         <button
           type="button"

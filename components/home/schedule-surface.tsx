@@ -1842,21 +1842,25 @@ function WeekVisibleDaysBar({
   return (
     <div
       className={cn(
-        "shrink-0 rounded-xl border border-[#E7E0D6] bg-white px-3 py-2.5 shadow-[0_2px_8px_rgba(15,23,42,0.04)]",
-        "dark:border-border dark:bg-card dark:shadow-[0_2px_8px_rgba(0,0,0,0.12)]",
+        "shrink-0 rounded-xl border border-[#E7E0D6] bg-white px-2 py-1 shadow-[0_2px_8px_rgba(15,23,42,0.03)]",
+        "dark:border-border dark:bg-card dark:shadow-[0_2px_8px_rgba(0,0,0,0.1)]",
       )}
     >
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <span className="text-[12px] font-medium text-muted-foreground">
-          {scheduleSch.visibleDaysLabel}
-        </span>
-        <span className="text-[13px] font-semibold tabular-nums text-[#2563EB] dark:text-blue-300">
-          {valueText}
-        </span>
-      </div>
-      {/* Mirror horizontally so low/high day counts map to the opposite screen side
-          without changing min/max/value (keeps SR + aria-valuetext aligned to real count). */}
-      <div className="w-full -scale-x-100 px-0.5" dir="ltr">
+      <div className="relative px-0.5">
+        <div
+          className="pointer-events-none absolute inset-x-1 top-1/2 z-0 flex -translate-y-1/2 items-center justify-between gap-2 text-[11px] leading-none"
+          aria-hidden
+        >
+          <span className="truncate font-medium text-foreground/30 dark:text-foreground/35">
+            {scheduleSch.visibleDaysLabel}
+          </span>
+          <span className="shrink-0 font-semibold tabular-nums text-[#2563EB]/40 dark:text-blue-300/45">
+            {valueText}
+          </span>
+        </div>
+        {/* Mirror horizontally so low/high day counts map to the opposite screen side
+            without changing min/max/value (keeps SR + aria-valuetext aligned to real count). */}
+        <div className="relative z-10 w-full -scale-x-100" dir="ltr">
         <input
           type="range"
           min={WEEK_CALENDAR_VISIBLE_DAY_MIN}
@@ -1872,9 +1876,9 @@ function WeekVisibleDaysBar({
             onChange(clampWeekCalendarVisibleDayCount(Number(event.target.value)));
           }}
           className={cn(
-            "block h-11 w-full cursor-grab touch-none appearance-none bg-transparent active:cursor-grabbing",
-            "[&::-webkit-slider-runnable-track]:h-3 [&::-webkit-slider-runnable-track]:rounded-full",
-            "[&::-webkit-slider-runnable-track]:bg-[#DBEAFE] dark:[&::-webkit-slider-runnable-track]:bg-blue-950/55",
+            "block h-10 w-full cursor-grab touch-none appearance-none bg-transparent active:cursor-grabbing",
+            "[&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full",
+            "[&::-webkit-slider-runnable-track]:bg-blue-100 dark:[&::-webkit-slider-runnable-track]:bg-blue-950/40",
             "[&::-webkit-slider-thumb]:appearance-none",
             "[&::-webkit-slider-thumb]:h-8 [&::-webkit-slider-thumb]:w-8",
             "[&::-webkit-slider-thumb]:-mt-[13px]",
@@ -1882,8 +1886,8 @@ function WeekVisibleDaysBar({
             "[&::-webkit-slider-thumb]:border-[3px] [&::-webkit-slider-thumb]:border-[#2563EB]",
             "[&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_2px_10px_rgba(37,99,235,0.35)]",
             "dark:[&::-webkit-slider-thumb]:border-blue-400 dark:[&::-webkit-slider-thumb]:bg-blue-950",
-            "[&::-moz-range-track]:h-3 [&::-moz-range-track]:rounded-full",
-            "[&::-moz-range-track]:bg-[#DBEAFE] dark:[&::-moz-range-track]:bg-blue-950/55",
+            "[&::-moz-range-track]:h-1.5 [&::-moz-range-track]:rounded-full",
+            "[&::-moz-range-track]:bg-blue-100 dark:[&::-moz-range-track]:bg-blue-950/40",
             "[&::-moz-range-thumb]:h-8 [&::-moz-range-thumb]:w-8",
             "[&::-moz-range-thumb]:rounded-full",
             "[&::-moz-range-thumb]:border-[3px] [&::-moz-range-thumb]:border-[#2563EB]",
@@ -1891,6 +1895,7 @@ function WeekVisibleDaysBar({
             "dark:[&::-moz-range-thumb]:border-blue-400 dark:[&::-moz-range-thumb]:bg-blue-950",
           )}
         />
+        </div>
       </div>
     </div>
   );

@@ -11,6 +11,7 @@ import { useChatReply } from "@/components/chat/chat-reply-context";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { formatMessage } from "@/lib/i18n/messages";
 import { ChatAttachmentPlusButton, ChatAttachmentTray } from "@/components/chat/chat-attachment-menu";
+import { ChatMessageInput } from "@/components/chat/chat-message-input";
 import { ChatThreadSearchButton } from "@/components/chat/chat-thread-search-button";
 import type { ThreadSearchEntry } from "@/lib/chat/thread-search-index";
 import { cn } from "@/lib/utils";
@@ -31,7 +32,7 @@ export function ChatComposer({
   const router = useRouter();
   const { chat: c, common } = useAppMessages();
   const { replyTo, setReplyTo } = useChatReply();
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const composerRootRef = useRef<HTMLDivElement>(null);
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
@@ -120,26 +121,13 @@ export function ChatComposer({
           <label className="sr-only" htmlFor={`chat-input-${connectionId}`}>
             {c.messageInputLabel}
           </label>
-          <textarea
+          <ChatMessageInput
             ref={inputRef}
             id={`chat-input-${connectionId}`}
-            autoComplete="off"
-            enterKeyHint="send"
             value={body}
-            onChange={(e) => setBody(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                void submit();
-              }
-            }}
-            rows={1}
+            onChange={(e) => setBody(e.target.value.replace(/[\r\n]+/g, " "))}
+            onSend={() => void submit()}
             placeholder={replyTo ? c.placeholderReply : c.placeholderWrite}
-            className={cn(
-              "min-h-[44px] max-h-32 flex-1 resize-none rounded-[1.25rem] border border-input bg-muted/40 px-3.5 py-2.5 text-[16px] leading-snug",
-              "placeholder:text-muted-foreground/70",
-              "outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
-            )}
           />
           <button
             type="button"

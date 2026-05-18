@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Send } from "lucide-react";
 
 import { FormMessage } from "@/components/forms/form-message";
+import { ChatMessageInput } from "@/components/chat/chat-message-input";
 import { ChatThreadSearchButton } from "@/components/chat/chat-thread-search-button";
 import type { ThreadSearchEntry } from "@/lib/chat/thread-search-index";
 import { cn } from "@/lib/utils";
@@ -62,26 +63,13 @@ export function GroupChatComposer({
         <label className="sr-only" htmlFor={`group-chat-input-${groupChatId}`}>
           Message
         </label>
-        <textarea
+        <ChatMessageInput
           ref={inputRef}
           id={`group-chat-input-${groupChatId}`}
-          autoComplete="off"
-          enterKeyHint="send"
           value={body}
-          onChange={(e) => setBody(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              void submit();
-            }
-          }}
-          rows={1}
+          onChange={(e) => setBody(e.target.value.replace(/[\r\n]+/g, " "))}
+          onSend={() => void submit()}
           placeholder="Message the group…"
-          className={cn(
-            "min-h-[44px] max-h-32 flex-1 resize-none rounded-[1.25rem] border border-input bg-muted/40 px-3.5 py-2.5 text-[16px] leading-snug",
-            "placeholder:text-muted-foreground/70",
-            "outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
-          )}
         />
         <button
           type="button"
