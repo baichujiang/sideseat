@@ -185,22 +185,24 @@ export function ScheduleShareViewer({
         </div>
       )}
 
-      <WeekCalendar
-        blocks={blocksForCalendar}
-        horizontalMode="workweek"
-        nowMinute={berlinClockMinutes(now)}
-        showNowLine={weekStart <= now && now <= weekEnd}
-        weekStartDate={weekStart}
-        focusDate={selectedDate}
-        today={now}
-        visibleDayCount={7}
-        minuteScale={WEEK_CALENDAR_MINUTE_SCALE_DEFAULT}
-        maxViewportBodyPx={520}
-        createEventMode={allowGuestProposals ? "tap-slot" : undefined}
-        onCreateEvent={allowGuestProposals ? handleCreateEvent : undefined}
-        onDraftPreviewTimesChange={allowGuestProposals ? handleDraftPreviewTimesChange : undefined}
-        onOpenItem={allowGuestProposals ? handleOpenCalendarItem : undefined}
-      />
+      <div className="min-h-0 touch-none overscroll-contain">
+        <WeekCalendar
+          blocks={blocksForCalendar}
+          horizontalMode="workweek"
+          nowMinute={berlinClockMinutes(now)}
+          showNowLine={weekStart <= now && now <= weekEnd}
+          weekStartDate={weekStart}
+          focusDate={selectedDate}
+          today={now}
+          visibleDayCount={7}
+          minuteScale={WEEK_CALENDAR_MINUTE_SCALE_DEFAULT}
+          maxViewportBodyPx={520}
+          createEventMode={allowGuestProposals ? "tap-slot" : undefined}
+          onCreateEvent={allowGuestProposals ? handleCreateEvent : undefined}
+          onDraftPreviewTimesChange={allowGuestProposals ? handleDraftPreviewTimesChange : undefined}
+          onOpenItem={allowGuestProposals ? handleOpenCalendarItem : undefined}
+        />
+      </div>
     </div>
   );
 }

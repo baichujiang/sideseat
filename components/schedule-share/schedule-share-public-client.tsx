@@ -190,7 +190,7 @@ export function ScheduleSharePublicClient({
       : storedDraft;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 px-3 py-6 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-4 sm:py-8">
+    <div className="mx-auto max-w-3xl space-y-6 overscroll-y-contain px-3 py-6 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-4 sm:py-8">
       <ScheduleShareViewer
         snapshot={snapshot}
         pageHeadline={shareHeadline.headline}

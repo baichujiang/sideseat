@@ -792,6 +792,8 @@ export function WeekCalendar({
     const onTouchMove = (e: TouchEvent) => {
       if (pinchTouchIds) return;
       if (tid === null || calendarDragSelectLockDepth > 0) return;
+      // Block document scroll / rubber-band while the calendar owns this gesture.
+      e.preventDefault();
       let touch: Touch | undefined;
       for (let i = 0; i < e.changedTouches.length; i++) {
         if (e.changedTouches[i].identifier === tid) {
@@ -895,7 +897,7 @@ export function WeekCalendar({
     window.addEventListener("pointercancel", onPointerUp);
     node.addEventListener("scroll", onScroll, { passive: true });
     node.addEventListener("touchstart", onTouchStart, { passive: true });
-    node.addEventListener("touchmove", onTouchMove, { passive: true });
+    node.addEventListener("touchmove", onTouchMove, { passive: false });
     node.addEventListener("touchend", onTouchEnd, { passive: true });
     node.addEventListener("touchcancel", onTouchEnd, { passive: true });
 
@@ -1562,7 +1564,8 @@ export function WeekCalendar({
   return (
     <div
       className={cn(
-        "select-none [-webkit-user-select:none] [-webkit-touch-callout:none]",
+        "touch-none overscroll-contain select-none [-webkit-user-select:none] [-webkit-touch-callout:none]",
+        "[&_input]:touch-auto [&_textarea]:touch-auto [&_select]:touch-auto",
         fillParent
           ? "mt-0 flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-[#E7E0D6] bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:border-border dark:bg-card dark:shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
           : cn(WEEK_CALENDAR_CARD, "flex flex-col overflow-hidden"),
