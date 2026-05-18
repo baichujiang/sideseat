@@ -34,6 +34,8 @@ export function ScheduleShareViewer({
   proposalSelection,
   onProposalSelectionChange,
   onEditProposalSelection,
+  /** Fill the parent flex column (share page shell); calendar scrolls inside the card. */
+  fillParent = false,
 }: {
   snapshot: PublicScheduleShareSnapshot;
   pageHeadline: string;
@@ -51,6 +53,7 @@ export function ScheduleShareViewer({
   onProposalSelectionChange?: (selection: ScheduleShareProposalSelection | null) => void;
   /** Short tap on the in-grid draft block — open time editor in the proposal panel. */
   onEditProposalSelection?: () => void;
+  fillParent?: boolean;
 }) {
   const rangeStart = useMemo(() => new Date(snapshot.rangeStart), [snapshot.rangeStart]);
   const rangeEnd = useMemo(() => new Date(snapshot.rangeEnd), [snapshot.rangeEnd]);
@@ -135,20 +138,38 @@ export function ScheduleShareViewer({
   const weekLabel = `${format(weekStart, "MMM d")} – ${format(weekEnd, "MMM d, yyyy")}`;
 
   return (
-    <div className="space-y-3">
-      <header className="space-y-1.5 px-0.5">
-        <h1 className="text-[17px] font-semibold leading-snug text-foreground">{pageHeadline}</h1>
-        <p className="text-[13px] text-muted-foreground">{rangeDetail}</p>
+    <div
+      className={cn(
+        fillParent ? "flex min-h-0 flex-1 flex-col gap-1 overflow-hidden" : "space-y-3",
+      )}
+    >
+      <header className={cn("shrink-0 space-y-1 px-0.5", fillParent && "pt-0.5")}>
+        <h1
+          className={cn(
+            "font-semibold leading-snug text-foreground",
+            fillParent ? "text-center text-[15px]" : "text-[17px]",
+          )}
+        >
+          {pageHeadline}
+        </h1>
+        <p
+          className={cn(
+            "text-muted-foreground",
+            fillParent ? "text-center text-[12px] leading-snug" : "text-[13px]",
+          )}
+        >
+          {rangeDetail}
+        </p>
       </header>
 
       {allowGuestProposals && labels.proposePickHint ? (
-        <p className="px-0.5 text-[11px] leading-snug text-muted-foreground">{labels.proposePickHint}</p>
+        <p className="shrink-0 px-0.5 text-[11px] leading-snug text-muted-foreground">{labels.proposePickHint}</p>
       ) : null}
 
       {singleWeekShare ? (
-        <p className="px-0.5 text-center text-[13px] font-medium text-foreground">{weekLabel}</p>
+        <p className="shrink-0 px-0.5 text-center text-[13px] font-medium text-foreground">{weekLabel}</p>
       ) : (
-        <div className="flex items-center justify-between gap-2 px-0.5">
+        <div className="flex shrink-0 items-center justify-between gap-2 px-0.5">
           <button
             type="button"
             disabled={!canGoPrev}
@@ -185,7 +206,12 @@ export function ScheduleShareViewer({
         </div>
       )}
 
-      <div className="min-h-0 touch-none overscroll-contain">
+      <div
+        className={cn(
+          "min-h-0 touch-none overscroll-contain",
+          fillParent && "flex min-h-0 flex-1 flex-col",
+        )}
+      >
         <WeekCalendar
           blocks={blocksForCalendar}
           horizontalMode="workweek"
@@ -196,7 +222,9 @@ export function ScheduleShareViewer({
           today={now}
           visibleDayCount={7}
           minuteScale={WEEK_CALENDAR_MINUTE_SCALE_DEFAULT}
-          maxViewportBodyPx={520}
+          fillParent={fillParent}
+          maxViewportBodyPx={fillParent ? undefined : 520}
+          showTimeColumnLabel={false}
           createEventMode={allowGuestProposals ? "tap-slot" : undefined}
           onCreateEvent={allowGuestProposals ? handleCreateEvent : undefined}
           onDraftPreviewTimesChange={allowGuestProposals ? handleDraftPreviewTimesChange : undefined}

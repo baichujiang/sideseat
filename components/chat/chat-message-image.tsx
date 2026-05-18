@@ -3,7 +3,6 @@
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import { useRegisterDismissOnEdgeSwipe } from "@/components/ui/app-push-layer";
 import { cn } from "@/lib/utils";
 
 export function ChatMessageImage({
@@ -15,8 +14,6 @@ export function ChatMessageImage({
 }) {
   const [open, setOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
-  useRegisterDismissOnEdgeSwipe(open, () => setOpen(false));
-
   useEffect(() => {
     const el = dialogRef.current;
     if (!el) return;

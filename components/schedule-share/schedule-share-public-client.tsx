@@ -1,8 +1,10 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
+import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { ScheduleShareMyProposalCard } from "@/components/schedule-share/schedule-share-my-proposal-card";
 import { ScheduleShareProposalPanel } from "@/components/schedule-share/schedule-share-proposal-panel";
 import { ScheduleShareViewer } from "@/components/schedule-share/schedule-share-viewer";
@@ -116,6 +118,23 @@ export function ScheduleSharePublicClient({
     setProposalTimeEditorOpen(true);
   }, [myProposal, snapshot]);
 
+  const cancelProposal = useCallback(() => {
+    setProposalSelection(null);
+    setIsEditingProposal(false);
+    setStoredDraft(null);
+    setProposalTimeEditorOpen(false);
+    clearScheduleShareProposalDraft();
+  }, []);
+
+  useEffect(() => {
+    if (unavailable || !snapshot) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [unavailable, snapshot]);
+
   if (unavailable || !snapshot || !token || !shareHeadline) {
     return (
       <div className="mx-auto max-w-lg space-y-6 px-4 py-8">
@@ -189,69 +208,99 @@ export function ScheduleSharePublicClient({
         }
       : storedDraft;
 
+  const showFooter =
+    (allowProposals && isSignedIn && myProposal && !isEditingProposal) ||
+    (!allowProposals && showGuestNudge);
+
   return (
-    <div className="mx-auto max-w-3xl space-y-6 overscroll-y-contain px-3 py-6 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-4 sm:py-8">
-      <ScheduleShareViewer
-        snapshot={snapshot}
-        pageHeadline={shareHeadline.headline}
-        rangeDetail={shareHeadline.rangeDetail}
-        labels={viewerLabels}
-        allowGuestProposals={canPickNewTime}
-        freeSlots={snapshot.freeSlots}
-        proposalSelection={proposalSelection}
-        onProposalSelectionChange={
-          canPickNewTime
-            ? (next) => {
-                setProposalSelection(next);
-                if (next) setProposalTimeEditorOpen(true);
-              }
-            : undefined
-        }
-        onEditProposalSelection={() => setProposalTimeEditorOpen(true)}
-      />
+    <>
+      <div className="mx-auto flex h-dvh max-h-dvh min-w-0 max-w-md flex-col overflow-hidden bg-background">
+        <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 pt-[env(safe-area-inset-top)]">
+          <ScheduleShareViewer
+            fillParent
+            snapshot={snapshot}
+            pageHeadline={shareHeadline.headline}
+            rangeDetail={shareHeadline.rangeDetail}
+            labels={viewerLabels}
+            allowGuestProposals={canPickNewTime}
+            freeSlots={snapshot.freeSlots}
+            proposalSelection={proposalSelection}
+            onProposalSelectionChange={
+              canPickNewTime
+                ? (next) => {
+                    setProposalSelection(next);
+                    if (next) setProposalTimeEditorOpen(true);
+                  }
+                : undefined
+            }
+            onEditProposalSelection={() => setProposalTimeEditorOpen(true)}
+          />
+        </section>
 
-      {allowProposals && isSignedIn && myProposal && !isEditingProposal ? (
-        <ScheduleShareMyProposalCard
-          proposal={myProposal}
-          labels={myProposalCardLabels}
-          onEdit={myProposal.status === "PENDING" ? startEditProposal : undefined}
-        />
-      ) : null}
+        {showFooter ? (
+          <div className="shrink-0 overflow-y-auto overscroll-y-contain border-t border-border/50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
+            {allowProposals && isSignedIn && myProposal && !isEditingProposal ? (
+              <ScheduleShareMyProposalCard
+                proposal={myProposal}
+                labels={myProposalCardLabels}
+                onEdit={myProposal.status === "PENDING" ? startEditProposal : undefined}
+              />
+            ) : null}
+            {!allowProposals && showGuestNudge ? (
+              <GuestAppCta headline={s.registerNudgeHeadline} body={s.registerNudgeBody} returnTo={returnTo} />
+            ) : null}
+          </div>
+        ) : null}
+      </div>
 
-      {showProposalPanel ? (
-        <ScheduleShareProposalPanel
-          token={token}
-          selection={proposalSelection}
-          freeSlots={snapshot.freeSlots}
-          returnTo={returnTo}
-          isSignedIn={isSignedIn}
-          isUpdate={isEditingProposal}
-          initialDraft={panelInitialDraft}
-          labels={panelLabels}
-          onSelectionChange={setProposalSelection}
-          adjustTimeOpen={proposalTimeEditorOpen}
-          onAdjustTimeOpenChange={setProposalTimeEditorOpen}
-          onCancel={() => {
-            setProposalSelection(null);
-            setIsEditingProposal(false);
-            setStoredDraft(null);
-            setProposalTimeEditorOpen(false);
-            clearScheduleShareProposalDraft();
-          }}
-          onSent={(proposal) => {
-            setMyProposal(proposal);
-            setProposalSelection(null);
-            setIsEditingProposal(false);
-            setStoredDraft(null);
-            setProposalTimeEditorOpen(false);
-            clearScheduleShareProposalDraft();
-          }}
-        />
+      {showProposalPanel && proposalSelection ? (
+        <AppPushLayer
+          open
+          onClose={cancelProposal}
+          zClassName="z-50"
+          panelClassName="w-[min(100vw,28rem)] border-0"
+        >
+          <div className="flex h-full min-h-0 flex-col bg-card pt-[env(safe-area-inset-top)]">
+            <section className="flex min-h-0 flex-1 flex-col overflow-hidden border-border/60">
+              <div className="relative flex min-h-12 shrink-0 items-center justify-center border-b border-border/50 px-4 py-2.5">
+                <button
+                  type="button"
+                  onClick={cancelProposal}
+                  aria-label={ui.common.close}
+                  className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border/70 bg-background text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                >
+                  <X className="h-5 w-5" strokeWidth={2.25} />
+                </button>
+                <h2 className="pointer-events-none text-center text-[15px] font-semibold text-foreground">
+                  {panelLabels.proposalFormTitle}
+                </h2>
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2.5">
+                <ScheduleShareProposalPanel
+                  bare
+                  token={token}
+                  selection={proposalSelection}
+                  freeSlots={snapshot.freeSlots}
+                  returnTo={returnTo}
+                  isSignedIn={isSignedIn}
+                  isUpdate={isEditingProposal}
+                  initialDraft={panelInitialDraft}
+                  labels={panelLabels}
+                  onSelectionChange={setProposalSelection}
+                  adjustTimeOpen={proposalTimeEditorOpen}
+                  onAdjustTimeOpenChange={setProposalTimeEditorOpen}
+                  onCancel={cancelProposal}
+                  onSent={(proposal) => {
+                    setMyProposal(proposal);
+                    cancelProposal();
+                  }}
+                />
+              </div>
+            </section>
+          </div>
+        </AppPushLayer>
       ) : null}
-
-      {!allowProposals && showGuestNudge ? (
-        <GuestAppCta headline={s.registerNudgeHeadline} body={s.registerNudgeBody} returnTo={returnTo} />
-      ) : null}
-    </div>
+    </>
   );
 }
+

@@ -11,16 +11,8 @@ import {
   courseMatchesViewer,
   type ViewerCourseMatchIndex,
 } from "@/lib/discover/viewer-course-match";
-import {
-  languageProficiencyLabel,
-  languageTagLabel,
-  sportTagLabel,
-  studyPurposeLabel,
-  studyTimeSlotLabel,
-} from "@/lib/discover/study-meta-labels";
 import type {
   DiscoverPostRowLanguageMeta,
-  DiscoverPostRowMealsMeta,
   DiscoverPostRowSportMeta,
   DiscoverPostRowStudyMeta,
 } from "@/lib/discover/discover-post-row";
@@ -67,9 +59,6 @@ export function BuddyRequestContent({
   const typeLabel = buddyTypeLabel(category, buddy);
   const statusLabel = buddyRequestStatusLabel(locale, displayStatus);
 
-  const showStudyPurposeTimeSection =
-    studyMeta && (studyMeta.purposes.length > 0 || studyMeta.timeSlots.length > 0);
-
   return (
     <div className="space-y-4 px-3 sm:px-4">
       <div className="flex flex-wrap items-center gap-2">
@@ -104,117 +93,6 @@ export function BuddyRequestContent({
           <p className="mt-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground/90">{body}</p>
         ) : null}
       </div>
-
-      {showStudyPurposeTimeSection ? (
-        <div className="space-y-2.5" aria-label={dl.postCardStudyMetaAria}>
-          {studyMeta!.purposes.length > 0 ? (
-            <div>
-              <p className="mb-1 text-[10px] font-medium leading-snug text-muted-foreground">
-                {dl.postCardStudyPurposesLabel}
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {studyMeta!.purposes.map((p) => (
-                  <span
-                    key={p}
-                    className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
-                  >
-                    {studyPurposeLabel(p, dl)}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ) : null}
-          {studyMeta!.timeSlots.length > 0 ? (
-            <div>
-              <p className="mb-1 text-[10px] font-medium leading-snug text-muted-foreground">
-                {dl.postCardStudyTimeLabel}
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {studyMeta!.timeSlots.map((t) => (
-                  <span
-                    key={t}
-                    className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
-                  >
-                    {studyTimeSlotLabel(t, dl)}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-
-      {languageMeta && (languageMeta.offers.length > 0 || languageMeta.targets.length > 0) ? (
-        <div className="space-y-2.5" aria-label={dl.postCardLanguageMetaAria}>
-          {languageMeta.offers.length > 0 ? (
-            <div>
-              <p className="mb-1 text-[10px] font-medium leading-snug text-muted-foreground">
-                {dl.postCardLanguageOffersLabel}
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {languageMeta.offers.map((offer) => (
-                  <span
-                    key={offer.tag}
-                    className="inline-flex max-w-full truncate rounded-full border border-violet-200/85 bg-violet-50/90 px-2 py-0.5 text-[10px] font-medium text-violet-950 dark:border-violet-500/35 dark:bg-violet-950/40 dark:text-violet-100"
-                  >
-                    {languageTagLabel(offer.tag, dl)} · {languageProficiencyLabel(offer.proficiency, dl)}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ) : null}
-          {languageMeta.targets.length > 0 ? (
-            <div>
-              <p className="mb-1 text-[10px] font-medium leading-snug text-muted-foreground">
-                {dl.postCardLanguageTargetsLabel}
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {languageMeta.targets.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex max-w-full truncate rounded-full border border-fuchsia-200/85 bg-fuchsia-50/90 px-2 py-0.5 text-[10px] font-medium text-fuchsia-950 dark:border-fuchsia-500/35 dark:bg-fuchsia-950/40 dark:text-fuchsia-100"
-                  >
-                    {languageTagLabel(tag, dl)}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-
-      {sportMeta && (sportMeta.sportTags.length > 0 || Boolean(sportMeta.sportOtherNote?.trim())) ? (
-        <div className="space-y-2.5" aria-label={dl.postCardSportsMetaAria}>
-          <div>
-            <p className="mb-1 text-[10px] font-medium leading-snug text-muted-foreground">
-              {dl.postCardSportsTagsLabel}
-            </p>
-            {sportMeta.sportTags.length > 0 ? (
-              <div className="flex flex-wrap gap-1.5">
-                {sportMeta.sportTags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex max-w-full truncate rounded-full border border-rose-200/85 bg-rose-50/90 px-2 py-0.5 text-[10px] font-medium text-rose-950 dark:border-rose-500/35 dark:bg-rose-950/40 dark:text-rose-100"
-                  >
-                    {sportTagLabel(tag, dl)}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-            {sportMeta.sportOtherNote?.trim() ? (
-              <p
-                className={
-                  sportMeta.sportTags.length > 0
-                    ? "mt-1.5 text-[11px] leading-snug text-muted-foreground"
-                    : "text-[11px] leading-snug text-muted-foreground"
-                }
-              >
-                {sportMeta.sportOtherNote.trim()}
-              </p>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
 
       {courses.length > 0 ? (
         <div className="flex flex-wrap gap-1.5" aria-label={dl.postCardLinkedCoursesAria}>

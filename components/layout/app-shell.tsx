@@ -3,11 +3,10 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import { BookOpen, Calendar, Inbox, UsersRound, UserRound } from "lucide-react";
 
 import { ProductTutorialGate, type ProductTutorialGateContext } from "@/components/app/product-tutorial-gate";
-import { EdgeSwipeBack } from "@/components/layout/edge-swipe-back";
 import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { PwaInstallBar } from "@/components/pwa/pwa-install-bar";
@@ -19,19 +18,6 @@ const navActiveTab =
   "rounded-2xl bg-classmates-blue-soft text-classmates-blue dark:bg-blue-500/15 dark:text-blue-400";
 const navInactiveTab =
   "group rounded-2xl text-[#6B7280] active:bg-black/[0.04] dark:text-muted-foreground dark:active:bg-white/[0.06] [@media(hover:hover)]:hover:bg-black/[0.04] dark:[@media(hover:hover)]:hover:bg-white/[0.06]";
-
-/**
- * Bottom-tab "root" routes. Left-edge swipe-back is a no-op on these paths
- * (iOS behaviour at the root of a navigation stack — no parent screen to pop).
- * Must stay in sync with `navItems` below.
- */
-const TAB_ROOT_PATHS = [
-  "/home",
-  "/courses",
-  "/discover",
-  "/inbox",
-  "/profile",
-] as const satisfies ReadonlyArray<Route>;
 
 /** Mobile shell: bottom tab bar only (no top nav bar). */
 export function AppShell({
@@ -54,8 +40,6 @@ export function AppShell({
   ] satisfies Array<{ href: Route; label: string; icon: typeof Calendar }>;
 
   const pathname = usePathname();
-  const shellRef = useRef<HTMLDivElement>(null);
-  const swipeBounds = useCallback(() => shellRef.current?.getBoundingClientRect() ?? null, []);
   const [liveUnreadTotal, setLiveUnreadTotal] = useState(inboxUnreadTotal);
 
   useEffect(() => {
@@ -114,7 +98,6 @@ export function AppShell({
 
   return (
     <div
-      ref={shellRef}
       style={
         isChatThread
           ? undefined
@@ -128,9 +111,6 @@ export function AppShell({
         "h-dvh max-h-dvh overflow-hidden",
       )}
     >
-      <Suspense fallback={null}>
-        <EdgeSwipeBack getBounds={swipeBounds} noBackPaths={TAB_ROOT_PATHS} />
-      </Suspense>
       <ProductTutorialGate context={productTutorialContext} />
       <main
         data-app-shell-scroll

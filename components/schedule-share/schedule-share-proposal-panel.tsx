@@ -59,6 +59,8 @@ export function ScheduleShareProposalPanel({
   onSent,
   adjustTimeOpen,
   onAdjustTimeOpenChange,
+  /** Omit card chrome when embedded in {@link AppPushLayer} (share page proposal sheet). */
+  bare = false,
 }: {
   token: string;
   selection: ScheduleShareProposalSelection;
@@ -97,6 +99,7 @@ export function ScheduleShareProposalPanel({
   onSent: (proposal: ViewerScheduleShareProposal) => void;
   adjustTimeOpen?: boolean;
   onAdjustTimeOpenChange?: (open: boolean) => void;
+  bare?: boolean;
 }) {
   const { locale } = useLocaleContext();
   const dateLocale = locale === "zh-CN" ? zhCN : enUS;
@@ -265,21 +268,9 @@ export function ScheduleShareProposalPanel({
     }
   };
 
-  return (
+  const formFields = (
     <>
-      <section className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm">
-        <div className="flex items-start justify-between gap-3">
-          <h2 className="text-[15px] font-semibold text-foreground">{labels.proposalFormTitle}</h2>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="shrink-0 text-[12px] font-medium text-muted-foreground hover:text-foreground"
-          >
-            {labels.proposalCancel}
-          </button>
-        </div>
-
-        <div className="mt-3 rounded-xl bg-muted/40 px-3 py-2.5">
+        <div className={cn(bare ? "mt-0" : "mt-3", "rounded-xl bg-muted/40 px-3 py-2.5")}>
           <p className="text-[13px] font-medium text-foreground">{timeSummary}</p>
           <button
             type="button"
@@ -396,7 +387,28 @@ export function ScheduleShareProposalPanel({
         >
           {submitting ? labels.sending : isUpdate ? labels.updateProposal : labels.submitProposal}
         </button>
-      </section>
+    </>
+  );
+
+  return (
+    <>
+      {bare ? (
+        formFields
+      ) : (
+        <section className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm">
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="text-[15px] font-semibold text-foreground">{labels.proposalFormTitle}</h2>
+            <button
+              type="button"
+              onClick={onCancel}
+              className="shrink-0 text-[12px] font-medium text-muted-foreground hover:text-foreground"
+            >
+              {labels.proposalCancel}
+            </button>
+          </div>
+          {formFields}
+        </section>
+      )}
 
       <ScheduleShareProposalAuthSheet
         open={authSheetOpen}

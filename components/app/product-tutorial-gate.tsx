@@ -7,7 +7,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
 
 import { useLocaleContext } from "@/components/i18n/locale-provider";
-import { useRegisterDismissOnEdgeSwipe } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/auth/api-fetch";
 import { formatMessage } from "@/lib/i18n/messages";
@@ -101,10 +100,6 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
     setStep(0);
     setEntered(false);
   }, [context.userId, dismissPersist]);
-
-  useRegisterDismissOnEdgeSwipe(open, () => {
-    void closeTutorial();
-  });
 
   useEffect(() => {
     if (!shouldMountTutorialUi) return;

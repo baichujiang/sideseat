@@ -8,7 +8,6 @@ import {
   Dumbbell,
   Languages,
   Link2,
-  MapPin,
   NotebookPen,
   UtensilsCrossed,
 } from "lucide-react";
@@ -24,13 +23,6 @@ import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { UserGenderCardIcon } from "@/components/ui/user-gender-icon";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import {
-  languageProficiencyLabel,
-  languageTagLabel,
-  sportTagLabel,
-  studyPurposeLabel,
-  studyTimeSlotLabel,
-} from "@/lib/discover/study-meta-labels";
-import {
   classmatePostCategoryToPalette,
   SCENE_LIST_ROW,
 } from "@/lib/discover/scene-palette";
@@ -38,7 +30,6 @@ import type {
   DiscoverPostCardScene,
   DiscoverPostRow,
 } from "@/lib/discover/discover-post-row";
-import { formatMealsVenueLine, formatStudyVenueLine } from "@/lib/discover/format-post-venue-line";
 import {
   courseMatchesViewer,
   type ViewerCourseMatchIndex,
@@ -76,19 +67,6 @@ function discoverPostInnerPanelClass(showSaveCorner: boolean) {
 
 const DISCOVER_POST_INNER_PANEL_BODY_CLASS =
   "w-full min-w-0 max-w-none px-3 sm:px-3.5";
-
-function PostCardPinLocationRow({ text, ariaLabel }: { text: string; ariaLabel: string }) {
-  if (!text.trim()) return null;
-  return (
-    <p
-      className="mt-2 flex min-w-0 items-start gap-1.5 rounded-lg bg-muted/30 px-1.5 py-1.5 text-[12px] leading-snug text-muted-foreground dark:bg-muted/20"
-      aria-label={ariaLabel}
-    >
-      <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 opacity-75" strokeWidth={2} aria-hidden />
-      <span className="min-w-0 flex-1 break-words">{text}</span>
-    </p>
-  );
-}
 
 const DISCOVER_POST_MY_POSTS_PILL_CLASS = cn(
   "inline-flex shrink-0 items-center rounded-full border border-classmates-blue-border/85 bg-classmates-blue-soft px-3 py-1.5 text-[12px] font-medium text-classmates-blue no-underline transition-colors",
@@ -245,35 +223,6 @@ export function DiscoverPostCard({
     post.linkedCourses &&
     post.linkedCourses.length > 0;
 
-  const showStudyPurposeTime =
-    post.category === ClassmatePostCategory.STUDY &&
-    post.studyMeta &&
-    (post.studyMeta.purposes.length > 0 || post.studyMeta.timeSlots.length > 0);
-
-  const mealsVenueLine =
-    post.category === ClassmatePostCategory.MEALS && post.mealsMeta
-      ? formatMealsVenueLine(post.mealsMeta, dl)
-      : "";
-  const showMealsPinRow = Boolean(mealsVenueLine.trim());
-
-  const studyVenueLine =
-    post.category === ClassmatePostCategory.STUDY && post.studyMeta
-      ? formatStudyVenueLine(post.studyMeta, dl)
-      : "";
-  const showStudyPinRow = Boolean(studyVenueLine.trim());
-
-  const showLanguageMeta =
-    post.category === ClassmatePostCategory.LANGUAGE &&
-    post.languageMeta &&
-    (post.languageMeta.offers.length > 0 ||
-      post.languageMeta.targets.length > 0);
-
-  const showSportsMeta =
-    post.category === ClassmatePostCategory.SPORTS &&
-    post.sportMeta &&
-    (post.sportMeta.sportTags.length > 0 ||
-      Boolean(post.sportMeta.sportOtherNote?.trim()));
-
   const defaultFooter = (
     <div className="mt-3 flex w-full min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-border/55 pt-3 dark:border-border/50">
       <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2.5 gap-y-1 sm:flex-none sm:max-w-[min(100%,26rem)]">
@@ -376,147 +325,12 @@ export function DiscoverPostCard({
                   {post.body}
                 </p>
               ) : null}
-              {showMealsPinRow ? (
-                <PostCardPinLocationRow
-                  text={mealsVenueLine}
-                  ariaLabel={`${dl.postCardLocationLabel}: ${mealsVenueLine}`}
-                />
-              ) : null}
-              {showStudyPinRow ? (
-                <PostCardPinLocationRow
-                  text={studyVenueLine}
-                  ariaLabel={`${dl.postCardLocationLabel}: ${studyVenueLine}`}
-                />
-              ) : null}
               {post.imageUrls && post.imageUrls.length > 0 ? (
                 <ClassmatePostImagesGallery
                   urls={post.imageUrls}
                   variant="card"
                   ariaLabel={dl.postCardImagesAria}
                 />
-              ) : null}
-              {showStudyPurposeTime ? (
-                <div
-                  className="mt-2.5 space-y-2"
-                  aria-label={dl.postCardStudyMetaAria}
-                >
-                  {post.studyMeta!.purposes.length > 0 ? (
-                    <div>
-                      <p className="mb-1 text-[10px] font-medium leading-snug text-muted-foreground">
-                        {dl.postCardStudyPurposesLabel}
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {post.studyMeta!.purposes.map((p) => (
-                          <span
-                            key={p}
-                            className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
-                          >
-                            {studyPurposeLabel(p, dl)}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-                  {post.studyMeta!.timeSlots.length > 0 ? (
-                    <div>
-                      <p className="mb-1 text-[10px] font-medium leading-snug text-muted-foreground">
-                        {dl.postCardStudyTimeLabel}
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {post.studyMeta!.timeSlots.map((t) => (
-                          <span
-                            key={t}
-                            className="inline-flex max-w-full truncate rounded-full border border-sky-200/85 bg-sky-50/90 px-2 py-0.5 text-[10px] font-medium text-sky-950 dark:border-sky-500/35 dark:bg-sky-950/40 dark:text-sky-100"
-                          >
-                            {studyTimeSlotLabel(t, dl)}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
-              {showSportsMeta ? (
-                <div
-                  className="mt-2.5 space-y-2"
-                  aria-label={dl.postCardSportsMetaAria}
-                >
-                  <div>
-                    <p className="mb-1 text-[10px] font-medium leading-snug text-muted-foreground">
-                      {dl.postCardSportsTagsLabel}
-                    </p>
-                    {post.sportMeta!.sportTags.length > 0 ? (
-                      <div className="flex flex-wrap gap-1.5">
-                        {post.sportMeta!.sportTags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="inline-flex max-w-full truncate rounded-full border border-rose-200/85 bg-rose-50/90 px-2 py-0.5 text-[10px] font-medium text-rose-950 dark:border-rose-500/35 dark:bg-rose-950/40 dark:text-rose-100"
-                          >
-                            {sportTagLabel(tag, dl)}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-                    {post.sportMeta!.sportOtherNote?.trim() ? (
-                      <p
-                        className={cn(
-                          "line-clamp-2 text-[11px] leading-snug text-muted-foreground",
-                          post.sportMeta!.sportTags.length > 0
-                            ? "mt-1"
-                            : undefined,
-                        )}
-                      >
-                        {post.sportMeta!.sportOtherNote.trim()}
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
-              ) : null}
-              {showLanguageMeta ? (
-                <div
-                  className="mt-2.5 space-y-2"
-                  aria-label={dl.postCardLanguageMetaAria}
-                >
-                  {post.languageMeta!.offers.length > 0 ? (
-                    <div>
-                      <p className="mb-1 text-[10px] font-medium leading-snug text-muted-foreground">
-                        {dl.postCardLanguageOffersLabel}
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {post.languageMeta!.offers.map((offer) => (
-                          <span
-                            key={offer.tag}
-                            title={languageProficiencyLabel(
-                              offer.proficiency,
-                              dl,
-                            )}
-                            className="inline-flex max-w-full truncate rounded-full border border-violet-200/80 bg-violet-50/90 px-2 py-0.5 text-[10px] font-medium text-violet-950 dark:border-violet-500/35 dark:bg-violet-950/40 dark:text-violet-100"
-                          >
-                            {languageTagLabel(offer.tag, dl)} ·{" "}
-                            {languageProficiencyLabel(offer.proficiency, dl)}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-                  {post.languageMeta!.targets.length > 0 ? (
-                    <div>
-                      <p className="mb-1 text-[10px] font-medium leading-snug text-muted-foreground">
-                        {dl.postCardLanguageTargetsLabel}
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {post.languageMeta!.targets.map((tag) => (
-                          <span
-                            key={tag}
-                            className="inline-flex max-w-full truncate rounded-full border border-fuchsia-200/80 bg-fuchsia-50/90 px-2 py-0.5 text-[10px] font-medium text-fuchsia-950 dark:border-fuchsia-500/35 dark:bg-fuchsia-950/40 dark:text-fuchsia-100"
-                          >
-                            {languageTagLabel(tag, dl)}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
               ) : null}
               {showSharedCourseChips ? (
                 <div

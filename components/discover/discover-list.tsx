@@ -17,12 +17,8 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ClassmatePostCategory,
-  StudyPurpose,
-  StudyTimeSlot,
-  StudyVenue,
   type LanguageProficiency,
   type LanguageTag,
-  type SportTag,
   type UserGender,
 } from "@prisma/client";
 
@@ -60,22 +56,14 @@ import {
   type DiscoverCityNameKey,
 } from "@/lib/discover/discover-city-name-keys";
 import { useAppMessages } from "@/hooks/use-app-locale";
-import { formatMessage, type AppMessages } from "@/lib/i18n/messages";
+import { formatMessage } from "@/lib/i18n/messages";
 import {
   CLASSMATE_POST_BODY_MAX_LEN,
-  CLASSMATE_POST_MEALS_VENUE_OTHER_NOTE_MAX,
-  CLASSMATE_POST_SPORT_OTHER_NOTE_MAX,
   CLASSMATE_POST_TITLE_MAX_LEN,
-  CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX,
-  STUDY_PURPOSE_VALUES,
-  STUDY_TIME_SLOT_VALUES,
-  STUDY_VENUE_VALUES,
 } from "@/lib/validators/classmate-posts";
-import { studyPurposeLabel, studyTimeSlotLabel, studyVenueLabel } from "@/lib/discover/study-meta-labels";
 import { cn } from "@/lib/utils";
 
 type PostExpiryPreset = "3d" | "1w" | "1m" | "never";
-const DEFAULT_LANGUAGE_OFFER_PROFICIENCY: LanguageProficiency = "CONVERSATIONAL";
 
 type CourseRef = {
   id: string;
@@ -459,26 +447,10 @@ function CreatePostSheet({
   const [body, setBody] = useState("");
   const [expiryPreset, setExpiryPreset] = useState<PostExpiryPreset>("1w");
   const [selectedCourseIds, setSelectedCourseIds] = useState<Set<string>>(new Set());
-  const [studyPurposes, setStudyPurposes] = useState<Set<StudyPurpose>>(new Set());
-  const [studyTimeSlots, setStudyTimeSlots] = useState<Set<StudyTimeSlot>>(new Set());
-  const [studyVenues, setStudyVenues] = useState<Set<StudyVenue>>(new Set());
-  const [studyVenueOtherNote, setStudyVenueOtherNote] = useState("");
-  const [mealVenueOtherNote, setMealVenueOtherNote] = useState("");
-  const [languageOfferTags, setLanguageOfferTags] = useState<Set<LanguageTag>>(new Set());
-  const [languageOfferLevels, setLanguageOfferLevels] = useState<
-    Partial<Record<LanguageTag, LanguageProficiency>>
-  >({});
-  const [languageTargets, setLanguageTargets] = useState<Set<LanguageTag>>(new Set());
-  const [sportTags, setSportTags] = useState<Set<SportTag>>(new Set());
-  const [sportOtherNote, setSportOtherNote] = useState("");
   const [postImageUrls, setPostImageUrls] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isShared = category === ClassmatePostCategory.SHARED_COURSES;
-  const isStudy = category === ClassmatePostCategory.STUDY;
-  const isMeals = category === ClassmatePostCategory.MEALS;
-  const isLanguage = category === ClassmatePostCategory.LANGUAGE;
-  const isSports = category === ClassmatePostCategory.SPORTS;
 
   useEffect(() => {
     if (!open) return;
@@ -488,16 +460,6 @@ function CreatePostSheet({
     setError(null);
     setExpiryPreset("1w");
     setSelectedCourseIds(new Set());
-    setStudyPurposes(new Set());
-    setStudyTimeSlots(new Set());
-    setStudyVenues(new Set());
-    setStudyVenueOtherNote("");
-    setMealVenueOtherNote("");
-    setLanguageOfferTags(new Set());
-    setLanguageOfferLevels({});
-    setLanguageTargets(new Set());
-    setSportTags(new Set());
-    setSportOtherNote("");
     setPostImageUrls([]);
   }, [open]);
 
@@ -514,80 +476,6 @@ function CreatePostSheet({
     setSelectedCourseIds(new Set(enrolledCourses.map((c) => c.id)));
   }
 
-  function toggleStudyPurpose(p: StudyPurpose) {
-    setStudyPurposes((prev) => {
-      const next = new Set(prev);
-      if (next.has(p)) next.delete(p);
-      else next.add(p);
-      return next;
-    });
-  }
-
-  function toggleStudyTimeSlot(t: StudyTimeSlot) {
-    setStudyTimeSlots((prev) => {
-      const next = new Set(prev);
-      if (next.has(t)) next.delete(t);
-      else next.add(t);
-      return next;
-    });
-  }
-
-  function toggleStudyVenue(v: StudyVenue) {
-    setStudyVenues((prev) => {
-      const next = new Set(prev);
-      if (next.has(v)) next.delete(v);
-      else next.add(v);
-      return next;
-    });
-  }
-
-  function toggleLanguageOffer(tag: LanguageTag) {
-    setLanguageOfferTags((prev) => {
-      const next = new Set(prev);
-      if (next.has(tag)) next.delete(tag);
-      else next.add(tag);
-      return next;
-    });
-    setLanguageOfferLevels((prev) => {
-      if (tag in prev) {
-        const next = { ...prev };
-        delete next[tag];
-        return next;
-      }
-      return { ...prev, [tag]: DEFAULT_LANGUAGE_OFFER_PROFICIENCY };
-    });
-  }
-
-  function setLanguageOfferLevel(tag: LanguageTag, proficiency: LanguageProficiency) {
-    setLanguageOfferLevels((prev) => ({ ...prev, [tag]: proficiency }));
-  }
-
-  function toggleLanguageTarget(tag: LanguageTag) {
-    setLanguageTargets((prev) => {
-      const next = new Set(prev);
-      if (next.has(tag)) next.delete(tag);
-      else next.add(tag);
-      return next;
-    });
-  }
-
-  function addSportPresetTag(tag: SportTag) {
-    if (tag === "OTHER") return;
-    setSportTags((prev) => {
-      const next = new Set(prev);
-      next.add(tag);
-      return next;
-    });
-  }
-
-  function removeSportPresetTag(tag: SportTag) {
-    setSportTags((prev) => {
-      const next = new Set(prev);
-      next.delete(tag);
-      return next;
-    });
-  }
-
   async function submit() {
     if (submitting) return;
     const trimmedTitle = title.trim();
@@ -600,6 +488,10 @@ function CreatePostSheet({
       setError(dl.postErrorNeedTitle);
       return;
     }
+    if (!trimmedBody) {
+      setError(dl.postErrorNeedBody);
+      return;
+    }
     if (trimmedTitle.length > CLASSMATE_POST_TITLE_MAX_LEN) {
       setError(formatMessage(dl.postErrorTitleTooLong, { max: CLASSMATE_POST_TITLE_MAX_LEN }));
       return;
@@ -608,86 +500,9 @@ function CreatePostSheet({
       setError(formatMessage(dl.postErrorBodyTooLong, { max: CLASSMATE_POST_BODY_MAX_LEN }));
       return;
     }
-    if (isStudy && studyVenues.has("OTHER") && !studyVenueOtherNote.trim()) {
-      setError(dl.postErrorStudyVenueOtherNote);
-      return;
-    }
-    if (isStudy && studyVenueOtherNote.trim() && !studyVenues.has("OTHER")) {
-      setError(dl.postErrorStudyVenueOtherRequiresOther);
-      return;
-    }
-    if (isStudy && studyVenueOtherNote.trim().length > CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX) {
-      setError(
-        formatMessage(dl.postErrorStudyVenueNoteTooLong, {
-          max: CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX,
-        }),
-      );
-      return;
-    }
-    if (isMeals && mealVenueOtherNote.trim().length > CLASSMATE_POST_MEALS_VENUE_OTHER_NOTE_MAX) {
-      setError(
-        formatMessage(dl.postErrorMealsVenueNoteTooLong, {
-          max: CLASSMATE_POST_MEALS_VENUE_OTHER_NOTE_MAX,
-        }),
-      );
-      return;
-    }
-    if (isLanguage && languageOfferTags.size === 0 && languageTargets.size === 0) {
-      setError(dl.postErrorLanguageNeedMeta);
-      return;
-    }
-    if (isSports && sportTags.has("OTHER") && !sportOtherNote.trim()) {
-      setError(dl.postErrorSportsOtherNote);
-      return;
-    }
-    if (isSports && sportOtherNote.trim().length > CLASSMATE_POST_SPORT_OTHER_NOTE_MAX) {
-      setError(
-        formatMessage(dl.postErrorSportsNoteTooLong, {
-          max: CLASSMATE_POST_SPORT_OTHER_NOTE_MAX,
-        }),
-      );
-      return;
-    }
     setSubmitting(true);
     setError(null);
     try {
-      const studyPayload =
-        isStudy &&
-        (studyPurposes.size > 0 ||
-          studyTimeSlots.size > 0 ||
-          studyVenues.size > 0 ||
-          (studyVenues.has("OTHER") && studyVenueOtherNote.trim().length > 0))
-          ? {
-              purposes: [...studyPurposes],
-              timeSlots: [...studyTimeSlots],
-              venues: [...studyVenues],
-              ...(studyVenues.has("OTHER") && studyVenueOtherNote.trim()
-                ? { venueOtherNote: studyVenueOtherNote.trim() }
-                : {}),
-            }
-          : undefined;
-      const mealsPayload =
-        isMeals && mealVenueOtherNote.trim().length > 0
-          ? { venueOtherNote: mealVenueOtherNote.trim() }
-          : undefined;
-      const languagePayload =
-        isLanguage && (languageOfferTags.size > 0 || languageTargets.size > 0)
-          ? {
-              offers: [...languageOfferTags].map((tag) => ({
-                tag,
-                proficiency: languageOfferLevels[tag] ?? DEFAULT_LANGUAGE_OFFER_PROFICIENCY,
-              })),
-              targets: [...languageTargets],
-            }
-          : undefined;
-      const sportPayload =
-        isSports && (sportTags.size > 0 || sportOtherNote.trim().length > 0)
-          ? {
-              sportTags: [...sportTags],
-              ...(sportOtherNote.trim() ? { sportOtherNote: sportOtherNote.trim() } : {}),
-            }
-          : undefined;
-
       const res = await apiFetch("/api/classmate-posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -700,10 +515,6 @@ function CreatePostSheet({
           ...(isShared && selectedCourseIds.size > 0
             ? { courseIds: [...selectedCourseIds] }
             : {}),
-          ...(studyPayload ? { study: studyPayload } : {}),
-          ...(mealsPayload ? { meals: mealsPayload } : {}),
-          ...(languagePayload ? { language: languagePayload } : {}),
-          ...(sportPayload ? { sport: sportPayload } : {}),
           ...(postImageUrls.length > 0 ? { imageUrls: postImageUrls } : {}),
         }),
       });
@@ -814,144 +625,6 @@ function CreatePostSheet({
             </div>
           ) : null}
 
-          {isStudy ? (
-            <div className="space-y-3 rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
-              <div>
-                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
-                  {dl.postSheetStudyPurposeLabel}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {STUDY_PURPOSE_VALUES.map((p) => {
-                    const active = studyPurposes.has(p);
-                    return (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => toggleStudyPurpose(p)}
-                        className={cn(
-                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
-                          active
-                            ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
-                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
-                        )}
-                      >
-                        {studyPurposeLabel(p, dl)}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-              <div>
-                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
-                  {dl.postSheetStudyTimeLabel}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {STUDY_TIME_SLOT_VALUES.map((t) => {
-                    const active = studyTimeSlots.has(t);
-                    return (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => toggleStudyTimeSlot(t)}
-                        className={cn(
-                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
-                          active
-                            ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
-                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
-                        )}
-                      >
-                        {studyTimeSlotLabel(t, dl)}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-              <div>
-                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
-                  {dl.postSheetStudyVenueLabel}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {STUDY_VENUE_VALUES.map((v) => {
-                    const active = studyVenues.has(v);
-                    return (
-                      <button
-                        key={v}
-                        type="button"
-                        onClick={() => toggleStudyVenue(v)}
-                        className={cn(
-                          "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
-                          active
-                            ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
-                            : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
-                        )}
-                      >
-                        {studyVenueLabel(v, dl)}
-                      </button>
-                    );
-                  })}
-                </div>
-                {studyVenues.has("OTHER") ? (
-                  <Input
-                    value={studyVenueOtherNote}
-                    onChange={(e) => setStudyVenueOtherNote(e.target.value)}
-                    placeholder={dl.postSheetVenueOtherPlaceholder}
-                    maxLength={CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX}
-                    className="mt-2 h-9 rounded-xl border-border/70 text-[13px]"
-                  />
-                ) : null}
-              </div>
-            </div>
-          ) : null}
-
-          {isMeals ? (
-            <div className="space-y-3 rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
-              <div>
-                <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
-                  {dl.postSheetMealsVenueLabel}
-                </p>
-                <Input
-                  value={mealVenueOtherNote}
-                  onChange={(e) => setMealVenueOtherNote(e.target.value)}
-                  placeholder={dl.postSheetMealsLocationPlaceholder}
-                  maxLength={CLASSMATE_POST_MEALS_VENUE_OTHER_NOTE_MAX}
-                  className="h-9 rounded-xl border-border/70 text-[13px]"
-                  aria-describedby="discover-meals-location-hint"
-                />
-                <p
-                  id="discover-meals-location-hint"
-                  className="mt-1.5 text-[11px] leading-snug text-muted-foreground"
-                >
-                  {dl.postSheetMealsLocationHint}
-                </p>
-              </div>
-            </div>
-          ) : null}
-
-          {isLanguage ? (
-            <LanguageExchangePostFields
-              dl={dl}
-              languageOfferTags={languageOfferTags}
-              languageOfferLevels={languageOfferLevels}
-              languageTargets={languageTargets}
-              defaultOfferProficiency={DEFAULT_LANGUAGE_OFFER_PROFICIENCY}
-              toggleLanguageOffer={toggleLanguageOffer}
-              setLanguageOfferLevel={setLanguageOfferLevel}
-              toggleLanguageTarget={toggleLanguageTarget}
-            />
-          ) : null}
-
-          {isSports ? (
-            <SportsPostFieldCombobox
-              dl={dl}
-              sportTags={sportTags}
-              sportOtherNote={sportOtherNote}
-              onAddPresetTag={addSportPresetTag}
-              onRemovePresetTag={removeSportPresetTag}
-              onSetCustomNote={(note) => setSportOtherNote(note)}
-              onClearCustomNote={() => setSportOtherNote("")}
-            />
-          ) : null}
-
           <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
             <div className="mb-1.5 flex items-start justify-between gap-2">
               <p className="text-[11px] font-medium text-muted-foreground">{dl.postSheetTitleQuestion}</p>
@@ -977,7 +650,7 @@ function CreatePostSheet({
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={postPlaceholderForCategory(category, dl)}
+              placeholder={dl.postSheetTitlePlaceholder}
               maxLength={CLASSMATE_POST_TITLE_MAX_LEN}
               className="h-11 rounded-xl border-border/70 text-[14px]"
             />
@@ -1010,7 +683,7 @@ function CreatePostSheet({
               onChange={(e) => setBody(e.target.value)}
               placeholder={dl.postSheetDetailsPlaceholder}
               maxLength={CLASSMATE_POST_BODY_MAX_LEN}
-              className="min-h-24 w-full resize-none rounded-xl border border-input bg-background px-3 py-2.5 text-[14px] outline-none transition focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+              className="min-h-28 w-full resize-none rounded-xl border border-input bg-background px-3 py-2.5 text-[14px] outline-none transition focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
             />
           </div>
 
@@ -1061,8 +734,8 @@ function CreatePostSheet({
             disabled={
               submitting ||
               !title.trim() ||
+              !body.trim() ||
               (isShared && selectedCourseIds.size === 0) ||
-              (isLanguage && languageOfferTags.size === 0 && languageTargets.size === 0) ||
               title.trim().length > CLASSMATE_POST_TITLE_MAX_LEN ||
               body.trim().length > CLASSMATE_POST_BODY_MAX_LEN
             }
@@ -1083,23 +756,6 @@ function CreatePostSheet({
       </div>
     </AppPushLayer>
   );
-}
-
-function postPlaceholderForCategory(category: ClassmatePostCategory, dl: AppMessages["discoverList"]) {
-  switch (category) {
-    case ClassmatePostCategory.SHARED_COURSES:
-      return dl.postPlaceholderShared;
-    case ClassmatePostCategory.STUDY:
-      return dl.postPlaceholderStudy;
-    case ClassmatePostCategory.MEALS:
-      return dl.postPlaceholderMeals;
-    case ClassmatePostCategory.LANGUAGE:
-      return dl.postPlaceholderLanguage;
-    case ClassmatePostCategory.SPORTS:
-      return dl.postPlaceholderSports;
-    default:
-      return dl.postPlaceholderStudy;
-  }
 }
 
 function ExpiryOption({

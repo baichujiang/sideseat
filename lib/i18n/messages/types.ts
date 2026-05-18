@@ -192,6 +192,7 @@ export type AppMessages = {
     postSheetDeselectAll: string;
     postSheetNeedEnroll: string;
     postSheetTitleQuestion: string;
+    postSheetTitlePlaceholder: string;
     /** `{current}` `{max}` — trimmed length vs limit for post title. */
     postCharCountCurrentMax: string;
     /** `{count}` — characters remaining before body limit (non-negative in copy; pass 0 when over). */
@@ -216,6 +217,7 @@ export type AppMessages = {
     postSubmitting: string;
     postErrorSelectCourse: string;
     postErrorNeedTitle: string;
+    postErrorNeedBody: string;
     /** `{max}` — title exceeds server max (trimmed). */
     postErrorTitleTooLong: string;
     /** `{max}` — body exceeds server max (trimmed). */

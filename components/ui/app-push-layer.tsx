@@ -8,42 +8,6 @@ import { cn } from "@/lib/utils";
 /** Matches ~iOS navigation push timing (ms). */
 export const APP_PUSH_TRANSITION_MS = 340;
 
-/**
- * Global stack of open push-layer close callbacks.
- * {@link EdgeSwipeBack} invokes the top callback when the user completes a left-edge swipe;
- * there is no route navigation when the stack is empty.
- */
-const layerCloseStack: Array<() => void> = [];
-
-/** Called by EdgeSwipeBack: returns true if a layer was closed, false if the stack was empty. */
-export function dismissTopPushLayer(): boolean {
-  if (layerCloseStack.length === 0) return false;
-  const top = layerCloseStack[layerCloseStack.length - 1];
-  top();
-  return true;
-}
-
-/**
- * While `open`, registers `onClose` on the same stack as {@link AppPushLayer} so a left-edge swipe
- * dismisses this overlay (e.g. menus or lightboxes that are not `AppPushLayer`).
- */
-export function useRegisterDismissOnEdgeSwipe(open: boolean, onClose: () => void) {
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
-
-  useEffect(() => {
-    if (!open) return;
-    const closeFromEdgeGesture = () => {
-      onCloseRef.current();
-    };
-    layerCloseStack.push(closeFromEdgeGesture);
-    return () => {
-      const idx = layerCloseStack.indexOf(closeFromEdgeGesture);
-      if (idx !== -1) layerCloseStack.splice(idx, 1);
-    };
-  }, [open]);
-}
-
 type AppPushLayerProps = {
   open: boolean;
   onClose: () => void;
@@ -151,21 +115,6 @@ export function AppPushLayer({
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [mounted, listenForEscape]);
-
-  // Register in global layer stack so EdgeSwipeBack can dismiss us.
-  // Depend only on `open`: parents often pass an inline `onClose` that changes every render; re-running
-  // this effect would remove then re-add the layer and briefly leave the stack empty. Latest `onClose` via ref.
-  useEffect(() => {
-    if (!open) return;
-    const closeFromEdgeGesture = () => {
-      onCloseRef.current();
-    };
-    layerCloseStack.push(closeFromEdgeGesture);
-    return () => {
-      const idx = layerCloseStack.indexOf(closeFromEdgeGesture);
-      if (idx !== -1) layerCloseStack.splice(idx, 1);
-    };
-  }, [open]);
 
   // Prevent "ghost clicks": when the sheet opens from a pointerup handler,
   // the browser may synthesize a click that lands on the newly-rendered backdrop,

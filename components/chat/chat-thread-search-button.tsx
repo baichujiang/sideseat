@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 
-import { AppPushLayer, useRegisterDismissOnEdgeSwipe } from "@/components/ui/app-push-layer";
+import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { chatMessageDomId } from "@/lib/chat/chat-message-dom-id";
 import type { ThreadSearchEntry } from "@/lib/chat/thread-search-index";
@@ -16,11 +16,6 @@ export function ChatThreadSearchButton({ entries }: { entries: ThreadSearchEntry
   const { chat } = useAppMessages();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
-
-  useRegisterDismissOnEdgeSwipe(open, () => {
-    setOpen(false);
-    setQ("");
-  });
 
   const trimmed = q.trim().toLowerCase();
   const hits = useMemo(() => {

@@ -8,7 +8,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { PlanRequestModal } from "@/components/chat/plan-request-modal";
 import { CreateScheduleShareDialog } from "@/components/schedule-share/create-schedule-share-dialog";
-import { useRegisterDismissOnEdgeSwipe } from "@/components/ui/app-push-layer";
 import { cn } from "@/lib/utils";
 
 /** Square icon + one-word caption; `aria-label` carries the fuller action text. */
@@ -94,8 +93,6 @@ export function ChatAttachmentTray({
   const [planOpen, setPlanOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-
-  useRegisterDismissOnEdgeSwipe(open, onClose);
 
   useEffect(() => {
     if (!open) return;
