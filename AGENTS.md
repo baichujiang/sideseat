@@ -33,7 +33,7 @@ After pushing the schema, seed demo data: `npm run prisma:seed`. Demo login: `li
 
 ### Gotchas
 
-- `npm run lint` (`next lint`) requires an `.eslintrc.json` file. If missing, it prompts interactively. Create one with `{"extends":"next/core-web-vitals"}`.
+- `npm run lint` (`next lint`) requires an `.eslintrc.json` file. If missing, it prompts interactively. For local runs only, create `{"extends":"next/core-web-vitals"}` — do **not** commit it until existing `react/no-unescaped-entities` errors are fixed, or `next build` / Vercel deploy will fail.
 - The smoke test defaults to port 3001 and email `lin@example.com`. Override with `SMOKE_APP_URL` and `SMOKE_EMAIL` env vars as shown above.
 - The smoke test's `/home` page check for "This week" may fail depending on the current day of the week; this is a pre-existing issue, not an environment problem.
 - External services (Stripe, Resend, Twilio, Vercel Blob, VAPID push) are all optional for local dev — features degrade gracefully without their keys.
