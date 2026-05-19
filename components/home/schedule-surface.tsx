@@ -1838,30 +1838,23 @@ function WeekVisibleDaysBar({
   const valueTemplate =
     scheduleSch.visibleDaysValue ?? (locale === "zh-CN" ? "{count} 天" : "{count} days");
   const valueText = formatMessage(valueTemplate, { count: safeValue });
-
+  const thumbRatio =
+    (safeValue - WEEK_CALENDAR_VISIBLE_DAY_MIN) /
+    (WEEK_CALENDAR_VISIBLE_DAY_MAX - WEEK_CALENDAR_VISIBLE_DAY_MIN);
   return (
     <div
       className={cn(
-        "shrink-0 rounded-xl border border-[#E7E0D6] bg-white px-2 py-1 shadow-[0_2px_8px_rgba(15,23,42,0.03)]",
+        "shrink-0 rounded-xl border border-[#E7E0D6] bg-white px-2 py-1.5 shadow-[0_2px_8px_rgba(15,23,42,0.03)]",
         "dark:border-border dark:bg-card dark:shadow-[0_2px_8px_rgba(0,0,0,0.1)]",
       )}
     >
-      <div className="relative px-0.5">
+      <div className="relative h-9 px-[2.125rem]">
         <div
-          className="pointer-events-none absolute inset-x-1 top-1/2 z-0 flex -translate-y-1/2 items-center justify-between gap-2 text-[11px] leading-none"
+          className="pointer-events-none absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-blue-100 dark:bg-blue-950/40"
           aria-hidden
-        >
-          <span className="truncate font-medium text-foreground/30 dark:text-foreground/35">
-            {scheduleSch.visibleDaysLabel}
-          </span>
-          <span className="shrink-0 font-semibold tabular-nums text-[#2563EB]/40 dark:text-blue-300/45">
-            {valueText}
-          </span>
-        </div>
-        {/* Mirror horizontally so low/high day counts map to the opposite screen side
-            without changing min/max/value (keeps SR + aria-valuetext aligned to real count). */}
-        <div className="relative z-10 w-full -scale-x-100" dir="ltr">
-        <input
+        />
+        <div className="relative h-full w-full">
+          <input
           type="range"
           min={WEEK_CALENDAR_VISIBLE_DAY_MIN}
           max={WEEK_CALENDAR_VISIBLE_DAY_MAX}
@@ -1876,25 +1869,36 @@ function WeekVisibleDaysBar({
             onChange(clampWeekCalendarVisibleDayCount(Number(event.target.value)));
           }}
           className={cn(
-            "block h-10 w-full cursor-grab touch-none appearance-none bg-transparent active:cursor-grabbing",
-            "[&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full",
-            "[&::-webkit-slider-runnable-track]:bg-blue-100 dark:[&::-webkit-slider-runnable-track]:bg-blue-950/40",
-            "[&::-webkit-slider-thumb]:appearance-none",
-            "[&::-webkit-slider-thumb]:h-8 [&::-webkit-slider-thumb]:w-8",
-            "[&::-webkit-slider-thumb]:-mt-[13px]",
-            "[&::-webkit-slider-thumb]:rounded-full",
-            "[&::-webkit-slider-thumb]:border-[3px] [&::-webkit-slider-thumb]:border-[#2563EB]",
-            "[&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_2px_10px_rgba(37,99,235,0.35)]",
-            "dark:[&::-webkit-slider-thumb]:border-blue-400 dark:[&::-webkit-slider-thumb]:bg-blue-950",
-            "[&::-moz-range-track]:h-1.5 [&::-moz-range-track]:rounded-full",
-            "[&::-moz-range-track]:bg-blue-100 dark:[&::-moz-range-track]:bg-blue-950/40",
-            "[&::-moz-range-thumb]:h-8 [&::-moz-range-thumb]:w-8",
-            "[&::-moz-range-thumb]:rounded-full",
-            "[&::-moz-range-thumb]:border-[3px] [&::-moz-range-thumb]:border-[#2563EB]",
-            "[&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:shadow-[0_2px_10px_rgba(37,99,235,0.35)]",
-            "dark:[&::-moz-range-thumb]:border-blue-400 dark:[&::-moz-range-thumb]:bg-blue-950",
-          )}
-        />
+              "absolute inset-0 z-20 m-0 h-full w-full cursor-grab touch-none appearance-none bg-transparent",
+              "active:cursor-grabbing",
+              "[&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full",
+              "[&::-webkit-slider-runnable-track]:bg-transparent",
+              "[&::-webkit-slider-thumb]:appearance-none",
+              "[&::-webkit-slider-thumb]:h-9 [&::-webkit-slider-thumb]:w-[4.25rem]",
+              "[&::-webkit-slider-thumb]:-mt-[calc(1.125rem-0.1875rem)]",
+              "[&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:opacity-0",
+              "[&::-moz-range-track]:h-1.5 [&::-moz-range-track]:rounded-full",
+              "[&::-moz-range-track]:bg-transparent",
+              "[&::-moz-range-thumb]:h-9 [&::-moz-range-thumb]:w-[4.25rem]",
+              "[&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:opacity-0",
+            )}
+          />
+          <div
+            className="pointer-events-none absolute top-1/2 z-10 -translate-y-1/2"
+            style={{ left: `${thumbRatio * 100}%` }}
+            aria-hidden
+          >
+            <span
+              className={cn(
+                "inline-flex w-[4.25rem] -translate-x-1/2 items-center justify-center",
+                "rounded-md bg-[#2563EB] px-2 py-1.5 text-[11px] font-semibold leading-none text-white tabular-nums",
+                "shadow-[0_2px_8px_rgba(37,99,235,0.35)]",
+                "dark:bg-blue-500",
+              )}
+            >
+              {valueText}
+            </span>
+          </div>
         </div>
       </div>
     </div>

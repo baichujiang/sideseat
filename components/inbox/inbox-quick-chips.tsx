@@ -25,14 +25,14 @@ function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   const label = count > 99 ? "99+" : String(count);
   return (
-    <span className="pointer-events-none absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#F43F5E] px-1 text-[10px] font-bold leading-none text-white shadow-sm ring-2 ring-background">
+    <span className="pointer-events-none absolute right-1 top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-[#F43F5E] px-0.5 text-[9px] font-bold leading-none text-white shadow-sm ring-2 ring-background">
       {label}
     </span>
   );
 }
 
 const chipPillBaseClass =
-  "relative inline-flex h-11 min-h-[44px] shrink-0 items-center gap-2 rounded-full border px-3.5 shadow-[0_1px_3px_rgba(15,23,42,0.04)] transition-[box-shadow,transform,opacity] active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:shadow-[0_2px_8px_rgba(15,23,42,0.08)]";
+  "relative flex h-10 min-h-[44px] min-w-0 w-full items-center justify-center gap-1 overflow-hidden rounded-full border px-2 shadow-[0_1px_3px_rgba(15,23,42,0.04)] transition-[box-shadow,transform,opacity] active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:shadow-[0_2px_8px_rgba(15,23,42,0.08)]";
 
 const chipPillPrimaryClass =
   "border-[#E8E1D8] bg-[#EFF6FF] text-[#2563EB] dark:border-blue-800/40 dark:bg-blue-950/35 dark:text-blue-300";
@@ -146,7 +146,7 @@ export function InboxChatsShell({
 
   return (
     <div className="space-y-3">
-      <header className="space-y-2 px-0.5">
+      <header className="min-w-0 space-y-2">
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
           <div
             className="pointer-events-none invisible flex items-center justify-start gap-1.5"
@@ -206,7 +206,7 @@ export function InboxChatsShell({
         ) : null}
 
         <nav
-          className="-mx-0.5 flex gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="grid w-full min-w-0 grid-cols-3 gap-1.5"
           aria-label={m.inbox.screenTitle}
         >
           <InboxNavChip

@@ -51,6 +51,16 @@ body {
   overscroll-behavior-x: none;
 }
 
+/* Reduce horizontal browser chrome gestures (e.g. iOS Safari history swipe). */
+@supports (-webkit-touch-callout: none) {
+  @media (pointer: coarse) {
+    html,
+    body {
+      touch-action: pan-y pinch-zoom;
+    }
+  }
+}
+
 /*
  * iOS Safari zooms focused form controls when their computed font-size is
  * below 16px. Keep text-entry controls at 16px on touch WebKit so the page

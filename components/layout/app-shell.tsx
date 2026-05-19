@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import { BookOpen, Calendar, Inbox, UsersRound, UserRound } from "lucide-react";
 
+import { BrowserSwipeBackGuard } from "@/components/layout/browser-swipe-back-guard";
 import { ProductTutorialGate, type ProductTutorialGateContext } from "@/components/app/product-tutorial-gate";
 import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
@@ -115,7 +116,7 @@ export function AppShell({
       <main
         data-app-shell-scroll
         className={cn(
-          "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden",
+          "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden [touch-action:pan-y]",
           shellSurface,
           isChatThread
             ? "px-0 pb-0 pt-[max(0.25rem,env(safe-area-inset-top))]"
