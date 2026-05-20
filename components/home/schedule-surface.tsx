@@ -36,6 +36,7 @@ import {
   useRef,
   useState,
 } from "react";
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
 
 import {
@@ -52,7 +53,7 @@ import type { WeekEventEditToolbarLabels } from "@/components/calendar/week-even
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { ScheduleAddPanel } from "@/components/home/schedule-add-panel";
 import { ScheduleCalendarCategoryManager } from "@/components/home/schedule-calendar-category-manager";
-import { CreateScheduleShareDialog } from "@/components/schedule-share/create-schedule-share-dialog";
+import { createScheduleSharePath } from "@/lib/schedule-share/create-schedule-share-client";
 import {
   ScheduleItemDetailSheet,
   type ScheduleDetailItem,
@@ -345,7 +346,7 @@ export function ScheduleSurface({
   const weekVisibleDaysBarRef = useRef<HTMLDivElement | null>(null);
   const [weekHomeMaxViewportBodyPx, setWeekHomeMaxViewportBodyPx] = useState<number | null>(null);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
-  const [scheduleShareOpen, setScheduleShareOpen] = useState(false);
+  const [scheduleShareBusy, setScheduleShareBusy] = useState(false);
   const recurringDeletePayloadRef = useRef<{ eventId: string } | null>(null);
   const recurringDeleteResolverRef = useRef<((ok: boolean) => void) | null>(null);
   const [recurringDeleteDialog, setRecurringDeleteDialog] = useState<{ eventId: string; title: string } | null>(
@@ -368,6 +369,21 @@ export function ScheduleSurface({
     resetAddDraft();
     if (refresh) router.refresh();
   };
+
+  const openScheduleShare = useCallback(async () => {
+    if (scheduleShareBusy) return;
+    setScheduleShareBusy(true);
+    const result = await createScheduleSharePath({
+      createFailed: messages.scheduleShare.createFailed,
+      networkError: messages.scheduleShare.networkError,
+    });
+    setScheduleShareBusy(false);
+    if (result.ok) {
+      router.push(result.path as Route);
+      return;
+    }
+    setIcsNotice({ tone: "err", message: result.error });
+  }, [scheduleShareBusy, messages.scheduleShare, router]);
 
   /** Toolbar + : open fresh add panel, or close when already open (keeps control visible). */
   const handleAddToolbarClick = () => {
@@ -1410,16 +1426,6 @@ export function ScheduleSurface({
         onClose={() => setCategoryManagerOpen(false)}
       />
 
-      <CreateScheduleShareDialog
-        open={scheduleShareOpen}
-        onClose={() => setScheduleShareOpen(false)}
-        calendarCategories={initialCalendarCategories.map((c) => ({
-          id: c.id,
-          name: c.name,
-          presetKey: c.presetKey,
-        }))}
-      />
-
       <div className="relative z-[5] space-y-1.5">
         <input
           ref={icsImportInputRef}
@@ -1532,16 +1538,22 @@ export function ScheduleSurface({
           <button
             type="button"
             aria-label={messages.schedule.shareScheduleOpenAria}
-            onClick={() => setScheduleShareOpen(true)}
+            onClick={() => void openScheduleShare()}
+            disabled={scheduleShareBusy}
             className={cn(
               "fixed z-40 flex h-11 w-11 items-center justify-center rounded-full border border-sky-200 bg-white text-sky-700 shadow-[0_6px_20px_rgba(15,23,42,0.14)] transition",
               "bottom-[calc(5.75rem+env(safe-area-inset-bottom))] right-3",
               "hover:bg-sky-50 active:scale-[0.97]",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               "dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-300 dark:shadow-[0_6px_20px_rgba(0,0,0,0.35)] dark:hover:bg-sky-950/70",
+              scheduleShareBusy && "pointer-events-none opacity-70",
             )}
           >
-            <Share2 className="h-5 w-5" strokeWidth={2} aria-hidden />
+            {scheduleShareBusy ? (
+              <Loader2 className="h-5 w-5 animate-spin" strokeWidth={2} aria-hidden />
+            ) : (
+              <Share2 className="h-5 w-5" strokeWidth={2} aria-hidden />
+            )}
           </button>
         ) : null}
 

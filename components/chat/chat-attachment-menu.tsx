@@ -3,11 +3,13 @@
 import { apiFetch } from "@/lib/auth/api-fetch";
 import type { LucideIcon } from "lucide-react";
 import { CalendarClock, Image, MapPin, Plus, Share2, X } from "lucide-react";
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { PlanRequestModal } from "@/components/chat/plan-request-modal";
-import { CreateScheduleShareDialog } from "@/components/schedule-share/create-schedule-share-dialog";
+import { useLocaleContext } from "@/components/i18n/locale-provider";
+import { createScheduleSharePath } from "@/lib/schedule-share/create-schedule-share-client";
 import { cn } from "@/lib/utils";
 
 /** Square icon + one-word caption; `aria-label` carries the fuller action text. */
@@ -85,11 +87,11 @@ export function ChatAttachmentTray({
   peerName: string;
 }) {
   const router = useRouter();
+  const { messages } = useLocaleContext();
   const fileRef = useRef<HTMLInputElement>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
-  const [shareOpen, setShareOpen] = useState(false);
   const [planOpen, setPlanOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -238,7 +240,20 @@ export function ChatAttachmentTray({
                 disabled={busy}
                 onClick={() => {
                   onClose();
-                  queueMicrotask(() => setShareOpen(true));
+                  void (async () => {
+                    setBusy(true);
+                    setError("");
+                    const result = await createScheduleSharePath({
+                      createFailed: messages.scheduleShare.createFailed,
+                      networkError: messages.scheduleShare.networkError,
+                    });
+                    setBusy(false);
+                    if (result.ok) {
+                      router.push(result.path as Route);
+                    } else {
+                      setError(result.error);
+                    }
+                  })();
                 }}
               />
               <AttachmentMenuTile
@@ -261,8 +276,6 @@ export function ChatAttachmentTray({
           </div>
         </div>
       </div>
-
-      <CreateScheduleShareDialog open={shareOpen} onClose={() => setShareOpen(false)} />
 
       <PlanRequestModal
         open={planOpen}

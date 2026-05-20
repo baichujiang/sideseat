@@ -618,6 +618,10 @@ export const enMessages: AppMessages = {
       "Visitors will only see free/busy times. No event titles or locations will be shown.",
     privacyPreviewSome:
       "Visitors will see titles and locations for selected categories only.",
+    ownerPageTitle: "Share your schedule",
+    ownerOptionsTitle: "Share settings",
+    ownerAdjustOptionsAria: "Adjust share settings",
+    savingSettings: "Updating preview…",
     createLink: "Create link",
     creating: "Creating…",
     copyLink: "Copy link",

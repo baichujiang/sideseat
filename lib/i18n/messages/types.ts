@@ -624,6 +624,10 @@ export type AppMessages = {
     linkExpiryHelper: string;
     privacyPreviewNone: string;
     privacyPreviewSome: string;
+    ownerPageTitle: string;
+    ownerOptionsTitle: string;
+    ownerAdjustOptionsAria: string;
+    savingSettings: string;
     createLink: string;
     creating: string;
     copyLink: string;

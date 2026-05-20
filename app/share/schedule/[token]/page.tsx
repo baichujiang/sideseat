@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { ScheduleShareOwnerClient } from "@/components/schedule-share/schedule-share-owner-client";
 import { ScheduleSharePublicClient } from "@/components/schedule-share/schedule-share-public-client";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
@@ -11,6 +12,7 @@ import { findScheduleShareLinkByPlainToken } from "@/lib/schedule-share/resolve-
 import { scheduleShareOwnerDisplayLabel } from "@/lib/schedule-share/build-schedule-share-snapshot";
 import { loadViewerProposalFromPlan } from "@/lib/schedule-share/create-plan-from-guest-proposal";
 import { serializeViewerProposal } from "@/lib/schedule-share/viewer-proposal";
+import { isScheduleShareOwner } from "@/lib/schedule-share/usage-limit";
 
 export async function generateMetadata({
   params,
@@ -58,13 +60,44 @@ export default async function ShareSchedulePage({
   const sessionUser = await getSessionUser();
   const showGuestNudge = !sessionUser;
 
-  const resolved = await findScheduleShareLinkByPlainToken(prisma, decoded);
+  const resolved = await findScheduleShareLinkByPlainToken(prisma, decoded, {
+    viewerUserId: sessionUser?.id,
+  });
 
   if (!resolved.ok) {
     return <ScheduleSharePublicClient unavailable showGuestNudge={showGuestNudge} />;
   }
 
   const snapshot = await buildPublicScheduleShareSnapshotForActiveLink(prisma, resolved.link);
+  const isOwner = isScheduleShareOwner(resolved.link, sessionUser?.id);
+
+  if (isOwner && sessionUser?.onboardingComplete) {
+    const categories = await prisma.userCalendarCategory.findMany({
+      where: { userId: sessionUser.id },
+      orderBy: { sortOrder: "asc" },
+      select: { id: true, name: true, presetKey: true },
+    });
+    const appOrigin = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const shareUrl = `${appOrigin}/share/schedule/${encodeURIComponent(decoded)}`;
+
+    return (
+      <ScheduleShareOwnerClient
+        token={decoded}
+        shareUrl={shareUrl}
+        initialSnapshot={snapshot}
+        linkSettings={{
+          rangeStart: resolved.link.rangeStart.toISOString(),
+          rangeEnd: resolved.link.rangeEnd.toISOString(),
+          revealConfig: resolved.link.revealConfig,
+          allowGuestProposals: resolved.link.allowGuestProposals,
+          usageLimit: resolved.link.usageLimit,
+          expiresAt: resolved.link.expiresAt.toISOString(),
+          createdAt: resolved.link.createdAt.toISOString(),
+        }}
+        calendarCategories={categories}
+      />
+    );
+  }
 
   let initialMyProposal = null;
   if (sessionUser?.onboardingComplete) {

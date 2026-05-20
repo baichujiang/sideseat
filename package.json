@@ -6,6 +6,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "scripts": {
+    "db:start": "node scripts/start-local-db.mjs",
     "dev": "next dev",
     "dev:clean": "sh -c 'chmod -R u+w .next 2>/dev/null || true; rm -rf .next'",
     "dev:reset": "npm run dev:clean && npm run dev",
@@ -57,6 +58,7 @@
     "@types/react-dom": "^19.0.0",
     "@types/web-push": "^3.6.4",
     "autoprefixer": "^10.4.20",
+    "embedded-postgres": "^18.3.0-beta.17",
     "eslint": "^9.11.1",
     "eslint-config-next": "^15.0.0",
     "postcss": "^8.4.47",
