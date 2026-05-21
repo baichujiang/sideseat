@@ -656,7 +656,7 @@ export const enMessages: AppMessages = {
     sendInChat: "Send in chat",
     sendingToChat: "Sending…",
     sendToChatFailed: "Could not send schedule to chat.",
-    dialogSubtitleChat: "Choose what to share, then send it in this conversation.",
+    dialogSubtitleChat: "Pick days on your calendar, set what visitors see, then send in this chat.",
     networkError:
       "Could not reach the server. Make sure the dev server is running (npm run dev) and your database is awake, then try again.",
     copyFailed: "Could not copy to clipboard.",

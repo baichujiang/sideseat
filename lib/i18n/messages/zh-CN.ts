@@ -635,7 +635,7 @@ export const zhCnMessages: AppMessages = {
     sendInChat: "发送到聊天",
     sendingToChat: "发送中…",
     sendToChatFailed: "无法将行程发送到聊天。",
-    dialogSubtitleChat: "选择要分享的内容，然后发送到当前对话。",
+    dialogSubtitleChat: "在日历上选择要分享的日期并设置可见范围，然后发送到当前对话。",
     networkError: "无法连接服务器。请确认开发服务已启动（npm run dev），数据库已唤醒后再试。",
     copyFailed: "无法复制到剪贴板。",
     ownerDisplayFallback: "日程主人",

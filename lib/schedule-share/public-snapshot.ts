@@ -1,7 +1,8 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 
 import type { ScheduleShareLinkWithOwner } from "@/lib/schedule-share/resolve-link";
-import { parseRevealConfigJson } from "@/lib/schedule-share/reveal-config";
+import { parseRevealConfigJson, REVEAL_PRESET_KEYS_ALLOWLIST } from "@/lib/schedule-share/reveal-config";
+import { defaultShareExpiresAt } from "@/lib/schedule-share/share-range-presets";
 import { shareOwnerCalendarPickerRange } from "@/lib/schedule-share/share-selected-days";
 import {
   collectInternalScheduleBlocks,
@@ -30,6 +31,30 @@ export async function buildPublicScheduleShareSnapshotForActiveLink(
     allowGuestProposals: link.allowGuestProposals,
     scopeToIncludedDates: options?.scopeToIncludedDates ?? true,
     forOwnerPreview: options?.forOwnerPreview ?? false,
+  });
+}
+
+/** Live owner calendar before a link exists (create dialog, etc.). */
+export async function buildOwnerPreviewSnapshotForUserId(
+  db: Db,
+  ownerUserId: string,
+): Promise<PublicScheduleShareSnapshot> {
+  const { rangeStart, rangeEnd } = shareOwnerCalendarPickerRange();
+  const internal = await collectInternalScheduleBlocks(db, ownerUserId, rangeStart, rangeEnd);
+  return internalBlocksToPublicSnapshot({
+    internal,
+    rangeStart,
+    rangeEnd,
+    reveal: {
+      categoryIds: [],
+      presetKeys: [...REVEAL_PRESET_KEYS_ALLOWLIST],
+      includedDates: [],
+    },
+    ownerDisplayLabel: "",
+    linkExpiresAt: defaultShareExpiresAt(new Date()),
+    allowGuestProposals: true,
+    scopeToIncludedDates: false,
+    forOwnerPreview: true,
   });
 }
 
