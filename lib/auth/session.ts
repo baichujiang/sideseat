@@ -90,6 +90,19 @@ export async function createSession(userId: string) {
   return { accessToken, expiresIn };
 }
 
+/** Signs out other devices; keeps the refresh cookie used for this request when present. */
+export async function revokeOtherSessions(userId: string) {
+  const cookieStore = await cookies();
+  const token = readRefreshRaw(cookieStore);
+  const currentHash = token ? hashToken(token) : null;
+
+  await prisma.session.deleteMany({
+    where: currentHash
+      ? { userId, tokenHash: { not: currentHash } }
+      : { userId },
+  });
+}
+
 export async function destroySession() {
   const cookieStore = await cookies();
   const token = readRefreshRaw(cookieStore);

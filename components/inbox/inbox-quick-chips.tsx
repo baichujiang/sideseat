@@ -7,6 +7,7 @@ import { BookOpen, CalendarClock, Search, UsersRound, X } from "lucide-react";
 
 import { InboxChatsView } from "@/components/inbox/inbox-chats-view";
 import { InboxCreateSheet } from "@/components/inbox/inbox-create-sheet";
+import { inboxMyPlanChipPillClass } from "@/components/profile/me-settings-row";
 import { Input } from "@/components/ui/input";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { formatMessage } from "@/lib/i18n/messages";
@@ -62,7 +63,7 @@ function InboxNavChip({
   ariaLabel: string;
   count?: number;
   icon: ReactNode;
-  variant?: "primary" | "muted";
+  variant?: "primary" | "muted" | "myPlan";
 }) {
   return (
     <Link
@@ -71,7 +72,11 @@ function InboxNavChip({
       aria-label={ariaLabel}
       className={cn(
         chipPillBaseClass,
-        variant === "primary" ? chipPillPrimaryClass : chipPillMutedClass,
+        variant === "myPlan"
+          ? inboxMyPlanChipPillClass
+          : variant === "primary"
+            ? chipPillPrimaryClass
+            : chipPillMutedClass,
       )}
     >
       <span className="inline-flex min-w-0 max-w-full items-center justify-center gap-1">
@@ -226,7 +231,7 @@ export function InboxChatsShell({
             title={m.inbox.chipUpcomingPlanLinkTitle}
             ariaLabel={upcomingPlanAria}
             count={plansNeedingYourAction}
-            variant={plansNeedingYourAction > 0 ? "primary" : "muted"}
+            variant="myPlan"
             icon={<CalendarClock strokeWidth={2} aria-hidden />}
           />
           <InboxNavChip

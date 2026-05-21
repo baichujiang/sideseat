@@ -1,3 +1,4 @@
+import { SIGNUP_EMAIL_ERROR_CODES } from "@/lib/auth/email-otp-error-codes";
 import { verifyEmailSignupOtp } from "@/lib/auth/email-otp";
 import { normalizeSignupEmail } from "@/lib/auth/normalize-email";
 import { hashPassword } from "@/lib/auth/password";
@@ -12,25 +13,35 @@ import { signupEmailSchema } from "@/lib/validators/auth";
 
 export async function POST(request: Request) {
   try {
-    const raw = await request.json();
+    let raw: unknown;
+    try {
+      raw = await request.json();
+    } catch {
+      return error("Invalid JSON body.", 400, SIGNUP_EMAIL_ERROR_CODES.INVALID_REQUEST);
+    }
+
     const parsed = parseBody(raw, signupEmailSchema);
     if (!parsed.ok) {
-      return error(parsed.error, 422);
+      return error(parsed.error, 422, SIGNUP_EMAIL_ERROR_CODES.INVALID_REQUEST);
     }
     const values = parsed.data;
     const email = normalizeSignupEmail(values.email);
     if (!email) {
-      return error("Enter a valid email address.", 422);
+      return error("Enter a valid email address.", 422, SIGNUP_EMAIL_ERROR_CODES.INVALID_REQUEST);
     }
 
     const otpOk = await verifyEmailSignupOtp(email, values.code);
     if (!otpOk) {
-      return error("Invalid or expired verification code.", 400);
+      return error("Invalid or expired verification code.", 400, SIGNUP_EMAIL_ERROR_CODES.CODE_INVALID);
     }
 
     const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
     if (existing) {
-      return error("That email is already registered.", 409);
+      return error(
+        "That email is already registered.",
+        409,
+        SIGNUP_EMAIL_ERROR_CODES.EMAIL_ALREADY_REGISTERED,
+      );
     }
 
     const username = await allocateUniqueUsername();
@@ -62,11 +73,12 @@ export async function POST(request: Request) {
     if (isDatabaseUnreachable(cause)) {
       warnDatabaseUnreachableThrottled("POST /api/auth/signup-email");
       return error(
-        "Cannot connect to the database. Check DATABASE_URL and that your Neon project is awake.",
+        "Cannot connect to the database. Check DATABASE_URL and that your database is running.",
         503,
+        SIGNUP_EMAIL_ERROR_CODES.DB_UNAVAILABLE,
       );
     }
     console.error(cause);
-    return error("Unable to sign up.", 400);
+    return error("Unable to sign up.", 400, SIGNUP_EMAIL_ERROR_CODES.UNKNOWN);
   }
 }

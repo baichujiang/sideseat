@@ -2,6 +2,7 @@ import { CornerUpLeft } from "lucide-react";
 
 import { ChatLocationLinkPreview } from "@/components/chat/chat-location-link-preview";
 import { ChatMessageImage } from "@/components/chat/chat-message-image";
+import { chatLocationMapPreviewMode } from "@/lib/maps/static-preview-config";
 import { cn } from "@/lib/utils";
 
 /** `bareMedia` — image without outer chat tint; quote/caption read on page background. */
@@ -78,7 +79,7 @@ export function MessageBubbleContent({
             lat={payload.lat}
             lng={payload.lng}
             name={payload.name}
-            staticPreviewEnabled={Boolean(process.env.GOOGLE_MAPS_STATIC_API_KEY?.trim())}
+            previewMode={chatLocationMapPreviewMode()}
           />
           {payload.caption ? (
             <p className="whitespace-pre-wrap break-words text-[15px] leading-snug">

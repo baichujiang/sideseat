@@ -12,6 +12,12 @@ import {
   mePageCardClass,
   mePageChevronClass,
   mePageIconMutedClass,
+  mePageIconMyPlanClass,
+  mePageIconMyPlanShellClass,
+  mePageIconMyPostsClass,
+  mePageIconMyPostsShellClass,
+  mePageIconSavedPostsClass,
+  mePageIconSavedPostsShellClass,
   mePageIconShellClass,
   mePageListDivideClass,
   mePageRowInteractiveClass,
@@ -39,17 +45,21 @@ function MeDestRow({
   icon: Icon,
   title,
   subtitle,
+  iconShellClass = mePageIconShellClass,
+  iconClass = mePageIconMutedClass,
 }: {
   href: Route;
   icon: LucideIcon;
   title: string;
   subtitle: string;
+  iconShellClass?: string;
+  iconClass?: string;
 }) {
   return (
     <Link href={href} className={mePageRowInteractiveClass}>
       <div className={mePageRowLeadClass}>
-        <span className={mePageIconShellClass}>
-          <Icon className={mePageIconMutedClass} strokeWidth={2} aria-hidden />
+        <span className={iconShellClass}>
+          <Icon className={iconClass} strokeWidth={2} aria-hidden />
         </span>
         <MePageSettingsRowLabel title={title} subtitle={subtitle} />
       </div>
@@ -221,18 +231,24 @@ export default async function ProfilePage({
           <MeDestRow
             href={'/profile/my-posts' as Route}
             icon={SquarePen}
+            iconShellClass={mePageIconMyPostsShellClass}
+            iconClass={mePageIconMyPostsClass}
             title={ui.profile.myPostsRowTitle}
             subtitle={ui.profile.myPostsRowSubtitle}
           />
           <MeDestRow
             href={'/profile/saved-posts' as Route}
             icon={Bookmark}
+            iconShellClass={mePageIconSavedPostsShellClass}
+            iconClass={mePageIconSavedPostsClass}
             title={ui.profile.savedPostsRowTitle}
             subtitle={ui.profile.savedPostsRowSubtitle}
           />
           <MeDestRow
             href={'/profile/my-plan' as Route}
             icon={CalendarClock}
+            iconShellClass={mePageIconMyPlanShellClass}
+            iconClass={mePageIconMyPlanClass}
             title={ui.profile.myPlanRowTitle}
             subtitle={ui.profile.myPlanRowSubtitle}
           />

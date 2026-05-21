@@ -1,6 +1,43 @@
 import { LanguageProficiency, LanguageTag, UserGender } from "@prisma/client";
 import { z } from "zod";
 
+const loginEmailFieldSchema = z
+  .string()
+  .trim()
+  .min(3, "Enter your email.")
+  .max(254)
+  .transform((s) => s.toLowerCase())
+  .refine((s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s), {
+    message: "Enter a valid email address.",
+  });
+
+export const loginEmailSendOtpSchema = z.object({
+  email: loginEmailFieldSchema,
+});
+
+export const loginEmailChangeSchema = z.object({
+  email: loginEmailFieldSchema,
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, "Enter the 6-digit verification code."),
+});
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Enter your current password."),
+    password: z.string().min(8, "Password must be at least 8 characters."),
+    confirmPassword: z.string().min(1, "Confirm your new password."),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  })
+  .refine((data) => data.currentPassword !== data.password, {
+    message: "New password must be different from your current password.",
+    path: ["password"],
+  });
+
 import { schoolDirectory } from "@/lib/constants/schools";
 import { DEGREE_LEVELS, MAX_SEMESTER } from "@/lib/constants/majors";
 

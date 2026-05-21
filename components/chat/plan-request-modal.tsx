@@ -14,6 +14,7 @@ import {
 import { ScheduleStyleDateTimeRange } from "@/components/schedule/event-datetime-pickers";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
+import type { PlanRequestPrefill } from "@/lib/calendar/plan-invite-from-event";
 import { cn } from "@/lib/utils";
 
 const PLAN_OPTIONS: Array<{ value: PlanType; label: string }> = [
@@ -38,6 +39,7 @@ export function PlanRequestModal({
   mode,
   peerName,
   slot,
+  prefill,
   layerZClassName = "z-50",
 }: {
   open: boolean;
@@ -45,11 +47,13 @@ export function PlanRequestModal({
   mode: Mode;
   peerName: string;
   slot?: { startTime: string; endTime: string } | null;
+  /** Prefill from Home calendar event (overrides generic defaults when open). */
+  prefill?: PlanRequestPrefill | null;
   /** Stack above another push layer (e.g. availability viewer at z-50). */
   layerZClassName?: string;
 }) {
   const router = useRouter();
-  const defaults = useMemo(() => computeDefaults(slot), [slot]);
+  const defaults = useMemo(() => computeDefaults(slot, prefill), [slot, prefill]);
   const [planType, setPlanType] = useState<PlanType>("STUDY");
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
@@ -61,10 +65,10 @@ export function PlanRequestModal({
 
   useEffect(() => {
     if (!open) return;
-    setPlanType("STUDY");
-    setTitle("");
-    setLocation("");
-    setMessage("");
+    setPlanType(defaults.planType);
+    setTitle(defaults.title);
+    setLocation(defaults.location);
+    setMessage(defaults.message);
     setStartAt(defaults.startAt);
     setEndAt(defaults.endAt);
     setErr(null);
@@ -225,9 +229,26 @@ function Labeled({ label, children }: { label: string; children: React.ReactNode
   );
 }
 
-function computeDefaults(slot?: { startTime: string; endTime: string } | null) {
+function computeDefaults(
+  slot?: { startTime: string; endTime: string } | null,
+  prefill?: PlanRequestPrefill | null,
+) {
+  if (prefill?.startTime && prefill?.endTime) {
+    return {
+      planType: prefill.planType,
+      title: prefill.title,
+      location: prefill.location ?? "",
+      message: prefill.message ?? "",
+      startAt: format(new Date(prefill.startTime), "yyyy-MM-dd'T'HH:mm"),
+      endAt: format(new Date(prefill.endTime), "yyyy-MM-dd'T'HH:mm"),
+    };
+  }
   if (slot?.startTime && slot?.endTime) {
     return {
+      planType: "STUDY" as PlanType,
+      title: "",
+      location: "",
+      message: "",
       startAt: format(new Date(slot.startTime), "yyyy-MM-dd'T'HH:mm"),
       endAt: format(new Date(slot.endTime), "yyyy-MM-dd'T'HH:mm"),
     };
@@ -237,6 +258,10 @@ function computeDefaults(slot?: { startTime: string; endTime: string } | null) {
   if (now.getMinutes() === 0) now.setHours(now.getHours() + 1);
   const end = new Date(now.getTime() + 60 * 60 * 1000);
   return {
+    planType: "STUDY" as PlanType,
+    title: "",
+    location: "",
+    message: "",
     startAt: format(now, "yyyy-MM-dd'T'HH:mm"),
     endAt: format(end, "yyyy-MM-dd'T'HH:mm"),
   };

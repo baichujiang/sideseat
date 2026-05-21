@@ -5,7 +5,9 @@ import { X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import { useLocaleContext } from "@/components/i18n/locale-provider";
+import { BackLink } from "@/components/nav/back-link";
 import { LinkButton } from "@/components/ui/link-button";
+import { backTargetPathname, withReturnTo } from "@/lib/nav/back";
 import { ScheduleShareGuestViewer } from "@/components/schedule-share/schedule-share-guest-viewer";
 import { ScheduleShareMyProposalCard } from "@/components/schedule-share/schedule-share-my-proposal-card";
 import { ScheduleShareProposalPanel } from "@/components/schedule-share/schedule-share-proposal-panel";
@@ -39,6 +41,8 @@ export function ScheduleShareRecipientPage({
   isLinkOwner = false,
   ownerEditPath,
   initialMyProposal = null,
+  backReturnTo,
+  backFallback = "/inbox",
 }: {
   token?: string;
   snapshot?: PublicScheduleShareSnapshot;
@@ -49,6 +53,9 @@ export function ScheduleShareRecipientPage({
   isLinkOwner?: boolean;
   ownerEditPath?: string;
   initialMyProposal?: ViewerScheduleShareProposal | null;
+  /** `?returnTo=` from URL (e.g. chat thread). */
+  backReturnTo?: string | null;
+  backFallback?: string;
 }) {
   const { messages: ui } = useLocaleContext();
   const s = ui.scheduleShare;
@@ -72,6 +79,20 @@ export function ScheduleShareRecipientPage({
 
   const ownerSettingsPath =
     ownerEditPath ?? (token ? scheduleShareOwnerEditPath(token) : undefined);
+  const ownerSettingsHref =
+    ownerSettingsPath && backReturnTo
+      ? (withReturnTo(ownerSettingsPath, backReturnTo) as Route)
+      : ownerSettingsPath
+        ? (ownerSettingsPath as Route)
+        : undefined;
+
+  const backLabel = (() => {
+    const target = backReturnTo?.trim();
+    if (target && backTargetPathname(target).startsWith("/connections/")) {
+      return ui.chat.scheduleShareBackToChat;
+    }
+    return ui.common.back;
+  })();
 
   const refreshMyProposal = useCallback(async () => {
     if (!token || !isSignedIn) return;
@@ -141,10 +162,15 @@ export function ScheduleShareRecipientPage({
 
   if (unavailable || !snapshot || !token || !pageHeadline) {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-background px-6">
-        <div className="max-w-sm text-center">
-          <h1 className="text-[17px] font-semibold text-foreground">{s.publicUnavailableTitle}</h1>
-          <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">{s.publicUnavailableBody}</p>
+      <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-background">
+        <header className="flex shrink-0 items-center gap-2 border-b border-border/50 px-2 pb-2.5 pt-[max(0.75rem,env(safe-area-inset-top))]">
+          <BackLink returnTo={backReturnTo} fallback={backFallback} label={backLabel} />
+        </header>
+        <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6">
+          <div className="max-w-sm text-center">
+            <h1 className="text-[17px] font-semibold text-foreground">{s.publicUnavailableTitle}</h1>
+            <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">{s.publicUnavailableBody}</p>
+          </div>
         </div>
       </div>
     );
@@ -217,17 +243,23 @@ export function ScheduleShareRecipientPage({
   return (
     <>
       <div className="mx-auto flex h-dvh max-h-dvh min-w-0 max-w-md flex-col overflow-hidden bg-background">
-        <header className="shrink-0 space-y-1 border-b border-border/50 px-4 pb-2.5 pt-[max(0.75rem,env(safe-area-inset-top))] text-center">
-          <h1 className="text-[15px] font-semibold leading-snug text-foreground">{pageHeadline}</h1>
-          {rangeDetail ? (
-            <p className="text-[12px] leading-snug text-muted-foreground">
-              <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/80">
-                {s.publicRangeHint}
-              </span>
-              <span className="mx-1.5 text-border">·</span>
-              {rangeDetail}
-            </p>
-          ) : null}
+        <header className="shrink-0 border-b border-border/50 px-2 pb-2.5 pt-[max(0.75rem,env(safe-area-inset-top))]">
+          <div className="flex items-start gap-2">
+            <BackLink returnTo={backReturnTo} fallback={backFallback} label={backLabel} className="mt-0.5" />
+            <div className="min-w-0 flex-1 space-y-1 text-center">
+              <h1 className="text-[15px] font-semibold leading-snug text-foreground">{pageHeadline}</h1>
+              {rangeDetail ? (
+                <p className="text-[12px] leading-snug text-muted-foreground">
+                  <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/80">
+                    {s.publicRangeHint}
+                  </span>
+                  <span className="mx-1.5 text-border">·</span>
+                  {rangeDetail}
+                </p>
+              ) : null}
+            </div>
+            <span className="h-10 w-10 shrink-0" aria-hidden />
+          </div>
         </header>
 
         {showOwnerPreviewBanner ? (
@@ -235,9 +267,9 @@ export function ScheduleShareRecipientPage({
             <p className="text-center text-[12px] leading-snug text-amber-950 dark:text-amber-100">
               {s.recipientOwnerProposeHint}
             </p>
-            {ownerSettingsPath ? (
+            {ownerSettingsHref ? (
               <div className="mt-2 flex justify-center">
-                <LinkButton href={ownerSettingsPath as Route} variant="outline" size="sm">
+                <LinkButton href={ownerSettingsHref} variant="outline" size="sm">
                   {s.recipientOwnerEditLink}
                 </LinkButton>
               </div>

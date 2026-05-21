@@ -2,7 +2,7 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import type { CalendarRepeatRule, Weekday } from "@prisma/client";
+import type { CalendarRepeatRule, PlanType, Weekday } from "@prisma/client";
 import {
   addDays,
   addMonths,
@@ -49,6 +49,7 @@ import { ScheduleDateNavControls } from "@/components/calendar/schedule-date-nav
 import { WeekVisibleDaysBar } from "@/components/calendar/week-visible-days-bar";
 import type { WeekEventEditToolbarLabels } from "@/components/calendar/week-event-edit-toolbar";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
+import { PlanRequestModal } from "@/components/chat/plan-request-modal";
 import { ScheduleAddPanel } from "@/components/home/schedule-add-panel";
 import { ScheduleCalendarCategoryManager } from "@/components/home/schedule-calendar-category-manager";
 import { createScheduleSharePath } from "@/lib/schedule-share/create-schedule-share-client";
@@ -84,6 +85,11 @@ import {
   parseStoredHomeCalendarMinuteScale,
   readHomeCalendarVisibleDaysFromStorage,
 } from "@/lib/calendar/home-calendar-preferences";
+import {
+  calendarDetailToPlanPrefill,
+  singleChatableParticipant,
+} from "@/lib/calendar/plan-invite-from-event";
+import type { PlanRequestPrefill } from "@/lib/calendar/plan-invite-from-event";
 import { cn } from "@/lib/utils";
 
 function formatRepeatLabel(rule: CalendarRepeatRule, s: AppMessages["schedule"]): string {
@@ -121,6 +127,7 @@ function weekBlockToDayTimelineItem(block: WeekCalendarBlock, repeatNoneLabel: s
     repeatRule: block.repeatRule ?? "NONE",
     repeatUntilISO: block.repeatUntilISO ?? null,
     eventParticipants: block.eventParticipants ?? [],
+    eventType: block.eventType ?? null,
     courseId: block.source === "course" ? block.courseId : null,
     courseCode: block.source === "course" ? block.courseCode : null,
     courseName: block.source === "course" ? block.courseName : null,
@@ -186,6 +193,7 @@ export type StudyEntry = {
   repeatUntilISO: string | null;
   /** Calendar companions with aligned ids (userId may be null for text-only invites). */
   eventParticipants: Array<{ userId: string | null; name: string }>;
+  eventType?: PlanType | null;
   /** ISO string — serialized so the server component can hand it off cleanly. */
   startISO: string;
   endISO: string;
@@ -326,6 +334,13 @@ export function ScheduleSurface({
   const [draftEventEnd, setDraftEventEnd] = useState<string | undefined>(undefined);
   const [editingItem, setEditingItem] = useState<ScheduleDetailItem | null>(null);
   const [detailItem, setDetailItem] = useState<ScheduleDetailItem | null>(null);
+  const [planInviteBusy, setPlanInviteBusy] = useState(false);
+  const [planInviteError, setPlanInviteError] = useState<string | null>(null);
+  const [planFromCalendar, setPlanFromCalendar] = useState<{
+    connectionId: string;
+    peerName: string;
+    prefill: PlanRequestPrefill;
+  } | null>(null);
   const [inviteFlow, setInviteFlow] = useState(false);
   const [deletingItem, setDeletingItem] = useState(false);
   const icsImportInputRef = useRef<HTMLInputElement | null>(null);
@@ -537,6 +552,7 @@ export function ScheduleSurface({
         repeatRule: s.repeatRule,
         repeatUntilISO: s.repeatUntilISO,
         eventParticipants: s.eventParticipants,
+        eventType: s.eventType ?? null,
         courseId: null,
         categoryId: s.categoryId,
         categoryName: s.categoryName,
@@ -649,6 +665,7 @@ export function ScheduleSurface({
       repeatRule: item.repeatRule ?? "NONE",
       repeatUntilISO: item.repeatUntilISO ?? null,
       eventParticipants: item.eventParticipants ?? [],
+      eventType: item.eventType ?? null,
       categoryId: item.categoryId ?? null,
       categoryName: item.categoryName ?? null,
       categoryColor: item.categoryColor ?? null,
@@ -677,6 +694,7 @@ export function ScheduleSurface({
       repeatRule: item.repeatRule ?? "NONE",
       repeatUntilISO: item.repeatUntilISO ?? null,
       eventParticipants: item.eventParticipants ?? [],
+      eventType: item.eventType ?? null,
       categoryId: item.categoryId ?? null,
       categoryName: item.categoryName ?? null,
       categoryColor: item.categoryColor ?? null,
@@ -721,6 +739,7 @@ export function ScheduleSurface({
         repeatRule: s.repeatRule,
         repeatUntilISO: s.repeatUntilISO,
         eventParticipants: s.eventParticipants,
+        eventType: s.eventType ?? null,
         kind: "study" as const,
         categoryId: s.categoryId,
         categoryName: s.categoryName,
@@ -855,6 +874,50 @@ export function ScheduleSurface({
     });
     if (!ok) return;
     setDetailItem(null);
+  }
+
+  const detailPlanInvitePeer = useMemo(() => {
+    if (!detailItem || detailItem.source !== "calendar") return null;
+    if (isIcsFeedStudyEntryId(detailItem.id)) return null;
+    return singleChatableParticipant(detailItem.eventParticipants);
+  }, [detailItem]);
+
+  useEffect(() => {
+    setPlanInviteError(null);
+  }, [detailItem?.id]);
+
+  async function sendPlanInviteFromDetail() {
+    const peer = detailPlanInvitePeer;
+    if (!detailItem || !peer) return;
+    setPlanInviteBusy(true);
+    setPlanInviteError(null);
+    try {
+      const res = await apiFetch("/api/connections/open", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ peerId: peer.userId }),
+      });
+      const payload = (await res.json().catch(() => ({}))) as {
+        success?: boolean;
+        error?: string;
+        data?: { connectionId?: string };
+      };
+      if (!res.ok || !payload.success || !payload.data?.connectionId) {
+        setPlanInviteError(
+          typeof payload.error === "string" ? payload.error : messages.schedule.sendPlanInviteFailed,
+        );
+        return;
+      }
+      setPlanFromCalendar({
+        connectionId: payload.data.connectionId,
+        peerName: peer.name,
+        prefill: calendarDetailToPlanPrefill(detailItem),
+      });
+    } catch {
+      setPlanInviteError(messages.schedule.sendPlanInviteNetwork);
+    } finally {
+      setPlanInviteBusy(false);
+    }
   }
 
   function openEditSheetFromDetail(inviteOnly = false) {
@@ -1590,7 +1653,22 @@ export function ScheduleSurface({
         onEdit={() => openEditSheetFromDetail(false)}
         onInvite={() => openEditSheetFromDetail(true)}
         onDelete={() => void deleteDetailItem()}
+        planInvitePeer={detailPlanInvitePeer}
+        onSendPlanInvite={() => void sendPlanInviteFromDetail()}
+        planInviteBusy={planInviteBusy}
+        planInviteError={planInviteError}
       />
+
+      {planFromCalendar ? (
+        <PlanRequestModal
+          open
+          onClose={() => setPlanFromCalendar(null)}
+          mode={{ kind: "direct", connectionId: planFromCalendar.connectionId }}
+          peerName={planFromCalendar.peerName}
+          prefill={planFromCalendar.prefill}
+          layerZClassName="z-[130]"
+        />
+      ) : null}
 
       <AppPushLayer
         open={Boolean(recurringDeleteDialog)}

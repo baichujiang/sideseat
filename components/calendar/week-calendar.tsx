@@ -1,6 +1,6 @@
 "use client";
 
-import type { CalendarRepeatRule, Weekday } from "@prisma/client";
+import type { CalendarRepeatRule, PlanType, Weekday } from "@prisma/client";
 import { addDays, addMinutes, format, isSameDay, startOfDay } from "date-fns";
 import { MapPin, Repeat2 } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -158,6 +158,7 @@ export type WeekCalendarBlock = {
   repeatRule?: CalendarRepeatRule;
   repeatUntilISO?: string | null;
   eventParticipants?: Array<{ userId: string | null; name: string }>;
+  eventType?: PlanType | null;
   kind?: "class" | "study";
   categoryId?: string | null;
   categoryName?: string | null;

@@ -5,8 +5,8 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  // Non-pooled Neon host (no "-pooler"). Required for reliable `migrate deploy` on CI/Vercel.
-  directUrl = env("DIRECT_URL")
+  // Non-pooled Neon host (no "-pooler"). Neon Quick start names this DATABASE_URL_UNPOOLED.
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 enum LanguageTag {

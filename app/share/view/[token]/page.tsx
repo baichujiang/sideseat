@@ -59,10 +59,13 @@ export async function generateMetadata({
 
 export default async function ShareScheduleRecipientViewPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>;
+  searchParams?: Promise<{ returnTo?: string }>;
 }) {
   const { token } = await params;
+  const query = (await searchParams) ?? {};
   const decoded = decodeURIComponent(token);
   const sessionUser = await getSessionUser();
   const showGuestNudge = !sessionUser;
@@ -72,7 +75,14 @@ export default async function ShareScheduleRecipientViewPage({
   });
 
   if (!loaded.ok) {
-    return <ScheduleShareRecipientPage unavailable showGuestNudge={showGuestNudge} />;
+    return (
+      <ScheduleShareRecipientPage
+        unavailable
+        showGuestNudge={showGuestNudge}
+        backReturnTo={query.returnTo}
+        backFallback="/inbox"
+      />
+    );
   }
 
   const locale = await getServerAppLocale();
@@ -111,6 +121,8 @@ export default async function ShareScheduleRecipientViewPage({
       isLinkOwner={isLinkOwner && Boolean(sessionUser?.onboardingComplete)}
       ownerEditPath={isLinkOwner ? scheduleShareOwnerEditPath(decoded) : undefined}
       initialMyProposal={initialMyProposal}
+      backReturnTo={query.returnTo}
+      backFallback="/inbox"
     />
   );
 }

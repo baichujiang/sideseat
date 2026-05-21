@@ -30,6 +30,9 @@ export default async function LoginPage({
         signupHref={
           (query.returnTo ? withReturnTo("/signup", query.returnTo) : "/signup") as Route
         }
+        forgotPasswordHref={
+          (query.returnTo ? withReturnTo("/forgot-password", query.returnTo) : "/forgot-password") as Route
+        }
       />
     </div>
   );

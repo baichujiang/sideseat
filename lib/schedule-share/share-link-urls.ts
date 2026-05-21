@@ -8,6 +8,17 @@ export function scheduleShareRecipientViewPath(token: string): string {
   return `/share/view/${encodeURIComponent(token)}`;
 }
 
+/** Recipient view with optional `?returnTo=` (e.g. back to a chat thread). */
+export function scheduleShareRecipientViewHref(
+  token: string,
+  options?: { returnTo?: string | null },
+): string {
+  const base = scheduleShareRecipientViewPath(token);
+  const returnTo = options?.returnTo?.trim();
+  if (!returnTo || !returnTo.startsWith("/") || returnTo.startsWith("//")) return base;
+  return `${base}?returnTo=${encodeURIComponent(returnTo)}`;
+}
+
 export function scheduleShareRecipientViewUrl(origin: string, token: string): string {
   return `${origin.replace(/\/$/, "")}${scheduleShareRecipientViewPath(token)}`;
 }

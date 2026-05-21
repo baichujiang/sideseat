@@ -163,6 +163,7 @@ export default async function HomePage() {
         userId: companion.userId,
         name: companion.displayName,
       })),
+      eventType: e.eventType,
       categoryId: mirrorCourse ? (courseCategory?.id ?? null) : e.categoryId,
       categoryColor: mirrorCourse ? null : (e.category?.color ?? null),
       categoryName: mirrorCourse ? (courseCategory?.name ?? null) : (e.category?.name ?? null),

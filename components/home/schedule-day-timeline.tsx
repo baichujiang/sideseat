@@ -1,5 +1,5 @@
 "use client";
-import type { CalendarRepeatRule } from "@prisma/client";
+import type { CalendarRepeatRule, PlanType } from "@prisma/client";
 import { addMinutes } from "date-fns";
 import { BookOpen, CalendarClock, MapPin } from "lucide-react";
 import { useEffect, useRef } from "react";
@@ -94,6 +94,7 @@ export type DayTimelineItem = {
   repeatRule?: CalendarRepeatRule;
   repeatUntilISO?: string | null;
   eventParticipants?: Array<{ userId: string | null; name: string }>;
+  eventType?: PlanType | null;
   courseId?: string | null;
   /** Enrolled class: official course code (e.g. IN0001) for two-line card layout. */
   courseCode?: string | null;

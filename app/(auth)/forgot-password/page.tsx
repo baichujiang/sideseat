@@ -1,20 +1,21 @@
-import Link from "next/link";
+import { redirect } from "next/navigation";
 
-import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { ForgotPasswordForm } from "@/components/forms/forgot-password-form";
+import { getSessionUser } from "@/lib/auth/session";
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ email?: string; returnTo?: string }>;
+}) {
+  const user = await getSessionUser();
+  if (user && !user.isGuest) {
+    redirect("/home");
+  }
+
+  const query = (await searchParams) ?? {};
+
   return (
-    <Card className="space-y-4 border-border/90 bg-card/95 shadow-soft">
-      <CardTitle>Forgot password</CardTitle>
-      <CardDescription className="leading-relaxed">
-        Email-based password reset isn&apos;t live yet. Contact support or create a new account.
-      </CardDescription>
-      <Link
-        className="inline-flex text-sm font-medium text-primary underline-offset-4 hover:underline"
-        href="/login"
-      >
-        Back to login
-      </Link>
-    </Card>
+    <ForgotPasswordForm initialEmail={query.email ?? ""} returnTo={query.returnTo} />
   );
 }

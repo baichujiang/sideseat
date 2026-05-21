@@ -11,20 +11,56 @@ import { CreateScheduleShareDialog } from "@/components/schedule-share/create-sc
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { cn } from "@/lib/utils";
 
+/** Matches schedule-share cards (sky), plan cards (amber), and other product accents. */
+type AttachmentMenuTone = "violet" | "emerald" | "sky" | "amber";
+
+const attachmentMenuToneClass: Record<
+  AttachmentMenuTone,
+  { shell: string; hover: string; focusRing: string }
+> = {
+  violet: {
+    shell:
+      "bg-violet-500/12 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300",
+    hover: "hover:bg-violet-500/8 active:bg-violet-500/12",
+    focusRing: "focus-visible:ring-violet-500/35",
+  },
+  emerald: {
+    shell:
+      "bg-emerald-500/12 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
+    hover: "hover:bg-emerald-500/8 active:bg-emerald-500/12",
+    focusRing: "focus-visible:ring-emerald-500/35",
+  },
+  sky: {
+    shell: "bg-sky-500/12 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300",
+    hover: "hover:bg-sky-500/8 active:bg-sky-500/12",
+    focusRing: "focus-visible:ring-sky-500/35",
+  },
+  amber: {
+    shell:
+      "bg-amber-500/12 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
+    hover: "hover:bg-amber-500/8 active:bg-amber-500/12",
+    focusRing: "focus-visible:ring-amber-500/35",
+  },
+};
+
 /** Square icon + one-word caption; `aria-label` carries the fuller action text. */
 function AttachmentMenuTile({
   icon: Icon,
   caption,
   ariaLabel,
+  tone,
   onClick,
   disabled,
 }: {
   icon: LucideIcon;
   caption: string;
   ariaLabel: string;
+  tone: AttachmentMenuTone;
   onClick: () => void;
   disabled?: boolean;
 }) {
+  const toneStyle = attachmentMenuToneClass[tone];
+
   return (
     <button
       type="button"
@@ -34,14 +70,16 @@ function AttachmentMenuTile({
       onClick={onClick}
       className={cn(
         "flex min-h-[44px] w-full min-w-0 flex-col items-center justify-start gap-0.5 rounded-xl px-0.5 py-1 text-center outline-none transition",
-        "hover:bg-primary/10 active:bg-primary/14",
-        "focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        toneStyle.hover,
+        "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        toneStyle.focusRing,
         "disabled:pointer-events-none disabled:opacity-40",
       )}
     >
       <span
         className={cn(
-          "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/12 text-primary",
+          "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg",
+          toneStyle.shell,
         )}
         aria-hidden
       >
@@ -183,7 +221,7 @@ export function ChatAttachmentTray({
         setError("Could not read location. Check permissions in your browser settings.");
         setBusy(false);
       },
-      { enableHighAccuracy: false, timeout: 15_000, maximumAge: 120_000 },
+      { enableHighAccuracy: true, timeout: 15_000, maximumAge: 0 },
     );
   }
 
@@ -223,6 +261,7 @@ export function ChatAttachmentTray({
                 icon={Image}
                 caption="Photo"
                 ariaLabel="Send photo"
+                tone="violet"
                 disabled={busy}
                 onClick={() => fileRef.current?.click()}
               />
@@ -230,6 +269,7 @@ export function ChatAttachmentTray({
                 icon={MapPin}
                 caption="Location"
                 ariaLabel="Send location"
+                tone="emerald"
                 disabled={busy}
                 onClick={sendLocation}
               />
@@ -237,6 +277,7 @@ export function ChatAttachmentTray({
                 icon={Share2}
                 caption={messages.chat.attachmentScheduleCaption}
                 ariaLabel={messages.chat.attachmentScheduleAria}
+                tone="sky"
                 disabled={busy}
                 onClick={() => {
                   onClose();
@@ -247,6 +288,7 @@ export function ChatAttachmentTray({
                 icon={CalendarClock}
                 caption="Plan"
                 ariaLabel="Plan together"
+                tone="amber"
                 disabled={busy}
                 onClick={() => {
                   onClose();

@@ -15,6 +15,7 @@ import {
   signupEmailSchema,
   signupPhoneSchema,
 } from "@/lib/validators/auth";
+import { mapEmailOtpApiError, mapSignupEmailApiError } from "@/lib/auth/map-auth-api-errors";
 import { safeReturnPath } from "@/lib/nav/back";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -41,6 +42,9 @@ function EmailSignupBlock({
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState("");
+  const [otpFeedback, setOtpFeedback] = useState<{ kind: "success" | "error"; message: string } | null>(
+    null,
+  );
   const [otpSending, setOtpSending] = useState(false);
   const schema = useMemo(
     () =>
@@ -84,7 +88,7 @@ function EmailSignupBlock({
       return;
     }
     setOtpSending(true);
-    setServerError("");
+    setOtpFeedback(null);
     try {
       const response = await fetch("/api/auth/email/send-otp", {
         method: "POST",
@@ -92,15 +96,17 @@ function EmailSignupBlock({
         credentials: "include",
         body: JSON.stringify({ email, purpose: "signup" }),
       });
-      const payload = await response.json();
+      const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
-        setServerError(typeof payload.error === "string" ? payload.error : af.unableToContinue);
+        setOtpFeedback({
+          kind: "error",
+          message: mapEmailOtpApiError(payload, af.emailOtpErrors),
+        });
         return;
       }
-      if (typeof payload.data?.devCode === "string") {
-        form.setValue("code", payload.data.devCode, { shouldValidate: true });
-      }
-      setServerError("");
+      setOtpFeedback({ kind: "success", message: af.emailOtpErrors.codeSent });
+    } catch {
+      setOtpFeedback({ kind: "error", message: af.emailOtpErrors.networkError });
     } finally {
       setOtpSending(false);
     }
@@ -114,9 +120,9 @@ function EmailSignupBlock({
       credentials: "include",
       body: JSON.stringify(values),
     });
-    const payload = await response.json();
+    const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
-      setServerError(payload.error ?? af.unableToContinue);
+      setServerError(mapSignupEmailApiError(payload, af.signupEmailErrors));
       return;
     }
     if (payload.data?.accessToken) {
@@ -158,7 +164,21 @@ function EmailSignupBlock({
           </Button>
         </div>
         <FormMessage message={form.formState.errors.email?.message} />
-        <p className="text-[11px] leading-snug text-muted-foreground">{af.emailCodeSentHint}</p>
+        {otpFeedback ? (
+          <p
+            className={cn(
+              "text-[12px] leading-snug",
+              otpFeedback.kind === "success"
+                ? "text-emerald-700 dark:text-emerald-400"
+                : "text-destructive",
+            )}
+            role={otpFeedback.kind === "error" ? "alert" : "status"}
+          >
+            {otpFeedback.message}
+          </p>
+        ) : (
+          <p className="text-[11px] leading-snug text-muted-foreground">{af.emailCodeSentHint}</p>
+        )}
       </div>
       <div className="space-y-1.5">
         <label className="text-sm font-medium">{af.emailOtpCodeLabel}</label>

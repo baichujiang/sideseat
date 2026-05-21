@@ -411,6 +411,15 @@ export type AppMessages = {
     emptyNoMatchesTitle: string;
     /** Use `{query}` placeholder. */
     emptyNoMatchesDesc: string;
+    preview: {
+      scheduleShared: string;
+      planInvite: string;
+      planConfirmed: string;
+      availabilityShared: string;
+      photo: string;
+      location: string;
+      reply: string;
+    };
   };
   me: {
     screenTitle: string;
@@ -453,6 +462,12 @@ export type AppMessages = {
     scheduleShareCardSubtitleOwn: string;
     scheduleShareCardSubtitlePeer: string;
     scheduleShareCardOpen: string;
+    scheduleShareCardLoadingPreview: string;
+    scheduleShareCardPreviewExpired: string;
+    scheduleShareCardPreviewUnavailable: string;
+    scheduleShareBackToChat: string;
+    locationShareDefaultLabel: string;
+    locationShareOpenInMaps: string;
     /** Subtitle on plan request cards that originated from a schedule share link. */
     planFromScheduleShare: string;
     messageInputLabel: string;
@@ -515,6 +530,47 @@ export type AppMessages = {
     submitLogIn: string;
     pleaseWait: string;
     unableToContinue: string;
+    emailOtpErrors: {
+      dbUnavailable: string;
+      dbSchema: string;
+      emailInvalid: string;
+      emailAlreadyRegistered: string;
+      rateLimited: string;
+      emailNotConfigured: string;
+      emailSendFailed: string;
+      invalidRequest: string;
+      networkError: string;
+      unknown: string;
+      codeSent: string;
+    };
+    signupEmailErrors: {
+      dbUnavailable: string;
+      codeInvalid: string;
+      emailAlreadyRegistered: string;
+      invalidRequest: string;
+      unknown: string;
+    };
+    forgotPassword: {
+      title: string;
+      description: string;
+      codeHint: string;
+      submitReset: string;
+      backToLogin: string;
+      errors: {
+        dbUnavailable: string;
+        dbSchema: string;
+        emailInvalid: string;
+        rateLimited: string;
+        emailNotConfigured: string;
+        emailSendFailed: string;
+        codeInvalid: string;
+        invalidRequest: string;
+        networkError: string;
+        unknown: string;
+        codeSent: string;
+        resetSuccess: string;
+      };
+    };
   };
   schedule: {
     repeatDaily: string;
@@ -604,6 +660,12 @@ export type AppMessages = {
     recurringDeleteAriaLabel: string;
     /** Home schedule toolbar — open Schedule Share dialog */
     shareScheduleOpenAria: string;
+    inviteOrEditPeople: string;
+    /** `{name}` — single connection companion on the event. */
+    sendPlanInviteTo: string;
+    sendPlanInviteOpening: string;
+    sendPlanInviteFailed: string;
+    sendPlanInviteNetwork: string;
   };
   /** Schedule Share — Home share link + public viewer + proposals */
   scheduleShare: {
@@ -745,6 +807,64 @@ export type AppMessages = {
     subtitle: string;
     discoverCityTitle: string;
     discoverCityHint: string;
+    changePassword: {
+      title: string;
+      hint: string;
+      listSubtitle: string;
+      currentLabel: string;
+      newLabel: string;
+      newPlaceholder: string;
+      confirmLabel: string;
+      confirmPlaceholder: string;
+      save: string;
+      saving: string;
+      enterCurrent: string;
+      passwordTooShort: string;
+      passwordsMismatch: string;
+      forgotLink: string;
+      errors: {
+        dbUnavailable: string;
+        dbSchema: string;
+        currentInvalid: string;
+        sameAsCurrent: string;
+        invalidRequest: string;
+        networkError: string;
+        unknown: string;
+        saved: string;
+      };
+    };
+    loginEmail: {
+      title: string;
+      hint: string;
+      currentLabel: string;
+      notSet: string;
+      newLabel: string;
+      newPlaceholder: string;
+      codeLabel: string;
+      codePlaceholder: string;
+      codeHint: string;
+      sendCode: string;
+      sendingCode: string;
+      save: string;
+      saving: string;
+      enterEmail: string;
+      errors: {
+        dbUnavailable: string;
+        dbSchema: string;
+        emailInvalid: string;
+        emailAlreadyRegistered: string;
+        sameAsCurrent: string;
+        rateLimited: string;
+        emailNotConfigured: string;
+        emailSendFailed: string;
+        codeInvalid: string;
+        invalidRequest: string;
+        networkError: string;
+        unknown: string;
+        codeSent: string;
+        saved: string;
+      };
+    };
     blockedTitle: string;
     blockedNone: string;
     blockedOne: string;

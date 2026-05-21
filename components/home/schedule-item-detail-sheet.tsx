@@ -2,7 +2,7 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import type { CalendarRepeatRule } from "@prisma/client";
+import type { CalendarRepeatRule, PlanType } from "@prisma/client";
 import type { Route } from "next";
 import { format } from "date-fns";
 import {
@@ -22,6 +22,8 @@ import { useEffect, useState } from "react";
 import { AppPushLayer, APP_PUSH_TRANSITION_MS } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { isIcsFeedStudyEntryId } from "@/lib/calendar/ics-feed-event-id";
+import { formatMessage } from "@/lib/i18n/messages";
+import { useAppMessages } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
 
 export type ScheduleDetailItem = {
@@ -36,6 +38,7 @@ export type ScheduleDetailItem = {
   repeatRule: CalendarRepeatRule;
   repeatUntilISO: string | null;
   eventParticipants: Array<{ userId: string | null; name: string }>;
+  eventType?: PlanType | null;
   categoryId?: string | null;
   categoryName?: string | null;
   categoryColor?: string | null;
@@ -51,6 +54,10 @@ export function ScheduleItemDetailSheet({
   onEdit,
   onDelete,
   onInvite,
+  planInvitePeer,
+  onSendPlanInvite,
+  planInviteBusy = false,
+  planInviteError,
 }: {
   item: ScheduleDetailItem | null;
   open: boolean;
@@ -63,8 +70,14 @@ export function ScheduleItemDetailSheet({
   onEdit: () => void;
   onDelete: () => void;
   onInvite: () => void;
+  /** When set (exactly one connection companion), show send-plan CTA. */
+  planInvitePeer?: { userId: string; name: string } | null;
+  onSendPlanInvite?: () => void;
+  planInviteBusy?: boolean;
+  planInviteError?: string | null;
 }) {
   const router = useRouter();
+  const { schedule: s } = useAppMessages();
   const [openingChatUserId, setOpeningChatUserId] = useState<string | null>(null);
   const [chatError, setChatError] = useState<string | null>(null);
   /** Keeps row data through close animation after parent clears `item`. */
@@ -259,13 +272,36 @@ export function ScheduleItemDetailSheet({
                         </p>
                       ) : null}
                       {canEdit ? (
-                        <button
-                          type="button"
-                          onClick={onInvite}
-                          className="mt-2 text-[12px] font-medium text-primary hover:underline"
-                        >
-                          Invite or edit people
-                        </button>
+                        <div className="mt-2 flex flex-col items-start gap-1.5">
+                          {planInvitePeer && onSendPlanInvite ? (
+                            <Button
+                              type="button"
+                              size="sm"
+                              className="h-9 rounded-full px-4 text-[12px] font-semibold"
+                              disabled={planInviteBusy || deleting}
+                              onClick={onSendPlanInvite}
+                            >
+                              {planInviteBusy ? (
+                                <>
+                                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" aria-hidden />
+                                  {s.sendPlanInviteOpening}
+                                </>
+                              ) : (
+                                formatMessage(s.sendPlanInviteTo, { name: planInvitePeer.name })
+                              )}
+                            </Button>
+                          ) : null}
+                          <button
+                            type="button"
+                            onClick={onInvite}
+                            className="text-[12px] font-medium text-primary hover:underline"
+                          >
+                            {s.inviteOrEditPeople}
+                          </button>
+                        </div>
+                      ) : null}
+                      {planInviteError ? (
+                        <p className="mt-2 text-[11px] text-destructive">{planInviteError}</p>
                       ) : null}
                       {chatError ? <p className="mt-2 text-[11px] text-destructive">{chatError}</p> : null}
                     </div>

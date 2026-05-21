@@ -24,8 +24,11 @@ export function ok(data: unknown, init?: ResponseInit) {
   return NextResponse.json({ success: true, data }, init);
 }
 
-export function error(message: string, status = 400) {
-  return NextResponse.json({ success: false, error: message }, { status });
+export function error(message: string, status = 400, code?: string) {
+  return NextResponse.json(
+    { success: false, error: message, ...(code ? { code } : {}) },
+    { status },
+  );
 }
 
 export function formatZodError(cause: ZodError): string {

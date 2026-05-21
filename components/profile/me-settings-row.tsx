@@ -112,6 +112,29 @@ export const mePageIconTipShellClass = cn(
   "bg-orange-50 text-orange-500 dark:bg-orange-950/35 dark:text-orange-400",
 );
 
+/** Me main destinations — distinct hues (My posts / Saved / My plan). */
+export const mePageIconMyPostsShellClass = cn(
+  mePageIconShellClass,
+  "bg-violet-50 dark:bg-violet-950/35",
+);
+export const mePageIconMyPostsClass = "h-5 w-5 text-violet-600 dark:text-violet-400";
+
+export const mePageIconSavedPostsShellClass = cn(
+  mePageIconShellClass,
+  "bg-amber-50 dark:bg-amber-950/35",
+);
+export const mePageIconSavedPostsClass = "h-5 w-5 text-amber-600 dark:text-amber-400";
+
+export const mePageIconMyPlanShellClass = cn(
+  mePageIconShellClass,
+  "bg-sky-50 dark:bg-sky-950/35",
+);
+export const mePageIconMyPlanClass = "h-5 w-5 text-sky-600 dark:text-sky-400";
+
+/** Inbox Chats “Plans” chip — same sky hue as Me → My plan. */
+export const inboxMyPlanChipPillClass =
+  "border-sky-200/80 bg-sky-50 text-sky-700 dark:border-sky-800/50 dark:bg-sky-950/35 dark:text-sky-300";
+
 export const mePageIconInstallClass = cn(mePageIconMutedClass, "text-classmates-success");
 
 export const mePageTitleClass = "truncate text-base font-semibold text-classmates-ink dark:text-foreground";

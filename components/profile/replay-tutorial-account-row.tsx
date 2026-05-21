@@ -7,7 +7,7 @@ import { meSettingsRowListIconShellLargeClass } from "@/components/profile/me-se
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
 
-export function ReplayTutorialAccountRow() {
+export function ReplayTutorialAccountRow({ className }: { className?: string }) {
   const router = useRouter();
   const m = useAppMessages();
 
@@ -18,6 +18,7 @@ export function ReplayTutorialAccountRow() {
         "flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors",
         "active:bg-classmates-warm-alt dark:active:bg-muted/30",
         "[@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25",
+        className,
       )}
       onClick={() => {
         router.push("/profile/account?replayTutorial=1");

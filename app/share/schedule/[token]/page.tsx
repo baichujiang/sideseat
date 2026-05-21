@@ -10,7 +10,7 @@ import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { buildOwnerPreviewScheduleShareSnapshotForActiveLink } from "@/lib/schedule-share/public-snapshot";
 import { findScheduleShareLinkByPlainToken } from "@/lib/schedule-share/resolve-link";
 import {
-  scheduleShareRecipientViewPath,
+  scheduleShareRecipientViewHref,
   scheduleShareRecipientViewUrl,
 } from "@/lib/schedule-share/share-link-urls";
 import { resolveBackHref } from "@/lib/nav/back";
@@ -56,12 +56,12 @@ export default async function ShareScheduleOwnerEditPage({
   });
 
   if (!resolved.ok) {
-    redirect(scheduleShareRecipientViewPath(decoded) as Route);
+    redirect(scheduleShareRecipientViewHref(decoded, { returnTo: query.returnTo }) as Route);
   }
 
   const isOwner = isScheduleShareOwner(resolved.link, sessionUser?.id);
   if (!isOwner || !sessionUser?.onboardingComplete) {
-    redirect(scheduleShareRecipientViewPath(decoded) as Route);
+    redirect(scheduleShareRecipientViewHref(decoded, { returnTo: query.returnTo }) as Route);
   }
 
   const ownerPreviewSnapshot = await buildOwnerPreviewScheduleShareSnapshotForActiveLink(

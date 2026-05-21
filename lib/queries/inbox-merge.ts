@@ -18,7 +18,23 @@ type ConnectionInbox = Awaited<
         userB: true;
         invitation: { include: { course: true } };
         originCourse: true;
-        messages: { orderBy: { createdAt: "desc" }; take: 1; include: { sender: true } };
+        messages: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+          include: {
+            sender: true,
+            planRequest: {
+              select: {
+                title: true,
+                startTime: true,
+                endTime: true,
+                status: true,
+                receiverUserId: true,
+                proposerUserId: true,
+              },
+            },
+          },
+        },
         _count: { select: { messages: true } };
         planRequests: {
           where: { status: "PENDING" },
@@ -130,7 +146,19 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
         messages: {
           orderBy: { createdAt: "desc" },
           take: 1,
-          include: { sender: true },
+          include: {
+            sender: true,
+            planRequest: {
+              select: {
+                title: true,
+                startTime: true,
+                endTime: true,
+                status: true,
+                receiverUserId: true,
+                proposerUserId: true,
+              },
+            },
+          },
         },
         _count: { select: { messages: true } },
         planRequests: {

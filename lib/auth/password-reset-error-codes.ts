@@ -1,0 +1,12 @@
+/** Stable codes for `/api/auth/forgot-password/*` — map to `authForm.forgotPasswordErrors` on the client. */
+export const PASSWORD_RESET_ERROR_CODES = {
+  DB_UNAVAILABLE: "PASSWORD_RESET_DB_UNAVAILABLE",
+  DB_SCHEMA: "PASSWORD_RESET_DB_SCHEMA",
+  EMAIL_INVALID: "PASSWORD_RESET_EMAIL_INVALID",
+  CODE_INVALID: "PASSWORD_RESET_CODE_INVALID",
+  INVALID_REQUEST: "PASSWORD_RESET_INVALID_REQUEST",
+  UNKNOWN: "PASSWORD_RESET_UNKNOWN",
+} as const;
+
+export type PasswordResetErrorCode =
+  (typeof PASSWORD_RESET_ERROR_CODES)[keyof typeof PASSWORD_RESET_ERROR_CODES];

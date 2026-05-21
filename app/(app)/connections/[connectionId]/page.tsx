@@ -26,6 +26,9 @@ import { formatMessage, getMessages, type AppMessages } from "@/lib/i18n/message
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { chatMessageDomId } from "@/lib/chat/chat-message-dom-id";
 import { indexConnectionMessagesForSearch } from "@/lib/chat/thread-search-index";
+import { prisma } from "@/lib/db/prisma";
+import { loadScheduleShareChatPreviewsForMessages } from "@/lib/schedule-share/load-chat-preview-server";
+import { plainTokenFromScheduleShareRecipientUrl } from "@/lib/schedule-share/share-link-urls";
 import { cn } from "@/lib/utils";
 
 function dayDividerLabel(d: Date, chat: AppMessages["chat"], dfLocale: typeof enUS): string {
@@ -66,6 +69,11 @@ export default async function ConnectionPage({
   const showPeerUsernameLine = !isSelfNotes && Boolean(myRemark) && !peerNickname.length;
   const showSelfBaseLine = isSelfNotes && Boolean(myRemark) && headerTitle !== selfBaseLabel;
   const messages = connection.messages;
+  const scheduleSharePreviewByToken = await loadScheduleShareChatPreviewsForMessages(
+    prisma,
+    messages,
+    user.id,
+  );
   const threadSearchEntries = indexConnectionMessagesForSearch(messages);
   const latestMessageId = messages.at(-1)?.id ?? null;
   const profileLinkHref = isSelfNotes
@@ -152,6 +160,7 @@ export default async function ConnectionPage({
               if (message.type === "SCHEDULE_SHARE_CARD" && message.body.trim()) {
                 const ownerDisplay =
                   message.sender.nickname?.trim() || message.sender.username || ui.common.studentFallback;
+                const shareToken = plainTokenFromScheduleShareRecipientUrl(message.body.trim());
                 return (
                   <div key={message.id} id={chatMessageDomId(message.id)}>
                     {dayStrip}
@@ -159,6 +168,10 @@ export default async function ConnectionPage({
                       shareUrl={message.body.trim()}
                       ownerName={ownerDisplay}
                       isOwner={message.senderId === user.id}
+                      returnTo={`/connections/${connectionId}`}
+                      initialPreview={
+                        shareToken ? (scheduleSharePreviewByToken.get(shareToken) ?? null) : null
+                      }
                     />
                   </div>
                 );

@@ -1,3 +1,5 @@
+"use client";
+
 import type { Route } from "next";
 import type { Course, Invitation, Message, PlanRequest, User } from "@prisma/client";
 import { ChevronRight } from "lucide-react";
@@ -8,7 +10,9 @@ import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { InboxSwipeRow } from "@/components/inbox/inbox-swipe-row";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { selfNotesDisplayTitle } from "@/lib/connections/self-notes-title";
-import { directMessageActionSnippet } from "@/lib/chat/direct-message-preview";
+import { InboxDirectMessagePreview } from "@/components/inbox/inbox-direct-message-preview";
+import { resolveInboxDirectPreview } from "@/lib/chat/inbox-direct-preview";
+import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { cn } from "@/lib/utils";
 
 export type DirectInboxConnection = {
@@ -24,7 +28,19 @@ export type DirectInboxConnection = {
   userB: User;
   originCourse: Course | null;
   invitation: (Invitation & { course: Course }) | null;
-  messages: Array<Message & { sender: User }>;
+  messages: Array<
+    Message & {
+      sender: User;
+      planRequest?: {
+        title: string;
+        startTime: Date;
+        endTime: Date;
+        status: import("@prisma/client").PlanRequestStatus;
+        receiverUserId: string;
+        proposerUserId: string;
+      } | null;
+    }
+  >;
   planRequests?: Array<
     Pick<PlanRequest, "id" | "title" | "receiverUserId" | "proposerUserId">
   >;
@@ -41,6 +57,7 @@ export function DirectInboxRow({
   unreadCount: number;
   returnTo?: string;
 }) {
+  const { locale } = useLocaleContext();
   const isSelfNotes = connection.userAId === connection.userBId;
   const other = connection.userAId === userId ? connection.userB : connection.userA;
   const myRemark =
@@ -54,16 +71,19 @@ export function DirectInboxRow({
   const fromMe = lastMessage?.senderId === userId;
   const contextCourseName =
     connection.originCourse?.name ?? connection.invitation?.course?.name ?? null;
-  const preview =
+  const lastPreview =
     lastMessage != null
-      ? `${fromMe ? "You: " : ""}${directMessageActionSnippet({
-          type: lastMessage.type,
-          body: lastMessage.body,
-          locationName: lastMessage.locationName,
-        })}`
-      : contextCourseName
-        ? contextCourseName
-        : "Say hi";
+      ? resolveInboxDirectPreview(
+          {
+            type: lastMessage.type,
+            body: lastMessage.body,
+            locationName: lastMessage.locationName,
+            planRequest: lastMessage.planRequest ?? null,
+          },
+          userId,
+          locale,
+        )
+      : null;
   const when = lastMessage?.createdAt ?? connection.updatedAt;
   const isUnread = unreadCount > 0;
   const href = `/connections/${connection.id}?returnTo=${encodeURIComponent(returnTo)}` as Route;
@@ -77,6 +97,11 @@ export function DirectInboxRow({
       ? "Plan request · Waiting for your reply"
       : "Plan request · Waiting for their reply"
     : null;
+
+  const lastMessageShowsPendingPlan =
+    lastMessage?.type === "PLAN_REQUEST_CARD" &&
+    lastMessage.planRequest?.status === "PENDING";
+  const showPendingPlanChip = Boolean(planChipLine && pendingPlan && !lastMessageShowsPendingPlan);
 
   return (
     <li className={inboxConversationTileClassName}>
@@ -97,15 +122,23 @@ export function DirectInboxRow({
               {displayName}
             </p>
           </div>
-          <p
-            className={cn(
-              "mt-0.5 truncate text-[13px] leading-snug text-[#5F6B7A] dark:text-zinc-400",
-              isUnread && "font-semibold text-[#374151] dark:text-zinc-300",
-            )}
-          >
-            {preview}
-          </p>
-          {planChipLine && pendingPlan ? (
+          {lastPreview ? (
+            <InboxDirectMessagePreview
+              fromMe={fromMe}
+              preview={lastPreview}
+              emphasize={isUnread}
+            />
+          ) : (
+            <p
+              className={cn(
+                "mt-0.5 truncate text-[13px] leading-snug text-[#5F6B7A] dark:text-zinc-400",
+                isUnread && "font-semibold text-[#374151] dark:text-zinc-300",
+              )}
+            >
+              {contextCourseName ? contextCourseName : "Say hi"}
+            </p>
+          )}
+          {showPendingPlanChip && pendingPlan ? (
             <p className="mt-1">
               <span
                 className={cn(

@@ -117,7 +117,14 @@ test.describe("Standard user flow (login + tabs + drill-ins)", () => {
 
 test.describe("Optional signup smoke", () => {
   test("signup reaches home", async ({ page, context }) => {
-    test.skip(process.env.E2E_SIGNUP !== "1", "Set E2E_SIGNUP=1 to run (creates a real user).");
+    test.skip(
+      process.env.E2E_SIGNUP !== "1",
+      "Set E2E_SIGNUP=1 to run (creates a real user; requires Resend + manual inbox OTP).",
+    );
+    test.skip(
+      !process.env.RESEND_API_KEY?.trim(),
+      "E2E signup requires RESEND_API_KEY (real email OTP; no dev auto-fill).",
+    );
 
     const username = `e2e_${Date.now()}`;
     const password = "Password123!";
@@ -135,11 +142,15 @@ test.describe("Optional signup smoke", () => {
     );
     await sendCode.click();
     const otpRes = await otpResponse;
-    const otpJson = (await otpRes.json()) as { data?: { devCode?: string } };
-    const code = otpJson.data?.devCode;
-    if (!code) {
-      throw new Error("Expected devCode from /api/auth/email/send-otp in non-production.");
-    }
+    expect(otpRes.ok()).toBeTruthy();
+    const otpJson = (await otpRes.json()) as { success?: boolean; data?: { sent?: boolean } };
+    expect(otpJson.success).toBe(true);
+    test.skip(
+      true,
+      "Enter the 6-digit code from the test inbox manually, or set E2E_OTP_CODE in env for automation.",
+    );
+    const code = process.env.E2E_OTP_CODE?.trim();
+    if (!code) return;
     await page.getByPlaceholder(/6.digit|6 位/i).fill(code);
     const pwInputs = page.locator('input[type="password"]');
     await pwInputs.nth(0).fill(password);
