@@ -69,17 +69,15 @@ function migrateDeployWithRetries() {
 }
 
 if (process.env.VERCEL) {
-  run(
-    "npx",
-    [
-      "prisma",
-      "migrate",
-      "resolve",
-      "--rolled-back",
-      "20260503120000_availability_share_included_dates",
-    ],
-    { allowFailure: true },
-  );
+  /** Clear stale failed rows from Neon cold-start / P1001 timeouts during deploy. */
+  const vercelMigrationResolves = [
+    ["--rolled-back", "20260503120000_availability_share_included_dates"],
+    // Mark applied when tables already exist; re-running CREATE would fail on redeploy.
+    ["--applied", "20260215180000_schedule_share_mvp"],
+  ];
+  for (const [flag, name] of vercelMigrationResolves) {
+    run("npx", ["prisma", "migrate", "resolve", flag, name], { allowFailure: true });
+  }
 }
 
 migrateDeployWithRetries();
