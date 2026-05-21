@@ -9,8 +9,6 @@ import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/consta
 export default async function ProfileIdentityPage() {
   const user = await getSessionUser();
   if (!user) redirect('/login');
-  if (!user.onboardingComplete) redirect('/onboarding');
-
   const schoolCode = normalizeSchoolCode(user.school) ?? DEFAULT_SCHOOL;
   const schoolShort = schoolOptions.find((s) => s.value === schoolCode)?.shortLabel ?? schoolCode;
 

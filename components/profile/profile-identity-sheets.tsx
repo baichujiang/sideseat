@@ -324,19 +324,19 @@ export function ProfileIdentitySheets({
   return (
     <>
       {variant === "summary" ? (
-        <div className={cn(mePageCardClass, "relative bg-gradient-to-b from-classmates-warm-alt/50 to-classmates-surface dark:from-card dark:to-card")}>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={openEditProfile}
-            aria-label={t.editProfileAria}
-            className="absolute right-3 top-3 z-[1] h-9 rounded-full border border-classmates-edge bg-white/95 px-3.5 text-[13px] font-semibold text-[#374151] shadow-none hover:border-classmates-edge hover:bg-classmates-warm-alt dark:border-border dark:bg-card/95 dark:text-foreground"
-          >
-            {t.editProfile}
-          </Button>
-
-          <div className="flex gap-3.5 px-4 py-3.5 pr-[6.5rem] sm:pr-24">
+        <button
+          type="button"
+          onClick={openEditProfile}
+          aria-label={t.editProfileAria}
+          className={cn(
+            mePageCardClass,
+            "relative w-full bg-gradient-to-b from-classmates-warm-alt/50 to-classmates-surface text-left transition-colors",
+            "hover:from-classmates-warm-alt/70 hover:to-classmates-warm-alt/40 active:bg-muted/30",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+            "dark:from-card dark:to-card dark:hover:from-muted/40 dark:hover:to-card dark:active:bg-muted/40",
+          )}
+        >
+          <div className="flex gap-3.5 px-4 py-3.5">
             <figure className="m-0 shrink-0 self-start">
               <PresetAvatar
                 id={avatarId}
@@ -364,8 +364,13 @@ export function ProfileIdentitySheets({
                 {bioDisplay}
               </p>
             </div>
+            <ChevronRight
+              className="mt-1 h-5 w-5 shrink-0 self-start text-muted-foreground/45"
+              strokeWidth={2}
+              aria-hidden
+            />
           </div>
-        </div>
+        </button>
       ) : variant === "hero" ? (
         <div className={heroCardClass}>
           <Button

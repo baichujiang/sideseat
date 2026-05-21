@@ -1,4 +1,3 @@
-import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
 import { InboxChatsShell } from "@/components/inbox/inbox-quick-chips";
 import { InboxRealtimeRefresh } from "@/components/inbox/inbox-realtime-refresh";
 import { GuestAppCta } from "@/components/app/guest-app-cta";
@@ -78,15 +77,12 @@ export default async function InboxPage() {
   return (
     <div className="space-y-3">
       <InboxRealtimeRefresh version={inboxVersion} />
-      {!user.onboardingComplete ? (
-        <OnboardingContinueCta title={ui.inbox.onboardingTitle} body={ui.inbox.onboardingBody} />
-      ) : null}
       <InboxChatsShell
         userId={user.id}
         merged={merged}
         plansNeedingYourAction={plansNeedingYourAction}
         initialContacts={directContacts}
-        showCreateSheet={user.onboardingComplete}
+        showCreateSheet
         recommendedClassmates={recommendedClassmates}
       />
     </div>

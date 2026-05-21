@@ -43,9 +43,6 @@ export default async function ProfileMyPlanPage({
       </div>
     );
   }
-  if (!sessionUser.onboardingComplete) {
-    redirect("/onboarding");
-  }
   const user = sessionUser;
   const now = new Date();
 

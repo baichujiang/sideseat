@@ -25,7 +25,7 @@ export async function PUT(request: Request) {
           gender: values.gender,
           school: values.school,
           degreeLevel: values.degreeLevel,
-          major: values.major,
+          major: values.major === "" ? null : values.major,
           semester: values.semester,
           bio: values.bio || null,
           wechatHandle: values.wechatHandle || null,
@@ -38,6 +38,8 @@ export async function PUT(request: Request) {
           allowInvitationNotes: values.allowInvitationNotes,
           contactInfoOptIn: values.contactInfoOptIn,
           hideFromCourseMembers: values.hideFromCourseMembers,
+          hideFromDiscovery: values.hideFromDiscovery,
+          hideFromRecommendations: values.hideFromRecommendations,
           onboardingComplete: true,
         },
       });

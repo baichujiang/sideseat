@@ -57,10 +57,6 @@ export default async function CourseDetailPage({
     notFound();
   }
 
-  if (sessionUser && !sessionUser.onboardingComplete) {
-    redirect("/onboarding");
-  }
-
   const school = normalizeSchoolCode(course.school) ?? DEFAULT_SCHOOL;
   const schoolValues = getSchoolMatchValues(course.school);
   const schoolLabel = getSchoolLabel(course.school);

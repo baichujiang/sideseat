@@ -91,9 +91,6 @@ export default async function ProfileMyPostsPage() {
       </div>
     );
   }
-  if (!sessionUser.onboardingComplete) {
-    redirect("/onboarding");
-  }
   const user = sessionUser;
 
   const posts = await prisma.classmatePost.findMany({

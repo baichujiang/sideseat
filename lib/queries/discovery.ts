@@ -140,6 +140,7 @@ export async function getDiscoverPeople(
 
   const where: Prisma.UserWhereInput = {
     id: { not: userId },
+    hideFromDiscovery: false,
     school: schoolValues.length ? { in: schoolValues } : undefined,
     moderationBlocks: { none: { isActive: true } },
     blocksReceived: { none: { blockerId: userId } },

@@ -1,7 +1,6 @@
 import { ClassmatePostStatus, ConnectionStatus } from "@prisma/client";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
-import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
 import { DiscoverList } from "@/components/discover/discover-list";
 import {
   classmatePostForDiscoverInclude,
@@ -98,9 +97,6 @@ export default async function DiscoverPage() {
 
   return (
     <div className="-mt-3 min-w-0 space-y-3">
-      {!user.onboardingComplete ? (
-        <OnboardingContinueCta title={ui.onboarding.discoverTitle} body={ui.onboarding.discoverBody} />
-      ) : null}
       <DiscoverList
         posts={posts}
         savedCourseCount={savedCount}

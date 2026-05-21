@@ -272,16 +272,12 @@ export function ProfileForm({
             </p>
           ) : null}
         {isSheet && discoverCity ? (
-          <div className="mb-3 flex flex-col gap-1.5">
-            <FieldLabel>{pr.discoverCityRowTitle}</FieldLabel>
-            <p className="text-[11px] leading-snug text-classmates-hint dark:text-zinc-500">
-              {pr.discoverCityRowSubtitle}
-            </p>
-            <MeDiscoverCitySelect
-              value={discoverCity}
-              variant="control"
-              className="w-full [&>summary]:w-full [&>summary]:justify-between"
-            />
+          <div
+            className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-background/60 px-3 py-2.5"
+            title={pr.discoverCityRowSubtitle}
+          >
+            <span className="shrink-0 text-[13px] font-medium text-foreground">{pr.discoverCityRowTitle}</span>
+            <MeDiscoverCitySelect value={discoverCity} variant="pill" />
           </div>
         ) : null}
         <div
@@ -328,22 +324,21 @@ export function ProfileForm({
           </div>
           <div className="flex flex-col gap-1">
             <FieldLabel>{pf.labelMajor}</FieldLabel>
-            <Input
-              list="profile-major-suggestions"
-              autoComplete="off"
-              spellCheck={false}
-              placeholder={pf.majorPlaceholder}
-              className={settingsControlClass}
-              {...register("major")}
-            />
-            <datalist id="profile-major-suggestions">
-              {majorOptions.map((m) => (
-                <option key={m} value={m} />
-              ))}
-            </datalist>
-            {variant === "full" ? (
-              <p className="text-[11px] leading-snug text-classmates-hint dark:text-zinc-500">{pf.majorFreeTextOk}</p>
-            ) : null}
+            <div className="relative">
+              <select className={settingsSelectClass} {...register("major")}>
+                <option value="">{pf.majorNotSpecified}</option>
+                {majorOptions.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-classmates-hint dark:text-zinc-500"
+                strokeWidth={2}
+                aria-hidden
+              />
+            </div>
             <FormMessage message={errors.major?.message} />
           </div>
           <div className="flex flex-col gap-1">
@@ -367,19 +362,48 @@ export function ProfileForm({
         </div>
         {/* Gender feature is temporarily disabled in UI; keep current value unchanged. */}
         <input type="hidden" {...register("gender")} />
-        <label className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-background/60 px-3 py-2.5">
-          <span className="min-w-0">
-            <span className="block text-[13px] font-medium text-foreground">{pf.hideInCourseTitle}</span>
-            <span className="mt-0.5 block text-[11px] text-muted-foreground">
-              {pf.hideInCourseSubtitle}
+        <div className="space-y-2">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {pf.privacyHeading}
+          </p>
+          <label className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-background/60 px-3 py-2.5">
+            <span className="min-w-0">
+              <span className="block text-[13px] font-medium text-foreground">{pf.hideFromDiscoveryTitle}</span>
+              <span className="mt-0.5 block text-[11px] text-muted-foreground">{pf.hideFromDiscoverySubtitle}</span>
             </span>
-          </span>
-          <input
-            type="checkbox"
-            className="h-4 w-4 shrink-0 rounded border-border text-primary accent-primary"
-            {...register("hideFromCourseMembers")}
-          />
-        </label>
+            <input
+              type="checkbox"
+              className="h-4 w-4 shrink-0 rounded border-border text-primary accent-primary"
+              {...register("hideFromDiscovery")}
+            />
+          </label>
+          <label className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-background/60 px-3 py-2.5">
+            <span className="min-w-0">
+              <span className="block text-[13px] font-medium text-foreground">{pf.hideFromRecommendationsTitle}</span>
+              <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                {pf.hideFromRecommendationsSubtitle}
+              </span>
+            </span>
+            <input
+              type="checkbox"
+              className="h-4 w-4 shrink-0 rounded border-border text-primary accent-primary"
+              {...register("hideFromRecommendations")}
+            />
+          </label>
+          <label className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-background/60 px-3 py-2.5">
+            <span className="min-w-0">
+              <span className="block text-[13px] font-medium text-foreground">{pf.hideInCourseTitle}</span>
+              <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                {pf.hideInCourseSubtitle}
+              </span>
+            </span>
+            <input
+              type="checkbox"
+              className="h-4 w-4 shrink-0 rounded border-border text-primary accent-primary"
+              {...register("hideFromCourseMembers")}
+            />
+          </label>
+        </div>
         </section>
       </div>
 

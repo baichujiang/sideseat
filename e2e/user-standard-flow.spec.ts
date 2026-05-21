@@ -116,7 +116,7 @@ test.describe("Standard user flow (login + tabs + drill-ins)", () => {
 });
 
 test.describe("Optional signup smoke", () => {
-  test("signup reaches onboarding", async ({ page, context }) => {
+  test("signup reaches home", async ({ page, context }) => {
     test.skip(process.env.E2E_SIGNUP !== "1", "Set E2E_SIGNUP=1 to run (creates a real user).");
 
     const username = `e2e_${Date.now()}`;
@@ -127,12 +127,24 @@ test.describe("Optional signup smoke", () => {
     await page.goto("/signup");
     await expect(page.getByRole("heading", { name: /create account/i })).toBeVisible();
     await page.getByPlaceholder(/how others see you/i).fill(displayName);
-    await page.getByPlaceholder(/you@school\.edu/i).fill(`${username}@example.com`);
+    const email = `${username}@example.com`;
+    await page.getByPlaceholder(/you@school\.edu/i).fill(email);
+    const sendCode = page.getByRole("button", { name: /send code|获取验证码/i });
+    const otpResponse = page.waitForResponse(
+      (res) => res.url().includes("/api/auth/email/send-otp") && res.request().method() === "POST",
+    );
+    await sendCode.click();
+    const otpRes = await otpResponse;
+    const otpJson = (await otpRes.json()) as { data?: { devCode?: string } };
+    const code = otpJson.data?.devCode;
+    if (!code) {
+      throw new Error("Expected devCode from /api/auth/email/send-otp in non-production.");
+    }
+    await page.getByPlaceholder(/6.digit|6 位/i).fill(code);
     const pwInputs = page.locator('input[type="password"]');
     await pwInputs.nth(0).fill(password);
     await pwInputs.nth(1).fill(password);
     await page.getByRole("button", { name: "Create account" }).click();
-    await page.waitForURL(/\/onboarding/, { timeout: 30_000 });
-    await expect(page.getByRole("heading", { name: /set up your profile/i })).toBeVisible();
+    await page.waitForURL(/\/home/, { timeout: 30_000 });
   });
 });

@@ -31,6 +31,11 @@ export async function getRecommendedClassmatesForViewer(
   if (hits.length === 0) return [];
 
   const otherIds = hits.map((h) => h.userId);
+  const recommendationOptOut = await prisma.user.findMany({
+    where: { id: { in: otherIds }, hideFromRecommendations: true },
+    select: { id: true },
+  });
+  const hiddenFromRecommendations = new Set(recommendationOptOut.map((u) => u.id));
   const activeConnections = await prisma.connection.findMany({
     where: {
       status: ConnectionStatus.ACTIVE,
@@ -46,7 +51,7 @@ export async function getRecommendedClassmatesForViewer(
   );
 
   return hits
-    .filter((h) => !connectedUserIds.has(h.userId))
+    .filter((h) => !connectedUserIds.has(h.userId) && !hiddenFromRecommendations.has(h.userId))
     .slice(0, limit)
     .map((h) => ({
       userId: h.userId,

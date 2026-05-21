@@ -51,6 +51,10 @@ export function createSignupEmailSchema(displayNameMessages: SignupDisplayNameMe
   return z
     .object({
       email: emailFieldSchema,
+      code: z
+        .string()
+        .trim()
+        .regex(/^\d{6}$/, "Enter the 6-digit verification code."),
       displayName: signupDisplayNameField(displayNameMessages),
       password: z.string().min(8, "Password must be at least 8 characters."),
       confirmPassword: z.string().min(1, "Confirm your password."),
@@ -96,6 +100,11 @@ export const signupPhoneSchema = createSignupPhoneSchema(SIGNUP_DISPLAY_NAME_MES
 
 export const phoneSendOtpSchema = z.object({
   phone: z.string().trim().min(1, "Enter your phone number."),
+  purpose: z.enum(["signup"]),
+});
+
+export const emailSendOtpSchema = z.object({
+  email: emailFieldSchema,
   purpose: z.enum(["signup"]),
 });
 

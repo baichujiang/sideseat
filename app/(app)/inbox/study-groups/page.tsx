@@ -27,10 +27,6 @@ export default async function InboxStudyGroupsPage() {
     );
   }
 
-  if (!sessionUser.onboardingComplete) {
-    redirect("/onboarding");
-  }
-
   const { merged } = await getInboxMergeBundle(sessionUser.id);
   const groups = merged.filter((item) => item.kind === "group");
 

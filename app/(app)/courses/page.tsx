@@ -2,7 +2,6 @@ import type { Route } from "next";
 import Link from "next/link";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
-import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
 import { RecommendedClassmatesRail } from "@/components/classmates/recommended-classmates-rail";
 import { CoursesSchoolSelect } from "@/components/courses/courses-school-select";
 import { inboxChatListUlClassName } from "@/components/inbox/inbox-conversation-tile";
@@ -96,7 +95,7 @@ export default async function CoursesPage({
     allowedSchools.includes(DEFAULT_SCHOOL) ? DEFAULT_SCHOOL : (allowedSchools[0] ?? DEFAULT_SCHOOL);
   const requestedSchool =
     normalizeSchoolCode(query.school) ??
-    (sessionUser?.onboardingComplete ? normalizeSchoolCode(sessionUser.school) : null) ??
+    (sessionUser ? normalizeSchoolCode(sessionUser.school) : null) ??
     schoolFallback;
   const selectedSchool: SchoolCode =
     allowedSchools.length > 0 && !allowedSchools.includes(requestedSchool) ?
@@ -303,9 +302,6 @@ export default async function CoursesPage({
 
   return (
     <div className="space-y-3 pb-4">
-      {!user.onboardingComplete ? (
-        <OnboardingContinueCta title={c.onboardingCoursesTitle} body={c.onboardingCoursesBody} />
-      ) : null}
       <CoursesHeader
         selectedSchool={selectedSchool}
         allowedSchools={allowedSchools}

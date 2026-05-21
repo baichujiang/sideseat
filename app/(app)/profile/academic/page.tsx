@@ -15,8 +15,6 @@ export default async function ProfileAcademicPage() {
   const locale = await getServerAppLocale();
   const ui = getMessages(locale);
   if (!user) redirect('/login');
-  if (!user.onboardingComplete) redirect('/onboarding');
-
   const profileUser = await prisma.user.findUnique({
     where: { id: user.id },
     include: { userLanguages: true },
@@ -74,6 +72,8 @@ export default async function ProfileAcademicPage() {
           allowInvitationNotes: user.allowInvitationNotes,
           contactInfoOptIn: user.contactInfoOptIn,
           hideFromCourseMembers: user.hideFromCourseMembers,
+          hideFromDiscovery: user.hideFromDiscovery,
+          hideFromRecommendations: user.hideFromRecommendations,
         }}
       />
     </div>

@@ -24,9 +24,6 @@ export default async function ToReplyPage() {
       </div>
     );
   }
-  if (!sessionUser.onboardingComplete) {
-    redirect("/onboarding");
-  }
   const user = sessionUser;
 
   const connections = await prisma.connection.findMany({

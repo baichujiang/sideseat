@@ -7,8 +7,6 @@ import { getSessionUser } from "@/lib/auth/session";
 export default async function DeleteAccountPage() {
   const user = await getSessionUser();
   if (!user) redirect("/login");
-  if (!user.onboardingComplete) redirect("/onboarding");
-
   return (
     <div className="space-y-5 pb-2">
       <header className="flex items-center gap-2 px-0.5">

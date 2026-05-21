@@ -34,7 +34,13 @@ export const profileSchema = z.object({
   degreeLevel: z.enum(DEGREE_LEVELS, {
     errorMap: () => ({ message: "Pick a degree level." }),
   }),
-  major: z.string().min(2).max(160),
+  major: z
+    .string()
+    .max(160)
+    .transform((s) => s.trim())
+    .refine((s) => s === "" || s.length >= 2, {
+      message: "Pick a major or leave it as not specified.",
+    }),
   semester: z.coerce.number().int().min(1).max(MAX_SEMESTER),
   /** Languages + level (shown on profile / Discover). */
   languages: z
@@ -59,4 +65,6 @@ export const profileSchema = z.object({
   allowInvitationNotes: z.boolean(),
   contactInfoOptIn: z.boolean(),
   hideFromCourseMembers: z.boolean(),
+  hideFromDiscovery: z.boolean(),
+  hideFromRecommendations: z.boolean(),
 });

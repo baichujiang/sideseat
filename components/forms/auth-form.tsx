@@ -41,6 +41,7 @@ function EmailSignupBlock({
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState("");
+  const [otpSending, setOtpSending] = useState(false);
   const schema = useMemo(
     () =>
       createSignupEmailSchema({
@@ -56,6 +57,7 @@ function EmailSignupBlock({
     defaultValues: {
       displayName: "",
       email: "",
+      code: "",
       password: initialPassword,
       confirmPassword: "",
     },
@@ -67,12 +69,42 @@ function EmailSignupBlock({
       form.reset({
         displayName: "",
         email: id,
+        code: "",
         password: initialPassword,
         confirmPassword: "",
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- seed from URL once; avoid reset loops
   }, [initialIdentifier, initialPassword]);
+
+  async function sendSignupOtp() {
+    const email = form.getValues("email").trim();
+    if (!email) {
+      form.setError("email", { type: "manual", message: af.enterEmailAddress });
+      return;
+    }
+    setOtpSending(true);
+    setServerError("");
+    try {
+      const response = await fetch("/api/auth/email/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, purpose: "signup" }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        setServerError(typeof payload.error === "string" ? payload.error : af.unableToContinue);
+        return;
+      }
+      if (typeof payload.data?.devCode === "string") {
+        form.setValue("code", payload.data.devCode, { shouldValidate: true });
+      }
+      setServerError("");
+    } finally {
+      setOtpSending(false);
+    }
+  }
 
   const onSubmit = form.handleSubmit(async (values) => {
     setServerError("");
@@ -90,7 +122,7 @@ function EmailSignupBlock({
     if (payload.data?.accessToken) {
       setAccessToken(payload.data.accessToken);
     }
-    router.push("/onboarding");
+    router.push("/home");
     router.refresh();
   });
 
@@ -107,13 +139,36 @@ function EmailSignupBlock({
       </div>
       <div className="space-y-1.5">
         <label className="text-sm font-medium">{af.emailLabel}</label>
-        <Input
-          type="email"
-          autoComplete="email"
-          placeholder={af.emailPlaceholder}
-          {...form.register("email")}
-        />
+        <div className="flex gap-2">
+          <Input
+            type="email"
+            autoComplete="email"
+            placeholder={af.emailPlaceholder}
+            className="min-w-0 flex-1"
+            {...form.register("email")}
+          />
+          <Button
+            type="button"
+            variant="secondary"
+            className="shrink-0"
+            disabled={otpSending}
+            onClick={() => void sendSignupOtp()}
+          >
+            {otpSending ? af.sendingCode : af.sendEmailCode}
+          </Button>
+        </div>
         <FormMessage message={form.formState.errors.email?.message} />
+        <p className="text-[11px] leading-snug text-muted-foreground">{af.emailCodeSentHint}</p>
+      </div>
+      <div className="space-y-1.5">
+        <label className="text-sm font-medium">{af.emailOtpCodeLabel}</label>
+        <Input
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          placeholder={af.otpCodePlaceholder}
+          {...form.register("code")}
+        />
+        <FormMessage message={form.formState.errors.code?.message} />
       </div>
       <div className="space-y-1.5">
         <label className="text-sm font-medium">{af.passwordLabel}</label>
@@ -232,7 +287,7 @@ function PhoneSignupBlock({
     if (payload.data?.accessToken) {
       setAccessToken(payload.data.accessToken);
     }
-    router.push("/onboarding");
+    router.push("/home");
     router.refresh();
   });
 
@@ -358,10 +413,7 @@ export function AuthForm({
     if (payload.data?.accessToken) {
       setAccessToken(payload.data.accessToken);
     }
-    const nextPath = payload.data?.onboardingComplete
-      ? safeReturnPath(returnTo, "/home")
-      : "/onboarding";
-    router.push(nextPath as Route);
+    router.push(safeReturnPath(returnTo, "/home") as Route);
     router.refresh();
   });
 

@@ -230,10 +230,6 @@ export default async function DiscoverPostDetailPage({
     );
   }
 
-  if (!sessionUser.onboardingComplete) {
-    redirect("/onboarding");
-  }
-
   const [data, saveRow] = await Promise.all([
     getClassmatePostDetailForViewer(postId, sessionUser.id),
     prisma.classmatePostSave.findUnique({

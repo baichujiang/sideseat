@@ -22,9 +22,7 @@ export async function GET(request: NextRequest) {
   const requestedSchool = normalizeSchoolCode(url.searchParams.get("school"));
   const school =
     requestedSchool ??
-    (user && user.onboardingComplete
-      ? (normalizeSchoolCode(user.school) ?? DEFAULT_SCHOOL)
-      : DEFAULT_SCHOOL);
+    (user ? (normalizeSchoolCode(user.school) ?? DEFAULT_SCHOOL) : DEFAULT_SCHOOL);
   const semesterLabel = getCurrentSemesterLabel();
 
   if (raw.length < 2) {
@@ -73,7 +71,7 @@ export async function GET(request: NextRequest) {
 
   const ids = matches.map((c) => c.id);
   const [enrolledRows, savedRows] =
-    user && user.onboardingComplete
+    user
       ? await Promise.all([
           prisma.userCourse.findMany({
             where: { userId: user.id, courseId: { in: ids } },

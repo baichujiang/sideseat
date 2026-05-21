@@ -1,5 +1,6 @@
 import "server-only";
 
+import { normalizeSignupEmail } from "@/lib/auth/normalize-email";
 import { normalizePhone } from "@/lib/auth/phone";
 import { prisma } from "@/lib/db/prisma";
 
@@ -17,8 +18,10 @@ export async function findUserForLogin(identifier: string) {
   }
 
   if (identifierLooksLikeEmail(trimmed)) {
+    const email = normalizeSignupEmail(trimmed);
+    if (!email) return null;
     return prisma.user.findUnique({
-      where: { email: trimmed.toLowerCase() },
+      where: { email },
     });
   }
 

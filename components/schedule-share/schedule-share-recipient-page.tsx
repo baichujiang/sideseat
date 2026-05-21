@@ -4,7 +4,6 @@ import type { Route } from "next";
 import { X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
-import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { LinkButton } from "@/components/ui/link-button";
 import { ScheduleShareGuestViewer } from "@/components/schedule-share/schedule-share-guest-viewer";
@@ -147,9 +146,6 @@ export function ScheduleShareRecipientPage({
           <h1 className="text-[17px] font-semibold text-foreground">{s.publicUnavailableTitle}</h1>
           <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">{s.publicUnavailableBody}</p>
         </div>
-        {showGuestNudge ? (
-          <GuestAppCta headline={s.registerNudgeHeadline} body={s.registerNudgeBody} returnTo={returnTo} />
-        ) : null}
       </div>
     );
   }
@@ -161,10 +157,9 @@ export function ScheduleShareRecipientPage({
     selectionPreview: proposalSelection ? ui.schedule.newEvent : undefined,
   };
 
-  const showGuestProposeBanner = allowProposals && showGuestNudge && !isLinkOwner;
   const showOwnerPreviewBanner = allowProposals && isLinkOwner;
-  const showVisitorProposeBanner =
-    allowProposals && isSignedIn && !isLinkOwner && canPickNewTime && !proposalSelection;
+  const showProposeHintBanner =
+    allowProposals && !isLinkOwner && canPickNewTime && !proposalSelection;
 
   const panelLabels = {
     proposalFormTitle: s.proposalFormTitle,
@@ -217,9 +212,7 @@ export function ScheduleShareRecipientPage({
         }
       : storedDraft;
 
-  const showFooter =
-    (allowProposals && isSignedIn && myProposal && !isEditingProposal) ||
-    (!allowProposals && showGuestNudge);
+  const showFooter = allowProposals && isSignedIn && myProposal && !isEditingProposal;
 
   return (
     <>
@@ -252,17 +245,7 @@ export function ScheduleShareRecipientPage({
           </div>
         ) : null}
 
-        {showGuestProposeBanner ? (
-          <div className="shrink-0 border-b border-border/50 px-3 py-2">
-            <GuestAppCta
-              headline={s.proposeSignInFirstHeadline}
-              body={s.proposeSignInFirstBody}
-              returnTo={returnTo}
-            />
-          </div>
-        ) : null}
-
-        {showVisitorProposeBanner ? (
+        {showProposeHintBanner ? (
           <p
             className={cn(
               "shrink-0 border-b border-border/50 px-4 py-2 text-center text-[12px] leading-snug text-muted-foreground",
@@ -301,9 +284,6 @@ export function ScheduleShareRecipientPage({
                 labels={myProposalCardLabels}
                 onEdit={myProposal.status === "PENDING" ? startEditProposal : undefined}
               />
-            ) : null}
-            {!allowProposals && showGuestNudge ? (
-              <GuestAppCta headline={s.registerNudgeHeadline} body={s.registerNudgeBody} returnTo={returnTo} />
             ) : null}
           </div>
         ) : null}

@@ -1,0 +1,3 @@
+ALTER TABLE "User"
+  ADD COLUMN IF NOT EXISTS "hideFromDiscovery" BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS "hideFromRecommendations" BOOLEAN NOT NULL DEFAULT false;

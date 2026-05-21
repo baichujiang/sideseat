@@ -107,7 +107,8 @@ See [prisma/schema.prisma](prisma/schema.prisma) for the full schema.
 
 ### Auth
 
-- `POST /api/auth/signup-email` — register with **email + password** (internal `username` is auto-allocated)
+- `POST /api/auth/email/send-otp` — send email signup code (`{ "email": "…", "purpose": "signup" }`); rejects already-registered addresses
+- `POST /api/auth/signup-email` — register with **verified email + password** (`code` from email OTP; one account per normalized email)
 - `POST /api/auth/phone/send-otp` — send SMS signup code (`{ "phone": "…", "purpose": "signup" }`)
 - `POST /api/auth/signup-phone` — register with **phone + SMS code + password**
 - `POST /api/auth/signup` — legacy **username + password** signup (still supported for scripts / old clients)

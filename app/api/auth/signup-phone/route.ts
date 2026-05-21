@@ -1,10 +1,8 @@
-import { LanguageProficiency, LanguageTag } from "@prisma/client";
-
 import { normalizePhone } from "@/lib/auth/phone";
 import { verifyPhoneSignupOtp } from "@/lib/auth/phone-otp";
 import { hashPassword } from "@/lib/auth/password";
 import { allocateUniqueUsername } from "@/lib/auth/random-username";
-import { SIGNUP_DEFAULT_PROFILE } from "@/lib/auth/signup-defaults";
+import { SIGNUP_DEFAULT_PROFILE, signupDefaultUserLanguages } from "@/lib/auth/signup-defaults";
 import { createSession } from "@/lib/auth/session";
 import { randomAvatarId } from "@/lib/constants/avatars";
 import { isDatabaseUnreachable, warnDatabaseUnreachableThrottled } from "@/lib/db/prisma-errors";
@@ -44,11 +42,8 @@ export async function POST(request: Request) {
         hashedPassword: await hashPassword(values.password),
         avatarUrl: randomAvatarId(),
         nickname: values.displayName,
-        school: SIGNUP_DEFAULT_PROFILE.school,
-        userLanguages: {
-          create: [{ tag: LanguageTag.ENGLISH, proficiency: LanguageProficiency.FLUENT }],
-        },
-        onboardingComplete: false,
+        ...SIGNUP_DEFAULT_PROFILE,
+        userLanguages: signupDefaultUserLanguages(),
       },
     });
 

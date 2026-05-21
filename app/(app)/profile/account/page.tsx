@@ -16,8 +16,6 @@ import { getServerAppLocale } from "@/lib/i18n/server-locale";
 export default async function ProfileAccountPage() {
   const user = await getSessionUser();
   if (!user) redirect('/login');
-  if (!user.onboardingComplete) redirect('/onboarding');
-
   const locale = await getServerAppLocale();
   const m = getMessages(locale);
   const blockedCount = await prisma.block.count({ where: { blockerId: user.id } });

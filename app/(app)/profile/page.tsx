@@ -4,7 +4,6 @@ import { Bookmark, CalendarClock, ChevronRight, Settings, SquarePen } from "luci
 import type { LucideIcon } from "lucide-react";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
-import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
 import { LogoutForm } from "@/components/auth/logout-form";
 import { StudentVerificationForm } from "@/components/forms/student-verification-form";
 import { MePageInstallCard } from "@/components/pwa/me-page-install-card";
@@ -161,10 +160,6 @@ export default async function ProfilePage({
           </nav>
       ) : null}
 
-      {!user.onboardingComplete ? (
-        <OnboardingContinueCta title={ui.onboarding.meTitle} body={ui.onboarding.meBody} />
-      ) : null}
-
       {query.verification === "success" ? (
         <p className="rounded-xl border border-[#d5e9df] bg-[#eef8f2] px-3 py-2 text-[13px] text-foreground">
           {ui.me.verificationSuccessBanner}
@@ -206,6 +201,8 @@ export default async function ProfilePage({
               allowInvitationNotes: user.allowInvitationNotes,
               contactInfoOptIn: user.contactInfoOptIn,
               hideFromCourseMembers: user.hideFromCourseMembers,
+              hideFromDiscovery: user.hideFromDiscovery,
+              hideFromRecommendations: user.hideFromRecommendations,
             }}
             schoolSummary={{
               schoolShort,

@@ -1,7 +1,6 @@
 import type { Weekday } from "@prisma/client";
 import { addDays, subDays } from "date-fns";
 import { GuestAppCta } from "@/components/app/guest-app-cta";
-import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
 import {
   ScheduleSurface,
   type ClassBlock,
@@ -211,11 +210,7 @@ export default async function HomePage() {
         semesterStartISO={semesterRange.start.toISOString()}
         semesterEndISO={semesterRange.end.toISOString()}
         homeGreeting={{ nickname: user.nickname, avatarUrl: user.avatarUrl }}
-        homeBelowHeaderSlot={
-          !user.onboardingComplete ? (
-            <OnboardingContinueCta title={ui.onboarding.homeTitle} body={ui.onboarding.homeBody} />
-          ) : null
-        }
+        homeBelowHeaderSlot={null}
       />
     </div>
   );

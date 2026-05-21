@@ -25,9 +25,6 @@ export default async function ContactsPage() {
       </div>
     );
   }
-  if (!sessionUser.onboardingComplete) {
-    redirect("/onboarding");
-  }
   const user = sessionUser;
 
   const links = await prisma.friendLink.findMany({

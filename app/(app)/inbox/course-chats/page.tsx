@@ -27,10 +27,6 @@ export default async function InboxCourseChatsPage() {
     );
   }
 
-  if (!sessionUser.onboardingComplete) {
-    redirect("/onboarding");
-  }
-
   const { merged } = await getInboxMergeBundle(sessionUser.id);
   const courses = merged.filter((item) => item.kind === "course");
 

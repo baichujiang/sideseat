@@ -38,19 +38,12 @@ export async function resolveOnboardedUserForApi(): Promise<
   if (!user) {
     return { ok: false, status: 401, error: "Sign in required." };
   }
-  if (!user.onboardingComplete) {
-    return { ok: false, status: 403, error: "Finish onboarding before continuing." };
-  }
   bumpLastActiveIfStale(user);
   return { ok: true, user };
 }
 
 export async function requireOnboardedUser() {
   const user = await requireUser();
-
-  if (!user.onboardingComplete) {
-    redirect("/onboarding");
-  }
 
   bumpLastActiveIfStale(user);
 

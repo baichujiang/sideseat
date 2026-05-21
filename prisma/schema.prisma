@@ -300,6 +300,10 @@ model User {
   allowInvitationNotes         Boolean                  @default(true)
   contactInfoOptIn             Boolean                  @default(false)
   hideFromCourseMembers        Boolean                  @default(false)
+  /// Excluded from Discover people search and matching lists.
+  hideFromDiscovery            Boolean                  @default(false)
+  /// Excluded from “people you may know” rails (Courses, Inbox).
+  hideFromRecommendations      Boolean                  @default(false)
   onboardingComplete           Boolean                  @default(false)
   /// First-run product tutorial (tab overview); set when user dismisses; optional cross-device sync.
   productTutorialDismissedAt   DateTime?
@@ -368,6 +372,18 @@ model PhoneOtpChallenge {
   createdAt DateTime @default(now())
 
   @@index([phone, purpose, createdAt])
+}
+
+/// Short-lived email OTP for signup (one account per verified address).
+model EmailOtpChallenge {
+  id        String   @id @default(cuid())
+  email     String
+  codeHash  String
+  purpose   String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email, purpose, createdAt])
 }
 
 model ProductFeedback {
