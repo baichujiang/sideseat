@@ -7,7 +7,10 @@ import {
   SCHEDULE_SHARE_DEFAULT_TTL_DAYS,
   SCHEDULE_SHARE_MAX_TTL_DAYS,
 } from "@/lib/schedule-share/constants";
-import { buildPublicScheduleShareSnapshotForActiveLink } from "@/lib/schedule-share/public-snapshot";
+import {
+  buildOwnerPreviewScheduleShareSnapshotForActiveLink,
+  buildPublicScheduleShareSnapshotForActiveLink,
+} from "@/lib/schedule-share/public-snapshot";
 import {
   normalizeRevealConfig,
   validateRevealCategoryOwnership,
@@ -44,6 +47,7 @@ export async function persistScheduleShareLinkUpdate(
   const normalizedReveal = normalizeRevealConfig({
     categoryIds: rc.categoryIds ?? [],
     presetKeys: rc.presetKeys ?? [],
+    includedDates: rc.includedDates,
   });
 
   const owned = await validateRevealCategoryOwnership(db, ownerUserId, normalizedReveal.categoryIds);
@@ -76,7 +80,7 @@ export async function persistScheduleShareLinkUpdate(
       rangeEnd,
       revealConfig: normalizedReveal as Prisma.InputJsonValue,
       allowGuestProposals: parsed.data.allowGuestProposals ?? true,
-      usageLimit: parsed.data.usageLimit ?? "UNLIMITED",
+      usageLimit: parsed.data.usageLimit ?? "SINGLE_USE",
       expiresAt,
     },
   });
@@ -91,4 +95,8 @@ export async function persistScheduleShareLinkUpdate(
 
 export async function buildSnapshotForLink(db: Db, link: ScheduleShareLinkWithOwner) {
   return buildPublicScheduleShareSnapshotForActiveLink(db, link);
+}
+
+export async function buildOwnerPreviewSnapshotForLink(db: Db, link: ScheduleShareLinkWithOwner) {
+  return buildOwnerPreviewScheduleShareSnapshotForActiveLink(db, link);
 }

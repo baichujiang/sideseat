@@ -16,7 +16,7 @@ export const calendarEventSchema = z
     repeat: z.enum(["NONE", "DAILY", "WEEKLY", "BIWEEKLY", "MONTHLY", "YEARLY"]).default("NONE"),
     repeatUntil: z.string().optional().or(z.literal("")),
     /** Optional calendar list / category */
-    categoryId: z.string().cuid().nullable().optional(),
+    categoryId: z.string().cuid().nullish(),
   })
   .superRefine((value, ctx) => {
     const start = new Date(value.startAt);

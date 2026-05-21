@@ -5,6 +5,7 @@ import { addMinutes, addMonths, format } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { apiFetch } from "@/lib/auth/api-fetch";
 import {
   EventDateTimeRow,
   InlineDateCalendar,
@@ -179,7 +180,14 @@ export function ScheduleAddPanel({
       calendarCategories.find((c) => c.presetKey === "study")?.id ??
       calendarCategories[0]?.id ??
       null;
-    setCategoryId(initialCategoryId !== undefined ? initialCategoryId : defaultCat);
+    const resolvedInitialCategory =
+      initialCategoryId !== undefined
+        ? initialCategoryId &&
+          calendarCategories.some((category) => category.id === initialCategoryId)
+          ? initialCategoryId
+          : null
+        : defaultCat;
+    setCategoryId(resolvedInitialCategory);
   }, [
     open,
     selectedDate,
@@ -249,27 +257,61 @@ export function ScheduleAddPanel({
   async function submitEntry() {
     setSaving(true);
     setError("");
-    const response = await fetch(mode === "edit" && entryId ? `/api/calendar/events/${entryId}` : "/api/calendar/events", {
-      method: mode === "edit" && entryId ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: mode === "create" ? title.trim() || sch.newEvent : title.trim(),
-        location: location.trim(),
-        note: note.trim(),
-        startAt: new Date(startAt).toISOString(),
-        endAt: new Date(endAt).toISOString(),
-        withUserIds,
-        repeat,
-        repeatUntil: repeat === "NONE" ? "" : new Date(`${repeatUntil}T23:59`).toISOString(),
-        categoryId,
-      }),
-    });
-    const payload = await response.json().catch(() => ({}));
+
+    const start = new Date(startAt);
+    const end = new Date(endAt);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
+      setSaving(false);
+      setError(sch.addPanelInvalidTimes);
+      return;
+    }
+    if (mode === "edit" && !title.trim()) {
+      setSaving(false);
+      setError(sch.addPanelTitleRequired);
+      return;
+    }
+
+    const validCategoryId =
+      categoryId && calendarCategories.some((category) => category.id === categoryId)
+        ? categoryId
+        : null;
+    const validWithUserIds = withUserIds.filter((id) =>
+      companionOptions.some((person) => person.id === id),
+    );
+
+    let repeatUntilPayload = "";
+    if (repeat !== "NONE") {
+      const untilDate = repeatUntil >= format(start, "yyyy-MM-dd") ? repeatUntil : format(start, "yyyy-MM-dd");
+      repeatUntilPayload = new Date(`${untilDate}T23:59:59`).toISOString();
+    }
+
+    const response = await apiFetch(
+      mode === "edit" && entryId ? `/api/calendar/events/${entryId}` : "/api/calendar/events",
+      {
+        method: mode === "edit" && entryId ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: mode === "create" ? title.trim() || sch.newEvent : title.trim(),
+          location: location.trim(),
+          note: note.trim(),
+          startAt: start.toISOString(),
+          endAt: end.toISOString(),
+          withUserIds: validWithUserIds,
+          repeat,
+          repeatUntil: repeatUntilPayload,
+          categoryId: validCategoryId,
+        }),
+      },
+    );
+    const payload = (await response.json().catch(() => ({}))) as {
+      success?: boolean;
+      error?: string;
+    };
     setSaving(false);
 
     if (!response.ok) {
       setError(
-        typeof payload.error === "string"
+        typeof payload.error === "string" && payload.error.trim()
           ? payload.error
           : mode === "edit"
             ? sch.addPanelSaveErrorEdit

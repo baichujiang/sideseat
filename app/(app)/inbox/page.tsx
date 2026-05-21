@@ -4,6 +4,7 @@ import { InboxRealtimeRefresh } from "@/components/inbox/inbox-realtime-refresh"
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { getSessionUser } from "@/lib/auth/session";
 import { getInboxMergeBundle } from "@/lib/queries/inbox-merge";
+import { getRecommendedClassmatesForViewer } from "@/lib/queries/recommended-classmates";
 import { getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 
@@ -24,7 +25,10 @@ export default async function InboxPage() {
   }
   const user = sessionUser;
 
-  const { merged, plansNeedingYourAction } = await getInboxMergeBundle(user.id);
+  const [{ merged, plansNeedingYourAction }, recommendedClassmates] = await Promise.all([
+    getInboxMergeBundle(user.id),
+    getRecommendedClassmatesForViewer(user.id),
+  ]);
   const directContacts = merged
     .filter((item): item is Extract<(typeof merged)[number], { kind: "direct" }> => item.kind === "direct")
     .filter((item) => item.connection.userAId !== item.connection.userBId)
@@ -83,6 +87,7 @@ export default async function InboxPage() {
         plansNeedingYourAction={plansNeedingYourAction}
         initialContacts={directContacts}
         showCreateSheet={user.onboardingComplete}
+        recommendedClassmates={recommendedClassmates}
       />
     </div>
   );

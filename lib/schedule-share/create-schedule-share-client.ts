@@ -1,14 +1,14 @@
 "use client";
 
 import { apiFetch } from "@/lib/auth/api-fetch";
-import {
-  buildDefaultScheduleShareCreatePayload,
-  pathFromScheduleShareUrl,
-} from "@/lib/schedule-share/default-create-payload";
+import { buildDefaultScheduleShareCreatePayload } from "@/lib/schedule-share/default-create-payload";
+import { withReturnTo } from "@/lib/nav/back";
+import { scheduleShareOwnerEditPathFromRecipientUrl } from "@/lib/schedule-share/share-link-urls";
 
 export async function createScheduleSharePath(
   messages: { createFailed: string; networkError: string },
-): Promise<{ ok: true; path: string } | { ok: false; error: string }> {
+  options?: { returnTo?: string | null },
+): Promise<{ ok: true; path: string; shareUrl: string } | { ok: false; error: string }> {
   const body = buildDefaultScheduleShareCreatePayload();
 
   let res: Response;
@@ -33,5 +33,10 @@ export async function createScheduleSharePath(
     return { ok: false, error: messages.createFailed };
   }
 
-  return { ok: true, path: pathFromScheduleShareUrl(shareUrl) };
+  const editPath = scheduleShareOwnerEditPathFromRecipientUrl(shareUrl);
+  return {
+    ok: true,
+    path: options?.returnTo ? withReturnTo(editPath, options.returnTo) : editPath,
+    shareUrl,
+  };
 }

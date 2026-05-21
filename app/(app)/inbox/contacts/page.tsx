@@ -18,7 +18,7 @@ export default async function ContactsPage() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <BackLink href="/inbox" label="Back to Chats" />
+          <BackLink fallback="/inbox" label="Back to Chats" />
           <h1 className="page-screen-title">Close friends</h1>
         </div>
         <GuestAppCta returnTo="/inbox/contacts" />
@@ -53,7 +53,7 @@ export default async function ContactsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <BackLink href="/inbox" label="Back to Chats" />
+        <BackLink fallback="/inbox" label="Back to Chats" />
         <div>
           <h1 className="page-screen-title">Close friends</h1>
         </div>

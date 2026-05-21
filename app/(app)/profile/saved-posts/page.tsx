@@ -77,7 +77,7 @@ export default async function ProfileSavedPostsPage() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <BackLink href="/profile" label={ui.common.back} />
+          <BackLink fallback="/profile" label={ui.common.back} />
           <h1 className="page-screen-title">{sc.screenTitle}</h1>
         </div>
         <GuestAppCta returnTo="/profile/saved-posts" />
@@ -99,7 +99,7 @@ export default async function ProfileSavedPostsPage() {
   return (
     <div className="space-y-5 px-0.5">
       <div className="flex items-start gap-2">
-        <BackLink href="/profile" label={ui.common.back} className="mt-0.5" />
+        <BackLink fallback="/profile" label={ui.common.back} className="mt-0.5" />
         <div className="min-w-0">
           <h1 className="page-screen-title">{sc.screenTitle}</h1>
           <p className="page-screen-subtitle mt-0.5">{sc.screenSubtitle}</p>

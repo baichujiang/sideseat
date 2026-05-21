@@ -1,11 +1,15 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { addDays, max as maxDate, min as minDate, startOfDay } from "date-fns";
 
+import { normalizeCalendarCategoryHex } from "@/lib/calendar/calendar-category-colors";
 import { isCalendarCourseMirrorRow } from "@/lib/calendar/calendar-course-mirror";
+import { scheduleDateKeyInBerlin } from "@/lib/calendar/schedule-berlin";
+import { shareDateKeysInInclusiveRange } from "@/lib/schedule-share/share-selected-days";
 import { loadIcsSubscriptionStudyEntries } from "@/lib/calendar/load-ics-subscription-entries";
 import {
   type NormalizedRevealConfig,
   isBlockRevealed,
+  shareIncludedDateKeySet,
 } from "@/lib/schedule-share/reveal-config";
 
 export type InternalScheduleBlock = {
@@ -15,6 +19,8 @@ export type InternalScheduleBlock = {
   location?: string | null;
   internalCategoryId?: string | null;
   internalPresetKey?: string | null;
+  internalCategoryColor?: string | null;
+  internalCategoryName?: string | null;
   internalSource?: string;
 };
 
@@ -26,12 +32,17 @@ export type PublicScheduleBlock = {
   end: string;
   title?: string;
   location?: string;
+  categoryId?: string | null;
+  categoryName?: string;
+  categoryColor?: string;
 };
 
 export type PublicScheduleShareSnapshot = {
   ownerDisplayLabel: string;
   rangeStart: string;
   rangeEnd: string;
+  /** Berlin yyyy-MM-dd keys actually shared (may be non-contiguous). */
+  includedDates: string[];
   expiresAt: string | null;
   allowGuestProposals: boolean;
   blocks: PublicScheduleBlock[];
@@ -163,6 +174,22 @@ export async function collectInternalScheduleBlocks(
   const presetByCategoryId = Object.fromEntries(
     calendarCategories.map((c) => [c.id, c.presetKey ?? null] as const),
   );
+  const colorByCategoryId = Object.fromEntries(
+    calendarCategories.map(
+      (c) => [c.id, normalizeCalendarCategoryHex(c.color) ?? "#64748B"] as const,
+    ),
+  );
+  const nameByCategoryId = Object.fromEntries(
+    calendarCategories.map((c) => [c.id, c.name] as const),
+  );
+
+  function categoryMeta(categoryId: string | null | undefined) {
+    if (!categoryId) return { color: null as string | null, name: null as string | null };
+    return {
+      color: colorByCategoryId[categoryId] ?? null,
+      name: nameByCategoryId[categoryId] ?? null,
+    };
+  }
 
   const mirroredSlotKeySet = new Set(
     mirroredRows.map((r) => r.courseScheduleMirrorKey).filter((k): k is string => Boolean(k)),
@@ -176,6 +203,7 @@ export async function collectInternalScheduleBlocks(
     const mirror = isCalendarCourseMirrorRow(e);
     const internalPresetKey = mirror ? "course" : (e.category?.presetKey ?? null);
     const internalCategoryId = mirror ? courseCategoryId : e.categoryId;
+    const meta = categoryMeta(internalCategoryId);
     blocks.push({
       start: clipped.start,
       end: clipped.end,
@@ -183,6 +211,8 @@ export async function collectInternalScheduleBlocks(
       location: e.location,
       internalCategoryId,
       internalPresetKey,
+      internalCategoryColor: meta.color,
+      internalCategoryName: meta.name,
       internalSource: "calendar_entry",
     });
   }
@@ -205,6 +235,7 @@ export async function collectInternalScheduleBlocks(
         const clipped = clipBlock(start, end, rangeStart, rangeEnd);
         if (!clipped) continue;
         const titleParts = [m.course.code ? `[${m.course.code}]` : null, m.course.name].filter(Boolean);
+        const courseMeta = categoryMeta(courseCategoryId);
         blocks.push({
           start: clipped.start,
           end: clipped.end,
@@ -212,6 +243,8 @@ export async function collectInternalScheduleBlocks(
           location: s.location,
           internalCategoryId: courseCategoryId,
           internalPresetKey: "course",
+          internalCategoryColor: courseMeta.color,
+          internalCategoryName: courseMeta.name,
           internalSource: "course_session",
         });
       }
@@ -235,6 +268,7 @@ export async function collectInternalScheduleBlocks(
     const clipped = clipBlock(start, end, rangeStart, rangeEnd);
     if (!clipped) continue;
     const catId = ev.categoryId;
+    const icsMeta = categoryMeta(catId);
     blocks.push({
       start: clipped.start,
       end: clipped.end,
@@ -242,6 +276,8 @@ export async function collectInternalScheduleBlocks(
       location: ev.location,
       internalCategoryId: catId,
       internalPresetKey: catId ? (presetByCategoryId[catId] ?? null) : null,
+      internalCategoryColor: icsMeta.color,
+      internalCategoryName: icsMeta.name,
       internalSource: "ics_subscription",
     });
   }
@@ -257,44 +293,62 @@ export function internalBlocksToPublicSnapshot(args: {
   ownerDisplayLabel: string;
   linkExpiresAt: Date | null;
   allowGuestProposals: boolean;
+  /** When false, all days in [rangeStart, rangeEnd] are included (owner edit preview). */
+  scopeToIncludedDates?: boolean;
+  /** Owner settings calendar: show real titles/colors for every block (not guest privacy). */
+  forOwnerPreview?: boolean;
 }): PublicScheduleShareSnapshot {
-  const { internal, rangeStart, rangeEnd, reveal, ownerDisplayLabel, linkExpiresAt, allowGuestProposals } =
-    args;
+  const {
+    internal,
+    rangeStart,
+    rangeEnd,
+    reveal,
+    ownerDisplayLabel,
+    linkExpiresAt,
+    allowGuestProposals,
+    scopeToIncludedDates = true,
+    forOwnerPreview = false,
+  } = args;
 
-  const busyMerged = mergeIntervals(internal.map((b) => ({ start: b.start, end: b.end })));
-  const freeRanges = computeFreeRanges(rangeStart, rangeEnd, busyMerged);
+  const includedKeys = scopeToIncludedDates ? shareIncludedDateKeySet(reveal) : null;
+  const includedDates =
+    includedKeys && includedKeys.size > 0
+      ? [...includedKeys].sort()
+      : [...shareDateKeysInInclusiveRange(rangeStart, rangeEnd)].sort();
+  const scopedInternal = includedKeys
+    ? internal.filter((b) => includedKeys.has(scheduleDateKeyInBerlin(b.start)))
+    : internal;
+
+  const revealedInternal = scopedInternal.filter((b) => isBlockRevealed(b, reveal));
+  const busyMerged = mergeIntervals(revealedInternal.map((b) => ({ start: b.start, end: b.end })));
+  let freeRanges = computeFreeRanges(rangeStart, rangeEnd, busyMerged);
+  if (includedKeys && includedKeys.size > 0) {
+    freeRanges = freeRanges.filter((f) => includedKeys.has(scheduleDateKeyInBerlin(f.start)));
+  }
   const freeSlots = freeRanges.map((f) => ({ start: f.start.toISOString(), end: f.end.toISOString() }));
 
   const detailBlocks: PublicScheduleBlock[] = [];
-  const anonRaw: Array<{ start: Date; end: Date }> = [];
 
-  for (const b of internal) {
-    const revealed = isBlockRevealed(b, reveal);
-    if (revealed) {
-      detailBlocks.push({
-        kind: "busy_detail",
-        start: b.start.toISOString(),
-        end: b.end.toISOString(),
-        ...(b.title?.trim() ? { title: b.title.trim() } : {}),
-        ...(b.location?.trim() ? { location: b.location.trim() } : {}),
-      });
-    } else {
-      anonRaw.push({ start: b.start, end: b.end });
-    }
+  for (const b of revealedInternal) {
+    detailBlocks.push({
+      kind: "busy_detail",
+      start: b.start.toISOString(),
+      end: b.end.toISOString(),
+      ...(b.title?.trim() ? { title: b.title.trim() } : {}),
+      ...(b.location?.trim() ? { location: b.location.trim() } : {}),
+      ...(b.internalCategoryId ? { categoryId: b.internalCategoryId } : {}),
+      ...(b.internalCategoryName ? { categoryName: b.internalCategoryName } : {}),
+      ...(b.internalCategoryColor ? { categoryColor: b.internalCategoryColor } : {}),
+    });
   }
 
-  const anonMerged = mergeIntervals(anonRaw).map((x) => ({
-    kind: "busy_anonymous" as const,
-    start: x.start.toISOString(),
-    end: x.end.toISOString(),
-  }));
-
-  const blocks = [...detailBlocks, ...anonMerged].sort((a, b) => a.start.localeCompare(b.start));
+  const blocks = detailBlocks.sort((a, b) => a.start.localeCompare(b.start));
 
   return {
     ownerDisplayLabel,
     rangeStart: rangeStart.toISOString(),
     rangeEnd: rangeEnd.toISOString(),
+    includedDates,
     expiresAt: linkExpiresAt ? linkExpiresAt.toISOString() : null,
     allowGuestProposals,
     blocks,

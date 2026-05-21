@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { formatMessage } from "@/lib/i18n/messages";
 import type { InboxMerged } from "@/lib/queries/inbox-merge";
+import type { RecommendedClassmateRow } from "@/lib/queries/recommended-classmates";
 import { cn } from "@/lib/utils";
 
 type ContactRow = {
@@ -25,14 +26,17 @@ function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   const label = count > 99 ? "99+" : String(count);
   return (
-    <span className="pointer-events-none absolute right-1 top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-[#F43F5E] px-0.5 text-[9px] font-bold leading-none text-white shadow-sm ring-2 ring-background">
+    <span
+      className="flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full bg-[#F43F5E] px-1 text-[10px] font-bold leading-none tabular-nums text-white shadow-[0_0_0_1.5px_#F0ECE6] dark:shadow-[0_0_0_1.5px_rgb(15,23,42,0.85)]"
+      aria-hidden
+    >
       {label}
     </span>
   );
 }
 
 const chipPillBaseClass =
-  "relative flex h-10 min-h-[44px] min-w-0 w-full items-center justify-center gap-1 overflow-hidden rounded-full border px-2 shadow-[0_1px_3px_rgba(15,23,42,0.04)] transition-[box-shadow,transform,opacity] active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:shadow-[0_2px_8px_rgba(15,23,42,0.08)]";
+  "relative flex h-10 min-h-[44px] min-w-0 w-full items-center justify-center overflow-visible rounded-full border px-2 shadow-[0_1px_3px_rgba(15,23,42,0.04)] transition-[box-shadow,transform,opacity] active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:shadow-[0_2px_8px_rgba(15,23,42,0.08)]";
 
 const chipPillPrimaryClass =
   "border-[#E8E1D8] bg-[#EFF6FF] text-[#2563EB] dark:border-blue-800/40 dark:bg-blue-950/35 dark:text-blue-300";
@@ -68,14 +72,19 @@ function InboxNavChip({
       className={cn(
         chipPillBaseClass,
         variant === "primary" ? chipPillPrimaryClass : chipPillMutedClass,
-        typeof count === "number" && count > 0 ? "pr-4" : null,
       )}
     >
-      {typeof count === "number" ? <CountBadge count={count} /> : null}
-      <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center [&_svg]:h-[18px] [&_svg]:w-[18px]">
-        {icon}
+      <span className="inline-flex min-w-0 max-w-full items-center justify-center gap-1">
+        <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center [&_svg]:h-[18px] [&_svg]:w-[18px]">
+          {icon}
+        </span>
+        <span className="inline-flex min-w-0 items-center gap-0.5">
+          <span className="truncate text-[14px] font-semibold leading-none">{label}</span>
+          {typeof count === "number" && count > 0 ? (
+            <CountBadge count={count} />
+          ) : null}
+        </span>
       </span>
-      <span className="whitespace-nowrap text-[14px] font-semibold leading-none">{label}</span>
     </Link>
   );
 }
@@ -86,12 +95,14 @@ export function InboxChatsShell({
   plansNeedingYourAction,
   initialContacts,
   showCreateSheet,
+  recommendedClassmates = [],
 }: {
   userId: string;
   merged: InboxMerged[];
   plansNeedingYourAction: number;
   initialContacts: ContactRow[];
   showCreateSheet: boolean;
+  recommendedClassmates?: RecommendedClassmateRow[];
 }) {
   const m = useAppMessages();
   const [query, setQuery] = useState("");
@@ -239,7 +250,12 @@ export function InboxChatsShell({
         </nav>
       </header>
 
-      <InboxChatsView userId={userId} merged={merged} query={searchOpen ? query : ""} />
+      <InboxChatsView
+        userId={userId}
+        merged={merged}
+        query={searchOpen ? query : ""}
+        recommendedClassmates={recommendedClassmates}
+      />
     </div>
   );
 }

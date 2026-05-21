@@ -17,7 +17,7 @@ export default async function ToReplyPage() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <BackLink href="/inbox" label="Back to Chats" />
+          <BackLink fallback="/inbox" label="Back to Chats" />
           <h1 className="page-screen-title">To reply</h1>
         </div>
         <GuestAppCta returnTo="/inbox/to-reply" />
@@ -70,7 +70,7 @@ export default async function ToReplyPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <BackLink href="/inbox" label="Back to Chats" />
+        <BackLink fallback="/inbox" label="Back to Chats" />
         <div>
           <h1 className="page-screen-title">To reply</h1>
           <p className="text-xs text-muted-foreground">First hellos from classmates waiting for you</p>

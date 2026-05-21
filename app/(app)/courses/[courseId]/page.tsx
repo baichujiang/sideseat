@@ -25,7 +25,7 @@ import { prisma } from "@/lib/db/prisma";
 import { formatListRelativeTime, isListRelativeJustNow } from "@/lib/format/list-relative-time";
 import { formatMessage, getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
-import { safeReturnPath } from "@/lib/nav/back";
+import { resolveBackHref } from "@/lib/nav/back";
 import { inboxCourseUnreadCounts } from "@/lib/queries/inbox-unread-counts";
 import { weeklyOverlapMinutes, type SessionBlock } from "@/lib/queries/schedule-overlap";
 import { cn } from "@/lib/utils";
@@ -42,7 +42,6 @@ export default async function CourseDetailPage({
 }) {
   const { courseId } = await params;
   const query = (await searchParams) ?? {};
-  const backHref = safeReturnPath(query.returnTo, "/courses");
   const locale = await getServerAppLocale();
   const ui = getMessages(locale);
   const c = ui.courses;
@@ -70,7 +69,7 @@ export default async function CourseDetailPage({
     return (
       <div className="space-y-5">
         <div className="flex items-center justify-between gap-2">
-          <BackLink href={backHref} label={c.backToCourses} className="-ml-2" />
+          <BackLink returnTo={query.returnTo} fallback="/courses" label={c.backToCourses} className="-ml-2" />
           <CourseShareLinkAction courseId={course.id} memberCount={totalMembers} variant="icon" />
         </div>
 
@@ -151,7 +150,7 @@ export default async function CourseDetailPage({
     return (
       <div className="space-y-5">
         <div className="flex items-center justify-between gap-2">
-          <BackLink href={backHref} label={c.backToCourses} className="-ml-2" />
+          <BackLink returnTo={query.returnTo} fallback="/courses" label={c.backToCourses} className="-ml-2" />
           <CourseShareLinkAction courseId={course.id} memberCount={totalMembers} variant="icon" />
         </div>
 
@@ -331,7 +330,7 @@ export default async function CourseDetailPage({
         </div>
       ) : null}
       <div className="flex items-center justify-between gap-2">
-        <BackLink href={backHref} label={c.backToCourses} className="-ml-2" />
+        <BackLink returnTo={query.returnTo} fallback="/courses" label={c.backToCourses} className="-ml-2" />
         <CourseShareLinkAction courseId={membership.course.id} memberCount={enrolledTotal} variant="icon" />
       </div>
 

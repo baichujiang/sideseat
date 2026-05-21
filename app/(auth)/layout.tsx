@@ -10,7 +10,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <Link
           aria-label="Back"
           className="inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          href="/"
+          href="/courses"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
         </Link>

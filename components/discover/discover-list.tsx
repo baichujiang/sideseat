@@ -5,27 +5,14 @@ import { apiFetch } from "@/lib/auth/api-fetch";
 import type { Route } from "next";
 import { addDays } from "date-fns";
 import { useEffect, useState } from "react";
-import {
-  BookUser,
-  Clock,
-  Edit3,
-  Loader2,
-  Plus,
-  Search,
-  X,
-} from "lucide-react";
+import { Edit3, Loader2, Plus, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ClassmatePostCategory,
   type LanguageProficiency,
   type LanguageTag,
-  type UserGender,
 } from "@prisma/client";
 
-import {
-  ClassmatesPersonRow,
-  CLASSMATES_PERSON_ROW_AVATAR_RING_DISCOVER,
-} from "@/components/classmates/classmates-person-row";
 import {
   DiscoverBuddyTypeChips,
   type BuddyTypeChipValue,
@@ -36,13 +23,10 @@ import { applyBuddyFeedClientFilters } from "@/components/discover/discover-filt
 import { ClassmatePostCreateImageRow } from "@/components/discover/classmate-post-create-image-row";
 import { LanguageExchangePostFields } from "@/components/discover/language-exchange-post-fields";
 import { SportsPostFieldCombobox } from "@/components/discover/sports-post-field-combobox";
-import { DiscoverMessageButton } from "@/components/discover/discover-message-button";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LinkButton } from "@/components/ui/link-button";
-import { UserGenderCardIcon } from "@/components/ui/user-gender-icon";
-import { VerifiedBadge } from "@/components/ui/verified-badge";
 import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
 import {
   discoverFeedKindToParam,
@@ -65,51 +49,16 @@ import { cn } from "@/lib/utils";
 
 type PostExpiryPreset = "3d" | "1w" | "1m" | "never";
 
-type CourseRef = {
-  id: string;
-  code: string | null;
-  name: string;
-};
-
-/** Shared-course tab rows — chips need overlap to distinguish schedule match vs enrollment-only. */
-type SharedCourse = CourseRef & { overlapMinutes: number };
-
-export type DiscoverRow = {
-  userId: string;
-  nickname: string;
-  gender: UserGender;
-  avatarUrl: string | null;
-  major: string | null;
-  semester: number | null;
-  bio: string | null;
-  school: string | null;
-  languages: Array<{ tag: LanguageTag; proficiency: LanguageProficiency }>;
-  verifiedStudent: boolean;
-  studentVerificationStatus:
-    | "UNVERIFIED"
-    | "EMAIL_PENDING"
-    | "VERIFIED"
-    | "MANUAL_REVIEW_REQUIRED"
-    | "REJECTED";
-  primaryReason: string;
-  primaryCourse: CourseRef;
-  sharedCourses: SharedCourse[];
-  otherCourses: CourseRef[];
-  connectionId: string | null;
-};
-
 export type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
 
 export type EnrolledCourseOption = { id: string; code: string | null; name: string };
 
 export function DiscoverList({
-  rows,
   posts,
   savedCourseCount,
   enrolledCourses = [],
   servedCity,
 }: {
-  rows: DiscoverRow[];
   posts: DiscoverPostRow[];
   /** Saved courses count — used to suggest “Add a course” when the feed is empty. */
   savedCourseCount?: number;
@@ -204,14 +153,10 @@ export function DiscoverList({
         <DiscoverBuddyTypeChips value={typeChip} onChange={setTypeChip} labels={buddy} />
       </div>
 
-      {feed === "for-you" && rows.length > 0 ? (
-        <DiscoverPeopleRail rows={rows} title={buddy.peopleStripTitle} />
-      ) : null}
-
       {filteredPosts.length === 0 ? (
         <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-6 text-center text-[13px] text-muted-foreground shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
           {emptyCopy}
-          {rows.length === 0 && savedCourseCount === 0 ? (
+          {enrolledCourses.length === 0 && savedCourseCount === 0 ? (
             <div className="mt-4 flex justify-center">
               <LinkButton href={"/courses/add" as Route} size="sm">
                 {dl.addCourse}
@@ -234,186 +179,6 @@ export function DiscoverList({
         }}
       />
     </div>
-  );
-}
-
-function DiscoverPeopleRail({ rows, title }: { rows: DiscoverRow[]; title: string }) {
-  return (
-    <div className="space-y-2">
-      <p className="text-[12px] font-semibold tracking-tight text-foreground">{title}</p>
-      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {rows.map((r) => (
-          <div key={r.userId} className="w-[min(100%,19rem)] shrink-0">
-            <RecommendationRow row={r} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function sharedCourseChipLabel(c: { code: string | null; name: string }): string {
-  const code = c.code?.trim();
-  return code || c.name.trim();
-}
-
-/**
- * Shared tab — one chip per mutual course. Teal + clock = weekly session overlap;
- * amber + book = same course enrollment but no overlapping times (not “deeper blue”).
- */
-function SharedCourseChipForRow({
-  code,
-  name,
-  overlapMinutes,
-}: {
-  code: string | null;
-  name: string;
-  overlapMinutes: number;
-}) {
-  const label = sharedCourseChipLabel({ code, name });
-  const hasScheduleOverlap = overlapMinutes > 0;
-  return (
-    <span
-      title={
-        hasScheduleOverlap
-          ? `${name} — calendar overlaps with yours this week`
-          : `${name} — same course; no overlapping sessions in your schedules`
-      }
-      className={cn(
-        "inline-flex max-w-[10rem] items-center gap-1 truncate rounded-full px-2.5 py-0.5 text-[11px] font-bold tabular-nums ring-1 ring-inset",
-        hasScheduleOverlap
-          ? "bg-classmates-teal-soft text-classmates-teal ring-classmates-teal-border dark:bg-teal-950/45 dark:text-teal-200 dark:ring-teal-500/40"
-          : "bg-amber-50/95 text-amber-950 ring-amber-200/90 dark:bg-amber-950/40 dark:text-amber-100 dark:ring-amber-500/35",
-      )}
-    >
-      {hasScheduleOverlap ? (
-        <Clock className="h-3 w-3 shrink-0 opacity-85" aria-hidden />
-      ) : (
-        <BookUser className="h-3 w-3 shrink-0 opacity-75" aria-hidden />
-      )}
-      <span className="truncate">{label}</span>
-    </span>
-  );
-}
-
-function RecommendationRow({ row }: { row: DiscoverRow }) {
-  const meta = [row.major, row.semester ? `sem ${row.semester}` : null]
-    .filter(Boolean)
-    .join(" · ");
-  const sharedCount = row.sharedCourses.length;
-  const profileHref = `/users/${row.userId}?returnTo=%2Fdiscover` as Route;
-  const hasSharedCourses = sharedCount > 0;
-
-  /** Primary course when not listing shared chips — style as enrollment-only hint. */
-  function PrimaryCourseHintChip({ code, name }: { code: string | null; name: string }) {
-    return <SharedCourseChipForRow code={code} name={name} overlapMinutes={0} />;
-  }
-
-  return (
-    <ClassmatesPersonRow
-      avatarHref={profileHref}
-      avatarUrl={row.avatarUrl}
-      avatarSize={72}
-      avatarLinkClassName={CLASSMATES_PERSON_ROW_AVATAR_RING_DISCOVER}
-      profileAriaLabel={`View ${row.nickname}'s profile`}
-      name={row.nickname}
-      nameRowAdornment={
-        <VerifiedBadge
-          size="xs"
-          school={row.school}
-          verifiedStudent={row.verifiedStudent}
-          status={row.studentVerificationStatus}
-        />
-      }
-      titleAdornment={
-        <>
-          <UserGenderCardIcon gender={row.gender} className="shrink-0" />
-          {row.connectionId ? (
-            <span className="shrink-0 rounded-full border border-classmates-teal-border/80 bg-classmates-teal-soft px-2 py-0.5 text-[10px] font-semibold text-classmates-teal dark:bg-teal-950/40 dark:text-teal-200">
-              Chatting
-            </span>
-          ) : null}
-        </>
-      }
-      body={
-        <>
-          {/* — meta: major + semester */}
-          {meta ? (
-            <p className="mt-1 truncate text-[12px] font-medium leading-snug text-muted-foreground">{meta}</p>
-          ) : null}
-
-          {/* — bio: gives personality, fills empty space */}
-          {row.bio ? (
-            <p className="mt-1.5 line-clamp-2 text-[12px] leading-snug text-foreground/80 dark:text-foreground/70">
-              {row.bio}
-            </p>
-          ) : null}
-
-          {/* — course match: inline chips, no heavy box */}
-          {hasSharedCourses ? (
-            <div
-              className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1.5"
-              aria-label="Courses you both take"
-            >
-              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.07em] text-classmates-teal dark:text-teal-300">
-                Shared
-              </span>
-              {row.sharedCourses.slice(0, 3).map((c) => (
-                <SharedCourseChipForRow
-                  key={c.id}
-                  code={c.code}
-                  name={c.name}
-                  overlapMinutes={c.overlapMinutes}
-                />
-              ))}
-              {sharedCount > 3 ? (
-                <span className="text-[11px] font-medium text-muted-foreground">
-                  +{sharedCount - 3} more
-                </span>
-              ) : null}
-              {/* Full name hint when only one shared course with a code */}
-              {sharedCount === 1 && row.sharedCourses[0]?.code ? (
-                <span className="w-full truncate text-[11px] leading-snug text-muted-foreground">
-                  {row.sharedCourses[0].name}
-                </span>
-              ) : null}
-            </div>
-          ) : (
-            /* No mutual courses — show primary course as nearby hint */
-            <div className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1.5">
-              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.07em] text-muted-foreground/70 dark:text-zinc-500">
-                Nearby
-              </span>
-              {row.primaryCourse.code ? (
-                <PrimaryCourseHintChip
-                  code={row.primaryCourse.code}
-                  name={row.primaryCourse.name}
-                />
-              ) : null}
-              <span className="min-w-0 truncate text-[11px] text-muted-foreground">
-                {row.primaryCourse.name}
-              </span>
-            </div>
-          )}
-        </>
-      }
-      titleRowAction={
-        <DiscoverMessageButton
-          peerId={row.userId}
-          courseId={row.primaryCourse.id}
-          tone={hasSharedCourses ? "soft" : "subtle"}
-          hasExistingChat={Boolean(row.connectionId)}
-          className="h-9 min-h-9 max-w-full shrink-0 touch-manipulation justify-center gap-1.5 px-3.5 text-[12px] sm:max-w-none"
-        />
-      }
-      action={
-        hasSharedCourses ? (
-          <p className="text-center text-[10px] font-semibold tabular-nums text-classmates-teal dark:text-teal-300 sm:text-right">
-            {sharedCount === 1 ? "1 course in common" : `${sharedCount} courses in common`}
-          </p>
-        ) : undefined
-      }
-    />
   );
 }
 

@@ -3,7 +3,7 @@
 import { apiFetch } from "@/lib/auth/api-fetch";
 
 import { MessageCircle, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ export function ProfileMessageButton({
   fullWidth?: boolean;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { userProfile: up } = useAppMessages();
   const [opening, setOpening] = useState(false);
   const [errorText, setErrorText] = useState("");
@@ -59,8 +60,10 @@ export function ProfileMessageButton({
         return;
       }
 
-      const suffix = returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : "";
-      router.push(`/connections/${data.connectionId}${suffix}`);
+      const parentReturn = returnTo?.trim() || pathname;
+      router.push(
+        `/connections/${data.connectionId}?returnTo=${encodeURIComponent(parentReturn)}`,
+      );
     } catch {
       setOpening(false);
       setErrorText(up.messageNetworkError);

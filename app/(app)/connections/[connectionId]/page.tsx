@@ -4,6 +4,7 @@ import { format, isSameDay, isToday, isYesterday } from "date-fns";
 import { enUS, zhCN } from "date-fns/locale";
 
 import { AvailabilityCardMessage } from "@/components/chat/availability-card-message";
+import { ScheduleShareCardMessage } from "@/components/chat/schedule-share-card-message";
 import { ChatComposer } from "@/components/chat/chat-composer";
 import { ChatReplyProvider } from "@/components/chat/chat-reply-context";
 import { ChatRealtimeRefresh } from "@/components/chat/chat-realtime-refresh";
@@ -20,7 +21,7 @@ import { requireConnection } from "@/lib/auth/guards";
 import { directMessageActionSnippet } from "@/lib/chat/direct-message-preview";
 import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
 import { selfNotesDisplayTitle } from "@/lib/connections/self-notes-title";
-import { safeReturnPath } from "@/lib/nav/back";
+import { resolveBackHref } from "@/lib/nav/back";
 import { formatMessage, getMessages, type AppMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { chatMessageDomId } from "@/lib/chat/chat-message-dom-id";
@@ -46,7 +47,6 @@ export default async function ConnectionPage({
 }) {
   const { connectionId } = await params;
   const query = (await searchParams) ?? {};
-  const backHref = safeReturnPath(query.returnTo, "/inbox");
   const { connection, user } = await requireConnection(connectionId);
   const locale = await getServerAppLocale();
   const ui = getMessages(locale);
@@ -83,7 +83,7 @@ export default async function ConnectionPage({
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background">
       {/* Chat app bar */}
       <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
-        <BackLink href={backHref} label={ui.chat.back} />
+        <BackLink returnTo={query.returnTo} fallback="/inbox" label={ui.chat.back} />
         <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl py-1 pl-1 pr-2">
           <Link
             href={profileLinkHref}
@@ -148,6 +148,21 @@ export default async function ConnectionPage({
                   </span>
                 </div>
               ) : null;
+
+              if (message.type === "SCHEDULE_SHARE_CARD" && message.body.trim()) {
+                const ownerDisplay =
+                  message.sender.nickname?.trim() || message.sender.username || ui.common.studentFallback;
+                return (
+                  <div key={message.id} id={chatMessageDomId(message.id)}>
+                    {dayStrip}
+                    <ScheduleShareCardMessage
+                      shareUrl={message.body.trim()}
+                      ownerName={ownerDisplay}
+                      isOwner={message.senderId === user.id}
+                    />
+                  </div>
+                );
+              }
 
               if (message.type === "AVAILABILITY_CARD" && message.availabilityShare) {
                 return (

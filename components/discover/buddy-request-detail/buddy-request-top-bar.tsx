@@ -11,6 +11,7 @@ type VerifiedStatus = ComponentProps<typeof VerifiedBadge>["status"];
 
 export function BuddyRequestTopBar({
   backHref,
+  backFallback = "/discover",
   backLabel,
   authorName,
   profileHref,
@@ -22,6 +23,7 @@ export function BuddyRequestTopBar({
   shareSlot,
 }: {
   backHref: Route;
+  backFallback?: string;
   backLabel: string;
   authorName: string;
   profileHref: Route;
@@ -40,7 +42,7 @@ export function BuddyRequestTopBar({
         "rounded-t-[1.25rem]",
       )}
     >
-      <BackLink href={backHref} label={backLabel} className="shrink-0" />
+      <BackLink href={backHref} fallback={backFallback} label={backLabel} className="shrink-0" />
       <Link
         href={profileHref}
         className="flex min-w-0 flex-1 items-center gap-2 rounded-lg py-0.5 pr-1 no-underline hover:bg-muted/40"

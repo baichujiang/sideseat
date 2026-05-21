@@ -5,6 +5,7 @@ import { format, formatDistanceToNowStrict } from "date-fns";
 import { CalendarClock, ChevronRight } from "lucide-react";
 import { ConnectionStatus, PlanRequestStatus, PlanType } from "@prisma/client";
 
+import { ScheduleShareLinksPanel } from "@/components/schedule-share/schedule-share-links-panel";
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { BackLink } from "@/components/nav/back-link";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -12,7 +13,7 @@ import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { formatMessage, getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
-import { safeReturnPath } from "@/lib/nav/back";
+import { resolveBackHref } from "@/lib/nav/back";
 import { cn } from "@/lib/utils";
 
 export default async function ProfileMyPlanPage({
@@ -24,7 +25,7 @@ export default async function ProfileMyPlanPage({
   const locale = await getServerAppLocale();
   const ui = getMessages(locale);
   const query = (await searchParams) ?? {};
-  const backHref = safeReturnPath(query.returnTo, "/profile") as Route;
+  const backHref = resolveBackHref(query.returnTo, "/profile") as Route;
   const planPageReturnTo = encodeURIComponent(
     query.returnTo
       ? `/profile/my-plan?returnTo=${encodeURIComponent(query.returnTo)}`
@@ -35,7 +36,7 @@ export default async function ProfileMyPlanPage({
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <BackLink href={backHref} label={ui.common.back} />
+          <BackLink returnTo={query.returnTo} fallback="/profile" label={ui.common.back} />
           <h1 className="page-screen-title">{ui.profile.myPlanPageTitle}</h1>
         </div>
         <GuestAppCta returnTo="/profile/my-plan" />
@@ -78,21 +79,56 @@ export default async function ProfileMyPlanPage({
     .filter((r) => r.status === PlanRequestStatus.ACCEPTED)
     .sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
 
+  const shareLinks = await prisma.scheduleShareLink.findMany({
+    where: {
+      ownerUserId: user.id,
+      revokedAt: null,
+      expiresAt: { gt: now },
+      OR: [{ usageLimit: "UNLIMITED" }, { usageLimit: "SINGLE_USE", consumedAt: null }],
+    },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+    select: {
+      id: true,
+      rangeStart: true,
+      rangeEnd: true,
+      expiresAt: true,
+      revokedAt: true,
+      consumedAt: true,
+      usageLimit: true,
+      createdAt: true,
+    },
+  });
+
+  const shareLinkItems = shareLinks.map((link) => ({
+    id: link.id,
+    rangeStart: link.rangeStart.toISOString(),
+    rangeEnd: link.rangeEnd.toISOString(),
+    expiresAt: link.expiresAt.toISOString(),
+    revokedAt: link.revokedAt?.toISOString() ?? null,
+    consumedAt: link.consumedAt?.toISOString() ?? null,
+    usageLimit: link.usageLimit,
+    createdAt: link.createdAt.toISOString(),
+  }));
+
   const hasPlans = planRequests.length > 0;
+  const hasActiveShareLinks = shareLinkItems.length > 0;
 
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-2 px-0.5">
-        <BackLink href={backHref} label={ui.common.back} />
+        <BackLink returnTo={query.returnTo} fallback="/profile" label={ui.common.back} />
         <div>
           <h1 className="page-screen-title">{ui.profile.myPlanPageTitle}</h1>
           <p className="text-[13px] leading-snug text-muted-foreground">{ui.profile.myPlanPageSubtitle}</p>
         </div>
       </div>
 
-      {!hasPlans ? (
+      <ScheduleShareLinksPanel links={shareLinkItems} />
+
+      {!hasPlans && !hasActiveShareLinks ? (
         <EmptyState title={ui.profile.myPlanEmptyTitle} description={ui.profile.myPlanEmptyDesc} />
-      ) : (
+      ) : !hasPlans ? null : (
         <div className="space-y-5">
           {pending.length > 0 ? (
             <section className="space-y-2">
@@ -139,6 +175,7 @@ export default async function ProfileMyPlanPage({
     </div>
   );
 }
+
 
 function PlanRequestRow({
   req,

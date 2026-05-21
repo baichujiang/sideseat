@@ -3,13 +3,12 @@
 import { apiFetch } from "@/lib/auth/api-fetch";
 import type { LucideIcon } from "lucide-react";
 import { CalendarClock, Image, MapPin, Plus, Share2, X } from "lucide-react";
-import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { PlanRequestModal } from "@/components/chat/plan-request-modal";
+import { CreateScheduleShareDialog } from "@/components/schedule-share/create-schedule-share-dialog";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
-import { createScheduleSharePath } from "@/lib/schedule-share/create-schedule-share-client";
 import { cn } from "@/lib/utils";
 
 /** Square icon + one-word caption; `aria-label` carries the fuller action text. */
@@ -93,6 +92,7 @@ export function ChatAttachmentTray({
   onCloseRef.current = onClose;
 
   const [planOpen, setPlanOpen] = useState(false);
+  const [scheduleShareOpen, setScheduleShareOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -235,25 +235,12 @@ export function ChatAttachmentTray({
               />
               <AttachmentMenuTile
                 icon={Share2}
-                caption="Schedule"
-                ariaLabel="Share schedule link"
+                caption={messages.chat.attachmentScheduleCaption}
+                ariaLabel={messages.chat.attachmentScheduleAria}
                 disabled={busy}
                 onClick={() => {
                   onClose();
-                  void (async () => {
-                    setBusy(true);
-                    setError("");
-                    const result = await createScheduleSharePath({
-                      createFailed: messages.scheduleShare.createFailed,
-                      networkError: messages.scheduleShare.networkError,
-                    });
-                    setBusy(false);
-                    if (result.ok) {
-                      router.push(result.path as Route);
-                    } else {
-                      setError(result.error);
-                    }
-                  })();
+                  queueMicrotask(() => setScheduleShareOpen(true));
                 }}
               />
               <AttachmentMenuTile
@@ -282,6 +269,15 @@ export function ChatAttachmentTray({
         onClose={() => setPlanOpen(false)}
         mode={{ kind: "direct", connectionId }}
         peerName={peerName}
+      />
+      <CreateScheduleShareDialog
+        open={scheduleShareOpen}
+        onClose={() => setScheduleShareOpen(false)}
+        connectionId={connectionId}
+        onSentToChat={() => {
+          setScheduleShareOpen(false);
+          router.refresh();
+        }}
       />
     </>
   );

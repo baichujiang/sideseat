@@ -1,7 +1,7 @@
 "use client";
 
 import type { CalendarRepeatRule, Weekday } from "@prisma/client";
-import { addDays, addMinutes, format, isSameDay } from "date-fns";
+import { addDays, addMinutes, format, isSameDay, startOfDay } from "date-fns";
 import { MapPin, Repeat2 } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
@@ -22,6 +22,7 @@ import {
 } from "@/lib/calendar/category-visual";
 import {
   computeEventOverlapLayout,
+  type EventOverlapLayout,
   SCHEDULE_SHORT_OVERLAP_GLASS,
 } from "@/lib/calendar/event-overlap-layout";
 import {
@@ -30,7 +31,54 @@ import {
 } from "@/lib/calendar/calendar-clipboard";
 import { calendarTodayChrome } from "@/lib/calendar/today-chrome";
 import { isDraftPreviewCourseId } from "@/lib/calendar/draft-preview-block";
+import {
+  blockMatchesDayColumn,
+  buildBlocksByDateKey,
+  buildWeekCalendarDayColumns,
+  horizontalScrollIndexForFocus,
+  type WeekCalendarDayColumn,
+} from "@/lib/calendar/week-calendar-day-columns";
+import { scheduleDateKeyInBerlin } from "@/lib/calendar/schedule-berlin";
+import {
+  buildShareSelectionChromeByDateKey,
+  buildShareSelectionRuns,
+  shareSelectionColumnDividerClass,
+  shareSelectionDayPillClass,
+  shareSelectionHeaderCellClass,
+  shareSelectionColumnToneClass,
+  shareRecipientDimColumnClass,
+  shareRecipientDimDayPillClass,
+  shareRecipientDimHeaderCellClass,
+  shareRecipientDimWeekdayLabelClass,
+  shareRecipientExcludedBodyOverlayClass,
+  shareSelectionRunOverlayClass,
+  shareSelectionRunOverlayLayerInsetClass,
+  shareSelectionWeekdayLabelClass,
+  shareSelectionChromeTokens,
+  type ShareSelectionChrome,
+  type ShareSelectionRun,
+  type ShareSelectionZone,
+} from "@/lib/calendar/week-calendar-share-selection-chrome";
+import {
+  clampWeekCalendarMinuteScale,
+  clampWeekCalendarVisibleDayCount,
+  WEEK_CALENDAR_MINUTE_SCALE_DEFAULT,
+  WEEK_CALENDAR_MINUTE_SCALE_MAX,
+  WEEK_CALENDAR_MINUTE_SCALE_MIN,
+  WEEK_CALENDAR_VISIBLE_DAY_MAX,
+  WEEK_CALENDAR_VISIBLE_DAY_MIN,
+} from "@/lib/calendar/week-calendar-constants";
 import { cn } from "@/lib/utils";
+
+export {
+  clampWeekCalendarMinuteScale,
+  clampWeekCalendarVisibleDayCount,
+  WEEK_CALENDAR_MINUTE_SCALE_DEFAULT,
+  WEEK_CALENDAR_MINUTE_SCALE_MAX,
+  WEEK_CALENDAR_MINUTE_SCALE_MIN,
+  WEEK_CALENDAR_VISIBLE_DAY_MAX,
+  WEEK_CALENDAR_VISIBLE_DAY_MIN,
+} from "@/lib/calendar/week-calendar-constants";
 
 /** Anchor (resize handle) accent fallback when an event has no category color. */
 const DEFAULT_ANCHOR_ACCENT = "#E53935";
@@ -117,6 +165,11 @@ export type WeekCalendarBlock = {
   categoryColor?: string | null;
   /** Stable id for PATCH when `source === "calendar"` (user-created events). */
   calendarEntryId?: string | null;
+  /**
+   * Berlin yyyy-MM-dd for one-off / dated blocks. When omitted, the block repeats on
+   * every column with the same `weekday` (e.g. weekly classes).
+   */
+  occurrenceDateKey?: string | null;
 };
 
 const DAY_ORDER: Weekday[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
@@ -135,6 +188,42 @@ const VISUAL_PADDING_BOTTOM_MINUTES = 12;
 const FULL_DAY_MINUTES = 24 * 60;
 /** Sticky week header band height — used by consumers that cap the scroll viewport to the shell. */
 export const WEEK_CALENDAR_HEADER_HEIGHT_PX = 32;
+
+/** Absolute overlay so share-selection borders do not add extra grid rows. */
+function ShareSelectionRunOverlayLayer({
+  runs,
+  zone,
+  gridTemplateColumns,
+  className,
+}: {
+  runs: readonly ShareSelectionRun[];
+  zone: ShareSelectionZone;
+  gridTemplateColumns: string;
+  className?: string;
+}) {
+  if (runs.length === 0) return null;
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        "pointer-events-none absolute z-20 grid",
+        shareSelectionRunOverlayLayerInsetClass(zone),
+        className,
+      )}
+      style={{ gridTemplateColumns }}
+    >
+      {runs.map((run) => (
+        <div
+          key={`share-run-${zone}-${run.startIndex}-${run.count}`}
+          className={cn(shareSelectionRunOverlayClass(zone), "h-full min-h-0")}
+          style={{
+            gridColumn: `${run.startIndex + 1} / span ${run.count}`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 /**
  * Week grid stacking (low → high). Prevents events / drag shadows from painting over sticky rails or headers.
@@ -171,9 +260,6 @@ const MIN_EVENT_MINUTES = 15;
 /** After this many px of movement, lock 2D scroll to horizontal OR vertical for the rest of the gesture. */
 const AXIS_LOCK_THRESHOLD_PX = 24;
 
-export const WEEK_CALENDAR_VISIBLE_DAY_MIN = 2;
-export const WEEK_CALENDAR_VISIBLE_DAY_MAX = 7;
-
 /** Nested calendar drags — only clear body `user-select` when outermost ends. */
 let calendarDragSelectLockDepth = 0;
 function lockBrowserTextSelectionForCalendarDrag() {
@@ -197,27 +283,7 @@ function snapMinute(m: number): number {
   return Math.max(0, Math.min(FULL_DAY_MINUTES - 1, s));
 }
 
-export function clampWeekCalendarVisibleDayCount(value: number): number {
-  if (!Number.isFinite(value)) return DENSITY_LAYOUT.default.visibleWeekDays;
-  return Math.max(
-    WEEK_CALENDAR_VISIBLE_DAY_MIN,
-    Math.min(WEEK_CALENDAR_VISIBLE_DAY_MAX, Math.round(value)),
-  );
-}
-
 export type WeekCalendarDensity = "default" | "immersive";
-export const WEEK_CALENDAR_MINUTE_SCALE_DEFAULT = 1;
-export const WEEK_CALENDAR_MINUTE_SCALE_MIN = 0.8;
-export const WEEK_CALENDAR_MINUTE_SCALE_MAX = 1.4;
-
-export function clampWeekCalendarMinuteScale(value: number): number {
-  if (!Number.isFinite(value)) return WEEK_CALENDAR_MINUTE_SCALE_DEFAULT;
-  const clamped = Math.max(
-    WEEK_CALENDAR_MINUTE_SCALE_MIN,
-    Math.min(WEEK_CALENDAR_MINUTE_SCALE_MAX, value),
-  );
-  return Math.round(clamped * 1000) / 1000;
-}
 
 const DENSITY_LAYOUT: Record<
   WeekCalendarDensity,
@@ -336,6 +402,21 @@ export function WeekCalendar({
   touchGestureRotateCw90 = false,
   /** Home week view hides the visible “Time” corner label; layout cell is kept. */
   showTimeColumnLabel = true,
+  /**
+   * `week`: Mon–Sun for `weekStartDate` only. `continuous`: long horizontal day strip
+   * centered on `focusDate` (free swipe; toolbar still jumps whole weeks via `focusDate`).
+   */
+  horizontalScrollMode = "week",
+  /** Clamp continuous strip ends (e.g. schedule share range). */
+  scrollRangeStart,
+  scrollRangeEnd,
+  columnDateKeys,
+  highlightedDateKeys,
+  shareExcludedDayLabel,
+  onDayHeaderSelect,
+  dayHeaderSelectAria,
+  /** Increment (e.g. Home “Today”) to scroll `focusDate` into view even when the date did not change. */
+  revealDateNonce = 0,
 }: {
   blocks: WeekCalendarBlock[];
   allDayBlocks?: WeekCalendarBlock[];
@@ -396,6 +477,16 @@ export function WeekCalendar({
   fillParent?: boolean;
   touchGestureRotateCw90?: boolean;
   showTimeColumnLabel?: boolean;
+  horizontalScrollMode?: "week" | "continuous";
+  scrollRangeStart?: Date;
+  scrollRangeEnd?: Date;
+  columnDateKeys?: readonly string[];
+  highlightedDateKeys?: ReadonlySet<string>;
+  /** Shown on recipient share days outside `highlightedDateKeys` (e.g. “Not shared”). */
+  shareExcludedDayLabel?: string;
+  onDayHeaderSelect?: (date: Date) => void;
+  dayHeaderSelectAria?: string;
+  revealDateNonce?: number;
 }) {
   const { locale, messages: appMessages } = useLocaleContext();
   const sch = appMessages.schedule;
@@ -411,6 +502,10 @@ export function WeekCalendar({
     () => new Intl.DateTimeFormat(locale, { weekday: "short", month: "short", day: "numeric" }),
     [locale],
   );
+  /** Share settings: tap day headers to toggle which days are shared. */
+  const dayColumnSelectMode = Boolean(onDayHeaderSelect) && !onCreateEvent && !onOpenItem;
+  /** Recipient view: dim days outside `highlightedDateKeys` without header toggles. */
+  const shareRecipientDimMode = Boolean(highlightedDateKeys?.size) && !onDayHeaderSelect;
 
   const cfg = DENSITY_LAYOUT[density];
   const resolvedMinuteScale = clampWeekCalendarMinuteScale(minuteScale);
@@ -423,13 +518,31 @@ export function WeekCalendar({
   const DEFAULT_VIEW_START = cfg.viewStart;
   const DEFAULT_VIEW_END = cfg.viewEnd;
 
+  const calendarFrameRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const horizontalScrollLayoutKeyRef = useRef<string | null>(null);
+  const horizontalScrollWeekStartKeyRef = useRef<string | null>(null);
+  const horizontalScrollFrameReadyRef = useRef(false);
+  const dayColumnWidthForScrollRef = useRef(0);
   const [frameWidth, setFrameWidth] = useState(0);
   const previousMinutePxRef = useRef(MINUTE_PX);
   const minutePxRef = useRef(MINUTE_PX);
   const minuteScaleRef = useRef(resolvedMinuteScale);
   const onMinuteScaleChangeRef = useRef(onMinuteScaleChange);
   const minuteScaleAnchorRef = useRef<{ minute: number; offsetY: number } | null>(null);
+  const revealScrollContextRef = useRef<{
+    todayBerlinKey: string | null;
+    nowMinute: number | undefined;
+    visualStartMinute: number;
+    defaultViewStart: number;
+    minutePx: number;
+  }>({
+    todayBerlinKey: null,
+    nowMinute: undefined,
+    visualStartMinute: -VISUAL_PADDING_TOP_MINUTES,
+    defaultViewStart: 8 * 60,
+    minutePx: 0.72,
+  });
 
   /**
    * Currently selected calendar entry. Long-press on an event body selects it
@@ -443,14 +556,16 @@ export function WeekCalendar({
   const [dragOverride, setDragOverride] = useState<{
     eventId: string;
     weekday: Weekday;
+    dateKey: string;
     startMinute: number;
     endMinute: number;
   } | null>(null);
-  const dayBodyElRef = useRef<Map<Weekday, HTMLDivElement | null>>(new Map());
+  const dayBodyElRef = useRef<Map<string, HTMLDivElement | null>>(new Map());
   /** After PATCH success, keep `dragOverride` until `blocks` reflect new times (avoids one frame of old position). */
   const pendingDragClearRef = useRef<{
     eventId: string;
     weekday: Weekday;
+    dateKey: string;
     startMinute: number;
     endMinute: number;
   } | null>(null);
@@ -483,6 +598,7 @@ export function WeekCalendar({
         return {
           ...b,
           weekday: dragOverride.weekday,
+          occurrenceDateKey: dragOverride.dateKey,
           startMinute: dragOverride.startMinute,
           endMinute: dragOverride.endMinute,
         };
@@ -491,7 +607,37 @@ export function WeekCalendar({
     });
   }, [blocks, dragOverride]);
 
-  const visibleDays = DAY_ORDER;
+  const dayColumns = useMemo(
+    () =>
+      buildWeekCalendarDayColumns({
+        mode: horizontalScrollMode,
+        weekStartDate,
+        focusDate,
+        scrollRangeStart,
+        scrollRangeEnd,
+        columnDateKeys,
+      }),
+    [horizontalScrollMode, weekStartDate, focusDate, scrollRangeStart, scrollRangeEnd, columnDateKeys],
+  );
+  const weekStartBerlinKey = scheduleDateKeyInBerlin(weekStartDate);
+  const focusBerlinKey = scheduleDateKeyInBerlin(focusDate);
+  const shareSelectionChromeByKey = useMemo(
+    () =>
+      dayColumnSelectMode
+        ? buildShareSelectionChromeByDateKey(dayColumns, highlightedDateKeys)
+        : new Map<string, ShareSelectionChrome>(),
+    [dayColumnSelectMode, dayColumns, highlightedDateKeys],
+  );
+  const shareSelectionRuns = useMemo(
+    () =>
+      dayColumnSelectMode ? buildShareSelectionRuns(dayColumns, highlightedDateKeys) : [],
+    [dayColumnSelectMode, dayColumns, highlightedDateKeys],
+  );
+  const todayBerlinKey = today ? scheduleDateKeyInBerlin(today) : null;
+  const todayColumnInStrip = todayBerlinKey
+    ? dayColumns.some((column) => column.dateKey === todayBerlinKey)
+    : false;
+  const effectiveShowNowLine = showNowLine && todayColumnInStrip;
   const visualStartMinute = -VISUAL_PADDING_TOP_MINUTES;
   const visualEndMinute = FULL_DAY_MINUTES + VISUAL_PADDING_BOTTOM_MINUTES;
   const totalMinutes = visualEndMinute - visualStartMinute;
@@ -511,11 +657,14 @@ export function WeekCalendar({
     maxViewportBodyPx != null && Number.isFinite(maxViewportBodyPx)
       ? Math.min(rawViewportBodyPx, maxViewportBodyPx)
       : rawViewportBodyPx;
+  const scrollViewportHeightPx = WEEK_CALENDAR_HEADER_HEIGHT_PX + viewportHeightPx;
+  /** Share/Home shells pin body height so the grid scrolls inside a bounded viewport. */
+  const pinScrollViewportHeight = !fillParent || maxViewportBodyPx != null;
 
   // Measure before paint so the first hydrated frame does not use the 56px
   // fallback column width (narrow grid → wide grid flash).
   useLayoutEffect(() => {
-    const node = scrollContainerRef.current;
+    const node = calendarFrameRef.current;
     if (!node) return;
 
     const update = () => setFrameWidth(node.clientWidth);
@@ -540,7 +689,7 @@ export function WeekCalendar({
       previousMinutePxRef.current = MINUTE_PX;
       minuteScaleAnchorRef.current = null;
     }
-  }, [visualStartMinute, weekStartDate, focusDate, DEFAULT_VIEW_START, density, frameWidth]);
+  }, [visualStartMinute, weekStartBerlinKey, focusBerlinKey, DEFAULT_VIEW_START, density, frameWidth]);
 
   useLayoutEffect(() => {
     const node = scrollContainerRef.current;
@@ -915,17 +1064,18 @@ export function WeekCalendar({
     };
   }, [touchGestureRotateCw90, visualStartMinute]);
 
-  const blocksByDay = new Map<Weekday, WeekCalendarBlock[]>();
-  for (const block of effectiveBlocks) {
-    const list = blocksByDay.get(block.weekday) ?? [];
-    list.push(block);
-    blocksByDay.set(block.weekday, list);
-  }
-  const positionedBlocksByDay = new Map(
-    DAY_ORDER.map((day) => {
-      const dayBlocks = blocksByDay.get(day) ?? [];
-      return [
-        day,
+  const blocksByDateKey = useMemo(
+    () => buildBlocksByDateKey(effectiveBlocks, dayColumns),
+    [effectiveBlocks, dayColumns],
+  );
+  type PositionedWeekBlock = WeekCalendarBlock & { id: string } & EventOverlapLayout;
+
+  const positionedBlocksByDateKey = useMemo(() => {
+    const map = new Map<string, PositionedWeekBlock[]>();
+    for (const column of dayColumns) {
+      const dayBlocks = blocksByDateKey.get(column.dateKey) ?? [];
+      map.set(
+        column.dateKey,
         computeEventOverlapLayout(
           dayBlocks.map((block, index) => ({
             ...block,
@@ -934,9 +1084,10 @@ export function WeekCalendar({
               : `${block.courseId}-${block.startMinute}-${block.endMinute}-${index}`,
           })),
         ),
-      ] as const;
-    }),
-  );
+      );
+    }
+    return map;
+  }, [blocksByDateKey, dayColumns]);
 
   /** Width available for day columns in the scrollport (sticky time axis is not part of the day strip). */
   const dayStripViewportPx = Math.max(frameWidth - TIME_COLUMN_PX, 1);
@@ -944,18 +1095,109 @@ export function WeekCalendar({
     () => Math.max(dayStripViewportPx / VISIBLE_WEEK_DAYS, 56),
     [dayStripViewportPx, VISIBLE_WEEK_DAYS],
   );
-  const dayTrackWidth = dayColumnWidth * visibleDays.length;
-  const gridTemplateColumns = `repeat(${visibleDays.length}, minmax(${dayColumnWidth}px, ${dayColumnWidth}px))`;
+  const dayTrackWidth = dayColumnWidth * dayColumns.length;
+  const gridTemplateColumns = `repeat(${dayColumns.length}, minmax(${dayColumnWidth}px, ${dayColumnWidth}px))`;
+
+  const handleDayColumnSelect = useCallback(
+    (date: Date) => {
+      onDayHeaderSelect?.(date);
+    },
+    [onDayHeaderSelect],
+  );
 
   useLayoutEffect(() => {
     const node = scrollContainerRef.current;
-    if (!node || dayColumnWidth <= 0) return;
-    const startIndex =
-      horizontalMode === "include-anchor"
-        ? horizontalStartIndexForDay(anchorWeekday, VISIBLE_WEEK_DAYS)
-        : 0;
+    if (!node || dayColumnWidth <= 0 || dayColumns.length === 0) return;
+
+    const focusKey = scheduleDateKeyInBerlin(focusDate);
+    const weekStartKey = scheduleDateKeyInBerlin(weekStartDate);
+    const layoutKey = `${focusKey}|${horizontalMode}|${VISIBLE_WEEK_DAYS}`;
+    const layoutChanged = horizontalScrollLayoutKeyRef.current !== layoutKey;
+    const weekChanged =
+      horizontalScrollMode === "week" &&
+      horizontalScrollWeekStartKeyRef.current !== weekStartKey;
+    const frameJustReady = frameWidth > 0 && !horizontalScrollFrameReadyRef.current;
+    if (frameWidth > 0) horizontalScrollFrameReadyRef.current = true;
+    const prevWidth = dayColumnWidthForScrollRef.current;
+    const widthChanged = prevWidth > 0 && Math.abs(prevWidth - dayColumnWidth) > 0.5;
+
+    horizontalScrollLayoutKeyRef.current = layoutKey;
+    horizontalScrollWeekStartKeyRef.current = weekStartKey;
+    dayColumnWidthForScrollRef.current = dayColumnWidth;
+
+    if (widthChanged && !layoutChanged && !weekChanged && !frameJustReady) {
+      const colIndex = node.scrollLeft / prevWidth;
+      node.scrollLeft = Math.max(0, colIndex * dayColumnWidth);
+      return;
+    }
+
+    if (!layoutChanged && !weekChanged && !frameJustReady) return;
+
+    const startIndex = horizontalScrollIndexForFocus(
+      dayColumns,
+      focusDate,
+      horizontalMode,
+      VISIBLE_WEEK_DAYS,
+    );
     node.scrollLeft = startIndex * dayColumnWidth;
-  }, [anchorWeekday, dayColumnWidth, horizontalMode, weekStartDate, VISIBLE_WEEK_DAYS]);
+  }, [
+    anchorWeekday,
+    dayColumnWidth,
+    dayColumns,
+    focusDate,
+    frameWidth,
+    horizontalMode,
+    horizontalScrollMode,
+    weekStartDate,
+    VISIBLE_WEEK_DAYS,
+  ]);
+
+  revealScrollContextRef.current = {
+    todayBerlinKey,
+    nowMinute,
+    visualStartMinute,
+    defaultViewStart: DEFAULT_VIEW_START,
+    minutePx: MINUTE_PX,
+  };
+
+  useLayoutEffect(() => {
+    if (!revealDateNonce) return;
+    const node = scrollContainerRef.current;
+    if (!node || dayColumnWidth <= 0 || dayColumns.length === 0) return;
+    const startIndex = horizontalScrollIndexForFocus(
+      dayColumns,
+      focusDate,
+      horizontalMode,
+      VISIBLE_WEEK_DAYS,
+    );
+    node.scrollLeft = startIndex * dayColumnWidth;
+    horizontalScrollLayoutKeyRef.current = `${scheduleDateKeyInBerlin(focusDate)}|${horizontalMode}|${VISIBLE_WEEK_DAYS}`;
+
+    const ctx = revealScrollContextRef.current;
+    const focusKey = scheduleDateKeyInBerlin(focusDate);
+    const jumpToNow =
+      ctx.todayBerlinKey &&
+      focusKey === ctx.todayBerlinKey &&
+      ctx.nowMinute !== undefined &&
+      ctx.nowMinute >= 0 &&
+      ctx.nowMinute <= FULL_DAY_MINUTES;
+
+    if (jumpToNow && ctx.nowMinute !== undefined) {
+      const nowMin = ctx.nowMinute;
+      const visibleMinutes = node.clientHeight / ctx.minutePx;
+      const anchorMinute = Math.max(
+        ctx.visualStartMinute,
+        nowMin - visibleMinutes * 0.35,
+      );
+      const scrollTop = (anchorMinute - ctx.visualStartMinute) * ctx.minutePx;
+      const maxScrollTop = Math.max(0, node.scrollHeight - node.clientHeight);
+      node.scrollTop = Math.max(0, Math.min(maxScrollTop, scrollTop));
+    } else {
+      node.scrollTop =
+        (ctx.defaultViewStart - VISUAL_PADDING_TOP_MINUTES - ctx.visualStartMinute) *
+        ctx.minutePx;
+    }
+  }, [revealDateNonce, dayColumnWidth, dayColumns, focusDate, horizontalMode, VISIBLE_WEEK_DAYS]);
 
   function minuteFromClientYInRect(clientY: number, rect: DOMRect): number {
     const y = clientY - rect.top;
@@ -966,7 +1208,7 @@ export function WeekCalendar({
   }
 
   function createRangeFromMinutes(
-    weekday: Weekday,
+    column: WeekCalendarDayColumn,
     startMinute: number,
     endMinute: number,
   ): { start: Date; end: Date } {
@@ -975,22 +1217,26 @@ export function WeekCalendar({
     if (em - sm < MIN_EVENT_MINUTES) {
       em = Math.min(FULL_DAY_MINUTES, sm + MIN_EVENT_MINUTES);
     }
-    const { startAt, endAt } = buildStartEndAt(weekday, sm, em);
+    const { startAt, endAt } = buildStartEndAt(column.date, sm, em);
     return { start: startAt, end: endAt };
   }
 
-  function emitCreateRangePreview(weekday: Weekday, startMinute: number, endMinute: number) {
+  function emitCreateRangePreview(
+    column: WeekCalendarDayColumn,
+    startMinute: number,
+    endMinute: number,
+  ) {
     if (!onCreateRangePreview) return;
-    onCreateRangePreview(createRangeFromMinutes(weekday, startMinute, endMinute));
+    onCreateRangePreview(createRangeFromMinutes(column, startMinute, endMinute));
   }
 
   function startCreatePointerSession(
     e: React.PointerEvent,
-    weekday: Weekday,
-    dayIndex: number,
+    column: WeekCalendarDayColumn,
     rect: DOMRect,
   ) {
     if (!onCreateEvent) return;
+    if (highlightedDateKeys?.size && !highlightedDateKeys.has(column.dateKey)) return;
     if (e.pointerType === "mouse" && e.button !== 0) return;
     e.stopPropagation();
 
@@ -1028,7 +1274,7 @@ export function WeekCalendar({
 
     const armCreate = () => {
       createArmed = true;
-      emitCreateRangePreview(weekday, anchorMinute, anchorMinute + MIN_EVENT_MINUTES);
+      emitCreateRangePreview(column, anchorMinute, anchorMinute + MIN_EVENT_MINUTES);
     };
 
     longPressTimer = window.setTimeout(() => {
@@ -1057,7 +1303,7 @@ export function WeekCalendar({
       }
       if (!rangeDragActive) return;
       currentMinute = minuteFromClientYInRect(ev.clientY, rect);
-      emitCreateRangePreview(weekday, anchorMinute, currentMinute);
+      emitCreateRangePreview(column, anchorMinute, currentMinute);
     };
 
     const onDocUp = (ev: PointerEvent) => {
@@ -1075,7 +1321,7 @@ export function WeekCalendar({
       }
 
       if (rangeDragActive) {
-        const { start, end } = createRangeFromMinutes(weekday, anchorMinute, currentMinute);
+        const { start, end } = createRangeFromMinutes(column, anchorMinute, currentMinute);
         onCreateRangePreview?.(null);
         onCreateEvent(start, end);
         return;
@@ -1087,8 +1333,7 @@ export function WeekCalendar({
           0,
           Math.min(FULL_DAY_MINUTES - 60, Math.round(anchorMinute / 60) * 60),
         );
-        const start = new Date(weekStartDate);
-        start.setDate(weekStartDate.getDate() + dayIndex);
+        const start = new Date(column.date);
         start.setHours(0, snapped, 0, 0);
         const end = addMinutes(start, 60);
         onCreateRangePreview?.(null);
@@ -1105,21 +1350,21 @@ export function WeekCalendar({
 
   const trackWidthPx = TIME_COLUMN_PX + dayTrackWidth;
 
-  function weekdayFromClientXY(clientX: number, clientY: number): Weekday | null {
-    for (const d of DAY_ORDER) {
-      const el = dayBodyElRef.current.get(d);
+  function columnFromClientXY(clientX: number, clientY: number): WeekCalendarDayColumn | null {
+    for (const column of dayColumns) {
+      const el = dayBodyElRef.current.get(column.dateKey);
       if (!el) continue;
       const r = el.getBoundingClientRect();
       if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) {
-        return d;
+        return column;
       }
     }
     return null;
   }
 
   /** Sub-minute precision — use while dragging; snap only on release / commit. */
-  function rawMinuteFromClientYForDay(clientY: number, weekday: Weekday): number {
-    const el = dayBodyElRef.current.get(weekday);
+  function rawMinuteFromClientYForDay(clientY: number, dateKey: string): number {
+    const el = dayBodyElRef.current.get(dateKey);
     if (!el) return 12 * 60;
     const r = el.getBoundingClientRect();
     if (r.height <= 1) return 0;
@@ -1128,10 +1373,8 @@ export function WeekCalendar({
     return Math.max(0, Math.min(FULL_DAY_MINUTES, raw));
   }
 
-  function buildStartEndAt(weekday: Weekday, startMinute: number, endMinute: number): { startAt: Date; endAt: Date } {
-    const idx = DAY_ORDER.indexOf(weekday);
-    const base = addDays(weekStartDate, idx);
-    const dayStart = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+  function buildStartEndAt(columnDate: Date, startMinute: number, endMinute: number): { startAt: Date; endAt: Date } {
+    const dayStart = startOfDay(columnDate);
     const sm = Math.max(0, Math.min(FULL_DAY_MINUTES - 1, startMinute));
     const em = Math.max(sm + MIN_EVENT_MINUTES, Math.min(FULL_DAY_MINUTES, endMinute));
     const startAt = addMinutes(dayStart, sm);
@@ -1185,7 +1428,7 @@ export function WeekCalendar({
     e: React.PointerEvent,
     block: WeekCalendarBlock,
     mode: "move" | "resize-start" | "resize-end",
-    fromWeekday: Weekday,
+    fromColumn: WeekCalendarDayColumn,
     occurrenceDate: Date,
     blockInteractionKey: string,
     moveFromSelected: boolean,
@@ -1211,12 +1454,14 @@ export function WeekCalendar({
     const y0 = e.clientY;
     const captureEl = e.currentTarget as HTMLElement;
 
-    let curWeekday: Weekday = fromWeekday;
+    let curColumn: WeekCalendarDayColumn = fromColumn;
     let curStart = block.startMinute;
     let curEnd = block.endMinute;
     const originDuration = Math.max(MIN_EVENT_MINUTES, block.endMinute - block.startMinute);
     const grabOffsetMove =
-      mode === "move" ? rawMinuteFromClientYForDay(e.clientY, fromWeekday) - block.startMinute : 0;
+      mode === "move"
+        ? rawMinuteFromClientYForDay(e.clientY, fromColumn.dateKey) - block.startMinute
+        : 0;
 
     /** Resize uses the same slop gate as body move so the first committed intent is stable. */
     let activatedForDrag = false;
@@ -1269,7 +1514,8 @@ export function WeekCalendar({
       document.addEventListener("touchmove", preventScroll, { passive: false });
       setDragOverride({
         eventId,
-        weekday: curWeekday,
+        weekday: curColumn.weekday,
+        dateKey: curColumn.dateKey,
         startMinute: curStart,
         endMinute: curEnd,
       });
@@ -1286,8 +1532,8 @@ export function WeekCalendar({
           return;
         }
         if (isResizeMode && pastSlop) {
-          /* Handle hit: commit to resize only — weekday stays on the starting column for the whole gesture. */
-          curWeekday = fromWeekday;
+          /* Handle hit: commit to resize only — column stays fixed for the whole gesture. */
+          curColumn = fromColumn;
           activateCalendarDrag();
           return;
         }
@@ -1302,12 +1548,12 @@ export function WeekCalendar({
         didMove = true;
       }
       if (mode === "move") {
-        const hit = weekdayFromClientXY(ev.clientX, ev.clientY);
-        if (hit) curWeekday = hit;
+        const hit = columnFromClientXY(ev.clientX, ev.clientY);
+        if (hit) curColumn = hit;
       }
       /* Resize: never follow the pointer into adjacent day columns — that read as a combined move + resize. */
-      const minuteDay: Weekday = mode === "move" ? curWeekday : fromWeekday;
-      const m = rawMinuteFromClientYForDay(ev.clientY, minuteDay);
+      const minuteDateKey = mode === "move" ? curColumn.dateKey : fromColumn.dateKey;
+      const m = rawMinuteFromClientYForDay(ev.clientY, minuteDateKey);
       if (mode === "move") {
         let ns = m - grabOffsetMove;
         ns = Math.max(0, Math.min(FULL_DAY_MINUTES - originDuration, ns));
@@ -1324,7 +1570,13 @@ export function WeekCalendar({
         ne = Math.min(FULL_DAY_MINUTES, ne);
         curEnd = ne;
       }
-      setDragOverride({ eventId, weekday: curWeekday, startMinute: curStart, endMinute: curEnd });
+      setDragOverride({
+        eventId,
+        weekday: curColumn.weekday,
+        dateKey: curColumn.dateKey,
+        startMinute: curStart,
+        endMinute: curEnd,
+      });
     };
 
     const onDocUp = (ev: PointerEvent) => {
@@ -1379,13 +1631,14 @@ export function WeekCalendar({
       }
       setDragOverride({
         eventId,
-        weekday: curWeekday,
+        weekday: curColumn.weekday,
+        dateKey: curColumn.dateKey,
         startMinute: snapStart,
         endMinute: snapEnd,
       });
 
       void (async () => {
-        const { startAt, endAt } = buildStartEndAt(curWeekday, snapStart, snapEnd);
+        const { startAt, endAt } = buildStartEndAt(curColumn.date, snapStart, snapEnd);
         if (endAt <= startAt) {
           pendingDragClearRef.current = null;
           clearDragClearFallbackTimer();
@@ -1410,7 +1663,8 @@ export function WeekCalendar({
           }
           pendingDragClearRef.current = {
             eventId: block.calendarEntryId,
-            weekday: curWeekday,
+            weekday: curColumn.weekday,
+            dateKey: curColumn.dateKey,
             startMinute: snapStart,
             endMinute: snapEnd,
           };
@@ -1444,10 +1698,15 @@ export function WeekCalendar({
 
   const selectedOccurrenceDate = useMemo<Date | null>(() => {
     if (!selectedBlock) return null;
+    const key = selectedBlock.occurrenceDateKey?.trim();
+    if (key) {
+      const column = dayColumns.find((entry) => entry.dateKey === key);
+      return column?.date ?? null;
+    }
     const dayIndex = DAY_ORDER.indexOf(selectedBlock.weekday);
     if (dayIndex < 0) return null;
     return addDays(weekStartDate, dayIndex);
-  }, [selectedBlock, weekStartDate]);
+  }, [selectedBlock, dayColumns, weekStartDate]);
 
   /**
    * Live DOM anchor for the toolbar (null while dragging or unselected). We
@@ -1563,13 +1822,22 @@ export function WeekCalendar({
 
   return (
     <div
+      ref={calendarFrameRef}
       className={cn(
         "touch-none overscroll-contain select-none [-webkit-user-select:none] [-webkit-touch-callout:none]",
         "[&_input]:touch-auto [&_textarea]:touch-auto [&_select]:touch-auto",
         fillParent
-          ? "mt-0 flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-[#E7E0D6] bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:border-border dark:bg-card dark:shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+          ? cn(
+              "mt-0 flex min-h-0 flex-col overflow-hidden rounded-2xl border border-[#E7E0D6] bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:border-border dark:bg-card dark:shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
+              pinScrollViewportHeight ? "shrink-0" : "h-full flex-1",
+            )
           : cn(WEEK_CALENDAR_CARD, "flex flex-col overflow-hidden"),
       )}
+      style={
+        fillParent && pinScrollViewportHeight
+          ? { height: `${scrollViewportHeightPx}px` }
+          : undefined
+      }
     >
       {/*
         One horizontal scroller keeps “Time + Mon…” aligned with the grid below.
@@ -1583,7 +1851,7 @@ export function WeekCalendar({
           fillParent ? "min-h-0 min-w-0 flex-1" : null,
         )}
         style={
-          fillParent ? undefined : { height: `${WEEK_CALENDAR_HEADER_HEIGHT_PX + viewportHeightPx}px` }
+          pinScrollViewportHeight ? { height: `${scrollViewportHeightPx}px` } : undefined
         }
       >
         {frameWidth === 0 ? null : <div className="bg-white dark:bg-card" style={{ width: trackWidthPx }}>
@@ -1610,7 +1878,11 @@ export function WeekCalendar({
               {showTimeColumnLabel ? sch.timeColumnLabel : null}
             </div>
             <div
-              className={cn("relative grid cursor-default box-border border-b bg-white dark:bg-card", WEEK_GRID_LINE)}
+              className={cn(
+                "relative grid cursor-default box-border bg-white dark:bg-card",
+                dayColumnSelectMode && shareSelectionRuns.length > 0 ? "border-b-0" : "border-b",
+                WEEK_GRID_LINE,
+              )}
               style={{
                 zIndex: Z_DAY_HEADER_CELL,
                 width: dayTrackWidth,
@@ -1619,56 +1891,114 @@ export function WeekCalendar({
                 minHeight: `${WEEK_CALENDAR_HEADER_HEIGHT_PX}px`,
               }}
             >
-              {visibleDays.map((day) => {
-                const dayIndex = DAY_ORDER.indexOf(day);
-                const date = addDays(weekStartDate, dayIndex);
-                const isToday = today ? isSameDay(date, today) : false;
+              {dayColumns.map((column, columnIndex) => {
+                const day = column.weekday;
+                const date = column.date;
+                const isToday = todayBerlinKey ? column.dateKey === todayBerlinKey : false;
                 const isWeekend = day === "SAT" || day === "SUN";
+                const isAnchor = isSameDay(date, focusDate);
+                const isShareSelected = highlightedDateKeys?.has(column.dateKey) ?? false;
+                const shareChrome = shareSelectionChromeByKey.get(column.dateKey);
 
                 return (
                   <div
-                    key={day}
+                    key={column.dateKey}
                     className={cn(
                       "box-border flex h-full min-h-0 items-center justify-center overflow-hidden border-l bg-white px-0.5 py-0 text-center",
                       WEEK_COL_DIVIDER,
-                      dayIndex === 0 && "border-l-0",
+                      columnIndex === 0 && "border-l-0",
                       "dark:bg-card",
-                      isWeekend && "bg-muted/40",
+                      isWeekend && !dayColumnSelectMode && "bg-muted/40",
+                      shareRecipientDimColumnClass(shareRecipientDimMode, isShareSelected),
+                      shareSelectionColumnToneClass(dayColumnSelectMode, isShareSelected),
+                      shareRecipientDimHeaderCellClass(shareRecipientDimMode, isShareSelected),
+                      shareSelectionHeaderCellClass(dayColumnSelectMode, isShareSelected),
+                      shareSelectionColumnDividerClass(shareChrome),
                     )}
                   >
-                    <div className="flex max-h-full flex-col items-center mt-1 mb-1 justify-center gap-px">
-                      <span
-                        className={cn(
-                          "text-[10px] tabular-nums leading-none",
-                          isToday
-                            ? calendarTodayChrome.weekdayLabel
-                            : cn(
-                                "font-medium text-[#9CA3AF]",
-                                isWeekend && !isToday && "text-[#B8C0CC]",
-                                anchorWeekday === day && !isToday && "font-semibold text-[#5F6B7A] dark:text-muted-foreground",
-                              ),
-                        )}
-                      >
-                        {dayColWeekdayFmt.format(date)}
-                      </span>
-                      <span
-                        className={cn(
-                          "inline-flex h-[20px] min-w-0 max-w-full shrink items-center justify-center whitespace-nowrap rounded-full px-1.5 text-[10px] font-semibold leading-none",
-                          isToday
-                            ? calendarTodayChrome.dayPill
-                            : cn(
-                                "font-medium text-[#6B7280]",
-                                isWeekend && !isToday && "text-[#9CA3AF]",
-                                anchorWeekday === day && !isToday && "font-semibold text-[#374151] dark:text-foreground",
-                              ),
-                        )}
-                      >
-                        {dayColDayMonthFmt.format(date)}
-                      </span>
-                    </div>
+                    {(() => {
+                      const weekdayClass = shareRecipientDimMode
+                        ? shareRecipientDimWeekdayLabelClass({
+                            isShareSelected,
+                            isToday,
+                            todayClass: calendarTodayChrome.weekdayLabel,
+                          })
+                        : shareSelectionWeekdayLabelClass({
+                            selectMode: dayColumnSelectMode,
+                            isToday,
+                            isShareSelected,
+                            isWeekend,
+                            isAnchor,
+                            todayClass: calendarTodayChrome.weekdayLabel,
+                          });
+                      const dayPillClass = shareRecipientDimMode
+                        ? shareRecipientDimDayPillClass({
+                            isShareSelected,
+                            isToday,
+                            todayClass: calendarTodayChrome.dayPill,
+                          })
+                        : shareSelectionDayPillClass({
+                            selectMode: dayColumnSelectMode,
+                            isToday,
+                            isShareSelected,
+                            isWeekend,
+                            isAnchor,
+                            todayClass: calendarTodayChrome.dayPill,
+                          });
+                      const dayLabel = (
+                        <div
+                          className={cn(
+                            "relative flex max-h-full flex-col items-center justify-center gap-px rounded-lg px-1 py-0.5",
+                          )}
+                        >
+                          <span className={cn("text-[10px] tabular-nums leading-none", weekdayClass)}>
+                            {dayColWeekdayFmt.format(date)}
+                          </span>
+                          <span
+                            className={cn(
+                              "inline-flex h-[20px] min-w-0 max-w-full shrink items-center justify-center whitespace-nowrap rounded-full px-1.5 text-[10px] font-semibold leading-none",
+                              dayPillClass,
+                            )}
+                          >
+                            {dayColDayMonthFmt.format(date)}
+                          </span>
+                          {shareRecipientDimMode && !isShareSelected && shareExcludedDayLabel ? (
+                            <span className="mt-0.5 max-w-full truncate text-[8px] font-bold uppercase tracking-wide text-neutral-600 dark:text-neutral-400">
+                              {shareExcludedDayLabel}
+                            </span>
+                          ) : null}
+                        </div>
+                      );
+                      if (!onDayHeaderSelect) return dayLabel;
+                      return (
+                        <button
+                          type="button"
+                          aria-label={
+                            dayHeaderSelectAria
+                              ? formatMessage(dayHeaderSelectAria, {
+                                  when: dayColDayMonthFmt.format(date),
+                                })
+                              : undefined
+                          }
+                          aria-pressed={isShareSelected}
+                          onClick={() => handleDayColumnSelect(date)}
+                          className={cn(
+                            "flex h-full w-full min-h-0 cursor-pointer items-center justify-center rounded-none border-0 bg-transparent p-0 outline-none",
+                            shareSelectionChromeTokens.focusRing,
+                          )}
+                        >
+                          {dayLabel}
+                        </button>
+                      );
+                    })()}
                   </div>
                 );
               })}
+              <ShareSelectionRunOverlayLayer
+                runs={shareSelectionRuns}
+                zone="header"
+                gridTemplateColumns={gridTemplateColumns}
+              />
             </div>
           </div>
 
@@ -1697,24 +2027,47 @@ export function WeekCalendar({
                 </span>
               </div>
               <div
-                className="grid min-w-0 bg-white dark:bg-card"
+                className="relative grid min-w-0 bg-white dark:bg-card"
                 style={{ width: dayTrackWidth, gridTemplateColumns }}
               >
-                {visibleDays.map((day) => {
-                  const dayIndex = DAY_ORDER.indexOf(day);
-                  const occurrenceDate = addDays(weekStartDate, dayIndex);
+                {dayColumns.map((column, columnIndex) => {
+                  const day = column.weekday;
+                  const occurrenceDate = column.date;
                   const isWeekend = day === "SAT" || day === "SUN";
-                  const dayBlocks = allDayBlocks.filter((b) => b.weekday === day);
+                  const isShareSelected = highlightedDateKeys?.has(column.dateKey) ?? false;
+                  const shareChrome = shareSelectionChromeByKey.get(column.dateKey);
+                  const dayBlocks = allDayBlocks.filter((block) => blockMatchesDayColumn(block, column));
                   return (
                     <div
-                      key={`allday-${day}`}
+                      key={`allday-${column.dateKey}`}
                       className={cn(
-                        "box-border flex min-h-[2.25rem] flex-col gap-1 border-l px-1 py-1",
+                        "relative box-border flex min-h-[2.25rem] flex-col gap-1 border-l px-1 py-1",
                         WEEK_COL_DIVIDER,
-                        dayIndex === 0 && "border-l-0",
-                        isWeekend && "bg-[#FAF8F5] dark:bg-muted/35",
+                        columnIndex === 0 && "border-l-0",
+                        isWeekend && !dayColumnSelectMode && "bg-[#FAF8F5] dark:bg-muted/35",
+                        shareRecipientDimColumnClass(shareRecipientDimMode, isShareSelected),
+                        shareSelectionColumnToneClass(dayColumnSelectMode, isShareSelected),
+                        shareSelectionColumnDividerClass(shareChrome),
                       )}
                     >
+                      {dayColumnSelectMode ? (
+                        <button
+                          type="button"
+                          aria-label={
+                            dayHeaderSelectAria
+                              ? formatMessage(dayHeaderSelectAria, {
+                                  when: dayColDayMonthFmt.format(occurrenceDate),
+                                })
+                              : undefined
+                          }
+                          aria-pressed={isShareSelected}
+                          onClick={() => handleDayColumnSelect(occurrenceDate)}
+                          className={cn(
+                            "absolute inset-0 z-[2] cursor-pointer border-0 bg-transparent p-0 outline-none",
+                            shareSelectionChromeTokens.focusRing,
+                          )}
+                        />
+                      ) : null}
                       {dayBlocks.map((block, bi) => {
                         const labelText = [block.courseCode, block.courseName]
                           .filter(Boolean)
@@ -1751,6 +2104,7 @@ export function WeekCalendar({
                                 "focus-visible:ring-2 focus-visible:ring-[#2563EB]/35 focus-visible:ring-offset-1 focus-visible:ring-offset-background dark:focus-visible:ring-blue-400/40",
                                 !useCategory && tone.card,
                                 useCategory && "border border-black/10 shadow-sm dark:border-white/10",
+                                dayColumnSelectMode && "pointer-events-none",
                               )}
                               style={
                                 useCategory && catHex
@@ -1822,6 +2176,11 @@ export function WeekCalendar({
                     </div>
                   );
                 })}
+                <ShareSelectionRunOverlayLayer
+                  runs={shareSelectionRuns}
+                  zone="middle"
+                  gridTemplateColumns={gridTemplateColumns}
+                />
               </div>
             </div>
           ) : null}
@@ -1846,7 +2205,7 @@ export function WeekCalendar({
                     >
                   {hourLabels.map((m) => {
                     const hiddenByNow =
-                      showNowLine &&
+                      effectiveShowNowLine &&
                       nowMinute !== undefined &&
                       nowMinute >= 0 &&
                       nowMinute <= FULL_DAY_MINUTES &&
@@ -1871,7 +2230,7 @@ export function WeekCalendar({
                     );
                   })}
 
-                  {showNowLine &&
+                  {effectiveShowNowLine &&
                   nowMinute !== undefined &&
                   nowMinute >= 0 &&
                   nowMinute <= FULL_DAY_MINUTES ? (
@@ -1907,7 +2266,7 @@ export function WeekCalendar({
                     height: `${fullHeightPx}px`,
                   }}
                 >
-                    {showNowLine &&
+                    {effectiveShowNowLine &&
                     nowMinute !== undefined &&
                     nowMinute >= 0 &&
                     nowMinute <= FULL_DAY_MINUTES ? (
@@ -1922,15 +2281,20 @@ export function WeekCalendar({
                       </div>
                     ) : null}
 
-                    {visibleDays.map((day) => {
-                      const dayBlocks = positionedBlocksByDay.get(day) ?? [];
-                      const isAnchor = anchorWeekday === day;
+                    {dayColumns.map((column, columnIndex) => {
+                      const day = column.weekday;
+                      const dayBlocks = positionedBlocksByDateKey.get(column.dateKey) ?? [];
+                      const isAnchor = isSameDay(column.date, focusDate);
                       const isWeekend = day === "SAT" || day === "SUN";
-                      const dayIndex = DAY_ORDER.indexOf(day);
-                      const occurrenceDate = addDays(weekStartDate, dayIndex);
+                      const isShareSelected = highlightedDateKeys?.has(column.dateKey) ?? false;
+                      const shareChrome = shareSelectionChromeByKey.get(column.dateKey);
+                      const occurrenceDate = column.date;
+
+                      const columnShareActive =
+                        !highlightedDateKeys?.size || highlightedDateKeys.has(column.dateKey);
 
                       const createFromPointer = (clientY: number, rect: DOMRect) => {
-                        if (!onCreateEvent) return;
+                        if (!onCreateEvent || !columnShareActive) return;
                         const snappedMinute = Math.max(
                           0,
                           Math.min(
@@ -1938,15 +2302,14 @@ export function WeekCalendar({
                             Math.round(minuteFromClientYInRect(clientY, rect) / 60) * 60,
                           ),
                         );
-                        const start = new Date(weekStartDate);
-                        start.setDate(weekStartDate.getDate() + dayIndex);
+                        const start = new Date(column.date);
                         start.setHours(0, snappedMinute, 0, 0);
                         const end = addMinutes(start, 60);
                         onCreateEvent(start, end);
                       };
 
                       const createFromTapSlot = (clientY: number, rect: DOMRect) => {
-                        if (!onCreateEvent) return;
+                        if (!onCreateEvent || !columnShareActive) return;
                         const rawMinute = minuteFromClientYInRect(clientY, rect);
                         const slotStart = Math.max(
                           0,
@@ -1956,7 +2319,7 @@ export function WeekCalendar({
                           ),
                         );
                         const { start, end } = createRangeFromMinutes(
-                          day,
+                          column,
                           slotStart,
                           slotStart + defaultTapSlotDurationMinutes,
                         );
@@ -1965,60 +2328,92 @@ export function WeekCalendar({
 
                       return (
                         <div
-                          key={day}
+                          key={column.dateKey}
                           ref={(node) => {
-                            dayBodyElRef.current.set(day, node);
+                            dayBodyElRef.current.set(column.dateKey, node);
                           }}
                           data-weekday={day}
                           className={cn(
                             "relative border-l bg-white/90",
                             WEEK_COL_DIVIDER,
-                            dayIndex === 0 && "border-l-0",
-                            isWeekend ? "bg-[#FAF8F5] dark:bg-muted/50" : "bg-white/90 dark:bg-card/80",
-                            isAnchor && !isWeekend && "bg-white dark:bg-card",
-                            isAnchor && isWeekend && "bg-[#FAF8F5] dark:bg-muted/50",
+                            columnIndex === 0 && "border-l-0",
+                            isWeekend && !dayColumnSelectMode
+                              ? "bg-[#FAF8F5] dark:bg-muted/50"
+                              : "bg-white/90 dark:bg-card/80",
+                            !dayColumnSelectMode && isAnchor && !isWeekend && "bg-white dark:bg-card",
+                            !dayColumnSelectMode &&
+                              isAnchor &&
+                              isWeekend &&
+                              "bg-[#FAF8F5] dark:bg-muted/50",
+                            shareRecipientDimColumnClass(shareRecipientDimMode, isShareSelected),
+                            shareSelectionColumnToneClass(dayColumnSelectMode, isShareSelected),
+                            shareSelectionColumnDividerClass(shareChrome),
                           )}
                         >
-                          <button
-                            type="button"
-                            aria-label={formatMessage(sch.createEventOnDayAria, {
-                              when: createEventWhenFmt.format(occurrenceDate),
-                            })}
-                            onDoubleClick={
-                              createEventMode === "drag"
-                                ? (event) => {
-                                    createFromPointer(
-                                      event.clientY,
-                                      event.currentTarget.getBoundingClientRect(),
-                                    );
-                                  }
-                                : undefined
-                            }
-                            onClick={
-                              createEventMode === "tap-slot"
-                                ? (event) => {
-                                    createFromTapSlot(
-                                      event.clientY,
-                                      event.currentTarget.getBoundingClientRect(),
-                                    );
-                                  }
-                                : undefined
-                            }
-                            onPointerDown={
-                              createEventMode === "drag"
-                                ? (event) => {
-                                    startCreatePointerSession(
-                                      event,
-                                      day,
-                                      dayIndex,
-                                      event.currentTarget.getBoundingClientRect(),
-                                    );
-                                  }
-                                : undefined
-                            }
-                            className="absolute inset-0 cursor-crosshair"
-                            style={{ zIndex: Z_DAY_CREATE_HIT }}
-                          />
+                          {shareRecipientDimMode && !isShareSelected ? (
+                            <div
+                              aria-hidden
+                              className={shareRecipientExcludedBodyOverlayClass()}
+                            />
+                          ) : null}
+                          {dayColumnSelectMode ? (
+                            <button
+                              type="button"
+                              aria-label={
+                                dayHeaderSelectAria
+                                  ? formatMessage(dayHeaderSelectAria, {
+                                      when: dayColDayMonthFmt.format(occurrenceDate),
+                                    })
+                                  : undefined
+                              }
+                              aria-pressed={isShareSelected}
+                              onClick={() => handleDayColumnSelect(occurrenceDate)}
+                              className={cn(
+                            "absolute inset-0 z-[2] cursor-pointer border-0 bg-transparent p-0 outline-none",
+                            shareSelectionChromeTokens.focusRing,
+                          )}
+                            />
+                          ) : columnShareActive ? (
+                            <button
+                              type="button"
+                              aria-label={formatMessage(sch.createEventOnDayAria, {
+                                when: createEventWhenFmt.format(occurrenceDate),
+                              })}
+                              onDoubleClick={
+                                createEventMode === "drag"
+                                  ? (event) => {
+                                      createFromPointer(
+                                        event.clientY,
+                                        event.currentTarget.getBoundingClientRect(),
+                                      );
+                                    }
+                                  : undefined
+                              }
+                              onClick={
+                                createEventMode === "tap-slot"
+                                  ? (event) => {
+                                      createFromTapSlot(
+                                        event.clientY,
+                                        event.currentTarget.getBoundingClientRect(),
+                                      );
+                                    }
+                                  : undefined
+                              }
+                              onPointerDown={
+                                createEventMode === "drag"
+                                  ? (event) => {
+                                      startCreatePointerSession(
+                                        event,
+                                        column,
+                                        event.currentTarget.getBoundingClientRect(),
+                                      );
+                                    }
+                                  : undefined
+                              }
+                              className="absolute inset-0 cursor-crosshair"
+                              style={{ zIndex: Z_DAY_CREATE_HIT }}
+                            />
+                          ) : null}
 
                           {hourLabels.map((m) => {
                             const top = ((m - visualStartMinute) / totalMinutes) * 100;
@@ -2053,7 +2448,7 @@ export function WeekCalendar({
                             const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
                             const isDraftNewTone = toneKey === "draftNew";
                             const key = block.id;
-                            const occurrenceDate = addDays(weekStartDate, dayIndex);
+                            const occurrenceDate = column.date;
                             const isDraftPreviewBlock = isDraftPreviewCourseId(block.courseId);
                             const isDraftPreviewEditable =
                               isDraftPreviewBlock && Boolean(onDraftPreviewTimesChange);
@@ -2086,6 +2481,7 @@ export function WeekCalendar({
                               : block.endMinute;
                             const eventCardVisualClassName = cn(
                               "absolute rounded-[2px] p-0 text-left leading-tight transition",
+                              dayColumnSelectMode && "pointer-events-none",
                               draggingThis && "!transition-none",
                               /* Pressed-state dim reads like “dragging” while the finger is still down after long-press select. */
                               isSelectedForEdit && !draggingThis
@@ -2396,7 +2792,7 @@ export function WeekCalendar({
                                           ev,
                                           block,
                                           "move",
-                                          day,
+                                          column,
                                           occurrenceDate,
                                           key,
                                           isDraftPreviewEditable ||
@@ -2431,7 +2827,7 @@ export function WeekCalendar({
                                             ev,
                                             block,
                                             "resize-start",
-                                            day,
+                                            column,
                                             occurrenceDate,
                                             key,
                                             true,
@@ -2462,7 +2858,7 @@ export function WeekCalendar({
                                             ev,
                                             block,
                                             "resize-end",
-                                            day,
+                                            column,
                                             occurrenceDate,
                                             key,
                                             true,
@@ -2514,6 +2910,11 @@ export function WeekCalendar({
                         </div>
                       );
                     })}
+                    <ShareSelectionRunOverlayLayer
+                      runs={shareSelectionRuns}
+                      zone="body"
+                      gridTemplateColumns={gridTemplateColumns}
+                    />
                 </div>
                 <div className="shrink-0" style={{ height: `${BOTTOM_SPACER_PX}px` }} aria-hidden />
               </div>

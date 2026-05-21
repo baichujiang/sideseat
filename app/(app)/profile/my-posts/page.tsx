@@ -84,7 +84,7 @@ export default async function ProfileMyPostsPage() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <BackLink href="/profile" label={ui.common.back} />
+          <BackLink fallback="/profile" label={ui.common.back} />
           <h1 className="page-screen-title">{ui.profile.myPostsPageTitle}</h1>
         </div>
         <GuestAppCta returnTo="/profile/my-posts" />
@@ -111,7 +111,7 @@ export default async function ProfileMyPostsPage() {
   return (
     <div className="space-y-5">
       <div className="flex items-start gap-2 px-0.5">
-        <BackLink href="/profile" label={ui.common.back} className="mt-0.5" />
+        <BackLink fallback="/profile" label={ui.common.back} className="mt-0.5" />
         <div className="min-w-0 flex-1">
           <h1 className="page-screen-title">{ui.profile.myPostsPageTitle}</h1>
           <p className="text-[13px] leading-snug text-muted-foreground">{ui.profile.myPostsPageSubtitle}</p>

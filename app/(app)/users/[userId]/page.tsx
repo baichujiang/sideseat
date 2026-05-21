@@ -9,7 +9,7 @@ import { BackLink } from "@/components/nav/back-link";
 import { requirePublicProfileAccess } from "@/lib/auth/guards";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { formatMessage, getMessages } from "@/lib/i18n/messages";
-import { safeReturnPath } from "@/lib/nav/back";
+import { resolveBackHref } from "@/lib/nav/back";
 
 export default async function PeerUserProfilePage({
   params,
@@ -25,7 +25,6 @@ export default async function PeerUserProfilePage({
   const locale = await getServerAppLocale();
   const ui = getMessages(locale);
   const up = ui.userProfile;
-  const backHref = safeReturnPath(query.returnTo, "/discover");
 
   const friendLinkReturnTo =
     query.returnTo != null && query.returnTo !== ""
@@ -35,7 +34,7 @@ export default async function PeerUserProfilePage({
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-background">
       <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
-        <BackLink href={backHref} label={ui.common.back} />
+        <BackLink returnTo={query.returnTo} fallback="/discover" label={ui.common.back} />
         <div className="min-w-0 flex-1 pr-2">
           <p className="truncate text-sm font-semibold">{up.screenTitle}</p>
           <p className="truncate text-[11px] text-muted-foreground">

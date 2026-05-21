@@ -63,6 +63,10 @@ export function indexConnectionMessagesForSearch(
       case "AVAILABILITY_CARD":
         if (m.body.trim()) parts.push(m.body);
         break;
+      case "SCHEDULE_SHARE_CARD":
+        parts.push("Shared schedule");
+        if (m.body.trim()) parts.push(m.body);
+        break;
       default:
         break;
     }

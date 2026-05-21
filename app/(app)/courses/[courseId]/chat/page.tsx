@@ -18,7 +18,7 @@ import { getSchoolLabel } from "@/lib/constants/schools";
 import { courseChatHeadline } from "@/lib/courses/course-code-label";
 import { formatMessage, getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
-import { safeReturnPath } from "@/lib/nav/back";
+import { resolveBackHref } from "@/lib/nav/back";
 import { chatMessageDomId } from "@/lib/chat/chat-message-dom-id";
 import { indexPlainTextMessagesForSearch } from "@/lib/chat/thread-search-index";
 
@@ -31,7 +31,6 @@ export default async function CourseChatPage({
 }) {
   const { courseId } = await params;
   const query = (await searchParams) ?? {};
-  const backHref = safeReturnPath(query.returnTo, `/courses/${courseId}`);
   const locale = await getServerAppLocale();
   const ui = getMessages(locale);
   const c = ui.courses;
@@ -101,7 +100,7 @@ export default async function CourseChatPage({
     <ChatRealtimeRefresh kind="course" courseId={courseId} latestMessageId={latestMessageId} />
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background">
       <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
-        <BackLink href={backHref} />
+        <BackLink returnTo={query.returnTo} fallback={`/courses/${courseId}`} />
         <Link
           href={`/courses/${courseId}`}
           className="flex min-w-0 flex-1 flex-col rounded-xl py-1 pl-1 pr-2 text-left transition hover:bg-muted/70 active:bg-muted"

@@ -16,5 +16,8 @@ export function directMessageActionSnippet(message: {
       "Location"
     );
   }
+  if (message.type === "SCHEDULE_SHARE_CARD") {
+    return message.body.trim() || "Shared schedule";
+  }
   return message.body;
 }

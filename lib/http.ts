@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ZodSchema } from "zod";
+import { ZodError, type ZodSchema } from "zod";
 
 export async function parseJson<T>(request: Request, schema: ZodSchema<T>) {
   const body = await request.json();
@@ -26,4 +26,11 @@ export function ok(data: unknown, init?: ResponseInit) {
 
 export function error(message: string, status = 400) {
   return NextResponse.json({ success: false, error: message }, { status });
+}
+
+export function formatZodError(cause: ZodError): string {
+  const first = cause.errors[0];
+  if (!first) return "Invalid request.";
+  const path = first.path.length ? `${first.path.join(".")}: ` : "";
+  return `${path}${first.message}`;
 }

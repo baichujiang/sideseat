@@ -2,6 +2,10 @@ import { formatInTimeZone } from "date-fns-tz";
 
 import { SCHEDULE_DISPLAY_TZ, scheduleDateKeyInBerlin } from "@/lib/calendar/schedule-berlin";
 import type { AppLocale } from "@/lib/i18n/app-locale";
+import {
+  berlinDateFromDateKey,
+  groupConsecutiveBerlinDateKeys,
+} from "@/lib/schedule-share/share-selected-days";
 
 function berlinKeys(d: Date) {
   const key = scheduleDateKeyInBerlin(d);
@@ -80,4 +84,49 @@ export function formatShareCreateRangeSummary(
 /** Expiry datetime for link summary row. */
 export function formatShareExpirySummary(expires: Date, locale: AppLocale): string {
   return fmtTime(expires, locale);
+}
+
+function formatBerlinDateKeyRun(
+  startKey: string,
+  endKey: string,
+  locale: AppLocale,
+  allSameYear: boolean,
+): string {
+  const start = berlinDateFromDateKey(startKey);
+  const end = berlinDateFromDateKey(endKey);
+  if (startKey === endKey) {
+    return fmtDate(start, locale, !allSameYear);
+  }
+
+  const runSameYear = startKey.slice(0, 4) === endKey.slice(0, 4);
+  const runSameMonth = runSameYear && startKey.slice(0, 7) === endKey.slice(0, 7);
+
+  if (runSameMonth) {
+    if (locale === "zh-CN") {
+      const startPart = formatInTimeZone(start, SCHEDULE_DISPLAY_TZ, "M月d日");
+      const endPart = formatInTimeZone(end, SCHEDULE_DISPLAY_TZ, "d日");
+      return `${startPart} – ${endPart}`;
+    }
+    const startPart = formatInTimeZone(start, SCHEDULE_DISPLAY_TZ, "MMM d");
+    const endPart = formatInTimeZone(end, SCHEDULE_DISPLAY_TZ, "d");
+    return `${startPart} – ${endPart}`;
+  }
+
+  const withYear = !allSameYear || !runSameYear;
+  return `${fmtDate(start, locale, withYear)} – ${fmtDate(end, locale, withYear)}`;
+}
+
+/** Summary for individually picked share days (Berlin yyyy-MM-dd keys). */
+export function formatShareSelectedDaysSummary(
+  selectedDateKeys: ReadonlySet<string>,
+  locale: AppLocale,
+): string {
+  const sorted = [...selectedDateKeys].sort();
+  if (sorted.length === 0) return "";
+
+  const allSameYear = sorted.every((k) => k.slice(0, 4) === sorted[0]!.slice(0, 4));
+  const runs = groupConsecutiveBerlinDateKeys(sorted);
+  return runs
+    .map((run) => formatBerlinDateKeyRun(run.startKey, run.endKey, locale, allSameYear))
+    .join(locale === "zh-CN" ? "、" : ", ");
 }

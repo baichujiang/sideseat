@@ -2,14 +2,18 @@
 
 import { useMemo } from "react";
 
-import { Checkbox } from "@/components/ui/checkbox";
+import { ScheduleShareRevealCategoryChips } from "@/components/schedule-share/schedule-share-reveal-category-chips";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import {
   formatShareCreateRangeSummary,
   formatShareExpirySummary,
 } from "@/lib/schedule-share/format-share-create-summary";
 import { formatMessage } from "@/lib/i18n/messages";
-import { REVEAL_PRESET_KEYS_ALLOWLIST, type RevealPresetKeyAllowlisted } from "@/lib/schedule-share/reveal-config";
+import {
+  isAllCategoriesRevealed,
+  isNoCategoriesRevealed,
+  shareRevealCategoryColor,
+} from "@/lib/schedule-share/reveal-category-selection";
 import {
   applyShareRangePresetToForm,
   type ScheduleShareFormState,
@@ -22,6 +26,7 @@ export type ScheduleShareCategoryInput = {
   id: string;
   name: string;
   presetKey: string | null;
+  color: string;
 };
 
 const FIELD_INPUT =
@@ -100,18 +105,16 @@ export function ScheduleShareOptionsForm({
   const { locale, messages: ui } = useLocaleContext();
   const s = ui.scheduleShare;
 
-  function presetLabel(key: RevealPresetKeyAllowlisted): string {
-    switch (key) {
-      case "course":
-        return s.presetCourse;
-      case "personal":
-        return s.presetPersonal;
-      case "work":
-        return s.presetWork;
-      default:
-        return s.presetOther;
-    }
-  }
+  const revealCategories = useMemo(
+    () =>
+      categories.map((c) => ({
+        id: c.id,
+        name: c.name,
+        presetKey: c.presetKey,
+        color: shareRevealCategoryColor(c.color),
+      })),
+    [categories],
+  );
 
   const rangeSummary = useMemo(() => {
     const start = new Date(value.rangeStartInput);
@@ -129,8 +132,11 @@ export function ScheduleShareOptionsForm({
     return formatMessage(s.linkExpirySummary, { usage, when });
   }, [value.expiresInput, value.usageLimit, locale, s]);
 
-  const hasRevealSelection = value.presetKeys.length > 0 || value.categoryIds.length > 0;
-  const customCalendars = useMemo(() => categories.filter((c) => !c.presetKey), [categories]);
+  const privacyPreviewText = useMemo(() => {
+    if (isNoCategoriesRevealed(revealCategories, value.revealedCategoryIds)) return s.privacyPreviewNone;
+    if (isAllCategoriesRevealed(revealCategories, value.revealedCategoryIds)) return null;
+    return s.privacyPreviewSome;
+  }, [revealCategories, value.revealedCategoryIds, s]);
 
   function selectPreset(preset: ShareRangePreset) {
     onChange(applyShareRangePresetToForm(value, preset, baseNow));
@@ -138,9 +144,9 @@ export function ScheduleShareOptionsForm({
 
   return (
     <div className="space-y-4">
-      {showPrivacyPreview ? (
+      {showPrivacyPreview && privacyPreviewText ? (
         <p className="rounded-xl bg-muted/30 px-3 py-2.5 text-[12px] leading-snug text-muted-foreground">
-          {hasRevealSelection ? s.privacyPreviewSome : s.privacyPreviewNone}
+          {privacyPreviewText}
         </p>
       ) : null}
 
@@ -193,89 +199,53 @@ export function ScheduleShareOptionsForm({
       </Section>
 
       <Section title={s.revealSectionTitle} hint={s.revealPresetsHint}>
-        <Subheading>{s.presetsGroupLabel}</Subheading>
-        <div className="space-y-2">
-          {REVEAL_PRESET_KEYS_ALLOWLIST.map((key) => (
-            <Checkbox
-              key={key}
-              checked={value.presetKeys.includes(key)}
-              onChange={(checked) => {
-                onChange({
-                  ...value,
-                  presetKeys: checked
-                    ? value.presetKeys.includes(key)
-                      ? value.presetKeys
-                      : [...value.presetKeys, key]
-                    : value.presetKeys.filter((k) => k !== key),
-                });
-              }}
-              label={presetLabel(key)}
-            />
-          ))}
-        </div>
-        {customCalendars.length ? (
-          <>
-            <Subheading>{s.myCalendarsTitle}</Subheading>
-            <div className="space-y-2">
-              {customCalendars.map((c) => (
-                <Checkbox
-                  key={c.id}
-                  checked={value.categoryIds.includes(c.id)}
-                  onChange={(checked) => {
-                    onChange({
-                      ...value,
-                      categoryIds: checked
-                        ? value.categoryIds.includes(c.id)
-                          ? value.categoryIds
-                          : [...value.categoryIds, c.id]
-                        : value.categoryIds.filter((x) => x !== c.id),
-                    });
-                  }}
-                  label={c.name}
-                />
-              ))}
-            </div>
-          </>
-        ) : null}
+        <ScheduleShareRevealCategoryChips
+          categories={revealCategories}
+          revealedCategoryIds={value.revealedCategoryIds}
+          onRevealedCategoryIdsChange={(revealedCategoryIds) =>
+            onChange({ ...value, revealedCategoryIds })
+          }
+        />
       </Section>
 
-      <div className="space-y-2 rounded-xl border border-border/60 bg-muted/25 px-3 py-3">
-        <p className="text-[13px] font-semibold">{s.meetingProposalsTitle}</p>
-        <Checkbox
-          checked={value.allowGuestProposals}
-          onChange={(checked) => onChange({ ...value, allowGuestProposals: checked })}
-          label={s.allowProposals}
-        />
-        <p className="text-[11px] leading-snug text-muted-foreground">{s.allowProposalsHelper}</p>
-      </div>
-
-      <Section title={s.linkExpiryLabel} hint={s.linkExpiryHelper} error={expiryError}>
-        <Subheading>{s.linkUsageLabel}</Subheading>
-        <div className={CHIP_ROW_CLASS}>
-          <RangeChip
-            active={value.usageLimit === "SINGLE_USE"}
-            onClick={() => onChange({ ...value, usageLimit: "SINGLE_USE" as ScheduleShareUsageLimitInput })}
-          >
-            {s.linkUsageSingleUse}
-          </RangeChip>
-          <RangeChip
-            active={value.usageLimit === "UNLIMITED"}
-            onClick={() => onChange({ ...value, usageLimit: "UNLIMITED" })}
-          >
-            {s.linkUsageUnlimited}
-          </RangeChip>
+      <Section
+        title={s.linkUsageLabel}
+        hint={value.usageLimit === "UNLIMITED" ? s.linkExpiryHelper : undefined}
+        error={expiryError}
+      >
+        <div className="flex items-center gap-2">
+          <div className={cn(CHIP_ROW_CLASS, "min-w-0 shrink-0")}>
+            <RangeChip
+              active={value.usageLimit === "SINGLE_USE"}
+              onClick={() => onChange({ ...value, usageLimit: "SINGLE_USE" as ScheduleShareUsageLimitInput })}
+            >
+              {s.linkUsageSingleUse}
+            </RangeChip>
+            <RangeChip
+              active={value.usageLimit === "UNLIMITED"}
+              onClick={() => onChange({ ...value, usageLimit: "UNLIMITED" })}
+            >
+              {s.linkUsageUnlimited}
+            </RangeChip>
+          </div>
+          {value.usageLimit === "UNLIMITED" ? (
+            <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-1.5">
+              <span className="shrink-0 whitespace-nowrap text-[11px] font-medium text-muted-foreground">
+                {s.linkExpiryLabel}
+              </span>
+              <input
+                type="datetime-local"
+                className="h-9 min-w-0 max-w-[11.5rem] shrink rounded-xl border border-input bg-background px-2 text-[13px] outline-none transition focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+                value={value.expiresInput}
+                onChange={(e) => onChange({ ...value, expiresInput: e.target.value })}
+              />
+            </div>
+          ) : null}
         </div>
         {value.usageLimit === "SINGLE_USE" ? (
           <p className="text-[11px] leading-snug text-muted-foreground">{s.linkUsageSingleUseHint}</p>
         ) : null}
-        <Subheading>{s.linkExpiresAtLabel}</Subheading>
-        <input
-          type="datetime-local"
-          className={FIELD_INPUT}
-          value={value.expiresInput}
-          onChange={(e) => onChange({ ...value, expiresInput: e.target.value })}
-        />
-        {expirySummary ? (
+        {value.usageLimit === "UNLIMITED" && expirySummary ? (
           <p className="text-[12px] leading-snug text-muted-foreground">{expirySummary}</p>
         ) : null}
       </Section>

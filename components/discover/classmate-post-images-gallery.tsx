@@ -9,17 +9,10 @@ function isDataUrl(url: string) {
   return url.startsWith("data:");
 }
 
-const CARD_MEDIA_HEIGHT_CLASS = "h-48 max-h-56";
+/** Caps very tall photos in feed cards without forcing a fixed strip height. */
+const CARD_IMAGE_CLASS = "block h-auto w-full max-h-72 object-contain";
 
-function PostImageMedia({
-  url,
-  alt,
-  sizes,
-}: {
-  url: string;
-  alt: string;
-  sizes: string;
-}) {
+function DetailHeroImage({ url, alt, sizes }: { url: string; alt: string; sizes: string }) {
   if (isDataUrl(url)) {
     return (
       // eslint-disable-next-line @next/next/no-img-element -- inline fallback when blob token unset
@@ -33,6 +26,25 @@ function PostImageMedia({
     );
   }
   return <Image src={url} alt={alt} fill sizes={sizes} className="object-cover" />;
+}
+
+function CardFeedImage({ url, alt, sizes }: { url: string; alt: string; sizes: string }) {
+  if (isDataUrl(url)) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- intrinsic height for masonry cards
+      <img src={url} alt={alt} className={CARD_IMAGE_CLASS} loading="lazy" decoding="async" />
+    );
+  }
+  return (
+    <Image
+      src={url}
+      alt={alt}
+      width={1200}
+      height={900}
+      sizes={sizes}
+      className={CARD_IMAGE_CLASS}
+    />
+  );
 }
 
 function CardMediaStrip({
@@ -58,7 +70,7 @@ function CardMediaStrip({
     >
       <div
         className={cn(
-          "flex w-full gap-2 overflow-x-auto overflow-y-hidden rounded-xl pb-0.5 [scrollbar-width:thin]",
+          "flex w-full items-start gap-2 overflow-x-auto overflow-y-hidden rounded-xl pb-0.5 [scrollbar-width:thin]",
           multi && "snap-x snap-mandatory",
         )}
       >
@@ -66,14 +78,13 @@ function CardMediaStrip({
           <div
             key={`${id}-card-${index}`}
             className={cn(
-              "relative shrink-0 overflow-hidden rounded-xl bg-muted/80 ring-1 ring-border/45",
-              CARD_MEDIA_HEIGHT_CLASS,
+              "shrink-0 overflow-hidden rounded-xl bg-muted/40 ring-1 ring-border/45",
               multi
                 ? "w-[min(100%,22rem)] min-w-[85%] snap-start sm:min-w-[70%]"
-                : "min-w-0 flex-1",
+                : "min-w-0 w-full",
             )}
           >
-            <PostImageMedia
+            <CardFeedImage
               url={url}
               alt=""
               sizes={multi ? "(max-width:640px) 85vw, 28rem" : "(max-width:640px) 100vw, 36rem"}
@@ -122,12 +133,8 @@ export function ClassmatePostImagesGallery({
   if (urls.length === 1) {
     return (
       <div role="group" aria-label={ariaLabel} className={cn("w-full", className)}>
-        <div className="relative aspect-[16/9] max-h-56 w-full overflow-hidden rounded-2xl bg-muted/80 ring-1 ring-border/50">
-          <PostImageMedia
-            url={first}
-            alt=""
-            sizes="(max-width: 640px) 100vw, 36rem"
-          />
+        <div className="relative w-full overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/50">
+          <CardFeedImage url={first} alt="" sizes="(max-width: 640px) 100vw, 36rem" />
         </div>
       </div>
     );

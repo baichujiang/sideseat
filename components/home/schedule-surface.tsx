@@ -11,13 +11,12 @@ import {
   isSameDay,
   isSameMonth,
   isSameYear,
+  startOfDay,
   startOfWeek,
 } from "date-fns";
 import {
   Archive,
   Calendar,
-  ChevronLeft,
-  ChevronRight,
   Download,
   FileUp,
   Loader2,
@@ -37,18 +36,17 @@ import {
   useState,
 } from "react";
 import type { Route } from "next";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import {
   WeekCalendar,
   WEEK_CALENDAR_HEADER_HEIGHT_PX,
   WEEK_CALENDAR_MINUTE_SCALE_DEFAULT,
-  WEEK_CALENDAR_VISIBLE_DAY_MAX,
-  WEEK_CALENDAR_VISIBLE_DAY_MIN,
-  clampWeekCalendarMinuteScale,
   clampWeekCalendarVisibleDayCount,
   type WeekCalendarBlock,
 } from "@/components/calendar/week-calendar";
+import { ScheduleDateNavControls } from "@/components/calendar/schedule-date-nav-controls";
+import { WeekVisibleDaysBar } from "@/components/calendar/week-visible-days-bar";
 import type { WeekEventEditToolbarLabels } from "@/components/calendar/week-event-edit-toolbar";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { ScheduleAddPanel } from "@/components/home/schedule-add-panel";
@@ -65,9 +63,13 @@ import {
 } from "@/components/home/schedule-day-timeline";
 import { ScheduleMonthView } from "@/components/home/schedule-month-view";
 import { HomeCalendarVisual, HomeGreetingHeading } from "@/components/home/home-hero";
+import { WEEK_CALENDAR_CONTINUOUS_BUFFER_DAYS } from "@/lib/calendar/week-calendar-day-columns";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import {
   berlinClockMinutes,
+  berlinEndOfWeek,
+  berlinStartOfCalendarDay,
+  berlinStartOfWeek,
   berlinWeekdayFromInstant,
   scheduleDateKeyInBerlin,
 } from "@/lib/calendar/schedule-berlin";
@@ -75,6 +77,13 @@ import { courseCalendarShortLabel } from "@/lib/calendar/course-calendar-short-l
 import { isIcsFeedStudyEntryId } from "@/lib/calendar/ics-feed-event-id";
 import type { AppLocale } from "@/lib/i18n/app-locale";
 import { formatMessage, type AppMessages } from "@/lib/i18n/messages";
+import {
+  HOME_CALENDAR_MINUTE_SCALE_STORAGE_KEY,
+  HOME_CALENDAR_VISIBLE_DAYS_DEFAULT,
+  HOME_CALENDAR_VISIBLE_DAYS_STORAGE_KEY,
+  parseStoredHomeCalendarMinuteScale,
+  readHomeCalendarVisibleDaysFromStorage,
+} from "@/lib/calendar/home-calendar-preferences";
 import { cn } from "@/lib/utils";
 
 function formatRepeatLabel(rule: CalendarRepeatRule, s: AppMessages["schedule"]): string {
@@ -132,10 +141,6 @@ type ViewKind = "day" | "week" | "month";
 
 type CalendarEventDeleteScope = "this" | "future" | "all";
 
-const HOME_CALENDAR_VISIBLE_DAYS_DEFAULT = 5;
-const HOME_CALENDAR_VISIBLE_DAYS_STORAGE_KEY = "homeCalendarVisibleDays";
-const HOME_CALENDAR_MINUTE_SCALE_STORAGE_KEY = "homeCalendarMinuteScale";
-
 /** Same offset as the week-view share FAB — keeps the visible-days slider above the tab bar. */
 const HOME_WEEK_FLOATING_CONTROLS_BOTTOM_REM = 5.75;
 
@@ -153,20 +158,6 @@ function measureSafeAreaInsetBottom(): number {
 function homeWeekFloatingControlsBottomPx(): number {
   const root = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
   return HOME_WEEK_FLOATING_CONTROLS_BOTTOM_REM * root + measureSafeAreaInsetBottom();
-}
-
-function parseStoredHomeCalendarVisibleDays(rawValue: string | null): number | null {
-  if (!rawValue) return null;
-  const parsed = Number.parseInt(rawValue, 10);
-  if (Number.isNaN(parsed)) return null;
-  return clampWeekCalendarVisibleDayCount(parsed);
-}
-
-function parseStoredHomeCalendarMinuteScale(rawValue: string | null): number | null {
-  if (!rawValue) return null;
-  const parsed = Number.parseFloat(rawValue);
-  if (Number.isNaN(parsed)) return null;
-  return clampWeekCalendarMinuteScale(parsed);
 }
 
 /** Recurring course block (weekday-indexed). */
@@ -218,8 +209,8 @@ export type CompanionOption = {
 };
 
 function isWeekendDay(date: Date) {
-  const day = date.getDay();
-  return day === 0 || day === 6;
+  const day = berlinWeekdayFromInstant(date);
+  return day === "SAT" || day === "SUN";
 }
 
 const WEEKDAY_BY_JS: Record<number, Weekday> = {
@@ -321,8 +312,9 @@ export function ScheduleSurface({
   const { messages, locale } = useLocaleContext();
   const [view, setView] = useState<ViewKind>("week");
   const [now, setNow] = useState(() => new Date(nowISO));
-  const [selectedDate, setSelectedDate] = useState<Date>(() => new Date(nowISO));
-  const [visibleDayCount, setVisibleDayCount] = useState(HOME_CALENDAR_VISIBLE_DAYS_DEFAULT);
+  const [selectedDate, setSelectedDate] = useState<Date>(() => berlinStartOfCalendarDay(new Date(nowISO)));
+  const [visibleDayCount, setVisibleDayCount] = useState(readHomeCalendarVisibleDaysFromStorage);
+  const [calendarRevealNonce, setCalendarRevealNonce] = useState(0);
   const [weekMinuteScale, setWeekMinuteScale] = useState(WEEK_CALENDAR_MINUTE_SCALE_DEFAULT);
   const [weekHorizontalMode, setWeekHorizontalMode] = useState<"workweek" | "include-anchor">(() =>
     isWeekendDay(new Date(nowISO)) ? "include-anchor" : "workweek",
@@ -370,20 +362,24 @@ export function ScheduleSurface({
     if (refresh) router.refresh();
   };
 
+  const pathname = usePathname();
   const openScheduleShare = useCallback(async () => {
     if (scheduleShareBusy) return;
     setScheduleShareBusy(true);
-    const result = await createScheduleSharePath({
-      createFailed: messages.scheduleShare.createFailed,
-      networkError: messages.scheduleShare.networkError,
-    });
+    const result = await createScheduleSharePath(
+      {
+        createFailed: messages.scheduleShare.createFailed,
+        networkError: messages.scheduleShare.networkError,
+      },
+      { returnTo: pathname },
+    );
     setScheduleShareBusy(false);
     if (result.ok) {
       router.push(result.path as Route);
       return;
     }
     setIcsNotice({ tone: "err", message: result.error });
-  }, [scheduleShareBusy, messages.scheduleShare, router]);
+  }, [scheduleShareBusy, messages.scheduleShare, router, pathname]);
 
   /** Toolbar + : open fresh add panel, or close when already open (keeps control visible). */
   const handleAddToolbarClick = () => {
@@ -399,14 +395,6 @@ export function ScheduleSurface({
     const serverNow = new Date(nowISO);
     setNow(serverNow);
   }, [nowISO]);
-
-  useEffect(() => {
-    const storedValue = parseStoredHomeCalendarVisibleDays(
-      window.localStorage.getItem(HOME_CALENDAR_VISIBLE_DAYS_STORAGE_KEY),
-    );
-    if (storedValue == null) return;
-    setVisibleDayCount(storedValue);
-  }, []);
 
   useEffect(() => {
     window.localStorage.setItem(HOME_CALENDAR_VISIBLE_DAYS_STORAGE_KEY, String(visibleDayCount));
@@ -559,8 +547,8 @@ export function ScheduleSurface({
     );
   };
 
-  const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
-  const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
+  const weekStart = berlinStartOfWeek(selectedDate);
+  const weekEnd = berlinEndOfWeek(selectedDate);
 
   const dayItems = useMemo(() => {
     const base = itemsForDate(selectedDate);
@@ -712,9 +700,12 @@ export function ScheduleSurface({
   // Week view: classes repeat every week, so we can show them on any
   // anchor week. Study entries need to be filtered to that week and
   // injected as "study"-kind blocks.
-  const { weekTimedBlocks } = useMemo(() => {
-    const includeClasses = weekEnd >= semesterStart && weekStart <= semesterEnd;
-    const studyBlocks = studies.filter((s) => s.start <= weekEnd && s.end >= weekStart)
+  const buildWeekTimedBlocks = useCallback((): WeekCalendarBlock[] => {
+    const stripStart = addDays(selectedDate, -WEEK_CALENDAR_CONTINUOUS_BUFFER_DAYS);
+    const stripEnd = addDays(selectedDate, WEEK_CALENDAR_CONTINUOUS_BUFFER_DAYS);
+    const includeClasses = stripEnd >= semesterStart && stripStart <= semesterEnd;
+    const studyBlocks = studies
+      .filter((s) => s.start <= stripEnd && s.end >= stripStart)
       .map((s) => ({
         courseId: `study-${s.id}`,
         courseName: s.title,
@@ -735,6 +726,8 @@ export function ScheduleSurface({
         categoryName: s.categoryName,
         categoryColor: s.categoryColor,
         calendarEntryId: isIcsFeedStudyEntryId(s.id) ? undefined : s.id,
+        occurrenceDateKey:
+          s.repeatRule === "NONE" ? scheduleDateKeyInBerlin(s.start) : null,
       }));
     const courseBlocks = includeClasses
       ? classBlocks.map((block) => ({
@@ -756,8 +749,8 @@ export function ScheduleSurface({
       if (
         !Number.isNaN(draftStart.getTime()) &&
         !Number.isNaN(draftEnd.getTime()) &&
-        draftStart >= weekStart &&
-        draftStart <= weekEnd
+        draftStart >= stripStart &&
+        draftStart <= stripEnd
       ) {
         const draftBlock: WeekCalendarBlock = {
           courseId: "__draft-preview__",
@@ -778,18 +771,17 @@ export function ScheduleSurface({
           categoryId: draftCategoryMeta.id,
           categoryName: draftCategoryMeta.name,
           categoryColor: null,
+          occurrenceDateKey: scheduleDateKeyInBerlin(draftStart),
         };
         timedMerged.push(draftBlock);
       }
     }
 
-    return { weekTimedBlocks: timedMerged };
+    return timedMerged;
   }, [
     classBlocks,
     studies,
     selectedDate,
-    weekStart,
-    weekEnd,
     semesterStart,
     semesterEnd,
     adding,
@@ -1009,9 +1001,6 @@ export function ScheduleSurface({
   const isSelectedToday = isSameDay(selectedDate, now);
   const nowMinute = now.getHours() * 60 + now.getMinutes();
 
-  const weekAnchorWeekday =
-    weekStart <= now && now <= weekEnd ? WEEKDAY_BY_JS[now.getDay()] : WEEKDAY_BY_JS[selectedDate.getDay()];
-
   const effectiveWeekHorizontalMode =
     visibleDayCount < HOME_CALENDAR_VISIBLE_DAYS_DEFAULT ? "include-anchor" : weekHorizontalMode;
 
@@ -1186,15 +1175,20 @@ export function ScheduleSurface({
     [messages],
   );
 
+  const weekAnchorWeekday =
+    weekStart <= now && now <= weekEnd ? WEEKDAY_BY_JS[now.getDay()] : WEEKDAY_BY_JS[selectedDate.getDay()];
+
   const weekCalendarProps = {
-    blocks: weekTimedBlocks,
+    blocks: buildWeekTimedBlocks(),
     anchorWeekday: weekAnchorWeekday,
     horizontalMode: effectiveWeekHorizontalMode,
+    horizontalScrollMode: "continuous" as const,
     nowMinute,
-    showNowLine: weekStart <= now && now <= weekEnd,
+    showNowLine: true,
     weekStartDate: weekStart,
     focusDate: selectedDate,
     today: now,
+    revealDateNonce: calendarRevealNonce,
     visibleDayCount,
     minuteScale: weekMinuteScale,
     onMinuteScaleChange: setWeekMinuteScale,
@@ -1481,7 +1475,8 @@ export function ScheduleSurface({
             onStepNext={() => step(1)}
             onJumpToday={() => {
               setWeekHorizontalMode(isWeekendDay(now) ? "include-anchor" : "workweek");
-              setSelectedDate(new Date(now));
+              setSelectedDate(berlinStartOfCalendarDay(now));
+              setCalendarRevealNonce((n) => n + 1);
             }}
             toolbarRight={toolbarActions}
             scheduleSch={messages.schedule}
@@ -1535,26 +1530,32 @@ export function ScheduleSurface({
         ) : null}
 
         {view === "week" && !adding ? (
-          <button
-            type="button"
-            aria-label={messages.schedule.shareScheduleOpenAria}
-            onClick={() => void openScheduleShare()}
-            disabled={scheduleShareBusy}
-            className={cn(
-              "fixed z-40 flex h-11 w-11 items-center justify-center rounded-full border border-sky-200 bg-white text-sky-700 shadow-[0_6px_20px_rgba(15,23,42,0.14)] transition",
-              "bottom-[calc(5.75rem+env(safe-area-inset-bottom))] right-3",
-              "hover:bg-sky-50 active:scale-[0.97]",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-              "dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-300 dark:shadow-[0_6px_20px_rgba(0,0,0,0.35)] dark:hover:bg-sky-950/70",
-              scheduleShareBusy && "pointer-events-none opacity-70",
-            )}
+          <div
+            className="pointer-events-none fixed inset-x-0 z-40 flex justify-center"
+            style={{ bottom: `calc(${HOME_WEEK_FLOATING_CONTROLS_BOTTOM_REM}rem + env(safe-area-inset-bottom))` }}
           >
-            {scheduleShareBusy ? (
-              <Loader2 className="h-5 w-5 animate-spin" strokeWidth={2} aria-hidden />
-            ) : (
-              <Share2 className="h-5 w-5" strokeWidth={2} aria-hidden />
-            )}
-          </button>
+            <div className="pointer-events-auto flex w-full max-w-md justify-end px-3">
+              <button
+                type="button"
+                aria-label={messages.schedule.shareScheduleOpenAria}
+                onClick={() => void openScheduleShare()}
+                disabled={scheduleShareBusy}
+                className={cn(
+                  "flex h-11 w-11 items-center justify-center rounded-full border border-sky-200 bg-white text-sky-700 shadow-[0_6px_20px_rgba(15,23,42,0.14)] transition",
+                  "hover:bg-sky-50 active:scale-[0.97]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                  "dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-300 dark:shadow-[0_6px_20px_rgba(0,0,0,0.35)] dark:hover:bg-sky-950/70",
+                  scheduleShareBusy && "pointer-events-none opacity-70",
+                )}
+              >
+                {scheduleShareBusy ? (
+                  <Loader2 className="h-5 w-5 animate-spin" strokeWidth={2} aria-hidden />
+                ) : (
+                  <Share2 className="h-5 w-5" strokeWidth={2} aria-hidden />
+                )}
+              </button>
+            </div>
+          </div>
         ) : null}
 
         {view === "month" ? (
@@ -1741,13 +1742,6 @@ function ScheduleDateNavToolbar({
   toolbarRight: ReactNode;
   scheduleSch: AppMessages["schedule"];
 }) {
-  /** Shared chrome for prev / Today / next — distinct from ViewTabs’ filled segment. */
-  const dateNavControlClass = cn(
-    "border border-[#2563EB]/55 bg-white text-[#1D4ED8] shadow-sm transition",
-    "hover:bg-blue-50/90 hover:border-[#2563EB]/80 active:scale-95",
-    "dark:border-blue-500/60 dark:bg-card dark:text-blue-300 dark:hover:bg-blue-950/40",
-  );
-
   return (
     <div
       className={cn(
@@ -1763,41 +1757,15 @@ function ScheduleDateNavToolbar({
       </div>
 
       <div className="flex min-w-0 justify-center justify-self-center">
-        <div className="flex items-center gap-0.5 sm:gap-1">
-          <button
-            type="button"
-            onClick={onStepPrev}
-            aria-label={scheduleSch.prevDateAria}
-            className={cn(
-              "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
-              dateNavControlClass,
-            )}
-          >
-            <ChevronLeft className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-          </button>
-          <button
-            type="button"
-            onClick={onJumpToday}
-            aria-label={scheduleSch.jumpToTodayAria}
-            className={cn(
-              "shrink-0 rounded-full px-2.5 py-1.5 text-[12px] font-semibold leading-none sm:px-3.5 sm:text-[13px]",
-              dateNavControlClass,
-            )}
-          >
-            {scheduleSch.today}
-          </button>
-          <button
-            type="button"
-            onClick={onStepNext}
-            aria-label={scheduleSch.nextDateAria}
-            className={cn(
-              "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
-              dateNavControlClass,
-            )}
-          >
-            <ChevronRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-          </button>
-        </div>
+        <ScheduleDateNavControls
+          prevAria={scheduleSch.prevDateAria}
+          nextAria={scheduleSch.nextDateAria}
+          todayAria={scheduleSch.jumpToTodayAria}
+          todayLabel={scheduleSch.today}
+          onStepPrev={onStepPrev}
+          onStepNext={onStepNext}
+          onJumpToday={onJumpToday}
+        />
       </div>
 
       <div className="flex min-w-0 shrink-0 items-center justify-end justify-self-end gap-1.5 pl-0.5 sm:pl-1">
@@ -1833,86 +1801,4 @@ function calendarRangeTitle(view: ViewKind, date: Date, locale: AppLocale): stri
   const left = new Intl.DateTimeFormat(locale, { month: "short", year: "numeric" }).format(ws);
   const right = new Intl.DateTimeFormat(locale, { month: "short", year: "numeric" }).format(we);
   return `${left} / ${right}`;
-}
-
-function WeekVisibleDaysBar({
-  value,
-  onChange,
-  scheduleSch,
-  locale,
-}: {
-  value: number;
-  onChange: (next: number) => void;
-  scheduleSch: AppMessages["schedule"];
-  locale: AppLocale;
-}) {
-  const safeValue = clampWeekCalendarVisibleDayCount(value);
-  const valueTemplate =
-    scheduleSch.visibleDaysValue ?? (locale === "zh-CN" ? "{count} 天" : "{count} days");
-  const valueText = formatMessage(valueTemplate, { count: safeValue });
-  const thumbRatio =
-    (safeValue - WEEK_CALENDAR_VISIBLE_DAY_MIN) /
-    (WEEK_CALENDAR_VISIBLE_DAY_MAX - WEEK_CALENDAR_VISIBLE_DAY_MIN);
-  return (
-    <div
-      className={cn(
-        "shrink-0 rounded-xl border border-[#E7E0D6] bg-white px-2 py-1.5 shadow-[0_2px_8px_rgba(15,23,42,0.03)]",
-        "dark:border-border dark:bg-card dark:shadow-[0_2px_8px_rgba(0,0,0,0.1)]",
-      )}
-    >
-      <div className="relative h-9 px-[2.125rem]">
-        <div
-          className="pointer-events-none absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-blue-100 dark:bg-blue-950/40"
-          aria-hidden
-        />
-        <div className="relative h-full w-full">
-          <input
-          type="range"
-          min={WEEK_CALENDAR_VISIBLE_DAY_MIN}
-          max={WEEK_CALENDAR_VISIBLE_DAY_MAX}
-          step={1}
-          value={safeValue}
-          aria-label={
-            scheduleSch.visibleDaysAria ??
-            (locale === "zh-CN" ? "周视图显示天数" : "Visible days in week calendar")
-          }
-          aria-valuetext={valueText}
-          onChange={(event) => {
-            onChange(clampWeekCalendarVisibleDayCount(Number(event.target.value)));
-          }}
-          className={cn(
-              "absolute inset-0 z-20 m-0 h-full w-full cursor-grab touch-none appearance-none bg-transparent",
-              "active:cursor-grabbing",
-              "[&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full",
-              "[&::-webkit-slider-runnable-track]:bg-transparent",
-              "[&::-webkit-slider-thumb]:appearance-none",
-              "[&::-webkit-slider-thumb]:h-9 [&::-webkit-slider-thumb]:w-[4.25rem]",
-              "[&::-webkit-slider-thumb]:-mt-[calc(1.125rem-0.1875rem)]",
-              "[&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:opacity-0",
-              "[&::-moz-range-track]:h-1.5 [&::-moz-range-track]:rounded-full",
-              "[&::-moz-range-track]:bg-transparent",
-              "[&::-moz-range-thumb]:h-9 [&::-moz-range-thumb]:w-[4.25rem]",
-              "[&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:opacity-0",
-            )}
-          />
-          <div
-            className="pointer-events-none absolute top-1/2 z-10 -translate-y-1/2"
-            style={{ left: `${thumbRatio * 100}%` }}
-            aria-hidden
-          >
-            <span
-              className={cn(
-                "inline-flex w-[4.25rem] -translate-x-1/2 items-center justify-center",
-                "rounded-md bg-[#2563EB] px-2 py-1.5 text-[11px] font-semibold leading-none text-white tabular-nums",
-                "shadow-[0_2px_8px_rgba(37,99,235,0.35)]",
-                "dark:bg-blue-500",
-              )}
-            >
-              {valueText}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }

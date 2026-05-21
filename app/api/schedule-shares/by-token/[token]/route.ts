@@ -4,7 +4,7 @@ import { isDatabaseUnreachable, warnDatabaseUnreachableThrottled } from "@/lib/d
 import { error, ok } from "@/lib/http";
 import { parseRevealConfigJson } from "@/lib/schedule-share/reveal-config";
 import {
-  buildSnapshotForLink,
+  buildOwnerPreviewSnapshotForLink,
   persistScheduleShareLinkUpdate,
 } from "@/lib/schedule-share/persist-schedule-share-link";
 import { findScheduleShareLinkByPlainToken } from "@/lib/schedule-share/resolve-link";
@@ -40,7 +40,7 @@ export async function PATCH(
       return error(result.error, result.status);
     }
 
-    const snapshot = await buildSnapshotForLink(prisma, result.link);
+    const snapshot = await buildOwnerPreviewSnapshotForLink(prisma, result.link);
     const reveal = parseRevealConfigJson(result.link.revealConfig);
 
     return ok({

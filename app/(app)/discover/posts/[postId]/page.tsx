@@ -23,7 +23,7 @@ import {
   buddyRequestWhereValue,
 } from "@/lib/discover/buddy-request-detail-meta";
 import { getBuddyRequestDisplayStatus } from "@/lib/discover/buddy-request-status";
-import { safeReturnPath } from "@/lib/nav/back";
+import { resolveBackHref } from "@/lib/nav/back";
 import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
 import { getDiscoverCityDisplayLabel } from "@/lib/discover/discover-city-display";
 import {
@@ -92,7 +92,7 @@ export default async function DiscoverPostDetailPage({
   const ui = getMessages(locale);
   const detail = ui.discoverBuddyDetail;
   const sessionUser = await getSessionUser();
-  const backHref = safeReturnPath(query.returnTo, "/discover") as Route;
+  const backHref = resolveBackHref(query.returnTo, "/discover") as Route;
   const postPath = `/discover/posts/${postId}`;
   const now = new Date();
 

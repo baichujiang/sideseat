@@ -11,6 +11,8 @@ import {
   berlinWeekdayFromInstant,
   scheduleDateKeyInBerlin,
 } from "@/lib/calendar/schedule-berlin";
+import { normalizeCalendarCategoryHex } from "@/lib/calendar/calendar-category-colors";
+import { isValidCategoryHex } from "@/lib/calendar/category-visual";
 import { DRAFT_PREVIEW_COURSE_ID } from "@/lib/calendar/draft-preview-block";
 import type { PublicScheduleBlock } from "@/lib/schedule-share/build-schedule-share-snapshot";
 
@@ -27,10 +29,21 @@ function weekDateKeys(weekStart: Date): Set<string> {
 
 export function publicBlocksToWeekCalendarBlocks(args: {
   blocks: PublicScheduleBlock[];
-  weekStart: Date;
+  /** Legacy: only blocks in this ISO week. */
+  weekStart?: Date;
+  /** Continuous strip: include every block on these Berlin calendar days (inclusive). */
+  rangeStart?: Date;
+  rangeEnd?: Date;
+  /** When set, only blocks on these Berlin yyyy-MM-dd days are shown (sparse selection). */
+  includedDateKeys?: ReadonlySet<string>;
   busyAnonymousLabel: string;
 }): WeekCalendarBlock[] {
-  const keys = weekDateKeys(args.weekStart);
+  const rangeStartKey = args.rangeStart
+    ? scheduleDateKeyInBerlin(args.rangeStart)
+    : null;
+  const rangeEndKey = args.rangeEnd ? scheduleDateKeyInBerlin(args.rangeEnd) : null;
+  const includedDateKeys = args.includedDateKeys;
+  const weekKeys = args.weekStart ? weekDateKeys(args.weekStart) : null;
   const out: WeekCalendarBlock[] = [];
 
   args.blocks.forEach((block, index) => {
@@ -39,7 +52,10 @@ export function publicBlocksToWeekCalendarBlocks(args: {
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return;
 
     const dateKey = scheduleDateKeyInBerlin(start);
-    if (!keys.has(dateKey)) return;
+    if (weekKeys && !weekKeys.has(dateKey)) return;
+    if (rangeStartKey && dateKey < rangeStartKey) return;
+    if (rangeEndKey && dateKey > rangeEndKey) return;
+    if (includedDateKeys && !includedDateKeys.has(dateKey)) return;
 
     const weekday = berlinWeekdayFromInstant(start);
     const startMinute = berlinClockMinutes(start);
@@ -50,6 +66,15 @@ export function publicBlocksToWeekCalendarBlocks(args: {
 
     const revealed = block.kind === "busy_detail";
     const title = revealed ? (block.title?.trim() || args.busyAnonymousLabel) : args.busyAnonymousLabel;
+    const rawHex = block.categoryColor?.trim();
+    const catHex =
+      rawHex && isValidCategoryHex(rawHex)
+        ? normalizeCalendarCategoryHex(rawHex) ?? rawHex
+        : null;
+    const useCategoryColor = revealed && Boolean(catHex);
+    const categoryName = revealed
+      ? block.categoryName?.trim() || title
+      : args.busyAnonymousLabel;
 
     out.push({
       courseId: `share-${dateKey}-${index}`,
@@ -67,10 +92,11 @@ export function publicBlocksToWeekCalendarBlocks(args: {
       repeatUntilISO: null,
       eventParticipants: [],
       kind: "study",
-      categoryId: null,
-      categoryName: revealed ? title : args.busyAnonymousLabel,
-      categoryColor: revealed ? DETAIL_BUSY_COLOR : ANONYMOUS_BUSY_COLOR,
+      categoryId: block.categoryId ?? null,
+      categoryName,
+      categoryColor: useCategoryColor ? catHex : revealed ? DETAIL_BUSY_COLOR : ANONYMOUS_BUSY_COLOR,
       calendarEntryId: null,
+      occurrenceDateKey: dateKey,
     });
   });
 
@@ -110,6 +136,7 @@ export function proposalSelectionToPreviewBlock(
     categoryName: label,
     categoryColor: null,
     calendarEntryId: null,
+    occurrenceDateKey: scheduleDateKeyInBerlin(start),
   };
 }
 
@@ -232,8 +259,16 @@ export function clampDateToShareRange(date: Date, rangeStart: Date, rangeEnd: Da
   return date;
 }
 
-/** First week row to show: the Berlin calendar week that contains the share window start. */
-export function initialShareViewDate(rangeStart: Date, _rangeEnd: Date): Date {
+/** First week row to show: week that contains the first shared day (or range start). */
+export function initialShareViewDate(
+  rangeStart: Date,
+  _rangeEnd: Date,
+  includedDates?: readonly string[],
+): Date {
+  const firstKey = includedDates?.[0];
+  if (firstKey) {
+    return berlinStartOfWeek(new Date(`${firstKey}T12:00:00`));
+  }
   return berlinStartOfWeek(rangeStart);
 }
 

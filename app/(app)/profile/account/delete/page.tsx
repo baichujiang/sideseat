@@ -12,7 +12,7 @@ export default async function DeleteAccountPage() {
   return (
     <div className="space-y-5 pb-2">
       <header className="flex items-center gap-2 px-0.5">
-        <BackLink href="/profile/account" label="Back" />
+        <BackLink fallback="/profile/account" label="Back" />
         <div>
           <h1 className="page-screen-title-ink">Delete account</h1>
           <p className="page-screen-subtitle mt-0.5">

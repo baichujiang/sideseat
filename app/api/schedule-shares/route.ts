@@ -1,14 +1,9 @@
-import { addDays } from "date-fns";
-import type { Prisma } from "@prisma/client";
-
 import { isDatabaseUnreachable, warnDatabaseUnreachableThrottled } from "@/lib/db/prisma-errors";
 import { prisma } from "@/lib/db/prisma";
 import { resolveOnboardedUserForApi } from "@/lib/auth/guards";
 import { error, ok, parseBody } from "@/lib/http";
 import { requestAppOrigin } from "@/lib/http/request-app-origin";
-import { SCHEDULE_SHARE_DEFAULT_TTL_DAYS, SCHEDULE_SHARE_MAX_TTL_DAYS } from "@/lib/schedule-share/constants";
-import { normalizeRevealConfig, validateRevealCategoryOwnership } from "@/lib/schedule-share/reveal-config";
-import { generateScheduleShareToken, hashScheduleShareToken } from "@/lib/schedule-share/token";
+import { createScheduleShareLinkForUser } from "@/lib/schedule-share/create-schedule-share-link-server";
 import { createScheduleShareSchema } from "@/lib/schedule-share/validation";
 
 export async function GET() {
@@ -58,53 +53,26 @@ export async function POST(request: Request) {
     const parsed = parseBody(raw, createScheduleShareSchema);
     if (!parsed.ok) return error(parsed.error, 400);
 
-    const rc = parsed.data.revealConfig;
-    const normalizedReveal = normalizeRevealConfig({
-      categoryIds: rc.categoryIds ?? [],
-      presetKeys: rc.presetKeys ?? [],
-    });
-
-    const owned = await validateRevealCategoryOwnership(prisma, auth.user.id, normalizedReveal.categoryIds);
-    if (!owned) {
-      return error("One or more calendar categories are invalid.", 400);
-    }
-
-    const rangeStart = new Date(parsed.data.rangeStart);
-    const rangeEnd = new Date(parsed.data.rangeEnd);
-    const now = new Date();
-
-    let expiresAt: Date;
-    if (parsed.data.expiresAt) {
-      expiresAt = new Date(parsed.data.expiresAt);
-      if (expiresAt.getTime() <= now.getTime()) {
-        return error("Expiry must be in the future.", 400);
-      }
-      const maxExp = addDays(now, SCHEDULE_SHARE_MAX_TTL_DAYS);
-      if (expiresAt.getTime() > maxExp.getTime()) {
-        expiresAt = maxExp;
-      }
-    } else {
-      expiresAt = addDays(now, SCHEDULE_SHARE_DEFAULT_TTL_DAYS);
-    }
-
-    const plaintext = generateScheduleShareToken();
-    const tokenHash = hashScheduleShareToken(plaintext);
-
-    await prisma.scheduleShareLink.create({
-      data: {
-        ownerUserId: auth.user.id,
-        tokenHash,
-        rangeStart,
-        rangeEnd,
-        revealConfig: normalizedReveal as Prisma.InputJsonValue,
-        allowGuestProposals: parsed.data.allowGuestProposals ?? true,
-        usageLimit: parsed.data.usageLimit ?? "UNLIMITED",
-        expiresAt,
-      },
-    });
-
     const origin = requestAppOrigin(request);
-    const shareUrl = `${origin}/share/schedule/${encodeURIComponent(plaintext)}`;
+    let shareUrl: string;
+    try {
+      const created = await createScheduleShareLinkForUser(prisma, {
+        ownerUserId: auth.user.id,
+        input: parsed.data,
+        appOrigin: origin,
+      });
+      shareUrl = created.shareUrl;
+    } catch (cause) {
+      if (cause instanceof Error) {
+        if (cause.message === "INVALID_CATEGORIES") {
+          return error("One or more calendar categories are invalid.", 400);
+        }
+        if (cause.message === "EXPIRY_PAST") {
+          return error("Expiry must be in the future.", 400);
+        }
+      }
+      throw cause;
+    }
 
     return ok({ shareUrl }, { status: 201 });
   } catch (cause) {

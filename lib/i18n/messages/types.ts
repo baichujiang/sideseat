@@ -406,6 +406,8 @@ export type AppMessages = {
     searchAria: string;
     emptyNoConversationsTitle: string;
     emptyNoConversationsDesc: string;
+    /** Shown above recommended classmates when the inbox list is empty. */
+    recommendedClassmatesEmptyHint: string;
     emptyNoMatchesTitle: string;
     /** Use `{query}` placeholder. */
     emptyNoMatchesDesc: string;
@@ -443,6 +445,14 @@ export type AppMessages = {
     yesterday: string;
     noMessagesYet: string;
     availabilityOrphan: string;
+    attachmentScheduleCaption: string;
+    attachmentScheduleAria: string;
+    scheduleShareCardTitleOwn: string;
+    /** `{name}` placeholder. */
+    scheduleShareCardTitlePeer: string;
+    scheduleShareCardSubtitleOwn: string;
+    scheduleShareCardSubtitlePeer: string;
+    scheduleShareCardOpen: string;
     /** Subtitle on plan request cards that originated from a schedule share link. */
     planFromScheduleShare: string;
     messageInputLabel: string;
@@ -541,6 +551,8 @@ export type AppMessages = {
     addPanelAddPerson: string;
     addPanelSaveErrorCreate: string;
     addPanelSaveErrorEdit: string;
+    addPanelInvalidTimes: string;
+    addPanelTitleRequired: string;
     exportError: string;
     exportSaved: string;
     importFailed: string;
@@ -599,6 +611,7 @@ export type AppMessages = {
     presetNextWeek: string;
     presetCustom: string;
     revealSectionTitle: string;
+    showAllCategories: string;
     revealPresetsHint: string;
     presetsGroupLabel: string;
     presetCourse: string;
@@ -631,11 +644,29 @@ export type AppMessages = {
     createLink: string;
     creating: string;
     copyLink: string;
+    /** Owner settings — copy guest read-only URL to clipboard */
+    generateShareLink: string;
+    shareLinkGenerated: string;
     copied: string;
     shareReady: string;
+    ownerShareMaxDays: string;
+    ownerShareDaysCount: string;
+    ownerNoShareDaysSelected: string;
+    ownerClearShareDays: string;
+    ownerQuickSelectNext3Days: string;
+    ownerQuickSelectNext3DaysHint: string;
+    ownerQuickSelectNext7Days: string;
+    ownerQuickSelectNext7DaysHint: string;
+    ownerQuickSelectNextWeek: string;
+    ownerQuickSelectNextWeekHint: string;
+    ownerSelectShareDayAria: string;
     shareUrlHelp: string;
     invalidRange: string;
     createFailed: string;
+    sendInChat: string;
+    sendingToChat: string;
+    sendToChatFailed: string;
+    dialogSubtitleChat: string;
     networkError: string;
     copyFailed: string;
     ownerDisplayFallback: string;
@@ -646,6 +677,7 @@ export type AppMessages = {
     noBusyInRange: string;
     freeSlotsTitle: string;
     publicRangeHint: string;
+    shareExcludedDayBadge: string;
     /** `{name}` `{range}` — e.g. “Lin shared their schedule for next week with you”. */
     publicShareHeadline: string;
     publicShareRangeNextWeek: string;
@@ -655,6 +687,12 @@ export type AppMessages = {
     proposePickHint: string;
     proposeSignInFirstHeadline: string;
     proposeSignInFirstBody: string;
+    /** Owner opened the recipient URL — preview headline (not “shared with you”). */
+    recipientOwnerViewHeadline: string;
+    recipientOwnerProposeHint: string;
+    recipientOwnerEditLink: string;
+    /** Signed-in visitor may propose on this link. */
+    recipientVisitorProposeHint: string;
     proposalPendingTitle: string;
     proposalPendingHint: string;
     proposalAcceptedTitle: string;
@@ -759,6 +797,23 @@ export type AppMessages = {
     myPostsRowSubtitle: string;
     myPlanPageTitle: string;
     myPlanPageSubtitle: string;
+    myPlanShareLinksHeading: string;
+    myPlanShareLinksHint: string;
+    myPlanShareLinksNoneActive: string;
+    myPlanShareLinksEndedHeading: string;
+    /** `{date}` */
+    myPlanShareLinkExpires: string;
+    myPlanShareLinkSelectAll: string;
+    myPlanShareLinkDeselectAll: string;
+    /** `{count}` */
+    myPlanShareLinkRevokeSelected: string;
+    /** `{count}` */
+    myPlanShareLinkRevokeSelectedConfirm: string;
+    myPlanShareLinkRevoke: string;
+    myPlanShareLinkStatusActive: string;
+    myPlanShareLinkStatusExpired: string;
+    myPlanShareLinkStatusRevoked: string;
+    myPlanShareLinkStatusUsed: string;
     myPlanEmptyTitle: string;
     myPlanEmptyDesc: string;
     myPlanPendingHeading: string;
@@ -1103,6 +1158,8 @@ export type CoursesMessages = {
   onboardingCoursesBody: string;
   myCoursesEmptyTitle: string;
   myCoursesEmptyBody: string;
+  /** Section title — classmates who share your courses (not yet chatting). */
+  recommendedClassmatesTitle: string;
   browsePopularCourses: string;
   addWithForm: string;
   /** Prefix before instructor name from API (not translated). */

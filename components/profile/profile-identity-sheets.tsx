@@ -336,31 +336,31 @@ export function ProfileIdentitySheets({
             {t.editProfile}
           </Button>
 
-          <div className="flex gap-4 px-5 py-4 pr-[7.5rem] sm:pr-28">
+          <div className="flex gap-3.5 px-4 py-3.5 pr-[6.5rem] sm:pr-24">
             <figure className="m-0 shrink-0 self-start">
               <PresetAvatar
                 id={avatarId}
-                size={72}
+                size={64}
                 className="ring-2 ring-[#F3F4F6] shadow-[0_4px_12px_-4px_rgba(15,23,42,0.12)] dark:ring-border"
               />
               <figcaption className="sr-only">{t.profilePhotoCaption}</figcaption>
             </figure>
             <div className="min-w-0 flex-1 text-left">
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="truncate text-[22px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <p className="truncate text-[17px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
                   {displayName}
                 </p>
-                {gender ? <UserGenderProfileMark gender={gender} iconClassName="h-4 w-4" /> : null}
+                {gender ? <UserGenderProfileMark gender={gender} iconClassName="h-3.5 w-3.5" /> : null}
               </div>
               {belowDisplayName ? (
-                <div className="mt-1.5 w-full min-w-0 max-w-full">{belowDisplayName}</div>
+                <div className="mt-1 w-full min-w-0 max-w-full">{belowDisplayName}</div>
               ) : null}
               {schoolLine ? (
-                <p className="mt-1 text-[15px] font-medium leading-snug text-classmates-sub dark:text-muted-foreground">
+                <p className="mt-0.5 text-[13px] font-medium leading-snug text-classmates-sub dark:text-muted-foreground">
                   {schoolLine}
                 </p>
               ) : null}
-              <p className="mt-1.5 line-clamp-4 text-pretty text-[15px] leading-snug text-classmates-sub dark:text-muted-foreground">
+              <p className="mt-1 line-clamp-4 text-pretty text-[13px] leading-snug text-classmates-sub dark:text-muted-foreground">
                 {bioDisplay}
               </p>
             </div>

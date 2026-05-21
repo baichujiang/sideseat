@@ -19,7 +19,7 @@ export default async function InboxStudyGroupsPage() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <BackLink href="/inbox" label={ui.common.back} />
+          <BackLink fallback="/inbox" label={ui.common.back} />
           <h1 className="page-screen-title">{ui.inbox.studyGroupsPageTitle}</h1>
         </div>
         <GuestAppCta returnTo={RETURN_TO} />
@@ -37,7 +37,7 @@ export default async function InboxStudyGroupsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 px-0.5">
-        <BackLink href="/inbox" label={ui.common.back} />
+        <BackLink fallback="/inbox" label={ui.common.back} />
         <div>
           <h1 className="page-screen-title">{ui.inbox.studyGroupsPageTitle}</h1>
           <p className="page-screen-subtitle mt-0.5">{ui.inbox.studyGroupsPageSubtitle}</p>

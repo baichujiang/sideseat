@@ -1,8 +1,10 @@
+import { parseRevealConfigJson } from "@/lib/schedule-share/reveal-config";
 import {
-  REVEAL_PRESET_KEYS_ALLOWLIST,
-  parseRevealConfigJson,
-  type RevealPresetKeyAllowlisted,
-} from "@/lib/schedule-share/reveal-config";
+  allRevealedCategoryIds,
+  initialRevealedCategoryIds,
+  revealConfigFromRevealedCategoryIds,
+  type ShareRevealCategoryInput,
+} from "@/lib/schedule-share/reveal-category-selection";
 import { inferShareRangePreset } from "@/lib/schedule-share/infer-range-preset";
 import {
   defaultShareExpiresAt,
@@ -20,8 +22,7 @@ export type ScheduleShareFormState = {
   rangePreset: ShareRangePreset;
   rangeStartInput: string;
   rangeEndInput: string;
-  presetKeys: RevealPresetKeyAllowlisted[];
-  categoryIds: string[];
+  revealedCategoryIds: string[];
   allowGuestProposals: boolean;
   usageLimit: ScheduleShareUsageLimitInput;
   expiresInput: string;
@@ -33,10 +34,9 @@ export function defaultScheduleShareFormState(baseNow = new Date()): ScheduleSha
     rangePreset: "next_week",
     rangeStartInput: toDatetimeLocalValue(start),
     rangeEndInput: toDatetimeLocalValue(end),
-    presetKeys: [],
-    categoryIds: [],
+    revealedCategoryIds: [],
     allowGuestProposals: true,
-    usageLimit: "UNLIMITED",
+    usageLimit: "SINGLE_USE",
     expiresInput: toDatetimeLocalValue(defaultShareExpiresAt(baseNow)),
   };
 }
@@ -51,6 +51,7 @@ export function scheduleShareFormFromLink(
     expiresAt: Date;
     createdAt: Date;
   },
+  categories: readonly ShareRevealCategoryInput[],
 ): ScheduleShareFormState {
   const reveal = parseRevealConfigJson(link.revealConfig);
   const baseNow = link.createdAt;
@@ -58,17 +59,17 @@ export function scheduleShareFormFromLink(
     rangePreset: inferShareRangePreset(link.rangeStart, link.rangeEnd, baseNow),
     rangeStartInput: toDatetimeLocalValue(link.rangeStart),
     rangeEndInput: toDatetimeLocalValue(link.rangeEnd),
-    presetKeys: reveal.presetKeys.filter((k): k is RevealPresetKeyAllowlisted =>
-      (REVEAL_PRESET_KEYS_ALLOWLIST as readonly string[]).includes(k),
-    ),
-    categoryIds: reveal.categoryIds,
+    revealedCategoryIds: initialRevealedCategoryIds(categories, reveal),
     allowGuestProposals: link.allowGuestProposals,
     usageLimit: link.usageLimit,
     expiresInput: toDatetimeLocalValue(link.expiresAt),
   };
 }
 
-export function scheduleShareFormToPayload(form: ScheduleShareFormState) {
+export function scheduleShareFormToPayload(
+  form: ScheduleShareFormState,
+  categories: readonly ShareRevealCategoryInput[],
+) {
   const rangeStart = new Date(form.rangeStartInput);
   const rangeEnd = new Date(form.rangeEndInput);
   let expiresAt: string | undefined;
@@ -78,10 +79,14 @@ export function scheduleShareFormToPayload(form: ScheduleShareFormState) {
       expiresAt = exp.toISOString();
     }
   }
+  const { categoryIds, presetKeys } = revealConfigFromRevealedCategoryIds(
+    categories,
+    form.revealedCategoryIds,
+  );
   return {
     rangeStart: rangeStart.toISOString(),
     rangeEnd: rangeEnd.toISOString(),
-    revealConfig: { categoryIds: form.categoryIds, presetKeys: form.presetKeys },
+    revealConfig: { categoryIds, presetKeys },
     allowGuestProposals: form.allowGuestProposals,
     usageLimit: form.usageLimit,
     expiresAt,

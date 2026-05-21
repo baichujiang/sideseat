@@ -6,14 +6,20 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/lib/auth/api-fetch";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { ScheduleShareRevealCategoryChips } from "@/components/schedule-share/schedule-share-reveal-category-chips";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import {
   formatShareCreateRangeSummary,
   formatShareExpirySummary,
 } from "@/lib/schedule-share/format-share-create-summary";
 import { formatMessage } from "@/lib/i18n/messages";
-import { REVEAL_PRESET_KEYS_ALLOWLIST, type RevealPresetKeyAllowlisted } from "@/lib/schedule-share/reveal-config";
+import {
+  allRevealedCategoryIds,
+  isAllCategoriesRevealed,
+  isNoCategoriesRevealed,
+  revealConfigFromRevealedCategoryIds,
+  shareRevealCategoryColor,
+} from "@/lib/schedule-share/reveal-category-selection";
 import type { ScheduleShareUsageLimitInput } from "@/lib/schedule-share/usage-limit";
 import {
   defaultShareExpiresAt,
@@ -87,16 +93,22 @@ export type ScheduleShareCategoryInput = {
   id: string;
   name: string;
   presetKey: string | null;
+  color: string;
 };
 
 export function CreateScheduleShareDialog({
   open,
   onClose,
   calendarCategories: calendarCategoriesProp,
+  connectionId,
+  onSentToChat,
 }: {
   open: boolean;
   onClose: () => void;
   calendarCategories?: ScheduleShareCategoryInput[];
+  /** When set, creates the share and posts a card in this chat instead of showing a copy-link step. */
+  connectionId?: string;
+  onSentToChat?: () => void;
 }) {
   const { locale, messages: ui } = useLocaleContext();
   const s = ui.scheduleShare;
@@ -106,11 +118,9 @@ export function CreateScheduleShareDialog({
   const [rangePreset, setRangePreset] = useState<ShareRangePreset>("next_week");
   const [rangeStartInput, setRangeStartInput] = useState("");
   const [rangeEndInput, setRangeEndInput] = useState("");
-  const [usageLimit, setUsageLimit] = useState<ScheduleShareUsageLimitInput>("UNLIMITED");
+  const [usageLimit, setUsageLimit] = useState<ScheduleShareUsageLimitInput>("SINGLE_USE");
   const [expiresInput, setExpiresInput] = useState("");
-  const [presetKeys, setPresetKeys] = useState<RevealPresetKeyAllowlisted[]>([]);
-  const [categoryIds, setCategoryIds] = useState<string[]>([]);
-  const [allowGuestProposals, setAllowGuestProposals] = useState(true);
+  const [revealedCategoryIds, setRevealedCategoryIds] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [rangeError, setRangeError] = useState<string | null>(null);
@@ -129,11 +139,9 @@ export function CreateScheduleShareDialog({
     setBaseNow(now);
     applyRangePreset("next_week", now);
     setRangePreset("next_week");
-    setUsageLimit("UNLIMITED");
+    setUsageLimit("SINGLE_USE");
     setExpiresInput(toDatetimeLocalValue(defaultShareExpiresAt(now)));
-    setPresetKeys([]);
-    setCategoryIds([]);
-    setAllowGuestProposals(true);
+    setRevealedCategoryIds([]);
     setShareUrl(null);
     setCopied(false);
     setErr(null);
@@ -160,10 +168,11 @@ export function CreateScheduleShareDialog({
       const payload = await res.json().catch(() => ({}));
       if (!res.ok || payload.success !== true || cancelled) return;
       const rows: ScheduleShareCategoryInput[] = (payload.data ?? []).map(
-        (c: { id: string; name: string; presetKey: string | null }) => ({
+        (c: { id: string; name: string; presetKey: string | null; color: string }) => ({
           id: c.id,
           name: c.name,
           presetKey: c.presetKey,
+          color: c.color,
         }),
       );
       setCategories(rows);
@@ -173,18 +182,16 @@ export function CreateScheduleShareDialog({
     };
   }, [open, calendarCategoriesProp]);
 
-  function presetLabel(key: RevealPresetKeyAllowlisted): string {
-    switch (key) {
-      case "course":
-        return s.presetCourse;
-      case "personal":
-        return s.presetPersonal;
-      case "work":
-        return s.presetWork;
-      default:
-        return s.presetOther;
-    }
-  }
+  const revealCategories = useMemo(
+    () =>
+      categories.map((c) => ({
+        id: c.id,
+        name: c.name,
+        presetKey: c.presetKey,
+        color: shareRevealCategoryColor(c.color),
+      })),
+    [categories],
+  );
 
   const rangeSummary = useMemo(() => {
     const start = new Date(rangeStartInput);
@@ -202,8 +209,17 @@ export function CreateScheduleShareDialog({
     return formatMessage(s.linkExpirySummary, { usage, when });
   }, [expiresInput, usageLimit, locale, s]);
 
-  const hasRevealSelection = presetKeys.length > 0 || categoryIds.length > 0;
-  const customCalendars = useMemo(() => categories.filter((c) => !c.presetKey), [categories]);
+  useEffect(() => {
+    if (revealCategories.length > 0) {
+      setRevealedCategoryIds(allRevealedCategoryIds(revealCategories));
+    }
+  }, [revealCategories]);
+
+  const privacyPreviewText = useMemo(() => {
+    if (isNoCategoriesRevealed(revealCategories, revealedCategoryIds)) return s.privacyPreviewNone;
+    if (isAllCategoriesRevealed(revealCategories, revealedCategoryIds)) return null;
+    return s.privacyPreviewSome;
+  }, [revealCategories, revealedCategoryIds, s]);
 
   function selectPreset(preset: ShareRangePreset) {
     if (preset !== "custom") {
@@ -240,18 +256,26 @@ export function CreateScheduleShareDialog({
         expiresAt = exp.toISOString();
       }
 
+      const { categoryIds, presetKeys } = revealConfigFromRevealedCategoryIds(
+        revealCategories,
+        revealedCategoryIds,
+      );
       const body = {
         rangeStart: rangeStart.toISOString(),
         rangeEnd: rangeEnd.toISOString(),
         revealConfig: { categoryIds, presetKeys },
-        allowGuestProposals,
+        allowGuestProposals: true,
         usageLimit,
         expiresAt,
       };
 
+      const endpoint = connectionId
+        ? `/api/connections/${encodeURIComponent(connectionId)}/schedule-shares`
+        : "/api/schedule-shares";
+
       let res: Response;
       try {
-        res = await apiFetch("/api/schedule-shares", {
+        res = await apiFetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
@@ -263,13 +287,23 @@ export function CreateScheduleShareDialog({
 
       const payload = await res.json().catch(() => ({}));
       if (!res.ok || payload.success !== true) {
-        const msg = typeof payload.error === "string" ? payload.error : s.createFailed;
+        const msg =
+          typeof payload.error === "string"
+            ? payload.error
+            : connectionId
+              ? s.sendToChatFailed
+              : s.createFailed;
         setErr(msg);
         return;
       }
       const url = payload.data?.shareUrl;
       if (typeof url !== "string") {
-        setErr(s.createFailed);
+        setErr(connectionId ? s.sendToChatFailed : s.createFailed);
+        return;
+      }
+      if (connectionId) {
+        onSentToChat?.();
+        onClose();
         return;
       }
       setShareUrl(url);
@@ -300,7 +334,9 @@ export function CreateScheduleShareDialog({
               </span>
               <div>
                 <h2 className="text-sm font-semibold">{s.dialogTitle}</h2>
-                <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">{s.dialogSubtitle}</p>
+                <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">
+                  {connectionId ? s.dialogSubtitleChat : s.dialogSubtitle}
+                </p>
               </div>
             </div>
             <button
@@ -313,9 +349,9 @@ export function CreateScheduleShareDialog({
             </button>
           </div>
 
-          {!shareUrl ? (
+          {!shareUrl && privacyPreviewText ? (
             <p className="mt-3 rounded-xl bg-muted/30 px-3 py-2.5 text-[12px] leading-snug text-muted-foreground">
-              {hasRevealSelection ? s.privacyPreviewSome : s.privacyPreviewNone}
+              {privacyPreviewText}
             </p>
           ) : null}
         </div>
@@ -389,90 +425,54 @@ export function CreateScheduleShareDialog({
               </Section>
 
               <Section title={s.revealSectionTitle} hint={s.revealPresetsHint}>
-                <Subheading>{s.presetsGroupLabel}</Subheading>
-                <div className="space-y-2">
-                  {REVEAL_PRESET_KEYS_ALLOWLIST.map((key) => (
-                    <Checkbox
-                      key={key}
-                      checked={presetKeys.includes(key)}
-                      onChange={(checked) => {
-                        setPresetKeys((prev) =>
-                          checked
-                            ? prev.includes(key)
-                              ? prev
-                              : [...prev, key]
-                            : prev.filter((k) => k !== key),
-                        );
-                      }}
-                      label={presetLabel(key)}
-                    />
-                  ))}
-                </div>
-                {customCalendars.length ? (
-                  <>
-                    <Subheading>{s.myCalendarsTitle}</Subheading>
-                    <div className="space-y-2">
-                      {customCalendars.map((c) => (
-                        <Checkbox
-                          key={c.id}
-                          checked={categoryIds.includes(c.id)}
-                          onChange={(checked) => {
-                            setCategoryIds((prev) =>
-                              checked
-                                ? prev.includes(c.id)
-                                  ? prev
-                                  : [...prev, c.id]
-                                : prev.filter((x) => x !== c.id),
-                            );
-                          }}
-                          label={c.name}
-                        />
-                      ))}
-                    </div>
-                  </>
-                ) : null}
+                <ScheduleShareRevealCategoryChips
+                  categories={revealCategories}
+                  revealedCategoryIds={revealedCategoryIds}
+                  onRevealedCategoryIdsChange={setRevealedCategoryIds}
+                />
               </Section>
 
-              <div className="rounded-xl border border-border/60 bg-muted/25 px-3 py-3 space-y-2">
-                <p className="text-[13px] font-semibold">{s.meetingProposalsTitle}</p>
-                <Checkbox
-                  checked={allowGuestProposals}
-                  onChange={setAllowGuestProposals}
-                  label={s.allowProposals}
-                />
-                <p className="text-[11px] leading-snug text-muted-foreground">{s.allowProposalsHelper}</p>
-              </div>
-
-              <Section title={s.linkExpiryLabel} hint={s.linkExpiryHelper} error={expiryError}>
-                <Subheading>{s.linkUsageLabel}</Subheading>
-                <div className={CHIP_ROW_CLASS}>
-                  <RangeChip
-                    active={usageLimit === "SINGLE_USE"}
-                    onClick={() => setUsageLimit("SINGLE_USE")}
-                  >
-                    {s.linkUsageSingleUse}
-                  </RangeChip>
-                  <RangeChip
-                    active={usageLimit === "UNLIMITED"}
-                    onClick={() => setUsageLimit("UNLIMITED")}
-                  >
-                    {s.linkUsageUnlimited}
-                  </RangeChip>
+              <Section
+                title={s.linkUsageLabel}
+                hint={usageLimit === "UNLIMITED" ? s.linkExpiryHelper : undefined}
+                error={expiryError}
+              >
+                <div className="flex items-center gap-2">
+                  <div className={cn(CHIP_ROW_CLASS, "min-w-0 shrink-0")}>
+                    <RangeChip
+                      active={usageLimit === "SINGLE_USE"}
+                      onClick={() => setUsageLimit("SINGLE_USE")}
+                    >
+                      {s.linkUsageSingleUse}
+                    </RangeChip>
+                    <RangeChip
+                      active={usageLimit === "UNLIMITED"}
+                      onClick={() => setUsageLimit("UNLIMITED")}
+                    >
+                      {s.linkUsageUnlimited}
+                    </RangeChip>
+                  </div>
+                  {usageLimit === "UNLIMITED" ? (
+                    <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-1.5">
+                      <span className="shrink-0 whitespace-nowrap text-[11px] font-medium text-muted-foreground">
+                        {s.linkExpiryLabel}
+                      </span>
+                      <input
+                        type="datetime-local"
+                        className="h-9 min-w-0 max-w-[11.5rem] shrink rounded-xl border border-input bg-background px-2 text-[13px] outline-none transition focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+                        value={expiresInput}
+                        onChange={(e) => {
+                          setExpiresInput(e.target.value);
+                          setExpiryError(null);
+                        }}
+                      />
+                    </div>
+                  ) : null}
                 </div>
                 {usageLimit === "SINGLE_USE" ? (
                   <p className="text-[11px] leading-snug text-muted-foreground">{s.linkUsageSingleUseHint}</p>
                 ) : null}
-                <Subheading>{s.linkExpiresAtLabel}</Subheading>
-                <input
-                  type="datetime-local"
-                  className={FIELD_INPUT}
-                  value={expiresInput}
-                  onChange={(e) => {
-                    setExpiresInput(e.target.value);
-                    setExpiryError(null);
-                  }}
-                />
-                {expirySummary ? (
+                {usageLimit === "UNLIMITED" && expirySummary ? (
                   <p className="text-[12px] leading-snug text-muted-foreground">{expirySummary}</p>
                 ) : null}
               </Section>
@@ -488,7 +488,7 @@ export function CreateScheduleShareDialog({
                 {ui.common.cancel}
               </Button>
               <Button type="button" className="h-11 flex-1 rounded-xl" onClick={submit} disabled={busy}>
-                {busy ? s.creating : s.createLink}
+                {busy ? (connectionId ? s.sendingToChat : s.creating) : connectionId ? s.sendInChat : s.createLink}
               </Button>
             </div>
           </div>

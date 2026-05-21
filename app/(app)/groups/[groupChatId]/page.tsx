@@ -11,7 +11,7 @@ import { GroupChatAvatarCollage } from "@/components/ui/group-chat-avatar-collag
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { requireGroupChatParticipant } from "@/lib/auth/guards";
 import { groupChatDisplayTitle } from "@/lib/group-chats/title";
-import { safeReturnPath } from "@/lib/nav/back";
+import { resolveBackHref } from "@/lib/nav/back";
 import { cn } from "@/lib/utils";
 import { chatMessageDomId } from "@/lib/chat/chat-message-dom-id";
 import { indexPlainTextMessagesForSearch } from "@/lib/chat/thread-search-index";
@@ -35,7 +35,6 @@ export default async function GroupChatPage({
 }) {
   const { groupChatId } = await params;
   const query = (await searchParams) ?? {};
-  const backHref = safeReturnPath(query.returnTo, "/inbox");
   const { groupChat, user } = await requireGroupChatParticipant(groupChatId);
   const myMembership = groupChat.participants.find((p) => p.userId === user.id);
   const latestMessageId = groupChat.messages.at(-1)?.id ?? null;
@@ -58,7 +57,7 @@ export default async function GroupChatPage({
       <ChatRealtimeRefresh kind="group" groupChatId={groupChat.id} latestMessageId={latestMessageId} />
       <div className="flex h-full min-h-0 flex-1 flex-col bg-background">
         <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
-          <BackLink href={backHref} label="Back" />
+          <BackLink returnTo={query.returnTo} fallback="/inbox" label="Back" />
           <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl py-1 pl-1 pr-2">
             <Link href={infoHref} className="shrink-0 transition hover:opacity-90 active:opacity-80">
               <GroupChatAvatarCollage

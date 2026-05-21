@@ -1,14 +1,25 @@
 import { addDays, addMonths, addWeeks, addYears } from "date-fns";
 
-import { requireOnboardedUser } from "@/lib/auth/guards";
+import { resolveOnboardedUserForApi } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
-import { error, ok, parseJson } from "@/lib/http";
+import { error, formatZodError, ok, parseBody } from "@/lib/http";
 import { calendarEventSchema } from "@/lib/validators/calendar";
+import { ZodError } from "zod";
 
 export async function POST(request: Request) {
   try {
-    const user = await requireOnboardedUser();
-    const values = await parseJson(request, calendarEventSchema);
+    const auth = await resolveOnboardedUserForApi();
+    if (!auth.ok) {
+      return error(auth.error, auth.status);
+    }
+    const user = auth.user;
+
+    const rawBody: unknown = await request.json().catch(() => null);
+    const parsed = parseBody(rawBody, calendarEventSchema);
+    if (!parsed.ok) {
+      return error(parsed.error, 400);
+    }
+    const values = parsed.data;
 
     const startAt = new Date(values.startAt);
     const endAt = new Date(values.endAt);
@@ -125,6 +136,9 @@ export async function POST(request: Request) {
 
     return ok({ count: createdCount }, { status: 201 });
   } catch (cause) {
+    if (cause instanceof ZodError) {
+      return error(formatZodError(cause), 400);
+    }
     console.error(cause);
     return error("Unable to add event.");
   }

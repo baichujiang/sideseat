@@ -1,25 +1,41 @@
 "use client";
 
-import { ArrowLeft, Copy, Settings2, X } from "lucide-react";
+import { addDays } from "date-fns";
+import { Share2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { AppPushLayer } from "@/components/ui/app-push-layer";
+import { BackLink } from "@/components/nav/back-link";
 import { Button } from "@/components/ui/button";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
+import { ScheduleShareOwnerInlineControls } from "@/components/schedule-share/schedule-share-owner-inline-controls";
+import { ScheduleShareOwnerPreview } from "@/components/schedule-share/schedule-share-owner-preview";
 import {
-  ScheduleShareOptionsForm,
-  type ScheduleShareCategoryInput,
-} from "@/components/schedule-share/schedule-share-options-form";
-import { ScheduleShareViewer } from "@/components/schedule-share/schedule-share-viewer";
+  HOME_CALENDAR_VISIBLE_DAYS_DEFAULT,
+  readHomeCalendarVisibleDaysFromStorage,
+  writeHomeCalendarVisibleDaysToStorage,
+} from "@/lib/calendar/home-calendar-preferences";
 import { apiFetch } from "@/lib/auth/api-fetch";
+import { formatMessage } from "@/lib/i18n/messages";
 import type { PublicScheduleShareSnapshot } from "@/lib/schedule-share/build-schedule-share-snapshot";
-import { formatShareCreateRangeSummary } from "@/lib/schedule-share/format-share-create-summary";
+import { formatShareSelectedDaysSummary } from "@/lib/schedule-share/format-share-create-summary";
+import { parseRevealConfigJson } from "@/lib/schedule-share/reveal-config";
 import {
-  scheduleShareFormFromLink,
-  scheduleShareFormToPayload,
-  type ScheduleShareFormState,
-} from "@/lib/schedule-share/schedule-share-form-state";
+  initialRevealedCategoryIds,
+  revealConfigFromRevealedCategoryIds,
+  shareRevealCategoryColor,
+  type ShareRevealCategoryInput,
+} from "@/lib/schedule-share/reveal-category-selection";
+import { berlinStartOfCalendarDay } from "@/lib/calendar/schedule-berlin";
+import {
+  berlinDateFromDateKey,
+  initialShareSelectedDateKeys,
+  shareDateKeysForQuickPreset,
+  shareRangeFromSelectedDateKeys,
+  sortedShareIncludedDates,
+  toggleShareDaySelection,
+  type ShareDayQuickPreset,
+} from "@/lib/schedule-share/share-selected-days";
 import type { ScheduleShareUsageLimitInput } from "@/lib/schedule-share/usage-limit";
 
 export type ScheduleShareLinkSettingsInput = {
@@ -32,73 +48,145 @@ export type ScheduleShareLinkSettingsInput = {
   createdAt: string;
 };
 
+function expiresInDaysFromDate(expiresAt: Date): 7 | 14 | 30 {
+  const days = Math.round((expiresAt.getTime() - Date.now()) / 86_400_000);
+  if (days <= 8) return 7;
+  if (days <= 21) return 14;
+  return 30;
+}
+
+function expiresAtFromDays(days: 7 | 14 | 30): Date {
+  return addDays(new Date(), days);
+}
+
 export function ScheduleShareOwnerClient({
   token,
+  backHref = "/home",
   shareUrl,
   initialSnapshot,
   linkSettings,
   calendarCategories,
 }: {
   token: string;
+  backHref?: string;
   shareUrl: string;
   initialSnapshot: PublicScheduleShareSnapshot;
   linkSettings: ScheduleShareLinkSettingsInput;
-  calendarCategories: ScheduleShareCategoryInput[];
+  calendarCategories: readonly ShareRevealCategoryInput[];
 }) {
   const router = useRouter();
   const { locale, messages: ui } = useLocaleContext();
   const s = ui.scheduleShare;
-
-  const baseNow = useMemo(() => new Date(linkSettings.createdAt), [linkSettings.createdAt]);
+  const initialRange = useMemo(
+    () => ({
+      start: new Date(linkSettings.rangeStart),
+      end: new Date(linkSettings.rangeEnd),
+    }),
+    [linkSettings.rangeStart, linkSettings.rangeEnd],
+  );
+  const initialReveal = useMemo(() => {
+    try {
+      return parseRevealConfigJson(linkSettings.revealConfig);
+    } catch {
+      return { categoryIds: [], presetKeys: [], includedDates: [] };
+    }
+  }, [linkSettings.revealConfig]);
 
   const [snapshot, setSnapshot] = useState(initialSnapshot);
-  const [form, setForm] = useState<ScheduleShareFormState>(() =>
-    scheduleShareFormFromLink({
-      rangeStart: new Date(linkSettings.rangeStart),
-      rangeEnd: new Date(linkSettings.rangeEnd),
-      revealConfig: linkSettings.revealConfig,
-      allowGuestProposals: linkSettings.allowGuestProposals,
-      usageLimit: linkSettings.usageLimit,
-      expiresAt: new Date(linkSettings.expiresAt),
-      createdAt: baseNow,
-    }),
+  const [focusDate, setFocusDate] = useState(() => berlinStartOfCalendarDay(initialRange.start));
+  const [calendarVisibleDays, setCalendarVisibleDays] = useState(HOME_CALENDAR_VISIBLE_DAYS_DEFAULT);
+  const [selectedShareDateKeys, setSelectedShareDateKeys] = useState<Set<string>>(() =>
+    initialShareSelectedDateKeys(initialRange.start, initialRange.end, initialReveal.includedDates),
   );
-  const [optionsOpen, setOptionsOpen] = useState(false);
+  const revealCategories = useMemo<ShareRevealCategoryInput[]>(
+    () =>
+      calendarCategories.map((c) => ({
+        id: c.id,
+        name: c.name,
+        presetKey: c.presetKey,
+        color: shareRevealCategoryColor(c.color),
+      })),
+    [calendarCategories],
+  );
+  const [revealedCategoryIds, setRevealedCategoryIds] = useState<string[]>(() =>
+    initialRevealedCategoryIds(revealCategories, initialReveal),
+  );
+  const [usageLimit, setUsageLimit] = useState<ScheduleShareUsageLimitInput>(linkSettings.usageLimit);
+  const [expiresInDays, setExpiresInDays] = useState<7 | 14 | 30>(() =>
+    expiresInDaysFromDate(new Date(linkSettings.expiresAt)),
+  );
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [rangeError, setRangeError] = useState<string | null>(null);
-  const [expiryError, setExpiryError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const skipNextSave = useRef(true);
-  const formRef = useRef(form);
-  formRef.current = form;
 
-  const persist = useCallback(async () => {
-    const current = formRef.current;
-    const rangeStart = new Date(current.rangeStartInput);
-    const rangeEnd = new Date(current.rangeEndInput);
-    if (Number.isNaN(rangeStart.getTime()) || Number.isNaN(rangeEnd.getTime()) || rangeEnd <= rangeStart) {
-      setRangeError(s.invalidRange);
-      return;
-    }
-    if (current.expiresInput.trim()) {
-      const exp = new Date(current.expiresInput);
-      if (Number.isNaN(exp.getTime())) {
-        setExpiryError(s.invalidRange);
+  useEffect(() => {
+    setCalendarVisibleDays(readHomeCalendarVisibleDaysFromStorage());
+  }, []);
+
+  useEffect(() => {
+    writeHomeCalendarVisibleDaysToStorage(calendarVisibleDays);
+  }, [calendarVisibleDays]);
+
+  const handleSelectShareDay = useCallback(
+    (date: Date) => {
+      const { next, atCapacity } = toggleShareDaySelection(selectedShareDateKeys, date);
+      if (atCapacity) {
+        setSaveError(s.ownerShareMaxDays);
         return;
       }
-    }
+      setSaveError(null);
+      setSelectedShareDateKeys(next);
+    },
+    [selectedShareDateKeys, s.ownerShareMaxDays],
+  );
 
+  const handleClearAllShareDays = useCallback(() => {
+    setSelectedShareDateKeys(new Set());
+    setSaveError(null);
+  }, []);
+
+  const handleQuickSelectShareDays = useCallback((preset: ShareDayQuickPreset) => {
+    const next = shareDateKeysForQuickPreset(preset);
+    setSaveError(null);
+    setSelectedShareDateKeys(next);
+    const firstKey = sortedShareIncludedDates(next)[0];
+    if (firstKey) setFocusDate(berlinDateFromDateKey(firstKey));
+  }, []);
+
+  const selectedDaysCountLabel = useMemo(() => {
+    const count = selectedShareDateKeys.size;
+    if (count === 0) return s.ownerNoShareDaysSelected;
+    return formatMessage(s.ownerShareDaysCount, { count });
+  }, [selectedShareDateKeys.size, s.ownerNoShareDaysSelected, s.ownerShareDaysCount]);
+
+  const rangeDetail = useMemo(() => {
+    if (selectedShareDateKeys.size === 0) return "";
+    return formatShareSelectedDaysSummary(selectedShareDateKeys, locale);
+  }, [selectedShareDateKeys, locale]);
+
+  const persist = useCallback(async () => {
+    if (selectedShareDateKeys.size === 0) return;
+    const { rangeStart, rangeEnd } = shareRangeFromSelectedDateKeys(selectedShareDateKeys);
+    const includedDates = sortedShareIncludedDates(selectedShareDateKeys);
+    const { categoryIds, presetKeys } = revealConfigFromRevealedCategoryIds(
+      revealCategories,
+      revealedCategoryIds,
+    );
     setSaving(true);
     setSaveError(null);
-    setRangeError(null);
-    setExpiryError(null);
-
     try {
       const res = await apiFetch(`/api/schedule-shares/by-token/${encodeURIComponent(token)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(scheduleShareFormToPayload(current)),
+        body: JSON.stringify({
+          rangeStart: rangeStart.toISOString(),
+          rangeEnd: rangeEnd.toISOString(),
+          revealConfig: { categoryIds, presetKeys, includedDates },
+          allowGuestProposals: true,
+          usageLimit,
+          expiresAt: expiresAtFromDays(expiresInDays).toISOString(),
+        }),
       });
       const payload = await res.json().catch(() => ({}));
       if (!res.ok || payload.success !== true) {
@@ -114,7 +202,15 @@ export function ScheduleShareOwnerClient({
     } finally {
       setSaving(false);
     }
-  }, [token, s]);
+  }, [
+    selectedShareDateKeys,
+    revealCategories,
+    revealedCategoryIds,
+    usageLimit,
+    expiresInDays,
+    token,
+    s,
+  ]);
 
   useEffect(() => {
     if (skipNextSave.current) {
@@ -125,15 +221,15 @@ export function ScheduleShareOwnerClient({
       void persist();
     }, 450);
     return () => window.clearTimeout(timer);
-  }, [form, persist]);
+  }, [
+    selectedShareDateKeys,
+    revealedCategoryIds,
+    usageLimit,
+    expiresInDays,
+    persist,
+  ]);
 
-  const rangeDetail = useMemo(() => {
-    const start = new Date(snapshot.rangeStart);
-    const end = new Date(snapshot.rangeEnd);
-    return formatShareCreateRangeSummary(start, end, locale);
-  }, [snapshot.rangeStart, snapshot.rangeEnd, locale]);
-
-  async function copyUrl() {
+  async function generateShareLinkForGuests() {
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
@@ -143,103 +239,82 @@ export function ScheduleShareOwnerClient({
     }
   }
 
-  const viewerLabels = {
-    busyAnonymous: s.busyAnonymous,
-    prevWeekAria: s.prevWeekAria,
-    nextWeekAria: s.nextWeekAria,
-  };
-
   return (
-    <>
-      <div className="mx-auto flex h-dvh max-h-dvh min-w-0 max-w-md flex-col overflow-hidden bg-background">
-        <header className="flex shrink-0 items-center gap-2 border-b border-border/50 px-2 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))]">
-          <button
-            type="button"
-            onClick={() => router.push("/home")}
-            aria-label={ui.common.back}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
-          >
-            <ArrowLeft className="h-5 w-5" strokeWidth={2.25} />
-          </button>
-          <div className="min-w-0 flex-1">
-            <h1 className="truncate text-[15px] font-semibold">{s.ownerPageTitle}</h1>
-            <p className="truncate text-[11px] text-muted-foreground">{rangeDetail}</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setOptionsOpen(true)}
-            aria-label={s.ownerAdjustOptionsAria}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
-          >
-            <Settings2 className="h-5 w-5" strokeWidth={2.25} />
-          </button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            className="h-9 shrink-0 rounded-full px-3 text-[12px]"
-            onClick={() => void copyUrl()}
-          >
-            <Copy className="mr-1 h-3.5 w-3.5" />
-            {copied ? s.copied : s.copyLink}
-          </Button>
-        </header>
-
-        {saveError ? (
-          <p className="shrink-0 px-3 py-1 text-[11px] text-destructive">{saveError}</p>
-        ) : null}
-        {saving ? (
-          <p className="shrink-0 px-3 py-1 text-[11px] text-muted-foreground">{s.savingSettings}</p>
-        ) : null}
-
-        <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 pb-[env(safe-area-inset-bottom)]">
-          <ScheduleShareViewer
-            fillParent
-            snapshot={snapshot}
-            pageHeadline={s.ownerPageTitle}
-            rangeDetail={rangeDetail}
-            labels={viewerLabels}
-            allowGuestProposals={false}
-            freeSlots={snapshot.freeSlots}
-          />
-        </section>
-      </div>
-
-      <AppPushLayer
-        open={optionsOpen}
-        onClose={() => setOptionsOpen(false)}
-        zClassName="z-50"
-        panelClassName="w-[min(100vw,28rem)] border-0"
-      >
-        <div className="flex h-full min-h-0 flex-col bg-background pt-[env(safe-area-inset-top)]">
-          <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border/50 px-4 py-3">
-            <h2 className="text-sm font-semibold">{s.ownerOptionsTitle}</h2>
-            <button
-              type="button"
-              onClick={() => setOptionsOpen(false)}
-              aria-label={ui.common.close}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
-            >
-              <X className="h-4 w-4" strokeWidth={2.25} />
-            </button>
-          </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
-            <ScheduleShareOptionsForm
-              value={form}
-              onChange={setForm}
-              baseNow={baseNow}
-              categories={calendarCategories}
-              rangeError={rangeError}
-              expiryError={expiryError}
-            />
-          </div>
-          <div className="border-t border-border/60 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
-            <Button type="button" className="h-11 w-full rounded-xl" onClick={() => setOptionsOpen(false)}>
-              {ui.common.done}
-            </Button>
-          </div>
+    <div className="mx-auto flex h-dvh max-h-dvh min-w-0 max-w-md flex-col overflow-hidden bg-background">
+      <header className="flex shrink-0 items-center gap-2 border-b border-border/50 px-2 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))]">
+        <BackLink href={backHref} fallback="/home" label={ui.common.back} />
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-[15px] font-semibold">{s.ownerPageTitle}</h1>
+          {saving ? (
+            <p className="truncate text-[11px] text-muted-foreground">{s.savingSettings}</p>
+          ) : null}
         </div>
-      </AppPushLayer>
-    </>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          className="h-9 shrink-0 rounded-full px-3 text-[12px]"
+          aria-label={s.generateShareLink}
+          onClick={() => void generateShareLinkForGuests()}
+        >
+          <Share2 className="mr-1 h-3.5 w-3.5" />
+          {copied ? s.shareLinkGenerated : s.generateShareLink}
+        </Button>
+      </header>
+
+      {saveError ? (
+        <p className="shrink-0 px-3 py-1 text-[11px] text-destructive">{saveError}</p>
+      ) : null}
+
+      <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-hidden px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <ScheduleShareOwnerPreview
+          fillParent
+          snapshot={snapshot}
+          rangeDetail={rangeDetail}
+          busyAnonymousLabel={s.busyAnonymous}
+          focusDate={focusDate}
+          visibleDayCount={calendarVisibleDays}
+          onVisibleDayCountChange={setCalendarVisibleDays}
+          selectedShareDateKeys={selectedShareDateKeys}
+          onSelectShareDay={handleSelectShareDay}
+          dayHeaderSelectAria={s.ownerSelectShareDayAria}
+          selectedDaysCountLabel={selectedDaysCountLabel}
+          onClearAllShareDays={handleClearAllShareDays}
+          clearAllShareDaysLabel={s.ownerClearShareDays}
+          quickSelectPresets={[
+            {
+              preset: "next_3_days",
+              title: s.ownerQuickSelectNext3Days,
+              hint: s.ownerQuickSelectNext3DaysHint,
+            },
+            {
+              preset: "next_7_days",
+              title: s.ownerQuickSelectNext7Days,
+              hint: s.ownerQuickSelectNext7DaysHint,
+            },
+            {
+              preset: "next_week",
+              title: s.ownerQuickSelectNextWeek,
+              hint: s.ownerQuickSelectNextWeekHint,
+            },
+          ]}
+          onQuickSelectShareDays={handleQuickSelectShareDays}
+        />
+        </div>
+
+        <div className="shrink-0 max-h-[34vh] overflow-y-auto overscroll-y-contain">
+        <ScheduleShareOwnerInlineControls
+          categories={revealCategories}
+          revealedCategoryIds={revealedCategoryIds}
+          onRevealedCategoryIdsChange={setRevealedCategoryIds}
+          usageLimit={usageLimit}
+          onUsageLimitChange={setUsageLimit}
+          expiresInDays={expiresInDays}
+          onExpiresInDaysChange={setExpiresInDays}
+        />
+        </div>
+      </div>
+    </div>
   );
 }

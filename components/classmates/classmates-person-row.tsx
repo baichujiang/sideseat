@@ -20,6 +20,18 @@ export const CLASSMATES_PERSON_ROW_AVATAR_RING_DISCOVER = cn(
   "ring-[3px] ring-classmates-blue-soft hover:ring-classmates-blue-border dark:ring-blue-950/60 dark:hover:ring-blue-500/35",
 );
 
+/** Tighter shell for horizontal Discover recommendation cards. */
+export const CLASSMATES_PERSON_ROW_COMPACT_CLASS = cn(
+  "rounded-2xl border border-[#E7E0D6] bg-white px-3 py-2.5 shadow-[0_2px_10px_rgba(15,23,42,0.04)]",
+  "dark:border-border dark:bg-card dark:shadow-[0_2px_10px_rgba(0,0,0,0.14)]",
+  "[@media(hover:hover)]:hover:border-[#D4C9BA] [@media(hover:hover)]:hover:shadow-[0_4px_14px_rgba(15,23,42,0.06)]",
+  "dark:[@media(hover:hover)]:hover:border-zinc-600",
+);
+
+export const CLASSMATES_PERSON_ROW_AVATAR_RING_DISCOVER_COMPACT = cn(
+  "ring-2 ring-classmates-blue-soft hover:ring-classmates-blue-border dark:ring-blue-950/60 dark:hover:ring-blue-500/35",
+);
+
 const avatarLinkClass = cn(
   "shrink-0 self-start rounded-full outline-none ring-offset-2 transition hover:opacity-90 active:opacity-80",
   "focus-visible:ring-2 focus-visible:ring-classmates-azure/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-card",
@@ -35,7 +47,9 @@ export type ClassmatesPersonRowProps = {
   /** Primary text block link; defaults to `avatarHref` (profile). */
   contentHref?: Route;
   avatarUrl: string | null;
-  avatarSize?: 56 | 72;
+  avatarSize?: 48 | 56 | 72;
+  /** Tighter padding and gaps (Discover people rail). */
+  compact?: boolean;
   avatarLinkClassName?: string;
   profileAriaLabel: string;
   name: string;
@@ -96,9 +110,14 @@ export function ClassmatesPersonRow({
   action,
   titleRowAction,
   className,
+  compact = false,
   disableNavigation = false,
 }: ClassmatesPersonRowProps) {
   const mainHref = contentHref ?? avatarHref;
+  const resolvedAvatarSize = avatarSize ?? (compact ? 48 : 56);
+  const shellClass = compact ? CLASSMATES_PERSON_ROW_COMPACT_CLASS : CLASSMATES_PERSON_ROW_CLASS;
+  const rowGap = compact ? "gap-2" : "gap-3 sm:gap-4";
+  const columnGap = compact ? "gap-1.5" : "gap-2";
 
   const headingBlock = (
     <div className="min-w-0 space-y-0.5">
@@ -123,7 +142,7 @@ export function ClassmatesPersonRow({
 
   return (
     <article
-      className={cn(CLASSMATES_PERSON_ROW_CLASS, className, cardTopRightAction != null && "relative")}
+      className={cn(shellClass, className, cardTopRightAction != null && "relative")}
     >
       {cardTopRightAction != null ? (
         <div className="pointer-events-auto absolute right-2 top-2 z-20 sm:right-3 sm:top-3">
@@ -132,7 +151,8 @@ export function ClassmatesPersonRow({
       ) : null}
       <div
         className={cn(
-          "flex flex-row items-start gap-3 sm:gap-4",
+          "flex flex-row items-start",
+          rowGap,
           cardTopRightAction != null && "pr-11 sm:pr-12",
         )}
       >
@@ -141,7 +161,7 @@ export function ClassmatesPersonRow({
             className={cn(avatarLinkClass, avatarLinkClassName, "cursor-default hover:opacity-100")}
             aria-label={profileAriaLabel}
           >
-            <PresetAvatar id={avatarUrl} size={avatarSize} className="shrink-0" />
+            <PresetAvatar id={avatarUrl} size={resolvedAvatarSize} className="shrink-0" />
           </span>
         ) : (
           <Link
@@ -149,14 +169,14 @@ export function ClassmatesPersonRow({
             className={cn(avatarLinkClass, avatarLinkClassName)}
             aria-label={profileAriaLabel}
           >
-            <PresetAvatar id={avatarUrl} size={avatarSize} className="shrink-0" />
+            <PresetAvatar id={avatarUrl} size={resolvedAvatarSize} className="shrink-0" />
           </Link>
         )}
 
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className={cn("flex min-w-0 flex-1 flex-col", columnGap)}>
           {titleRowAction != null ? (
-            <div className="min-w-0 flex-1 space-y-1">
-              <div className="flex min-w-0 flex-row items-start gap-2">
+            <div className={cn("min-w-0 flex-1", compact ? "space-y-0.5" : "space-y-1")}>
+              <div className="flex min-w-0 flex-row items-start gap-1.5">
                 {disableNavigation ? (
                   <span
                     className={cn(contentLinkClass, "min-w-0 flex-1 cursor-default overflow-hidden")}

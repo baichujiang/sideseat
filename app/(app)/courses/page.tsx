@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { OnboardingContinueCta } from "@/components/app/onboarding-continue-cta";
+import { RecommendedClassmatesRail } from "@/components/classmates/recommended-classmates-rail";
 import { CoursesSchoolSelect } from "@/components/courses/courses-school-select";
 import { inboxChatListUlClassName } from "@/components/inbox/inbox-conversation-tile";
 import {
@@ -28,6 +29,7 @@ import { formatMessage, getMessages, type CoursesMessages } from "@/lib/i18n/mes
 import { schoolCodesForDiscoverCity } from "@/lib/discover/city-school-scope";
 import { getServerDiscoverServedCity } from "@/lib/discover/discover-city-preference";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
+import { getRecommendedClassmatesForViewer } from "@/lib/queries/recommended-classmates";
 import { cn } from "@/lib/utils";
 
 type CoursesTab = "popular-courses" | "my-courses" | "my-bookmarked-courses";
@@ -247,7 +249,7 @@ export default async function CoursesPage({
 
   const user = sessionUser;
 
-  const [memberships, savedRows] = await Promise.all([
+  const [memberships, savedRows, recommendedClassmates] = await Promise.all([
     prisma.userCourse.findMany({
       where: {
         userId: user.id,
@@ -279,6 +281,7 @@ export default async function CoursesPage({
       },
       orderBy: { createdAt: "desc" },
     }),
+    getRecommendedClassmatesForViewer(user.id),
   ]);
 
   const enrolledIds = new Set(memberships.map((m) => m.courseId));
@@ -309,6 +312,12 @@ export default async function CoursesPage({
         courses={c}
       />
       <CoursesEntryTabs activeTab={activeTab} selectedSchool={selectedSchool} query={rawCourseQuery} courses={c} />
+
+      <RecommendedClassmatesRail
+        rows={recommendedClassmates}
+        title={c.recommendedClassmatesTitle}
+        returnTo="/courses"
+      />
 
       {activeTab === "popular-courses" ? (
         <>

@@ -3,7 +3,7 @@
 import { apiFetch } from "@/lib/auth/api-fetch";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 
@@ -32,6 +32,8 @@ export function FirstMessageComposer({
   compact?: boolean;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
@@ -67,7 +69,11 @@ export function FirstMessageComposer({
         return;
       }
       onSent?.();
-      router.push(`/connections/${data.connectionId}`);
+      const parentReturn =
+        searchParams.get("returnTo")?.trim() || pathname;
+      router.push(
+        `/connections/${data.connectionId}?returnTo=${encodeURIComponent(parentReturn)}`,
+      );
       router.refresh();
     } catch (cause) {
       console.error(cause);

@@ -127,20 +127,27 @@ export function BuddyRequestCard({
 
   const mainBlock = (
     <>
-      <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted/50">
-        {headerOverlay ? (
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 p-2 [&>*]:pointer-events-auto">
-            {headerOverlay}
-          </div>
-        ) : null}
-        {images.length > 0 ? (
+      {images.length > 0 ? (
+        <div className="relative w-full overflow-hidden bg-muted/30">
+          {headerOverlay ? (
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 p-2 [&>*]:pointer-events-auto">
+              {headerOverlay}
+            </div>
+          ) : null}
           <ClassmatePostImagesGallery
             urls={images}
             variant="card"
             ariaLabel={dl.postCardImagesAria}
             className="[&>div]:mt-0"
           />
-        ) : (
+        </div>
+      ) : (
+        <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted/50">
+          {headerOverlay ? (
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 p-2 [&>*]:pointer-events-auto">
+              {headerOverlay}
+            </div>
+          ) : null}
           <div
             className={cn(
               "flex h-full min-h-[7.5rem] w-full flex-col justify-end bg-gradient-to-br from-violet-100/90 via-sky-50/80 to-amber-50/70 p-3 dark:from-violet-950/50 dark:via-slate-900/40 dark:to-amber-950/30",
@@ -153,8 +160,8 @@ export function BuddyRequestCard({
               {post.title}
             </p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="space-y-1.5 p-2.5">
         {images.length > 0 ? (
