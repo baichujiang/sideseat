@@ -69,11 +69,10 @@ function migrateDeployWithRetries() {
 }
 
 if (process.env.VERCEL) {
-  /** Clear stale failed rows from Neon cold-start / P1001 timeouts during deploy. */
+  /** Clear failed migration rows so deploy can continue (allowFailure: prior resolve may noop). */
   const vercelMigrationResolves = [
-    ["--rolled-back", "20260503120000_availability_share_included_dates"],
-    // Mark applied when tables already exist; re-running CREATE would fail on redeploy.
-    ["--applied", "20260215180000_schedule_share_mvp"],
+    ["--rolled-back", "20260511130000_user_calendar_ics_subscription_url"],
+    ["--rolled-back", "20260215180000_schedule_share_mvp"],
   ];
   for (const [flag, name] of vercelMigrationResolves) {
     run("npx", ["prisma", "migrate", "resolve", flag, name], { allowFailure: true });

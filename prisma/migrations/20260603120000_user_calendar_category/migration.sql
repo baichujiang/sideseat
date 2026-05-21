@@ -6,6 +6,7 @@ CREATE TABLE "UserCalendarCategory" (
     "color" TEXT NOT NULL,
     "sortOrder" INTEGER NOT NULL DEFAULT 0,
     "presetKey" TEXT,
+    "icsSubscriptionUrl" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
