@@ -74,6 +74,7 @@ if (process.env.VERCEL) {
     ["--rolled-back", "20260511130000_user_calendar_ics_subscription_url"],
     ["--rolled-back", "20260215180000_schedule_share_mvp"],
     ["--rolled-back", "20260516180000_schedule_share_one_pending_per_user"],
+    ["--rolled-back", "20260521140000_user_calendar_category_ics_backfill"],
   ];
   for (const [flag, name] of vercelMigrationResolves) {
     run("npx", ["prisma", "migrate", "resolve", flag, name], { allowFailure: true });

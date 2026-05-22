@@ -1,2 +1,2 @@
--- Backfill when UserCalendarCategory was created before icsSubscriptionUrl was on CREATE TABLE.
-ALTER TABLE "UserCalendarCategory" ADD COLUMN IF NOT EXISTS "icsSubscriptionUrl" TEXT;
+-- icsSubscriptionUrl is added on CREATE TABLE in 20260603120000_user_calendar_category.
+SELECT 1;
