@@ -1,4 +1,2 @@
--- One pending proposal per signed-in proposer per share link.
-CREATE UNIQUE INDEX "ScheduleShareGuestProposal_link_proposer_pending_key"
-ON "ScheduleShareGuestProposal"("scheduleShareLinkId", "proposerUserId")
-WHERE "status" = 'PENDING' AND "proposerUserId" IS NOT NULL;
+-- Index created in 20260516170000_schedule_share_tables_idempotent (IF NOT EXISTS).
+SELECT 1;
