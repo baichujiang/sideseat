@@ -13,6 +13,7 @@ import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { PwaInstallBar } from "@/components/pwa/pwa-install-bar";
 import { useCapacitorNative } from "@/hooks/use-capacitor-native";
 import { apiFetch } from "@/lib/auth/api-fetch";
+import { coursesNavHrefFromStorage } from "@/lib/courses/courses-tab";
 import { cn } from "@/lib/utils";
 
 /** Flat bar: light tint only (no nested “card” / shadow), like native tab selection. */
@@ -135,12 +136,13 @@ export function AppShell({
         >
           {navItems.map((item) => {
             const Icon = item.icon;
+            const href = item.href === "/courses" ? coursesNavHrefFromStorage() : item.href;
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={href}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "flex min-h-[3rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-1 text-[10px] font-semibold leading-tight transition-[background-color,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",

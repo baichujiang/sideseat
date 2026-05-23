@@ -1293,11 +1293,12 @@ export const enMessages: AppMessages = {
     hintSaveFailed: "Could not save subscription.",
     hintEnableFailed: "Something went wrong while enabling push.",
     hintDisableFailed: "Could not turn off push on this device.",
-    nativeSubtitle: "Turn on in iPhone Settings",
-    nativeBody:
-      "This app uses iOS notification permission. Open Settings → SideSeat → Notifications to allow alerts.",
     nativeDataSync:
       "Calendar, messages, and profile stay in sync when you sign in with the same account on the website, home screen icon, or App Store app.",
+    nativeSubtitle: "Messages and plans on this device.",
+    nativeDeniedHint:
+      "Notifications are off. Open Settings → SideSeat → Notifications to allow alerts, then turn the switch on again.",
+    nativeRegisterFailed: "Could not register for push on this device.",
     nativeOpenSettings: "Open Settings",
   },
   tip: {
