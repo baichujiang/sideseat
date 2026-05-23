@@ -19,7 +19,7 @@ export function BuddyRequestTopBar({
   school,
   verifiedStudent,
   studentVerificationStatus,
-  showProfileCue,
+  profileAria,
   shareSlot,
 }: {
   backHref: Route;
@@ -31,7 +31,8 @@ export function BuddyRequestTopBar({
   school: string | null;
   verifiedStudent: boolean;
   studentVerificationStatus: VerifiedStatus;
-  showProfileCue: boolean;
+  /** When set, applied to the author profile link (avatar + name). */
+  profileAria?: string;
   shareSlot: ReactNode;
 }) {
   return (
@@ -45,6 +46,7 @@ export function BuddyRequestTopBar({
       <BackLink href={backHref} fallback={backFallback} label={backLabel} className="shrink-0" />
       <Link
         href={profileHref}
+        aria-label={profileAria}
         className="flex min-w-0 flex-1 items-center gap-2 rounded-lg py-0.5 pr-1 no-underline hover:bg-muted/40"
       >
         <PresetAvatar id={avatarUrl} size={36} className="shrink-0 ring-2 ring-background" />
@@ -55,9 +57,6 @@ export function BuddyRequestTopBar({
           verifiedStudent={verifiedStudent}
           status={studentVerificationStatus}
         />
-        {showProfileCue ? (
-          <span className="sr-only">Profile</span>
-        ) : null}
       </Link>
       {shareSlot ? <div className="shrink-0">{shareSlot}</div> : null}
     </div>

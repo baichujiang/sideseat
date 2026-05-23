@@ -4,13 +4,17 @@ import { useEffect, useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 
 import { AppPushLayer } from "@/components/ui/app-push-layer";
+import { chatComposerIconBtnClassName } from "@/components/chat/chat-composer-chrome";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { chatMessageDomId } from "@/lib/chat/chat-message-dom-id";
 import type { ThreadSearchEntry } from "@/lib/chat/thread-search-index";
 import { cn } from "@/lib/utils";
 
-const searchIconBtnClass =
-  "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-input bg-background/80 text-foreground transition hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+const searchIconBtnClass = cn(
+  chatComposerIconBtnClassName,
+  "mb-0 h-10 w-10 border border-border/70 bg-background/95 shadow-sm",
+  "hover:border-border hover:bg-muted/60",
+);
 
 export function ChatThreadSearchButton({ entries }: { entries: ThreadSearchEntry[] }) {
   const { chat } = useAppMessages();

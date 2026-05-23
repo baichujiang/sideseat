@@ -170,6 +170,7 @@ export default async function HomePage() {
       categoryId: mirrorCourse ? (courseCategory?.id ?? null) : e.categoryId,
       categoryColor: mirrorCourse ? null : (e.category?.color ?? null),
       categoryName: mirrorCourse ? (courseCategory?.name ?? null) : (e.category?.name ?? null),
+      discoverActivityId: e.discoverActivityId,
     };
   });
 

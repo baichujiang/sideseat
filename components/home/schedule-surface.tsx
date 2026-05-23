@@ -143,6 +143,7 @@ function weekBlockToDayTimelineItem(block: WeekCalendarBlock, repeatNoneLabel: s
     categoryId: block.categoryId ?? null,
     categoryName: block.categoryName ?? null,
     categoryColor: block.categoryColor ?? null,
+    discoverActivityId: block.discoverActivityId ?? null,
   };
 }
 
@@ -202,6 +203,7 @@ export type StudyEntry = {
   categoryId: string | null;
   categoryColor: string | null;
   categoryName: string | null;
+  discoverActivityId?: string | null;
 };
 
 export type CalendarCategoryLite = {
@@ -559,6 +561,7 @@ export function ScheduleSurface({
         categoryId: s.categoryId,
         categoryName: s.categoryName,
         categoryColor: s.categoryColor,
+        discoverActivityId: s.discoverActivityId ?? null,
       }));
     return [...classItems, ...studyItems].sort(
       (a, b) => a.startMinute - b.startMinute,
@@ -671,6 +674,7 @@ export function ScheduleSurface({
       categoryId: item.categoryId ?? null,
       categoryName: item.categoryName ?? null,
       categoryColor: item.categoryColor ?? null,
+      discoverActivityId: item.discoverActivityId ?? null,
     });
   };
 
@@ -700,6 +704,7 @@ export function ScheduleSurface({
       categoryId: item.categoryId ?? null,
       categoryName: item.categoryName ?? null,
       categoryColor: item.categoryColor ?? null,
+      discoverActivityId: item.discoverActivityId ?? null,
     };
     setInviteFlow(false);
     setEditingItem(detail);
@@ -747,6 +752,7 @@ export function ScheduleSurface({
         categoryName: s.categoryName,
         categoryColor: s.categoryColor,
         calendarEntryId: isIcsFeedStudyEntryId(s.id) ? undefined : s.id,
+        discoverActivityId: s.discoverActivityId ?? null,
         occurrenceDateKey:
           s.repeatRule === "NONE" ? scheduleDateKeyInBerlin(s.start) : null,
       }));

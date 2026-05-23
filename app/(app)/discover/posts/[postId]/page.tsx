@@ -4,7 +4,6 @@ import { redirect, notFound } from "next/navigation";
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { ClassmatePostDetailViewBeacon } from "@/components/discover/classmate-post-detail-view-beacon";
 import { ClassmatePostDetailShareMenu } from "@/components/discover/classmate-post-detail-share-menu";
-import { BuddyAuthorCard } from "@/components/discover/buddy-request-detail/buddy-author-card";
 import { BuddyRequestBottomBar } from "@/components/discover/buddy-request-detail/buddy-request-bottom-bar";
 import { BuddyRequestContent } from "@/components/discover/buddy-request-detail/buddy-request-content";
 import { BuddyRequestDetailShell } from "@/components/discover/buddy-request-detail/buddy-request-detail-shell";
@@ -17,7 +16,6 @@ import {
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import {
-  buddyRequestAvailabilityValue,
   buddyRequestPreferredTimeValue,
   buddyRequestStatusLabel,
   buddyRequestWhereValue,
@@ -63,20 +61,11 @@ function buildBuddyPlanRows(
     { label: whenLabel, value: whenValue },
     { label: d.rowWhere, value: whereValue },
     { label: d.rowStatus, value: buddyRequestStatusLabel(locale, displayStatus) },
-    {
-      label: d.rowAvailability,
-      value: buddyRequestAvailabilityValue(locale, displayStatus, post.expiresAt, post.updatedAt),
-    },
   ];
   if (cityLabel?.trim()) {
     rows.push({ label: d.rowCity, value: cityLabel.trim() });
   }
   return rows;
-}
-
-function majorSemesterLine(author: ClassmatePostDetailAuthor): string | null {
-  const parts = [author.major, author.semester != null ? `Sem ${author.semester}` : null].filter(Boolean);
-  return parts.length ? parts.join(" · ") : null;
 }
 
 export default async function DiscoverPostDetailPage({
@@ -184,16 +173,10 @@ export default async function DiscoverPostDetailPage({
             school={author.school}
             verifiedStudent={author.verifiedStudent}
             studentVerificationStatus={author.studentVerificationStatus}
-            showProfileCue
+            profileAria={detail.viewProfileAria}
             shareSlot={null}
           />
-          <div className="space-y-4 px-3 pb-4 pt-3 sm:px-4 sm:pb-5 sm:pt-4">
-            <BuddyRequestMediaCarousel
-              urls={imageUrls}
-              category={post.category}
-              title={post.title}
-              ariaLabel={ui.discoverList.postCardImagesAria}
-            />
+          <div className="space-y-5 px-3 pb-4 pt-4 sm:px-4 sm:pb-5 sm:pt-5">
             <BuddyRequestContent
               locale={locale}
               category={post.category}
@@ -201,6 +184,8 @@ export default async function DiscoverPostDetailPage({
               title={post.title}
               body={post.body}
               createdAt={post.createdAt}
+              expiresAt={post.expiresAt}
+              updatedAt={post.updatedAt}
               isAuthor={false}
               studyMeta={studyMeta}
               languageMeta={languageMeta}
@@ -209,21 +194,20 @@ export default async function DiscoverPostDetailPage({
               courseLinkBase={null}
               highlightViewerCourses={false}
               viewerCourseMatchIndex={null}
+              media={
+                <BuddyRequestMediaCarousel
+                  urls={imageUrls}
+                  category={post.category}
+                  title={post.title}
+                  ariaLabel={ui.discoverList.postCardImagesAria}
+                />
+              }
             />
             <PlanDetailsCard title={detail.planDetailsTitle} rows={planRows} />
-            <BuddyAuthorCard
-              displayName={author.nickname ?? author.username}
-              profileHref={profilePeerHref}
-              avatarUrl={author.avatarUrl}
-              majorSemesterLine={majorSemesterLine(author)}
-              school={author.school}
-              verifiedStudent={author.verifiedStudent}
-              studentVerificationStatus={author.studentVerificationStatus}
-              viewProfileCta={detail.viewProfileCta}
-              viewProfileAria={detail.viewProfileAria}
-            />
-            <p className="text-[13px] leading-snug text-muted-foreground">{detail.guestIntro}</p>
-            <GuestAppCta returnTo={postPath} />
+            <div className="space-y-3 border-t border-border/60 pt-4">
+              <p className="text-[13px] leading-snug text-muted-foreground">{detail.guestIntro}</p>
+              <GuestAppCta returnTo={postPath} />
+            </div>
           </div>
         </article>
       </BuddyRequestDetailShell>
@@ -335,16 +319,10 @@ export default async function DiscoverPostDetailPage({
           school={author.school}
           verifiedStudent={author.verifiedStudent}
           studentVerificationStatus={author.studentVerificationStatus}
-          showProfileCue={!isAuthor}
+          profileAria={!isAuthor ? detail.viewProfileAria : undefined}
           shareSlot={shareSlot}
         />
-        <div className="space-y-4 px-3 pb-4 pt-3 sm:px-4 sm:pb-5 sm:pt-4">
-          <BuddyRequestMediaCarousel
-            urls={post.imageUrls}
-            category={post.category}
-            title={post.title}
-            ariaLabel={ui.discoverList.postCardImagesAria}
-          />
+        <div className="space-y-5 px-3 pb-4 pt-4 sm:px-4 sm:pb-5 sm:pt-5">
           <BuddyRequestContent
             locale={locale}
             category={post.category}
@@ -352,6 +330,8 @@ export default async function DiscoverPostDetailPage({
             title={post.title}
             body={post.body}
             createdAt={post.createdAt}
+            expiresAt={post.expiresAt}
+            updatedAt={post.updatedAt}
             isAuthor={isAuthor}
             studyMeta={post.studyMeta}
             languageMeta={post.languageMeta}
@@ -360,19 +340,16 @@ export default async function DiscoverPostDetailPage({
             courseLinkBase="/courses"
             highlightViewerCourses
             viewerCourseMatchIndex={viewerCourseMatchIndex}
+            media={
+              <BuddyRequestMediaCarousel
+                urls={post.imageUrls}
+                category={post.category}
+                title={post.title}
+                ariaLabel={ui.discoverList.postCardImagesAria}
+              />
+            }
           />
           <PlanDetailsCard title={detail.planDetailsTitle} rows={planRows} />
-          <BuddyAuthorCard
-            displayName={author.nickname ?? author.username}
-            profileHref={profilePeerHref}
-            avatarUrl={author.avatarUrl}
-            majorSemesterLine={majorSemesterLine(author)}
-            school={author.school}
-            verifiedStudent={author.verifiedStudent}
-            studentVerificationStatus={author.studentVerificationStatus}
-            viewProfileCta={detail.viewProfileCta}
-            viewProfileAria={detail.viewProfileAria}
-          />
         </div>
       </article>
     </BuddyRequestDetailShell>

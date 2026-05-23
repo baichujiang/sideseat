@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { PlanRequestModal } from "@/components/chat/plan-request-modal";
+import { ChatComposerSlotButton } from "@/components/chat/chat-composer-chrome";
 import { CreateScheduleShareDialog } from "@/components/schedule-share/create-schedule-share-dialog";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { cn } from "@/lib/utils";
@@ -100,15 +101,18 @@ export function ChatAttachmentPlusButton({
   onToggle: () => void;
 }) {
   return (
-    <button
-      type="button"
+    <ChatComposerSlotButton
       onClick={onToggle}
+      active={open}
       aria-label={open ? "Close attachment menu" : "Open attachment menu"}
       aria-expanded={open}
-      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-input bg-background/80 text-foreground transition hover:bg-muted/50"
     >
-      {open ? <X className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} /> : <Plus className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />}
-    </button>
+      {open ? (
+        <X className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />
+      ) : (
+        <Plus className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />
+      )}
+    </ChatComposerSlotButton>
   );
 }
 
@@ -241,7 +245,7 @@ export function ChatAttachmentTray({
         <div className="min-h-0 overflow-hidden">
           <div className="max-h-[min(320px,52dvh)] overflow-x-hidden overflow-y-auto overscroll-y-contain">
             <div
-              className="border-t border-border/50 bg-transparent px-0 pb-1.5 pt-1.5"
+              className="border-t border-border/50 bg-muted/15 px-1 pb-1.5 pt-1.5"
               role="region"
               aria-label="Attachments: Photo, Location, Share schedule, Plan"
             >

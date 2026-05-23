@@ -36,6 +36,7 @@ import {
   buildBlocksByDateKey,
   buildWeekCalendarDayColumns,
   horizontalScrollIndexForFocus,
+  horizontalScrollLeftToRevealDay,
   type WeekCalendarDayColumn,
 } from "@/lib/calendar/week-calendar-day-columns";
 import { scheduleDateKeyInBerlin } from "@/lib/calendar/schedule-berlin";
@@ -171,6 +172,7 @@ export type WeekCalendarBlock = {
    * every column with the same `weekday` (e.g. weekly classes).
    */
   occurrenceDateKey?: string | null;
+  discoverActivityId?: string | null;
 };
 
 const DAY_ORDER: Weekday[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
@@ -635,9 +637,10 @@ export function WeekCalendar({
     [dayColumnSelectMode, dayColumns, highlightedDateKeys],
   );
   const todayBerlinKey = today ? scheduleDateKeyInBerlin(today) : null;
-  const todayColumnInStrip = todayBerlinKey
-    ? dayColumns.some((column) => column.dateKey === todayBerlinKey)
-    : false;
+  const todayColumnIndex = todayBerlinKey
+    ? dayColumns.findIndex((column) => column.dateKey === todayBerlinKey)
+    : -1;
+  const todayColumnInStrip = todayColumnIndex >= 0;
   const effectiveShowNowLine = showNowLine && todayColumnInStrip;
   const visualStartMinute = -VISUAL_PADDING_TOP_MINUTES;
   const visualEndMinute = FULL_DAY_MINUTES + VISUAL_PADDING_BOTTOM_MINUTES;
@@ -1165,13 +1168,14 @@ export function WeekCalendar({
     if (!revealDateNonce) return;
     const node = scrollContainerRef.current;
     if (!node || dayColumnWidth <= 0 || dayColumns.length === 0) return;
-    const startIndex = horizontalScrollIndexForFocus(
+    const viewportWidth = Math.max(frameWidth - TIME_COLUMN_PX, 1);
+    node.scrollLeft = horizontalScrollLeftToRevealDay(
       dayColumns,
       focusDate,
-      horizontalMode,
-      VISIBLE_WEEK_DAYS,
+      node.scrollLeft,
+      viewportWidth,
+      dayColumnWidth,
     );
-    node.scrollLeft = startIndex * dayColumnWidth;
     horizontalScrollLayoutKeyRef.current = `${scheduleDateKeyInBerlin(focusDate)}|${horizontalMode}|${VISIBLE_WEEK_DAYS}`;
 
     const ctx = revealScrollContextRef.current;
@@ -1198,7 +1202,16 @@ export function WeekCalendar({
         (ctx.defaultViewStart - VISUAL_PADDING_TOP_MINUTES - ctx.visualStartMinute) *
         ctx.minutePx;
     }
-  }, [revealDateNonce, dayColumnWidth, dayColumns, focusDate, horizontalMode, VISIBLE_WEEK_DAYS]);
+  }, [
+    revealDateNonce,
+    dayColumnWidth,
+    dayColumns,
+    focusDate,
+    horizontalMode,
+    VISIBLE_WEEK_DAYS,
+    frameWidth,
+    TIME_COLUMN_PX,
+  ]);
 
   function minuteFromClientYInRect(clientY: number, rect: DOMRect): number {
     const y = clientY - rect.top;
@@ -2244,7 +2257,8 @@ export function WeekCalendar({
                     >
                       <span
                         className={cn(
-                          "absolute right-0 top-0 inline-block -translate-y-1/2 rounded-full bg-[#E53935] px-1.5 py-px font-semibold tabular-nums leading-none text-white dark:bg-red-500",
+                          "absolute right-0 top-0 inline-block -translate-y-1/2 rounded-full px-1.5 py-0.5 tabular-nums leading-none",
+                          calendarTodayChrome.nowPill,
                           cfg.axisTimeClass,
                         )}
                       >
@@ -2278,7 +2292,36 @@ export function WeekCalendar({
                           top: `${((nowMinute - visualStartMinute) / totalMinutes) * 100}%`,
                         }}
                       >
-                        <div className="absolute inset-x-0 top-0 h-px -translate-y-1/2 bg-[#E53935]/90 dark:bg-red-400/90" />
+                        <div className="relative h-0 w-full -translate-y-1/2">
+                          <div
+                            className={cn(
+                              "absolute inset-x-0 top-1/2 h-px -translate-y-1/2",
+                              calendarTodayChrome.nowLineThin,
+                            )}
+                          />
+                          {todayColumnIndex >= 0 ? (
+                            <>
+                              <span
+                                className={cn(
+                                  "absolute top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full",
+                                  calendarTodayChrome.nowDot,
+                                )}
+                                style={{ left: `${todayColumnIndex * dayColumnWidth}px` }}
+                                aria-hidden
+                              />
+                              <div
+                                className={cn(
+                                  "absolute top-1/2 h-0.5 -translate-y-1/2",
+                                  calendarTodayChrome.nowLineBold,
+                                )}
+                                style={{
+                                  left: `${todayColumnIndex * dayColumnWidth}px`,
+                                  width: `${dayColumnWidth}px`,
+                                }}
+                              />
+                            </>
+                          ) : null}
+                        </div>
                       </div>
                     ) : null}
 

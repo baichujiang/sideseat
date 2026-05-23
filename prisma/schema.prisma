@@ -208,6 +208,7 @@ enum ClassmatePostCategory {
   LANGUAGE
   SPORTS
   SHARED_COURSES
+  OTHER
 }
 
 enum ClassmatePostStatus {
@@ -220,6 +221,27 @@ enum ClassmatePostStatus {
 enum ClassmatePostInsightKind {
   DETAIL_VIEW
   MESSAGE_INTENT
+}
+
+enum DiscoverActivityCategory {
+  STUDY_GROUP
+  SOCIAL
+  SPORTS
+  FOOD
+  CAMPUS_EVENT
+  OTHER
+}
+
+enum DiscoverActivityStatus {
+  OPEN
+  FULL
+  CLOSED
+  CANCELED
+}
+
+enum DiscoverActivitySignupStatus {
+  GOING
+  CANCELED
 }
 
 /// Discover STUDY post — learning intent (orthogonal to `CourseIntent` on enrollments).
@@ -356,6 +378,8 @@ model User {
   classmatePosts               ClassmatePost[]
   classmatePostInsights        ClassmatePostInsight[]
   classmatePostSaves           ClassmatePostSave[]
+  discoverActivitiesOrganized DiscoverActivity[]       @relation("DiscoverActivityOrganizer")
+  discoverActivitySignups    DiscoverActivitySignup[]
   userLanguages                UserLanguage[]
   groupChatsCreated            GroupChat[]               @relation("GroupChatCreator")
   groupChatParticipants        GroupChatParticipant[]
@@ -539,6 +563,46 @@ model ClassmatePostImage {
 
   @@unique([postId, sortOrder])
   @@index([postId])
+}
+
+/// Discover activities zone — fixed-time events with public RSVP.
+model DiscoverActivity {
+  id          String                   @id @default(cuid())
+  organizerId String
+  city        String
+  school      String
+  title       String                   @db.VarChar(120)
+  description String?                  @db.VarChar(1000)
+  category    DiscoverActivityCategory?
+  startAt     DateTime
+  endAt       DateTime
+  location    String                   @db.VarChar(120)
+  capacity    Int?
+  status      DiscoverActivityStatus   @default(OPEN)
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  organizer   User                     @relation("DiscoverActivityOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
+  signups     DiscoverActivitySignup[]
+  calendarEntries CalendarEntry[]
+
+  @@index([city, status, startAt])
+  @@index([organizerId, status])
+}
+
+model DiscoverActivitySignup {
+  id         String                       @id @default(cuid())
+  activityId String
+  userId     String
+  status     DiscoverActivitySignupStatus @default(GOING)
+  createdAt  DateTime                     @default(now())
+  updatedAt  DateTime                     @updatedAt
+  canceledAt DateTime?
+  activity   DiscoverActivity             @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user       User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([activityId, userId])
+  @@index([activityId, status])
+  @@index([userId, createdAt])
 }
 
 model SchoolEmailVerification {
@@ -1177,6 +1241,7 @@ model CalendarEntry {
   userId     String
   proposalId String?
   planRequestId String?
+  discoverActivityId String?
   title      String
   eventType  PlanType?
   source     String   @default("manual")
@@ -1196,6 +1261,7 @@ model CalendarEntry {
   user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   proposal   StudySessionProposal? @relation(fields: [proposalId], references: [id], onDelete: SetNull)
   planRequest PlanRequest?         @relation(fields: [planRequestId], references: [id], onDelete: SetNull)
+  discoverActivity DiscoverActivity? @relation(fields: [discoverActivityId], references: [id], onDelete: SetNull)
   companions CalendarEntryCompanion[]
 
   /// When set, this row mirrors a recurring course session so Home can show it as a draggable calendar event (dedupe key per slot).
@@ -1203,6 +1269,7 @@ model CalendarEntry {
 
   @@unique([userId, proposalId])
   @@unique([userId, planRequestId])
+  @@unique([userId, discoverActivityId])
   @@index([userId, startAt])
   @@index([categoryId])
   @@index([userId, courseScheduleMirrorKey])

@@ -220,7 +220,7 @@ export const classmatePostImageUrlsSchema = z
 export const createClassmatePostSchema = z
   .object({
     city: z.string().trim().min(1).max(CLASSMATE_POST_CITY_MAX_LEN).default("Munich"),
-    category: classmatePostCategorySchema,
+    category: classmatePostCategorySchema.optional(),
     title: z.string().trim().min(1, "Add a short title.").max(CLASSMATE_POST_TITLE_MAX_LEN),
     body: z.preprocess(
       (v) => (v == null ? undefined : v),

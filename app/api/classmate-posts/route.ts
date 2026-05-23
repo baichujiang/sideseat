@@ -1,4 +1,4 @@
-import { ClassmatePostStatus, type Prisma } from "@prisma/client";
+import { ClassmatePostCategory, ClassmatePostStatus, type Prisma } from "@prisma/client";
 
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { MAX_ACTIVE_CLASSMATE_POSTS_PER_CATEGORY } from "@/lib/constants/app";
@@ -27,6 +27,7 @@ export async function POST(request: Request) {
     }
 
     const values = parsed.data;
+    const category = values.category ?? ClassmatePostCategory.OTHER;
     const postBody =
       typeof values.body === "string" && values.body.trim().length > 0
         ? values.body.trim()
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
 
     const courseIds = values.courseIds ?? [];
 
-    if (values.category === "SHARED_COURSES" && courseIds.length > 0) {
+    if (category === ClassmatePostCategory.SHARED_COURSES && courseIds.length > 0) {
       const enrolled = await prisma.userCourse.count({
         where: { userId: user.id, courseId: { in: courseIds } },
       });
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
     const activeInCategory = await prisma.classmatePost.count({
       where: {
         userId: user.id,
-        category: values.category,
+        category,
         status: ClassmatePostStatus.ACTIVE,
         expiresAt: { gt: now },
       },
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
         data: {
           userId: user.id,
           city: values.city ?? "Munich",
-          category: values.category,
+          category,
           title: values.title,
           body: postBody,
           expiresAt,
@@ -88,7 +89,7 @@ export async function POST(request: Request) {
         },
       });
 
-      if (values.category === "SHARED_COURSES" && courseIds.length > 0) {
+      if (category === ClassmatePostCategory.SHARED_COURSES && courseIds.length > 0) {
         await tx.classmatePostCourse.createMany({
           data: courseIds.map((courseId) => ({
             postId: created.id,
@@ -97,7 +98,7 @@ export async function POST(request: Request) {
         });
       }
 
-      if (values.category === "STUDY" && values.study) {
+      if (category === ClassmatePostCategory.STUDY && values.study) {
         const s = studyPayloadSchema.parse(values.study);
         if (classmatePostStudyPayloadHasData(s)) {
           await tx.classmatePostStudy.create({
@@ -112,7 +113,7 @@ export async function POST(request: Request) {
         }
       }
 
-      if (values.category === "MEALS" && values.meals) {
+      if (category === ClassmatePostCategory.MEALS && values.meals) {
         const meals = mealsPayloadSchema.parse(values.meals);
         if (classmatePostMealsPayloadHasData(meals)) {
           await tx.classmatePostMeals.create({
@@ -125,7 +126,7 @@ export async function POST(request: Request) {
         }
       }
 
-      if (values.category === "LANGUAGE") {
+      if (category === ClassmatePostCategory.LANGUAGE) {
         const language = languagePayloadSchema.parse(values.language);
         if (classmatePostLanguagePayloadHasData(language)) {
           await tx.classmatePostLanguage.create({
@@ -138,7 +139,7 @@ export async function POST(request: Request) {
         }
       }
 
-      if (values.category === "SPORTS" && values.sport) {
+      if (category === ClassmatePostCategory.SPORTS && values.sport) {
         const sport = sportPayloadSchema.parse(values.sport);
         if (classmatePostSportPayloadHasData(sport)) {
           await tx.classmatePostSport.create({

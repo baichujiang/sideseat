@@ -11,6 +11,8 @@ import {
   ConnectionStatus,
   CourseIntent,
   DegreeLevel,
+  DiscoverActivitySignupStatus,
+  DiscoverActivityStatus,
   FriendLinkStatus,
   LanguageProficiency,
   LanguageTag,
@@ -24,6 +26,7 @@ import { getOrCreateAssistantBotUser } from "@/lib/auth/assistant-bot";
 import { nicknameToKey } from "@/lib/auth/nickname-key";
 import { hashPassword } from "@/lib/auth/password";
 import { getCurrentSemesterLabel } from "@/lib/constants/semester";
+import { DISCOVER_ACTIVITY_DEFAULT_DURATION_MS } from "@/lib/constants/discover-activity";
 import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
 import { prisma } from "@/lib/db/prisma";
 
@@ -134,6 +137,10 @@ function hoursAgo(hours: number) {
 
 function minutesAgo(minutes: number) {
   return new Date(Date.now() - minutes * 60 * 1000);
+}
+
+function hoursFromNow(hours: number) {
+  return new Date(Date.now() + hours * 60 * 60 * 1000);
 }
 
 async function upsertTestUser(spec: AccountSpec) {
@@ -270,6 +277,77 @@ async function enrollInMlIfAvailable(userId: string) {
   return course.id;
 }
 
+async function seedDiscoverActivitiesIfMissing(organizerId: string, participantId: string) {
+  const marker = "[test]";
+  const existing = await prisma.discoverActivity.findFirst({
+    where: { title: { contains: marker } },
+  });
+  if (existing) {
+    await prisma.discoverActivity.updateMany({
+      where: { title: { contains: marker }, description: null },
+      data: {
+        description:
+          "Seeded test activity — add your own events from Discover → Organize an activity.",
+      },
+    });
+    console.log(`  Discover activities: already seeded (${existing.id}); backfilled missing descriptions`);
+    return;
+  }
+
+  const city = DEFAULT_DISCOVER_SERVED_CITY;
+  const school = "TUM";
+
+  const studyStart = hoursFromNow(72);
+  const studyEnd = new Date(studyStart.getTime() + DISCOVER_ACTIVITY_DEFAULT_DURATION_MS);
+  const studyActivity = await prisma.discoverActivity.create({
+    data: {
+      organizerId,
+      city,
+      school,
+      title: `${marker} Garching library study group`,
+      description:
+        "Bring your laptop and course notes. We will work through problem sets together for 2 hours, then optional coffee break. Meet at the main entrance.",
+      startAt: studyStart,
+      endAt: studyEnd,
+      location: "Garching Forschungszentrum · Main library",
+      capacity: 8,
+      status: DiscoverActivityStatus.OPEN,
+    },
+  });
+
+  const socialStart = hoursFromNow(120);
+  const socialEnd = new Date(socialStart.getTime() + DISCOVER_ACTIVITY_DEFAULT_DURATION_MS);
+  await prisma.discoverActivity.create({
+    data: {
+      organizerId: participantId,
+      city,
+      school,
+      title: `${marker} Coffee & campus walk`,
+      description:
+        "Casual meetup for new classmates. No agenda — just coffee near Stammstrecke and a short walk around campus. Everyone welcome.",
+      startAt: socialStart,
+      endAt: socialEnd,
+      location: "Stammstrecke · Arcisstraße café",
+      capacity: null,
+      status: DiscoverActivityStatus.OPEN,
+    },
+  });
+
+  await prisma.discoverActivitySignup.create({
+    data: {
+      activityId: studyActivity.id,
+      userId: participantId,
+      status: DiscoverActivitySignupStatus.GOING,
+    },
+  });
+
+  console.log("  Discover activities: created 2 sample events + 1 RSVP");
+  console.log(`    • ${studyActivity.title}`);
+  console.log(`      id: ${studyActivity.id}`);
+  console.log(`      organizer: test_001 · 1 going (test_003)`);
+  console.log(`    • ${marker} Coffee & campus walk (test_002)`);
+}
+
 async function seedDiscoverPostIfMissing(userId: string) {
   const existing = await prisma.classmatePost.findFirst({
     where: { userId, title: { contains: "[test]" } },
@@ -345,6 +423,7 @@ async function main() {
   );
 
   await seedDiscoverPostIfMissing(u001.id);
+  await seedDiscoverActivitiesIfMissing(u001.id, u003.id);
 
   const semester = getCurrentSemesterLabel();
   console.log("\n=== SideSeat test accounts (idempotent) ===\n");
@@ -366,6 +445,7 @@ async function main() {
     console.log(`  IN2064 not in DB for ${semester} — skipped course enroll`);
   }
   console.log("  test_001 has one [test] Discover post");
+  console.log("  test_001 / test_002: [test] Discover activities (see log above)");
   console.log("\nRe-run anytime: npm run seed:test-accounts\n");
 }
 

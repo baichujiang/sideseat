@@ -7,35 +7,31 @@ import { addDays } from "date-fns";
 import { useEffect, useState } from "react";
 import { Edit3, Loader2, Plus, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  ClassmatePostCategory,
-  type LanguageProficiency,
-  type LanguageTag,
-} from "@prisma/client";
-
+import { DiscoverActivityList } from "@/components/discover/discover-activity-list";
 import {
   DiscoverBuddyTypeChips,
   type BuddyTypeChipValue,
 } from "@/components/discover/discover-buddy-type-chips";
+import { DiscoverCreateActionSheet } from "@/components/discover/discover-create-action-sheet";
+import { DiscoverCreateActivitySheet } from "@/components/discover/discover-create-activity-sheet";
 import { DiscoverFeed } from "@/components/discover/discover-feed";
-import { DiscoverFeedTabs } from "@/components/discover/discover-feed-tabs";
 import { applyBuddyFeedClientFilters } from "@/components/discover/discover-filter-sheet";
+import { DiscoverZoneTabs } from "@/components/discover/discover-zone-tabs";
 import { ClassmatePostCreateImageRow } from "@/components/discover/classmate-post-create-image-row";
 import { displayableClassmatePostImageUrls } from "@/lib/discover/classmate-post-display-images";
-import { LanguageExchangePostFields } from "@/components/discover/language-exchange-post-fields";
-import { SportsPostFieldCombobox } from "@/components/discover/sports-post-field-combobox";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LinkButton } from "@/components/ui/link-button";
+import type { DiscoverActivityRow } from "@/lib/discover/discover-activity-row";
 import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
+import { filterDiscoverFeedPosts } from "@/lib/discover/discover-feed-kind";
 import {
-  discoverFeedKindToParam,
-  filterDiscoverFeedPosts,
-  parseDiscoverFeedKind,
-  type DiscoverFeedKind,
-} from "@/lib/discover/discover-feed-kind";
-import { ALL_BUDDY_CATEGORIES, buddyTypeLabel } from "@/lib/discover/buddy-type-labels";
+  discoverZoneToParam,
+  parseDiscoverZone,
+  type DiscoverZone,
+} from "@/lib/discover/discover-zone";
+import { buddyTypeLabel, shouldShowBuddyCategoryLabel } from "@/lib/discover/buddy-type-labels";
 import {
   DEFAULT_DISCOVER_SERVED_CITY,
   type DiscoverCityNameKey,
@@ -58,11 +54,13 @@ export type EnrolledCourseOption = { id: string; code: string | null; name: stri
 
 export function DiscoverList({
   posts,
+  activities = [],
   savedCourseCount,
   enrolledCourses = [],
   servedCity,
 }: {
   posts: DiscoverPostRow[];
+  activities?: DiscoverActivityRow[];
   /** Saved courses count — used to suggest “Add a course” when the feed is empty. */
   savedCourseCount?: number;
   enrolledCourses?: EnrolledCourseOption[];
@@ -77,28 +75,31 @@ export function DiscoverList({
   const dl = m.discoverList;
   const buddy = m.discoverBuddy;
 
-  const [feed, setFeed] = useState<DiscoverFeedKind>(() => parseDiscoverFeedKind(searchParams.get("feed")));
+  const [zone, setZone] = useState<DiscoverZone>(() => parseDiscoverZone(searchParams.get("zone")));
   const [searchQuery, setSearchQuery] = useState("");
   const [typeChip, setTypeChip] = useState<BuddyTypeChipValue>("all");
+  const [createActionOpen, setCreateActionOpen] = useState(false);
   const [postOpen, setPostOpen] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
 
   useEffect(() => {
-    setFeed(parseDiscoverFeedKind(searchParams.get("feed")));
+    setZone(parseDiscoverZone(searchParams.get("zone")));
   }, [searchParams]);
 
-  const setFeedKind = (kind: DiscoverFeedKind) => {
-    setFeed(kind);
+  const setDiscoverZone = (next: DiscoverZone) => {
+    setZone(next);
     const url = new URL(window.location.href);
-    if (kind === "for-you") {
-      url.searchParams.delete("feed");
+    if (next === "buddies") {
+      url.searchParams.delete("zone");
     } else {
-      url.searchParams.set("feed", discoverFeedKindToParam(kind));
+      url.searchParams.set("zone", discoverZoneToParam(next));
     }
+    url.searchParams.delete("feed");
     url.searchParams.delete("tab");
     window.history.replaceState(null, "", url.toString());
   };
 
-  const filteredByFeed = filterDiscoverFeedPosts(posts, feed);
+  const filteredByFeed = filterDiscoverFeedPosts(posts, "for-you");
   const categoriesFilter = typeChip === "all" ? null : [typeChip];
   const filteredByType = applyBuddyFeedClientFilters(filteredByFeed, categoriesFilter);
   const q = searchQuery.trim().toLowerCase();
@@ -107,88 +108,149 @@ export function DiscoverList({
       ? filteredByType
       : filteredByType.filter((p) => {
           const courseBlob = (p.linkedCourses ?? []).map((c) => `${c.code ?? ""} ${c.name}`).join(" ");
-          const blob = [p.title, p.body ?? "", p.nickname, buddyTypeLabel(p.category, buddy), courseBlob]
+          const blob = [
+            p.title,
+            p.body ?? "",
+            p.nickname,
+            shouldShowBuddyCategoryLabel(p.category) ? buddyTypeLabel(p.category, buddy) : "",
+            courseBlob,
+          ]
             .join(" ")
             .toLowerCase();
           return blob.includes(q);
         });
 
-  const emptyCopy = feed === "today" ? buddy.emptyFeedToday : buddy.emptyFeed;
+  const filteredActivities =
+    q.length < 2
+      ? activities
+      : activities.filter((a) => {
+          const blob = [a.title, a.description ?? "", a.location, a.organizerNickname]
+            .join(" ")
+            .toLowerCase();
+          return blob.includes(q);
+        });
+
+  const emptyCopy = buddy.emptyFeed;
   const cityNameKey = servedCity ?? DEFAULT_DISCOVER_SERVED_CITY;
+  const isBuddiesZone = zone === "buddies";
+  const searchPlaceholder = isBuddiesZone ? buddy.searchPlaceholder : m.discoverActivity.searchPlaceholder;
+  const searchAria = isBuddiesZone ? buddy.searchAria : m.discoverActivity.searchAria;
+
+  function openCreateFlow() {
+    if (!sessionHint || sessionHint.isGuest || !sessionHint.signedIn) {
+      openPrompt({ returnTo: "/discover" });
+      return;
+    }
+    setCreateActionOpen(true);
+  }
 
   return (
     <div className="space-y-3">
-      <div className="sticky top-0 z-20 -mx-3 space-y-1.5 border-b border-classmates-edge/50 bg-classmates-warm/95 px-3 pb-2 pt-0 backdrop-blur-md supports-[backdrop-filter]:bg-classmates-warm/90 dark:border-border/40 dark:bg-background/90">
-        <div className="flex items-center gap-2">
-          <h1 className="page-screen-title shrink-0 text-[17px] leading-tight">{m.discover.screenTitle}</h1>
-          <div className="relative min-w-0 flex-1">
-            <Search
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-              strokeWidth={2.25}
-              aria-hidden
-            />
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={buddy.searchPlaceholder}
-              aria-label={buddy.searchAria}
-              className="h-9 min-w-0 w-full rounded-full border-border/80 bg-white py-0 pl-9 pr-9 text-[13px] shadow-sm dark:bg-card"
-            />
-            {searchQuery.trim().length > 0 ? (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                aria-label={m.common.close}
-                className="absolute right-1 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
-              >
-                <X className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
-              </button>
-            ) : null}
+      <div
+        className={cn(
+          "sticky top-0 z-20 -mx-3 space-y-3 border-b border-classmates-edge/45 bg-background/95 px-3 pb-3 pt-0",
+          "backdrop-blur-md supports-[backdrop-filter]:bg-background/88",
+          "dark:border-border/40 dark:bg-background/90 dark:supports-[backdrop-filter]:bg-background/85",
+        )}
+      >
+        <header className="space-y-1.5">
+          <div className="flex items-start justify-between gap-3">
+            <h1
+              className={cn(
+                "min-w-0 text-[34px] font-bold leading-[1.05] tracking-[-0.02em] text-classmates-ink",
+                "dark:text-foreground",
+              )}
+            >
+              {m.discover.screenTitle}
+            </h1>
+            <button
+              type="button"
+              onClick={openCreateFlow}
+              aria-label={m.discoverZone.createActionAria}
+              className="mt-1 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-classmates-blue text-white shadow-sm transition hover:bg-classmates-blue/90"
+            >
+              <Plus className="h-4 w-4" strokeWidth={2.5} aria-hidden />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              if (!sessionHint || sessionHint.isGuest || !sessionHint.signedIn) {
-                openPrompt({ returnTo: "/discover" });
-                return;
-              }
-              setPostOpen(true);
-            }}
-            aria-label={buddy.createRequestCtaAria}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-classmates-blue text-white shadow-sm transition hover:bg-classmates-blue/90"
-          >
-            <Plus className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-          </button>
-        </div>
-        <DiscoverFeedTabs active={feed} onChange={setFeedKind} labels={buddy} />
-        <DiscoverBuddyTypeChips value={typeChip} onChange={setTypeChip} labels={buddy} />
-      </div>
+          <p className="max-w-[22rem] text-[15px] leading-snug text-classmates-sub dark:text-muted-foreground">
+            {m.discover.screenSubtitle}
+          </p>
+        </header>
 
-      {filteredPosts.length === 0 ? (
-        <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-6 text-center text-[13px] text-muted-foreground shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
-          {emptyCopy}
-          {enrolledCourses.length === 0 && savedCourseCount === 0 ? (
-            <div className="mt-4 flex justify-center">
-              <LinkButton href={"/courses/add" as Route} size="sm">
-                {dl.addCourse}
-              </LinkButton>
-            </div>
+        <DiscoverZoneTabs active={zone} onChange={setDiscoverZone} labels={m.discoverZone} />
+
+        <div className="relative min-w-0">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            strokeWidth={2.25}
+            aria-hidden
+          />
+          <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={searchPlaceholder}
+            aria-label={searchAria}
+            className="h-9 min-w-0 w-full rounded-full border-border/80 bg-white py-0 pl-9 pr-9 text-[13px] shadow-sm dark:bg-card"
+          />
+          {searchQuery.trim().length > 0 ? (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              aria-label={m.common.close}
+              className="absolute right-1 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
+            </button>
           ) : null}
         </div>
+
+        {isBuddiesZone ? (
+          <DiscoverBuddyTypeChips value={typeChip} onChange={setTypeChip} labels={buddy} />
+        ) : null}
+      </div>
+
+      {isBuddiesZone ? (
+        filteredPosts.length === 0 ? (
+          <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-6 text-center text-[13px] text-muted-foreground shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
+            {emptyCopy}
+            {enrolledCourses.length === 0 && savedCourseCount === 0 ? (
+              <div className="mt-4 flex justify-center">
+                <LinkButton href={"/courses/add" as Route} size="sm">
+                  {dl.addCourse}
+                </LinkButton>
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <DiscoverFeed posts={filteredPosts} cityNameKey={cityNameKey as DiscoverCityNameKey} />
+        )
       ) : (
-        <DiscoverFeed posts={filteredPosts} cityNameKey={cityNameKey as DiscoverCityNameKey} />
+        <DiscoverActivityList
+          activities={filteredActivities}
+          filteredEmpty={activities.length > 0 && filteredActivities.length === 0}
+        />
       )}
+
+      <DiscoverCreateActionSheet
+        open={createActionOpen}
+        onClose={() => setCreateActionOpen(false)}
+        onChoose={(choice) => {
+          if (choice === "buddy") setPostOpen(true);
+          else setActivityOpen(true);
+        }}
+      />
 
       <CreatePostSheet
         open={postOpen}
         servedCity={cityNameKey}
-        enrolledCourses={enrolledCourses}
         onClose={() => setPostOpen(false)}
         onCreated={() => {
           setPostOpen(false);
           router.refresh();
         }}
       />
+
+      <DiscoverCreateActivitySheet open={activityOpen} onClose={() => setActivityOpen(false)} />
     </div>
   );
 }
@@ -204,62 +266,37 @@ function postFieldCharCountClassName(current: number, max: number) {
 function CreatePostSheet({
   open,
   servedCity,
-  enrolledCourses = [],
   onClose,
   onCreated,
 }: {
   open: boolean;
   servedCity: DiscoverCityNameKey;
-  enrolledCourses?: EnrolledCourseOption[];
   onClose: () => void;
   onCreated: () => void;
 }) {
   const m = useAppMessages();
   const dl = m.discoverList;
-  const buddy = m.discoverBuddy;
   const common = m.common;
-  const [category, setCategory] = useState<ClassmatePostCategory>(ClassmatePostCategory.STUDY);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [expiryPreset, setExpiryPreset] = useState<PostExpiryPreset>("1w");
-  const [selectedCourseIds, setSelectedCourseIds] = useState<Set<string>>(new Set());
   const [postImageUrls, setPostImageUrls] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const isShared = category === ClassmatePostCategory.SHARED_COURSES;
 
   useEffect(() => {
     if (!open) return;
-    setCategory(ClassmatePostCategory.STUDY);
     setTitle("");
     setBody("");
     setError(null);
     setExpiryPreset("1w");
-    setSelectedCourseIds(new Set());
     setPostImageUrls([]);
   }, [open]);
-
-  function toggleCourse(id: string) {
-    setSelectedCourseIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
-
-  function selectAllCourses() {
-    setSelectedCourseIds(new Set(enrolledCourses.map((c) => c.id)));
-  }
 
   async function submit() {
     if (submitting) return;
     const trimmedTitle = title.trim();
     const trimmedBody = body.trim();
-    if (isShared && selectedCourseIds.size === 0) {
-      setError(dl.postErrorSelectCourse);
-      return;
-    }
     if (!trimmedTitle) {
       setError(dl.postErrorNeedTitle);
       return;
@@ -285,13 +322,9 @@ function CreatePostSheet({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           city: servedCity,
-          category,
           title: trimmedTitle,
           body: trimmedBody,
           expiresAt: expiryPresetToDate(expiryPreset).toISOString(),
-          ...(isShared && selectedCourseIds.size > 0
-            ? { courseIds: [...selectedCourseIds] }
-            : {}),
           ...(imageUrls.length > 0 ? { imageUrls } : {}),
         }),
       });
@@ -318,9 +351,7 @@ function CreatePostSheet({
         <div className="mx-auto mb-3 h-1.5 w-12 shrink-0 rounded-full bg-border/80" />
         <div className="mb-3 flex shrink-0 items-start justify-between gap-3">
           <div>
-            <h3 className="text-[15px] font-semibold text-foreground">
-              {buddy.sheetTitlePrefix} {buddyTypeLabel(category, buddy)}
-            </h3>
+            <h3 className="text-[15px] font-semibold text-foreground">{dl.postSheetHeading}</h3>
             <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{dl.postSheetSubtitle}</p>
           </div>
           <button
@@ -334,74 +365,6 @@ function CreatePostSheet({
         </div>
 
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto">
-          <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
-            <p className="mb-2 text-[11px] font-medium text-muted-foreground">{buddy.sheetChooseBuddyType}</p>
-            <div className="flex flex-wrap gap-1.5">
-              {ALL_BUDDY_CATEGORIES.map((c) => {
-                const active = c === category;
-                return (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setCategory(c)}
-                    className={cn(
-                      "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
-                      active
-                        ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
-                        : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
-                    )}
-                  >
-                    {buddyTypeLabel(c, buddy)}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {isShared && enrolledCourses.length > 0 ? (
-            <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
-              <div className="mb-1.5 flex items-center justify-between">
-                <p className="text-[11px] font-medium text-muted-foreground">
-                  {formatMessage(dl.postSheetCoursePicker, {
-                    selected: selectedCourseIds.size,
-                    total: enrolledCourses.length,
-                  })}
-                </p>
-                <button
-                  type="button"
-                  className="text-[11px] font-medium text-classmates-blue hover:text-classmates-blue/80"
-                  onClick={selectedCourseIds.size === enrolledCourses.length ? () => setSelectedCourseIds(new Set()) : selectAllCourses}
-                >
-                  {selectedCourseIds.size === enrolledCourses.length ? dl.postSheetDeselectAll : dl.postSheetSelectAll}
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {enrolledCourses.map((course) => {
-                  const active = selectedCourseIds.has(course.id);
-                  return (
-                    <button
-                      key={course.id}
-                      type="button"
-                      onClick={() => toggleCourse(course.id)}
-                      className={cn(
-                        "inline-flex items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-colors",
-                        active
-                          ? "border-classmates-blue-border bg-classmates-blue-soft text-classmates-blue"
-                          : "border-[#E7E0D6]/90 bg-white text-foreground/78 dark:border-border/80 dark:bg-card dark:text-muted-foreground",
-                      )}
-                    >
-                      {course.code ?? course.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ) : isShared && enrolledCourses.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-amber-200/80 bg-amber-50/40 px-3 py-3 text-center text-[12px] text-muted-foreground">
-              {dl.postSheetNeedEnroll}
-            </div>
-          ) : null}
-
           <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
             <div className="mb-1.5 flex items-start justify-between gap-2">
               <p className="text-[11px] font-medium text-muted-foreground">{dl.postSheetTitleQuestion}</p>
@@ -512,7 +475,6 @@ function CreatePostSheet({
               submitting ||
               !title.trim() ||
               !body.trim() ||
-              (isShared && selectedCourseIds.size === 0) ||
               title.trim().length > CLASSMATE_POST_TITLE_MAX_LEN ||
               body.trim().length > CLASSMATE_POST_BODY_MAX_LEN
             }

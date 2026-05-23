@@ -105,6 +105,7 @@ export type DayTimelineItem = {
   categoryId?: string | null;
   categoryName?: string | null;
   categoryColor?: string | null;
+  discoverActivityId?: string | null;
 };
 
 function isAllDayStyleTimelineItem(item: DayTimelineItem): boolean {

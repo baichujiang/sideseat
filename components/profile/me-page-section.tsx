@@ -1,5 +1,35 @@
 import { cn } from "@/lib/utils";
 
+/** iOS Settings–style grouped block label for the Me (`/profile`) landing screen. */
+export function MePageGroupedSection({
+  id,
+  title,
+  footer,
+  children,
+  className,
+}: {
+  id: string;
+  title: string;
+  footer?: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section aria-labelledby={id} className={cn("space-y-1.5", className)}>
+      <h2
+        id={id}
+        className="px-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground"
+      >
+        {title}
+      </h2>
+      {children}
+      {footer?.trim() ? (
+        <p className="px-1 text-[11px] leading-snug text-muted-foreground">{footer}</p>
+      ) : null}
+    </section>
+  );
+}
+
 /** Consistent section chrome for the Me (`/profile`) screen. */
 export function MePageSection({
   id,

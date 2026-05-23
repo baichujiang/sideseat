@@ -84,6 +84,106 @@ export type AppMessages = {
     /** Keys match stored `ClassmatePost.city` English names; UI labels only. */
     cityNames: Record<DiscoverCityNameKey, string>;
   };
+  /** Discover top-level zones and create-action sheet. */
+  discoverZone: {
+    tabsNavAria: string;
+    tabBuddies: string;
+    tabActivities: string;
+    createActionAria: string;
+    createSheetTitle: string;
+    createBuddyOption: string;
+    createBuddyOptionSubtitle: string;
+    createActivityOption: string;
+    createActivityOptionSubtitle: string;
+    createSheetCancel: string;
+  };
+  /** Discover activities zone — organized events with RSVP. */
+  discoverActivity: {
+    searchPlaceholder: string;
+    searchAria: string;
+    emptyTitle: string;
+    emptyBody: string;
+    filteredEmptyTitle: string;
+    filteredEmptyBody: string;
+    sheetTitle: string;
+    sheetSubtitle: string;
+    titleLabel: string;
+    titlePlaceholder: string;
+    descriptionLabel: string;
+    descriptionPlaceholder: string;
+    categoryLabel: string;
+    whenLabel: string;
+    whereLabel: string;
+    wherePlaceholder: string;
+    capacityLabel: string;
+    capacityUnlimitedToggle: string;
+    capacityPlaceholder: string;
+    capacityUnlimited: string;
+    /** `{going}` `{capacity}` */
+    capacityGoing: string;
+    submitButton: string;
+    submitBusy: string;
+    formIncomplete: string;
+    createFailed: string;
+    organizerLabel: string;
+    badgeFull: string;
+    detailScreenTitle: string;
+    detailDescription: string;
+    detailDescriptionEmpty: string;
+    detailWhen: string;
+    detailWhere: string;
+    detailAttendees: string;
+    detailOrganizer: string;
+    detailGoingList: string;
+    /** `{count}` */
+    goingCountUnlimited: string;
+    /** `{count}` `{capacity}` */
+    goingCountCapped: string;
+    joinCta: string;
+    leaveCta: string;
+    signInToJoin: string;
+    contactOrganizer: string;
+    messageOrganizer: string;
+    closeSignup: string;
+    cancelActivity: string;
+    confirmClose: string;
+    confirmCancel: string;
+    phaseExpired: string;
+    phaseCanceled: string;
+    phaseClosed: string;
+    phaseFull: string;
+    signupFailed: string;
+    actionFailed: string;
+    addCalendarCta: string;
+    addCalendarDone: string;
+    addCalendarSuccess: string;
+    addCalendarFailed: string;
+    categories: {
+      STUDY_GROUP: string;
+      SOCIAL: string;
+      SPORTS: string;
+      FOOD: string;
+      CAMPUS_EVENT: string;
+      OTHER: string;
+    };
+    errors: {
+      AUTH_REQUIRED: string;
+      ONBOARDING_REQUIRED: string;
+      CROSS_SCHOOL: string;
+      SELF_SIGNUP: string;
+      NOT_BOOKABLE: string;
+      ALREADY_GOING: string;
+      NOT_GOING: string;
+      ORGANIZER_ONLY: string;
+      CREATE_LIMIT: string;
+      BLOCKED: string;
+    };
+    myActivitiesTitle: string;
+    myActivitiesTabOrganized: string;
+    myActivitiesTabJoined: string;
+    myActivitiesEmptyOrganized: string;
+    myActivitiesEmptyJoined: string;
+  };
   /** Discover — buddy-finding feed (tabs, search, filters, card chrome). */
   discoverBuddy: {
     feedTabForYou: string;
@@ -150,8 +250,8 @@ export type AppMessages = {
     messageAuthorAria: string;
     signInToMessageCta: string;
     signInToMessageAria: string;
-    viewProfileCta: string;
     viewProfileAria: string;
+    postMetaSectionAria: string;
     shareRequestAria: string;
     guestIntro: string;
     bottomBarRequestExpired: string;
@@ -188,6 +288,7 @@ export type AppMessages = {
     postDetailExpiredUpdated: string;
     /** Primary CTA to open the create-post sheet. */
     postCta: string;
+    postSheetHeading: string;
     postSheetSubtitle: string;
     postSheetTitlePrefix: string;
     /** `{selected}` `{total}` — course picker heading in create-post sheet. */
@@ -661,6 +762,7 @@ export type AppMessages = {
     addPanelTitleAria: string;
     addPanelLocationPlaceholder: string;
     addPanelNotesPlaceholder: string;
+    viewDiscoverActivity: string;
     addPanelStart: string;
     addPanelEnd: string;
     addPanelRepeat: string;
@@ -1001,6 +1103,13 @@ export type AppMessages = {
     bilingualLabel: string;
   };
   profile: {
+    landingSectionActivity: string;
+    landingSectionNotifications: string;
+    landingSectionMore: string;
+    landingStatPosts: string;
+    landingStatSaved: string;
+    landingStatCourses: string;
+    landingEditProfileCta: string;
     preferencesTitle: string;
     preferencesSubtitleNone: string;
     preferencesSubtitleOne: string;
@@ -1014,6 +1123,8 @@ export type AppMessages = {
     discoverCitySelectAria: string;
     myPostsRowTitle: string;
     myPostsRowSubtitle: string;
+    myActivitiesRowTitle: string;
+    myActivitiesRowSubtitle: string;
     myPlanPageTitle: string;
     myPlanPageSubtitle: string;
     myPlanShareLinksHeading: string;
@@ -1528,7 +1639,6 @@ export type CoursesMessages = {
   setupSyncing: string;
   setupEdit: string;
   setupAddTimes: string;
-  setupNoOfficialSchedule: string;
   setupErrorSaveCalendarPrefix: string;
   setupErrorSaveCalendarRetry: string;
   setupUnableSaveGeneric: string;
@@ -1585,14 +1695,6 @@ export type CoursesMessages = {
   /** `{count}` */
   formSchedulesOthersMany: string;
   formSchedulesOthersOne: string;
-  formSchedulesOfficial: string;
-  formSchedulesMixed: string;
-  formOfficialBadge: string;
-  formOfficialApplied: string;
-  formNoOfficialSchedule: string;
-  formPickOfficialVariant: string;
-  formNeedManualTimes: string;
-  formOfficialLoading: string;
   formUse: string;
   formUsing: string;
   formRoomDefault: string;

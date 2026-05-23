@@ -4,16 +4,20 @@ import { apiFetch } from "@/lib/auth/api-fetch";
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Send } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { FormMessage } from "@/components/forms/form-message";
 import { ReplyPreview } from "@/components/chat/chat-composer";
+import {
+  ChatComposerBar,
+  ChatComposerSendButton,
+  ChatComposerSlotButton,
+} from "@/components/chat/chat-composer-chrome";
 import { ChatMessageInput } from "@/components/chat/chat-message-input";
 import { ChatThreadSearchButton } from "@/components/chat/chat-thread-search-button";
 import { useChatReply } from "@/components/chat/chat-reply-context";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import type { ThreadSearchEntry } from "@/lib/chat/thread-search-index";
-import { cn } from "@/lib/utils";
 
 export function CourseChatComposer({
   courseId,
@@ -76,42 +80,31 @@ export function CourseChatComposer({
       ) : null}
       <div className="flex items-end gap-2">
         <ChatThreadSearchButton entries={threadSearchEntries} />
-        <button
-          type="button"
-          disabled
-          aria-label={co.courseChatAttachmentsUnavailableAria}
-          title={co.courseChatAttachmentsUnavailableTitle}
-          className={cn(
-            "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-dashed border-border/70 bg-muted/35 text-muted-foreground/60",
-            "cursor-not-allowed",
-          )}
-        >
-          <Plus className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />
-        </button>
-        <label className="sr-only" htmlFor={`course-chat-input-${courseId}`}>
-          {co.courseChatComposerInputLabel}
-        </label>
-        <ChatMessageInput
-          ref={inputRef}
-          id={`course-chat-input-${courseId}`}
-          value={body}
-          onChange={(e) => setBody(e.target.value.replace(/[\r\n]+/g, " "))}
-          onSend={() => void submit()}
-          placeholder={replyTo ? ch.placeholderReply : co.courseChatComposerPlaceholder}
-        />
-        <button
-          type="button"
-          disabled={submitting || !body.trim()}
-          onClick={() => void submit()}
-          className={cn(
-            "flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition",
-            "hover:bg-primary/90",
-            "disabled:pointer-events-none disabled:opacity-35",
-          )}
-          aria-label={ch.sendAria}
-        >
-          <Send className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />
-        </button>
+        <ChatComposerBar>
+          <ChatComposerSlotButton
+            disabled
+            aria-label={co.courseChatAttachmentsUnavailableAria}
+            title={co.courseChatAttachmentsUnavailableTitle}
+          >
+            <Plus className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />
+          </ChatComposerSlotButton>
+          <label className="sr-only" htmlFor={`course-chat-input-${courseId}`}>
+            {co.courseChatComposerInputLabel}
+          </label>
+          <ChatMessageInput
+            ref={inputRef}
+            id={`course-chat-input-${courseId}`}
+            value={body}
+            onChange={(e) => setBody(e.target.value.replace(/[\r\n]+/g, " "))}
+            onSend={() => void submit()}
+            placeholder={replyTo ? ch.placeholderReply : co.courseChatComposerPlaceholder}
+          />
+          <ChatComposerSendButton
+            disabled={submitting || !body.trim()}
+            onClick={() => void submit()}
+            ariaLabel={ch.sendAria}
+          />
+        </ChatComposerBar>
       </div>
       {error ? (
         <div className="pb-0.5">

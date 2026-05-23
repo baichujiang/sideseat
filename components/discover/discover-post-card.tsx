@@ -39,6 +39,7 @@ import { formatClassmatePostExpiryMonthDay } from "@/lib/i18n/format-classmate-p
 import { formatMessage, type AppMessages } from "@/lib/i18n/messages";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
+import { shouldShowBuddyCategoryLabel } from "@/lib/discover/buddy-type-labels";
 
 export const DISCOVER_POST_CARD_SHELL_CLASS = cn(
   "rounded-3xl border border-border/55 bg-white px-5 py-4 shadow-[0_8px_30px_-14px_rgba(15,23,42,0.12)] sm:px-6 sm:py-5",
@@ -120,6 +121,8 @@ function categoryIconNode(c: ClassmatePostCategory) {
       return <Dumbbell className={cls} strokeWidth={2} aria-hidden />;
     case ClassmatePostCategory.STUDY:
       return <NotebookPen className={cls} strokeWidth={2} aria-hidden />;
+    default:
+      return null;
   }
 }
 
@@ -138,6 +141,8 @@ function categoryTabLabel(
       return dl.sceneTabLanguage;
     case ClassmatePostCategory.SPORTS:
       return dl.sceneTabSports;
+    default:
+      return dl.sceneTabStudy;
   }
 }
 
@@ -146,6 +151,7 @@ function DiscoverPostCategoryBadge({
 }: {
   category: ClassmatePostCategory;
 }) {
+  if (!shouldShowBuddyCategoryLabel(category)) return null;
   const m = useAppMessages();
   const dl = m.discoverList;
   const palette = classmatePostCategoryToPalette(category);

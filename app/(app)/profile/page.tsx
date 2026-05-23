@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Route } from "next";
-import { Bookmark, CalendarClock, ChevronRight, Settings, SquarePen } from "lucide-react";
+import { Bookmark, CalendarClock, CalendarDays, ChevronRight, Settings, SquarePen } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { MeGuestScreen } from "@/components/profile/me-guest-screen";
@@ -22,7 +22,7 @@ import {
   mePageRowLeadClass,
 } from "@/components/profile/me-settings-row";
 import { ProfileMeDisplayCard } from "@/components/profile/profile-me-display-card";
-import { MePageSection } from "@/components/profile/me-page-section";
+import { MePageGroupedSection, MePageSection } from "@/components/profile/me-page-section";
 import { FeedbackFormCard } from "@/components/profile/feedback-form-card";
 import { PushNotificationsCard } from "@/components/profile/push-notifications-card";
 import { TipSupportCard } from "@/components/profile/tip-support-card";
@@ -87,7 +87,14 @@ export default async function ProfilePage({
     );
   }
 
-  const blockedCount = await prisma.block.count({ where: { blockerId: user.id } });
+  const [blockedCount, postsCount, savedCount, coursesCount] = await Promise.all([
+    prisma.block.count({ where: { blockerId: user.id } }),
+    prisma.classmatePost.count({
+      where: { userId: user.id, status: "ACTIVE" },
+    }),
+    prisma.classmatePostSave.count({ where: { userId: user.id } }),
+    prisma.userCourse.count({ where: { userId: user.id } }),
+  ]);
   const isAdmin = isConfiguredAdmin(user);
 
   const schoolCode = normalizeSchoolCode(user.school) ?? DEFAULT_SCHOOL;
@@ -100,7 +107,7 @@ export default async function ProfilePage({
         : formatMessage(ui.profile.preferencesSubtitleMany, { count: blockedCount });
 
   return (
-    <div className="-mx-3 space-y-5 bg-classmates-warm-alt px-5 pb-2 pt-1 dark:bg-background">
+    <div className="-mx-3 space-y-4 bg-classmates-warm-alt px-5 pb-4 pt-1 dark:bg-background">
       {isAdmin ? (
           <nav
             className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-border/60 px-0.5 pb-2"
@@ -148,59 +155,77 @@ export default async function ProfilePage({
         bio={user.bio}
         avatarUrl={user.avatarUrl}
         gender={user.gender}
+        school={user.school}
+        verifiedStudent={user.verifiedStudent}
+        studentVerificationStatus={user.studentVerificationStatus}
         schoolSummary={{
           schoolShort,
           degreeLabel: DEGREE_LEVEL_LABELS[user.degreeLevel ?? "BACHELOR"],
           major: user.major?.trim() ?? "",
           semester: user.semester ?? 1,
         }}
+        stats={{
+          posts: postsCount,
+          saved: savedCount,
+          courses: coursesCount,
+        }}
       />
 
-      <div className={mePageCardClass}>
-        <div className={mePageListDivideClass}>
-          <MeDestRow
-            href={'/profile/my-posts' as Route}
-            icon={SquarePen}
-            iconShellClass={mePageIconMyPostsShellClass}
-            iconClass={mePageIconMyPostsClass}
-            title={ui.profile.myPostsRowTitle}
-            subtitle={ui.profile.myPostsRowSubtitle}
-          />
-          <MeDestRow
-            href={'/profile/saved-posts' as Route}
-            icon={Bookmark}
-            iconShellClass={mePageIconSavedPostsShellClass}
-            iconClass={mePageIconSavedPostsClass}
-            title={ui.profile.savedPostsRowTitle}
-            subtitle={ui.profile.savedPostsRowSubtitle}
-          />
-          <MeDestRow
-            href={'/profile/my-plan' as Route}
-            icon={CalendarClock}
-            iconShellClass={mePageIconMyPlanShellClass}
-            iconClass={mePageIconMyPlanClass}
-            title={ui.profile.myPlanRowTitle}
-            subtitle={ui.profile.myPlanRowSubtitle}
-          />
+      <MePageGroupedSection id="me-activity-heading" title={ui.profile.landingSectionActivity}>
+        <div className={mePageCardClass}>
+          <div className={mePageListDivideClass}>
+            <MeDestRow
+              href={'/profile/my-posts' as Route}
+              icon={SquarePen}
+              iconShellClass={mePageIconMyPostsShellClass}
+              iconClass={mePageIconMyPostsClass}
+              title={ui.profile.myPostsRowTitle}
+              subtitle={ui.profile.myPostsRowSubtitle}
+            />
+            <MeDestRow
+              href={'/profile/my-activities' as Route}
+              icon={CalendarDays}
+              title={ui.profile.myActivitiesRowTitle}
+              subtitle={ui.profile.myActivitiesRowSubtitle}
+            />
+            <MeDestRow
+              href={'/profile/saved-posts' as Route}
+              icon={Bookmark}
+              iconShellClass={mePageIconSavedPostsShellClass}
+              iconClass={mePageIconSavedPostsClass}
+              title={ui.profile.savedPostsRowTitle}
+              subtitle={ui.profile.savedPostsRowSubtitle}
+            />
+            <MeDestRow
+              href={'/profile/my-plan' as Route}
+              icon={CalendarClock}
+              iconShellClass={mePageIconMyPlanShellClass}
+              iconClass={mePageIconMyPlanClass}
+              title={ui.profile.myPlanRowTitle}
+              subtitle={ui.profile.myPlanRowSubtitle}
+            />
+          </div>
         </div>
-      </div>
+      </MePageGroupedSection>
 
-      <MePageSection id="me-push-heading" density="compact">
+      <MePageGroupedSection id="me-push-heading" title={ui.profile.landingSectionNotifications}>
         <PushNotificationsCard />
-      </MePageSection>
+      </MePageGroupedSection>
 
-      <div className={mePageCardClass}>
-        <div className={mePageListDivideClass}>
-          <MePageInstallCard inList />
-          <FeedbackFormCard variant="listRow" />
-          <MeDestRow
-            href={'/profile/account' as Route}
-            icon={Settings}
-            title={ui.profile.preferencesTitle}
-            subtitle={settingsSubtitle}
-          />
+      <MePageGroupedSection id="me-more-heading" title={ui.profile.landingSectionMore}>
+        <div className={mePageCardClass}>
+          <div className={mePageListDivideClass}>
+            <MePageInstallCard inList />
+            <FeedbackFormCard variant="listRow" />
+            <MeDestRow
+              href={'/profile/account' as Route}
+              icon={Settings}
+              title={ui.profile.preferencesTitle}
+              subtitle={settingsSubtitle}
+            />
+          </div>
         </div>
-      </div>
+      </MePageGroupedSection>
 
       {tipsEnabled ? (
         <MePageSection id="me-tip-heading" density="compact">

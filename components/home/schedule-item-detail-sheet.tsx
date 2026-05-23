@@ -3,6 +3,7 @@
 import { apiFetch } from "@/lib/auth/api-fetch";
 
 import type { CalendarRepeatRule, PlanType } from "@prisma/client";
+import Link from "next/link";
 import type { Route } from "next";
 import { format } from "date-fns";
 import {
@@ -42,6 +43,7 @@ export type ScheduleDetailItem = {
   categoryId?: string | null;
   categoryName?: string | null;
   categoryColor?: string | null;
+  discoverActivityId?: string | null;
 };
 
 export function ScheduleItemDetailSheet({
@@ -320,6 +322,15 @@ export function ScheduleItemDetailSheet({
                     {noteValue}
                   </p>
                 </div>
+
+                {displayItem.discoverActivityId ? (
+                  <Link
+                    href={`/discover/activities/${displayItem.discoverActivityId}?returnTo=${encodeURIComponent(chatReturnTo)}` as Route}
+                    className="flex h-11 w-full items-center justify-center rounded-full border border-classmates-blue-border bg-classmates-blue-soft text-[13px] font-semibold text-classmates-blue no-underline"
+                  >
+                    {s.viewDiscoverActivity}
+                  </Link>
+                ) : null}
 
                 {canEdit ? (
                   <div className="mt-1 border-t border-border/50 pt-3">

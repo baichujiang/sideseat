@@ -14,9 +14,16 @@ export function buddyTypeLabel(category: ClassmatePostCategory, b: AppMessages["
       return b.buddyTypeLanguage;
     case ClassmatePostCategory.SPORTS:
       return b.buddyTypeSports;
+    case ClassmatePostCategory.OTHER:
+      return "";
     default:
-      return b.buddyTypeStudy;
+      return "";
   }
+}
+
+/** Legacy typed posts show a chip; new posts default to OTHER and hide the label. */
+export function shouldShowBuddyCategoryLabel(category: ClassmatePostCategory): boolean {
+  return category !== ClassmatePostCategory.OTHER;
 }
 
 export const ALL_BUDDY_CATEGORIES: ClassmatePostCategory[] = [

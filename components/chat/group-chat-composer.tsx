@@ -4,13 +4,15 @@ import { apiFetch } from "@/lib/auth/api-fetch";
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Send } from "lucide-react";
 
 import { FormMessage } from "@/components/forms/form-message";
+import {
+  ChatComposerBar,
+  ChatComposerSendButton,
+} from "@/components/chat/chat-composer-chrome";
 import { ChatMessageInput } from "@/components/chat/chat-message-input";
 import { ChatThreadSearchButton } from "@/components/chat/chat-thread-search-button";
 import type { ThreadSearchEntry } from "@/lib/chat/thread-search-index";
-import { cn } from "@/lib/utils";
 
 export function GroupChatComposer({
   groupChatId,
@@ -60,30 +62,24 @@ export function GroupChatComposer({
     <div className="relative space-y-2">
       <div className="flex items-end gap-2">
         <ChatThreadSearchButton entries={threadSearchEntries} />
-        <label className="sr-only" htmlFor={`group-chat-input-${groupChatId}`}>
-          Message
-        </label>
-        <ChatMessageInput
-          ref={inputRef}
-          id={`group-chat-input-${groupChatId}`}
-          value={body}
-          onChange={(e) => setBody(e.target.value.replace(/[\r\n]+/g, " "))}
-          onSend={() => void submit()}
-          placeholder="Message the group…"
-        />
-        <button
-          type="button"
-          disabled={submitting || !body.trim()}
-          onClick={() => void submit()}
-          className={cn(
-            "flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition",
-            "hover:bg-primary/90",
-            "disabled:pointer-events-none disabled:opacity-35",
-          )}
-          aria-label="Send"
-        >
-          <Send className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />
-        </button>
+        <ChatComposerBar>
+          <label className="sr-only" htmlFor={`group-chat-input-${groupChatId}`}>
+            Message
+          </label>
+          <ChatMessageInput
+            ref={inputRef}
+            id={`group-chat-input-${groupChatId}`}
+            value={body}
+            onChange={(e) => setBody(e.target.value.replace(/[\r\n]+/g, " "))}
+            onSend={() => void submit()}
+            placeholder="Message the group…"
+          />
+          <ChatComposerSendButton
+            disabled={submitting || !body.trim()}
+            onClick={() => void submit()}
+            ariaLabel="Send"
+          />
+        </ChatComposerBar>
       </div>
       {error ? (
         <div className="pb-0.5">

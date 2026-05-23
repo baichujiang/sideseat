@@ -1,6 +1,7 @@
 import { ConnectionStatus } from "@prisma/client";
 
 import { DiscoverList } from "@/components/discover/discover-list";
+import { loadActiveDiscoverActivitiesForCity } from "@/lib/discover/load-active-discover-activities-for-city";
 import { loadActiveDiscoverPostsForCity } from "@/lib/discover/load-active-discover-posts";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
@@ -24,8 +25,9 @@ export default async function DiscoverPage() {
 
   const savedCount = await prisma.savedCourse.count({ where: { userId: user.id } });
 
-  const [loadedPosts, myEnrolledCourses, activeConnections] = await Promise.all([
+  const [loadedPosts, loadedActivities, myEnrolledCourses, activeConnections] = await Promise.all([
     loadActiveDiscoverPostsForCity(servedCity, user.id),
+    loadActiveDiscoverActivitiesForCity(servedCity, user.id),
     prisma.userCourse.findMany({
       where: { userId: user.id },
       select: { courseId: true, course: { select: { id: true, code: true, name: true } } },
@@ -56,6 +58,7 @@ export default async function DiscoverPage() {
     <div className="-mt-3 min-w-0 space-y-3">
       <DiscoverList
         posts={posts}
+        activities={loadedActivities}
         savedCourseCount={savedCount}
         enrolledCourses={enrolledCourses}
         servedCity={servedCity}

@@ -201,7 +201,7 @@ export default async function GroupChatPage({
           )}
         </ChatScrollContainer>
 
-        <div className="shrink-0 border-t border-border/80 bg-background/95 px-3 pt-2 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
+        <div className="shrink-0 border-t border-border/60 bg-background/95 px-3 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_24px_rgba(15,23,42,0.05)] backdrop-blur-sm dark:bg-background/90 dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]">
           <GroupChatComposer groupChatId={groupChat.id} threadSearchEntries={threadSearchEntries} />
         </div>
       </div>

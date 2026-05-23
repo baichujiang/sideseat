@@ -139,5 +139,7 @@ export function classmatePostCategoryToPalette(c: ClassmatePostCategory): SceneT
       return "violet";
     case ClassmatePostCategory.SPORTS:
       return "rose";
+    default:
+      return "indigo";
   }
 }

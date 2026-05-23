@@ -2,6 +2,7 @@ import { BookUser, Dumbbell, Languages, NotebookPen, UtensilsCrossed } from "luc
 import { ClassmatePostCategory } from "@prisma/client";
 
 import { cn } from "@/lib/utils";
+import { shouldShowBuddyCategoryLabel } from "@/lib/discover/buddy-type-labels";
 
 const GRADIENT_CLASS =
   "bg-gradient-to-br from-violet-100/90 via-sky-50/80 to-amber-50/70 dark:from-violet-950/50 dark:via-slate-900/40 dark:to-amber-950/30";
@@ -20,7 +21,7 @@ function categoryIcon(category: ClassmatePostCategory, size: "card" | "detail") 
     case ClassmatePostCategory.SPORTS:
       return <Dumbbell className={cls} strokeWidth={1.75} aria-hidden />;
     default:
-      return <NotebookPen className={cls} strokeWidth={1.75} aria-hidden />;
+      return null;
   }
 }
 
@@ -37,6 +38,8 @@ export function ClassmatePostTextCover({
   variant: "card" | "detail";
   className?: string;
 }) {
+  const showType = shouldShowBuddyCategoryLabel(category) && typeLabel.trim().length > 0;
+
   if (variant === "card") {
     return (
       <div
@@ -46,10 +49,17 @@ export function ClassmatePostTextCover({
           className,
         )}
       >
-        <span className="inline-flex max-w-full self-start rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-foreground shadow-sm dark:bg-white/10 dark:text-foreground">
-          {typeLabel}
-        </span>
-        <p className="mt-2 line-clamp-2 text-[14px] font-semibold leading-snug text-foreground drop-shadow-sm">
+        {showType ? (
+          <span className="inline-flex max-w-full self-start rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-foreground shadow-sm dark:bg-white/10 dark:text-foreground">
+            {typeLabel}
+          </span>
+        ) : null}
+        <p
+          className={cn(
+            "line-clamp-2 text-[14px] font-semibold leading-snug text-foreground drop-shadow-sm",
+            showType && "mt-2",
+          )}
+        >
           {title}
         </p>
       </div>
@@ -65,10 +75,12 @@ export function ClassmatePostTextCover({
       )}
     >
       <div className={cn("flex min-h-[11rem] flex-col justify-end gap-2 p-4", GRADIENT_CLASS)}>
-        <div className="text-foreground/90">{categoryIcon(category, "detail")}</div>
-        <span className="inline-flex max-w-full self-start rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-foreground shadow-sm dark:bg-white/10 dark:text-foreground">
-          {typeLabel}
-        </span>
+        {categoryIcon(category, "detail")}
+        {showType ? (
+          <span className="inline-flex max-w-full self-start rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-foreground shadow-sm dark:bg-white/10 dark:text-foreground">
+            {typeLabel}
+          </span>
+        ) : null}
         <p className="line-clamp-3 text-[16px] font-semibold leading-snug text-foreground drop-shadow-sm">
           {title}
         </p>

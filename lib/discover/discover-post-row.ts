@@ -102,6 +102,8 @@ export function discoverSceneForPostCategory(category: ClassmatePostCategory): D
       return "language";
     case ClassmatePostCategory.SPORTS:
       return "sports";
+    default:
+      return "study";
   }
 }
 

@@ -1,6 +1,7 @@
 import type { Route } from "next";
 import type { StudentVerificationStatus, UserGender } from "@prisma/client";
 
+import { MePageGroupedSection } from "@/components/profile/me-page-section";
 import { ProfileInfoRow } from "@/components/profile/profile-info-row";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import {
@@ -70,34 +71,41 @@ export function ProfileMeInfoCard({
   const verificationDisplay = studentVerificationRowValue(verificationStatus, sv, verificationEmail);
 
   return (
-    <nav className={mePageCardClass} aria-label={t.profileInfoNavAria}>
-      <div className={mePageListDivideClass}>
-        <ProfileInfoRow
-          href={"/profile/avatar" as Route}
-          title={t.rowPhoto}
-          value={<PresetAvatar id={avatarUrl} size={40} className="shrink-0" />}
-          valueClassName="flex justify-end"
-        />
-        <ProfileInfoRow href={"/profile/name" as Route} title={t.rowName} value={nameDisplay} />
-        <ProfileInfoRow href={"/profile/bio" as Route} title={t.rowBio} value={bioDisplay} />
-        <ProfileInfoRow href={"/profile/gender" as Route} title={t.rowGender} value={genderDisplay} />
-        <ProfileInfoRow href={"/profile/academic" as Route} title={t.rowSchool} value={schoolDisplay} />
-        <ProfileInfoRow
-          href={"/profile/verification" as Route}
-          title={me.verificationSectionTitle}
-          value={verificationDisplay}
-        />
-        <ProfileInfoRow
-          href={"/profile/languages" as Route}
-          title={t.rowLanguages}
-          value={languagesDisplay}
-        />
-        <ProfileInfoRow
-          href={"/profile/discover-city" as Route}
-          title={pr.discoverCityRowTitle}
-          value={cityDisplay}
-        />
-      </div>
-    </nav>
+    <div className="space-y-4">
+      <nav className={mePageCardClass} aria-label={t.profileInfoNavAria}>
+        <div className={mePageListDivideClass}>
+          <ProfileInfoRow
+            href={"/profile/avatar" as Route}
+            title={t.rowPhoto}
+            value={<PresetAvatar id={avatarUrl} size={40} className="shrink-0" />}
+            valueClassName="flex justify-end"
+          />
+          <ProfileInfoRow href={"/profile/name" as Route} title={t.rowName} value={nameDisplay} />
+          <ProfileInfoRow href={"/profile/bio" as Route} title={t.rowBio} value={bioDisplay} />
+          <ProfileInfoRow href={"/profile/gender" as Route} title={t.rowGender} value={genderDisplay} />
+          <ProfileInfoRow href={"/profile/academic" as Route} title={t.rowSchool} value={schoolDisplay} />
+          <ProfileInfoRow
+            href={"/profile/languages" as Route}
+            title={t.rowLanguages}
+            value={languagesDisplay}
+          />
+          <ProfileInfoRow
+            href={"/profile/discover-city" as Route}
+            title={pr.discoverCityRowTitle}
+            value={cityDisplay}
+          />
+        </div>
+      </nav>
+
+      <MePageGroupedSection id="profile-verification-heading" title={me.verificationSectionTitle}>
+        <nav className={mePageCardClass} aria-label={me.verificationSectionTitle}>
+          <ProfileInfoRow
+            href={"/profile/verification" as Route}
+            title={me.verificationSectionTitle}
+            value={verificationDisplay}
+          />
+        </nav>
+      </MePageGroupedSection>
+    </div>
   );
 }

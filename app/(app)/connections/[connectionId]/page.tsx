@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { format, isSameDay, isToday, isYesterday } from "date-fns";
 import { enUS, zhCN } from "date-fns/locale";
+import { MessageCircle } from "lucide-react";
 
 import { AvailabilityCardMessage } from "@/components/chat/availability-card-message";
 import { ScheduleShareCardMessage } from "@/components/chat/schedule-share-card-message";
@@ -162,8 +163,14 @@ export default async function ConnectionPage({
 
       <ChatScrollContainer messageCount={messages.length}>
         {messages.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/80 text-muted-foreground/70">
+              <MessageCircle className="h-5 w-5" strokeWidth={2} aria-hidden />
+            </span>
             <p className="text-sm font-medium text-foreground">{ui.chat.noMessagesYet}</p>
+            <p className="max-w-[14rem] text-xs leading-relaxed text-muted-foreground">
+              {isAssistantChat ? ui.assistant.composerPlaceholder : ui.chat.placeholderWrite}
+            </p>
           </div>
         ) : (
           <div className="space-y-3 pb-2">
@@ -434,7 +441,7 @@ export default async function ConnectionPage({
         )}
       </ChatScrollContainer>
 
-      <div className="shrink-0 border-t border-border/80 bg-background/95 px-3 pt-2 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
+      <div className="shrink-0 border-t border-border/60 bg-background/95 px-3 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_24px_rgba(15,23,42,0.05)] backdrop-blur-sm dark:bg-background/90 dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]">
         {isAssistantChat ? (
           <AssistantQuickReplies connectionId={connection.id} className="mb-2" />
         ) : null}

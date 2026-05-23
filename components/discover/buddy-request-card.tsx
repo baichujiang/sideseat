@@ -12,7 +12,7 @@ import { DiscoverMessageButton } from "@/components/discover/discover-message-bu
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { buddyRequestAvailabilityValue, buddyRequestStatusLabel } from "@/lib/discover/buddy-request-detail-meta";
 import { getBuddyRequestDisplayStatus } from "@/lib/discover/buddy-request-status";
-import { buddyTypeLabel } from "@/lib/discover/buddy-type-labels";
+import { buddyTypeLabel, shouldShowBuddyCategoryLabel } from "@/lib/discover/buddy-type-labels";
 import { formatMealsVenueLine, formatStudyVenueLine } from "@/lib/discover/format-post-venue-line";
 import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
 import { studyTimeSlotLabel } from "@/lib/discover/study-meta-labels";
@@ -102,7 +102,9 @@ export function BuddyRequestCard({
   const detailHref =
     `/discover/posts/${post.id}?returnTo=${encodeURIComponent(returnTo)}` as Route;
   const images = displayableClassmatePostImageUrls(post.imageUrls);
-  const typeLabel = buddyTypeLabel(post.category, buddy);
+  const typeLabel = shouldShowBuddyCategoryLabel(post.category)
+    ? buddyTypeLabel(post.category, buddy)
+    : "";
   const timeLine = buddyTimeLine(post, dl, buddy);
   const locLine = buddyLocationLine(post, dl, cityLabel, buddy);
   const displayStatus = getBuddyRequestDisplayStatus({
@@ -160,7 +162,7 @@ export function BuddyRequestCard({
       )}
 
       <div className="space-y-1.5 p-2.5">
-        {images.length > 0 ? (
+        {images.length > 0 && shouldShowBuddyCategoryLabel(post.category) && typeLabel.trim() ? (
           <span className="inline-flex max-w-full rounded-full bg-muted/80 px-2 py-0.5 text-[10px] font-semibold text-foreground/90">
             {typeLabel}
           </span>
