@@ -1,5 +1,7 @@
 "use client";
 
+import { useCallback, useRef } from "react";
+
 import {
   WEEK_CALENDAR_VISIBLE_DAY_MAX,
   WEEK_CALENDAR_VISIBLE_DAY_MIN,
@@ -33,6 +35,66 @@ export function WeekVisibleDaysBar({
     (safeValue - WEEK_CALENDAR_VISIBLE_DAY_MIN) /
     (WEEK_CALENDAR_VISIBLE_DAY_MAX - WEEK_CALENDAR_VISIBLE_DAY_MIN);
 
+  const trackRef = useRef<HTMLDivElement>(null);
+  const draggingRef = useRef(false);
+
+  const valueFromClientX = useCallback((clientX: number) => {
+    const track = trackRef.current;
+    if (!track) return safeValue;
+    const rect = track.getBoundingClientRect();
+    const innerWidth = Math.max(1, rect.width);
+    const x = clientX - rect.left;
+    const ratio = Math.max(0, Math.min(1, x / innerWidth));
+    const raw =
+      WEEK_CALENDAR_VISIBLE_DAY_MIN +
+      ratio * (WEEK_CALENDAR_VISIBLE_DAY_MAX - WEEK_CALENDAR_VISIBLE_DAY_MIN);
+    return clampWeekCalendarVisibleDayCount(Math.round(raw));
+  }, [safeValue]);
+
+  const onPointerDown = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      draggingRef.current = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      onChange(valueFromClientX(event.clientX));
+    },
+    [onChange, valueFromClientX],
+  );
+
+  const onPointerMove = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (!draggingRef.current) return;
+      onChange(valueFromClientX(event.clientX));
+    },
+    [onChange, valueFromClientX],
+  );
+
+  const endDrag = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    draggingRef.current = false;
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      /* capture may already be released */
+    }
+  }, []);
+
+  const onKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+        event.preventDefault();
+        onChange(clampWeekCalendarVisibleDayCount(safeValue - 1));
+      } else if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+        event.preventDefault();
+        onChange(clampWeekCalendarVisibleDayCount(safeValue + 1));
+      }
+    },
+    [onChange, safeValue],
+  );
+
+  const ariaLabel =
+    sch.visibleDaysAria ??
+    (loc === "zh-CN" ? "周视图显示天数" : "Visible days in week calendar");
+
   return (
     <div
       className={cn(
@@ -42,38 +104,29 @@ export function WeekVisibleDaysBar({
     >
       <div className="relative h-9 px-[2.125rem]">
         <div
-          className="pointer-events-none absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-blue-100 dark:bg-blue-950/40"
-          aria-hidden
-        />
-        <div className="relative h-full w-full">
-          <input
-            type="range"
-            min={WEEK_CALENDAR_VISIBLE_DAY_MIN}
-            max={WEEK_CALENDAR_VISIBLE_DAY_MAX}
-            step={1}
-            value={safeValue}
-            aria-label={
-              sch.visibleDaysAria ??
-              (loc === "zh-CN" ? "周视图显示天数" : "Visible days in week calendar")
-            }
-            aria-valuetext={valueText}
-            onChange={(event) => {
-              onChange(clampWeekCalendarVisibleDayCount(Number(event.target.value)));
-            }}
-            className={cn(
-              "absolute inset-0 z-20 m-0 h-full w-full cursor-grab touch-none appearance-none bg-transparent",
-              "active:cursor-grabbing",
-              "[&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full",
-              "[&::-webkit-slider-runnable-track]:bg-transparent",
-              "[&::-webkit-slider-thumb]:appearance-none",
-              "[&::-webkit-slider-thumb]:h-9 [&::-webkit-slider-thumb]:w-[4.25rem]",
-              "[&::-webkit-slider-thumb]:-mt-[calc(1.125rem-0.1875rem)]",
-              "[&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:opacity-0",
-              "[&::-moz-range-track]:h-1.5 [&::-moz-range-track]:rounded-full",
-              "[&::-moz-range-track]:bg-transparent",
-              "[&::-moz-range-thumb]:h-9 [&::-moz-range-thumb]:w-[4.25rem]",
-              "[&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:opacity-0",
-            )}
+          ref={trackRef}
+          role="slider"
+          tabIndex={0}
+          aria-label={ariaLabel}
+          aria-valuemin={WEEK_CALENDAR_VISIBLE_DAY_MIN}
+          aria-valuemax={WEEK_CALENDAR_VISIBLE_DAY_MAX}
+          aria-valuenow={safeValue}
+          aria-valuetext={valueText}
+          className={cn(
+            "relative h-full w-full select-none touch-none",
+            "cursor-grab outline-none active:cursor-grabbing",
+            "[-webkit-touch-callout:none]",
+          )}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          onContextMenu={(event) => event.preventDefault()}
+          onKeyDown={onKeyDown}
+        >
+          <div
+            className="pointer-events-none absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-blue-100 dark:bg-blue-950/40"
+            aria-hidden
           />
           <div
             className="pointer-events-none absolute top-1/2 z-10 -translate-y-1/2"

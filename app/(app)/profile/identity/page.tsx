@@ -33,6 +33,7 @@ export default async function ProfileIdentityPage() {
         initialAvatarUrl={user.avatarUrl}
         initialBio={user.bio}
         initialNickname={user.nickname}
+        loginUsername={user.username}
       />
     </div>
   );

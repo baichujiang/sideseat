@@ -1,7 +1,6 @@
 import type { Route } from "next";
 import Link from "next/link";
 
-import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { RecommendedClassmatesRail } from "@/components/classmates/recommended-classmates-rail";
 import { CoursesSchoolSelect } from "@/components/courses/courses-school-select";
 import { inboxChatListUlClassName } from "@/components/inbox/inbox-conversation-tile";
@@ -229,18 +228,11 @@ export default async function CoursesPage({
             <PopularCoursesSearchBar selectedSchool={selectedSchool} query={rawCourseQuery} courses={c} />
             <PopularCoursesMeta subtitle={popularSourceLabel} count={popularRows.length} courses={c} />
             <CourseRowsList rows={popularRows} query={rawCourseQuery} emptyText={c.emptyNoCourses} courses={c} />
-            <GuestAppCta
-              returnTo="/courses"
-              headline={c.guestManageHeadline}
-              body={c.guestManageBodyPopular}
-            />
           </>
         ) : (
-          <GuestAppCta
-            returnTo={coursesTabHref(activeTab, selectedSchool, rawCourseQuery)}
-            headline={c.guestManageHeadline}
-            body={c.guestManageBodyBookmarksTabs}
-          />
+          <p className="rounded-2xl border border-dashed border-border/70 bg-muted/20 px-4 py-6 text-center text-[14px] text-muted-foreground">
+            {c.guestManageBodyBookmarksTabs}
+          </p>
         )}
       </div>
     );

@@ -24,9 +24,20 @@
     "sync:lmu-lsf-catalog": "tsx scripts/sync-lmu-lsf-catalog.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "seed:test-accounts": "tsx scripts/seed-test-accounts.ts",
+    "cap:sync": "cap sync ios",
+    "cap:open:ios": "cap open ios",
+    "cap:run:ios": "cap run ios",
+    "ios:dev": "CAPACITOR_SERVER_URL=http://localhost:3000 cap sync ios && cap open ios"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
+    "@capacitor/ios": "^8.3.4",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
     "@hookform/resolvers": "^3.9.0",
     "@prisma/client": "^5.18.0",
     "@radix-ui/react-popover": "^1.1.15",

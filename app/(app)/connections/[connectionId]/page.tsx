@@ -5,6 +5,8 @@ import { enUS, zhCN } from "date-fns/locale";
 
 import { AvailabilityCardMessage } from "@/components/chat/availability-card-message";
 import { ScheduleShareCardMessage } from "@/components/chat/schedule-share-card-message";
+import { AssistantMessageBody } from "@/components/chat/assistant-message-body";
+import { AssistantQuickReplies } from "@/components/chat/assistant-quick-replies";
 import { ChatComposer } from "@/components/chat/chat-composer";
 import { ChatReplyProvider } from "@/components/chat/chat-reply-context";
 import { ChatRealtimeRefresh } from "@/components/chat/chat-realtime-refresh";
@@ -17,6 +19,8 @@ import {
 } from "@/components/chat/plan-request-card-message";
 import { BackLink } from "@/components/nav/back-link";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
+import { isAssistantBotUser } from "@/lib/auth/assistant-bot";
+import { displayUserMessageBody } from "@/lib/assistant/display-user-message";
 import { requireConnection } from "@/lib/auth/guards";
 import { directMessageActionSnippet } from "@/lib/chat/direct-message-preview";
 import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
@@ -56,6 +60,7 @@ export default async function ConnectionPage({
   const dfLocale = locale === "zh-CN" ? zhCN : enUS;
   const isSelfNotes = connection.userAId === connection.userBId;
   const otherUser = connection.userAId === user.id ? connection.userB : connection.userA;
+  const isAssistantChat = !isSelfNotes && isAssistantBotUser(otherUser);
 
   const courseName = connection.invitation?.course?.name ?? null;
   const myRemark = contactRemarkForViewer(connection, user.id);
@@ -76,9 +81,11 @@ export default async function ConnectionPage({
   );
   const threadSearchEntries = indexConnectionMessagesForSearch(messages);
   const latestMessageId = messages.at(-1)?.id ?? null;
-  const profileLinkHref = isSelfNotes
-    ? (`/profile?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route)
-    : (`/users/${otherUser.id}?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route);
+  const profileLinkHref = isAssistantChat
+    ? null
+    : isSelfNotes
+      ? (`/profile?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route)
+      : (`/users/${otherUser.id}?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route);
   const peerHref = profileLinkHref;
 
   return (
@@ -93,26 +100,37 @@ export default async function ConnectionPage({
       <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
         <BackLink returnTo={query.returnTo} fallback="/inbox" label={ui.chat.back} />
         <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl py-1 pl-1 pr-2">
-          <Link
-            href={profileLinkHref}
-            className="shrink-0 rounded-full transition hover:opacity-90 active:opacity-80"
-            aria-label={
-              isSelfNotes
-                ? ui.chat.openYourProfileAria
-                : formatMessage(ui.chat.openPeerProfileAria, {
-                    name: peerNickname || otherUser.username,
-                  })
-            }
-          >
-            <PresetAvatar id={otherUser.avatarUrl} size={40} className="shrink-0" />
-          </Link>
-          <div className="min-w-0 flex-1">
+          {profileLinkHref ? (
             <Link
               href={profileLinkHref}
-              className="min-w-0 rounded-md py-0.5 text-left transition hover:bg-muted/70 active:bg-muted"
+              className="shrink-0 rounded-full transition hover:opacity-90 active:opacity-80"
+              aria-label={
+                isSelfNotes
+                  ? ui.chat.openYourProfileAria
+                  : formatMessage(ui.chat.openPeerProfileAria, {
+                      name: peerNickname || otherUser.username,
+                    })
+              }
             >
-              <p className="truncate text-sm font-semibold leading-tight">{headerTitle}</p>
+              <PresetAvatar id={otherUser.avatarUrl} size={40} className="shrink-0" />
             </Link>
+          ) : (
+            <PresetAvatar id={otherUser.avatarUrl} size={40} className="shrink-0" />
+          )}
+          <div className="min-w-0 flex-1">
+            {profileLinkHref ? (
+              <Link
+                href={profileLinkHref}
+                className="min-w-0 rounded-md py-0.5 text-left transition hover:bg-muted/70 active:bg-muted"
+              >
+                <p className="truncate text-sm font-semibold leading-tight">{headerTitle}</p>
+              </Link>
+            ) : (
+              <p className="truncate text-sm font-semibold leading-tight">{headerTitle}</p>
+            )}
+            {isAssistantChat ? (
+              <p className="truncate text-[11px] text-muted-foreground">{ui.assistant.headerSubtitle}</p>
+            ) : null}
             {showSelfBaseLine ? (
               <p className="truncate text-[11px] text-muted-foreground">{selfBaseLabel}</p>
             ) : null}
@@ -122,10 +140,15 @@ export default async function ConnectionPage({
             {showPeerUsernameLine ? (
               <p className="truncate text-[11px] text-muted-foreground">@{otherUser.username}</p>
             ) : null}
-            {!isSelfNotes && courseName ? (
+            {!isAssistantChat && !isSelfNotes && courseName ? (
               <p className="truncate text-[11px] text-muted-foreground">{courseName}</p>
             ) : null}
           </div>
+          {isAssistantChat ? (
+            <span className="shrink-0 rounded-full bg-classmates-azure/10 px-2 py-0.5 text-[10px] font-semibold text-classmates-azure dark:bg-sky-900/30 dark:text-sky-300">
+              {ui.assistant.officialBadge}
+            </span>
+          ) : null}
         </div>
       </header>
 
@@ -259,6 +282,7 @@ export default async function ConnectionPage({
               }
 
               const isOwn = message.senderId === user.id;
+              const fromAssistant = isAssistantBotUser(message.sender);
               const actionSnippet = directMessageActionSnippet({
                 type: message.type,
                 body: message.body,
@@ -281,7 +305,10 @@ export default async function ConnectionPage({
                         name: message.locationName,
                         caption: message.body,
                       }
-                    : { kind: "text" as const, body: message.body };
+                    : {
+                        kind: "text" as const,
+                        body: isOwn ? displayUserMessageBody(message.body, locale) : message.body,
+                      };
 
               const bareImageChrome =
                 message.deletedAt == null &&
@@ -298,15 +325,19 @@ export default async function ConnectionPage({
                     )}
                   >
                     {!isOwn ? (
-                      <Link
-                        href={peerHref}
-                        className="mt-0.5 shrink-0 self-end rounded-full transition hover:opacity-90 active:opacity-80"
-                        aria-label={formatMessage(ui.chat.openPeerProfileAria, {
-                          name: otherUser.nickname?.trim() || ui.common.studentFallback,
-                        })}
-                      >
-                        <PresetAvatar id={message.sender.avatarUrl} size={32} />
-                      </Link>
+                      peerHref ? (
+                        <Link
+                          href={peerHref}
+                          className="mt-0.5 shrink-0 self-end rounded-full transition hover:opacity-90 active:opacity-80"
+                          aria-label={formatMessage(ui.chat.openPeerProfileAria, {
+                            name: otherUser.nickname?.trim() || ui.common.studentFallback,
+                          })}
+                        >
+                          <PresetAvatar id={message.sender.avatarUrl} size={32} />
+                        </Link>
+                      ) : (
+                        <PresetAvatar id={message.sender.avatarUrl} size={32} className="mt-0.5 shrink-0 self-end" />
+                      )
                     ) : null}
                     {isOwn ? (
                       <MessageActionMenu
@@ -344,25 +375,29 @@ export default async function ConnectionPage({
                               ),
                         )}
                       >
-                        <MessageBubbleContent
-                          isOwn={isOwn}
-                          surface={bareImageChrome ? "bareMedia" : "inBubble"}
-                          payload={bubblePayload}
-                          deleted={message.deletedAt != null}
-                          reply={
-                            message.replyTo
-                              ? {
-                                  senderName: message.replyTo.sender?.nickname ?? null,
-                                  body: directMessageActionSnippet({
-                                    type: message.replyTo.type,
-                                    body: message.replyTo.body,
-                                    locationName: message.replyTo.locationName,
-                                  }),
-                                  deleted: message.replyTo.deletedAt != null,
-                                }
-                              : null
-                          }
-                        />
+                        {fromAssistant && bubblePayload.kind === "text" && message.deletedAt == null ? (
+                          <AssistantMessageBody rawBody={bubblePayload.body} />
+                        ) : (
+                          <MessageBubbleContent
+                            isOwn={isOwn}
+                            surface={bareImageChrome ? "bareMedia" : "inBubble"}
+                            payload={bubblePayload}
+                            deleted={message.deletedAt != null}
+                            reply={
+                              message.replyTo
+                                ? {
+                                    senderName: message.replyTo.sender?.nickname ?? null,
+                                    body: directMessageActionSnippet({
+                                      type: message.replyTo.type,
+                                      body: message.replyTo.body,
+                                      locationName: message.replyTo.locationName,
+                                    }),
+                                    deleted: message.replyTo.deletedAt != null,
+                                  }
+                                : null
+                            }
+                          />
+                        )}
                       </div>
                       <time
                         className={cn(
@@ -400,11 +435,15 @@ export default async function ConnectionPage({
       </ChatScrollContainer>
 
       <div className="shrink-0 border-t border-border/80 bg-background/95 px-3 pt-2 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
+        {isAssistantChat ? (
+          <AssistantQuickReplies connectionId={connection.id} className="mb-2" />
+        ) : null}
         <ChatComposer
           connectionId={connection.id}
           peerName={otherUser.nickname ?? "Student"}
-          hideAttachments={isSelfNotes}
+          hideAttachments={isSelfNotes || isAssistantChat}
           threadSearchEntries={threadSearchEntries}
+          placeholder={isAssistantChat ? ui.assistant.composerPlaceholder : undefined}
         />
       </div>
     </div>

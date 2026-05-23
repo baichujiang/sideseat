@@ -6,8 +6,10 @@ import { format } from "date-fns";
 import { enUS, zhCN } from "date-fns/locale";
 
 import { useLocaleContext } from "@/components/i18n/locale-provider";
+import { LinkButton } from "@/components/ui/link-button";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import type { AppMessages } from "@/lib/i18n/messages";
+import { withReturnTo } from "@/lib/nav/back";
 import { cn } from "@/lib/utils";
 
 /** Compact desk-calendar visual for Home (date also exposed via `aria-label`). */
@@ -64,43 +66,69 @@ export function HomeGreetingHeading({
   nickname,
   avatarUrl,
   nowDate,
+  guestReturnTo,
 }: {
   nickname: string | null;
   avatarUrl: string | null;
   nowDate: Date;
+  /** When set, show guest label + sign-in CTAs in the header (no profile avatar). */
+  guestReturnTo?: string;
 }) {
   const { messages } = useLocaleContext();
-  const name = nickname?.trim() || messages.common.studentFallback;
+  const isGuest = Boolean(guestReturnTo?.trim());
+  const name = isGuest
+    ? messages.home.guestDisplayName
+    : nickname?.trim() || messages.common.studentFallback;
   const greeting = greetingForHour(nowDate.getHours(), messages.home);
+  const loginHref = withReturnTo("/login", guestReturnTo ?? "/home") as Route;
+  const signupHref = withReturnTo("/signup", guestReturnTo ?? "/home") as Route;
 
   return (
-    <div className="flex min-w-0 flex-1 items-center justify-start gap-1.5">
-      <h1
-        className={cn(
-          "min-w-0 shrink truncate text-[20px] font-bold leading-tight tracking-tight text-[#111827]",
-          "dark:text-foreground",
-        )}
-      >
-        {greeting}, {name}
-      </h1>
-      <Link
-        href={"/profile" as Route}
-        aria-label={messages.home.openProfileAria}
-        className={cn(
-          "shrink-0 rounded-full p-1 -m-1 touch-manipulation transition hover:opacity-90 active:opacity-85",
-          "inline-flex items-center justify-center",
-        )}
-      >
-        <span
+    <div className="min-w-0 flex-1 space-y-2">
+      <div className="flex min-w-0 items-center justify-start gap-1.5">
+        <h1
           className={cn(
-            "inline-flex h-14 w-14 items-center justify-center overflow-hidden rounded-full",
-            "border border-[#E7E0D6] bg-white shadow-[0_2px_8px_rgba(15,23,42,0.08)]",
-            "dark:border-border dark:bg-card dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]",
+            "min-w-0 truncate text-[20px] font-bold leading-tight tracking-tight text-[#111827]",
+            "dark:text-foreground",
+            isGuest && "text-classmates-blue dark:text-blue-400",
           )}
         >
-          <PresetAvatar id={avatarUrl} size={56} className="h-14 w-14" />
-        </span>
-      </Link>
+          {greeting}, {name}
+        </h1>
+        {!isGuest ? (
+          <Link
+            href={"/profile" as Route}
+            aria-label={messages.home.openProfileAria}
+            className={cn(
+              "shrink-0 rounded-full p-1 -m-1 touch-manipulation transition hover:opacity-90 active:opacity-85",
+              "inline-flex items-center justify-center",
+            )}
+          >
+            <span
+              className={cn(
+                "inline-flex h-14 w-14 items-center justify-center overflow-hidden rounded-full",
+                "border border-[#E7E0D6] bg-white shadow-[0_2px_8px_rgba(15,23,42,0.08)]",
+                "dark:border-border dark:bg-card dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]",
+              )}
+            >
+              <PresetAvatar id={avatarUrl} size={56} className="h-14 w-14" />
+            </span>
+          </Link>
+        ) : null}
+      </div>
+      {isGuest ? (
+        <>
+          <p className="text-[12px] leading-snug text-muted-foreground">{messages.home.guestBrowseHint}</p>
+          <div className="flex max-w-[280px] gap-2">
+            <LinkButton href={loginHref} variant="outline" size="sm" className="min-h-9 flex-1">
+              {messages.guest.logIn}
+            </LinkButton>
+            <LinkButton href={signupHref} size="sm" className="min-h-9 flex-1">
+              {messages.guest.createAccount}
+            </LinkButton>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }

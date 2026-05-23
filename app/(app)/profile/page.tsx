@@ -3,9 +3,7 @@ import type { Route } from "next";
 import { Bookmark, CalendarClock, ChevronRight, Settings, SquarePen } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-import { GuestAppCta } from "@/components/app/guest-app-cta";
-import { LogoutForm } from "@/components/auth/logout-form";
-import { StudentVerificationForm } from "@/components/forms/student-verification-form";
+import { MeGuestScreen } from "@/components/profile/me-guest-screen";
 import { MePageInstallCard } from "@/components/pwa/me-page-install-card";
 import {
   MePageSettingsRowLabel,
@@ -23,23 +21,18 @@ import {
   mePageRowInteractiveClass,
   mePageRowLeadClass,
 } from "@/components/profile/me-settings-row";
-import { ProfileIdentitySheets } from "@/components/profile/profile-identity-sheets";
+import { ProfileMeDisplayCard } from "@/components/profile/profile-me-display-card";
 import { MePageSection } from "@/components/profile/me-page-section";
 import { FeedbackFormCard } from "@/components/profile/feedback-form-card";
 import { PushNotificationsCard } from "@/components/profile/push-notifications-card";
 import { TipSupportCard } from "@/components/profile/tip-support-card";
-import { Button } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
 import { getSessionUser } from "@/lib/auth/session";
 import { isConfiguredAdmin } from "@/lib/constants/app";
 import { formatMessage, getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { DEGREE_LEVEL_LABELS } from "@/lib/constants/majors";
 import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
-import { profileLanguagesFormDefault } from "@/lib/constants/languages";
 import { prisma } from "@/lib/db/prisma";
-import { getServerDiscoverServedCity } from "@/lib/discover/discover-city-preference";
-
 function MeDestRow({
   href,
   icon: Icon,
@@ -80,64 +73,25 @@ export default async function ProfilePage({
   const tipsEnabled = Boolean(process.env.STRIPE_SECRET_KEY?.trim());
 
   if (!sessionUser) {
-    return (
-      <div className="space-y-3 pb-2">
-        <header className="px-0.5">
-          <h1 className="page-screen-title">{ui.me.guestScreenTitle}</h1>
-          <p className="page-screen-subtitle mt-0.5">{ui.me.guestScreenSubtitle}</p>
-        </header>
-        <GuestAppCta returnTo="/profile" headline={ui.guest.profileHeadline} body={ui.guest.profileBody} />
-      </div>
-    );
+    return <MeGuestScreen mode="anonymous" />;
   }
   const user = sessionUser;
 
   if (user.isGuest) {
     return (
-      <div className="space-y-6">
-        <Card className="space-y-3 border-dashed border-primary/30 bg-muted/30">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
-              G
-            </div>
-            <CardTitle className="text-base">{ui.me.guestSessionTitle}</CardTitle>
-          </div>
-          <form action="/api/auth/end-guest?to=signup" method="post">
-            <Button className="w-full" type="submit">
-              {ui.me.createAccount}
-            </Button>
-          </form>
-          <form action="/api/auth/end-guest?to=login" method="post">
-            <Button className="w-full" type="submit" variant="outline">
-              {ui.me.logInExisting}
-            </Button>
-          </form>
-        </Card>
-
-        <LogoutForm>
-          <Button className="w-full" type="submit" variant="ghost">
-            {ui.me.endGuestSession}
-          </Button>
-        </LogoutForm>
-      </div>
+      <MeGuestScreen
+        mode="guest-session"
+        guestNickname={user.nickname}
+        guestAvatarUrl={user.avatarUrl}
+      />
     );
   }
 
-  const [blockedCount, servedCity] = await Promise.all([
-    prisma.block.count({ where: { blockerId: user.id } }),
-    getServerDiscoverServedCity(),
-  ]);
+  const blockedCount = await prisma.block.count({ where: { blockerId: user.id } });
   const isAdmin = isConfiguredAdmin(user);
-
-  const profileForSheet = await prisma.user.findUnique({
-    where: { id: user.id },
-    include: { userLanguages: true },
-  });
 
   const schoolCode = normalizeSchoolCode(user.school) ?? DEFAULT_SCHOOL;
   const schoolShort = schoolOptions.find((s) => s.value === schoolCode)?.shortLabel ?? schoolCode;
-  const sheetProfileFormKey = `${user.id}-${user.updatedAt.getTime()}`;
-
   const settingsSubtitle =
     blockedCount === 0
       ? ui.profile.preferencesSubtitleNone
@@ -188,42 +142,18 @@ export default async function ProfilePage({
         </p>
       ) : null}
 
-      <ProfileIdentitySheets
-        variant="summary"
+      <ProfileMeDisplayCard
+        locale={locale}
+        nickname={user.nickname}
+        bio={user.bio}
+        avatarUrl={user.avatarUrl}
         gender={user.gender}
-        sheetProfileFormKey={sheetProfileFormKey}
-        sheetProfileInitialValues={{
-              nickname: user.nickname ?? "",
-              gender: user.gender,
-              school: schoolCode,
-              degreeLevel: user.degreeLevel ?? "BACHELOR",
-              major: user.major ?? "",
-              semester: user.semester ?? 1,
-              languages: profileLanguagesFormDefault(profileForSheet?.userLanguages ?? []),
-              bio: user.bio ?? "",
-              wechatHandle: user.wechatHandle ?? "",
-              whatsappHandle: user.whatsappHandle ?? "",
-              telegramHandle: user.telegramHandle ?? "",
-              instagramHandle: user.instagramHandle ?? "",
-              discoverByCourse: user.discoverByCourse,
-              discoverByMajor: user.discoverByMajor,
-              discoverBySemester: user.discoverBySemester,
-              allowInvitationNotes: user.allowInvitationNotes,
-              contactInfoOptIn: user.contactInfoOptIn,
-              hideFromCourseMembers: user.hideFromCourseMembers,
-              hideFromDiscovery: user.hideFromDiscovery,
-              hideFromRecommendations: user.hideFromRecommendations,
-            }}
-            schoolSummary={{
-              schoolShort,
-              degreeLabel: DEGREE_LEVEL_LABELS[user.degreeLevel ?? "BACHELOR"],
-              major: user.major?.trim() ?? "",
-              semester: user.semester ?? 1,
-            }}
-            initialAvatarUrl={user.avatarUrl}
-            initialBio={user.bio}
-        initialNickname={user.nickname}
-        discoverCity={servedCity}
+        schoolSummary={{
+          schoolShort,
+          degreeLabel: DEGREE_LEVEL_LABELS[user.degreeLevel ?? "BACHELOR"],
+          major: user.major?.trim() ?? "",
+          semester: user.semester ?? 1,
+        }}
       />
 
       <div className={mePageCardClass}>
@@ -254,17 +184,6 @@ export default async function ProfilePage({
           />
         </div>
       </div>
-
-      <MePageSection id="me-verification-heading" title={ui.me.verificationSectionTitle}>
-        <StudentVerificationForm
-            currentStatus={user.studentVerificationStatus}
-            schoolCode={schoolCode}
-            schoolShortLabel={schoolShort}
-            notes={user.studentVerificationNotes}
-            email={user.email}
-            hasProofUploaded={Boolean(user.manualReviewProofUrl)}
-          />
-      </MePageSection>
 
       <MePageSection id="me-push-heading" density="compact">
         <PushNotificationsCard />

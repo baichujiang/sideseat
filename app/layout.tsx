@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 
 import "./globals.css";
 import { AuthBootstrap } from "@/components/auth/auth-bootstrap";
+import { CapacitorBootstrap } from "@/components/capacitor/capacitor-bootstrap";
+import { SignInPromptProvider } from "@/components/auth/sign-in-prompt-dialog";
 import { LocaleProvider } from "@/components/i18n/locale-provider";
 import { PwaRegister } from "@/components/pwa/pwa-register";
 import { APP_NAME } from "@/lib/constants/app";
@@ -61,9 +63,12 @@ export default async function RootLayout({
     <html lang={htmlLang} className={inter.variable} suppressHydrationWarning>
       <body className="min-h-dvh bg-transparent font-sans text-[15px] leading-relaxed antialiased text-foreground">
         <LocaleProvider initialLocale={locale}>
-          {children}
-          <AuthBootstrap />
-          <PwaRegister />
+          <SignInPromptProvider>
+            {children}
+            <CapacitorBootstrap />
+            <AuthBootstrap />
+            <PwaRegister />
+          </SignInPromptProvider>
         </LocaleProvider>
       </body>
     </html>

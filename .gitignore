@@ -13,3 +13,10 @@ playwright-report
 test-results
 .playwright
 .local-postgres/
+
+# Capacitor / Xcode
+.capacitor/
+ios/App/Pods/
+ios/App/build/
+ios/DerivedData/
+*.xcuserstate

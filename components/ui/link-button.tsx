@@ -12,14 +12,19 @@ type Props = {
   href: NextLinkHref | string;
   className?: string;
   children: ReactNode;
+  onClick?: ComponentProps<typeof Link>["onClick"];
 } & VariantProps<typeof buttonVariants>;
 
 /**
  * Renders a Next.js Link styled as a Button (valid `<a>`, no nested `<button>`).
  */
-export function LinkButton({ href, className, variant, size, children }: Props) {
+export function LinkButton({ href, className, variant, size, children, onClick }: Props) {
   return (
-    <Link href={href as NextLinkHref} className={cn(buttonVariants({ variant, size }), className)}>
+    <Link
+      href={href as NextLinkHref}
+      className={cn(buttonVariants({ variant, size }), className)}
+      onClick={onClick}
+    >
       {children}
     </Link>
   );

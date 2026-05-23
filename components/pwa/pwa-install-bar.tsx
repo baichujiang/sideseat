@@ -18,6 +18,7 @@ import {
   copyInstallPageUrl,
   openIosShareForInstall,
 } from "@/lib/pwa/ios-share-for-install";
+import { useCapacitorNative } from "@/hooks/use-capacitor-native";
 import { isIosDevice, isStandalonePwa } from "@/lib/pwa/pwa-environment";
 import { cn } from "@/lib/utils";
 
@@ -54,6 +55,7 @@ function writeDismissUntil(ts: number) {
  * iOS: one “Add to Home Screen” action — tries Web Share (multiple payloads), then copies the page link if Share is unavailable or fails.
  */
 export function PwaInstallBar({ className }: { className?: string }) {
+  const isNativeApp = useCapacitorNative();
   const i = useAppMessages().meInstall;
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
@@ -214,7 +216,7 @@ export function PwaInstallBar({ className }: { className?: string }) {
   }, [mounted, dismissedUntil, engaged, refresh]);
 
   if (!mounted) return null;
-  if (isStandalonePwa()) return null;
+  if (isNativeApp || isStandalonePwa()) return null;
 
   const deferred = getDeferredInstallPrompt();
   const showChromium = deferred !== null;
@@ -230,7 +232,7 @@ export function PwaInstallBar({ className }: { className?: string }) {
     <div
       className={cn(
         "pointer-events-auto fixed inset-x-0 z-[21] flex justify-center pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]",
-        "bottom-[calc(5.75rem+env(safe-area-inset-bottom))]",
+        "bottom-[calc(5.75rem+var(--safe-bottom))]",
         className,
       )}
     >

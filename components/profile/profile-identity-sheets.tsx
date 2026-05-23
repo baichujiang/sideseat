@@ -25,6 +25,7 @@ import { mePageCardClass } from "@/components/profile/me-settings-row";
 import type { DiscoverCityNameKey } from "@/lib/discover/discover-city-name-keys";
 import { cn } from "@/lib/utils";
 import { formatMessage } from "@/lib/i18n/messages";
+import { mapNicknameApiError } from "@/lib/profile/nickname-api-errors";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { homeProfileQuickSchema, profileSchema } from "@/lib/validators/profile";
 
@@ -89,6 +90,8 @@ export function ProfileIdentitySheets({
   sheetProfileFormKey,
   belowDisplayName,
   discoverCity,
+  /** ASCII handle for sign-in — shown on Me card and name sheet. */
+  loginUsername,
 }: {
   initialNickname: string | null;
   initialBio: string | null;
@@ -102,6 +105,7 @@ export function ProfileIdentitySheets({
   /** Me /profile summary only — e.g. private self-chat title under the display name. */
   belowDisplayName?: ReactNode;
   discoverCity?: DiscoverCityNameKey;
+  loginUsername?: string | null;
 }) {
   const t = useAppMessages().meIdentity;
   const crop = useAppMessages().meAvatarCrop;
@@ -161,7 +165,13 @@ export function ProfileIdentitySheets({
     });
     const payload = await res.json().catch(() => ({}));
     if (!res.ok || !payload.success) {
-      throw new Error(typeof payload.error === "string" ? payload.error : t.errorCouldNotSave);
+      throw new Error(
+        mapNicknameApiError(
+          payload,
+          { taken: t.errorNicknameTaken, reserved: t.errorNicknameReserved },
+          typeof payload.error === "string" ? payload.error : t.errorCouldNotSave,
+        ),
+      );
     }
     router.refresh();
   }, [router, t]);
@@ -304,6 +314,11 @@ export function ProfileIdentitySheets({
   };
 
   const displayName = nickname.trim() || t.displayNamePlaceholder;
+  const loginUsernameTrimmed = loginUsername?.trim() ?? "";
+  const loginUsernameCardLine = loginUsernameTrimmed
+    ? formatMessage(t.loginUsernameOnCard, { username: loginUsernameTrimmed })
+    : null;
+  const loginUsernameNameHint = loginUsernameTrimmed ? t.loginUsernameNameSheetHint : null;
   const bioDisplay = bio.trim() ? bio.trim() : t.taglineEmpty;
   const schoolLine = schoolSummary ? buildSchoolSubtitle(schoolSummary, t.schoolLineSemester) : null;
   const isCropOpen = avatarCropFile !== null;
@@ -397,6 +412,11 @@ export function ProfileIdentitySheets({
               <p className="page-screen-title-ink max-w-[18rem] truncate sm:max-w-md">{displayName}</p>
               {gender ? <UserGenderProfileMark gender={gender} iconClassName="h-5 w-5" /> : null}
             </div>
+            {loginUsernameCardLine ? (
+              <p className="mt-1.5 max-w-md truncate px-1 font-mono text-[13px] font-medium tabular-nums text-classmates-sub dark:text-zinc-400">
+                {loginUsernameCardLine}
+              </p>
+            ) : null}
             {schoolLine ? (
               <p className="mt-2 max-w-md px-1 text-[14px] font-medium leading-snug text-classmates-sub dark:text-zinc-400">
                 {schoolLine}
@@ -693,6 +713,9 @@ export function ProfileIdentitySheets({
                     className="h-12 rounded-[20px] border-border bg-muted/40 text-[15px] focus-visible:border-[#ff2442] focus-visible:ring-[#ff2442]/25"
                   />
                   <p className="mt-2 text-right text-[11px] text-muted-foreground tabular-nums">{draftName.length}/32</p>
+                  {loginUsernameNameHint ? (
+                    <p className="mt-3 text-[12px] leading-snug text-muted-foreground">{loginUsernameNameHint}</p>
+                  ) : null}
                   {error ? <p className="mt-2 text-[12px] text-destructive">{error}</p> : null}
                 </div>
                 <div className="border-t border-border px-3 pt-2">

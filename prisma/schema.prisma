@@ -287,6 +287,8 @@ model User {
   isGuest                      Boolean                  @default(false)
   hashedPassword               String
   nickname                     String?
+  /// Lowercase trimmed nickname for uniqueness (null for guests).
+  nicknameKey                  String?                  @unique
   gender                       UserGender               @default(PRIVATE)
   school                       String?
   degreeLevel                  DegreeLevel?

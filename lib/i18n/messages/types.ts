@@ -46,6 +46,8 @@ export type AppMessages = {
     inboxBody: string;
     profileHeadline: string;
     profileBody: string;
+    signInPromptTitle: string;
+    signInPromptBody: string;
   };
   onboarding: {
     genericTitle: string;
@@ -65,6 +67,8 @@ export type AppMessages = {
     greetingMorning: string;
     greetingAfternoon: string;
     greetingEvening: string;
+    guestDisplayName: string;
+    guestBrowseHint: string;
     openProfileAria: string;
   };
   discover: {
@@ -346,6 +350,11 @@ export type AppMessages = {
     screenSubtitleGuest: string;
     guestHeadline: string;
     guestBody: string;
+    dbUnavailableTitle: string;
+    dbUnavailableBody: string;
+    sessionBootstrapFailed: string;
+    sessionBootstrapHint: string;
+    retryBootstrap: string;
     onboardingTitle: string;
     onboardingBody: string;
     chipNew: string;
@@ -427,6 +436,11 @@ export type AppMessages = {
     guestScreenTitle: string;
     guestScreenSubtitle: string;
     guestSessionTitle: string;
+    guestHeroBadge: string;
+    guestUnlockSection: string;
+    guestLockedLabel: string;
+    guestPreviewIdentitySubtitle: string;
+    guestPreviewVerificationSubtitle: string;
     createAccount: string;
     logInExisting: string;
     endGuestSession: string;
@@ -488,6 +502,44 @@ export type AppMessages = {
     searchThreadHint: string;
     searchThreadCloseAria: string;
   };
+  /** SideSeat Assistant DM (FAQ + quick chips). */
+  assistant: {
+    officialBadge: string;
+    headerSubtitle: string;
+    composerPlaceholder: string;
+    chipsAria: string;
+    chips: {
+      gettingStarted: string;
+      discover: string;
+      verification: string;
+      guestSignup: string;
+      schedule: string;
+      inbox: string;
+    };
+    faqLinks: {
+      home: string;
+      discover: string;
+      inbox: string;
+      courses: string;
+      profile: string;
+      profileInfo: string;
+      verification: string;
+      signup: string;
+      login: string;
+      account: string;
+    };
+    faq: {
+      gettingStartedBody: string;
+      discoverBody: string;
+      verificationBody: string;
+      verificationDoneBody: string;
+      guestSignupBody: string;
+      guestSignupRegisteredBody: string;
+      scheduleBody: string;
+      inboxBody: string;
+      fallbackBody: string;
+    };
+  };
   auth: {
     forgotPassword: string;
     signUpLink: string;
@@ -504,8 +556,16 @@ export type AppMessages = {
     signupDisplayNameTooShort: string;
     signupDisplayNameTooLong: string;
     signupDisplayNameNotEmail: string;
+    signupDisplayNameHint: string;
+    signupDisplayNameTaken: string;
+    signupDisplayNameReserved: string;
     usernameLabel: string;
     usernamePlaceholder: string;
+    usernameHint: string;
+    signupUsernameTooShort: string;
+    signupUsernameTooLong: string;
+    signupUsernameInvalid: string;
+    signupUsernameReserved: string;
     emailLabel: string;
     emailPlaceholder: string;
     phoneLabel: string;
@@ -547,6 +607,9 @@ export type AppMessages = {
       dbUnavailable: string;
       codeInvalid: string;
       emailAlreadyRegistered: string;
+      usernameTaken: string;
+      displayNameTaken: string;
+      displayNameReserved: string;
       invalidRequest: string;
       unknown: string;
     };
@@ -666,6 +729,20 @@ export type AppMessages = {
     sendPlanInviteOpening: string;
     sendPlanInviteFailed: string;
     sendPlanInviteNetwork: string;
+    naturalScheduleAria: string;
+    naturalSheetTitle: string;
+    naturalSheetCloseAria: string;
+    naturalSheetHint: string;
+    naturalInputPlaceholder: string;
+    naturalParseCta: string;
+    naturalParsing: string;
+    naturalParseError: string;
+    naturalParseEmpty: string;
+    /** `{count}` */
+    naturalPreviewCount: string;
+    naturalConfirmCta: string;
+    naturalSaving: string;
+    naturalSaveError: string;
   };
   /** Schedule Share — Home share link + public viewer + proposals */
   scheduleShare: {
@@ -828,6 +905,24 @@ export type AppMessages = {
         currentInvalid: string;
         sameAsCurrent: string;
         invalidRequest: string;
+        networkError: string;
+        unknown: string;
+        saved: string;
+      };
+    };
+    loginUsername: {
+      title: string;
+      hint: string;
+      hintSystem: string;
+      currentLabel: string;
+      newLabel: string;
+      newPlaceholder: string;
+      save: string;
+      saving: string;
+      enterUsername: string;
+      errors: {
+        invalidRequest: string;
+        usernameTaken: string;
         networkError: string;
         unknown: string;
         saved: string;
@@ -1029,6 +1124,10 @@ export type AppMessages = {
     rowPhoto: string;
     rowName: string;
     rowBio: string;
+    rowGender: string;
+    rowSchool: string;
+    rowLanguages: string;
+    profileInfoNavAria: string;
     backAria: string;
     adjustPhotoTitle: string;
     adjustPhotoHint: string;
@@ -1038,6 +1137,10 @@ export type AppMessages = {
     usingUploadedPhoto: string;
     tapAvatarHint: string;
     displayNameLabel: string;
+    /** `{username}` — ASCII login handle. */
+    loginUsernameOnCard: string;
+    /** Shown when editing display name — points to account settings. */
+    loginUsernameNameSheetHint: string;
     nameFieldPlaceholder: string;
     bioSectionLabel: string;
     bioFieldPlaceholder: string;
@@ -1051,6 +1154,8 @@ export type AppMessages = {
     avatarPresetAria: string;
     errorCouldNotSave: string;
     errorInvalidName: string;
+    errorNicknameTaken: string;
+    errorNicknameReserved: string;
     errorInvalidBio: string;
     errorChoosePhoto: string;
     errorCouldNotUpload: string;
@@ -1142,6 +1247,8 @@ export type AppMessages = {
     homeProfileHeading: string;
     homeProfileBlurb: string;
     nicknamePlaceholder: string;
+    nicknameTaken: string;
+    nicknameReserved: string;
     taglinePlaceholderLong: string;
     unableToSave: string;
     saving: string;
@@ -1176,6 +1283,11 @@ export type AppMessages = {
     hintSaveFailed: string;
     hintEnableFailed: string;
     hintDisableFailed: string;
+    /** Capacitor iOS/Android — system notification settings (not Web Push). */
+    nativeSubtitle: string;
+    nativeBody: string;
+    nativeDataSync: string;
+    nativeOpenSettings: string;
   };
   tip: {
     /** Standalone card label above the headline. */

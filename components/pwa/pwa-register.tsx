@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { PwaUpdatePrompt } from "@/components/pwa/pwa-update-prompt";
+import { useCapacitorNative } from "@/hooks/use-capacitor-native";
 import { registerBeforeInstallPromptCapture } from "@/lib/pwa/deferred-install";
 
 /**
@@ -11,13 +12,16 @@ import { registerBeforeInstallPromptCapture } from "@/lib/pwa/deferred-install";
  * manifest + meta tags only; SW is ignored but harmless.
  */
 export function PwaRegister() {
+  const isNativeApp = useCapacitorNative();
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
+    if (isNativeApp) return;
     return registerBeforeInstallPromptCapture();
-  }, []);
+  }, [isNativeApp]);
 
   useEffect(() => {
+    if (isNativeApp) return;
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
       return;
     }
@@ -50,7 +54,9 @@ export function PwaRegister() {
     return () => {
       navigator.serviceWorker.removeEventListener("message", onSwMessage);
     };
-  }, []);
+  }, [isNativeApp]);
+
+  if (isNativeApp) return null;
 
   return <PwaUpdatePrompt registration={registration} />;
 }

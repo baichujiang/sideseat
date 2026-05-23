@@ -1,6 +1,8 @@
 import { LanguageProficiency, LanguageTag, UserGender } from "@prisma/client";
 import { z } from "zod";
 
+import { loginUsernameField, LOGIN_USERNAME_MESSAGES_EN } from "@/lib/validators/auth";
+
 const loginEmailFieldSchema = z
   .string()
   .trim()
@@ -42,10 +44,30 @@ import { schoolDirectory } from "@/lib/constants/schools";
 import { DEGREE_LEVELS, MAX_SEMESTER } from "@/lib/constants/majors";
 
 /** Name + tagline only (e.g. Home card). Avatar uses POST /api/profile/avatar. */
+export const profileUsernameChangeSchema = z.object({
+  username: loginUsernameField(LOGIN_USERNAME_MESSAGES_EN),
+});
+
 export const homeProfileQuickSchema = z.object({
   nickname: z.string().min(2).max(32),
   bio: z.string().max(120).optional().or(z.literal("")),
 });
+
+/** PATCH /api/profile/privacy — visibility toggles only. */
+export const profilePrivacyPatchSchema = z
+  .object({
+    hideFromDiscovery: z.boolean().optional(),
+    hideFromRecommendations: z.boolean().optional(),
+    hideFromCourseMembers: z.boolean().optional(),
+  })
+  .strict()
+  .refine(
+    (d) =>
+      d.hideFromDiscovery !== undefined ||
+      d.hideFromRecommendations !== undefined ||
+      d.hideFromCourseMembers !== undefined,
+    { message: "Nothing to update." },
+  );
 
 /** PATCH: update nickname and/or bio independently (at least one field required). */
 export const homeProfileQuickPatchSchema = z

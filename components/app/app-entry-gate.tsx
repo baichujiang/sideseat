@@ -9,7 +9,7 @@ import { APP_NAME } from "@/lib/constants/app";
  */
 export function AppEntryGate() {
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col bg-background px-6 pb-[max(2rem,env(safe-area-inset-bottom))] pt-[max(2.5rem,env(safe-area-inset-top))]">
+    <main className="mx-auto flex min-h-dvh max-w-md flex-col bg-background px-6 pb-[max(2rem,var(--safe-bottom))] pt-[max(2.5rem,var(--safe-top))]">
       <div className="flex flex-1 flex-col justify-center gap-10">
         <div className="space-y-2 text-center">
           <p className="text-sm font-medium text-muted-foreground">{APP_NAME}</p>

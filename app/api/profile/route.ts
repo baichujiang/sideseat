@@ -1,6 +1,11 @@
+import { validateNicknameForUser } from "@/lib/auth/nickname-fields";
 import { requireUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
+import {
+  NICKNAME_ERROR_CODES,
+  nicknameValidationErrorMessage,
+} from "@/lib/profile/nickname-api-errors";
 import { mirrorSchoolVerificationToUser } from "@/lib/verification/school-state";
 import { profileSchema } from "@/lib/validators/profile";
 
@@ -8,6 +13,22 @@ export async function PUT(request: Request) {
   try {
     const user = await requireUser();
     const values = await parseJson(request, profileSchema);
+
+    const nicknameCheck = await validateNicknameForUser(values.nickname, { excludeUserId: user.id });
+    if (!nicknameCheck.ok) {
+      const code =
+        nicknameCheck.reason === "taken"
+          ? NICKNAME_ERROR_CODES.TAKEN
+          : NICKNAME_ERROR_CODES.RESERVED;
+      return error(
+        nicknameValidationErrorMessage(nicknameCheck.reason, {
+          taken: "That name is already taken.",
+          reserved: "That name is reserved.",
+        }, "Invalid name."),
+        nicknameCheck.reason === "taken" ? 409 : 422,
+        code,
+      );
+    }
 
     await prisma.$transaction(async (tx) => {
       await tx.userLanguage.deleteMany({ where: { userId: user.id } });
@@ -21,7 +42,8 @@ export async function PUT(request: Request) {
       await tx.user.update({
         where: { id: user.id },
         data: {
-          nickname: values.nickname,
+          nickname: nicknameCheck.nickname,
+          nicknameKey: nicknameCheck.nicknameKey,
           gender: values.gender,
           school: values.school,
           degreeLevel: values.degreeLevel,

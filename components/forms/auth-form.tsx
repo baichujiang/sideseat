@@ -48,18 +48,35 @@ function EmailSignupBlock({
   const [otpSending, setOtpSending] = useState(false);
   const schema = useMemo(
     () =>
-      createSignupEmailSchema({
-        tooShort: af.signupDisplayNameTooShort,
-        tooLong: af.signupDisplayNameTooLong,
-        notEmailLike: af.signupDisplayNameNotEmail,
-      }),
-    [af.signupDisplayNameTooShort, af.signupDisplayNameTooLong, af.signupDisplayNameNotEmail],
+      createSignupEmailSchema(
+        {
+          tooShort: af.signupDisplayNameTooShort,
+          tooLong: af.signupDisplayNameTooLong,
+          notEmailLike: af.signupDisplayNameNotEmail,
+        },
+        {
+          tooShort: af.signupUsernameTooShort,
+          tooLong: af.signupUsernameTooLong,
+          invalid: af.signupUsernameInvalid,
+          reserved: af.signupUsernameReserved,
+        },
+      ),
+    [
+      af.signupDisplayNameTooShort,
+      af.signupDisplayNameTooLong,
+      af.signupDisplayNameNotEmail,
+      af.signupUsernameTooShort,
+      af.signupUsernameTooLong,
+      af.signupUsernameInvalid,
+      af.signupUsernameReserved,
+    ],
   );
 
   const form = useForm<SignupEmailValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       displayName: "",
+      username: "",
       email: "",
       code: "",
       password: initialPassword,
@@ -141,7 +158,21 @@ function EmailSignupBlock({
           placeholder={af.signupDisplayNamePlaceholder}
           {...form.register("displayName")}
         />
+        <p className="text-[11px] leading-snug text-muted-foreground">{af.signupDisplayNameHint}</p>
         <FormMessage message={form.formState.errors.displayName?.message} />
+      </div>
+      <div className="space-y-1.5">
+        <label className="text-sm font-medium">{af.usernameLabel}</label>
+        <Input
+          autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
+          placeholder={af.usernamePlaceholder}
+          className="font-mono"
+          {...form.register("username")}
+        />
+        <p className="text-[11px] leading-snug text-muted-foreground">{af.usernameHint}</p>
+        <FormMessage message={form.formState.errors.username?.message} />
       </div>
       <div className="space-y-1.5">
         <label className="text-sm font-medium">{af.emailLabel}</label>
@@ -232,18 +263,35 @@ function PhoneSignupBlock({
   const [otpSending, setOtpSending] = useState(false);
   const schema = useMemo(
     () =>
-      createSignupPhoneSchema({
-        tooShort: af.signupDisplayNameTooShort,
-        tooLong: af.signupDisplayNameTooLong,
-        notEmailLike: af.signupDisplayNameNotEmail,
-      }),
-    [af.signupDisplayNameTooShort, af.signupDisplayNameTooLong, af.signupDisplayNameNotEmail],
+      createSignupPhoneSchema(
+        {
+          tooShort: af.signupDisplayNameTooShort,
+          tooLong: af.signupDisplayNameTooLong,
+          notEmailLike: af.signupDisplayNameNotEmail,
+        },
+        {
+          tooShort: af.signupUsernameTooShort,
+          tooLong: af.signupUsernameTooLong,
+          invalid: af.signupUsernameInvalid,
+          reserved: af.signupUsernameReserved,
+        },
+      ),
+    [
+      af.signupDisplayNameTooShort,
+      af.signupDisplayNameTooLong,
+      af.signupDisplayNameNotEmail,
+      af.signupUsernameTooShort,
+      af.signupUsernameTooLong,
+      af.signupUsernameInvalid,
+      af.signupUsernameReserved,
+    ],
   );
 
   const form = useForm<SignupPhoneValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       displayName: "",
+      username: "",
       phone: "",
       code: "",
       password: initialPassword,
@@ -256,6 +304,7 @@ function PhoneSignupBlock({
     if (/^\+?\d[\d\s-]{6,}$/.test(id)) {
       form.reset({
         displayName: "",
+        username: "",
         phone: id,
         code: "",
         password: initialPassword,
@@ -301,7 +350,7 @@ function PhoneSignupBlock({
     });
     const payload = await response.json();
     if (!response.ok) {
-      setServerError(payload.error ?? af.unableToContinue);
+      setServerError(mapSignupEmailApiError(payload, af.signupEmailErrors));
       return;
     }
     if (payload.data?.accessToken) {
@@ -320,7 +369,21 @@ function PhoneSignupBlock({
           placeholder={af.signupDisplayNamePlaceholder}
           {...form.register("displayName")}
         />
+        <p className="text-[11px] leading-snug text-muted-foreground">{af.signupDisplayNameHint}</p>
         <FormMessage message={form.formState.errors.displayName?.message} />
+      </div>
+      <div className="space-y-1.5">
+        <label className="text-sm font-medium">{af.usernameLabel}</label>
+        <Input
+          autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
+          placeholder={af.usernamePlaceholder}
+          className="font-mono"
+          {...form.register("username")}
+        />
+        <p className="text-[11px] leading-snug text-muted-foreground">{af.usernameHint}</p>
+        <FormMessage message={form.formState.errors.username?.message} />
       </div>
       <div className="space-y-1.5">
         <label className="text-sm font-medium">{af.phoneLabel}</label>

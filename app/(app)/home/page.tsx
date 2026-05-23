@@ -1,6 +1,5 @@
 import type { Weekday } from "@prisma/client";
 import { addDays, subDays } from "date-fns";
-import { GuestAppCta } from "@/components/app/guest-app-cta";
 import {
   ScheduleSurface,
   type ClassBlock,
@@ -33,23 +32,27 @@ export default async function HomePage() {
   const sessionUser = await getSessionUser();
   const locale = await getServerAppLocale();
   const ui = getMessages(locale);
-  if (!sessionUser) {
+  if (!sessionUser || sessionUser.isGuest) {
     const now = new Date();
-    const semesterRange = getClassScheduleDateRange({ school: null, now });
+    const semesterRange = getClassScheduleDateRange({
+      school: sessionUser?.school ?? null,
+      now,
+    });
     return (
-      <div className="flex min-h-0 flex-1 flex-col gap-3">
-        <ScheduleSurface
-          classBlocks={[]}
-          studyEntries={[]}
-          companionOptions={[]}
-          initialCalendarCategories={[]}
-          nowISO={now.toISOString()}
-          semesterStartISO={semesterRange.start.toISOString()}
-          semesterEndISO={semesterRange.end.toISOString()}
-          homeGreeting={{ nickname: null, avatarUrl: null }}
-        />
-        <GuestAppCta returnTo="/home" headline={ui.guest.homeHeadline} body={ui.guest.homeBody} />
-      </div>
+      <ScheduleSurface
+        classBlocks={[]}
+        studyEntries={[]}
+        companionOptions={[]}
+        initialCalendarCategories={[]}
+        nowISO={now.toISOString()}
+        semesterStartISO={semesterRange.start.toISOString()}
+        semesterEndISO={semesterRange.end.toISOString()}
+        homeGreeting={{
+          nickname: sessionUser?.nickname ?? null,
+          avatarUrl: sessionUser?.avatarUrl ?? null,
+          guestReturnTo: "/home",
+        }}
+      />
     );
   }
   const user = sessionUser;
@@ -212,6 +215,7 @@ export default async function HomePage() {
         semesterEndISO={semesterRange.end.toISOString()}
         homeGreeting={{ nickname: user.nickname, avatarUrl: user.avatarUrl }}
         homeBelowHeaderSlot={null}
+        naturalScheduleEnabled
       />
     </div>
   );

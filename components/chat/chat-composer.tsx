@@ -21,6 +21,7 @@ export function ChatComposer({
   peerName,
   hideAttachments = false,
   threadSearchEntries = [],
+  placeholder,
 }: {
   connectionId: string;
   peerName: string;
@@ -28,6 +29,7 @@ export function ChatComposer({
   hideAttachments?: boolean;
   /** Server-built index for in-thread search (scroll-to message). */
   threadSearchEntries?: ThreadSearchEntry[];
+  placeholder?: string;
 }) {
   const router = useRouter();
   const { chat: c, common } = useAppMessages();
@@ -127,7 +129,7 @@ export function ChatComposer({
             value={body}
             onChange={(e) => setBody(e.target.value.replace(/[\r\n]+/g, " "))}
             onSend={() => void submit()}
-            placeholder={replyTo ? c.placeholderReply : c.placeholderWrite}
+            placeholder={placeholder ?? (replyTo ? c.placeholderReply : c.placeholderWrite)}
           />
           <button
             type="button"

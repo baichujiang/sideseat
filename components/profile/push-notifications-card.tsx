@@ -3,6 +3,8 @@
 import { apiFetch } from "@/lib/auth/api-fetch";
 
 import { useLocaleContext } from "@/components/i18n/locale-provider";
+import { PushNotificationsNativeCard } from "@/components/profile/push-notifications-native-card";
+import { useCapacitorNative } from "@/hooks/use-capacitor-native";
 import { useCallback, useEffect, useId, useState } from "react";
 import { Bell, BellOff, Loader2 } from "lucide-react";
 
@@ -65,6 +67,7 @@ function IosStyleSwitch({
 const settingCardClass = cn(mePageCardClass, "px-5 py-0");
 
 export function PushNotificationsCard() {
+  const isNativeApp = useCapacitorNative();
   const { messages: m } = useLocaleContext();
   const titleId = useId();
   const [phase, setPhase] = useState<"loading" | "ready">("loading");
@@ -104,8 +107,9 @@ export function PushNotificationsCard() {
   }, []);
 
   useEffect(() => {
+    if (isNativeApp) return;
     void refresh();
-  }, [refresh]);
+  }, [refresh, isNativeApp]);
 
   const enable = async () => {
     if (!serverKey) return;
@@ -179,6 +183,10 @@ export function PushNotificationsCard() {
     }
     setBusy(false);
   };
+
+  if (isNativeApp) {
+    return <PushNotificationsNativeCard />;
+  }
 
   if (phase === "loading") {
     return (

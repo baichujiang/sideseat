@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 
-import { StudentVerificationForm } from "@/components/forms/student-verification-form";
 import { ProfileForm } from "@/components/forms/profile-form";
-import { BackLink } from "@/components/nav/back-link";
+import { ProfileSubpageShell } from "@/components/profile/profile-subpage-shell";
 import { getSessionUser } from "@/lib/auth/session";
 import { profileLanguagesFormDefault } from "@/lib/constants/languages";
 import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
@@ -25,34 +24,17 @@ export default async function ProfileAcademicPage() {
   const schoolShort = schoolOptions.find((s) => s.value === schoolCode)?.shortLabel ?? schoolCode;
 
   return (
-    <div className="space-y-4 pb-2">
-      <header className="flex items-center gap-2 px-0.5">
-        <BackLink fallback="/profile" label="Back" />
-        <div>
-          <h1 className="page-screen-title">Edit profile</h1>
-          <p className="page-screen-subtitle mt-0.5 text-[13px] leading-snug">
-            School, major, semester, languages, and verification.
-          </p>
-        </div>
-      </header>
-
+    <ProfileSubpageShell
+      title={ui.meIdentity.rowSchool}
+      subtitle={ui.profileForm.academicSectionDescription}
+      backFallback="/profile/info"
+    >
       <ProfileForm
         key={formKey}
         submitLabel={ui.profileForm.saveChanges}
-        variant="academicOnly"
+        variant="schoolOnly"
         requireDirtyToSubmit
-        mePageStructure
         avatarId={user.avatarUrl}
-        verificationSlot={
-          <StudentVerificationForm
-            currentStatus={user.studentVerificationStatus}
-            schoolCode={schoolCode}
-            schoolShortLabel={schoolShort}
-            notes={user.studentVerificationNotes}
-            email={user.email}
-            hasProofUploaded={Boolean(user.manualReviewProofUrl)}
-          />
-        }
         initialValues={{
           nickname: user.nickname ?? "",
           gender: user.gender,
@@ -76,6 +58,6 @@ export default async function ProfileAcademicPage() {
           hideFromRecommendations: user.hideFromRecommendations,
         }}
       />
-    </div>
+    </ProfileSubpageShell>
   );
 }

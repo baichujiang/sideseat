@@ -39,7 +39,9 @@ import {
   DEFAULT_DISCOVER_SERVED_CITY,
   type DiscoverCityNameKey,
 } from "@/lib/discover/discover-city-name-keys";
+import { useSignInPrompt } from "@/components/auth/sign-in-prompt-dialog";
 import { useAppMessages } from "@/hooks/use-app-locale";
+import { useSessionHint } from "@/hooks/use-session-hint";
 import { formatMessage } from "@/lib/i18n/messages";
 import {
   CLASSMATE_POST_BODY_MAX_LEN,
@@ -68,6 +70,8 @@ export function DiscoverList({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const sessionHint = useSessionHint();
+  const { openPrompt } = useSignInPrompt();
   const m = useAppMessages();
   const dl = m.discoverList;
   const buddy = m.discoverBuddy;
@@ -142,7 +146,13 @@ export function DiscoverList({
           </div>
           <button
             type="button"
-            onClick={() => setPostOpen(true)}
+            onClick={() => {
+              if (!sessionHint || sessionHint.isGuest || !sessionHint.signedIn) {
+                openPrompt({ returnTo: "/discover" });
+                return;
+              }
+              setPostOpen(true);
+            }}
             aria-label={buddy.createRequestCtaAria}
             className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-classmates-blue text-white shadow-sm transition hover:bg-classmates-blue/90"
           >

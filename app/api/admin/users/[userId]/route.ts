@@ -1,6 +1,7 @@
 import { Prisma, StudentVerificationStatus } from "@prisma/client";
 
 import { requireAdminUser } from "@/lib/auth/guards";
+import { validateNicknameForUser } from "@/lib/auth/nickname-fields";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
 import { mirrorSchoolVerificationToUser, upsertSchoolVerificationState } from "@/lib/verification/school-state";
@@ -39,7 +40,20 @@ export async function PATCH(
     // null so the admin can actually clear a value on the record.
     const data: Prisma.UserUpdateInput = {};
 
-    if (values.nickname !== undefined) data.nickname = values.nickname;
+    if (values.nickname !== undefined) {
+      const nicknameCheck = await validateNicknameForUser(values.nickname, { excludeUserId: userId });
+      if (!nicknameCheck.ok) {
+        const message =
+          nicknameCheck.reason === "taken"
+            ? "That nickname is already taken."
+            : nicknameCheck.reason === "reserved"
+              ? "That nickname is reserved."
+              : "Invalid nickname.";
+        return error(message, nicknameCheck.reason === "taken" ? 409 : 422);
+      }
+      data.nickname = nicknameCheck.nickname;
+      data.nicknameKey = nicknameCheck.nicknameKey;
+    }
     if (values.gender !== undefined) data.gender = values.gender;
     if (values.email !== undefined) data.email = values.email === "" ? null : values.email;
     if (values.school !== undefined) data.school = values.school;

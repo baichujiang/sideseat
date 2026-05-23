@@ -111,11 +111,11 @@ export function ScheduleItemDetailSheet({
   const locationValue = displayItem.location?.trim() ? displayItem.location : "No location";
   const repeatValue = displayItem.repeatLabel;
   const noteValue = displayItem.note?.trim() ? displayItem.note : "No notes";
-  const categoryLabel = displayItem.categoryName?.trim()
+  const categoryDisplay = displayItem.categoryName?.trim()
     ? displayItem.categoryName
     : displayItem.categoryColor
       ? "Custom"
-      : null;
+      : s.addPanelNone;
 
   const participants = displayItem.eventParticipants;
   const hasPeople = participants.length > 0;
@@ -191,31 +191,37 @@ export function ScheduleItemDetailSheet({
             <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
               <div className="space-y-2.5">
                 <div className="rounded-2xl border border-border/70 bg-muted/[0.03] px-4 py-3">
-                  {categoryLabel ? (
-                    <DetailRow
-                      icon={<Palette className="h-4 w-4" strokeWidth={2.1} />}
-                      label="Calendar"
-                      value={
-                        <span className="inline-flex items-center gap-2">
-                          {displayItem.categoryColor ? (
-                            <span
-                              className="h-3 w-3 shrink-0 rounded-full border border-border/60 shadow-sm"
-                              style={{ backgroundColor: displayItem.categoryColor }}
-                              aria-hidden
-                            />
-                          ) : null}
-                          <span>{categoryLabel}</span>
+                  <DetailRow
+                    icon={<Palette className="h-4 w-4" strokeWidth={2.1} />}
+                    label={s.addPanelCalendar}
+                    value={
+                      <span className="inline-flex items-center gap-2">
+                        {displayItem.categoryColor ? (
+                          <span
+                            className="h-3 w-3 shrink-0 rounded-full border border-border/60 shadow-sm"
+                            style={{ backgroundColor: displayItem.categoryColor }}
+                            aria-hidden
+                          />
+                        ) : null}
+                        <span
+                          className={
+                            !displayItem.categoryName?.trim() && !displayItem.categoryColor
+                              ? "text-muted-foreground"
+                              : undefined
+                          }
+                        >
+                          {categoryDisplay}
                         </span>
-                      }
-                      compact
-                    />
-                  ) : null}
+                      </span>
+                    }
+                    compact
+                  />
                   <DetailRow
                     icon={<MapPin className="h-4 w-4" strokeWidth={2.1} />}
                     label="Location"
                     value={locationValue}
                     compact
-                    divider={Boolean(categoryLabel)}
+                    divider
                   />
                   <DetailRow
                     icon={<Repeat2 className="h-4 w-4" strokeWidth={2.1} />}
