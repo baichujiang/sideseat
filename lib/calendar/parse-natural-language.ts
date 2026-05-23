@@ -44,7 +44,7 @@ Rules:
 - Put ambiguity notes in "warnings" (same language as user input when possible).
 - Do not invent courses or classmates. Only schedule-like items (study, meetings, sports, meals as calendar blocks).
 - Titles should be short (max 120 chars).
-- Optional per event: categoryPreset — one of ${CALENDAR_CATEGORY_PRESET_KEYS.join("|")}. Map intent (work meeting → work, class/lecture → course, gym → sports, lunch → meal, language class → language, homework → study, personal errands → personal). Omit or null if unclear; add a short warning when category is ambiguous.
+- Optional per event: categoryPreset — one of ${CALENDAR_CATEGORY_PRESET_KEYS.join("|")}. Map intent (work meeting → work, class/lecture → course, gym → sports, lunch → meal, language class → language, homework → study, personal errands → personal, must-do/deadline/urgent priority → important). Omit or null if unclear; add a short warning when category is ambiguous.
 - Do not output categoryId; only categoryPreset.`;
 }
 
@@ -58,7 +58,7 @@ export async function parseNaturalLanguageSchedule(params: {
   | { ok: false; code: "NOT_CONFIGURED" | "PARSE_FAILED" | "VALIDATION_FAILED"; error: string }
 > {
   if (!isDashScopeConfigured()) {
-    return { ok: false, code: "NOT_CONFIGURED", error: "DashScope API key is not configured." };
+    return { ok: false, code: "NOT_CONFIGURED", error: "Natural language scheduling is not available." };
   }
 
   const referenceTime = params.referenceTime ?? new Date();
@@ -77,7 +77,7 @@ export async function parseNaturalLanguageSchedule(params: {
     return {
       ok: false,
       code: "PARSE_FAILED",
-      error: "Could not reach the language model. Try again or add the event manually.",
+      error: "Could not parse your text. Try again or add the event manually.",
     };
   }
 
@@ -89,7 +89,7 @@ export async function parseNaturalLanguageSchedule(params: {
     return {
       ok: false,
       code: "PARSE_FAILED",
-      error: "Could not read the model response. Try rephrasing your request.",
+      error: "Could not parse your text. Try rephrasing your request.",
     };
   }
 
@@ -99,7 +99,7 @@ export async function parseNaturalLanguageSchedule(params: {
     return {
       ok: false,
       code: "VALIDATION_FAILED",
-      error: "The model returned an invalid schedule format. Try being more specific about dates and times.",
+      error: "Could not understand the schedule. Try being more specific about dates and times.",
     };
   }
 
