@@ -26,7 +26,7 @@ export type ClassmatePostForDiscoverPayload = Prisma.ClassmatePostGetPayload<{
 
 export function prismaClassmatePostToDiscoverRow(
   post: ClassmatePostForDiscoverPayload,
-  viewerUserId: string,
+  viewerUserId: string | null,
   opts?: { savedByViewer?: boolean },
 ): DiscoverPostRow {
   const row: DiscoverPostRow = {
@@ -37,7 +37,7 @@ export function prismaClassmatePostToDiscoverRow(
     body: post.body,
     createdAt: post.createdAt,
     expiresAt: post.expiresAt,
-    isOwn: post.userId === viewerUserId,
+    isOwn: viewerUserId != null && post.userId === viewerUserId,
     userId: post.user.id,
     nickname: post.user.nickname ?? post.user.username,
     gender: post.user.gender,
