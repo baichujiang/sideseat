@@ -6,6 +6,7 @@ import type { AppLocale } from "@/lib/i18n/app-locale";
 export const CALENDAR_CATEGORY_PRESET_KEYS = [
   "personal",
   "work",
+  "important",
   "course",
   "study",
   "meal",
