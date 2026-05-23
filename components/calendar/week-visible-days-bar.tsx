@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import {
   WEEK_CALENDAR_VISIBLE_DAY_MAX,
@@ -11,6 +11,17 @@ import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { formatMessage, type AppMessages } from "@/lib/i18n/messages";
 import type { AppLocale } from "@/lib/i18n/app-locale";
 import { cn } from "@/lib/utils";
+
+const DAY_RANGE = WEEK_CALENDAR_VISIBLE_DAY_MAX - WEEK_CALENDAR_VISIBLE_DAY_MIN;
+
+function ratioFromValue(count: number): number {
+  return (clampWeekCalendarVisibleDayCount(count) - WEEK_CALENDAR_VISIBLE_DAY_MIN) / DAY_RANGE;
+}
+
+function valueFromRatio(ratio: number): number {
+  const raw = WEEK_CALENDAR_VISIBLE_DAY_MIN + ratio * DAY_RANGE;
+  return clampWeekCalendarVisibleDayCount(Math.round(raw));
+}
 
 export function WeekVisibleDaysBar({
   value,
@@ -30,53 +41,58 @@ export function WeekVisibleDaysBar({
   const safeValue = clampWeekCalendarVisibleDayCount(value);
   const valueTemplate =
     sch.visibleDaysValue ?? (loc === "zh-CN" ? "{count} 天" : "{count} days");
-  const valueText = formatMessage(valueTemplate, { count: safeValue });
-  const thumbRatio =
-    (safeValue - WEEK_CALENDAR_VISIBLE_DAY_MIN) /
-    (WEEK_CALENDAR_VISIBLE_DAY_MAX - WEEK_CALENDAR_VISIBLE_DAY_MIN);
 
   const trackRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
+  /** Continuous 0–1 thumb position while dragging; null = snapped to `value`. */
+  const [dragRatio, setDragRatio] = useState<number | null>(null);
 
-  const valueFromClientX = useCallback((clientX: number) => {
+  const ratioFromClientX = useCallback((clientX: number) => {
     const track = trackRef.current;
-    if (!track) return safeValue;
+    if (!track) return ratioFromValue(safeValue);
     const rect = track.getBoundingClientRect();
-    const innerWidth = Math.max(1, rect.width);
     const x = clientX - rect.left;
-    const ratio = Math.max(0, Math.min(1, x / innerWidth));
-    const raw =
-      WEEK_CALENDAR_VISIBLE_DAY_MIN +
-      ratio * (WEEK_CALENDAR_VISIBLE_DAY_MAX - WEEK_CALENDAR_VISIBLE_DAY_MIN);
-    return clampWeekCalendarVisibleDayCount(Math.round(raw));
+    return Math.max(0, Math.min(1, x / Math.max(1, rect.width)));
   }, [safeValue]);
+
+  const displayRatio = dragRatio ?? ratioFromValue(safeValue);
+  const displayValue = dragRatio != null ? valueFromRatio(dragRatio) : safeValue;
+  const valueText = formatMessage(valueTemplate, { count: displayValue });
+  const isDragging = dragRatio != null;
 
   const onPointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
       event.preventDefault();
       draggingRef.current = true;
       event.currentTarget.setPointerCapture(event.pointerId);
-      onChange(valueFromClientX(event.clientX));
+      setDragRatio(ratioFromClientX(event.clientX));
     },
-    [onChange, valueFromClientX],
+    [ratioFromClientX],
   );
 
   const onPointerMove = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
       if (!draggingRef.current) return;
-      onChange(valueFromClientX(event.clientX));
+      setDragRatio(ratioFromClientX(event.clientX));
     },
-    [onChange, valueFromClientX],
+    [ratioFromClientX],
   );
 
-  const endDrag = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
-    draggingRef.current = false;
-    try {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    } catch {
-      /* capture may already be released */
-    }
-  }, []);
+  const endDrag = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (!draggingRef.current) return;
+      draggingRef.current = false;
+      const ratio = ratioFromClientX(event.clientX);
+      setDragRatio(null);
+      onChange(valueFromRatio(ratio));
+      try {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      } catch {
+        /* capture may already be released */
+      }
+    },
+    [onChange, ratioFromClientX],
+  );
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
@@ -110,7 +126,7 @@ export function WeekVisibleDaysBar({
           aria-label={ariaLabel}
           aria-valuemin={WEEK_CALENDAR_VISIBLE_DAY_MIN}
           aria-valuemax={WEEK_CALENDAR_VISIBLE_DAY_MAX}
-          aria-valuenow={safeValue}
+          aria-valuenow={displayValue}
           aria-valuetext={valueText}
           className={cn(
             "relative h-full w-full select-none touch-none",
@@ -129,8 +145,11 @@ export function WeekVisibleDaysBar({
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute top-1/2 z-10 -translate-y-1/2"
-            style={{ left: `${thumbRatio * 100}%` }}
+            className={cn(
+              "pointer-events-none absolute top-1/2 z-10 -translate-y-1/2",
+              !isDragging && "transition-[left] duration-200 ease-out",
+            )}
+            style={{ left: `${displayRatio * 100}%` }}
             aria-hidden
           >
             <span
@@ -139,6 +158,7 @@ export function WeekVisibleDaysBar({
                 "rounded-md bg-[#2563EB] px-2 py-1.5 text-[11px] font-semibold leading-none text-white tabular-nums",
                 "shadow-[0_2px_8px_rgba(37,99,235,0.35)]",
                 "dark:bg-blue-500",
+                isDragging && "scale-[1.02]",
               )}
             >
               {valueText}

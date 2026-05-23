@@ -742,7 +742,7 @@ export const enMessages: AppMessages = {
     naturalSheetTitle: "Quick add from text",
     naturalSheetCloseAria: "Close",
     naturalSheetHint:
-      "Describe one or more events in plain language. We use Alibaba Cloud Qwen to parse times in Europe/Berlin. Calendar categories are guessed — adjust each row in the preview before saving.",
+      "Describe one or more events in plain language. Times are interpreted in Europe/Berlin. Calendar categories are guessed — adjust each row in the preview before saving.",
     naturalInputPlaceholder:
       "e.g. Tomorrow 3–5pm library study; Friday 10am team sync for 1 hour",
     naturalParseCta: "Parse schedule",
@@ -1298,8 +1298,8 @@ export const enMessages: AppMessages = {
     nativeSubtitle: "Messages and plans on this device.",
     nativeDeniedHint:
       "Notifications are off. Open Settings → SideSeat → Notifications to allow alerts, then turn the switch on again.",
-    nativeRegisterFailed: "Could not register for push on this device.",
     nativeOpenSettings: "Open Settings",
+    nativeRegisterFailed: "Could not register for push on this device.",
   },
   tip: {
     cardLabel: "Support",
@@ -1385,8 +1385,9 @@ export const enMessages: AppMessages = {
     instructorPrefix: "Instructor:",
     classmatesCountMany: "{count} classmates",
     classmatesCountOne: "1 classmate",
-    enrolledNoWeeklyTimes: "No weekly times on Home",
-    enrolledNoWeeklyTimesCard: "No weekly times on Home · Open this course to add them",
+    enrolledNoWeeklyTimes: "No class times on Home yet",
+    enrolledNoWeeklyTimesCard:
+      "No official timetable — open this course to add your class times",
     enrolledMoreSlotsCount: "+{n} more",
     backToCourses: "Back to courses",
     addCourseTitle: "Add course",
@@ -1486,6 +1487,8 @@ export const enMessages: AppMessages = {
     setupSyncing: "Syncing…",
     setupEdit: "Edit",
     setupAddTimes: "Add times",
+    setupNoOfficialSchedule:
+      "No official timetable for this course — add your class times so they show on Home.",
     setupErrorSaveCalendarPrefix: "Class times saved. Calendar sync failed: ",
     setupErrorSaveCalendarRetry: "Class times saved. Calendar didn’t update — tap “Sync to calendar” to retry.",
     setupUnableSaveGeneric: "Unable to save course.",
@@ -1532,6 +1535,17 @@ export const enMessages: AppMessages = {
     formUseThisCourse: "Use this course",
     formSchedulesOthersMany: "{count} schedules used by other students",
     formSchedulesOthersOne: "1 schedule used by other students",
+    formSchedulesOfficial: "Official school timetable — pick your section if needed",
+    formSchedulesMixed: "Official timetable and schedules from other students",
+    formOfficialBadge: "Official",
+    formOfficialApplied:
+      "Official school timetable applied. Change below only if your section differs.",
+    formNoOfficialSchedule:
+      "No official timetable for this course yet — add your class times below.",
+    formPickOfficialVariant:
+      "Multiple official sections — pick yours above before saving.",
+    formNeedManualTimes: "Add at least one class time.",
+    formOfficialLoading: "Loading official timetable…",
     formUse: "Use",
     formUsing: "Using",
     formRoomDefault: "Room (default)",

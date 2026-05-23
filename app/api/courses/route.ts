@@ -1,5 +1,6 @@
 import { Weekday } from "@prisma/client";
 
+import { applyOfficialScheduleToUserCourse } from "@/lib/courses/official-schedule";
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
 import { getCurrentSemesterLabel } from "@/lib/constants/semester";
@@ -100,6 +101,20 @@ export async function POST(request: Request) {
           ]
         : []),
     ]);
+
+    if (sessionRecords.length === 0) {
+      const applied = await applyOfficialScheduleToUserCourse({
+        userCourseId: membership.id,
+        courseId: course.id,
+        variantFingerprint: values.variantFingerprint ?? null,
+      }).catch(() => false);
+      if (!applied) {
+        return error(
+          "No official timetable is available for this course yet. Please add your class times below.",
+          422,
+        );
+      }
+    }
 
     return ok({ courseId: membership.courseId }, { status: 201 });
   } catch (cause) {

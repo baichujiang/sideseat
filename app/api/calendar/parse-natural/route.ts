@@ -40,10 +40,7 @@ export async function POST(request: Request) {
 
     if (!result.ok) {
       if (result.code === "NOT_CONFIGURED") {
-        return error(
-          "Natural language scheduling is not configured (missing DASHSCOPE_API_KEY).",
-          503,
-        );
+        return error("Natural language scheduling is not available right now.", 503);
       }
       return error(result.error, 422);
     }

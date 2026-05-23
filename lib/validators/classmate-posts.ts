@@ -212,7 +212,8 @@ export const classmatePostImageUrlsSchema = z
   .optional()
   .transform((arr) => {
     if (!arr?.length) return undefined;
-    const next = dedupeImageUrlsPreserveOrder(arr);
+    const trimmed = arr.map((u) => u.trim()).filter((u) => u.length > 0);
+    const next = dedupeImageUrlsPreserveOrder(trimmed);
     return next.length ? next : undefined;
   });
 

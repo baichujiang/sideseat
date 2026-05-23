@@ -2,9 +2,12 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { BookUser, Dumbbell, Languages, NotebookPen, UtensilsCrossed } from "lucide-react";
 import { ClassmatePostCategory } from "@prisma/client";
 
+import { ClassmatePostTextCover } from "@/components/discover/classmate-post-text-cover";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { buddyTypeLabel } from "@/lib/discover/buddy-type-labels";
+import { displayableClassmatePostImageUrls } from "@/lib/discover/classmate-post-display-images";
 import { cn } from "@/lib/utils";
 
 function isDataUrl(url: string) {
@@ -21,24 +24,6 @@ function SlideImage({ url, sizes }: { url: string; sizes: string }) {
   return <Image src={url} alt="" fill sizes={sizes} className="object-cover" />;
 }
 
-function categoryIcon(category: ClassmatePostCategory) {
-  const cls = "h-8 w-8 text-foreground/80";
-  switch (category) {
-    case ClassmatePostCategory.SHARED_COURSES:
-      return <BookUser className={cls} strokeWidth={1.75} aria-hidden />;
-    case ClassmatePostCategory.STUDY:
-      return <NotebookPen className={cls} strokeWidth={1.75} aria-hidden />;
-    case ClassmatePostCategory.MEALS:
-      return <UtensilsCrossed className={cls} strokeWidth={1.75} aria-hidden />;
-    case ClassmatePostCategory.LANGUAGE:
-      return <Languages className={cls} strokeWidth={1.75} aria-hidden />;
-    case ClassmatePostCategory.SPORTS:
-      return <Dumbbell className={cls} strokeWidth={1.75} aria-hidden />;
-    default:
-      return <NotebookPen className={cls} strokeWidth={1.75} aria-hidden />;
-  }
-}
-
 export function BuddyRequestMediaCarousel({
   urls,
   category,
@@ -50,19 +35,22 @@ export function BuddyRequestMediaCarousel({
   title: string;
   ariaLabel: string;
 }) {
+  const m = useAppMessages();
+  const typeLabel = buddyTypeLabel(category, m.discoverBuddy);
+  const displayUrls = displayableClassmatePostImageUrls(urls);
   const id = useId();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
-  const multi = urls.length > 1;
+  const multi = displayUrls.length > 1;
 
   const onScroll = useCallback(() => {
     const el = scrollerRef.current;
-    if (!el || urls.length <= 1) return;
+    if (!el || displayUrls.length <= 1) return;
     const slideW = el.firstElementChild?.clientWidth ?? 1;
     const gap = 8;
     const i = Math.round(el.scrollLeft / (slideW + gap));
-    setIndex(Math.min(urls.length - 1, Math.max(0, i)));
-  }, [urls.length]);
+    setIndex(Math.min(displayUrls.length - 1, Math.max(0, i)));
+  }, [displayUrls.length]);
 
   useEffect(() => {
     const el = scrollerRef.current;
@@ -71,24 +59,14 @@ export function BuddyRequestMediaCarousel({
     return () => el.removeEventListener("scroll", onScroll);
   }, [onScroll]);
 
-  if (!urls.length) {
+  if (!displayUrls.length) {
     return (
-      <div
-        data-testid="buddy-request-media"
-        className="relative w-full max-h-52 overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/50"
-      >
-        <div
-          className={cn(
-            "flex min-h-[11rem] flex-col justify-end gap-2 bg-gradient-to-br p-4",
-            "from-violet-100/90 via-sky-50/80 to-amber-50/70 dark:from-violet-950/50 dark:via-slate-900/40 dark:to-amber-950/30",
-          )}
-        >
-          <div className="text-foreground/90">{categoryIcon(category)}</div>
-          <p className="line-clamp-3 text-[16px] font-semibold leading-snug text-foreground drop-shadow-sm">
-            {title}
-          </p>
-        </div>
-      </div>
+      <ClassmatePostTextCover
+        category={category}
+        typeLabel={typeLabel}
+        title={title}
+        variant="detail"
+      />
     );
   }
 
@@ -104,7 +82,7 @@ export function BuddyRequestMediaCarousel({
           multi && "snap-x snap-mandatory",
         )}
       >
-        {urls.map((url, i) => (
+        {displayUrls.map((url, i) => (
           <div
             key={`${id}-${i}`}
             className={cn(
@@ -119,7 +97,7 @@ export function BuddyRequestMediaCarousel({
       </div>
       {multi ? (
         <div className="pointer-events-none absolute bottom-2 right-2 rounded-full bg-black/50 px-2 py-0.5 text-[11px] font-medium text-white tabular-nums">
-          {index + 1}/{urls.length}
+          {index + 1}/{displayUrls.length}
         </div>
       ) : null}
     </div>

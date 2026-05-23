@@ -1283,11 +1283,12 @@ export type AppMessages = {
     hintSaveFailed: string;
     hintEnableFailed: string;
     hintDisableFailed: string;
-    /** Capacitor iOS/Android — system notification settings (not Web Push). */
+    /** Capacitor iOS/Android — native push (not Web Push). */
     nativeSubtitle: string;
-    nativeBody: string;
     nativeDataSync: string;
+    nativeDeniedHint: string;
     nativeOpenSettings: string;
+    nativeRegisterFailed: string;
   };
   tip: {
     /** Standalone card label above the headline. */
@@ -1527,6 +1528,7 @@ export type CoursesMessages = {
   setupSyncing: string;
   setupEdit: string;
   setupAddTimes: string;
+  setupNoOfficialSchedule: string;
   setupErrorSaveCalendarPrefix: string;
   setupErrorSaveCalendarRetry: string;
   setupUnableSaveGeneric: string;
@@ -1583,6 +1585,14 @@ export type CoursesMessages = {
   /** `{count}` */
   formSchedulesOthersMany: string;
   formSchedulesOthersOne: string;
+  formSchedulesOfficial: string;
+  formSchedulesMixed: string;
+  formOfficialBadge: string;
+  formOfficialApplied: string;
+  formNoOfficialSchedule: string;
+  formPickOfficialVariant: string;
+  formNeedManualTimes: string;
+  formOfficialLoading: string;
   formUse: string;
   formUsing: string;
   formRoomDefault: string;
