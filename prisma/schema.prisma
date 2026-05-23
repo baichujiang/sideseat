@@ -345,6 +345,7 @@ model User {
   friendLinksRequested         FriendLink[]               @relation("FriendLinkRequester")
   friendLinksToRespond         FriendLink[]               @relation("FriendLinkResponder")
   pushSubscriptions            PushSubscription[]
+  nativePushDevices            NativePushDevice[]
   studyProposalsCreated        StudySessionProposal[]     @relation("StudyProposer")
   availabilitySharesOwned      AvailabilityShare[]        @relation("AvailabilityShareOwner")
   planRequestsProposed         PlanRequest[]              @relation("PlanRequestProposer")
@@ -576,6 +577,7 @@ model UserSchoolVerification {
   @@id([userId, school])
   @@index([school, studentVerificationStatus])
 }
+
 
 model Course {
   id            String       @id @default(cuid())
@@ -1047,6 +1049,21 @@ model PushSubscription {
   endpoint  String   @unique
   p256dh    String
   auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// APNs / FCM device token from the Capacitor native app (not Web Push).
+/// Server delivery via APNs is not wired yet — tokens are stored for future use.
+model NativePushDevice {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String
   userAgent String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
