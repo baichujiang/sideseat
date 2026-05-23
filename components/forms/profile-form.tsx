@@ -35,6 +35,7 @@ import { profileSectionLabelClassName } from "@/lib/ui/profile-section-label";
 import { profileSettingsControlClassName } from "@/lib/ui/profile-settings-control";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { formatMessage } from "@/lib/i18n/messages";
+import { mapNicknameApiError } from "@/lib/profile/nickname-api-errors";
 import { cn } from "@/lib/utils";
 
 type ProfileValues = z.infer<typeof profileSchema>;
@@ -54,7 +55,7 @@ export function ProfileForm({
   avatarId,
   verificationSlot,
   onSaved,
-  /** `sheet`: Me page bottom sheet — card (avatar/name/bio) first, then school & languages (no verification slot). */
+  /** `sheet`: legacy bottom sheet. `schoolOnly` / `languagesOnly`: profile subpages. */
   variant = "full",
   /** When true, Save stays disabled until the user changes something (Me /profile). Onboarding should pass false. */
   requireDirtyToSubmit = true,
@@ -70,7 +71,7 @@ export function ProfileForm({
   /** When set, rendered in its own “Verified email” card after Languages (Me /profile). */
   verificationSlot?: React.ReactNode;
   onSaved?: () => void;
-  variant?: "full" | "academicOnly" | "sheet";
+  variant?: "full" | "academicOnly" | "schoolOnly" | "languagesOnly" | "sheet";
   requireDirtyToSubmit?: boolean;
   mePageStructure?: boolean;
 }) {
@@ -94,7 +95,9 @@ export function ProfileForm({
   const [justSaved, setJustSaved] = useState(false);
 
   const isSheet = variant === "sheet";
-  const isCompactAcademic = variant === "academicOnly" || isSheet;
+  const isSchoolOnly = variant === "schoolOnly";
+  const isLanguagesOnly = variant === "languagesOnly";
+  const isCompactAcademic = variant === "academicOnly" || isSheet || isSchoolOnly || isLanguagesOnly;
 
   useEffect(() => {
     if (isDirty) setJustSaved(false);
@@ -108,25 +111,37 @@ export function ProfileForm({
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError("");
+    const body =
+      isSchoolOnly || isLanguagesOnly ? { ...initialValues, ...values } : values;
 
     const response = await apiFetch("/api/profile", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(values),
+      body: JSON.stringify(body),
     });
 
-    const payload = await response.json();
+    const resPayload = await response.json();
 
     if (!response.ok) {
-      setServerError(payload.error ?? pf.unableToSave);
+      setServerError(
+        mapNicknameApiError(
+          resPayload,
+          { taken: pf.nicknameTaken, reserved: pf.nicknameReserved },
+          pf.unableToSave,
+        ),
+      );
       return;
     }
 
-    reset(values);
+    reset(body);
     setJustSaved(true);
     router.refresh();
+    if (isSchoolOnly || isLanguagesOnly) {
+      router.push("/profile/info");
+      return;
+    }
     onSaved?.();
   });
 
@@ -235,16 +250,17 @@ export function ProfileForm({
         </div>
       ) : null}
 
-      <MeAcademicShell mePageStructure={mePageStructure && !isSheet}>
+      <MeAcademicShell mePageStructure={mePageStructure && !isSheet && !isSchoolOnly && !isLanguagesOnly}>
       {isSheet ? (
         <div className="border-t border-classmates-hairline pt-3 dark:border-border/60" aria-hidden />
       ) : null}
+      {!isLanguagesOnly ? (
       <div className={cn("space-y-2", isSheet && "space-y-0")}>
         <h2
           id="profile-school-program-heading"
           className={cn(
             profileSectionLabelClassName,
-            (mePageStructure && !isSheet) || isSheet ? "sr-only" : "",
+            (mePageStructure && !isSheet) || isSheet || isSchoolOnly ? "sr-only" : "",
           )}
         >
           {pf.schoolProgramHeading}
@@ -362,65 +378,29 @@ export function ProfileForm({
         </div>
         {/* Gender feature is temporarily disabled in UI; keep current value unchanged. */}
         <input type="hidden" {...register("gender")} />
-        <div className="space-y-2">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            {pf.privacyHeading}
-          </p>
-          <label className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-background/60 px-3 py-2.5">
-            <span className="min-w-0">
-              <span className="block text-[13px] font-medium text-foreground">{pf.hideFromDiscoveryTitle}</span>
-              <span className="mt-0.5 block text-[11px] text-muted-foreground">{pf.hideFromDiscoverySubtitle}</span>
-            </span>
-            <input
-              type="checkbox"
-              className="h-4 w-4 shrink-0 rounded border-border text-primary accent-primary"
-              {...register("hideFromDiscovery")}
-            />
-          </label>
-          <label className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-background/60 px-3 py-2.5">
-            <span className="min-w-0">
-              <span className="block text-[13px] font-medium text-foreground">{pf.hideFromRecommendationsTitle}</span>
-              <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                {pf.hideFromRecommendationsSubtitle}
-              </span>
-            </span>
-            <input
-              type="checkbox"
-              className="h-4 w-4 shrink-0 rounded border-border text-primary accent-primary"
-              {...register("hideFromRecommendations")}
-            />
-          </label>
-          <label className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-background/60 px-3 py-2.5">
-            <span className="min-w-0">
-              <span className="block text-[13px] font-medium text-foreground">{pf.hideInCourseTitle}</span>
-              <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                {pf.hideInCourseSubtitle}
-              </span>
-            </span>
-            <input
-              type="checkbox"
-              className="h-4 w-4 shrink-0 rounded border-border text-primary accent-primary"
-              {...register("hideFromCourseMembers")}
-            />
-          </label>
-        </div>
         </section>
       </div>
+      ) : null}
 
       {isSheet ? (
         <div className="border-t border-classmates-hairline pt-3 dark:border-border/60" aria-hidden />
       ) : null}
+      {!isSchoolOnly ? (
       <div
         className={cn(
           "space-y-2",
           isCompactAcademic && !isSheet && "space-y-1",
           isSheet && "space-y-0",
           isSheet && "mb-6",
+          isLanguagesOnly && "space-y-0",
         )}
       >
         <h2
           id="profile-languages-heading"
-          className={cn(profileSectionLabelClassName, (isCompactAcademic || isSheet) && "sr-only")}
+          className={cn(
+            profileSectionLabelClassName,
+            (isCompactAcademic || isSheet || isLanguagesOnly) && "sr-only",
+          )}
         >
           {pf.languagesHeading}
         </h2>
@@ -611,8 +591,9 @@ export function ProfileForm({
         <FormMessage message={errors.languages?.message} />
         </section>
       </div>
+      ) : null}
 
-      {verificationSlot && !isSheet ? (
+      {verificationSlot && !isSheet && !isLanguagesOnly ? (
         <div className="space-y-2">
           <h2
             id="profile-verified-email-heading"
@@ -747,6 +728,9 @@ export function ProfileForm({
           <input type="hidden" {...register("discoverBySemester")} />
           <input type="hidden" {...register("allowInvitationNotes")} />
           <input type="hidden" {...register("contactInfoOptIn")} />
+          <input type="hidden" {...register("hideFromDiscovery")} />
+          <input type="hidden" {...register("hideFromRecommendations")} />
+          <input type="hidden" {...register("hideFromCourseMembers")} />
         </>
       ) : (
         <div className="space-y-2">

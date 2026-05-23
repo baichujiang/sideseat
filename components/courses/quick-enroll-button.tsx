@@ -6,7 +6,9 @@ import { Check, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useSignInPrompt } from "@/components/auth/sign-in-prompt-dialog";
 import { useAppMessages } from "@/hooks/use-app-locale";
+import { useSessionHint } from "@/hooks/use-session-hint";
 import { cn } from "@/lib/utils";
 
 /**
@@ -42,12 +44,23 @@ export function QuickEnrollButton({
 }) {
   const router = useRouter();
   const { courses: co } = useAppMessages();
+  const sessionHint = useSessionHint();
+  const { openPrompt } = useSignInPrompt();
   const [state, setState] = useState<"idle" | "pending" | "done">("idle");
 
   async function enroll(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     event.stopPropagation();
     if (state !== "idle") return;
+    if (!sessionHint || sessionHint.isGuest || !sessionHint.signedIn) {
+      openPrompt({
+        returnTo:
+          typeof window !== "undefined"
+            ? `${window.location.pathname}${window.location.search}`
+            : "/courses",
+      });
+      return;
+    }
     setState("pending");
     try {
       const res = await apiFetch(

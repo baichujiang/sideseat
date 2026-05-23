@@ -28,6 +28,7 @@ import {
   openIosShareForInstall,
 } from "@/lib/pwa/ios-share-for-install";
 import { isIosDevice, isStandalonePwa } from "@/lib/pwa/pwa-environment";
+import { useCapacitorNative } from "@/hooks/use-capacitor-native";
 import { cn } from "@/lib/utils";
 
 /** Persistent Me-tab entry for install / Add to Home Screen (survives floating bar dismiss). */
@@ -39,6 +40,7 @@ export function MePageInstallCard({
   /** Renders as an expandable row inside a divided list (no outer card). */
   inList?: boolean;
 }) {
+  const isNativeApp = useCapacitorNative();
   const i = useAppMessages().meInstall;
   const [mounted, setMounted] = useState(false);
   const [, refresh] = useState(0);
@@ -78,6 +80,8 @@ export function MePageInstallCard({
       setIosShareBusy(false);
     }
   }, []);
+
+  if (isNativeApp) return null;
 
   /** Avoid SSR/client mismatch: `isStandalonePwa()` used to return true without `window`. */
   if (!mounted) {

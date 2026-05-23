@@ -1,33 +1,28 @@
 import { InboxChatsShell } from "@/components/inbox/inbox-quick-chips";
 import { InboxRealtimeRefresh } from "@/components/inbox/inbox-realtime-refresh";
-import { GuestAppCta } from "@/components/app/guest-app-cta";
+import { InboxSessionBootstrap } from "@/components/inbox/inbox-session-bootstrap";
+import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
 import { getSessionUser } from "@/lib/auth/session";
+import { dedupeAssistantInboxRows } from "@/lib/inbox/dedupe-assistant-inbox-rows";
+import { pinAssistantBotInbox } from "@/lib/inbox/pin-assistant-bot";
 import { getInboxMergeBundle } from "@/lib/queries/inbox-merge";
 import { getRecommendedClassmatesForViewer } from "@/lib/queries/recommended-classmates";
-import { getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 
 export default async function InboxPage() {
   const sessionUser = await getSessionUser();
-  const locale = await getServerAppLocale();
-  const ui = getMessages(locale);
+  await getServerAppLocale();
   if (!sessionUser) {
-    return (
-      <div className="space-y-3">
-        <header className="px-0.5 text-center">
-          <h1 className="page-screen-title">{ui.inbox.screenTitle}</h1>
-          <p className="page-screen-subtitle mt-0.5">{ui.inbox.screenSubtitleGuest}</p>
-        </header>
-        <GuestAppCta returnTo="/inbox" headline={ui.inbox.guestHeadline} body={ui.inbox.guestBody} />
-      </div>
-    );
+    return <InboxSessionBootstrap />;
   }
   const user = sessionUser;
+  await ensureAssistantBotConnection(user.id);
 
-  const [{ merged, plansNeedingYourAction }, recommendedClassmates] = await Promise.all([
+  const [{ merged: rawMerged, plansNeedingYourAction }, recommendedClassmates] = await Promise.all([
     getInboxMergeBundle(user.id),
     getRecommendedClassmatesForViewer(user.id),
   ]);
+  const merged = pinAssistantBotInbox(dedupeAssistantInboxRows(rawMerged));
   const directContacts = merged
     .filter((item): item is Extract<(typeof merged)[number], { kind: "direct" }> => item.kind === "direct")
     .filter((item) => item.connection.userAId !== item.connection.userBId)

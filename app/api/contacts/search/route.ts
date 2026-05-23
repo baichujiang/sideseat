@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
-import { ConnectionStatus, type UserGender } from "@prisma/client";
+import { ConnectionStatus, type Prisma, type UserGender } from "@prisma/client";
 
 import { requireOnboardedUser } from "@/lib/auth/guards";
+import { nicknameToKey } from "@/lib/auth/nickname-key";
 import { prisma } from "@/lib/db/prisma";
 import { ok } from "@/lib/http";
 
@@ -26,6 +27,17 @@ export async function GET(request: NextRequest) {
   }
 
   const lower = query.toLowerCase();
+  const nicknameQueryKey = nicknameToKey(query);
+  const matchOr: Prisma.UserWhereInput[] = [
+    { id: { equals: query } },
+    { username: { contains: query, mode: "insensitive" } },
+    { nickname: { contains: query, mode: "insensitive" } },
+    { email: { contains: query, mode: "insensitive" } },
+  ];
+  if (nicknameQueryKey.length >= 2) {
+    matchOr.unshift({ nicknameKey: nicknameQueryKey });
+  }
+
   const matches = await prisma.user.findMany({
     where: {
       id: { not: user.id },
@@ -34,12 +46,7 @@ export async function GET(request: NextRequest) {
       blocksInitiated: { none: { blockedId: user.id } },
       blocksReceived: { none: { blockerId: user.id } },
       moderationBlocks: { none: { isActive: true } },
-      OR: [
-        { id: { equals: query } },
-        { username: { contains: query, mode: "insensitive" } },
-        { nickname: { contains: query, mode: "insensitive" } },
-        { email: { contains: query, mode: "insensitive" } },
-      ],
+      OR: matchOr,
     },
     select: {
       id: true,
@@ -89,6 +96,18 @@ export async function GET(request: NextRequest) {
       const aEmailExact = (a.email ?? "").toLowerCase() === lower ? 1 : 0;
       const bEmailExact = (b.email ?? "").toLowerCase() === lower ? 1 : 0;
       if (aEmailExact !== bEmailExact) return bEmailExact - aEmailExact;
+
+      const aNickExact =
+        nicknameQueryKey.length >= 2 &&
+        (a.nickname ? nicknameToKey(a.nickname) === nicknameQueryKey : false)
+          ? 1
+          : 0;
+      const bNickExact =
+        nicknameQueryKey.length >= 2 &&
+        (b.nickname ? nicknameToKey(b.nickname) === nicknameQueryKey : false)
+          ? 1
+          : 0;
+      if (aNickExact !== bNickExact) return bNickExact - aNickExact;
 
       const aHandleStarts = a.username.toLowerCase().startsWith(lower) ? 1 : 0;
       const bHandleStarts = b.username.toLowerCase().startsWith(lower) ? 1 : 0;

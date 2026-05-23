@@ -1,4 +1,7 @@
+import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
+import { validateNicknameForUser } from "@/lib/auth/nickname-fields";
 import { hashPassword } from "@/lib/auth/password";
+import { NICKNAME_ERROR_CODES } from "@/lib/profile/nickname-api-errors";
 import {
   defaultNicknameFromUsername,
   SIGNUP_DEFAULT_PROFILE,
@@ -28,17 +31,35 @@ export async function POST(request: Request) {
       return error("That username is already taken.", 409);
     }
 
+    const defaultNick = defaultNicknameFromUsername(values.username);
+    const nicknameCheck = await validateNicknameForUser(defaultNick);
+    if (!nicknameCheck.ok) {
+      const code =
+        nicknameCheck.reason === "taken"
+          ? NICKNAME_ERROR_CODES.TAKEN
+          : NICKNAME_ERROR_CODES.RESERVED;
+      return error(
+        nicknameCheck.reason === "taken"
+          ? "That display name is already taken."
+          : "That display name is reserved.",
+        409,
+        code,
+      );
+    }
+
     const user = await prisma.user.create({
       data: {
         username: values.username,
         hashedPassword: await hashPassword(values.password),
         avatarUrl: randomAvatarId(),
-        nickname: defaultNicknameFromUsername(values.username),
+        nickname: nicknameCheck.nickname,
+        nicknameKey: nicknameCheck.nicknameKey,
         ...SIGNUP_DEFAULT_PROFILE,
         userLanguages: signupDefaultUserLanguages(),
       },
     });
 
+    await ensureAssistantBotConnection(user.id);
     const { accessToken, expiresIn } = await createSession(user.id);
 
     return ok(

@@ -223,7 +223,7 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
       <div
         className={cn(
           "pointer-events-none absolute inset-x-0 bottom-0 flex justify-center",
-          "pb-[calc(5.25rem+env(safe-area-inset-bottom))]",
+          "pb-[calc(5.25rem+var(--safe-bottom))]",
         )}
       >
         <div

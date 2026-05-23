@@ -11,6 +11,7 @@ import { ProductTutorialGate, type ProductTutorialGateContext } from "@/componen
 import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { PwaInstallBar } from "@/components/pwa/pwa-install-bar";
+import { useCapacitorNative } from "@/hooks/use-capacitor-native";
 import { apiFetch } from "@/lib/auth/api-fetch";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +42,7 @@ export function AppShell({
   ] satisfies Array<{ href: Route; label: string; icon: typeof Calendar }>;
 
   const pathname = usePathname();
+  const isNativeApp = useCapacitorNative();
   const [liveUnreadTotal, setLiveUnreadTotal] = useState(inboxUnreadTotal);
 
   useEffect(() => {
@@ -103,7 +105,7 @@ export function AppShell({
         isChatThread
           ? undefined
           : ({
-              "--bottom-nav-clearance": "calc(160px + env(safe-area-inset-bottom))",
+              "--bottom-nav-clearance": "calc(160px + var(--safe-bottom))",
             } as CSSProperties)
       }
       className={cn(
@@ -119,16 +121,16 @@ export function AppShell({
           "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden [touch-action:pan-y]",
           shellSurface,
           isChatThread
-            ? "px-0 pb-0 pt-[max(0.25rem,env(safe-area-inset-top))]"
-            : "overflow-y-auto overscroll-y-contain px-3 pb-[var(--bottom-nav-clearance)] pt-3 sm:px-3",
+            ? "px-0 pb-0 pt-[max(0.25rem,var(--safe-top))]"
+            : "overflow-y-auto overscroll-y-contain px-3 pb-[var(--bottom-nav-clearance)] pt-[max(0.75rem,var(--safe-top))] sm:px-3",
         )}
       >
         {children}
       </main>
-      {isChatThread ? null : <PwaInstallBar />}
+      {isChatThread || isNativeApp ? null : <PwaInstallBar />}
       {isChatThread ? null : (
         <nav
-          className="fixed bottom-0 left-1/2 z-20 flex w-full max-w-md -translate-x-1/2 items-stretch border-t border-classmates-edge/80 bg-classmates-warm-alt/95 px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1.5 backdrop-blur-xl supports-[backdrop-filter]:bg-classmates-warm-alt/92 dark:border-border/50 dark:bg-background/92"
+          className="fixed bottom-0 left-1/2 z-20 flex w-full max-w-md -translate-x-1/2 items-stretch border-t border-classmates-edge/80 bg-classmates-warm-alt/95 px-1 pb-[max(0.5rem,var(--safe-bottom))] pt-1.5 backdrop-blur-xl supports-[backdrop-filter]:bg-classmates-warm-alt/92 dark:border-border/50 dark:bg-background/92"
           aria-label={m.nav.mainNavAria}
         >
           {navItems.map((item) => {

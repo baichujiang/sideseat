@@ -1,3 +1,4 @@
+import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
 import { findUserForLogin } from "@/lib/auth/lookup-user";
 import { verifyPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
@@ -20,6 +21,7 @@ export async function POST(request: Request) {
       return error("Invalid username, email, phone, or password.", 401);
     }
 
+    await ensureAssistantBotConnection(user.id);
     const { accessToken, expiresIn } = await createSession(user.id);
 
     return ok({

@@ -1,7 +1,10 @@
 import { normalizePhone } from "@/lib/auth/phone";
 import { verifyPhoneSignupOtp } from "@/lib/auth/phone-otp";
 import { hashPassword } from "@/lib/auth/password";
-import { allocateUniqueUsername } from "@/lib/auth/random-username";
+import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
+import { validateNicknameForUser } from "@/lib/auth/nickname-fields";
+import { isUsernameAvailable } from "@/lib/auth/username-availability";
+import { SIGNUP_EMAIL_ERROR_CODES } from "@/lib/auth/email-otp-error-codes";
 import { SIGNUP_DEFAULT_PROFILE, signupDefaultUserLanguages } from "@/lib/auth/signup-defaults";
 import { createSession } from "@/lib/auth/session";
 import { randomAvatarId } from "@/lib/constants/avatars";
@@ -33,7 +36,24 @@ export async function POST(request: Request) {
       return error("That phone number is already registered.", 409);
     }
 
-    const username = await allocateUniqueUsername();
+    const displayName = values.displayName.trim();
+    const nicknameCheck = await validateNicknameForUser(displayName);
+    if (!nicknameCheck.ok) {
+      const message =
+        nicknameCheck.reason === "taken"
+          ? "That display name is already taken."
+          : "That display name is reserved.";
+      const code =
+        nicknameCheck.reason === "taken"
+          ? SIGNUP_EMAIL_ERROR_CODES.NICKNAME_TAKEN
+          : SIGNUP_EMAIL_ERROR_CODES.NICKNAME_RESERVED;
+      return error(message, 409, code);
+    }
+
+    const username = values.username;
+    if (!(await isUsernameAvailable(username))) {
+      return error("That username is already taken.", 409);
+    }
 
     const user = await prisma.user.create({
       data: {
@@ -41,12 +61,14 @@ export async function POST(request: Request) {
         phone,
         hashedPassword: await hashPassword(values.password),
         avatarUrl: randomAvatarId(),
-        nickname: values.displayName,
+        nickname: nicknameCheck.nickname,
+        nicknameKey: nicknameCheck.nicknameKey,
         ...SIGNUP_DEFAULT_PROFILE,
         userLanguages: signupDefaultUserLanguages(),
       },
     });
 
+    await ensureAssistantBotConnection(user.id);
     const { accessToken, expiresIn } = await createSession(user.id);
 
     return ok(

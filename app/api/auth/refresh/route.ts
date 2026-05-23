@@ -1,4 +1,5 @@
 import { signAccessToken } from "@/lib/auth/access-token";
+import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
 import { isDatabaseUnreachable, warnDatabaseUnreachableThrottled } from "@/lib/db/prisma-errors";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok } from "@/lib/http";
@@ -42,6 +43,7 @@ export async function POST() {
       return error("Session expired.", 401);
     }
 
+    await ensureAssistantBotConnection(session.userId);
     const { token: accessToken, expiresIn } = await signAccessToken(session.userId);
     return ok({
       accessToken,

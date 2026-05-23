@@ -22,6 +22,7 @@ import {
   Loader2,
   Plus,
   Share2,
+  Sparkles,
   Upload,
   X,
 } from "lucide-react";
@@ -50,6 +51,7 @@ import { WeekVisibleDaysBar } from "@/components/calendar/week-visible-days-bar"
 import type { WeekEventEditToolbarLabels } from "@/components/calendar/week-event-edit-toolbar";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { PlanRequestModal } from "@/components/chat/plan-request-modal";
+import { NaturalScheduleSheet } from "@/components/home/natural-schedule-sheet";
 import { ScheduleAddPanel } from "@/components/home/schedule-add-panel";
 import { ScheduleCalendarCategoryManager } from "@/components/home/schedule-calendar-category-manager";
 import { createScheduleSharePath } from "@/lib/schedule-share/create-schedule-share-client";
@@ -302,6 +304,7 @@ export function ScheduleSurface({
   semesterEndISO,
   homeGreeting,
   homeBelowHeaderSlot,
+  naturalScheduleEnabled = false,
 }: {
   classBlocks: ClassBlock[];
   studyEntries: StudyEntry[];
@@ -312,9 +315,15 @@ export function ScheduleSurface({
   semesterStartISO: string;
   semesterEndISO: string;
   /** When set, greeting + view tabs share a column with calendar + toolbar on the right (Home). */
-  homeGreeting?: { nickname: string | null; avatarUrl: string | null } | null;
+  homeGreeting?: {
+    nickname: string | null;
+    avatarUrl: string | null;
+    guestReturnTo?: string;
+  } | null;
   /** Inserted between the home header row and the date navigation (e.g. onboarding CTA). */
   homeBelowHeaderSlot?: ReactNode;
+  /** Logged-in users: Alibaba Qwen natural-language calendar (requires DASHSCOPE_API_KEY). */
+  naturalScheduleEnabled?: boolean;
 }) {
   const router = useRouter();
   const { messages, locale } = useLocaleContext();
@@ -328,6 +337,7 @@ export function ScheduleSurface({
     isWeekendDay(new Date(nowISO)) ? "include-anchor" : "workweek",
   );
   const [adding, setAdding] = useState(false);
+  const [naturalScheduleOpen, setNaturalScheduleOpen] = useState(false);
   /** In-grid draft visible while dragging on empty week cells (before add panel opens). */
   const [gridCreatePreview, setGridCreatePreview] = useState(false);
   const [draftEventStart, setDraftEventStart] = useState<string | undefined>(undefined);
@@ -1316,6 +1326,22 @@ export function ScheduleSurface({
 
   const toolbarActions = (
     <>
+      {naturalScheduleEnabled ? (
+        <button
+          type="button"
+          aria-label={messages.schedule.naturalScheduleAria}
+          onClick={() => setNaturalScheduleOpen(true)}
+          className={cn(
+            "flex shrink-0 items-center justify-center rounded-full border border-violet-200 bg-white text-violet-600 shadow-sm transition",
+            iconBtnSm,
+            "hover:bg-violet-50 active:scale-[0.98]",
+            "dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300 dark:hover:bg-violet-950/70",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/35",
+          )}
+        >
+          <Sparkles className={cn("shrink-0", iconGlyphSm)} strokeWidth={2} aria-hidden />
+        </button>
+      ) : null}
       <div ref={icsMenuRef} className="relative z-[1] isolate">
         <button
           type="button"
@@ -1447,6 +1473,17 @@ export function ScheduleSurface({
   return (
     <section className="pb-2">
       <div className="space-y-2.5">
+      <NaturalScheduleSheet
+        open={naturalScheduleOpen}
+        onClose={() => setNaturalScheduleOpen(false)}
+        calendarCategories={initialCalendarCategories}
+        onSaved={() => {
+          setNaturalScheduleOpen(false);
+          setDetailItem(null);
+          router.refresh();
+        }}
+      />
+
       <ScheduleAddPanel
         selectedDate={selectedDate}
         open={adding}
@@ -1500,6 +1537,7 @@ export function ScheduleSurface({
                   nickname={homeGreeting.nickname}
                   avatarUrl={homeGreeting.avatarUrl}
                   nowDate={now}
+                  guestReturnTo={homeGreeting.guestReturnTo}
                 />
                 <div className="mt-0.5 -ml-1 pr-1 sm:-ml-1.5">
                   <ViewTabs

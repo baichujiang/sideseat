@@ -16,29 +16,13 @@ import { getSchoolLogoPath } from "@/lib/constants/schools";
 import { cn } from "@/lib/utils";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { formatMessage } from "@/lib/i18n/messages";
-import type { AppMessages } from "@/lib/i18n/messages/types";
+import { defaultSchoolVerificationEmailInput } from "@/lib/verification/default-school-email-input";
+import { studentVerificationStatusLabel } from "@/lib/verification/student-verification-display";
 
 const verifiedChipClass =
   "shrink-0 self-center rounded-full bg-[#D1FAE5] px-2.5 py-1 text-xs font-semibold leading-none text-[#047857] dark:bg-emerald-900/40 dark:text-emerald-300";
 
 type DeliveryKind = "sent" | "failed" | "skipped" | "manual";
-
-function verificationStatusLabel(status: StudentVerificationStatus, t: AppMessages["studentVerification"]): string {
-  switch (status) {
-    case StudentVerificationStatus.UNVERIFIED:
-      return t.statusUnverified;
-    case StudentVerificationStatus.EMAIL_PENDING:
-      return t.statusEmailPending;
-    case StudentVerificationStatus.VERIFIED:
-      return t.statusVerified;
-    case StudentVerificationStatus.MANUAL_REVIEW_REQUIRED:
-      return t.statusManualReviewRequired;
-    case StudentVerificationStatus.REJECTED:
-      return t.statusRejected;
-    default:
-      return t.statusUnverified;
-  }
-}
 
 function statusTone(status: StudentVerificationStatus) {
   if (status === StudentVerificationStatus.VERIFIED) return "calm";
@@ -67,7 +51,8 @@ export function StudentVerificationForm({
 }) {
   const { studentVerification: v, common } = useAppMessages();
   const router = useRouter();
-  const [input, setInput] = useState(email ?? "");
+  const initialEmail = defaultSchoolVerificationEmailInput(currentStatus, email);
+  const [input, setInput] = useState(initialEmail);
   const [message, setMessage] = useState("");
   const [verifyUrl, setVerifyUrl] = useState("");
   const [delivery, setDelivery] = useState<DeliveryKind | "">("");
@@ -81,7 +66,7 @@ export function StudentVerificationForm({
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [manualEmail, setManualEmail] = useState(email ?? "");
+  const [manualEmail, setManualEmail] = useState(initialEmail);
   const [manualMessage, setManualMessage] = useState("");
   const [manualError, setManualError] = useState("");
   const [isUploading, startUploadTransition] = useTransition();
@@ -241,7 +226,7 @@ export function StudentVerificationForm({
           <p className="text-xs font-medium text-muted-foreground">{v.heading}</p>
         </div>
         <StatusBadge tone={statusTone(currentStatus)}>
-          {verificationStatusLabel(currentStatus, v)}
+          {studentVerificationStatusLabel(currentStatus, v)}
         </StatusBadge>
       </div>
       <div className="flex gap-2">

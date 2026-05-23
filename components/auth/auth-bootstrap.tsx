@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { setAccessToken } from "@/lib/auth/client-access-token";
+import { shouldAutoGuestSession } from "@/lib/nav/auto-guest-path";
 import { isPublicAppPath } from "@/lib/nav/public-app-path";
 
 /**
@@ -28,9 +29,31 @@ export function AuthBootstrap() {
           }
           return;
         }
-        if (res.status === 401) {
+        if (res.status === 401 || res.status === 503) {
           setAccessToken(null);
-          if (!isPublicAppPath(pathname)) {
+          if (shouldAutoGuestSession(pathname)) {
+            const guestRes = await fetch("/api/auth/ensure-guest", {
+              method: "POST",
+              credentials: "include",
+              headers: { "Content-Type": "application/json" },
+              body: "{}",
+            });
+            if (!cancelled && guestRes.ok) {
+              const refreshAgain = await fetch("/api/auth/refresh", {
+                method: "POST",
+                credentials: "include",
+              });
+              if (refreshAgain.ok) {
+                const body = (await refreshAgain.json()) as { data?: { accessToken?: string } };
+                if (body.data?.accessToken) {
+                  setAccessToken(body.data.accessToken);
+                }
+                router.refresh();
+                return;
+              }
+            }
+          }
+          if (res.status === 401 && !isPublicAppPath(pathname)) {
             const returnTo = `${pathname}${typeof window !== "undefined" ? window.location.search : ""}`;
             router.replace(
               `/login?returnTo=${encodeURIComponent(returnTo)}` as Route,

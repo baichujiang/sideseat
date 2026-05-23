@@ -27,6 +27,9 @@ export type AuthFormSignupEmailErrors = {
   dbUnavailable: string;
   codeInvalid: string;
   emailAlreadyRegistered: string;
+  usernameTaken: string;
+  displayNameTaken: string;
+  displayNameReserved: string;
   invalidRequest: string;
   unknown: string;
 };
@@ -64,6 +67,9 @@ const SIGNUP_EMAIL_CODE_TO_KEY: Record<SignupEmailErrorCode, keyof AuthFormSignu
   [SIGNUP_EMAIL_ERROR_CODES.DB_UNAVAILABLE]: "dbUnavailable",
   [SIGNUP_EMAIL_ERROR_CODES.CODE_INVALID]: "codeInvalid",
   [SIGNUP_EMAIL_ERROR_CODES.EMAIL_ALREADY_REGISTERED]: "emailAlreadyRegistered",
+  [SIGNUP_EMAIL_ERROR_CODES.USERNAME_TAKEN]: "usernameTaken",
+  [SIGNUP_EMAIL_ERROR_CODES.NICKNAME_TAKEN]: "displayNameTaken",
+  [SIGNUP_EMAIL_ERROR_CODES.NICKNAME_RESERVED]: "displayNameReserved",
   [SIGNUP_EMAIL_ERROR_CODES.INVALID_REQUEST]: "invalidRequest",
   [SIGNUP_EMAIL_ERROR_CODES.UNKNOWN]: "unknown",
 };

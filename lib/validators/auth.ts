@@ -1,17 +1,31 @@
 import { z } from "zod";
 
-const usernameSchema = z
-  .string()
-  .trim()
-  .min(2, "Username must be at least 2 characters.")
-  .max(32)
-  .transform((s) => s.toLowerCase())
-  .refine((s) => /^[a-z0-9_-]+$/.test(s), {
-    message: "Use only letters, numbers, underscores, and hyphens.",
-  })
-  .refine((s) => !s.startsWith("guest_"), {
-    message: "This username is reserved.",
-  });
+export type LoginUsernameMessages = {
+  tooShort: string;
+  tooLong: string;
+  invalid: string;
+  reserved: string;
+};
+
+export const LOGIN_USERNAME_MESSAGES_EN: LoginUsernameMessages = {
+  tooShort: "Username must be at least 2 characters.",
+  tooLong: "Username must be at most 32 characters.",
+  invalid: "Use only letters, numbers, underscores, and hyphens.",
+  reserved: "This username is reserved.",
+};
+
+export function loginUsernameField(messages: LoginUsernameMessages) {
+  return z
+    .string()
+    .trim()
+    .min(2, messages.tooShort)
+    .max(32, messages.tooLong)
+    .transform((s) => s.toLowerCase())
+    .refine((s) => /^[a-z0-9_-]+$/.test(s), { message: messages.invalid })
+    .refine((s) => !s.startsWith("guest_"), { message: messages.reserved });
+}
+
+const usernameSchema = loginUsernameField(LOGIN_USERNAME_MESSAGES_EN);
 
 const emailFieldSchema = z
   .string()
@@ -47,7 +61,10 @@ export function signupDisplayNameField(messages: SignupDisplayNameMessages) {
     .refine((s) => !emailAddressShape.test(s), { message: messages.notEmailLike });
 }
 
-export function createSignupEmailSchema(displayNameMessages: SignupDisplayNameMessages) {
+export function createSignupEmailSchema(
+  displayNameMessages: SignupDisplayNameMessages,
+  usernameMessages: LoginUsernameMessages = LOGIN_USERNAME_MESSAGES_EN,
+) {
   return z
     .object({
       email: emailFieldSchema,
@@ -56,6 +73,7 @@ export function createSignupEmailSchema(displayNameMessages: SignupDisplayNameMe
         .trim()
         .regex(/^\d{6}$/, "Enter the 6-digit verification code."),
       displayName: signupDisplayNameField(displayNameMessages),
+      username: loginUsernameField(usernameMessages),
       password: z.string().min(8, "Password must be at least 8 characters."),
       confirmPassword: z.string().min(1, "Confirm your password."),
     })
@@ -65,7 +83,10 @@ export function createSignupEmailSchema(displayNameMessages: SignupDisplayNameMe
     });
 }
 
-export function createSignupPhoneSchema(displayNameMessages: SignupDisplayNameMessages) {
+export function createSignupPhoneSchema(
+  displayNameMessages: SignupDisplayNameMessages,
+  usernameMessages: LoginUsernameMessages = LOGIN_USERNAME_MESSAGES_EN,
+) {
   return z
     .object({
       phone: z.string().trim().min(1, "Enter your phone number."),
@@ -74,6 +95,7 @@ export function createSignupPhoneSchema(displayNameMessages: SignupDisplayNameMe
         .trim()
         .regex(/^\d{6}$/, "Enter the 6-digit verification code."),
       displayName: signupDisplayNameField(displayNameMessages),
+      username: loginUsernameField(usernameMessages),
       password: z.string().min(8, "Password must be at least 8 characters."),
       confirmPassword: z.string().min(1, "Confirm your password."),
     })

@@ -1,6 +1,8 @@
 import { ConnectionStatus, MessageType } from "@prisma/client";
 
+import { replyAfterUserMessageToAssistant } from "@/lib/assistant/reply-after-user-message";
 import { requireOnboardedUser } from "@/lib/auth/guards";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { isAllowedChatImageUrl } from "@/lib/constants/chat-media";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
@@ -77,6 +79,17 @@ export async function POST(
         senderId: user.id,
         bodyPreview,
       }).catch(() => {});
+
+      const locale = await getServerAppLocale();
+      await replyAfterUserMessageToAssistant({
+        connectionId,
+        senderUserId: user.id,
+        messageBody: body,
+        locale,
+      }).catch((err) => {
+        console.error("[assistant] reply failed", err);
+      });
+
       return ok(message, { status: 201 });
     }
 

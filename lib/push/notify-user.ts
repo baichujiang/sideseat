@@ -2,6 +2,7 @@ import "server-only";
 
 import { WebPushError } from "web-push";
 
+import { isAssistantBotUser } from "@/lib/auth/assistant-bot";
 import { prisma } from "@/lib/db/prisma";
 import { isWebPushConfigured } from "@/lib/push/vapid-env";
 import { sendWebPushNotification } from "@/lib/push/web-push-server";
@@ -59,6 +60,12 @@ export async function notifyNewDirectChatMessage(params: {
 
   const peerId =
     connection.userAId === params.senderId ? connection.userBId : connection.userAId;
+
+  const peer = await prisma.user.findUnique({
+    where: { id: peerId },
+    select: { username: true },
+  });
+  if (peer && isAssistantBotUser(peer)) return;
 
   const sender = await prisma.user.findUnique({
     where: { id: params.senderId },
