@@ -33,10 +33,12 @@ function catalogSearchHref(school?: string): Route {
 export function SavedCoursesPanel({
   initialSaved,
   school,
+  listReturnTo = "/courses",
 }: {
   initialSaved: SavedRow[];
   /** Keeps “Search courses” deep-link on the same school tab. */
   school?: string;
+  listReturnTo?: string;
 }) {
   const router = useRouter();
   const { courses: co } = useAppMessages();
@@ -86,7 +88,7 @@ export function SavedCoursesPanel({
             <li key={row.savedId} className="list-none">
               <div className="flex items-center gap-3 px-3 py-2.5 transition-colors active:bg-muted/40 [@media(hover:hover)]:hover:bg-muted/25">
               <Link
-                href={`/courses/${row.courseId}?returnTo=%2Fcourses` as Route}
+                href={`/courses/${row.courseId}?returnTo=${encodeURIComponent(listReturnTo)}` as Route}
                 className="min-w-0 flex-1"
               >
                 <p className="truncate text-[15px] font-semibold leading-snug tracking-tight text-[#111827] dark:text-foreground">

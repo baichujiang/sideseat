@@ -32,6 +32,7 @@ export function PopularCourseCard({
   viewer,
   variant = "card",
   courses,
+  listReturnTo = "/courses",
 }: {
   course: {
     id: string;
@@ -45,6 +46,8 @@ export function PopularCourseCard({
   variant?: "card" | "compact";
   /** When omitted, English-only fallbacks are used (e.g. discover embeds). */
   courses?: CoursesMessages;
+  /** Full `/courses?...` path for back navigation from course detail. */
+  listReturnTo?: string;
 }) {
   const codeLabel = courseCodeBadgeLabel(course.name, course.code);
   const instructorLabel = course.instructorSummary?.trim() || extractInstructorHint(course.name);
@@ -83,7 +86,7 @@ export function PopularCourseCard({
         />
       ) : null}
       <Link
-        href={`/courses/${course.id}?returnTo=%2Fcourses` as Route}
+        href={`/courses/${course.id}?returnTo=${encodeURIComponent(listReturnTo)}` as Route}
         className={cn(
           "group flex transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/25 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-card",
           isCompact

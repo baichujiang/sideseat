@@ -2,19 +2,17 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import { CourseIntent, type UserGender } from "@prisma/client";
+import type { UserGender } from "@prisma/client";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
 
-import { ClassmatesPersonRow, CLASSMATES_PERSON_ROW_CLASS } from "@/components/classmates/classmates-person-row";
 import { Input } from "@/components/ui/input";
-import { UserGenderCardIcon } from "@/components/ui/user-gender-icon";
+import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { formatMessage, type CoursesMessages } from "@/lib/i18n/messages";
-import { cn } from "@/lib/utils";
 
 export type CourseMember = {
   membershipId: string;
@@ -33,7 +31,7 @@ export type CourseMember = {
     | "VERIFIED"
     | "MANUAL_REVIEW_REQUIRED"
     | "REJECTED";
-  intentions: CourseIntent[];
+  intentions: import("@prisma/client").CourseIntent[];
   overlapMinutes: number;
   /**
    * Connection state between the viewer and this member:
@@ -45,19 +43,16 @@ export type CourseMember = {
     | { kind: "ACTIVE"; connectionId: string };
 };
 
-const intentChipClass =
-  "rounded-full bg-[#F0FDFA] px-3 py-1 text-xs font-semibold text-[#0F766E] dark:border dark:border-teal-800/40 dark:bg-teal-950/45 dark:text-teal-100";
+const memberListShellClass =
+  "divide-y divide-[#F1F1F1] overflow-hidden rounded-[1.25rem] border border-classmates-edge/90 bg-classmates-surface dark:divide-border/60 dark:border-border/60 dark:bg-card";
 
-/** No thread yet — primary CTA, brand blue (not near-black). */
+/** No thread yet — compact primary CTA. */
 const memberMessageButtonClass =
-  "inline-flex min-h-[2.25rem] items-center justify-center rounded-full bg-[#2563EB] px-3.5 text-xs font-semibold text-white shadow-[0_2px_8px_rgba(37,99,235,0.22)] transition hover:bg-[#1D4ED8] active:bg-[#1E40AF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:bg-blue-600 dark:hover:bg-blue-500 dark:focus-visible:ring-blue-400/50 dark:ring-offset-card";
+  "inline-flex h-8 shrink-0 items-center justify-center rounded-full bg-[#2563EB] px-3 text-[12px] font-semibold text-white transition hover:bg-[#1D4ED8] active:bg-[#1E40AF] disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/45 dark:bg-blue-600 dark:hover:bg-blue-500";
 
-/** Existing thread — secondary, matches calendar-style chips on course hub. */
+/** Existing thread — compact secondary CTA. */
 const memberOpenChatLinkClass =
-  "inline-flex min-h-[2.25rem] items-center justify-center rounded-full border border-[#BFDBFE] bg-[#EFF6FF] px-3.5 text-xs font-semibold text-[#2563EB] transition hover:bg-[#DBEAFE] active:bg-[#BFDBFE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-blue-800/60 dark:bg-blue-950/45 dark:text-blue-200 dark:hover:bg-blue-950/70 dark:focus-visible:ring-blue-400/40 dark:ring-offset-card";
-
-const classmateCardClass =
-  "rounded-[24px] border border-[#E7E0D6] bg-white px-4 py-4 shadow-[0_4px_16px_rgba(15,23,42,0.04)] transition-[border-color,box-shadow] sm:px-5 sm:py-[1.125rem] dark:border-border dark:bg-card dark:shadow-[0_4px_14px_rgba(0,0,0,0.18)] [@media(hover:hover)]:hover:border-[#D4C9BA] [@media(hover:hover)]:hover:shadow-[0_6px_22px_rgba(15,23,42,0.08)] dark:[@media(hover:hover)]:hover:border-zinc-600";
+  "inline-flex h-8 shrink-0 items-center justify-center rounded-full border border-[#BFDBFE] bg-[#EFF6FF] px-3 text-[12px] font-semibold text-[#2563EB] transition hover:bg-[#DBEAFE] active:bg-[#BFDBFE] dark:border-blue-800/60 dark:bg-blue-950/45 dark:text-blue-200 dark:hover:bg-blue-950/70";
 
 function formatOverlapShort(minutes: number): string {
   if (minutes <= 0) return "";
@@ -75,12 +70,6 @@ export function CourseMemberList({
   members: CourseMember[];
 }) {
   const { courses: co } = useAppMessages();
-  const intentLabel: Record<CourseIntent, string> = {
-    STUDY_TOGETHER: co.intentStudyTogether,
-    EXAM_PREP: co.intentExamPrep,
-    GO_TO_CLASS_TOGETHER: co.intentGoTogether,
-    EAT_AFTER_CLASS: co.intentGetCoffee,
-  };
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -96,7 +85,7 @@ export function CourseMemberList({
 
   return (
     <section
-      className="space-y-2.5 border-t border-classmates-hairline pt-5 dark:border-border/60"
+      className="space-y-2 border-t border-classmates-hairline pt-4 dark:border-border/60"
       aria-labelledby="course-classmates-heading"
     >
       <h3
@@ -117,26 +106,19 @@ export function CourseMemberList({
       ) : null}
 
       {n === 0 ? (
-        <p className="px-1 text-center text-[12px] leading-snug text-classmates-hint dark:text-zinc-500">
+        <p className="px-1 py-2 text-center text-[12px] leading-snug text-classmates-hint dark:text-zinc-500">
           {co.memberEmpty}
         </p>
+      ) : filtered.length === 0 ? (
+        <p className="rounded-[1.25rem] border border-classmates-edge/90 bg-classmates-surface px-3 py-6 text-center text-[12px] text-muted-foreground dark:border-border/60 dark:bg-card dark:text-zinc-400">
+          {formatMessage(co.memberNoMatch, { query: query.trim() })}
+        </p>
       ) : (
-        <div className="flex flex-col gap-2.5">
-          {filtered.length === 0 ? (
-            <div
-              className={cn(
-                CLASSMATES_PERSON_ROW_CLASS,
-                "py-8 text-center text-sm text-muted-foreground dark:text-zinc-400",
-              )}
-            >
-              {formatMessage(co.memberNoMatch, { query: query.trim() })}
-            </div>
-          ) : (
-            filtered.map((m) => (
-              <MemberRow key={m.membershipId} member={m} courseId={courseId} intentLabel={intentLabel} copy={co} />
-            ))
-          )}
-        </div>
+        <ul className={memberListShellClass}>
+          {filtered.map((m) => (
+            <MemberRow key={m.membershipId} member={m} courseId={courseId} copy={co} />
+          ))}
+        </ul>
       )}
     </section>
   );
@@ -145,12 +127,10 @@ export function CourseMemberList({
 function MemberRow({
   member,
   courseId,
-  intentLabel,
   copy,
 }: {
   member: CourseMember;
   courseId: string;
-  intentLabel: Record<CourseIntent, string>;
   copy: CoursesMessages;
 }) {
   const router = useRouter();
@@ -158,16 +138,7 @@ function MemberRow({
   const overlap = formatOverlapShort(member.overlapMinutes);
   const profileHref =
     `/users/${member.userId}?returnTo=${encodeURIComponent(`/courses/${courseId}`)}` as Route;
-  const schoolInBadge =
-    member.studentVerificationStatus === "VERIFIED" && member.verifiedStudent;
-  const schoolMeta = !schoolInBadge && member.school?.trim() ? member.school.trim() : null;
-  const metaLine = [
-    member.major,
-    member.semester ? formatMessage(copy.memberSemesterChip, { semester: member.semester }) : null,
-    schoolMeta,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  const metaLine = buildMemberMetaLine(member, overlap, copy);
 
   async function openChat() {
     if (opening) return;
@@ -205,61 +176,50 @@ function MemberRow({
         {copy.memberOpenChat}
       </Link>
     ) : (
-      <button
-        type="button"
-        onClick={() => void openChat()}
-        disabled={opening}
-        className={cn(memberMessageButtonClass, opening && "pointer-events-none opacity-60")}
-      >
+      <button type="button" onClick={() => void openChat()} disabled={opening} className={memberMessageButtonClass}>
         {opening ? copy.memberOpening : copy.memberMessage}
       </button>
     );
 
   return (
-    <ClassmatesPersonRow
-      avatarHref={profileHref}
-      avatarUrl={member.avatarUrl}
-      profileAriaLabel={formatMessage(copy.memberViewProfileAria, { name: member.nickname })}
-      name={member.nickname}
-      nameRowAdornment={
-        <VerifiedBadge
-          size="xs"
-          school={member.school}
-          verifiedStudent={member.verifiedStudent}
-          status={member.studentVerificationStatus}
-        />
-      }
-      titleAdornment={<UserGenderCardIcon gender={member.gender} className="shrink-0" />}
-      body={
-        <>
-          {metaLine ? (
-            <p className="mt-1 truncate text-[12px] leading-snug text-muted-foreground">{metaLine}</p>
-          ) : null}
-          {overlap ? (
-            <p className="mt-1 text-[11px] font-semibold leading-snug text-[#0F766E] dark:text-teal-300">
-              {formatMessage(copy.memberOverlapLine, { overlap })}
-            </p>
-          ) : null}
-          {member.bio ? (
-            <p className="mt-1 line-clamp-2 text-[12px] leading-snug text-muted-foreground/90">{member.bio}</p>
-          ) : null}
-        </>
-      }
-      footer={
-        member.intentions.length ? (
-          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5 pt-1">
-            <span className="shrink-0 text-[12px] font-semibold text-classmates-sub dark:text-zinc-400">
-              {copy.memberWantsTo}
-            </span>
-            {member.intentions.map((intent) => (
-              <span key={intent} className={intentChipClass}>
-                {intentLabel[intent]}
-              </span>
-            ))}
-          </div>
-        ) : null
-      }
-      action={cta}
-    />
+    <li className="flex items-center gap-2.5 px-3 py-2">
+      <Link
+        href={profileHref}
+        className="shrink-0 rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-classmates-azure/40 focus-visible:ring-offset-2"
+        aria-label={formatMessage(copy.memberViewProfileAria, { name: member.nickname })}
+      >
+        <PresetAvatar id={member.avatarUrl} size={40} className="shrink-0" />
+      </Link>
+
+      <Link href={profileHref} className="min-w-0 flex-1 overflow-hidden rounded-md outline-none focus-visible:ring-2 focus-visible:ring-classmates-azure/40">
+        <div className="flex min-w-0 items-center gap-1">
+          <span className="min-w-0 truncate text-[13px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
+            {member.nickname}
+          </span>
+          <VerifiedBadge
+            size="xs"
+            school={member.school}
+            verifiedStudent={member.verifiedStudent}
+            status={member.studentVerificationStatus}
+          />
+        </div>
+        {metaLine ? (
+          <p className="mt-0.5 truncate text-[11px] leading-snug text-muted-foreground">{metaLine}</p>
+        ) : null}
+      </Link>
+
+      {cta}
+    </li>
   );
+}
+
+function buildMemberMetaLine(member: CourseMember, overlap: string, copy: CoursesMessages): string | null {
+  if (overlap) {
+    return formatMessage(copy.memberOverlapLine, { overlap });
+  }
+  const parts = [
+    member.major,
+    member.semester ? formatMessage(copy.memberSemesterChip, { semester: member.semester }) : null,
+  ].filter(Boolean);
+  return parts.length ? parts.join(" · ") : null;
 }
