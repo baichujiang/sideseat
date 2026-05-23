@@ -218,11 +218,6 @@ export type CompanionOption = {
   avatarUrl: string | null;
 };
 
-function isWeekendDay(date: Date) {
-  const day = berlinWeekdayFromInstant(date);
-  return day === "SAT" || day === "SUN";
-}
-
 const WEEKDAY_BY_JS: Record<number, Weekday> = {
   0: "SUN",
   1: "MON",
@@ -322,7 +317,7 @@ export function ScheduleSurface({
   } | null;
   /** Inserted between the home header row and the date navigation (e.g. onboarding CTA). */
   homeBelowHeaderSlot?: ReactNode;
-  /** Logged-in users: Alibaba Qwen natural-language calendar (requires DASHSCOPE_API_KEY). */
+  /** Logged-in users: natural-language calendar quick add (requires server LLM config). */
   naturalScheduleEnabled?: boolean;
 }) {
   const router = useRouter();
@@ -333,9 +328,6 @@ export function ScheduleSurface({
   const [visibleDayCount, setVisibleDayCount] = useState(readHomeCalendarVisibleDaysFromStorage);
   const [calendarRevealNonce, setCalendarRevealNonce] = useState(0);
   const [weekMinuteScale, setWeekMinuteScale] = useState(WEEK_CALENDAR_MINUTE_SCALE_DEFAULT);
-  const [weekHorizontalMode, setWeekHorizontalMode] = useState<"workweek" | "include-anchor">(() =>
-    isWeekendDay(new Date(nowISO)) ? "include-anchor" : "workweek",
-  );
   const [adding, setAdding] = useState(false);
   const [naturalScheduleOpen, setNaturalScheduleOpen] = useState(false);
   /** In-grid draft visible while dragging on empty week cells (before add panel opens). */
@@ -987,17 +979,13 @@ export function ScheduleSurface({
     draftEventEnd,
   ]);
 
-  // Navigation handlers. Day: ±1 day; Week: ±7 days; Month: ±1 month.
+  // Navigation handlers. Day: ±1 day; Week: previous/next calendar week (Mon-aligned); Month: ±1 month.
   // "Today" snaps `selectedDate` back without leaving the current view.
   const step = (direction: 1 | -1) => {
     setSelectedDate((prev) => {
       if (view === "day") return addDays(prev, direction);
       if (view === "week") {
-        const next = addDays(prev, direction * 7);
-        // Default week grid only shows 5 columns wide; `include-anchor` scrolls so Sat/Sun stay in view.
-        // Never force workweek here — doing so hid Sunday whenever the user stepped weeks on a weekend.
-        setWeekHorizontalMode(isWeekendDay(next) ? "include-anchor" : "workweek");
-        return next;
+        return berlinStartOfCalendarDay(addDays(berlinStartOfWeek(prev), direction * 7));
       }
       return addMonths(prev, direction);
     });
@@ -1074,8 +1062,15 @@ export function ScheduleSurface({
   const isSelectedToday = isSameDay(selectedDate, now);
   const nowMinute = now.getHours() * 60 + now.getMinutes();
 
-  const effectiveWeekHorizontalMode =
-    visibleDayCount < HOME_CALENDAR_VISIBLE_DAYS_DEFAULT ? "include-anchor" : weekHorizontalMode;
+  const weekMonday = berlinStartOfWeek(selectedDate);
+  const isSelectedWeekMonday =
+    scheduleDateKeyInBerlin(selectedDate) === scheduleDateKeyInBerlin(weekMonday);
+
+  /** Narrow day strip: anchor on tapped day, but week prev/next always land on Monday → workweek. */
+  const effectiveWeekHorizontalMode: "workweek" | "include-anchor" =
+    visibleDayCount < HOME_CALENDAR_VISIBLE_DAYS_DEFAULT && !isSelectedWeekMonday
+      ? "include-anchor"
+      : "workweek";
 
   const patchCalendarEventTimes = useCallback(
     async (args: { eventId: string; startAt: Date; endAt: Date }): Promise<boolean> => {
@@ -1275,6 +1270,7 @@ export function ScheduleSurface({
     onCopyCalendarEvent: copyCalendarEvent,
     editToolbarLabels,
     showTimeColumnLabel: false,
+    onDayHeaderSelect: (date: Date) => setSelectedDate(berlinStartOfCalendarDay(date)),
   };
 
   const useCompactHomeHeader = homeGreeting != null;
@@ -1462,11 +1458,6 @@ export function ScheduleSurface({
   );
 
   const viewTabsOnChange = (next: ViewKind) => {
-    if (next === "week") {
-      setWeekHorizontalMode(
-        isSameDay(selectedDate, now) && isWeekendDay(now) ? "include-anchor" : "workweek",
-      );
-    }
     setView(next);
   };
 
@@ -1575,7 +1566,6 @@ export function ScheduleSurface({
             onStepPrev={() => step(-1)}
             onStepNext={() => step(1)}
             onJumpToday={() => {
-              setWeekHorizontalMode(isWeekendDay(now) ? "include-anchor" : "workweek");
               setSelectedDate(berlinStartOfCalendarDay(now));
               setCalendarRevealNonce((n) => n + 1);
             }}

@@ -73,7 +73,8 @@
 ## 5. 推送与系统能力（按需）
 
 - [ ] **Web Push**：在 App 内订阅/收通知（WKWebView 常与 Safari 不同，需真机验证）
-- [ ] 若 Web Push 不可靠：评估 `@capacitor/push-notifications` + 后端 APNs（未做则上架说明里勿承诺推送）
+- [ ] Xcode：**Push Notifications** capability + **Remote notifications** background mode；真机/TestFlight 需付费开发者账号
+- [ ] 数据库已跑迁移 `NativePushDevice`；服务端 APNs 发送仍未实现（勿在上架文案承诺推送已可用）
 - [ ] 相机/相册上传头像（若有）：考虑后续插件；当前若仅 `<input type="file">` 需在真机点一次上传
 
 ---

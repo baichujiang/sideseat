@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useId } from "react";
 
+import { displayableClassmatePostImageUrls } from "@/lib/discover/classmate-post-display-images";
 import { cn } from "@/lib/utils";
 
 function isDataUrl(url: string) {
@@ -115,12 +116,13 @@ export function ClassmatePostImagesGallery({
   topClassName?: string;
 }) {
   const id = useId();
-  if (!urls.length) return null;
+  const displayUrls = displayableClassmatePostImageUrls(urls);
+  if (!displayUrls.length) return null;
 
   if (variant === "card") {
     return (
       <CardMediaStrip
-        urls={urls}
+        urls={displayUrls}
         ariaLabel={ariaLabel}
         className={className}
         id={id}
@@ -129,8 +131,8 @@ export function ClassmatePostImagesGallery({
     );
   }
 
-  const [first] = urls;
-  if (urls.length === 1) {
+  const [first] = displayUrls;
+  if (displayUrls.length === 1) {
     return (
       <div role="group" aria-label={ariaLabel} className={cn("w-full", className)}>
         <div className="relative w-full overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/50">
@@ -142,7 +144,7 @@ export function ClassmatePostImagesGallery({
 
   return (
     <CardMediaStrip
-      urls={urls}
+      urls={displayUrls}
       ariaLabel={ariaLabel}
       className={className}
       id={id}

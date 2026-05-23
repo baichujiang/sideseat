@@ -14,8 +14,10 @@ function truncate(s: string, max: number) {
 }
 
 /**
- * Sends the same payload to every stored subscription for the user.
+ * Sends the same payload to every stored Web Push subscription for the user.
  * Removes subscriptions that the push service reports as gone (410/404).
+ *
+ * TODO: Also send via APNs/FCM using `NativePushDevice` rows once server credentials exist.
  */
 export async function notifyUserPush(
   userId: string,

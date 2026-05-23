@@ -2,6 +2,8 @@ import type { Route } from "next";
 import Link from "next/link";
 
 import { RecommendedClassmatesRail } from "@/components/classmates/recommended-classmates-rail";
+import { CoursesEntryTabs } from "@/components/courses/courses-entry-tabs";
+import { CoursesTabRestore } from "@/components/courses/courses-tab-restore";
 import { CoursesSchoolSelect } from "@/components/courses/courses-school-select";
 import { inboxChatListUlClassName } from "@/components/inbox/inbox-conversation-tile";
 import {
@@ -28,9 +30,12 @@ import { schoolCodesForDiscoverCity } from "@/lib/discover/city-school-scope";
 import { getServerDiscoverServedCity } from "@/lib/discover/discover-city-preference";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { getRecommendedClassmatesForViewer } from "@/lib/queries/recommended-classmates";
+import {
+  coursesListReturnPath,
+  coursesTabHref,
+  normalizeCoursesTab,
+} from "@/lib/courses/courses-tab";
 import { cn } from "@/lib/utils";
-
-type CoursesTab = "popular-courses" | "my-courses" | "my-bookmarked-courses";
 
 type CourseRow = {
   id: string;
@@ -42,8 +47,6 @@ type CourseRow = {
   viewerSaved?: boolean;
   viewerEnrolled?: boolean;
 };
-
-const TAB_OPTIONS: CoursesTab[] = ["popular-courses", "my-courses", "my-bookmarked-courses"];
 
 // Starter set for common required/foundation courses (used as fallback when
 // popularity signals are sparse in a fresh database).
@@ -68,16 +71,6 @@ const CURATED_REQUIRED_CODES: Partial<Record<SchoolCode, string[]>> = {
   ],
 };
 
-function normalizeTab(raw?: string): CoursesTab {
-  return TAB_OPTIONS.includes(raw as CoursesTab) ? (raw as CoursesTab) : "popular-courses";
-}
-
-function coursesTabHref(tab: CoursesTab, school: SchoolCode, q?: string): Route {
-  const params = new URLSearchParams({ school, tab });
-  if (q && q.trim()) params.set("q", q.trim());
-  return `/courses?${params.toString()}` as Route;
-}
-
 export default async function CoursesPage({
   searchParams,
 }: {
@@ -100,9 +93,10 @@ export default async function CoursesPage({
     allowedSchools.length > 0 && !allowedSchools.includes(requestedSchool) ?
       schoolFallback
     : requestedSchool;
-  const activeTab = normalizeTab(query.tab);
+  const activeTab = normalizeCoursesTab(query.tab);
   const semesterLabel = getCurrentSemesterLabel();
   const rawCourseQuery = query.q?.trim() ?? "";
+  const listReturnTo = coursesListReturnPath(activeTab, selectedSchool, rawCourseQuery);
 
   const popularWhere = {
     school: selectedSchool,
@@ -216,6 +210,7 @@ export default async function CoursesPage({
   if (!sessionUser) {
     return (
       <div className="space-y-3 pb-4">
+        <CoursesTabRestore />
         <CoursesHeader
           selectedSchool={selectedSchool}
           allowedSchools={allowedSchools}
@@ -227,7 +222,13 @@ export default async function CoursesPage({
           <>
             <PopularCoursesSearchBar selectedSchool={selectedSchool} query={rawCourseQuery} courses={c} />
             <PopularCoursesMeta subtitle={popularSourceLabel} count={popularRows.length} courses={c} />
-            <CourseRowsList rows={popularRows} query={rawCourseQuery} emptyText={c.emptyNoCourses} courses={c} />
+            <CourseRowsList
+              rows={popularRows}
+              query={rawCourseQuery}
+              emptyText={c.emptyNoCourses}
+              courses={c}
+              listReturnTo={listReturnTo}
+            />
           </>
         ) : (
           <p className="rounded-2xl border border-dashed border-border/70 bg-muted/20 px-4 py-6 text-center text-[14px] text-muted-foreground">
@@ -294,6 +295,7 @@ export default async function CoursesPage({
 
   return (
     <div className="space-y-3 pb-4">
+      <CoursesTabRestore />
       <CoursesHeader
         selectedSchool={selectedSchool}
         allowedSchools={allowedSchools}
@@ -304,14 +306,20 @@ export default async function CoursesPage({
       <RecommendedClassmatesRail
         rows={recommendedClassmates}
         title={c.recommendedClassmatesTitle}
-        returnTo="/courses"
+        returnTo={listReturnTo}
       />
 
       {activeTab === "popular-courses" ? (
         <>
           <PopularCoursesSearchBar selectedSchool={selectedSchool} query={rawCourseQuery} courses={c} />
           <PopularCoursesMeta subtitle={popularSourceLabel} count={popularRows.length} courses={c} />
-          <CourseRowsList rows={popularRowsForViewer} query={rawCourseQuery} emptyText={c.emptyNoCourses} courses={c} />
+          <CourseRowsList
+            rows={popularRowsForViewer}
+            query={rawCourseQuery}
+            emptyText={c.emptyNoCourses}
+            courses={c}
+            listReturnTo={listReturnTo}
+          />
         </>
       ) : null}
 
@@ -358,6 +366,7 @@ export default async function CoursesPage({
                   <EnrolledCourseCard
                     variant="compact"
                     courses={c}
+                    listReturnTo={listReturnTo}
                     course={{
                       id: membership.course.id,
                       name: membership.course.name,
@@ -375,7 +384,11 @@ export default async function CoursesPage({
       ) : null}
 
       {activeTab === "my-bookmarked-courses" ? (
-        <SavedCoursesPanel initialSaved={savedPanelRows} school={selectedSchool} />
+        <SavedCoursesPanel
+          initialSaved={savedPanelRows}
+          school={selectedSchool}
+          listReturnTo={listReturnTo}
+        />
       ) : null}
     </div>
   );
@@ -410,46 +423,6 @@ function CoursesHeader({
         <p className="sr-only">{formatMessage(courses.schoolSelectSrSuffix, { school: schoolLabel })}</p>
       </div>
     </div>
-  );
-}
-
-function CoursesEntryTabs({
-  activeTab,
-  selectedSchool,
-  query,
-  courses,
-}: {
-  activeTab: CoursesTab;
-  selectedSchool: SchoolCode;
-  query: string;
-  courses: CoursesMessages;
-}) {
-  const base =
-    "inline-flex h-9 w-full items-center justify-center rounded-full border px-2 text-[12px] font-semibold transition";
-
-  const tabClass = (tab: CoursesTab) =>
-    cn(
-      base,
-      activeTab === tab
-        ? "border-[#2563EB]/30 bg-[#EFF6FF] text-[#1D4ED8]"
-        : "border-[#D8D1C7] bg-white text-[#111827] shadow-sm hover:bg-[#F8F6F1] dark:border-border dark:bg-card dark:text-foreground dark:hover:bg-muted/45",
-    );
-
-  return (
-    <nav aria-label={courses.tabsNavAria} className="grid grid-cols-3 items-center gap-2">
-      <Link href={coursesTabHref("popular-courses", selectedSchool, query)} className={tabClass("popular-courses")}>
-        {courses.tabPopular}
-      </Link>
-      <Link href={coursesTabHref("my-courses", selectedSchool, query)} className={tabClass("my-courses")}>
-        {courses.tabMyCourses}
-      </Link>
-      <Link
-        href={coursesTabHref("my-bookmarked-courses", selectedSchool, query)}
-        className={tabClass("my-bookmarked-courses")}
-      >
-        {courses.tabBookmarks}
-      </Link>
-    </nav>
   );
 }
 
@@ -519,11 +492,13 @@ function CourseRowsList({
   query,
   emptyText,
   courses,
+  listReturnTo,
 }: {
   rows: CourseRow[];
   query: string;
   emptyText: string;
   courses: CoursesMessages;
+  listReturnTo: string;
 }) {
   if (rows.length === 0) {
     return (
@@ -547,6 +522,7 @@ function CourseRowsList({
           <PopularCourseCard
             variant="compact"
             courses={courses}
+            listReturnTo={listReturnTo}
             course={{
               id: row.id,
               name: row.name,

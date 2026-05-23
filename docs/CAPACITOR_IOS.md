@@ -107,14 +107,27 @@ The following run when `Capacitor.isNativePlatform()` is true (see `CapacitorBoo
 - Safe areas via `--safe-top` / `--safe-bottom` (`app-shell`, auth layout)
 - Status bar does not overlay the WebView; splash auto-hides
 - PWA “Add to Home Screen” / service-worker update bars are hidden (you already have the native app)
-- Me tab: no install row; notifications card points to **iOS Settings** (not Web Push)
+- Me tab: no install row; notifications card uses **native push** (`@capacitor/push-notifications`, not Web Push)
 - Week “visible days” bar uses pointer drag (no iOS range loupe)
 
 After changing `capacitor.config.ts` plugins, run `npm run cap:sync`.
 
-## Limitations / notes
+## Push notifications (native)
 
-- **Push**: Web Push is for browser/PWA only. The native app shows a Settings guide; server-side APNs would need `@capacitor/push-notifications` later.
+The Me tab uses `@capacitor/push-notifications`: request permission, register for APNs, and POST the device token to `/api/push/native-register`.
+
+**You must finish in Xcode** (cannot be done from this repo alone):
+
+1. Target **App** → **Signing & Capabilities** → **+ Capability** → **Push Notifications**
+2. Same screen → **Background Modes** → enable **Remote notifications** (if not already on)
+3. Use a **paid Apple Developer** team for real devices / TestFlight (simulator tokens are limited)
+4. `AppDelegate.swift` already forwards `didRegisterForRemoteNotificationsWithDeviceToken` to Capacitor
+
+**Server (still TODO):** tokens are stored in `NativePushDevice`. Sending via APNs (`.p8` key, `node-apn` or similar) is not implemented — see `notifyUserPush` in `lib/push/notify-user.ts`.
+
+Web/PWA continues to use Web Push + VAPID (`/api/push/subscribe`).
+
+## Limitations / notes
 - **Stripe / OAuth** redirects must use URLs allowed in your app and Apple associated domains if you use universal links.
 - Re-run `npm run cap:sync` after changing `capacitor.config.ts` or adding Capacitor plugins.
 
