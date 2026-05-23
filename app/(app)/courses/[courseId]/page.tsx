@@ -26,6 +26,7 @@ import { formatListRelativeTime, isListRelativeJustNow } from "@/lib/format/list
 import { formatMessage, getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { resolveBackHref } from "@/lib/nav/back";
+import { coursesListReturnPath } from "@/lib/courses/courses-tab";
 import { inboxCourseUnreadCounts } from "@/lib/queries/inbox-unread-counts";
 import { weeklyOverlapMinutes, type SessionBlock } from "@/lib/queries/schedule-overlap";
 import { cn } from "@/lib/utils";
@@ -62,10 +63,11 @@ export default async function CourseDetailPage({
   const schoolLabel = getSchoolLabel(course.school);
 
   if (!sessionUser) {
+    const guestCoursesFallback = coursesListReturnPath("popular-courses", school);
     return (
       <div className="space-y-5">
         <div className="flex items-center justify-between gap-2">
-          <BackLink returnTo={query.returnTo} fallback="/courses" label={c.backToCourses} className="-ml-2" />
+          <BackLink returnTo={query.returnTo} fallback={guestCoursesFallback} label={c.backToCourses} className="-ml-2" />
           <CourseShareLinkAction courseId={course.id} memberCount={totalMembers} variant="icon" />
         </div>
 
@@ -143,10 +145,14 @@ export default async function CourseDetailPage({
 
   if (!membership) {
     const isSaved = Boolean(savedRow);
+    const coursesFallback = coursesListReturnPath(
+      isSaved ? "my-bookmarked-courses" : "popular-courses",
+      school,
+    );
     return (
       <div className="space-y-5">
         <div className="flex items-center justify-between gap-2">
-          <BackLink returnTo={query.returnTo} fallback="/courses" label={c.backToCourses} className="-ml-2" />
+          <BackLink returnTo={query.returnTo} fallback={coursesFallback} label={c.backToCourses} className="-ml-2" />
           <CourseShareLinkAction courseId={course.id} memberCount={totalMembers} variant="icon" />
         </div>
 
@@ -268,6 +274,7 @@ export default async function CourseDetailPage({
   memberList.sort((a, b) => b.overlapMinutes - a.overlapMinutes);
 
   const enrolledTotal = membership.course._count.members;
+  const enrolledCoursesFallback = coursesListReturnPath("my-courses", school);
   const enrolledOthers = Math.max(0, enrolledTotal - 1);
   const myCourseSessions = [...membership.sessions].sort((a, b) => {
     const weekdayOrder = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
@@ -326,7 +333,7 @@ export default async function CourseDetailPage({
         </div>
       ) : null}
       <div className="flex items-center justify-between gap-2">
-        <BackLink returnTo={query.returnTo} fallback="/courses" label={c.backToCourses} className="-ml-2" />
+        <BackLink returnTo={query.returnTo} fallback={enrolledCoursesFallback} label={c.backToCourses} className="-ml-2" />
         <CourseShareLinkAction courseId={membership.course.id} memberCount={enrolledTotal} variant="icon" />
       </div>
 

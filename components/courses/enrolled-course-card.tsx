@@ -64,6 +64,7 @@ export function EnrolledCourseCard({
   memberCount,
   variant = "card",
   courses,
+  listReturnTo,
 }: {
   course: {
     id: string;
@@ -75,6 +76,8 @@ export function EnrolledCourseCard({
   memberCount: number;
   variant?: "card" | "compact";
   courses?: CoursesMessages;
+  /** Full `/courses?...` path for back navigation from course detail. */
+  listReturnTo?: string;
 }) {
   const sortedSessions = [...sessions].sort((a, b) => {
     const weekdayOrder: Weekday[] = [
@@ -130,6 +133,11 @@ export function EnrolledCourseCard({
     classmatesLine(c, memberCount),
   ].filter(Boolean);
 
+  const courseHref =
+    listReturnTo ?
+      (`/courses/${course.id}?returnTo=${encodeURIComponent(listReturnTo)}` as Route)
+    : (`/courses/${course.id}` as Route);
+
   return (
     <div
       className={cn(
@@ -154,7 +162,7 @@ export function EnrolledCourseCard({
         )}
       />
       <Link
-        href={`/courses/${course.id}` as Route}
+        href={courseHref}
         className={cn(
           "group flex transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/25 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-card",
           isCompact
