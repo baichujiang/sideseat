@@ -11,6 +11,7 @@ import {
   type UserGender,
 } from "@prisma/client";
 
+import { displayableClassmatePostImageUrls } from "@/lib/discover/classmate-post-display-images";
 import { classmatePostLanguageOffersSchema } from "@/lib/validators/classmate-posts";
 
 export type DiscoverPostRowCourse = {
@@ -183,5 +184,6 @@ export function mapPrismaClassmatePostImagesToUrls(
 ): string[] | undefined {
   if (!images?.length) return undefined;
   const sorted = [...images].sort((a, b) => a.sortOrder - b.sortOrder);
-  return sorted.map((r) => r.url);
+  const urls = displayableClassmatePostImageUrls(sorted.map((r) => r.url));
+  return urls.length ? urls : undefined;
 }

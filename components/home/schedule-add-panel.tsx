@@ -2,7 +2,7 @@
 
 import { Check, Loader2, Plus, X } from "lucide-react";
 import { addMinutes, addMonths, format } from "date-fns";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import { apiFetch } from "@/lib/auth/api-fetch";
@@ -70,6 +70,13 @@ function truncateClipboardPreview(text: string, maxChars: number) {
   const single = text.replace(/\s+/g, " ").trim();
   if (single.length <= maxChars) return single;
   return `${single.slice(0, Math.max(0, maxChars - 1))}…`;
+}
+
+/** Mobile keyboards fire Enter/Done; dismiss without implicit submit or form re-hydration. */
+function dismissKeyboardOnEnter(event: KeyboardEvent<HTMLInputElement>) {
+  if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+  event.preventDefault();
+  event.currentTarget.blur();
 }
 
 export function ScheduleAddPanel({
@@ -140,6 +147,8 @@ export function ScheduleAddPanel({
   const [showCompanionList, setShowCompanionList] = useState(false);
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [clipboardSession, setClipboardSession] = useState<CalendarClipboardSessionV1 | null>(null);
+  /** Avoid re-hydrating (wiping typed title) when parent re-renders while the sheet stays open. */
+  const formSessionKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!open || mode !== "create") {
@@ -150,7 +159,15 @@ export function ScheduleAddPanel({
   }, [open, mode]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      formSessionKeyRef.current = null;
+      return;
+    }
+
+    const sessionKey = `${mode}:${entryId ?? "new"}:${initialMode}`;
+    if (formSessionKeyRef.current === sessionKey) return;
+    formSessionKeyRef.current = sessionKey;
+
     void initialMode;
     setSaving(false);
     setError("");
@@ -416,6 +433,8 @@ export function ScheduleAddPanel({
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          onKeyDown={dismissKeyboardOnEnter}
+          enterKeyHint="done"
           placeholder={sch.newEvent}
           aria-label={sch.addPanelTitleAria}
           className="h-10 rounded-xl border-border/70 bg-muted/10 text-[15px] shadow-none placeholder:text-muted-foreground/80"
@@ -463,6 +482,8 @@ export function ScheduleAddPanel({
         <Input
           value={location}
           onChange={(e) => setLocation(e.target.value)}
+          onKeyDown={dismissKeyboardOnEnter}
+          enterKeyHint="done"
           placeholder={sch.addPanelLocationPlaceholder}
           className="h-10 rounded-xl border-border/70 bg-muted/10 text-[15px] shadow-none"
         />

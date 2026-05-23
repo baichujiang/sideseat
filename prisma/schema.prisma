@@ -578,6 +578,11 @@ model UserSchoolVerification {
   @@index([school, studentVerificationStatus])
 }
 
+enum CourseExternalSource {
+  TUM_NAT
+  LMU_LSF
+}
+
 
 model Course {
   id            String       @id @default(cuid())
@@ -586,6 +591,10 @@ model Course {
   instructorSummary String?
   school        String
   semesterLabel String
+  /// External catalog id (e.g. TUM NAT course_id, LMU LSF publishId).
+  externalSource CourseExternalSource?
+  externalId     String?
+  officialScheduleSyncedAt DateTime?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   members       UserCourse[]
@@ -594,9 +603,38 @@ model Course {
   courseRoomMessages CourseRoomMessage[]
   originConnections Connection[] @relation("ConnectionOriginCourse")
   classmatePostCourses ClassmatePostCourse[]
+  officialScheduleVariants CourseOfficialScheduleVariant[]
 
   @@unique([name, school, semesterLabel])
   @@unique([code, school, semesterLabel])
+  @@index([school, semesterLabel, externalSource])
+}
+
+/// Official weekly timetable from school catalog (TUM NAT, LMU LSF, …).
+model CourseOfficialScheduleVariant {
+  id          String   @id @default(cuid())
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  label       String
+  fingerprint String
+  externalKey String?
+  syncedAt    DateTime @default(now())
+  sessions    CourseOfficialScheduleSession[]
+
+  @@unique([courseId, fingerprint])
+  @@index([courseId])
+}
+
+model CourseOfficialScheduleSession {
+  id          String   @id @default(cuid())
+  variantId   String
+  variant     CourseOfficialScheduleVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  weekday     Weekday
+  startMinute Int
+  endMinute   Int
+  location    String?
+
+  @@index([variantId])
 }
 
 model CourseSession {

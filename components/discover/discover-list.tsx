@@ -21,6 +21,7 @@ import { DiscoverFeed } from "@/components/discover/discover-feed";
 import { DiscoverFeedTabs } from "@/components/discover/discover-feed-tabs";
 import { applyBuddyFeedClientFilters } from "@/components/discover/discover-filter-sheet";
 import { ClassmatePostCreateImageRow } from "@/components/discover/classmate-post-create-image-row";
+import { displayableClassmatePostImageUrls } from "@/lib/discover/classmate-post-display-images";
 import { LanguageExchangePostFields } from "@/components/discover/language-exchange-post-fields";
 import { SportsPostFieldCombobox } from "@/components/discover/sports-post-field-combobox";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
@@ -277,6 +278,7 @@ function CreatePostSheet({
     }
     setSubmitting(true);
     setError(null);
+    const imageUrls = displayableClassmatePostImageUrls(postImageUrls);
     try {
       const res = await apiFetch("/api/classmate-posts", {
         method: "POST",
@@ -290,7 +292,7 @@ function CreatePostSheet({
           ...(isShared && selectedCourseIds.size > 0
             ? { courseIds: [...selectedCourseIds] }
             : {}),
-          ...(postImageUrls.length > 0 ? { imageUrls: postImageUrls } : {}),
+          ...(imageUrls.length > 0 ? { imageUrls } : {}),
         }),
       });
       const payload = await res.json().catch(() => ({}));

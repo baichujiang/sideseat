@@ -5,6 +5,8 @@ import type { Route } from "next";
 import { Calendar, Clock, MapPin } from "lucide-react";
 
 import { ClassmatePostImagesGallery } from "@/components/discover/classmate-post-images-gallery";
+import { ClassmatePostTextCover } from "@/components/discover/classmate-post-text-cover";
+import { displayableClassmatePostImageUrls } from "@/lib/discover/classmate-post-display-images";
 import { ClassmatePostSaveButton } from "@/components/discover/classmate-post-save-button";
 import { DiscoverMessageButton } from "@/components/discover/discover-message-button";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
@@ -99,7 +101,7 @@ export function BuddyRequestCard({
   const cityLabel = getDiscoverCityDisplayLabel(cityNameKey, m.discover.cityNames);
   const detailHref =
     `/discover/posts/${post.id}?returnTo=${encodeURIComponent(returnTo)}` as Route;
-  const images = post.imageUrls ?? [];
+  const images = displayableClassmatePostImageUrls(post.imageUrls);
   const typeLabel = buddyTypeLabel(post.category, buddy);
   const timeLine = buddyTimeLine(post, dl, buddy);
   const locLine = buddyLocationLine(post, dl, cityLabel, buddy);
@@ -142,24 +144,18 @@ export function BuddyRequestCard({
           />
         </div>
       ) : (
-        <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted/50">
+        <div className="relative aspect-[4/5] w-full overflow-hidden">
           {headerOverlay ? (
             <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 p-2 [&>*]:pointer-events-auto">
               {headerOverlay}
             </div>
           ) : null}
-          <div
-            className={cn(
-              "flex h-full min-h-[7.5rem] w-full flex-col justify-end bg-gradient-to-br from-violet-100/90 via-sky-50/80 to-amber-50/70 p-3 dark:from-violet-950/50 dark:via-slate-900/40 dark:to-amber-950/30",
-            )}
-          >
-            <span className="inline-flex max-w-full self-start rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-foreground shadow-sm dark:bg-white/10 dark:text-foreground">
-              {typeLabel}
-            </span>
-            <p className="mt-2 line-clamp-2 text-[14px] font-semibold leading-snug text-foreground drop-shadow-sm">
-              {post.title}
-            </p>
-          </div>
+          <ClassmatePostTextCover
+            category={post.category}
+            typeLabel={typeLabel}
+            title={post.title}
+            variant="card"
+          />
         </div>
       )}
 

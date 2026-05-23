@@ -9,8 +9,9 @@ export async function uploadClassmatePostImage(file: File): Promise<string> {
     data?: { url?: string };
     error?: string;
   };
-  if (!res.ok || payload.success !== true || typeof payload.data?.url !== "string") {
+  const url = payload.data?.url?.trim();
+  if (!res.ok || payload.success !== true || !url) {
     throw new Error(typeof payload.error === "string" ? payload.error : "Could not upload photo.");
   }
-  return payload.data.url;
+  return url;
 }

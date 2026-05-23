@@ -21,6 +21,8 @@
     "e2e:course-id": "tsx scripts/print-e2e-course-id.ts",
     "sync:course-instructors": "tsx scripts/sync-course-instructors.ts",
     "sync:tum-exam-catalog": "tsx scripts/sync-tum-exam-catalog.ts",
+    "sync:tum-official-schedules": "tsx scripts/sync-tum-official-schedules.ts",
+    "sync:tum-catalog-and-schedules": "tsx scripts/sync-tum-exam-catalog.ts && tsx scripts/sync-tum-official-schedules.ts",
     "sync:lmu-lsf-catalog": "tsx scripts/sync-lmu-lsf-catalog.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
