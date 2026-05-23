@@ -59,4 +59,6 @@ export const courseSchema = z.object({
   location: z.string().max(120).optional().or(z.literal("")),
   intentions: z.array(z.nativeEnum(CourseIntent)).min(1),
   sessions: z.array(courseSessionInput).max(8).default([]),
+  /** When sessions are empty, apply this official variant if available. */
+  variantFingerprint: z.string().min(8).max(200).optional(),
 });
