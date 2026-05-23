@@ -1592,6 +1592,8 @@ export const enMessages: AppMessages = {
     setupSyncing: "Syncing…",
     setupEdit: "Edit",
     setupAddTimes: "Add times",
+    setupNoOfficialSchedule:
+      "No official timetable is available for this course yet. Add your class times below.",
     setupErrorSaveCalendarPrefix: "Class times saved. Calendar sync failed: ",
     setupErrorSaveCalendarRetry: "Class times saved. Calendar didn’t update — tap “Sync to calendar” to retry.",
     setupUnableSaveGeneric: "Unable to save course.",

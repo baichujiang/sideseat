@@ -1543,6 +1543,7 @@ export const zhCnMessages: AppMessages = {
     setupSyncing: "正在同步…",
     setupEdit: "编辑",
     setupAddTimes: "添加时间",
+    setupNoOfficialSchedule: "暂无该课程的官方课表，请在下方添加上课时间。",
     setupErrorSaveCalendarPrefix: "上课时间已保存，但日历同步失败：",
     setupErrorSaveCalendarRetry: "上课时间已保存，但日历未更新——可点击「同步到日历」重试。",
     setupUnableSaveGeneric: "无法保存课程。",

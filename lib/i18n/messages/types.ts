@@ -1639,6 +1639,8 @@ export type CoursesMessages = {
   setupSyncing: string;
   setupEdit: string;
   setupAddTimes: string;
+  /** Shown when a course has no official schedule and no user-added sessions yet. */
+  setupNoOfficialSchedule: string;
   setupErrorSaveCalendarPrefix: string;
   setupErrorSaveCalendarRetry: string;
   setupUnableSaveGeneric: string;
