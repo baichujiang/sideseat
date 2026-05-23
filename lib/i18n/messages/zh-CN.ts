@@ -1247,11 +1247,12 @@ export const zhCnMessages: AppMessages = {
     hintSaveFailed: "无法保存订阅。",
     hintEnableFailed: "开启推送时出现问题。",
     hintDisableFailed: "无法在本设备关闭推送。",
-    nativeSubtitle: "请在 iPhone「设置」中开启",
-    nativeBody: "App 使用系统通知权限。请打开「设置 → SideSeat → 通知」并允许提醒。",
+    nativeSubtitle: "本设备上的消息与计划提醒。",
     nativeDataSync:
       "使用同一账号登录时，网站、主屏幕图标与 App Store 应用中的课表、消息与个人资料会自动同步。",
+    nativeDeniedHint: "通知已关闭。请打开「设置 → SideSeat → 通知」允许提醒，再重新打开开关。",
     nativeOpenSettings: "打开设置",
+    nativeRegisterFailed: "无法在本设备注册推送。",
   },
   tip: {
     cardLabel: "支持",

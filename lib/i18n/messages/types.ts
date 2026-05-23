@@ -1283,11 +1283,12 @@ export type AppMessages = {
     hintSaveFailed: string;
     hintEnableFailed: string;
     hintDisableFailed: string;
-    /** Capacitor iOS/Android — system notification settings (not Web Push). */
+    /** Capacitor iOS/Android — native push (not Web Push). */
     nativeSubtitle: string;
-    nativeBody: string;
     nativeDataSync: string;
+    nativeDeniedHint: string;
     nativeOpenSettings: string;
+    nativeRegisterFailed: string;
   };
   tip: {
     /** Standalone card label above the headline. */
