@@ -212,7 +212,8 @@ export const classmatePostImageUrlsSchema = z
   .optional()
   .transform((arr) => {
     if (!arr?.length) return undefined;
-    const next = dedupeImageUrlsPreserveOrder(arr);
+    const trimmed = arr.map((u) => u.trim()).filter((u) => u.length > 0);
+    const next = dedupeImageUrlsPreserveOrder(trimmed);
     return next.length ? next : undefined;
   });
 
@@ -222,8 +223,13 @@ export const createClassmatePostSchema = z
     category: classmatePostCategorySchema,
     title: z.string().trim().min(1, "Add a short title.").max(CLASSMATE_POST_TITLE_MAX_LEN),
     body: z.preprocess(
-      (v) => (v == null ? undefined : v),
-      z.string().trim().max(CLASSMATE_POST_BODY_MAX_LEN).optional(),
+      (v) => {
+        if (v == null) return undefined;
+        if (typeof v !== "string") return v;
+        const trimmed = v.trim();
+        return trimmed.length === 0 ? undefined : trimmed;
+      },
+      z.string().max(CLASSMATE_POST_BODY_MAX_LEN).optional(),
     ),
     /** ISO-8601 instant; accept any string `Date` can parse. */
     expiresAt: z

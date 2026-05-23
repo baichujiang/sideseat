@@ -21,6 +21,7 @@ import { DiscoverFeed } from "@/components/discover/discover-feed";
 import { DiscoverFeedTabs } from "@/components/discover/discover-feed-tabs";
 import { applyBuddyFeedClientFilters } from "@/components/discover/discover-filter-sheet";
 import { ClassmatePostCreateImageRow } from "@/components/discover/classmate-post-create-image-row";
+import { displayableClassmatePostImageUrls } from "@/lib/discover/classmate-post-display-images";
 import { LanguageExchangePostFields } from "@/components/discover/language-exchange-post-fields";
 import { SportsPostFieldCombobox } from "@/components/discover/sports-post-field-combobox";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
@@ -263,10 +264,6 @@ function CreatePostSheet({
       setError(dl.postErrorNeedTitle);
       return;
     }
-    if (!trimmedBody) {
-      setError(dl.postErrorNeedBody);
-      return;
-    }
     if (trimmedTitle.length > CLASSMATE_POST_TITLE_MAX_LEN) {
       setError(formatMessage(dl.postErrorTitleTooLong, { max: CLASSMATE_POST_TITLE_MAX_LEN }));
       return;
@@ -277,6 +274,7 @@ function CreatePostSheet({
     }
     setSubmitting(true);
     setError(null);
+    const imageUrls = displayableClassmatePostImageUrls(postImageUrls);
     try {
       const res = await apiFetch("/api/classmate-posts", {
         method: "POST",
@@ -285,12 +283,12 @@ function CreatePostSheet({
           city: servedCity,
           category,
           title: trimmedTitle,
-          body: trimmedBody,
+          ...(trimmedBody ? { body: trimmedBody } : {}),
           expiresAt: expiryPresetToDate(expiryPreset).toISOString(),
           ...(isShared && selectedCourseIds.size > 0
             ? { courseIds: [...selectedCourseIds] }
             : {}),
-          ...(postImageUrls.length > 0 ? { imageUrls: postImageUrls } : {}),
+          ...(imageUrls.length > 0 ? { imageUrls } : {}),
         }),
       });
       const payload = await res.json().catch(() => ({}));
@@ -509,7 +507,6 @@ function CreatePostSheet({
             disabled={
               submitting ||
               !title.trim() ||
-              !body.trim() ||
               (isShared && selectedCourseIds.size === 0) ||
               title.trim().length > CLASSMATE_POST_TITLE_MAX_LEN ||
               body.trim().length > CLASSMATE_POST_BODY_MAX_LEN

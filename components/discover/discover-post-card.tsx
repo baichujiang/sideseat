@@ -16,6 +16,7 @@ import type { ReactNode } from "react";
 
 import { ClassmatesPersonRow } from "@/components/classmates/classmates-person-row";
 import { ClassmatePostImagesGallery } from "@/components/discover/classmate-post-images-gallery";
+import { displayableClassmatePostImageUrls } from "@/lib/discover/classmate-post-display-images";
 import { ClassmatePostSaveButton } from "@/components/discover/classmate-post-save-button";
 import { DiscoverMessageButton } from "@/components/discover/discover-message-button";
 import { DiscoverPostPostedTime } from "@/components/discover/discover-post-posted-time";
@@ -193,6 +194,7 @@ export function DiscoverPostCard({
 }: DiscoverPostCardProps) {
   const { locale, messages } = useLocaleContext();
   const dl = messages.discoverList;
+  const displayImages = displayableClassmatePostImageUrls(post.imageUrls);
   const meta = [post.major, post.semester ? `sem ${post.semester}` : null]
     .filter(Boolean)
     .join(" · ");
@@ -325,9 +327,9 @@ export function DiscoverPostCard({
                   {post.body}
                 </p>
               ) : null}
-              {post.imageUrls && post.imageUrls.length > 0 ? (
+              {displayImages.length > 0 ? (
                 <ClassmatePostImagesGallery
-                  urls={post.imageUrls}
+                  urls={displayImages}
                   variant="card"
                   ariaLabel={dl.postCardImagesAria}
                 />
