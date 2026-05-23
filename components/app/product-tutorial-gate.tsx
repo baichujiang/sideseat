@@ -192,8 +192,6 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
   const transitionMs = reducedMotion ? 0 : 200;
   const dur = `${transitionMs}ms`;
   const stepCopy = steps[step];
-  const textShadowTitle = "0 2px 14px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.45)";
-  const textShadowBody = "0 1px 10px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.4)";
 
   const panel = (
     <div
@@ -205,7 +203,7 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
         aria-hidden="true"
         tabIndex={-1}
         className={cn(
-          "absolute inset-0 bg-black/25 transition-opacity ease-out dark:bg-black/35",
+          "absolute inset-0 bg-black/45 transition-opacity ease-out dark:bg-black/60",
           entered ? "opacity-100" : "opacity-0",
         )}
         style={{ transitionDuration: dur }}
@@ -214,16 +212,10 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
         }}
       />
 
-      {/* Bottom read legibility: soft wash only (not a card). */}
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[min(48vh,320px)] bg-gradient-to-t from-black/58 via-black/28 to-transparent dark:from-black/65 dark:via-black/32"
-        aria-hidden
-      />
-
       <div
         className={cn(
           "pointer-events-none absolute inset-x-0 bottom-0 flex justify-center",
-          "pb-[calc(5.25rem+var(--safe-bottom))]",
+          "pb-[calc(4.75rem+var(--safe-bottom))]",
         )}
       >
         <div
@@ -231,116 +223,120 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
           aria-modal="true"
           aria-labelledby="product-tutorial-title"
           className={cn(
-            "pointer-events-auto w-full max-w-md px-4",
-            "transition-opacity ease-out",
-            entered ? "opacity-100" : "opacity-0",
+            "pointer-events-auto w-full max-w-md px-3",
+            "transition-[opacity,transform] ease-out",
+            entered ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0",
+            reducedMotion && entered && "translate-y-0",
           )}
           style={{ transitionDuration: dur }}
         >
-          <div className="mb-3 flex items-center justify-end gap-1">
-            <button
-              type="button"
-              className="rounded-full px-3 py-1.5 text-[12px] font-semibold text-white/85 transition-colors [text-shadow:0_1px_6px_rgba(0,0,0,0.5)] hover:bg-white/10 hover:text-white"
-              onClick={() => void closeTutorial()}
-            >
-              {m.tutorial.skip}
-            </button>
-            <button
-              type="button"
-              className="rounded-full p-2 text-white/90 transition-colors [text-shadow:0_1px_6px_rgba(0,0,0,0.5)] hover:bg-white/10 hover:text-white"
-              aria-label={m.common.close}
-              onClick={() => void closeTutorial()}
-            >
-              <X className="h-5 w-5" strokeWidth={2} aria-hidden />
-            </button>
-          </div>
-
           <div
-            className={cn(!reducedMotion && "transition-opacity duration-150")}
-            key={step}
-            aria-live="polite"
+            className={cn(
+              "overflow-hidden rounded-[22px] border border-classmates-edge bg-classmates-surface",
+              "shadow-[0_8px_40px_rgba(15,23,42,0.18)] dark:border-border dark:bg-card dark:shadow-[0_8px_40px_rgba(0,0,0,0.45)]",
+            )}
           >
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/70 [text-shadow:0_1px_6px_rgba(0,0,0,0.45)]">
-              {formatMessage(m.tutorial.stepLabel, { current: step + 1, total })}
-            </p>
-            <h2
-              id="product-tutorial-title"
-              className="mt-1 text-[1.4rem] font-semibold leading-snug tracking-tight text-white"
-              style={{ textShadow: textShadowTitle }}
-            >
-              {stepCopy?.title}
-            </h2>
-            <p
-              className="mt-2 max-w-prose text-[15px] font-normal leading-relaxed text-white/95"
-              style={{ textShadow: textShadowBody }}
-            >
-              {stepCopy?.body}
-            </p>
-            {step === 0 ? (
-              <p
-                className="mt-2 max-w-prose text-[12px] leading-snug text-white/80"
-                style={{ textShadow: textShadowBody }}
-              >
-                {m.tutorial.subtitle}
-              </p>
-            ) : isLast ? (
-              <p
-                className="mt-2 max-w-prose text-[12px] leading-snug text-white/75"
-                style={{ textShadow: textShadowBody }}
-              >
-                {m.tutorial.replayHint}
-              </p>
-            ) : (
-              <p
-                className="mt-2 max-w-prose text-[12px] leading-snug text-white/75"
-                style={{ textShadow: textShadowBody }}
-              >
-                {m.tutorial.coachSubtitle}
-              </p>
-            )}
-          </div>
+            <div className="flex justify-center pt-2.5" aria-hidden>
+              <span className="h-1 w-9 rounded-full bg-classmates-edge dark:bg-muted-foreground/30" />
+            </div>
 
-          <div className="mt-4 flex items-center gap-1.5" aria-hidden>
-            {steps.map((_, i) => (
-              <span
-                key={i}
-                className={cn(
-                  "h-1.5 rounded-full transition-all duration-200",
-                  i === step ? "w-5 bg-white" : "w-1.5 bg-white/35",
-                )}
-              />
-            ))}
-          </div>
+            <div className="flex items-center justify-between gap-3 border-b border-classmates-hairline px-5 pb-3 pt-1 dark:border-border/60">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-classmates-hint dark:text-muted-foreground">
+                {formatMessage(m.tutorial.stepLabel, { current: step + 1, total })}
+              </p>
+              <div className="flex shrink-0 items-center gap-0.5">
+                <button
+                  type="button"
+                  className="rounded-full px-3 py-1.5 text-[13px] font-medium text-classmates-sub transition-colors hover:bg-classmates-warm active:bg-classmates-warm dark:text-muted-foreground dark:hover:bg-muted/50 dark:active:bg-muted/50"
+                  onClick={() => void closeTutorial()}
+                >
+                  {m.tutorial.skip}
+                </button>
+                <button
+                  type="button"
+                  className="rounded-full p-2 text-classmates-sub transition-colors hover:bg-classmates-warm active:bg-classmates-warm dark:text-muted-foreground dark:hover:bg-muted/50 dark:active:bg-muted/50"
+                  aria-label={m.common.close}
+                  onClick={() => void closeTutorial()}
+                >
+                  <X className="h-5 w-5" strokeWidth={2} aria-hidden />
+                </button>
+              </div>
+            </div>
 
-          <div className="mt-5 flex items-center gap-2 pb-1">
-            {step > 0 ? (
-              <button
-                type="button"
-                className="flex-1 rounded-full py-2.5 text-center text-[13px] font-semibold text-white/90 transition-colors [text-shadow:0_1px_8px_rgba(0,0,0,0.45)] hover:bg-white/5 hover:text-white"
-                onClick={() => setStep((s) => Math.max(0, s - 1))}
+            <div
+              className={cn("px-5 pt-4", !reducedMotion && "transition-opacity duration-150")}
+              key={step}
+              aria-live="polite"
+            >
+              <h2
+                id="product-tutorial-title"
+                className="text-[20px] font-semibold leading-tight tracking-tight text-classmates-ink dark:text-foreground"
               >
-                {m.tutorial.back}
-              </button>
-            ) : (
-              <span className="flex-1" />
-            )}
-            {!isLast ? (
-              <Button
-                type="button"
-                className="flex-1 rounded-full bg-white text-[13px] font-semibold text-neutral-900 shadow-[0_2px_14px_rgba(0,0,0,0.28)] hover:bg-white/95"
-                onClick={() => setStep((s) => Math.min(total - 1, s + 1))}
-              >
-                {m.tutorial.next}
-              </Button>
-            ) : (
-              <Button
-                type="button"
-                className="flex-1 rounded-full bg-white text-[13px] font-semibold text-neutral-900 shadow-[0_2px_14px_rgba(0,0,0,0.28)] hover:bg-white/95"
-                onClick={() => void closeTutorial()}
-              >
-                {m.tutorial.getStarted}
-              </Button>
-            )}
+                {stepCopy?.title}
+              </h2>
+              <p className="mt-2.5 text-[16px] font-normal leading-relaxed text-classmates-ink/90 dark:text-foreground/90">
+                {stepCopy?.body}
+              </p>
+              {step === 0 ? (
+                <p className="mt-2.5 text-[13px] leading-snug text-classmates-sub dark:text-muted-foreground">
+                  {m.tutorial.subtitle}
+                </p>
+              ) : isLast ? (
+                <p className="mt-2.5 text-[13px] leading-snug text-classmates-sub dark:text-muted-foreground">
+                  {m.tutorial.replayHint}
+                </p>
+              ) : (
+                <p className="mt-2.5 text-[13px] leading-snug text-classmates-sub dark:text-muted-foreground">
+                  {m.tutorial.coachSubtitle}
+                </p>
+              )}
+            </div>
+
+            <div className="mt-4 flex items-center gap-1.5 px-5" aria-hidden>
+              {steps.map((_, i) => (
+                <span
+                  key={i}
+                  className={cn(
+                    "h-1.5 rounded-full transition-all duration-200",
+                    i === step
+                      ? "w-5 bg-classmates-blue dark:bg-primary"
+                      : "w-1.5 bg-classmates-edge dark:bg-muted-foreground/35",
+                  )}
+                />
+              ))}
+            </div>
+
+            <div className="mt-4 flex items-center gap-2 px-5 pb-5">
+              {step > 0 ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-11 flex-1 rounded-full text-[15px] font-semibold"
+                  onClick={() => setStep((s) => Math.max(0, s - 1))}
+                >
+                  {m.tutorial.back}
+                </Button>
+              ) : (
+                <span className="flex-1" />
+              )}
+              {!isLast ? (
+                <Button
+                  type="button"
+                  className="h-11 flex-1 rounded-full text-[15px] font-semibold"
+                  onClick={() => setStep((s) => Math.min(total - 1, s + 1))}
+                >
+                  {m.tutorial.next}
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  className="h-11 flex-1 rounded-full text-[15px] font-semibold"
+                  onClick={() => void closeTutorial()}
+                >
+                  {m.tutorial.getStarted}
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>

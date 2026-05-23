@@ -2,7 +2,7 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import type { UserGender } from "@prisma/client";
+import { type CourseIntent, type UserGender } from "@prisma/client";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -31,7 +31,7 @@ export type CourseMember = {
     | "VERIFIED"
     | "MANUAL_REVIEW_REQUIRED"
     | "REJECTED";
-  intentions: import("@prisma/client").CourseIntent[];
+  intentions: CourseIntent[];
   overlapMinutes: number;
   /**
    * Connection state between the viewer and this member:
@@ -44,7 +44,10 @@ export type CourseMember = {
 };
 
 const memberListShellClass =
-  "divide-y divide-[#F1F1F1] overflow-hidden rounded-[1.25rem] border border-classmates-edge/90 bg-classmates-surface dark:divide-border/60 dark:border-border/60 dark:bg-card";
+  "divide-y divide-[#F1F1F1] rounded-[1.25rem] border border-classmates-edge/90 bg-classmates-surface dark:divide-border/60 dark:border-border/60 dark:bg-card";
+
+const memberIntentChipClass =
+  "rounded-full bg-[#F0FDFA] px-2 py-0.5 text-[10px] font-semibold leading-tight text-[#0F766E] dark:border dark:border-teal-800/40 dark:bg-teal-950/45 dark:text-teal-100";
 
 /** No thread yet — compact primary CTA. */
 const memberMessageButtonClass =
@@ -70,6 +73,12 @@ export function CourseMemberList({
   members: CourseMember[];
 }) {
   const { courses: co } = useAppMessages();
+  const intentLabel: Record<CourseIntent, string> = {
+    STUDY_TOGETHER: co.intentStudyTogether,
+    EXAM_PREP: co.intentExamPrep,
+    GO_TO_CLASS_TOGETHER: co.intentGoTogether,
+    EAT_AFTER_CLASS: co.intentGetCoffee,
+  };
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -116,7 +125,13 @@ export function CourseMemberList({
       ) : (
         <ul className={memberListShellClass}>
           {filtered.map((m) => (
-            <MemberRow key={m.membershipId} member={m} courseId={courseId} copy={co} />
+            <MemberRow
+              key={m.membershipId}
+              member={m}
+              courseId={courseId}
+              intentLabel={intentLabel}
+              copy={co}
+            />
           ))}
         </ul>
       )}
@@ -127,10 +142,12 @@ export function CourseMemberList({
 function MemberRow({
   member,
   courseId,
+  intentLabel,
   copy,
 }: {
   member: CourseMember;
   courseId: string;
+  intentLabel: Record<CourseIntent, string>;
   copy: CoursesMessages;
 }) {
   const router = useRouter();
@@ -138,7 +155,7 @@ function MemberRow({
   const overlap = formatOverlapShort(member.overlapMinutes);
   const profileHref =
     `/users/${member.userId}?returnTo=${encodeURIComponent(`/courses/${courseId}`)}` as Route;
-  const metaLine = buildMemberMetaLine(member, overlap, copy);
+  const profileMeta = buildProfileMetaLine(member, copy);
 
   async function openChat() {
     if (opening) return;
@@ -182,7 +199,7 @@ function MemberRow({
     );
 
   return (
-    <li className="flex items-center gap-2.5 px-3 py-2">
+    <li className="flex items-start gap-2.5 px-3 py-2.5">
       <Link
         href={profileHref}
         className="shrink-0 rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-classmates-azure/40 focus-visible:ring-offset-2"
@@ -191,35 +208,60 @@ function MemberRow({
         <PresetAvatar id={member.avatarUrl} size={40} className="shrink-0" />
       </Link>
 
-      <Link href={profileHref} className="min-w-0 flex-1 overflow-hidden rounded-md outline-none focus-visible:ring-2 focus-visible:ring-classmates-azure/40">
-        <div className="flex min-w-0 items-center gap-1">
-          <span className="min-w-0 truncate text-[13px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
-            {member.nickname}
-          </span>
-          <VerifiedBadge
-            size="xs"
-            school={member.school}
-            verifiedStudent={member.verifiedStudent}
-            status={member.studentVerificationStatus}
-          />
-        </div>
-        {metaLine ? (
-          <p className="mt-0.5 truncate text-[11px] leading-snug text-muted-foreground">{metaLine}</p>
-        ) : null}
-      </Link>
+      <div className="min-w-0 flex-1 space-y-1">
+        <Link
+          href={profileHref}
+          className="block min-w-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-classmates-azure/40"
+        >
+          <div className="flex min-w-0 items-center gap-1">
+            <span className="min-w-0 truncate text-[13px] font-semibold leading-tight text-classmates-ink dark:text-foreground">
+              {member.nickname}
+            </span>
+            <VerifiedBadge
+              size="xs"
+              school={member.school}
+              verifiedStudent={member.verifiedStudent}
+              status={member.studentVerificationStatus}
+              className="shrink-0"
+            />
+          </div>
+          {profileMeta ? (
+            <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-muted-foreground">{profileMeta}</p>
+          ) : null}
+          {overlap ? (
+            <p className="mt-0.5 text-[11px] font-semibold leading-snug text-[#0F766E] dark:text-teal-300">
+              {formatMessage(copy.memberOverlapLine, { overlap })}
+            </p>
+          ) : null}
+        </Link>
 
-      {cta}
+        {member.intentions.length ? (
+          <div
+            className="flex flex-wrap gap-1"
+            aria-label={`${copy.memberWantsTo} ${member.intentions.map((intent) => intentLabel[intent]).join(", ")}`}
+          >
+            {member.intentions.map((intent) => (
+              <span key={intent} className={memberIntentChipClass}>
+                {intentLabel[intent]}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="shrink-0 self-center">{cta}</div>
     </li>
   );
 }
 
-function buildMemberMetaLine(member: CourseMember, overlap: string, copy: CoursesMessages): string | null {
-  if (overlap) {
-    return formatMessage(copy.memberOverlapLine, { overlap });
-  }
+function buildProfileMetaLine(member: CourseMember, copy: CoursesMessages): string | null {
+  const schoolInBadge =
+    member.studentVerificationStatus === "VERIFIED" && member.verifiedStudent;
+  const schoolMeta = !schoolInBadge && member.school?.trim() ? member.school.trim() : null;
   const parts = [
     member.major,
     member.semester ? formatMessage(copy.memberSemesterChip, { semester: member.semester }) : null,
+    schoolMeta,
   ].filter(Boolean);
   return parts.length ? parts.join(" · ") : null;
 }

@@ -37,42 +37,8 @@ type CourseHit = {
 type Variant = {
   fingerprint: string;
   userCount: number;
-  source?: "official" | "community";
-  label?: string;
-  sessions: { weekday: Weekday; start: string; end: string; location?: string | null }[];
+  sessions: { weekday: Weekday; start: string; end: string }[];
 };
-
-type OfficialScheduleMeta = {
-  hasOfficial: boolean;
-  needsChoice: boolean;
-  canAutoApply: boolean;
-  defaultFingerprint: string | null;
-};
-
-const EMPTY_OFFICIAL_META: OfficialScheduleMeta = {
-  hasOfficial: false,
-  needsChoice: false,
-  canAutoApply: false,
-  defaultFingerprint: null,
-};
-
-function pickAutoFillVariant(variants: Variant[]): Variant | null {
-  if (variants.length === 0) return null;
-  const official = variants.filter((v) => v.source === "official");
-  if (official.length === 1) return official[0]!;
-  if (official.length > 1) {
-    const lecture = official.find(
-      (v) =>
-        /\bvorlesung\b/i.test(v.label ?? "") ||
-        /\blecture\b/i.test(v.label ?? "") ||
-        (v.label ?? "").startsWith("Vorlesung"),
-    );
-    if (lecture) return lecture;
-    return null;
-  }
-  const community = variants.find((v) => v.userCount >= 2);
-  return community ?? variants[0] ?? null;
-}
 
 type Picked = { code: string; name: string; courseId?: string };
 
@@ -110,8 +76,6 @@ export function CourseForm({
   const [manualOpen, setManualOpen] = useState(false);
 
   const [variants, setVariants] = useState<Variant[]>([]);
-  const [variantsLoading, setVariantsLoading] = useState(false);
-  const [officialMeta, setOfficialMeta] = useState<OfficialScheduleMeta>(EMPTY_OFFICIAL_META);
   const [usedVariantFingerprint, setUsedVariantFingerprint] = useState<string | null>(null);
   const sessionsAutoFilled = useRef(false);
   const prefillLoaded = useRef(false);
@@ -131,7 +95,7 @@ export function CourseForm({
       code: "",
       location: "",
       intentions: [CourseIntent.STUDY_TOGETHER],
-      sessions: [],
+      sessions: [{ weekday: "TUE" as Weekday, start: "14:00", end: "16:00", location: "" }],
     },
   });
 
@@ -161,8 +125,6 @@ export function CourseForm({
         setHits([]);
         sessionsAutoFilled.current = false;
         setUsedVariantFingerprint(null);
-        setOfficialMeta(EMPTY_OFFICIAL_META);
-        setVariants([]);
       } catch {
         /* ignore */
       }
@@ -209,8 +171,6 @@ export function CourseForm({
     setMode("picked");
     setManualOpen(false);
     setHits([]);
-    setVariants([]);
-    setOfficialMeta(EMPTY_OFFICIAL_META);
     sessionsAutoFilled.current = false;
     setUsedVariantFingerprint(null);
   };
@@ -222,7 +182,6 @@ export function CourseForm({
     setValue("code", "");
     setValue("name", "");
     setVariants([]);
-    setOfficialMeta(EMPTY_OFFICIAL_META);
     setUsedVariantFingerprint(null);
     sessionsAutoFilled.current = false;
   };
@@ -235,9 +194,6 @@ export function CourseForm({
     setPicked({ code: code.toUpperCase(), name });
     setMode("picked");
     setManualOpen(false);
-    setVariants([]);
-    setOfficialMeta(EMPTY_OFFICIAL_META);
-    setUsedVariantFingerprint(null);
     sessionsAutoFilled.current = false;
   };
 
@@ -245,8 +201,6 @@ export function CourseForm({
   useEffect(() => {
     if (mode !== "picked") {
       setVariants([]);
-      setOfficialMeta(EMPTY_OFFICIAL_META);
-      setVariantsLoading(false);
       return;
     }
     const params = new URLSearchParams();
@@ -255,43 +209,31 @@ export function CourseForm({
     else return;
 
     const controller = new AbortController();
-    setVariantsLoading(true);
-    setOfficialMeta(EMPTY_OFFICIAL_META);
     (async () => {
       try {
         const res = await apiFetch(`/api/courses/schedule-variants?${params.toString()}`, {
           signal: controller.signal,
         });
         if (!res.ok) return;
-        const payload = (await res.json()) as {
-          data?: { variants?: Variant[]; official?: OfficialScheduleMeta };
-        };
+        const payload = (await res.json()) as { data?: { variants?: Variant[] } };
         const next = payload.data?.variants ?? [];
-        const meta = payload.data?.official ?? EMPTY_OFFICIAL_META;
         setVariants(next);
-        setOfficialMeta(meta);
 
-        if (!sessionsAutoFilled.current) {
-          const top = pickAutoFillVariant(next);
-          if (top && (top.source === "official" || top.userCount >= 2)) {
-            replace(
-              top.sessions.map((s) => ({
-                weekday: s.weekday,
-                start: s.start,
-                end: s.end,
-                location: s.location?.trim() ?? "",
-              })),
-            );
-            setUsedVariantFingerprint(top.fingerprint);
-            sessionsAutoFilled.current = true;
-          } else if (!meta.hasOfficial) {
-            replace([]);
-          }
+        const top = next[0];
+        if (top && top.userCount >= 2 && !sessionsAutoFilled.current) {
+          replace(
+            top.sessions.map((s) => ({
+              weekday: s.weekday,
+              start: s.start,
+              end: s.end,
+              location: "",
+            })),
+          );
+          setUsedVariantFingerprint(top.fingerprint);
+          sessionsAutoFilled.current = true;
         }
       } catch (err) {
         if ((err as { name?: string }).name !== "AbortError") console.error(err);
-      } finally {
-        if (!controller.signal.aborted) setVariantsLoading(false);
       }
     })();
     return () => controller.abort();
@@ -303,7 +245,7 @@ export function CourseForm({
         weekday: s.weekday,
         start: s.start,
         end: s.end,
-        location: s.location?.trim() ?? "",
+        location: "",
       })),
     );
     setUsedVariantFingerprint(variant.fingerprint);
@@ -320,28 +262,10 @@ export function CourseForm({
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError("");
-
-    const hasSessions = values.sessions.length > 0;
-    const canApplyOfficial =
-      officialMeta.hasOfficial &&
-      (usedVariantFingerprint != null || officialMeta.canAutoApply);
-
-    if (!hasSessions && officialMeta.needsChoice && !usedVariantFingerprint) {
-      setServerError(co.formPickOfficialVariant);
-      return;
-    }
-    if (!hasSessions && !canApplyOfficial) {
-      setServerError(co.formNeedManualTimes);
-      return;
-    }
-
     const response = await apiFetch("/api/courses", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...values,
-        variantFingerprint: usedVariantFingerprint ?? officialMeta.defaultFingerprint ?? undefined,
-      }),
+      body: JSON.stringify(values),
     });
     const payload = await response.json();
     if (!response.ok) {
@@ -364,15 +288,7 @@ export function CourseForm({
     router.refresh();
   });
 
-  const canSubmit =
-    mode === "picked" && (codeValue?.trim().length ?? 0) >= 2 && !variantsLoading;
-
-  const officialApplied =
-    officialMeta.hasOfficial && sessionsAutoFilled.current && usedVariantFingerprint != null;
-  const showManualPrompt =
-    !variantsLoading && mode === "picked" && !officialMeta.hasOfficial;
-  const showPickOfficialPrompt =
-    !variantsLoading && officialMeta.needsChoice && usedVariantFingerprint == null;
+  const canSubmit = mode === "picked" && (codeValue?.trim().length ?? 0) >= 2;
 
   return (
     <form className="space-y-4" onSubmit={onSubmit}>
@@ -500,40 +416,12 @@ export function CourseForm({
 
       {mode === "picked" ? (
         <>
-          {variantsLoading ? (
-            <p className="rounded-2xl border border-border bg-muted/30 px-3 py-2.5 text-xs text-muted-foreground">
-              {co.formOfficialLoading}
-            </p>
-          ) : null}
-
-          {!variantsLoading && officialApplied ? (
-            <p className="rounded-2xl border border-emerald-200/80 bg-emerald-50/80 px-3 py-2.5 text-xs text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200">
-              {co.formOfficialApplied}
-            </p>
-          ) : null}
-
-          {showManualPrompt ? (
-            <p className="rounded-2xl border border-amber-200/90 bg-amber-50/90 px-3 py-2.5 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
-              {co.formNoOfficialSchedule}
-            </p>
-          ) : null}
-
-          {showPickOfficialPrompt ? (
-            <p className="rounded-2xl border border-blue-200/85 bg-blue-50/80 px-3 py-2.5 text-xs text-blue-950 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-100">
-              {co.formPickOfficialVariant}
-            </p>
-          ) : null}
-
           {variants.length > 0 ? (
             <div className="space-y-2 rounded-2xl border border-border bg-muted/30 p-3">
               <p className="text-xs font-medium text-muted-foreground">
-                {variants.some((v) => v.source === "official")
-                  ? variants.some((v) => v.source === "community")
-                    ? co.formSchedulesMixed
-                    : co.formSchedulesOfficial
-                  : variants.length === 1
-                    ? co.formSchedulesOthersOne
-                    : formatMessage(co.formSchedulesOthersMany, { count: variants.length })}
+                {variants.length === 1
+                  ? co.formSchedulesOthersOne
+                  : formatMessage(co.formSchedulesOthersMany, { count: variants.length })}
               </p>
               <div className="space-y-1.5">
                 {variants.map((variant) => {
@@ -551,21 +439,9 @@ export function CourseForm({
                       )}
                     >
                       <span className="min-w-0 flex-1 truncate">
-                        <span
-                          className={cn(
-                            "mr-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold",
-                            variant.source === "official"
-                              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300"
-                              : "bg-foreground/10",
-                          )}
-                        >
-                          {variant.source === "official"
-                            ? co.formOfficialBadge
-                            : `${variant.userCount}×`}
+                        <span className="mr-2 inline-block rounded-full bg-foreground/10 px-2 py-0.5 text-[10px] font-semibold">
+                          {variant.userCount}×
                         </span>
-                        {variant.label ? (
-                          <span className="mr-1 font-medium text-foreground">{variant.label}: </span>
-                        ) : null}
                         {variant.sessions
                           .map(
                             (s) =>
@@ -597,13 +473,7 @@ export function CourseForm({
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <p className="text-sm font-medium">{co.formWeeklyTimesTitle}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {showManualPrompt
-                      ? co.formNoOfficialSchedule
-                      : officialApplied
-                        ? co.formOfficialApplied
-                        : co.formWeeklyTimesHint}
-                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{co.formWeeklyTimesHint}</p>
                 </div>
                 <button
                   type="button"
@@ -620,9 +490,7 @@ export function CourseForm({
 
             <div className="space-y-2 p-4 pt-3">
             {fields.length === 0 ? (
-              <p className="text-xs text-muted-foreground">
-                {showManualPrompt ? co.formNeedManualTimes : co.formNeedWeeklySlot}
-              </p>
+              <p className="text-xs text-muted-foreground">{co.formNeedWeeklySlot}</p>
             ) : null}
 
             <div className="space-y-2">

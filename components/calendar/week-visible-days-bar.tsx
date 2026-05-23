@@ -60,38 +60,54 @@ export function WeekVisibleDaysBar({
   const valueText = formatMessage(valueTemplate, { count: displayValue });
   const isDragging = dragRatio != null;
 
+  /** Thumb follows `ratio` continuously; calendar width updates when snapped day count changes. */
+  const applyPointerRatio = useCallback(
+    (clientX: number, { finalize = false }: { finalize?: boolean } = {}) => {
+      const ratio = ratioFromClientX(clientX);
+      const nextValue = valueFromRatio(ratio);
+      if (finalize) {
+        setDragRatio(null);
+        onChange(nextValue);
+        return;
+      }
+      setDragRatio(ratio);
+      if (nextValue !== safeValue) {
+        onChange(nextValue);
+      }
+    },
+    [onChange, ratioFromClientX, safeValue],
+  );
+
   const onPointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
       event.preventDefault();
       draggingRef.current = true;
       event.currentTarget.setPointerCapture(event.pointerId);
-      setDragRatio(ratioFromClientX(event.clientX));
+      applyPointerRatio(event.clientX);
     },
-    [ratioFromClientX],
+    [applyPointerRatio],
   );
 
   const onPointerMove = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
       if (!draggingRef.current) return;
-      setDragRatio(ratioFromClientX(event.clientX));
+      applyPointerRatio(event.clientX);
     },
-    [ratioFromClientX],
+    [applyPointerRatio],
   );
 
   const endDrag = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
       if (!draggingRef.current) return;
       draggingRef.current = false;
-      const ratio = ratioFromClientX(event.clientX);
-      setDragRatio(null);
-      onChange(valueFromRatio(ratio));
+      applyPointerRatio(event.clientX, { finalize: true });
       try {
         event.currentTarget.releasePointerCapture(event.pointerId);
       } catch {
         /* capture may already be released */
       }
     },
-    [onChange, ratioFromClientX],
+    [applyPointerRatio],
   );
 
   const onKeyDown = useCallback(

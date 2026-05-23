@@ -2,9 +2,8 @@ import type { Route } from "next";
 import Link from "next/link";
 
 import { RecommendedClassmatesRail } from "@/components/classmates/recommended-classmates-rail";
-import { CoursesEntryTabs } from "@/components/courses/courses-entry-tabs";
+import { CoursesPageTop } from "@/components/courses/courses-page-top";
 import { CoursesTabRestore } from "@/components/courses/courses-tab-restore";
-import { CoursesSchoolSelect } from "@/components/courses/courses-school-select";
 import { inboxChatListUlClassName } from "@/components/inbox/inbox-conversation-tile";
 import {
   EnrolledCourseCard,
@@ -19,7 +18,6 @@ import { LinkButton } from "@/components/ui/link-button";
 import { getSessionUser } from "@/lib/auth/session";
 import {
   DEFAULT_SCHOOL,
-  getSchoolLabel,
   normalizeSchoolCode,
   type SchoolCode,
 } from "@/lib/constants/schools";
@@ -209,14 +207,15 @@ export default async function CoursesPage({
 
   if (!sessionUser) {
     return (
-      <div className="space-y-3 pb-4">
+      <div className="space-y-4 pb-4">
         <CoursesTabRestore />
-        <CoursesHeader
+        <CoursesPageTop
           selectedSchool={selectedSchool}
           allowedSchools={allowedSchools}
+          activeTab={activeTab}
+          query={rawCourseQuery}
           courses={c}
         />
-        <CoursesEntryTabs activeTab={activeTab} selectedSchool={selectedSchool} query={rawCourseQuery} courses={c} />
 
         {activeTab === "popular-courses" ? (
           <>
@@ -294,14 +293,15 @@ export default async function CoursesPage({
     }));
 
   return (
-    <div className="space-y-3 pb-4">
+    <div className="space-y-4 pb-4">
       <CoursesTabRestore />
-      <CoursesHeader
+      <CoursesPageTop
         selectedSchool={selectedSchool}
         allowedSchools={allowedSchools}
+        activeTab={activeTab}
+        query={rawCourseQuery}
         courses={c}
       />
-      <CoursesEntryTabs activeTab={activeTab} selectedSchool={selectedSchool} query={rawCourseQuery} courses={c} />
 
       <RecommendedClassmatesRail
         rows={recommendedClassmates}
@@ -394,37 +394,6 @@ export default async function CoursesPage({
   );
 }
 
-function CoursesHeader({
-  selectedSchool,
-  allowedSchools,
-  courses,
-}: {
-  selectedSchool: SchoolCode;
-  allowedSchools: SchoolCode[];
-  courses: CoursesMessages;
-}) {
-  const schoolLabel = getSchoolLabel(selectedSchool);
-  return (
-    <div className="flex items-start justify-between gap-3">
-      <header className="min-w-0">
-        <h1 className="page-screen-title">{courses.screenTitle}</h1>
-        <p className="page-screen-subtitle mt-0.5">{courses.screenSubtitle}</p>
-      </header>
-
-      <div className="shrink-0 space-y-1">
-        <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8A94A6] dark:text-muted-foreground">
-          {courses.schoolHeading}
-        </p>
-        <CoursesSchoolSelect
-          value={selectedSchool}
-          allowedSchools={allowedSchools.length > 0 ? allowedSchools : undefined}
-          className="w-auto max-w-[11.5rem]"
-        />
-        <p className="sr-only">{formatMessage(courses.schoolSelectSrSuffix, { school: schoolLabel })}</p>
-      </div>
-    </div>
-  );
-}
 
 function PopularCoursesSearchBar({
   selectedSchool,

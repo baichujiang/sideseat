@@ -1,10 +1,6 @@
 import type { Weekday } from "@prisma/client";
 import { NextRequest } from "next/server";
 
-import {
-  getOfficialScheduleMeta,
-  loadOfficialScheduleVariantsForCourse,
-} from "@/lib/courses/official-schedule";
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
 import { getCurrentSemesterLabel } from "@/lib/constants/semester";
@@ -15,13 +11,10 @@ type SessionShape = {
   weekday: Weekday;
   start: string;
   end: string;
-  location?: string | null;
 };
 
 type Variant = {
   fingerprint: string;
-  label?: string;
-  source: "official" | "community";
   userCount: number;
   sessions: SessionShape[];
 };
@@ -51,10 +44,7 @@ export async function GET(request: NextRequest) {
   const semesterLabel = getCurrentSemesterLabel();
 
   if (!courseId && (!code || code.length < 2)) {
-    return ok({
-      variants: [] as Variant[],
-      official: getOfficialScheduleMeta([]),
-    });
+    return ok({ variants: [] as Variant[] });
   }
 
   const course = courseId
@@ -77,26 +67,9 @@ export async function GET(request: NextRequest) {
         },
       });
 
-  if (!course) {
-    return ok({
-      variants: [] as Variant[],
-      official: getOfficialScheduleMeta([]),
-    });
+  if (!course || course.members.length === 0) {
+    return ok({ variants: [] as Variant[] });
   }
-
-  const officialRows = await loadOfficialScheduleVariantsForCourse(course.id);
-  const official: Variant[] = officialRows.map((v) => ({
-    fingerprint: v.fingerprint,
-    label: v.label,
-    source: "official" as const,
-    userCount: 0,
-    sessions: v.sessions.map((s) => ({
-      weekday: s.weekday,
-      start: s.start,
-      end: s.end,
-      location: s.location,
-    })),
-  }));
 
   const groups = new Map<string, { count: number; sessions: SessionShape[] }>();
   for (const membership of course.members) {
@@ -111,7 +84,9 @@ export async function GET(request: NextRequest) {
       start: formatMinutes(s.startMinute),
       end: formatMinutes(s.endMinute),
     }));
-    const fingerprint = `community:${shape.map((s) => `${s.weekday} ${s.start}-${s.end}`).join(" | ")}`;
+    const fingerprint = shape
+      .map((s) => `${s.weekday} ${s.start}-${s.end}`)
+      .join(" | ");
     const existing = groups.get(fingerprint);
     if (existing) {
       existing.count += 1;
@@ -120,18 +95,14 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const community: Variant[] = [...groups.entries()]
+  const variants: Variant[] = [...groups.entries()]
     .map(([fingerprint, entry]) => ({
       fingerprint,
-      source: "community" as const,
       userCount: entry.count,
       sessions: entry.sessions,
     }))
     .sort((a, b) => b.userCount - a.userCount)
     .slice(0, 3);
 
-  return ok({
-    variants: [...official, ...community],
-    official: getOfficialScheduleMeta(officialRows),
-  });
+  return ok({ variants });
 }

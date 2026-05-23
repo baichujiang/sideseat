@@ -131,7 +131,7 @@ export function AppShell({
       {isChatThread || isNativeApp ? null : <PwaInstallBar />}
       {isChatThread ? null : (
         <nav
-          className="fixed bottom-0 left-1/2 z-20 flex w-full max-w-md -translate-x-1/2 items-stretch border-t border-classmates-edge/80 bg-classmates-warm-alt/95 px-1 pb-[max(0.5rem,var(--safe-bottom))] pt-1.5 backdrop-blur-xl supports-[backdrop-filter]:bg-classmates-warm-alt/92 dark:border-border/50 dark:bg-background/92"
+          className="fixed bottom-0 left-1/2 z-20 flex w-full max-w-md -translate-x-1/2 items-stretch border-t border-classmates-edge/80 bg-white/95 px-1 pb-[max(0.5rem,var(--safe-bottom))] pt-1.5 backdrop-blur-xl supports-[backdrop-filter]:bg-white/92 dark:border-border/50 dark:bg-background/92"
           aria-label={m.nav.mainNavAria}
         >
           {navItems.map((item) => {

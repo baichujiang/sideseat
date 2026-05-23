@@ -229,5 +229,5 @@ export async function upsertOfficialVariantsForCourse(
       where: { id: courseId },
       data: { officialScheduleSyncedAt: new Date() },
     });
-  });
+  }, { timeout: 60_000 });
 }

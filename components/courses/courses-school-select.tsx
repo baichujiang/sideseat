@@ -16,6 +16,8 @@ type Props = {
   allowedSchools?: SchoolCode[];
   id?: string;
   className?: string;
+  /** Compact toolbar pill for page headers (iOS nav-bar menu style). */
+  variant?: "default" | "toolbar";
 };
 
 /**
@@ -27,6 +29,7 @@ export function CoursesSchoolSelect({
   allowedSchools,
   id = "courses-school-select",
   className,
+  variant = "default",
 }: Props) {
   const router = useRouter();
   const { courses: co } = useAppMessages();
@@ -52,10 +55,18 @@ export function CoursesSchoolSelect({
         id={id}
         aria-label={formatMessage(co.schoolFilterAria, { label: selected?.shortLabel ?? value })}
         className={cn(
-          "inline-flex h-10 w-full cursor-pointer list-none select-none items-center justify-between gap-2 rounded-full border border-[#E7E0D6] bg-white px-3 text-[13px] font-semibold text-foreground shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] transition",
-          "hover:border-[#D8D1C7] hover:bg-muted/35 active:bg-muted/50",
+          "inline-flex w-full cursor-pointer list-none select-none items-center justify-between gap-1.5 transition",
           "[&::-webkit-details-marker]:hidden",
-          "dark:border-border dark:bg-card dark:hover:bg-muted/30",
+          variant === "toolbar"
+            ? cn(
+                "h-8 rounded-lg bg-classmates-rail/45 px-2.5 text-[15px] font-medium text-classmates-blue",
+                "active:bg-classmates-rail/70 dark:bg-muted/50 dark:text-blue-400 dark:active:bg-muted/70",
+              )
+            : cn(
+                "h-10 rounded-full border border-[#E7E0D6] bg-white px-3 text-[13px] font-semibold text-foreground shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]",
+                "hover:border-[#D8D1C7] hover:bg-muted/35 active:bg-muted/50",
+                "dark:border-border dark:bg-card dark:hover:bg-muted/30",
+              ),
         )}
       >
         <span className="truncate">{selected?.shortLabel ?? value}</span>

@@ -13,8 +13,8 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
-  /* Page background ≈ #F8F7F4; text ≈ #111827 / #5F6B7A; borders ≈ #E7E0D6 */
-  --background: 40 23% 97%;
+  /* Page background ≈ #F2F2F7 (iOS grouped); text ≈ #111827 / #5F6B7A; borders ≈ #E5E5EA */
+  --background: 240 11% 96%;
   --foreground: 222 47% 11%;
   --card: 0 0% 100%;
   --card-foreground: 222 47% 11%;
@@ -22,24 +22,22 @@
   --popover-foreground: 222 47% 11%;
   --primary: 217 91% 53%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 170 20% 92%;
-  --secondary-foreground: 176 32% 22%;
-  --muted: 42 28% 94%;
+  --secondary: 240 6% 94%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 240 6% 94%;
   --muted-foreground: 218 15% 42%;
-  --accent: 39 66% 92%;
-  --accent-foreground: 24 48% 25%;
+  --accent: 240 6% 94%;
+  --accent-foreground: 222 47% 11%;
   --destructive: 0 75% 54%;
   --destructive-foreground: 0 0% 100%;
-  --border: 38 20% 87%;
-  --input: 38 20% 87%;
+  --border: 240 6% 90%;
+  --input: 240 6% 90%;
   --ring: 217 91% 53%;
   --radius: 1.5rem;
 }
 
 html {
-  background:
-    radial-gradient(circle at top, rgba(170, 214, 222, 0.18), transparent 38%),
-    linear-gradient(180deg, rgba(255, 247, 236, 0.96) 0%, rgba(250, 248, 244, 1) 100%);
+  background: #f2f2f7;
   scroll-behavior: smooth;
   overflow-x: hidden;
   overscroll-behavior-y: none;

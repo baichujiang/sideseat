@@ -29,7 +29,7 @@ const config: Config = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        /** Classmates / Discover — blues for CTAs & chips, teal for social “link”, warm surfaces */
+        /** Classmates / Discover — blues for CTAs & chips, teal for social “link”, iOS-like surfaces */
         /** Product surface + ink — Profile, Discover cards, inbox (light). */
         classmates: {
           blue: "#2563EB",
@@ -40,12 +40,12 @@ const config: Config = {
           teal: "#0F766E",
           "teal-soft": "#F0FDFA",
           "teal-border": "#99F6E4",
-          warm: "#F8F7F4",
-          "warm-alt": "#FAF9F6",
+          warm: "#F2F2F7",
+          "warm-alt": "#FFFFFF",
           surface: "#FFFFFF",
-          edge: "#E7E0D6",
-          hairline: "#EFECE6",
-          rail: "#E6E3DC",
+          edge: "#E5E5EA",
+          hairline: "#EBEBF0",
+          rail: "#E5E5EA",
           ink: "#111827",
           sub: "#5F6B7A",
           hint: "#8A94A6",

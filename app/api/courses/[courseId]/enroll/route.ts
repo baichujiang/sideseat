@@ -1,6 +1,5 @@
 import { CourseIntent } from "@prisma/client";
 
-import { applyOfficialScheduleToUserCourse } from "@/lib/courses/official-schedule";
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok } from "@/lib/http";
@@ -19,7 +18,9 @@ import { error, ok } from "@/lib/http";
  *
  * Defaults applied on quick enroll:
  *   - intentions = [STUDY_TOGETHER]  (most common, safe for matching)
- *   - sessions   = official TUM/LMU timetable when synced, else []
+ *   - sessions   = []                 (user can add weekly times later via
+ *                                      /courses/add?prefillCourseId=... — the
+ *                                      enrolled course card advertises this)
  *
  * Side effects mirror the full path:
  *   - any matching SavedCourse row is removed (the course has graduated
@@ -38,7 +39,7 @@ export async function POST(
 
     const course = await prisma.course.findUnique({
       where: { id: courseId },
-      select: { id: true, code: true, school: true, semesterLabel: true },
+      select: { id: true },
     });
     if (!course) {
       return error("Course not found.", 404);
@@ -53,8 +54,6 @@ export async function POST(
       },
       select: { id: true },
     });
-
-    let membershipId = existing?.id;
 
     await prisma.$transaction([
       ...(existing
@@ -73,27 +72,7 @@ export async function POST(
       }),
     ]);
 
-    if (!membershipId) {
-      const created = await prisma.userCourse.findUnique({
-        where: { userId_courseId: { userId: user.id, courseId: course.id } },
-        select: { id: true },
-      });
-      membershipId = created?.id;
-    }
-
-    let scheduleApplied = false;
-    if (membershipId && !existing) {
-      scheduleApplied = await applyOfficialScheduleToUserCourse({
-        userCourseId: membershipId,
-        courseId: course.id,
-      }).catch(() => false);
-    }
-
-    return ok({
-      courseId: course.id,
-      alreadyEnrolled: Boolean(existing),
-      scheduleApplied,
-    });
+    return ok({ courseId: course.id, alreadyEnrolled: Boolean(existing) });
   } catch (cause) {
     console.error(cause);
     return error("Unable to enroll in course.");
