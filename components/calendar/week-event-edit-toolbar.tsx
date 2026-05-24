@@ -20,14 +20,22 @@ export type WeekCalendarSlotPasteMenuLabels = {
   menuAriaLabel: string;
 };
 
+export type ScheduleSlotActionPrompt = {
+  start: Date;
+  end: Date;
+  clientX: number;
+  clientY: number;
+};
+
 /**
- * Shown after tapping / long-pressing an empty grid slot when a calendar copy/cut
- * payload is buffered — offers Paste vs New event (instead of prefilling the form).
+ * Shown after long-pressing an empty grid slot — New event always; Paste when a copy/cut
+ * payload is buffered.
  */
 export function WeekCalendarSlotPasteMenu({
   clientX,
   clientY,
   labels,
+  showPaste = false,
   onPaste,
   onNewEvent,
   onDismiss,
@@ -35,6 +43,7 @@ export function WeekCalendarSlotPasteMenu({
   clientX: number;
   clientY: number;
   labels: WeekCalendarSlotPasteMenuLabels;
+  showPaste?: boolean;
   onPaste: () => void;
   onNewEvent: () => void;
   onDismiss: () => void;
@@ -102,9 +111,13 @@ export function WeekCalendarSlotPasteMenu({
           "dark:bg-zinc-900 dark:ring-white/10",
         )}
       >
-        <ToolbarButton onClick={onPaste} label={labels.paste} />
-        <ToolbarDivider />
         <ToolbarButton onClick={onNewEvent} label={labels.newEvent} />
+        {showPaste ? (
+          <>
+            <ToolbarDivider />
+            <ToolbarButton onClick={onPaste} label={labels.paste} />
+          </>
+        ) : null}
       </div>
     </div>,
     document.body,

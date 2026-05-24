@@ -48,7 +48,8 @@ import {
 } from "@/components/calendar/week-calendar";
 import { ScheduleDateNavControls } from "@/components/calendar/schedule-date-nav-controls";
 import { WeekVisibleDaysBar } from "@/components/calendar/week-visible-days-bar";
-import type { WeekEventEditToolbarLabels, WeekCalendarSlotPasteMenuLabels } from "@/components/calendar/week-event-edit-toolbar";
+import type { WeekEventEditToolbarLabels, WeekCalendarSlotPasteMenuLabels, ScheduleSlotActionPrompt } from "@/components/calendar/week-event-edit-toolbar";
+import { WeekCalendarSlotPasteMenu } from "@/components/calendar/week-event-edit-toolbar";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { PlanRequestModal } from "@/components/chat/plan-request-modal";
 import { NaturalScheduleSheet } from "@/components/home/natural-schedule-sheet";
@@ -83,6 +84,7 @@ import { courseCalendarShortLabel } from "@/lib/calendar/course-calendar-short-l
 import { isIcsFeedStudyEntryId } from "@/lib/calendar/ics-feed-event-id";
 import {
   clearCalendarClipboardSession,
+  pasteRangeAtSlot,
   readCalendarClipboardSession,
 } from "@/lib/calendar/calendar-clipboard";
 import type { AppLocale } from "@/lib/i18n/app-locale";
@@ -348,6 +350,7 @@ export function ScheduleSurface({
   const [editingItem, setEditingItem] = useState<ScheduleDetailItem | null>(null);
   const [detailItem, setDetailItem] = useState<ScheduleDetailItem | null>(null);
   const [detailAnchorEl, setDetailAnchorEl] = useState<HTMLElement | null>(null);
+  const [slotActionMenu, setSlotActionMenu] = useState<ScheduleSlotActionPrompt | null>(null);
   const [planInviteBusy, setPlanInviteBusy] = useState(false);
   const [planInviteError, setPlanInviteError] = useState<string | null>(null);
   const [planFromCalendar, setPlanFromCalendar] = useState<{
@@ -1313,6 +1316,30 @@ export function ScheduleSurface({
     [messages.schedule],
   );
 
+  const promptSlotAction = useCallback((args: ScheduleSlotActionPrompt) => {
+    setSlotActionMenu(args);
+  }, []);
+
+  const handleSlotNewEvent = useCallback(() => {
+    if (!slotActionMenu) return;
+    openEventDraft(slotActionMenu.start, slotActionMenu.end);
+    setSlotActionMenu(null);
+  }, [slotActionMenu]);
+
+  const handleSlotPaste = useCallback(async () => {
+    if (!slotActionMenu) return;
+    const session = readCalendarClipboardSession();
+    if (!session) {
+      setSlotActionMenu(null);
+      return;
+    }
+    const { start, end } = pasteRangeAtSlot(slotActionMenu.start, session);
+    const ok = await pasteCalendarEvent({ start, end });
+    if (ok) setSlotActionMenu(null);
+  }, [slotActionMenu, pasteCalendarEvent]);
+
+  const slotActionCanPaste = Boolean(slotActionMenu && readCalendarClipboardSession());
+
   const weekAnchorWeekday =
     weekStart <= now && now <= weekEnd ? WEEKDAY_BY_JS[now.getDay()] : WEEKDAY_BY_JS[selectedDate.getDay()];
 
@@ -1338,9 +1365,8 @@ export function ScheduleSurface({
     onDeleteCalendarEvent: deleteCalendarEvent,
     onDuplicateCalendarEvent: duplicateCalendarEvent,
     onCopyCalendarEvent: copyCalendarEvent,
-    onPasteCalendarEvent: pasteCalendarEvent,
+    onSlotActionPrompt: promptSlotAction,
     editToolbarLabels,
-    slotPasteMenuLabels,
     showTimeColumnLabel: false,
     onDayHeaderSelect: (date: Date) => setSelectedDate(berlinStartOfCalendarDay(date)),
   };
@@ -1662,7 +1688,7 @@ export function ScheduleSurface({
             isToday={isSelectedToday}
             nowMinute={nowMinute}
             date={selectedDate}
-            onCreateEvent={openEventDraft}
+            onSlotActionPrompt={promptSlotAction}
             onLongPressItem={(item, anchorEl) => {
               if (item.id === "__draft-preview__") return;
               openDetailFromTimelineItem(item, selectedDate, anchorEl ?? null);
@@ -1756,6 +1782,18 @@ export function ScheduleSurface({
         onEdit={() => openEditSheetFromDetail(false)}
         onDelete={() => void deleteDetailItem()}
       />
+
+      {slotActionMenu ? (
+        <WeekCalendarSlotPasteMenu
+          clientX={slotActionMenu.clientX}
+          clientY={slotActionMenu.clientY}
+          labels={slotPasteMenuLabels}
+          showPaste={slotActionCanPaste}
+          onPaste={() => void handleSlotPaste()}
+          onNewEvent={handleSlotNewEvent}
+          onDismiss={() => setSlotActionMenu(null)}
+        />
+      ) : null}
 
       {planFromCalendar ? (
         <PlanRequestModal

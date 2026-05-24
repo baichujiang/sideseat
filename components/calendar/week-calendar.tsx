@@ -6,9 +6,8 @@ import { MapPin, Repeat2 } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import {
-  WeekCalendarSlotPasteMenu,
   WeekEventEditToolbar,
-  type WeekCalendarSlotPasteMenuLabels,
+  type ScheduleSlotActionPrompt,
   type WeekEventEditToolbarLabels,
 } from "@/components/calendar/week-event-edit-toolbar";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
@@ -29,8 +28,6 @@ import {
 } from "@/lib/calendar/event-overlap-layout";
 import {
   buildClipboardSessionFromBlock,
-  pasteRangeAtSlot,
-  readCalendarClipboardSession,
   writeCalendarClipboardSession,
 } from "@/lib/calendar/calendar-clipboard";
 import { calendarTodayChrome } from "@/lib/calendar/today-chrome";
@@ -41,6 +38,7 @@ import {
   buildWeekCalendarDayColumns,
   horizontalScrollIndexForFocus,
   horizontalScrollLeftToRevealDay,
+  weekCalendarHorizontalModeForFocus,
   type WeekCalendarDayColumn,
 } from "@/lib/calendar/week-calendar-day-columns";
 import { scheduleDateKeyInBerlin } from "@/lib/calendar/schedule-berlin";
@@ -67,6 +65,7 @@ import {
 import {
   clampWeekCalendarMinuteScale,
   clampWeekCalendarVisibleDayCount,
+  fitWeekCalendarDayColumnWidth,
   WEEK_CALENDAR_MINUTE_SCALE_DEFAULT,
   WEEK_CALENDAR_MINUTE_SCALE_MAX,
   WEEK_CALENDAR_MINUTE_SCALE_MIN,
@@ -94,12 +93,6 @@ const DEFAULT_EDIT_TOOLBAR_LABELS: WeekEventEditToolbarLabels = {
   duplicate: "Duplicate",
   delete: "Delete",
   toolbarAriaLabel: "Event actions",
-};
-
-const DEFAULT_SLOT_PASTE_LABELS: WeekCalendarSlotPasteMenuLabels = {
-  paste: "Paste",
-  newEvent: "New event",
-  menuAriaLabel: "Paste copied event or create new",
 };
 
 /** Multiline summary used when the consumer does not provide a richer copy hook. */
@@ -386,9 +379,8 @@ export function WeekCalendar({
   onDeleteCalendarEvent,
   onDuplicateCalendarEvent,
   onCopyCalendarEvent,
-  onPasteCalendarEvent,
+  onSlotActionPrompt,
   editToolbarLabels,
-  slotPasteMenuLabels,
   density = "default",
   minuteScale = WEEK_CALENDAR_MINUTE_SCALE_DEFAULT,
   onMinuteScaleChange,
@@ -483,12 +475,13 @@ export function WeekCalendar({
     block: WeekCalendarBlock;
     occurrenceDate: Date;
   }) => Promise<{ summaryText: string } | void> | { summaryText: string } | void;
-  /** Paste buffered copy/cut at an empty slot (parent creates the event). */
-  onPasteCalendarEvent?: (args: { start: Date; end: Date }) => Promise<boolean> | boolean;
+  /**
+   * After long-press on an empty slot, show a menu (New event / Paste) instead of
+   * opening the create form immediately. When omitted, falls back to `onCreateEvent`.
+   */
+  onSlotActionPrompt?: (args: ScheduleSlotActionPrompt) => void;
   /** Localized labels for the floating edit toolbar. When omitted, English defaults are used. */
   editToolbarLabels?: WeekEventEditToolbarLabels;
-  /** Labels for empty-slot Paste vs New event menu after copy/cut. */
-  slotPasteMenuLabels?: WeekCalendarSlotPasteMenuLabels;
   density?: WeekCalendarDensity;
   minuteScale?: number;
   onMinuteScaleChange?: (nextScale: number) => void;
@@ -547,6 +540,7 @@ export function WeekCalendar({
   const horizontalScrollWeekStartKeyRef = useRef<string | null>(null);
   const horizontalScrollFrameReadyRef = useRef(false);
   const dayColumnWidthForScrollRef = useRef(0);
+  const prevRevealNonceRef = useRef(revealDateNonce);
   const [frameWidth, setFrameWidth] = useState(0);
   const previousMinutePxRef = useRef(MINUTE_PX);
   const minutePxRef = useRef(MINUTE_PX);
@@ -573,12 +567,6 @@ export function WeekCalendar({
    * allowed while selected. Single tap opens the detail sheet.
    */
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [slotPasteMenu, setSlotPasteMenu] = useState<{
-    start: Date;
-    end: Date;
-    clientX: number;
-    clientY: number;
-  } | null>(null);
   /** Per-eventId DOM node ref so the toolbar can anchor to the visible block. */
   const eventCardElsRef = useRef<Map<string, HTMLDivElement | null>>(new Map());
 
@@ -702,17 +690,21 @@ export function WeekCalendar({
   /** Share/Home shells pin body height so the grid scrolls inside a bounded viewport. */
   const pinScrollViewportHeight = !fillParent || maxViewportBodyPx != null;
 
-  // Measure before paint so the first hydrated frame does not use the 56px
-  // fallback column width (narrow grid → wide grid flash).
+  // Measure the scrollport (not the outer card) so vertical scrollbars and borders
+  // are included — otherwise N-day view can clip the last column on the right.
   useLayoutEffect(() => {
-    const node = calendarFrameRef.current;
-    if (!node) return;
+    const scrollNode = scrollContainerRef.current;
+    const frameNode = calendarFrameRef.current;
+    if (!scrollNode && !frameNode) return;
 
-    const update = () => setFrameWidth(node.clientWidth);
+    const update = () => {
+      setFrameWidth(scrollNode?.clientWidth ?? frameNode?.clientWidth ?? 0);
+    };
     update();
 
     const observer = new ResizeObserver(update);
-    observer.observe(node);
+    if (scrollNode) observer.observe(scrollNode);
+    if (frameNode) observer.observe(frameNode);
     return () => observer.disconnect();
   }, []);
 
@@ -1133,7 +1125,7 @@ export function WeekCalendar({
   /** Width available for day columns in the scrollport (sticky time axis is not part of the day strip). */
   const dayStripViewportPx = Math.max(frameWidth - TIME_COLUMN_PX, 1);
   const dayColumnWidth = useMemo(
-    () => Math.max(dayStripViewportPx / VISIBLE_WEEK_DAYS, 56),
+    () => fitWeekCalendarDayColumnWidth(dayStripViewportPx, VISIBLE_WEEK_DAYS),
     [dayStripViewportPx, VISIBLE_WEEK_DAYS],
   );
   const dayTrackWidth = dayColumnWidth * dayColumns.length;
@@ -1159,6 +1151,11 @@ export function WeekCalendar({
       horizontalScrollWeekStartKeyRef.current !== weekStartKey;
     const frameJustReady = frameWidth > 0 && !horizontalScrollFrameReadyRef.current;
     if (frameWidth > 0) horizontalScrollFrameReadyRef.current = true;
+    const revealNonceBumped =
+      revealDateNonce > 0 && revealDateNonce !== prevRevealNonceRef.current;
+    prevRevealNonceRef.current = revealDateNonce;
+    const jumpToTodayReveal =
+      revealNonceBumped && todayBerlinKey != null && focusKey === todayBerlinKey;
     const prevWidth = dayColumnWidthForScrollRef.current;
     const widthChanged = prevWidth > 0 && Math.abs(prevWidth - dayColumnWidth) > 0.5;
 
@@ -1172,15 +1169,21 @@ export function WeekCalendar({
       return;
     }
 
-    if (!layoutChanged && !weekChanged && !frameJustReady) return;
+    if (!layoutChanged && !weekChanged && !frameJustReady && !revealNonceBumped) return;
 
+    const modeForScroll =
+      todayBerlinKey != null && focusKey === todayBerlinKey
+        ? weekCalendarHorizontalModeForFocus(focusDate, VISIBLE_WEEK_DAYS)
+        : horizontalMode;
     const startIndex = horizontalScrollIndexForFocus(
       dayColumns,
       focusDate,
-      horizontalMode,
+      modeForScroll,
       VISIBLE_WEEK_DAYS,
     );
-    node.scrollLeft = startIndex * dayColumnWidth;
+    if (!jumpToTodayReveal) {
+      node.scrollLeft = startIndex * dayColumnWidth;
+    }
   }, [
     anchorWeekday,
     dayColumnWidth,
@@ -1189,6 +1192,8 @@ export function WeekCalendar({
     frameWidth,
     horizontalMode,
     horizontalScrollMode,
+    revealDateNonce,
+    todayBerlinKey,
     weekStartDate,
     VISIBLE_WEEK_DAYS,
   ]);
@@ -1206,9 +1211,10 @@ export function WeekCalendar({
     const node = scrollContainerRef.current;
     if (!node || dayColumnWidth <= 0 || dayColumns.length === 0) return;
     const viewportWidth = Math.max(frameWidth - TIME_COLUMN_PX, 1);
+    const dateToReveal = today ?? focusDate;
     node.scrollLeft = horizontalScrollLeftToRevealDay(
       dayColumns,
-      focusDate,
+      dateToReveal,
       node.scrollLeft,
       viewportWidth,
       dayColumnWidth,
@@ -1216,7 +1222,7 @@ export function WeekCalendar({
     horizontalScrollLayoutKeyRef.current = `${scheduleDateKeyInBerlin(focusDate)}|${horizontalMode}|${VISIBLE_WEEK_DAYS}`;
 
     const ctx = revealScrollContextRef.current;
-    const focusKey = scheduleDateKeyInBerlin(focusDate);
+    const focusKey = scheduleDateKeyInBerlin(dateToReveal);
     const jumpToNow =
       ctx.todayBerlinKey &&
       focusKey === ctx.todayBerlinKey &&
@@ -1244,6 +1250,7 @@ export function WeekCalendar({
     dayColumnWidth,
     dayColumns,
     focusDate,
+    today,
     horizontalMode,
     VISIBLE_WEEK_DAYS,
     frameWidth,
@@ -1283,14 +1290,14 @@ export function WeekCalendar({
 
   const promptCreateOrPaste = useCallback(
     (start: Date, end: Date, clientX: number, clientY: number) => {
-      if (readCalendarClipboardSession() && onPasteCalendarEvent) {
-        onCreateRangePreview?.(null);
-        setSlotPasteMenu({ start, end, clientX, clientY });
+      onCreateRangePreview?.(null);
+      if (onSlotActionPrompt) {
+        onSlotActionPrompt({ start, end, clientX, clientY });
         return;
       }
       onCreateEvent?.(start, end);
     },
-    [onCreateEvent, onCreateRangePreview, onPasteCalendarEvent],
+    [onCreateEvent, onCreateRangePreview, onSlotActionPrompt],
   );
 
   function startCreatePointerSession(
@@ -1852,26 +1859,6 @@ export function WeekCalendar({
     });
     if (ok) setSelectedEventId(null);
   }, [onDuplicateCalendarEvent, selectedBlock, selectedOccurrenceDate]);
-
-  const resolvedSlotPasteLabels = slotPasteMenuLabels ?? DEFAULT_SLOT_PASTE_LABELS;
-
-  const handleSlotPaste = useCallback(async () => {
-    if (!slotPasteMenu || !onPasteCalendarEvent) return;
-    const session = readCalendarClipboardSession();
-    if (!session) {
-      setSlotPasteMenu(null);
-      return;
-    }
-    const { start, end } = pasteRangeAtSlot(slotPasteMenu.start, session);
-    const ok = await onPasteCalendarEvent({ start, end });
-    if (ok) setSlotPasteMenu(null);
-  }, [slotPasteMenu, onPasteCalendarEvent]);
-
-  const handleSlotNewEvent = useCallback(() => {
-    if (!slotPasteMenu || !onCreateEvent) return;
-    onCreateEvent(slotPasteMenu.start, slotPasteMenu.end);
-    setSlotPasteMenu(null);
-  }, [slotPasteMenu, onCreateEvent]);
 
   const handleDeleteSelection = useCallback(async () => {
     if (!selectedEventId) return;
@@ -3046,16 +3033,6 @@ export function WeekCalendar({
         onDelete={() => void handleDeleteSelection()}
         onDismiss={dismissSelection}
       />
-      {slotPasteMenu ? (
-        <WeekCalendarSlotPasteMenu
-          clientX={slotPasteMenu.clientX}
-          clientY={slotPasteMenu.clientY}
-          labels={resolvedSlotPasteLabels}
-          onPaste={() => void handleSlotPaste()}
-          onNewEvent={handleSlotNewEvent}
-          onDismiss={() => setSlotPasteMenu(null)}
-        />
-      ) : null}
     </div>
   );
 }

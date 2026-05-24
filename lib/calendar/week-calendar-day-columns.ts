@@ -151,10 +151,10 @@ export function horizontalScrollLeftToRevealDay(
     return currentScrollLeft;
   }
   const targetKey = scheduleDateKeyInBerlin(date);
-  const idx = columns.findIndex((column) => column.dateKey === targetKey);
-  if (idx < 0) return currentScrollLeft;
+  const targetIdx = columns.findIndex((column) => column.dateKey === targetKey);
+  if (targetIdx < 0) return currentScrollLeft;
 
-  const colStart = idx * dayColumnWidthPx;
+  const colStart = targetIdx * dayColumnWidthPx;
   const colEnd = colStart + dayColumnWidthPx;
   const viewStart = currentScrollLeft;
   const viewEnd = viewStart + viewportWidthPx;
@@ -162,8 +162,14 @@ export function horizontalScrollLeftToRevealDay(
   if (colStart >= viewStart && colEnd <= viewEnd) {
     return currentScrollLeft;
   }
-  if (colStart < viewStart) {
-    return colStart;
+
+  const maxScrollLeft = Math.max(0, columns.length * dayColumnWidthPx - viewportWidthPx);
+
+  if (targetIdx * dayColumnWidthPx < viewStart || colEnd <= viewStart) {
+    // Target is left of the viewport — pan right until today is included.
+    return Math.min(colStart, maxScrollLeft);
   }
-  return Math.max(0, colEnd - viewportWidthPx);
+
+  // Target is right of the viewport — pan left until today is included.
+  return Math.min(Math.max(0, colEnd - viewportWidthPx), maxScrollLeft);
 }

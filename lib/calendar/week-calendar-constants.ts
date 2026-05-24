@@ -6,6 +6,22 @@ export const WEEK_CALENDAR_MINUTE_SCALE_DEFAULT = 1;
 export const WEEK_CALENDAR_MINUTE_SCALE_MIN = 0.8;
 export const WEEK_CALENDAR_MINUTE_SCALE_MAX = 1.65;
 
+/** Minimum day-column width when the viewport can still fit every visible column. */
+export const WEEK_CALENDAR_DAY_COLUMN_MIN_PX = 56;
+
+export function fitWeekCalendarDayColumnWidth(
+  dayStripViewportPx: number,
+  visibleWeekDays: number,
+): number {
+  const visible = clampWeekCalendarVisibleDayCount(visibleWeekDays);
+  const strip = Math.max(dayStripViewportPx, 1);
+  const evenShare = Math.floor(strip / visible);
+  const minReadable = WEEK_CALENDAR_DAY_COLUMN_MIN_PX;
+  if (evenShare >= minReadable) return evenShare;
+  if (minReadable * visible <= strip) return minReadable;
+  return Math.max(1, evenShare);
+}
+
 export function clampWeekCalendarVisibleDayCount(value: number): number {
   if (!Number.isFinite(value)) return WEEK_CALENDAR_VISIBLE_DAYS_DEFAULT;
   return Math.max(

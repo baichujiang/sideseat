@@ -21,6 +21,8 @@ import {
 import { isLongOrAllDayTimedMinutes } from "@/lib/calendar/long-calendar-block";
 import { cn } from "@/lib/utils";
 
+import type { ScheduleSlotActionPrompt } from "@/components/calendar/week-event-edit-toolbar";
+
 const TIMELINE_LONG_PRESS_MS = 450;
 const TIMELINE_POINTER_SLOP_PX = 14;
 
@@ -145,6 +147,7 @@ export function ScheduleDayTimeline({
   nowMinute,
   date,
   onCreateEvent,
+  onSlotActionPrompt,
   onLongPressItem,
 }: {
   items: DayTimelineItem[];
@@ -153,6 +156,8 @@ export function ScheduleDayTimeline({
   nowMinute: number;
   date: Date;
   onCreateEvent?: (start: Date, end: Date) => void;
+  /** Long-press empty slot → menu (New event / Paste). Falls back to `onCreateEvent`. */
+  onSlotActionPrompt?: (args: ScheduleSlotActionPrompt) => void;
   /** Long-press (~450ms): calendar → edit sheet from parent; course → detail. Tap selects only. */
   onLongPressItem?: (item: DayTimelineItem, anchorEl?: HTMLElement | null) => void;
 }) {
@@ -193,17 +198,22 @@ export function ScheduleDayTimeline({
     }
   }
 
-  function startMouseHold(clientY: number, rect: DOMRect) {
-    if (!onCreateEvent) return;
+  function startMouseHold(clientX: number, clientY: number, rect: DOMRect) {
+    if (!onSlotActionPrompt && !onCreateEvent) return;
     clearHoldTimer();
     holdTimerRef.current = window.setTimeout(() => {
-      createFromPointer(clientY, rect);
+      createFromPointer(clientY, rect, clientX, clientY);
       holdTimerRef.current = null;
     }, 380);
   }
 
-  function createFromPointer(clientY: number, rect: DOMRect) {
-    if (!onCreateEvent) return;
+  function createFromPointer(
+    clientY: number,
+    rect: DOMRect,
+    pointerClientX?: number,
+    pointerClientY?: number,
+  ) {
+    if (!onSlotActionPrompt && !onCreateEvent) return;
     const y = clientY - rect.top;
     const rawMinute = visualStartMinute + (y / rect.height) * totalMinutes;
     const snappedMinute = Math.max(
@@ -213,7 +223,13 @@ export function ScheduleDayTimeline({
     const start = new Date(date);
     start.setHours(0, snappedMinute, 0, 0);
     const end = addMinutes(start, 60);
-    onCreateEvent(start, end);
+    const clientX = pointerClientX ?? rect.left + rect.width / 2;
+    const anchorY = pointerClientY ?? clientY;
+    if (onSlotActionPrompt) {
+      onSlotActionPrompt({ start, end, clientX, clientY: anchorY });
+      return;
+    }
+    onCreateEvent?.(start, end);
   }
 
   const positionedItems = computeTimelineColumns(timedItems);
@@ -343,15 +359,17 @@ export function ScheduleDayTimeline({
                 createFromPointer(
                   event.clientY,
                   event.currentTarget.getBoundingClientRect(),
+                  event.clientX,
+                  event.clientY,
                 );
               }}
               onTouchStart={(event) => {
-                if (!onCreateEvent) return;
+                if (!onSlotActionPrompt && !onCreateEvent) return;
                 const touch = event.touches[0];
                 const rect = event.currentTarget.getBoundingClientRect();
                 clearHoldTimer();
                 holdTimerRef.current = window.setTimeout(() => {
-                  createFromPointer(touch.clientY, rect);
+                  createFromPointer(touch.clientY, rect, touch.clientX, touch.clientY);
                   holdTimerRef.current = null;
                 }, 380);
               }}
@@ -360,6 +378,7 @@ export function ScheduleDayTimeline({
               onTouchCancel={clearHoldTimer}
               onMouseDown={(event) => {
                 startMouseHold(
+                  event.clientX,
                   event.clientY,
                   event.currentTarget.getBoundingClientRect(),
                 );
