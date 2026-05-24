@@ -139,6 +139,19 @@ export function horizontalScrollIndexForFocus(
   return mondayIdx >= 0 ? Math.min(mondayIdx, maxStart) : Math.min(focusIdx, maxStart);
 }
 
+/** Snap horizontal scroll to the nearest whole day-column boundary. */
+export function snapWeekCalendarHorizontalScrollLeft(
+  scrollLeft: number,
+  dayColumnWidthPx: number,
+  maxScrollLeft: number,
+): number {
+  if (dayColumnWidthPx <= 0) {
+    return Math.max(0, Math.min(maxScrollLeft, scrollLeft));
+  }
+  const snapped = Math.round(scrollLeft / dayColumnWidthPx) * dayColumnWidthPx;
+  return Math.max(0, Math.min(maxScrollLeft, snapped));
+}
+
 /** Minimal horizontal scroll so `date` column is fully inside the day-strip viewport. */
 export function horizontalScrollLeftToRevealDay(
   columns: WeekCalendarDayColumn[],

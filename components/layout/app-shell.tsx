@@ -190,10 +190,6 @@ export function AppShell({
     };
   }, [refreshUnreadTotal]);
 
-  useEffect(() => {
-    void refreshUnreadTotal();
-  }, [pathname, refreshUnreadTotal]);
-
   /** Full-height drill-ins: hide tab bar (chat thread, course chat, peer profile). */
   const isChatThread =
     /^\/connections\/[^/]+$/.test(pathname) ||

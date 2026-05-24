@@ -1289,7 +1289,9 @@ export function ScheduleSurface({
         }),
       });
       if (!res.ok) return false;
-      clearCalendarClipboardSession();
+      if (session.kind === "cut") {
+        clearCalendarClipboardSession();
+      }
       router.refresh();
       return true;
     },

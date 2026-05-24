@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createHash, randomBytes } from "crypto";
@@ -119,7 +120,7 @@ export async function destroySession() {
   cookieStore.delete(LEGACY_SESSION_COOKIE_NAME);
 }
 
-export async function getSessionUser() {
+export const getSessionUser = cache(async function getSessionUser() {
   try {
     const fromCookie = await getUserFromRefreshCookie();
     if (fromCookie) {
@@ -146,7 +147,7 @@ export async function getSessionUser() {
     }
     throw cause;
   }
-}
+});
 
 export async function requireUser() {
   const user = await getSessionUser();

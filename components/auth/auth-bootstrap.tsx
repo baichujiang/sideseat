@@ -2,36 +2,64 @@
 
 import type { Route } from "next";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { setAccessToken } from "@/lib/auth/client-access-token";
+import { getAccessToken, setAccessToken } from "@/lib/auth/client-access-token";
 import { shouldAutoGuestSession } from "@/lib/nav/auto-guest-path";
 import { isPublicAppPath } from "@/lib/nav/public-app-path";
+
+async function refreshAccessToken(): Promise<"ok" | "guest" | "unauthorized" | "unavailable"> {
+  try {
+    const res = await fetch("/api/auth/refresh", { method: "POST", credentials: "include" });
+    if (res.ok) {
+      const body = (await res.json()) as { data?: { accessToken?: string } };
+      if (body.data?.accessToken) {
+        setAccessToken(body.data.accessToken);
+      }
+      return "ok";
+    }
+    if (res.status === 401 || res.status === 503) {
+      setAccessToken(null);
+      return res.status === 401 ? "unauthorized" : "unavailable";
+    }
+    setAccessToken(null);
+    return "unauthorized";
+  } catch {
+    setAccessToken(null);
+    return "unavailable";
+  }
+}
 
 /**
  * On app load: POST `/api/auth/refresh` with refresh cookie → in-memory access JWT.
  * 401 on non-public routes → redirect to login.
+ *
+ * Refresh runs once per mount — not on every tab navigation — to avoid competing with RSC.
  */
 export function AuthBootstrap() {
   const pathname = usePathname();
   const router = useRouter();
+  const bootstrappedRef = useRef(false);
+  const [sessionReady, setSessionReady] = useState(false);
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
 
   useEffect(() => {
+    if (bootstrappedRef.current) return;
+    bootstrappedRef.current = true;
+
     let cancelled = false;
+    const pathAtMount = pathnameRef.current;
+
     const run = async () => {
       try {
-        const res = await fetch("/api/auth/refresh", { method: "POST", credentials: "include" });
+        const status = await refreshAccessToken();
         if (cancelled) return;
-        if (res.ok) {
-          const body = (await res.json()) as { data?: { accessToken?: string } };
-          if (body.data?.accessToken) {
-            setAccessToken(body.data.accessToken);
-          }
-          return;
-        }
-        if (res.status === 401 || res.status === 503) {
-          setAccessToken(null);
-          if (shouldAutoGuestSession(pathname)) {
+
+        if (status === "ok") return;
+
+        if (status === "unauthorized" || status === "unavailable") {
+          if (shouldAutoGuestSession(pathAtMount)) {
             const guestRes = await fetch("/api/auth/ensure-guest", {
               method: "POST",
               credentials: "include",
@@ -39,36 +67,36 @@ export function AuthBootstrap() {
               body: "{}",
             });
             if (!cancelled && guestRes.ok) {
-              const refreshAgain = await fetch("/api/auth/refresh", {
-                method: "POST",
-                credentials: "include",
-              });
-              if (refreshAgain.ok) {
-                const body = (await refreshAgain.json()) as { data?: { accessToken?: string } };
-                if (body.data?.accessToken) {
-                  setAccessToken(body.data.accessToken);
-                }
+              const again = await refreshAccessToken();
+              if (!cancelled && again === "ok") {
                 router.refresh();
                 return;
               }
             }
           }
-          if (res.status === 401 && !isPublicAppPath(pathname)) {
-            const returnTo = `${pathname}${typeof window !== "undefined" ? window.location.search : ""}`;
-            router.replace(
-              `/login?returnTo=${encodeURIComponent(returnTo)}` as Route,
-            );
+          if (status === "unauthorized" && !isPublicAppPath(pathAtMount)) {
+            const returnTo = `${pathAtMount}${typeof window !== "undefined" ? window.location.search : ""}`;
+            router.replace(`/login?returnTo=${encodeURIComponent(returnTo)}` as Route);
           }
         }
-      } catch {
-        if (!cancelled) setAccessToken(null);
+      } finally {
+        if (!cancelled) setSessionReady(true);
       }
     };
+
     void run();
     return () => {
       cancelled = true;
     };
-  }, [pathname, router]);
+  }, [router]);
+
+  useEffect(() => {
+    if (!sessionReady) return;
+    if (getAccessToken()) return;
+    if (isPublicAppPath(pathname) || shouldAutoGuestSession(pathname)) return;
+    const returnTo = `${pathname}${typeof window !== "undefined" ? window.location.search : ""}`;
+    router.replace(`/login?returnTo=${encodeURIComponent(returnTo)}` as Route);
+  }, [sessionReady, pathname, router]);
 
   return null;
 }
