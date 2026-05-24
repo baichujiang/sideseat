@@ -154,7 +154,7 @@ export function ScheduleDayTimeline({
   date: Date;
   onCreateEvent?: (start: Date, end: Date) => void;
   /** Long-press (~450ms): calendar → edit sheet from parent; course → detail. Tap selects only. */
-  onLongPressItem?: (item: DayTimelineItem) => void;
+  onLongPressItem?: (item: DayTimelineItem, anchorEl?: HTMLElement | null) => void;
 }) {
   const holdTimerRef = useRef<number | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -256,15 +256,15 @@ export function ScheduleDayTimeline({
                     if (item.id === "__draft-preview__") return;
                     attachTimelineTapOrLongPress(
                       e,
-                      () => onLongPressItem?.(item),
-                      () => onLongPressItem?.(item),
+                      () => onLongPressItem?.(item, e.currentTarget as HTMLElement),
+                      () => onLongPressItem?.(item, e.currentTarget as HTMLElement),
                     );
                   }}
                   onKeyDown={(ev) => {
                     if (ev.key === "Enter" || ev.key === " ") {
                       ev.preventDefault();
                       if (item.id === "__draft-preview__") return;
-                      onLongPressItem?.(item);
+                      onLongPressItem?.(item, ev.currentTarget as HTMLElement);
                     }
                   }}
                   className={cn(
@@ -421,9 +421,9 @@ export function ScheduleDayTimeline({
                 hasShortOverlap={item.hasShortOverlap}
                 isToday={isToday}
                 nowMinute={nowMinute}
-                onLongPress={() => {
+                onLongPress={(anchorEl) => {
                   if (item.id === "__draft-preview__") return;
-                  onLongPressItem?.(item);
+                  onLongPressItem?.(item, anchorEl);
                 }}
               />
             ))}
@@ -468,7 +468,7 @@ function TimelineBlock({
   hasShortOverlap: boolean;
   isToday: boolean;
   nowMinute: number;
-  onLongPress: () => void;
+  onLongPress: (anchorEl: HTMLElement) => void;
 }) {
   const top = ((item.startMinute - dayStart) / totalMinutes) * 100;
   const height = ((item.endMinute - item.startMinute) / totalMinutes) * 100;
@@ -637,13 +637,17 @@ function TimelineBlock({
         title={title}
         onPointerDown={(e) => {
           if (item.id === "__draft-preview__") return;
-          attachTimelineTapOrLongPress(e, onLongPress, onLongPress);
+          attachTimelineTapOrLongPress(
+            e,
+            () => onLongPress(e.currentTarget as HTMLElement),
+            () => onLongPress(e.currentTarget as HTMLElement),
+          );
         }}
         onKeyDown={(ev) => {
           if (ev.key === "Enter" || ev.key === " ") {
             ev.preventDefault();
             if (item.id === "__draft-preview__") return;
-            onLongPress();
+            onLongPress(ev.currentTarget as HTMLElement);
           }
         }}
       >

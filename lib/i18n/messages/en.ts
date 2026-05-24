@@ -818,9 +818,14 @@ export const enMessages: AppMessages = {
     monthCellAriaNone: "{when} — no events",
     monthCellAriaOne: "{when} — 1 event",
     monthCellAriaMany: "{when} — {count} events",
-    calendarClipboardBannerTitle: "Clipboard",
-    calendarClipboardDismiss: "Clear",
-    calendarClipboardApplyTitle: "Use title",
+    calendarSlotPaste: "Paste",
+    calendarSlotNewEvent: "New event",
+    calendarSlotPasteMenuAria: "Paste copied event or create new",
+    detailPopoverEdit: "Edit",
+    detailPopoverDelete: "Delete",
+    detailPopoverDeleting: "Deleting…",
+    detailPopoverDismissAria: "Close event preview",
+    detailPopoverReadOnlyFeed: "From a subscribed calendar (read-only).",
     recurringDeleteDialogTitle: "Delete repeating event?",
     /** `{title}` — event title */
     recurringDeleteDialogBody:

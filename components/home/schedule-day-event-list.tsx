@@ -89,7 +89,7 @@ export function ScheduleDayEventList({
 }: {
   items: DayTimelineItem[];
   /** Long-press opens edit (calendar) or detail (course). Tap selects row to expand text. */
-  onLongPressItem: (item: DayTimelineItem) => void;
+  onLongPressItem: (item: DayTimelineItem, anchorEl?: HTMLElement | null) => void;
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   if (items.length === 0) {
@@ -127,14 +127,14 @@ export function ScheduleDayEventList({
                 attachListTapOrLongPress(
                   e,
                   () => setSelectedId(item.id),
-                  () => onLongPressItem(item),
+                  () => onLongPressItem(item, e.currentTarget as HTMLElement),
                 );
               }}
               onKeyDown={(ev) => {
                 if (ev.key === "Enter" || ev.key === " ") {
                   ev.preventDefault();
                   if (item.id === "__draft-preview__") return;
-                  onLongPressItem(item);
+                  onLongPressItem(item, ev.currentTarget as HTMLElement);
                 }
               }}
               className={cn(

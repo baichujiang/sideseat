@@ -48,7 +48,7 @@ import {
 } from "@/components/calendar/week-calendar";
 import { ScheduleDateNavControls } from "@/components/calendar/schedule-date-nav-controls";
 import { WeekVisibleDaysBar } from "@/components/calendar/week-visible-days-bar";
-import type { WeekEventEditToolbarLabels } from "@/components/calendar/week-event-edit-toolbar";
+import type { WeekEventEditToolbarLabels, WeekCalendarSlotPasteMenuLabels } from "@/components/calendar/week-event-edit-toolbar";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { PlanRequestModal } from "@/components/chat/plan-request-modal";
 import { NaturalScheduleSheet } from "@/components/home/natural-schedule-sheet";
@@ -56,9 +56,9 @@ import { ScheduleAddPanel } from "@/components/home/schedule-add-panel";
 import { ScheduleCalendarCategoryManager } from "@/components/home/schedule-calendar-category-manager";
 import { createScheduleSharePath } from "@/lib/schedule-share/create-schedule-share-client";
 import {
-  ScheduleItemDetailSheet,
-  type ScheduleDetailItem,
-} from "@/components/home/schedule-item-detail-sheet";
+  ScheduleItemDetailPopover,
+} from "@/components/home/schedule-item-detail-popover";
+import type { ScheduleDetailItem } from "@/components/home/schedule-item-detail-sheet";
 import { ScheduleDayEventList } from "@/components/home/schedule-day-event-list";
 import {
   ScheduleDayTimeline,
@@ -66,7 +66,10 @@ import {
 } from "@/components/home/schedule-day-timeline";
 import { ScheduleMonthView } from "@/components/home/schedule-month-view";
 import { HomeCalendarVisual, HomeGreetingHeading } from "@/components/home/home-hero";
-import { WEEK_CALENDAR_CONTINUOUS_BUFFER_DAYS } from "@/lib/calendar/week-calendar-day-columns";
+import {
+  WEEK_CALENDAR_CONTINUOUS_BUFFER_DAYS,
+  weekCalendarHorizontalModeForFocus,
+} from "@/lib/calendar/week-calendar-day-columns";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import {
   berlinClockMinutes,
@@ -78,6 +81,10 @@ import {
 } from "@/lib/calendar/schedule-berlin";
 import { courseCalendarShortLabel } from "@/lib/calendar/course-calendar-short-label";
 import { isIcsFeedStudyEntryId } from "@/lib/calendar/ics-feed-event-id";
+import {
+  clearCalendarClipboardSession,
+  readCalendarClipboardSession,
+} from "@/lib/calendar/calendar-clipboard";
 import type { AppLocale } from "@/lib/i18n/app-locale";
 import { formatMessage, type AppMessages } from "@/lib/i18n/messages";
 import {
@@ -85,8 +92,9 @@ import {
   HOME_CALENDAR_VISIBLE_DAYS_DEFAULT,
   HOME_CALENDAR_VISIBLE_DAYS_STORAGE_KEY,
   parseStoredHomeCalendarMinuteScale,
-  readHomeCalendarVisibleDaysFromStorage,
+  parseStoredHomeCalendarVisibleDays,
 } from "@/lib/calendar/home-calendar-preferences";
+import { defaultHomeCalendarMinuteScaleForViewport, defaultHomeCalendarVisibleDaysForViewport } from "@/lib/layout/desktop-browser-layout";
 import {
   calendarDetailToPlanPrefill,
   singleChatableParticipant,
@@ -327,7 +335,8 @@ export function ScheduleSurface({
   const [view, setView] = useState<ViewKind>("week");
   const [now, setNow] = useState(() => new Date(nowISO));
   const [selectedDate, setSelectedDate] = useState<Date>(() => berlinStartOfCalendarDay(new Date(nowISO)));
-  const [visibleDayCount, setVisibleDayCount] = useState(readHomeCalendarVisibleDaysFromStorage);
+  const [visibleDayCount, setVisibleDayCount] = useState(HOME_CALENDAR_VISIBLE_DAYS_DEFAULT);
+  const [calendarPrefsHydrated, setCalendarPrefsHydrated] = useState(false);
   const [calendarRevealNonce, setCalendarRevealNonce] = useState(0);
   const [weekMinuteScale, setWeekMinuteScale] = useState(WEEK_CALENDAR_MINUTE_SCALE_DEFAULT);
   const [adding, setAdding] = useState(false);
@@ -338,6 +347,7 @@ export function ScheduleSurface({
   const [draftEventEnd, setDraftEventEnd] = useState<string | undefined>(undefined);
   const [editingItem, setEditingItem] = useState<ScheduleDetailItem | null>(null);
   const [detailItem, setDetailItem] = useState<ScheduleDetailItem | null>(null);
+  const [detailAnchorEl, setDetailAnchorEl] = useState<HTMLElement | null>(null);
   const [planInviteBusy, setPlanInviteBusy] = useState(false);
   const [planInviteError, setPlanInviteError] = useState<string | null>(null);
   const [planFromCalendar, setPlanFromCalendar] = useState<{
@@ -416,18 +426,28 @@ export function ScheduleSurface({
   }, [nowISO]);
 
   useEffect(() => {
+    if (!calendarPrefsHydrated) return;
     window.localStorage.setItem(HOME_CALENDAR_VISIBLE_DAYS_STORAGE_KEY, String(visibleDayCount));
-  }, [visibleDayCount]);
+  }, [visibleDayCount, calendarPrefsHydrated]);
 
   useEffect(() => {
-    const storedValue = parseStoredHomeCalendarMinuteScale(
+    const storedVisibleDays = parseStoredHomeCalendarVisibleDays(
+      window.localStorage.getItem(HOME_CALENDAR_VISIBLE_DAYS_STORAGE_KEY),
+    );
+    const storedMinuteScale = parseStoredHomeCalendarMinuteScale(
       window.localStorage.getItem(HOME_CALENDAR_MINUTE_SCALE_STORAGE_KEY),
     );
-    if (storedValue == null) return;
-    setWeekMinuteScale(storedValue);
+    setVisibleDayCount(
+      storedVisibleDays ?? defaultHomeCalendarVisibleDaysForViewport(window.innerWidth),
+    );
+    setWeekMinuteScale(
+      storedMinuteScale ?? defaultHomeCalendarMinuteScaleForViewport(window.innerWidth),
+    );
+    setCalendarPrefsHydrated(true);
   }, []);
 
   useEffect(() => {
+    if (!calendarPrefsHydrated) return;
     const timeoutId = window.setTimeout(() => {
       window.localStorage.setItem(
         HOME_CALENDAR_MINUTE_SCALE_STORAGE_KEY,
@@ -652,12 +672,17 @@ export function ScheduleSurface({
     setAdding(true);
   };
 
-  const openDetailFromTimelineItem = (item: DayTimelineItem, date: Date) => {
+  const openDetailFromTimelineItem = (
+    item: DayTimelineItem,
+    date: Date,
+    anchorEl: HTMLElement | null = null,
+  ) => {
     if (item.id === "__draft-preview__") return;
     const start = new Date(date);
     start.setHours(0, item.startMinute, 0, 0);
     const end = new Date(date);
     end.setHours(0, item.endMinute, 0, 0);
+    setDetailAnchorEl(anchorEl);
     setDetailItem({
       id: item.id,
       source: item.source,
@@ -715,11 +740,14 @@ export function ScheduleSurface({
     setAdding(true);
   }
 
-  /** Tap on week grid: always open detail sheet first; user edits from there. */
-  function handleWeekCardTap(item: WeekCalendarBlock, occurrenceDate: Date) {
+  function handleWeekCardTap(
+    item: WeekCalendarBlock,
+    occurrenceDate: Date,
+    anchorEl: HTMLElement | null,
+  ) {
     if (item.courseId === "__draft-preview__") return;
     const ti = weekBlockToDayTimelineItem(item, messages.schedule.repeatNone);
-    openDetailFromTimelineItem(ti, occurrenceDate);
+    openDetailFromTimelineItem(ti, occurrenceDate, anchorEl);
   }
 
   // Week view: classes repeat every week, so we can show them on any
@@ -936,6 +964,8 @@ export function ScheduleSurface({
     setDraftEventStart(format(new Date(detailItem.startISO), "yyyy-MM-dd'T'HH:mm"));
     setDraftEventEnd(format(new Date(detailItem.endISO), "yyyy-MM-dd'T'HH:mm"));
     setSelectedDate(new Date(detailItem.startISO));
+    setDetailItem(null);
+    setDetailAnchorEl(null);
     setAdding(true);
   }
 
@@ -1068,15 +1098,11 @@ export function ScheduleSurface({
   const isSelectedToday = isSameDay(selectedDate, now);
   const nowMinute = now.getHours() * 60 + now.getMinutes();
 
-  const weekMonday = berlinStartOfWeek(selectedDate);
-  const isSelectedWeekMonday =
-    scheduleDateKeyInBerlin(selectedDate) === scheduleDateKeyInBerlin(weekMonday);
-
-  /** Narrow day strip: anchor on tapped day, but week prev/next always land on Monday → workweek. */
-  const effectiveWeekHorizontalMode: "workweek" | "include-anchor" =
-    visibleDayCount < HOME_CALENDAR_VISIBLE_DAYS_DEFAULT && !isSelectedWeekMonday
-      ? "include-anchor"
-      : "workweek";
+  /** Align Mon-first workweek strip unless focus is outside it (e.g. Sat/Sun on a 5-day phone view). */
+  const effectiveWeekHorizontalMode = weekCalendarHorizontalModeForFocus(
+    selectedDate,
+    visibleDayCount,
+  );
 
   const patchCalendarEventTimes = useCallback(
     async (args: { eventId: string; startAt: Date; endAt: Date }): Promise<boolean> => {
@@ -1155,7 +1181,8 @@ export function ScheduleSurface({
       const entry = studyEntries.find((s) => s.id === block.calendarEntryId);
       if (!entry) return false;
 
-      const durationMs = Math.max(15 * 60_000, block.endMinute - block.startMinute) * 60_000;
+      const durationMinutes = Math.max(15, block.endMinute - block.startMinute);
+      const durationMs = durationMinutes * 60_000;
       const occurrenceMidnight = new Date(occurrenceDate);
       occurrenceMidnight.setHours(0, 0, 0, 0);
       const newStart = new Date(occurrenceMidnight.getTime() + block.endMinute * 60_000);
@@ -1238,6 +1265,34 @@ export function ScheduleSurface({
     [],
   );
 
+  const pasteCalendarEvent = useCallback(
+    async ({ start, end }: { start: Date; end: Date }): Promise<boolean> => {
+      const session = readCalendarClipboardSession();
+      if (!session) return false;
+
+      const res = await apiFetch("/api/calendar/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: session.title?.trim() || messages.schedule.newEvent,
+          location: session.location?.trim() ?? "",
+          note: session.note?.trim() ?? "",
+          startAt: start.toISOString(),
+          endAt: end.toISOString(),
+          withUserIds: session.withUserIds ?? [],
+          repeat: "NONE",
+          repeatUntil: "",
+          categoryId: session.categoryId ?? undefined,
+        }),
+      });
+      if (!res.ok) return false;
+      clearCalendarClipboardSession();
+      router.refresh();
+      return true;
+    },
+    [messages.schedule.newEvent, router],
+  );
+
   const editToolbarLabels: WeekEventEditToolbarLabels = useMemo(
     () => ({
       cut: messages.weekCalendarEditToolbar.cut,
@@ -1247,6 +1302,15 @@ export function ScheduleSurface({
       toolbarAriaLabel: messages.weekCalendarEditToolbar.toolbarAriaLabel,
     }),
     [messages],
+  );
+
+  const slotPasteMenuLabels: WeekCalendarSlotPasteMenuLabels = useMemo(
+    () => ({
+      paste: messages.schedule.calendarSlotPaste,
+      newEvent: messages.schedule.calendarSlotNewEvent,
+      menuAriaLabel: messages.schedule.calendarSlotPasteMenuAria,
+    }),
+    [messages.schedule],
   );
 
   const weekAnchorWeekday =
@@ -1274,7 +1338,9 @@ export function ScheduleSurface({
     onDeleteCalendarEvent: deleteCalendarEvent,
     onDuplicateCalendarEvent: duplicateCalendarEvent,
     onCopyCalendarEvent: copyCalendarEvent,
+    onPasteCalendarEvent: pasteCalendarEvent,
     editToolbarLabels,
+    slotPasteMenuLabels,
     showTimeColumnLabel: false,
     onDayHeaderSelect: (date: Date) => setSelectedDate(berlinStartOfCalendarDay(date)),
   };
@@ -1323,8 +1389,8 @@ export function ScheduleSurface({
     };
   }, [view, useCompactHomeHeader, homeBelowHeaderSlot, adding, visibleDayCount, weekMinuteScale]);
 
-  const iconBtnSm = "h-8 w-8 sm:h-9 sm:w-9";
-  const iconGlyphSm = "h-3.5 w-3.5 sm:h-4 sm:w-4";
+  const iconBtnSm = "h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10";
+  const iconGlyphSm = "h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-[18px] md:w-[18px]";
 
   const toolbarActions = (
     <>
@@ -1528,7 +1594,7 @@ export function ScheduleSurface({
         />
         <div className="flex flex-col gap-1">
           {useCompactHomeHeader && homeGreeting ? (
-            <div className="flex min-w-0 items-start gap-x-2 sm:gap-x-3">
+            <div className="flex min-w-0 items-start gap-x-2 sm:gap-x-3 lg:items-center lg:justify-between lg:gap-x-6">
               <div className="min-w-0 flex-1">
                 <HomeGreetingHeading
                   nickname={homeGreeting.nickname}
@@ -1545,10 +1611,10 @@ export function ScheduleSurface({
                   />
                 </div>
               </div>
-              <HomeCalendarVisual date={now} className="h-24 w-24 shrink-0 self-start" />
+              <HomeCalendarVisual date={now} className="h-24 w-24 shrink-0 self-start lg:h-28 lg:w-28 xl:h-32 xl:w-32" />
             </div>
           ) : (
-            <div className="flex justify-center px-1">
+            <div className="flex justify-center px-1 lg:justify-start lg:px-0">
               <ViewTabs
                 value={view}
                 onChange={viewTabsOnChange}
@@ -1597,9 +1663,9 @@ export function ScheduleSurface({
             nowMinute={nowMinute}
             date={selectedDate}
             onCreateEvent={openEventDraft}
-            onLongPressItem={(item) => {
+            onLongPressItem={(item, anchorEl) => {
               if (item.id === "__draft-preview__") return;
-              openDetailFromTimelineItem(item, selectedDate);
+              openDetailFromTimelineItem(item, selectedDate, anchorEl ?? null);
             }}
           />
         ) : null}
@@ -1631,7 +1697,7 @@ export function ScheduleSurface({
             className="pointer-events-none fixed inset-x-0 z-40 flex justify-center"
             style={{ bottom: `calc(${HOME_WEEK_FLOATING_CONTROLS_BOTTOM_REM}rem + env(safe-area-inset-bottom))` }}
           >
-            <div className="pointer-events-auto flex w-full max-w-md justify-end px-3">
+            <div className="pointer-events-auto flex w-full justify-end px-3 md:px-6 lg:px-8 xl:px-10 2xl:px-12">
               <button
                 type="button"
                 aria-label={messages.schedule.shareScheduleOpenAria}
@@ -1668,29 +1734,27 @@ export function ScheduleSurface({
             />
             <ScheduleDayEventList
               items={dayItems}
-              onLongPressItem={(item) => {
+              onLongPressItem={(item, anchorEl) => {
                 if (item.id === "__draft-preview__") return;
-                openDetailFromTimelineItem(item, selectedDate);
+                openDetailFromTimelineItem(item, selectedDate, anchorEl ?? null);
               }}
             />
           </div>
         ) : null}
       </div>
 
-      <ScheduleItemDetailSheet
+      <ScheduleItemDetailPopover
         item={detailItem}
+        anchorEl={detailAnchorEl}
         open={Boolean(detailItem)}
         deleting={deletingItem || recurringDeleteBusy}
         chatReturnTo="/home"
-        listenForEscape={!(adding && Boolean(detailItem)) && !recurringDeleteDialog}
-        onClose={() => setDetailItem(null)}
+        onClose={() => {
+          setDetailItem(null);
+          setDetailAnchorEl(null);
+        }}
         onEdit={() => openEditSheetFromDetail(false)}
-        onInvite={() => openEditSheetFromDetail(true)}
         onDelete={() => void deleteDetailItem()}
-        planInvitePeer={detailPlanInvitePeer}
-        onSendPlanInvite={() => void sendPlanInviteFromDetail()}
-        planInviteBusy={planInviteBusy}
-        planInviteError={planInviteError}
       />
 
       {planFromCalendar ? (
@@ -1797,7 +1861,7 @@ function ViewTabs({
       role="tablist"
       aria-label={scheduleSch.viewTablistAria}
       className={cn(
-        "flex w-full max-w-[16.5rem] shrink-0 rounded-full border border-blue-200/90 bg-blue-50/90 p-[3px] sm:max-w-[17.5rem] mt-2 mb-2",
+        "flex w-full max-w-[16.5rem] shrink-0 rounded-full border border-blue-200/90 bg-blue-50/90 p-[3px] sm:max-w-[17.5rem] lg:max-w-[22rem] xl:max-w-[26rem] mt-2 mb-2",
         "dark:border-blue-800/55 dark:bg-blue-950/45",
         tabAlign === "center" && "mx-auto",
         tabAlign === "start" && "mr-auto",
@@ -1813,7 +1877,7 @@ function ViewTabs({
             aria-selected={active}
             onClick={() => onChange(t)}
             className={cn(
-              "min-h-7 min-w-0 flex-1 rounded-full px-2 py-0.5 text-center text-xs capitalize leading-tight transition sm:min-h-8 sm:px-2.5 sm:py-1 sm:text-[13px]",
+              "min-h-7 min-w-0 flex-1 rounded-full px-2 py-0.5 text-center text-xs capitalize leading-tight transition sm:min-h-8 sm:px-2.5 sm:py-1 sm:text-[13px] lg:min-h-9 lg:text-sm",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/35 focus-visible:ring-offset-1 focus-visible:ring-offset-blue-50",
               "dark:focus-visible:ring-blue-400/45 dark:focus-visible:ring-offset-blue-950",
               active
@@ -1863,7 +1927,7 @@ function ScheduleDateNavToolbar({
       )}
     >
       <div className="min-w-0 justify-self-start pr-0.5 sm:pr-1">
-        <h2 className="truncate text-base font-bold leading-tight text-[#111827] dark:text-foreground">
+        <h2 className="truncate text-base font-bold leading-tight text-[#111827] dark:text-foreground lg:text-xl xl:text-2xl">
           {calendarRangeTitle(view, selectedDate, locale)}
         </h2>
       </div>

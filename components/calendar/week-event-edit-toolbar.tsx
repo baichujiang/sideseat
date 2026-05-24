@@ -13,6 +13,104 @@ export type WeekEventEditToolbarLabels = {
   toolbarAriaLabel: string;
 };
 
+export type WeekCalendarSlotPasteMenuLabels = {
+  paste: string;
+  /** Create a blank event at the tapped slot instead of pasting. */
+  newEvent: string;
+  menuAriaLabel: string;
+};
+
+/**
+ * Shown after tapping / long-pressing an empty grid slot when a calendar copy/cut
+ * payload is buffered — offers Paste vs New event (instead of prefilling the form).
+ */
+export function WeekCalendarSlotPasteMenu({
+  clientX,
+  clientY,
+  labels,
+  onPaste,
+  onNewEvent,
+  onDismiss,
+}: {
+  clientX: number;
+  clientY: number;
+  labels: WeekCalendarSlotPasteMenuLabels;
+  onPaste: () => void;
+  onNewEvent: () => void;
+  onDismiss: () => void;
+}) {
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const innerRef = useRef<HTMLDivElement | null>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+
+  useLayoutEffect(() => {
+    const inner = innerRef.current;
+    const tw = inner?.offsetWidth ?? 0;
+    const th = inner?.offsetHeight ?? 40;
+    const margin = 8;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    let left = clientX - tw / 2;
+    if (left < margin) left = margin;
+    if (left + tw > vw - margin) left = Math.max(margin, vw - margin - tw);
+    let top = clientY - th - 12;
+    if (top < margin) top = Math.min(clientY + 12, vh - margin - th);
+    setPos({ top, left });
+  }, [clientX, clientY]);
+
+  useEffect(() => {
+    const onPointer = (ev: PointerEvent) => {
+      const t = ev.target;
+      if (!(t instanceof Node)) return;
+      if (t instanceof Element && t.closest("[data-week-calendar-slot-paste-menu]")) return;
+      onDismiss();
+    };
+    document.addEventListener("pointerdown", onPointer, true);
+    return () => document.removeEventListener("pointerdown", onPointer, true);
+  }, [onDismiss]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onDismiss();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onDismiss]);
+
+  if (typeof window === "undefined") return null;
+
+  return createPortal(
+    <div
+      ref={wrapRef}
+      data-week-calendar-slot-paste-menu
+      className="fixed z-[200] select-none"
+      style={{
+        top: pos?.top ?? clientY,
+        left: pos?.left ?? clientX,
+        visibility: pos ? "visible" : "hidden",
+      }}
+      role="presentation"
+      onPointerDown={(e) => e.stopPropagation()}
+    >
+      <p className="sr-only">{labels.menuAriaLabel}</p>
+      <div
+        ref={innerRef}
+        role="menu"
+        aria-label={labels.menuAriaLabel}
+        className={cn(
+          "inline-flex items-stretch overflow-hidden rounded-2xl bg-white shadow-[0_18px_44px_-12px_rgba(15,23,42,0.45)] ring-1 ring-black/[0.06]",
+          "dark:bg-zinc-900 dark:ring-white/10",
+        )}
+      >
+        <ToolbarButton onClick={onPaste} label={labels.paste} />
+        <ToolbarDivider />
+        <ToolbarButton onClick={onNewEvent} label={labels.newEvent} />
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
 /**
  * iOS-Calendar–style popover that floats above a **long-press–selected** calendar event.
  *

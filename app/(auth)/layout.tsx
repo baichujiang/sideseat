@@ -5,7 +5,7 @@ import { APP_NAME } from "@/lib/constants/app";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col px-4 pb-[max(2rem,var(--safe-bottom))] pt-[max(2rem,var(--safe-top))] sm:px-5">
+    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 pb-[max(2rem,var(--safe-bottom))] pt-[max(2rem,var(--safe-top))] md:max-w-2xl lg:max-w-4xl lg:px-12">
       <div className="mb-8 flex items-center justify-between">
         <Link
           aria-label="Back"

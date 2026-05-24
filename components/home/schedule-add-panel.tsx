@@ -26,12 +26,6 @@ import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Input } from "@/components/ui/input";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
-import {
-  clearCalendarClipboardSession,
-  readCalendarClipboardSession,
-  type CalendarClipboardSessionV1,
-} from "@/lib/calendar/calendar-clipboard";
-import { isValidCategoryHex } from "@/lib/calendar/category-visual";
 import { cn } from "@/lib/utils";
 
 type RepeatRule = "NONE" | "DAILY" | "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "YEARLY";
@@ -64,12 +58,6 @@ function defaultEndDateTime(date: Date) {
 
 function defaultDateOnly(date: Date) {
   return format(date, "yyyy-MM-dd");
-}
-
-function truncateClipboardPreview(text: string, maxChars: number) {
-  const single = text.replace(/\s+/g, " ").trim();
-  if (single.length <= maxChars) return single;
-  return `${single.slice(0, Math.max(0, maxChars - 1))}…`;
 }
 
 /** Mobile keyboards fire Enter/Done; dismiss without implicit submit or form re-hydration. */
@@ -146,17 +134,8 @@ export function ScheduleAddPanel({
   const [withDraft, setWithDraft] = useState("");
   const [showCompanionList, setShowCompanionList] = useState(false);
   const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [clipboardSession, setClipboardSession] = useState<CalendarClipboardSessionV1 | null>(null);
   /** Avoid re-hydrating (wiping typed title) when parent re-renders while the sheet stays open. */
   const formSessionKeyRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (!open || mode !== "create") {
-      setClipboardSession(null);
-      return;
-    }
-    setClipboardSession(readCalendarClipboardSession());
-  }, [open, mode]);
 
   useEffect(() => {
     if (!open) {
@@ -263,12 +242,6 @@ export function ScheduleAddPanel({
   const repeatLabel = useMemo(() => {
     return repeatOptions.find((o) => o.value === repeat)?.label ?? sch.repeatNone;
   }, [repeat, repeatOptions, sch.repeatNone]);
-
-  const clipboardBannerAccentHex = useMemo(() => {
-    const raw = clipboardSession?.categoryColor?.trim();
-    if (!raw || !isValidCategoryHex(raw)) return null;
-    return raw;
-  }, [clipboardSession]);
 
   async function submitEntry() {
     setSaving(true);
@@ -439,45 +412,6 @@ export function ScheduleAddPanel({
           aria-label={sch.addPanelTitleAria}
           className="h-10 rounded-xl border-border/70 bg-muted/10 text-[15px] shadow-none placeholder:text-muted-foreground/80"
         />
-
-        {clipboardSession ? (
-          <div
-            className={cn(
-              "flex items-center gap-2 rounded-xl border border-border/60 bg-muted/[0.08] px-2.5 py-2",
-              clipboardBannerAccentHex && "border-l-[3px]",
-            )}
-            style={
-              clipboardBannerAccentHex
-                ? { borderLeftColor: clipboardBannerAccentHex }
-                : undefined
-            }
-            role="status"
-            aria-label={sch.calendarClipboardBannerTitle}
-          >
-            <p className="min-w-0 flex-1 truncate text-[12px] text-muted-foreground">
-              {truncateClipboardPreview(clipboardSession.summaryText, 56)}
-            </p>
-            {clipboardSession.title?.trim() ? (
-              <button
-                type="button"
-                onClick={() => setTitle(clipboardSession.title!.trim())}
-                className="shrink-0 rounded-full border border-border/70 bg-background px-2.5 py-0.5 text-[11px] font-medium text-foreground"
-              >
-                {sch.calendarClipboardApplyTitle}
-              </button>
-            ) : null}
-            <button
-              type="button"
-              onClick={() => {
-                clearCalendarClipboardSession();
-                setClipboardSession(null);
-              }}
-              className="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground hover:text-foreground"
-            >
-              {sch.calendarClipboardDismiss}
-            </button>
-          </div>
-        ) : null}
 
         <Input
           value={location}

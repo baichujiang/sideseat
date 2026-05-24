@@ -109,10 +109,10 @@ a {
 @layer components {
   /** Primary page title — matches Discover “Classmates” line (text-lg / semibold). */
   .page-screen-title {
-    @apply text-lg font-semibold leading-tight tracking-tight text-foreground;
+    @apply text-lg font-semibold leading-tight tracking-tight text-foreground lg:text-xl xl:text-2xl;
   }
   .page-screen-title-ink {
-    @apply text-lg font-semibold leading-tight tracking-tight text-classmates-ink dark:text-foreground;
+    @apply text-lg font-semibold leading-tight tracking-tight text-classmates-ink dark:text-foreground lg:text-xl xl:text-2xl;
   }
   .page-screen-subtitle {
     @apply text-[13px] leading-tight text-muted-foreground;

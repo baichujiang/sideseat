@@ -79,6 +79,24 @@ export function buildWeekCalendarDayColumns(args: {
   return columns;
 }
 
+const WEEKDAY_ORDER: Weekday[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+
+/**
+ * Pick how the visible day strip aligns when fewer than seven columns are shown.
+ * Workweek (Mon-first) is used only when the focused day fits in Mon..N;
+ * otherwise anchor the strip on the focus date (e.g. Sat/Sun with a 5-day phone view).
+ */
+export function weekCalendarHorizontalModeForFocus(
+  focusDate: Date,
+  visibleWeekDays: number,
+): "workweek" | "include-anchor" {
+  const clamped = Math.max(1, Math.min(WEEKDAY_ORDER.length, Math.round(visibleWeekDays)));
+  const weekday = berlinWeekdayFromInstant(focusDate);
+  const dayIndex = WEEKDAY_ORDER.indexOf(weekday);
+  if (dayIndex < 0) return "workweek";
+  return dayIndex < clamped ? "workweek" : "include-anchor";
+}
+
 export function blockMatchesDayColumn(block: WeekCalendarBlock, column: WeekCalendarDayColumn): boolean {
   const key = block.occurrenceDateKey?.trim();
   if (key) return key === column.dateKey;

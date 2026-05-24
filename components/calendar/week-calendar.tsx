@@ -6,7 +6,9 @@ import { MapPin, Repeat2 } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import {
+  WeekCalendarSlotPasteMenu,
   WeekEventEditToolbar,
+  type WeekCalendarSlotPasteMenuLabels,
   type WeekEventEditToolbarLabels,
 } from "@/components/calendar/week-event-edit-toolbar";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
@@ -27,6 +29,8 @@ import {
 } from "@/lib/calendar/event-overlap-layout";
 import {
   buildClipboardSessionFromBlock,
+  pasteRangeAtSlot,
+  readCalendarClipboardSession,
   writeCalendarClipboardSession,
 } from "@/lib/calendar/calendar-clipboard";
 import { calendarTodayChrome } from "@/lib/calendar/today-chrome";
@@ -90,6 +94,12 @@ const DEFAULT_EDIT_TOOLBAR_LABELS: WeekEventEditToolbarLabels = {
   duplicate: "Duplicate",
   delete: "Delete",
   toolbarAriaLabel: "Event actions",
+};
+
+const DEFAULT_SLOT_PASTE_LABELS: WeekCalendarSlotPasteMenuLabels = {
+  paste: "Paste",
+  newEvent: "New event",
+  menuAriaLabel: "Paste copied event or create new",
 };
 
 /** Multiline summary used when the consumer does not provide a richer copy hook. */
@@ -376,7 +386,9 @@ export function WeekCalendar({
   onDeleteCalendarEvent,
   onDuplicateCalendarEvent,
   onCopyCalendarEvent,
+  onPasteCalendarEvent,
   editToolbarLabels,
+  slotPasteMenuLabels,
   density = "default",
   minuteScale = WEEK_CALENDAR_MINUTE_SCALE_DEFAULT,
   onMinuteScaleChange,
@@ -433,8 +445,12 @@ export function WeekCalendar({
   onCreateEvent?: (start: Date, end: Date) => void;
   onCreateRangePreview?: (range: { start: Date; end: Date } | null) => void;
   onDraftPreviewTimesChange?: (range: { start: Date; end: Date }) => void;
-  /** Open edit/detail from parent — timed events: detail sheet "编辑" (and keyboard Enter/Space); all-day: row edit. */
-  onOpenItem?: (item: WeekCalendarBlock, occurrenceDate: Date) => void;
+  /** Open edit/detail from parent — timed events: compact popover beside the card; all-day: row tap. */
+  onOpenItem?: (
+    item: WeekCalendarBlock,
+    occurrenceDate: Date,
+    anchorEl: HTMLElement | null,
+  ) => void;
   /** Drag / resize calendar events (PATCH start/end only). */
   onPatchCalendarEventTimes?: (args: { eventId: string; startAt: Date; endAt: Date }) => Promise<boolean>;
   /**
@@ -467,8 +483,12 @@ export function WeekCalendar({
     block: WeekCalendarBlock;
     occurrenceDate: Date;
   }) => Promise<{ summaryText: string } | void> | { summaryText: string } | void;
+  /** Paste buffered copy/cut at an empty slot (parent creates the event). */
+  onPasteCalendarEvent?: (args: { start: Date; end: Date }) => Promise<boolean> | boolean;
   /** Localized labels for the floating edit toolbar. When omitted, English defaults are used. */
   editToolbarLabels?: WeekEventEditToolbarLabels;
+  /** Labels for empty-slot Paste vs New event menu after copy/cut. */
+  slotPasteMenuLabels?: WeekCalendarSlotPasteMenuLabels;
   density?: WeekCalendarDensity;
   minuteScale?: number;
   onMinuteScaleChange?: (nextScale: number) => void;
@@ -553,8 +573,25 @@ export function WeekCalendar({
    * allowed while selected. Single tap opens the detail sheet.
    */
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [slotPasteMenu, setSlotPasteMenu] = useState<{
+    start: Date;
+    end: Date;
+    clientX: number;
+    clientY: number;
+  } | null>(null);
   /** Per-eventId DOM node ref so the toolbar can anchor to the visible block. */
   const eventCardElsRef = useRef<Map<string, HTMLDivElement | null>>(new Map());
+
+  const notifyOpenItem = useCallback(
+    (block: WeekCalendarBlock, occurrenceDate: Date, anchorEl?: HTMLElement | null) => {
+      const fromRef =
+        block.calendarEntryId != null
+          ? eventCardElsRef.current.get(block.calendarEntryId)
+          : undefined;
+      onOpenItem?.(block, occurrenceDate, fromRef ?? anchorEl ?? null);
+    },
+    [onOpenItem],
+  );
 
   const [dragOverride, setDragOverride] = useState<{
     eventId: string;
@@ -1244,6 +1281,18 @@ export function WeekCalendar({
     onCreateRangePreview(createRangeFromMinutes(column, startMinute, endMinute));
   }
 
+  const promptCreateOrPaste = useCallback(
+    (start: Date, end: Date, clientX: number, clientY: number) => {
+      if (readCalendarClipboardSession() && onPasteCalendarEvent) {
+        onCreateRangePreview?.(null);
+        setSlotPasteMenu({ start, end, clientX, clientY });
+        return;
+      }
+      onCreateEvent?.(start, end);
+    },
+    [onCreateEvent, onCreateRangePreview, onPasteCalendarEvent],
+  );
+
   function startCreatePointerSession(
     e: React.PointerEvent,
     column: WeekCalendarDayColumn,
@@ -1337,7 +1386,7 @@ export function WeekCalendar({
       if (rangeDragActive) {
         const { start, end } = createRangeFromMinutes(column, anchorMinute, currentMinute);
         onCreateRangePreview?.(null);
-        onCreateEvent(start, end);
+        promptCreateOrPaste(start, end, ev.clientX, ev.clientY);
         return;
       }
 
@@ -1351,7 +1400,7 @@ export function WeekCalendar({
         start.setHours(0, snapped, 0, 0);
         const end = addMinutes(start, 60);
         onCreateRangePreview?.(null);
-        onCreateEvent(start, end);
+        promptCreateOrPaste(start, end, ev.clientX, ev.clientY);
       } else {
         onCreateRangePreview?.(null);
       }
@@ -1425,11 +1474,12 @@ export function WeekCalendar({
       }
     };
 
+    const captureEl = e.currentTarget as HTMLElement;
     const onUp = (ev: PointerEvent) => {
       if (ev.pointerId !== pointerId) return;
       detach();
       if (Math.hypot(ev.clientX - x0, ev.clientY - y0) <= POINTER_SLOP_PX) {
-        onOpenItem?.(block, occurrenceDate);
+        notifyOpenItem(block, occurrenceDate, captureEl);
       }
     };
 
@@ -1606,8 +1656,8 @@ export function WeekCalendar({
           const withinTapSlop =
             Math.hypot(ev.clientX - x0, ev.clientY - y0) <= POINTER_SLOP_PX;
           if (withinTapSlop) {
-            /* Short tap (no drag, no long-press): open detail / edit sheet; clear selection. */
-            onOpenItem?.(block, occurrenceDate);
+            /* Short tap (no drag, no long-press): open detail popover beside the card. */
+            notifyOpenItem(block, occurrenceDate, captureEl);
             setSelectedEventId(null);
           }
         }
@@ -1802,6 +1852,26 @@ export function WeekCalendar({
     });
     if (ok) setSelectedEventId(null);
   }, [onDuplicateCalendarEvent, selectedBlock, selectedOccurrenceDate]);
+
+  const resolvedSlotPasteLabels = slotPasteMenuLabels ?? DEFAULT_SLOT_PASTE_LABELS;
+
+  const handleSlotPaste = useCallback(async () => {
+    if (!slotPasteMenu || !onPasteCalendarEvent) return;
+    const session = readCalendarClipboardSession();
+    if (!session) {
+      setSlotPasteMenu(null);
+      return;
+    }
+    const { start, end } = pasteRangeAtSlot(slotPasteMenu.start, session);
+    const ok = await onPasteCalendarEvent({ start, end });
+    if (ok) setSlotPasteMenu(null);
+  }, [slotPasteMenu, onPasteCalendarEvent]);
+
+  const handleSlotNewEvent = useCallback(() => {
+    if (!slotPasteMenu || !onCreateEvent) return;
+    onCreateEvent(slotPasteMenu.start, slotPasteMenu.end);
+    setSlotPasteMenu(null);
+  }, [slotPasteMenu, onCreateEvent]);
 
   const handleDeleteSelection = useCallback(async () => {
     if (!selectedEventId) return;
@@ -2109,7 +2179,7 @@ export function WeekCalendar({
                               onKeyDown={(ev) => {
                                 if (ev.key === "Enter" || ev.key === " ") {
                                   ev.preventDefault();
-                                  onOpenItem?.(block, occurrenceDate);
+                                  notifyOpenItem(block, occurrenceDate, ev.currentTarget as HTMLElement);
                                 }
                               }}
                               className={cn(
@@ -2337,7 +2407,7 @@ export function WeekCalendar({
                       const columnShareActive =
                         !highlightedDateKeys?.size || highlightedDateKeys.has(column.dateKey);
 
-                      const createFromPointer = (clientY: number, rect: DOMRect) => {
+                      const createFromPointer = (clientY: number, rect: DOMRect, clientX: number) => {
                         if (!onCreateEvent || !columnShareActive) return;
                         const snappedMinute = Math.max(
                           0,
@@ -2349,10 +2419,10 @@ export function WeekCalendar({
                         const start = new Date(column.date);
                         start.setHours(0, snappedMinute, 0, 0);
                         const end = addMinutes(start, 60);
-                        onCreateEvent(start, end);
+                        promptCreateOrPaste(start, end, clientX, clientY);
                       };
 
-                      const createFromTapSlot = (clientY: number, rect: DOMRect) => {
+                      const createFromTapSlot = (clientY: number, rect: DOMRect, clientX: number) => {
                         if (!onCreateEvent || !columnShareActive) return;
                         const rawMinute = minuteFromClientYInRect(clientY, rect);
                         const slotStart = Math.max(
@@ -2367,7 +2437,7 @@ export function WeekCalendar({
                           slotStart,
                           slotStart + defaultTapSlotDurationMinutes,
                         );
-                        onCreateEvent(start, end);
+                        promptCreateOrPaste(start, end, clientX, clientY);
                       };
 
                       return (
@@ -2429,6 +2499,7 @@ export function WeekCalendar({
                                       createFromPointer(
                                         event.clientY,
                                         event.currentTarget.getBoundingClientRect(),
+                                        event.clientX,
                                       );
                                     }
                                   : undefined
@@ -2439,6 +2510,7 @@ export function WeekCalendar({
                                       createFromTapSlot(
                                         event.clientY,
                                         event.currentTarget.getBoundingClientRect(),
+                                        event.clientX,
                                       );
                                     }
                                   : undefined
@@ -2826,7 +2898,7 @@ export function WeekCalendar({
                                       onKeyDown={(ev) => {
                                         if (ev.key === "Enter" || ev.key === " ") {
                                           ev.preventDefault();
-                                          onOpenItem?.(block, occurrenceDate);
+                                          notifyOpenItem(block, occurrenceDate, ev.currentTarget as HTMLElement);
                                         }
                                       }}
                                       onPointerDown={(ev) => {
@@ -2857,12 +2929,9 @@ export function WeekCalendar({
                                       */}
                                       <button
                                         type="button"
-                                        className="absolute flex h-8 w-10 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
+                                        className="absolute left-1/2 top-0 flex h-8 w-10 -translate-x-1/2 -translate-y-1/2 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
                                         style={{
                                           zIndex: Z_EVENT_RESIZE_HANDLE,
-                                          top: 0,
-                                          right: 0,
-                                          transform: "translate(50%, -50%)",
                                         }}
                                         aria-label={`Drag anchor to change start time: ${titleLine}`}
                                         onPointerDown={(ev) => {
@@ -2888,12 +2957,9 @@ export function WeekCalendar({
                                       </button>
                                       <button
                                         type="button"
-                                        className="absolute flex h-8 w-10 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
+                                        className="absolute bottom-0 left-1/2 flex h-8 w-10 -translate-x-1/2 translate-y-1/2 cursor-ns-resize touch-none items-center justify-center rounded-full bg-transparent p-0 outline-none"
                                         style={{
                                           zIndex: Z_EVENT_RESIZE_HANDLE,
-                                          bottom: 0,
-                                          left: 0,
-                                          transform: "translate(-50%, 50%)",
                                         }}
                                         aria-label={`Drag anchor to change end time: ${titleLine}`}
                                         onPointerDown={(ev) => {
@@ -2938,13 +3004,13 @@ export function WeekCalendar({
                                     if (isDraftPreviewCourseId(block.courseId)) return;
                                     attachTapOpen(e, block, occurrenceDate);
                                   }}
-                                  onKeyDown={(ev) => {
-                                    if (ev.key === "Enter" || ev.key === " ") {
-                                      ev.preventDefault();
-                                      if (isDraftPreviewCourseId(block.courseId)) return;
-                                      onOpenItem?.(block, occurrenceDate);
-                                    }
-                                  }}
+                                      onKeyDown={(ev) => {
+                                        if (ev.key === "Enter" || ev.key === " ") {
+                                          ev.preventDefault();
+                                          if (isDraftPreviewCourseId(block.courseId)) return;
+                                          notifyOpenItem(block, occurrenceDate, ev.currentTarget as HTMLElement);
+                                        }
+                                      }}
                                 >
                                   {innerWithRail}
                                 </button>
@@ -2980,6 +3046,16 @@ export function WeekCalendar({
         onDelete={() => void handleDeleteSelection()}
         onDismiss={dismissSelection}
       />
+      {slotPasteMenu ? (
+        <WeekCalendarSlotPasteMenu
+          clientX={slotPasteMenu.clientX}
+          clientY={slotPasteMenu.clientY}
+          labels={resolvedSlotPasteLabels}
+          onPaste={() => void handleSlotPaste()}
+          onNewEvent={handleSlotNewEvent}
+          onDismiss={() => setSlotPasteMenu(null)}
+        />
+      ) : null}
     </div>
   );
 }

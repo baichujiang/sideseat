@@ -811,11 +811,15 @@ export type AppMessages = {
     monthCellAriaOne: string;
     /** `{when}` `{count}` */
     monthCellAriaMany: string;
-    /** Banner when opening “new event” after a calendar copy/cut. */
-    calendarClipboardBannerTitle: string;
-    calendarClipboardDismiss: string;
-    /** Fills the title field from structured clipboard payload. */
-    calendarClipboardApplyTitle: string;
+    /** Empty week-grid slot after copy/cut — paste buffered event or create blank. */
+    calendarSlotPaste: string;
+    calendarSlotNewEvent: string;
+    calendarSlotPasteMenuAria: string;
+    detailPopoverEdit: string;
+    detailPopoverDelete: string;
+    detailPopoverDeleting: string;
+    detailPopoverDismissAria: string;
+    detailPopoverReadOnlyFeed: string;
     recurringDeleteDialogTitle: string;
     /** `{title}` */
     recurringDeleteDialogBody: string;
