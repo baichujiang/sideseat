@@ -347,6 +347,10 @@ export async function requirePublicProfileAccess(peerUserId: string) {
       verifiedStudent: true,
       studentVerificationStatus: true,
       userLanguages: { select: { tag: true, proficiency: true } },
+      lifePhotos: {
+        orderBy: { sortOrder: "asc" },
+        select: { id: true, url: true, sortOrder: true },
+      },
       onboardingComplete: true,
       wechatHandle: true,
       whatsappHandle: true,
@@ -397,8 +401,18 @@ export async function requirePublicProfileAccess(peerUserId: string) {
         invitation: { include: { course: true } },
         contactExchangeRequests: { orderBy: { createdAt: "desc" } },
         friendLink: true,
-        userA: { include: { userLanguages: true } },
-        userB: { include: { userLanguages: true } },
+        userA: {
+          include: {
+            userLanguages: true,
+            lifePhotos: { orderBy: { sortOrder: "asc" }, select: { id: true, url: true, sortOrder: true } },
+          },
+        },
+        userB: {
+          include: {
+            userLanguages: true,
+            lifePhotos: { orderBy: { sortOrder: "asc" }, select: { id: true, url: true, sortOrder: true } },
+          },
+        },
       },
     }),
     prisma.course.findMany({

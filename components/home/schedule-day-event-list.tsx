@@ -5,7 +5,16 @@ import { BookOpen, CalendarClock, MapPin } from "lucide-react";
 
 import type { DayTimelineItem } from "@/components/home/schedule-day-timeline";
 import {
+  categoryAccentColor,
+  categoryBlockSurfaceStyle,
+} from "@/lib/calendar/category-visual";
+import {
+  SCHEDULE_EVENT_CARD_RADIUS,
+  SCHEDULE_EVENT_LIST_INNER_PAD,
+  SCHEDULE_EVENT_LIST_TIME_CLASS,
+  SCHEDULE_EVENT_LIST_TITLE_SIZE,
   SCHEDULE_EVENT_TONE_STYLES,
+  scheduleEventRailClass,
   scheduleVisualToneKey,
 } from "@/lib/schedule-event-card-tone";
 import { isLongOrAllDayTimedMinutes } from "@/lib/calendar/long-calendar-block";
@@ -112,12 +121,14 @@ export function ScheduleDayEventList({
         const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
         const Icon = isStudy ? CalendarClock : BookOpen;
         const catHex = item.source === "calendar" ? item.categoryColor?.trim() : undefined;
-        const railStyle = catHex ? { backgroundColor: catHex } : undefined;
-        const railClass = cn(
-          "w-1 shrink-0 self-stretch rounded-l-sm",
-          !catHex && tone.rail,
-        );
+        const useCategory = Boolean(catHex);
         const rowSelected = selectedId === item.id;
+        const railStyle = useCategory && catHex ? { backgroundColor: categoryAccentColor(catHex) } : undefined;
+        const railClass = scheduleEventRailClass({
+          tone,
+          highlighted: rowSelected,
+          useToneRail: !useCategory,
+        });
         return (
           <li key={`${item.kind}-${item.id}`}>
             <button
@@ -138,15 +149,27 @@ export function ScheduleDayEventList({
                 }
               }}
               className={cn(
-                "flex w-full items-stretch rounded-sm p-0 text-left transition",
+                "flex w-full items-stretch p-0 text-left transition",
+                SCHEDULE_EVENT_CARD_RADIUS,
                 rowSelected ? "z-[1] overflow-visible ring-2 ring-[#2563EB]/30 ring-offset-2 ring-offset-background dark:ring-blue-400/35" : "overflow-hidden",
-                tone.card,
-                rowSelected && tone.cardSelected,
+                !useCategory && tone.card,
+                !useCategory && rowSelected && tone.cardSelected,
+                useCategory && "border border-black/10 shadow-sm dark:border-white/10",
                 "hover:brightness-[0.98] active:brightness-95",
               )}
+              style={
+                useCategory && catHex
+                  ? categoryBlockSurfaceStyle(catHex, rowSelected)
+                  : undefined
+              }
             >
               <span aria-hidden className={railClass} style={railStyle} />
-              <span className="flex min-w-0 flex-1 items-start gap-2.5 px-3 py-2">
+              <span
+                className={cn(
+                  "flex min-w-0 flex-1 items-start gap-2.5",
+                  SCHEDULE_EVENT_LIST_INNER_PAD,
+                )}
+              >
                 {item.source === "course" && item.courseCode?.trim() ? (
                   <span
                     className={cn(
@@ -178,9 +201,14 @@ export function ScheduleDayEventList({
                 <span className="min-w-0 flex-1">
                   <span
                     className={cn(
-                      "block text-xs font-medium tabular-nums leading-none",
-                      tone.accentColor,
+                      SCHEDULE_EVENT_LIST_TIME_CLASS,
+                      !useCategory && tone.accentColor,
                     )}
+                    style={
+                      useCategory && catHex
+                        ? { color: rowSelected ? "#ffffff" : categoryAccentColor(catHex) }
+                        : undefined
+                    }
                   >
                     {formatItemTimeRange(item)}
                   </span>
@@ -188,7 +216,8 @@ export function ScheduleDayEventList({
                     <>
                       <span
                         className={cn(
-                          "mt-1 block text-sm font-bold tabular-nums leading-snug text-classmates-blue dark:text-blue-200",
+                          "mt-1 block font-bold tabular-nums text-classmates-blue dark:text-blue-200",
+                          SCHEDULE_EVENT_LIST_TITLE_SIZE,
                           !rowSelected && "truncate",
                           rowSelected && "whitespace-normal break-words",
                         )}
@@ -197,7 +226,8 @@ export function ScheduleDayEventList({
                       </span>
                       <span
                         className={cn(
-                          "mt-0.5 block text-sm font-semibold leading-snug",
+                          "mt-0.5 block font-semibold",
+                          SCHEDULE_EVENT_LIST_TITLE_SIZE,
                           tone.title,
                           !rowSelected && "truncate",
                           rowSelected && "whitespace-normal break-words",
@@ -209,8 +239,11 @@ export function ScheduleDayEventList({
                   ) : (
                     <span
                       className={cn(
-                        "mt-1 block text-sm font-semibold leading-snug",
-                        tone.title,
+                        "mt-1 block font-semibold",
+                        SCHEDULE_EVENT_LIST_TITLE_SIZE,
+                        !useCategory && tone.title,
+                        useCategory &&
+                          (rowSelected ? "text-white" : "text-[#111827] dark:text-foreground"),
                         !rowSelected && "truncate",
                         rowSelected && "whitespace-normal break-words",
                       )}

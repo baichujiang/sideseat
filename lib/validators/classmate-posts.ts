@@ -190,32 +190,8 @@ const classmatePostCategorySchema = z.enum([
   "SHARED_COURSES",
 ]);
 
-/** Max images per Discover post (`ClassmatePostImage.sortOrder` is 0..2). */
+/** Legacy: max images on existing Discover posts (`ClassmatePostImage.sortOrder` is 0..2). */
 export const CLASSMATE_POST_MAX_IMAGES = 3;
-
-function dedupeImageUrlsPreserveOrder(urls: string[]): string[] {
-  const seen = new Set<string>();
-  const out: string[] = [];
-  for (const u of urls) {
-    if (seen.has(u)) continue;
-    seen.add(u);
-    out.push(u);
-    if (out.length >= CLASSMATE_POST_MAX_IMAGES) break;
-  }
-  return out;
-}
-
-/** Optional image URLs for `POST /api/classmate-posts` (validated again server-side for origin). */
-export const classmatePostImageUrlsSchema = z
-  .array(z.string().min(1).max(4_000_000))
-  .max(CLASSMATE_POST_MAX_IMAGES)
-  .optional()
-  .transform((arr) => {
-    if (!arr?.length) return undefined;
-    const trimmed = arr.map((u) => u.trim()).filter((u) => u.length > 0);
-    const next = dedupeImageUrlsPreserveOrder(trimmed);
-    return next.length ? next : undefined;
-  });
 
 export const createClassmatePostSchema = z
   .object({
@@ -238,8 +214,8 @@ export const createClassmatePostSchema = z
     meals: mealsPayloadSchema.optional(),
     language: languagePayloadSchema.optional(),
     sport: sportPayloadSchema.optional(),
-    imageUrls: classmatePostImageUrlsSchema,
   })
+  .strict()
   .refine(
     (data) =>
       data.category !== "SHARED_COURSES" ||

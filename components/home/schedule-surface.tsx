@@ -299,8 +299,8 @@ async function saveIcsBlobWithPickerOrDownload(
  *
  * Data model: `classBlocks` is inherently recurring (we just filter by
  * weekday), `studyEntries` is a flat list of materialized calendar rows.
- * Parent fetches a wide date window of one-off calendar rows (see Home page);
- * recurring courses are not windowed.
+ * Home loads entries client-side via `HomeScheduleClient` (narrow initial
+ * window, extended on virtual scroll).
  */
 export function ScheduleSurface({
   classBlocks,
@@ -313,6 +313,8 @@ export function ScheduleSurface({
   homeGreeting,
   homeBelowHeaderSlot,
   naturalScheduleEnabled = false,
+  onScheduleRefresh,
+  onVirtualStripBoundsChange,
 }: {
   classBlocks: ClassBlock[];
   studyEntries: StudyEntry[];
@@ -332,8 +334,16 @@ export function ScheduleSurface({
   homeBelowHeaderSlot?: ReactNode;
   /** Logged-in users: natural-language calendar quick add (requires server LLM config). */
   naturalScheduleEnabled?: boolean;
+  /** Client-side schedule cache revalidation (Home tab). */
+  onScheduleRefresh?: () => void;
+  /** Fetch calendar entries when the virtual day strip expands near an edge. */
+  onVirtualStripBoundsChange?: (bounds: { start: Date; end: Date }) => void;
 }) {
   const router = useRouter();
+  const refreshSchedule = useCallback(() => {
+    router.refresh();
+    onScheduleRefresh?.();
+  }, [router, onScheduleRefresh]);
   const { messages, locale } = useLocaleContext();
   const [view, setView] = useState<ViewKind>("week");
   const [now, setNow] = useState(() => new Date(nowISO));
@@ -392,7 +402,7 @@ export function ScheduleSurface({
   const closeAddPanel = ({ refresh = false }: { refresh?: boolean } = {}) => {
     setAdding(false);
     resetAddDraft();
-    if (refresh) router.refresh();
+    if (refresh) refreshSchedule();
   };
 
   const pathname = usePathname();
@@ -892,7 +902,7 @@ export function ScheduleSurface({
       recurringDeleteResolverRef.current = null;
       setRecurringDeleteDialog(null);
       resolve(true);
-      router.refresh();
+      refreshSchedule();
     },
     [router],
   );
@@ -910,7 +920,7 @@ export function ScheduleSurface({
       setDeletingItem(false);
       if (!response.ok) return;
       setDetailItem(null);
-      router.refresh();
+      refreshSchedule();
       return;
     }
     recurringDeletePayloadRef.current = { eventId: detailItem.id };
@@ -1100,7 +1110,7 @@ export function ScheduleSurface({
         tone: "ok",
         message: `${base}${suffix}`,
       });
-      router.refresh();
+      refreshSchedule();
     } catch {
       setIcsNotice({ tone: "err", message: messages.schedule.importErrorGeneric });
     } finally {
@@ -1143,7 +1153,7 @@ export function ScheduleSurface({
         }),
       });
       if (!res.ok) return false;
-      router.refresh();
+      refreshSchedule();
       return true;
     },
     [studyEntries, router],
@@ -1163,7 +1173,7 @@ export function ScheduleSurface({
           { method: "DELETE" },
         );
         if (!res.ok) return false;
-        router.refresh();
+        refreshSchedule();
         return true;
       }
       recurringDeletePayloadRef.current = { eventId };
@@ -1222,7 +1232,7 @@ export function ScheduleSurface({
         }),
       });
       if (!res.ok) return false;
-      router.refresh();
+      refreshSchedule();
       return true;
     },
     [studyEntries, router],
@@ -1302,7 +1312,7 @@ export function ScheduleSurface({
       if (session.kind === "cut") {
         clearCalendarClipboardSession();
       }
-      router.refresh();
+      refreshSchedule();
       return true;
     },
     [messages.schedule.newEvent, router],
@@ -1388,6 +1398,7 @@ export function ScheduleSurface({
     editToolbarLabels,
     showTimeColumnLabel: false,
     onDayHeaderSelect: (date: Date) => setSelectedDate(berlinStartOfCalendarDay(date)),
+    onVirtualStripBoundsChange,
   };
 
   const useCompactHomeHeader = homeGreeting != null;
@@ -1588,7 +1599,7 @@ export function ScheduleSurface({
         onSaved={() => {
           setNaturalScheduleOpen(false);
           setDetailItem(null);
-          router.refresh();
+          refreshSchedule();
         }}
       />
 

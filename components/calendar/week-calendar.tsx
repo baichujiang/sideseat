@@ -13,8 +13,13 @@ import {
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { formatMessage } from "@/lib/i18n/messages";
 import {
+  SCHEDULE_EVENT_CARD_RADIUS,
+  SCHEDULE_EVENT_GRID_INNER_PAD,
+  SCHEDULE_EVENT_GRID_TIME_CLASS,
+  SCHEDULE_EVENT_GRID_TITLE_SIZE,
   SCHEDULE_EVENT_TONE_STYLES,
-  scheduleShortOverlapRailClass,
+  scheduleEventGridTitleLayoutClass,
+  scheduleEventRailClass,
   scheduleVisualToneKey,
 } from "@/lib/schedule-event-card-tone";
 import {
@@ -37,6 +42,7 @@ import {
   buildBlocksByDateKey,
   buildWeekCalendarDayColumns,
   horizontalScrollIndexForFocus,
+  horizontalScrollLeftForColumnDateKey,
   horizontalScrollLeftToRevealDay,
   snapWeekCalendarHorizontalScrollLeft,
   weekCalendarHorizontalModeForFocus,
@@ -332,8 +338,8 @@ const DENSITY_LAYOUT: Record<
     metaLocPct: 8,
     metaWithPct: 11,
     axisTimeClass: "text-[10px]",
-    blockTimeClass: "text-[10px]",
-    blockTitleClass: "text-[11px]",
+    blockTimeClass: SCHEDULE_EVENT_GRID_TIME_CLASS,
+    blockTitleClass: SCHEDULE_EVENT_GRID_TITLE_SIZE,
     metaClass: "text-[9px]",
   },
   immersive: {
@@ -346,8 +352,8 @@ const DENSITY_LAYOUT: Record<
     metaLocPct: 5,
     metaWithPct: 7,
     axisTimeClass: "text-[11px]",
-    blockTimeClass: "text-[11px]",
-    blockTitleClass: "text-[12px]",
+    blockTimeClass: SCHEDULE_EVENT_GRID_TIME_CLASS,
+    blockTitleClass: SCHEDULE_EVENT_GRID_TITLE_SIZE,
     metaClass: "text-[10px]",
   },
 };
@@ -364,11 +370,6 @@ function horizontalStartIndexForDay(day: Weekday | undefined, visibleWeekDays: n
   if (dayIndex < 0) return 0;
   const maxStartIndex = Math.max(DAY_ORDER.length - visibleWeekDays, 0);
   return Math.min(Math.max(dayIndex - (visibleWeekDays - 1), 0), maxStartIndex);
-}
-
-/** Timed week-grid event titles: up to two lines, word wrap, tight leading. */
-function scheduleEventTitleLayoutClass(): string {
-  return "line-clamp-2 min-w-0 whitespace-normal break-words leading-tight [overflow-wrap:anywhere] text-left";
 }
 
 export function WeekCalendar({
@@ -438,6 +439,8 @@ export function WeekCalendar({
   dayHeaderSelectAria,
   /** Increment (e.g. Home “Today”) to scroll `focusDate` into view even when the date did not change. */
   revealDateNonce = 0,
+  /** Notified when the continuous virtual day strip grows or recenters (Home entry fetch). */
+  onVirtualStripBoundsChange,
 }: {
   blocks: WeekCalendarBlock[];
   allDayBlocks?: WeekCalendarBlock[];
@@ -517,6 +520,7 @@ export function WeekCalendar({
   onDayHeaderSelect?: (date: Date) => void;
   dayHeaderSelectAria?: string;
   revealDateNonce?: number;
+  onVirtualStripBoundsChange?: (bounds: VirtualStripBounds) => void;
 }) {
   const { locale, messages: appMessages } = useLocaleContext();
   const sch = appMessages.schedule;
@@ -555,7 +559,10 @@ export function WeekCalendar({
   const horizontalScrollFrameReadyRef = useRef(false);
   const dayColumnWidthForScrollRef = useRef(0);
   const prevRevealNonceRef = useRef(revealDateNonce);
+  const revealScrollAppliedNonceRef = useRef(0);
   const prevVisibleWeekDaysRef = useRef<number | null>(null);
+  /** Skip post-scroll snap while visible-day width is being adjusted programmatically. */
+  const suppressHorizontalSnapRef = useRef(false);
   const virtualScrollEnabled =
     horizontalScrollMode === "continuous" && !(columnDateKeys?.length ?? 0);
   const [virtualStripBounds, setVirtualStripBounds] = useState<VirtualStripBounds | null>(() =>
@@ -882,6 +889,10 @@ export function WeekCalendar({
     };
 
     const scheduleHorizontalSnap = () => {
+      if (suppressHorizontalSnapRef.current) {
+        suppressHorizontalSnapRef.current = false;
+        return;
+      }
       if (tid !== null || mouseDown || momentumRafRef.current !== null || snapAnimRafRef.current !== null) {
         return;
       }
@@ -1355,6 +1366,11 @@ export function WeekCalendar({
     };
   }, [virtualScrollEnabled, scrollRangeStart, scrollRangeEnd, TIME_COLUMN_PX]);
 
+  useEffect(() => {
+    if (!virtualScrollEnabled || !virtualStripBounds || !onVirtualStripBoundsChange) return;
+    onVirtualStripBoundsChange(virtualStripBounds);
+  }, [virtualScrollEnabled, virtualStripBounds, onVirtualStripBoundsChange]);
+
   useLayoutEffect(() => {
     const node = scrollContainerRef.current;
     if (!node || dayColumnWidth <= 0 || dayColumns.length === 0) return;
@@ -1395,10 +1411,21 @@ export function WeekCalendar({
       (visibleDaysChanged || !layoutChanged);
 
     if (shouldPreserveScrollPosition) {
-      const colIndex = prevWidth > 0 ? node.scrollLeft / prevWidth : 0;
       const viewportWidth = Math.max(frameWidth - TIME_COLUMN_PX, 1);
-      const maxScrollLeft = Math.max(0, dayColumnWidth * dayColumns.length - viewportWidth);
-      commitDayScroll(Math.min(Math.max(0, colIndex * dayColumnWidth), maxScrollLeft));
+      const prevColWidth = prevWidth > 0 ? prevWidth : dayColumnWidth;
+      const anchorColIndex = Math.max(0, Math.floor(node.scrollLeft / prevColWidth + 1e-6));
+      const anchorDateKey = dayColumns[anchorColIndex]?.dateKey;
+      const fallbackScrollLeft = anchorColIndex * dayColumnWidth;
+      suppressHorizontalSnapRef.current = true;
+      commitDayScroll(
+        horizontalScrollLeftForColumnDateKey(
+          dayColumns,
+          anchorDateKey,
+          fallbackScrollLeft,
+          dayColumnWidth,
+          viewportWidth,
+        ),
+      );
       return;
     }
 
@@ -1449,9 +1476,10 @@ export function WeekCalendar({
   };
 
   useLayoutEffect(() => {
-    if (!revealDateNonce) return;
+    if (!revealDateNonce || revealDateNonce === revealScrollAppliedNonceRef.current) return;
     const node = scrollContainerRef.current;
     if (!node || dayColumnWidth <= 0 || dayColumns.length === 0) return;
+    revealScrollAppliedNonceRef.current = revealDateNonce;
     const viewportWidth = Math.max(frameWidth - TIME_COLUMN_PX, 1);
     const dateToReveal = today ?? focusDate;
     node.scrollLeft = horizontalScrollLeftToRevealDay(
@@ -1494,7 +1522,6 @@ export function WeekCalendar({
     focusDate,
     today,
     horizontalMode,
-    VISIBLE_WEEK_DAYS,
     frameWidth,
     TIME_COLUMN_PX,
   ]);
@@ -2450,7 +2477,8 @@ export function WeekCalendar({
                                 }
                               }}
                               className={cn(
-                                "relative z-[1] w-full overflow-hidden rounded-[2px] p-0 text-left text-[10px] font-semibold leading-tight transition outline-none",
+                                "relative z-[1] w-full overflow-hidden p-0 text-left font-semibold leading-tight transition outline-none",
+                                SCHEDULE_EVENT_CARD_RADIUS,
                                 "hover:brightness-[0.98] active:brightness-95",
                                 "focus-visible:ring-2 focus-visible:ring-[#2563EB]/35 focus-visible:ring-offset-1 focus-visible:ring-offset-background dark:focus-visible:ring-blue-400/40",
                                 !useCategory && tone.card,
@@ -2466,18 +2494,22 @@ export function WeekCalendar({
                               <span className="relative flex min-w-0 flex-row overflow-hidden rounded-[inherit]">
                                 <span
                                   aria-hidden
-                                  className={cn(
-                                    "w-1 shrink-0 self-stretch rounded-l-[2px]",
-                                    !useCategory && tone.rail,
-                                    useCategory && catHex && "bg-transparent",
-                                  )}
+                                  className={scheduleEventRailClass({
+                                    tone,
+                                    useToneRail: !useCategory,
+                                  })}
                                   style={
                                     useCategory && catHex
                                       ? { backgroundColor: categoryAccentColor(catHex) }
                                       : undefined
                                   }
                                 />
-                                <span className="flex min-w-0 flex-1 flex-col gap-px px-1.5 py-1">
+                                <span
+                                  className={cn(
+                                    "flex min-w-0 flex-1 flex-col gap-px",
+                                    SCHEDULE_EVENT_GRID_INNER_PAD,
+                                  )}
+                                >
                                   {block.source === "course" && block.courseCode?.trim() ? (
                                     <>
                                       <span className="truncate font-bold tabular-nums leading-tight text-classmates-blue dark:text-blue-200">
@@ -2863,7 +2895,8 @@ export function WeekCalendar({
                               ? snapMinute(block.endMinute)
                               : block.endMinute;
                             const eventCardVisualClassName = cn(
-                              "absolute rounded-[2px] p-0 text-left leading-tight transition",
+                              "absolute p-0 text-left leading-tight transition",
+                              SCHEDULE_EVENT_CARD_RADIUS,
                               dayColumnSelectMode && "pointer-events-none",
                               draggingThis && "!transition-none",
                               /* Pressed-state dim reads like “dragging” while the finger is still down after long-press select. */
@@ -2899,7 +2932,7 @@ export function WeekCalendar({
                                   ? "text-white/80"
                                   : "text-[#111827]/65 dark:text-muted-foreground",
                             );
-                            const titleLayout = scheduleEventTitleLayoutClass();
+                            const titleLayout = scheduleEventGridTitleLayoutClass();
                             const titleLine =
                               block.source === "course" && block.courseCode?.trim()
                                 ? block.courseName
@@ -3054,17 +3087,12 @@ export function WeekCalendar({
                               useCategoryColor && catHex
                                 ? { backgroundColor: categoryAccentColor(catHex) }
                                 : undefined;
-                            const railClass = cn(
-                              shortOverlapGlass
-                                ? "w-[7px] min-w-[7px] shrink-0 self-stretch rounded-full my-1 ml-1 mr-px"
-                                : "w-1 min-w-[4px] shrink-0 self-stretch rounded-l-[2px]",
-                              !useCategoryColor &&
-                                (highlighted
-                                  ? tone.railSelected
-                                  : shortOverlapGlass
-                                    ? scheduleShortOverlapRailClass(tone)
-                                    : tone.rail),
-                            );
+                            const railClass = scheduleEventRailClass({
+                              shortOverlapGlass,
+                              highlighted,
+                              tone,
+                              useToneRail: !useCategoryColor,
+                            });
                             const hasRecurrence =
                               block.repeatRule != null &&
                               block.repeatRule !== "NONE";
@@ -3075,7 +3103,12 @@ export function WeekCalendar({
                                 )}
                               >
                                 <div aria-hidden className={railClass} style={railStyle} />
-                                <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col items-start justify-start px-1.5 py-1">
+                                <div
+                                  className={cn(
+                                    "flex min-h-0 min-w-0 w-full flex-1 flex-col items-start justify-start",
+                                    SCHEDULE_EVENT_GRID_INNER_PAD,
+                                  )}
+                                >
                                   {innerSlot}
                                 </div>
                                 {hasRecurrence && (

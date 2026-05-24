@@ -13,9 +13,13 @@ import {
   SCHEDULE_SHORT_OVERLAP_GLASS,
 } from "@/lib/calendar/event-overlap-layout";
 import {
-  inferScheduleEventToneKey,
+  SCHEDULE_EVENT_CARD_RADIUS,
+  SCHEDULE_EVENT_GRID_INNER_PAD,
+  SCHEDULE_EVENT_GRID_TIME_CLASS,
+  SCHEDULE_EVENT_GRID_TITLE_SIZE,
   SCHEDULE_EVENT_TONE_STYLES,
-  scheduleShortOverlapRailClass,
+  scheduleEventGridTitleLayoutClass,
+  scheduleEventRailClass,
   scheduleVisualToneKey,
 } from "@/lib/schedule-event-card-tone";
 import { isLongOrAllDayTimedMinutes } from "@/lib/calendar/long-calendar-block";
@@ -246,21 +250,23 @@ export function ScheduleDayTimeline({
           <div className="flex flex-wrap gap-1.5">
             {allDayItems.map((item) => {
               const isStudy = item.kind === "study";
-              const toneKey = inferScheduleEventToneKey({
+              const toneKey = scheduleVisualToneKey({
+                source: item.source,
                 kind: isStudy ? "study" : "class",
                 title: item.title,
+                courseId: item.courseId ?? undefined,
               });
               const tone = SCHEDULE_EVENT_TONE_STYLES[toneKey];
               const catHex = item.categoryColor?.trim();
-              const useCategory = Boolean(catHex);
+              const useCategory = item.source === "calendar" && Boolean(catHex);
               const allDayRailStyle =
                 useCategory && catHex
                   ? { backgroundColor: categoryAccentColor(catHex) }
                   : undefined;
-              const allDayRailClass = cn(
-                "w-1 shrink-0 self-stretch rounded-l-lg",
-                !useCategory && tone.rail,
-              );
+              const allDayRailClass = scheduleEventRailClass({
+                tone,
+                useToneRail: !useCategory,
+              });
               return (
                 <button
                   key={`${item.kind}-${item.id}`}
@@ -281,7 +287,8 @@ export function ScheduleDayTimeline({
                     }
                   }}
                   className={cn(
-                    "max-w-full rounded-lg p-0 text-left text-[12px] font-semibold leading-snug transition",
+                    "max-w-full overflow-hidden p-0 text-left font-semibold leading-snug transition",
+                    SCHEDULE_EVENT_CARD_RADIUS,
                     "hover:brightness-[0.98] active:brightness-95",
                     !useCategory && tone.card,
                     useCategory && "border border-black/10 shadow-sm dark:border-white/10",
@@ -292,7 +299,14 @@ export function ScheduleDayTimeline({
                 >
                   <span className="flex max-w-full flex-row overflow-hidden rounded-[inherit]">
                     <span aria-hidden className={allDayRailClass} style={allDayRailStyle} />
-                    <span className="min-w-0 flex-1 whitespace-normal break-words px-2.5 py-1.5 text-left [overflow-wrap:anywhere] line-clamp-2">
+                    <span
+                      className={cn(
+                        "min-w-0 flex-1 text-left font-semibold",
+                        SCHEDULE_EVENT_GRID_INNER_PAD,
+                        SCHEDULE_EVENT_GRID_TITLE_SIZE,
+                        scheduleEventGridTitleLayoutClass(),
+                      )}
+                    >
                       {item.title}
                     </span>
                   </span>
@@ -450,17 +464,6 @@ export function ScheduleDayTimeline({
   );
 }
 
-/** `%` height of a timed block — taller blocks wrap event titles; short slots stay one line. */
-function dayTimelineEventTitleLayoutClass(effectiveHeightPct: number): string {
-  if (effectiveHeightPct >= 14) {
-    return "whitespace-normal break-words [overflow-wrap:anywhere] text-left";
-  }
-  if (effectiveHeightPct >= 8) {
-    return "line-clamp-2 whitespace-normal break-words [overflow-wrap:anywhere] text-left";
-  }
-  return "truncate text-left";
-}
-
 function TimelineBlock({
   item,
   dayStart,
@@ -508,7 +511,8 @@ function TimelineBlock({
   const useCategoryColor = item.source === "calendar" && Boolean(catHex);
   const shortOverlapGlass = Boolean(hasShortOverlap);
   const toneClassOuter = cn(
-    "pointer-events-none absolute rounded-sm transition z-[1] overflow-hidden",
+    "pointer-events-none absolute transition z-[1] overflow-hidden",
+    SCHEDULE_EVENT_CARD_RADIUS,
     !useCategoryColor &&
       (shortOverlapGlass ? SCHEDULE_SHORT_OVERLAP_GLASS : tone.card),
     useCategoryColor &&
@@ -525,7 +529,7 @@ function TimelineBlock({
   // We cap at what fits instead of overflowing.
   const minHeightPct = Math.min(4, height);
   const effectiveHeight = Math.max(height, minHeightPct);
-  const titleLayout = dayTimelineEventTitleLayoutClass(effectiveHeight);
+  const titleLayout = scheduleEventGridTitleLayoutClass(effectiveHeight);
   const showTimeRow = effectiveHeight > 0;
   const showLocationRow = Boolean(item.location) && effectiveHeight > 9;
   const showWithRow = Boolean(item.withLabel) && effectiveHeight > 11;
@@ -537,7 +541,7 @@ function TimelineBlock({
       {showTimeRow ? (
         <p
           className={cn(
-            "truncate text-left text-[12px] font-medium tabular-nums leading-none",
+            SCHEDULE_EVENT_GRID_TIME_CLASS,
             !useCategoryColor && tone.accentColor,
           )}
           style={useCategoryColor && catHex ? { color: categoryAccentColor(catHex) } : undefined}
@@ -547,13 +551,19 @@ function TimelineBlock({
       ) : null}
       {item.source === "course" && item.courseCode?.trim() ? (
         <div className="mt-0.5 min-w-0 space-y-0.5">
-          <p className="truncate text-left text-[12px] font-bold tabular-nums leading-tight text-classmates-blue dark:text-blue-200">
+          <p
+            className={cn(
+              "truncate text-left font-bold tabular-nums leading-tight text-classmates-blue dark:text-blue-200",
+              SCHEDULE_EVENT_GRID_TITLE_SIZE,
+            )}
+          >
             {item.courseCode.trim()}
           </p>
           <p
             className={cn(
               titleLayout,
-              "text-[13px] font-bold leading-snug",
+              "font-bold",
+              SCHEDULE_EVENT_GRID_TITLE_SIZE,
               !useCategoryColor && tone.title,
             )}
           >
@@ -578,8 +588,9 @@ function TimelineBlock({
           )}
           <p
             className={cn(
-              "min-w-0 flex-1 text-[13px] font-bold leading-snug",
+              "min-w-0 flex-1 font-semibold",
               titleLayout,
+              SCHEDULE_EVENT_GRID_TITLE_SIZE,
               !useCategoryColor && tone.title,
               useCategoryColor && (shortOverlapGlass ? "" : "text-[#111827] dark:text-foreground"),
             )}
@@ -633,15 +644,11 @@ function TimelineBlock({
     useCategoryColor && catHex
       ? { backgroundColor: categoryAccentColor(catHex) }
       : undefined;
-  const railClass = cn(
-    shortOverlapGlass
-      ? "w-[7px] min-w-[7px] shrink-0 self-stretch rounded-full my-1 ml-1 mr-px"
-      : "w-1 min-w-[4px] shrink-0 self-stretch rounded-l-sm",
-    !useCategoryColor &&
-      (shortOverlapGlass
-        ? scheduleShortOverlapRailClass(tone)
-        : tone.rail),
-  );
+  const railClass = scheduleEventRailClass({
+    shortOverlapGlass,
+    tone,
+    useToneRail: !useCategoryColor,
+  });
 
   return (
     <div className={toneClassOuter} style={surfaceStyle}>
@@ -668,7 +675,12 @@ function TimelineBlock({
         <div className="flex w-full h-full min-h-0 flex-row overflow-hidden rounded-[inherit]">
 
           <div aria-hidden className={railClass} style={railStyle} />
-          <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col items-start justify-start px-2 py-1.5">
+          <div
+            className={cn(
+              "flex min-h-0 min-w-0 w-full flex-1 flex-col items-start justify-start",
+              SCHEDULE_EVENT_GRID_INNER_PAD,
+            )}
+          >
             {innerSlot}
           </div>
         </div>

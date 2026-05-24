@@ -3,8 +3,7 @@ import { InboxRealtimeRefresh } from "@/components/inbox/inbox-realtime-refresh"
 import { InboxSessionBootstrap } from "@/components/inbox/inbox-session-bootstrap";
 import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
 import { getSessionUser } from "@/lib/auth/session";
-import { dedupeAssistantInboxRows } from "@/lib/inbox/dedupe-assistant-inbox-rows";
-import { pinAssistantBotInbox } from "@/lib/inbox/pin-assistant-bot";
+import { buildInboxListVersion, prepareInboxListMerged } from "@/lib/inbox/inbox-list-version";
 import { getInboxMergeBundle } from "@/lib/queries/inbox-merge";
 import { getRecommendedClassmatesForViewer } from "@/lib/queries/recommended-classmates";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
@@ -22,7 +21,7 @@ export default async function InboxPage() {
     getInboxMergeBundle(user.id),
     getRecommendedClassmatesForViewer(user.id),
   ]);
-  const merged = pinAssistantBotInbox(dedupeAssistantInboxRows(rawMerged));
+  const merged = prepareInboxListMerged(rawMerged);
   const directContacts = merged
     .filter((item): item is Extract<(typeof merged)[number], { kind: "direct" }> => item.kind === "direct")
     .filter((item) => item.connection.userAId !== item.connection.userBId)
@@ -36,38 +35,7 @@ export default async function InboxPage() {
         avatarUrl: peer.avatarUrl,
       };
     });
-  const listVersion = merged
-    .map((item) => {
-      if (item.kind === "direct") {
-        return [
-          "direct",
-          item.connection.id,
-          item.connection.messages[0]?.id ?? "none",
-          item.unreadCount,
-          item.sortAt.toISOString(),
-        ].join(":");
-      }
-
-      if (item.kind === "course") {
-        return [
-          "course",
-          item.course.id,
-          item.last?.id ?? "none",
-          item.unreadCount,
-          item.sortAt.toISOString(),
-        ].join(":");
-      }
-
-      return [
-        "group",
-        item.groupChat.id,
-        item.last?.id ?? "none",
-        item.unreadCount,
-        item.sortAt.toISOString(),
-      ].join(":");
-    })
-    .join("|");
-  const inboxVersion = `${listVersion}|plans:${plansNeedingYourAction}`;
+  const inboxVersion = buildInboxListVersion(merged, plansNeedingYourAction);
 
   return (
     <div className="space-y-3">

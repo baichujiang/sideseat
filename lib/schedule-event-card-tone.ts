@@ -3,6 +3,8 @@
  * Solid fills + soft borders — not dashed “placeholder” chrome.
  */
 
+import { cn } from "@/lib/utils";
+
 export type ScheduleEventToneKey =
   | "draftNew"
   | "study"
@@ -40,6 +42,61 @@ type ToneStyle = {
 export function scheduleShortOverlapRailClass(tone: Pick<ToneStyle, "rail" | "railSelected">): string {
   if (/bg-white\//.test(tone.railSelected)) return tone.rail;
   return tone.railSelected;
+}
+
+/** Corner radius baked into tone `card` — keep outer shells aligned with tokens. */
+export const SCHEDULE_EVENT_CARD_RADIUS = "rounded-[2px]";
+
+/** Inner padding for timed / all-day blocks on the hour grid (week + day). */
+export const SCHEDULE_EVENT_GRID_INNER_PAD = "px-1.5 py-1";
+
+export const SCHEDULE_EVENT_GRID_TIME_CLASS =
+  "truncate text-left text-[11px] font-medium tabular-nums leading-none";
+
+export const SCHEDULE_EVENT_GRID_TITLE_SIZE = "text-[12px] leading-snug";
+
+/** Compact list rows (month navigator → day agenda). */
+export const SCHEDULE_EVENT_LIST_INNER_PAD = "px-3 py-2";
+
+export const SCHEDULE_EVENT_LIST_TIME_CLASS =
+  "block text-xs font-medium tabular-nums leading-none";
+
+export const SCHEDULE_EVENT_LIST_TITLE_SIZE = "text-sm leading-snug";
+
+/** Timed grid titles: up to two lines when height allows (day timeline height-aware). */
+export function scheduleEventGridTitleLayoutClass(effectiveHeightPct?: number): string {
+  if (effectiveHeightPct === undefined) {
+    return "line-clamp-2 min-w-0 whitespace-normal break-words leading-tight [overflow-wrap:anywhere] text-left";
+  }
+  if (effectiveHeightPct >= 14) {
+    return "whitespace-normal break-words [overflow-wrap:anywhere] text-left";
+  }
+  if (effectiveHeightPct >= 8) {
+    return "line-clamp-2 whitespace-normal break-words [overflow-wrap:anywhere] text-left";
+  }
+  return "truncate text-left";
+}
+
+/** Left accent strip — shared week / day grid + list rail geometry. */
+export function scheduleEventRailClass(options: {
+  shortOverlapGlass?: boolean;
+  highlighted?: boolean;
+  /** When false (category hex on rail), only geometry classes apply. */
+  useToneRail?: boolean;
+  tone: Pick<ToneStyle, "rail" | "railSelected">;
+}): string {
+  const { shortOverlapGlass, highlighted, useToneRail = true, tone } = options;
+  return cn(
+    shortOverlapGlass
+      ? "w-[7px] min-w-[7px] shrink-0 self-stretch rounded-full my-1 ml-1 mr-px"
+      : "w-1 min-w-[4px] shrink-0 self-stretch rounded-l-[2px]",
+    useToneRail &&
+      (highlighted
+        ? tone.railSelected
+        : shortOverlapGlass
+          ? scheduleShortOverlapRailClass(tone)
+          : tone.rail),
+  );
 }
 
 /** Default study title before the user names the event — reads as provisional on the grid. */

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   WEEK_CALENDAR_VISIBLE_DAY_MAX,
@@ -44,8 +44,42 @@ export function WeekVisibleDaysBar({
 
   const trackRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
+  /** Latest committed day count — avoids stale `safeValue` during fast drags. */
+  const committedValueRef = useRef(safeValue);
+  committedValueRef.current = safeValue;
+  const pendingChangeRafRef = useRef<number | null>(null);
+  const pendingChangeValueRef = useRef<number | null>(null);
   /** Continuous 0–1 thumb position while dragging; null = snapped to `value`. */
   const [dragRatio, setDragRatio] = useState<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (pendingChangeRafRef.current != null) {
+        cancelAnimationFrame(pendingChangeRafRef.current);
+      }
+    },
+    [],
+  );
+
+  const flushPendingChange = useCallback(() => {
+    pendingChangeRafRef.current = null;
+    const next = pendingChangeValueRef.current;
+    pendingChangeValueRef.current = null;
+    if (next == null || next === committedValueRef.current) return;
+    onChange(next);
+  }, [onChange]);
+
+  /** At most one calendar width update per frame while dragging. */
+  const scheduleChange = useCallback(
+    (next: number) => {
+      if (next === committedValueRef.current) return;
+      pendingChangeValueRef.current = next;
+      if (pendingChangeRafRef.current == null) {
+        pendingChangeRafRef.current = requestAnimationFrame(flushPendingChange);
+      }
+    },
+    [flushPendingChange],
+  );
 
   const ratioFromClientX = useCallback((clientX: number) => {
     const track = trackRef.current;
@@ -66,16 +100,19 @@ export function WeekVisibleDaysBar({
       const ratio = ratioFromClientX(clientX);
       const nextValue = valueFromRatio(ratio);
       if (finalize) {
+        if (pendingChangeRafRef.current != null) {
+          cancelAnimationFrame(pendingChangeRafRef.current);
+          pendingChangeRafRef.current = null;
+          pendingChangeValueRef.current = null;
+        }
         setDragRatio(null);
         onChange(nextValue);
         return;
       }
       setDragRatio(ratio);
-      if (nextValue !== safeValue) {
-        onChange(nextValue);
-      }
+      scheduleChange(nextValue);
     },
-    [onChange, ratioFromClientX, safeValue],
+    [onChange, ratioFromClientX, scheduleChange],
   );
 
   const onPointerDown = useCallback(

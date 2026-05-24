@@ -17,8 +17,6 @@ import { DiscoverCreateActivitySheet } from "@/components/discover/discover-crea
 import { DiscoverFeed } from "@/components/discover/discover-feed";
 import { applyBuddyFeedClientFilters } from "@/components/discover/discover-filter-sheet";
 import { DiscoverZoneTabs } from "@/components/discover/discover-zone-tabs";
-import { ClassmatePostCreateImageRow } from "@/components/discover/classmate-post-create-image-row";
-import { displayableClassmatePostImageUrls } from "@/lib/discover/classmate-post-display-images";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -280,7 +278,6 @@ function CreatePostSheet({
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [expiryPreset, setExpiryPreset] = useState<PostExpiryPreset>("1w");
-  const [postImageUrls, setPostImageUrls] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -290,7 +287,6 @@ function CreatePostSheet({
     setBody("");
     setError(null);
     setExpiryPreset("1w");
-    setPostImageUrls([]);
   }, [open]);
 
   async function submit() {
@@ -315,7 +311,6 @@ function CreatePostSheet({
     }
     setSubmitting(true);
     setError(null);
-    const imageUrls = displayableClassmatePostImageUrls(postImageUrls);
     try {
       const res = await apiFetch("/api/classmate-posts", {
         method: "POST",
@@ -325,7 +320,6 @@ function CreatePostSheet({
           title: trimmedTitle,
           body: trimmedBody,
           expiresAt: expiryPresetToDate(expiryPreset).toISOString(),
-          ...(imageUrls.length > 0 ? { imageUrls } : {}),
         }),
       });
       const payload = await res.json().catch(() => ({}));
@@ -426,13 +420,6 @@ function CreatePostSheet({
               className="min-h-28 w-full resize-none rounded-xl border border-input bg-background px-3 py-2.5 text-[14px] outline-none transition focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
             />
           </div>
-
-          <ClassmatePostCreateImageRow
-            urls={postImageUrls}
-            onUrlsChange={setPostImageUrls}
-            disabled={submitting}
-            onError={setError}
-          />
 
           <div className="rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
             <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">{dl.postSheetExpiresLabel}</p>

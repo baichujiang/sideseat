@@ -11,7 +11,7 @@ export const WEEK_CALENDAR_VIRTUAL_EXTEND_THRESHOLD_DAYS = 7;
 /** Sliding window cap after extending. */
 export const WEEK_CALENDAR_VIRTUAL_MAX_COLUMNS = 50;
 
-/** Matches Home RSC calendar-entry fetch window. */
+/** Matches Home client schedule fetch window (scroll clamp + background load). */
 export const HOME_CALENDAR_DATA_WINDOW_PAST_DAYS = 90;
 export const HOME_CALENDAR_DATA_WINDOW_FUTURE_DAYS = 180;
 

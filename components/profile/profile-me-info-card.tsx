@@ -44,6 +44,7 @@ export function ProfileMeInfoCard({
   discoverCity,
   verificationStatus,
   verificationEmail,
+  lifePhotoCount = 0,
 }: {
   locale: AppLocale;
   nickname: string | null;
@@ -55,9 +56,11 @@ export function ProfileMeInfoCard({
   discoverCity: DiscoverCityNameKey;
   verificationStatus: StudentVerificationStatus;
   verificationEmail: string | null;
+  lifePhotoCount?: number;
 }) {
   const t = getMessages(locale).meIdentity;
   const pr = getMessages(locale).profile;
+  const lp = getMessages(locale).profileLifePhotos;
   const me = getMessages(locale).me;
   const sv = getMessages(locale).studentVerification;
   const cityNames = getMessages(locale).discover.cityNames;
@@ -69,6 +72,10 @@ export function ProfileMeInfoCard({
   const cityDisplay = getDiscoverCityDisplayLabel(discoverCity, cityNames);
   const genderDisplay = userGenderLabel(gender);
   const verificationDisplay = studentVerificationRowValue(verificationStatus, sv, verificationEmail);
+  const lifePhotosDisplay =
+    lifePhotoCount > 0
+      ? formatMessage(lp.rowSubtitleCount, { count: String(lifePhotoCount) })
+      : lp.rowSubtitleEmpty;
 
   return (
     <div className="space-y-4">
@@ -82,6 +89,11 @@ export function ProfileMeInfoCard({
           />
           <ProfileInfoRow href={"/profile/name" as Route} title={t.rowName} value={nameDisplay} />
           <ProfileInfoRow href={"/profile/bio" as Route} title={t.rowBio} value={bioDisplay} />
+          <ProfileInfoRow
+            href={"/profile/life-photos" as Route}
+            title={t.rowLifePhotos}
+            value={lifePhotosDisplay}
+          />
           <ProfileInfoRow href={"/profile/gender" as Route} title={t.rowGender} value={genderDisplay} />
           <ProfileInfoRow href={"/profile/academic" as Route} title={t.rowSchool} value={schoolDisplay} />
           <ProfileInfoRow

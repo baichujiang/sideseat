@@ -42,15 +42,9 @@ export function filterDiscoverFeedPosts(posts: DiscoverPostRow[], feed: Discover
       // Same city as server query; later: geo radius.
       return sortByCreatedDesc(posts);
     case "for-you":
-    default: {
-      const withImages = (p: DiscoverPostRow) => (p.imageUrls?.length ?? 0) > 0;
-      const ranked = [...posts].sort((a, b) => {
-        if (a.isOwn !== b.isOwn) return a.isOwn ? 1 : -1;
-        const img = Number(withImages(b)) - Number(withImages(a));
-        if (img !== 0) return img;
-        return new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime();
-      });
-      return ranked;
-    }
+    default:
+      return sortByExpiresDesc(
+        [...posts].sort((a, b) => (a.isOwn === b.isOwn ? 0 : a.isOwn ? 1 : -1)),
+      );
   }
 }

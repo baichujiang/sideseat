@@ -378,6 +378,7 @@ model User {
   classmatePosts               ClassmatePost[]
   classmatePostInsights        ClassmatePostInsight[]
   classmatePostSaves           ClassmatePostSave[]
+  lifePhotos                   UserLifePhoto[]
   discoverActivitiesOrganized DiscoverActivity[]       @relation("DiscoverActivityOrganizer")
   discoverActivitySignups    DiscoverActivitySignup[]
   userLanguages                UserLanguage[]
@@ -550,6 +551,19 @@ model ClassmatePostCourse {
 
   @@unique([postId, courseId])
   @@index([courseId])
+}
+
+/// Profile “life photos” (生活照) — up to 6 per user; `sortOrder` 0..5.
+model UserLifePhoto {
+  id        String   @id @default(cuid())
+  userId    String
+  url       String
+  sortOrder Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sortOrder])
+  @@index([userId])
 }
 
 /// Optional photos on a Discover post (max 3 per post; `sortOrder` 0..2).

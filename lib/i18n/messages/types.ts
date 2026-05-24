@@ -1170,6 +1170,21 @@ export type AppMessages = {
     myPostsSectionLive: string;
     myPostsSectionPast: string;
   };
+  profileLifePhotos: {
+    pageTitle: string;
+    /** `{max}` — max photos per profile. */
+    hint: string;
+    addPhoto: string;
+    uploading: string;
+    removePhotoAria: string;
+    errorUpload: string;
+    errorRemove: string;
+    emptyPeer: string;
+    sectionTitle: string;
+    rowSubtitleEmpty: string;
+    /** `{count}` — photos on profile. */
+    rowSubtitleCount: string;
+  };
   savedClassmatePosts: {
     screenTitle: string;
     screenSubtitle: string;
@@ -1242,6 +1257,7 @@ export type AppMessages = {
     rowGender: string;
     rowSchool: string;
     rowLanguages: string;
+    rowLifePhotos: string;
     profileInfoNavAria: string;
     backAria: string;
     adjustPhotoTitle: string;
@@ -1454,6 +1470,7 @@ export type AppMessages = {
     screenTitle: string;
     aboutSection: string;
     languagesSection: string;
+    lifePhotosSection: string;
     emptyBio: string;
     coursesSection: string;
     coursesEmpty: string;

@@ -66,6 +66,11 @@ export default async function PeerUserProfilePage({
               tag: r.tag,
               proficiency: r.proficiency,
             })),
+            lifePhotos: (peer.lifePhotos ?? []).map((p) => ({
+              id: p.id,
+              url: p.url,
+              sortOrder: p.sortOrder,
+            })),
           }}
           metVia={
             access.mode === "connection"
@@ -76,6 +81,7 @@ export default async function PeerUserProfilePage({
             studentFallback: ui.common.studentFallback,
             aboutSection: up.aboutSection,
             languagesSection: up.languagesSection,
+            lifePhotosSection: up.lifePhotosSection,
             emptyBio: up.emptyBio,
           }}
           belowDisplayName={

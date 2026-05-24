@@ -114,15 +114,29 @@ export function buildBlocksByDateKey(
   columns: WeekCalendarDayColumn[],
 ): Map<string, WeekCalendarBlock[]> {
   const map = new Map<string, WeekCalendarBlock[]>();
+  const dateKeysByWeekday = new Map<Weekday, string[]>();
+
   for (const column of columns) {
     map.set(column.dateKey, []);
+    const weekdayKeys = dateKeysByWeekday.get(column.weekday) ?? [];
+    weekdayKeys.push(column.dateKey);
+    dateKeysByWeekday.set(column.weekday, weekdayKeys);
   }
+
   for (const block of blocks) {
-    for (const column of columns) {
-      if (!blockMatchesDayColumn(block, column)) continue;
-      map.get(column.dateKey)!.push(block);
+    const occurrenceKey = block.occurrenceDateKey?.trim();
+    if (occurrenceKey) {
+      const list = map.get(occurrenceKey);
+      if (list) list.push(block);
+      continue;
+    }
+    const matchingKeys = dateKeysByWeekday.get(block.weekday);
+    if (!matchingKeys) continue;
+    for (const dateKey of matchingKeys) {
+      map.get(dateKey)!.push(block);
     }
   }
+
   return map;
 }
 
@@ -143,6 +157,28 @@ export function horizontalScrollIndexForFocus(
   const mondayKey = scheduleDateKeyInBerlin(berlinStartOfWeek(focusDate));
   const mondayIdx = columns.findIndex((column) => column.dateKey === mondayKey);
   return mondayIdx >= 0 ? Math.min(mondayIdx, maxStart) : Math.min(focusIdx, maxStart);
+}
+
+/** Left-edge scroll for the column matching `dateKey`, or a scaled fallback when the key is missing. */
+export function horizontalScrollLeftForColumnDateKey(
+  columns: WeekCalendarDayColumn[],
+  dateKey: string | null | undefined,
+  fallbackScrollLeft: number,
+  dayColumnWidthPx: number,
+  viewportWidthPx: number,
+): number {
+  if (columns.length === 0 || dayColumnWidthPx <= 0) {
+    return fallbackScrollLeft;
+  }
+  const maxScrollLeft = Math.max(0, columns.length * dayColumnWidthPx - viewportWidthPx);
+  if (!dateKey) {
+    return Math.min(Math.max(0, fallbackScrollLeft), maxScrollLeft);
+  }
+  const columnIndex = columns.findIndex((column) => column.dateKey === dateKey);
+  if (columnIndex < 0) {
+    return Math.min(Math.max(0, fallbackScrollLeft), maxScrollLeft);
+  }
+  return Math.min(Math.max(0, columnIndex * dayColumnWidthPx), maxScrollLeft);
 }
 
 /** Snap horizontal scroll to the nearest whole day-column boundary. */

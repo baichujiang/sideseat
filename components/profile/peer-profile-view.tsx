@@ -7,6 +7,7 @@ import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { LANGUAGE_PROFICIENCY_LABEL, LANGUAGE_TAG_LABEL } from "@/lib/constants/languages";
 import { DEGREE_LEVEL_LABELS } from "@/lib/constants/majors";
 import { getSchoolLabel } from "@/lib/constants/schools";
+import { ProfileLifePhotosEditor, type LifePhotoRow } from "@/components/profile/profile-life-photos-editor";
 import { formatSemester } from "@/lib/utils";
 
 export type PeerProfileFields = {
@@ -26,6 +27,7 @@ export type PeerProfileFields = {
     | "MANUAL_REVIEW_REQUIRED"
     | "REJECTED";
   languages: Array<{ tag: LanguageTag; proficiency: LanguageProficiency }>;
+  lifePhotos?: LifePhotoRow[];
 };
 
 export function PeerProfileView({
@@ -42,6 +44,7 @@ export function PeerProfileView({
     studentFallback: string;
     aboutSection: string;
     languagesSection: string;
+    lifePhotosSection: string;
     emptyBio: string;
   };
 }) {
@@ -104,6 +107,17 @@ export function PeerProfileView({
             {labels.emptyBio}
           </div>
         )}
+
+        {(peer.lifePhotos?.length ?? 0) > 0 ? (
+          <div className="rounded-xl border border-border bg-card px-3 py-2.5">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {labels.lifePhotosSection}
+            </p>
+            <div className="mt-2">
+              <ProfileLifePhotosEditor initialPhotos={peer.lifePhotos!} readOnly />
+            </div>
+          </div>
+        ) : null}
 
         {peer.languages.length > 0 ? (
           <div className="rounded-xl border border-border bg-card px-3 py-2.5">
