@@ -8,6 +8,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { Button } from "@/components/ui/button";
+import { useGhostClickGuard } from "@/lib/ui/suppress-ghost-click";
 import { isIcsFeedStudyEntryId } from "@/lib/calendar/ics-feed-event-id";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,7 @@ export function ScheduleItemDetailPopover({
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const guardAction = useGhostClickGuard(open && item ? item.id : null);
 
   useLayoutEffect(() => {
     if (!open || !anchorEl || !item) {
@@ -233,14 +235,14 @@ export function ScheduleItemDetailPopover({
 
         {canEdit ? (
           <div className="grid grid-cols-2 gap-2 border-t border-border/50 px-3.5 py-3">
-            <Button type="button" className="h-10 rounded-full text-[13px]" onClick={onEdit}>
+            <Button type="button" className="h-10 rounded-full text-[13px]" onClick={guardAction(onEdit)}>
               {s.detailPopoverEdit}
             </Button>
             <Button
               type="button"
               variant="ghost"
               className="h-10 rounded-full text-[13px] text-destructive hover:bg-destructive/8 hover:text-destructive"
-              onClick={onDelete}
+              onClick={guardAction(onDelete)}
               disabled={deleting}
             >
               {deleting ? s.detailPopoverDeleting : s.detailPopoverDelete}

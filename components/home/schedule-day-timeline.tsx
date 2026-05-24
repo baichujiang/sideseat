@@ -19,6 +19,7 @@ import {
   scheduleVisualToneKey,
 } from "@/lib/schedule-event-card-tone";
 import { isLongOrAllDayTimedMinutes } from "@/lib/calendar/long-calendar-block";
+import { deferAfterTapClick } from "@/lib/ui/suppress-ghost-click";
 import { cn } from "@/lib/utils";
 
 import type { ScheduleSlotActionPrompt } from "@/components/calendar/week-event-edit-toolbar";
@@ -69,7 +70,7 @@ function attachTimelineTapOrLongPress(
     clearTimer();
     detach();
     if (!longPressFired) {
-      onTap();
+      deferAfterTapClick(onTap);
     }
   };
 
@@ -202,29 +203,25 @@ export function ScheduleDayTimeline({
     if (!onSlotActionPrompt && !onCreateEvent) return;
     clearHoldTimer();
     holdTimerRef.current = window.setTimeout(() => {
-      createFromPointer(clientY, rect, clientX, clientY);
+      createFromPointer(clientY, rect);
       holdTimerRef.current = null;
     }, 380);
   }
 
-  function createFromPointer(
-    clientY: number,
-    rect: DOMRect,
-    pointerClientX?: number,
-    pointerClientY?: number,
-  ) {
+  function createFromPointer(clientY: number, rect: DOMRect) {
     if (!onSlotActionPrompt && !onCreateEvent) return;
     const y = clientY - rect.top;
     const rawMinute = visualStartMinute + (y / rect.height) * totalMinutes;
-    const snappedMinute = Math.max(
+    const startMinute = Math.max(
       0,
       Math.min(FULL_DAY_MINUTES - 60, Math.round(rawMinute / 60) * 60),
     );
     const start = new Date(date);
-    start.setHours(0, snappedMinute, 0, 0);
+    start.setHours(0, startMinute, 0, 0);
     const end = addMinutes(start, 60);
-    const clientX = pointerClientX ?? rect.left + rect.width / 2;
-    const anchorY = pointerClientY ?? clientY;
+    const frac = (startMinute - visualStartMinute) / totalMinutes;
+    const anchorY = rect.top + frac * rect.height;
+    const clientX = rect.left + rect.width * 0.55;
     if (onSlotActionPrompt) {
       onSlotActionPrompt({ start, end, clientX, clientY: anchorY });
       return;
@@ -359,8 +356,6 @@ export function ScheduleDayTimeline({
                 createFromPointer(
                   event.clientY,
                   event.currentTarget.getBoundingClientRect(),
-                  event.clientX,
-                  event.clientY,
                 );
               }}
               onTouchStart={(event) => {
@@ -369,7 +364,7 @@ export function ScheduleDayTimeline({
                 const rect = event.currentTarget.getBoundingClientRect();
                 clearHoldTimer();
                 holdTimerRef.current = window.setTimeout(() => {
-                  createFromPointer(touch.clientY, rect, touch.clientX, touch.clientY);
+                  createFromPointer(touch.clientY, rect);
                   holdTimerRef.current = null;
                 }, 380);
               }}

@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { cn } from "@/lib/utils";
+import { useGhostClickGuard } from "@/lib/ui/suppress-ghost-click";
 
 export type WeekEventEditToolbarLabels = {
   cut: string;
@@ -57,13 +58,19 @@ export function WeekCalendarSlotPasteMenu({
     const tw = inner?.offsetWidth ?? 0;
     const th = inner?.offsetHeight ?? 40;
     const margin = 8;
+    const gap = 12;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    let left = clientX - tw / 2;
-    if (left < margin) left = margin;
-    if (left + tw > vw - margin) left = Math.max(margin, vw - margin - tw);
-    let top = clientY - th - 12;
-    if (top < margin) top = Math.min(clientY + 12, vh - margin - th);
+    let left = clientX + gap;
+    let top = clientY - th / 2;
+    if (left + tw > vw - margin) {
+      left = clientX - gap - tw;
+    }
+    if (left < margin) {
+      left = Math.max(margin, Math.min(vw - margin - tw, clientX - tw / 2));
+    }
+    if (top < margin) top = margin;
+    if (top + th > vh - margin) top = Math.max(margin, vh - margin - th);
     setPos({ top, left });
   }, [clientX, clientY]);
 
@@ -89,6 +96,25 @@ export function WeekCalendarSlotPasteMenu({
   if (typeof window === "undefined") return null;
 
   return createPortal(
+  <>
+    <div
+      aria-hidden
+      className="pointer-events-none fixed z-[199]"
+      style={{
+        left: clientX,
+        top: clientY,
+        transform: "translate(-50%, -50%)",
+      }}
+    >
+      <span className="relative flex size-3 items-center justify-center">
+        <span className="absolute inline-flex size-3 animate-ping rounded-full bg-[#2563EB]/35" />
+        <span className="relative inline-flex size-2.5 rounded-full bg-[#2563EB] ring-2 ring-white dark:ring-zinc-900" />
+      </span>
+      <span
+        className="absolute left-1/2 top-1/2 h-px w-8 -translate-y-1/2 bg-[#2563EB]/70"
+        style={{ marginLeft: "0.35rem" }}
+      />
+    </div>
     <div
       ref={wrapRef}
       data-week-calendar-slot-paste-menu
@@ -119,7 +145,8 @@ export function WeekCalendarSlotPasteMenu({
           </>
         ) : null}
       </div>
-    </div>,
+    </div>
+  </>,
     document.body,
   );
 }
@@ -152,6 +179,8 @@ export function WeekEventEditToolbar({
 }) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const innerRef = useRef<HTMLDivElement | null>(null);
+  const [toolbarGuardKey, setToolbarGuardKey] = useState(0);
+  const guardAction = useGhostClickGuard(anchorEl ? toolbarGuardKey : null);
   const [pos, setPos] = useState<{
     top: number;
     left: number;
@@ -166,6 +195,7 @@ export function WeekEventEditToolbar({
       setPos(null);
       return;
     }
+    setToolbarGuardKey((k) => k + 1);
 
     const recompute = () => {
       const r = anchorEl.getBoundingClientRect();
@@ -292,13 +322,13 @@ export function WeekEventEditToolbar({
             "dark:bg-zinc-900 dark:ring-white/10",
           )}
         >
-          <ToolbarButton onClick={onCut} label={labels.cut} />
+          <ToolbarButton onClick={guardAction(onCut)} label={labels.cut} />
           <ToolbarDivider />
-          <ToolbarButton onClick={onCopy} label={labels.copy} />
+          <ToolbarButton onClick={guardAction(onCopy)} label={labels.copy} />
           <ToolbarDivider />
-          <ToolbarButton onClick={onDuplicate} label={labels.duplicate} />
+          <ToolbarButton onClick={guardAction(onDuplicate)} label={labels.duplicate} />
           <ToolbarDivider />
-          <ToolbarButton onClick={onDelete} label={labels.delete} destructive />
+          <ToolbarButton onClick={guardAction(onDelete)} label={labels.delete} destructive />
         </div>
         {/* Caret — small triangle pointing toward the anchor. */}
         <Caret leftPx={caretLeftRel} flipBelow={pos?.flipBelow ?? false} />
@@ -315,7 +345,7 @@ function ToolbarButton({
   destructive = false,
 }: {
   label: string;
-  onClick: () => void;
+  onClick: (ev: React.MouseEvent<HTMLButtonElement>) => void;
   destructive?: boolean;
 }) {
   return (
@@ -323,7 +353,7 @@ function ToolbarButton({
       type="button"
       onClick={(e) => {
         e.stopPropagation();
-        onClick();
+        onClick(e);
       }}
       /* Prevent the outside-dismiss listener from firing on our own pointerdown. */
       onPointerDown={(e) => {

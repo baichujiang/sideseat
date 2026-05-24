@@ -41,7 +41,7 @@ import {
   weekCalendarHorizontalModeForFocus,
   type WeekCalendarDayColumn,
 } from "@/lib/calendar/week-calendar-day-columns";
-import { scheduleDateKeyInBerlin } from "@/lib/calendar/schedule-berlin";
+import { berlinClockMinutes, scheduleDateKeyInBerlin } from "@/lib/calendar/schedule-berlin";
 import {
   buildShareSelectionChromeByDateKey,
   buildShareSelectionRuns,
@@ -73,6 +73,7 @@ import {
   WEEK_CALENDAR_VISIBLE_DAY_MIN,
 } from "@/lib/calendar/week-calendar-constants";
 import { cn } from "@/lib/utils";
+import { deferAfterTapClick } from "@/lib/ui/suppress-ghost-click";
 
 export {
   clampWeekCalendarMinuteScale,
@@ -541,6 +542,7 @@ export function WeekCalendar({
   const horizontalScrollFrameReadyRef = useRef(false);
   const dayColumnWidthForScrollRef = useRef(0);
   const prevRevealNonceRef = useRef(revealDateNonce);
+  const prevVisibleWeekDaysRef = useRef<number | null>(null);
   const [frameWidth, setFrameWidth] = useState(0);
   const previousMinutePxRef = useRef(MINUTE_PX);
   const minutePxRef = useRef(MINUTE_PX);
@@ -1144,8 +1146,11 @@ export function WeekCalendar({
 
     const focusKey = scheduleDateKeyInBerlin(focusDate);
     const weekStartKey = scheduleDateKeyInBerlin(weekStartDate);
-    const layoutKey = `${focusKey}|${horizontalMode}|${VISIBLE_WEEK_DAYS}`;
+    const layoutKey = `${focusKey}|${horizontalMode}`;
     const layoutChanged = horizontalScrollLayoutKeyRef.current !== layoutKey;
+    const visibleDaysChanged =
+      prevVisibleWeekDaysRef.current != null &&
+      prevVisibleWeekDaysRef.current !== VISIBLE_WEEK_DAYS;
     const weekChanged =
       horizontalScrollMode === "week" &&
       horizontalScrollWeekStartKeyRef.current !== weekStartKey;
@@ -1159,17 +1164,31 @@ export function WeekCalendar({
     const prevWidth = dayColumnWidthForScrollRef.current;
     const widthChanged = prevWidth > 0 && Math.abs(prevWidth - dayColumnWidth) > 0.5;
 
-    horizontalScrollLayoutKeyRef.current = layoutKey;
-    horizontalScrollWeekStartKeyRef.current = weekStartKey;
-    dayColumnWidthForScrollRef.current = dayColumnWidth;
+    const commitDayScroll = (scrollLeft: number) => {
+      node.scrollLeft = scrollLeft;
+      horizontalScrollLayoutKeyRef.current = layoutKey;
+      horizontalScrollWeekStartKeyRef.current = weekStartKey;
+      dayColumnWidthForScrollRef.current = dayColumnWidth;
+      prevVisibleWeekDaysRef.current = VISIBLE_WEEK_DAYS;
+    };
 
-    if (widthChanged && !layoutChanged && !weekChanged && !frameJustReady) {
-      const colIndex = node.scrollLeft / prevWidth;
-      node.scrollLeft = Math.max(0, colIndex * dayColumnWidth);
+    if (
+      (widthChanged || visibleDaysChanged) &&
+      !layoutChanged &&
+      !weekChanged &&
+      !frameJustReady &&
+      !jumpToTodayReveal
+    ) {
+      const colIndex = prevWidth > 0 ? node.scrollLeft / prevWidth : 0;
+      commitDayScroll(Math.max(0, colIndex * dayColumnWidth));
       return;
     }
 
-    if (!layoutChanged && !weekChanged && !frameJustReady && !revealNonceBumped) return;
+    if (!layoutChanged && !weekChanged && !frameJustReady && !revealNonceBumped) {
+      dayColumnWidthForScrollRef.current = dayColumnWidth;
+      prevVisibleWeekDaysRef.current = VISIBLE_WEEK_DAYS;
+      return;
+    }
 
     const modeForScroll =
       todayBerlinKey != null && focusKey === todayBerlinKey
@@ -1182,7 +1201,12 @@ export function WeekCalendar({
       VISIBLE_WEEK_DAYS,
     );
     if (!jumpToTodayReveal) {
-      node.scrollLeft = startIndex * dayColumnWidth;
+      commitDayScroll(startIndex * dayColumnWidth);
+    } else {
+      horizontalScrollLayoutKeyRef.current = layoutKey;
+      horizontalScrollWeekStartKeyRef.current = weekStartKey;
+      dayColumnWidthForScrollRef.current = dayColumnWidth;
+      prevVisibleWeekDaysRef.current = VISIBLE_WEEK_DAYS;
     }
   }, [
     anchorWeekday,
@@ -1219,7 +1243,7 @@ export function WeekCalendar({
       viewportWidth,
       dayColumnWidth,
     );
-    horizontalScrollLayoutKeyRef.current = `${scheduleDateKeyInBerlin(focusDate)}|${horizontalMode}|${VISIBLE_WEEK_DAYS}`;
+    horizontalScrollLayoutKeyRef.current = `${scheduleDateKeyInBerlin(focusDate)}|${horizontalMode}`;
 
     const ctx = revealScrollContextRef.current;
     const focusKey = scheduleDateKeyInBerlin(dateToReveal);
@@ -1288,16 +1312,41 @@ export function WeekCalendar({
     onCreateRangePreview(createRangeFromMinutes(column, startMinute, endMinute));
   }
 
+  function slotMenuClientPointForStart(
+    start: Date,
+    fallbackX: number,
+    fallbackY: number,
+  ): { clientX: number; clientY: number } {
+    const dateKey = scheduleDateKeyInBerlin(start);
+    const el = dayBodyElRef.current.get(dateKey);
+    if (!el) return { clientX: fallbackX, clientY: fallbackY };
+    const rect = el.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return { clientX: fallbackX, clientY: fallbackY };
+    }
+    const startMinute = berlinClockMinutes(start);
+    const clampedMinute = Math.max(
+      visualStartMinute,
+      Math.min(visualStartMinute + totalMinutes, startMinute),
+    );
+    const frac = (clampedMinute - visualStartMinute) / totalMinutes;
+    return {
+      clientX: rect.left + rect.width / 2,
+      clientY: rect.top + frac * rect.height,
+    };
+  }
+
   const promptCreateOrPaste = useCallback(
     (start: Date, end: Date, clientX: number, clientY: number) => {
       onCreateRangePreview?.(null);
       if (onSlotActionPrompt) {
-        onSlotActionPrompt({ start, end, clientX, clientY });
+        const anchor = slotMenuClientPointForStart(start, clientX, clientY);
+        onSlotActionPrompt({ start, end, clientX: anchor.clientX, clientY: anchor.clientY });
         return;
       }
       onCreateEvent?.(start, end);
     },
-    [onCreateEvent, onCreateRangePreview, onSlotActionPrompt],
+    [onCreateEvent, onCreateRangePreview, onSlotActionPrompt, totalMinutes, visualStartMinute],
   );
 
   function startCreatePointerSession(
@@ -1305,7 +1354,7 @@ export function WeekCalendar({
     column: WeekCalendarDayColumn,
     rect: DOMRect,
   ) {
-    if (!onCreateEvent) return;
+    if (!onCreateEvent && !onSlotActionPrompt) return;
     if (highlightedDateKeys?.size && !highlightedDateKeys.has(column.dateKey)) return;
     if (e.pointerType === "mouse" && e.button !== 0) return;
     e.stopPropagation();
@@ -1344,7 +1393,9 @@ export function WeekCalendar({
 
     const armCreate = () => {
       createArmed = true;
-      emitCreateRangePreview(column, anchorMinute, anchorMinute + MIN_EVENT_MINUTES);
+      if (!onSlotActionPrompt) {
+        emitCreateRangePreview(column, anchorMinute, anchorMinute + MIN_EVENT_MINUTES);
+      }
     };
 
     longPressTimer = window.setTimeout(() => {
@@ -1373,7 +1424,9 @@ export function WeekCalendar({
       }
       if (!rangeDragActive) return;
       currentMinute = minuteFromClientYInRect(ev.clientY, rect);
-      emitCreateRangePreview(column, anchorMinute, currentMinute);
+      if (!onSlotActionPrompt) {
+        emitCreateRangePreview(column, anchorMinute, currentMinute);
+      }
     };
 
     const onDocUp = (ev: PointerEvent) => {
@@ -1486,7 +1539,7 @@ export function WeekCalendar({
       if (ev.pointerId !== pointerId) return;
       detach();
       if (Math.hypot(ev.clientX - x0, ev.clientY - y0) <= POINTER_SLOP_PX) {
-        notifyOpenItem(block, occurrenceDate, captureEl);
+        deferAfterTapClick(() => notifyOpenItem(block, occurrenceDate, captureEl));
       }
     };
 
@@ -1664,8 +1717,8 @@ export function WeekCalendar({
             Math.hypot(ev.clientX - x0, ev.clientY - y0) <= POINTER_SLOP_PX;
           if (withinTapSlop) {
             /* Short tap (no drag, no long-press): open detail popover beside the card. */
-            notifyOpenItem(block, occurrenceDate, captureEl);
             setSelectedEventId(null);
+            deferAfterTapClick(() => notifyOpenItem(block, occurrenceDate, captureEl));
           }
         }
         return;

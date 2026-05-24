@@ -1317,8 +1317,13 @@ export function ScheduleSurface({
   );
 
   const promptSlotAction = useCallback((args: ScheduleSlotActionPrompt) => {
+    if (!adding) {
+      setGridCreatePreview(false);
+      setDraftEventStart(undefined);
+      setDraftEventEnd(undefined);
+    }
     setSlotActionMenu(args);
-  }, []);
+  }, [adding]);
 
   const handleSlotNewEvent = useCallback(() => {
     if (!slotActionMenu) return;
@@ -1791,7 +1796,14 @@ export function ScheduleSurface({
           showPaste={slotActionCanPaste}
           onPaste={() => void handleSlotPaste()}
           onNewEvent={handleSlotNewEvent}
-          onDismiss={() => setSlotActionMenu(null)}
+          onDismiss={() => {
+            if (!adding) {
+              setGridCreatePreview(false);
+              setDraftEventStart(undefined);
+              setDraftEventEnd(undefined);
+            }
+            setSlotActionMenu(null);
+          }}
         />
       ) : null}
 
