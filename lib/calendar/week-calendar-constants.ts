@@ -2,6 +2,22 @@ export const WEEK_CALENDAR_VISIBLE_DAY_MIN = 2;
 export const WEEK_CALENDAR_VISIBLE_DAY_MAX = 7;
 export const WEEK_CALENDAR_VISIBLE_DAYS_DEFAULT = 5;
 
+/** Initial half-width around `focusDate` in continuous virtual scroll (total ≈ 29 columns). */
+export const WEEK_CALENDAR_VIRTUAL_INITIAL_BUFFER_DAYS = 14;
+/** Days prepended/appended when scrolling near a strip edge. */
+export const WEEK_CALENDAR_VIRTUAL_EXTEND_CHUNK_DAYS = 14;
+/** Extend when within this many day-columns of an edge. */
+export const WEEK_CALENDAR_VIRTUAL_EXTEND_THRESHOLD_DAYS = 7;
+/** Sliding window cap after extending. */
+export const WEEK_CALENDAR_VIRTUAL_MAX_COLUMNS = 50;
+
+/** Matches Home RSC calendar-entry fetch window. */
+export const HOME_CALENDAR_DATA_WINDOW_PAST_DAYS = 90;
+export const HOME_CALENDAR_DATA_WINDOW_FUTURE_DAYS = 180;
+
+/** @deprecated Use `WEEK_CALENDAR_VIRTUAL_INITIAL_BUFFER_DAYS`. */
+export const WEEK_CALENDAR_CONTINUOUS_BUFFER_DAYS = WEEK_CALENDAR_VIRTUAL_INITIAL_BUFFER_DAYS;
+
 export const WEEK_CALENDAR_MINUTE_SCALE_DEFAULT = 1;
 export const WEEK_CALENDAR_MINUTE_SCALE_MIN = 0.8;
 export const WEEK_CALENDAR_MINUTE_SCALE_MAX = 1.65;

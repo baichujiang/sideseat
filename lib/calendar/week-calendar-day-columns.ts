@@ -9,13 +9,13 @@ import {
   SCHEDULE_DISPLAY_TZ,
   scheduleDateKeyInBerlin,
 } from "@/lib/calendar/schedule-berlin";
+import { WEEK_CALENDAR_VIRTUAL_INITIAL_BUFFER_DAYS } from "@/lib/calendar/week-calendar-constants";
 
-function berlinCalendarDayStart(instant: Date): Date {
+export function berlinCalendarDayStart(instant: Date): Date {
   return startOfDay(toZonedTime(instant, SCHEDULE_DISPLAY_TZ));
 }
 
-/** Days rendered on each side of `focusDate` in continuous horizontal scroll mode. */
-export const WEEK_CALENDAR_CONTINUOUS_BUFFER_DAYS = 70;
+export { WEEK_CALENDAR_CONTINUOUS_BUFFER_DAYS } from "@/lib/calendar/week-calendar-constants";
 
 export type WeekCalendarDayColumn = {
   weekday: Weekday;
@@ -31,6 +31,9 @@ export function buildWeekCalendarDayColumns(args: {
   scrollRangeEnd?: Date;
   /** When set (continuous mode), render only these Berlin days — supports sparse share selection. */
   columnDateKeys?: readonly string[];
+  /** Virtual-scroll window (continuous mode). When set, only this inclusive day range is rendered. */
+  continuousStripStart?: Date;
+  continuousStripEnd?: Date;
 }): WeekCalendarDayColumn[] {
   if (args.mode === "week") {
     const order: Weekday[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
@@ -53,20 +56,23 @@ export function buildWeekCalendarDayColumns(args: {
     });
   }
 
-  const bufferStart = berlinCalendarDayStart(
-    addDays(args.focusDate, -WEEK_CALENDAR_CONTINUOUS_BUFFER_DAYS),
-  );
-  const bufferEnd = berlinCalendarDayStart(
-    addDays(args.focusDate, WEEK_CALENDAR_CONTINUOUS_BUFFER_DAYS),
-  );
+  const focusDay = berlinCalendarDayStart(args.focusDate);
+  const defaultStripStart = addDays(focusDay, -WEEK_CALENDAR_VIRTUAL_INITIAL_BUFFER_DAYS);
+  const defaultStripEnd = addDays(focusDay, WEEK_CALENDAR_VIRTUAL_INITIAL_BUFFER_DAYS);
+  const windowStart = args.continuousStripStart
+    ? berlinCalendarDayStart(args.continuousStripStart)
+    : defaultStripStart;
+  const windowEnd = args.continuousStripEnd
+    ? berlinCalendarDayStart(args.continuousStripEnd)
+    : defaultStripEnd;
   const rangeStart = args.scrollRangeStart
     ? berlinCalendarDayStart(args.scrollRangeStart)
-    : bufferStart;
+    : windowStart;
   const rangeEnd = args.scrollRangeEnd
     ? berlinCalendarDayStart(args.scrollRangeEnd)
-    : bufferEnd;
-  const stripStart = rangeStart > bufferStart ? rangeStart : bufferStart;
-  const stripEnd = rangeEnd < bufferEnd ? rangeEnd : bufferEnd;
+    : windowEnd;
+  const stripStart = windowStart < rangeStart ? rangeStart : windowStart;
+  const stripEnd = windowEnd > rangeEnd ? rangeEnd : windowEnd;
 
   const columns: WeekCalendarDayColumn[] = [];
   for (let cursor = stripStart; cursor <= stripEnd; cursor = addDays(cursor, 1)) {

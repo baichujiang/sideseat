@@ -42,6 +42,17 @@ import {
   weekCalendarHorizontalModeForFocus,
   type WeekCalendarDayColumn,
 } from "@/lib/calendar/week-calendar-day-columns";
+import {
+  buildInitialVirtualStrip,
+  canExtendVirtualStripLeft,
+  canExtendVirtualStripRight,
+  extendVirtualStripLeft,
+  extendVirtualStripRight,
+  focusInVirtualStrip,
+  virtualStripDayCount,
+  type VirtualStripBounds,
+  type VirtualStripScrollAdjust,
+} from "@/lib/calendar/week-calendar-virtual-strip";
 import { berlinClockMinutes, scheduleDateKeyInBerlin } from "@/lib/calendar/schedule-berlin";
 import {
   buildShareSelectionChromeByDateKey,
@@ -72,6 +83,7 @@ import {
   WEEK_CALENDAR_MINUTE_SCALE_MIN,
   WEEK_CALENDAR_VISIBLE_DAY_MAX,
   WEEK_CALENDAR_VISIBLE_DAY_MIN,
+  WEEK_CALENDAR_VIRTUAL_EXTEND_THRESHOLD_DAYS,
 } from "@/lib/calendar/week-calendar-constants";
 import { cn } from "@/lib/utils";
 import { deferAfterTapClick } from "@/lib/ui/suppress-ghost-click";
@@ -544,6 +556,17 @@ export function WeekCalendar({
   const dayColumnWidthForScrollRef = useRef(0);
   const prevRevealNonceRef = useRef(revealDateNonce);
   const prevVisibleWeekDaysRef = useRef<number | null>(null);
+  const virtualScrollEnabled =
+    horizontalScrollMode === "continuous" && !(columnDateKeys?.length ?? 0);
+  const [virtualStripBounds, setVirtualStripBounds] = useState<VirtualStripBounds | null>(() =>
+    virtualScrollEnabled
+      ? buildInitialVirtualStrip(focusDate, scrollRangeStart, scrollRangeEnd)
+      : null,
+  );
+  const virtualStripBoundsRef = useRef(virtualStripBounds);
+  virtualStripBoundsRef.current = virtualStripBounds;
+  const pendingVirtualScrollAdjustRef = useRef<VirtualStripScrollAdjust | null>(null);
+  const virtualEdgeExtendLockRef = useRef<"none" | "left" | "right">("none");
   const [frameWidth, setFrameWidth] = useState(0);
   const previousMinutePxRef = useRef(MINUTE_PX);
   const minutePxRef = useRef(MINUTE_PX);
@@ -606,6 +629,8 @@ export function WeekCalendar({
   const momentumRafRef = useRef<number | null>(null);
   /** Horizontal day-column snap animation after scroll release. */
   const snapAnimRafRef = useRef<number | null>(null);
+  /** Release an in-progress calendar touch-scroll when an event drag takes over. */
+  const releaseCalendarTouchScrollRef = useRef<(() => void) | null>(null);
 
   function clearDragClearFallbackTimer() {
     if (dragClearFallbackTimerRef.current !== null) {
@@ -649,8 +674,21 @@ export function WeekCalendar({
         scrollRangeStart,
         scrollRangeEnd,
         columnDateKeys,
+        continuousStripStart:
+          virtualScrollEnabled && virtualStripBounds ? virtualStripBounds.start : undefined,
+        continuousStripEnd:
+          virtualScrollEnabled && virtualStripBounds ? virtualStripBounds.end : undefined,
       }),
-    [horizontalScrollMode, weekStartDate, focusDate, scrollRangeStart, scrollRangeEnd, columnDateKeys],
+    [
+      horizontalScrollMode,
+      weekStartDate,
+      focusDate,
+      scrollRangeStart,
+      scrollRangeEnd,
+      columnDateKeys,
+      virtualScrollEnabled,
+      virtualStripBounds,
+    ],
   );
   const weekStartBerlinKey = scheduleDateKeyInBerlin(weekStartDate);
   const focusBerlinKey = scheduleDateKeyInBerlin(focusDate);
@@ -1018,14 +1056,6 @@ export function WeekCalendar({
       }
       if (pinchTouchIds) return;
       if (tid !== null) return;
-      const rawTarget = e.target;
-      if (
-        rawTarget instanceof Element &&
-        rawTarget.closest("[data-week-calendar-drag-root]")
-      ) {
-        /* Draggable event pills use pointer + long-press; do not bind this touch to axis-scroll. */
-        return;
-      }
       stopMomentum();
       stopSnapAnim();
       if (scrollSnapTimer != null) {
@@ -1158,7 +1188,15 @@ export function WeekCalendar({
     node.addEventListener("touchend", onTouchEnd, { passive: true });
     node.addEventListener("touchcancel", onTouchEnd, { passive: true });
 
+    releaseCalendarTouchScrollRef.current = () => {
+      tid = null;
+      tLock = "free";
+      vx = vy = 0;
+      stopMomentum();
+    };
+
     return () => {
+      releaseCalendarTouchScrollRef.current = null;
       node.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("pointercancel", onPointerUp);
@@ -1217,6 +1255,105 @@ export function WeekCalendar({
     },
     [onDayHeaderSelect],
   );
+
+  useLayoutEffect(() => {
+    if (!virtualScrollEnabled) return;
+    setVirtualStripBounds((prev) => {
+      if (prev && focusInVirtualStrip(focusDate, prev)) return prev;
+      virtualEdgeExtendLockRef.current = "none";
+      return buildInitialVirtualStrip(focusDate, scrollRangeStart, scrollRangeEnd);
+    });
+  }, [focusBerlinKey, focusDate, virtualScrollEnabled, scrollRangeStart, scrollRangeEnd]);
+
+  useLayoutEffect(() => {
+    const adjust = pendingVirtualScrollAdjustRef.current;
+    if (!adjust || (adjust.prependDays === 0 && adjust.trimStartDays === 0)) return;
+    pendingVirtualScrollAdjustRef.current = null;
+    const node = scrollContainerRef.current;
+    const colWidth = dayColumnWidthForScrollRef.current;
+    if (!node || colWidth <= 0) return;
+    node.scrollLeft += adjust.prependDays * colWidth;
+    node.scrollLeft -= adjust.trimStartDays * colWidth;
+  }, [virtualStripBounds]);
+
+  useEffect(() => {
+    if (!virtualScrollEnabled) return;
+    const node = scrollContainerRef.current;
+    if (!node) return;
+
+    let rafId: number | null = null;
+
+    const maybeExtendVirtualStrip = () => {
+      const bounds = virtualStripBoundsRef.current;
+      if (!bounds) return;
+      const colWidth = dayColumnWidthForScrollRef.current;
+      if (colWidth <= 0) return;
+
+      const viewportWidth = Math.max(node.clientWidth - TIME_COLUMN_PX, 1);
+      const scrollLeft = node.scrollLeft;
+      const firstVisibleCol = scrollLeft / colWidth;
+      const lastVisibleCol = (scrollLeft + viewportWidth) / colWidth;
+      const totalCols = virtualStripDayCount(bounds);
+      const threshold = WEEK_CALENDAR_VIRTUAL_EXTEND_THRESHOLD_DAYS;
+
+      if (firstVisibleCol <= threshold) {
+        if (
+          virtualEdgeExtendLockRef.current !== "left" &&
+          canExtendVirtualStripLeft(bounds, scrollRangeStart)
+        ) {
+          const before = virtualStripDayCount(bounds);
+          const result = extendVirtualStripLeft(bounds, scrollRangeStart, scrollRangeEnd);
+          if (
+            result.scrollAdjust.prependDays > 0 ||
+            virtualStripDayCount(result.bounds) !== before
+          ) {
+            virtualEdgeExtendLockRef.current = "left";
+            pendingVirtualScrollAdjustRef.current = result.scrollAdjust;
+            setVirtualStripBounds(result.bounds);
+          }
+        }
+      } else if (firstVisibleCol > threshold + 2 && virtualEdgeExtendLockRef.current === "left") {
+        virtualEdgeExtendLockRef.current = "none";
+      }
+
+      if (totalCols - lastVisibleCol <= threshold) {
+        if (
+          virtualEdgeExtendLockRef.current !== "right" &&
+          canExtendVirtualStripRight(bounds, scrollRangeEnd)
+        ) {
+          const before = virtualStripDayCount(bounds);
+          const result = extendVirtualStripRight(bounds, scrollRangeStart, scrollRangeEnd);
+          if (
+            result.scrollAdjust.trimStartDays > 0 ||
+            virtualStripDayCount(result.bounds) !== before
+          ) {
+            virtualEdgeExtendLockRef.current = "right";
+            pendingVirtualScrollAdjustRef.current = result.scrollAdjust;
+            setVirtualStripBounds(result.bounds);
+          }
+        }
+      } else if (
+        totalCols - lastVisibleCol > threshold + 2 &&
+        virtualEdgeExtendLockRef.current === "right"
+      ) {
+        virtualEdgeExtendLockRef.current = "none";
+      }
+    };
+
+    const onScroll = () => {
+      if (rafId != null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        maybeExtendVirtualStrip();
+      });
+    };
+
+    node.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      if (rafId != null) cancelAnimationFrame(rafId);
+      node.removeEventListener("scroll", onScroll);
+    };
+  }, [virtualScrollEnabled, scrollRangeStart, scrollRangeEnd, TIME_COLUMN_PX]);
 
   useLayoutEffect(() => {
     const node = scrollContainerRef.current;
@@ -1707,6 +1844,7 @@ export function WeekCalendar({
     };
 
     const activateCalendarDrag = () => {
+      releaseCalendarTouchScrollRef.current?.();
       activatedForDrag = true;
       didMove = true;
       lockBrowserTextSelectionForCalendarDrag();
@@ -1729,7 +1867,15 @@ export function WeekCalendar({
     const onDocMove = (ev: PointerEvent) => {
       if (ev.pointerId !== pointerId) return;
       if (!activatedForDrag) {
-        const pastSlop = Math.hypot(ev.clientX - x0, ev.clientY - y0) > POINTER_SLOP_PX;
+        const dx = ev.clientX - x0;
+        const dy = ev.clientY - y0;
+        const pastSlop = Math.hypot(dx, dy) > POINTER_SLOP_PX;
+        if (pastSlop && Math.abs(dx) > Math.abs(dy)) {
+          /* Horizontal week pan — defer to the calendar touch-scroll handler. */
+          clearSelectHoldTimer();
+          detach();
+          return;
+        }
         if (selectHoldTimer != null && pastSlop) {
           /* Moved before long-press — cancel selection arm (e.g. week pan / scroll). */
           clearSelectHoldTimer();

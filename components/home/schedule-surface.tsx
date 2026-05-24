@@ -68,9 +68,10 @@ import {
 import { ScheduleMonthView } from "@/components/home/schedule-month-view";
 import { HomeCalendarVisual, HomeGreetingHeading } from "@/components/home/home-hero";
 import {
-  WEEK_CALENDAR_CONTINUOUS_BUFFER_DAYS,
-  weekCalendarHorizontalModeForFocus,
-} from "@/lib/calendar/week-calendar-day-columns";
+  HOME_CALENDAR_DATA_WINDOW_FUTURE_DAYS,
+  HOME_CALENDAR_DATA_WINDOW_PAST_DAYS,
+} from "@/lib/calendar/week-calendar-virtual-strip";
+import { weekCalendarHorizontalModeForFocus } from "@/lib/calendar/week-calendar-day-columns";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import {
   berlinClockMinutes,
@@ -593,6 +594,14 @@ export function ScheduleSurface({
 
   const weekStart = berlinStartOfWeek(selectedDate);
   const weekEnd = berlinEndOfWeek(selectedDate);
+  const weekScrollRangeStart = useMemo(
+    () => addDays(now, -HOME_CALENDAR_DATA_WINDOW_PAST_DAYS),
+    [now],
+  );
+  const weekScrollRangeEnd = useMemo(
+    () => addDays(now, HOME_CALENDAR_DATA_WINDOW_FUTURE_DAYS),
+    [now],
+  );
 
   const dayItems = useMemo(() => {
     const base = itemsForDate(selectedDate);
@@ -757,8 +766,8 @@ export function ScheduleSurface({
   // anchor week. Study entries need to be filtered to that week and
   // injected as "study"-kind blocks.
   const buildWeekTimedBlocks = useCallback((): WeekCalendarBlock[] => {
-    const stripStart = addDays(selectedDate, -WEEK_CALENDAR_CONTINUOUS_BUFFER_DAYS);
-    const stripEnd = addDays(selectedDate, WEEK_CALENDAR_CONTINUOUS_BUFFER_DAYS);
+    const stripStart = weekScrollRangeStart;
+    const stripEnd = weekScrollRangeEnd;
     const includeClasses = stripEnd >= semesterStart && stripStart <= semesterEnd;
     const studyBlocks = studies
       .filter((s) => s.start <= stripEnd && s.end >= stripStart)
@@ -839,7 +848,8 @@ export function ScheduleSurface({
   }, [
     classBlocks,
     studies,
-    selectedDate,
+    weekScrollRangeStart,
+    weekScrollRangeEnd,
     semesterStart,
     semesterEnd,
     adding,
@@ -1360,6 +1370,8 @@ export function ScheduleSurface({
     weekStartDate: weekStart,
     focusDate: selectedDate,
     today: now,
+    scrollRangeStart: weekScrollRangeStart,
+    scrollRangeEnd: weekScrollRangeEnd,
     revealDateNonce: calendarRevealNonce,
     visibleDayCount,
     minuteScale: weekMinuteScale,
