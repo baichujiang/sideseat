@@ -15,11 +15,11 @@ export function fitWeekCalendarDayColumnWidth(
 ): number {
   const visible = clampWeekCalendarVisibleDayCount(visibleWeekDays);
   const strip = Math.max(dayStripViewportPx, 1);
-  const evenShare = Math.floor(strip / visible);
+  const exactShare = strip / visible;
   const minReadable = WEEK_CALENDAR_DAY_COLUMN_MIN_PX;
-  if (evenShare >= minReadable) return evenShare;
+  if (exactShare >= minReadable) return exactShare;
   if (minReadable * visible <= strip) return minReadable;
-  return Math.max(1, evenShare);
+  return Math.max(1, strip / visible);
 }
 
 export function clampWeekCalendarVisibleDayCount(value: number): number {

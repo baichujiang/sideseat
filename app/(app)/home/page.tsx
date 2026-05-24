@@ -66,65 +66,65 @@ export default async function HomePage() {
 
   await ensureUserCalendarCategories(prisma, user.id);
 
-  const [memberships, calendarEntries, calendarCategories, mirroredScheduleKeys] = await Promise.all([
-    prisma.userCourse.findMany({
-      where: { userId: user.id },
-      include: { course: true, sessions: true },
-    }),
-    prisma.calendarEntry.findMany({
-      where: {
-        userId: user.id,
-        AND: [{ startAt: { lte: windowEnd } }, { endAt: { gte: windowStart } }],
-      },
-      include: {
-        companions: {
-          orderBy: { createdAt: "asc" },
+  const [memberships, calendarEntries, calendarCategories, mirroredScheduleKeys, connections] =
+    await Promise.all([
+      prisma.userCourse.findMany({
+        where: { userId: user.id },
+        include: { course: true, sessions: true },
+      }),
+      prisma.calendarEntry.findMany({
+        where: {
+          userId: user.id,
+          AND: [{ startAt: { lte: windowEnd } }, { endAt: { gte: windowStart } }],
         },
-        category: {
-          select: { id: true, name: true, color: true },
+        include: {
+          companions: {
+            orderBy: { createdAt: "asc" },
+          },
+          category: {
+            select: { id: true, name: true, color: true },
+          },
         },
-      },
-      orderBy: { startAt: "asc" },
-    }),
-    prisma.userCalendarCategory.findMany({
-      where: { userId: user.id },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-      select: {
-        id: true,
-        name: true,
-        color: true,
-        presetKey: true,
-        sortOrder: true,
-        icsSubscriptionUrl: true,
-      },
-    }),
-    prisma.calendarEntry.findMany({
-      where: { userId: user.id, courseScheduleMirrorKey: { not: null } },
-      select: { courseScheduleMirrorKey: true },
-    }),
-  ]);
+        orderBy: { startAt: "asc" },
+      }),
+      prisma.userCalendarCategory.findMany({
+        where: { userId: user.id },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+        select: {
+          id: true,
+          name: true,
+          color: true,
+          presetKey: true,
+          sortOrder: true,
+          icsSubscriptionUrl: true,
+        },
+      }),
+      prisma.calendarEntry.findMany({
+        where: { userId: user.id, courseScheduleMirrorKey: { not: null } },
+        select: { courseScheduleMirrorKey: true },
+      }),
+      prisma.connection.findMany({
+        where: {
+          status: "ACTIVE",
+          OR: [{ userAId: user.id }, { userBId: user.id }],
+        },
+        include: {
+          userA: {
+            select: { id: true, nickname: true, username: true, avatarUrl: true },
+          },
+          userB: {
+            select: { id: true, nickname: true, username: true, avatarUrl: true },
+          },
+        },
+        orderBy: { updatedAt: "desc" },
+      }),
+    ]);
 
   const mirroredSlotKeySet = new Set(
     mirroredScheduleKeys
       .map((r) => r.courseScheduleMirrorKey)
       .filter((k): k is string => Boolean(k)),
   );
-
-  const connections = await prisma.connection.findMany({
-    where: {
-      status: "ACTIVE",
-      OR: [{ userAId: user.id }, { userBId: user.id }],
-    },
-    include: {
-      userA: {
-        select: { id: true, nickname: true, username: true, avatarUrl: true },
-      },
-      userB: {
-        select: { id: true, nickname: true, username: true, avatarUrl: true },
-      },
-    },
-    orderBy: { updatedAt: "desc" },
-  });
 
   const courseCategory = calendarCategories.find((c) => c.presetKey === "course");
 
@@ -183,6 +183,7 @@ export default async function HomePage() {
     })),
     windowStart,
     windowEnd,
+    maxWaitMs: 2500,
   });
 
   const studyEntries: StudyEntry[] = [...dbStudyEntries, ...subscriptionStudyEntries];

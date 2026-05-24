@@ -16,9 +16,9 @@ export default async function InboxPage() {
     return <InboxSessionBootstrap />;
   }
   const user = sessionUser;
-  await ensureAssistantBotConnection(user.id);
 
-  const [{ merged: rawMerged, plansNeedingYourAction }, recommendedClassmates] = await Promise.all([
+  const [, { merged: rawMerged, plansNeedingYourAction }, recommendedClassmates] = await Promise.all([
+    ensureAssistantBotConnection(user.id),
     getInboxMergeBundle(user.id),
     getRecommendedClassmatesForViewer(user.id),
   ]);

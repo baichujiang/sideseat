@@ -806,7 +806,6 @@ export function WeekCalendar({
     if (!node) return;
 
     let scrollSnapTimer: number | null = null;
-    let momentumAxis: "h" | "v" | null = null;
 
     const stopSnapAnim = () => {
       if (snapAnimRafRef.current !== null) {
@@ -830,7 +829,7 @@ export function WeekCalendar({
 
       const start = node.scrollLeft;
       const startTime = performance.now();
-      const durationMs = 220;
+      const durationMs = 120;
       const step = (now: number) => {
         const t = Math.min(1, (now - startTime) / durationMs);
         const eased = 1 - (1 - t) ** 3;
@@ -848,12 +847,12 @@ export function WeekCalendar({
       if (tid !== null || mouseDown || momentumRafRef.current !== null || snapAnimRafRef.current !== null) {
         return;
       }
-      if (scrollSnapTimer != null) window.clearTimeout(scrollSnapTimer);
-      scrollSnapTimer = window.setTimeout(() => {
+      if (scrollSnapTimer != null) cancelAnimationFrame(scrollSnapTimer);
+      scrollSnapTimer = requestAnimationFrame(() => {
         scrollSnapTimer = null;
         if (tid !== null || mouseDown || momentumRafRef.current !== null) return;
         snapHorizontalToNearestDay(true);
-      }, 120);
+      });
     };
 
     // ---- Mouse / trackpad: correct non-dominant axis via scroll events ----
@@ -866,7 +865,7 @@ export function WeekCalendar({
       if (e.pointerType === "touch") return;
       stopSnapAnim();
       if (scrollSnapTimer != null) {
-        window.clearTimeout(scrollSnapTimer);
+        cancelAnimationFrame(scrollSnapTimer);
         scrollSnapTimer = null;
       }
       mouseDown = true;
@@ -929,7 +928,6 @@ export function WeekCalendar({
         cancelAnimationFrame(momentumRafRef.current);
         momentumRafRef.current = null;
       }
-      momentumAxis = null;
     };
 
     const findTrackedTouch = (touches: TouchList, identifier: number) => {
@@ -1031,7 +1029,7 @@ export function WeekCalendar({
       stopMomentum();
       stopSnapAnim();
       if (scrollSnapTimer != null) {
-        window.clearTimeout(scrollSnapTimer);
+        cancelAnimationFrame(scrollSnapTimer);
         scrollSnapTimer = null;
       }
       const t = e.changedTouches[0];
@@ -1120,9 +1118,14 @@ export function WeekCalendar({
       const endLock = tLock;
       tid = null;
       tLock = "free";
+      stopMomentum();
 
-      let mvx = endLock === "v" ? 0 : -vx;
-      let mvy = endLock === "h" ? 0 : -vy;
+      if (endLock === "h") {
+        snapHorizontalToNearestDay(true);
+        return;
+      }
+
+      let mvy = -vy;
       const DECEL = 0.965;
       const STOP_V = 30;
       let prev = performance.now();
@@ -1132,27 +1135,17 @@ export function WeekCalendar({
         const s = (now - prev) / 1000;
         prev = now;
         const f = Math.pow(DECEL, s * 60);
-        mvx *= f;
         mvy *= f;
-        if (Math.abs(mvx) < STOP_V && Math.abs(mvy) < STOP_V) {
+        if (Math.abs(mvy) < STOP_V) {
           momentumRafRef.current = null;
-          if (momentumAxis === "h") {
-            snapHorizontalToNearestDay(true);
-          }
-          momentumAxis = null;
           return;
         }
-        node.scrollLeft += mvx * s;
         node.scrollTop += mvy * s;
         momentumRafRef.current = requestAnimationFrame(tick);
       };
 
-      if (Math.abs(mvx) > STOP_V || Math.abs(mvy) > STOP_V) {
-        momentumAxis =
-          endLock === "h" ? "h" : endLock === "v" ? "v" : Math.abs(mvx) >= Math.abs(mvy) ? "h" : "v";
+      if (Math.abs(mvy) > STOP_V) {
         momentumRafRef.current = requestAnimationFrame(tick);
-      } else if (endLock === "h") {
-        snapHorizontalToNearestDay(true);
       }
     };
 
@@ -1178,7 +1171,7 @@ export function WeekCalendar({
       stopMomentum();
       stopSnapAnim();
       if (scrollSnapTimer != null) {
-        window.clearTimeout(scrollSnapTimer);
+        cancelAnimationFrame(scrollSnapTimer);
         scrollSnapTimer = null;
       }
     };

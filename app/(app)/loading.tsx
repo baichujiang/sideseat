@@ -1,14 +1,26 @@
 import { cn } from "@/lib/utils";
 
 function Block({ className }: { className?: string }) {
-  return <div className={cn("rounded-2xl bg-muted/50 dark:bg-muted/30", className)} aria-hidden />;
+  return (
+    <div
+      className={cn(
+        "rounded-2xl bg-classmates-edge/70 dark:bg-muted/40",
+        className,
+      )}
+      aria-hidden
+    />
+  );
 }
 
-/** Instant feedback while `(app)` route segments load their RSC payload. */
+/**
+ * Instant feedback while `(app)` route segments load their RSC payload.
+ * Opaque shell background + static blocks — no pulse, so brand-colored page
+ * headers do not bleed through during tab switches.
+ */
 export default function AppLoading() {
   return (
     <div
-      className="flex min-h-[min(70vh,32rem)] flex-col gap-3 animate-pulse"
+      className="flex min-h-[min(70vh,32rem)] flex-col gap-3 bg-background"
       aria-busy
       aria-live="polite"
     >

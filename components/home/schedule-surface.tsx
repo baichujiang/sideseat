@@ -1712,7 +1712,7 @@ export function ScheduleSurface({
               />
               <div
                 ref={weekVisibleDaysBarRef}
-                className="shrink-0 px-0.5"
+                className="shrink-0"
               >
                 <WeekVisibleDaysBar
                   value={visibleDayCount}

@@ -150,10 +150,6 @@ export function AppShell({
   const isNativeApp = useCapacitorNative();
   const [liveUnreadTotal, setLiveUnreadTotal] = useState(inboxUnreadTotal);
 
-  useEffect(() => {
-    setLiveUnreadTotal(inboxUnreadTotal);
-  }, [inboxUnreadTotal]);
-
   const refreshUnreadTotal = useCallback(async () => {
     const response = await apiFetch("/api/inbox/unread-total", {
       cache: "no-store",
