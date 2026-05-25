@@ -14,7 +14,6 @@ import { usePathname } from "next/navigation";
 
 export const TAB_KEEP_ALIVE_PATHS = {
   home: "/home",
-  courses: "/courses",
   discover: "/discover",
   inbox: "/inbox",
   profile: "/profile",

@@ -17,9 +17,6 @@ import {
   LanguageProficiency,
   LanguageTag,
   StudentVerificationStatus,
-  StudyPurpose,
-  StudyTimeSlot,
-  StudyVenue,
 } from "@prisma/client";
 
 import { getOrCreateAssistantBotUser } from "@/lib/auth/assistant-bot";
@@ -142,6 +139,59 @@ function minutesAgo(minutes: number) {
 function hoursFromNow(hours: number) {
   return new Date(Date.now() + hours * 60 * 60 * 1000);
 }
+
+type SeededFindBuddyPostSpec = {
+  username: string;
+  title: string;
+  body: string;
+  expiresInDays: number;
+  createdAt: Date;
+};
+
+const SEEDED_FIND_BUDDY_POSTS: SeededFindBuddyPostSpec[] = [
+  {
+    username: "test_001",
+    title: "Looking for a quiet library study buddy",
+    body: "I am reviewing algorithms most weekday evenings at the main library. Would be great to sit together, do focused blocks, and compare notes during breaks.",
+    expiresInDays: 14,
+    createdAt: hoursAgo(3),
+  },
+  {
+    username: "test_002",
+    title: "Garching lunch or coffee after lecture",
+    body: "Usually around MI on Tuesday and Thursday. Happy to grab Mensa lunch, coffee, or just walk around campus and meet new classmates.",
+    expiresInDays: 10,
+    createdAt: hoursAgo(7),
+  },
+  {
+    username: "test_003",
+    title: "Chinese / English language exchange",
+    body: "Looking for someone to practice casual English conversation with. I can help with Chinese in return. Coffee near Innenstadt or a short online call both work.",
+    expiresInDays: 21,
+    createdAt: hoursAgo(12),
+  },
+  {
+    username: "test_006",
+    title: "Gym partner near Olympiapark",
+    body: "Trying to get back into a regular gym routine two evenings a week. Beginner friendly; mainly weights and a bit of cardio, no pressure.",
+    expiresInDays: 18,
+    createdAt: hoursAgo(20),
+  },
+  {
+    username: "test_001",
+    title: "IN2064 exam prep group",
+    body: "Want to form a small Machine Learning exam prep group for problem sheets and old questions. Weekend mornings or Sunday afternoon would be ideal.",
+    expiresInDays: 16,
+    createdAt: hoursAgo(28),
+  },
+  {
+    username: "test_002",
+    title: "Weekend museum or Isar walk",
+    body: "Planning something low-key this weekend: Deutsches Museum, English Garden, or a walk by the Isar. Nice chance to meet people outside class.",
+    expiresInDays: 12,
+    createdAt: hoursAgo(36),
+  },
+];
 
 async function upsertTestUser(spec: AccountSpec) {
   const hashedPassword = await hashPassword(PASSWORD);
@@ -348,29 +398,59 @@ async function seedDiscoverActivitiesIfMissing(organizerId: string, participantI
   console.log(`    • ${marker} Coffee & campus walk (test_002)`);
 }
 
-async function seedDiscoverPostIfMissing(userId: string) {
-  const existing = await prisma.classmatePost.findFirst({
-    where: { userId, title: { contains: "[test]" } },
-  });
-  if (existing) return;
-  await prisma.classmatePost.create({
-    data: {
-      userId,
-      city: DEFAULT_DISCOVER_SERVED_CITY,
-      category: ClassmatePostCategory.STUDY,
+async function seedDiscoverFindBuddyPosts(usersByUsername: Record<string, { id: string }>) {
+  const legacy = await prisma.classmatePost.deleteMany({
+    where: {
       title: "[test] Library study buddy",
       body: "Seeded Discover post for QA. Safe to delete.",
-      status: ClassmatePostStatus.ACTIVE,
-      expiresAt: daysFromNow(14),
-      study: {
-        create: {
-          purposes: [StudyPurpose.EXAM_PREP],
-          timeSlots: [StudyTimeSlot.EVENING],
-          venues: [StudyVenue.MAIN_LIBRARY],
-        },
-      },
     },
   });
+  if (legacy.count > 0) {
+    console.log(`  Discover posts: removed ${legacy.count} legacy placeholder post(s)`);
+  }
+
+  let created = 0;
+  let updated = 0;
+
+  for (const spec of SEEDED_FIND_BUDDY_POSTS) {
+    const author = usersByUsername[spec.username];
+    if (!author) continue;
+
+    const data = {
+      userId: author.id,
+      city: DEFAULT_DISCOVER_SERVED_CITY,
+      category: ClassmatePostCategory.OTHER,
+      title: spec.title,
+      body: spec.body,
+      status: ClassmatePostStatus.ACTIVE,
+      expiresAt: daysFromNow(spec.expiresInDays),
+      createdAt: spec.createdAt,
+    };
+
+    const existing = await prisma.classmatePost.findFirst({
+      where: {
+        userId: author.id,
+        category: ClassmatePostCategory.OTHER,
+        title: spec.title,
+      },
+      select: { id: true },
+    });
+
+    if (existing) {
+      await prisma.classmatePost.update({
+        where: { id: existing.id },
+        data,
+      });
+      updated += 1;
+    } else {
+      await prisma.classmatePost.create({ data });
+      created += 1;
+    }
+  }
+
+  console.log(
+    `  Discover posts: created ${created}, updated ${updated} realistic find-buddy posts`,
+  );
 }
 
 async function removeLegacyTestAccounts() {
@@ -422,7 +502,7 @@ async function main() {
     FriendLinkStatus.PENDING,
   );
 
-  await seedDiscoverPostIfMissing(u001.id);
+  await seedDiscoverFindBuddyPosts(byName);
   await seedDiscoverActivitiesIfMissing(u001.id, u003.id);
 
   const semester = getCurrentSemesterLabel();
@@ -444,7 +524,7 @@ async function main() {
   } else {
     console.log(`  IN2064 not in DB for ${semester} — skipped course enroll`);
   }
-  console.log("  test_001 has one [test] Discover post");
+  console.log("  test_001 / test_002 / test_003 / test_006: realistic Discover find-buddy posts");
   console.log("  test_001 / test_002: [test] Discover activities (see log above)");
   console.log("\nRe-run anytime: npm run seed:test-accounts\n");
 }

@@ -6,7 +6,6 @@ import { useEffect, useRef } from "react";
 /** Bottom-tab roots — no history trap (nothing in-app to pop). */
 const TAB_ROOT_PATHS = new Set([
   "/home",
-  "/courses",
   "/discover",
   "/inbox",
   "/profile",

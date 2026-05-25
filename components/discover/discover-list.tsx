@@ -4,12 +4,10 @@ import { apiFetch } from "@/lib/auth/api-fetch";
 
 import type { Route } from "next";
 import { addDays } from "date-fns";
-import { useEffect, useState } from "react";
-import { Edit3, Loader2, Plus, Search, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Edit3, Loader2, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DiscoverActivityList } from "@/components/discover/discover-activity-list";
-import { DiscoverCreateActionSheet } from "@/components/discover/discover-create-action-sheet";
-import { DiscoverCreateActivitySheet } from "@/components/discover/discover-create-activity-sheet";
 import { DiscoverFeed } from "@/components/discover/discover-feed";
 import { DiscoverZoneTabs } from "@/components/discover/discover-zone-tabs";
 import { OfflineStateCard } from "@/components/offline/offline-state-card";
@@ -74,9 +72,8 @@ export function DiscoverList({
   const [zone, setZone] = useState<DiscoverZone>(() => parseDiscoverZone(searchParams.get("zone")));
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [createActionOpen, setCreateActionOpen] = useState(false);
   const [postOpen, setPostOpen] = useState(false);
-  const [activityOpen, setActivityOpen] = useState(false);
+  const createParam = searchParams.get("create");
 
   useEffect(() => {
     setZone(parseDiscoverZone(searchParams.get("zone")));
@@ -154,14 +151,30 @@ export function DiscoverList({
     setSearchOpen(true);
   };
 
-  function openCreateFlow() {
+  const openCreatePostFlow = useCallback(() => {
     if (!isOnline) return;
     if (!sessionHint || sessionHint.isGuest || !sessionHint.signedIn) {
-      openPrompt({ returnTo: "/discover" });
+      openPrompt({ returnTo: "/discover?create=post" });
       return;
     }
-    setCreateActionOpen(true);
-  }
+    setPostOpen(true);
+  }, [isOnline, openPrompt, sessionHint]);
+
+  useEffect(() => {
+    if (createParam !== "post") return;
+    openCreatePostFlow();
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete("create");
+    window.history.replaceState(null, "", url.toString());
+  }, [createParam, openCreatePostFlow]);
+
+  useEffect(() => {
+    window.addEventListener("sideseat:discover-create-post", openCreatePostFlow);
+    return () => {
+      window.removeEventListener("sideseat:discover-create-post", openCreatePostFlow);
+    };
+  }, [openCreatePostFlow]);
 
   return (
     <div className="space-y-3">
@@ -171,7 +184,6 @@ export function DiscoverList({
             className="pointer-events-none invisible flex items-center justify-start gap-1.5"
             aria-hidden
           >
-            <span className="inline-flex h-9 w-9 shrink-0" />
             <span className="inline-flex h-9 w-9 shrink-0" />
           </div>
           <h1 className="page-screen-title min-w-0 truncate text-center">{m.discover.screenTitle}</h1>
@@ -187,21 +199,6 @@ export function DiscoverList({
               )}
             >
               <Search className="h-4 w-4" strokeWidth={2.25} aria-hidden />
-            </button>
-            <button
-              type="button"
-              onClick={openCreateFlow}
-              aria-label={m.discoverZone.createActionAria}
-              disabled={!isOnline}
-              title={!isOnline ? m.offline.onlineRequiredAction : undefined}
-              className={cn(
-                "inline-flex h-9 w-9 items-center justify-center rounded-full border border-classmates-blue-border bg-gradient-to-br from-classmates-blue-soft to-white text-classmates-blue shadow-[0_4px_16px_-6px_rgba(37,99,235,0.45)] transition",
-                "hover:border-classmates-blue/40 hover:shadow-[0_6px_20px_-6px_rgba(37,99,235,0.5)] active:scale-[0.97]",
-                "dark:border-blue-500/45 dark:from-blue-950/55 dark:to-blue-950/25 dark:text-blue-200 dark:shadow-[0_4px_20px_-8px_rgba(59,130,246,0.35)]",
-                !isOnline && "cursor-not-allowed opacity-55 hover:border-classmates-blue-border",
-              )}
-            >
-              <Plus className="h-4 w-4" strokeWidth={2.5} aria-hidden />
             </button>
           </div>
         </div>
@@ -268,15 +265,6 @@ export function DiscoverList({
         />
       )}
 
-      <DiscoverCreateActionSheet
-        open={createActionOpen}
-        onClose={() => setCreateActionOpen(false)}
-        onChoose={(choice) => {
-          if (choice === "buddy") setPostOpen(true);
-          else setActivityOpen(true);
-        }}
-      />
-
       <CreatePostSheet
         open={postOpen}
         servedCity={cityNameKey}
@@ -286,8 +274,6 @@ export function DiscoverList({
           router.refresh();
         }}
       />
-
-      <DiscoverCreateActivitySheet open={activityOpen} onClose={() => setActivityOpen(false)} />
     </div>
   );
 }

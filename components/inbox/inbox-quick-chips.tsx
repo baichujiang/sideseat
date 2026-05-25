@@ -14,7 +14,6 @@ import { useAppMessages } from "@/hooks/use-app-locale";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { formatMessage } from "@/lib/i18n/messages";
 import type { InboxMerged } from "@/lib/queries/inbox-merge";
-import type { RecommendedClassmateRow } from "@/lib/queries/recommended-classmates";
 import { cn } from "@/lib/utils";
 
 type ContactRow = {
@@ -102,14 +101,12 @@ export function InboxChatsShell({
   plansNeedingYourAction,
   initialContacts,
   showCreateSheet,
-  recommendedClassmates = [],
 }: {
   userId: string;
   merged: InboxMerged[];
   plansNeedingYourAction: number;
   initialContacts: ContactRow[];
   showCreateSheet: boolean;
-  recommendedClassmates?: RecommendedClassmateRow[];
 }) {
   const m = useAppMessages();
   const isOnline = useOnlineStatus();
@@ -274,7 +271,6 @@ export function InboxChatsShell({
           userId={userId}
           merged={merged}
           query={searchOpen ? query : ""}
-          recommendedClassmates={recommendedClassmates}
         />
       )}
     </div>

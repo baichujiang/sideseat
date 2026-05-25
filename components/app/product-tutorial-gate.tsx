@@ -28,7 +28,7 @@ export type ProductTutorialGateContext = {
   skipAsAdmin: boolean;
 };
 
-const STEP_ROUTES = ["/home", "/courses", "/discover", "/inbox", "/profile"] as const satisfies readonly Route[];
+const STEP_ROUTES = ["/home", "/discover", "/inbox", "/profile"] as const satisfies readonly Route[];
 
 function pathMatchesTutorialRoute(route: (typeof STEP_ROUTES)[number], pathname: string) {
   return pathname === route || pathname.startsWith(`${route}/`);
@@ -46,12 +46,10 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
   const [reducedMotion, setReducedMotion] = useState(false);
   const [entered, setEntered] = useState(false);
   const didAutoShowRef = useRef(false);
-  const backdropClickableRef = useRef(false);
 
   const steps = useMemo(
     () => [
       { title: m.tutorial.homeTitle, body: m.tutorial.homeBody },
-      { title: m.tutorial.coursesTitle, body: m.tutorial.coursesBody },
       { title: m.tutorial.discoverTabTitle, body: m.tutorial.discoverTabBody },
       { title: m.tutorial.chatsTitle, body: m.tutorial.chatsBody },
       { title: m.tutorial.meTitle, body: m.tutorial.meBody },
@@ -151,10 +149,8 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
   useEffect(() => {
     if (!open) {
       setEntered(false);
-      backdropClickableRef.current = false;
       return;
     }
-    backdropClickableRef.current = false;
     if (reducedMotion) {
       setEntered(true);
       return;
@@ -164,17 +160,6 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
     });
     return () => cancelAnimationFrame(id);
   }, [open, reducedMotion]);
-
-  useEffect(() => {
-    if (!open) {
-      backdropClickableRef.current = false;
-      return;
-    }
-    const id = window.setTimeout(() => {
-      backdropClickableRef.current = true;
-    }, 320);
-    return () => window.clearTimeout(id);
-  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -196,52 +181,36 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
   const panel = (
     <div
       data-testid="product-tutorial"
-      className={cn("fixed inset-0 z-[70]", !reducedMotion && "transition-opacity duration-200")}
+      className={cn("pointer-events-none fixed inset-0 z-[70]", !reducedMotion && "transition-opacity duration-200")}
     >
-      <button
-        type="button"
-        aria-hidden="true"
-        tabIndex={-1}
-        className={cn(
-          "absolute inset-0 bg-black/45 transition-opacity ease-out dark:bg-black/60",
-          entered ? "opacity-100" : "opacity-0",
-        )}
-        style={{ transitionDuration: dur }}
-        onClick={() => {
-          if (backdropClickableRef.current) void closeTutorial();
-        }}
-      />
-
       <div
         className={cn(
-          "pointer-events-none absolute inset-x-0 bottom-0 flex justify-center",
-          "pb-[calc(4.75rem+var(--safe-bottom))]",
+          "pointer-events-none absolute inset-x-0 bottom-0 flex justify-center px-3",
+          "pb-[calc(5.25rem+var(--safe-bottom))]",
+          "sm:px-4 lg:inset-x-auto lg:bottom-[max(1rem,var(--safe-bottom))] lg:left-[15rem] lg:right-4 lg:justify-end lg:pb-0 xl:left-[16rem]",
         )}
       >
         <div
           role="dialog"
-          aria-modal="true"
           aria-labelledby="product-tutorial-title"
+          aria-describedby="product-tutorial-body"
           className={cn(
-            "pointer-events-auto w-full max-w-md px-3",
+            "pointer-events-auto w-full max-w-sm",
             "transition-[opacity,transform] ease-out",
-            entered ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0",
+            entered ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0",
             reducedMotion && entered && "translate-y-0",
           )}
           style={{ transitionDuration: dur }}
         >
           <div
             className={cn(
-              "overflow-hidden rounded-[22px] border border-classmates-edge bg-classmates-surface",
-              "shadow-[0_8px_40px_rgba(15,23,42,0.18)] dark:border-border dark:bg-card dark:shadow-[0_8px_40px_rgba(0,0,0,0.45)]",
+              "overflow-hidden rounded-[24px] border border-white/80 bg-white/95 backdrop-blur-xl",
+              "shadow-[0_18px_48px_rgba(15,23,42,0.18)] ring-1 ring-classmates-edge/70",
+              "dark:border-border/70 dark:bg-card/95 dark:ring-white/10 dark:shadow-[0_18px_48px_rgba(0,0,0,0.4)]",
             )}
           >
-            <div className="flex justify-center pt-2.5" aria-hidden>
-              <span className="h-1 w-9 rounded-full bg-classmates-edge dark:bg-muted-foreground/30" />
-            </div>
-
-            <div className="flex items-center justify-between gap-3 border-b border-classmates-hairline px-5 pb-3 pt-1 dark:border-border/60">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-classmates-hint dark:text-muted-foreground">
+            <div className="flex items-center justify-between gap-3 px-4 pb-2.5 pt-3.5">
+              <p className="rounded-full bg-classmates-warm px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-classmates-hint dark:bg-muted/60 dark:text-muted-foreground">
                 {formatMessage(m.tutorial.stepLabel, { current: step + 1, total })}
               </p>
               <div className="flex shrink-0 items-center gap-0.5">
@@ -254,45 +223,55 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
                 </button>
                 <button
                   type="button"
-                  className="rounded-full p-2 text-classmates-sub transition-colors hover:bg-classmates-warm active:bg-classmates-warm dark:text-muted-foreground dark:hover:bg-muted/50 dark:active:bg-muted/50"
+                  className="rounded-full p-1.5 text-classmates-sub transition-colors hover:bg-classmates-warm active:bg-classmates-warm dark:text-muted-foreground dark:hover:bg-muted/50 dark:active:bg-muted/50"
                   aria-label={m.common.close}
                   onClick={() => void closeTutorial()}
                 >
-                  <X className="h-5 w-5" strokeWidth={2} aria-hidden />
+                  <X className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden />
                 </button>
               </div>
             </div>
 
             <div
-              className={cn("px-5 pt-4", !reducedMotion && "transition-opacity duration-150")}
+              className={cn("px-4", !reducedMotion && "transition-opacity duration-150")}
               key={step}
               aria-live="polite"
             >
-              <h2
-                id="product-tutorial-title"
-                className="text-[20px] font-semibold leading-tight tracking-tight text-classmates-ink dark:text-foreground"
-              >
-                {stepCopy?.title}
-              </h2>
-              <p className="mt-2.5 text-[16px] font-normal leading-relaxed text-classmates-ink/90 dark:text-foreground/90">
-                {stepCopy?.body}
-              </p>
-              {step === 0 ? (
-                <p className="mt-2.5 text-[13px] leading-snug text-classmates-sub dark:text-muted-foreground">
-                  {m.tutorial.subtitle}
-                </p>
-              ) : isLast ? (
-                <p className="mt-2.5 text-[13px] leading-snug text-classmates-sub dark:text-muted-foreground">
-                  {m.tutorial.replayHint}
-                </p>
-              ) : (
-                <p className="mt-2.5 text-[13px] leading-snug text-classmates-sub dark:text-muted-foreground">
-                  {m.tutorial.coachSubtitle}
-                </p>
-              )}
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-classmates-blue text-[15px] font-semibold text-white shadow-sm dark:bg-primary dark:text-primary-foreground">
+                  {step + 1}
+                </div>
+                <div className="min-w-0">
+                  <h2
+                    id="product-tutorial-title"
+                    className="text-[17px] font-semibold leading-tight tracking-tight text-classmates-ink dark:text-foreground"
+                  >
+                    {stepCopy?.title}
+                  </h2>
+                  <p
+                    id="product-tutorial-body"
+                    className="mt-1.5 text-[14px] font-normal leading-snug text-classmates-ink/90 dark:text-foreground/90"
+                  >
+                    {stepCopy?.body}
+                  </p>
+                  {step === 0 ? (
+                    <p className="mt-2 text-[12.5px] leading-snug text-classmates-sub dark:text-muted-foreground">
+                      {m.tutorial.subtitle}
+                    </p>
+                  ) : isLast ? (
+                    <p className="mt-2 text-[12.5px] leading-snug text-classmates-sub dark:text-muted-foreground">
+                      {m.tutorial.replayHint}
+                    </p>
+                  ) : (
+                    <p className="mt-2 text-[12.5px] leading-snug text-classmates-sub dark:text-muted-foreground">
+                      {m.tutorial.coachSubtitle}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
 
-            <div className="mt-4 flex items-center gap-1.5 px-5" aria-hidden>
+            <div className="mt-3 flex items-center gap-1.5 px-4" aria-hidden>
               {steps.map((_, i) => (
                 <span
                   key={i}
@@ -306,12 +285,12 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
               ))}
             </div>
 
-            <div className="mt-4 flex items-center gap-2 px-5 pb-5">
+            <div className="mt-3 flex items-center gap-2 px-4 pb-4">
               {step > 0 ? (
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-11 flex-1 rounded-full text-[15px] font-semibold"
+                  className="h-10 flex-1 rounded-full text-[14px] font-semibold"
                   onClick={() => setStep((s) => Math.max(0, s - 1))}
                 >
                   {m.tutorial.back}
@@ -322,7 +301,7 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
               {!isLast ? (
                 <Button
                   type="button"
-                  className="h-11 flex-1 rounded-full text-[15px] font-semibold"
+                  className="h-10 flex-1 rounded-full text-[14px] font-semibold"
                   onClick={() => setStep((s) => Math.min(total - 1, s + 1))}
                 >
                   {m.tutorial.next}
@@ -330,7 +309,7 @@ function ProductTutorialInner({ context }: { context: ProductTutorialGateContext
               ) : (
                 <Button
                   type="button"
-                  className="h-11 flex-1 rounded-full text-[15px] font-semibold"
+                  className="h-10 flex-1 rounded-full text-[14px] font-semibold"
                   onClick={() => void closeTutorial()}
                 >
                   {m.tutorial.getStarted}

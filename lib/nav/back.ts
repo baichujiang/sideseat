@@ -5,7 +5,7 @@
  *  - A safe return path MUST start with `/` and MUST NOT start with `//`
  *  - When `returnTo` is missing, unsafe, or would return to the current page,
  *    callers supply a logical fallback (e.g. `/inbox` for chat threads).
- *  - Tab roots (`/home`, `/inbox`, `/discover`, `/courses`, `/profile`) never
+ *  - Tab roots (`/home`, `/inbox`, `/discover`, `/profile`) never
  *    show a back button; they rely on the bottom tab bar.
  */
 

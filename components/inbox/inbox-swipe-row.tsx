@@ -143,8 +143,8 @@ export function InboxSwipeRow({
         className={cn(
           "relative z-[1] touch-pan-y will-change-transform",
           pinned
-            ? "bg-[#F5F1EA] dark:bg-amber-950/20"
-            : "bg-white dark:bg-card",
+            ? "bg-[#F7F3EC] dark:bg-amber-950/20"
+            : "bg-background",
         )}
       >
         <Link

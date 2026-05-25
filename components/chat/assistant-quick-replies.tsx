@@ -22,9 +22,11 @@ const CHIP_KEYS: AssistantFaqKey[] = [
 export function AssistantQuickReplies({
   connectionId,
   className,
+  surface = "standalone",
 }: {
   connectionId: string;
   className?: string;
+  surface?: "standalone" | "bubble";
 }) {
   const { assistant: a } = useAppMessages();
   const router = useRouter();
@@ -68,7 +70,12 @@ export function AssistantQuickReplies({
             type="button"
             disabled={isPending}
             onClick={() => sendFaq(key)}
-            className="rounded-full border border-border/70 bg-muted/40 px-2.5 py-1 text-[11px] font-medium text-foreground transition hover:bg-muted disabled:opacity-50 dark:border-border"
+            className={cn(
+              "rounded-full border px-2.5 py-1 text-[11px] font-medium text-foreground transition disabled:opacity-50",
+              surface === "bubble"
+                ? "border-border/80 bg-background/90 shadow-sm hover:bg-background dark:border-border dark:bg-card/80 dark:hover:bg-card"
+                : "border-border/70 bg-muted/40 hover:bg-muted dark:border-border",
+            )}
           >
             {chipLabel[key]}
           </button>

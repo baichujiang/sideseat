@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import {
+  BookOpen,
   Bookmark,
   CalendarClock,
   CalendarDays,
@@ -21,7 +22,11 @@ import {
   MePageSettingsRowLabel,
   mePageCardClass,
   mePageChevronClass,
+  mePageIconCoursesClass,
+  mePageIconCoursesShellClass,
   mePageIconMutedClass,
+  mePageIconMyActivitiesClass,
+  mePageIconMyActivitiesShellClass,
   mePageIconMyPlanClass,
   mePageIconMyPlanShellClass,
   mePageIconMyPostsClass,
@@ -51,6 +56,7 @@ export type ProfilePagePayload = {
   query: { verification?: string; tip?: string };
   settingsSubtitle: string;
   user: {
+    username: string | null;
     nickname: string | null;
     bio: string | null;
     avatarUrl: string | null;
@@ -232,8 +238,8 @@ export function ProfilePageClient({ initialPayload }: { initialPayload: ProfileP
 
       <ProfileMeTopBlock
         locale={payload.locale}
+        username={payload.user.username}
         nickname={payload.user.nickname}
-        bio={payload.user.bio}
         avatarUrl={payload.user.avatarUrl}
         gender={payload.user.gender}
         school={payload.user.school}
@@ -248,20 +254,30 @@ export function ProfilePageClient({ initialPayload }: { initialPayload: ProfileP
         <div className={mePageCardClass}>
           <div className={mePageListDivideClass}>
             <MeDestRow
+              href={"/courses" as Route}
+              icon={BookOpen}
+              iconShellClass={mePageIconCoursesShellClass}
+              iconClass={mePageIconCoursesClass}
+              title={ui.profile.coursesRowTitle}
+              subtitle={ui.profile.coursesRowSubtitle}
+            />
+            <MeDestRow
+              href={"/profile/my-activities" as Route}
+              icon={CalendarDays}
+              iconShellClass={mePageIconMyActivitiesShellClass}
+              iconClass={mePageIconMyActivitiesClass}
+              title={ui.profile.myActivitiesRowTitle}
+              subtitle={ui.profile.myActivitiesRowSubtitle}
+              disabled={readOnly}
+              disabledTitle={disabledTitle}
+            />
+            <MeDestRow
               href={"/profile/my-posts" as Route}
               icon={SquarePen}
               iconShellClass={mePageIconMyPostsShellClass}
               iconClass={mePageIconMyPostsClass}
               title={ui.profile.myPostsRowTitle}
               subtitle={ui.profile.myPostsRowSubtitle}
-              disabled={readOnly}
-              disabledTitle={disabledTitle}
-            />
-            <MeDestRow
-              href={"/profile/my-activities" as Route}
-              icon={CalendarDays}
-              title={ui.profile.myActivitiesRowTitle}
-              subtitle={ui.profile.myActivitiesRowSubtitle}
               disabled={readOnly}
               disabledTitle={disabledTitle}
             />

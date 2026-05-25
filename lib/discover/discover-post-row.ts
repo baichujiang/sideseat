@@ -80,6 +80,8 @@ export type DiscoverPostRow = {
   imageUrls?: string[];
   /** When set, Discover post cards show the save/bookmark control for the signed-in viewer. */
   savedByViewer?: boolean;
+  /** Current visible interest signal: number of users who saved/hearted this post. */
+  interestedCount?: number;
   /**
    * Client-only / UI-injected rows (e.g. `NEXT_PUBLIC_DISCOVER_DEV_EXAMPLE_POSTS=1`).
    * Disables post detail navigation, save, and peer messaging on the card.

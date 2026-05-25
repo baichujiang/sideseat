@@ -19,7 +19,7 @@ type TabLoadingSurface = "background" | "warm" | "warmAlt";
 function tabLoadingSurfaceClass(surface: TabLoadingSurface): string {
   switch (surface) {
     case "warm":
-      return "bg-classmates-warm";
+      return "bg-classmates-warm dark:bg-background";
     case "warmAlt":
       return "bg-classmates-warm-alt dark:bg-background";
     default:
@@ -53,10 +53,12 @@ function TabLoadingShell({
 
 /** Screen header chrome aligned with Inbox / Chats top pattern. */
 function ScreenHeaderSkeleton({
+  withBack,
   withAction,
   withToolbarAction,
   tabCols = 3,
 }: {
+  withBack?: boolean;
   withAction?: boolean;
   /** Compact toolbar control on the right (e.g. Courses school select). */
   withToolbarAction?: boolean;
@@ -65,21 +67,18 @@ function ScreenHeaderSkeleton({
   return (
     <header className="min-w-0 space-y-2">
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-        <div
-          className="pointer-events-none invisible flex items-center justify-start gap-1.5"
-          aria-hidden
-        >
-          <span className="inline-flex h-9 w-9 shrink-0" />
-          {withAction && tabCols === 2 ? <span className="inline-flex h-9 w-9 shrink-0" /> : null}
+        <div className="flex items-center justify-start gap-1.5" aria-hidden>
+          {withBack ? (
+            <SkeletonBlock className="h-10 w-10 shrink-0 rounded-full" />
+          ) : (
+            <span className="inline-flex h-9 w-9 shrink-0" />
+          )}
         </div>
         <SkeletonBlock className="mx-auto h-7 w-28 rounded-lg" />
         <div className="flex justify-end gap-1.5">
           {withToolbarAction ? <SkeletonBlock className="h-8 w-14 rounded-lg" /> : null}
           {withAction ? (
-            <>
-              <SkeletonBlock className="h-9 w-9 rounded-full" />
-              {tabCols === 2 ? <SkeletonBlock className="h-9 w-9 rounded-full" /> : null}
-            </>
+            <SkeletonBlock className="h-9 w-9 rounded-full" />
           ) : null}
         </div>
       </div>
@@ -100,7 +99,7 @@ function ScreenHeaderSkeleton({
 
 export function HomeTabLoadingSkeleton() {
   return (
-    <TabLoadingShell className="gap-3">
+    <TabLoadingShell surface="warmAlt" className="gap-3">
       <div className="flex min-w-0 items-start gap-x-2 sm:gap-x-3">
         <div className="min-w-0 flex-1 space-y-2">
           <SkeletonBlock className="h-6 w-40 max-w-full rounded-lg" />
@@ -149,7 +148,7 @@ export function HomeTabLoadingSkeleton() {
 
 export function DiscoverTabLoadingSkeleton() {
   return (
-    <TabLoadingShell surface="warm" className="gap-3">
+    <TabLoadingShell surface="warmAlt" className="gap-3">
       <ScreenHeaderSkeleton withAction tabCols={2} />
       <div className="space-y-3">
         {Array.from({ length: 3 }).map((_, i) => (
@@ -189,7 +188,7 @@ function InboxConversationRowSkeleton() {
 
 export function InboxTabLoadingSkeleton() {
   return (
-    <TabLoadingShell className="gap-3">
+    <TabLoadingShell surface="warmAlt" className="gap-3">
       <header className="min-w-0 space-y-2">
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
           <span className="h-9 w-9" aria-hidden />
@@ -217,7 +216,7 @@ export function InboxTabLoadingSkeleton() {
 export function CoursesTabLoadingSkeleton() {
   return (
     <TabLoadingShell className="gap-3 pb-4">
-      <ScreenHeaderSkeleton withToolbarAction tabCols={3} />
+      <ScreenHeaderSkeleton withBack withToolbarAction tabCols={3} />
       <SkeletonBlock className="h-20 w-full rounded-2xl" />
       <SkeletonBlock className="h-9 w-full rounded-full" />
       <ul className={inboxChatListUlClassName} aria-hidden>
@@ -260,7 +259,7 @@ export function ProfileTabLoadingSkeleton() {
       <div className="space-y-2">
         <SkeletonBlock className="h-3 w-24 rounded-md" />
         <div className={cn(mePageCardClass, "divide-y divide-classmates-edge/60 overflow-hidden dark:divide-border")}>
-          {Array.from({ length: 3 }).map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3 px-4 py-3.5">
               <SkeletonBlock className="h-9 w-9 shrink-0 rounded-xl" />
               <div className="min-w-0 flex-1 space-y-1.5">

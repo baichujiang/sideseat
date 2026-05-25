@@ -82,6 +82,13 @@ export default async function ConnectionPage({
   );
   const threadSearchEntries = indexConnectionMessagesForSearch(messages);
   const latestMessageId = messages.at(-1)?.id ?? null;
+  const hasViewerMessage = isAssistantChat
+    ? messages.some((message) => message.senderId === user.id)
+    : false;
+  const firstAssistantQuickReplyMessageId =
+    isAssistantChat && !hasViewerMessage
+      ? (messages.find((message) => message.type === "TEXT" && isAssistantBotUser(message.sender))?.id ?? null)
+      : null;
   const profileLinkHref = isAssistantChat
     ? null
     : isSelfNotes
@@ -321,6 +328,11 @@ export default async function ConnectionPage({
                 message.deletedAt == null &&
                 message.type === "IMAGE" &&
                 Boolean(message.imageUrl);
+              const showAssistantQuickReplies =
+                firstAssistantQuickReplyMessageId === message.id &&
+                fromAssistant &&
+                bubblePayload.kind === "text" &&
+                message.deletedAt == null;
 
               return (
                 <div key={message.id} id={chatMessageDomId(message.id)}>
@@ -365,7 +377,10 @@ export default async function ConnectionPage({
                     ) : null}
                     <div
                       className={cn(
-                        "max-w-[min(100%,20rem)] shrink",
+                        "shrink",
+                        showAssistantQuickReplies
+                          ? "max-w-[min(100%,22rem)]"
+                          : "max-w-[min(100%,20rem)]",
                         isOwn ? "text-right" : "text-left",
                       )}
                     >
@@ -383,7 +398,16 @@ export default async function ConnectionPage({
                         )}
                       >
                         {fromAssistant && bubblePayload.kind === "text" && message.deletedAt == null ? (
-                          <AssistantMessageBody rawBody={bubblePayload.body} />
+                          <>
+                            <AssistantMessageBody rawBody={bubblePayload.body} />
+                            {showAssistantQuickReplies ? (
+                              <AssistantQuickReplies
+                                connectionId={connection.id}
+                                surface="bubble"
+                                className="mt-3 border-t border-border/60 pt-2.5"
+                              />
+                            ) : null}
+                          </>
                         ) : (
                           <MessageBubbleContent
                             isOwn={isOwn}
@@ -442,9 +466,6 @@ export default async function ConnectionPage({
       </ChatScrollContainer>
 
       <div className="shrink-0 border-t border-border/60 bg-background/95 px-3 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_24px_rgba(15,23,42,0.05)] backdrop-blur-sm dark:bg-background/90 dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]">
-        {isAssistantChat ? (
-          <AssistantQuickReplies connectionId={connection.id} className="mb-2" />
-        ) : null}
         <ChatComposer
           connectionId={connection.id}
           peerName={otherUser.nickname ?? "Student"}

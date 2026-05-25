@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { Route } from "next";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Heart } from "lucide-react";
 
 import { ClassmatePostImagesGallery } from "@/components/discover/classmate-post-images-gallery";
 import { displayableClassmatePostImageUrls } from "@/lib/discover/classmate-post-display-images";
@@ -49,6 +49,8 @@ export function BuddyRequestCard({
   const buddy = m.discoverBuddy;
   const detailHref =
     `/discover/posts/${post.id}?returnTo=${encodeURIComponent(returnTo)}` as Route;
+  const profileHref =
+    `/users/${post.userId}?returnTo=${encodeURIComponent(returnTo)}` as Route;
   const images = displayableClassmatePostImageUrls(post.imageUrls);
   const typeLabel = shouldShowBuddyCategoryLabel(post.category)
     ? buddyTypeLabel(post.category, buddy)
@@ -69,6 +71,10 @@ export function BuddyRequestCard({
   const showDefaultMessage = customFooter === undefined && !post.isDevExample;
   const linkedCourseId = post.linkedCourses?.[0]?.id;
   const contentReserveClass = showSave ? "pr-11 sm:pr-12" : undefined;
+  const interestedLine =
+    post.interestedCount !== undefined
+      ? formatMessage(buddy.buddyInterestedCount, { count: post.interestedCount })
+      : null;
 
   const expiryLabel = isNeverExpiry(post.expiresAt)
     ? dl.postNoExpiry
@@ -109,12 +115,20 @@ export function BuddyRequestCard({
           {post.body.trim()}
         </p>
       ) : null}
-      <p className="mt-1.5 flex items-center gap-1.5 text-[13px] text-muted-foreground">
-        <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden />
-        <span className="min-w-0 truncate">
-          {displayStatus === "open" ? expiryLabel : availabilityLine}
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13px] text-muted-foreground">
+        <span className="inline-flex min-w-0 items-center gap-1.5">
+          <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          <span className="min-w-0 truncate">
+            {displayStatus === "open" ? expiryLabel : availabilityLine}
+          </span>
         </span>
-      </p>
+        {interestedLine ? (
+          <span className="inline-flex shrink-0 items-center gap-1.5 tabular-nums">
+            <Heart className="h-3.5 w-3.5 shrink-0 text-red-500" aria-hidden />
+            {interestedLine}
+          </span>
+        ) : null}
+      </div>
       {images.length > 0 ? (
         <ClassmatePostImagesGallery
           urls={images}
@@ -129,15 +143,17 @@ export function BuddyRequestCard({
 
   const authorRow =
     !hideAuthorRow ? (
-      <div className="flex items-center justify-between gap-2 border-t border-border/50 px-4 pb-3 pt-3">
+      <div className="flex items-center justify-between gap-2 border-t border-border/50 px-4 py-2.5">
         <Link
-          href={detailHref}
-          className="flex min-w-0 flex-1 items-center gap-2 rounded-lg outline-none ring-offset-2 transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          href={profileHref}
+          aria-label={m.discoverBuddyDetail.viewProfileAria}
+          onClick={(event) => event.stopPropagation()}
+          className="flex min-w-0 flex-1 items-center gap-1.5 rounded-lg outline-none ring-offset-2 transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
-          <PresetAvatar id={post.avatarUrl} size={32} className="h-8 w-8 shrink-0" />
+          <PresetAvatar id={post.avatarUrl} size={28} className="h-7 w-7 shrink-0" />
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-medium text-foreground">{post.nickname}</p>
-            <p className="text-[11px] text-muted-foreground">{buddy.buddyCardAuthorLabel}</p>
+            <p className="truncate text-[12px] font-medium leading-tight text-foreground">{post.nickname}</p>
+            <p className="text-[10px] leading-tight text-muted-foreground">{buddy.buddyCardAuthorLabel}</p>
           </div>
         </Link>
         {showDefaultMessage ? (
@@ -148,7 +164,7 @@ export function BuddyRequestCard({
             tone="outline"
             hasExistingChat={false}
             iconOnly
-            className="h-11 w-11 min-h-11 min-w-11 shrink-0 touch-manipulation p-0"
+            className="h-10 w-10 min-h-10 min-w-10 shrink-0 touch-manipulation p-0 [&_svg]:h-[13px] [&_svg]:w-[13px]"
             label={buddy.buddyCardMessage}
             insightPostId={post.id}
           />
@@ -162,11 +178,11 @@ export function BuddyRequestCard({
         <div className="px-4 py-3.5">
           {mainBlock}
           {!hideAuthorRow ? (
-            <div className="mt-3 flex items-center gap-2 border-t border-border/50 pt-3">
-              <PresetAvatar id={post.avatarUrl} size={32} className="h-8 w-8 shrink-0" />
+            <div className="mt-2.5 flex items-center gap-1.5 border-t border-border/50 pt-2.5">
+              <PresetAvatar id={post.avatarUrl} size={28} className="h-7 w-7 shrink-0" />
               <div className="min-w-0">
-                <p className="truncate text-[13px] font-medium text-foreground">{post.nickname}</p>
-                <p className="text-[11px] text-muted-foreground">{buddy.buddyCardAuthorLabel}</p>
+                <p className="truncate text-[12px] font-medium leading-tight text-foreground">{post.nickname}</p>
+                <p className="text-[10px] leading-tight text-muted-foreground">{buddy.buddyCardAuthorLabel}</p>
               </div>
             </div>
           ) : null}

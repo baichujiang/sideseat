@@ -18,6 +18,7 @@ export const classmatePostForDiscoverInclude = {
   language: true,
   sport: true,
   images: { select: { url: true, sortOrder: true } },
+  _count: { select: { saves: true } },
 } satisfies Prisma.ClassmatePostInclude;
 
 export type ClassmatePostForDiscoverPayload = Prisma.ClassmatePostGetPayload<{
@@ -60,6 +61,7 @@ export function prismaClassmatePostToDiscoverRow(
     mealsMeta: mapPrismaMealsToDiscoverRow(post.meals),
     languageMeta: mapPrismaLanguageToDiscoverRow(post.language),
     sportMeta: mapPrismaSportToDiscoverRow(post.sport),
+    interestedCount: post._count.saves,
   };
   const imageUrls = mapPrismaClassmatePostImagesToUrls(post.images);
   if (imageUrls?.length) {

@@ -8,6 +8,7 @@ import {
   PASSWORD_RESET_ERROR_CODES,
   type PasswordResetErrorCode,
 } from "@/lib/auth/password-reset-error-codes";
+import { SIGNUP_ERROR_CODES, type SignupErrorCode } from "@/lib/auth/signup-error-codes";
 
 export type AuthFormEmailOtpErrors = {
   dbUnavailable: string;
@@ -30,6 +31,13 @@ export type AuthFormSignupEmailErrors = {
   usernameTaken: string;
   displayNameTaken: string;
   displayNameReserved: string;
+  invalidRequest: string;
+  unknown: string;
+};
+
+export type AuthFormSignupErrors = {
+  dbUnavailable: string;
+  usernameTaken: string;
   invalidRequest: string;
   unknown: string;
 };
@@ -74,6 +82,13 @@ const SIGNUP_EMAIL_CODE_TO_KEY: Record<SignupEmailErrorCode, keyof AuthFormSignu
   [SIGNUP_EMAIL_ERROR_CODES.UNKNOWN]: "unknown",
 };
 
+const SIGNUP_CODE_TO_KEY: Record<SignupErrorCode, keyof AuthFormSignupErrors> = {
+  [SIGNUP_ERROR_CODES.DB_UNAVAILABLE]: "dbUnavailable",
+  [SIGNUP_ERROR_CODES.USERNAME_TAKEN]: "usernameTaken",
+  [SIGNUP_ERROR_CODES.INVALID_REQUEST]: "invalidRequest",
+  [SIGNUP_ERROR_CODES.UNKNOWN]: "unknown",
+};
+
 function mapByCode(
   payload: ApiErrorPayload,
   codeToKey: Record<string, string>,
@@ -102,6 +117,10 @@ export function mapSignupEmailApiError(
   messages: AuthFormSignupEmailErrors,
 ): string {
   return mapByCode(payload, SIGNUP_EMAIL_CODE_TO_KEY, messages, messages.unknown);
+}
+
+export function mapSignupApiError(payload: ApiErrorPayload, messages: AuthFormSignupErrors): string {
+  return mapByCode(payload, SIGNUP_CODE_TO_KEY, messages, messages.unknown);
 }
 
 const FORGOT_PASSWORD_SEND_CODE_TO_KEY: Record<

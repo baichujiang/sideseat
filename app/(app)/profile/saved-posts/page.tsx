@@ -27,6 +27,7 @@ const savedPostInclude = {
   language: true,
   sport: true,
   images: { select: { url: true, sortOrder: true } },
+  _count: { select: { saves: true } },
 } satisfies Prisma.ClassmatePostInclude;
 
 type PostWithAuthorCourses = Prisma.ClassmatePostGetPayload<{ include: typeof savedPostInclude }>;
@@ -64,6 +65,7 @@ function toDiscoverPostRow(post: PostWithAuthorCourses, currentUserId: string): 
     mealsMeta: mapPrismaMealsToDiscoverRow(post.meals),
     languageMeta: mapPrismaLanguageToDiscoverRow(post.language),
     sportMeta: mapPrismaSportToDiscoverRow(post.sport),
+    interestedCount: post._count.saves,
     ...(imageUrls?.length ? { imageUrls } : {}),
   };
 }

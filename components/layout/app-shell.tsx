@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import type { Route } from "next";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type MouseEvent } from "react";
-import { BookOpen, Calendar, Inbox, UsersRound, UserRound } from "lucide-react";
+import { Calendar, Inbox, Plus, UsersRound, UserRound, type LucideIcon } from "lucide-react";
 
 import { ProductTutorialGate, type ProductTutorialGateContext } from "@/components/app/product-tutorial-gate";
 import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
@@ -19,7 +19,6 @@ import { OfflineBanner } from "@/components/offline/offline-banner";
 import { PwaInstallBar } from "@/components/pwa/pwa-install-bar";
 import { useCapacitorNative } from "@/hooks/use-capacitor-native";
 import { apiFetch } from "@/lib/auth/api-fetch";
-import { coursesNavHrefFromStorage } from "@/lib/courses/courses-tab";
 import { APP_NAME } from "@/lib/constants/app";
 import { cn } from "@/lib/utils";
 
@@ -34,7 +33,7 @@ const navActiveSide =
 const navInactiveSide =
   "group rounded-xl text-[#6B7280] [@media(hover:hover)]:hover:bg-black/[0.04] dark:text-muted-foreground dark:[@media(hover:hover)]:hover:bg-white/[0.06]";
 
-type NavItem = { href: Route; label: string; icon: typeof Calendar };
+type NavItem = { href: Route; label: string; icon: LucideIcon };
 
 function ShellNavLink({
   item,
@@ -48,7 +47,7 @@ function ShellNavLink({
   variant: "bottom" | "side";
 }) {
   const Icon = item.icon;
-  const href = item.href === "/courses" ? coursesNavHrefFromStorage() : item.href;
+  const href = item.href;
   const tab = tabKeepAliveKeyFromPathname(item.href);
   const { getSnapshot, requestTab } = useTabKeepAliveNavigation();
   const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -106,6 +105,7 @@ function ShellNavLink({
   return (
     <Link
       href={href}
+      replace
       aria-current={isActive ? "page" : undefined}
       onClick={handleClick}
       className={cn(
@@ -141,6 +141,57 @@ function ShellNavLink({
         {item.label}
       </span>
     </Link>
+  );
+}
+
+function ShellCreatePostButton({
+  label,
+  onClick,
+  variant,
+}: {
+  label: string;
+  onClick: () => void;
+  variant: "bottom" | "side";
+}) {
+  if (variant === "side") {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn(
+          "flex min-h-[2.75rem] w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition-[background-color,box-shadow,transform]",
+          "bg-classmates-blue text-white shadow-[0_10px_24px_-14px_rgba(37,99,235,0.95)] active:scale-[0.99]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          "[@media(hover:hover)]:hover:bg-classmates-blue/92",
+        )}
+        aria-label={label}
+      >
+        <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center">
+          <Plus className="h-5 w-5" strokeWidth={2.5} aria-hidden />
+        </span>
+        <span className="truncate">{label}</span>
+      </button>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex min-h-[3rem] min-w-0 flex-1 items-center justify-center px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      aria-label={label}
+    >
+      <span
+        className={cn(
+          "-mt-5 inline-flex h-12 w-12 items-center justify-center rounded-full",
+          "bg-classmates-blue text-white shadow-[0_10px_28px_-10px_rgba(37,99,235,0.9)] ring-4 ring-white",
+          "transition-[background-color,transform,box-shadow] active:scale-95 dark:ring-background",
+          "[@media(hover:hover)]:group-hover:bg-classmates-blue/92",
+        )}
+      >
+        <Plus className="h-6 w-6" strokeWidth={2.75} aria-hidden />
+      </span>
+    </button>
   );
 }
 
@@ -182,17 +233,33 @@ function AppShellContent({
   const { messages: m } = useLocaleContext();
   const navItems = [
     { href: "/home", label: m.nav.home, icon: Calendar },
-    { href: "/courses", label: m.nav.courses, icon: BookOpen },
     { href: "/discover", label: m.nav.discoverTab, icon: UsersRound },
     { href: "/inbox", label: m.nav.chats, icon: Inbox },
     { href: "/profile", label: m.nav.me, icon: UserRound },
   ] satisfies NavItem[];
 
+  const router = useRouter();
   const pathname = usePathname();
   const isNativeApp = useCapacitorNative();
   const { pendingTab, getSnapshot } = useTabKeepAliveNavigation();
   const [liveUnreadTotal, setLiveUnreadTotal] = useState(inboxUnreadTotal);
   const displayedPathname = pendingTab ? TAB_KEEP_ALIVE_PATHS[pendingTab] : pathname;
+  const leadingNavItems = navItems.slice(0, 2);
+  const trailingNavItems = navItems.slice(2);
+  const currentTopLevelTab = tabKeepAliveKeyFromPathname(pathname);
+
+  const openDiscoverCreatePost = useCallback(() => {
+    if (pathname === "/discover") {
+      window.dispatchEvent(new Event("sideseat:discover-create-post"));
+      return;
+    }
+    const target = "/discover?create=post" as Route;
+    if (currentTopLevelTab) {
+      router.push(target);
+      return;
+    }
+    router.replace(target);
+  }, [currentTopLevelTab, pathname, router]);
 
   const refreshUnreadTotal = useCallback(async () => {
     const response = await apiFetch("/api/inbox/unread-total", {
@@ -237,11 +304,17 @@ function AppShellContent({
     /^\/courses\/[^/]+\/chat$/.test(displayedPathname) ||
     /^\/groups\/[^/]+$/.test(displayedPathname);
 
-  const isDiscover = displayedPathname === "/discover" || displayedPathname.startsWith("/discover/");
-  const shellSurface = isDiscover && !isChatThread ? "bg-classmates-warm" : "bg-background";
+  const usesPrimaryTabSurface =
+    displayedPathname === "/home" ||
+    displayedPathname === "/discover" ||
+    displayedPathname === "/inbox" ||
+    displayedPathname === "/profile";
+  const shellSurface =
+    usesPrimaryTabSurface && !isChatThread
+      ? "bg-classmates-warm-alt dark:bg-background"
+      : "bg-background";
   const showBottomNav = !isChatThread && !isNativeApp;
   const showSideNav = showBottomNav;
-  const currentTopLevelTab = tabKeepAliveKeyFromPathname(pathname);
   const pendingSnapshot = pendingTab ? getSnapshot(pendingTab) : null;
   const showPendingSnapshot = Boolean(pendingTab && pendingSnapshot && currentTopLevelTab !== pendingTab);
 
@@ -273,6 +346,13 @@ function AppShellContent({
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               {APP_NAME}
             </p>
+          </div>
+          <div className="px-2 pb-3">
+            <ShellCreatePostButton
+              label={m.nav.createPost}
+              onClick={openDiscoverCreatePost}
+              variant="side"
+            />
           </div>
           <div className="flex min-h-0 flex-1 flex-col gap-0.5 px-2">
             {navItems.map((item) => (
@@ -310,7 +390,21 @@ function AppShellContent({
             className="fixed bottom-0 left-1/2 z-20 flex w-full max-w-md -translate-x-1/2 items-stretch border-t border-classmates-edge/80 bg-white/95 px-1 pb-[max(0.5rem,var(--safe-bottom))] pt-1.5 backdrop-blur-xl supports-[backdrop-filter]:bg-white/92 dark:border-border/50 dark:bg-background/92 lg:hidden"
             aria-label={m.nav.mainNavAria}
           >
-            {navItems.map((item) => (
+            {leadingNavItems.map((item) => (
+              <ShellNavLink
+                key={item.href}
+                item={item}
+                pathname={displayedPathname}
+                liveUnreadTotal={liveUnreadTotal}
+                variant="bottom"
+              />
+            ))}
+            <ShellCreatePostButton
+              label={m.nav.createPost}
+              onClick={openDiscoverCreatePost}
+              variant="bottom"
+            />
+            {trailingNavItems.map((item) => (
               <ShellNavLink
                 key={item.href}
                 item={item}

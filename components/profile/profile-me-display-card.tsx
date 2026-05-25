@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils";
 /** Me page profile preview — tap to open {@link /profile/info} field list and editors. */
 export function ProfileMeDisplayCard({
   locale,
+  username,
   nickname,
-  bio,
   avatarUrl,
   gender,
   school,
@@ -25,8 +25,8 @@ export function ProfileMeDisplayCard({
   readOnly = false,
 }: {
   locale: AppLocale;
+  username: string | null;
   nickname: string | null;
-  bio: string | null;
   avatarUrl: string | null;
   gender: UserGender;
   school: string | null;
@@ -48,8 +48,8 @@ export function ProfileMeDisplayCard({
       <div className="relative px-4 pb-3.5 pt-4">
         <ProfileMeHeaderDisplay
           locale={locale}
+          username={username}
           nickname={nickname}
-          bio={bio}
           avatarUrl={avatarUrl}
           gender={gender}
           school={school}

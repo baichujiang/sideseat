@@ -1,9 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import type { Route } from "next";
 import {
+  BookOpen,
   Bookmark,
   CalendarClock,
+  ChevronRight,
   Lock,
   ShieldCheck,
   Sparkles,
@@ -19,6 +22,9 @@ import { LinkButton } from "@/components/ui/link-button";
 import {
   MePageSettingsRowLabel,
   mePageCardClass,
+  mePageChevronClass,
+  mePageIconCoursesClass,
+  mePageIconCoursesShellClass,
   mePageIconMyPlanClass,
   mePageIconMyPlanShellClass,
   mePageIconMyPostsClass,
@@ -26,6 +32,7 @@ import {
   mePageIconSavedPostsClass,
   mePageIconSavedPostsShellClass,
   mePageListDivideClass,
+  mePageRowInteractiveClass,
   mePageRowLeadClass,
 } from "@/components/profile/me-settings-row";
 import { useAppMessages } from "@/hooks/use-app-locale";
@@ -65,6 +72,25 @@ function MeGuestLockedRow({
         {m.me.guestLockedLabel}
       </span>
     </div>
+  );
+}
+
+function MeGuestCoursesRow() {
+  const m = useAppMessages();
+
+  return (
+    <Link href={"/courses" as Route} className={mePageRowInteractiveClass}>
+      <div className={mePageRowLeadClass}>
+        <span className={mePageIconCoursesShellClass}>
+          <BookOpen className={mePageIconCoursesClass} strokeWidth={2} aria-hidden />
+        </span>
+        <MePageSettingsRowLabel
+          title={m.profile.coursesRowTitle}
+          subtitle={m.profile.coursesRowSubtitle}
+        />
+      </div>
+      <ChevronRight className={mePageChevronClass} strokeWidth={2} aria-hidden />
+    </Link>
   );
 }
 
@@ -152,6 +178,18 @@ export function MeGuestScreen({
           <p className="mx-auto mt-2.5 max-w-[300px] text-[13px] leading-relaxed text-muted-foreground">
             {m.guest.profileBody}
           </p>
+        </div>
+      </section>
+
+      <section aria-labelledby="me-guest-more-heading">
+        <h2
+          id="me-guest-more-heading"
+          className="mb-2 px-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
+        >
+          {m.profile.landingSectionMore}
+        </h2>
+        <div className={mePageCardClass}>
+          <MeGuestCoursesRow />
         </div>
       </section>
 

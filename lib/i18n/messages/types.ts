@@ -7,6 +7,7 @@ export type AppMessages = {
     discoverTab: string;
     chats: string;
     me: string;
+    createPost: string;
     mainNavAria: string;
   };
   common: {
@@ -79,9 +80,7 @@ export type AppMessages = {
     guestDisplayName: string;
     guestBrowseHint: string;
     openProfileAria: string;
-    offlineScheduleCacheNotice: string;
-    staleScheduleCacheNotice: string;
-    retryScheduleCache: string;
+    updatingSchedule: string;
   };
   discover: {
     screenTitle: string;
@@ -226,7 +225,6 @@ export type AppMessages = {
     buddyTypeSports: string;
     emptyFeed: string;
     emptyFeedToday: string;
-    peopleStripTitle: string;
     buddyCardMessage: string;
     buddyCardMessageAria: string;
     buddyCardOpen: string;
@@ -234,6 +232,8 @@ export type AppMessages = {
     /** `{city}` — city label on compact card */
     buddyCardCityLine: string;
     buddyCardAuthorLabel: string;
+    /** `{count}` — save/heart count shown as visible interest. */
+    buddyInterestedCount: string;
   };
   /** Buddy request detail / Discover post drill-in — request-first copy. */
   discoverBuddyDetail: {
@@ -243,6 +243,7 @@ export type AppMessages = {
     rowWhere: string;
     rowStatus: string;
     rowAvailability: string;
+    rowInterested: string;
     rowCity: string;
     notSpecified: string;
     statusOpen: string;
@@ -527,8 +528,6 @@ export type AppMessages = {
     searchAria: string;
     emptyNoConversationsTitle: string;
     emptyNoConversationsDesc: string;
-    /** Shown above recommended classmates when the inbox list is empty. */
-    recommendedClassmatesEmptyHint: string;
     emptyNoMatchesTitle: string;
     /** Use `{query}` placeholder. */
     emptyNoMatchesDesc: string;
@@ -661,6 +660,7 @@ export type AppMessages = {
   authForm: {
     createAccountTitle: string;
     logInTitle: string;
+    signupIntro: string;
     signupWithEmail: string;
     signupWithPhone: string;
     signupDisplayNameLabel: string;
@@ -678,6 +678,7 @@ export type AppMessages = {
     signupUsernameTooLong: string;
     signupUsernameInvalid: string;
     signupUsernameReserved: string;
+    signupPasswordTooShort: string;
     emailLabel: string;
     emailPlaceholder: string;
     phoneLabel: string;
@@ -702,6 +703,12 @@ export type AppMessages = {
     submitLogIn: string;
     pleaseWait: string;
     unableToContinue: string;
+    signupErrors: {
+      dbUnavailable: string;
+      usernameTaken: string;
+      invalidRequest: string;
+      unknown: string;
+    };
     emailOtpErrors: {
       dbUnavailable: string;
       dbSchema: string;
@@ -1135,6 +1142,8 @@ export type AppMessages = {
     preferencesSubtitleNone: string;
     preferencesSubtitleOne: string;
     preferencesSubtitleMany: string;
+    coursesRowTitle: string;
+    coursesRowSubtitle: string;
     savedPostsRowTitle: string;
     savedPostsRowSubtitle: string;
     myPlanRowTitle: string;
@@ -1269,7 +1278,7 @@ export type AppMessages = {
     profilePhotoCaption: string;
     profileRowsNavAria: string;
     rowPhoto: string;
-    rowName: string;
+    rowUsername: string;
     rowBio: string;
     rowGender: string;
     rowSchool: string;
@@ -1284,12 +1293,6 @@ export type AppMessages = {
     photoSectionLabel: string;
     usingUploadedPhoto: string;
     tapAvatarHint: string;
-    displayNameLabel: string;
-    /** `{username}` — ASCII login handle. */
-    loginUsernameOnCard: string;
-    /** Shown when editing display name — points to account settings. */
-    loginUsernameNameSheetHint: string;
-    nameFieldPlaceholder: string;
     bioSectionLabel: string;
     bioFieldPlaceholder: string;
     saving: string;
@@ -1301,9 +1304,6 @@ export type AppMessages = {
     /** `{id}` — preset avatar id, not translated. */
     avatarPresetAria: string;
     errorCouldNotSave: string;
-    errorInvalidName: string;
-    errorNicknameTaken: string;
-    errorNicknameReserved: string;
     errorInvalidBio: string;
     errorChoosePhoto: string;
     errorCouldNotUpload: string;
@@ -1356,7 +1356,7 @@ export type AppMessages = {
     sheetDisplayNamePlaceholder: string;
     sheetTaglinePlaceholder: string;
     schoolProgramHeading: string;
-    recommendClassmatesBlurb: string;
+    schoolProgramBlurb: string;
     labelSchool: string;
     labelDegree: string;
     labelMajor: string;
@@ -1367,8 +1367,6 @@ export type AppMessages = {
     privacyHeading: string;
     hideFromDiscoveryTitle: string;
     hideFromDiscoverySubtitle: string;
-    hideFromRecommendationsTitle: string;
-    hideFromRecommendationsSubtitle: string;
     hideInCourseTitle: string;
     hideInCourseSubtitle: string;
     languagesHeading: string;
@@ -1535,7 +1533,7 @@ export type CoursesMessages = {
   popularSubtitlePopularInSchool: string;
   /** `{query}` — raw search string, not translated. */
   popularSubtitleResultsFor: string;
-  popularSubtitleRequiredCore: string;
+  popularSubtitlePopularPicks: string;
   /** `{count}` — number of courses in the list meta line. */
   metaCourseCount: string;
   emptyNoCourses: string;
@@ -1548,8 +1546,6 @@ export type CoursesMessages = {
   onboardingCoursesBody: string;
   myCoursesEmptyTitle: string;
   myCoursesEmptyBody: string;
-  /** Section title — classmates who share your courses (not yet chatting). */
-  recommendedClassmatesTitle: string;
   browsePopularCourses: string;
   addWithForm: string;
   /** Prefix before instructor name from API (not translated). */

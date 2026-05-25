@@ -9,27 +9,132 @@ import { z } from "zod";
 
 import { setAccessToken } from "@/lib/auth/client-access-token";
 import {
+  createSignupSchema,
   createSignupEmailSchema,
   createSignupPhoneSchema,
   loginSchema,
+  signupSchema,
   signupEmailSchema,
   signupPhoneSchema,
 } from "@/lib/validators/auth";
-import { mapEmailOtpApiError, mapSignupEmailApiError } from "@/lib/auth/map-auth-api-errors";
+import {
+  mapEmailOtpApiError,
+  mapSignupApiError,
+  mapSignupEmailApiError,
+} from "@/lib/auth/map-auth-api-errors";
 import { safeReturnPath } from "@/lib/nav/back";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { FormMessage } from "@/components/forms/form-message";
-import { useAppLocale, useAppMessages } from "@/hooks/use-app-locale";
+import { useAppMessages } from "@/hooks/use-app-locale";
 import type { AppMessages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
+type SignupValues = z.infer<typeof signupSchema>;
 type SignupEmailValues = z.infer<typeof signupEmailSchema>;
 type SignupPhoneValues = z.infer<typeof signupPhoneSchema>;
 type LoginValues = z.infer<typeof loginSchema>;
 
 type AuthFormCopy = AppMessages["authForm"];
+
+function SignupBlock({
+  af,
+  initialIdentifier,
+  initialPassword,
+  returnTo,
+}: {
+  af: AuthFormCopy;
+  initialIdentifier: string;
+  initialPassword: string;
+  returnTo?: string | null;
+}) {
+  const router = useRouter();
+  const [serverError, setServerError] = useState("");
+  const schema = useMemo(
+    () =>
+      createSignupSchema(
+        {
+          tooShort: af.signupUsernameTooShort,
+          tooLong: af.signupUsernameTooLong,
+          invalid: af.signupUsernameInvalid,
+          reserved: af.signupUsernameReserved,
+        },
+        { tooShort: af.signupPasswordTooShort },
+      ),
+    [
+      af.signupPasswordTooShort,
+      af.signupUsernameInvalid,
+      af.signupUsernameReserved,
+      af.signupUsernameTooLong,
+      af.signupUsernameTooShort,
+    ],
+  );
+  const seededUsername = /^[a-zA-Z0-9_-]{2,32}$/.test(initialIdentifier.trim())
+    ? initialIdentifier.trim().toLowerCase()
+    : "";
+
+  const form = useForm<SignupValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      username: seededUsername,
+      password: initialPassword,
+    },
+  });
+
+  const onSubmit = form.handleSubmit(async (values) => {
+    setServerError("");
+    const response = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(values),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setServerError(mapSignupApiError(payload, af.signupErrors));
+      return;
+    }
+    if (payload.data?.accessToken) {
+      setAccessToken(payload.data.accessToken);
+    }
+    router.push(safeReturnPath(returnTo, "/home") as Route);
+    router.refresh();
+  });
+
+  return (
+    <form className="space-y-4" onSubmit={onSubmit}>
+      <p className="text-sm leading-snug text-muted-foreground">{af.signupIntro}</p>
+      <div className="space-y-1.5">
+        <label className="text-sm font-medium">{af.usernameLabel}</label>
+        <Input
+          autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
+          placeholder={af.usernamePlaceholder}
+          className="font-mono"
+          {...form.register("username")}
+        />
+        <p className="text-[11px] leading-snug text-muted-foreground">{af.usernameHint}</p>
+        <FormMessage message={form.formState.errors.username?.message} />
+      </div>
+      <div className="space-y-1.5">
+        <label className="text-sm font-medium">{af.passwordLabel}</label>
+        <Input
+          type="password"
+          autoComplete="new-password"
+          placeholder={af.passwordPlaceholderNew}
+          {...form.register("password")}
+        />
+        <FormMessage message={form.formState.errors.password?.message} />
+      </div>
+      <FormMessage message={serverError} />
+      <Button className="w-full" disabled={form.formState.isSubmitting} type="submit">
+        {form.formState.isSubmitting ? af.pleaseWait : af.submitCreate}
+      </Button>
+    </form>
+  );
+}
 
 function EmailSignupBlock({
   af,
@@ -459,11 +564,9 @@ export function AuthForm({
   returnTo?: string | null;
 }) {
   const router = useRouter();
-  const { locale } = useAppLocale();
   const a = useAppMessages();
   const af = a.authForm;
   const [serverError, setServerError] = useState("");
-  const [signupMethod, setSignupMethod] = useState<"email" | "phone">("email");
 
   const loginForm = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -472,13 +575,6 @@ export function AuthForm({
       password: initialPassword,
     },
   });
-
-  useEffect(() => {
-    if (mode !== "signup") return;
-    const id = initialIdentifier.trim();
-    if (id.includes("@")) setSignupMethod("email");
-    else if (/^\+?\d[\d\s-]{6,}$/.test(id)) setSignupMethod("phone");
-  }, [mode, initialIdentifier]);
 
   const onSubmitLogin = loginForm.handleSubmit(async (values) => {
     setServerError("");
@@ -504,57 +600,12 @@ export function AuthForm({
     return (
       <Card className="space-y-5 border-border/90 bg-card/95 shadow-soft backdrop-blur-[2px]">
         <CardTitle className="text-xl">{af.createAccountTitle}</CardTitle>
-
-        <div
-          className="flex rounded-full border border-border bg-muted/40 p-1"
-          role="tablist"
-          aria-label="Sign up method"
-        >
-          <button
-            type="button"
-            role="tab"
-            aria-selected={signupMethod === "email"}
-            onClick={() => setSignupMethod("email")}
-            className={cn(
-              "min-h-9 flex-1 rounded-full px-3 text-sm font-semibold transition-colors",
-              signupMethod === "email"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {af.signupWithEmail}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={signupMethod === "phone"}
-            onClick={() => setSignupMethod("phone")}
-            className={cn(
-              "min-h-9 flex-1 rounded-full px-3 text-sm font-semibold transition-colors",
-              signupMethod === "phone"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {af.signupWithPhone}
-          </button>
-        </div>
-
-        {signupMethod === "email" ? (
-          <EmailSignupBlock
-            key={`signup-email-${locale}`}
-            af={af}
-            initialIdentifier={initialIdentifier}
-            initialPassword={initialPassword}
-          />
-        ) : (
-          <PhoneSignupBlock
-            key={`signup-phone-${locale}`}
-            af={af}
-            initialIdentifier={initialIdentifier}
-            initialPassword={initialPassword}
-          />
-        )}
+        <SignupBlock
+          af={af}
+          initialIdentifier={initialIdentifier}
+          initialPassword={initialPassword}
+          returnTo={returnTo}
+        />
       </Card>
     );
   }

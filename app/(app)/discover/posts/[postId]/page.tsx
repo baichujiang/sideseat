@@ -1,5 +1,6 @@
 import type { Route } from "next";
-import { redirect, notFound } from "next/navigation";
+import type { ReactNode } from "react";
+import { notFound } from "next/navigation";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { ClassmatePostDetailViewBeacon } from "@/components/discover/classmate-post-detail-view-beacon";
@@ -8,11 +9,11 @@ import { BuddyRequestBottomBar } from "@/components/discover/buddy-request-detai
 import { BuddyRequestContent } from "@/components/discover/buddy-request-detail/buddy-request-content";
 import { BuddyRequestDetailShell } from "@/components/discover/buddy-request-detail/buddy-request-detail-shell";
 import { BuddyRequestMediaCarousel } from "@/components/discover/buddy-request-detail/buddy-request-media-carousel";
-import { BuddyRequestTopBar } from "@/components/discover/buddy-request-detail/buddy-request-top-bar";
 import {
   PlanDetailsCard,
   type BuddyPlanRow,
 } from "@/components/discover/buddy-request-detail/plan-details-card";
+import { BackLink } from "@/components/nav/back-link";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import {
@@ -43,7 +44,26 @@ import {
   type ClassmatePostDetail,
   type ClassmatePostDetailAuthor,
 } from "@/lib/queries/classmate-post-detail";
-import { cn } from "@/lib/utils";
+
+function BuddyRequestPageHeader({
+  backHref,
+  backLabel,
+  title,
+  shareSlot,
+}: {
+  backHref: Route;
+  backLabel: string;
+  title: string;
+  shareSlot?: ReactNode;
+}) {
+  return (
+    <div className="mb-3 flex items-center gap-2">
+      <BackLink href={backHref} fallback="/discover" label={backLabel} />
+      <h1 className="min-w-0 flex-1 truncate text-[17px] font-semibold text-foreground">{title}</h1>
+      {shareSlot ? <div className="shrink-0">{shareSlot}</div> : null}
+    </div>
+  );
+}
 
 function buildBuddyPlanRows(
   locale: AppLocale,
@@ -125,6 +145,7 @@ export default async function DiscoverPostDetailPage({
       sportMeta,
       imageUrls,
       linkedCourses: courses,
+      interestedCount: post._count.saves,
     };
     const displayStatus = getBuddyRequestDisplayStatus({
       status: post.status,
@@ -135,84 +156,80 @@ export default async function DiscoverPostDetailPage({
     const planRows = buildBuddyPlanRows(locale, bundle, displayStatus, cityLabel);
 
     return (
-      <BuddyRequestDetailShell
-        bottomBar={
-          <BuddyRequestBottomBar
-            variant="guest"
-            displayStatus={displayStatus}
-            viewerCanMessage={false}
-            postId={post.id}
-            authorId={author.id}
-            postPath={postPath}
-            initialSaved={false}
-            signInHref={signInHref}
-            messageCta={detail.messageAuthorCta}
-            messageAria={detail.messageAuthorAria}
-            signInCta={detail.signInToMessageCta}
-            signInAria={detail.signInToMessageAria}
-            manageCta={detail.manageRequestCta}
-            manageAria={detail.manageRequestAria}
-            expiredNote={detail.bottomBarRequestExpired}
-            closedNote={detail.bottomBarRequestClosed}
-            messagingUnavailable={detail.bottomBarMessagingUnavailable}
-          />
-        }
-      >
-        <article
-          className={cn(
-            "overflow-hidden rounded-[1.25rem] border border-border/80 bg-card",
-            "shadow-[0_4px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.25)]",
-          )}
-        >
-          <BuddyRequestTopBar
-            backHref={backHref}
-            backLabel={ui.common.back}
-            authorName={author.nickname ?? author.username}
-            profileHref={profilePeerHref}
-            avatarUrl={author.avatarUrl}
-            school={author.school}
-            verifiedStudent={author.verifiedStudent}
-            studentVerificationStatus={author.studentVerificationStatus}
-            profileAria={detail.viewProfileAria}
-            shareSlot={null}
-          />
-          <div className="space-y-5 px-3 pb-4 pt-4 sm:px-4 sm:pb-5 sm:pt-5">
-            <BuddyRequestContent
-              locale={locale}
-              category={post.category}
+      <>
+        <BuddyRequestPageHeader
+          backHref={backHref}
+          backLabel={ui.common.back}
+          title={ui.discoverZone.tabBuddies}
+        />
+        <BuddyRequestDetailShell
+          bottomBar={
+            <BuddyRequestBottomBar
+              variant="guest"
               displayStatus={displayStatus}
-              title={post.title}
-              body={post.body}
-              createdAt={post.createdAt}
-              expiresAt={post.expiresAt}
-              updatedAt={post.updatedAt}
-              isAuthor={false}
-              studyMeta={studyMeta}
-              languageMeta={languageMeta}
-              sportMeta={sportMeta}
-              courses={courses}
-              courseLinkBase={null}
-              highlightViewerCourses={false}
-              viewerCourseMatchIndex={null}
-              media={
-                imageUrls.length > 0 ? (
-                  <BuddyRequestMediaCarousel
-                    urls={imageUrls}
-                    category={post.category}
-                    title={post.title}
-                    ariaLabel={ui.discoverList.postCardImagesAria}
-                  />
-                ) : undefined
-              }
+              viewerCanMessage={false}
+              postId={post.id}
+              authorId={author.id}
+              postPath={postPath}
+              initialSaved={false}
+              signInHref={signInHref}
+              messageCta={detail.messageAuthorCta}
+              messageAria={detail.messageAuthorAria}
+              signInCta={detail.signInToMessageCta}
+              signInAria={detail.signInToMessageAria}
+              manageCta={detail.manageRequestCta}
+              manageAria={detail.manageRequestAria}
+              expiredNote={detail.bottomBarRequestExpired}
+              closedNote={detail.bottomBarRequestClosed}
+              messagingUnavailable={detail.bottomBarMessagingUnavailable}
             />
-            <PlanDetailsCard title={detail.planDetailsTitle} rows={planRows} />
-            <div className="space-y-3 border-t border-border/60 pt-4">
-              <p className="text-[13px] leading-snug text-muted-foreground">{detail.guestIntro}</p>
-              <GuestAppCta returnTo={postPath} />
-            </div>
+          }
+        >
+          <BuddyRequestContent
+            locale={locale}
+            category={post.category}
+            displayStatus={displayStatus}
+            title={post.title}
+            body={post.body}
+            createdAt={post.createdAt}
+            expiresAt={post.expiresAt}
+            updatedAt={post.updatedAt}
+            isAuthor={false}
+            interestedCount={bundle.interestedCount}
+            studyMeta={studyMeta}
+            languageMeta={languageMeta}
+            sportMeta={sportMeta}
+            courses={courses}
+            courseLinkBase={null}
+            highlightViewerCourses={false}
+            viewerCourseMatchIndex={null}
+            author={{
+              name: author.nickname ?? author.username,
+              profileHref: profilePeerHref,
+              avatarUrl: author.avatarUrl,
+              school: author.school,
+              verifiedStudent: author.verifiedStudent,
+              studentVerificationStatus: author.studentVerificationStatus,
+              profileAria: detail.viewProfileAria,
+            }}
+            planDetails={<PlanDetailsCard title={detail.planDetailsTitle} rows={planRows} />}
+            media={
+              imageUrls.length > 0 ? (
+                <BuddyRequestMediaCarousel
+                  urls={imageUrls}
+                  category={post.category}
+                  title={post.title}
+                  ariaLabel={ui.discoverList.postCardImagesAria}
+                />
+              ) : undefined
+            }
+          />
+          <div className="space-y-3 rounded-2xl border border-border/70 bg-card/50 px-4 py-3">
+            <p className="text-[13px] leading-snug text-muted-foreground">{detail.guestIntro}</p>
+            <GuestAppCta returnTo={postPath} />
           </div>
-        </article>
-      </BuddyRequestDetailShell>
+        </BuddyRequestDetailShell>
+      </>
     );
   }
 
@@ -304,59 +321,56 @@ export default async function DiscoverPostDetailPage({
   );
 
   return (
-    <BuddyRequestDetailShell bottomBar={bottomBar}>
-      <article
-        className={cn(
-          "overflow-hidden rounded-[1.25rem] border border-border/80 bg-card",
-          "shadow-[0_4px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.25)]",
-        )}
-      >
+    <>
+      <BuddyRequestPageHeader
+        backHref={backHref}
+        backLabel={ui.common.back}
+        title={ui.discoverZone.tabBuddies}
+        shareSlot={shareSlot}
+      />
+      <BuddyRequestDetailShell bottomBar={bottomBar}>
         {!isAuthor ? <ClassmatePostDetailViewBeacon postId={post.id} /> : null}
-        <BuddyRequestTopBar
-          backHref={backHref}
-          backLabel={ui.common.back}
-          authorName={author.nickname ?? author.username}
-          profileHref={profilePeerHref}
-          avatarUrl={author.avatarUrl}
-          school={author.school}
-          verifiedStudent={author.verifiedStudent}
-          studentVerificationStatus={author.studentVerificationStatus}
-          profileAria={!isAuthor ? detail.viewProfileAria : undefined}
-          shareSlot={shareSlot}
+        <BuddyRequestContent
+          locale={locale}
+          category={post.category}
+          displayStatus={displayStatus}
+          title={post.title}
+          body={post.body}
+          createdAt={post.createdAt}
+          expiresAt={post.expiresAt}
+          updatedAt={post.updatedAt}
+          isAuthor={isAuthor}
+          interestedCount={post.interestedCount}
+          studyMeta={post.studyMeta}
+          languageMeta={post.languageMeta}
+          sportMeta={post.sportMeta}
+          courses={post.linkedCourses}
+          courseLinkBase="/courses"
+          highlightViewerCourses
+          viewerCourseMatchIndex={viewerCourseMatchIndex}
+          author={{
+            name: author.nickname ?? author.username,
+            profileHref: profilePeerHref,
+            avatarUrl: author.avatarUrl,
+            school: author.school,
+            verifiedStudent: author.verifiedStudent,
+            studentVerificationStatus: author.studentVerificationStatus,
+            profileAria: !isAuthor ? detail.viewProfileAria : undefined,
+          }}
+          planDetails={<PlanDetailsCard title={detail.planDetailsTitle} rows={planRows} />}
+          media={
+            post.imageUrls.length > 0 ? (
+              <BuddyRequestMediaCarousel
+                urls={post.imageUrls}
+                category={post.category}
+                title={post.title}
+                ariaLabel={ui.discoverList.postCardImagesAria}
+              />
+            ) : undefined
+          }
         />
-        <div className="space-y-5 px-3 pb-4 pt-4 sm:px-4 sm:pb-5 sm:pt-5">
-          <BuddyRequestContent
-            locale={locale}
-            category={post.category}
-            displayStatus={displayStatus}
-            title={post.title}
-            body={post.body}
-            createdAt={post.createdAt}
-            expiresAt={post.expiresAt}
-            updatedAt={post.updatedAt}
-            isAuthor={isAuthor}
-            studyMeta={post.studyMeta}
-            languageMeta={post.languageMeta}
-            sportMeta={post.sportMeta}
-            courses={post.linkedCourses}
-            courseLinkBase="/courses"
-            highlightViewerCourses
-            viewerCourseMatchIndex={viewerCourseMatchIndex}
-            media={
-              post.imageUrls.length > 0 ? (
-                <BuddyRequestMediaCarousel
-                  urls={post.imageUrls}
-                  category={post.category}
-                  title={post.title}
-                  ariaLabel={ui.discoverList.postCardImagesAria}
-                />
-              ) : undefined
-            }
-          />
-          <PlanDetailsCard title={detail.planDetailsTitle} rows={planRows} />
-        </div>
-      </article>
-    </BuddyRequestDetailShell>
+      </BuddyRequestDetailShell>
+    </>
   );
 }
 
@@ -401,6 +415,7 @@ async function getClassmatePostDetailForGuest(postId: string, now: Date) {
       language: true,
       sport: true,
       images: { select: { url: true, sortOrder: true } },
+      _count: { select: { saves: true } },
     },
   });
 }

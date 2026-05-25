@@ -7,6 +7,10 @@ export type LoginUsernameMessages = {
   reserved: string;
 };
 
+export type SignupPasswordMessages = {
+  tooShort: string;
+};
+
 export const LOGIN_USERNAME_MESSAGES_EN: LoginUsernameMessages = {
   tooShort: "Username must be at least 2 characters.",
   tooLong: "Username must be at most 32 characters.",
@@ -26,6 +30,10 @@ export function loginUsernameField(messages: LoginUsernameMessages) {
 }
 
 const usernameSchema = loginUsernameField(LOGIN_USERNAME_MESSAGES_EN);
+
+const SIGNUP_PASSWORD_MESSAGES_EN: SignupPasswordMessages = {
+  tooShort: "Password must be at least 8 characters.",
+};
 
 const emailFieldSchema = z
   .string()
@@ -105,7 +113,19 @@ export function createSignupPhoneSchema(
     });
 }
 
-export const signupSchema = z
+export function createSignupSchema(
+  usernameMessages: LoginUsernameMessages = LOGIN_USERNAME_MESSAGES_EN,
+  passwordMessages: SignupPasswordMessages = SIGNUP_PASSWORD_MESSAGES_EN,
+) {
+  return z.object({
+    username: loginUsernameField(usernameMessages),
+    password: z.string().min(8, passwordMessages.tooShort),
+  });
+}
+
+export const signupSchema = createSignupSchema();
+
+export const legacySignupSchema = z
   .object({
     username: usernameSchema,
     password: z.string().min(8, "Password must be at least 8 characters."),
@@ -150,7 +170,7 @@ export const forgotPasswordResetSchema = z
   });
 
 export const loginSchema = z.object({
-  identifier: z.string().min(1, "Enter your username, email, or phone."),
+  identifier: z.string().min(1, "Enter your username."),
   password: z.string().min(1, "Enter your password."),
 });
 

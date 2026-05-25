@@ -52,6 +52,7 @@ export type ClassmatePostDetail = {
   languageMeta?: DiscoverPostRowLanguageMeta;
   sportMeta?: DiscoverPostRowSportMeta;
   imageUrls: string[];
+  interestedCount: number;
 };
 
 export type ClassmatePostDetailView =
@@ -124,6 +125,7 @@ export async function getClassmatePostDetailForViewer(
       language: true,
       sport: true,
       images: { select: { url: true, sortOrder: true } },
+      _count: { select: { saves: true } },
     },
   });
 
@@ -164,6 +166,7 @@ export async function getClassmatePostDetailForViewer(
         languageMeta,
         sportMeta,
         imageUrls,
+        interestedCount: post._count.saves,
       },
       author,
       isAuthor: true,
@@ -218,6 +221,7 @@ export async function getClassmatePostDetailForViewer(
       languageMeta,
       sportMeta,
       imageUrls,
+      interestedCount: post._count.saves,
     },
     author,
     isAuthor: false,

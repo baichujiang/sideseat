@@ -55,6 +55,7 @@ export default async function PeerUserProfilePage({
             semester: peer.semester,
           })}
           peer={{
+            username: peer.username,
             nickname: peer.nickname,
             gender: peer.gender,
             avatarUrl: peer.avatarUrl,

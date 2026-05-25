@@ -6,7 +6,6 @@ import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
 import { getSessionUser } from "@/lib/auth/session";
 import { buildInboxListVersion, prepareInboxListMerged } from "@/lib/inbox/inbox-list-version";
 import { getInboxMergeBundle } from "@/lib/queries/inbox-merge";
-import { getRecommendedClassmatesForViewer } from "@/lib/queries/recommended-classmates";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 
 export default async function InboxPage() {
@@ -21,10 +20,9 @@ export default async function InboxPage() {
   }
   const user = sessionUser;
 
-  const [, { merged: rawMerged, plansNeedingYourAction }, recommendedClassmates] = await Promise.all([
+  const [, { merged: rawMerged, plansNeedingYourAction }] = await Promise.all([
     ensureAssistantBotConnection(user.id),
     getInboxMergeBundle(user.id),
-    getRecommendedClassmatesForViewer(user.id),
   ]);
   const merged = prepareInboxListMerged(rawMerged);
   const directContacts = merged
@@ -52,7 +50,6 @@ export default async function InboxPage() {
           plansNeedingYourAction={plansNeedingYourAction}
           initialContacts={directContacts}
           showCreateSheet
-          recommendedClassmates={recommendedClassmates}
         />
       </div>
     </TabKeepAliveSnapshot>

@@ -1,9 +1,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { redirect } from "next/navigation";
-import { AtSign, Info, KeyRound, LogOut, Mail, ShieldBan, UserX } from "lucide-react";
-
-import { isSystemAllocatedUsername } from "@/lib/auth/system-username";
+import { Info, KeyRound, LogOut, Mail, ShieldBan, UserX } from "lucide-react";
 
 import { LogoutForm } from "@/components/auth/logout-form";
 import { BackLink } from "@/components/nav/back-link";
@@ -30,12 +28,6 @@ export default async function ProfileAccountPage() {
         : formatMessage(m.account.blockedMany, { count: blockedCount });
 
   const loginEmailMeta = user.email?.trim() ? user.email.trim() : m.account.loginEmail.notSet;
-  const loginUsername = user.username?.trim() ?? "";
-  const loginUsernameHint = loginUsername
-    ? isSystemAllocatedUsername(loginUsername)
-      ? m.account.loginUsername.hintSystem
-      : m.account.loginUsername.hint
-    : null;
 
   return (
     <div className="space-y-5 pb-2">
@@ -52,7 +44,6 @@ export default async function ProfileAccountPage() {
       <ProfilePrivacyCard
         initialValues={{
           hideFromDiscovery: user.hideFromDiscovery,
-          hideFromRecommendations: user.hideFromRecommendations,
           hideFromCourseMembers: user.hideFromCourseMembers,
         }}
       />
@@ -60,36 +51,9 @@ export default async function ProfileAccountPage() {
       <div className="overflow-hidden rounded-2xl border border-classmates-edge bg-classmates-surface shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card">
         {!user.isGuest ? (
           <>
-            {loginUsername ? (
-              <Link
-                href="/profile/account/login-username"
-                className="flex items-center justify-between gap-3 px-4 py-3.5 transition-colors active:bg-classmates-warm-alt dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
-              >
-                <div className="flex min-w-0 items-start gap-3">
-                  <span className={meSettingsRowListIconShellLargeClass}>
-                    <AtSign className="h-5 w-5" strokeWidth={2} aria-hidden />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[14px] font-semibold leading-tight text-foreground">
-                      {m.account.loginUsername.title}
-                    </p>
-                    <p className="mt-1 truncate font-mono text-[12px] font-medium tabular-nums text-muted-foreground">
-                      {loginUsername}
-                    </p>
-                    {loginUsernameHint ? (
-                      <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{loginUsernameHint}</p>
-                    ) : null}
-                  </div>
-                </div>
-              </Link>
-            ) : null}
             <Link
               href="/profile/account/login-email"
-              className={
-                loginUsername
-                  ? "flex items-center justify-between gap-3 border-t border-classmates-hairline px-4 py-3.5 transition-colors active:bg-classmates-warm-alt dark:border-border/60 dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
-                  : "flex items-center justify-between gap-3 px-4 py-3.5 transition-colors active:bg-classmates-warm-alt dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
-              }
+              className="flex items-center justify-between gap-3 px-4 py-3.5 transition-colors active:bg-classmates-warm-alt dark:active:bg-muted/30 [@media(hover:hover)]:hover:bg-classmates-warm-alt dark:[@media(hover:hover)]:hover:bg-muted/25"
             >
               <div className="flex min-w-0 items-center gap-3">
                 <span className={meSettingsRowListIconShellLargeClass}>

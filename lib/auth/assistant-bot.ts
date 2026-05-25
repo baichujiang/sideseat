@@ -9,9 +9,9 @@ import { prisma } from "@/lib/db/prisma";
 export const ASSISTANT_BOT_USERNAME = "sideseat_assistant";
 
 const WELCOME_MESSAGE_EN =
-  "Hi! I'm the SideSeat assistant — product help only, not a real classmate.\n\nTap a quick question below or type your own. I'll point you to the right place in the app.";
+  "Hi! I'm the SideSeat assistant — product help only, not a real classmate.\n\nTap a quick question here or type your own. I'll point you to the right place in the app.";
 const WELCOME_MESSAGE_ZH =
-  "你好！我是 SideSeat 小助手，只做产品说明，不是真人同学。\n\n点下面快捷问题，或直接输入；我会告诉你在应用里该怎么操作。";
+  "你好！我是 SideSeat 小助手，只做产品说明，不是真人同学。\n\n点这里的快捷问题，或直接输入；我会告诉你在应用里该怎么操作。";
 
 export async function getOrCreateAssistantBotUser() {
   const existing = await prisma.user.findUnique({

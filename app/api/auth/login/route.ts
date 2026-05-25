@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const user = await findUserForLogin(values.identifier);
 
     if (!user || !(await verifyPassword(values.password, user.hashedPassword))) {
-      return error("Invalid username, email, phone, or password.", 401);
+      return error("Invalid username or password.", 401);
     }
 
     await ensureAssistantBotConnection(user.id);

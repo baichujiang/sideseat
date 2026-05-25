@@ -9,11 +9,11 @@ import { getMessages } from "@/lib/i18n/messages";
 import { buildSchoolSummaryLine } from "@/lib/profile/school-summary-line";
 import { cn } from "@/lib/utils";
 
-/** Shared avatar + name + tagline + school block for Me preview and `/profile/info` header. */
+/** Shared avatar + username + school block for Me preview and `/profile/info` header. */
 export function ProfileMeHeaderDisplay({
   locale,
+  username,
   nickname,
-  bio,
   avatarUrl,
   gender,
   school,
@@ -23,8 +23,8 @@ export function ProfileMeHeaderDisplay({
   className,
 }: {
   locale: AppLocale;
+  username: string | null;
   nickname: string | null;
-  bio: string | null;
   avatarUrl: string | null;
   gender: UserGender;
   school: string | null;
@@ -34,9 +34,7 @@ export function ProfileMeHeaderDisplay({
   className?: string;
 }) {
   const t = getMessages(locale).meIdentity;
-  const displayName = nickname?.trim() || t.displayNamePlaceholder;
-  const bioTrimmed = bio?.trim() ?? "";
-  const hasBio = bioTrimmed.length > 0;
+  const displayName = username?.trim() || nickname?.trim() || t.displayNamePlaceholder;
   const schoolLine = buildSchoolSummaryLine(schoolSummary, t.schoolLineSemester);
 
   return (
@@ -51,7 +49,7 @@ export function ProfileMeHeaderDisplay({
       </figure>
       <div className="min-w-0 flex-1 pt-0.5 text-left">
         <div className="flex flex-wrap items-center gap-1.5">
-          <p className="truncate text-[20px] font-bold leading-tight tracking-tight text-classmates-ink dark:text-foreground">
+          <p className="truncate font-mono text-[20px] font-bold leading-tight tracking-tight text-classmates-ink dark:text-foreground">
             {displayName}
           </p>
           <UserGenderProfileMark gender={gender} iconClassName="h-4 w-4" />
@@ -63,16 +61,6 @@ export function ProfileMeHeaderDisplay({
             status={studentVerificationStatus}
           />
         </div>
-        <p
-          className={cn(
-            "mt-1 line-clamp-2 text-pretty text-[13px] leading-snug",
-            hasBio
-              ? "text-classmates-ink/90 dark:text-foreground/90"
-              : "italic text-classmates-sub dark:text-muted-foreground",
-          )}
-        >
-          {hasBio ? bioTrimmed : t.taglineEmpty}
-        </p>
         <p className="mt-1 text-[13px] font-medium leading-snug text-classmates-sub dark:text-muted-foreground">
           {schoolLine}
         </p>

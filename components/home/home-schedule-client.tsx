@@ -44,8 +44,6 @@ type HomeScheduleStorageRecord = HomeScheduleCache & {
   version: typeof HOME_SCHEDULE_STORAGE_VERSION;
 };
 
-type CacheNoticeKind = "offline" | "stale";
-
 function homeScheduleStorageKey(userId: string): string | null {
   if (!userId.trim()) return null;
   return `${HOME_SCHEDULE_STORAGE_PREFIX}${encodeURIComponent(userId)}`;
@@ -168,8 +166,13 @@ export function HomeScheduleClient({
 }) {
   const { messages } = useLocaleContext();
   const nowRef = useRef(new Date(nowISO));
-  const fullScrollRangeStart = subDays(nowRef.current, HOME_CALENDAR_DATA_WINDOW_PAST_DAYS);
-  const fullScrollRangeEnd = addDays(nowRef.current, HOME_CALENDAR_DATA_WINDOW_FUTURE_DAYS);
+  const { fullScrollRangeStart, fullScrollRangeEnd } = useMemo(
+    () => ({
+      fullScrollRangeStart: subDays(nowRef.current, HOME_CALENDAR_DATA_WINDOW_PAST_DAYS),
+      fullScrollRangeEnd: addDays(nowRef.current, HOME_CALENDAR_DATA_WINDOW_FUTURE_DAYS),
+    }),
+    [],
+  );
 
   const cached =
     homeScheduleModuleCache?.userId === userId ? homeScheduleModuleCache : null;
@@ -193,8 +196,7 @@ export function HomeScheduleClient({
   const [loadedRangeEndMs, setLoadedRangeEndMs] = useState<number | null>(
     () => cached?.loadedRangeEndMs ?? null,
   );
-  const [cacheNotice, setCacheNotice] = useState<CacheNoticeKind | null>(null);
-  const [isOnline, setIsOnline] = useState(true);
+  const [activeOnlineRefreshes, setActiveOnlineRefreshes] = useState(0);
 
   const stateRef = useRef({
     classBlocks,
@@ -216,6 +218,15 @@ export function HomeScheduleClient({
   };
 
   const inFlightWindowsRef = useRef<Set<string>>(new Set());
+  const inFlightIcsWindowsRef = useRef<Set<string>>(new Set());
+  const lastVirtualFetchWindowKeyRef = useRef<string | null>(null);
+
+  const beginOnlineRefresh = useCallback(() => {
+    setActiveOnlineRefreshes((count) => count + 1);
+    return () => {
+      setActiveOnlineRefreshes((count) => Math.max(0, count - 1));
+    };
+  }, []);
 
   const applyScheduleCache = useCallback((cache: HomeScheduleCache) => {
     const nextState = {
@@ -239,37 +250,29 @@ export function HomeScheduleClient({
   }, []);
 
   const restorePersistentScheduleCache = useCallback(
-    (notice: CacheNoticeKind) => {
+    () => {
       const stored = readPersistentHomeScheduleCache(userId);
       const currentModule =
         homeScheduleModuleCache?.userId === userId ? homeScheduleModuleCache : null;
 
       if (!stored) {
-        if (
+        return Boolean(
           currentModule &&
           stateRef.current.loadedRangeStartMs != null &&
           stateRef.current.loadedRangeEndMs != null
-        ) {
-          setCacheNotice(notice);
-          return true;
-        }
-        return false;
+        );
       }
 
       if (!currentModule || stored.fetchedAt > currentModule.fetchedAt) {
         applyScheduleCache(stored);
       }
-      setCacheNotice(notice);
       return true;
     },
     [applyScheduleCache, userId],
   );
 
   const markCachedFallback = useCallback(() => {
-    const notice: CacheNoticeKind = isBrowserOnline() ? "stale" : "offline";
-    if (restorePersistentScheduleCache(notice)) return;
-    const { loadedRangeStartMs: loadedStart, loadedRangeEndMs: loadedEnd } = stateRef.current;
-    if (loadedStart != null && loadedEnd != null) setCacheNotice(notice);
+    restorePersistentScheduleCache();
   }, [restorePersistentScheduleCache]);
 
   const writeModuleCache = useCallback(
@@ -318,6 +321,7 @@ export function HomeScheduleClient({
       const flightKey = `${clampedStart.toISOString()}|${clampedEnd.toISOString()}`;
       if (inFlightWindowsRef.current.has(flightKey)) return;
       inFlightWindowsRef.current.add(flightKey);
+      const endOnlineRefresh = beginOnlineRefresh();
 
       try {
         const res = await apiFetch(scheduleFetchUrl(clampedStart, clampedEnd));
@@ -360,14 +364,14 @@ export function HomeScheduleClient({
           loadedRangeStartMs: nextStartMs,
           loadedRangeEndMs: nextEndMs,
         });
-        setCacheNotice(null);
       } catch {
         markCachedFallback();
       } finally {
         inFlightWindowsRef.current.delete(flightKey);
+        endOnlineRefresh();
       }
     },
-    [fullScrollRangeEnd, fullScrollRangeStart, markCachedFallback, userId, writeModuleCache],
+    [beginOnlineRefresh, fullScrollRangeEnd, fullScrollRangeStart, markCachedFallback, userId, writeModuleCache],
   );
 
   const fetchIcsWindow = useCallback(
@@ -376,6 +380,10 @@ export function HomeScheduleClient({
       const clampedEnd = windowEnd > fullScrollRangeEnd ? fullScrollRangeEnd : windowEnd;
       if (clampedStart > clampedEnd) return;
       if (!isBrowserOnline()) return;
+      const flightKey = `${clampedStart.toISOString()}|${clampedEnd.toISOString()}`;
+      if (inFlightIcsWindowsRef.current.has(flightKey)) return;
+      inFlightIcsWindowsRef.current.add(flightKey);
+      const endOnlineRefresh = beginOnlineRefresh();
 
       try {
         const res = await apiFetch(icsFetchUrl(clampedStart, clampedEnd));
@@ -394,9 +402,12 @@ export function HomeScheduleClient({
         writeModuleCache({ userId, icsStudyEntries: nextIcsStudyEntries });
       } catch {
         // ICS feeds are best-effort — keep DB entries visible.
+      } finally {
+        inFlightIcsWindowsRef.current.delete(flightKey);
+        endOnlineRefresh();
       }
     },
-    [fullScrollRangeEnd, fullScrollRangeStart, userId, writeModuleCache],
+    [beginOnlineRefresh, fullScrollRangeEnd, fullScrollRangeStart, userId, writeModuleCache],
   );
 
   const revalidateSchedule = useCallback(() => {
@@ -420,28 +431,14 @@ export function HomeScheduleClient({
   }, [fetchIcsWindow, fetchScheduleWindow, markCachedFallback]);
 
   useEffect(() => {
-    const syncOnline = () => {
-      setIsOnline(isBrowserOnline());
-    };
     const handleOnline = () => {
-      setIsOnline(true);
-      const { loadedRangeStartMs: loadedStart, loadedRangeEndMs: loadedEnd } = stateRef.current;
-      if (loadedStart != null && loadedEnd != null) {
-        setCacheNotice("stale");
-      }
       revalidateSchedule();
     };
     const handleOffline = () => {
-      setIsOnline(false);
-      const { loadedRangeStartMs: loadedStart, loadedRangeEndMs: loadedEnd } = stateRef.current;
-      if (loadedStart != null && loadedEnd != null) {
-        setCacheNotice("offline");
-      } else {
-        restorePersistentScheduleCache("offline");
-      }
+      restorePersistentScheduleCache();
     };
 
-    syncOnline();
+    if (!isBrowserOnline()) restorePersistentScheduleCache();
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
     return () => {
@@ -455,11 +452,10 @@ export function HomeScheduleClient({
     const initialEnd = addDays(nowRef.current, HOME_SCHEDULE_INITIAL_WINDOW_FUTURE_DAYS);
     const hadModuleCache = cached != null;
     const restoredPersistentCache =
-      hadModuleCache ? false : restorePersistentScheduleCache(isBrowserOnline() ? "stale" : "offline");
+      hadModuleCache ? false : restorePersistentScheduleCache();
     const hadCache = hadModuleCache || restoredPersistentCache;
 
     if (!isBrowserOnline()) {
-      if (hadCache) setCacheNotice("offline");
       return;
     }
 
@@ -489,6 +485,9 @@ export function HomeScheduleClient({
       const pad = WEEK_CALENDAR_VIRTUAL_EXTEND_CHUNK_DAYS;
       const needStart = subDays(bounds.start, pad);
       const needEnd = addDays(bounds.end, pad);
+      const fetchWindowKey = `${needStart.toISOString()}|${needEnd.toISOString()}`;
+      if (lastVirtualFetchWindowKeyRef.current === fetchWindowKey) return;
+      lastVirtualFetchWindowKeyRef.current = fetchWindowKey;
       void fetchScheduleWindow(needStart, needEnd, { mergeEntries: true });
       void fetchIcsWindow(needStart, needEnd);
     },
@@ -500,25 +499,22 @@ export function HomeScheduleClient({
     [dbStudyEntries, icsStudyEntries],
   );
 
-  const cacheNoticeSlot = cacheNotice ? (
+  const isUpdatingSchedule = activeOnlineRefreshes > 0;
+  const scheduleUpdateSlot = isUpdatingSchedule ? (
     <div
       role="status"
-      className="inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-amber-200/80 bg-amber-50/90 px-3 py-1.5 text-[12px] font-medium text-amber-900 shadow-sm dark:border-amber-400/25 dark:bg-amber-950/35 dark:text-amber-100"
+      aria-live="polite"
+      className="flex justify-end"
     >
-      <span>
-        {cacheNotice === "offline"
-          ? messages.home.offlineScheduleCacheNotice
-          : messages.home.staleScheduleCacheNotice}
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-border/55 bg-background/70 px-2.5 py-1 text-[11px] font-medium text-muted-foreground shadow-sm backdrop-blur">
+        <span className="relative flex h-2 w-2" aria-hidden>
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#2563EB]/35" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-[#2563EB]/75" />
+        </span>
+        <span>
+          {messages.home.updatingSchedule}
+        </span>
       </span>
-      {isOnline ? (
-        <button
-          type="button"
-          className="rounded-full border border-amber-300/70 bg-white/75 px-2 py-0.5 text-[11px] font-semibold text-amber-950 transition hover:bg-white dark:border-amber-300/30 dark:bg-amber-900/45 dark:text-amber-50 dark:hover:bg-amber-900/65"
-          onClick={revalidateSchedule}
-        >
-          {messages.home.retryScheduleCache}
-        </button>
-      ) : null}
     </div>
   ) : null;
 
@@ -533,7 +529,7 @@ export function HomeScheduleClient({
         semesterStartISO={semesterStartISO}
         semesterEndISO={semesterEndISO}
         homeGreeting={homeGreeting}
-        homeBelowHeaderSlot={cacheNoticeSlot}
+        homeBelowHeaderSlot={scheduleUpdateSlot}
         naturalScheduleEnabled={naturalScheduleEnabled}
         onScheduleRefresh={revalidateSchedule}
         onVirtualStripBoundsChange={handleVirtualStripBoundsChange}

@@ -39,6 +39,7 @@ const infoHeaderCardClass = cn(
 
 export function ProfileMeInfoCard({
   locale,
+  username,
   nickname,
   bio,
   avatarUrl,
@@ -53,6 +54,7 @@ export function ProfileMeInfoCard({
   verificationEmail,
 }: {
   locale: AppLocale;
+  username: string | null;
   nickname: string | null;
   bio: string | null;
   avatarUrl: string | null;
@@ -72,7 +74,7 @@ export function ProfileMeInfoCard({
   const sv = getMessages(locale).studentVerification;
   const cityNames = getMessages(locale).discover.cityNames;
 
-  const nameDisplay = nickname?.trim() || t.displayNamePlaceholder;
+  const usernameDisplay = username?.trim() || nickname?.trim() || "—";
   const bioDisplay = bio?.trim() || t.taglineEmpty;
   const schoolDisplay = buildSchoolSummaryLine(schoolSummary, t.schoolLineSemester);
   const languagesDisplay = buildLanguagesValue(languageTags, locale, "—");
@@ -91,8 +93,8 @@ export function ProfileMeInfoCard({
           <div className="relative px-4 pb-3.5 pt-4">
             <ProfileMeHeaderDisplay
               locale={locale}
+              username={username}
               nickname={nickname}
-              bio={bio}
               avatarUrl={avatarUrl}
               gender={gender}
               school={school}
@@ -108,7 +110,11 @@ export function ProfileMeInfoCard({
               value={<PresetAvatar id={avatarUrl} size={40} className="shrink-0" />}
               valueClassName="flex justify-end"
             />
-            <ProfileInfoRow href={"/profile/name" as Route} title={t.rowName} value={nameDisplay} />
+            <ProfileInfoRow
+              href={"/profile/account/login-username" as Route}
+              title={t.rowUsername}
+              value={usernameDisplay}
+            />
             <ProfileInfoRow href={"/profile/bio" as Route} title={t.rowBio} value={bioDisplay} />
             <ProfileInfoRow href={"/profile/gender" as Route} title={t.rowGender} value={genderDisplay} />
             <ProfileInfoRow href={"/profile/academic" as Route} title={t.rowSchool} value={schoolDisplay} />

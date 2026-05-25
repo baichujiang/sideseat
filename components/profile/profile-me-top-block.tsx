@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 /** Me page header: profile preview (links to info) + inline life photo editor. */
 export function ProfileMeTopBlock({
   locale,
+  username,
   nickname,
-  bio,
   avatarUrl,
   gender,
   school,
@@ -26,8 +26,8 @@ export function ProfileMeTopBlock({
   readOnly = false,
 }: {
   locale: AppLocale;
+  username: string | null;
   nickname: string | null;
-  bio: string | null;
   avatarUrl: string | null;
   gender: UserGender;
   school: string | null;
@@ -52,8 +52,8 @@ export function ProfileMeTopBlock({
       <ProfileMeDisplayCard
         embedded
         locale={locale}
+        username={username}
         nickname={nickname}
-        bio={bio}
         avatarUrl={avatarUrl}
         gender={gender}
         school={school}

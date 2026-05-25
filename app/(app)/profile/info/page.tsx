@@ -32,6 +32,7 @@ export default async function ProfileInfoPage() {
     <ProfileSubpageShell title={ui.meIdentity.editProfileSheetTitle} backFallback="/profile">
       <ProfileMeInfoCard
         locale={locale}
+        username={user.username}
         nickname={user.nickname}
         bio={user.bio}
         avatarUrl={user.avatarUrl}

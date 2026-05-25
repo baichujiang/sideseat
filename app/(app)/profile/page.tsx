@@ -68,6 +68,7 @@ export default async function ProfilePage({
     query,
     settingsSubtitle,
     user: {
+      username: user.username,
       nickname: user.nickname,
       bio: user.bio,
       avatarUrl: user.avatarUrl,

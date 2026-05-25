@@ -17,7 +17,6 @@ import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { UserGenderProfileMark } from "@/components/ui/user-gender-icon";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { AVATAR_IDS, isDisplayableCustomAvatarUrl, isValidAvatarId } from "@/lib/constants/avatars";
 import { uploadProfileAvatarPhoto } from "@/lib/profile/upload-avatar";
@@ -26,11 +25,10 @@ import type { DiscoverCityNameKey } from "@/lib/discover/discover-city-name-keys
 import { cn } from "@/lib/utils";
 import { formatMessage } from "@/lib/i18n/messages";
 import { buildSchoolSummaryLine } from "@/lib/profile/school-summary-line";
-import { mapNicknameApiError } from "@/lib/profile/nickname-api-errors";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { homeProfileQuickSchema, profileSchema } from "@/lib/validators/profile";
 
-type Sheet = null | "edit" | "avatar" | "name" | "bio";
+type Sheet = null | "edit" | "avatar" | "bio";
 type SheetProfileValues = z.infer<typeof profileSchema>;
 
 const ROW =
@@ -85,7 +83,7 @@ export function ProfileIdentitySheets({
   sheetProfileFormKey,
   belowDisplayName,
   discoverCity,
-  /** ASCII handle for sign-in — shown on Me card and name sheet. */
+  /** Public username, also usable for sign-in. */
   loginUsername,
 }: {
   initialNickname: string | null;
@@ -97,7 +95,7 @@ export function ProfileIdentitySheets({
   gender?: UserGender | null;
   sheetProfileInitialValues?: SheetProfileValues;
   sheetProfileFormKey?: string;
-  /** Me /profile summary only — e.g. private self-chat title under the display name. */
+  /** Me /profile summary only — e.g. private self-chat title under the username. */
   belowDisplayName?: ReactNode;
   discoverCity?: DiscoverCityNameKey;
   loginUsername?: string | null;
@@ -113,7 +111,6 @@ export function ProfileIdentitySheets({
   const [nickname, setNickname] = useState(initialNickname?.trim() ?? "");
   const [bio, setBio] = useState(initialBio ?? "");
   const [avatarId, setAvatarId] = useState<string | null>(initialAvatarUrl);
-  const [draftName, setDraftName] = useState("");
   const [draftBio, setDraftBio] = useState("");
   const [draftAvatarId, setDraftAvatarId] = useState<string | null>(null);
   const [avatarAtEditOpen, setAvatarAtEditOpen] = useState<string | null>(null);
@@ -132,18 +129,12 @@ export function ProfileIdentitySheets({
     setError("");
   }, [sheet]);
 
-  const openName = () => {
-    setDraftName(nickname.trim() || "");
-    setSheet("name");
-  };
-
   const openBio = () => {
     setDraftBio(bio);
     setSheet("bio");
   };
 
   const openEditProfile = () => {
-    setDraftName(nickname.trim() || "");
     setDraftBio(bio);
     const initialA = avatarId ?? AVATAR_IDS[0] ?? null;
     setDraftAvatarId(initialA);
@@ -152,7 +143,7 @@ export function ProfileIdentitySheets({
     setSheet("edit");
   };
 
-  const patchQuick = useCallback(async (body: { nickname?: string; bio?: string }) => {
+  const patchQuick = useCallback(async (body: { bio?: string }) => {
     const res = await apiFetch("/api/profile/quick", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -160,13 +151,7 @@ export function ProfileIdentitySheets({
     });
     const payload = await res.json().catch(() => ({}));
     if (!res.ok || !payload.success) {
-      throw new Error(
-        mapNicknameApiError(
-          payload,
-          { taken: t.errorNicknameTaken, reserved: t.errorNicknameReserved },
-          typeof payload.error === "string" ? payload.error : t.errorCouldNotSave,
-        ),
-      );
+      throw new Error(typeof payload.error === "string" ? payload.error : t.errorCouldNotSave);
     }
     router.refresh();
   }, [router, t]);
@@ -204,24 +189,6 @@ export function ProfileIdentitySheets({
     [router, t],
   );
 
-  const saveName = () => {
-    setError("");
-    const parsed = homeProfileQuickSchema.shape.nickname.safeParse(draftName.trim());
-    if (!parsed.success) {
-      setError(parsed.error.errors[0]?.message ?? t.errorInvalidName);
-      return;
-    }
-    startTransition(async () => {
-      try {
-        await patchQuick({ nickname: parsed.data });
-        setNickname(parsed.data);
-        setSheet(null);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : t.errorCouldNotSave);
-      }
-    });
-  };
-
   const saveBio = () => {
     setError("");
     const parsed = homeProfileQuickSchema.shape.bio.safeParse(draftBio.trim() === "" ? "" : draftBio.trim());
@@ -243,11 +210,6 @@ export function ProfileIdentitySheets({
 
   const saveEditProfile = () => {
     setError("");
-    const parsedName = homeProfileQuickSchema.shape.nickname.safeParse(draftName.trim());
-    if (!parsedName.success) {
-      setError(parsedName.error.errors[0]?.message ?? t.errorInvalidName);
-      return;
-    }
     const parsedBio = homeProfileQuickSchema.shape.bio.safeParse(draftBio.trim() === "" ? "" : draftBio.trim());
     if (!parsedBio.success) {
       setError(parsedBio.error.errors[0]?.message ?? t.errorInvalidBio);
@@ -273,8 +235,7 @@ export function ProfileIdentitySheets({
             setAvatarId(nextAvatar);
           }
         }
-        await patchQuick({ nickname: parsedName.data, bio: parsedBio.data ?? "" });
-        setNickname(parsedName.data);
+        await patchQuick({ bio: parsedBio.data ?? "" });
         setBio(parsedBio.data ?? "");
         setSheet(null);
         router.refresh();
@@ -308,12 +269,8 @@ export function ProfileIdentitySheets({
     });
   };
 
-  const displayName = nickname.trim() || t.displayNamePlaceholder;
   const loginUsernameTrimmed = loginUsername?.trim() ?? "";
-  const loginUsernameCardLine = loginUsernameTrimmed
-    ? formatMessage(t.loginUsernameOnCard, { username: loginUsernameTrimmed })
-    : null;
-  const loginUsernameNameHint = loginUsernameTrimmed ? t.loginUsernameNameSheetHint : null;
+  const displayName = loginUsernameTrimmed || nickname.trim() || t.displayNamePlaceholder;
   const bioDisplay = bio.trim() ? bio.trim() : t.taglineEmpty;
   const schoolLine = schoolSummary ? buildSchoolSummaryLine(schoolSummary, t.schoolLineSemester) : null;
   const isCropOpen = avatarCropFile !== null;
@@ -407,11 +364,6 @@ export function ProfileIdentitySheets({
               <p className="page-screen-title-ink max-w-[18rem] truncate sm:max-w-md">{displayName}</p>
               {gender ? <UserGenderProfileMark gender={gender} iconClassName="h-5 w-5" /> : null}
             </div>
-            {loginUsernameCardLine ? (
-              <p className="mt-1.5 max-w-md truncate px-1 font-mono text-[13px] font-medium tabular-nums text-classmates-sub dark:text-zinc-400">
-                {loginUsernameCardLine}
-              </p>
-            ) : null}
             {schoolLine ? (
               <p className="mt-2 max-w-md px-1 text-[14px] font-medium leading-snug text-classmates-sub dark:text-zinc-400">
                 {schoolLine}
@@ -435,15 +387,6 @@ export function ProfileIdentitySheets({
             <span className="shrink-0 text-[15px] font-medium text-foreground">{t.rowPhoto}</span>
             <span className="flex min-w-0 items-center gap-2">
               <PresetAvatar className="h-11 w-11" id={avatarId} />
-              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50" aria-hidden />
-            </span>
-          </button>
-          <button type="button" className={ROW} onClick={openName}>
-            <span className="shrink-0 text-[15px] font-medium text-foreground">{t.rowName}</span>
-            <span className="flex min-w-0 max-w-[62%] items-center gap-1">
-              <span className="truncate text-right text-[14px] text-muted-foreground">
-                {nickname.trim() || "—"}
-              </span>
               <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50" aria-hidden />
             </span>
           </button>
@@ -575,17 +518,6 @@ export function ProfileIdentitySheets({
                         ) : null}
                         <p className="text-center text-[11px] text-muted-foreground">{t.tapAvatarHint}</p>
                       </div>
-                      <p className="mb-1 mt-5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                        {t.displayNameLabel}
-                      </p>
-                      <Input
-                        value={draftName}
-                        onChange={(e) => setDraftName(e.target.value)}
-                        maxLength={32}
-                        placeholder={t.nameFieldPlaceholder}
-                        className="h-11 rounded-[20px] border-classmates-edge bg-muted/40 text-[15px] outline-none transition focus-visible:border-classmates-azure focus-visible:ring-2 focus-visible:ring-classmates-azure/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:border-border"
-                      />
-                      <p className="mt-1 text-right text-[11px] text-muted-foreground tabular-nums">{draftName.length}/32</p>
                       <p className="mb-1 mt-4 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                         {t.bioSectionLabel}
                       </p>
@@ -686,41 +618,6 @@ export function ProfileIdentitySheets({
                     onClick={() => setSheet(avatarReturnToEdit ? "edit" : null)}
                   >
                     {common.cancel}
-                  </Button>
-                </div>
-              </>
-            ) : null}
-
-            {sheet === "name" && !isCropOpen ? (
-              <>
-                <SheetScreenHeader
-                  title={t.rowName}
-                  backAriaLabel={t.backAria}
-                  disabled={pending}
-                  onBack={() => setSheet(null)}
-                />
-                <div className="px-4 py-4">
-                  <Input
-                    value={draftName}
-                    onChange={(e) => setDraftName(e.target.value)}
-                    maxLength={32}
-                    placeholder={t.nameFieldPlaceholder}
-                    className="h-12 rounded-[20px] border-border bg-muted/40 text-[15px] focus-visible:border-[#ff2442] focus-visible:ring-[#ff2442]/25"
-                  />
-                  <p className="mt-2 text-right text-[11px] text-muted-foreground tabular-nums">{draftName.length}/32</p>
-                  {loginUsernameNameHint ? (
-                    <p className="mt-3 text-[12px] leading-snug text-muted-foreground">{loginUsernameNameHint}</p>
-                  ) : null}
-                  {error ? <p className="mt-2 text-[12px] text-destructive">{error}</p> : null}
-                </div>
-                <div className="border-t border-border px-3 pt-2">
-                  <Button
-                    type="button"
-                    className={cn("h-11 w-full rounded-full text-[16px] font-medium", SAVE_RED)}
-                    disabled={pending}
-                    onClick={saveName}
-                  >
-                    {pending ? t.saving : t.save}
                   </Button>
                 </div>
               </>

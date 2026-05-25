@@ -284,7 +284,7 @@ export function ProfileForm({
                 isCompactAcademic ? "pb-2" : "pb-3",
               )}
             >
-              {pf.recommendClassmatesBlurb}
+              {pf.schoolProgramBlurb}
             </p>
           ) : null}
         {isSheet && discoverCity ? (

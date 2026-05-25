@@ -164,6 +164,7 @@ type CalendarEventDeleteScope = "this" | "future" | "all";
 
 /** Same offset as the week-view share FAB — keeps the visible-days slider above the tab bar. */
 const HOME_WEEK_FLOATING_CONTROLS_BOTTOM_REM = 5.75;
+const HOME_WEEK_VIEWPORT_BODY_PX_UPDATE_THRESHOLD = 2;
 
 function measureSafeAreaInsetBottom(): number {
   if (typeof document === "undefined") return 0;
@@ -382,6 +383,7 @@ export function ScheduleSurface({
   const weekHomeLayoutRef = useRef<HTMLDivElement | null>(null);
   const weekVisibleDaysBarRef = useRef<HTMLDivElement | null>(null);
   const [weekHomeMaxViewportBodyPx, setWeekHomeMaxViewportBodyPx] = useState<number | null>(null);
+  const weekHomeMaxViewportBodyPxRef = useRef<number | null>(null);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
   const [scheduleShareBusy, setScheduleShareBusy] = useState(false);
   const recurringDeletePayloadRef = useRef<{ eventId: string } | null>(null);
@@ -1414,15 +1416,48 @@ export function ScheduleSurface({
   };
 
   const useCompactHomeHeader = homeGreeting != null;
+  const hasHomeBelowHeaderSlot = homeBelowHeaderSlot != null;
+  weekHomeMaxViewportBodyPxRef.current = weekHomeMaxViewportBodyPx;
 
   useLayoutEffect(() => {
     if (view !== "week") {
-      setWeekHomeMaxViewportBodyPx(null);
+      if (weekHomeMaxViewportBodyPxRef.current != null) {
+        weekHomeMaxViewportBodyPxRef.current = null;
+        setWeekHomeMaxViewportBodyPx((current) => (current == null ? current : null));
+      }
       return;
     }
     const wrap = weekHomeLayoutRef.current;
     const bar = weekVisibleDaysBarRef.current;
     if (!wrap || !bar) return;
+
+    let frameId: number | null = null;
+
+    const setMeasuredBodyPx = (next: number | null) => {
+      const current = weekHomeMaxViewportBodyPxRef.current;
+      if (current === next) return;
+      if (
+        current != null &&
+        next != null &&
+        Math.abs(current - next) < HOME_WEEK_VIEWPORT_BODY_PX_UPDATE_THRESHOLD
+      ) {
+        return;
+      }
+
+      weekHomeMaxViewportBodyPxRef.current = next;
+      setWeekHomeMaxViewportBodyPx((current) => {
+        if (current === next) return current;
+        if (
+          current != null &&
+          next != null &&
+          Math.abs(current - next) < HOME_WEEK_VIEWPORT_BODY_PX_UPDATE_THRESHOLD
+        ) {
+          weekHomeMaxViewportBodyPxRef.current = current;
+          return current;
+        }
+        return next;
+      });
+    };
 
     const measure = () => {
       const vv = window.visualViewport;
@@ -1437,25 +1472,32 @@ export function ScheduleSurface({
       const maxOuterPx =
         vh - top - barHeightPx - gapAboveBarPx - bottomStackPx - cushionPx;
       const maxBodyPx = maxOuterPx - WEEK_CALENDAR_HEADER_HEIGHT_PX;
-      setWeekHomeMaxViewportBodyPx(
-        Number.isFinite(maxBodyPx) ? Math.max(140, Math.floor(maxBodyPx)) : null,
-      );
+      setMeasuredBodyPx(Number.isFinite(maxBodyPx) ? Math.max(140, Math.floor(maxBodyPx)) : null);
+    };
+
+    const scheduleMeasure = () => {
+      if (frameId != null) return;
+      frameId = window.requestAnimationFrame(() => {
+        frameId = null;
+        measure();
+      });
     };
 
     measure();
-    const ro = new ResizeObserver(measure);
+    const ro = new ResizeObserver(scheduleMeasure);
     ro.observe(wrap);
     const vv = window.visualViewport;
-    vv?.addEventListener("resize", measure);
-    vv?.addEventListener("scroll", measure);
-    window.addEventListener("resize", measure);
+    vv?.addEventListener("resize", scheduleMeasure);
+    vv?.addEventListener("scroll", scheduleMeasure);
+    window.addEventListener("resize", scheduleMeasure);
     return () => {
+      if (frameId != null) window.cancelAnimationFrame(frameId);
       ro.disconnect();
-      vv?.removeEventListener("resize", measure);
-      vv?.removeEventListener("scroll", measure);
-      window.removeEventListener("resize", measure);
+      vv?.removeEventListener("resize", scheduleMeasure);
+      vv?.removeEventListener("scroll", scheduleMeasure);
+      window.removeEventListener("resize", scheduleMeasure);
     };
-  }, [view, useCompactHomeHeader, homeBelowHeaderSlot, adding, visibleDayCount, weekMinuteScale]);
+  }, [view, useCompactHomeHeader, hasHomeBelowHeaderSlot, visibleDayCount]);
 
   const iconBtnSm = "h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10";
   const iconGlyphSm = "h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-[18px] md:w-[18px]";

@@ -1,5 +1,6 @@
 import { CoursesEntryTabs } from "@/components/courses/courses-entry-tabs";
 import { CoursesSchoolSelect } from "@/components/courses/courses-school-select";
+import { BackLink } from "@/components/nav/back-link";
 import { getSchoolLabel, type SchoolCode } from "@/lib/constants/schools";
 import type { CoursesTab } from "@/lib/courses/courses-tab";
 import { formatMessage, type CoursesMessages } from "@/lib/i18n/messages";
@@ -24,11 +25,8 @@ export function CoursesPageTop({
   return (
     <header className="min-w-0 space-y-2">
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-        <div
-          className="pointer-events-none invisible flex items-center justify-start gap-1.5"
-          aria-hidden
-        >
-          <span className="inline-flex h-9 w-9 shrink-0" />
+        <div className="flex items-center justify-start gap-1.5">
+          <BackLink fallback="/profile" />
         </div>
         <h1 className="page-screen-title min-w-0 truncate text-center">{courses.screenTitle}</h1>
         <div className="flex shrink-0 items-center justify-end gap-1.5">

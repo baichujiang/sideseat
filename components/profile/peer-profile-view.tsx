@@ -21,6 +21,7 @@ import { formatMessage, getMessages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 export type PeerProfileFields = {
+  username: string | null;
   nickname: string | null;
   gender: UserGender;
   avatarUrl: string | null;
@@ -93,8 +94,11 @@ export function PeerProfileView({
     noCourseOverlap: string;
   };
 }) {
-  const lp = getMessages(locale).profileLifePhotos;
+  const messages = getMessages(locale);
+  const lp = messages.profileLifePhotos;
+  const mi = messages.meIdentity;
   const lifePhotos = peer.lifePhotos ?? [];
+  const peerBio = peer.bio?.trim() ?? "";
   const sharedCourseIds = new Set(sharedCourses.map((c) => c.id));
 
   return (
@@ -103,8 +107,8 @@ export function PeerProfileView({
         <div className="px-4 pb-3.5 pt-4">
           <ProfileMeHeaderDisplay
             locale={locale}
+            username={peer.username}
             nickname={peer.nickname}
-            bio={peer.bio}
             avatarUrl={peer.avatarUrl}
             gender={peer.gender}
             school={peer.school}
@@ -123,6 +127,12 @@ export function PeerProfileView({
         </div>
 
         <div className={mePageListDivideClass}>
+          {peerBio ? (
+            <ProfileDetailSection title={mi.rowBio}>
+              <p className="text-sm leading-relaxed text-foreground/85 dark:text-foreground/80">{peerBio}</p>
+            </ProfileDetailSection>
+          ) : null}
+
           <ProfileDetailSection title={lp.sectionTitle}>
             <ProfileLifePhotosEditor initialPhotos={lifePhotos} readOnly layout="me" />
           </ProfileDetailSection>

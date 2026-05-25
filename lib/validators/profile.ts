@@ -57,14 +57,12 @@ export const homeProfileQuickSchema = z.object({
 export const profilePrivacyPatchSchema = z
   .object({
     hideFromDiscovery: z.boolean().optional(),
-    hideFromRecommendations: z.boolean().optional(),
     hideFromCourseMembers: z.boolean().optional(),
   })
   .strict()
   .refine(
     (d) =>
       d.hideFromDiscovery !== undefined ||
-      d.hideFromRecommendations !== undefined ||
       d.hideFromCourseMembers !== undefined,
     { message: "Nothing to update." },
   );

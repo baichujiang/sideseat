@@ -4,7 +4,7 @@ import {
   type CoursesPagePayload,
   type EnrolledCourseRow,
 } from "@/components/courses/courses-page-client";
-import { TabKeepAliveSnapshot } from "@/components/layout/tab-keep-alive";
+import type { Prisma } from "@prisma/client";
 import { getSessionUser } from "@/lib/auth/session";
 import {
   DEFAULT_SCHOOL,
@@ -17,32 +17,44 @@ import { formatMessage, getMessages } from "@/lib/i18n/messages";
 import { schoolCodesForDiscoverCity } from "@/lib/discover/city-school-scope";
 import { getServerDiscoverServedCity } from "@/lib/discover/discover-city-preference";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
-import { getRecommendedClassmatesForViewer } from "@/lib/queries/recommended-classmates";
 import {
   coursesListReturnPath,
   normalizeCoursesTab,
 } from "@/lib/courses/courses-tab";
 
-// Starter set for common required/foundation courses (used as fallback when
-// popularity signals are sparse in a fresh database).
-const CURATED_REQUIRED_CODES: Partial<Record<SchoolCode, string[]>> = {
+type CuratedPopularCoursePick = {
+  code?: string;
+  name: string;
+  aliases?: string[];
+};
+
+// Curated popular defaults shown only when local enrollment/member counts do
+// not exist yet. TUM picks use public TUM module pages; LMU picks use public
+// LMU Informatik course/module listings for recurring high-demand CS topics.
+const CURATED_POPULAR_DEFAULT_PICKS: Partial<Record<SchoolCode, CuratedPopularCoursePick[]>> = {
   TUM: [
-    "IN0006",
-    "IN0007",
-    "IN0010",
-    "IN2001",
-    "IN2022",
-    "IN2064",
-    "MA0901",
-    "MA0902",
-    "MA1008",
-    "PH1007",
+    { code: "IN2064", name: "Machine Learning" },
+    { code: "IN2346", name: "Introduction to Deep Learning" },
+    { code: "IN2003", name: "Efficient Algorithms and Data Structures", aliases: ["Algorithms"] },
+    { code: "IN2031", name: "Application and Implementation of Database Systems", aliases: ["Databases"] },
+    { code: "IN2375", name: "Computer Vision" },
+    { code: "IN0006", name: "Introduction to Software Engineering" },
+    { code: "IN2361", name: "Natural Language Processing" },
+    { code: "IN2073", name: "Cloud Computing" },
+    { code: "IN2030", name: "Data Mining and Knowledge Discovery", aliases: ["Data Mining und Knowledge Discovery"] },
+    { code: "IN2017", name: "Computer Graphics", aliases: ["Computer Grafik"] },
   ],
   LMU: [
-    "IN0006",
-    "IN2001",
-    "MA0901",
-    "MA0902",
+    { name: "Machine Learning", aliases: ["Maschinelles Lernen", "Grundlagen des Maschinellen Lernens"] },
+    { name: "Deep Learning and Artificial Intelligence", aliases: ["Deep Learning", "Künstliche Intelligenz"] },
+    { name: "Data Mining Algorithms I", aliases: ["Data Mining Algorithmen I"] },
+    { name: "Datenbanksysteme", aliases: ["Database Systems"] },
+    { name: "Softwaretechnik", aliases: ["Software Engineering", "Methods in Software Engineering"] },
+    { name: "Algorithmen und Datenstrukturen", aliases: ["Algorithms and Data Structures"] },
+    { name: "Computer Vision: Image and Video Understanding", aliases: ["Computer Vision"] },
+    { name: "Computational Intelligence" },
+    { name: "Intelligent Systems", aliases: ["Intelligente Systeme"] },
+    { name: "Algorithm Design" },
   ],
 };
 
@@ -105,72 +117,29 @@ export default async function CoursesPage({
     }));
     popularSourceLabel = formatMessage(c.popularSubtitleResultsFor, { query: rawCourseQuery });
   } else {
-    const seededCodes = CURATED_REQUIRED_CODES[selectedSchool] ?? [];
-    const seededRowsRaw = seededCodes.length
-      ? await prisma.course.findMany({
-          where: {
-            school: selectedSchool,
-            semesterLabel,
-            code: { in: seededCodes },
-          },
-        })
-      : [];
+    const topMembershipCounts = await prisma.userCourse.groupBy({
+      by: ["courseId"],
+      where: {
+        course: { school: selectedSchool, semesterLabel },
+      },
+      _count: { courseId: true },
+      orderBy: { _count: { courseId: "desc" } },
+      take: 10,
+    });
 
-    const seededByCode = new Map(
-      seededRowsRaw
-        .filter((r) => r.code)
-        .map((r) => [r.code as string, r]),
-    );
-
-    const seededRowsOrdered = seededCodes
-      .map((code) => seededByCode.get(code))
-      .filter((r): r is (typeof seededRowsRaw)[number] => Boolean(r))
-      .slice(0, 10);
-
-    if (seededRowsOrdered.length > 0) {
-      const memberCountMap = await getCourseMemberCountMap(
-        seededRowsOrdered.map((course) => course.id),
-      );
-      popularRows = seededRowsOrdered.map((course) => ({
-        id: course.id,
-        code: course.code,
-        name: course.name,
-        instructorSummary: course.instructorSummary,
-        memberCount: memberCountMap.get(course.id) ?? 0,
-      }));
-      popularSourceLabel = c.popularSubtitleRequiredCore;
-    } else {
-      const topMembershipCounts = await prisma.userCourse.groupBy({
-        by: ["courseId"],
-        where: {
-          course: { school: selectedSchool, semesterLabel },
-        },
-        _count: { courseId: true },
-        orderBy: { _count: { courseId: "desc" } },
-        take: 10,
-      });
-
+    if (topMembershipCounts.length > 0) {
       const orderedTopIds = topMembershipCounts.map((item) => item.courseId);
-      const rows = orderedTopIds.length
-        ? await prisma.course.findMany({
-            where: { id: { in: orderedTopIds } },
-          })
-        : await prisma.course.findMany({
-            where: { school: selectedSchool, semesterLabel },
-            orderBy: [{ code: "asc" }, { name: "asc" }],
-            take: 10,
-          });
+      const rows = await prisma.course.findMany({
+        where: { id: { in: orderedTopIds } },
+      });
 
       const rowsById = new Map(rows.map((course) => [course.id, course]));
       const memberCountMap = new Map(
         topMembershipCounts.map((item) => [item.courseId, item._count.courseId]),
       );
-      const orderedRows =
-        orderedTopIds.length > 0
-          ? orderedTopIds
-              .map((id) => rowsById.get(id))
-              .filter((course): course is (typeof rows)[number] => Boolean(course))
-          : rows;
+      const orderedRows = orderedTopIds
+        .map((id) => rowsById.get(id))
+        .filter((course): course is (typeof rows)[number] => Boolean(course));
 
       popularRows = orderedRows.map((course) => ({
         id: course.id,
@@ -179,6 +148,16 @@ export default async function CoursesPage({
         instructorSummary: course.instructorSummary,
         memberCount: memberCountMap.get(course.id) ?? 0,
       }));
+    } else {
+      const defaultRows = await getCuratedPopularDefaultRows(selectedSchool, semesterLabel);
+      popularRows = defaultRows.map((course) => ({
+        id: course.id,
+        code: course.code,
+        name: course.name,
+        instructorSummary: course.instructorSummary,
+        memberCount: 0,
+      }));
+      popularSourceLabel = c.popularSubtitlePopularPicks;
     }
   }
 
@@ -195,18 +174,13 @@ export default async function CoursesPage({
       popularSourceLabel,
       memberships: [],
       savedPanelRows: [],
-      recommendedClassmates: [],
     };
-    return (
-      <TabKeepAliveSnapshot tab="courses">
-        <CoursesPageClient initialPayload={payload} />
-      </TabKeepAliveSnapshot>
-    );
+    return <CoursesPageClient initialPayload={payload} />;
   }
 
   const user = sessionUser;
 
-  const [memberships, savedRows, recommendedClassmates] = await Promise.all([
+  const [memberships, savedRows] = await Promise.all([
     prisma.userCourse.findMany({
       where: {
         userId: user.id,
@@ -238,7 +212,6 @@ export default async function CoursesPage({
       },
       orderBy: { createdAt: "desc" },
     }),
-    getRecommendedClassmatesForViewer(user.id),
   ]);
 
   const enrolledIds = new Set(memberships.map((m) => m.courseId));
@@ -286,14 +259,9 @@ export default async function CoursesPage({
     popularSourceLabel,
     memberships: membershipRows,
     savedPanelRows,
-    recommendedClassmates,
   };
 
-  return (
-    <TabKeepAliveSnapshot tab="courses">
-      <CoursesPageClient initialPayload={payload} />
-    </TabKeepAliveSnapshot>
-  );
+  return <CoursesPageClient initialPayload={payload} />;
 }
 
 
@@ -309,4 +277,84 @@ async function getCourseMemberCountMap(courseIds: string[]) {
   });
 
   return new Map(grouped.map((item) => [item.courseId, item._count.courseId]));
+}
+
+async function getCuratedPopularDefaultRows(school: SchoolCode, semesterLabel: string) {
+  const picks = CURATED_POPULAR_DEFAULT_PICKS[school] ?? [];
+  if (picks.length === 0) {
+    return [];
+  }
+
+  const codeFilters = picks
+    .map((pick) => pick.code)
+    .filter((code): code is string => Boolean(code));
+  const nameFilters = Array.from(
+    new Set(picks.flatMap((pick) => [pick.name, ...(pick.aliases ?? [])])),
+  ).filter((name) => name.trim().length > 0);
+  const orFilters: Prisma.CourseWhereInput[] = [
+    ...codeFilters.map((code) => ({ code })),
+    ...nameFilters.map((name) => ({ name: { contains: name, mode: "insensitive" as const } })),
+  ];
+
+  if (orFilters.length === 0) {
+    return [];
+  }
+
+  const rows = await prisma.course.findMany({
+    where: {
+      school,
+      semesterLabel,
+      OR: orFilters,
+    },
+    orderBy: [{ code: "asc" }, { name: "asc" }],
+  });
+
+  const selected = new Set<string>();
+  return picks
+    .map((pick) => {
+      const match = rows
+        .filter((row) => !selected.has(row.id) && courseMatchesCuratedPick(row, pick))
+        .sort((a, b) => coursePickScore(a, pick) - coursePickScore(b, pick))[0];
+      if (match) {
+        selected.add(match.id);
+      }
+      return match;
+    })
+    .filter((row): row is (typeof rows)[number] => Boolean(row))
+    .slice(0, 10);
+}
+
+function courseMatchesCuratedPick(
+  course: { code: string | null; name: string },
+  pick: CuratedPopularCoursePick,
+) {
+  if (pick.code && course.code === pick.code) {
+    return true;
+  }
+
+  const normalizedName = course.name.toLowerCase();
+  return curatedPickNameTerms(pick).some((term) => normalizedName.includes(term.toLowerCase()));
+}
+
+function coursePickScore(
+  course: { code: string | null; name: string },
+  pick: CuratedPopularCoursePick,
+) {
+  if (pick.code && course.code === pick.code) {
+    return 0;
+  }
+
+  const normalizedName = course.name.toLowerCase();
+  const terms = curatedPickNameTerms(pick).map((term) => term.toLowerCase());
+  if (terms.some((term) => normalizedName === term)) {
+    return 1;
+  }
+  if (terms.some((term) => normalizedName.startsWith(term))) {
+    return 2;
+  }
+  return 3 + course.name.length / 1000;
+}
+
+function curatedPickNameTerms(pick: CuratedPopularCoursePick) {
+  return [pick.name, ...(pick.aliases ?? [])];
 }

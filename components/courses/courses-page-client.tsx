@@ -5,7 +5,6 @@ import type { Route } from "next";
 import type { Weekday } from "@prisma/client";
 import { useEffect, useState } from "react";
 
-import { RecommendedClassmatesRail } from "@/components/classmates/recommended-classmates-rail";
 import { CoursesPageTop } from "@/components/courses/courses-page-top";
 import { CoursesTabRestore } from "@/components/courses/courses-tab-restore";
 import { EnrolledCourseCard, type EnrolledSession } from "@/components/courses/enrolled-course-card";
@@ -19,7 +18,6 @@ import type { SchoolCode } from "@/lib/constants/schools";
 import type { CoursesTab } from "@/lib/courses/courses-tab";
 import { coursesTabHref } from "@/lib/courses/courses-tab";
 import { formatMessage, type CoursesMessages } from "@/lib/i18n/messages";
-import type { RecommendedClassmateRow } from "@/lib/queries/recommended-classmates";
 import { cn } from "@/lib/utils";
 
 export type CourseRow = {
@@ -61,7 +59,6 @@ export type CoursesPagePayload = {
   popularSourceLabel: string;
   memberships: EnrolledCourseRow[];
   savedPanelRows: SavedRow[];
-  recommendedClassmates: RecommendedClassmateRow[];
 };
 
 type CoursesPageCacheRecord = {
@@ -148,14 +145,6 @@ export function CoursesPageClient({ initialPayload }: { initialPayload: CoursesP
         <p className="rounded-xl border border-amber-200/80 bg-amber-50/70 px-3 py-2 text-[13px] text-amber-950 dark:border-amber-400/25 dark:bg-amber-950/25 dark:text-amber-100">
           {messages.offline.coursesReadOnlyNotice}
         </p>
-      ) : null}
-
-      {payload.signedIn ? (
-        <RecommendedClassmatesRail
-          rows={payload.recommendedClassmates}
-          title={c.recommendedClassmatesTitle}
-          returnTo={payload.listReturnTo}
-        />
       ) : null}
 
       {payload.activeTab === "popular-courses" ? (

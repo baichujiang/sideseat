@@ -326,7 +326,7 @@ model User {
   hideFromCourseMembers        Boolean                  @default(false)
   /// Excluded from Discover people search and matching lists.
   hideFromDiscovery            Boolean                  @default(false)
-  /// Excluded from “people you may know” rails (Courses, Inbox).
+  /// Legacy recommendation opt-out retained for existing profile data.
   hideFromRecommendations      Boolean                  @default(false)
   onboardingComplete           Boolean                  @default(false)
   /// First-run product tutorial (tab overview); set when user dismisses; optional cross-device sync.
