@@ -26,11 +26,14 @@ function valueFromRatio(ratio: number): number {
 export function WeekVisibleDaysBar({
   value,
   onChange,
+  onAdjustingChange,
   scheduleSch,
   locale,
 }: {
   value: number;
   onChange: (next: number) => void;
+  /** Fired when the user starts/ends dragging the width slider (Home week anchor). */
+  onAdjustingChange?: (adjusting: boolean) => void;
   scheduleSch?: AppMessages["schedule"];
   locale?: AppLocale;
 }) {
@@ -119,10 +122,11 @@ export function WeekVisibleDaysBar({
     (event: React.PointerEvent<HTMLDivElement>) => {
       event.preventDefault();
       draggingRef.current = true;
+      onAdjustingChange?.(true);
       event.currentTarget.setPointerCapture(event.pointerId);
       applyPointerRatio(event.clientX);
     },
-    [applyPointerRatio],
+    [applyPointerRatio, onAdjustingChange],
   );
 
   const onPointerMove = useCallback(
@@ -138,13 +142,14 @@ export function WeekVisibleDaysBar({
       if (!draggingRef.current) return;
       draggingRef.current = false;
       applyPointerRatio(event.clientX, { finalize: true });
+      onAdjustingChange?.(false);
       try {
         event.currentTarget.releasePointerCapture(event.pointerId);
       } catch {
         /* capture may already be released */
       }
     },
-    [applyPointerRatio],
+    [applyPointerRatio, onAdjustingChange],
   );
 
   const onKeyDown = useCallback(

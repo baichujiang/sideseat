@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import type { Route } from "next";
-import { ClassmatePostCategory } from "@prisma/client";
 import { CalendarClock, Link2 } from "lucide-react";
 
 import { DiscoverPostPostedTime } from "@/components/discover/discover-post-posted-time";
@@ -23,6 +22,7 @@ import type {
 import type { AppLocale } from "@/lib/i18n/app-locale";
 import { getMessages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
+import { ClassmatePostCategory } from "@prisma/client";
 
 type CourseChip = { id: string; code: string | null; name: string };
 
@@ -36,9 +36,9 @@ export function BuddyRequestContent({
   expiresAt,
   updatedAt,
   isAuthor,
-  studyMeta,
-  languageMeta,
-  sportMeta,
+  studyMeta: _studyMeta,
+  languageMeta: _languageMeta,
+  sportMeta: _sportMeta,
   courses,
   courseLinkBase,
   highlightViewerCourses,
@@ -61,7 +61,7 @@ export function BuddyRequestContent({
   courseLinkBase: "/courses" | null;
   highlightViewerCourses: boolean;
   viewerCourseMatchIndex: ViewerCourseMatchIndex | null;
-  /** Rendered between the headline and the metadata group (e.g. image carousel). */
+  /** Legacy post photos — rendered after the description when present. */
   media?: ReactNode;
 }) {
   const dl = getMessages(locale).discoverList;
@@ -70,41 +70,25 @@ export function BuddyRequestContent({
   const typeLabel = shouldShowBuddyCategoryLabel(category) ? buddyTypeLabel(category, buddy) : "";
   const statusLabel = buddyRequestStatusLabel(locale, displayStatus);
   const availabilityLine = buddyRequestAvailabilityValue(locale, displayStatus, expiresAt, updatedAt);
+  const trimmedBody = body?.trim() ?? "";
 
   return (
-    <div className="space-y-5">
-      <header className="space-y-3">
-        <h1
-          data-testid="buddy-request-title"
-          className="text-xl font-bold leading-snug tracking-tight text-foreground sm:text-2xl"
-        >
-          {title}
-        </h1>
-        {body ? (
-          <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground/90">{body}</p>
-        ) : null}
-      </header>
-
-      {media ? <div className="min-w-0">{media}</div> : null}
-
-      <section
-        className="space-y-3.5 rounded-2xl border border-border/70 bg-muted/20 px-3 py-3.5 sm:px-4"
-        aria-label={detail.postMetaSectionAria}
-      >
+    <div className="space-y-4">
+      <div>
         <div className="flex flex-wrap items-center gap-2">
           {typeLabel ? (
-            <span className="rounded-full border border-classmates-teal-border/60 bg-classmates-teal-soft px-2.5 py-1 text-[11px] font-semibold text-classmates-teal">
+            <span className="inline-flex rounded-full border border-classmates-blue-border/70 bg-classmates-blue-soft px-2.5 py-0.5 text-[11px] font-medium text-classmates-blue">
               {typeLabel}
             </span>
           ) : null}
           {isAuthor ? (
-            <span className="rounded-full border border-classmates-blue-border/80 bg-classmates-blue-soft px-2.5 py-1 text-[11px] font-semibold text-classmates-blue">
+            <span className="inline-flex rounded-full border border-classmates-blue-border/80 bg-classmates-blue-soft px-2.5 py-0.5 text-[11px] font-semibold text-classmates-blue">
               {detail.yourRequestBadge}
             </span>
           ) : null}
           <span
             className={cn(
-              "rounded-full border px-2.5 py-1 text-[11px] font-semibold",
+              "inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-semibold",
               displayStatus === "open"
                 ? "border-classmates-teal-border/70 bg-classmates-teal-soft text-classmates-teal dark:text-teal-200"
                 : "border-border/80 bg-muted font-medium text-muted-foreground",
@@ -113,14 +97,40 @@ export function BuddyRequestContent({
             {statusLabel}
           </span>
         </div>
+        <h1
+          data-testid="buddy-request-title"
+          className={cn(
+            "text-[22px] font-bold leading-tight text-foreground",
+            typeLabel || isAuthor || statusLabel ? "mt-2" : undefined,
+          )}
+        >
+          {title}
+        </h1>
+      </div>
 
-        <p className="flex items-start gap-2 text-[13px] leading-snug text-muted-foreground">
-          <CalendarClock className="mt-0.5 h-4 w-4 shrink-0 opacity-80" strokeWidth={2} aria-hidden />
-          <span>{availabilityLine}</span>
+      <div className="rounded-2xl border border-border/70 bg-card/50 px-4 py-3">
+        <p className="text-[11px] font-medium text-muted-foreground">{dl.postSheetDetailsLabel}</p>
+        <p className="mt-1.5 whitespace-pre-wrap text-[14px] leading-relaxed text-foreground">
+          {trimmedBody || detail.notSpecified}
         </p>
+      </div>
+
+      {media ? <div className="min-w-0">{media}</div> : null}
+
+      <section
+        className="space-y-2.5 rounded-2xl border border-border/70 bg-card/50 px-4 py-3"
+        aria-label={detail.postMetaSectionAria}
+      >
+        <div className="flex gap-2.5">
+          <CalendarClock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={2} aria-hidden />
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium text-muted-foreground">{detail.rowAvailability}</p>
+            <p className="text-[14px] text-foreground">{availabilityLine}</p>
+          </div>
+        </div>
 
         {courses.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5" aria-label={dl.postCardLinkedCoursesAria}>
+          <div className="flex flex-wrap gap-1.5 pt-0.5" aria-label={dl.postCardLinkedCoursesAria}>
             {courses.map((c) => {
               const label = c.code ?? c.name;
               const matchesViewer =

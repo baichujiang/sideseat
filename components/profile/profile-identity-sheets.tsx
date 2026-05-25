@@ -25,6 +25,7 @@ import { mePageCardClass } from "@/components/profile/me-settings-row";
 import type { DiscoverCityNameKey } from "@/lib/discover/discover-city-name-keys";
 import { cn } from "@/lib/utils";
 import { formatMessage } from "@/lib/i18n/messages";
+import { buildSchoolSummaryLine } from "@/lib/profile/school-summary-line";
 import { mapNicknameApiError } from "@/lib/profile/nickname-api-errors";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { homeProfileQuickSchema, profileSchema } from "@/lib/validators/profile";
@@ -71,12 +72,6 @@ export type ProfileSchoolSummary = {
   major: string;
   semester: number;
 };
-
-function buildSchoolSubtitle(summary: ProfileSchoolSummary, semesterLabel: string): string {
-  const majorOrDegree = summary.major.trim() || summary.degreeLabel;
-  const sem = formatMessage(semesterLabel, { semester: String(summary.semester) });
-  return [summary.schoolShort, majorOrDegree, sem].join(" · ");
-}
 
 export function ProfileIdentitySheets({
   initialNickname,
@@ -320,7 +315,7 @@ export function ProfileIdentitySheets({
     : null;
   const loginUsernameNameHint = loginUsernameTrimmed ? t.loginUsernameNameSheetHint : null;
   const bioDisplay = bio.trim() ? bio.trim() : t.taglineEmpty;
-  const schoolLine = schoolSummary ? buildSchoolSubtitle(schoolSummary, t.schoolLineSemester) : null;
+  const schoolLine = schoolSummary ? buildSchoolSummaryLine(schoolSummary, t.schoolLineSemester) : null;
   const isCropOpen = avatarCropFile !== null;
 
   const dismissOverlay = useCallback(() => {

@@ -22,7 +22,6 @@ import {
   Loader2,
   Plus,
   Share2,
-  Sparkles,
   Upload,
   X,
 } from "lucide-react";
@@ -53,6 +52,7 @@ import { WeekCalendarSlotPasteMenu } from "@/components/calendar/week-event-edit
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { PlanRequestModal } from "@/components/chat/plan-request-modal";
 import { NaturalScheduleSheet } from "@/components/home/natural-schedule-sheet";
+import { ScheduleAddActionSheet } from "@/components/home/schedule-add-action-sheet";
 import { ScheduleAddPanel } from "@/components/home/schedule-add-panel";
 import { ScheduleCalendarCategoryManager } from "@/components/home/schedule-calendar-category-manager";
 import { createScheduleSharePath } from "@/lib/schedule-share/create-schedule-share-client";
@@ -349,11 +349,13 @@ export function ScheduleSurface({
   const [now, setNow] = useState(() => new Date(nowISO));
   const [selectedDate, setSelectedDate] = useState<Date>(() => berlinStartOfCalendarDay(new Date(nowISO)));
   const [visibleDayCount, setVisibleDayCount] = useState(HOME_CALENDAR_VISIBLE_DAYS_DEFAULT);
+  const [visibleDaysWidthAdjusting, setVisibleDaysWidthAdjusting] = useState(false);
   const [calendarPrefsHydrated, setCalendarPrefsHydrated] = useState(false);
   const [calendarRevealNonce, setCalendarRevealNonce] = useState(0);
   const [weekMinuteScale, setWeekMinuteScale] = useState(WEEK_CALENDAR_MINUTE_SCALE_DEFAULT);
   const [adding, setAdding] = useState(false);
   const [naturalScheduleOpen, setNaturalScheduleOpen] = useState(false);
+  const [addActionSheetOpen, setAddActionSheetOpen] = useState(false);
   /** In-grid draft visible while dragging on empty week cells (before add panel opens). */
   const [gridCreatePreview, setGridCreatePreview] = useState(false);
   const [draftEventStart, setDraftEventStart] = useState<string | undefined>(undefined);
@@ -376,7 +378,7 @@ export function ScheduleSurface({
   const [icsNotice, setIcsNotice] = useState<{ tone: "ok" | "err"; message: string } | null>(null);
   const [icsMenuOpen, setIcsMenuOpen] = useState(false);
   const icsMenuRef = useRef<HTMLDivElement | null>(null);
-  /** Caps inline week grid height so pinch-zoom cannot push controls off-screen (see `maxViewportBodyPx`). */
+  /** Measured week grid body height — fills viewport space above tab bar / share FAB (see `maxViewportBodyPx`). */
   const weekHomeLayoutRef = useRef<HTMLDivElement | null>(null);
   const weekVisibleDaysBarRef = useRef<HTMLDivElement | null>(null);
   const [weekHomeMaxViewportBodyPx, setWeekHomeMaxViewportBodyPx] = useState<number | null>(null);
@@ -424,12 +426,21 @@ export function ScheduleSurface({
     setIcsNotice({ tone: "err", message: result.error });
   }, [scheduleShareBusy, messages.scheduleShare, router, pathname]);
 
-  /** Toolbar + : open fresh add panel, or close when already open (keeps control visible). */
+  /** Toolbar + : choose add mode (when smart add enabled), open manual panel, or close when already open. */
   const handleAddToolbarClick = () => {
     if (adding) {
       closeAddPanel({ refresh: false });
       return;
     }
+    if (naturalScheduleEnabled) {
+      setAddActionSheetOpen(true);
+      return;
+    }
+    resetAddDraft();
+    setAdding(true);
+  };
+
+  const openManualAddPanel = () => {
     resetAddDraft();
     setAdding(true);
   };
@@ -1399,6 +1410,7 @@ export function ScheduleSurface({
     showTimeColumnLabel: false,
     onDayHeaderSelect: (date: Date) => setSelectedDate(berlinStartOfCalendarDay(date)),
     onVirtualStripBoundsChange,
+    visibleDaysWidthAdjusting,
   };
 
   const useCompactHomeHeader = homeGreeting != null;
@@ -1450,22 +1462,6 @@ export function ScheduleSurface({
 
   const toolbarActions = (
     <>
-      {naturalScheduleEnabled ? (
-        <button
-          type="button"
-          aria-label={messages.schedule.naturalScheduleAria}
-          onClick={() => setNaturalScheduleOpen(true)}
-          className={cn(
-            "flex shrink-0 items-center justify-center rounded-full border border-violet-200 bg-white text-violet-600 shadow-sm transition",
-            iconBtnSm,
-            "hover:bg-violet-50 active:scale-[0.98]",
-            "dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300 dark:hover:bg-violet-950/70",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/35",
-          )}
-        >
-          <Sparkles className={cn("shrink-0", iconGlyphSm)} strokeWidth={2} aria-hidden />
-        </button>
-      ) : null}
       <div ref={icsMenuRef} className="relative z-[1] isolate">
         <button
           type="button"
@@ -1592,6 +1588,20 @@ export function ScheduleSurface({
   return (
     <section className="pb-2">
       <div className="space-y-2.5">
+      {naturalScheduleEnabled ? (
+        <ScheduleAddActionSheet
+          open={addActionSheetOpen}
+          onClose={() => setAddActionSheetOpen(false)}
+          onChoose={(choice) => {
+            if (choice === "natural") {
+              setNaturalScheduleOpen(true);
+              return;
+            }
+            openManualAddPanel();
+          }}
+        />
+      ) : null}
+
       <NaturalScheduleSheet
         open={naturalScheduleOpen}
         onClose={() => setNaturalScheduleOpen(false)}
@@ -1631,6 +1641,14 @@ export function ScheduleSurface({
         initialCategoryId={editingItem ? (editingItem.categoryId ?? null) : undefined}
         calendarCategories={initialCalendarCategories}
         companionOptions={companionOptions}
+        onOpenNaturalSchedule={
+          naturalScheduleEnabled && !editingItem
+            ? () => {
+                closeAddPanel({ refresh: false });
+                setNaturalScheduleOpen(true);
+              }
+            : undefined
+        }
       />
 
       <ScheduleCalendarCategoryManager
@@ -1731,6 +1749,7 @@ export function ScheduleSurface({
             <div ref={weekHomeLayoutRef} className="flex min-h-0 flex-col gap-1">
               <WeekCalendar
                 {...weekCalendarProps}
+                fillParent
                 maxViewportBodyPx={weekHomeMaxViewportBodyPx ?? undefined}
               />
               <div
@@ -1740,6 +1759,7 @@ export function ScheduleSurface({
                 <WeekVisibleDaysBar
                   value={visibleDayCount}
                   onChange={setVisibleDayCount}
+                  onAdjustingChange={setVisibleDaysWidthAdjusting}
                   scheduleSch={messages.schedule}
                   locale={locale}
                 />

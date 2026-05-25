@@ -4,9 +4,6 @@ import Image from "next/image";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { ClassmatePostCategory } from "@prisma/client";
 
-import { ClassmatePostTextCover } from "@/components/discover/classmate-post-text-cover";
-import { useAppMessages } from "@/hooks/use-app-locale";
-import { buddyTypeLabel } from "@/lib/discover/buddy-type-labels";
 import { displayableClassmatePostImageUrls } from "@/lib/discover/classmate-post-display-images";
 import { cn } from "@/lib/utils";
 
@@ -26,8 +23,8 @@ function SlideImage({ url, sizes }: { url: string; sizes: string }) {
 
 export function BuddyRequestMediaCarousel({
   urls,
-  category,
-  title,
+  category: _category,
+  title: _title,
   ariaLabel,
 }: {
   urls: string[];
@@ -35,8 +32,6 @@ export function BuddyRequestMediaCarousel({
   title: string;
   ariaLabel: string;
 }) {
-  const m = useAppMessages();
-  const typeLabel = buddyTypeLabel(category, m.discoverBuddy);
   const displayUrls = displayableClassmatePostImageUrls(urls);
   const id = useId();
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -60,14 +55,7 @@ export function BuddyRequestMediaCarousel({
   }, [onScroll]);
 
   if (!displayUrls.length) {
-    return (
-      <ClassmatePostTextCover
-        category={category}
-        typeLabel={typeLabel}
-        title={title}
-        variant="detail"
-      />
-    );
+    return null;
   }
 
   return (
@@ -78,7 +66,7 @@ export function BuddyRequestMediaCarousel({
         aria-roledescription="carousel"
         aria-label={ariaLabel}
         className={cn(
-          "flex max-h-52 gap-2 overflow-x-auto overflow-y-hidden rounded-2xl pb-1 [scrollbar-width:thin]",
+          "flex max-h-40 gap-2 overflow-x-auto overflow-y-hidden rounded-2xl pb-1 [scrollbar-width:thin]",
           multi && "snap-x snap-mandatory",
         )}
       >
@@ -87,7 +75,7 @@ export function BuddyRequestMediaCarousel({
             key={`${id}-${i}`}
             className={cn(
               "relative shrink-0 overflow-hidden rounded-2xl bg-muted/80 ring-1 ring-border/45",
-              "h-48 max-h-52",
+              "h-36 max-h-40",
               multi ? "w-[min(100%,20rem)] min-w-[88%] snap-start sm:min-w-[75%]" : "w-full min-w-0",
             )}
           >

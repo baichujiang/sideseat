@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { Route } from "next";
 
 import { ContactRemarkEditor } from "@/components/chat/contact-remark-editor";
 import { PeerProfileMenu } from "@/components/profile/peer-profile-menu";
@@ -8,8 +7,8 @@ import { PeerProfileView } from "@/components/profile/peer-profile-view";
 import { BackLink } from "@/components/nav/back-link";
 import { requirePublicProfileAccess } from "@/lib/auth/guards";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
-import { formatMessage, getMessages } from "@/lib/i18n/messages";
-import { resolveBackHref } from "@/lib/nav/back";
+import { getMessages } from "@/lib/i18n/messages";
+import { buildProfileSchoolSummary } from "@/lib/profile/build-school-summary";
 
 export default async function PeerUserProfilePage({
   params,
@@ -35,11 +34,8 @@ export default async function PeerUserProfilePage({
     <div className="flex min-h-0 flex-1 flex-col bg-background">
       <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
         <BackLink returnTo={query.returnTo} fallback="/discover" label={ui.common.back} />
-        <div className="min-w-0 flex-1 pr-2">
+        <div className="min-w-0 flex-1 text-center">
           <p className="truncate text-sm font-semibold">{up.screenTitle}</p>
-          <p className="truncate text-[11px] text-muted-foreground">
-            {peer.nickname?.trim() || ui.common.studentFallback}
-          </p>
         </div>
         <PeerProfileMenu
           peerUserId={peer.id}
@@ -49,17 +45,21 @@ export default async function PeerUserProfilePage({
         />
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-3">
         <PeerProfileView
+          locale={locale}
+          schoolSummary={buildProfileSchoolSummary({
+            school: peer.school,
+            degreeLevel: peer.degreeLevel,
+            major: peer.major,
+            semester: peer.semester,
+          })}
           peer={{
             nickname: peer.nickname,
             gender: peer.gender,
             avatarUrl: peer.avatarUrl,
             bio: peer.bio,
-            major: peer.major,
-            semester: peer.semester,
             school: peer.school,
-            degreeLevel: peer.degreeLevel,
             verifiedStudent: peer.verifiedStudent,
             studentVerificationStatus: peer.studentVerificationStatus,
             languages: peer.userLanguages.map((r) => ({
@@ -78,12 +78,24 @@ export default async function PeerUserProfilePage({
               : access.sharedCourses[0]?.name ?? null
           }
           labels={{
-            studentFallback: ui.common.studentFallback,
-            aboutSection: up.aboutSection,
             languagesSection: up.languagesSection,
-            lifePhotosSection: up.lifePhotosSection,
-            emptyBio: up.emptyBio,
+            coursesSection: up.coursesSection,
+            coursesEmpty: up.coursesEmpty,
+            sharedCoursesOne: up.sharedCoursesOne,
+            sharedCoursesMany: up.sharedCoursesMany,
+            noCourseOverlap: up.noCourseOverlap,
           }}
+          peerCourses={access.peerCourses.map((course) => ({
+            id: course.id,
+            code: course.code,
+            name: course.name,
+          }))}
+          sharedCourses={access.sharedCourses.map((course) => ({
+            id: course.id,
+            code: course.code,
+            name: course.name,
+          }))}
+          coursesReturnTo={friendLinkReturnTo}
           belowDisplayName={
             access.mode === "connection" ? (
               <ContactRemarkEditor
@@ -95,50 +107,6 @@ export default async function PeerUserProfilePage({
             ) : null
           }
         />
-
-        <div className="mt-4 space-y-2 rounded-2xl border border-border/60 bg-card px-3 py-3">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-            {up.coursesSection}
-          </p>
-          {access.peerCourses.length === 0 ? (
-            <p className="text-xs text-muted-foreground">{up.coursesEmpty}</p>
-          ) : (
-            <>
-              <ul className="flex flex-wrap gap-1.5">
-                {access.peerCourses.map((course) => {
-                  const isShared = access.sharedCourses.some((c) => c.id === course.id);
-                  const courseHref =
-                    `/courses/${course.id}?returnTo=${encodeURIComponent(friendLinkReturnTo)}` as Route;
-                  const courseLabel = course.code ? `[${course.code}] ${course.name}` : course.name;
-                  return (
-                    <li key={course.id}>
-                      <Link
-                        href={courseHref}
-                        className={
-                          isShared
-                            ? "inline-flex max-w-[14rem] rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary transition hover:bg-primary/15"
-                            : "inline-flex max-w-[14rem] rounded-full bg-foreground/5 px-2.5 py-1 text-[11px] text-foreground/75 transition hover:bg-foreground/10"
-                        }
-                        title={courseLabel}
-                      >
-                        <span className="truncate">{courseLabel}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-              {access.sharedCourses.length > 0 ? (
-                <p className="text-[11px] text-primary/90">
-                  {access.sharedCourses.length === 1
-                    ? up.sharedCoursesOne
-                    : formatMessage(up.sharedCoursesMany, { count: access.sharedCourses.length })}
-                </p>
-              ) : (
-                <p className="text-[11px] text-muted-foreground">{up.noCourseOverlap}</p>
-              )}
-            </>
-          )}
-        </div>
 
         <div className="mt-4">
           {access.mode === "connection" ? (

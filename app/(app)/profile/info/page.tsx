@@ -16,13 +16,12 @@ export default async function ProfileInfoPage() {
   const locale = await getServerAppLocale();
   const ui = getMessages(locale);
 
-  const [profileUser, servedCity, lifePhotoCount] = await Promise.all([
+  const [profileUser, servedCity] = await Promise.all([
     prisma.user.findUnique({
       where: { id: user.id },
       include: { userLanguages: true },
     }),
     getServerDiscoverServedCity(),
-    prisma.userLifePhoto.count({ where: { userId: user.id } }),
   ]);
 
   const schoolCode = normalizeSchoolCode(user.school) ?? DEFAULT_SCHOOL;
@@ -37,11 +36,13 @@ export default async function ProfileInfoPage() {
         bio={user.bio}
         avatarUrl={user.avatarUrl}
         gender={user.gender}
+        school={user.school}
+        verifiedStudent={user.verifiedStudent}
+        studentVerificationStatus={user.studentVerificationStatus}
         discoverCity={servedCity}
         languageTags={languageTags}
         verificationStatus={user.studentVerificationStatus}
         verificationEmail={user.email}
-        lifePhotoCount={lifePhotoCount}
         schoolSummary={{
           schoolShort,
           degreeLabel: DEGREE_LEVEL_LABELS[user.degreeLevel ?? "BACHELOR"],

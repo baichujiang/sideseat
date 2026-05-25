@@ -1,142 +1,189 @@
-import type { DegreeLevel, LanguageProficiency, LanguageTag, UserGender } from "@prisma/client";
+import Link from "next/link";
+import type { Route } from "next";
+import type {
+  LanguageProficiency,
+  LanguageTag,
+  StudentVerificationStatus,
+  UserGender,
+} from "@prisma/client";
 import type { ReactNode } from "react";
 
-import { PresetAvatar } from "@/components/ui/preset-avatar";
-import { UserGenderProfileMark } from "@/components/ui/user-gender-icon";
-import { VerifiedBadge } from "@/components/ui/verified-badge";
-import { LANGUAGE_PROFICIENCY_LABEL, LANGUAGE_TAG_LABEL } from "@/lib/constants/languages";
-import { DEGREE_LEVEL_LABELS } from "@/lib/constants/majors";
-import { getSchoolLabel } from "@/lib/constants/schools";
+import { ProfileMeHeaderDisplay } from "@/components/profile/profile-me-header-display";
+import type { ProfileSchoolSummary } from "@/components/profile/profile-identity-sheets";
 import { ProfileLifePhotosEditor, type LifePhotoRow } from "@/components/profile/profile-life-photos-editor";
-import { formatSemester } from "@/lib/utils";
+import {
+  mePageCardClass,
+  mePageListDivideClass,
+} from "@/components/profile/me-settings-row";
+import { LANGUAGE_PROFICIENCY_LABEL, LANGUAGE_TAG_LABEL } from "@/lib/constants/languages";
+import type { AppLocale } from "@/lib/i18n/app-locale";
+import { formatMessage, getMessages } from "@/lib/i18n/messages";
+import { cn } from "@/lib/utils";
 
 export type PeerProfileFields = {
   nickname: string | null;
   gender: UserGender;
   avatarUrl: string | null;
   bio: string | null;
-  major: string | null;
-  semester: number | null;
-  school: string | null;
-  degreeLevel: string | null;
   verifiedStudent: boolean;
-  studentVerificationStatus:
-    | "UNVERIFIED"
-    | "EMAIL_PENDING"
-    | "VERIFIED"
-    | "MANUAL_REVIEW_REQUIRED"
-    | "REJECTED";
+  studentVerificationStatus: StudentVerificationStatus;
+  school: string | null;
   languages: Array<{ tag: LanguageTag; proficiency: LanguageProficiency }>;
   lifePhotos?: LifePhotoRow[];
 };
 
+export type PeerProfileCourse = {
+  id: string;
+  code: string | null;
+  name: string;
+};
+
+const peerProfileCardClass = cn(
+  mePageCardClass,
+  "bg-gradient-to-b from-white via-classmates-surface to-classmates-warm-alt/35",
+  "shadow-[0_2px_16px_-6px_rgba(15,23,42,0.08)]",
+  "dark:from-card dark:via-card dark:to-muted/25 dark:shadow-none",
+);
+
+function ProfileDetailSection({
+  title,
+  children,
+  className,
+}: {
+  title: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className="px-5 py-3.5">
+      <h2 className="text-[11px] font-semibold uppercase tracking-wide text-classmates-sub dark:text-muted-foreground">
+        {title}
+      </h2>
+      <div className={cn("mt-2.5", className)}>{children}</div>
+    </div>
+  );
+}
+
 export function PeerProfileView({
+  locale,
   peer,
+  schoolSummary,
   metVia,
   belowDisplayName,
+  peerCourses,
+  sharedCourses,
+  coursesReturnTo,
   labels,
 }: {
+  locale: AppLocale;
   peer: PeerProfileFields;
+  schoolSummary: ProfileSchoolSummary;
   metVia: string | null;
   /** Your private name for this contact — only when viewer has a connection. */
   belowDisplayName?: ReactNode;
+  peerCourses: PeerProfileCourse[];
+  sharedCourses: PeerProfileCourse[];
+  coursesReturnTo: string;
   labels: {
-    studentFallback: string;
-    aboutSection: string;
     languagesSection: string;
-    lifePhotosSection: string;
-    emptyBio: string;
+    coursesSection: string;
+    coursesEmpty: string;
+    sharedCoursesOne: string;
+    sharedCoursesMany: string;
+    noCourseOverlap: string;
   };
 }) {
-  const name = peer.nickname?.trim() || labels.studentFallback;
-
-  const degreeLabel =
-    peer.degreeLevel != null && peer.degreeLevel in DEGREE_LEVEL_LABELS
-      ? DEGREE_LEVEL_LABELS[peer.degreeLevel as DegreeLevel]
-      : null;
-
-  const metaLine = [getSchoolLabel(peer.school), peer.major, formatSemester(peer.semester)]
-    .filter((s) => s && s !== "Semester not set")
-    .join(" · ");
+  const lp = getMessages(locale).profileLifePhotos;
+  const lifePhotos = peer.lifePhotos ?? [];
+  const sharedCourseIds = new Set(sharedCourses.map((c) => c.id));
 
   return (
-    <div className="space-y-4 px-1 pb-8 pt-2">
-      <section className="overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-card via-card to-muted/30 px-4 py-4">
-        <div className="flex items-start gap-4">
-          <PresetAvatar id={peer.avatarUrl} size={78} className="shrink-0 ring-2 ring-background/90" />
-          <div className="min-w-0 flex-1 pt-0.5">
-            <h1 className="flex flex-wrap items-center gap-2 text-[22px] font-semibold tracking-tight">
-              <span className="break-words">{name}</span>
-              <UserGenderProfileMark gender={peer.gender} iconClassName="h-5 w-5" />
-              <VerifiedBadge
-                size="sm"
-                school={peer.school}
-                verifiedStudent={peer.verifiedStudent}
-                status={peer.studentVerificationStatus}
-              />
-            </h1>
-            {belowDisplayName ? (
-              <div className="mt-1.5 w-full min-w-0 max-w-full">{belowDisplayName}</div>
-            ) : null}
-            {degreeLabel ? (
-              <p className="mt-1 text-sm text-muted-foreground">{degreeLabel}</p>
-            ) : null}
-            {metaLine ? (
-              <p className="mt-1.5 text-xs text-muted-foreground">{metaLine}</p>
-            ) : null}
-          </div>
+    <div className="pb-2">
+      <section className={peerProfileCardClass} aria-label={lp.sectionTitle}>
+        <div className="px-4 pb-3.5 pt-4">
+          <ProfileMeHeaderDisplay
+            locale={locale}
+            nickname={peer.nickname}
+            bio={peer.bio}
+            avatarUrl={peer.avatarUrl}
+            gender={peer.gender}
+            school={peer.school}
+            verifiedStudent={peer.verifiedStudent}
+            studentVerificationStatus={peer.studentVerificationStatus}
+            schoolSummary={schoolSummary}
+          />
+          {belowDisplayName ? (
+            <div className="mt-2.5 w-full min-w-0 max-w-full">{belowDisplayName}</div>
+          ) : null}
+          {metVia ? (
+            <div className="mt-3 inline-flex max-w-full items-center rounded-full bg-primary/10 px-3 py-1 text-[11px] font-medium text-primary">
+              {metVia}
+            </div>
+          ) : null}
         </div>
 
-        {metVia ? (
-          <div className="mt-3 inline-flex max-w-full items-center rounded-full bg-primary/10 px-3 py-1 text-[11px] font-medium text-primary">
-            {metVia}
-          </div>
-        ) : null}
-      </section>
+        <div className={mePageListDivideClass}>
+          <ProfileDetailSection title={lp.sectionTitle}>
+            <ProfileLifePhotosEditor initialPhotos={lifePhotos} readOnly layout="me" />
+          </ProfileDetailSection>
 
-      <section className="space-y-4 text-sm">
-        {peer.bio?.trim() ? (
-          <div className="rounded-xl border border-border bg-card px-3 py-2.5">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              {labels.aboutSection}
-            </p>
-            <p className="mt-1.5 leading-relaxed text-foreground/90">{peer.bio.trim()}</p>
-          </div>
-        ) : (
-          <div className="rounded-xl border border-dashed border-border bg-muted/20 px-3 py-2 text-xs italic text-muted-foreground">
-            {labels.emptyBio}
-          </div>
-        )}
+          {peer.languages.length > 0 ? (
+            <ProfileDetailSection title={labels.languagesSection}>
+              <div className="flex flex-wrap gap-1.5">
+                {peer.languages.map((row) => (
+                  <span
+                    key={row.tag}
+                    className="rounded-full bg-foreground/5 px-2.5 py-0.5 text-xs font-medium text-foreground/80"
+                    title={LANGUAGE_PROFICIENCY_LABEL[row.proficiency]}
+                  >
+                    {LANGUAGE_TAG_LABEL[row.tag]} · {LANGUAGE_PROFICIENCY_LABEL[row.proficiency]}
+                  </span>
+                ))}
+              </div>
+            </ProfileDetailSection>
+          ) : null}
 
-        {(peer.lifePhotos?.length ?? 0) > 0 ? (
-          <div className="rounded-xl border border-border bg-card px-3 py-2.5">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              {labels.lifePhotosSection}
-            </p>
-            <div className="mt-2">
-              <ProfileLifePhotosEditor initialPhotos={peer.lifePhotos!} readOnly />
-            </div>
-          </div>
-        ) : null}
-
-        {peer.languages.length > 0 ? (
-          <div className="rounded-xl border border-border bg-card px-3 py-2.5">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              {labels.languagesSection}
-            </p>
-            <div className="mt-1.5 flex flex-wrap gap-1.5">
-              {peer.languages.map((row) => (
-                <span
-                  key={row.tag}
-                  className="rounded-full bg-foreground/5 px-2.5 py-0.5 text-xs font-medium text-foreground/80"
-                  title={LANGUAGE_PROFICIENCY_LABEL[row.proficiency]}
-                >
-                  {LANGUAGE_TAG_LABEL[row.tag]} · {LANGUAGE_PROFICIENCY_LABEL[row.proficiency]}
-                </span>
-              ))}
-            </div>
-          </div>
-        ) : null}
+          <ProfileDetailSection title={labels.coursesSection}>
+            {peerCourses.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{labels.coursesEmpty}</p>
+            ) : (
+              <div className="space-y-2">
+                <ul className="flex flex-wrap gap-1.5">
+                  {peerCourses.map((course) => {
+                    const isShared = sharedCourseIds.has(course.id);
+                    const courseHref =
+                      `/courses/${course.id}?returnTo=${encodeURIComponent(coursesReturnTo)}` as Route;
+                    const courseLabel = course.code ? `[${course.code}] ${course.name}` : course.name;
+                    return (
+                      <li key={course.id}>
+                        <Link
+                          href={courseHref}
+                          className={
+                            isShared
+                              ? "inline-flex max-w-[14rem] rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary transition hover:bg-primary/15"
+                              : "inline-flex max-w-[14rem] rounded-full bg-foreground/5 px-2.5 py-1 text-[11px] text-foreground/75 transition hover:bg-foreground/10"
+                          }
+                          title={courseLabel}
+                        >
+                          <span className="truncate">{courseLabel}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+                {sharedCourses.length > 0 ? (
+                  <p className="text-[11px] text-primary/90">
+                    {sharedCourses.length === 1
+                      ? labels.sharedCoursesOne
+                      : formatMessage(labels.sharedCoursesMany, { count: sharedCourses.length })}
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-muted-foreground">{labels.noCourseOverlap}</p>
+                )}
+              </div>
+            )}
+          </ProfileDetailSection>
+        </div>
       </section>
     </div>
   );

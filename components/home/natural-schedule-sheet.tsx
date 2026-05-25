@@ -12,8 +12,8 @@ import {
   type CalendarCategoryOption,
 } from "@/components/calendar/category-picker-row";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
+import { discoverPrimarySolidCtaClassName } from "@/components/discover/discover-message-button";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
-import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/auth/api-fetch";
 import { formatMessage } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,24 @@ type DraftEvent = {
   repeatUntil: string;
   categoryId: string | null;
 };
+
+const naturalTextareaClassName = cn(
+  "min-h-[7.5rem] w-full resize-none rounded-2xl border border-border/70 bg-muted/10 px-4 py-3.5",
+  "text-[15px] leading-relaxed text-foreground shadow-none placeholder:text-muted-foreground/75",
+  "transition-[border-color,box-shadow] focus-visible:border-classmates-blue-border focus-visible:outline-none",
+  "focus-visible:ring-2 focus-visible:ring-classmates-blue-border/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+  "dark:bg-muted/20",
+);
+
+const naturalParseCtaClassName = cn(
+  "inline-flex h-11 w-full touch-manipulation items-center justify-center gap-2 rounded-xl",
+  "border border-classmates-blue-border bg-gradient-to-br from-classmates-blue-soft via-white to-classmates-blue-soft/60",
+  "text-[14px] font-semibold text-classmates-blue shadow-[0_4px_16px_-8px_rgba(37,99,235,0.45)]",
+  "transition hover:border-classmates-blue/45 hover:shadow-[0_6px_20px_-8px_rgba(37,99,235,0.5)] active:scale-[0.99]",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+  "disabled:pointer-events-none disabled:opacity-45",
+  "dark:from-blue-950/55 dark:via-zinc-950/40 dark:to-blue-950/35 dark:text-blue-200",
+);
 
 function formatEventWhen(isoStart: string, isoEnd: string, locale: "zh-CN" | "en") {
   const start = new Date(isoStart);
@@ -75,6 +93,11 @@ export function NaturalScheduleSheet({
     resetPreview();
     setText("");
     onClose();
+  };
+
+  const applyExample = (example: string) => {
+    setText(example);
+    resetPreview();
   };
 
   const updateDraftCategory = (index: number, categoryId: string | null) => {
@@ -190,102 +213,148 @@ export function NaturalScheduleSheet({
             {sch.naturalSheetTitle}
           </h2>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className="space-y-4 px-4 pb-6 pt-3">
-        <p className="text-[13px] leading-relaxed text-muted-foreground">{sch.naturalSheetHint}</p>
 
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={sch.naturalInputPlaceholder}
-          rows={4}
-          className={cn(
-            "w-full resize-none rounded-2xl border border-border/80 bg-muted/30 px-3.5 py-3",
-            "text-[15px] leading-snug text-foreground placeholder:text-muted-foreground",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30",
-          )}
-        />
-
-        <Button
-          type="button"
-          className="w-full gap-2"
-          disabled={!text.trim() || parsing}
-          onClick={() => void parse()}
-        >
-          {parsing ? (
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-          ) : (
-            <Sparkles className="h-4 w-4" aria-hidden />
-          )}
-          {parsing ? sch.naturalParsing : sch.naturalParseCta}
-        </Button>
-
-        {warnings.length > 0 ? (
-          <ul className="space-y-1 rounded-xl bg-amber-50/80 px-3 py-2 text-[12px] text-amber-950 dark:bg-amber-950/30 dark:text-amber-100">
-            {warnings.map((w) => (
-              <li key={w}>• {w}</li>
-            ))}
-          </ul>
-        ) : null}
-
-        {drafts.length > 0 ? (
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              {formatMessage(sch.naturalPreviewCount, { count: drafts.length })}
-            </p>
-            <ul className="space-y-2">
-              {drafts.map((ev, i) => (
-                <li
-                  key={`${ev.startAt}-${i}`}
-                  className="space-y-2 rounded-2xl border border-border/70 bg-card px-3.5 py-3 shadow-sm"
-                >
-                  <div>
-                    <p className="text-[14px] font-semibold text-foreground">{ev.title}</p>
-                    <p className="mt-1 text-[12px] text-muted-foreground">
-                      {formatEventWhen(ev.startAt, ev.endAt, locale)}
-                    </p>
-                    {ev.location?.trim() ? (
-                      <p className="mt-0.5 text-[12px] text-muted-foreground">{ev.location}</p>
-                    ) : null}
-                  </div>
-                  {calendarCategories.length > 0 ? (
-                    <CategoryPickerRow
-                      categories={calendarCategories}
-                      value={ev.categoryId}
-                      onChange={(id) => updateDraftCategory(i, id)}
-                      labels={sch}
-                      compact
-                    />
-                  ) : (
-                    <CategoryNoneRow labels={sch} />
-                  )}
-                </li>
-              ))}
-            </ul>
-            <Button
-              type="button"
-              className="w-full"
-              disabled={saving}
-              onClick={() => void confirm()}
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
-                  {sch.naturalSaving}
-                </>
-              ) : (
-                sch.naturalConfirmCta
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
+          <div className="space-y-4">
+            <div
+              className={cn(
+                "flex gap-3 rounded-2xl border border-classmates-blue-border/60 bg-gradient-to-br from-classmates-blue-soft/80 via-white/90 to-transparent px-3.5 py-3",
+                "dark:border-blue-500/25 dark:from-blue-950/40 dark:via-zinc-950/20 dark:to-transparent",
               )}
-            </Button>
-          </div>
-        ) : null}
+            >
+              <span
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-classmates-blue-border/70 bg-white text-classmates-blue shadow-sm dark:border-blue-500/35 dark:bg-blue-950/50 dark:text-blue-300"
+                aria-hidden
+              >
+                <Sparkles className="h-4 w-4" strokeWidth={2} />
+              </span>
+              <div className="min-w-0 space-y-0.5">
+                <p className="text-[13px] font-medium leading-snug text-foreground">{sch.naturalSheetHint}</p>
+                <p className="text-[12px] leading-snug text-muted-foreground">{sch.naturalSheetHintDetail}</p>
+              </div>
+            </div>
 
-        {error ? (
-          <p className="text-center text-[13px] text-red-600 dark:text-red-400" role="alert">
-            {error}
-          </p>
-        ) : null}
-      </div>
+            <div className="space-y-2.5">
+              <label className="sr-only" htmlFor="natural-schedule-input">
+                {sch.naturalInputPlaceholder}
+              </label>
+              <textarea
+                id="natural-schedule-input"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder={sch.naturalInputPlaceholder}
+                rows={5}
+                className={naturalTextareaClassName}
+              />
+
+              {sch.naturalExampleChips.length > 0 ? (
+                <div className="space-y-2">
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                    {sch.naturalExamplesLabel}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {sch.naturalExampleChips.map((example) => (
+                      <button
+                        key={example}
+                        type="button"
+                        onClick={() => applyExample(example)}
+                        className={cn(
+                          "max-w-full rounded-full border border-border/70 bg-muted/15 px-3 py-1.5 text-left text-[12px] leading-snug text-foreground transition",
+                          "hover:border-classmates-blue-border hover:bg-classmates-blue-soft hover:text-classmates-blue active:scale-[0.98]",
+                          "dark:hover:bg-blue-950/40 dark:hover:text-blue-200",
+                        )}
+                      >
+                        {example}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            <button
+              type="button"
+              className={naturalParseCtaClassName}
+              disabled={!text.trim() || parsing}
+              onClick={() => void parse()}
+            >
+              {parsing ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <Sparkles className="h-4 w-4" strokeWidth={2} aria-hidden />
+              )}
+              {parsing ? sch.naturalParsing : sch.naturalParseCta}
+            </button>
+
+            {warnings.length > 0 ? (
+              <ul className="space-y-1 rounded-2xl border border-amber-200/80 bg-amber-50/90 px-3.5 py-2.5 text-[12px] leading-snug text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-100">
+                {warnings.map((w) => (
+                  <li key={w}>• {w}</li>
+                ))}
+              </ul>
+            ) : null}
+
+            {drafts.length > 0 ? (
+              <div className="space-y-2.5">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  {formatMessage(sch.naturalPreviewCount, { count: drafts.length })}
+                </p>
+                <ul className="space-y-2">
+                  {drafts.map((ev, i) => (
+                    <li
+                      key={`${ev.startAt}-${i}`}
+                      className="space-y-2 rounded-2xl border border-border/70 bg-background/80 px-3.5 py-3 shadow-sm"
+                    >
+                      <div>
+                        <p className="text-[14px] font-semibold text-foreground">{ev.title}</p>
+                        <p className="mt-1 text-[12px] text-muted-foreground">
+                          {formatEventWhen(ev.startAt, ev.endAt, locale)}
+                        </p>
+                        {ev.location?.trim() ? (
+                          <p className="mt-0.5 text-[12px] text-muted-foreground">{ev.location}</p>
+                        ) : null}
+                      </div>
+                      {calendarCategories.length > 0 ? (
+                        <CategoryPickerRow
+                          categories={calendarCategories}
+                          value={ev.categoryId}
+                          onChange={(id) => updateDraftCategory(i, id)}
+                          labels={sch}
+                          compact
+                        />
+                      ) : (
+                        <CategoryNoneRow labels={sch} />
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  type="button"
+                  className={cn(discoverPrimarySolidCtaClassName, "rounded-xl")}
+                  disabled={saving}
+                  onClick={() => void confirm()}
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                      {sch.naturalSaving}
+                    </>
+                  ) : (
+                    sch.naturalConfirmCta
+                  )}
+                </button>
+              </div>
+            ) : null}
+
+            {error ? (
+              <p
+                className="rounded-xl border border-red-200/80 bg-red-50/80 px-3 py-2 text-center text-[13px] text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
+                role="alert"
+              >
+                {error}
+              </p>
+            ) : null}
+          </div>
         </div>
       </div>
     </AppPushLayer>

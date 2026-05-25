@@ -16,7 +16,7 @@ export default async function DiscoverPage() {
   if (!sessionUser) {
     const posts = await loadActiveDiscoverPostsForCity(servedCity, null);
     return (
-      <div className="-mt-3 min-w-0 space-y-3">
+      <div className="min-w-0 space-y-3">
         <DiscoverList posts={posts} servedCity={servedCity} />
       </div>
     );
@@ -55,7 +55,7 @@ export default async function DiscoverPage() {
   }));
 
   return (
-    <div className="-mt-3 min-w-0 space-y-3">
+    <div className="min-w-0 space-y-3">
       <DiscoverList
         posts={posts}
         activities={loadedActivities}

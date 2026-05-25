@@ -21,7 +21,7 @@ import {
   mePageRowInteractiveClass,
   mePageRowLeadClass,
 } from "@/components/profile/me-settings-row";
-import { ProfileMeDisplayCard } from "@/components/profile/profile-me-display-card";
+import { ProfileMeTopBlock } from "@/components/profile/profile-me-top-block";
 import { MePageGroupedSection, MePageSection } from "@/components/profile/me-page-section";
 import { FeedbackFormCard } from "@/components/profile/feedback-form-card";
 import { PushNotificationsCard } from "@/components/profile/push-notifications-card";
@@ -87,13 +87,13 @@ export default async function ProfilePage({
     );
   }
 
-  const [blockedCount, postsCount, savedCount, coursesCount] = await Promise.all([
+  const [blockedCount, lifePhotoRows] = await Promise.all([
     prisma.block.count({ where: { blockerId: user.id } }),
-    prisma.classmatePost.count({
-      where: { userId: user.id, status: "ACTIVE" },
+    prisma.userLifePhoto.findMany({
+      where: { userId: user.id },
+      orderBy: { sortOrder: "asc" },
+      select: { id: true, url: true, sortOrder: true },
     }),
-    prisma.classmatePostSave.count({ where: { userId: user.id } }),
-    prisma.userCourse.count({ where: { userId: user.id } }),
   ]);
   const isAdmin = isConfiguredAdmin(user);
 
@@ -149,7 +149,7 @@ export default async function ProfilePage({
         </p>
       ) : null}
 
-      <ProfileMeDisplayCard
+      <ProfileMeTopBlock
         locale={locale}
         nickname={user.nickname}
         bio={user.bio}
@@ -164,11 +164,11 @@ export default async function ProfilePage({
           major: user.major?.trim() ?? "",
           semester: user.semester ?? 1,
         }}
-        stats={{
-          posts: postsCount,
-          saved: savedCount,
-          courses: coursesCount,
-        }}
+        initialLifePhotos={lifePhotoRows.map((r) => ({
+          id: r.id,
+          url: r.url,
+          sortOrder: r.sortOrder,
+        }))}
       />
 
       <MePageGroupedSection id="me-activity-heading" title={ui.profile.landingSectionActivity}>

@@ -44,6 +44,7 @@ import {
   horizontalScrollIndexForFocus,
   horizontalScrollLeftForColumnDateKey,
   horizontalScrollLeftToRevealDay,
+  leftmostVisibleColumnDateKey,
   snapWeekCalendarHorizontalScrollLeft,
   weekCalendarHorizontalModeForFocus,
   type WeekCalendarDayColumn,
@@ -441,6 +442,8 @@ export function WeekCalendar({
   revealDateNonce = 0,
   /** Notified when the continuous virtual day strip grows or recenters (Home entry fetch). */
   onVirtualStripBoundsChange,
+  /** Home visible-days slider drag — keep horizontal anchor, skip focus re-centering. */
+  visibleDaysWidthAdjusting = false,
 }: {
   blocks: WeekCalendarBlock[];
   allDayBlocks?: WeekCalendarBlock[];
@@ -521,6 +524,7 @@ export function WeekCalendar({
   dayHeaderSelectAria?: string;
   revealDateNonce?: number;
   onVirtualStripBoundsChange?: (bounds: VirtualStripBounds) => void;
+  visibleDaysWidthAdjusting?: boolean;
 }) {
   const { locale, messages: appMessages } = useLocaleContext();
   const sch = appMessages.schedule;
@@ -561,8 +565,10 @@ export function WeekCalendar({
   const prevRevealNonceRef = useRef(revealDateNonce);
   const revealScrollAppliedNonceRef = useRef(0);
   const prevVisibleWeekDaysRef = useRef<number | null>(null);
-  /** Skip post-scroll snap while visible-day width is being adjusted programmatically. */
-  const suppressHorizontalSnapRef = useRef(false);
+  /** Last leftmost visible Berlin day key — stable anchor during width / visible-count changes. */
+  const leftmostVisibleDateKeyRef = useRef<string | null>(null);
+  /** Skip post-scroll snap for N scroll events after programmatic horizontal scroll. */
+  const suppressHorizontalSnapFramesRef = useRef(0);
   const virtualScrollEnabled =
     horizontalScrollMode === "continuous" && !(columnDateKeys?.length ?? 0);
   const [virtualStripBounds, setVirtualStripBounds] = useState<VirtualStripBounds | null>(() =>
@@ -697,6 +703,8 @@ export function WeekCalendar({
       virtualStripBounds,
     ],
   );
+  const dayColumnsForScrollRef = useRef(dayColumns);
+  dayColumnsForScrollRef.current = dayColumns;
   const weekStartBerlinKey = scheduleDateKeyInBerlin(weekStartDate);
   const focusBerlinKey = scheduleDateKeyInBerlin(focusDate);
   const shareSelectionChromeByKey = useMemo(
@@ -732,9 +740,12 @@ export function WeekCalendar({
       VISUAL_PADDING_BOTTOM_MINUTES) *
     MINUTE_PX;
   const rawViewportBodyPx = viewportBodyPx ?? computedViewportBodyPx;
+  /** Shell-measured max (Home / share fill) is allocated body height — expand to it unless an explicit body px is set. */
   const viewportHeightPx =
     maxViewportBodyPx != null && Number.isFinite(maxViewportBodyPx)
-      ? Math.min(rawViewportBodyPx, maxViewportBodyPx)
+      ? viewportBodyPx != null
+        ? Math.min(viewportBodyPx, maxViewportBodyPx)
+        : maxViewportBodyPx
       : rawViewportBodyPx;
   const scrollViewportHeightPx = WEEK_CALENDAR_HEADER_HEIGHT_PX + viewportHeightPx;
   /** Share/Home shells pin body height so the grid scrolls inside a bounded viewport. */
@@ -889,8 +900,8 @@ export function WeekCalendar({
     };
 
     const scheduleHorizontalSnap = () => {
-      if (suppressHorizontalSnapRef.current) {
-        suppressHorizontalSnapRef.current = false;
+      if (suppressHorizontalSnapFramesRef.current > 0) {
+        suppressHorizontalSnapFramesRef.current -= 1;
         return;
       }
       if (tid !== null || mouseDown || momentumRafRef.current !== null || snapAnimRafRef.current !== null) {
@@ -932,6 +943,15 @@ export function WeekCalendar({
       }
     };
     const onScroll = () => {
+      const colWidth = dayColumnWidthForScrollRef.current;
+      if (colWidth > 0) {
+        const key = leftmostVisibleColumnDateKey(
+          dayColumnsForScrollRef.current,
+          node.scrollLeft,
+          colWidth,
+        );
+        if (key) leftmostVisibleDateKeyRef.current = key;
+      }
       if (mouseDown) {
         const dx = node.scrollLeft - mouseOriginL;
         const dy = node.scrollTop - mouseOriginT;
@@ -1380,8 +1400,9 @@ export function WeekCalendar({
     const layoutKey = `${focusKey}|${horizontalMode}`;
     const layoutChanged = horizontalScrollLayoutKeyRef.current !== layoutKey;
     const visibleDaysChanged =
-      prevVisibleWeekDaysRef.current != null &&
+      prevVisibleWeekDaysRef.current == null ||
       prevVisibleWeekDaysRef.current !== VISIBLE_WEEK_DAYS;
+    const adjustingVisibleDays = visibleDaysWidthAdjusting;
     const weekChanged =
       horizontalScrollMode === "week" &&
       horizontalScrollWeekStartKeyRef.current !== weekStartKey;
@@ -1404,28 +1425,54 @@ export function WeekCalendar({
     };
 
     const shouldPreserveScrollPosition =
-      (widthChanged || visibleDaysChanged) &&
+      (widthChanged || visibleDaysChanged || adjustingVisibleDays) &&
       !weekChanged &&
       !frameJustReady &&
       !jumpToTodayReveal &&
-      (visibleDaysChanged || !layoutChanged);
+      (visibleDaysChanged || adjustingVisibleDays || !layoutChanged);
 
     if (shouldPreserveScrollPosition) {
       const viewportWidth = Math.max(frameWidth - TIME_COLUMN_PX, 1);
       const prevColWidth = prevWidth > 0 ? prevWidth : dayColumnWidth;
-      const anchorColIndex = Math.max(0, Math.floor(node.scrollLeft / prevColWidth + 1e-6));
-      const anchorDateKey = dayColumns[anchorColIndex]?.dateKey;
-      const fallbackScrollLeft = anchorColIndex * dayColumnWidth;
-      suppressHorizontalSnapRef.current = true;
-      commitDayScroll(
-        horizontalScrollLeftForColumnDateKey(
-          dayColumns,
-          anchorDateKey,
-          fallbackScrollLeft,
-          dayColumnWidth,
-          viewportWidth,
-        ),
+      const anchorFromScroll = leftmostVisibleColumnDateKey(
+        dayColumns,
+        node.scrollLeft,
+        prevColWidth,
       );
+      const anchorDateKey =
+        leftmostVisibleDateKeyRef.current ?? anchorFromScroll ?? null;
+      const anchorColIndex = anchorDateKey
+        ? dayColumns.findIndex((column) => column.dateKey === anchorDateKey)
+        : Math.max(0, Math.floor(node.scrollLeft / prevColWidth + 1e-6));
+      const fallbackScrollLeft =
+        anchorColIndex >= 0 ? anchorColIndex * dayColumnWidth : node.scrollLeft;
+      suppressHorizontalSnapFramesRef.current = Math.max(
+        suppressHorizontalSnapFramesRef.current,
+        5,
+      );
+      const nextScrollLeft = horizontalScrollLeftForColumnDateKey(
+        dayColumns,
+        anchorDateKey,
+        fallbackScrollLeft,
+        dayColumnWidth,
+        viewportWidth,
+      );
+      commitDayScroll(nextScrollLeft);
+      if (anchorDateKey) leftmostVisibleDateKeyRef.current = anchorDateKey;
+      else {
+        const key = leftmostVisibleColumnDateKey(
+          dayColumns,
+          nextScrollLeft,
+          dayColumnWidth,
+        );
+        if (key) leftmostVisibleDateKeyRef.current = key;
+      }
+      return;
+    }
+
+    if (adjustingVisibleDays) {
+      dayColumnWidthForScrollRef.current = dayColumnWidth;
+      prevVisibleWeekDaysRef.current = VISIBLE_WEEK_DAYS;
       return;
     }
 
@@ -1465,7 +1512,21 @@ export function WeekCalendar({
     todayBerlinKey,
     weekStartDate,
     VISIBLE_WEEK_DAYS,
+    visibleDaysWidthAdjusting,
   ]);
+
+  useLayoutEffect(() => {
+    if (!visibleDaysWidthAdjusting) return;
+    const node = scrollContainerRef.current;
+    const colWidth = dayColumnWidthForScrollRef.current;
+    if (!node || colWidth <= 0) return;
+    const key = leftmostVisibleColumnDateKey(
+      dayColumnsForScrollRef.current,
+      node.scrollLeft,
+      colWidth,
+    );
+    if (key) leftmostVisibleDateKeyRef.current = key;
+  }, [visibleDaysWidthAdjusting, dayColumns]);
 
   revealScrollContextRef.current = {
     todayBerlinKey,

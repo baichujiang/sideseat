@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import type { Route } from "next";
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 
 import { ClassmatePostImagesGallery } from "@/components/discover/classmate-post-images-gallery";
-import { ClassmatePostTextCover } from "@/components/discover/classmate-post-text-cover";
 import { displayableClassmatePostImageUrls } from "@/lib/discover/classmate-post-display-images";
 import { ClassmatePostSaveButton } from "@/components/discover/classmate-post-save-button";
 import { DiscoverMessageButton } from "@/components/discover/discover-message-button";
@@ -13,69 +12,21 @@ import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { buddyRequestAvailabilityValue, buddyRequestStatusLabel } from "@/lib/discover/buddy-request-detail-meta";
 import { getBuddyRequestDisplayStatus } from "@/lib/discover/buddy-request-status";
 import { buddyTypeLabel, shouldShowBuddyCategoryLabel } from "@/lib/discover/buddy-type-labels";
-import { formatMealsVenueLine, formatStudyVenueLine } from "@/lib/discover/format-post-venue-line";
 import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
-import { studyTimeSlotLabel } from "@/lib/discover/study-meta-labels";
-import { getDiscoverCityDisplayLabel } from "@/lib/discover/discover-city-display";
-import type { DiscoverCityNameKey } from "@/lib/discover/discover-city-name-keys";
-import { formatMessage, type AppMessages } from "@/lib/i18n/messages";
+import { formatClassmatePostExpiryMonthDay } from "@/lib/i18n/format-classmate-post-expiry";
+import { formatMessage } from "@/lib/i18n/messages";
 import { ClassmatePostStatus } from "@prisma/client";
 import type { ReactNode } from "react";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { cn } from "@/lib/utils";
 
-function buddyTimeLine(post: DiscoverPostRow, dl: AppMessages["discoverList"], buddy: AppMessages["discoverBuddy"]) {
-  const slots = post.studyMeta?.timeSlots;
-  if (slots?.length) {
-    return slots
-      .slice(0, 2)
-      .map((s) => studyTimeSlotLabel(s, dl))
-      .join(" · ");
-  }
-  return buddy.buddyCardTimeTbd;
-}
-
-function buddyLocationLine(
-  post: DiscoverPostRow,
-  dl: AppMessages["discoverList"],
-  cityLabel: string,
-  buddy: AppMessages["discoverBuddy"],
-) {
-  if (post.category === "MEALS" && post.mealsMeta) {
-    const line = formatMealsVenueLine(post.mealsMeta, dl);
-    if (line.trim()) return line;
-  }
-  if (post.category === "STUDY" && post.studyMeta) {
-    const line = formatStudyVenueLine(post.studyMeta, dl);
-    if (line.trim()) return line;
-  }
-  return formatMessage(buddy.buddyCardCityLine, { city: cityLabel });
-}
-
-function MiniAvatar({ url, name }: { url: string | null; name: string }) {
-  const initial = name.trim().charAt(0) || "?";
-  const trimmed = url?.trim();
-  /** Preset ids (`p01`–`p20`) and blob URLs — same resolution as {@link PresetAvatar}. */
-  if (trimmed) {
-    return (
-      <PresetAvatar
-        id={trimmed}
-        size={28}
-        className="h-7 w-7 shrink-0 border border-border/50"
-      />
-    );
-  }
-  return (
-    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border/50 bg-muted text-[10px] font-semibold text-muted-foreground">
-      {initial}
-    </span>
-  );
+function isNeverExpiry(value: Date) {
+  return new Date(value).getUTCFullYear() >= 2099;
 }
 
 export function BuddyRequestCard({
   post,
-  cityNameKey: cityNameKeyProp,
   returnTo = "/discover",
   customFooter,
   headerOverlay,
@@ -84,9 +35,8 @@ export function BuddyRequestCard({
   listingStatus,
 }: {
   post: DiscoverPostRow;
-  cityNameKey?: DiscoverCityNameKey;
   returnTo?: string;
-  /** When set, replaces the default message + save footer. */
+  /** When set, replaces the default message action in the author row. */
   customFooter?: ReactNode;
   headerOverlay?: ReactNode;
   articleClassName?: string;
@@ -97,16 +47,12 @@ export function BuddyRequestCard({
   const { locale } = useLocaleContext();
   const dl = m.discoverList;
   const buddy = m.discoverBuddy;
-  const cityNameKey = (cityNameKeyProp ?? post.city) as DiscoverCityNameKey;
-  const cityLabel = getDiscoverCityDisplayLabel(cityNameKey, m.discover.cityNames);
   const detailHref =
     `/discover/posts/${post.id}?returnTo=${encodeURIComponent(returnTo)}` as Route;
   const images = displayableClassmatePostImageUrls(post.imageUrls);
   const typeLabel = shouldShowBuddyCategoryLabel(post.category)
     ? buddyTypeLabel(post.category, buddy)
     : "";
-  const timeLine = buddyTimeLine(post, dl, buddy);
-  const locLine = buddyLocationLine(post, dl, cityLabel, buddy);
   const displayStatus = getBuddyRequestDisplayStatus({
     status: listingStatus ?? ClassmatePostStatus.ACTIVE,
     expiresAt: new Date(post.expiresAt),
@@ -119,129 +65,135 @@ export function BuddyRequestCard({
     new Date(post.expiresAt),
     new Date(post.createdAt),
   );
-  const statusFooter = `${statusLabel} · ${availabilityLine}`;
   const showSave = post.savedByViewer !== undefined && !post.isDevExample;
-
+  const showDefaultMessage = customFooter === undefined && !post.isDevExample;
   const linkedCourseId = post.linkedCourses?.[0]?.id;
+  const contentReserveClass = showSave ? "pr-11 sm:pr-12" : undefined;
+
+  const expiryLabel = isNeverExpiry(post.expiresAt)
+    ? dl.postNoExpiry
+    : formatMessage(dl.postActiveUntil, {
+        date: formatClassmatePostExpiryMonthDay(new Date(post.expiresAt), locale),
+      });
 
   const articleSurfaceClassName = cn(
-    "break-inside-avoid overflow-hidden rounded-2xl border border-border/55 bg-white shadow-[0_4px_18px_-10px_rgba(15,23,42,0.12)] dark:border-border dark:bg-card",
+    "break-inside-avoid overflow-hidden rounded-2xl border border-[#E7E0D6] bg-white shadow-[0_4px_16px_rgba(15,23,42,0.04)] dark:border-border/80 dark:bg-card",
+    showSave && "relative",
     articleClassName,
   );
 
   const mainBlock = (
     <>
-      {images.length > 0 ? (
-        <div className="relative w-full overflow-hidden bg-muted/30">
-          {headerOverlay ? (
-            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 p-2 [&>*]:pointer-events-auto">
-              {headerOverlay}
-            </div>
-          ) : null}
-          <ClassmatePostImagesGallery
-            urls={images}
-            variant="card"
-            ariaLabel={dl.postCardImagesAria}
-            className="[&>div]:mt-0"
-          />
+      {headerOverlay ? (
+        <div className={cn("mb-2 flex w-full items-start justify-between gap-2", contentReserveClass)}>
+          {headerOverlay}
         </div>
-      ) : (
-        <div className="relative aspect-[4/5] w-full overflow-hidden">
-          {headerOverlay ? (
-            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 p-2 [&>*]:pointer-events-auto">
-              {headerOverlay}
-            </div>
-          ) : null}
-          <ClassmatePostTextCover
-            category={post.category}
-            typeLabel={typeLabel}
-            title={post.title}
-            variant="card"
-          />
-        </div>
-      )}
-
-      <div className="space-y-1.5 p-2.5">
-        {images.length > 0 && shouldShowBuddyCategoryLabel(post.category) && typeLabel.trim() ? (
-          <span className="inline-flex max-w-full rounded-full bg-muted/80 px-2 py-0.5 text-[10px] font-semibold text-foreground/90">
+      ) : null}
+      <div className={cn("mb-2 flex items-start justify-between gap-2", contentReserveClass)}>
+        {typeLabel ? (
+          <span className="inline-flex rounded-full border border-classmates-blue-border/70 bg-classmates-blue-soft px-2.5 py-0.5 text-[11px] font-medium text-classmates-blue">
             {typeLabel}
           </span>
+        ) : (
+          <span />
+        )}
+        {displayStatus !== "open" ? (
+          <span className="text-[11px] font-semibold text-muted-foreground">{statusLabel}</span>
         ) : null}
-        {images.length > 0 ? (
-          <h3 className="line-clamp-2 text-[13px] font-semibold leading-snug text-foreground">{post.title}</h3>
-        ) : null}
-        {post.body ? (
-          <p className="line-clamp-2 text-[11px] leading-snug text-muted-foreground">{post.body}</p>
-        ) : null}
-
-        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-          <Clock className="h-3 w-3 shrink-0 opacity-80" aria-hidden />
-          <span className="min-w-0 truncate">{timeLine}</span>
-        </div>
-        <div className="flex items-start gap-1 text-[10px] text-muted-foreground">
-          <MapPin className="mt-0.5 h-3 w-3 shrink-0 opacity-80" aria-hidden />
-          <span className="min-w-0 line-clamp-2 leading-snug">{locLine}</span>
-        </div>
-
-        {!hideAuthorRow ? (
-          <div className="flex items-center gap-2 pt-0.5">
-            <MiniAvatar url={post.avatarUrl} name={post.nickname} />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[11px] font-medium text-foreground">{post.nickname}</p>
-            {post.school ? (
-              <p className="truncate text-[10px] text-muted-foreground">{post.school}</p>
-            ) : null}
-            </div>
-          </div>
-        ) : null}
-
-        <div className="flex items-center gap-1 border-t border-border/50 pt-2 text-[10px] text-muted-foreground">
-          <Calendar className="h-3 w-3 shrink-0 opacity-80" aria-hidden />
-          <span className="min-w-0 flex-1 truncate">{statusFooter}</span>
-        </div>
       </div>
+      <h3 className={cn("text-[15px] font-semibold leading-snug text-foreground", contentReserveClass)}>
+        {post.title}
+      </h3>
+      {post.body?.trim() ? (
+        <p className="mt-1.5 line-clamp-3 text-[13px] leading-relaxed text-muted-foreground">
+          {post.body.trim()}
+        </p>
+      ) : null}
+      <p className="mt-1.5 flex items-center gap-1.5 text-[13px] text-muted-foreground">
+        <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        <span className="min-w-0 truncate">
+          {displayStatus === "open" ? expiryLabel : availabilityLine}
+        </span>
+      </p>
+      {images.length > 0 ? (
+        <ClassmatePostImagesGallery
+          urls={images}
+          variant="card"
+          ariaLabel={dl.postCardImagesAria}
+          topClassName="mt-2"
+          className="[&_img]:max-h-28"
+        />
+      ) : null}
     </>
   );
 
-  const actionFooter =
-    customFooter !== undefined ? (
-      customFooter
-    ) : (
-      <div className="flex items-center justify-between gap-2 border-t border-border/50 px-2.5 pb-2.5 pt-2">
-        <DiscoverMessageButton
-          peerId={post.userId}
-          courseId={linkedCourseId}
-          returnTo={returnTo}
-          tone="outline"
-          hasExistingChat={false}
-          className="h-8 min-h-8 flex-1 touch-manipulation px-2 text-[11px]"
-          label={buddy.buddyCardMessage}
-          insightPostId={post.id}
-        />
-        {showSave ? (
-          <ClassmatePostSaveButton postId={post.id} initialSaved={Boolean(post.savedByViewer)} />
+  const authorRow =
+    !hideAuthorRow ? (
+      <div className="flex items-center justify-between gap-2 border-t border-border/50 px-4 pb-3 pt-3">
+        <Link
+          href={detailHref}
+          className="flex min-w-0 flex-1 items-center gap-2 rounded-lg outline-none ring-offset-2 transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          <PresetAvatar id={post.avatarUrl} size={32} className="h-8 w-8 shrink-0" />
+          <div className="min-w-0">
+            <p className="truncate text-[13px] font-medium text-foreground">{post.nickname}</p>
+            <p className="text-[11px] text-muted-foreground">{buddy.buddyCardAuthorLabel}</p>
+          </div>
+        </Link>
+        {showDefaultMessage ? (
+          <DiscoverMessageButton
+            peerId={post.userId}
+            courseId={linkedCourseId}
+            returnTo={returnTo}
+            tone="outline"
+            hasExistingChat={false}
+            iconOnly
+            className="h-11 w-11 min-h-11 min-w-11 shrink-0 touch-manipulation p-0"
+            label={buddy.buddyCardMessage}
+            insightPostId={post.id}
+          />
         ) : null}
       </div>
-    );
+    ) : null;
 
   if (post.isDevExample) {
     return (
       <article className={articleSurfaceClassName}>
-        {mainBlock}
-        <p className="px-2.5 pb-2 text-center text-[10px] text-muted-foreground">Demo</p>
+        <div className="px-4 py-3.5">
+          {mainBlock}
+          {!hideAuthorRow ? (
+            <div className="mt-3 flex items-center gap-2 border-t border-border/50 pt-3">
+              <PresetAvatar id={post.avatarUrl} size={32} className="h-8 w-8 shrink-0" />
+              <div className="min-w-0">
+                <p className="truncate text-[13px] font-medium text-foreground">{post.nickname}</p>
+                <p className="text-[11px] text-muted-foreground">{buddy.buddyCardAuthorLabel}</p>
+              </div>
+            </div>
+          ) : null}
+        </div>
+        <p className="px-4 pb-2 text-center text-[10px] text-muted-foreground">Demo</p>
       </article>
     );
   }
 
   return (
     <article className={articleSurfaceClassName}>
+      {showSave ? (
+        <div className="pointer-events-auto absolute right-1.5 top-1.5 z-20 sm:right-2 sm:top-2">
+          <ClassmatePostSaveButton postId={post.id} initialSaved={Boolean(post.savedByViewer)} />
+        </div>
+      ) : null}
       <Link
         href={detailHref}
-        className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className={cn(
+          "block px-4 py-3.5 transition hover:border-classmates-blue-border/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          contentReserveClass,
+        )}
       >
         {mainBlock}
       </Link>
-      {actionFooter}
+      {authorRow}
+      {customFooter}
     </article>
   );
 }

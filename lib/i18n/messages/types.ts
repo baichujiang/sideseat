@@ -190,8 +190,6 @@ export type AppMessages = {
     feedTabToday: string;
     feedTabNearby: string;
     feedTabLatest: string;
-    typeChipAll: string;
-    typeChipsAria: string;
     searchPlaceholder: string;
     searchAria: string;
     filterOpenAria: string;
@@ -223,6 +221,7 @@ export type AppMessages = {
     buddyCardTimeTbd: string;
     /** `{city}` — city label on compact card */
     buddyCardCityLine: string;
+    buddyCardAuthorLabel: string;
   };
   /** Buddy request detail / Discover post drill-in — request-first copy. */
   discoverBuddyDetail: {
@@ -835,10 +834,20 @@ export type AppMessages = {
     sendPlanInviteOpening: string;
     sendPlanInviteFailed: string;
     sendPlanInviteNetwork: string;
+    addActionSheetTitle: string;
+    addActionSheetNaturalOption: string;
+    addActionSheetNaturalSubtitle: string;
+    addActionSheetManualOption: string;
+    addActionSheetManualSubtitle: string;
+    addActionSheetCancel: string;
+    addPanelNaturalLink: string;
     naturalScheduleAria: string;
     naturalSheetTitle: string;
     naturalSheetCloseAria: string;
     naturalSheetHint: string;
+    naturalSheetHintDetail: string;
+    naturalExamplesLabel: string;
+    naturalExampleChips: string[];
     naturalInputPlaceholder: string;
     naturalParseCta: string;
     naturalParsing: string;
@@ -1110,10 +1119,6 @@ export type AppMessages = {
     landingSectionActivity: string;
     landingSectionNotifications: string;
     landingSectionMore: string;
-    landingStatPosts: string;
-    landingStatSaved: string;
-    landingStatCourses: string;
-    landingEditProfileCta: string;
     preferencesTitle: string;
     preferencesSubtitleNone: string;
     preferencesSubtitleOne: string;
@@ -1468,10 +1473,8 @@ export type AppMessages = {
   /** Other user's profile (`/users/[id]`) — not your own Me page. */
   userProfile: {
     screenTitle: string;
-    aboutSection: string;
     languagesSection: string;
     lifePhotosSection: string;
-    emptyBio: string;
     coursesSection: string;
     coursesEmpty: string;
     sharedCoursesOne: string;

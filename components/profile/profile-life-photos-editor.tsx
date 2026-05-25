@@ -19,9 +19,12 @@ export type LifePhotoRow = {
 export function ProfileLifePhotosEditor({
   initialPhotos,
   readOnly = false,
+  layout = "page",
 }: {
   initialPhotos: LifePhotoRow[];
   readOnly?: boolean;
+  /** `me` — compact spacing on Me page top block. */
+  layout?: "page" | "me";
 }) {
   const m = useAppMessages();
   const lp = m.profileLifePhotos;
@@ -75,10 +78,12 @@ export function ProfileLifePhotosEditor({
   }
 
   return (
-    <div className="space-y-3">
-      <p className="text-[12px] leading-snug text-muted-foreground">
-        {formatMessage(lp.hint, { max: USER_LIFE_PHOTO_MAX })}
-      </p>
+    <div className={cn(layout === "me" ? "space-y-2" : "space-y-3")}>
+      {!readOnly && layout !== "me" ? (
+        <p className="text-[12px] leading-snug text-muted-foreground">
+          {formatMessage(lp.hint, { max: USER_LIFE_PHOTO_MAX })}
+        </p>
+      ) : null}
 
       <div className="grid grid-cols-3 gap-2">
         {photos.map((photo) => (

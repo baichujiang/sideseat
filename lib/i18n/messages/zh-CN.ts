@@ -210,8 +210,6 @@ export const zhCnMessages: AppMessages = {
     feedTabToday: "今天",
     feedTabNearby: "附近",
     feedTabLatest: "最新",
-    typeChipAll: "全部",
-    typeChipsAria: "按搭子类型筛选",
     searchPlaceholder: "找自习搭子、饭搭子、课程…",
     searchAria: "搜索找搭子请求",
     filterOpenAria: "筛选",
@@ -242,6 +240,7 @@ export const zhCnMessages: AppMessages = {
     buddyCardOpen: "招募中",
     buddyCardTimeTbd: "时间待定",
     buddyCardCityLine: "{city}",
+    buddyCardAuthorLabel: "发布者",
   },
   discoverBuddyDetail: {
     planDetailsTitle: "计划详情",
@@ -607,7 +606,7 @@ export const zhCnMessages: AppMessages = {
     },
     faq: {
       gettingStartedBody:
-        "SideSeat 帮你管理课表、发现同学、聊天约学习计划。\n\n• 首页 — 日历与自然语言排课（首页 ✨）。\n• 发现 — 本校同学与帖子。\n• 课程 — 课程群与同学。\n• 聊天 — 私信与群聊。\n• 我的 — 资料、验证与设置。",
+        "SideSeat 帮你管理课表、发现同学、聊天约学习计划。\n\n• 首页 — 日历与自然语言排课（点 + 选择「一句话添加」）。\n• 发现 — 本校同学与帖子。\n• 课程 — 课程群与同学。\n• 聊天 — 私信与群聊。\n• 我的 — 资料、验证与设置。",
       discoverBody:
         "发现页展示本校、本城的同学与帖子。完善资料（学校、专业、语言）匹配更准。访客可浏览；注册后可发帖和私信。",
       verificationBody:
@@ -617,7 +616,7 @@ export const zhCnMessages: AppMessages = {
         "访客模式无需注册即可浏览首页、发现和本助手。发帖、匹配、与真实同学私信需注册；同一账号登录后数据在同一服务器上。",
       guestSignupRegisteredBody: "你已登录。用发现和课程认识同学；聊天用于约计划和私信。",
       scheduleBody:
-        "在首页点 ✨ 用自然语言描述事件，预览后保存到日历。也可手动添加事件，并在聊天「+」中向熟人分享空闲时间。",
+        "在首页点 +，选择「一句话添加」，用自然语言描述事件，预览后保存到日历。也可选手动填写，并在聊天「+」中向熟人分享空闲时间。",
       inboxBody:
         "聊天列表包含课程群、私信与群聊。可在会话菜单置顶。计划邀请以卡片形式出现在对话中，可直接接受或拒绝。",
       fallbackBody:
@@ -815,13 +814,21 @@ export const zhCnMessages: AppMessages = {
     sendPlanInviteOpening: "正在打开聊天…",
     sendPlanInviteFailed: "无法打开聊天发送计划。",
     sendPlanInviteNetwork: "网络错误，请重试。",
+    addActionSheetTitle: "添加日程",
+    addActionSheetNaturalOption: "一句话添加",
+    addActionSheetNaturalSubtitle: "用中文或英文描述时间，自动解析多条日程",
+    addActionSheetManualOption: "手动填写",
+    addActionSheetManualSubtitle: "时间、地点、重复与同行人",
+    addActionSheetCancel: "取消",
+    addPanelNaturalLink: "改用自然语言描述日程",
     naturalScheduleAria: "用自然语言快速添加日程",
     naturalSheetTitle: "一句话添加日程",
     naturalSheetCloseAria: "关闭",
-    naturalSheetHint:
-      "用中文或英文描述一个或多个日程（欧洲/柏林时区）。解析后会猜测日历类别，可在预览里修改后再保存。",
-    naturalInputPlaceholder:
-      "例如：明天下午 3 点到 5 点主图书馆自习；周五上午 10 点组会 1 小时",
+    naturalSheetHint: "用中文或英文描述一条或多条日程。",
+    naturalSheetHintDetail: "按欧洲/柏林时区解析；类别会自动猜测，可在预览中修改。",
+    naturalExamplesLabel: "示例",
+    naturalExampleChips: ["明天下午3点到5点图书馆自习", "周五上午10点组会1小时"],
+    naturalInputPlaceholder: "明天下午3点到5点图书馆自习…",
     naturalParseCta: "解析日程",
     naturalParsing: "解析中…",
     naturalParseError: "无法解析，请换个说法或用手动添加。",
@@ -1089,10 +1096,6 @@ export const zhCnMessages: AppMessages = {
     landingSectionActivity: "动态与内容",
     landingSectionNotifications: "通知",
     landingSectionMore: "更多",
-    landingStatPosts: "帖子",
-    landingStatSaved: "收藏",
-    landingStatCourses: "课程",
-    landingEditProfileCta: "编辑资料",
     preferencesTitle: "偏好与账户",
     preferencesSubtitleNone: "通知、已屏蔽用户、关于、删除账户",
     preferencesSubtitleOne: "通知、已屏蔽 1 人、关于、删除账户",
@@ -1146,14 +1149,14 @@ export const zhCnMessages: AppMessages = {
   },
   profileLifePhotos: {
     pageTitle: "生活照",
-    hint: "最多可添加 {max} 张，展示你的校园生活（发现页帖子不再支持配图）。",
+    hint: "最多 {max} 张",
     addPhoto: "添加照片",
     uploading: "上传中…",
     removePhotoAria: "删除照片",
     errorUpload: "上传失败。",
     errorRemove: "删除失败。",
-    emptyPeer: "暂无生活照。",
-    sectionTitle: "生活照",
+    emptyPeer: "暂无日常",
+    sectionTitle: "我的日常",
     rowSubtitleEmpty: "暂无",
     rowSubtitleCount: "{count} 张",
   },
@@ -1412,10 +1415,8 @@ export const zhCnMessages: AppMessages = {
   },
   userProfile: {
     screenTitle: "资料",
-    aboutSection: "简介",
     languagesSection: "语言",
-    lifePhotosSection: "生活照",
-    emptyBio: "还没有个人简介。",
+    lifePhotosSection: "我的日常",
     coursesSection: "课程",
     coursesEmpty: "对方暂未添加课程。",
     sharedCoursesOne: "1 门共同课程",

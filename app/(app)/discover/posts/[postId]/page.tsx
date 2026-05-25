@@ -195,12 +195,14 @@ export default async function DiscoverPostDetailPage({
               highlightViewerCourses={false}
               viewerCourseMatchIndex={null}
               media={
-                <BuddyRequestMediaCarousel
-                  urls={imageUrls}
-                  category={post.category}
-                  title={post.title}
-                  ariaLabel={ui.discoverList.postCardImagesAria}
-                />
+                imageUrls.length > 0 ? (
+                  <BuddyRequestMediaCarousel
+                    urls={imageUrls}
+                    category={post.category}
+                    title={post.title}
+                    ariaLabel={ui.discoverList.postCardImagesAria}
+                  />
+                ) : undefined
               }
             />
             <PlanDetailsCard title={detail.planDetailsTitle} rows={planRows} />
@@ -341,12 +343,14 @@ export default async function DiscoverPostDetailPage({
             highlightViewerCourses
             viewerCourseMatchIndex={viewerCourseMatchIndex}
             media={
-              <BuddyRequestMediaCarousel
-                urls={post.imageUrls}
-                category={post.category}
-                title={post.title}
-                ariaLabel={ui.discoverList.postCardImagesAria}
-              />
+              post.imageUrls.length > 0 ? (
+                <BuddyRequestMediaCarousel
+                  urls={post.imageUrls}
+                  category={post.category}
+                  title={post.title}
+                  ariaLabel={ui.discoverList.postCardImagesAria}
+                />
+              ) : undefined
             }
           />
           <PlanDetailsCard title={detail.planDetailsTitle} rows={planRows} />

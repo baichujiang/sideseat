@@ -159,6 +159,20 @@ export function horizontalScrollIndexForFocus(
   return mondayIdx >= 0 ? Math.min(mondayIdx, maxStart) : Math.min(focusIdx, maxStart);
 }
 
+/** Berlin date key of the leftmost day column at `scrollLeft` (stable anchor for width changes). */
+export function leftmostVisibleColumnDateKey(
+  columns: WeekCalendarDayColumn[],
+  scrollLeft: number,
+  columnWidthPx: number,
+): string | null {
+  if (columns.length === 0 || columnWidthPx <= 0) return null;
+  const index = Math.max(
+    0,
+    Math.min(columns.length - 1, Math.floor(scrollLeft / columnWidthPx + 1e-6)),
+  );
+  return columns[index]?.dateKey ?? null;
+}
+
 /** Left-edge scroll for the column matching `dateKey`, or a scaled fallback when the key is missing. */
 export function horizontalScrollLeftForColumnDateKey(
   columns: WeekCalendarDayColumn[],

@@ -1,7 +1,9 @@
 import type { Route } from "next";
 import type { StudentVerificationStatus, UserGender } from "@prisma/client";
+import type { LanguageTag } from "@prisma/client";
 
 import { MePageGroupedSection } from "@/components/profile/me-page-section";
+import { ProfileMeHeaderDisplay } from "@/components/profile/profile-me-header-display";
 import { ProfileInfoRow } from "@/components/profile/profile-info-row";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import {
@@ -13,16 +15,11 @@ import { userGenderLabel } from "@/components/ui/user-gender-icon";
 import { getDiscoverCityDisplayLabel } from "@/lib/discover/discover-city-display";
 import type { DiscoverCityNameKey } from "@/lib/discover/discover-city-name-keys";
 import { LANGUAGE_TAG_LABEL } from "@/lib/constants/languages";
-import type { LanguageTag } from "@prisma/client";
-import { formatMessage, getMessages } from "@/lib/i18n/messages";
+import { getMessages } from "@/lib/i18n/messages";
 import type { AppLocale } from "@/lib/i18n/app-locale";
+import { buildSchoolSummaryLine } from "@/lib/profile/school-summary-line";
 import { studentVerificationRowValue } from "@/lib/verification/student-verification-display";
-
-function buildSchoolValue(summary: ProfileSchoolSummary, semesterLabel: string): string {
-  const majorOrDegree = summary.major.trim() || summary.degreeLabel;
-  const sem = formatMessage(semesterLabel, { semester: String(summary.semester) });
-  return [summary.schoolShort, majorOrDegree, sem].join(" · ");
-}
+import { cn } from "@/lib/utils";
 
 function buildLanguagesValue(tags: LanguageTag[], locale: AppLocale, emptyLabel: string): string {
   if (tags.length === 0) return emptyLabel;
@@ -33,81 +30,101 @@ function buildLanguagesValue(tags: LanguageTag[], locale: AppLocale, emptyLabel:
   return labels.join(", ");
 }
 
+const infoHeaderCardClass = cn(
+  mePageCardClass,
+  "relative overflow-hidden bg-gradient-to-b from-white via-classmates-surface to-classmates-warm-alt/35",
+  "shadow-[0_2px_16px_-6px_rgba(15,23,42,0.08)]",
+  "dark:from-card dark:via-card dark:to-muted/25 dark:shadow-none",
+);
+
 export function ProfileMeInfoCard({
   locale,
   nickname,
   bio,
   avatarUrl,
   gender,
+  school,
+  verifiedStudent,
+  studentVerificationStatus,
   schoolSummary,
   languageTags,
   discoverCity,
   verificationStatus,
   verificationEmail,
-  lifePhotoCount = 0,
 }: {
   locale: AppLocale;
   nickname: string | null;
   bio: string | null;
   avatarUrl: string | null;
   gender: UserGender;
+  school: string | null;
+  verifiedStudent: boolean;
+  studentVerificationStatus: StudentVerificationStatus;
   schoolSummary: ProfileSchoolSummary;
   languageTags: LanguageTag[];
   discoverCity: DiscoverCityNameKey;
   verificationStatus: StudentVerificationStatus;
   verificationEmail: string | null;
-  lifePhotoCount?: number;
 }) {
   const t = getMessages(locale).meIdentity;
   const pr = getMessages(locale).profile;
-  const lp = getMessages(locale).profileLifePhotos;
   const me = getMessages(locale).me;
   const sv = getMessages(locale).studentVerification;
   const cityNames = getMessages(locale).discover.cityNames;
 
   const nameDisplay = nickname?.trim() || t.displayNamePlaceholder;
   const bioDisplay = bio?.trim() || t.taglineEmpty;
-  const schoolDisplay = buildSchoolValue(schoolSummary, t.schoolLineSemester);
+  const schoolDisplay = buildSchoolSummaryLine(schoolSummary, t.schoolLineSemester);
   const languagesDisplay = buildLanguagesValue(languageTags, locale, "—");
   const cityDisplay = getDiscoverCityDisplayLabel(discoverCity, cityNames);
   const genderDisplay = userGenderLabel(gender);
   const verificationDisplay = studentVerificationRowValue(verificationStatus, sv, verificationEmail);
-  const lifePhotosDisplay =
-    lifePhotoCount > 0
-      ? formatMessage(lp.rowSubtitleCount, { count: String(lifePhotoCount) })
-      : lp.rowSubtitleEmpty;
 
   return (
     <div className="space-y-4">
-      <nav className={mePageCardClass} aria-label={t.profileInfoNavAria}>
-        <div className={mePageListDivideClass}>
-          <ProfileInfoRow
-            href={"/profile/avatar" as Route}
-            title={t.rowPhoto}
-            value={<PresetAvatar id={avatarUrl} size={40} className="shrink-0" />}
-            valueClassName="flex justify-end"
+      <MePageGroupedSection id="profile-fields-heading" title={t.profileRowsNavAria}>
+        <nav className={infoHeaderCardClass} aria-label={t.profileInfoNavAria}>
+          <div
+            className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-blue-400/10 blur-2xl dark:bg-blue-500/10"
+            aria-hidden
           />
-          <ProfileInfoRow href={"/profile/name" as Route} title={t.rowName} value={nameDisplay} />
-          <ProfileInfoRow href={"/profile/bio" as Route} title={t.rowBio} value={bioDisplay} />
-          <ProfileInfoRow
-            href={"/profile/life-photos" as Route}
-            title={t.rowLifePhotos}
-            value={lifePhotosDisplay}
-          />
-          <ProfileInfoRow href={"/profile/gender" as Route} title={t.rowGender} value={genderDisplay} />
-          <ProfileInfoRow href={"/profile/academic" as Route} title={t.rowSchool} value={schoolDisplay} />
-          <ProfileInfoRow
-            href={"/profile/languages" as Route}
-            title={t.rowLanguages}
-            value={languagesDisplay}
-          />
-          <ProfileInfoRow
-            href={"/profile/discover-city" as Route}
-            title={pr.discoverCityRowTitle}
-            value={cityDisplay}
-          />
-        </div>
-      </nav>
+          <div className="relative px-4 pb-3.5 pt-4">
+            <ProfileMeHeaderDisplay
+              locale={locale}
+              nickname={nickname}
+              bio={bio}
+              avatarUrl={avatarUrl}
+              gender={gender}
+              school={school}
+              verifiedStudent={verifiedStudent}
+              studentVerificationStatus={studentVerificationStatus}
+              schoolSummary={schoolSummary}
+            />
+          </div>
+          <div className={mePageListDivideClass}>
+            <ProfileInfoRow
+              href={"/profile/avatar" as Route}
+              title={t.rowPhoto}
+              value={<PresetAvatar id={avatarUrl} size={40} className="shrink-0" />}
+              valueClassName="flex justify-end"
+            />
+            <ProfileInfoRow href={"/profile/name" as Route} title={t.rowName} value={nameDisplay} />
+            <ProfileInfoRow href={"/profile/bio" as Route} title={t.rowBio} value={bioDisplay} />
+            <ProfileInfoRow href={"/profile/gender" as Route} title={t.rowGender} value={genderDisplay} />
+            <ProfileInfoRow href={"/profile/academic" as Route} title={t.rowSchool} value={schoolDisplay} />
+            <ProfileInfoRow
+              href={"/profile/languages" as Route}
+              title={t.rowLanguages}
+              value={languagesDisplay}
+            />
+            <ProfileInfoRow
+              href={"/profile/discover-city" as Route}
+              title={pr.discoverCityRowTitle}
+              value={cityDisplay}
+            />
+          </div>
+        </nav>
+      </MePageGroupedSection>
 
       <MePageGroupedSection id="profile-verification-heading" title={me.verificationSectionTitle}>
         <nav className={mePageCardClass} aria-label={me.verificationSectionTitle}>

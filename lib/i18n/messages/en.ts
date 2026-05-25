@@ -217,8 +217,6 @@ export const enMessages: AppMessages = {
     feedTabToday: "Today",
     feedTabNearby: "Nearby",
     feedTabLatest: "Latest",
-    typeChipAll: "All",
-    typeChipsAria: "Filter by buddy type",
     searchPlaceholder: "Find study partners, meal buddies, courses…",
     searchAria: "Search buddy requests",
     filterOpenAria: "Filters",
@@ -249,6 +247,7 @@ export const enMessages: AppMessages = {
     buddyCardOpen: "Open",
     buddyCardTimeTbd: "Time TBD",
     buddyCardCityLine: "{city}",
+    buddyCardAuthorLabel: "Posted by",
   },
   discoverBuddyDetail: {
     planDetailsTitle: "Plan details",
@@ -623,7 +622,7 @@ export const enMessages: AppMessages = {
     },
     faq: {
       gettingStartedBody:
-        "SideSeat helps you manage your schedule, find classmates, and chat to make study plans.\n\n• Home — calendar and natural-language scheduling (✨ on Home).\n• Discover — posts and people at your school.\n• Courses — course chats and classmates.\n• Chats — direct messages and groups.\n• Me — profile, verification, and settings.",
+        "SideSeat helps you manage your schedule, find classmates, and chat to make study plans.\n\n• Home — calendar and natural-language scheduling (tap +, then “Describe in plain language”).\n• Discover — posts and people at your school.\n• Courses — course chats and classmates.\n• Chats — direct messages and groups.\n• Me — profile, verification, and settings.",
       discoverBody:
         "Discover shows classmates and posts scoped to your school and city. Complete your profile (school, major, languages) for better matches. Guests can browse; sign up to post and message.",
       verificationBody:
@@ -635,7 +634,7 @@ export const enMessages: AppMessages = {
       guestSignupRegisteredBody:
         "You're signed in. Use Discover and Courses to meet classmates; Chats is for plans and DMs.",
       scheduleBody:
-        "On Home, tap ✨ to describe events in plain language, review drafts, then save to your calendar. You can also add events manually and share availability from chat (+ menu) with people you know.",
+        "On Home, tap + and choose “Describe in plain language” to add events from text, review drafts, then save to your calendar. You can also fill in details manually and share availability from chat (+ menu) with people you know.",
       inboxBody:
         "Chats lists course rooms, direct messages, and groups. Pin important threads from the row menu. Plan invites appear as cards inside the chat — accept or decline there.",
       fallbackBody:
@@ -840,13 +839,25 @@ export const enMessages: AppMessages = {
     sendPlanInviteOpening: "Opening chat…",
     sendPlanInviteFailed: "Could not open chat to send the plan.",
     sendPlanInviteNetwork: "Network error. Try again.",
+    addActionSheetTitle: "Add to schedule",
+    addActionSheetNaturalOption: "Describe in plain language",
+    addActionSheetNaturalSubtitle: "Type one or more events in Chinese or English — we parse times for you",
+    addActionSheetManualOption: "Fill in details",
+    addActionSheetManualSubtitle: "Time, location, repeat, and companions",
+    addActionSheetCancel: "Cancel",
+    addPanelNaturalLink: "Or describe events in plain language",
     naturalScheduleAria: "Add events with natural language",
     naturalSheetTitle: "Quick add from text",
     naturalSheetCloseAria: "Close",
-    naturalSheetHint:
-      "Describe one or more events in plain language. Times are interpreted in Europe/Berlin. Calendar categories are guessed — adjust each row in the preview before saving.",
-    naturalInputPlaceholder:
-      "e.g. Tomorrow 3–5pm library study; Friday 10am team sync for 1 hour",
+    naturalSheetHint: "Describe one or more events in plain language.",
+    naturalSheetHintDetail:
+      "Times use Europe/Berlin. Categories are guessed — tweak each row in the preview.",
+    naturalExamplesLabel: "Examples",
+    naturalExampleChips: [
+      "Tomorrow 3–5pm library study",
+      "Friday 10am team sync, 1 hour",
+    ],
+    naturalInputPlaceholder: "Tomorrow 3–5pm library study…",
     naturalParseCta: "Parse schedule",
     naturalParsing: "Parsing…",
     naturalParseError: "Could not parse that text. Try again or add events manually.",
@@ -1122,10 +1133,6 @@ export const enMessages: AppMessages = {
     landingSectionActivity: "Activity",
     landingSectionNotifications: "Notifications",
     landingSectionMore: "More",
-    landingStatPosts: "Posts",
-    landingStatSaved: "Saved",
-    landingStatCourses: "Courses",
-    landingEditProfileCta: "Edit profile",
     preferencesTitle: "Preferences & account",
     preferencesSubtitleNone: "Notifications, blocked users, about, delete account",
     preferencesSubtitleOne: "Notifications, 1 blocked user, about, delete account",
@@ -1181,14 +1188,14 @@ export const enMessages: AppMessages = {
   },
   profileLifePhotos: {
     pageTitle: "Life photos",
-    hint: "Add up to {max} photos that show your campus life (not on Discover posts).",
+    hint: "Up to {max} photos",
     addPhoto: "Add photo",
     uploading: "Uploading…",
     removePhotoAria: "Remove photo",
     errorUpload: "Could not upload photo.",
     errorRemove: "Could not remove photo.",
-    emptyPeer: "No life photos yet.",
-    sectionTitle: "Life photos",
+    emptyPeer: "No photos yet",
+    sectionTitle: "Moments",
     rowSubtitleEmpty: "None yet",
     rowSubtitleCount: "{count} photos",
   },
@@ -1459,10 +1466,8 @@ export const enMessages: AppMessages = {
   },
   userProfile: {
     screenTitle: "Profile",
-    aboutSection: "About",
     languagesSection: "Languages",
-    lifePhotosSection: "Life photos",
-    emptyBio: "No tagline yet.",
+    lifePhotosSection: "Moments",
     coursesSection: "Courses",
     coursesEmpty: "No courses on their profile yet.",
     sharedCoursesOne: "1 shared course",

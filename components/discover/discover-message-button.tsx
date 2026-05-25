@@ -24,6 +24,8 @@ type Props = {
   icon?: "message" | "notes";
   /** When set, records a deduplicated MESSAGE_INTENT for the classmate post (author excluded server-side). */
   insightPostId?: string;
+  /** Icon without visible label; uses `label` (or default) as `aria-label`. */
+  iconOnly?: boolean;
   className?: string;
 };
 
@@ -61,6 +63,7 @@ export function DiscoverMessageButton({
   hasExistingChat = false,
   icon = "message",
   insightPostId,
+  iconOnly = false,
   className,
 }: Props) {
   const buttonLabel = label ?? (hasExistingChat ? "Message" : "Say hi");
@@ -108,6 +111,7 @@ export function DiscoverMessageButton({
       type="button"
       onClick={openChat}
       disabled={opening}
+      aria-label={iconOnly ? buttonLabel : undefined}
       className={cn(toneClasses[tone], className)}
     >
       {opening ? (
@@ -144,7 +148,7 @@ export function DiscoverMessageButton({
               strokeWidth={2.25}
             />
           )}
-          {buttonLabel}
+          {iconOnly ? null : buttonLabel}
         </>
       )}
     </button>

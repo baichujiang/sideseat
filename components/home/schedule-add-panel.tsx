@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Loader2, Plus, X } from "lucide-react";
+import { Check, ChevronRight, Loader2, Plus, Sparkles, X } from "lucide-react";
 import { addMinutes, addMonths, format } from "date-fns";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -87,6 +87,7 @@ export function ScheduleAddPanel({
   initialCategoryId,
   calendarCategories = [],
   companionOptions,
+  onOpenNaturalSchedule,
 }: {
   selectedDate: Date;
   open: boolean;
@@ -109,6 +110,8 @@ export function ScheduleAddPanel({
   initialCategoryId?: string | null;
   calendarCategories?: CalendarCategoryOption[];
   companionOptions: CompanionOption[];
+  /** When set (create mode on Home), shows a link to the natural-language add sheet. */
+  onOpenNaturalSchedule?: () => void;
 }) {
   const router = useRouter();
   const { messages } = useLocaleContext();
@@ -403,6 +406,25 @@ export function ScheduleAddPanel({
 
             <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2.5">
               <div className="space-y-2">
+        {mode === "create" && onOpenNaturalSchedule ? (
+          <button
+            type="button"
+            onClick={onOpenNaturalSchedule}
+            className={cn(
+              "flex w-full items-center gap-2.5 rounded-xl border border-violet-200/90 bg-violet-50/80 px-3 py-2.5 text-left transition",
+              "hover:border-violet-300 hover:bg-violet-50 active:scale-[0.99]",
+              "dark:border-violet-800/80 dark:bg-violet-950/35 dark:hover:bg-violet-950/55",
+            )}
+          >
+            <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-violet-600 shadow-sm dark:bg-violet-950/60 dark:text-violet-300">
+              <Sparkles className="h-4 w-4" strokeWidth={2} aria-hidden />
+            </span>
+            <span className="min-w-0 flex-1 text-[13px] font-medium leading-snug text-violet-900 dark:text-violet-100">
+              {sch.addPanelNaturalLink}
+            </span>
+            <ChevronRight className="h-4 w-4 shrink-0 text-violet-500/80" strokeWidth={2.25} aria-hidden />
+          </button>
+        ) : null}
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}

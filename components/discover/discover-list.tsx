@@ -8,14 +8,9 @@ import { useEffect, useState } from "react";
 import { Edit3, Loader2, Plus, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DiscoverActivityList } from "@/components/discover/discover-activity-list";
-import {
-  DiscoverBuddyTypeChips,
-  type BuddyTypeChipValue,
-} from "@/components/discover/discover-buddy-type-chips";
 import { DiscoverCreateActionSheet } from "@/components/discover/discover-create-action-sheet";
 import { DiscoverCreateActivitySheet } from "@/components/discover/discover-create-activity-sheet";
 import { DiscoverFeed } from "@/components/discover/discover-feed";
-import { applyBuddyFeedClientFilters } from "@/components/discover/discover-filter-sheet";
 import { DiscoverZoneTabs } from "@/components/discover/discover-zone-tabs";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
@@ -75,7 +70,7 @@ export function DiscoverList({
 
   const [zone, setZone] = useState<DiscoverZone>(() => parseDiscoverZone(searchParams.get("zone")));
   const [searchQuery, setSearchQuery] = useState("");
-  const [typeChip, setTypeChip] = useState<BuddyTypeChipValue>("all");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [createActionOpen, setCreateActionOpen] = useState(false);
   const [postOpen, setPostOpen] = useState(false);
   const [activityOpen, setActivityOpen] = useState(false);
@@ -83,6 +78,16 @@ export function DiscoverList({
   useEffect(() => {
     setZone(parseDiscoverZone(searchParams.get("zone")));
   }, [searchParams]);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    const id = window.requestAnimationFrame(() => {
+      document.querySelector<HTMLInputElement>("#discover-search-input")?.focus({
+        preventScroll: true,
+      });
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [searchOpen]);
 
   const setDiscoverZone = (next: DiscoverZone) => {
     setZone(next);
@@ -98,13 +103,12 @@ export function DiscoverList({
   };
 
   const filteredByFeed = filterDiscoverFeedPosts(posts, "for-you");
-  const categoriesFilter = typeChip === "all" ? null : [typeChip];
-  const filteredByType = applyBuddyFeedClientFilters(filteredByFeed, categoriesFilter);
-  const q = searchQuery.trim().toLowerCase();
+  const activeSearchQuery = searchOpen ? searchQuery : "";
+  const q = activeSearchQuery.trim().toLowerCase();
   const filteredPosts =
     q.length < 2
-      ? filteredByType
-      : filteredByType.filter((p) => {
+      ? filteredByFeed
+      : filteredByFeed.filter((p) => {
           const courseBlob = (p.linkedCourses ?? []).map((c) => `${c.code ?? ""} ${c.name}`).join(" ");
           const blob = [
             p.title,
@@ -134,6 +138,19 @@ export function DiscoverList({
   const searchPlaceholder = isBuddiesZone ? buddy.searchPlaceholder : m.discoverActivity.searchPlaceholder;
   const searchAria = isBuddiesZone ? buddy.searchAria : m.discoverActivity.searchAria;
 
+  const closeSearch = () => {
+    setSearchOpen(false);
+    setSearchQuery("");
+  };
+
+  const toggleSearch = () => {
+    if (searchOpen) {
+      closeSearch();
+      return;
+    }
+    setSearchOpen(true);
+  };
+
   function openCreateFlow() {
     if (!sessionHint || sessionHint.isGuest || !sessionHint.signedIn) {
       openPrompt({ returnTo: "/discover" });
@@ -144,68 +161,78 @@ export function DiscoverList({
 
   return (
     <div className="space-y-3">
-      <div
-        className={cn(
-          "sticky top-0 z-20 -mx-3 space-y-3 border-b border-classmates-edge/45 bg-background/95 px-3 pb-3 pt-0",
-          "backdrop-blur-md supports-[backdrop-filter]:bg-background/88",
-          "dark:border-border/40 dark:bg-background/90 dark:supports-[backdrop-filter]:bg-background/85",
-        )}
-      >
-        <header className="space-y-1.5">
-          <div className="flex items-start justify-between gap-3">
-            <h1
+      <header className="min-w-0 space-y-2">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          <div
+            className="pointer-events-none invisible flex items-center justify-start gap-1.5"
+            aria-hidden
+          >
+            <span className="inline-flex h-9 w-9 shrink-0" />
+            <span className="inline-flex h-9 w-9 shrink-0" />
+          </div>
+          <h1 className="page-screen-title min-w-0 truncate text-center">{m.discover.screenTitle}</h1>
+          <div className="flex shrink-0 items-center justify-end gap-1.5">
+            <button
+              type="button"
+              onClick={toggleSearch}
+              aria-label={searchAria}
+              aria-pressed={searchOpen}
               className={cn(
-                "min-w-0 text-[34px] font-bold leading-[1.05] tracking-[-0.02em] text-classmates-ink",
-                "dark:text-foreground",
+                "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/80 bg-white text-muted-foreground shadow-sm transition hover:bg-muted/50 hover:text-foreground dark:bg-card",
+                searchOpen && "border-classmates-blue-border text-classmates-blue",
               )}
             >
-              {m.discover.screenTitle}
-            </h1>
+              <Search className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+            </button>
             <button
               type="button"
               onClick={openCreateFlow}
               aria-label={m.discoverZone.createActionAria}
-              className="mt-1 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-classmates-blue text-white shadow-sm transition hover:bg-classmates-blue/90"
+              className={cn(
+                "inline-flex h-9 w-9 items-center justify-center rounded-full border border-classmates-blue-border bg-gradient-to-br from-classmates-blue-soft to-white text-classmates-blue shadow-[0_4px_16px_-6px_rgba(37,99,235,0.45)] transition",
+                "hover:border-classmates-blue/40 hover:shadow-[0_6px_20px_-6px_rgba(37,99,235,0.5)] active:scale-[0.97]",
+                "dark:border-blue-500/45 dark:from-blue-950/55 dark:to-blue-950/25 dark:text-blue-200 dark:shadow-[0_4px_20px_-8px_rgba(59,130,246,0.35)]",
+              )}
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} aria-hidden />
             </button>
           </div>
-          <p className="max-w-[22rem] text-[15px] leading-snug text-classmates-sub dark:text-muted-foreground">
-            {m.discover.screenSubtitle}
-          </p>
-        </header>
-
-        <DiscoverZoneTabs active={zone} onChange={setDiscoverZone} labels={m.discoverZone} />
-
-        <div className="relative min-w-0">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-            strokeWidth={2.25}
-            aria-hidden
-          />
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={searchPlaceholder}
-            aria-label={searchAria}
-            className="h-9 min-w-0 w-full rounded-full border-border/80 bg-white py-0 pl-9 pr-9 text-[13px] shadow-sm dark:bg-card"
-          />
-          {searchQuery.trim().length > 0 ? (
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              aria-label={m.common.close}
-              className="absolute right-1 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
-            >
-              <X className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
-            </button>
-          ) : null}
         </div>
 
-        {isBuddiesZone ? (
-          <DiscoverBuddyTypeChips value={typeChip} onChange={setTypeChip} labels={buddy} />
+        {searchOpen ? (
+          <div className="relative min-w-0">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              strokeWidth={2}
+              aria-hidden
+            />
+            <Input
+              id="discover-search-input"
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={searchPlaceholder}
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              aria-label={searchAria}
+              className="h-9 min-w-0 w-full rounded-full border-border/80 bg-white py-0 pl-9 pr-9 text-[13px] shadow-sm dark:bg-card"
+            />
+            {searchQuery.trim().length > 0 ? (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                aria-label={m.common.close}
+                className="absolute right-1 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
+              </button>
+            ) : null}
+          </div>
         ) : null}
-      </div>
+
+        <DiscoverZoneTabs active={zone} onChange={setDiscoverZone} labels={m.discoverZone} />
+      </header>
 
       {isBuddiesZone ? (
         filteredPosts.length === 0 ? (
@@ -220,7 +247,7 @@ export function DiscoverList({
             ) : null}
           </div>
         ) : (
-          <DiscoverFeed posts={filteredPosts} cityNameKey={cityNameKey as DiscoverCityNameKey} />
+          <DiscoverFeed posts={filteredPosts} />
         )
       ) : (
         <DiscoverActivityList
