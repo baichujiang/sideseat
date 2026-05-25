@@ -1,20 +1,9 @@
-import type { Route } from "next";
-import Link from "next/link";
-
-import { RecommendedClassmatesRail } from "@/components/classmates/recommended-classmates-rail";
-import { CoursesPageTop } from "@/components/courses/courses-page-top";
-import { CoursesTabRestore } from "@/components/courses/courses-tab-restore";
-import { inboxChatListUlClassName } from "@/components/inbox/inbox-conversation-tile";
 import {
-  EnrolledCourseCard,
-  type EnrolledSession,
-} from "@/components/courses/enrolled-course-card";
-import { PopularCourseCard } from "@/components/courses/popular-course-card";
-import {
-  SavedCoursesPanel,
-  type SavedRow,
-} from "@/components/courses/saved-courses-panel";
-import { LinkButton } from "@/components/ui/link-button";
+  CoursesPageClient,
+  type CourseRow,
+  type CoursesPagePayload,
+  type EnrolledCourseRow,
+} from "@/components/courses/courses-page-client";
 import { getSessionUser } from "@/lib/auth/session";
 import {
   DEFAULT_SCHOOL,
@@ -23,28 +12,15 @@ import {
 } from "@/lib/constants/schools";
 import { getCurrentSemesterLabel } from "@/lib/constants/semester";
 import { prisma } from "@/lib/db/prisma";
-import { formatMessage, getMessages, type CoursesMessages } from "@/lib/i18n/messages";
+import { formatMessage, getMessages } from "@/lib/i18n/messages";
 import { schoolCodesForDiscoverCity } from "@/lib/discover/city-school-scope";
 import { getServerDiscoverServedCity } from "@/lib/discover/discover-city-preference";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { getRecommendedClassmatesForViewer } from "@/lib/queries/recommended-classmates";
 import {
   coursesListReturnPath,
-  coursesTabHref,
   normalizeCoursesTab,
 } from "@/lib/courses/courses-tab";
-import { cn } from "@/lib/utils";
-
-type CourseRow = {
-  id: string;
-  code: string | null;
-  name: string;
-  instructorSummary: string | null;
-  memberCount: number;
-  /** Set when the viewer is signed in (Popular tab). */
-  viewerSaved?: boolean;
-  viewerEnrolled?: boolean;
-};
 
 // Starter set for common required/foundation courses (used as fallback when
 // popularity signals are sparse in a fresh database).
@@ -206,36 +182,21 @@ export default async function CoursesPage({
   }
 
   if (!sessionUser) {
-    return (
-      <div className="space-y-4 pb-4">
-        <CoursesTabRestore />
-        <CoursesPageTop
-          selectedSchool={selectedSchool}
-          allowedSchools={allowedSchools}
-          activeTab={activeTab}
-          query={rawCourseQuery}
-          courses={c}
-        />
-
-        {activeTab === "popular-courses" ? (
-          <>
-            <PopularCoursesSearchBar selectedSchool={selectedSchool} query={rawCourseQuery} courses={c} />
-            <PopularCoursesMeta subtitle={popularSourceLabel} count={popularRows.length} courses={c} />
-            <CourseRowsList
-              rows={popularRows}
-              query={rawCourseQuery}
-              emptyText={c.emptyNoCourses}
-              courses={c}
-              listReturnTo={listReturnTo}
-            />
-          </>
-        ) : (
-          <p className="rounded-2xl border border-dashed border-border/70 bg-muted/20 px-4 py-6 text-center text-[14px] text-muted-foreground">
-            {c.guestManageBodyBookmarksTabs}
-          </p>
-        )}
-      </div>
-    );
+    const payload: CoursesPagePayload = {
+      cacheUserId: "guest",
+      signedIn: false,
+      selectedSchool,
+      allowedSchools,
+      activeTab,
+      rawCourseQuery,
+      listReturnTo,
+      popularRows,
+      popularSourceLabel,
+      memberships: [],
+      savedPanelRows: [],
+      recommendedClassmates: [],
+    };
+    return <CoursesPageClient initialPayload={payload} />;
   }
 
   const user = sessionUser;
@@ -282,7 +243,7 @@ export default async function CoursesPage({
     viewerSaved: savedIdSet.has(row.id),
     viewerEnrolled: enrolledIds.has(row.id),
   }));
-  const savedPanelRows: SavedRow[] = savedRows
+  const savedPanelRows = savedRows
     .filter((s) => !enrolledIds.has(s.courseId))
     .map((s) => ({
       savedId: s.id,
@@ -291,225 +252,41 @@ export default async function CoursesPage({
       name: s.course.name,
       memberCount: s.course._count.members,
     }));
+  const membershipRows: EnrolledCourseRow[] = memberships.map((membership) => ({
+    membershipId: membership.id,
+    course: {
+      id: membership.course.id,
+      name: membership.course.name,
+      code: membership.course.code,
+      instructorSummary: membership.course.instructorSummary,
+    },
+    sessions: membership.sessions.map((s) => ({
+      weekday: s.weekday,
+      startMinute: s.startMinute,
+      endMinute: s.endMinute,
+      location: s.location,
+    })),
+    memberCount: membership.course._count.members,
+  }));
 
-  return (
-    <div className="space-y-4 pb-4">
-      <CoursesTabRestore />
-      <CoursesPageTop
-        selectedSchool={selectedSchool}
-        allowedSchools={allowedSchools}
-        activeTab={activeTab}
-        query={rawCourseQuery}
-        courses={c}
-      />
+  const payload: CoursesPagePayload = {
+    cacheUserId: user.id,
+    signedIn: true,
+    selectedSchool,
+    allowedSchools,
+    activeTab,
+    rawCourseQuery,
+    listReturnTo,
+    popularRows: popularRowsForViewer,
+    popularSourceLabel,
+    memberships: membershipRows,
+    savedPanelRows,
+    recommendedClassmates,
+  };
 
-      <RecommendedClassmatesRail
-        rows={recommendedClassmates}
-        title={c.recommendedClassmatesTitle}
-        returnTo={listReturnTo}
-      />
-
-      {activeTab === "popular-courses" ? (
-        <>
-          <PopularCoursesSearchBar selectedSchool={selectedSchool} query={rawCourseQuery} courses={c} />
-          <PopularCoursesMeta subtitle={popularSourceLabel} count={popularRows.length} courses={c} />
-          <CourseRowsList
-            rows={popularRowsForViewer}
-            query={rawCourseQuery}
-            emptyText={c.emptyNoCourses}
-            courses={c}
-            listReturnTo={listReturnTo}
-          />
-        </>
-      ) : null}
-
-      {activeTab === "my-courses" ? (
-        memberships.length === 0 ? (
-          <div
-            className={cn(
-              "rounded-[1.25rem] border border-dashed border-[#D8D1C7] bg-[#FCFBF8] px-6 py-8 text-center",
-              "dark:border-border dark:bg-muted/20",
-            )}
-          >
-            <h3 className="text-lg font-semibold tracking-tight text-[#111827] dark:text-foreground">
-              {c.myCoursesEmptyTitle}
-            </h3>
-            <p className="mx-auto mt-2 max-w-[22rem] text-[14px] leading-relaxed text-[#5F6B7A] dark:text-muted-foreground">
-              {c.myCoursesEmptyBody}
-            </p>
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-              <Link
-                href={coursesTabHref("popular-courses", selectedSchool, rawCourseQuery)}
-                className={cn(
-                  "inline-flex rounded-full border border-[#BFDBFE] bg-[#EFF6FF] px-4 py-2 text-sm font-semibold text-[#2563EB] transition",
-                  "hover:bg-[#DBEAFE] dark:border-blue-500/40 dark:bg-blue-950/35 dark:text-blue-300",
-                )}
-              >
-                {c.browsePopularCourses}
-              </Link>
-              <LinkButton href={"/courses/add" as Route} variant="outline" size="sm" className="rounded-full">
-                {c.addWithForm}
-              </LinkButton>
-            </div>
-          </div>
-        ) : (
-          <ul className={inboxChatListUlClassName}>
-            {memberships.map((membership) => {
-              const sessions: EnrolledSession[] = membership.sessions.map((s) => ({
-                weekday: s.weekday,
-                startMinute: s.startMinute,
-                endMinute: s.endMinute,
-                location: s.location,
-              }));
-              return (
-                <li key={membership.id} className="list-none">
-                  <EnrolledCourseCard
-                    variant="compact"
-                    courses={c}
-                    listReturnTo={listReturnTo}
-                    course={{
-                      id: membership.course.id,
-                      name: membership.course.name,
-                      code: membership.course.code,
-                      instructorSummary: membership.course.instructorSummary,
-                    }}
-                    sessions={sessions}
-                    memberCount={membership.course._count.members}
-                  />
-                </li>
-              );
-            })}
-          </ul>
-        )
-      ) : null}
-
-      {activeTab === "my-bookmarked-courses" ? (
-        <SavedCoursesPanel
-          initialSaved={savedPanelRows}
-          school={selectedSchool}
-          listReturnTo={listReturnTo}
-        />
-      ) : null}
-    </div>
-  );
+  return <CoursesPageClient initialPayload={payload} />;
 }
 
-
-function PopularCoursesSearchBar({
-  selectedSchool,
-  query,
-  courses,
-}: {
-  selectedSchool: SchoolCode;
-  query: string;
-  courses: CoursesMessages;
-}) {
-  return (
-    <form
-      method="get"
-      action="/courses"
-      className={cn(
-        "flex items-center gap-2 rounded-[1.1rem] border border-[#E7E0D6] bg-white px-3 py-2.5",
-        "dark:border-border dark:bg-card",
-      )}
-    >
-      <input type="hidden" name="school" value={selectedSchool} />
-      <input type="hidden" name="tab" value="popular-courses" />
-      <input
-        name="q"
-        defaultValue={query}
-        placeholder={courses.searchPlaceholder}
-        className="h-9 flex-1 rounded-xl border border-[#E7E0D6] bg-background px-3 text-[14px] outline-none focus-visible:border-[#2563EB]/55 dark:border-border"
-      />
-      <button
-        type="submit"
-        className="inline-flex h-9 shrink-0 items-center justify-center rounded-full border border-[#D8D1C7] bg-white px-3 text-[12px] font-semibold text-[#111827] transition hover:bg-[#F8F6F1] dark:border-border dark:bg-card dark:text-foreground"
-      >
-        {courses.searchSubmit}
-      </button>
-      {query ? (
-        <Link
-          href={coursesTabHref("popular-courses", selectedSchool)}
-          className="inline-flex h-9 shrink-0 items-center justify-center rounded-full border border-transparent px-2.5 text-[12px] font-medium text-muted-foreground transition hover:bg-muted/40 hover:text-foreground"
-        >
-          {courses.searchClear}
-        </Link>
-      ) : null}
-    </form>
-  );
-}
-
-function PopularCoursesMeta({
-  subtitle,
-  count,
-  courses,
-}: {
-  subtitle: string;
-  count: number;
-  courses: CoursesMessages;
-}) {
-  return (
-    <div className="flex items-center justify-between px-1 text-[12px] text-[#5F6B7A] dark:text-muted-foreground">
-      <span>{subtitle}</span>
-      <span>{formatMessage(courses.metaCourseCount, { count })}</span>
-    </div>
-  );
-}
-
-function CourseRowsList({
-  rows,
-  query,
-  emptyText,
-  courses,
-  listReturnTo,
-}: {
-  rows: CourseRow[];
-  query: string;
-  emptyText: string;
-  courses: CoursesMessages;
-  listReturnTo: string;
-}) {
-  if (rows.length === 0) {
-    return (
-      <div
-        className={cn(
-          "rounded-[1.25rem] border border-dashed border-[#D8D1C7] bg-[#FCFBF8] px-6 py-8 text-center",
-          "dark:border-border dark:bg-muted/20",
-        )}
-      >
-        <p className="text-[14px] font-medium text-[#111827] dark:text-foreground">
-          {query ? formatMessage(courses.emptyNoMatchQuery, { query }) : emptyText}
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <ul className={inboxChatListUlClassName}>
-      {rows.map((row) => (
-        <li key={row.id} className="list-none">
-          <PopularCourseCard
-            variant="compact"
-            courses={courses}
-            listReturnTo={listReturnTo}
-            course={{
-              id: row.id,
-              name: row.name,
-              code: row.code,
-              instructorSummary: row.instructorSummary,
-            }}
-            memberCount={row.memberCount}
-            viewer={
-              row.viewerSaved !== undefined && row.viewerEnrolled !== undefined
-                ? { saved: row.viewerSaved, enrolled: row.viewerEnrolled }
-                : null
-            }
-          />
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 async function getCourseMemberCountMap(courseIds: string[]) {
   if (courseIds.length === 0) {

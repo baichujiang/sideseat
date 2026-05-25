@@ -7,9 +7,11 @@ import { BookOpen, CalendarClock, Search, UsersRound, X } from "lucide-react";
 
 import { InboxChatsView } from "@/components/inbox/inbox-chats-view";
 import { InboxCreateSheet } from "@/components/inbox/inbox-create-sheet";
+import { OfflineStateCard } from "@/components/offline/offline-state-card";
 import { inboxMyPlanChipPillClass } from "@/components/profile/me-settings-row";
 import { Input } from "@/components/ui/input";
 import { useAppMessages } from "@/hooks/use-app-locale";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 import { formatMessage } from "@/lib/i18n/messages";
 import type { InboxMerged } from "@/lib/queries/inbox-merge";
 import type { RecommendedClassmateRow } from "@/lib/queries/recommended-classmates";
@@ -110,6 +112,7 @@ export function InboxChatsShell({
   recommendedClassmates?: RecommendedClassmateRow[];
 }) {
   const m = useAppMessages();
+  const isOnline = useOnlineStatus();
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -142,6 +145,7 @@ export function InboxChatsShell({
       closeSearch();
       return;
     }
+    if (!isOnline) return;
     setSearchOpen(true);
   };
 
@@ -178,14 +182,17 @@ export function InboxChatsShell({
               onClick={toggleSearch}
               aria-label={m.inbox.searchAria}
               aria-pressed={searchOpen}
+              disabled={!isOnline}
+              title={!isOnline ? m.offline.onlineRequiredAction : undefined}
               className={cn(
                 inboxHeaderIconBtnClass,
                 searchOpen && "border-classmates-blue-border text-classmates-blue",
+                !isOnline && "cursor-not-allowed opacity-55",
               )}
             >
               <Search className="h-4 w-4" strokeWidth={2.25} aria-hidden />
             </button>
-            {showCreateSheet ? <InboxCreateSheet initialContacts={initialContacts} /> : null}
+            {showCreateSheet && isOnline ? <InboxCreateSheet initialContacts={initialContacts} /> : null}
           </div>
         </div>
 
@@ -221,46 +228,55 @@ export function InboxChatsShell({
           </div>
         ) : null}
 
-        <nav
-          className="grid w-full min-w-0 grid-cols-3 gap-1.5"
-          aria-label={m.inbox.screenTitle}
-        >
-          <InboxNavChip
-            href={`/profile/my-plan?returnTo=${encodeURIComponent("/inbox")}` as Route}
-            label={m.inbox.chipUpcomingPlan}
-            title={m.inbox.chipUpcomingPlanLinkTitle}
-            ariaLabel={upcomingPlanAria}
-            count={plansNeedingYourAction}
-            variant="myPlan"
-            icon={<CalendarClock strokeWidth={2} aria-hidden />}
-          />
-          <InboxNavChip
-            href={"/inbox/study-groups" as Route}
-            label={m.inbox.chipStudyGroup}
-            title={m.inbox.chipStudyGroupLinkTitle}
-            ariaLabel={studyGroupAria}
-            count={groupUnread}
-            variant="muted"
-            icon={<UsersRound strokeWidth={2} aria-hidden />}
-          />
-          <InboxNavChip
-            href={"/inbox/course-chats" as Route}
-            label={m.inbox.chipCourseChats}
-            title={m.inbox.chipCourseChatsLinkTitle}
-            ariaLabel={courseChatsAria}
-            count={courseUnread}
-            variant="muted"
-            icon={<BookOpen strokeWidth={2} aria-hidden />}
-          />
-        </nav>
+        {isOnline ? (
+          <nav
+            className="grid w-full min-w-0 grid-cols-3 gap-1.5"
+            aria-label={m.inbox.screenTitle}
+          >
+            <InboxNavChip
+              href={`/profile/my-plan?returnTo=${encodeURIComponent("/inbox")}` as Route}
+              label={m.inbox.chipUpcomingPlan}
+              title={m.inbox.chipUpcomingPlanLinkTitle}
+              ariaLabel={upcomingPlanAria}
+              count={plansNeedingYourAction}
+              variant="myPlan"
+              icon={<CalendarClock strokeWidth={2} aria-hidden />}
+            />
+            <InboxNavChip
+              href={"/inbox/study-groups" as Route}
+              label={m.inbox.chipStudyGroup}
+              title={m.inbox.chipStudyGroupLinkTitle}
+              ariaLabel={studyGroupAria}
+              count={groupUnread}
+              variant="muted"
+              icon={<UsersRound strokeWidth={2} aria-hidden />}
+            />
+            <InboxNavChip
+              href={"/inbox/course-chats" as Route}
+              label={m.inbox.chipCourseChats}
+              title={m.inbox.chipCourseChatsLinkTitle}
+              ariaLabel={courseChatsAria}
+              count={courseUnread}
+              variant="muted"
+              icon={<BookOpen strokeWidth={2} aria-hidden />}
+            />
+          </nav>
+        ) : null}
       </header>
 
-      <InboxChatsView
-        userId={userId}
-        merged={merged}
-        query={searchOpen ? query : ""}
-        recommendedClassmates={recommendedClassmates}
-      />
+      {!isOnline ? (
+        <OfflineStateCard
+          title={m.offline.needsInternetTitle}
+          description={m.offline.inboxNeedsInternetBody}
+        />
+      ) : (
+        <InboxChatsView
+          userId={userId}
+          merged={merged}
+          query={searchOpen ? query : ""}
+          recommendedClassmates={recommendedClassmates}
+        />
+      )}
     </div>
   );
 }

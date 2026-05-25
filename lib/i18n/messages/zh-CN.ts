@@ -62,6 +62,15 @@ export const zhCnMessages: AppMessages = {
       yesterday: "昨天",
     },
   },
+  offline: {
+    banner: "离线 · 可用时会显示已保存内容。",
+    needsInternetTitle: "需要联网",
+    discoverNeedsInternetBody: "发现页是实时内容，需要联网查看最新帖子、活动与同学。",
+    inboxNeedsInternetBody: "聊天需要联网同步消息、未读数与新会话。",
+    profileReadOnlyNotice: "离线 · 正在显示上次保存的「我的」页面，编辑已停用。",
+    coursesReadOnlyNotice: "离线 · 正在显示上次保存的课程页，操作已停用。",
+    onlineRequiredAction: "连接网络后才能使用此操作。",
+  },
   guest: {
     genericHeadline: "登录以继续",
     genericBody: "创建账户或登录，以同步课程、消息与个人资料。",
@@ -100,6 +109,9 @@ export const zhCnMessages: AppMessages = {
     guestDisplayName: "访客",
     guestBrowseHint: "当前为免注册浏览，登录后可保存课表与日程。",
     openProfileAria: "打开个人主页",
+    offlineScheduleCacheNotice: "离线 · 正在显示上次保存的日程",
+    staleScheduleCacheNotice: "正在显示上次保存的日程",
+    retryScheduleCache: "重试",
   },
   discover: {
     screenTitle: "发现",

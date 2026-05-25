@@ -33,6 +33,7 @@ export function PopularCourseCard({
   variant = "card",
   courses,
   listReturnTo = "/courses",
+  readOnly = false,
 }: {
   course: {
     id: string;
@@ -48,6 +49,7 @@ export function PopularCourseCard({
   courses?: CoursesMessages;
   /** Full `/courses?...` path for back navigation from course detail. */
   listReturnTo?: string;
+  readOnly?: boolean;
 }) {
   const codeLabel = courseCodeBadgeLabel(course.name, course.code);
   const instructorLabel = course.instructorSummary?.trim() || extractInstructorHint(course.name);
@@ -83,6 +85,7 @@ export function PopularCourseCard({
             "absolute right-2 z-10",
             isCompact ? "top-1/2 -translate-y-1/2" : "top-2 sm:right-2.5 sm:top-2.5",
           )}
+          readOnly={readOnly}
         />
       ) : null}
       <Link

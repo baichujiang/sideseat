@@ -62,6 +62,17 @@ export const enMessages: AppMessages = {
       yesterday: "Yesterday",
     },
   },
+  offline: {
+    banner: "Offline · saved content stays available where possible.",
+    needsInternetTitle: "Internet required",
+    discoverNeedsInternetBody:
+      "Discover is live and needs a connection to show fresh posts, activities, and classmates.",
+    inboxNeedsInternetBody:
+      "Chats need a connection for messages, unread counts, and new conversations.",
+    profileReadOnlyNotice: "Offline · showing your last saved Me page. Editing is disabled.",
+    coursesReadOnlyNotice: "Offline · showing the last saved Courses view. Actions are disabled.",
+    onlineRequiredAction: "Connect to the internet to use this action.",
+  },
   guest: {
     genericHeadline: "Sign in to continue",
     genericBody: "Create an account or log in to sync your courses, messages, and profile.",
@@ -106,6 +117,9 @@ export const enMessages: AppMessages = {
     guestDisplayName: "Guest",
     guestBrowseHint: "Browsing without an account — sign in to save your schedule.",
     openProfileAria: "Open profile",
+    offlineScheduleCacheNotice: "Offline · showing last saved schedule",
+    staleScheduleCacheNotice: "Showing last saved schedule",
+    retryScheduleCache: "Retry",
   },
   discover: {
     screenTitle: "Discover",

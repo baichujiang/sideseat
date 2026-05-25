@@ -65,6 +65,7 @@ export function EnrolledCourseCard({
   variant = "card",
   courses,
   listReturnTo,
+  readOnly = false,
 }: {
   course: {
     id: string;
@@ -78,6 +79,7 @@ export function EnrolledCourseCard({
   courses?: CoursesMessages;
   /** Full `/courses?...` path for back navigation from course detail. */
   listReturnTo?: string;
+  readOnly?: boolean;
 }) {
   const sortedSessions = [...sessions].sort((a, b) => {
     const weekdayOrder: Weekday[] = [
@@ -160,6 +162,7 @@ export function EnrolledCourseCard({
           "absolute right-2 z-10",
           isCompact ? "top-1/2 -translate-y-1/2" : "top-2 sm:right-2.5 sm:top-2.5",
         )}
+        readOnly={readOnly}
       />
       <Link
         href={courseHref}

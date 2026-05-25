@@ -31,6 +31,15 @@ export type AppMessages = {
       yesterday: string;
     };
   };
+  offline: {
+    banner: string;
+    needsInternetTitle: string;
+    discoverNeedsInternetBody: string;
+    inboxNeedsInternetBody: string;
+    profileReadOnlyNotice: string;
+    coursesReadOnlyNotice: string;
+    onlineRequiredAction: string;
+  };
   guest: {
     /** When a page does not pass a specific headline/body. */
     genericHeadline: string;
@@ -70,6 +79,9 @@ export type AppMessages = {
     guestDisplayName: string;
     guestBrowseHint: string;
     openProfileAria: string;
+    offlineScheduleCacheNotice: string;
+    staleScheduleCacheNotice: string;
+    retryScheduleCache: string;
   };
   discover: {
     screenTitle: string;

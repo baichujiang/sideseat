@@ -18,6 +18,7 @@ type Props = {
   className?: string;
   /** Compact toolbar pill for page headers (iOS nav-bar menu style). */
   variant?: "default" | "toolbar";
+  disabled?: boolean;
 };
 
 /**
@@ -30,6 +31,7 @@ export function CoursesSchoolSelect({
   id = "courses-school-select",
   className,
   variant = "default",
+  disabled = false,
 }: Props) {
   const router = useRouter();
   const { courses: co } = useAppMessages();
@@ -42,6 +44,7 @@ export function CoursesSchoolSelect({
   const selected = options.find((s) => s.value === value) ?? options[0];
 
   function navigate(next: SchoolCode) {
+    if (disabled) return;
     detailsRef.current?.removeAttribute("open");
     const params = new URLSearchParams(searchParams.toString());
     params.set("school", next);
@@ -50,10 +53,14 @@ export function CoursesSchoolSelect({
   }
 
   return (
-    <details ref={detailsRef} className={cn("relative w-full max-w-[11.5rem] shrink-0", className)}>
+    <details
+      ref={detailsRef}
+      className={cn("relative w-full max-w-[11.5rem] shrink-0", disabled && "pointer-events-none opacity-65", className)}
+    >
       <summary
         id={id}
         aria-label={formatMessage(co.schoolFilterAria, { label: selected?.shortLabel ?? value })}
+        aria-disabled={disabled || undefined}
         className={cn(
           "inline-flex w-full cursor-pointer list-none select-none items-center justify-between gap-1.5 transition",
           "[&::-webkit-details-marker]:hidden",

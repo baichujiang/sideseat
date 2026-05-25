@@ -34,14 +34,17 @@ export function SavedCoursesPanel({
   initialSaved,
   school,
   listReturnTo = "/courses",
+  readOnly = false,
 }: {
   initialSaved: SavedRow[];
   /** Keeps “Search courses” deep-link on the same school tab. */
   school?: string;
   listReturnTo?: string;
+  readOnly?: boolean;
 }) {
   const router = useRouter();
-  const { courses: co } = useAppMessages();
+  const messages = useAppMessages();
+  const co = messages.courses;
   const [rows, setRows] = useState<SavedRow[]>(initialSaved);
 
   useEffect(() => {
@@ -49,6 +52,7 @@ export function SavedCoursesPanel({
   }, [initialSaved]);
 
   async function unsave(row: SavedRow) {
+    if (readOnly) return;
     setRows((prev) => prev.filter((r) => r.courseId !== row.courseId));
     try {
       const res = await apiFetch(
@@ -107,13 +111,15 @@ export function SavedCoursesPanel({
                 </p>
               </Link>
 
-              <QuickEnrollButton courseId={row.courseId} />
+              {readOnly ? null : <QuickEnrollButton courseId={row.courseId} />}
 
               <button
                 type="button"
                 onClick={() => void unsave(row)}
+                disabled={readOnly}
                 aria-label={formatMessage(co.savedRemoveAria, { label: row.code ?? row.name })}
-                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#8A94A6] transition hover:bg-[#F3F0EA] hover:text-[#111827] dark:hover:bg-muted"
+                title={readOnly ? messages.offline.onlineRequiredAction : undefined}
+                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#8A94A6] transition hover:bg-[#F3F0EA] hover:text-[#111827] disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-muted"
               >
                 <X className="h-3.5 w-3.5" strokeWidth={2.25} />
               </button>

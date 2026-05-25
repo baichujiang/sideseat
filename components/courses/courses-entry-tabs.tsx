@@ -17,11 +17,13 @@ export function CoursesEntryTabs({
   selectedSchool,
   query,
   courses,
+  disabled = false,
 }: {
   activeTab: CoursesTab;
   selectedSchool: SchoolCode;
   query: string;
   courses: CoursesMessages;
+  disabled?: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -36,6 +38,7 @@ export function CoursesEntryTabs({
     );
 
   function selectTab(tab: CoursesTab) {
+    if (disabled) return;
     if (tab === activeTab) return;
 
     writeStoredCoursesTab(tab);
@@ -72,7 +75,8 @@ export function CoursesEntryTabs({
           aria-selected={activeTab === id}
           aria-current={activeTab === id ? "page" : undefined}
           onClick={() => selectTab(id)}
-          className={tabClass(id)}
+          disabled={disabled}
+          className={cn(tabClass(id), disabled && "cursor-not-allowed opacity-65")}
         >
           <span className="truncate">{label}</span>
         </button>

@@ -12,6 +12,7 @@ import { DiscoverCreateActionSheet } from "@/components/discover/discover-create
 import { DiscoverCreateActivitySheet } from "@/components/discover/discover-create-activity-sheet";
 import { DiscoverFeed } from "@/components/discover/discover-feed";
 import { DiscoverZoneTabs } from "@/components/discover/discover-zone-tabs";
+import { OfflineStateCard } from "@/components/offline/offline-state-card";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ import {
 } from "@/lib/discover/discover-city-name-keys";
 import { useSignInPrompt } from "@/components/auth/sign-in-prompt-dialog";
 import { useAppMessages } from "@/hooks/use-app-locale";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 import { useSessionHint } from "@/hooks/use-session-hint";
 import { formatMessage } from "@/lib/i18n/messages";
 import {
@@ -65,6 +67,7 @@ export function DiscoverList({
   const sessionHint = useSessionHint();
   const { openPrompt } = useSignInPrompt();
   const m = useAppMessages();
+  const isOnline = useOnlineStatus();
   const dl = m.discoverList;
   const buddy = m.discoverBuddy;
 
@@ -152,6 +155,7 @@ export function DiscoverList({
   };
 
   function openCreateFlow() {
+    if (!isOnline) return;
     if (!sessionHint || sessionHint.isGuest || !sessionHint.signedIn) {
       openPrompt({ returnTo: "/discover" });
       return;
@@ -188,10 +192,13 @@ export function DiscoverList({
               type="button"
               onClick={openCreateFlow}
               aria-label={m.discoverZone.createActionAria}
+              disabled={!isOnline}
+              title={!isOnline ? m.offline.onlineRequiredAction : undefined}
               className={cn(
                 "inline-flex h-9 w-9 items-center justify-center rounded-full border border-classmates-blue-border bg-gradient-to-br from-classmates-blue-soft to-white text-classmates-blue shadow-[0_4px_16px_-6px_rgba(37,99,235,0.45)] transition",
                 "hover:border-classmates-blue/40 hover:shadow-[0_6px_20px_-6px_rgba(37,99,235,0.5)] active:scale-[0.97]",
                 "dark:border-blue-500/45 dark:from-blue-950/55 dark:to-blue-950/25 dark:text-blue-200 dark:shadow-[0_4px_20px_-8px_rgba(59,130,246,0.35)]",
+                !isOnline && "cursor-not-allowed opacity-55 hover:border-classmates-blue-border",
               )}
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} aria-hidden />
@@ -234,7 +241,12 @@ export function DiscoverList({
         <DiscoverZoneTabs active={zone} onChange={setDiscoverZone} labels={m.discoverZone} />
       </header>
 
-      {isBuddiesZone ? (
+      {!isOnline ? (
+        <OfflineStateCard
+          title={m.offline.needsInternetTitle}
+          description={m.offline.discoverNeedsInternetBody}
+        />
+      ) : isBuddiesZone ? (
         filteredPosts.length === 0 ? (
           <div className="rounded-2xl border border-[#E7E0D6] bg-white px-4 py-6 text-center text-[13px] text-muted-foreground shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
             {emptyCopy}

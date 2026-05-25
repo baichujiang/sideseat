@@ -10,12 +10,14 @@ export function CoursesPageTop({
   activeTab,
   query,
   courses,
+  readOnly = false,
 }: {
   selectedSchool: SchoolCode;
   allowedSchools: SchoolCode[];
   activeTab: CoursesTab;
   query: string;
   courses: CoursesMessages;
+  readOnly?: boolean;
 }) {
   const schoolLabel = getSchoolLabel(selectedSchool);
 
@@ -35,6 +37,7 @@ export function CoursesPageTop({
             allowedSchools={allowedSchools.length > 0 ? allowedSchools : undefined}
             variant="toolbar"
             className="w-auto max-w-[7.5rem]"
+            disabled={readOnly}
           />
           <p className="sr-only">
             {formatMessage(courses.schoolSelectSrSuffix, { school: schoolLabel })}
@@ -47,6 +50,7 @@ export function CoursesPageTop({
         selectedSchool={selectedSchool}
         query={query}
         courses={courses}
+        disabled={readOnly}
       />
     </header>
   );

@@ -4,8 +4,10 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { GuestAuthBar } from "@/components/app/guest-auth-bar";
+import { OfflineStateCard } from "@/components/offline/offline-state-card";
 import { setAccessToken } from "@/lib/auth/client-access-token";
 import { useAppMessages } from "@/hooks/use-app-locale";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 import { Button } from "@/components/ui/button";
 
 type Phase = "loading" | "error";
@@ -16,10 +18,16 @@ type Phase = "loading" | "error";
 export function InboxSessionBootstrap() {
   const router = useRouter();
   const m = useAppMessages();
+  const isOnline = useOnlineStatus();
   const [phase, setPhase] = useState<Phase>("loading");
   const [errorDetail, setErrorDetail] = useState<string | null>(null);
 
   const bootstrap = useCallback(async () => {
+    if (!isOnline) {
+      setPhase("error");
+      setErrorDetail(m.offline.inboxNeedsInternetBody);
+      return;
+    }
     setPhase("loading");
     setErrorDetail(null);
     try {
@@ -59,13 +67,28 @@ export function InboxSessionBootstrap() {
       setErrorDetail(m.inbox.sessionBootstrapFailed);
       setPhase("error");
     }
-  }, [m.inbox.dbUnavailableBody, m.inbox.sessionBootstrapFailed, router]);
+  }, [isOnline, m.inbox.dbUnavailableBody, m.inbox.sessionBootstrapFailed, m.offline.inboxNeedsInternetBody, router]);
 
   useEffect(() => {
     void bootstrap();
   }, [bootstrap]);
 
   if (phase === "error") {
+    if (!isOnline) {
+      return (
+        <div className="space-y-4 px-1 py-6">
+          <header className="text-center">
+            <h1 className="page-screen-title">{m.inbox.screenTitle}</h1>
+          </header>
+          <OfflineStateCard
+            title={m.offline.needsInternetTitle}
+            description={m.offline.inboxNeedsInternetBody}
+          />
+          <GuestAuthBar returnTo="/inbox" />
+        </div>
+      );
+    }
+
     return (
       <div className="space-y-4 px-1 py-6">
         <header className="text-center">

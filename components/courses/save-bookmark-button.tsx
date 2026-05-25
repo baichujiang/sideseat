@@ -27,6 +27,7 @@ export function SaveBookmarkButton({
   variant = "icon",
   className,
   onChange,
+  readOnly = false,
 }: {
   courseId: string;
   initialSaved: boolean;
@@ -40,9 +41,11 @@ export function SaveBookmarkButton({
   className?: string;
   /** Called after a successful save/unsave with the new `saved` state. */
   onChange?: (saved: boolean) => void;
+  readOnly?: boolean;
 }) {
   const router = useRouter();
-  const { courses: co } = useAppMessages();
+  const messages = useAppMessages();
+  const co = messages.courses;
   const [saved, setSaved] = useState(initialSaved);
   const [pending, setPending] = useState(false);
 
@@ -136,16 +139,18 @@ export function SaveBookmarkButton({
 
   const label = saved ? co.bookmarkSaved : co.bookmarkSave;
   const ariaLabel = saved ? co.bookmarkRemoveAria : co.bookmarkSaveAria;
+  const disabled = pending || readOnly;
+  const title = readOnly ? messages.offline.onlineRequiredAction : ariaLabel;
 
   if (variant === "icon") {
     return (
       <button
         type="button"
         onClick={toggle}
-        disabled={pending}
+        disabled={disabled}
         aria-label={ariaLabel}
         aria-pressed={saved}
-        title={ariaLabel}
+        title={title}
         className={cn(
           "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition disabled:opacity-60",
           saved
@@ -167,7 +172,7 @@ export function SaveBookmarkButton({
       <button
         type="button"
         onClick={toggle}
-        disabled={pending}
+        disabled={disabled}
         aria-pressed={saved}
         className={cn(
           "inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition disabled:opacity-60",
@@ -191,7 +196,7 @@ export function SaveBookmarkButton({
     <button
       type="button"
       onClick={toggle}
-      disabled={pending}
+      disabled={disabled}
       aria-pressed={saved}
       className={cn(
         "flex w-full items-center justify-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-medium transition disabled:opacity-60",

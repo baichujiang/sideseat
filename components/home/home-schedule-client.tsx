@@ -21,6 +21,7 @@ import {
   HOME_SCHEDULE_INITIAL_WINDOW_PAST_DAYS,
 } from "@/lib/home/home-schedule-constants";
 import type { HomeSchedulePayload } from "@/lib/home/load-home-schedule-payload";
+import { useLocaleContext } from "@/components/i18n/locale-provider";
 
 type HomeScheduleCache = {
   userId: string;
@@ -35,6 +36,88 @@ type HomeScheduleCache = {
 };
 
 let homeScheduleModuleCache: HomeScheduleCache | null = null;
+
+const HOME_SCHEDULE_STORAGE_VERSION = 1;
+const HOME_SCHEDULE_STORAGE_PREFIX = "sideseat:homeSchedule:v1:";
+
+type HomeScheduleStorageRecord = HomeScheduleCache & {
+  version: typeof HOME_SCHEDULE_STORAGE_VERSION;
+};
+
+type CacheNoticeKind = "offline" | "stale";
+
+function homeScheduleStorageKey(userId: string): string | null {
+  if (!userId.trim()) return null;
+  return `${HOME_SCHEDULE_STORAGE_PREFIX}${encodeURIComponent(userId)}`;
+}
+
+function isBrowserOnline(): boolean {
+  return typeof navigator === "undefined" ? true : navigator.onLine;
+}
+
+function sanitizeCategoriesForStorage(categories: CalendarCategoryLite[]): CalendarCategoryLite[] {
+  return categories.map((category) => ({
+    ...category,
+    // Feed URLs can be sensitive; offline render only needs category identity/color.
+    icsSubscriptionUrl: null,
+  }));
+}
+
+function isHomeScheduleStorageRecord(value: unknown, userId: string): value is HomeScheduleStorageRecord {
+  if (!value || typeof value !== "object") return false;
+  const record = value as Partial<HomeScheduleStorageRecord>;
+  return (
+    record.version === HOME_SCHEDULE_STORAGE_VERSION &&
+    record.userId === userId &&
+    Array.isArray(record.classBlocks) &&
+    Array.isArray(record.dbStudyEntries) &&
+    Array.isArray(record.icsStudyEntries) &&
+    Array.isArray(record.companionOptions) &&
+    Array.isArray(record.initialCalendarCategories) &&
+    typeof record.loadedRangeStartMs === "number" &&
+    typeof record.loadedRangeEndMs === "number" &&
+    Number.isFinite(record.loadedRangeStartMs) &&
+    Number.isFinite(record.loadedRangeEndMs) &&
+    record.loadedRangeEndMs >= record.loadedRangeStartMs &&
+    typeof record.fetchedAt === "number" &&
+    Number.isFinite(record.fetchedAt)
+  );
+}
+
+function readPersistentHomeScheduleCache(userId: string): HomeScheduleCache | null {
+  if (typeof window === "undefined") return null;
+  const key = homeScheduleStorageKey(userId);
+  if (!key) return null;
+
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as unknown;
+    if (!isHomeScheduleStorageRecord(parsed, userId)) return null;
+    const { version: _version, ...cache } = parsed;
+    return cache;
+  } catch {
+    return null;
+  }
+}
+
+function writePersistentHomeScheduleCache(cache: HomeScheduleCache) {
+  if (typeof window === "undefined") return;
+  if (cache.loadedRangeStartMs <= 0 || cache.loadedRangeEndMs <= 0) return;
+  const key = homeScheduleStorageKey(cache.userId);
+  if (!key) return;
+
+  try {
+    const record: HomeScheduleStorageRecord = {
+      ...cache,
+      version: HOME_SCHEDULE_STORAGE_VERSION,
+      initialCalendarCategories: sanitizeCategoriesForStorage(cache.initialCalendarCategories),
+    };
+    window.localStorage.setItem(key, JSON.stringify(record));
+  } catch {
+    // Storage can be unavailable or full; the in-memory Home cache still works.
+  }
+}
 
 function mergeStudyEntries(existing: StudyEntry[], incoming: StudyEntry[]): StudyEntry[] {
   const byId = new Map(existing.map((entry) => [entry.id, entry]));
@@ -83,6 +166,7 @@ export function HomeScheduleClient({
   } | null;
   naturalScheduleEnabled?: boolean;
 }) {
+  const { messages } = useLocaleContext();
   const nowRef = useRef(new Date(nowISO));
   const fullScrollRangeStart = subDays(nowRef.current, HOME_CALENDAR_DATA_WINDOW_PAST_DAYS);
   const fullScrollRangeEnd = addDays(nowRef.current, HOME_CALENDAR_DATA_WINDOW_FUTURE_DAYS);
@@ -109,6 +193,8 @@ export function HomeScheduleClient({
   const [loadedRangeEndMs, setLoadedRangeEndMs] = useState<number | null>(
     () => cached?.loadedRangeEndMs ?? null,
   );
+  const [cacheNotice, setCacheNotice] = useState<CacheNoticeKind | null>(null);
+  const [isOnline, setIsOnline] = useState(true);
 
   const stateRef = useRef({
     classBlocks,
@@ -131,6 +217,61 @@ export function HomeScheduleClient({
 
   const inFlightWindowsRef = useRef<Set<string>>(new Set());
 
+  const applyScheduleCache = useCallback((cache: HomeScheduleCache) => {
+    const nextState = {
+      classBlocks: cache.classBlocks,
+      dbStudyEntries: cache.dbStudyEntries,
+      icsStudyEntries: cache.icsStudyEntries,
+      companionOptions: cache.companionOptions,
+      initialCalendarCategories: cache.initialCalendarCategories,
+      loadedRangeStartMs: cache.loadedRangeStartMs,
+      loadedRangeEndMs: cache.loadedRangeEndMs,
+    };
+    stateRef.current = nextState;
+    homeScheduleModuleCache = cache;
+    setClassBlocks(nextState.classBlocks);
+    setDbStudyEntries(nextState.dbStudyEntries);
+    setIcsStudyEntries(nextState.icsStudyEntries);
+    setCompanionOptions(nextState.companionOptions);
+    setInitialCalendarCategories(nextState.initialCalendarCategories);
+    setLoadedRangeStartMs(nextState.loadedRangeStartMs);
+    setLoadedRangeEndMs(nextState.loadedRangeEndMs);
+  }, []);
+
+  const restorePersistentScheduleCache = useCallback(
+    (notice: CacheNoticeKind) => {
+      const stored = readPersistentHomeScheduleCache(userId);
+      const currentModule =
+        homeScheduleModuleCache?.userId === userId ? homeScheduleModuleCache : null;
+
+      if (!stored) {
+        if (
+          currentModule &&
+          stateRef.current.loadedRangeStartMs != null &&
+          stateRef.current.loadedRangeEndMs != null
+        ) {
+          setCacheNotice(notice);
+          return true;
+        }
+        return false;
+      }
+
+      if (!currentModule || stored.fetchedAt > currentModule.fetchedAt) {
+        applyScheduleCache(stored);
+      }
+      setCacheNotice(notice);
+      return true;
+    },
+    [applyScheduleCache, userId],
+  );
+
+  const markCachedFallback = useCallback(() => {
+    const notice: CacheNoticeKind = isBrowserOnline() ? "stale" : "offline";
+    if (restorePersistentScheduleCache(notice)) return;
+    const { loadedRangeStartMs: loadedStart, loadedRangeEndMs: loadedEnd } = stateRef.current;
+    if (loadedStart != null && loadedEnd != null) setCacheNotice(notice);
+  }, [restorePersistentScheduleCache]);
+
   const writeModuleCache = useCallback(
     (patch: Partial<HomeScheduleCache> & { userId: string }) => {
       const prev = homeScheduleModuleCache?.userId === userId ? homeScheduleModuleCache : null;
@@ -146,6 +287,7 @@ export function HomeScheduleClient({
         loadedRangeEndMs: patch.loadedRangeEndMs ?? prev?.loadedRangeEndMs ?? 0,
         fetchedAt: Date.now(),
       };
+      writePersistentHomeScheduleCache(homeScheduleModuleCache);
     },
     [userId],
   );
@@ -157,6 +299,11 @@ export function HomeScheduleClient({
       const clampedStart = windowStart < fullScrollRangeStart ? fullScrollRangeStart : windowStart;
       const clampedEnd = windowEnd > fullScrollRangeEnd ? fullScrollRangeEnd : windowEnd;
       if (clampedStart > clampedEnd) return;
+
+      if (!isBrowserOnline()) {
+        markCachedFallback();
+        return;
+      }
 
       const { loadedRangeStartMs: loadedStart, loadedRangeEndMs: loadedEnd } = stateRef.current;
       if (
@@ -178,7 +325,10 @@ export function HomeScheduleClient({
           success?: boolean;
           data?: HomeSchedulePayload;
         };
-        if (!res.ok || !json.success || !json.data) return;
+        if (!res.ok || !json.success || !json.data) {
+          markCachedFallback();
+          return;
+        }
 
         const payload = json.data;
         const prev = stateRef.current;
@@ -210,11 +360,14 @@ export function HomeScheduleClient({
           loadedRangeStartMs: nextStartMs,
           loadedRangeEndMs: nextEndMs,
         });
+        setCacheNotice(null);
+      } catch {
+        markCachedFallback();
       } finally {
         inFlightWindowsRef.current.delete(flightKey);
       }
     },
-    [fullScrollRangeEnd, fullScrollRangeStart, userId, writeModuleCache],
+    [fullScrollRangeEnd, fullScrollRangeStart, markCachedFallback, userId, writeModuleCache],
   );
 
   const fetchIcsWindow = useCallback(
@@ -222,6 +375,7 @@ export function HomeScheduleClient({
       const clampedStart = windowStart < fullScrollRangeStart ? fullScrollRangeStart : windowStart;
       const clampedEnd = windowEnd > fullScrollRangeEnd ? fullScrollRangeEnd : windowEnd;
       if (clampedStart > clampedEnd) return;
+      if (!isBrowserOnline()) return;
 
       try {
         const res = await apiFetch(icsFetchUrl(clampedStart, clampedEnd));
@@ -246,6 +400,10 @@ export function HomeScheduleClient({
   );
 
   const revalidateSchedule = useCallback(() => {
+    if (!isBrowserOnline()) {
+      markCachedFallback();
+      return;
+    }
     const { loadedRangeStartMs, loadedRangeEndMs } = stateRef.current;
     if (loadedRangeStartMs != null && loadedRangeEndMs != null) {
       void fetchScheduleWindow(new Date(loadedRangeStartMs), new Date(loadedRangeEndMs), {
@@ -259,12 +417,51 @@ export function HomeScheduleClient({
     const end = addDays(nowRef.current, HOME_SCHEDULE_INITIAL_WINDOW_FUTURE_DAYS);
     void fetchScheduleWindow(start, end, { force: true, mergeEntries: false });
     void fetchIcsWindow(start, end, false);
-  }, [fetchIcsWindow, fetchScheduleWindow]);
+  }, [fetchIcsWindow, fetchScheduleWindow, markCachedFallback]);
+
+  useEffect(() => {
+    const syncOnline = () => {
+      setIsOnline(isBrowserOnline());
+    };
+    const handleOnline = () => {
+      setIsOnline(true);
+      const { loadedRangeStartMs: loadedStart, loadedRangeEndMs: loadedEnd } = stateRef.current;
+      if (loadedStart != null && loadedEnd != null) {
+        setCacheNotice("stale");
+      }
+      revalidateSchedule();
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      const { loadedRangeStartMs: loadedStart, loadedRangeEndMs: loadedEnd } = stateRef.current;
+      if (loadedStart != null && loadedEnd != null) {
+        setCacheNotice("offline");
+      } else {
+        restorePersistentScheduleCache("offline");
+      }
+    };
+
+    syncOnline();
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [restorePersistentScheduleCache, revalidateSchedule]);
 
   useEffect(() => {
     const initialStart = subDays(nowRef.current, HOME_SCHEDULE_INITIAL_WINDOW_PAST_DAYS);
     const initialEnd = addDays(nowRef.current, HOME_SCHEDULE_INITIAL_WINDOW_FUTURE_DAYS);
-    const hadCache = cached != null;
+    const hadModuleCache = cached != null;
+    const restoredPersistentCache =
+      hadModuleCache ? false : restorePersistentScheduleCache(isBrowserOnline() ? "stale" : "offline");
+    const hadCache = hadModuleCache || restoredPersistentCache;
+
+    if (!isBrowserOnline()) {
+      if (hadCache) setCacheNotice("offline");
+      return;
+    }
 
     void fetchScheduleWindow(initialStart, initialEnd, {
       mergeEntries: hadCache,
@@ -303,6 +500,28 @@ export function HomeScheduleClient({
     [dbStudyEntries, icsStudyEntries],
   );
 
+  const cacheNoticeSlot = cacheNotice ? (
+    <div
+      role="status"
+      className="inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-amber-200/80 bg-amber-50/90 px-3 py-1.5 text-[12px] font-medium text-amber-900 shadow-sm dark:border-amber-400/25 dark:bg-amber-950/35 dark:text-amber-100"
+    >
+      <span>
+        {cacheNotice === "offline"
+          ? messages.home.offlineScheduleCacheNotice
+          : messages.home.staleScheduleCacheNotice}
+      </span>
+      {isOnline ? (
+        <button
+          type="button"
+          className="rounded-full border border-amber-300/70 bg-white/75 px-2 py-0.5 text-[11px] font-semibold text-amber-950 transition hover:bg-white dark:border-amber-300/30 dark:bg-amber-900/45 dark:text-amber-50 dark:hover:bg-amber-900/65"
+          onClick={revalidateSchedule}
+        >
+          {messages.home.retryScheduleCache}
+        </button>
+      ) : null}
+    </div>
+  ) : null;
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       <ScheduleSurface
@@ -314,7 +533,7 @@ export function HomeScheduleClient({
         semesterStartISO={semesterStartISO}
         semesterEndISO={semesterEndISO}
         homeGreeting={homeGreeting}
-        homeBelowHeaderSlot={null}
+        homeBelowHeaderSlot={cacheNoticeSlot}
         naturalScheduleEnabled={naturalScheduleEnabled}
         onScheduleRefresh={revalidateSchedule}
         onVirtualStripBoundsChange={handleVirtualStripBoundsChange}

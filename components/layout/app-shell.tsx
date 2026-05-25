@@ -9,6 +9,7 @@ import { BookOpen, Calendar, Inbox, UsersRound, UserRound } from "lucide-react";
 import { ProductTutorialGate, type ProductTutorialGateContext } from "@/components/app/product-tutorial-gate";
 import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
+import { OfflineBanner } from "@/components/offline/offline-banner";
 import { PwaInstallBar } from "@/components/pwa/pwa-install-bar";
 import { useCapacitorNative } from "@/hooks/use-capacitor-native";
 import { apiFetch } from "@/lib/auth/api-fetch";
@@ -254,6 +255,7 @@ export function AppShell({
                 ),
           )}
         >
+          <OfflineBanner />
           {children}
         </main>
         {showBottomNav ? <PwaInstallBar /> : null}

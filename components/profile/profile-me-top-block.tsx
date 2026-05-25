@@ -23,6 +23,7 @@ export function ProfileMeTopBlock({
   studentVerificationStatus,
   schoolSummary,
   initialLifePhotos,
+  readOnly = false,
 }: {
   locale: AppLocale;
   nickname: string | null;
@@ -34,6 +35,7 @@ export function ProfileMeTopBlock({
   studentVerificationStatus: StudentVerificationStatus;
   schoolSummary: ProfileSchoolSummary;
   initialLifePhotos: LifePhotoRow[];
+  readOnly?: boolean;
 }) {
   const lp = getMessages(locale).profileLifePhotos;
 
@@ -58,13 +60,14 @@ export function ProfileMeTopBlock({
         verifiedStudent={verifiedStudent}
         studentVerificationStatus={studentVerificationStatus}
         schoolSummary={schoolSummary}
+        readOnly={readOnly}
       />
       <div className="px-4 pb-4 pt-3.5">
         <h2 className="text-[11px] font-semibold uppercase tracking-wide text-classmates-sub dark:text-muted-foreground">
           {lp.sectionTitle}
         </h2>
         <div className="mt-2.5">
-          <ProfileLifePhotosEditor initialPhotos={initialLifePhotos} layout="me" />
+          <ProfileLifePhotosEditor initialPhotos={initialLifePhotos} readOnly={readOnly} layout="me" />
         </div>
       </div>
     </section>
