@@ -4,6 +4,7 @@ import {
   type CoursesPagePayload,
   type EnrolledCourseRow,
 } from "@/components/courses/courses-page-client";
+import { TabKeepAliveSnapshot } from "@/components/layout/tab-keep-alive";
 import { getSessionUser } from "@/lib/auth/session";
 import {
   DEFAULT_SCHOOL,
@@ -196,7 +197,11 @@ export default async function CoursesPage({
       savedPanelRows: [],
       recommendedClassmates: [],
     };
-    return <CoursesPageClient initialPayload={payload} />;
+    return (
+      <TabKeepAliveSnapshot tab="courses">
+        <CoursesPageClient initialPayload={payload} />
+      </TabKeepAliveSnapshot>
+    );
   }
 
   const user = sessionUser;
@@ -284,7 +289,11 @@ export default async function CoursesPage({
     recommendedClassmates,
   };
 
-  return <CoursesPageClient initialPayload={payload} />;
+  return (
+    <TabKeepAliveSnapshot tab="courses">
+      <CoursesPageClient initialPayload={payload} />
+    </TabKeepAliveSnapshot>
+  );
 }
 
 

@@ -3,12 +3,18 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type MouseEvent } from "react";
 import { BookOpen, Calendar, Inbox, UsersRound, UserRound } from "lucide-react";
 
 import { ProductTutorialGate, type ProductTutorialGateContext } from "@/components/app/product-tutorial-gate";
 import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
+import {
+  TAB_KEEP_ALIVE_PATHS,
+  TabKeepAliveProvider,
+  tabKeepAliveKeyFromPathname,
+  useTabKeepAliveNavigation,
+} from "@/components/layout/tab-keep-alive";
 import { OfflineBanner } from "@/components/offline/offline-banner";
 import { PwaInstallBar } from "@/components/pwa/pwa-install-bar";
 import { useCapacitorNative } from "@/hooks/use-capacitor-native";
@@ -43,13 +49,23 @@ function ShellNavLink({
 }) {
   const Icon = item.icon;
   const href = item.href === "/courses" ? coursesNavHrefFromStorage() : item.href;
+  const tab = tabKeepAliveKeyFromPathname(item.href);
+  const { getSnapshot, requestTab } = useTabKeepAliveNavigation();
   const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+  const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!tab) return;
+    if (event.defaultPrevented || event.button !== 0) return;
+    if (event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) return;
+    if (!getSnapshot(tab)) return;
+    requestTab(tab);
+  };
 
   if (variant === "side") {
     return (
       <Link
         href={href}
         aria-current={isActive ? "page" : undefined}
+        onClick={handleClick}
         className={cn(
           "flex min-h-[2.75rem] items-center gap-3 px-3 py-2 text-sm font-semibold transition-[background-color,color] duration-150 ease-out",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
@@ -91,6 +107,7 @@ function ShellNavLink({
     <Link
       href={href}
       aria-current={isActive ? "page" : undefined}
+      onClick={handleClick}
       className={cn(
         "flex min-h-[3rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-1 text-[10px] font-semibold leading-tight transition-[background-color,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         isActive ? navActiveTab : navInactiveTab,
@@ -138,6 +155,30 @@ export function AppShell({
   inboxUnreadTotal?: number;
   productTutorialContext?: ProductTutorialGateContext | null;
 }) {
+  const cacheScope = productTutorialContext?.userId ?? "anonymous";
+
+  return (
+    <TabKeepAliveProvider cacheScope={cacheScope}>
+      <AppShellContent
+        inboxUnreadTotal={inboxUnreadTotal}
+        productTutorialContext={productTutorialContext}
+      >
+        {children}
+      </AppShellContent>
+    </TabKeepAliveProvider>
+  );
+}
+
+function AppShellContent({
+  children,
+  inboxUnreadTotal = 0,
+  productTutorialContext = null,
+}: {
+  children: React.ReactNode;
+  /** Total unread DM + course-room messages (same as inbox bundle). */
+  inboxUnreadTotal?: number;
+  productTutorialContext?: ProductTutorialGateContext | null;
+}) {
   const { messages: m } = useLocaleContext();
   const navItems = [
     { href: "/home", label: m.nav.home, icon: Calendar },
@@ -149,7 +190,9 @@ export function AppShell({
 
   const pathname = usePathname();
   const isNativeApp = useCapacitorNative();
+  const { pendingTab, getSnapshot } = useTabKeepAliveNavigation();
   const [liveUnreadTotal, setLiveUnreadTotal] = useState(inboxUnreadTotal);
+  const displayedPathname = pendingTab ? TAB_KEEP_ALIVE_PATHS[pendingTab] : pathname;
 
   const refreshUnreadTotal = useCallback(async () => {
     const response = await apiFetch("/api/inbox/unread-total", {
@@ -189,15 +232,18 @@ export function AppShell({
 
   /** Full-height drill-ins: hide tab bar (chat thread, course chat, peer profile). */
   const isChatThread =
-    /^\/connections\/[^/]+$/.test(pathname) ||
-    /^\/users\/[^/]+$/.test(pathname) ||
-    /^\/courses\/[^/]+\/chat$/.test(pathname) ||
-    /^\/groups\/[^/]+$/.test(pathname);
+    /^\/connections\/[^/]+$/.test(displayedPathname) ||
+    /^\/users\/[^/]+$/.test(displayedPathname) ||
+    /^\/courses\/[^/]+\/chat$/.test(displayedPathname) ||
+    /^\/groups\/[^/]+$/.test(displayedPathname);
 
-  const isDiscover = pathname === "/discover" || pathname.startsWith("/discover/");
+  const isDiscover = displayedPathname === "/discover" || displayedPathname.startsWith("/discover/");
   const shellSurface = isDiscover && !isChatThread ? "bg-classmates-warm" : "bg-background";
   const showBottomNav = !isChatThread && !isNativeApp;
   const showSideNav = showBottomNav;
+  const currentTopLevelTab = tabKeepAliveKeyFromPathname(pathname);
+  const pendingSnapshot = pendingTab ? getSnapshot(pendingTab) : null;
+  const showPendingSnapshot = Boolean(pendingTab && pendingSnapshot && currentTopLevelTab !== pendingTab);
 
   return (
     <div
@@ -233,7 +279,7 @@ export function AppShell({
               <ShellNavLink
                 key={item.href}
                 item={item}
-                pathname={pathname}
+                pathname={displayedPathname}
                 liveUnreadTotal={liveUnreadTotal}
                 variant="side"
               />
@@ -256,7 +302,7 @@ export function AppShell({
           )}
         >
           <OfflineBanner />
-          {children}
+          {showPendingSnapshot ? pendingSnapshot?.node : children}
         </main>
         {showBottomNav ? <PwaInstallBar /> : null}
         {showBottomNav ? (
@@ -268,7 +314,7 @@ export function AppShell({
               <ShellNavLink
                 key={item.href}
                 item={item}
-                pathname={pathname}
+                pathname={displayedPathname}
                 liveUnreadTotal={liveUnreadTotal}
                 variant="bottom"
               />

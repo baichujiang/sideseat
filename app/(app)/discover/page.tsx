@@ -1,6 +1,7 @@
 import { ConnectionStatus } from "@prisma/client";
 
 import { DiscoverList } from "@/components/discover/discover-list";
+import { TabKeepAliveSnapshot } from "@/components/layout/tab-keep-alive";
 import { loadActiveDiscoverActivitiesForCity } from "@/lib/discover/load-active-discover-activities-for-city";
 import { loadActiveDiscoverPostsForCity } from "@/lib/discover/load-active-discover-posts";
 import { getSessionUser } from "@/lib/auth/session";
@@ -16,9 +17,11 @@ export default async function DiscoverPage() {
   if (!sessionUser) {
     const posts = await loadActiveDiscoverPostsForCity(servedCity, null);
     return (
-      <div className="min-w-0 space-y-3">
-        <DiscoverList posts={posts} servedCity={servedCity} />
-      </div>
+      <TabKeepAliveSnapshot tab="discover">
+        <div className="min-w-0 space-y-3">
+          <DiscoverList posts={posts} servedCity={servedCity} />
+        </div>
+      </TabKeepAliveSnapshot>
     );
   }
   const user = sessionUser;
@@ -55,14 +58,16 @@ export default async function DiscoverPage() {
   }));
 
   return (
-    <div className="min-w-0 space-y-3">
-      <DiscoverList
-        posts={posts}
-        activities={loadedActivities}
-        savedCourseCount={savedCount}
-        enrolledCourses={enrolledCourses}
-        servedCity={servedCity}
-      />
-    </div>
+    <TabKeepAliveSnapshot tab="discover">
+      <div className="min-w-0 space-y-3">
+        <DiscoverList
+          posts={posts}
+          activities={loadedActivities}
+          savedCourseCount={savedCount}
+          enrolledCourses={enrolledCourses}
+          servedCity={servedCity}
+        />
+      </div>
+    </TabKeepAliveSnapshot>
   );
 }

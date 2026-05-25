@@ -1,6 +1,7 @@
 import { InboxChatsShell } from "@/components/inbox/inbox-quick-chips";
 import { InboxRealtimeRefresh } from "@/components/inbox/inbox-realtime-refresh";
 import { InboxSessionBootstrap } from "@/components/inbox/inbox-session-bootstrap";
+import { TabKeepAliveSnapshot } from "@/components/layout/tab-keep-alive";
 import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
 import { getSessionUser } from "@/lib/auth/session";
 import { buildInboxListVersion, prepareInboxListMerged } from "@/lib/inbox/inbox-list-version";
@@ -12,7 +13,11 @@ export default async function InboxPage() {
   const sessionUser = await getSessionUser();
   await getServerAppLocale();
   if (!sessionUser) {
-    return <InboxSessionBootstrap />;
+    return (
+      <TabKeepAliveSnapshot tab="inbox">
+        <InboxSessionBootstrap />
+      </TabKeepAliveSnapshot>
+    );
   }
   const user = sessionUser;
 
@@ -38,16 +43,18 @@ export default async function InboxPage() {
   const inboxVersion = buildInboxListVersion(merged, plansNeedingYourAction);
 
   return (
-    <div className="space-y-3">
-      <InboxRealtimeRefresh version={inboxVersion} />
-      <InboxChatsShell
-        userId={user.id}
-        merged={merged}
-        plansNeedingYourAction={plansNeedingYourAction}
-        initialContacts={directContacts}
-        showCreateSheet
-        recommendedClassmates={recommendedClassmates}
-      />
-    </div>
+    <TabKeepAliveSnapshot tab="inbox">
+      <div className="space-y-3">
+        <InboxRealtimeRefresh version={inboxVersion} />
+        <InboxChatsShell
+          userId={user.id}
+          merged={merged}
+          plansNeedingYourAction={plansNeedingYourAction}
+          initialContacts={directContacts}
+          showCreateSheet
+          recommendedClassmates={recommendedClassmates}
+        />
+      </div>
+    </TabKeepAliveSnapshot>
   );
 }

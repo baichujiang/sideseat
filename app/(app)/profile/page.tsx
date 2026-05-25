@@ -1,5 +1,6 @@
 import { MeGuestScreen } from "@/components/profile/me-guest-screen";
 import { ProfilePageClient, type ProfilePagePayload } from "@/components/profile/profile-page-client";
+import { TabKeepAliveSnapshot } from "@/components/layout/tab-keep-alive";
 import { getSessionUser } from "@/lib/auth/session";
 import { isConfiguredAdmin } from "@/lib/constants/app";
 import { formatMessage, getMessages } from "@/lib/i18n/messages";
@@ -20,17 +21,23 @@ export default async function ProfilePage({
   const tipsEnabled = Boolean(process.env.STRIPE_SECRET_KEY?.trim());
 
   if (!sessionUser) {
-    return <MeGuestScreen mode="anonymous" />;
+    return (
+      <TabKeepAliveSnapshot tab="profile">
+        <MeGuestScreen mode="anonymous" />
+      </TabKeepAliveSnapshot>
+    );
   }
   const user = sessionUser;
 
   if (user.isGuest) {
     return (
-      <MeGuestScreen
-        mode="guest-session"
-        guestNickname={user.nickname}
-        guestAvatarUrl={user.avatarUrl}
-      />
+      <TabKeepAliveSnapshot tab="profile">
+        <MeGuestScreen
+          mode="guest-session"
+          guestNickname={user.nickname}
+          guestAvatarUrl={user.avatarUrl}
+        />
+      </TabKeepAliveSnapshot>
     );
   }
 
@@ -82,5 +89,9 @@ export default async function ProfilePage({
     },
   };
 
-  return <ProfilePageClient initialPayload={payload} />;
+  return (
+    <TabKeepAliveSnapshot tab="profile">
+      <ProfilePageClient initialPayload={payload} />
+    </TabKeepAliveSnapshot>
+  );
 }
