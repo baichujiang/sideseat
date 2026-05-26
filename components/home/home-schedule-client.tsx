@@ -150,6 +150,9 @@ export function HomeScheduleClient({
   nowISO,
   semesterStartISO,
   semesterEndISO,
+  initialPayload,
+  initialWindowStartISO,
+  initialWindowEndISO,
   homeGreeting,
   naturalScheduleEnabled = false,
 }: {
@@ -157,6 +160,9 @@ export function HomeScheduleClient({
   nowISO: string;
   semesterStartISO: string;
   semesterEndISO: string;
+  initialPayload?: HomeSchedulePayload;
+  initialWindowStartISO?: string;
+  initialWindowEndISO?: string;
   homeGreeting?: {
     nickname: string | null;
     avatarUrl: string | null;
@@ -176,25 +182,50 @@ export function HomeScheduleClient({
 
   const cached =
     homeScheduleModuleCache?.userId === userId ? homeScheduleModuleCache : null;
+  const initialScheduleCache = useMemo<HomeScheduleCache | null>(() => {
+    if (!initialPayload || !initialWindowStartISO || !initialWindowEndISO) return null;
+    const loadedRangeStartMs = new Date(initialWindowStartISO).getTime();
+    const loadedRangeEndMs = new Date(initialWindowEndISO).getTime();
+    if (
+      !Number.isFinite(loadedRangeStartMs) ||
+      !Number.isFinite(loadedRangeEndMs) ||
+      loadedRangeEndMs < loadedRangeStartMs
+    ) {
+      return null;
+    }
 
-  const [classBlocks, setClassBlocks] = useState<ClassBlock[]>(() => cached?.classBlocks ?? []);
+    return {
+      userId,
+      classBlocks: initialPayload.classBlocks,
+      dbStudyEntries: initialPayload.studyEntries,
+      icsStudyEntries: [],
+      companionOptions: initialPayload.companionOptions,
+      initialCalendarCategories: initialPayload.initialCalendarCategories,
+      loadedRangeStartMs,
+      loadedRangeEndMs,
+      fetchedAt: Date.now(),
+    };
+  }, [initialPayload, initialWindowEndISO, initialWindowStartISO, userId]);
+  const bootCache = cached ?? initialScheduleCache;
+
+  const [classBlocks, setClassBlocks] = useState<ClassBlock[]>(() => bootCache?.classBlocks ?? []);
   const [dbStudyEntries, setDbStudyEntries] = useState<StudyEntry[]>(
-    () => cached?.dbStudyEntries ?? [],
+    () => bootCache?.dbStudyEntries ?? [],
   );
   const [icsStudyEntries, setIcsStudyEntries] = useState<StudyEntry[]>(
-    () => cached?.icsStudyEntries ?? [],
+    () => bootCache?.icsStudyEntries ?? [],
   );
   const [companionOptions, setCompanionOptions] = useState<CompanionOption[]>(
-    () => cached?.companionOptions ?? [],
+    () => bootCache?.companionOptions ?? [],
   );
   const [initialCalendarCategories, setInitialCalendarCategories] = useState<CalendarCategoryLite[]>(
-    () => cached?.initialCalendarCategories ?? [],
+    () => bootCache?.initialCalendarCategories ?? [],
   );
   const [loadedRangeStartMs, setLoadedRangeStartMs] = useState<number | null>(
-    () => cached?.loadedRangeStartMs ?? null,
+    () => bootCache?.loadedRangeStartMs ?? null,
   );
   const [loadedRangeEndMs, setLoadedRangeEndMs] = useState<number | null>(
-    () => cached?.loadedRangeEndMs ?? null,
+    () => bootCache?.loadedRangeEndMs ?? null,
   );
   const [activeOnlineRefreshes, setActiveOnlineRefreshes] = useState(0);
 
@@ -451,9 +482,14 @@ export function HomeScheduleClient({
     const initialStart = subDays(nowRef.current, HOME_SCHEDULE_INITIAL_WINDOW_PAST_DAYS);
     const initialEnd = addDays(nowRef.current, HOME_SCHEDULE_INITIAL_WINDOW_FUTURE_DAYS);
     const hadModuleCache = cached != null;
+    const hadInitialCache = initialScheduleCache != null;
+    if (hadInitialCache && !hadModuleCache) {
+      homeScheduleModuleCache = initialScheduleCache;
+      writePersistentHomeScheduleCache(initialScheduleCache);
+    }
     const restoredPersistentCache =
-      hadModuleCache ? false : restorePersistentScheduleCache();
-    const hadCache = hadModuleCache || restoredPersistentCache;
+      hadModuleCache || hadInitialCache ? false : restorePersistentScheduleCache();
+    const hadCache = hadModuleCache || hadInitialCache || restoredPersistentCache;
 
     if (!isBrowserOnline()) {
       return;

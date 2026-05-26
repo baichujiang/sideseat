@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 
 import "./globals.css";
 import { AuthBootstrap } from "@/components/auth/auth-bootstrap";
+import { ChunkLoadRecovery } from "@/components/app/chunk-load-recovery";
 import { CapacitorBootstrap } from "@/components/capacitor/capacitor-bootstrap";
 import { SignInPromptProvider } from "@/components/auth/sign-in-prompt-dialog";
 import { LocaleProvider } from "@/components/i18n/locale-provider";
@@ -65,6 +66,7 @@ export default async function RootLayout({
         <LocaleProvider initialLocale={locale}>
           <SignInPromptProvider>
             {children}
+            <ChunkLoadRecovery />
             <CapacitorBootstrap />
             <AuthBootstrap />
             <PwaRegister />

@@ -19,10 +19,12 @@ function mapUsernameApiError(
   errors: {
     invalidRequest: string;
     usernameTaken: string;
+    usernameCooldown: string;
     unknown: string;
   },
 ): string {
   if (payload?.code === "USERNAME_TAKEN") return errors.usernameTaken;
+  if (payload?.code === "USERNAME_CHANGE_COOLDOWN") return errors.usernameCooldown;
   if (payload?.code === "INVALID_REQUEST") return errors.invalidRequest;
   return payload?.error?.trim() || errors.unknown;
 }

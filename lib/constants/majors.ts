@@ -1,12 +1,11 @@
 /**
  * Curated lists of TUM degree programs, scraped from the official program
  * catalogue (https://www.tum.de/en/studies/degree-programs). Kept as static
- * constants so the dropdown stays consistent and we can aggregate cleanly
- * (e.g. "How many M.Sc. Informatics students are looking for partners?").
+ * constants so the profile editor can offer consistent suggestions while still
+ * allowing students to type their exact program name.
  *
- * If TUM publishes new programs, append them here — old saved values that no
- * longer match the list are surfaced via `LEGACY_MAJOR_OPTGROUP_LABEL` in the
- * form so users aren't silently reset.
+ * If TUM publishes new programs, append them here. Saved custom values do not
+ * need to match this list.
  */
 
 import type { DegreeLevel } from "@prisma/client";

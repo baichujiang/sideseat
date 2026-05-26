@@ -1,22 +1,12 @@
 import "server-only";
 
-import { prisma } from "@/lib/db/prisma";
 import { isReservedNicknameKey, nicknameToKey } from "@/lib/auth/nickname-key";
 
 export { nicknameToKey, isReservedNicknameKey } from "@/lib/auth/nickname-key";
 
 export async function isNicknameKeyAvailable(key: string, excludeUserId?: string): Promise<boolean> {
-  if (isReservedNicknameKey(key)) {
-    return false;
-  }
-  const clash = await prisma.user.findFirst({
-    where: {
-      nicknameKey: key,
-      ...(excludeUserId ? { id: { not: excludeUserId } } : {}),
-    },
-    select: { id: true },
-  });
-  return !clash;
+  void excludeUserId;
+  return !isReservedNicknameKey(key);
 }
 
 export type NicknameValidationResult =
@@ -27,6 +17,7 @@ export async function validateNicknameForUser(
   nickname: string,
   options?: { excludeUserId?: string },
 ): Promise<NicknameValidationResult> {
+  void options;
   const trimmed = nickname.trim();
   if (trimmed.length < 2 || trimmed.length > 32) {
     return { ok: false, reason: "invalid" };
@@ -35,9 +26,6 @@ export async function validateNicknameForUser(
   const key = nicknameToKey(trimmed);
   if (isReservedNicknameKey(key)) {
     return { ok: false, reason: "reserved" };
-  }
-  if (!(await isNicknameKeyAvailable(key, options?.excludeUserId))) {
-    return { ok: false, reason: "taken" };
   }
   return { ok: true, nickname: trimmed, nicknameKey: key };
 }

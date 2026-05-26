@@ -93,8 +93,8 @@ export const profileSchema = z.object({
   }),
   major: z
     .string()
+    .trim()
     .max(160)
-    .transform((s) => s.trim())
     .refine((s) => s === "" || s.length >= 2, {
       message: "Pick a major or leave it as not specified.",
     }),

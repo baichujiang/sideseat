@@ -45,6 +45,7 @@ function toDiscoverPostRow(post: PostWithAuthorCourses, currentUserId: string): 
     isOwn: post.userId === currentUserId,
     userId: post.user.id,
     nickname: post.user.nickname ?? post.user.username,
+    tagline: post.user.bio,
     gender: post.user.gender,
     avatarUrl: post.user.avatarUrl,
     major: post.user.major,

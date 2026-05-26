@@ -58,6 +58,7 @@ export type DiscoverPostRow = {
   isOwn: boolean;
   userId: string;
   nickname: string;
+  tagline: string | null;
   gender: UserGender;
   avatarUrl: string | null;
   major: string | null;

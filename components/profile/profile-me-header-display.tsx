@@ -9,7 +9,7 @@ import { getMessages } from "@/lib/i18n/messages";
 import { buildSchoolSummaryLine } from "@/lib/profile/school-summary-line";
 import { cn } from "@/lib/utils";
 
-/** Shared avatar + username + school block for Me preview and `/profile/info` header. */
+/** Shared avatar + nickname + account username block for Me preview and `/profile/info` header. */
 export function ProfileMeHeaderDisplay({
   locale,
   username,
@@ -34,7 +34,8 @@ export function ProfileMeHeaderDisplay({
   className?: string;
 }) {
   const t = getMessages(locale).meIdentity;
-  const displayName = username?.trim() || nickname?.trim() || t.displayNamePlaceholder;
+  const displayName = nickname?.trim() || t.displayNamePlaceholder;
+  const usernameDisplay = username?.trim() ? `@${username.trim()}` : null;
   const schoolLine = buildSchoolSummaryLine(schoolSummary, t.schoolLineSemester);
 
   return (
@@ -49,7 +50,7 @@ export function ProfileMeHeaderDisplay({
       </figure>
       <div className="min-w-0 flex-1 pt-0.5 text-left">
         <div className="flex flex-wrap items-center gap-1.5">
-          <p className="truncate font-mono text-[20px] font-bold leading-tight tracking-tight text-classmates-ink dark:text-foreground">
+          <p className="truncate text-[20px] font-bold leading-tight tracking-tight text-classmates-ink dark:text-foreground">
             {displayName}
           </p>
           <UserGenderProfileMark gender={gender} iconClassName="h-4 w-4" />
@@ -61,7 +62,10 @@ export function ProfileMeHeaderDisplay({
             status={studentVerificationStatus}
           />
         </div>
-        <p className="mt-1 text-[13px] font-medium leading-snug text-classmates-sub dark:text-muted-foreground">
+        <p className="mt-1 truncate font-mono text-[12px] font-semibold leading-snug text-classmates-sub dark:text-muted-foreground">
+          {usernameDisplay}
+        </p>
+        <p className="mt-0.5 text-[13px] font-medium leading-snug text-classmates-sub dark:text-muted-foreground">
           {schoolLine}
         </p>
       </div>

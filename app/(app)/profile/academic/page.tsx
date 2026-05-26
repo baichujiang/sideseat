@@ -4,7 +4,7 @@ import { ProfileForm } from "@/components/forms/profile-form";
 import { ProfileSubpageShell } from "@/components/profile/profile-subpage-shell";
 import { getSessionUser } from "@/lib/auth/session";
 import { profileLanguagesFormDefault } from "@/lib/constants/languages";
-import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
+import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
 import { getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { prisma } from "@/lib/db/prisma";
@@ -21,7 +21,6 @@ export default async function ProfileAcademicPage() {
 
   const formKey = `${user.id}-${user.updatedAt.getTime()}`;
   const schoolCode = normalizeSchoolCode(user.school) ?? DEFAULT_SCHOOL;
-  const schoolShort = schoolOptions.find((s) => s.value === schoolCode)?.shortLabel ?? schoolCode;
 
   return (
     <ProfileSubpageShell

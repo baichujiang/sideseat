@@ -269,8 +269,7 @@ export function ProfileIdentitySheets({
     });
   };
 
-  const loginUsernameTrimmed = loginUsername?.trim() ?? "";
-  const displayName = loginUsernameTrimmed || nickname.trim() || t.displayNamePlaceholder;
+  const displayName = nickname.trim() || t.displayNamePlaceholder;
   const bioDisplay = bio.trim() ? bio.trim() : t.taglineEmpty;
   const schoolLine = schoolSummary ? buildSchoolSummaryLine(schoolSummary, t.schoolLineSemester) : null;
   const isCropOpen = avatarCropFile !== null;

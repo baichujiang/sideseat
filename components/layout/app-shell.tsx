@@ -178,18 +178,27 @@ function ShellCreatePostButton({
     <button
       type="button"
       onClick={onClick}
-      className="group flex min-h-[3rem] min-w-0 flex-1 items-center justify-center px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className={cn(
+        "group flex min-h-[3rem] min-w-0 flex-1 items-center justify-center rounded-2xl px-1 py-1",
+        "text-classmates-blue transition-[background-color,color] duration-150 ease-out active:bg-classmates-blue-soft dark:text-blue-400 dark:active:bg-blue-500/15",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "[@media(hover:hover)]:hover:bg-classmates-blue-soft dark:[@media(hover:hover)]:hover:bg-blue-500/15",
+      )}
       aria-label={label}
     >
       <span
         className={cn(
-          "-mt-5 inline-flex h-12 w-12 items-center justify-center rounded-full",
-          "bg-classmates-blue text-white shadow-[0_10px_28px_-10px_rgba(37,99,235,0.9)] ring-4 ring-white",
-          "transition-[background-color,transform,box-shadow] active:scale-95 dark:ring-background",
+          "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+          "bg-classmates-blue text-white shadow-[0_8px_18px_-12px_rgba(37,99,235,0.9)]",
+          "transition-[background-color,transform] group-active:scale-95",
           "[@media(hover:hover)]:group-hover:bg-classmates-blue/92",
         )}
       >
-        <Plus className="h-6 w-6" strokeWidth={2.75} aria-hidden />
+        <Plus
+          className="h-5 w-5"
+          strokeWidth={2.7}
+          aria-hidden
+        />
       </span>
     </button>
   );
@@ -315,6 +324,7 @@ function AppShellContent({
       : "bg-background";
   const showBottomNav = !isChatThread && !isNativeApp;
   const showSideNav = showBottomNav;
+  const showCreatePostAction = usesPrimaryTabSurface && !isChatThread;
   const pendingSnapshot = pendingTab ? getSnapshot(pendingTab) : null;
   const showPendingSnapshot = Boolean(pendingTab && pendingSnapshot && currentTopLevelTab !== pendingTab);
 
@@ -347,13 +357,15 @@ function AppShellContent({
               {APP_NAME}
             </p>
           </div>
-          <div className="px-2 pb-3">
-            <ShellCreatePostButton
-              label={m.nav.createPost}
-              onClick={openDiscoverCreatePost}
-              variant="side"
-            />
-          </div>
+          {showCreatePostAction ? (
+            <div className="px-2 pb-3">
+              <ShellCreatePostButton
+                label={m.nav.createPost}
+                onClick={openDiscoverCreatePost}
+                variant="side"
+              />
+            </div>
+          ) : null}
           <div className="flex min-h-0 flex-1 flex-col gap-0.5 px-2">
             {navItems.map((item) => (
               <ShellNavLink
@@ -399,11 +411,13 @@ function AppShellContent({
                 variant="bottom"
               />
             ))}
-            <ShellCreatePostButton
-              label={m.nav.createPost}
-              onClick={openDiscoverCreatePost}
-              variant="bottom"
-            />
+            {showCreatePostAction ? (
+              <ShellCreatePostButton
+                label={m.nav.createPost}
+                onClick={openDiscoverCreatePost}
+                variant="bottom"
+              />
+            ) : null}
             {trailingNavItems.map((item) => (
               <ShellNavLink
                 key={item.href}

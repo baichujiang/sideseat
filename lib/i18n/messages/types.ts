@@ -1057,6 +1057,7 @@ export type AppMessages = {
       errors: {
         invalidRequest: string;
         usernameTaken: string;
+        usernameCooldown: string;
         networkError: string;
         unknown: string;
         saved: string;
@@ -1279,6 +1280,7 @@ export type AppMessages = {
     profileRowsNavAria: string;
     rowPhoto: string;
     rowUsername: string;
+    rowNickname: string;
     rowBio: string;
     rowGender: string;
     rowSchool: string;
@@ -1520,7 +1522,6 @@ export type CoursesWeekdayShort = {
 export type CoursesMessages = {
   screenTitle: string;
   screenSubtitle: string;
-  schoolHeading: string;
   /** `{school}` — full school label after the colon. */
   schoolSelectSrSuffix: string;
   tabsNavAria: string;

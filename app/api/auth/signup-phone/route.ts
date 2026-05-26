@@ -39,15 +39,13 @@ export async function POST(request: Request) {
     const displayName = values.displayName.trim();
     const nicknameCheck = await validateNicknameForUser(displayName);
     if (!nicknameCheck.ok) {
-      const message =
-        nicknameCheck.reason === "taken"
-          ? "That display name is already taken."
-          : "That display name is reserved.";
-      const code =
-        nicknameCheck.reason === "taken"
-          ? SIGNUP_EMAIL_ERROR_CODES.NICKNAME_TAKEN
-          : SIGNUP_EMAIL_ERROR_CODES.NICKNAME_RESERVED;
-      return error(message, 409, code);
+      return error(
+        nicknameCheck.reason === "reserved"
+          ? "That display name is reserved."
+          : "That display name is not valid.",
+        422,
+        SIGNUP_EMAIL_ERROR_CODES.NICKNAME_RESERVED,
+      );
     }
 
     const username = values.username;

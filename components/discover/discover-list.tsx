@@ -8,6 +8,11 @@ import { useCallback, useEffect, useState } from "react";
 import { Edit3, Loader2, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DiscoverActivityList } from "@/components/discover/discover-activity-list";
+import {
+  DiscoverCreateActionSheet,
+  type DiscoverCreateChoice,
+} from "@/components/discover/discover-create-action-sheet";
+import { DiscoverCreateActivitySheet } from "@/components/discover/discover-create-activity-sheet";
 import { DiscoverFeed } from "@/components/discover/discover-feed";
 import { DiscoverZoneTabs } from "@/components/discover/discover-zone-tabs";
 import { OfflineStateCard } from "@/components/offline/offline-state-card";
@@ -51,6 +56,7 @@ export function DiscoverList({
   savedCourseCount,
   enrolledCourses = [],
   servedCity,
+  viewerSession,
 }: {
   posts: DiscoverPostRow[];
   activities?: DiscoverActivityRow[];
@@ -59,6 +65,8 @@ export function DiscoverList({
   enrolledCourses?: EnrolledCourseOption[];
   /** Metro scope from Me → city preference (cookie). */
   servedCity?: DiscoverCityNameKey;
+  /** Server-confirmed auth state; avoids treating a slow client refresh as logged out. */
+  viewerSession?: { signedIn: boolean; isGuest: boolean };
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -72,7 +80,9 @@ export function DiscoverList({
   const [zone, setZone] = useState<DiscoverZone>(() => parseDiscoverZone(searchParams.get("zone")));
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [createActionOpen, setCreateActionOpen] = useState(false);
   const [postOpen, setPostOpen] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
   const createParam = searchParams.get("create");
 
   useEffect(() => {
@@ -151,30 +161,40 @@ export function DiscoverList({
     setSearchOpen(true);
   };
 
-  const openCreatePostFlow = useCallback(() => {
+  const openCreateFlow = useCallback(() => {
     if (!isOnline) return;
-    if (!sessionHint || sessionHint.isGuest || !sessionHint.signedIn) {
+    const session = viewerSession ?? sessionHint;
+    if (!session) return;
+    if (session.isGuest || !session.signedIn) {
       openPrompt({ returnTo: "/discover?create=post" });
       return;
     }
+    setCreateActionOpen(true);
+  }, [isOnline, openPrompt, sessionHint, viewerSession]);
+
+  const chooseCreateFlow = (choice: DiscoverCreateChoice) => {
+    if (choice === "activity") {
+      setActivityOpen(true);
+      return;
+    }
     setPostOpen(true);
-  }, [isOnline, openPrompt, sessionHint]);
+  };
 
   useEffect(() => {
     if (createParam !== "post") return;
-    openCreatePostFlow();
+    openCreateFlow();
 
     const url = new URL(window.location.href);
     url.searchParams.delete("create");
     window.history.replaceState(null, "", url.toString());
-  }, [createParam, openCreatePostFlow]);
+  }, [createParam, openCreateFlow]);
 
   useEffect(() => {
-    window.addEventListener("sideseat:discover-create-post", openCreatePostFlow);
+    window.addEventListener("sideseat:discover-create-post", openCreateFlow);
     return () => {
-      window.removeEventListener("sideseat:discover-create-post", openCreatePostFlow);
+      window.removeEventListener("sideseat:discover-create-post", openCreateFlow);
     };
-  }, [openCreatePostFlow]);
+  }, [openCreateFlow]);
 
   return (
     <div className="space-y-3">
@@ -273,6 +293,12 @@ export function DiscoverList({
           setPostOpen(false);
           router.refresh();
         }}
+      />
+      <DiscoverCreateActivitySheet open={activityOpen} onClose={() => setActivityOpen(false)} />
+      <DiscoverCreateActionSheet
+        open={createActionOpen}
+        onClose={() => setCreateActionOpen(false)}
+        onChoose={chooseCreateFlow}
       />
     </div>
   );

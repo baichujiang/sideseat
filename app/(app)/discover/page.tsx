@@ -19,7 +19,11 @@ export default async function DiscoverPage() {
     return (
       <TabKeepAliveSnapshot tab="discover">
         <div className="min-w-0 space-y-3">
-          <DiscoverList posts={posts} servedCity={servedCity} />
+          <DiscoverList
+            posts={posts}
+            servedCity={servedCity}
+            viewerSession={{ signedIn: false, isGuest: true }}
+          />
         </div>
       </TabKeepAliveSnapshot>
     );
@@ -66,6 +70,7 @@ export default async function DiscoverPage() {
           savedCourseCount={savedCount}
           enrolledCourses={enrolledCourses}
           servedCity={servedCity}
+          viewerSession={{ signedIn: true, isGuest: user.isGuest }}
         />
       </div>
     </TabKeepAliveSnapshot>

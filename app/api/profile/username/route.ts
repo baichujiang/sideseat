@@ -4,6 +4,9 @@ import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseBody } from "@/lib/http";
 import { profileUsernameChangeSchema } from "@/lib/validators/profile";
 
+const USERNAME_CHANGE_COOLDOWN_DAYS = 30;
+const USERNAME_CHANGE_COOLDOWN_MS = USERNAME_CHANGE_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+
 export async function PATCH(request: Request) {
   try {
     const user = await requireUser();
@@ -22,6 +25,17 @@ export async function PATCH(request: Request) {
       return ok({ saved: true, username });
     }
 
+    if (user.usernameUpdatedAt) {
+      const nextAllowedAt = new Date(user.usernameUpdatedAt.getTime() + USERNAME_CHANGE_COOLDOWN_MS);
+      if (nextAllowedAt.getTime() > Date.now()) {
+        return error(
+          `Username can only be changed once every ${USERNAME_CHANGE_COOLDOWN_DAYS} days.`,
+          429,
+          "USERNAME_CHANGE_COOLDOWN",
+        );
+      }
+    }
+
     const available = await isUsernameAvailable(username, user.id);
     if (!available) {
       return error("That username is already taken.", 409, "USERNAME_TAKEN");
@@ -29,7 +43,7 @@ export async function PATCH(request: Request) {
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { username },
+      data: { username, usernameUpdatedAt: new Date() },
     });
 
     return ok({ saved: true, username });

@@ -306,11 +306,12 @@ model User {
   email                        String?                  @unique
   /// E.164, e.g. +8613800138000 — used for login when set.
   phone                        String?                  @unique
+  usernameUpdatedAt            DateTime?
   isGuest                      Boolean                  @default(false)
   hashedPassword               String
   nickname                     String?
-  /// Lowercase trimmed nickname for uniqueness (null for guests).
-  nicknameKey                  String?                  @unique
+  /// Lowercase trimmed nickname for search (null for guests; display names are not unique).
+  nicknameKey                  String?
   gender                       UserGender               @default(PRIVATE)
   school                       String?
   degreeLevel                  DegreeLevel?
@@ -388,6 +389,8 @@ model User {
   productFeedback              ProductFeedback[]
   scheduleShareLinksOwned      ScheduleShareLink[]              @relation("ScheduleShareLinkOwner")
   scheduleShareProposalsAsProposer ScheduleShareGuestProposal[] @relation("ScheduleShareProposalProposer")
+
+  @@index([nicknameKey])
 }
 
 /// Short-lived SMS OTP for phone signup (and future phone login without password).

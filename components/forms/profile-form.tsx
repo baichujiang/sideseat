@@ -2,7 +2,7 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { ChevronDown, Plus, X } from "lucide-react";
@@ -80,6 +80,8 @@ export function ProfileForm({
   const [serverError, setServerError] = useState("");
   const [languagePickerOpen, setLanguagePickerOpen] = useState(false);
   const [languageSearch, setLanguageSearch] = useState("");
+  const majorSuggestionsListId = useId();
+  const majorHelpId = `${majorSuggestionsListId}-help`;
   const {
     register,
     handleSubmit,
@@ -158,7 +160,6 @@ export function ProfileForm({
 
   const degreeLevel = watch("degreeLevel");
   const semester = watch("semester");
-  const currentMajor = watch("major");
   const selectedLanguages = watch("languages") ?? [];
   const selectedTags = new Set(selectedLanguages.map((l) => l.tag));
   const unselectedLanguageOptions = LANGUAGE_TAG_OPTIONS.filter((o) => !selectedTags.has(o.value));
@@ -185,13 +186,7 @@ export function ProfileForm({
     return () => document.removeEventListener("keydown", onKeyDown, true);
   }, [isSheet, languagePickerOpen]);
 
-  // Build the major list for the selected degree level. Preserve any legacy
-  // free-text major so old rows don't silently get reset to empty.
   const baseMajors = degreeLevel ? MAJORS_BY_LEVEL[degreeLevel] : [];
-  const majorOptions =
-    currentMajor && baseMajors.length && !baseMajors.includes(currentMajor)
-      ? [currentMajor, ...baseMajors]
-      : baseMajors;
 
   const semesterChoices = semesterOptions(degreeLevel);
 
@@ -341,20 +336,24 @@ export function ProfileForm({
           <div className="flex flex-col gap-1">
             <FieldLabel>{pf.labelMajor}</FieldLabel>
             <div className="relative">
-              <select className={settingsSelectClass} {...register("major")}>
-                <option value="">{pf.majorNotSpecified}</option>
-                {majorOptions.map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-classmates-hint dark:text-zinc-500"
-                strokeWidth={2}
-                aria-hidden
+              <Input
+                {...register("major")}
+                list={majorSuggestionsListId}
+                placeholder={pf.majorPlaceholder}
+                maxLength={160}
+                autoComplete="off"
+                aria-describedby={majorHelpId}
+                className={settingsControlClass}
               />
+              <datalist id={majorSuggestionsListId}>
+                {baseMajors.map((m) => (
+                  <option key={m} value={m} />
+                ))}
+              </datalist>
             </div>
+            <p id={majorHelpId} className="text-[11px] leading-snug text-muted-foreground">
+              {pf.majorFreeTextOk}
+            </p>
             <FormMessage message={errors.major?.message} />
           </div>
           <div className="flex flex-col gap-1">
@@ -717,7 +716,7 @@ export function ProfileForm({
         </div>
       </AppPushLayer>
 
-      {variant === "academicOnly" || isSheet ? (
+      {isCompactAcademic ? (
         <>
           <input type="hidden" {...register("wechatHandle")} />
           <input type="hidden" {...register("whatsappHandle")} />
@@ -754,7 +753,7 @@ export function ProfileForm({
         </div>
       )}
 
-      {variant === "academicOnly" ? (
+      {isCompactAcademic && !isSheet ? (
         <>
           <input type="hidden" {...register("nickname")} />
           <input type="hidden" {...register("bio")} />

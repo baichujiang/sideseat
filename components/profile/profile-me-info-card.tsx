@@ -74,7 +74,8 @@ export function ProfileMeInfoCard({
   const sv = getMessages(locale).studentVerification;
   const cityNames = getMessages(locale).discover.cityNames;
 
-  const usernameDisplay = username?.trim() || nickname?.trim() || "—";
+  const usernameDisplay = username?.trim() ? `@${username.trim()}` : "—";
+  const nicknameDisplay = nickname?.trim() || t.displayNamePlaceholder;
   const bioDisplay = bio?.trim() || t.taglineEmpty;
   const schoolDisplay = buildSchoolSummaryLine(schoolSummary, t.schoolLineSemester);
   const languagesDisplay = buildLanguagesValue(languageTags, locale, "—");
@@ -109,6 +110,11 @@ export function ProfileMeInfoCard({
               title={t.rowPhoto}
               value={<PresetAvatar id={avatarUrl} size={40} className="shrink-0" />}
               valueClassName="flex justify-end"
+            />
+            <ProfileInfoRow
+              href={"/profile/name" as Route}
+              title={t.rowNickname}
+              value={nicknameDisplay}
             />
             <ProfileInfoRow
               href={"/profile/account/login-username" as Route}

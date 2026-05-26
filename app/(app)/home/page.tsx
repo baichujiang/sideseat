@@ -1,9 +1,17 @@
+import { addDays, subDays } from "date-fns";
+
 import { ScheduleSurface } from "@/components/home/schedule-surface";
 import { HomeScheduleClient } from "@/components/home/home-schedule-client";
 import { TabKeepAliveSnapshot } from "@/components/layout/tab-keep-alive";
 import { getClassScheduleDateRange } from "@/lib/constants/vorlesungszeit";
 import { getSessionUser } from "@/lib/auth/session";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
+import {
+  HOME_SCHEDULE_INITIAL_WINDOW_FUTURE_DAYS,
+  HOME_SCHEDULE_INITIAL_WINDOW_PAST_DAYS,
+} from "@/lib/home/home-schedule-constants";
+import { loadHomeSchedulePayload } from "@/lib/home/load-home-schedule-payload";
+import { prisma } from "@/lib/db/prisma";
 
 export default async function HomePage() {
   const sessionUser = await getSessionUser();
@@ -35,6 +43,18 @@ export default async function HomePage() {
     );
   }
 
+  const initialWindowStart = subDays(now, HOME_SCHEDULE_INITIAL_WINDOW_PAST_DAYS);
+  const initialWindowEnd = addDays(now, HOME_SCHEDULE_INITIAL_WINDOW_FUTURE_DAYS);
+  const initialSchedulePayload = await loadHomeSchedulePayload({
+    prisma,
+    userId: sessionUser.id,
+    windowStart: initialWindowStart,
+    windowEnd: initialWindowEnd,
+  }).catch((cause) => {
+    console.error("Failed to load initial Home schedule payload", cause);
+    return null;
+  });
+
   return (
     <TabKeepAliveSnapshot tab="home">
       <HomeScheduleClient
@@ -42,6 +62,9 @@ export default async function HomePage() {
         nowISO={now.toISOString()}
         semesterStartISO={semesterRange.start.toISOString()}
         semesterEndISO={semesterRange.end.toISOString()}
+        initialPayload={initialSchedulePayload ?? undefined}
+        initialWindowStartISO={initialWindowStart.toISOString()}
+        initialWindowEndISO={initialWindowEnd.toISOString()}
         homeGreeting={{ nickname: sessionUser.nickname, avatarUrl: sessionUser.avatarUrl }}
         naturalScheduleEnabled
       />

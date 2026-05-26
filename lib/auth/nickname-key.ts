@@ -1,4 +1,4 @@
-/** Case-insensitive key for nickname uniqueness and search. */
+/** Case-insensitive key for nickname search. Nicknames are display names and are not unique. */
 export function nicknameToKey(nickname: string): string {
   return nickname.trim().toLowerCase();
 }

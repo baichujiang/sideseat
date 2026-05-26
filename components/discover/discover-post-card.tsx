@@ -201,6 +201,7 @@ export function DiscoverPostCard({
   const { locale, messages } = useLocaleContext();
   const dl = messages.discoverList;
   const displayImages = displayableClassmatePostImageUrls(post.imageUrls);
+  const tagline = post.tagline?.trim() ?? "";
   const meta = [post.major, post.semester ? `sem ${post.semester}` : null]
     .filter(Boolean)
     .join(" · ");
@@ -301,6 +302,11 @@ export function DiscoverPostCard({
       }
       body={
         <>
+          {tagline ? (
+            <p className="mt-1 line-clamp-1 text-[13px] leading-snug text-classmates-sub dark:text-muted-foreground">
+              {tagline}
+            </p>
+          ) : null}
           {meta ? (
             <p className="mt-1 truncate text-[13px] leading-snug text-muted-foreground">
               {meta}

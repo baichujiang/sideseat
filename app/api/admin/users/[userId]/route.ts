@@ -44,12 +44,8 @@ export async function PATCH(
       const nicknameCheck = await validateNicknameForUser(values.nickname, { excludeUserId: userId });
       if (!nicknameCheck.ok) {
         const message =
-          nicknameCheck.reason === "taken"
-            ? "That nickname is already taken."
-            : nicknameCheck.reason === "reserved"
-              ? "That nickname is reserved."
-              : "Invalid nickname.";
-        return error(message, nicknameCheck.reason === "taken" ? 409 : 422);
+          nicknameCheck.reason === "reserved" ? "That nickname is reserved." : "Invalid nickname.";
+        return error(message, 422);
       }
       data.nickname = nicknameCheck.nickname;
       data.nicknameKey = nicknameCheck.nicknameKey;
