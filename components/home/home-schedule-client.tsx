@@ -540,9 +540,9 @@ export function HomeScheduleClient({
     <div
       role="status"
       aria-live="polite"
-      className="flex justify-end"
+      className="pointer-events-none"
     >
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-border/55 bg-background/70 px-2.5 py-1 text-[11px] font-medium text-muted-foreground shadow-sm backdrop-blur">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-border/55 bg-background/85 px-2.5 py-1 text-[11px] font-medium text-muted-foreground shadow-sm backdrop-blur-md dark:bg-card/85">
         <span className="relative flex h-2 w-2" aria-hidden>
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#2563EB]/35" />
           <span className="relative inline-flex h-2 w-2 rounded-full bg-[#2563EB]/75" />
@@ -565,7 +565,7 @@ export function HomeScheduleClient({
         semesterStartISO={semesterStartISO}
         semesterEndISO={semesterEndISO}
         homeGreeting={homeGreeting}
-        homeBelowHeaderSlot={scheduleUpdateSlot}
+        homeCalendarStatusSlot={scheduleUpdateSlot}
         naturalScheduleEnabled={naturalScheduleEnabled}
         onScheduleRefresh={revalidateSchedule}
         onVirtualStripBoundsChange={handleVirtualStripBoundsChange}

@@ -1,9 +1,6 @@
-import type { PlanType } from "@prisma/client";
-
 export type PlanInviteParticipant = { userId: string | null; name: string };
 
 export type PlanRequestPrefill = {
-  planType: PlanType;
   title: string;
   location?: string;
   message?: string;
@@ -17,7 +14,6 @@ export type CalendarPlanInviteSource = {
   endISO: string;
   location: string | null;
   note: string | null;
-  eventType?: PlanType | null;
 };
 
 /** Exactly one active connection companion — required for calendar → plan invite. */
@@ -34,7 +30,6 @@ export function singleChatableParticipant(
 export function calendarDetailToPlanPrefill(source: CalendarPlanInviteSource): PlanRequestPrefill {
   const note = source.note?.trim();
   return {
-    planType: source.eventType ?? "CUSTOM",
     title: source.title.trim() || "Plan together",
     location: source.location?.trim() || undefined,
     message: note || undefined,

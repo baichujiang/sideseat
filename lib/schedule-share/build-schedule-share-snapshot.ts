@@ -33,6 +33,7 @@ export type PublicScheduleBlock = {
   title?: string;
   location?: string;
   categoryId?: string | null;
+  categoryPresetKey?: string | null;
   categoryName?: string;
   categoryColor?: string;
 };
@@ -170,7 +171,6 @@ export async function collectInternalScheduleBlocks(
     }),
   ]);
 
-  const courseCategoryId = calendarCategories.find((c) => c.presetKey === "course")?.id ?? null;
   const presetByCategoryId = Object.fromEntries(
     calendarCategories.map((c) => [c.id, c.presetKey ?? null] as const),
   );
@@ -202,7 +202,7 @@ export async function collectInternalScheduleBlocks(
     if (!clipped) continue;
     const mirror = isCalendarCourseMirrorRow(e);
     const internalPresetKey = mirror ? "course" : (e.category?.presetKey ?? null);
-    const internalCategoryId = mirror ? courseCategoryId : e.categoryId;
+    const internalCategoryId = mirror ? null : e.categoryId;
     const meta = categoryMeta(internalCategoryId);
     blocks.push({
       start: clipped.start,
@@ -235,16 +235,15 @@ export async function collectInternalScheduleBlocks(
         const clipped = clipBlock(start, end, rangeStart, rangeEnd);
         if (!clipped) continue;
         const titleParts = [m.course.code ? `[${m.course.code}]` : null, m.course.name].filter(Boolean);
-        const courseMeta = categoryMeta(courseCategoryId);
         blocks.push({
           start: clipped.start,
           end: clipped.end,
           title: titleParts.join(" ") || m.course.name,
           location: s.location,
-          internalCategoryId: courseCategoryId,
+          internalCategoryId: null,
           internalPresetKey: "course",
-          internalCategoryColor: courseMeta.color,
-          internalCategoryName: courseMeta.name,
+          internalCategoryColor: null,
+          internalCategoryName: null,
           internalSource: "course_session",
         });
       }
@@ -319,8 +318,7 @@ export function internalBlocksToPublicSnapshot(args: {
     ? internal.filter((b) => includedKeys.has(scheduleDateKeyInBerlin(b.start)))
     : internal;
 
-  const revealedInternal = scopedInternal.filter((b) => isBlockRevealed(b, reveal));
-  const busyMerged = mergeIntervals(revealedInternal.map((b) => ({ start: b.start, end: b.end })));
+  const busyMerged = mergeIntervals(scopedInternal.map((b) => ({ start: b.start, end: b.end })));
   let freeRanges = computeFreeRanges(rangeStart, rangeEnd, busyMerged);
   if (includedKeys && includedKeys.size > 0) {
     freeRanges = freeRanges.filter((f) => includedKeys.has(scheduleDateKeyInBerlin(f.start)));
@@ -329,16 +327,18 @@ export function internalBlocksToPublicSnapshot(args: {
 
   const detailBlocks: PublicScheduleBlock[] = [];
 
-  for (const b of revealedInternal) {
+  for (const b of scopedInternal) {
+    const revealed = forOwnerPreview || isBlockRevealed(b, reveal);
     detailBlocks.push({
-      kind: "busy_detail",
+      kind: revealed ? "busy_detail" : "busy_anonymous",
       start: b.start.toISOString(),
       end: b.end.toISOString(),
-      ...(b.title?.trim() ? { title: b.title.trim() } : {}),
-      ...(b.location?.trim() ? { location: b.location.trim() } : {}),
-      ...(b.internalCategoryId ? { categoryId: b.internalCategoryId } : {}),
-      ...(b.internalCategoryName ? { categoryName: b.internalCategoryName } : {}),
-      ...(b.internalCategoryColor ? { categoryColor: b.internalCategoryColor } : {}),
+      ...(revealed && b.title?.trim() ? { title: b.title.trim() } : {}),
+      ...(revealed && b.location?.trim() ? { location: b.location.trim() } : {}),
+      ...(revealed && b.internalCategoryId ? { categoryId: b.internalCategoryId } : {}),
+      ...(revealed && b.internalPresetKey ? { categoryPresetKey: b.internalPresetKey } : {}),
+      ...(revealed && b.internalCategoryName ? { categoryName: b.internalCategoryName } : {}),
+      ...(revealed && b.internalCategoryColor ? { categoryColor: b.internalCategoryColor } : {}),
     });
   }
 

@@ -66,7 +66,7 @@ export const availabilityShareSchema = z
 
 export const planRequestCreateSchema = z
   .object({
-    planType: z.nativeEnum(PlanType),
+    planType: z.nativeEnum(PlanType).optional().default(PlanType.CUSTOM),
     title: z.string().trim().min(1).max(120),
     location: z.string().trim().max(120).optional().or(z.literal("")),
     message: z.string().trim().max(500).optional().or(z.literal("")),
@@ -103,7 +103,7 @@ export const planRequestActionSchema = z.object({
 
 export const counterProposeSchema = z
   .object({
-    planType: z.nativeEnum(PlanType),
+    planType: z.nativeEnum(PlanType).optional().default(PlanType.CUSTOM),
     title: z.string().trim().min(1).max(120),
     location: z.string().trim().max(120).optional().or(z.literal("")),
     message: z.string().trim().max(500).optional().or(z.literal("")),

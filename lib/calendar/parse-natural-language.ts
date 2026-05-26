@@ -44,7 +44,7 @@ Rules:
 - Put ambiguity notes in "warnings" (same language as user input when possible).
 - Do not invent courses or classmates. Only schedule-like items (study, meetings, sports, meals as calendar blocks).
 - Titles should be short (max 120 chars).
-- Optional per event: categoryPreset — one of ${CALENDAR_CATEGORY_PRESET_KEYS.join("|")}. Map intent (work meeting → work, class/lecture → course, gym → sports, lunch → meal, language class → language, homework → study, personal errands → personal, must-do/deadline/urgent priority → important). Omit or null if unclear; add a short warning when category is ambiguous.
+- Optional per event: categoryPreset — one of ${CALENDAR_CATEGORY_PRESET_KEYS.join("|")}. Use only broad calendar lists: work meetings → work, personal errands/social/health → personal, must-do/deadline/urgent priority → important, anything else → other. Omit or null if unclear; add a short warning when category is ambiguous.
 - Do not output categoryId; only categoryPreset.`;
 }
 

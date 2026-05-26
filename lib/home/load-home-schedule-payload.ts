@@ -85,8 +85,6 @@ export async function loadHomeSchedulePayload(args: {
       .filter((k): k is string => Boolean(k)),
   );
 
-  const courseCategory = calendarCategories.find((c) => c.presetKey === "course");
-
   const classBlocks: ClassBlock[] = memberships.flatMap((m) =>
     m.sessions
       .filter((s) => {
@@ -102,8 +100,8 @@ export async function loadHomeSchedulePayload(args: {
         endMinute: s.endMinute,
         location: s.location,
         categoryColor: null,
-        categoryId: courseCategory?.id ?? null,
-        categoryName: courseCategory?.name ?? null,
+        categoryId: null,
+        categoryName: null,
       })),
   );
 
@@ -124,9 +122,9 @@ export async function loadHomeSchedulePayload(args: {
         name: companion.displayName,
       })),
       eventType: e.eventType,
-      categoryId: mirrorCourse ? (courseCategory?.id ?? null) : e.categoryId,
+      categoryId: mirrorCourse ? null : e.categoryId,
       categoryColor: mirrorCourse ? null : (e.category?.color ?? null),
-      categoryName: mirrorCourse ? (courseCategory?.name ?? null) : (e.category?.name ?? null),
+      categoryName: mirrorCourse ? null : (e.category?.name ?? null),
       discoverActivityId: e.discoverActivityId,
     };
   });

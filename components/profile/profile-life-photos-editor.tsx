@@ -78,14 +78,14 @@ export function ProfileLifePhotosEditor({
   }
 
   return (
-    <div className={cn(layout === "me" ? "space-y-2" : "space-y-3")}>
+    <div className={cn(layout === "me" ? "space-y-1.5" : "space-y-3")}>
       {!readOnly && layout !== "me" ? (
         <p className="text-[12px] leading-snug text-muted-foreground">
           {formatMessage(lp.hint, { max: USER_LIFE_PHOTO_MAX })}
         </p>
       ) : null}
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className={cn("grid grid-cols-3", layout === "me" ? "gap-1.5" : "gap-2")}>
         {photos.map((photo) => (
           <div
             key={photo.id}

@@ -48,7 +48,7 @@ export async function POST(
           counterOfId: planRequest.id,
           proposerUserId: user.id,
           receiverUserId: planRequest.proposerUserId,
-          planType: values.planType,
+          planType: values.planType ?? "CUSTOM",
           title: values.title.trim(),
           location: values.location?.trim() || null,
           message: values.message?.trim() || null,

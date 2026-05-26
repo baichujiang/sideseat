@@ -7,11 +7,6 @@ export const CALENDAR_CATEGORY_PRESET_KEYS = [
   "personal",
   "work",
   "important",
-  "course",
-  "study",
-  "meal",
-  "language",
-  "sports",
   "other",
 ] as const satisfies ReadonlyArray<
   (typeof DEFAULT_USER_CALENDAR_PRESETS)[number]["presetKey"]

@@ -62,11 +62,11 @@ export function ProfileMeTopBlock({
         schoolSummary={schoolSummary}
         readOnly={readOnly}
       />
-      <div className="px-4 pb-4 pt-3.5">
+      <div className="px-4 pb-3 pt-2.5">
         <h2 className="text-[11px] font-semibold uppercase tracking-wide text-classmates-sub dark:text-muted-foreground">
           {lp.sectionTitle}
         </h2>
-        <div className="mt-2.5">
+        <div className="mt-1.5">
           <ProfileLifePhotosEditor initialPhotos={initialLifePhotos} readOnly={readOnly} layout="me" />
         </div>
       </div>

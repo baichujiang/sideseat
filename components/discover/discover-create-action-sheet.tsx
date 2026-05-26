@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { MouseEventHandler } from "react";
 import { CalendarDays, UsersRound, X } from "lucide-react";
 import { createPortal } from "react-dom";
 
 import { useAppMessages } from "@/hooks/use-app-locale";
+import { useGhostClickGuard } from "@/lib/ui/suppress-ghost-click";
 import { cn } from "@/lib/utils";
 
 export type DiscoverCreateChoice = "buddy" | "activity";
@@ -22,6 +24,7 @@ export function DiscoverCreateActionSheet({
   const dz = m.discoverZone;
   const common = m.common;
   const [portalReady, setPortalReady] = useState(false);
+  const guardGhostClick = useGhostClickGuard(open ? "discover-create-action" : null);
 
   useEffect(() => {
     setPortalReady(true);
@@ -58,7 +61,7 @@ export function DiscoverCreateActionSheet({
         type="button"
         className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"
         aria-label={common.close}
-        onClick={onClose}
+        onClick={guardGhostClick(onClose)}
       />
       <div className="relative z-[61] w-full max-w-lg rounded-t-[1.25rem] border border-border/70 bg-background px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 shadow-2xl">
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-muted" aria-hidden />
@@ -68,7 +71,7 @@ export function DiscoverCreateActionSheet({
           </h2>
           <button
             type="button"
-            onClick={onClose}
+            onClick={guardGhostClick(onClose)}
             className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
             aria-label={common.close}
           >
@@ -81,25 +84,25 @@ export function DiscoverCreateActionSheet({
             icon={UsersRound}
             title={dz.createBuddyOption}
             subtitle={dz.createBuddyOptionSubtitle}
-            onClick={() => {
+            onClick={guardGhostClick(() => {
               onClose();
               onChoose("buddy");
-            }}
+            })}
           />
           <ActionOption
             icon={CalendarDays}
             title={dz.createActivityOption}
             subtitle={dz.createActivityOptionSubtitle}
-            onClick={() => {
+            onClick={guardGhostClick(() => {
               onClose();
               onChoose("activity");
-            }}
+            })}
           />
         </div>
 
         <button
           type="button"
-          onClick={onClose}
+          onClick={guardGhostClick(onClose)}
           className="mt-3 w-full rounded-xl py-2.5 text-center text-[13px] font-medium text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
         >
           {dz.createSheetCancel}
@@ -119,7 +122,7 @@ function ActionOption({
   icon: typeof UsersRound;
   title: string;
   subtitle: string;
-  onClick: () => void;
+  onClick: MouseEventHandler<HTMLButtonElement>;
 }) {
   return (
     <button

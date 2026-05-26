@@ -63,11 +63,7 @@ export async function PATCH(
     const mirrorCourse = isCalendarCourseMirrorRow(existing);
     let resolvedCategoryId: string | null | undefined = undefined;
     if (mirrorCourse) {
-      const courseCat = await prisma.userCalendarCategory.findFirst({
-        where: { userId: user.id, presetKey: "course" },
-        select: { id: true },
-      });
-      resolvedCategoryId = courseCat?.id ?? null;
+      resolvedCategoryId = null;
     } else if (values.categoryId) {
       const cat = await prisma.userCalendarCategory.findFirst({
         where: { id: values.categoryId, userId: user.id },

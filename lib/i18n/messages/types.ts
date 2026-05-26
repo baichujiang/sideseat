@@ -1227,7 +1227,19 @@ export type AppMessages = {
   meFeedback: {
     dialogTitle: string;
     intro: string;
+    forumIntro: string;
+    createPostTitle: string;
+    titlePlaceholder: string;
     placeholder: string;
+    loading: string;
+    emptyForum: string;
+    sortHint: string;
+    officialBadge: string;
+    upvote: string;
+    downvote: string;
+    commentPlaceholder: string;
+    adminCommentPlaceholder: string;
+    reply: string;
     errorMinLength: string;
     errorSendFailed: string;
     errorNetwork: string;

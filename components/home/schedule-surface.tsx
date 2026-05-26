@@ -312,7 +312,7 @@ export function ScheduleSurface({
   semesterStartISO,
   semesterEndISO,
   homeGreeting,
-  homeBelowHeaderSlot,
+  homeCalendarStatusSlot,
   naturalScheduleEnabled = false,
   onScheduleRefresh,
   onVirtualStripBoundsChange,
@@ -331,8 +331,8 @@ export function ScheduleSurface({
     avatarUrl: string | null;
     guestReturnTo?: string;
   } | null;
-  /** Inserted between the home header row and the date navigation (e.g. onboarding CTA). */
-  homeBelowHeaderSlot?: ReactNode;
+  /** Floating status rendered inside the visible calendar area without affecting layout. */
+  homeCalendarStatusSlot?: ReactNode;
   /** Logged-in users: natural-language calendar quick add (requires server LLM config). */
   naturalScheduleEnabled?: boolean;
   /** Client-side schedule cache revalidation (Home tab). */
@@ -1416,7 +1416,6 @@ export function ScheduleSurface({
   };
 
   const useCompactHomeHeader = homeGreeting != null;
-  const hasHomeBelowHeaderSlot = homeBelowHeaderSlot != null;
   weekHomeMaxViewportBodyPxRef.current = weekHomeMaxViewportBodyPx;
 
   useLayoutEffect(() => {
@@ -1497,7 +1496,13 @@ export function ScheduleSurface({
       vv?.removeEventListener("scroll", scheduleMeasure);
       window.removeEventListener("resize", scheduleMeasure);
     };
-  }, [view, useCompactHomeHeader, hasHomeBelowHeaderSlot, visibleDayCount]);
+  }, [view, useCompactHomeHeader, visibleDayCount]);
+
+  const calendarStatusOverlay = homeCalendarStatusSlot ? (
+    <div className="pointer-events-none absolute bottom-3 right-3 z-[70] flex justify-end">
+      {homeCalendarStatusSlot}
+    </div>
+  ) : null;
 
   const iconBtnSm = "h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10";
   const iconGlyphSm = "h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-[18px] md:w-[18px]";
@@ -1740,7 +1745,6 @@ export function ScheduleSurface({
             </div>
           )}
 
-          {homeBelowHeaderSlot ? <div className="mt-2 min-w-0">{homeBelowHeaderSlot}</div> : null}
         </div>
       </div>
       </div>
@@ -1773,27 +1777,33 @@ export function ScheduleSurface({
           ) : null}
         </div>
         {view === "day" ? (
-          <ScheduleDayTimeline
-            items={dayItems}
-            isToday={isSelectedToday}
-            nowMinute={nowMinute}
-            date={selectedDate}
-            onSlotActionPrompt={promptSlotAction}
-            onLongPressItem={(item, anchorEl) => {
-              if (item.id === "__draft-preview__") return;
-              openDetailFromTimelineItem(item, selectedDate, anchorEl ?? null);
-            }}
-          />
+          <div className="relative">
+            <ScheduleDayTimeline
+              items={dayItems}
+              isToday={isSelectedToday}
+              nowMinute={nowMinute}
+              date={selectedDate}
+              onSlotActionPrompt={promptSlotAction}
+              onLongPressItem={(item, anchorEl) => {
+                if (item.id === "__draft-preview__") return;
+                openDetailFromTimelineItem(item, selectedDate, anchorEl ?? null);
+              }}
+            />
+            {calendarStatusOverlay}
+          </div>
         ) : null}
 
         {view === "week" ? (
           <>
             <div ref={weekHomeLayoutRef} className="flex min-h-0 flex-col gap-1">
-              <WeekCalendar
-                {...weekCalendarProps}
-                fillParent
-                maxViewportBodyPx={weekHomeMaxViewportBodyPx ?? undefined}
-              />
+              <div className="relative min-h-0">
+                <WeekCalendar
+                  {...weekCalendarProps}
+                  fillParent
+                  maxViewportBodyPx={weekHomeMaxViewportBodyPx ?? undefined}
+                />
+                {calendarStatusOverlay}
+              </div>
               <div
                 ref={weekVisibleDaysBarRef}
                 className="shrink-0"
@@ -1840,7 +1850,7 @@ export function ScheduleSurface({
         ) : null}
 
         {view === "month" ? (
-          <div className="space-y-2">
+          <div className="relative space-y-2">
             <ScheduleMonthView
               anchorDate={selectedDate}
               selectedDate={selectedDate}
@@ -1857,6 +1867,7 @@ export function ScheduleSurface({
                 openDetailFromTimelineItem(item, selectedDate, anchorEl ?? null);
               }}
             />
+            {calendarStatusOverlay}
           </div>
         ) : null}
       </div>

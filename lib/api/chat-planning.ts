@@ -1,7 +1,5 @@
 "use client";
 
-import { PlanType } from "@prisma/client";
-
 import { apiFetch } from "@/lib/auth/api-fetch";
 
 type JsonResult<T> = {
@@ -19,7 +17,6 @@ export type AvailabilitySharePayload = {
 };
 
 export type PlanRequestPayload = {
-  planType: PlanType;
   title: string;
   location?: string;
   message?: string;

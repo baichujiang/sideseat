@@ -7,6 +7,7 @@ import { CourseChatComposer } from "@/components/chat/course-chat-composer";
 import { ChatReplyProvider } from "@/components/chat/chat-reply-context";
 import { ChatRealtimeRefresh } from "@/components/chat/chat-realtime-refresh";
 import { ChatScrollContainer } from "@/components/chat/chat-scroll-container";
+import { ChatThreadSearchButton } from "@/components/chat/chat-thread-search-button";
 import { MessageActionMenu } from "@/components/chat/message-action-menu";
 import { MessageBubbleContent } from "@/components/chat/message-bubble-content";
 import { BackLink } from "@/components/nav/back-link";
@@ -98,8 +99,8 @@ export default async function CourseChatPage({
   return (
     <ChatReplyProvider>
     <ChatRealtimeRefresh kind="course" courseId={courseId} latestMessageId={latestMessageId} />
-    <div className="flex h-full min-h-0 flex-1 flex-col bg-background">
-      <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
+    <div className="flex h-full min-h-0 flex-1 flex-col bg-[#F6F8FB] dark:bg-[#090B10]">
+      <header className="flex shrink-0 items-center gap-2 border-b border-slate-200/75 bg-white/95 px-2 py-2 backdrop-blur-sm dark:border-border dark:bg-background/95">
         <BackLink returnTo={query.returnTo} fallback={`/courses/${courseId}`} />
         <Link
           href={`/courses/${courseId}`}
@@ -110,6 +111,7 @@ export default async function CourseChatPage({
           </p>
           <p className="truncate text-[11px] text-muted-foreground">{chatSubtitle}</p>
         </Link>
+        <ChatThreadSearchButton entries={threadSearchEntries} />
       </header>
 
       {userCourse.inboxHiddenAt ? (
@@ -279,8 +281,8 @@ export default async function CourseChatPage({
         )}
       </ChatScrollContainer>
 
-      <div className="shrink-0 border-t border-border/60 bg-background/95 px-3 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_24px_rgba(15,23,42,0.05)] backdrop-blur-sm dark:bg-background/90 dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]">
-        <CourseChatComposer courseId={courseId} threadSearchEntries={threadSearchEntries} />
+      <div className="shrink-0 border-t border-slate-200/75 bg-white/95 px-3 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_24px_rgba(15,23,42,0.045)] backdrop-blur-sm dark:border-border/60 dark:bg-background/90 dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]">
+        <CourseChatComposer courseId={courseId} />
       </div>
     </div>
     </ChatReplyProvider>

@@ -89,10 +89,6 @@ export async function POST(request: Request) {
     }
 
     await ensureUserCalendarCategories(prisma, user.id);
-    const courseCategory = await prisma.userCalendarCategory.findFirst({
-      where: { userId: user.id, presetKey: "course" },
-      select: { id: true },
-    });
 
     const now = new Date();
     const { start: semesterStart, end: semesterEnd } = getClassScheduleDateRange({
@@ -137,7 +133,7 @@ export async function POST(request: Request) {
           note: null,
           startAt: slot.startAt,
           endAt: slot.endAt,
-          categoryId: courseCategory?.id ?? null,
+          categoryId: null,
           source: "course_mirror",
           courseScheduleMirrorKey: key,
           repeatRule: CalendarRepeatRule.NONE,

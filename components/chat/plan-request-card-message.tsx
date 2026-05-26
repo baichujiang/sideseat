@@ -1,6 +1,6 @@
 "use client";
 
-import { PlanRequestStatus, PlanType } from "@prisma/client";
+import { PlanRequestStatus } from "@prisma/client";
 import { format, isToday, isTomorrow } from "date-fns";
 import { CalendarClock, Check, MapPin, MessageSquareReply, X } from "lucide-react";
 import { useState } from "react";
@@ -18,7 +18,6 @@ export function PlanRequestCardMessage({
   viewerUserId,
   proposerUserId,
   receiverUserId,
-  planType,
   title,
   location,
   message,
@@ -33,7 +32,6 @@ export function PlanRequestCardMessage({
   viewerUserId: string;
   proposerUserId: string;
   receiverUserId: string;
-  planType: PlanType;
   title: string;
   location: string | null;
   message: string | null;
@@ -101,9 +99,6 @@ export function PlanRequestCardMessage({
               {message ? (
                 <p className="mt-2 text-[12.5px] leading-relaxed text-foreground/80">{message}</p>
               ) : null}
-              <p className="mt-2 text-[11px] font-medium text-muted-foreground">
-                {labelForType(planType)}
-              </p>
             </div>
           </div>
 
@@ -186,19 +181,4 @@ function formatWhen(start: Date, end: Date) {
       ? "Tomorrow"
       : format(start, "EEE, MMM d");
   return `${dayLabel} · ${format(start, "HH:mm")}–${format(end, "HH:mm")}`;
-}
-
-function labelForType(planType: PlanType) {
-  switch (planType) {
-    case "MEAL":
-      return "Meal";
-    case "SPORTS":
-      return "Sports";
-    case "LANGUAGE":
-      return "Language";
-    case "CUSTOM":
-      return "Custom";
-    default:
-      return "Study";
-  }
 }

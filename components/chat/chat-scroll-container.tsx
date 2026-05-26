@@ -66,7 +66,7 @@ export function ChatScrollContainer({
   };
 
   return (
-    <div className="relative min-h-0 flex-1">
+    <div className="relative min-h-0 flex-1 bg-[#F6F8FB] dark:bg-[#090B10]">
       <div
         ref={ref}
         className="h-full overflow-y-auto overscroll-y-contain px-3 pt-2"

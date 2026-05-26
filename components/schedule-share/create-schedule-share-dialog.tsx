@@ -393,6 +393,8 @@ export function CreateScheduleShareDialog({
                     },
                   ]}
                   onQuickSelectShareDays={handleQuickSelectShareDays}
+                  revealCategories={revealCategories}
+                  revealedCategoryIds={revealedCategoryIds}
                 />
               </div>
               <div className="max-h-[34vh] shrink-0 overflow-y-auto overscroll-y-contain border-t border-border/50 pt-2">

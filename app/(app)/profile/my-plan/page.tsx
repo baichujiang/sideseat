@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { format, formatDistanceToNowStrict } from "date-fns";
 import { CalendarClock, ChevronRight } from "lucide-react";
-import { ConnectionStatus, PlanRequestStatus, PlanType } from "@prisma/client";
+import { ConnectionStatus, PlanRequestStatus } from "@prisma/client";
 
 import { ScheduleShareLinksPanel } from "@/components/schedule-share/schedule-share-links-panel";
 import { GuestAppCta } from "@/components/app/guest-app-cta";
@@ -185,7 +185,6 @@ function PlanRequestRow({
   req: {
     id: string;
     connectionId: string;
-    planType: PlanType;
     title: string;
     location: string | null;
     startTime: Date;
@@ -233,8 +232,7 @@ function PlanRequestRow({
         <div className="min-w-0 flex-1">
           <p className="truncate text-[15px] font-semibold text-foreground">{req.title}</p>
           <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
-            {labelPlanType(req.planType, planLabels)}
-            {req.location ? ` · ${req.location}` : ""}
+            {req.location || peerName}
           </p>
           <p className="mt-0.5 text-[12px] font-medium text-foreground/85">{statusLine}</p>
         </div>
@@ -242,19 +240,4 @@ function PlanRequestRow({
       </Link>
     </li>
   );
-}
-
-function labelPlanType(planType: PlanType, planLabels: ReturnType<typeof getMessages>["profile"]) {
-  switch (planType) {
-    case PlanType.MEAL:
-      return planLabels.myPlanTypeMeal;
-    case PlanType.SPORTS:
-      return planLabels.myPlanTypeSports;
-    case PlanType.LANGUAGE:
-      return planLabels.myPlanTypeLanguage;
-    case PlanType.CUSTOM:
-      return planLabels.myPlanTypeCustom;
-    default:
-      return planLabels.myPlanTypeStudy;
-  }
 }

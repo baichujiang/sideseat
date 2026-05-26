@@ -5,16 +5,8 @@ import { normalizeCalendarCategoryHex } from "@/lib/calendar/calendar-category-c
 /**
  * Built-in calendar lists per user (`presetKey` unique per user).
  *
- * **Display / creation order** (`sortOrder` ascending): Personal and Work first, then Important,
- * then the five activity presets (course → study → meal → language → sports), then Other.
- *
- * **Default colors** for the five activity rows follow Discover classmates scene tabs
- * (`components/discover/discover-list.tsx` + `lib/discover/scene-palette.ts`): each hex is the
- * approximate Tailwind `*-600` stroke used by Lucide icons there (light mode). Slight deviation is
- * normal between Tailwind tokens and sRGB rounding.
- *
- * Personal is a warm accent (not grey — it is the most-used preset); Work is a deep navy blue,
- * clearly separate from Course teal. Both are tuned for white/light label text on chips.
+ * These should stay general-purpose. Discover buddy posts no longer use fixed activity buckets,
+ * so calendar defaults should not recreate those old buckets as built-in lists.
  */
 export const DEFAULT_USER_CALENDAR_PRESETS: ReadonlyArray<{
   presetKey: string;
@@ -24,19 +16,8 @@ export const DEFAULT_USER_CALENDAR_PRESETS: ReadonlyArray<{
 }> = [
   { presetKey: "personal", name: "Personal", color: "#EA580C", sortOrder: 0 },
   { presetKey: "work", name: "Work", color: "#1E3A8A", sortOrder: 1 },
-  /** 重要 — must-do / priority tasks (red-600; distinct from Personal orange and Sports rose). */
   { presetKey: "important", name: "Important", color: "#DC2626", sortOrder: 2 },
-  /** 课程 — aligned with Discover “Shared courses” tab (teal icon ≈ teal-600). */
-  { presetKey: "course", name: "Course", color: "#0D9488", sortOrder: 3 },
-  /** 学习 — Discover Study tab (indigo-600). */
-  { presetKey: "study", name: "Study", color: "#4F46E5", sortOrder: 4 },
-  /** 用餐 — Discover Meals tab (amber-600). */
-  { presetKey: "meal", name: "Meals", color: "#D97706", sortOrder: 5 },
-  /** 语言 — Discover Language tab (violet-600). */
-  { presetKey: "language", name: "Language", color: "#7C3AED", sortOrder: 6 },
-  /** 运动 — Discover Sports tab (rose-600). */
-  { presetKey: "sports", name: "Sports", color: "#E11D48", sortOrder: 7 },
-  { presetKey: "other", name: "Other", color: "#64748B", sortOrder: 8 },
+  { presetKey: "other", name: "Other", color: "#64748B", sortOrder: 3 },
 ];
 
 /**
@@ -59,6 +40,11 @@ const LEGACY_PRESET_COLORS_BY_KEY: Readonly<Record<string, readonly string[]>> =
  * no longer appear as immovable “preset” categories (`CalendarEntry.categoryId` → null).
  */
 export const OBSOLETE_USER_CALENDAR_PRESET_KEYS = [
+  "course",
+  "study",
+  "meal",
+  "language",
+  "sports",
   "publicHolidays",
   "publicholidays",
   "public_holidays",

@@ -73,7 +73,9 @@ export function ScheduleShareRevealCategoryChips({
         <CategoryVisibilityChip
           isRevealed={showAll}
           showAllMode
-          onClick={() => onRevealedCategoryIdsChange(allRevealedCategoryIds(categories))}
+          onClick={() =>
+            onRevealedCategoryIdsChange(showAll ? [] : allRevealedCategoryIds(categories))
+          }
           name={s.showAllCategories}
           color="#2563EB"
         />

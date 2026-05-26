@@ -51,6 +51,13 @@ export function CapacitorBootstrap() {
         /* optional */
       }
 
+      try {
+        const { Keyboard } = await import("@capacitor/keyboard");
+        await Keyboard.setAccessoryBarVisible({ isVisible: false });
+      } catch {
+        /* Plugin unavailable or not supported on this platform. */
+      }
+
       requestAnimationFrame(() => {
         applySafeAreaFallback(root);
         window.setTimeout(() => applySafeAreaFallback(root), 120);

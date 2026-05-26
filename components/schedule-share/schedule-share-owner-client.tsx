@@ -300,6 +300,8 @@ export function ScheduleShareOwnerClient({
             },
           ]}
           onQuickSelectShareDays={handleQuickSelectShareDays}
+          revealCategories={revealCategories}
+          revealedCategoryIds={revealedCategoryIds}
         />
         </div>
 

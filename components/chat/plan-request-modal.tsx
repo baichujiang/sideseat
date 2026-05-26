@@ -1,6 +1,5 @@
 "use client";
 
-import { PlanType } from "@prisma/client";
 import { format } from "date-fns";
 import { CalendarClock, MapPin, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -16,14 +15,6 @@ import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import type { PlanRequestPrefill } from "@/lib/calendar/plan-invite-from-event";
 import { cn } from "@/lib/utils";
-
-const PLAN_OPTIONS: Array<{ value: PlanType; label: string }> = [
-  { value: "STUDY", label: "Study" },
-  { value: "MEAL", label: "Meal" },
-  { value: "SPORTS", label: "Sports" },
-  { value: "LANGUAGE", label: "Language" },
-  { value: "CUSTOM", label: "Custom" },
-];
 
 const FIELD_INPUT =
   "h-11 w-full rounded-xl border border-input bg-background px-3.5 text-[14px] outline-none transition focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30";
@@ -54,7 +45,6 @@ export function PlanRequestModal({
 }) {
   const router = useRouter();
   const defaults = useMemo(() => computeDefaults(slot, prefill), [slot, prefill]);
-  const [planType, setPlanType] = useState<PlanType>("STUDY");
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
   const [message, setMessage] = useState("");
@@ -65,7 +55,6 @@ export function PlanRequestModal({
 
   useEffect(() => {
     if (!open) return;
-    setPlanType(defaults.planType);
     setTitle(defaults.title);
     setLocation(defaults.location);
     setMessage(defaults.message);
@@ -78,8 +67,7 @@ export function PlanRequestModal({
     setBusy(true);
     setErr(null);
     const payload = {
-      planType,
-      title: title.trim() || defaultTitle(planType),
+      title: title.trim() || defaultTitle(),
       location: location.trim() || undefined,
       message: message.trim() || undefined,
       startTime: new Date(startAt).toISOString(),
@@ -120,9 +108,7 @@ export function PlanRequestModal({
                 <h2 className="text-sm font-semibold">
                   {mode.kind === "counter" ? `Suggest another time` : `Plan with ${peerName}`}
                 </h2>
-                <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">
-                  What do you want to plan?
-                </p>
+                <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">Pick a time and add details.</p>
               </div>
             </div>
             <button
@@ -137,35 +123,12 @@ export function PlanRequestModal({
         </div>
 
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-3">
-          <Labeled label="Type">
-            <div className="grid grid-cols-2 gap-2">
-              {PLAN_OPTIONS.map((option) => {
-                const active = option.value === planType;
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setPlanType(option.value)}
-                    className={cn(
-                      "min-h-11 rounded-[0.95rem] border px-3 py-2 text-left text-[13px] font-medium transition",
-                      active
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-background text-foreground/80",
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                );
-              })}
-            </div>
-          </Labeled>
-
           <Labeled label="Title">
             <input
               className={FIELD_INPUT}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={defaultTitle(planType)}
+              placeholder={defaultTitle()}
               maxLength={120}
             />
           </Labeled>
@@ -235,7 +198,6 @@ function computeDefaults(
 ) {
   if (prefill?.startTime && prefill?.endTime) {
     return {
-      planType: prefill.planType,
       title: prefill.title,
       location: prefill.location ?? "",
       message: prefill.message ?? "",
@@ -245,7 +207,6 @@ function computeDefaults(
   }
   if (slot?.startTime && slot?.endTime) {
     return {
-      planType: "STUDY" as PlanType,
       title: "",
       location: "",
       message: "",
@@ -258,7 +219,6 @@ function computeDefaults(
   if (now.getMinutes() === 0) now.setHours(now.getHours() + 1);
   const end = new Date(now.getTime() + 60 * 60 * 1000);
   return {
-    planType: "STUDY" as PlanType,
     title: "",
     location: "",
     message: "",
@@ -267,17 +227,6 @@ function computeDefaults(
   };
 }
 
-function defaultTitle(planType: PlanType) {
-  switch (planType) {
-    case "MEAL":
-      return "Lunch together";
-    case "SPORTS":
-      return "Sports session";
-    case "LANGUAGE":
-      return "Language practice";
-    case "CUSTOM":
-      return "Plan together";
-    default:
-      return "Study together";
-  }
+function defaultTitle() {
+  return "Plan together";
 }

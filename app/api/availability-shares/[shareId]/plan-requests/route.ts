@@ -60,7 +60,7 @@ export async function POST(
           availabilityShareId: share.id,
           proposerUserId: user.id,
           receiverUserId: share.ownerUserId,
-          planType: values.planType,
+          planType: values.planType ?? "CUSTOM",
           title: values.title.trim(),
           location: values.location?.trim() || null,
           message: values.message?.trim() || null,

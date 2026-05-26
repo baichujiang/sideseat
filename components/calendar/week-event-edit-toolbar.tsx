@@ -51,7 +51,9 @@ export function WeekCalendarSlotPasteMenu({
 }) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const innerRef = useRef<HTMLDivElement | null>(null);
-  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const [pos, setPos] = useState<{ top: number; left: number; placement: "above" | "below" } | null>(
+    null,
+  );
 
   useLayoutEffect(() => {
     const inner = innerRef.current;
@@ -61,17 +63,18 @@ export function WeekCalendarSlotPasteMenu({
     const gap = 12;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    let left = clientX + gap;
-    let top = clientY - th / 2;
-    if (left + tw > vw - margin) {
-      left = clientX - gap - tw;
+    let placement: "above" | "below" = "above";
+    let top = clientY - gap - th;
+    let left = clientX - tw / 2;
+    if (top < margin) {
+      placement = "below";
+      top = clientY + gap;
     }
-    if (left < margin) {
-      left = Math.max(margin, Math.min(vw - margin - tw, clientX - tw / 2));
+    if (top + th > vh - margin) {
+      top = Math.max(margin, vh - margin - th);
     }
-    if (top < margin) top = margin;
-    if (top + th > vh - margin) top = Math.max(margin, vh - margin - th);
-    setPos({ top, left });
+    left = Math.max(margin, Math.min(vw - margin - tw, left));
+    setPos({ top, left, placement });
   }, [clientX, clientY]);
 
   useEffect(() => {
@@ -111,8 +114,10 @@ export function WeekCalendarSlotPasteMenu({
         <span className="relative inline-flex size-2.5 rounded-full bg-[#2563EB] ring-2 ring-white dark:ring-zinc-900" />
       </span>
       <span
-        className="absolute left-1/2 top-1/2 h-px w-8 -translate-y-1/2 bg-[#2563EB]/70"
-        style={{ marginLeft: "0.35rem" }}
+        className={cn(
+          "absolute left-1/2 h-8 w-px -translate-x-1/2 bg-[#2563EB]/70",
+          pos?.placement === "below" ? "top-1/2 mt-[0.35rem]" : "bottom-1/2 mb-[0.35rem]",
+        )}
       />
     </div>
     <div

@@ -12,6 +12,7 @@ import { WeekVisibleDaysBar } from "@/components/calendar/week-visible-days-bar"
 import { berlinClockMinutes, berlinEndOfWeek, berlinStartOfWeek } from "@/lib/calendar/schedule-berlin";
 import type { PublicScheduleShareSnapshot } from "@/lib/schedule-share/build-schedule-share-snapshot";
 import { publicBlocksToWeekCalendarBlocks } from "@/lib/schedule-share/public-blocks-to-week-calendar";
+import type { ShareRevealCategoryInput } from "@/lib/schedule-share/reveal-category-selection";
 import {
   shareOwnerCalendarPickerRange,
   type ShareDayQuickPreset,
@@ -37,6 +38,8 @@ export function ScheduleShareOwnerPreview({
   clearAllShareDaysLabel,
   quickSelectPresets,
   onQuickSelectShareDays,
+  revealCategories = [],
+  revealedCategoryIds = [],
   fillParent = false,
 }: {
   snapshot: PublicScheduleShareSnapshot;
@@ -57,6 +60,8 @@ export function ScheduleShareOwnerPreview({
     hint: string;
   }>;
   onQuickSelectShareDays: (preset: ShareDayQuickPreset) => void;
+  revealCategories?: readonly ShareRevealCategoryInput[];
+  revealedCategoryIds?: readonly string[];
   fillParent?: boolean;
 }) {
   const selectedCount = selectedShareDateKeys.size;
@@ -65,16 +70,32 @@ export function ScheduleShareOwnerPreview({
 
   const weekStart = useMemo(() => berlinStartOfWeek(focusDate), [focusDate]);
   const weekEnd = useMemo(() => berlinEndOfWeek(focusDate), [focusDate]);
+  const previewBlocks = useMemo(() => {
+    if (revealCategories.length === 0) return snapshot.blocks;
+    const knownCategoryIds = new Set(revealCategories.map((c) => c.id));
+    const revealedSet = new Set(revealedCategoryIds);
+    return snapshot.blocks.map((block) => {
+      const categoryId = block.categoryId?.trim();
+      if (!categoryId || !knownCategoryIds.has(categoryId) || revealedSet.has(categoryId)) {
+        return block;
+      }
+      return {
+        kind: "busy_anonymous" as const,
+        start: block.start,
+        end: block.end,
+      };
+    });
+  }, [revealCategories, revealedCategoryIds, snapshot.blocks]);
 
   const timedBlocks = useMemo(
     () =>
       publicBlocksToWeekCalendarBlocks({
-        blocks: snapshot.blocks,
+        blocks: previewBlocks,
         rangeStart,
         rangeEnd,
         busyAnonymousLabel,
       }),
-    [snapshot.blocks, rangeStart, rangeEnd, busyAnonymousLabel],
+    [previewBlocks, rangeStart, rangeEnd, busyAnonymousLabel],
   );
 
   const [minuteScale, setMinuteScale] = useHomeCalendarMinuteScale();

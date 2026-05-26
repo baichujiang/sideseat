@@ -12,6 +12,7 @@ import { ChatComposer } from "@/components/chat/chat-composer";
 import { ChatReplyProvider } from "@/components/chat/chat-reply-context";
 import { ChatRealtimeRefresh } from "@/components/chat/chat-realtime-refresh";
 import { ChatScrollContainer } from "@/components/chat/chat-scroll-container";
+import { ChatThreadSearchButton } from "@/components/chat/chat-thread-search-button";
 import { MessageActionMenu } from "@/components/chat/message-action-menu";
 import { MessageBubbleContent } from "@/components/chat/message-bubble-content";
 import {
@@ -103,9 +104,9 @@ export default async function ConnectionPage({
       connectionId={connection.id}
       latestMessageId={latestMessageId}
     />
-    <div className="flex h-full min-h-0 flex-1 flex-col bg-background">
+    <div className="flex h-full min-h-0 flex-1 flex-col bg-[#F6F8FB] dark:bg-[#090B10]">
       {/* Chat app bar */}
-      <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur-sm">
+      <header className="flex shrink-0 items-center gap-2 border-b border-slate-200/75 bg-white/95 px-2 py-2 backdrop-blur-sm dark:border-border dark:bg-background/95">
         <BackLink returnTo={query.returnTo} fallback="/inbox" label={ui.chat.back} />
         <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl py-1 pl-1 pr-2">
           {profileLinkHref ? (
@@ -158,10 +159,11 @@ export default async function ConnectionPage({
             </span>
           ) : null}
         </div>
+        <ChatThreadSearchButton entries={threadSearchEntries} />
       </header>
 
       {!isSelfNotes && courseName ? (
-        <div className="shrink-0 border-b border-border/70 bg-background/80 px-3 py-2">
+        <div className="shrink-0 border-b border-slate-200/75 bg-white/80 px-3 py-2 dark:border-border/70 dark:bg-background/80">
           <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground/85">
             {courseName}
           </span>
@@ -255,7 +257,6 @@ export default async function ConnectionPage({
                       viewerUserId={user.id}
                       proposerUserId={request.proposerUserId}
                       receiverUserId={request.receiverUserId}
-                      planType={request.planType}
                       title={request.title}
                       location={request.location}
                       message={request.message}
@@ -465,12 +466,11 @@ export default async function ConnectionPage({
         )}
       </ChatScrollContainer>
 
-      <div className="shrink-0 border-t border-border/60 bg-background/95 px-3 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_24px_rgba(15,23,42,0.05)] backdrop-blur-sm dark:bg-background/90 dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]">
+      <div className="shrink-0 border-t border-slate-200/75 bg-white/95 px-3 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_24px_rgba(15,23,42,0.045)] backdrop-blur-sm dark:border-border/60 dark:bg-background/90 dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]">
         <ChatComposer
           connectionId={connection.id}
           peerName={otherUser.nickname ?? "Student"}
           hideAttachments={isSelfNotes || isAssistantChat}
-          threadSearchEntries={threadSearchEntries}
           placeholder={isAssistantChat ? ui.assistant.composerPlaceholder : undefined}
         />
       </div>

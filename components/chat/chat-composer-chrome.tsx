@@ -64,6 +64,9 @@ export function ChatComposerSendButton({
     <button
       type="button"
       disabled={disabled}
+      onPointerDown={(event) => {
+        if (!disabled) event.preventDefault();
+      }}
       onClick={onClick}
       aria-label={ariaLabel}
       className={cn(

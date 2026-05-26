@@ -17,22 +17,17 @@ import {
   ChatComposerSlotButton,
 } from "@/components/chat/chat-composer-chrome";
 import { ChatMessageInput } from "@/components/chat/chat-message-input";
-import { ChatThreadSearchButton } from "@/components/chat/chat-thread-search-button";
-import type { ThreadSearchEntry } from "@/lib/chat/thread-search-index";
 
 export function ChatComposer({
   connectionId,
   peerName,
   hideAttachments = false,
-  threadSearchEntries = [],
   placeholder,
 }: {
   connectionId: string;
   peerName: string;
   /** Hide share-availability / plan (+) — used for notes-to-self threads. */
   hideAttachments?: boolean;
-  /** Server-built index for in-thread search (scroll-to message). */
-  threadSearchEntries?: ThreadSearchEntry[];
   placeholder?: string;
 }) {
   const router = useRouter();
@@ -107,7 +102,6 @@ export function ChatComposer({
         />
       ) : null}
       <div className="flex min-h-0 items-end gap-2">
-        <ChatThreadSearchButton entries={threadSearchEntries} />
         <ChatComposerBar>
           {hideAttachments ? (
             <ChatComposerSlotButton

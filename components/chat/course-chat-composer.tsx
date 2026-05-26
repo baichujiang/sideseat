@@ -14,17 +14,13 @@ import {
   ChatComposerSlotButton,
 } from "@/components/chat/chat-composer-chrome";
 import { ChatMessageInput } from "@/components/chat/chat-message-input";
-import { ChatThreadSearchButton } from "@/components/chat/chat-thread-search-button";
 import { useChatReply } from "@/components/chat/chat-reply-context";
 import { useAppMessages } from "@/hooks/use-app-locale";
-import type { ThreadSearchEntry } from "@/lib/chat/thread-search-index";
 
 export function CourseChatComposer({
   courseId,
-  threadSearchEntries = [],
 }: {
   courseId: string;
-  threadSearchEntries?: ThreadSearchEntry[];
 }) {
   const router = useRouter();
   const { courses: co, chat: ch } = useAppMessages();
@@ -79,7 +75,6 @@ export function CourseChatComposer({
         />
       ) : null}
       <div className="flex items-end gap-2">
-        <ChatThreadSearchButton entries={threadSearchEntries} />
         <ChatComposerBar>
           <ChatComposerSlotButton
             disabled

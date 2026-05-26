@@ -300,6 +300,11 @@ enum ProductFeedbackTopic {
   OTHER
 }
 
+enum ProductFeedbackVoteValue {
+  UP
+  DOWN
+}
+
 model User {
   id                           String                   @id @default(cuid())
   username                     String                   @unique
@@ -387,6 +392,8 @@ model User {
   groupChatParticipants        GroupChatParticipant[]
   groupChatMessages            GroupChatMessage[]
   productFeedback              ProductFeedback[]
+  productFeedbackVotes         ProductFeedbackVote[]
+  productFeedbackComments      ProductFeedbackComment[]
   scheduleShareLinksOwned      ScheduleShareLink[]              @relation("ScheduleShareLinkOwner")
   scheduleShareProposalsAsProposer ScheduleShareGuestProposal[] @relation("ScheduleShareProposalProposer")
 
@@ -422,13 +429,45 @@ model ProductFeedback {
   userId          String
   user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   topic           ProductFeedbackTopic @default(OTHER)
+  title           String?
   message         String
   emailSentAt     DateTime?
   emailProviderId String?
   createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  votes           ProductFeedbackVote[]
+  comments        ProductFeedbackComment[]
 
   @@index([userId, createdAt])
   @@index([createdAt])
+}
+
+model ProductFeedbackVote {
+  id         String                   @id @default(cuid())
+  feedbackId String
+  feedback   ProductFeedback          @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  value      ProductFeedbackVoteValue
+  createdAt  DateTime                 @default(now())
+  updatedAt  DateTime                 @updatedAt
+
+  @@unique([feedbackId, userId])
+  @@index([userId, createdAt])
+}
+
+model ProductFeedbackComment {
+  id         String          @id @default(cuid())
+  feedbackId String
+  feedback   ProductFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body       String
+  isOfficial Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+
+  @@index([feedbackId, createdAt])
+  @@index([userId, createdAt])
 }
 
 model UserLanguage {

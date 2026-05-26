@@ -11,15 +11,11 @@ import {
   ChatComposerSendButton,
 } from "@/components/chat/chat-composer-chrome";
 import { ChatMessageInput } from "@/components/chat/chat-message-input";
-import { ChatThreadSearchButton } from "@/components/chat/chat-thread-search-button";
-import type { ThreadSearchEntry } from "@/lib/chat/thread-search-index";
 
 export function GroupChatComposer({
   groupChatId,
-  threadSearchEntries = [],
 }: {
   groupChatId: string;
-  threadSearchEntries?: ThreadSearchEntry[];
 }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -61,7 +57,6 @@ export function GroupChatComposer({
   return (
     <div className="relative space-y-2">
       <div className="flex items-end gap-2">
-        <ChatThreadSearchButton entries={threadSearchEntries} />
         <ChatComposerBar>
           <label className="sr-only" htmlFor={`group-chat-input-${groupChatId}`}>
             Message
