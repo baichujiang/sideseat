@@ -16,7 +16,7 @@
   --app-viewport-height: 100dvh;
   --app-visual-viewport-offset-top: 0px;
   --keyboard-inset-bottom: 0px;
-  --chat-composer-padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  --chat-composer-padding-bottom: calc(0.5rem + min(env(safe-area-inset-bottom), 0.75rem));
   /* Page background ≈ #F2F2F7 (iOS grouped); text ≈ #111827 / #5F6B7A; borders ≈ #E5E5EA */
   --background: 240 11% 96%;
   --foreground: 222 47% 11%;
