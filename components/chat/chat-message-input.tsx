@@ -6,8 +6,8 @@ import {
   useRef,
   useState,
   type ChangeEvent,
-  type FocusEvent,
   type KeyboardEvent,
+  type PointerEvent,
   type TextareaHTMLAttributes,
 } from "react";
 
@@ -20,7 +20,10 @@ export const ChatMessageInput = forwardRef<
   Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "rows"> & {
     onSend?: () => void;
   }
->(function ChatMessageInput({ className, onChange, onFocus, onKeyDown, onSend, value, ...props }, ref) {
+>(function ChatMessageInput(
+  { className, onChange, onFocus, onKeyDown, onPointerDown, onSend, value, ...props },
+  ref,
+) {
   const localRef = useRef<HTMLTextAreaElement | null>(null);
   const [isComposing, setIsComposing] = useState(false);
 
@@ -65,15 +68,24 @@ export const ChatMessageInput = forwardRef<
     onSend?.();
   };
 
-  const handleFocus = (event: FocusEvent<HTMLTextAreaElement>) => {
+  const keepAppShellAnchored = () => {
+    if (window.scrollX === 0 && window.scrollY === 0) return;
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" });
+  };
+
+  const handlePointerDown = (event: PointerEvent<HTMLTextAreaElement>) => {
+    onPointerDown?.(event);
+    if (event.defaultPrevented || event.pointerType === "mouse") return;
+    if (document.activeElement === event.currentTarget) return;
+    event.preventDefault();
+    event.currentTarget.focus({ preventScroll: true });
+  };
+
+  const handleFocus: TextareaHTMLAttributes<HTMLTextAreaElement>["onFocus"] = (event) => {
     onFocus?.(event);
-    const textarea = event.currentTarget;
-    const keepVisible = () => {
-      textarea.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
-    };
-    requestAnimationFrame(keepVisible);
-    window.setTimeout(keepVisible, 120);
-    window.setTimeout(keepVisible, 320);
+    requestAnimationFrame(keepAppShellAnchored);
+    window.setTimeout(keepAppShellAnchored, 120);
+    window.setTimeout(keepAppShellAnchored, 320);
   };
 
   return (
@@ -90,6 +102,7 @@ export const ChatMessageInput = forwardRef<
       onCompositionEnd={() => setIsComposing(false)}
       onFocus={handleFocus}
       onKeyDown={handleKeyDown}
+      onPointerDown={handlePointerDown}
       {...props}
     />
   );

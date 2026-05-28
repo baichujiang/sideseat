@@ -100,6 +100,7 @@ test.describe.serial("Chat regression flow", () => {
 
     await input.click();
     await expect(input).toBeFocused();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 
     const paddingBefore = await footer.evaluate((el) => parseFloat(getComputedStyle(el).paddingBottom));
     await page.evaluate(() => {
