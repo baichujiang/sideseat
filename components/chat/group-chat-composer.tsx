@@ -11,6 +11,7 @@ import {
   ChatComposerSendButton,
 } from "@/components/chat/chat-composer-chrome";
 import { ChatMessageInput } from "@/components/chat/chat-message-input";
+import { scheduleChatInputRefocus } from "@/components/chat/refocus-chat-input";
 
 export function GroupChatComposer({
   groupChatId,
@@ -47,11 +48,7 @@ export function GroupChatComposer({
     setBody("");
     setSubmitting(false);
     router.refresh();
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        inputRef.current?.focus({ preventScroll: true });
-      });
-    });
+    scheduleChatInputRefocus(inputRef);
   };
 
   return (

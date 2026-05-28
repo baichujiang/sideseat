@@ -30,8 +30,8 @@ async function dismissProductTutorialIfPresent(page: import("@playwright/test").
 async function loginWithPassword(page: import("@playwright/test").Page) {
   await page.goto("/login");
   await expect(page.getByRole("heading", { name: /log in/i })).toBeVisible();
-  await page.getByPlaceholder(/janedoe or alex@example.com/i).fill(E2E_USER);
-  await page.locator('input[type="password"]').first().fill(E2E_PASSWORD);
+  await page.getByLabel(/username/i).fill(E2E_USER);
+  await page.getByLabel(/password/i).fill(E2E_PASSWORD);
   await page.getByRole("button", { name: "Log in" }).click();
   await page.waitForURL(/\/(home|onboarding)/, { timeout: 30_000 });
   if (page.url().includes("/onboarding")) {
@@ -45,8 +45,15 @@ async function loginWithPassword(page: import("@playwright/test").Page) {
 
 async function goMainTab(page: import("@playwright/test").Page, label: string, urlRe: RegExp) {
   const nav = page.getByRole("navigation", { name: "Main navigation" });
-  // `name` is substring by default — "Me" matches "Home"; always use exact tab labels.
-  await nav.getByRole("link", { name: label, exact: true }).click();
+  const hrefByLabel: Record<string, string> = {
+    Home: "/home",
+    Discover: "/discover",
+    Chats: "/inbox",
+    Me: "/profile",
+  };
+  const href = hrefByLabel[label];
+  if (!href) throw new Error(`Unknown main tab label "${label}"`);
+  await nav.locator(`a[href="${href}"]`).click();
   await expect(page).toHaveURL(urlRe);
 }
 
@@ -57,10 +64,11 @@ test.describe("Standard user flow (login + tabs + drill-ins)", () => {
 
     logStep("Tab: Home");
     await goMainTab(page, "Home", /\/home$/);
-    await expect(page.getByText(/Week \d+/)).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Week", selected: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^[A-Z][a-z]+ \d{4}$/ })).toBeVisible();
 
-    logStep("Tab: Courses");
-    await goMainTab(page, "Courses", /\/courses$/);
+    logStep("Page: Courses");
+    await page.goto("/courses");
     await expect(page.getByRole("heading", { name: "Courses" })).toBeVisible();
 
     logStep("Drill-in: Add course");
@@ -101,13 +109,14 @@ test.describe("Standard user flow (login + tabs + drill-ins)", () => {
     await goMainTab(page, "Me", /\/profile$/);
     await expect(page.getByRole("heading", { name: "Me" })).toBeVisible();
 
-    logStep("Profile: school verification block");
-    await expect(page.locator("#me-verification-heading")).toBeVisible();
+    logStep("Profile: summary and hub");
+    await expect(page.getByText("Test 001", { exact: true })).toBeVisible();
+    await expect(page.getByText("MY HUB")).toBeVisible();
 
-    logStep("Drill-in: Settings & account");
-    await page.getByRole("link", { name: /settings & account/i }).click();
+    logStep("Drill-in: Preferences & account");
+    await page.getByRole("link", { name: /preferences & account/i }).click();
     await expect(page).toHaveURL(/\/profile\/account$/);
-    await expect(page.getByRole("heading", { name: "Settings & account" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Preferences & account" })).toBeVisible();
     await page.getByRole("link", { name: "Back", exact: true }).click();
     await expect(page).toHaveURL(/\/profile$/);
 

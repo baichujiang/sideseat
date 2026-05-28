@@ -615,8 +615,11 @@ export function AuthForm({
       <CardTitle className="text-xl">{af.logInTitle}</CardTitle>
       <form className="space-y-4" onSubmit={onSubmitLogin}>
         <div className="space-y-1.5">
-          <label className="text-sm font-medium">{af.identifierLabel}</label>
+          <label className="text-sm font-medium" htmlFor="login-identifier">
+            {af.identifierLabel}
+          </label>
           <Input
+            id="login-identifier"
             autoComplete="username"
             placeholder={af.identifierPlaceholder}
             {...loginForm.register("identifier")}
@@ -624,8 +627,11 @@ export function AuthForm({
           <FormMessage message={loginForm.formState.errors.identifier?.message} />
         </div>
         <div className="space-y-1.5">
-          <label className="text-sm font-medium">{af.passwordLabel}</label>
+          <label className="text-sm font-medium" htmlFor="login-password">
+            {af.passwordLabel}
+          </label>
           <Input
+            id="login-password"
             type="password"
             autoComplete="current-password"
             {...loginForm.register("password")}

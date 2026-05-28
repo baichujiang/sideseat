@@ -96,6 +96,7 @@ export function PlanRequestModal({
       onClose={onClose}
       zClassName={layerZClassName}
       panelClassName="w-[min(100vw,28rem)] border-0"
+      ariaLabel={mode.kind === "counter" ? "Suggest another time" : `Plan with ${peerName}`}
     >
       <div className="flex h-full min-h-0 flex-col bg-background pt-[env(safe-area-inset-top)]">
         <div className="shrink-0 px-4 pb-3 pt-2">

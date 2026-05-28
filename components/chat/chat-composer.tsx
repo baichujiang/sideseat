@@ -17,6 +17,7 @@ import {
   ChatComposerSlotButton,
 } from "@/components/chat/chat-composer-chrome";
 import { ChatMessageInput } from "@/components/chat/chat-message-input";
+import { scheduleChatInputRefocus } from "@/components/chat/refocus-chat-input";
 
 export function ChatComposer({
   connectionId,
@@ -85,11 +86,7 @@ export function ChatComposer({
     setReplyTo(null);
     setSubmitting(false);
     router.refresh();
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        inputRef.current?.focus({ preventScroll: true });
-      });
-    });
+    scheduleChatInputRefocus(inputRef);
   };
 
   return (
