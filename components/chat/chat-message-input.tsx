@@ -68,9 +68,13 @@ export const ChatMessageInput = forwardRef<
     onSend?.();
   };
 
-  const keepAppShellAnchored = () => {
+  const resetPageScroll = () => {
     if (window.scrollX === 0 && window.scrollY === 0) return;
     window.scrollTo({ left: 0, top: 0, behavior: "instant" });
+  };
+
+  const scheduleViewportReset = () => {
+    document.dispatchEvent(new Event("sideseat:chat-viewport-reset"));
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLTextAreaElement>) => {
@@ -84,9 +88,6 @@ export const ChatMessageInput = forwardRef<
   const handleFocus: TextareaHTMLAttributes<HTMLTextAreaElement>["onFocus"] = (event) => {
     onFocus?.(event);
     document.documentElement.classList.add("chat-input-focused");
-    requestAnimationFrame(keepAppShellAnchored);
-    window.setTimeout(keepAppShellAnchored, 120);
-    window.setTimeout(keepAppShellAnchored, 320);
   };
 
   const handleBlur: TextareaHTMLAttributes<HTMLTextAreaElement>["onBlur"] = (event) => {
@@ -97,6 +98,14 @@ export const ChatMessageInput = forwardRef<
         return;
       }
       document.documentElement.classList.remove("chat-input-focused");
+      // After keyboard dismiss, iOS can leave window scroll offset behind. Reset on blur
+      // (not on the next focus) so refocusing the composer does not jump to the top.
+      requestAnimationFrame(resetPageScroll);
+      window.setTimeout(resetPageScroll, 120);
+      window.setTimeout(resetPageScroll, 320);
+      scheduleViewportReset();
+      window.setTimeout(scheduleViewportReset, 180);
+      window.setTimeout(scheduleViewportReset, 360);
     }, 80);
   };
 

@@ -36,9 +36,15 @@ function applyVisualViewportVars(root: HTMLElement) {
     height,
   );
   const keyboardLikelyVisible = layoutHeight - height - offsetTop > 80;
-  root.style.setProperty("--app-viewport-height", `${height}px`);
   root.style.setProperty("--app-visual-viewport-offset-top", `${offsetTop}px`);
   root.classList.toggle("keyboard-visible", keyboardLikelyVisible);
+  // Only pin shell height while the keyboard is open. Keeping a shrunken height after
+  // dismiss makes the chat composer sit too high on the next focus.
+  if (keyboardLikelyVisible) {
+    root.style.setProperty("--app-viewport-height", `${height}px`);
+  } else {
+    root.style.removeProperty("--app-viewport-height");
+  }
 }
 
 /**
@@ -68,6 +74,8 @@ export function CapacitorBootstrap() {
     window.visualViewport?.addEventListener("scroll", syncVisualViewport);
     window.addEventListener("resize", syncVisualViewport);
     document.addEventListener("focusin", scheduleViewportSync);
+    const onChatViewportReset = () => scheduleViewportSync();
+    document.addEventListener("sideseat:chat-viewport-reset", onChatViewportReset);
 
     if (!native) {
       return () => {
@@ -75,6 +83,7 @@ export function CapacitorBootstrap() {
         window.visualViewport?.removeEventListener("scroll", syncVisualViewport);
         window.removeEventListener("resize", syncVisualViewport);
         document.removeEventListener("focusin", scheduleViewportSync);
+        document.removeEventListener("sideseat:chat-viewport-reset", onChatViewportReset);
         root.style.removeProperty("--app-viewport-height");
         root.style.removeProperty("--app-visual-viewport-offset-top");
       };
@@ -172,6 +181,7 @@ export function CapacitorBootstrap() {
       window.visualViewport?.removeEventListener("scroll", syncVisualViewport);
       window.removeEventListener("resize", syncVisualViewport);
       document.removeEventListener("focusin", scheduleViewportSync);
+      document.removeEventListener("sideseat:chat-viewport-reset", onChatViewportReset);
       root.classList.remove("capacitor-native", "capacitor-safe-area-fallback", "keyboard-visible");
       root.style.removeProperty("--app-viewport-height");
       root.style.removeProperty("--app-visual-viewport-offset-top");

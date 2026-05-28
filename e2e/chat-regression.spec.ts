@@ -116,6 +116,22 @@ test.describe.serial("Chat regression flow", () => {
       document.documentElement.style.setProperty("--keyboard-inset-bottom", "0px");
     });
 
+    const viewportHeight = page.viewportSize()?.height ?? 800;
+    const footerBottomBeforeBlur = await footer.evaluate((el) => el.getBoundingClientRect().bottom);
+    expect(footerBottomBeforeBlur).toBeGreaterThan(viewportHeight * 0.75);
+    await input.blur();
+    await expect(input).not.toBeFocused();
+    await expect
+      .poll(() =>
+        page.evaluate(() => document.documentElement.classList.contains("chat-input-focused")),
+      )
+      .toBe(false);
+    await input.click();
+    await expect(input).toBeFocused();
+    await expect
+      .poll(() => footer.evaluate((el) => el.getBoundingClientRect().bottom))
+      .toBeGreaterThan(viewportHeight * 0.75);
+
     const firstMessage = `e2e first ${Date.now()}`;
     await input.fill(firstMessage);
     await input.press("Enter");
