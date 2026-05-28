@@ -1,5 +1,5 @@
 export function scheduleChatInputRefocus(
-  inputRef: { current: HTMLInputElement | null },
+  inputRef: { current: HTMLTextAreaElement | null },
   inputId?: string,
 ) {
   const focus = () => {
@@ -8,7 +8,7 @@ export function scheduleChatInputRefocus(
       refTarget?.isConnected
         ? refTarget
         : inputId
-          ? (document.getElementById(inputId) as HTMLInputElement | null)
+          ? (document.getElementById(inputId) as HTMLTextAreaElement | null)
           : null;
     if (!target || !target.isConnected) return;
     target.focus({ preventScroll: true });

@@ -26,7 +26,7 @@ export function CourseChatComposer({
   const router = useRouter();
   const { courses: co, chat: ch } = useAppMessages();
   const { replyTo, setReplyTo } = useChatReply();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const inputId = `course-chat-input-${courseId}`;
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
@@ -39,6 +39,7 @@ export function CourseChatComposer({
 
     setSubmitting(true);
     setError("");
+    setBody("");
 
     const response = await apiFetch(`/api/courses/${courseId}/chat/messages`, {
       method: "POST",
@@ -52,11 +53,11 @@ export function CourseChatComposer({
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
       setError(typeof payload.error === "string" ? payload.error : ch.unableToSend);
+      setBody((current) => (current.trim() ? current : text));
       setSubmitting(false);
       return;
     }
 
-    setBody("");
     setReplyTo(null);
     setSubmitting(false);
     router.refresh();
@@ -88,7 +89,7 @@ export function CourseChatComposer({
             ref={inputRef}
             id={inputId}
             value={body}
-            onChange={(e) => setBody(e.target.value.replace(/[\r\n]+/g, " "))}
+            onChange={(e) => setBody(e.target.value)}
             onSend={() => void submit()}
             placeholder={replyTo ? ch.placeholderReply : co.courseChatComposerPlaceholder}
           />

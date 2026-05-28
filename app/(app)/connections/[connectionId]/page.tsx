@@ -11,7 +11,7 @@ import { AssistantQuickReplies } from "@/components/chat/assistant-quick-replies
 import { ChatComposer } from "@/components/chat/chat-composer";
 import { ChatReplyProvider } from "@/components/chat/chat-reply-context";
 import { ChatRealtimeRefresh } from "@/components/chat/chat-realtime-refresh";
-import { ChatScrollContainer } from "@/components/chat/chat-scroll-container";
+import { DirectMessageList } from "@/components/chat/direct-message-list";
 import { ChatThreadSearchButton } from "@/components/chat/chat-thread-search-button";
 import { MessageActionMenu } from "@/components/chat/message-action-menu";
 import { MessageBubbleContent } from "@/components/chat/message-bubble-content";
@@ -47,6 +47,14 @@ function timeLabel(d: Date): string {
   return format(d, "HH:mm");
 }
 
+function minutesBetween(a: Date, b: Date): number {
+  return Math.abs(a.getTime() - b.getTime()) / 60000;
+}
+
+function isStandardBubbleMessage(type: string): boolean {
+  return type !== "SYSTEM" && !type.endsWith("_CARD");
+}
+
 export default async function ConnectionPage({
   params,
   searchParams,
@@ -73,8 +81,11 @@ export default async function ConnectionPage({
     : (myRemark || peerNickname || "Student");
   const showPeerNicknameLine =
     !isSelfNotes && Boolean(myRemark) && myRemark !== peerNickname && peerNickname.length > 0;
-  const showPeerUsernameLine = !isSelfNotes && Boolean(myRemark) && !peerNickname.length;
   const showSelfBaseLine = isSelfNotes && Boolean(myRemark) && headerTitle !== selfBaseLabel;
+  const peerStatusLine =
+    !isAssistantChat && !isSelfNotes
+      ? courseName || (showPeerNicknameLine ? peerNickname : `@${otherUser.username}`)
+      : null;
   const messages = connection.messages;
   const scheduleSharePreviewByToken = await loadScheduleShareChatPreviewsForMessages(
     prisma,
@@ -96,6 +107,10 @@ export default async function ConnectionPage({
       ? (`/profile?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route)
       : (`/users/${otherUser.id}?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route);
   const peerHref = profileLinkHref;
+  const messageMetas = messages.map((message) => ({
+    id: message.id,
+    senderId: message.senderId,
+  }));
 
   return (
     <ChatReplyProvider>
@@ -104,7 +119,7 @@ export default async function ConnectionPage({
       connectionId={connection.id}
       latestMessageId={latestMessageId}
     />
-    <div className="flex h-full min-h-0 flex-1 flex-col bg-[#F6F8FB] dark:bg-[#090B10]">
+    <div className="flex h-full max-h-[100dvh] min-h-0 flex-1 flex-col overflow-hidden bg-[#F6F8FB] dark:bg-[#090B10]">
       {/* Chat app bar */}
       <header className="flex shrink-0 items-center gap-2 border-b border-slate-200/75 bg-white/95 px-2 py-2 backdrop-blur-sm dark:border-border dark:bg-background/95">
         <BackLink returnTo={query.returnTo} fallback="/inbox" label={ui.chat.back} />
@@ -143,14 +158,8 @@ export default async function ConnectionPage({
             {showSelfBaseLine ? (
               <p className="truncate text-[11px] text-muted-foreground">{selfBaseLabel}</p>
             ) : null}
-            {showPeerNicknameLine ? (
-              <p className="truncate text-[11px] text-muted-foreground">{peerNickname}</p>
-            ) : null}
-            {showPeerUsernameLine ? (
-              <p className="truncate text-[11px] text-muted-foreground">@{otherUser.username}</p>
-            ) : null}
-            {!isAssistantChat && !isSelfNotes && courseName ? (
-              <p className="truncate text-[11px] text-muted-foreground">{courseName}</p>
+            {peerStatusLine ? (
+              <p className="truncate text-[11px] text-muted-foreground">{peerStatusLine}</p>
             ) : null}
           </div>
           {isAssistantChat ? (
@@ -162,15 +171,11 @@ export default async function ConnectionPage({
         <ChatThreadSearchButton entries={threadSearchEntries} />
       </header>
 
-      {!isSelfNotes && courseName ? (
-        <div className="shrink-0 border-b border-slate-200/75 bg-white/80 px-3 py-2 dark:border-border/70 dark:bg-background/80">
-          <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground/85">
-            {courseName}
-          </span>
-        </div>
-      ) : null}
-
-      <ChatScrollContainer messageCount={messages.length}>
+      <DirectMessageList
+        messages={messageMetas}
+        currentUserId={user.id}
+        newMessageLabel={ui.chat.newMessagesBadge}
+      >
         {messages.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 py-16 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/80 text-muted-foreground/70">
@@ -182,11 +187,31 @@ export default async function ConnectionPage({
             </p>
           </div>
         ) : (
-          <div className="space-y-3 pb-2">
+          <div className="pb-2">
             {messages.map((message, index) => {
+              const previousMessage = messages[index - 1];
+              const nextMessage = messages[index + 1];
               const showDay =
                 index === 0 ||
                 !isSameDay(message.createdAt, messages[index - 1]!.createdAt);
+              const showTimestamp =
+                index === 0 ||
+                showDay ||
+                minutesBetween(message.createdAt, messages[index - 1]!.createdAt) >= 10;
+              const canGroupWithPrevious =
+                Boolean(previousMessage) &&
+                !showTimestamp &&
+                previousMessage?.senderId === message.senderId &&
+                isStandardBubbleMessage(previousMessage.type) &&
+                isStandardBubbleMessage(message.type) &&
+                minutesBetween(message.createdAt, previousMessage.createdAt) < 5;
+              const canGroupWithNext =
+                Boolean(nextMessage) &&
+                nextMessage?.senderId === message.senderId &&
+                isStandardBubbleMessage(nextMessage.type) &&
+                isStandardBubbleMessage(message.type) &&
+                isSameDay(message.createdAt, nextMessage!.createdAt) &&
+                minutesBetween(nextMessage!.createdAt, message.createdAt) < 5;
 
               const dayStrip = showDay ? (
                 <div className="flex justify-center py-2">
@@ -195,14 +220,25 @@ export default async function ConnectionPage({
                   </span>
                 </div>
               ) : null;
+              const timeStrip = showTimestamp ? (
+                <div className={cn("flex justify-center", showDay ? "pb-1" : "py-2")}>
+                  <time
+                    dateTime={message.createdAt.toISOString()}
+                    className="rounded-full bg-black/[0.04] px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground dark:bg-white/10"
+                  >
+                    {timeLabel(message.createdAt)}
+                  </time>
+                </div>
+              ) : null;
 
               if (message.type === "SCHEDULE_SHARE_CARD" && message.body.trim()) {
                 const ownerDisplay =
                   message.sender.nickname?.trim() || message.sender.username || ui.common.studentFallback;
                 const shareToken = plainTokenFromScheduleShareRecipientUrl(message.body.trim());
                 return (
-                  <div key={message.id} id={chatMessageDomId(message.id)}>
+                  <div key={message.id} id={chatMessageDomId(message.id)} className="mt-3 first:mt-0">
                     {dayStrip}
+                    {timeStrip}
                     <ScheduleShareCardMessage
                       shareUrl={message.body.trim()}
                       ownerName={ownerDisplay}
@@ -218,8 +254,9 @@ export default async function ConnectionPage({
 
               if (message.type === "AVAILABILITY_CARD" && message.availabilityShare) {
                 return (
-                  <div key={message.id} id={chatMessageDomId(message.id)}>
+                  <div key={message.id} id={chatMessageDomId(message.id)} className="mt-3 first:mt-0">
                     {dayStrip}
+                    {timeStrip}
                     <AvailabilityCardMessage
                       shareId={message.availabilityShare.id}
                       ownerName={
@@ -234,8 +271,9 @@ export default async function ConnectionPage({
 
               if (message.type === "AVAILABILITY_CARD") {
                 return (
-                  <div key={message.id} id={chatMessageDomId(message.id)}>
+                  <div key={message.id} id={chatMessageDomId(message.id)} className="mt-3 first:mt-0">
                     {dayStrip}
+                    {timeStrip}
                     <div className="flex justify-center py-2">
                       <span className="max-w-sm rounded-full bg-muted px-3 py-1.5 text-center text-[11px] text-muted-foreground">
                         {ui.chat.availabilityOrphan}
@@ -248,8 +286,9 @@ export default async function ConnectionPage({
               if (message.type === "PLAN_REQUEST_CARD" && message.planRequest) {
                 const request = message.planRequest;
                 return (
-                  <div key={message.id} id={chatMessageDomId(message.id)}>
+                  <div key={message.id} id={chatMessageDomId(message.id)} className="mt-3 first:mt-0">
                     {dayStrip}
+                    {timeStrip}
                     <PlanRequestCardMessage
                       requestId={request.id}
                       proposerName={request.proposer.nickname ?? request.proposer.username}
@@ -272,8 +311,9 @@ export default async function ConnectionPage({
               if (message.type === "PLAN_CONFIRMED_CARD" && message.planRequest) {
                 const request = message.planRequest;
                 return (
-                  <div key={message.id} id={chatMessageDomId(message.id)}>
+                  <div key={message.id} id={chatMessageDomId(message.id)} className="mt-3 first:mt-0">
                     {dayStrip}
+                    {timeStrip}
                     <PlanConfirmedCardMessage
                       title={request.title}
                       startTimeISO={request.startTime.toISOString()}
@@ -285,8 +325,9 @@ export default async function ConnectionPage({
 
               if (message.type === "SYSTEM") {
                 return (
-                  <div key={message.id} id={chatMessageDomId(message.id)}>
+                  <div key={message.id} id={chatMessageDomId(message.id)} className="mt-3 first:mt-0">
                     {dayStrip}
+                    {timeStrip}
                     <div className="flex justify-center py-1">
                       <span className="rounded-full bg-muted px-3 py-1 text-[11px] text-muted-foreground">
                         {message.body}
@@ -334,29 +375,37 @@ export default async function ConnectionPage({
                 fromAssistant &&
                 bubblePayload.kind === "text" &&
                 message.deletedAt == null;
+              const showPeerAvatar = !isOwn && !canGroupWithNext;
 
               return (
-                <div key={message.id} id={chatMessageDomId(message.id)}>
+                <div
+                  key={message.id}
+                  id={chatMessageDomId(message.id)}
+                  className={cn("first:mt-0", canGroupWithPrevious ? "mt-1" : "mt-3")}
+                >
                   {dayStrip}
+                  {timeStrip}
                   <div
                     className={cn(
-                      "group flex gap-2",
+                      "group flex items-end gap-2",
                       isOwn ? "justify-end" : "justify-start",
                     )}
                   >
                     {!isOwn ? (
-                      peerHref ? (
+                      showPeerAvatar && peerHref ? (
                         <Link
                           href={peerHref}
-                          className="mt-0.5 shrink-0 self-end rounded-full transition hover:opacity-90 active:opacity-80"
+                          className="shrink-0 rounded-full transition hover:opacity-90 active:opacity-80"
                           aria-label={formatMessage(ui.chat.openPeerProfileAria, {
                             name: otherUser.nickname?.trim() || ui.common.studentFallback,
                           })}
                         >
                           <PresetAvatar id={message.sender.avatarUrl} size={32} />
                         </Link>
+                      ) : showPeerAvatar ? (
+                        <PresetAvatar id={message.sender.avatarUrl} size={32} className="shrink-0" />
                       ) : (
-                        <PresetAvatar id={message.sender.avatarUrl} size={32} className="mt-0.5 shrink-0 self-end" />
+                        <span className="h-8 w-8 shrink-0" aria-hidden />
                       )
                     ) : null}
                     {isOwn ? (
@@ -378,23 +427,31 @@ export default async function ConnectionPage({
                     ) : null}
                     <div
                       className={cn(
-                        "shrink",
+                        "shrink text-sm leading-5",
                         showAssistantQuickReplies
-                          ? "max-w-[min(100%,22rem)]"
-                          : "max-w-[min(100%,20rem)]",
+                          ? "max-w-[78%] sm:max-w-[22rem]"
+                          : "max-w-[78%] sm:max-w-[20rem]",
                         isOwn ? "text-right" : "text-left",
                       )}
                     >
                       <div
                         className={cn(
-                          "inline-block text-left text-[15px] leading-snug",
+                          "inline-block text-left text-sm leading-5",
                           bareImageChrome
-                            ? "max-w-[min(100vw-4rem,20rem)] p-0 align-top"
+                            ? "max-w-[min(78vw,20rem)] p-0 align-top"
                             : cn(
-                                "px-3.5 py-2",
+                                "px-3.5 py-2.5",
                                 isOwn
-                                  ? "rounded-[1.25rem] rounded-br-md bg-primary text-primary-foreground"
-                                  : "rounded-[1.25rem] rounded-bl-md bg-muted text-foreground",
+                                  ? cn(
+                                      "rounded-[1.15rem] bg-primary text-primary-foreground",
+                                      canGroupWithPrevious ? "rounded-tr-lg" : "rounded-tr-[1.15rem]",
+                                      canGroupWithNext ? "rounded-br-lg" : "rounded-br-md",
+                                    )
+                                  : cn(
+                                      "rounded-[1.15rem] bg-white text-foreground shadow-[0_1px_2px_rgba(15,23,42,0.06)] ring-1 ring-black/[0.04] dark:bg-zinc-900 dark:ring-white/10",
+                                      canGroupWithPrevious ? "rounded-tl-lg" : "rounded-tl-[1.15rem]",
+                                      canGroupWithNext ? "rounded-bl-lg" : "rounded-bl-md",
+                                    ),
                               ),
                         )}
                       >
@@ -431,15 +488,6 @@ export default async function ConnectionPage({
                           />
                         )}
                       </div>
-                      <time
-                        className={cn(
-                          "mt-0.5 block text-[10px] text-muted-foreground",
-                          isOwn ? "pr-0.5" : "pl-0.5",
-                        )}
-                        dateTime={message.createdAt.toISOString()}
-                      >
-                        {timeLabel(message.createdAt)}
-                      </time>
                     </div>
                     {!isOwn ? (
                       <MessageActionMenu
@@ -464,11 +512,11 @@ export default async function ConnectionPage({
             })}
           </div>
         )}
-      </ChatScrollContainer>
+      </DirectMessageList>
 
       <div
         data-testid="chat-composer-footer"
-        className="shrink-0 border-t border-slate-200/75 bg-white/95 px-3 pt-2.5 pb-[calc(max(0.75rem,env(safe-area-inset-bottom))+var(--keyboard-inset-bottom,0px))] shadow-[0_-4px_24px_rgba(15,23,42,0.045)] backdrop-blur-sm dark:border-border/60 dark:bg-background/90 dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]"
+        className="shrink-0 border-t border-slate-200/75 bg-white/95 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2.5 shadow-[0_-4px_24px_rgba(15,23,42,0.045)] backdrop-blur-sm dark:border-border/60 dark:bg-background/90 dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]"
       >
         <ChatComposer
           connectionId={connection.id}

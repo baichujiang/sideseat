@@ -599,6 +599,8 @@ export type AppMessages = {
     placeholderWrite: string;
     placeholderReply: string;
     sendAria: string;
+    /** `{count}` placeholder. */
+    newMessagesBadge: string;
     attachmentsUnavailableTitle: string;
     attachmentsUnavailableAria: string;
     cancelReplyAria: string;

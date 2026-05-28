@@ -34,7 +34,7 @@ export function ChatComposer({
   const router = useRouter();
   const { chat: c, common } = useAppMessages();
   const { replyTo, setReplyTo } = useChatReply();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const inputId = `chat-input-${connectionId}`;
   const composerRootRef = useRef<HTMLDivElement>(null);
   const [body, setBody] = useState("");
@@ -66,6 +66,7 @@ export function ChatComposer({
 
     setSubmitting(true);
     setError("");
+    setBody("");
 
     const response = await apiFetch(`/api/connections/${connectionId}/messages`, {
       method: "POST",
@@ -79,11 +80,11 @@ export function ChatComposer({
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
       setError(typeof payload.error === "string" ? payload.error : c.unableToSend);
+      setBody((current) => (current.trim() ? current : text));
       setSubmitting(false);
       return;
     }
 
-    setBody("");
     setReplyTo(null);
     setSubmitting(false);
     router.refresh();
@@ -119,7 +120,7 @@ export function ChatComposer({
             ref={inputRef}
             id={inputId}
             value={body}
-            onChange={(e) => setBody(e.target.value.replace(/[\r\n]+/g, " "))}
+            onChange={(e) => setBody(e.target.value)}
             onSend={() => void submit()}
             placeholder={placeholder ?? (replyTo ? c.placeholderReply : c.placeholderWrite)}
           />

@@ -19,7 +19,7 @@ export function GroupChatComposer({
   groupChatId: string;
 }) {
   const router = useRouter();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const inputId = `group-chat-input-${groupChatId}`;
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
@@ -32,6 +32,7 @@ export function GroupChatComposer({
 
     setSubmitting(true);
     setError("");
+    setBody("");
 
     const response = await apiFetch(`/api/group-chats/${groupChatId}/messages`, {
       method: "POST",
@@ -42,11 +43,11 @@ export function GroupChatComposer({
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
       setError(typeof payload.error === "string" ? payload.error : "Unable to send.");
+      setBody((current) => (current.trim() ? current : text));
       setSubmitting(false);
       return;
     }
 
-    setBody("");
     setSubmitting(false);
     router.refresh();
     scheduleChatInputRefocus(inputRef, inputId);
@@ -63,7 +64,7 @@ export function GroupChatComposer({
             ref={inputRef}
             id={inputId}
             value={body}
-            onChange={(e) => setBody(e.target.value.replace(/[\r\n]+/g, " "))}
+            onChange={(e) => setBody(e.target.value)}
             onSend={() => void submit()}
             placeholder="Message the group…"
           />

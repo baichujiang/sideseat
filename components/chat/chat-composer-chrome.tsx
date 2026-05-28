@@ -18,8 +18,8 @@ export const chatComposerBarClassName = cn(
 );
 
 export const chatComposerInputClassName = cn(
-  "h-10 min-w-0 flex-1 border-0 bg-transparent px-2.5 py-2",
-  "text-[16px] leading-snug text-foreground",
+  "max-h-24 min-h-10 min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent px-2.5 py-2",
+  "text-[16px] leading-6 text-foreground",
   "placeholder:text-muted-foreground/65",
   "outline-none ring-0 focus-visible:outline-none focus-visible:ring-0",
 );

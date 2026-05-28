@@ -595,6 +595,7 @@ export const enMessages: AppMessages = {
     placeholderWrite: "Write a message…",
     placeholderReply: "Write your reply…",
     sendAria: "Send",
+    newMessagesBadge: "{count} new messages",
     attachmentsUnavailableTitle: "Attachments unavailable in self chat",
     attachmentsUnavailableAria: "Attachments unavailable in self chat",
     cancelReplyAria: "Cancel reply",

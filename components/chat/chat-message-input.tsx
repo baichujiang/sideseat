@@ -1,29 +1,75 @@
 "use client";
 
-import { forwardRef, type FocusEvent, type InputHTMLAttributes, type KeyboardEvent } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FocusEvent,
+  type KeyboardEvent,
+  type TextareaHTMLAttributes,
+} from "react";
 
 import { chatComposerInputClassName } from "@/components/chat/chat-composer-chrome";
 import { cn } from "@/lib/utils";
 
-/** Shared 1:1 / group chat field — single-line input so mobile keyboards show Send, not 确认+换行. */
+/** Shared chat field: single-line by default, grows up to four mobile-friendly rows. */
 export const ChatMessageInput = forwardRef<
-  HTMLInputElement,
-  Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & {
+  HTMLTextAreaElement,
+  Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "rows"> & {
     onSend?: () => void;
   }
->(function ChatMessageInput({ className, onFocus, onKeyDown, onSend, ...props }, ref) {
-  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+>(function ChatMessageInput({ className, onChange, onFocus, onKeyDown, onSend, value, ...props }, ref) {
+  const localRef = useRef<HTMLTextAreaElement | null>(null);
+  const [isComposing, setIsComposing] = useState(false);
+
+  const setRefs = (node: HTMLTextAreaElement | null) => {
+    localRef.current = node;
+    if (typeof ref === "function") {
+      ref(node);
+    } else if (ref) {
+      ref.current = node;
+    }
+  };
+
+  const autosize = (textarea: HTMLTextAreaElement) => {
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 96)}px`;
+  };
+
+  useEffect(() => {
+    const textarea = localRef.current;
+    if (!textarea) return;
+    if (!value) {
+      requestAnimationFrame(() => {
+        textarea.style.height = "auto";
+      });
+      return;
+    }
+    autosize(textarea);
+  }, [value]);
+
+  const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    autosize(event.currentTarget);
+    onChange?.(event);
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     onKeyDown?.(event);
     if (event.defaultPrevented) return;
-    if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+    if (event.key !== "Enter" || event.shiftKey || isComposing || event.nativeEvent.isComposing) {
+      return;
+    }
     event.preventDefault();
     onSend?.();
   };
-  const handleFocus = (event: FocusEvent<HTMLInputElement>) => {
+
+  const handleFocus = (event: FocusEvent<HTMLTextAreaElement>) => {
     onFocus?.(event);
-    const input = event.currentTarget;
+    const textarea = event.currentTarget;
     const keepVisible = () => {
-      input.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
+      textarea.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
     };
     requestAnimationFrame(keepVisible);
     window.setTimeout(keepVisible, 120);
@@ -31,13 +77,17 @@ export const ChatMessageInput = forwardRef<
   };
 
   return (
-    <input
-      ref={ref}
-      type="text"
+    <textarea
+      ref={setRefs}
+      rows={1}
       enterKeyHint="send"
       inputMode="text"
       autoComplete="off"
       className={cn(chatComposerInputClassName, className)}
+      value={value}
+      onChange={handleChange}
+      onCompositionStart={() => setIsComposing(true)}
+      onCompositionEnd={() => setIsComposing(false)}
       onFocus={handleFocus}
       onKeyDown={handleKeyDown}
       {...props}

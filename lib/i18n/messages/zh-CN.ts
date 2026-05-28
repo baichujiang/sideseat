@@ -578,6 +578,7 @@ export const zhCnMessages: AppMessages = {
     placeholderWrite: "输入消息…",
     placeholderReply: "输入回复…",
     sendAria: "发送",
+    newMessagesBadge: "{count} 条新消息",
     attachmentsUnavailableTitle: "与自己的对话无法使用附件",
     attachmentsUnavailableAria: "与自己的对话无法使用附件",
     cancelReplyAria: "取消引用回复",

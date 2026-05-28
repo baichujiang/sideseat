@@ -107,7 +107,7 @@ test.describe.serial("Chat regression flow", () => {
     });
     await expect
       .poll(() => footer.evaluate((el) => parseFloat(getComputedStyle(el).paddingBottom)))
-      .toBeGreaterThan(paddingBefore + 180);
+      .toBe(paddingBefore);
     await page.evaluate(() => {
       document.documentElement.style.setProperty("--keyboard-inset-bottom", "0px");
     });
@@ -115,12 +115,16 @@ test.describe.serial("Chat regression flow", () => {
     const firstMessage = `e2e first ${Date.now()}`;
     await input.fill(firstMessage);
     await input.press("Enter");
+    await expect(input).toHaveValue("");
     await expect(page.getByText(firstMessage)).toBeVisible();
     await expect(input).toBeFocused();
 
     const secondMessage = `e2e second ${Date.now()}`;
     await input.fill(secondMessage);
+    await expect(input).toHaveValue(secondMessage);
+    await expect(page.getByRole("button", { name: /send/i })).toBeEnabled();
     await page.getByRole("button", { name: /send/i }).click();
+    await expect(input).toHaveValue("");
     await expect(page.getByText(secondMessage)).toBeVisible();
     await expect(input).toBeFocused();
 
