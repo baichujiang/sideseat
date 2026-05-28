@@ -54,7 +54,7 @@ export function GroupChatComposer({
   };
 
   return (
-    <div className="relative space-y-2">
+    <div data-chat-composer-root className="relative space-y-2">
       <div className="flex items-end gap-2">
         <ChatComposerBar>
           <label className="sr-only" htmlFor={inputId}>

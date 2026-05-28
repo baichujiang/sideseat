@@ -65,7 +65,7 @@ export function CourseChatComposer({
   };
 
   return (
-    <div className="relative space-y-2">
+    <div data-chat-composer-root className="relative space-y-2">
       {replyTo ? (
         <ReplyPreview
           senderName={replyTo.senderName}

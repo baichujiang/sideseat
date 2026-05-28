@@ -92,7 +92,7 @@ export function ChatComposer({
   };
 
   return (
-    <div ref={composerRootRef} className="relative space-y-2">
+    <div ref={composerRootRef} data-chat-composer-root className="relative space-y-2">
       {replyTo ? (
         <ReplyPreview
           senderName={replyTo.senderName}

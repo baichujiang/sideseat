@@ -21,7 +21,7 @@ export const ChatMessageInput = forwardRef<
     onSend?: () => void;
   }
 >(function ChatMessageInput(
-  { className, onChange, onFocus, onKeyDown, onPointerDown, onSend, value, ...props },
+  { className, onBlur, onChange, onFocus, onKeyDown, onPointerDown, onSend, value, ...props },
   ref,
 ) {
   const localRef = useRef<HTMLTextAreaElement | null>(null);
@@ -83,9 +83,21 @@ export const ChatMessageInput = forwardRef<
 
   const handleFocus: TextareaHTMLAttributes<HTMLTextAreaElement>["onFocus"] = (event) => {
     onFocus?.(event);
+    document.documentElement.classList.add("chat-input-focused");
     requestAnimationFrame(keepAppShellAnchored);
     window.setTimeout(keepAppShellAnchored, 120);
     window.setTimeout(keepAppShellAnchored, 320);
+  };
+
+  const handleBlur: TextareaHTMLAttributes<HTMLTextAreaElement>["onBlur"] = (event) => {
+    onBlur?.(event);
+    window.setTimeout(() => {
+      const active = document.activeElement;
+      if (active instanceof HTMLTextAreaElement && active.closest("[data-chat-composer-root]")) {
+        return;
+      }
+      document.documentElement.classList.remove("chat-input-focused");
+    }, 80);
   };
 
   return (
@@ -100,6 +112,7 @@ export const ChatMessageInput = forwardRef<
       onChange={handleChange}
       onCompositionStart={() => setIsComposing(true)}
       onCompositionEnd={() => setIsComposing(false)}
+      onBlur={handleBlur}
       onFocus={handleFocus}
       onKeyDown={handleKeyDown}
       onPointerDown={handlePointerDown}

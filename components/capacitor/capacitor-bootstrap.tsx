@@ -30,8 +30,15 @@ function applyVisualViewportVars(root: HTMLElement) {
   const vv = window.visualViewport;
   const height = Math.max(1, Math.round(vv?.height ?? window.innerHeight));
   const offsetTop = Math.max(0, Math.round(vv?.offsetTop ?? 0));
+  const layoutHeight = Math.max(
+    window.innerHeight,
+    document.documentElement.clientHeight,
+    height,
+  );
+  const keyboardLikelyVisible = layoutHeight - height - offsetTop > 80;
   root.style.setProperty("--app-viewport-height", `${height}px`);
   root.style.setProperty("--app-visual-viewport-offset-top", `${offsetTop}px`);
+  root.classList.toggle("keyboard-visible", keyboardLikelyVisible);
 }
 
 /**
@@ -111,7 +118,7 @@ export function CapacitorBootstrap() {
           const viewportConsumed = Math.max(0, baselineViewportHeight - currentViewportHeight());
           const fallbackInset = Math.max(0, keyboardHeight - viewportConsumed);
           root.style.setProperty("--keyboard-inset-bottom", `${Math.round(fallbackInset)}px`);
-          root.classList.toggle("keyboard-visible", fallbackInset > 0);
+          root.classList.toggle("keyboard-visible", fallbackInset > 0 || viewportConsumed > 80);
         };
 
         const willShow = await Keyboard.addListener("keyboardWillShow", (info) => {

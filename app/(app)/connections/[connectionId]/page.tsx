@@ -516,7 +516,7 @@ export default async function ConnectionPage({
 
       <div
         data-testid="chat-composer-footer"
-        className="shrink-0 border-t border-slate-200/75 bg-white/95 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2.5 shadow-[0_-4px_24px_rgba(15,23,42,0.045)] backdrop-blur-sm dark:border-border/60 dark:bg-background/90 dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]"
+        className="shrink-0 border-t border-slate-200/75 bg-white/95 px-3 pb-[var(--chat-composer-padding-bottom)] pt-2.5 shadow-[0_-4px_24px_rgba(15,23,42,0.045)] backdrop-blur-sm dark:border-border/60 dark:bg-background/90 dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]"
       >
         <ChatComposer
           connectionId={connection.id}

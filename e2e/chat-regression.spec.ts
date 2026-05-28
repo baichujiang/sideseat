@@ -101,6 +101,9 @@ test.describe.serial("Chat regression flow", () => {
     await input.click();
     await expect(input).toBeFocused();
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.classList.contains("chat-input-focused")))
+      .toBe(true);
 
     const paddingBefore = await footer.evaluate((el) => parseFloat(getComputedStyle(el).paddingBottom));
     await page.evaluate(() => {
