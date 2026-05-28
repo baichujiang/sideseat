@@ -80,7 +80,23 @@ test.describe.serial("Chat regression flow", () => {
 
     const input = page.getByRole("textbox", { name: /message/i });
     const footer = page.getByTestId("chat-composer-footer");
+    const shell = page.locator("[data-app-shell]");
     await expect(footer).toBeVisible();
+    await expect(shell).toBeVisible();
+
+    const shellHeightBefore = await shell.evaluate((el) => el.getBoundingClientRect().height);
+    await page.evaluate(() => {
+      document.documentElement.style.setProperty("--app-viewport-height", "640px");
+    });
+    await expect
+      .poll(() => shell.evaluate((el) => Math.round(el.getBoundingClientRect().height)))
+      .toBe(640);
+    await page.evaluate(() => {
+      document.documentElement.style.removeProperty("--app-viewport-height");
+    });
+    await expect
+      .poll(() => shell.evaluate((el) => Math.round(el.getBoundingClientRect().height)))
+      .toBe(Math.round(shellHeightBefore));
 
     await input.click();
     await expect(input).toBeFocused();

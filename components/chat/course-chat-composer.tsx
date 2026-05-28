@@ -27,6 +27,7 @@ export function CourseChatComposer({
   const { courses: co, chat: ch } = useAppMessages();
   const { replyTo, setReplyTo } = useChatReply();
   const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = `course-chat-input-${courseId}`;
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -59,7 +60,7 @@ export function CourseChatComposer({
     setReplyTo(null);
     setSubmitting(false);
     router.refresh();
-    scheduleChatInputRefocus(inputRef);
+    scheduleChatInputRefocus(inputRef, inputId);
   };
 
   return (
@@ -80,12 +81,12 @@ export function CourseChatComposer({
           >
             <Plus className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.25} />
           </ChatComposerSlotButton>
-          <label className="sr-only" htmlFor={`course-chat-input-${courseId}`}>
+          <label className="sr-only" htmlFor={inputId}>
             {co.courseChatComposerInputLabel}
           </label>
           <ChatMessageInput
             ref={inputRef}
-            id={`course-chat-input-${courseId}`}
+            id={inputId}
             value={body}
             onChange={(e) => setBody(e.target.value.replace(/[\r\n]+/g, " "))}
             onSend={() => void submit()}

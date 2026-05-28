@@ -12,7 +12,11 @@ import { WeekVisibleDaysBar } from "@/components/calendar/week-visible-days-bar"
 import { berlinClockMinutes, berlinEndOfWeek, berlinStartOfWeek } from "@/lib/calendar/schedule-berlin";
 import type { PublicScheduleShareSnapshot } from "@/lib/schedule-share/build-schedule-share-snapshot";
 import { publicBlocksToWeekCalendarBlocks } from "@/lib/schedule-share/public-blocks-to-week-calendar";
-import type { ShareRevealCategoryInput } from "@/lib/schedule-share/reveal-category-selection";
+import {
+  UNCATEGORIZED_REVEAL_CATEGORY_ID,
+  type ShareRevealCategoryInput,
+} from "@/lib/schedule-share/reveal-category-selection";
+import { UNCATEGORIZED_REVEAL_PRESET_KEY } from "@/lib/schedule-share/reveal-config";
 import {
   shareOwnerCalendarPickerRange,
   type ShareDayQuickPreset,
@@ -75,7 +79,11 @@ export function ScheduleShareOwnerPreview({
     const knownCategoryIds = new Set(revealCategories.map((c) => c.id));
     const revealedSet = new Set(revealedCategoryIds);
     return snapshot.blocks.map((block) => {
-      const categoryId = block.categoryId?.trim();
+      const categoryId =
+        block.categoryId?.trim() ||
+        (block.categoryPresetKey === UNCATEGORIZED_REVEAL_PRESET_KEY
+          ? UNCATEGORIZED_REVEAL_CATEGORY_ID
+          : "");
       if (!categoryId || !knownCategoryIds.has(categoryId) || revealedSet.has(categoryId)) {
         return block;
       }

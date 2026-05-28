@@ -1346,6 +1346,7 @@ export function ScheduleSurface({
     () => ({
       paste: messages.schedule.calendarSlotPaste,
       newEvent: messages.schedule.calendarSlotNewEvent,
+      selectedSlot: messages.schedule.calendarSlotSelected,
       menuAriaLabel: messages.schedule.calendarSlotPasteMenuAria,
     }),
     [messages.schedule],
@@ -1888,8 +1889,14 @@ export function ScheduleSurface({
 
       {slotActionMenu ? (
         <WeekCalendarSlotPasteMenu
+          start={slotActionMenu.start}
+          end={slotActionMenu.end}
           clientX={slotActionMenu.clientX}
           clientY={slotActionMenu.clientY}
+          slotLeft={slotActionMenu.slotLeft}
+          slotTop={slotActionMenu.slotTop}
+          slotWidth={slotActionMenu.slotWidth}
+          slotHeight={slotActionMenu.slotHeight}
           labels={slotPasteMenuLabels}
           showPaste={slotActionCanPaste}
           onPaste={() => void handleSlotPaste()}

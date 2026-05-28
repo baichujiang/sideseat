@@ -226,8 +226,18 @@ export function ScheduleDayTimeline({
     const frac = (startMinute - visualStartMinute) / totalMinutes;
     const anchorY = rect.top + frac * rect.height;
     const clientX = rect.left + rect.width * 0.55;
+    const hourPx = Math.max(28, (60 / totalMinutes) * rect.height);
     if (onSlotActionPrompt) {
-      onSlotActionPrompt({ start, end, clientX, clientY: anchorY });
+      onSlotActionPrompt({
+        start,
+        end,
+        clientX,
+        clientY: anchorY,
+        slotLeft: rect.left + 2,
+        slotTop: anchorY,
+        slotWidth: Math.max(0, rect.width - 4),
+        slotHeight: Math.min(hourPx, Math.max(24, rect.bottom - anchorY)),
+      });
       return;
     }
     onCreateEvent?.(start, end);

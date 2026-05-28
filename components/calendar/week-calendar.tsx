@@ -1622,7 +1622,10 @@ export function WeekCalendar({
     start: Date,
     fallbackX: number,
     fallbackY: number,
-  ): { clientX: number; clientY: number } {
+  ): Pick<
+    ScheduleSlotActionPrompt,
+    "clientX" | "clientY" | "slotLeft" | "slotTop" | "slotWidth" | "slotHeight"
+  > {
     const dateKey = scheduleDateKeyInBerlin(start);
     const el = dayBodyElRef.current.get(dateKey);
     if (!el) return { clientX: fallbackX, clientY: fallbackY };
@@ -1636,9 +1639,15 @@ export function WeekCalendar({
       Math.min(visualStartMinute + totalMinutes, startMinute),
     );
     const frac = (clampedMinute - visualStartMinute) / totalMinutes;
+    const hourPx = Math.max(28, (60 / totalMinutes) * rect.height);
+    const top = rect.top + frac * rect.height;
     return {
       clientX: rect.left + rect.width / 2,
-      clientY: rect.top + frac * rect.height,
+      clientY: top,
+      slotLeft: rect.left + 2,
+      slotTop: top,
+      slotWidth: Math.max(0, rect.width - 4),
+      slotHeight: Math.min(hourPx, Math.max(24, rect.bottom - top)),
     };
   }
 
@@ -1647,7 +1656,7 @@ export function WeekCalendar({
       onCreateRangePreview?.(null);
       if (onSlotActionPrompt) {
         const anchor = slotMenuClientPointForStart(start, clientX, clientY);
-        onSlotActionPrompt({ start, end, clientX: anchor.clientX, clientY: anchor.clientY });
+        onSlotActionPrompt({ start, end, ...anchor });
         return;
       }
       onCreateEvent?.(start, end);

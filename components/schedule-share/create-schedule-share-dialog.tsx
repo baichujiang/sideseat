@@ -23,6 +23,7 @@ import {
   allRevealedCategoryIds,
   revealConfigFromRevealedCategoryIds,
   shareRevealCategoryColor,
+  uncategorizedRevealCategory,
   type ShareRevealCategoryInput,
 } from "@/lib/schedule-share/reveal-category-selection";
 import { defaultShareExpiresAt } from "@/lib/schedule-share/share-range-presets";
@@ -82,14 +83,16 @@ export function CreateScheduleShareDialog({
   const [copied, setCopied] = useState(false);
 
   const revealCategories = useMemo<ShareRevealCategoryInput[]>(
-    () =>
-      categories.map((c) => ({
+    () => [
+      uncategorizedRevealCategory(s.uncategorizedCategory),
+      ...categories.map((c) => ({
         id: c.id,
         name: c.name,
         presetKey: c.presetKey,
         color: shareRevealCategoryColor(c.color),
       })),
-    [categories],
+    ],
+    [categories, s.uncategorizedCategory],
   );
 
   const resetForm = useCallback(() => {

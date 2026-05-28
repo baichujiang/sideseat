@@ -1,9 +1,12 @@
 import { normalizeCalendarCategoryHex } from "@/lib/calendar/calendar-category-colors";
 import {
   REVEAL_PRESET_KEYS_ALLOWLIST,
+  UNCATEGORIZED_REVEAL_PRESET_KEY,
   type NormalizedRevealConfig,
   type RevealPresetKeyAllowlisted,
 } from "@/lib/schedule-share/reveal-config";
+
+export const UNCATEGORIZED_REVEAL_CATEGORY_ID = "__sideseat_uncategorized__";
 
 export type ShareRevealCategoryInput = {
   id: string;
@@ -15,6 +18,15 @@ export type ShareRevealCategoryInput = {
 export function shareRevealCategoryColor(color: string): string {
   const trimmed = color.trim();
   return normalizeCalendarCategoryHex(trimmed) ?? "#64748B";
+}
+
+export function uncategorizedRevealCategory(name: string): ShareRevealCategoryInput {
+  return {
+    id: UNCATEGORIZED_REVEAL_CATEGORY_ID,
+    name,
+    presetKey: UNCATEGORIZED_REVEAL_PRESET_KEY,
+    color: "#94A3B8",
+  };
 }
 
 export function initialRevealedCategoryIds(

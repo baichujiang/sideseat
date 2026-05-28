@@ -35,6 +35,7 @@ export function ChatComposer({
   const { chat: c, common } = useAppMessages();
   const { replyTo, setReplyTo } = useChatReply();
   const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = `chat-input-${connectionId}`;
   const composerRootRef = useRef<HTMLDivElement>(null);
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
@@ -86,7 +87,7 @@ export function ChatComposer({
     setReplyTo(null);
     setSubmitting(false);
     router.refresh();
-    scheduleChatInputRefocus(inputRef);
+    scheduleChatInputRefocus(inputRef, inputId);
   };
 
   return (
@@ -111,12 +112,12 @@ export function ChatComposer({
           ) : (
             <ChatAttachmentPlusButton open={attachOpen} onToggle={() => setAttachOpen((o) => !o)} />
           )}
-          <label className="sr-only" htmlFor={`chat-input-${connectionId}`}>
+          <label className="sr-only" htmlFor={inputId}>
             {c.messageInputLabel}
           </label>
           <ChatMessageInput
             ref={inputRef}
-            id={`chat-input-${connectionId}`}
+            id={inputId}
             value={body}
             onChange={(e) => setBody(e.target.value.replace(/[\r\n]+/g, " "))}
             onSend={() => void submit()}

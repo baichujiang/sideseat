@@ -20,6 +20,7 @@ export function GroupChatComposer({
 }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = `group-chat-input-${groupChatId}`;
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -48,19 +49,19 @@ export function GroupChatComposer({
     setBody("");
     setSubmitting(false);
     router.refresh();
-    scheduleChatInputRefocus(inputRef);
+    scheduleChatInputRefocus(inputRef, inputId);
   };
 
   return (
     <div className="relative space-y-2">
       <div className="flex items-end gap-2">
         <ChatComposerBar>
-          <label className="sr-only" htmlFor={`group-chat-input-${groupChatId}`}>
+          <label className="sr-only" htmlFor={inputId}>
             Message
           </label>
           <ChatMessageInput
             ref={inputRef}
-            id={`group-chat-input-${groupChatId}`}
+            id={inputId}
             value={body}
             onChange={(e) => setBody(e.target.value.replace(/[\r\n]+/g, " "))}
             onSend={() => void submit()}

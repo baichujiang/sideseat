@@ -1,6 +1,17 @@
-export function scheduleChatInputRefocus(inputRef: { current: HTMLInputElement | null }) {
+export function scheduleChatInputRefocus(
+  inputRef: { current: HTMLInputElement | null },
+  inputId?: string,
+) {
   const focus = () => {
-    inputRef.current?.focus({ preventScroll: true });
+    const refTarget = inputRef.current;
+    const target =
+      refTarget?.isConnected
+        ? refTarget
+        : inputId
+          ? (document.getElementById(inputId) as HTMLInputElement | null)
+          : null;
+    if (!target || !target.isConnected) return;
+    target.focus({ preventScroll: true });
   };
 
   focus();
@@ -11,4 +22,5 @@ export function scheduleChatInputRefocus(inputRef: { current: HTMLInputElement |
   window.setTimeout(focus, 120);
   window.setTimeout(focus, 320);
   window.setTimeout(focus, 650);
+  window.setTimeout(focus, 1000);
 }

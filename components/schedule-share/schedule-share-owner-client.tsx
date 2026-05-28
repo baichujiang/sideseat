@@ -24,6 +24,7 @@ import {
   initialRevealedCategoryIds,
   revealConfigFromRevealedCategoryIds,
   shareRevealCategoryColor,
+  uncategorizedRevealCategory,
   type ShareRevealCategoryInput,
 } from "@/lib/schedule-share/reveal-category-selection";
 import { berlinStartOfCalendarDay } from "@/lib/calendar/schedule-berlin";
@@ -99,14 +100,16 @@ export function ScheduleShareOwnerClient({
     initialShareSelectedDateKeys(initialRange.start, initialRange.end, initialReveal.includedDates),
   );
   const revealCategories = useMemo<ShareRevealCategoryInput[]>(
-    () =>
-      calendarCategories.map((c) => ({
+    () => [
+      uncategorizedRevealCategory(s.uncategorizedCategory),
+      ...calendarCategories.map((c) => ({
         id: c.id,
         name: c.name,
         presetKey: c.presetKey,
         color: shareRevealCategoryColor(c.color),
       })),
-    [calendarCategories],
+    ],
+    [calendarCategories, s.uncategorizedCategory],
   );
   const [revealedCategoryIds, setRevealedCategoryIds] = useState<string[]>(() =>
     initialRevealedCategoryIds(revealCategories, initialReveal),

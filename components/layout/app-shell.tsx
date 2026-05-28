@@ -336,7 +336,7 @@ function AppShellContent({
         "md:max-w-none md:w-full",
         "lg:flex-row lg:max-w-none",
         shellSurface,
-        "h-dvh max-h-dvh overflow-hidden",
+        "h-[var(--app-viewport-height,100dvh)] max-h-[var(--app-viewport-height,100dvh)] overflow-hidden",
         !isChatThread &&
           "[--bottom-nav-clearance:calc(160px+var(--safe-bottom))] lg:[--bottom-nav-clearance:max(1.25rem,var(--safe-bottom))]",
       )}

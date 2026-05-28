@@ -841,6 +841,7 @@ export const enMessages: AppMessages = {
     monthCellAriaMany: "{when} — {count} events",
     calendarSlotPaste: "Paste",
     calendarSlotNewEvent: "New event",
+    calendarSlotSelected: "Selected time",
     calendarSlotPasteMenuAria: "Paste copied event or create new",
     detailPopoverEdit: "Edit",
     detailPopoverDelete: "Delete",
@@ -900,6 +901,7 @@ export const enMessages: AppMessages = {
     presetCustom: "Custom",
     revealSectionTitle: "Show on shared calendar",
     showAllCategories: "All",
+    uncategorizedCategory: "None",
     revealPresetsHint:
       "Titles and locations are visible by default. Tap a category to hide its details from visitors.",
     presetsGroupLabel: "Presets",

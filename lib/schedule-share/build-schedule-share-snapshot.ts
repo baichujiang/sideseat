@@ -7,6 +7,7 @@ import { scheduleDateKeyInBerlin } from "@/lib/calendar/schedule-berlin";
 import { shareDateKeysInInclusiveRange } from "@/lib/schedule-share/share-selected-days";
 import { loadIcsSubscriptionStudyEntries } from "@/lib/calendar/load-ics-subscription-entries";
 import {
+  UNCATEGORIZED_REVEAL_PRESET_KEY,
   type NormalizedRevealConfig,
   isBlockRevealed,
   shareIncludedDateKeySet,
@@ -201,7 +202,9 @@ export async function collectInternalScheduleBlocks(
     const clipped = clipBlock(e.startAt, e.endAt, rangeStart, rangeEnd);
     if (!clipped) continue;
     const mirror = isCalendarCourseMirrorRow(e);
-    const internalPresetKey = mirror ? "course" : (e.category?.presetKey ?? null);
+    const internalPresetKey = mirror
+      ? "course"
+      : (e.category?.presetKey ?? (e.categoryId ? null : UNCATEGORIZED_REVEAL_PRESET_KEY));
     const internalCategoryId = mirror ? null : e.categoryId;
     const meta = categoryMeta(internalCategoryId);
     blocks.push({
@@ -274,7 +277,9 @@ export async function collectInternalScheduleBlocks(
       title: ev.title,
       location: ev.location,
       internalCategoryId: catId,
-      internalPresetKey: catId ? (presetByCategoryId[catId] ?? null) : null,
+      internalPresetKey: catId
+        ? (presetByCategoryId[catId] ?? null)
+        : UNCATEGORIZED_REVEAL_PRESET_KEY,
       internalCategoryColor: icsMeta.color,
       internalCategoryName: icsMeta.name,
       internalSource: "ics_subscription",

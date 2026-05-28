@@ -18,6 +18,7 @@ export type WeekCalendarSlotPasteMenuLabels = {
   paste: string;
   /** Create a blank event at the tapped slot instead of pasting. */
   newEvent: string;
+  selectedSlot: string;
   menuAriaLabel: string;
 };
 
@@ -26,6 +27,10 @@ export type ScheduleSlotActionPrompt = {
   end: Date;
   clientX: number;
   clientY: number;
+  slotLeft?: number;
+  slotTop?: number;
+  slotWidth?: number;
+  slotHeight?: number;
 };
 
 /**
@@ -33,16 +38,28 @@ export type ScheduleSlotActionPrompt = {
  * payload is buffered.
  */
 export function WeekCalendarSlotPasteMenu({
+  start,
+  end,
   clientX,
   clientY,
+  slotLeft,
+  slotTop,
+  slotWidth,
+  slotHeight,
   labels,
   showPaste = false,
   onPaste,
   onNewEvent,
   onDismiss,
 }: {
+  start: Date;
+  end: Date;
   clientX: number;
   clientY: number;
+  slotLeft?: number;
+  slotTop?: number;
+  slotWidth?: number;
+  slotHeight?: number;
   labels: WeekCalendarSlotPasteMenuLabels;
   showPaste?: boolean;
   onPaste: () => void;
@@ -54,6 +71,11 @@ export function WeekCalendarSlotPasteMenu({
   const [pos, setPos] = useState<{ top: number; left: number; placement: "above" | "below" } | null>(
     null,
   );
+  const timeLabel = formatSlotTimeRange(start, end);
+  const markerTop = slotTop ?? clientY;
+  const markerLeft = slotLeft ?? clientX - 36;
+  const markerWidth = slotWidth ?? 72;
+  const markerHeight = Math.max(24, slotHeight ?? 32);
 
   useLayoutEffect(() => {
     const inner = innerRef.current;
@@ -102,6 +124,19 @@ export function WeekCalendarSlotPasteMenu({
   <>
     <div
       aria-hidden
+      className="pointer-events-none fixed z-[198]"
+      style={{
+        left: markerLeft,
+        top: markerTop,
+        width: markerWidth,
+        height: markerHeight,
+      }}
+    >
+      <div className="absolute inset-x-0 top-0 h-0.5 rounded-full bg-[#2563EB] shadow-[0_0_0_2px_rgba(37,99,235,0.18)]" />
+      <div className="absolute inset-x-0 top-0 h-full rounded-xl border border-[#2563EB]/45 bg-[#2563EB]/10 ring-4 ring-[#2563EB]/10 dark:bg-blue-400/15 dark:ring-blue-400/10" />
+    </div>
+    <div
+      aria-hidden
       className="pointer-events-none fixed z-[199]"
       style={{
         left: clientX,
@@ -138,22 +173,47 @@ export function WeekCalendarSlotPasteMenu({
         role="menu"
         aria-label={labels.menuAriaLabel}
         className={cn(
-          "inline-flex items-stretch overflow-hidden rounded-2xl bg-white shadow-[0_18px_44px_-12px_rgba(15,23,42,0.45)] ring-1 ring-black/[0.06]",
+          "overflow-hidden rounded-2xl bg-white shadow-[0_18px_44px_-12px_rgba(15,23,42,0.45)] ring-1 ring-black/[0.06]",
           "dark:bg-zinc-900 dark:ring-white/10",
         )}
       >
-        <ToolbarButton onClick={onNewEvent} label={labels.newEvent} />
-        {showPaste ? (
-          <>
-            <ToolbarDivider />
-            <ToolbarButton onClick={onPaste} label={labels.paste} />
-          </>
-        ) : null}
+        <div className="border-b border-black/[0.06] px-3.5 py-2 text-left dark:border-white/10">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#2563EB] dark:text-blue-300">
+            {labels.selectedSlot}
+          </p>
+          <p className="mt-0.5 whitespace-nowrap text-[13px] font-semibold text-zinc-900 dark:text-zinc-50">
+            {timeLabel}
+          </p>
+        </div>
+        <div className="inline-flex items-stretch">
+          <ToolbarButton onClick={onNewEvent} label={labels.newEvent} />
+          {showPaste ? (
+            <>
+              <ToolbarDivider />
+              <ToolbarButton onClick={onPaste} label={labels.paste} />
+            </>
+          ) : null}
+        </div>
       </div>
     </div>
   </>,
     document.body,
   );
+}
+
+function formatSlotTimeRange(start: Date, end: Date): string {
+  const locale =
+    typeof navigator !== "undefined" && navigator.language ? navigator.language : "en-US";
+  const day = new Intl.DateTimeFormat(locale, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  }).format(start);
+  const time = new Intl.DateTimeFormat(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `${day} · ${time.format(start)}-${time.format(end)}`;
 }
 
 /**

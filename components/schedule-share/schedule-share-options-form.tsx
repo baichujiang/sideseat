@@ -13,6 +13,7 @@ import {
   isAllCategoriesRevealed,
   isNoCategoriesRevealed,
   shareRevealCategoryColor,
+  uncategorizedRevealCategory,
 } from "@/lib/schedule-share/reveal-category-selection";
 import {
   applyShareRangePresetToForm,
@@ -106,14 +107,16 @@ export function ScheduleShareOptionsForm({
   const s = ui.scheduleShare;
 
   const revealCategories = useMemo(
-    () =>
-      categories.map((c) => ({
+    () => [
+      uncategorizedRevealCategory(s.uncategorizedCategory),
+      ...categories.map((c) => ({
         id: c.id,
         name: c.name,
         presetKey: c.presetKey,
         color: shareRevealCategoryColor(c.color),
       })),
-    [categories],
+    ],
+    [categories, s.uncategorizedCategory],
   );
 
   const rangeSummary = useMemo(() => {

@@ -832,6 +832,7 @@ export type AppMessages = {
     /** Empty week-grid slot after copy/cut — paste buffered event or create blank. */
     calendarSlotPaste: string;
     calendarSlotNewEvent: string;
+    calendarSlotSelected: string;
     calendarSlotPasteMenuAria: string;
     detailPopoverEdit: string;
     detailPopoverDelete: string;
@@ -889,6 +890,7 @@ export type AppMessages = {
     presetCustom: string;
     revealSectionTitle: string;
     showAllCategories: string;
+    uncategorizedCategory: string;
     revealPresetsHint: string;
     presetsGroupLabel: string;
     presetCourse: string;

@@ -4,6 +4,8 @@ import { useEffect } from "react";
 
 import { getCapacitorPlatform, isCapacitorNative } from "@/lib/capacitor/platform";
 
+const VIEWPORT_SYNC_DELAYS_MS = [60, 180, 360];
+
 function measureSafeAreaInsetTop(): number {
   if (typeof document === "undefined") return 0;
   const probe = document.createElement("div");
@@ -24,18 +26,53 @@ function applySafeAreaFallback(root: HTMLElement) {
   }
 }
 
+function applyVisualViewportVars(root: HTMLElement) {
+  const vv = window.visualViewport;
+  const height = Math.max(1, Math.round(vv?.height ?? window.innerHeight));
+  const offsetTop = Math.max(0, Math.round(vv?.offsetTop ?? 0));
+  root.style.setProperty("--app-viewport-height", `${height}px`);
+  root.style.setProperty("--app-visual-viewport-offset-top", `${offsetTop}px`);
+}
+
 /**
- * iOS/Android shell: status bar, splash, and CSS safe-area fallbacks for WKWebView.
+ * Mobile shell bootstrap: status bar, splash, visual viewport sizing, and CSS
+ * safe-area fallbacks for WKWebView.
  */
 export function CapacitorBootstrap() {
   useEffect(() => {
-    if (!isCapacitorNative()) return;
-
     const root = document.documentElement;
+    const native = isCapacitorNative();
     let keyboardCleanup: (() => void) | null = null;
     let keyboardHeight = 0;
     let baselineViewportHeight =
       window.visualViewport?.height ?? window.innerHeight;
+
+    const syncVisualViewport = () => applyVisualViewportVars(root);
+    const scheduleViewportSync = () => {
+      syncVisualViewport();
+      requestAnimationFrame(syncVisualViewport);
+      for (const delay of VIEWPORT_SYNC_DELAYS_MS) {
+        window.setTimeout(syncVisualViewport, delay);
+      }
+    };
+
+    syncVisualViewport();
+    window.visualViewport?.addEventListener("resize", syncVisualViewport);
+    window.visualViewport?.addEventListener("scroll", syncVisualViewport);
+    window.addEventListener("resize", syncVisualViewport);
+    document.addEventListener("focusin", scheduleViewportSync);
+
+    if (!native) {
+      return () => {
+        window.visualViewport?.removeEventListener("resize", syncVisualViewport);
+        window.visualViewport?.removeEventListener("scroll", syncVisualViewport);
+        window.removeEventListener("resize", syncVisualViewport);
+        document.removeEventListener("focusin", scheduleViewportSync);
+        root.style.removeProperty("--app-viewport-height");
+        root.style.removeProperty("--app-visual-viewport-offset-top");
+      };
+    }
+
     root.classList.add("capacitor-native");
     root.dataset.capacitorPlatform = getCapacitorPlatform();
     root.style.setProperty("--keyboard-inset-bottom", "0px");
@@ -63,6 +100,7 @@ export function CapacitorBootstrap() {
 
         const currentViewportHeight = () => window.visualViewport?.height ?? window.innerHeight;
         const updateKeyboardInset = () => {
+          syncVisualViewport();
           if (keyboardHeight <= 0) {
             baselineViewportHeight = Math.max(baselineViewportHeight, currentViewportHeight());
             root.style.setProperty("--keyboard-inset-bottom", "0px");
@@ -81,6 +119,7 @@ export function CapacitorBootstrap() {
           updateKeyboardInset();
           requestAnimationFrame(updateKeyboardInset);
           window.setTimeout(updateKeyboardInset, 120);
+          window.setTimeout(updateKeyboardInset, 320);
         });
         const didShow = await Keyboard.addListener("keyboardDidShow", (info) => {
           keyboardHeight = info.keyboardHeight;
@@ -96,6 +135,7 @@ export function CapacitorBootstrap() {
         });
         const onViewportResize = () => updateKeyboardInset();
         window.visualViewport?.addEventListener("resize", onViewportResize);
+        window.visualViewport?.addEventListener("scroll", onViewportResize);
         window.addEventListener("resize", onViewportResize);
 
         keyboardCleanup = () => {
@@ -104,6 +144,7 @@ export function CapacitorBootstrap() {
           void willHide.remove();
           void didHide.remove();
           window.visualViewport?.removeEventListener("resize", onViewportResize);
+          window.visualViewport?.removeEventListener("scroll", onViewportResize);
           window.removeEventListener("resize", onViewportResize);
           keyboardHeight = 0;
           updateKeyboardInset();
@@ -120,7 +161,13 @@ export function CapacitorBootstrap() {
 
     return () => {
       keyboardCleanup?.();
+      window.visualViewport?.removeEventListener("resize", syncVisualViewport);
+      window.visualViewport?.removeEventListener("scroll", syncVisualViewport);
+      window.removeEventListener("resize", syncVisualViewport);
+      document.removeEventListener("focusin", scheduleViewportSync);
       root.classList.remove("capacitor-native", "capacitor-safe-area-fallback", "keyboard-visible");
+      root.style.removeProperty("--app-viewport-height");
+      root.style.removeProperty("--app-visual-viewport-offset-top");
       root.style.removeProperty("--keyboard-inset-bottom");
       delete root.dataset.capacitorPlatform;
     };

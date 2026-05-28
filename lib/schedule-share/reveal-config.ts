@@ -3,7 +3,14 @@ import { z } from "zod";
 
 import { SCHEDULE_SHARE_MAX_RANGE_DAYS } from "@/lib/schedule-share/constants";
 
-export const REVEAL_PRESET_KEYS_ALLOWLIST = ["course", "personal", "work", "other"] as const;
+export const UNCATEGORIZED_REVEAL_PRESET_KEY = "none";
+export const REVEAL_PRESET_KEYS_ALLOWLIST = [
+  "course",
+  "personal",
+  "work",
+  "other",
+  UNCATEGORIZED_REVEAL_PRESET_KEY,
+] as const;
 export type RevealPresetKeyAllowlisted = (typeof REVEAL_PRESET_KEYS_ALLOWLIST)[number];
 
 const isoDateOnly = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
