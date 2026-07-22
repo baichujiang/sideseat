@@ -1,0 +1,6 @@
+// Optional overrides for Staging/Production builds (gitignored as Local.xcconfig).
+// Copy: cp Configuration/Local.xcconfig.example Configuration/Local.xcconfig
+//
+// Example — point a Production archive at a real HTTPS API without committing the host:
+// SIDESEAT_API_BASE_URL = https:/$()/api.your-domain.example
+// SIDESEAT_CRASH_DSN = https:/$()/o0.ingest.example/0

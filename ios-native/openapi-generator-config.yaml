@@ -1,0 +1,8 @@
+generate:
+  - types
+  - client
+accessModifier: internal
+namingStrategy: idiomatic
+additionalFileComments:
+  - "swift-format-ignore-file"
+  - "Generated from openapi/v1.json. Do not edit by hand."

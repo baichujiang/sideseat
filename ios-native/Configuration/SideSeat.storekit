@@ -1,0 +1,110 @@
+{
+  "identifier" : "A1B2C3D4-E5F6-7890-ABCD-EF1234567890",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "1.00",
+      "familyShareable" : false,
+      "internalID" : "11111111-1111-1111-1111-111111111111",
+      "localizations" : [
+        {
+          "description" : "Optional thanks — not payment for goods or services.",
+          "displayName" : "Support SideSeat (€1)",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "app.sideseat.support.tier1",
+      "referenceName" : "Support Tier 1",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "3.00",
+      "familyShareable" : false,
+      "internalID" : "22222222-2222-2222-2222-222222222222",
+      "localizations" : [
+        {
+          "description" : "Optional thanks — not payment for goods or services.",
+          "displayName" : "Support SideSeat (€3)",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "app.sideseat.support.tier3",
+      "referenceName" : "Support Tier 3",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "5.00",
+      "familyShareable" : false,
+      "internalID" : "33333333-3333-3333-3333-333333333333",
+      "localizations" : [
+        {
+          "description" : "Optional thanks — not payment for goods or services.",
+          "displayName" : "Support SideSeat (€5)",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "app.sideseat.support.tier5",
+      "referenceName" : "Support Tier 5",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}
