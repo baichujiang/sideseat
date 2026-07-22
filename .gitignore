@@ -19,5 +19,11 @@ test-results
 ios/App/Pods/
 ios/App/build/
 ios/DerivedData/
+ios-native/DerivedData/
+ios-native/DerivedData-*/
+ios-native/TestResults/
+ios-native/.build-tools/
+ios-native/Configuration/Local.xcconfig
 *.xcuserstate
+**/xcuserdata/
 .vercel
