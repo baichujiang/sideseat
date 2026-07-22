@@ -279,9 +279,10 @@
 
 | 已有 | 可选后续 |
 |------|----------|
-| Theme + Components + CalendarChrome 冻结 | 真机深色截图归档 |
-| Auth / 5 Tab 走查通过；背景 / 空态二次收敛 | |
+| Theme + Components + CalendarChrome 冻结 | 真机（非模拟器）复跑 `capture-visual-qa.sh` |
+| Auth / 5 Tab 走查通过；背景 / 空态二次收敛 | Me 底栏安全区 / 周历事件折行微调 |
 | Auth UITest id；danger / success / HubTint / Chat / fillTertiary | |
+| 模拟器 Light/Dark 截图归档：`docs/ios-native/visual-qa/` | |
 
 ---
 

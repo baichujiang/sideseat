@@ -87,6 +87,7 @@
 		8D7ABA25A762779EEB5ABFC9 /* HomeWeekWindowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 784E9C59FFE992F378473968 /* HomeWeekWindowTests.swift */; };
 		8F185009BFC56BD54F47D9D3 /* SSEmptyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECC089BBB5641CAF4370E41 /* SSEmptyState.swift */; };
 		90376EC7D97C3014590E2B41 /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D6D6302A2092FF92C83BCDA /* Client.swift */; };
+		90ADB3D2C81172F69F3259A8 /* VisualQAScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAC02EF84D2731B1C13E4F1B /* VisualQAScreenshotUITests.swift */; };
 		9210AB46B48F229A8BD52454 /* LiveLoginSmokeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7301DBAEBCC79573895478FE /* LiveLoginSmokeUITests.swift */; };
 		9224D1447AF355047828746C /* ScheduleShareRecipientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1EC7B6461F3CFDB8B3510A1 /* ScheduleShareRecipientView.swift */; };
 		92F1E96FF60238FF1CF57F60 /* PlanCreateSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27150D95DF55323B911FAF17 /* PlanCreateSheet.swift */; };
@@ -284,6 +285,7 @@
 		C7CDF3B3AE4D27632C78CCFB /* DiscoverImagePreprocessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverImagePreprocessor.swift; sourceTree = "<group>"; };
 		CA1AB8EFDDB08C466B6D4199 /* SSPrimaryButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSPrimaryButton.swift; sourceTree = "<group>"; };
 		CA6EAEC43670BED2E9DC894C /* PlansRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansRootView.swift; sourceTree = "<group>"; };
+		CAC02EF84D2731B1C13E4F1B /* VisualQAScreenshotUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualQAScreenshotUITests.swift; sourceTree = "<group>"; };
 		CD6E43D6350D929117151777 /* HomeScheduleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScheduleTests.swift; sourceTree = "<group>"; };
 		CDB10D0772B9B7A53A6AB6FA /* SideSeatTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SideSeatTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEC905827C24F6CC783D7D4C /* DiscoverStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverStores.swift; sourceTree = "<group>"; };
@@ -459,6 +461,7 @@
 				64B4F7AFF1F2EEF950896417 /* CalendarLiveUITests.swift */,
 				2994C3E92F406A2707D7361E /* CoursesLiveUITests.swift */,
 				7301DBAEBCC79573895478FE /* LiveLoginSmokeUITests.swift */,
+				CAC02EF84D2731B1C13E4F1B /* VisualQAScreenshotUITests.swift */,
 			);
 			path = SideSeatUITests;
 			sourceTree = "<group>";
@@ -981,6 +984,7 @@
 				3CBFB62CAF5F49D250BCC3CA /* CalendarLiveUITests.swift in Sources */,
 				AC6F7D9A2E2AD631C9A90C7B /* CoursesLiveUITests.swift in Sources */,
 				9210AB46B48F229A8BD52454 /* LiveLoginSmokeUITests.swift in Sources */,
+				90ADB3D2C81172F69F3259A8 /* VisualQAScreenshotUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
