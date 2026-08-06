@@ -2,13 +2,15 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CornerUpLeft, Copy, Flag, Trash2, MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useChatMessageSelection } from "@/components/chat/chat-message-selection";
 import { useChatReply } from "@/components/chat/chat-reply-context";
+import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { cn } from "@/lib/utils";
 
 export type MessageTarget =
@@ -24,13 +26,13 @@ export type MessageSummary = {
   senderId: string;
 };
 
-const REPORT_REASONS = [
-  { value: "HARASSMENT", label: "Harassment" },
-  { value: "REPEATED_UNWANTED_CONTACT", label: "Repeated unwanted contact" },
-  { value: "OFFENSIVE_LANGUAGE", label: "Offensive language" },
-  { value: "SPAM", label: "Spam" },
-  { value: "FAKE_IDENTITY", label: "Fake identity" },
-  { value: "OTHER", label: "Other" },
+const REPORT_REASON_VALUES = [
+  "HARASSMENT",
+  "REPEATED_UNWANTED_CONTACT",
+  "OFFENSIVE_LANGUAGE",
+  "SPAM",
+  "FAKE_IDENTITY",
+  "OTHER",
 ] as const;
 
 /**
@@ -55,7 +57,12 @@ export function MessageActionMenu({
   target: MessageTarget;
 }) {
   const router = useRouter();
+  const { messages } = useLocaleContext();
+  const chat = messages.chat;
+  const common = messages.common;
   const { setReplyTo } = useChatReply();
+  const { isSelected, selectMessage } = useChatMessageSelection();
+  const actionsVisible = isSelected(message.id);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -79,7 +86,7 @@ export function MessageActionMenu({
       await navigator.clipboard.writeText(text);
       close();
     } catch {
-      setErr("Couldn't copy.");
+      setErr(chat.copyFailed);
     }
   };
 
@@ -94,7 +101,7 @@ export function MessageActionMenu({
 
   const remove = async () => {
     if (busy) return;
-    if (!confirm("Delete this message? This cannot be undone.")) return;
+    if (!confirm(chat.deleteMessageConfirm)) return;
     setBusy(true);
     const url =
       target.kind === "direct"
@@ -103,7 +110,7 @@ export function MessageActionMenu({
     const r = await apiFetch(url, { method: "DELETE" });
     setBusy(false);
     if (!r.ok) {
-      setErr("Couldn't delete.");
+      setErr(chat.deleteFailed);
       return;
     }
     close();
@@ -131,7 +138,7 @@ export function MessageActionMenu({
     setBusy(false);
     if (!r.ok) {
       const payload = await r.json().catch(() => ({}));
-      setErr(typeof payload.error === "string" ? payload.error : "Couldn't report.");
+      setErr(typeof payload.error === "string" ? payload.error : chat.deleteFailed);
       return;
     }
     close();
@@ -140,7 +147,12 @@ export function MessageActionMenu({
   return (
     <Popover open={popoverOpen} onOpenChange={handleOpenChange} modal>
       <div
+        data-chat-message-actions
         className="inline-flex self-center"
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          selectMessage(message.id);
+        }}
         onContextMenu={(e) => {
           e.preventDefault();
           setReportOpen(false);
@@ -151,10 +163,11 @@ export function MessageActionMenu({
         <PopoverTrigger asChild>
           <button
             type="button"
-            aria-label="Message actions"
+            aria-label={chat.messageActionsAria}
             aria-expanded={popoverOpen}
             className={cn(
               "inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground/70 opacity-0 transition hover:bg-muted hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100 active:opacity-100 sm:group-hover:opacity-100",
+              actionsVisible && "opacity-100",
               anchorClassName,
             )}
           >
@@ -177,19 +190,19 @@ export function MessageActionMenu({
       >
         {!reportOpen ? (
           <div role="menu">
-            <MenuItem icon={CornerUpLeft} label="Reply" onClick={doReply} />
-            <MenuItem icon={Copy} label="Copy" onClick={copy} />
+            <MenuItem icon={CornerUpLeft} label={chat.actionReply} onClick={doReply} />
+            <MenuItem icon={Copy} label={chat.actionCopy} onClick={copy} />
             {isOwn ? (
               <MenuItem
                 icon={Trash2}
-                label={busy ? "Deleting…" : "Delete"}
+                label={busy ? common.deleting : chat.actionDelete}
                 onClick={remove}
                 destructive
               />
             ) : (
               <MenuItem
                 icon={Flag}
-                label="Report message"
+                label={chat.actionReport}
                 onClick={() => setReportOpen(true)}
                 destructive
               />
@@ -251,21 +264,43 @@ function ReportForm({
   onSubmit: (reason: string, details: string) => void;
   onCancel: () => void;
 }) {
-  const [reason, setReason] = useState<string>(REPORT_REASONS[0].value);
+  const { messages } = useLocaleContext();
+  const chat = messages.chat;
+  const common = messages.common;
+  const reasons = useMemo(
+    () =>
+      REPORT_REASON_VALUES.map((value) => ({
+        value,
+        label:
+          value === "HARASSMENT"
+            ? chat.reportReasonHarassment
+            : value === "REPEATED_UNWANTED_CONTACT"
+              ? chat.reportReasonRepeated
+              : value === "OFFENSIVE_LANGUAGE"
+                ? chat.reportReasonOffensive
+                : value === "SPAM"
+                  ? chat.reportReasonSpam
+                  : value === "FAKE_IDENTITY"
+                    ? chat.reportReasonFakeIdentity
+                    : chat.reportReasonOther,
+      })),
+    [chat],
+  );
+  const [reason, setReason] = useState<string>(REPORT_REASON_VALUES[0]);
   const [details, setDetails] = useState("");
   return (
-    <div role="dialog" aria-label="Report message">
+    <div role="dialog" aria-label={chat.reportMessageTitle}>
       <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-        Report message
+        {chat.reportMessageTitle}
       </p>
       <label className="block">
-        <span className="sr-only">Reason</span>
+        <span className="sr-only">{chat.reportReasonLabel}</span>
         <select
           className="field-select mb-2 h-9 w-full text-[13px]"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
         >
-          {REPORT_REASONS.map((r) => (
+          {reasons.map((r) => (
             <option key={r.value} value={r.value}>
               {r.label}
             </option>
@@ -274,21 +309,15 @@ function ReportForm({
       </label>
       <textarea
         className="mb-2 h-16 w-full resize-none rounded-lg border border-input bg-background px-2 py-1.5 text-[12.5px]"
-        placeholder="Optional note (500 chars)"
+        placeholder={chat.reportNotePlaceholder}
         maxLength={500}
         value={details}
         onChange={(e) => setDetails(e.target.value)}
       />
       {err ? <p className="mb-1.5 text-[11px] text-destructive">{err}</p> : null}
       <div className="flex gap-1.5">
-        <Button
-          size="sm"
-          type="button"
-          variant="ghost"
-          className="flex-1"
-          onClick={onCancel}
-        >
-          Cancel
+        <Button size="sm" type="button" variant="ghost" className="flex-1" onClick={onCancel}>
+          {common.cancel}
         </Button>
         <Button
           size="sm"
@@ -297,7 +326,7 @@ function ReportForm({
           disabled={busy}
           onClick={() => onSubmit(reason, details)}
         >
-          {busy ? "Sending…" : "Send"}
+          {busy ? common.sending : chat.sendAria}
         </Button>
       </div>
     </div>

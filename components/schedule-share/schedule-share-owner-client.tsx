@@ -2,7 +2,6 @@
 
 import { addDays } from "date-fns";
 import { Share2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { BackLink } from "@/components/nav/back-link";
@@ -75,7 +74,6 @@ export function ScheduleShareOwnerClient({
   linkSettings: ScheduleShareLinkSettingsInput;
   calendarCategories: readonly ShareRevealCategoryInput[];
 }) {
-  const router = useRouter();
   const { locale, messages: ui } = useLocaleContext();
   const s = ui.scheduleShare;
   const initialRange = useMemo(
@@ -172,7 +170,7 @@ export function ScheduleShareOwnerClient({
     if (selectedShareDateKeys.size === 0) return;
     const { rangeStart, rangeEnd } = shareRangeFromSelectedDateKeys(selectedShareDateKeys);
     const includedDates = sortedShareIncludedDates(selectedShareDateKeys);
-    const { categoryIds, presetKeys } = revealConfigFromRevealedCategoryIds(
+    const { categoryIds, presetKeys, hideAllDetails } = revealConfigFromRevealedCategoryIds(
       revealCategories,
       revealedCategoryIds,
     );
@@ -185,7 +183,7 @@ export function ScheduleShareOwnerClient({
         body: JSON.stringify({
           rangeStart: rangeStart.toISOString(),
           rangeEnd: rangeEnd.toISOString(),
-          revealConfig: { categoryIds, presetKeys, includedDates },
+          revealConfig: { categoryIds, presetKeys, hideAllDetails, includedDates },
           allowGuestProposals: true,
           usageLimit,
           expiresAt: expiresAtFromDays(expiresInDays).toISOString(),

@@ -74,8 +74,11 @@ export default async function AdminVerificationsPage() {
               <div className="grid gap-1 text-sm text-muted-foreground">
                 <p>School: {user.school ?? "not set"}</p>
                 <p>Major: {user.major ?? "not set"}</p>
-                {user.emailVerifiedAt ? (
-                  <p>Verified at: {user.emailVerifiedAt.toLocaleString()}</p>
+                {user.studentVerifiedAt ? (
+                  <p>
+                    Verified at: {user.studentVerifiedAt.toLocaleString()} · method: {" "}
+                    {(user.studentVerificationMethod ?? "legacy").toLowerCase().replaceAll("_", " ")}
+                  </p>
                 ) : null}
                 {user.studentVerificationNotes ? (
                   <p className="text-foreground">{user.studentVerificationNotes}</p>
@@ -91,7 +94,7 @@ export default async function AdminVerificationsPage() {
                     Enrollment certificate:{" "}
                     <a
                       className="font-medium underline"
-                      href={user.manualReviewProofUrl}
+                      href={`/api/admin/verifications/${encodeURIComponent(user.id)}/proof`}
                       rel="noreferrer"
                       target="_blank"
                     >

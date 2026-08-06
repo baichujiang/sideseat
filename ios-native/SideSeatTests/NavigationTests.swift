@@ -16,6 +16,14 @@ struct NavigationTests {
         #expect(DeepLinkRouter.route(for: groupURL) == .groupChat(groupChatID: "group-123"))
         let shareURL = try #require(URL(string: "https://sideseat.example/share/view/share-token-123"))
         #expect(DeepLinkRouter.route(for: shareURL) == .scheduleShare(token: "share-token-123"))
+        let customShareURL = try #require(URL(string: "sideseat://share/view/share-token-123"))
+        #expect(DeepLinkRouter.route(for: customShareURL) == .scheduleShare(token: "share-token-123"))
+        let pathCustomShareURL = try #require(URL(string: "sideseat:///share/view/share-token-123"))
+        #expect(DeepLinkRouter.route(for: pathCustomShareURL) == .scheduleShare(token: "share-token-123"))
+        let activityURL = try #require(
+            URL(string: "https://sideseat.example/discover/activities/activity-123")
+        )
+        #expect(DeepLinkRouter.route(for: activityURL) == .activity(activityID: "activity-123"))
     }
 
     @Test("Routes relative push notification paths")
@@ -41,5 +49,26 @@ struct NavigationTests {
         let unsafe = try #require(URL(string: "javascript://connections/123"))
         #expect(DeepLinkRouter.route(for: unknown) == nil)
         #expect(DeepLinkRouter.route(for: unsafe) == nil)
+    }
+
+    @Test("Product tutorial copy stays customer-facing")
+    @MainActor
+    func productTutorialCopyIsCustomerFacing() {
+        let internalPhrases = [
+            "the guide",
+            "switches tabs",
+            "compare the note",
+            "the screen",
+            "replay this",
+        ]
+
+        for step in ProductTutorialController.steps {
+            let visibleCopy = "\(step.title) \(step.body) \(step.hint)".lowercased()
+            #expect(!step.body.isEmpty)
+            #expect(!step.hint.isEmpty)
+            for phrase in internalPhrases {
+                #expect(!visibleCopy.contains(phrase))
+            }
+        }
     }
 }

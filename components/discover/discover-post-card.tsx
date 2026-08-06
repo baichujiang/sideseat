@@ -151,8 +151,8 @@ function DiscoverPostCategoryBadge({
 }: {
   category: ClassmatePostCategory;
 }) {
-  if (!shouldShowBuddyCategoryLabel(category)) return null;
   const m = useAppMessages();
+  if (!shouldShowBuddyCategoryLabel(category)) return null;
   const dl = m.discoverList;
   const palette = classmatePostCategoryToPalette(category);
   const row = SCENE_LIST_ROW[palette];
@@ -190,7 +190,6 @@ export type DiscoverPostCardProps = {
 
 export function DiscoverPostCard({
   post,
-  scene,
   viewerCourseMatchIndex,
   listReturnTo,
   cardFooter,
@@ -200,9 +199,22 @@ export function DiscoverPostCard({
 }: DiscoverPostCardProps) {
   const { locale, messages } = useLocaleContext();
   const dl = messages.discoverList;
+  const studentRoleLabel =
+    post.studentStatus === "CURRENT_STUDENT"
+      ? messages.profileForm.statusCurrentStudent
+      : post.studentStatus === "EXCHANGE_STUDENT"
+        ? messages.profileForm.statusExchangeStudent
+        : post.studentStatus === "ALUMNI"
+          ? [messages.profileForm.statusAlumni, post.graduationYear].filter(Boolean).join(" ")
+          : null;
   const displayImages = displayableClassmatePostImageUrls(post.imageUrls);
   const tagline = post.tagline?.trim() ?? "";
-  const meta = [post.major, post.semester ? `sem ${post.semester}` : null]
+  const meta = [
+    post.major,
+    post.semester
+      ? formatMessage(messages.meIdentity.schoolLineSemester, { semester: post.semester })
+      : null,
+  ]
     .filter(Boolean)
     .join(" · ");
   const postPath = `/discover/posts/${post.id}`;
@@ -231,6 +243,17 @@ export function DiscoverPostCard({
     post.category === ClassmatePostCategory.SHARED_COURSES &&
     post.linkedCourses &&
     post.linkedCourses.length > 0;
+
+  const statusLabel =
+    post.status === "CLOSED" ? "Matched" : post.status === "EXPIRED" ? "Expired" : "Open";
+  const visibilityLabel =
+    post.visibility === "CITY_INTERNATIONALS"
+      ? "Everyone"
+      : post.visibility === "VERIFIED_ONLY"
+        ? "Verified students"
+        : post.visibility === "COURSEMATES_ONLY"
+          ? "Coursemates"
+          : "Same school";
 
   const defaultFooter = (
     <div className="mt-3 flex w-full min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-border/55 pt-3 dark:border-border/50">
@@ -287,18 +310,27 @@ export function DiscoverPostCard({
       disableNavigation={isDevExample}
       avatarUrl={post.avatarUrl}
       profileAriaLabel={
-        post.isOwn ? "View your post" : `View ${post.nickname}'s post`
+        post.isOwn
+          ? dl.postCardViewYourPostAria
+          : formatMessage(dl.postCardViewPeerPostAria, { name: post.nickname })
       }
       name={post.nickname}
       nameClassName="text-[17px] font-bold leading-snug tracking-tight text-classmates-ink dark:text-foreground"
       nameRowAdornment={
-        <VerifiedBadge
-          size="xs"
-          tone="brandBlue"
-          school={post.school}
-          verifiedStudent={post.verifiedStudent}
-          status={post.studentVerificationStatus}
-        />
+        <>
+          <VerifiedBadge
+            size="xs"
+            tone="brandBlue"
+            school={post.school}
+            verifiedStudent={post.verifiedStudent}
+            status={post.studentVerificationStatus}
+          />
+          {studentRoleLabel ? (
+            <span className="shrink-0 rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-semibold text-teal-700 ring-1 ring-inset ring-teal-200 dark:bg-teal-950/35 dark:text-teal-200 dark:ring-teal-500/30">
+              {studentRoleLabel}
+            </span>
+          ) : null}
+        </>
       }
       body={
         <>
@@ -314,6 +346,12 @@ export function DiscoverPostCard({
           ) : null}
           <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1">
             <UserGenderCardIcon gender={post.gender} className="shrink-0" />
+            <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-950/35 dark:text-emerald-200 dark:ring-emerald-500/30">
+              {statusLabel}
+            </span>
+            <span className="shrink-0 rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-700 ring-1 ring-inset ring-sky-200 dark:bg-sky-950/35 dark:text-sky-200 dark:ring-sky-500/30">
+              {visibilityLabel}
+            </span>
             {titleTrailing}
             {showYourPostTitlePill ? (
               <span
@@ -338,6 +376,18 @@ export function DiscoverPostCard({
                 <p className="mt-2 line-clamp-2 w-full min-w-0 max-w-none break-words text-[13px] leading-snug text-muted-foreground sm:line-clamp-3">
                   {post.body}
                 </p>
+              ) : null}
+              {post.tags.length > 0 ? (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {post.tags.slice(0, 6).map((tag) => (
+                    <span
+                      key={tag}
+                      className="max-w-[9rem] truncate rounded-full bg-white/85 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground ring-1 ring-inset ring-border/60 dark:bg-background/35"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
               ) : null}
               {displayImages.length > 0 ? (
                 <ClassmatePostImagesGallery

@@ -5,10 +5,14 @@ import Observation
 @Observable
 final class DeepLinkRouter {
     private(set) var pendingRoute: AppRoute?
+    private(set) var pendingTab: AppTab?
+    private(set) var navigationEpoch = 0
 
     func handle(_ url: URL) {
         guard let route = Self.route(for: url) else { return }
         pendingRoute = route
+        pendingTab = Self.tab(for: route)
+        navigationEpoch += 1
     }
 
     /// Handles absolute URLs or relative app paths from push payloads (`/connections/{id}`).
@@ -21,8 +25,24 @@ final class DeepLinkRouter {
             handle(url)
             return
         }
-        if let route = Self.route(forPath: trimmed) {
+        handleAppPath(trimmed)
+    }
+
+    /// Maps web in-app paths (e.g. `/discover`) to native tab + optional route.
+    func handleAppPath(_ raw: String) {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        let normalized = trimmed.hasPrefix("/") ? trimmed : "/\(trimmed)"
+        if let tabRoute = Self.tabRoute(forAppPath: normalized) {
+            pendingTab = tabRoute.tab
+            pendingRoute = tabRoute.route
+            navigationEpoch += 1
+            return
+        }
+        if let route = Self.route(forPath: normalized) {
             pendingRoute = route
+            pendingTab = Self.tab(for: route)
+            navigationEpoch += 1
         }
     }
 
@@ -31,11 +51,20 @@ final class DeepLinkRouter {
         return pendingRoute
     }
 
+    func consumePendingTab() -> AppTab? {
+        defer { pendingTab = nil }
+        return pendingTab
+    }
+
     nonisolated static func route(for url: URL) -> AppRoute? {
         guard let scheme = url.scheme?.lowercased(),
               scheme == "https" || scheme == "sideseat" || scheme == "http"
         else { return nil }
-        return route(forPathComponents: url.pathComponents.filter { $0 != "/" })
+        var components = url.pathComponents.filter { $0 != "/" }
+        if scheme == "sideseat", let host = url.host, !host.isEmpty {
+            components.insert(host, at: 0)
+        }
+        return route(forPathComponents: components)
     }
 
     nonisolated static func route(forPath path: String) -> AppRoute? {
@@ -61,6 +90,10 @@ final class DeepLinkRouter {
             let postID = components[2]
             guard postID.count <= 128 else { return nil }
             return .discoverPost(postID: postID)
+        case "discover" where components.count >= 3 && components[1] == "activities":
+            let activityID = components[2]
+            guard activityID.count <= 128 else { return nil }
+            return .activity(activityID: activityID)
         case "activities": return .activity(activityID: identifier)
         case "share" where components.count >= 3 && components[1] == "view":
             let token = components[2]
@@ -69,6 +102,40 @@ final class DeepLinkRouter {
         case "profile" where identifier == "blocked":
             return .blockedUsers
         default: return nil
+        }
+    }
+
+    nonisolated private static func tabRoute(forAppPath path: String) -> (tab: AppTab, route: AppRoute?)? {
+        switch path {
+        case "/home":
+            return (.home, nil)
+        case "/discover":
+            return (.discover, nil)
+        case "/inbox":
+            return (.chats, nil)
+        case "/courses":
+            return (.home, .courses)
+        case "/profile":
+            return (.me, nil)
+        case "/profile/info", "/profile/verification":
+            return (.me, nil)
+        case "/profile/account":
+            return (.me, .settings)
+        default:
+            return nil
+        }
+    }
+
+    nonisolated private static func tab(for route: AppRoute) -> AppTab {
+        switch route {
+        case .courses, .course:
+            return .home
+        case .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .plans, .scheduleShare:
+            return .chats
+        case .myPosts, .profile, .settings, .blockedUsers, .supportStore, .feedback, .feedbackDetail:
+            return .me
+        case .discoverPost, .activity:
+            return .discover
         }
     }
 }

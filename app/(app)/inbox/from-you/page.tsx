@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { ConnectionStatus } from "@prisma/client";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";

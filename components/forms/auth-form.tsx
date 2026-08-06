@@ -27,6 +27,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { FormMessage } from "@/components/forms/form-message";
+import { DEGREE_LEVEL_LABELS, DEGREE_LEVELS } from "@/lib/constants/majors";
+import { schoolOptions } from "@/lib/constants/schools";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import type { AppMessages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
@@ -61,9 +63,17 @@ function SignupBlock({
           reserved: af.signupUsernameReserved,
         },
         { tooShort: af.signupPasswordTooShort },
+        {
+          tooShort: af.signupDisplayNameTooShort,
+          tooLong: af.signupDisplayNameTooLong,
+          notEmailLike: af.signupDisplayNameNotEmail,
+        },
       ),
     [
       af.signupPasswordTooShort,
+      af.signupDisplayNameNotEmail,
+      af.signupDisplayNameTooLong,
+      af.signupDisplayNameTooShort,
       af.signupUsernameInvalid,
       af.signupUsernameReserved,
       af.signupUsernameTooLong,
@@ -77,10 +87,18 @@ function SignupBlock({
   const form = useForm<SignupValues>({
     resolver: zodResolver(schema),
     defaultValues: {
+      displayName: "",
       username: seededUsername,
       password: initialPassword,
+      school: "TUM",
+      studentStatus: "CURRENT_STUDENT",
+      degreeLevel: "BACHELOR",
+      semester: 1,
+      graduationYear: new Date().getFullYear(),
     },
   });
+
+  const studentStatus = form.watch("studentStatus");
 
   const onSubmit = form.handleSubmit(async (values) => {
     setServerError("");
@@ -98,13 +116,21 @@ function SignupBlock({
     if (payload.data?.accessToken) {
       setAccessToken(payload.data.accessToken);
     }
-    router.push(safeReturnPath(returnTo, "/home") as Route);
-    router.refresh();
+    router.replace(safeReturnPath(returnTo, "/home") as Route);
   });
 
   return (
     <form className="space-y-4" onSubmit={onSubmit}>
       <p className="text-sm leading-snug text-muted-foreground">{af.signupIntro}</p>
+      <div className="space-y-1.5">
+        <label className="text-sm font-medium">{af.signupDisplayNameLabel}</label>
+        <Input
+          autoComplete="nickname"
+          placeholder={af.signupDisplayNamePlaceholder}
+          {...form.register("displayName")}
+        />
+        <FormMessage message={form.formState.errors.displayName?.message} />
+      </div>
       <div className="space-y-1.5">
         <label className="text-sm font-medium">{af.usernameLabel}</label>
         <Input
@@ -117,6 +143,75 @@ function SignupBlock({
         />
         <p className="text-[11px] leading-snug text-muted-foreground">{af.usernameHint}</p>
         <FormMessage message={form.formState.errors.username?.message} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium">{af.signupSchoolLabel}</label>
+          <select
+            className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+            {...form.register("school")}
+          >
+            {schoolOptions.map((school) => (
+              <option key={school.value} value={school.value}>
+                {school.shortLabel}
+              </option>
+            ))}
+          </select>
+          <FormMessage message={form.formState.errors.school?.message} />
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium">{af.signupStatusLabel}</label>
+          <select
+            className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+            {...form.register("studentStatus")}
+          >
+            <option value="CURRENT_STUDENT">{af.signupStatusCurrent}</option>
+            <option value="EXCHANGE_STUDENT">{af.signupStatusExchange}</option>
+            <option value="ALUMNI">{af.signupStatusAlumni}</option>
+          </select>
+          <FormMessage message={form.formState.errors.studentStatus?.message} />
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium">{af.signupDegreeLabel}</label>
+          <select
+            className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+            {...form.register("degreeLevel")}
+          >
+            {DEGREE_LEVELS.map((level) => (
+              <option key={level} value={level}>
+                {DEGREE_LEVEL_LABELS[level]}
+              </option>
+            ))}
+          </select>
+          <FormMessage message={form.formState.errors.degreeLevel?.message} />
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium">
+            {studentStatus === "ALUMNI" ? af.signupGraduationYearLabel : af.signupSemesterLabel}
+          </label>
+          {studentStatus === "ALUMNI" ? (
+            <Input
+              type="number"
+              inputMode="numeric"
+              {...form.register("graduationYear", { valueAsNumber: true })}
+            />
+          ) : (
+            <Input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={20}
+              {...form.register("semester", { valueAsNumber: true })}
+            />
+          )}
+          <FormMessage
+            message={
+              studentStatus === "ALUMNI"
+                ? form.formState.errors.graduationYear?.message
+                : form.formState.errors.semester?.message
+            }
+          />
+        </div>
       </div>
       <div className="space-y-1.5">
         <label className="text-sm font-medium">{af.passwordLabel}</label>
@@ -136,6 +231,8 @@ function SignupBlock({
   );
 }
 
+// Retained for deployments that enable the email-OTP signup variant.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function EmailSignupBlock({
   af,
   initialIdentifier,
@@ -250,8 +347,7 @@ function EmailSignupBlock({
     if (payload.data?.accessToken) {
       setAccessToken(payload.data.accessToken);
     }
-    router.push("/home");
-    router.refresh();
+    router.replace("/home");
   });
 
   return (
@@ -354,6 +450,8 @@ function EmailSignupBlock({
   );
 }
 
+// Retained for deployments that enable the phone-OTP signup variant.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PhoneSignupBlock({
   af,
   initialIdentifier,
@@ -461,8 +559,7 @@ function PhoneSignupBlock({
     if (payload.data?.accessToken) {
       setAccessToken(payload.data.accessToken);
     }
-    router.push("/home");
-    router.refresh();
+    router.replace("/home");
   });
 
   return (
@@ -592,8 +689,7 @@ export function AuthForm({
     if (payload.data?.accessToken) {
       setAccessToken(payload.data.accessToken);
     }
-    router.push(safeReturnPath(returnTo, "/home") as Route);
-    router.refresh();
+    router.replace(safeReturnPath(returnTo, "/home") as Route);
   });
 
   if (mode === "signup") {

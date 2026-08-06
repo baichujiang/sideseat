@@ -24,6 +24,40 @@ struct NativeCourseList: Decodable, Sendable {
     let schools: [NativeCourseSchool]
     let courses: [NativeCourseSummary]
     let nextCursor: String?
+    let semesterReview: NativeCourseSemesterReviewSummary?
+}
+
+struct NativeCourseSemesterReviewSummary: Decodable, Sendable {
+    let semesterLabel: String
+    let required: Bool
+    let courseCount: Int
+}
+
+struct NativeCourseSemesterReview: Decodable, Sendable {
+    let semesterLabel: String
+    let required: Bool
+    let courseCount: Int
+    let courses: [NativeCourseSemesterReviewCourse]
+}
+
+struct NativeCourseSemesterReviewCourse: Decodable, Identifiable, Sendable {
+    let id: String
+    let code: String?
+    let name: String
+    let school: String
+    let previousSemesterLabel: String
+    let activeUntil: String
+    let sessions: [NativeCourseSession]
+}
+
+struct NativeCourseSemesterReviewRequest: Encodable, Sendable {
+    let courseIds: [String]
+}
+
+struct NativeCourseSemesterReviewResult: Decodable, Sendable {
+    let semesterLabel: String
+    let renewedCount: Int
+    let archivedCount: Int
 }
 
 struct NativeCourseSchool: Decodable, Sendable, Identifiable {
@@ -45,6 +79,7 @@ struct NativeCourseSummary: Decodable, Sendable, Identifiable {
     let viewer: NativeCourseViewerState
     let sessions: [NativeCourseSession]
     let officialScheduleSyncedAt: String?
+    let communitySubmitted: Bool?
 
     init(
         id: String,
@@ -56,7 +91,8 @@ struct NativeCourseSummary: Decodable, Sendable, Identifiable {
         memberCount: Int,
         viewer: NativeCourseViewerState,
         sessions: [NativeCourseSession],
-        officialScheduleSyncedAt: String? = nil
+        officialScheduleSyncedAt: String? = nil,
+        communitySubmitted: Bool? = nil
     ) {
         self.id = id
         self.code = code
@@ -68,6 +104,7 @@ struct NativeCourseSummary: Decodable, Sendable, Identifiable {
         self.viewer = viewer
         self.sessions = sessions
         self.officialScheduleSyncedAt = officialScheduleSyncedAt
+        self.communitySubmitted = communitySubmitted
     }
 }
 
@@ -151,6 +188,31 @@ struct NativeCourseScheduleRequest: Encodable, Sendable {
     let variantFingerprint: String
 }
 
+struct NativeCourseManualCreateRequest: Encodable, Sendable {
+    let name: String
+    let code: String
+}
+
+struct NativeCourseManualCreateResult: Decodable, Sendable {
+    let courseId: String
+    let name: String
+    let code: String?
+    let school: String
+    let semesterLabel: String
+    let communitySubmitted: Bool
+}
+
+struct NativeCourseMatchRequest: Encodable, Sendable {
+    let school: String?
+    let terms: [String]
+}
+
+struct NativeCourseMatchResult: Decodable, Sendable {
+    let school: String
+    let semesterLabel: String
+    let courses: [NativeCourseSummary]
+}
+
 private extension String {
     var nilIfBlank: String? {
         trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : self
@@ -181,7 +243,12 @@ extension NativeCourseList {
                 sessions: []
             )
         ],
-        nextCursor: nil
+        nextCursor: nil,
+        semesterReview: NativeCourseSemesterReviewSummary(
+            semesterLabel: "SS 2026",
+            required: true,
+            courseCount: 1
+        )
     )
 }
 

@@ -42,6 +42,7 @@ struct GroupInfoView: View {
                                 .foregroundStyle(.primary)
                         }
                     }
+                    .buttonStyle(.plain)
                     .accessibilityIdentifier("group-member-\(peer.id)")
                 }
                 Button {
@@ -50,7 +51,7 @@ struct GroupInfoView: View {
                         showAddMembers = true
                     }
                 } label: {
-                    Label("Add members", systemImage: "person.badge.plus")
+                    Label("Add members", systemImage: ChatCreationSymbol.newGroup)
                 }
                 .accessibilityIdentifier("group-info-add-members")
             }
@@ -79,9 +80,11 @@ struct GroupInfoView: View {
                                 Spacer()
                                 if addSelected.contains(row.id) {
                                     Image(systemName: "checkmark.circle.fill")
+                                        .foregroundStyle(SideSeatTheme.accent)
                                 }
                             }
                         }
+                        .buttonStyle(.plain)
                     }
                 }
                 .navigationTitle("Add members")

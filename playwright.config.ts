@@ -12,7 +12,7 @@ import { defineConfig, devices } from "@playwright/test";
  * Env:
  *   PLAYWRIGHT_BASE_URL   default http://127.0.0.1:3000
  *   PLAYWRIGHT_SKIP_WEBSERVER  set to "1" if dev server already running
- *   E2E_USER / E2E_PASSWORD   seeded onboarded user (default lin / Password123)
+ *   E2E_USER / E2E_PASSWORD   seeded onboarded user (default test_001 / Password123)
  */
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000";
 
@@ -39,6 +39,10 @@ export default defineConfig({
       : {
           command: "npm run dev",
           url: baseURL,
+          env: {
+            ...process.env,
+            CRON_SECRET: process.env.CRON_SECRET ?? "playwright-cron-secret",
+          },
           reuseExistingServer: true,
           timeout: 180_000,
         },

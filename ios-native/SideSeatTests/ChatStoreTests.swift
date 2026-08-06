@@ -96,7 +96,7 @@ struct ChatScrollPolicyTests {
         let older = try #require(calendar.date(byAdding: .day, value: -20, to: now))
 
         #expect(InboxActivityFormatting.label(for: earlierToday, now: now, calendar: calendar).contains(":"))
-        #expect(InboxActivityFormatting.label(for: yesterday, now: now, calendar: calendar) == "Yesterday")
+        #expect(["Yesterday", "昨天"].contains(InboxActivityFormatting.label(for: yesterday, now: now, calendar: calendar)))
         #expect(!InboxActivityFormatting.label(for: lastWeek, now: now, calendar: calendar).contains(":"))
         #expect(InboxActivityFormatting.label(for: older, now: now, calendar: calendar).contains("2026")
             || InboxActivityFormatting.label(for: older, now: now, calendar: calendar).contains("Jun")
@@ -115,6 +115,153 @@ struct ChatScrollPolicyTests {
     }
 }
 
+@Suite("Schedule share composition")
+struct ScheduleShareCompositionTests {
+    @Test("Default selection starts tomorrow and spans three days")
+    func defaultDateSelection() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try #require(TimeZone(identifier: "Europe/Berlin"))
+        let now = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 3, hour: 12))
+        )
+
+        let selected = ScheduleShareDateSelection.nextDays(3, from: now, calendar: calendar)
+
+        #expect(selected == Set(["2026-08-04", "2026-08-05", "2026-08-06"]))
+        let range = try #require(ScheduleShareDateSelection.range(for: selected, calendar: calendar))
+        #expect(ScheduleShareDateSelection.dateKey(for: range.start, calendar: calendar) == "2026-08-04")
+        #expect(ScheduleShareDateSelection.dateKey(for: range.end, calendar: calendar) == "2026-08-06")
+    }
+
+    @Test("Week preview always returns a stable Monday through Sunday grid")
+    func fixedWeekPreviewDates() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try #require(TimeZone(identifier: "Europe/Berlin"))
+        let thursday = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 6, hour: 12))
+        )
+
+        let currentWeek = ScheduleShareDateSelection.weekDays(
+            containing: thursday,
+            calendar: calendar
+        )
+        let nextWeek = ScheduleShareDateSelection.weekDays(
+            containing: thursday,
+            offset: 1,
+            calendar: calendar
+        )
+
+        #expect(currentWeek.map { ScheduleShareDateSelection.dateKey(for: $0, calendar: calendar) } == [
+            "2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06",
+            "2026-08-07", "2026-08-08", "2026-08-09",
+        ])
+        #expect(nextWeek.first.map { ScheduleShareDateSelection.dateKey(for: $0, calendar: calendar) } == "2026-08-10")
+        #expect(nextWeek.count == 7)
+    }
+
+    @Test("A skipped day keeps its place inside the shared date range")
+    func sharedRangeKeepsExcludedDayColumn() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try #require(TimeZone(identifier: "Europe/Berlin"))
+        let start = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 3, hour: 0))
+        )
+        let end = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 9, hour: 23, minute: 59))
+        )
+        let included = Set([
+            "2026-08-03", "2026-08-04", "2026-08-05",
+            "2026-08-07", "2026-08-08", "2026-08-09",
+        ])
+
+        let displayKeys = ScheduleShareDateSelection.dates(
+            from: start,
+            through: end,
+            limit: 7,
+            calendar: calendar
+        ).map { ScheduleShareDateSelection.dateKey(for: $0, calendar: calendar) }
+
+        #expect(displayKeys.count == 7)
+        #expect(displayKeys[3] == "2026-08-06")
+        #expect(!included.contains(displayKeys[3]))
+    }
+
+    @Test("Hide-all privacy is encoded explicitly")
+    func hideAllPrivacyEncoding() throws {
+        let request = NativeScheduleShareCreateRequest(
+            rangeStart: "2026-08-04T00:00:00.000Z",
+            rangeEnd: "2026-08-06T23:59:59.999Z",
+            revealConfig: NativeScheduleShareRevealConfigRequest(
+                categoryIds: [],
+                presetKeys: [],
+                hideAllDetails: true,
+                includedDates: ["2026-08-04", "2026-08-05", "2026-08-06"]
+            ),
+            allowGuestProposals: true,
+            usageLimit: "SINGLE_USE",
+            expiresAt: "2026-08-17T23:59:59.999Z"
+        )
+
+        let object = try #require(
+            JSONSerialization.jsonObject(with: JSONEncoder().encode(request)) as? [String: Any]
+        )
+        let reveal = try #require(object["revealConfig"] as? [String: Any])
+        #expect(reveal["hideAllDetails"] as? Bool == true)
+        #expect((reveal["includedDates"] as? [String])?.count == 3)
+    }
+
+    @Test("Detail labels use live categories and real schedule sources")
+    func revealOptionsExcludeGhostPresets() {
+        let categories = [
+            NativeCalendarCategory(
+                id: "project-id",
+                name: "Project",
+                color: "#2563EB",
+                sortOrder: 0,
+                presetKey: nil,
+                icsSubscriptionUrl: nil
+            ),
+            NativeCalendarCategory(
+                id: "unused-id",
+                name: "Unused",
+                color: "#16A34A",
+                sortOrder: 1,
+                presetKey: nil,
+                icsSubscriptionUrl: nil
+            ),
+        ]
+        let blocks = [
+            scheduleBlock(categoryID: "project-id", presetKey: nil),
+            scheduleBlock(categoryID: nil, presetKey: "course"),
+            scheduleBlock(categoryID: nil, presetKey: "none"),
+            scheduleBlock(categoryID: nil, presetKey: "work"),
+        ]
+
+        let options = ScheduleShareRevealSelection.options(categories: categories, blocks: blocks)
+
+        #expect(options.map(\.id) == [
+            "project-id",
+            ScheduleShareRevealOption.courseSourceID,
+            ScheduleShareRevealOption.uncategorizedID,
+        ])
+        #expect(!options.contains { $0.name == "Work" || $0.name == "Unused" })
+    }
+
+    private func scheduleBlock(categoryID: String?, presetKey: String?) -> NativeScheduleShareBlock {
+        NativeScheduleShareBlock(
+            kind: "busy_detail",
+            start: "2026-08-04T10:00:00.000Z",
+            end: "2026-08-04T11:00:00.000Z",
+            title: "Event",
+            location: nil,
+            categoryId: categoryID,
+            categoryPresetKey: presetKey,
+            categoryName: nil,
+            categoryColor: nil
+        )
+    }
+}
+
 @Suite("Unreplied direct message limit")
 struct UnrepliedDirectMessageLimitTests {
     private let me = NativeChatAuthor(id: "me", username: "me", nickname: "Me", avatarUrl: nil)
@@ -125,7 +272,6 @@ struct UnrepliedDirectMessageLimitTests {
         let newestFirst = [
             message(id: "3", sender: me),
             message(id: "2", sender: me),
-            message(id: "1", sender: peer),
         ]
         #expect(
             DirectChatStore.countUnrepliedStreak(
@@ -136,8 +282,8 @@ struct UnrepliedDirectMessageLimitTests {
         )
     }
 
-    @Test("Resets after a peer reply")
-    func resetsAfterPeerReply() {
+    @Test("Unlocks permanently after a mutual reply")
+    func unlocksAfterMutualReply() {
         let newestFirst = [
             message(id: "3", sender: me),
             message(id: "2", sender: peer),
@@ -148,7 +294,14 @@ struct UnrepliedDirectMessageLimitTests {
                 messagesNewestFirst: newestFirst,
                 viewerID: me.id,
                 peerID: peer.id
-            ) == 1
+            ) == 0
+        )
+        #expect(
+            DirectChatStore.hasMutualExchange(
+                messages: newestFirst,
+                viewerID: me.id,
+                peerID: peer.id
+            )
         )
     }
 
@@ -180,8 +333,53 @@ struct ChatSSEClientTests {
     }
 }
 
+@Suite("Assistant message parser")
+struct AssistantMessageParserTests {
+    @Test("Parses action links from serialized assistant payload")
+    func parsesActionLinks() {
+        let raw = """
+        Hello from SideSeat.
+
+        [sideseat-actions]
+        {"links":[{"label":"Open Home","href":"/home"},{"label":"Open Discover","href":"/discover"}]}
+        [/sideseat-actions]
+        """
+        let payload = AssistantMessageParser.parse(raw)
+        #expect(payload.text == "Hello from SideSeat.")
+        #expect(payload.links.count == 2)
+        #expect(payload.links[0].href == "/home")
+    }
+
+    @Test("Maps FAQ trigger bodies to chip labels for the viewer bubble")
+    func mapsFaqTriggerToChipLabel() {
+        let display = AssistantMessageParser.displayUserBody("[[faq:getting_started]]")
+        #expect(display == AssistantFaqKey.gettingStarted.chipTitle)
+    }
+}
+
 @Suite("Inbox store")
 struct InboxStoreTests {
+    @Test("Formats the Chats tab badge from 1 through 99+")
+    func formatsUnreadBadge() {
+        #expect(InboxStore.unreadBadgeLabel(for: 0) == nil)
+        #expect(InboxStore.unreadBadgeLabel(for: 1) == "1")
+        #expect(InboxStore.unreadBadgeLabel(for: 99) == "99")
+        #expect(InboxStore.unreadBadgeLabel(for: 100) == "99+")
+    }
+
+    @Test("Clears the Chats tab badge immediately after reading")
+    @MainActor
+    func clearsUnreadBadgeImmediately() async throws {
+        let session = try await chatSession(transport: ChatTestTransport())
+        let store = InboxStore(cache: InboxCache(inMemoryOnly: true))
+        await store.load(using: session)
+
+        #expect(store.unreadBadgeLabel == "1")
+        store.clearUnread(conversationID: "connection-1")
+        #expect(store.unreadBadgeLabel == nil)
+        #expect(store.payload?.unreadTotal == 0)
+    }
+
     @Test("Loads merged inbox conversations")
     @MainActor
     func loadsInbox() async throws {
@@ -207,7 +405,7 @@ struct InboxStoreTests {
         )
         await session.login(identifier: "test_001", password: "Password123")
 
-        let store = InboxStore()
+        let store = InboxStore(cache: InboxCache(inMemoryOnly: true))
         await store.load(using: session)
         #expect(store.payload?.conversations.count == 3)
         #expect(store.pinned.count == 1)
@@ -221,7 +419,7 @@ struct InboxStoreTests {
     func filtersSearch() async throws {
         let transport = ChatTestTransport()
         let session = try await chatSession(transport: transport)
-        let store = InboxStore()
+        let store = InboxStore(cache: InboxCache(inMemoryOnly: true))
         await store.load(using: session)
 
         store.searchQuery = "algorithms"
@@ -238,7 +436,7 @@ struct InboxStoreTests {
     func pinAndHide() async throws {
         let transport = ChatTestTransport()
         let session = try await chatSession(transport: transport)
-        let store = InboxStore()
+        let store = InboxStore(cache: InboxCache(inMemoryOnly: true))
         await store.load(using: session)
 
         let direct = try #require(store.payload?.conversations.first { $0.id == "connection-1" })
@@ -252,6 +450,36 @@ struct InboxStoreTests {
         #expect(hidden)
         #expect(store.payload?.conversations.contains(where: { $0.id == "course-1" }) == false)
         #expect(await transport.hiddenPaths.contains("/api/v1/courses/course-1/inbox-hide"))
+    }
+
+    @Test("Restores the inbox snapshot while offline")
+    @MainActor
+    func restoresCachedInboxOffline() async throws {
+        let cache = InboxCache(inMemoryOnly: true)
+        await cache.save(
+            accountID: "user-1",
+            snapshot: InboxCacheSnapshot(payload: .uiTestingFixture)
+        )
+        let transport = ChatTestTransport(failInbox: true)
+        let session = try await chatSession(transport: transport)
+        let store = InboxStore(cache: cache)
+
+        await store.load(using: session)
+
+        #expect(store.payload?.conversations.isEmpty == false)
+        #expect(store.isLoading == false)
+        #expect(store.issue != nil)
+    }
+
+    @Test("Keeps inbox snapshots isolated by account")
+    func cacheIsolation() async {
+        let cache = InboxCache(inMemoryOnly: true)
+        await cache.save(
+            accountID: "user-1",
+            snapshot: InboxCacheSnapshot(payload: .uiTestingFixture)
+        )
+        #expect(await cache.load(accountID: "user-1") != nil)
+        #expect(await cache.load(accountID: "user-2") == nil)
     }
 
     @MainActor
@@ -286,9 +514,9 @@ struct InboxChatSearchTests {
     func matchesHaystack() {
         let course = NativeInboxPayload.uiTestingFixture.conversations.first { $0.kind == .course }!
         #expect(InboxChatSearch.matches(course, query: "IN0007"))
-        #expect(InboxChatSearch.matches(course, query: "  algorithms "))
-        let direct = NativeInboxPayload.uiTestingFixture.conversations.first { $0.kind == .direct }!
-        #expect(InboxChatSearch.matches(direct, query: "mina"))
+        #expect(InboxChatSearch.matches(course, query: "  算法 "))
+        let direct = NativeInboxPayload.uiTestingFixture.conversations.first { $0.id == "ui-connection" }!
+        #expect(InboxChatSearch.matches(direct, query: "test_002"))
         #expect(!InboxChatSearch.matches(direct, query: "nope"))
     }
 }
@@ -307,14 +535,170 @@ struct ChatThreadSearchRowTests {
             createdAt: "2026-07-17T12:00:00.000Z"
         )
         let row = ChatThreadSearchRow.from(schedule)
-        #expect(row.preview == "Shared schedule")
-        #expect(row.matches(query: "schedule"))
+        #expect(["Shared schedule", "共享日程"].contains(row.preview))
+        #expect(row.matches(query: row.preview))
+        #expect(row.matches(query: "token"))
         #expect(!row.matches(query: "zzzz"))
     }
 }
 
 @Suite("Direct chat store")
 struct DirectChatStoreTests {
+    @Test("Local cache keeps message state isolated by account")
+    func cacheIsolation() async throws {
+        let cache = DirectChatCache(inMemoryOnly: true)
+        let peer = NativeChatAuthor(
+            id: "peer-1",
+            username: "test_002",
+            nickname: "Mina",
+            avatarUrl: nil
+        )
+        let pending = NativeDirectMessage(
+            id: "local-pending",
+            connectionId: "connection-1",
+            sender: NativeChatAuthor(
+                id: "user-1",
+                username: "test_001",
+                nickname: "Test User",
+                avatarUrl: nil
+            ),
+            type: "TEXT",
+            body: "Cached hello",
+            createdAt: "2026-08-04T12:00:00.000Z"
+        )
+        await cache.save(
+            accountID: "user-1",
+            connectionID: "connection-1",
+            snapshot: DirectChatCacheSnapshot(
+                conversation: NativeDirectConversation(
+                    id: "connection-1",
+                    isSelfNotes: false,
+                    displayName: "Mina",
+                    peer: peer
+                ),
+                messages: [pending],
+                sendStatuses: [pending.id: .failed],
+                hasMoreOlder: true,
+                nextCursor: "older-cursor",
+                realtimeCursor: "realtime-cursor"
+            )
+        )
+
+        let restored = try #require(
+            await cache.load(accountID: "user-1", connectionID: "connection-1")
+        )
+        #expect(restored.messages == [pending])
+        #expect(restored.sendStatuses[pending.id] == .failed)
+        #expect(
+            await cache.load(accountID: "user-2", connectionID: "connection-1") == nil
+        )
+
+        let remote = NativeDirectMessage(
+            id: "remote-2",
+            connectionId: "connection-1",
+            sender: peer,
+            type: "TEXT",
+            body: "Server update",
+            createdAt: "2026-08-04T12:01:00.000Z"
+        )
+        await cache.merge(
+            accountID: "user-1",
+            connectionID: "connection-1",
+            page: NativeDirectMessagePageResponse(
+                data: NativeDirectMessagePageData(
+                    connection: restored.conversation,
+                    messages: [remote]
+                ),
+                meta: NativeDirectMessagePageMeta(
+                    hasMore: false,
+                    nextCursor: nil,
+                    realtimeCursor: "realtime-cursor-2"
+                )
+            )
+        )
+        let merged = try #require(
+            await cache.load(accountID: "user-1", connectionID: "connection-1")
+        )
+        #expect(merged.messages.contains(pending))
+        #expect(merged.messages.contains(remote))
+        #expect(merged.sendStatuses[pending.id] == .failed)
+
+        await cache.removeAccount("user-1")
+        #expect(
+            await cache.load(accountID: "user-1", connectionID: "connection-1") == nil
+        )
+    }
+
+    @Test("Cached conversation opens when history sync is offline")
+    @MainActor
+    func cachedConversationSurvivesOfflineSync() async throws {
+        let cache = DirectChatCache(inMemoryOnly: true)
+        let peer = NativeChatAuthor(
+            id: "peer-1",
+            username: "test_002",
+            nickname: "Mina",
+            avatarUrl: nil
+        )
+        let cachedMessage = NativeDirectMessage(
+            id: "cached-1",
+            connectionId: "connection-1",
+            sender: peer,
+            type: "TEXT",
+            body: "Available offline",
+            createdAt: "2026-08-04T12:00:00.000Z"
+        )
+        await cache.save(
+            accountID: "user-1",
+            connectionID: "connection-1",
+            snapshot: DirectChatCacheSnapshot(
+                conversation: NativeDirectConversation(
+                    id: "connection-1",
+                    isSelfNotes: false,
+                    displayName: "Mina",
+                    peer: peer
+                ),
+                messages: [cachedMessage],
+                hasMoreOlder: true,
+                nextCursor: "older-cursor",
+                realtimeCursor: "realtime-cursor"
+            )
+        )
+
+        let transport = ChatTestTransport(failDirectHistory: true)
+        let session = SessionStore(
+            apiClient: APIClient(
+                environment: AppEnvironment(
+                    deployment: .development,
+                    apiBaseURL: URL(string: "https://api.sideseat.test")!,
+                    bundleIdentifier: "app.sideseat.mobile.tests",
+                    appVersion: "1.0.0",
+                    buildNumber: "1"
+                ),
+                transport: transport
+            ),
+            credentialStore: ChatMemoryCredentialStore(),
+            device: NativeDevice(
+                id: "chat-device",
+                name: "Chat iPhone",
+                appVersion: "1.0.0",
+                platformVersion: "26.5"
+            )
+        )
+        await session.login(identifier: "test_001", password: "Password123")
+
+        let store = DirectChatStore(cache: cache)
+        await store.load(
+            connectionID: "connection-1",
+            using: session,
+            apiBaseURL: URL(string: "https://api.sideseat.test")!,
+            enableRealtime: false
+        )
+
+        #expect(store.isLoading == false)
+        #expect(store.conversation?.displayName == "Mina")
+        #expect(store.messages == [cachedMessage])
+    }
+
     @Test("Loads history and sends optimistic text")
     @MainActor
     func loadsAndSends() async throws {
@@ -340,7 +724,7 @@ struct DirectChatStoreTests {
         )
         await session.login(identifier: "test_001", password: "Password123")
 
-        let store = DirectChatStore()
+        let store = DirectChatStore(cache: DirectChatCache(inMemoryOnly: true))
         await store.load(
             connectionID: "connection-1",
             using: session,
@@ -350,6 +734,7 @@ struct DirectChatStoreTests {
 
         #expect(store.conversation?.displayName == "Mina")
         #expect(store.messages.count == 1)
+        await store.waitForInitialSideEffects()
         #expect(await transport.readMarked)
 
         let ok = await store.sendText("Hello Mina", using: session)
@@ -384,7 +769,7 @@ struct DirectChatStoreTests {
         )
         await session.login(identifier: "test_001", password: "Password123")
 
-        let store = DirectChatStore()
+        let store = DirectChatStore(cache: DirectChatCache(inMemoryOnly: true))
         await store.load(
             connectionID: "connection-1",
             using: session,
@@ -434,7 +819,7 @@ struct DirectChatStoreTests {
         )
         await session.login(identifier: "test_001", password: "Password123")
 
-        let store = DirectChatStore()
+        let store = DirectChatStore(cache: DirectChatCache(inMemoryOnly: true))
         await store.load(
             connectionID: "connection-1",
             using: session,
@@ -442,11 +827,21 @@ struct DirectChatStoreTests {
             enableRealtime: false
         )
 
-        let sent = await store.sendLocation(latitude: 48.137, longitude: 11.575, using: session)
+        let sent = await store.sendLocation(
+            latitude: 48.137,
+            longitude: 11.575,
+            name: "Marienplatz, Munich",
+            using: session
+        )
         #expect(sent)
         #expect(await transport.lastLocationLat == 48.137)
         #expect(await transport.lastLocationLng == 11.575)
-        #expect(store.messages.contains(where: { $0.type == "LOCATION" && $0.location?.latitude == 48.137 }))
+        #expect(await transport.lastLocationName == "Marienplatz, Munich")
+        #expect(store.messages.contains(where: {
+            $0.type == "LOCATION"
+                && $0.location?.latitude == 48.137
+                && $0.location?.name == "Marienplatz, Munich"
+        }))
 
         let peer = try #require(store.messages.first(where: { $0.sender.id == "peer-1" }))
         let failure = await store.reportMessage(
@@ -458,6 +853,61 @@ struct DirectChatStoreTests {
         #expect(failure == nil)
         #expect(await transport.lastReportMessageID == "msg-1")
         #expect(await transport.lastReportReason == "SPAM")
+    }
+
+    @Test("Accepting a plan invalidates calendar, plans, and inbox state")
+    @MainActor
+    func acceptingPlanPublishesRefreshes() async throws {
+        let transport = ChatTestTransport()
+        let session = SessionStore(
+            apiClient: APIClient(
+                environment: AppEnvironment(
+                    deployment: .development,
+                    apiBaseURL: URL(string: "https://api.sideseat.test")!,
+                    bundleIdentifier: "app.sideseat.mobile.tests",
+                    appVersion: "1.0.0",
+                    buildNumber: "1"
+                ),
+                transport: transport
+            ),
+            credentialStore: ChatMemoryCredentialStore(),
+            device: NativeDevice(
+                id: "chat-device",
+                name: "Chat iPhone",
+                appVersion: "1.0.0",
+                platformVersion: "26.5"
+            )
+        )
+        await session.login(identifier: "test_001", password: "Password123")
+
+        let store = DirectChatStore(cache: DirectChatCache(inMemoryOnly: true))
+        await store.load(
+            connectionID: "connection-1",
+            using: session,
+            apiBaseURL: URL(string: "https://api.sideseat.test")!,
+            enableRealtime: false
+        )
+
+        let probe = ChatNotificationProbe()
+        let names: [Notification.Name] = [
+            .sideSeatCalendarNeedsRefresh,
+            .sideSeatPlansNeedsRefresh,
+            .sideSeatInboxNeedsRefresh,
+        ]
+        let observers = names.map { name in
+            NotificationCenter.default.addObserver(forName: name, object: nil, queue: nil) { notification in
+                probe.record(notification.name)
+            }
+        }
+        defer {
+            observers.forEach(NotificationCenter.default.removeObserver)
+        }
+
+        #expect(await store.acceptPlan("plan-accepted", using: session))
+        #expect(await transport.acceptedPlanIDs == ["plan-accepted"])
+        #expect(probe.received(.sideSeatCalendarNeedsRefresh))
+        #expect(probe.received(.sideSeatPlansNeedsRefresh))
+        #expect(probe.received(.sideSeatInboxNeedsRefresh))
     }
 }
 
@@ -488,7 +938,7 @@ struct CommunityChatStoreTests {
         )
         await session.login(identifier: "test_001", password: "Password123")
 
-        let store = CommunityChatStore()
+        let store = CommunityChatStore(cache: CommunityChatCache(inMemoryOnly: true))
         await store.load(
             kind: .course,
             conversationID: "course-1",
@@ -496,6 +946,7 @@ struct CommunityChatStoreTests {
             apiBaseURL: URL(string: "https://api.sideseat.test")!,
             enableRealtime: false
         )
+        await store.waitForInitialSideEffects()
         #expect(store.conversation?.displayName == "Algorithms")
         #expect(store.messages.count == 1)
         #expect(await transport.courseReadMarked)
@@ -522,7 +973,7 @@ struct CommunityChatStoreTests {
         #expect(await transport.lastReportReason == "HARASSMENT")
     }
 
-    @Test("Loads group history and sends text without reply")
+    @Test("Loads group history and supports reply, delete, and report")
     @MainActor
     func groupChatFlow() async throws {
         let transport = ChatTestTransport()
@@ -547,7 +998,7 @@ struct CommunityChatStoreTests {
         )
         await session.login(identifier: "test_001", password: "Password123")
 
-        let store = CommunityChatStore()
+        let store = CommunityChatStore(cache: CommunityChatCache(inMemoryOnly: true))
         await store.load(
             kind: .group,
             conversationID: "group-1",
@@ -555,15 +1006,149 @@ struct CommunityChatStoreTests {
             apiBaseURL: URL(string: "https://api.sideseat.test")!,
             enableRealtime: false
         )
+        await store.waitForInitialSideEffects()
         #expect(store.conversation?.displayName == "Study crew")
-        store.beginReply(to: try #require(store.messages.first))
-        #expect(store.replyTarget == nil)
+        let peer = try #require(store.messages.first)
+        store.beginReply(to: peer)
+        #expect(store.replyTarget?.id == "group-msg-1")
 
         let sent = await store.sendText("See you there", using: session)
         #expect(sent)
-        #expect(await transport.lastReplyToId == nil)
+        #expect(await transport.lastReplyToId == "group-msg-1")
         #expect(store.messages.contains(where: { $0.body == "See you there" }))
         #expect(await transport.groupReadMarked)
+
+        let own = try #require(store.messages.first(where: { $0.body == "See you there" }))
+        #expect(await store.deleteMessage(own.id, using: session))
+        #expect(await transport.deletedGroupMessageID == own.id)
+        #expect(store.messages.contains(where: { $0.id == own.id && $0.isDeleted }))
+
+        let failure = await store.reportMessage(
+            peer,
+            reason: .harassment,
+            details: "",
+            using: session
+        )
+        #expect(failure == nil)
+        #expect(await transport.lastReportGroupMessageID == "group-msg-1")
+        #expect(await transport.lastReportReason == "HARASSMENT")
+    }
+
+    @Test("Restores cached course history while offline")
+    @MainActor
+    func cachedCourseHistoryWorksOffline() async throws {
+        let cache = CommunityChatCache(inMemoryOnly: true)
+        let conversation = NativeCommunityConversation(
+            kind: NativeCommunityChatKind.course.rawValue,
+            id: "course-1",
+            name: "Algorithms",
+            code: "IN0007",
+            school: "TUM",
+            semesterLabel: "SS26",
+            memberCount: 12,
+            title: nil,
+            customTitle: nil,
+            participants: nil
+        )
+        let cachedMessage = NativeCommunityMessage(
+            id: "cached-course-message",
+            conversationId: "course-1",
+            sender: NativeChatAuthor(
+                id: "peer-1",
+                username: "test_002",
+                nickname: "Mina",
+                avatarUrl: nil
+            ),
+            body: "Cached tutorial note",
+            createdAt: "2026-07-17T13:00:00.000Z"
+        )
+        await cache.save(
+            accountID: "user-1",
+            kind: .course,
+            conversationID: "course-1",
+            snapshot: CommunityChatCacheSnapshot(
+                conversation: conversation,
+                messages: [cachedMessage],
+                hasMoreOlder: false,
+                nextCursor: nil,
+                realtimeCursor: "cached-cursor"
+            )
+        )
+
+        let transport = ChatTestTransport(failCommunityHistory: true)
+        let session = makeChatSession(transport: transport)
+        await session.login(identifier: "test_001", password: "Password123")
+
+        let store = CommunityChatStore(cache: cache)
+        await store.load(
+            kind: .course,
+            conversationID: "course-1",
+            using: session,
+            apiBaseURL: URL(string: "https://api.sideseat.test")!,
+            enableRealtime: false
+        )
+
+        #expect(store.isLoading == false)
+        #expect(store.conversation?.displayName == "Algorithms")
+        #expect(store.messages.map(\.id) == ["cached-course-message"])
+        #expect(store.issue != nil)
+    }
+
+    @Test("Separates community cache by account and chat kind")
+    @MainActor
+    func communityCacheIsolation() async {
+        let cache = CommunityChatCache(inMemoryOnly: true)
+        let course = NativeCommunityConversation(
+            kind: NativeCommunityChatKind.course.rawValue,
+            id: "shared-id",
+            name: "Course room",
+            code: nil,
+            school: "TUM",
+            semesterLabel: nil,
+            memberCount: nil,
+            title: nil,
+            customTitle: nil,
+            participants: nil
+        )
+        await cache.save(
+            accountID: "user-a",
+            kind: .course,
+            conversationID: "shared-id",
+            snapshot: CommunityChatCacheSnapshot(
+                conversation: course,
+                messages: [],
+                hasMoreOlder: false,
+                nextCursor: nil,
+                realtimeCursor: nil
+            )
+        )
+
+        #expect(await cache.load(accountID: "user-a", kind: .course, conversationID: "shared-id") != nil)
+        #expect(await cache.load(accountID: "user-a", kind: .group, conversationID: "shared-id") == nil)
+        #expect(await cache.load(accountID: "user-b", kind: .course, conversationID: "shared-id") == nil)
+    }
+
+    @MainActor
+    private func makeChatSession(transport: ChatTestTransport) -> SessionStore {
+        SessionStore(
+            apiClient: APIClient(
+                environment: AppEnvironment(
+                    deployment: .development,
+                    apiBaseURL: URL(string: "https://api.sideseat.test")!,
+                    bundleIdentifier: "app.sideseat.mobile.tests",
+                    appVersion: "1.0.0",
+                    buildNumber: "1"
+                ),
+                transport: transport
+            ),
+            credentialStore: ChatMemoryCredentialStore(),
+            device: NativeDevice(
+                id: "chat-device",
+                name: "Chat iPhone",
+                appVersion: "1.0.0",
+                platformVersion: "26.5"
+            )
+        )
     }
 }
 
@@ -574,7 +1159,27 @@ private actor ChatMemoryCredentialStore: CredentialStore {
     func clear() { token = nil }
 }
 
+private final class ChatNotificationProbe: @unchecked Sendable {
+    private let lock = NSLock()
+    private var names = Set<Notification.Name>()
+
+    func record(_ name: Notification.Name) {
+        lock.lock()
+        names.insert(name)
+        lock.unlock()
+    }
+
+    func received(_ name: Notification.Name) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return names.contains(name)
+    }
+}
+
 private actor ChatTestTransport: APITransport {
+    private let failDirectHistory: Bool
+    private let failCommunityHistory: Bool
+    private let failInbox: Bool
     private(set) var readMarked = false
     private(set) var courseReadMarked = false
     private(set) var groupReadMarked = false
@@ -583,17 +1188,31 @@ private actor ChatTestTransport: APITransport {
     private(set) var lastReplyToId: String?
     private(set) var lastLocationLat: Double?
     private(set) var lastLocationLng: Double?
+    private(set) var lastLocationName: String?
     private(set) var lastReportMessageID: String?
     private(set) var lastReportCourseMessageID: String?
+    private(set) var lastReportGroupMessageID: String?
     private(set) var lastReportReason: String?
     private(set) var deletedMessageID: String?
     private(set) var deletedCourseMessageID: String?
+    private(set) var deletedGroupMessageID: String?
     private(set) var pinnedPaths: [String] = []
     private(set) var hiddenPaths: [String] = []
+    private(set) var acceptedPlanIDs: [String] = []
     private var messageCounter = 2
     private var courseMessageCounter = 1
     private var groupMessageCounter = 1
     private var directPinned = true
+
+    init(
+        failDirectHistory: Bool = false,
+        failCommunityHistory: Bool = false,
+        failInbox: Bool = false
+    ) {
+        self.failDirectHistory = failDirectHistory
+        self.failCommunityHistory = failCommunityHistory
+        self.failInbox = failInbox
+    }
 
     func data(for request: URLRequest) async throws -> (Data, URLResponse) {
         let path = request.url?.path ?? ""
@@ -605,6 +1224,9 @@ private actor ChatTestTransport: APITransport {
                 #"{"data":{"user":{"id":"user-1","username":"test_001","nickname":"Test User","gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","locale":"en"},"tokens":{"accessToken":"access-token","accessExpiresIn":900,"refreshToken":"refresh-token","refreshExpiresAt":"2026-08-16T00:00:00.000Z"}}}"#
             )
         case "/api/v1/inbox":
+            if failInbox {
+                throw URLError(.notConnectedToInternet)
+            }
             return response(
                 request,
                 200,
@@ -630,6 +1252,7 @@ private actor ChatTestTransport: APITransport {
             let body = try JSONSerialization.jsonObject(with: request.httpBody ?? Data()) as? [String: Any]
             lastReportMessageID = body?["messageId"] as? String
             lastReportCourseMessageID = body?["courseRoomMessageId"] as? String
+            lastReportGroupMessageID = body?["groupChatMessageId"] as? String
             lastReportReason = body?["reason"] as? String
             return response(
                 request,
@@ -656,12 +1279,14 @@ private actor ChatTestTransport: APITransport {
                 if type == "LOCATION" {
                     let lat = body?["locationLat"] as? Double ?? 0
                     let lng = body?["locationLng"] as? Double ?? 0
+                    let name = body?["locationName"] as? String
                     lastLocationLat = lat
                     lastLocationLng = lng
+                    lastLocationName = name
                     return response(
                         request,
                         201,
-                        #"{"data":{"id":"\#(messageID)","connectionId":"connection-1","sender":{"id":"user-1","username":"test_001","nickname":"Test User","avatarUrl":null},"type":"LOCATION","body":null,"imageUrl":null,"location":{"latitude":\#(lat),"longitude":\#(lng),"name":null},"availabilityShareId":null,"planRequestId":null,"replyTo":\#(replyJSON),"deletedAt":null,"createdAt":"2026-07-17T12:01:00.000Z"}}"#
+                        #"{"data":{"id":"\#(messageID)","connectionId":"connection-1","sender":{"id":"user-1","username":"test_001","nickname":"Test User","avatarUrl":null},"type":"LOCATION","body":null,"imageUrl":null,"location":{"latitude":\#(lat),"longitude":\#(lng),"name":"\#(name ?? "Location")"},"availabilityShareId":null,"planRequestId":null,"replyTo":\#(replyJSON),"deletedAt":null,"createdAt":"2026-07-17T12:01:00.000Z"}}"#
                     )
                 }
                 let text = body?["body"] as? String ?? ""
@@ -672,6 +1297,9 @@ private actor ChatTestTransport: APITransport {
                     #"{"data":{"id":"\#(messageID)","connectionId":"connection-1","sender":{"id":"user-1","username":"test_001","nickname":"Test User","avatarUrl":null},"type":"TEXT","body":"\#(text)","imageUrl":null,"location":null,"availabilityShareId":null,"planRequestId":null,"replyTo":\#(replyJSON),"deletedAt":null,"createdAt":"2026-07-17T12:01:00.000Z"}}"#
                 )
             }
+            if failDirectHistory {
+                throw URLError(.notConnectedToInternet)
+            }
             return response(
                 request,
                 200,
@@ -680,6 +1308,13 @@ private actor ChatTestTransport: APITransport {
         case "/api/v1/connections/connection-1/read":
             readMarked = true
             return response(request, 200, #"{"data":{"readAt":"2026-07-17T12:00:30.000Z"}}"#)
+        case "/api/v1/plans/plan-accepted/accept":
+            acceptedPlanIDs.append("plan-accepted")
+            return response(
+                request,
+                200,
+                #"{"data":{"plan":{"id":"plan-accepted","connectionId":"connection-1","status":"ACCEPTED","planType":"CUSTOM","title":"Dinner in town","location":"Maxvorstadt","message":null,"startTime":"2026-08-07T18:00:00.000Z","endTime":"2026-08-07T19:30:00.000Z","proposer":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"receiver":{"id":"user-1","username":"test_001","nickname":"Test User","avatarUrl":null},"counterOfId":null,"availabilityShareId":null,"scheduleShareLinkId":null,"createdAt":"2026-08-05T12:00:00.000Z","updatedAt":"2026-08-05T12:01:00.000Z"}}}"#
+            )
         case "/api/v1/courses/course-1/messages":
             if request.httpMethod == "POST" {
                 if let key = request.value(forHTTPHeaderField: "Idempotency-Key") {
@@ -702,6 +1337,9 @@ private actor ChatTestTransport: APITransport {
                     #"{"data":{"id":"\#(messageID)","conversationId":"course-1","sender":{"id":"user-1","username":"test_001","nickname":"Test User","avatarUrl":null},"type":"TEXT","body":"\#(text)","replyTo":\#(replyJSON),"deletedAt":null,"createdAt":"2026-07-17T13:02:00.000Z"}}"#
                 )
             }
+            if failCommunityHistory {
+                throw URLError(.notConnectedToInternet)
+            }
             return response(
                 request,
                 200,
@@ -720,11 +1358,20 @@ private actor ChatTestTransport: APITransport {
                 lastReplyToId = body?["replyToId"] as? String
                 groupMessageCounter += 1
                 let messageID = "group-msg-\(groupMessageCounter)"
+                let replyJSON: String
+                if let replyToId = lastReplyToId {
+                    replyJSON = #"{"id":"\#(replyToId)","sender":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"body":"Library at 4?","deletedAt":null}"#
+                } else {
+                    replyJSON = "null"
+                }
                 return response(
                     request,
                     201,
-                    #"{"data":{"id":"\#(messageID)","conversationId":"group-1","sender":{"id":"user-1","username":"test_001","nickname":"Test User","avatarUrl":null},"type":"TEXT","body":"\#(text)","replyTo":null,"deletedAt":null,"createdAt":"2026-07-17T14:01:00.000Z"}}"#
+                    #"{"data":{"id":"\#(messageID)","conversationId":"group-1","sender":{"id":"user-1","username":"test_001","nickname":"Test User","avatarUrl":null},"type":"TEXT","body":"\#(text)","replyTo":\#(replyJSON),"deletedAt":null,"createdAt":"2026-07-17T14:01:00.000Z"}}"#
                 )
+            }
+            if failCommunityHistory {
+                throw URLError(.notConnectedToInternet)
             }
             return response(
                 request,
@@ -743,6 +1390,10 @@ private actor ChatTestTransport: APITransport {
                 if path.hasPrefix("/api/courses/course-1/chat/messages/") {
                     deletedCourseMessageID = path.split(separator: "/").last.map(String.init)
                     return response(request, 200, #"{"success":true,"data":{"id":"\#(deletedCourseMessageID ?? "")"}}"#)
+                }
+                if path.hasPrefix("/api/group-chats/group-1/messages/") {
+                    deletedGroupMessageID = path.split(separator: "/").last.map(String.init)
+                    return response(request, 200, #"{"success":true,"data":{"id":"\#(deletedGroupMessageID ?? "")"}}"#)
                 }
             }
             throw URLError(.badURL)

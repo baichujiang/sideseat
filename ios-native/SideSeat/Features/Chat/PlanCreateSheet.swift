@@ -5,6 +5,7 @@ struct PlanCreateSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     let connectionID: String
+    var recipientName: String? = nil
     var counterOf: NativePlanRequest? = nil
     let onCreated: () -> Void
 
@@ -16,33 +17,37 @@ struct PlanCreateSheet: View {
     @State private var isCreating = false
     @State private var issue: String?
     @State private var didSeed = false
+    @FocusState private var focusedField: Field?
+
+    private enum Field: Hashable {
+        case title
+        case location
+        case note
+    }
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Plan") {
-                    TextField("Title", text: $title)
-                        .accessibilityIdentifier("plan-create-title")
-                    TextField("Location (optional)", text: $location)
-                        .accessibilityIdentifier("plan-create-location")
-                    TextField("Note (optional)", text: $message, axis: .vertical)
-                        .lineLimit(2...4)
-                        .accessibilityIdentifier("plan-create-message")
-                }
-                Section("When") {
-                    DatePicker("Starts", selection: $start)
-                        .accessibilityIdentifier("plan-create-start")
-                    DatePicker("Ends", selection: $end)
-                        .accessibilityIdentifier("plan-create-end")
-                }
-                if let issue {
-                    Section {
-                        Text(issue)
+            ScrollView {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXL) {
+                    recipientSummary
+                    planDetails
+                    timing
+                    calendarOutcome
+
+                    if let issue {
+                        Label(issue, systemImage: "exclamationmark.circle")
                             .font(.footnote)
                             .foregroundStyle(SideSeatTheme.danger)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .accessibilityIdentifier("plan-create-issue")
                     }
                 }
+                .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                .padding(.top, SideSeatTheme.spaceLG)
+                .padding(.bottom, SideSeatTheme.spaceXL)
             }
+            .scrollDismissesKeyboard(.interactively)
+            .background(SideSeatTheme.bgGrouped)
             .navigationTitle(
                 counterOf == nil
                     ? String(localized: "Propose a plan")
@@ -53,17 +58,169 @@ struct PlanCreateSheet: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Send") {
-                        Task { await create() }
-                    }
-                    .disabled(!canSend || isCreating)
-                    .accessibilityIdentifier("plan-create-submit")
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                SSPrimaryButton(
+                    title: counterOf == nil
+                        ? String(localized: "Send plan")
+                        : String(localized: "Send new time"),
+                    isLoading: isCreating,
+                    fill: .product,
+                    height: 48,
+                    accessibilityID: "plan-create-submit"
+                ) {
+                    Task { await create() }
                 }
+                .disabled(!canSend || isCreating)
+                .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                .padding(.vertical, SideSeatTheme.spaceSM)
+                .background(.bar)
             }
             .onAppear { seedFromCounterIfNeeded() }
+            .onChange(of: start) { oldValue, newValue in
+                guard end <= newValue else { return }
+                let previousDuration = max(end.timeIntervalSince(oldValue), 30 * 60)
+                end = newValue.addingTimeInterval(previousDuration)
+            }
             .accessibilityIdentifier("plan-create-sheet")
         }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
+    }
+
+    private var recipientSummary: some View {
+        HStack(spacing: SideSeatTheme.spaceMD) {
+            Image(systemName: counterOf == nil ? "person.crop.circle.badge.plus" : "arrow.triangle.2.circlepath")
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(SideSeatTheme.accent)
+                .frame(width: 42, height: 42)
+                .background(SideSeatTheme.accent.opacity(0.10), in: Circle())
+            VStack(alignment: .leading, spacing: 2) {
+                Text(counterOf == nil ? String(localized: "Plan with") : String(localized: "New time for"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(recipientName ?? String(localized: "This chat"))
+                    .font(.body.weight(.semibold))
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(SideSeatTheme.spaceMD)
+        .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+
+    private var planDetails: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+            Text("Details")
+                .font(.headline)
+
+            VStack(spacing: 0) {
+                HStack(spacing: SideSeatTheme.spaceMD) {
+                    Image(systemName: "text.cursor")
+                        .foregroundStyle(SideSeatTheme.accent)
+                        .frame(width: 22)
+                    TextField("What are you planning?", text: $title)
+                        .focused($focusedField, equals: .title)
+                        .submitLabel(.next)
+                        .onSubmit { focusedField = .location }
+                        .accessibilityIdentifier("plan-create-title")
+                }
+                .padding(.horizontal, SideSeatTheme.spaceMD)
+                .frame(minHeight: 50)
+
+                Divider().padding(.leading, 50)
+
+                HStack(spacing: SideSeatTheme.spaceMD) {
+                    Image(systemName: "mappin.and.ellipse")
+                        .foregroundStyle(SideSeatTheme.accent)
+                        .frame(width: 22)
+                    TextField("Location (optional)", text: $location)
+                        .focused($focusedField, equals: .location)
+                        .submitLabel(.next)
+                        .onSubmit { focusedField = .note }
+                        .accessibilityIdentifier("plan-create-location")
+                }
+                .padding(.horizontal, SideSeatTheme.spaceMD)
+                .frame(minHeight: 50)
+
+                Divider().padding(.leading, 50)
+
+                HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
+                    Image(systemName: "note.text")
+                        .foregroundStyle(SideSeatTheme.accent)
+                        .frame(width: 22)
+                        .padding(.top, 3)
+                    TextField("Note (optional)", text: $message, axis: .vertical)
+                        .lineLimit(2...4)
+                        .focused($focusedField, equals: .note)
+                        .accessibilityIdentifier("plan-create-message")
+                }
+                .padding(SideSeatTheme.spaceMD)
+                .frame(minHeight: 58, alignment: .top)
+            }
+            .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        }
+    }
+
+    private var timing: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+            Text("When")
+                .font(.headline)
+
+            VStack(spacing: 0) {
+                dateRow(label: String(localized: "Starts"), icon: "clock", selection: $start)
+                Divider().padding(.leading, 50)
+                dateRow(label: String(localized: "Ends"), icon: "clock.badge.checkmark", selection: $end)
+            }
+            .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+
+            if end.timeIntervalSince(start) < 30 * 60 {
+                Text("A plan must be at least 30 minutes.")
+                    .font(.caption)
+                    .foregroundStyle(SideSeatTheme.danger)
+            }
+        }
+    }
+
+    private func dateRow(
+        label: String,
+        icon: String,
+        selection: Binding<Date>
+    ) -> some View {
+        HStack(spacing: SideSeatTheme.spaceMD) {
+            Image(systemName: icon)
+                .foregroundStyle(SideSeatTheme.accent)
+                .frame(width: 22)
+            Text(label)
+                .font(.body)
+            Spacer(minLength: SideSeatTheme.spaceSM)
+            DatePicker(label, selection: selection, displayedComponents: [.date, .hourAndMinute])
+                .labelsHidden()
+                .datePickerStyle(.compact)
+                .accessibilityIdentifier(label == String(localized: "Starts") ? "plan-create-start" : "plan-create-end")
+        }
+        .padding(.horizontal, SideSeatTheme.spaceMD)
+        .frame(minHeight: 54)
+    }
+
+    private var calendarOutcome: some View {
+        HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
+            Image(systemName: "calendar.badge.checkmark")
+                .font(.body.weight(.semibold))
+                .foregroundStyle(SideSeatTheme.success)
+                .frame(width: 34, height: 34)
+                .background(SideSeatTheme.success.opacity(0.10), in: Circle())
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Added after acceptance")
+                    .font(.subheadline.weight(.semibold))
+                Text("Once accepted, this plan appears in both calendars.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(SideSeatTheme.spaceMD)
+        .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
     private func seedFromCounterIfNeeded() {
@@ -104,14 +261,8 @@ struct PlanCreateSheet: View {
         do {
             let body = NativePlanCreateRequest(
                 title: title.trimmingCharacters(in: .whitespacesAndNewlines),
-                location: {
-                    let value = location.trimmingCharacters(in: .whitespacesAndNewlines)
-                    return value.isEmpty ? nil : value
-                }(),
-                message: {
-                    let value = message.trimmingCharacters(in: .whitespacesAndNewlines)
-                    return value.isEmpty ? nil : value
-                }(),
+                location: normalized(location),
+                message: normalized(message),
                 startTime: formatter.string(from: start),
                 endTime: formatter.string(from: end),
                 planType: counterOf?.planType ?? "CUSTOM"
@@ -136,5 +287,10 @@ struct PlanCreateSheet: View {
         } catch {
             issue = error.localizedDescription
         }
+    }
+
+    private func normalized(_ value: String) -> String? {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
     }
 }

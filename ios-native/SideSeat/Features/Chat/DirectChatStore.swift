@@ -26,17 +26,24 @@ final class DirectChatStore {
     private var nextCursor: String?
     private var realtimeCursor: String?
     private var streamTask: Task<Void, Never>?
+    private var initialSideEffectsTask: Task<Void, Never>?
+    private var cacheWriteTask: Task<Void, Never>?
     private var connectionID: String = ""
     private var apiBaseURL: URL?
     private var currentUserID: String = ""
     /// Set while prepending history so scroll policy does not treat it as new arrivals.
     private var suppressNextScrollDecision = false
     private var markReadTask: Task<Void, Never>?
+    private let cache: DirectChatCache
 
     private static let unrepliedDirectMessageLimit = 2
-    private static let assistantBotUsername = "sideseat_assistant"
+    static let assistantBotUsername = AssistantBot.username
 
-    /// Viewer messages since the peer's latest reply (includes soft-deleted rows).
+    init(cache: DirectChatCache = .shared) {
+        self.cache = cache
+    }
+
+    /// Messages sent before the conversation completes its first mutual reply.
     var unrepliedStreak: Int {
         guard !isUnrepliedGateExempt else { return 0 }
         guard let peerID = conversation?.peer.id, !currentUserID.isEmpty else { return 0 }
@@ -62,10 +69,31 @@ final class DirectChatStore {
         return newest.sender.id != peerID
     }
 
+    var isAssistantChat: Bool {
+        conversation?.peer.username == Self.assistantBotUsername
+    }
+
     private var isUnrepliedGateExempt: Bool {
         if conversation?.isSelfNotes == true { return true }
-        if conversation?.peer.username == Self.assistantBotUsername { return true }
+        if isAssistantChat { return true }
+        if conversation?.replyLimitUnlocked == true { return true }
+        if let peerID = conversation?.peer.id, !currentUserID.isEmpty {
+            let countable = messages.filter { sendStatuses[$0.id] != .failed }
+            if Self.hasMutualExchange(
+                messages: countable,
+                viewerID: currentUserID,
+                peerID: peerID
+            ) {
+                return true
+            }
+        }
         return false
+    }
+
+    /// First assistant welcome bubble (kept for tests / future first-run affordances).
+    var assistantWelcomeMessageID: String? {
+        guard isAssistantChat, !currentUserID.isEmpty else { return nil }
+        return messages.first(where: { $0.type == "TEXT" && AssistantBot.isBot($0.sender) })?.id
     }
 
     nonisolated static func countUnrepliedStreak(
@@ -74,9 +102,15 @@ final class DirectChatStore {
         peerID: String
     ) -> Int {
         guard !viewerID.isEmpty, !peerID.isEmpty, viewerID != peerID else { return 0 }
+        if hasMutualExchange(
+            messages: messagesNewestFirst,
+            viewerID: viewerID,
+            peerID: peerID
+        ) {
+            return 0
+        }
         var unreplied = 0
         for message in messagesNewestFirst {
-            if message.sender.id == peerID { break }
             if message.sender.id == viewerID, message.type != "SYSTEM" {
                 unreplied += 1
             }
@@ -84,11 +118,33 @@ final class DirectChatStore {
         return unreplied
     }
 
+    nonisolated static func hasMutualExchange(
+        messages: [NativeDirectMessage],
+        viewerID: String,
+        peerID: String
+    ) -> Bool {
+        guard !viewerID.isEmpty, !peerID.isEmpty, viewerID != peerID else { return false }
+        var viewerHasSent = false
+        var peerHasSent = false
+        for message in messages where message.type != "SYSTEM" {
+            if message.sender.id == viewerID { viewerHasSent = true }
+            if message.sender.id == peerID { peerHasSent = true }
+            if viewerHasSent, peerHasSent { return true }
+        }
+        return false
+    }
+
     func stop() {
         streamTask?.cancel()
         streamTask = nil
+        initialSideEffectsTask?.cancel()
+        initialSideEffectsTask = nil
         markReadTask?.cancel()
         markReadTask = nil
+    }
+
+    func waitForInitialSideEffects() async {
+        await initialSideEffectsTask?.value
     }
 
     func load(
@@ -116,7 +172,6 @@ final class DirectChatStore {
         issue = nil
         pendingRemoteCount = 0
         suppressNextScrollDecision = false
-        defer { isLoading = false }
 
         let stagedUnread = ChatUnreadLaunch.take(conversationID: connectionID)
 
@@ -132,25 +187,37 @@ final class DirectChatStore {
             applyUnreadJump(unreadCount: stagedUnread)
             await markRead(using: session)
             await loadConnectionActions(using: session)
+            isLoading = false
             return
         }
         #endif
 
+        if !currentUserID.isEmpty,
+           let snapshot = await cache.load(
+               accountID: currentUserID,
+               connectionID: connectionID
+           )
+        {
+            restore(snapshot)
+            applyUnreadJump(unreadCount: stagedUnread)
+            isLoading = false
+        }
+
+        if enableRealtime {
+            startRealtime(using: session)
+        }
+        scheduleInitialSideEffects(using: session)
+
         do {
             let page = try await fetchPage(cursor: nil, using: session)
-            conversation = page.data.connection
-            messages = page.data.messages
-            hasMoreOlder = page.meta.hasMore
-            nextCursor = page.meta.nextCursor
-            realtimeCursor = page.meta.realtimeCursor
+            applyNetworkPage(page)
             applyUnreadJump(unreadCount: stagedUnread)
-            await markRead(using: session)
-            await loadConnectionActions(using: session)
-            if enableRealtime {
-                startRealtime(using: session)
-            }
+            issue = nil
+            isLoading = false
+            await persistCache()
         } catch {
             issue = error.localizedDescription
+            isLoading = false
         }
     }
 
@@ -203,6 +270,7 @@ final class DirectChatStore {
             messages = older + messages
             hasMoreOlder = page.meta.hasMore
             self.nextCursor = page.meta.nextCursor
+            scheduleCachePersist()
         } catch {
             issue = error.localizedDescription
         }
@@ -223,6 +291,7 @@ final class DirectChatStore {
         isSending = true
         sendIssue = nil
         sendStatuses[messageID] = .sending
+        scheduleCachePersist()
         defer { isSending = false }
 
         #if DEBUG
@@ -242,9 +311,13 @@ final class DirectChatStore {
             messages.removeAll { $0.id == messageID }
             sendStatuses.removeValue(forKey: messageID)
             upsert(response.data)
+            if isAssistantChat {
+                await reloadHistory(using: session)
+            }
             return true
         } catch {
             sendStatuses[messageID] = .failed
+            scheduleCachePersist()
             noteSendFailure(error)
             return false
         }
@@ -309,6 +382,7 @@ final class DirectChatStore {
         sendStatuses[localID] = .sending
         pendingRemoteCount = 0
         publishInboxPreview(for: optimistic)
+        scheduleCachePersist()
 
         do {
             let response: APIEnvelope<NativeDirectMessage> = try await session.sendAuthorized(
@@ -321,12 +395,21 @@ final class DirectChatStore {
             sendStatuses.removeValue(forKey: localID)
             upsert(response.data)
             clearReply()
+            if isAssistantChat {
+                await reloadHistory(using: session)
+            }
             return true
         } catch {
             sendStatuses[localID] = .failed
+            scheduleCachePersist()
             noteSendFailure(error)
             return false
         }
+    }
+
+    @discardableResult
+    func sendFaq(_ key: AssistantFaqKey, using session: SessionStore) async -> Bool {
+        await sendText(key.triggerBody, using: session)
     }
 
     @discardableResult
@@ -368,6 +451,7 @@ final class DirectChatStore {
         sendStatuses[localID] = .sending
         pendingRemoteCount = 0
         publishInboxPreview(for: optimistic)
+        scheduleCachePersist()
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
@@ -416,6 +500,7 @@ final class DirectChatStore {
             return true
         } catch {
             sendStatuses[localID] = .failed
+            scheduleCachePersist()
             noteSendFailure(error)
             return false
         }
@@ -425,6 +510,7 @@ final class DirectChatStore {
     func sendLocation(
         latitude: Double,
         longitude: Double,
+        name: String? = nil,
         using session: SessionStore
     ) async -> Bool {
         guard !isSending else { return false }
@@ -451,24 +537,25 @@ final class DirectChatStore {
             type: "LOCATION",
             body: nil,
             createdAt: ISO8601DateFormatter().string(from: Date()),
-            location: NativeChatLocation(latitude: latitude, longitude: longitude, name: nil),
+            location: NativeChatLocation(latitude: latitude, longitude: longitude, name: name),
             replyTo: reply?.asReplyReference()
         )
         messages.append(optimistic)
         sendStatuses[localID] = .sending
         pendingRemoteCount = 0
         publishInboxPreview(for: optimistic)
+        scheduleCachePersist()
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             let sent = NativeDirectMessage(
-                id: "ui-local-location-\(UUID().uuidString)",
+                id: "ui-local-location",
                 connectionId: connectionID.isEmpty ? "ui-connection" : connectionID,
                 sender: optimistic.sender,
                 type: "LOCATION",
                 body: nil,
                 createdAt: optimistic.createdAt,
-                location: NativeChatLocation(latitude: latitude, longitude: longitude, name: nil),
+                location: NativeChatLocation(latitude: latitude, longitude: longitude, name: name),
                 replyTo: reply?.asReplyReference()
             )
             messages.removeAll { $0.id == localID }
@@ -485,6 +572,7 @@ final class DirectChatStore {
                 body: NativeDirectLocationMessageRequest(
                     locationLat: latitude,
                     locationLng: longitude,
+                    locationName: name,
                     replyToId: replyToId
                 ),
                 idempotencyKey: UUID().uuidString
@@ -496,6 +584,7 @@ final class DirectChatStore {
             return true
         } catch {
             sendStatuses[localID] = .failed
+            scheduleCachePersist()
             noteSendFailure(error)
             return false
         }
@@ -828,7 +917,7 @@ final class DirectChatStore {
 
     func seedLocalScheduleShareCard() {
         let message = NativeDirectMessage(
-            id: "ui-local-schedule-\(UUID().uuidString)",
+            id: "ui-local-schedule-shared",
             connectionId: connectionID.isEmpty ? "ui-connection" : connectionID,
             sender: NativeChatAuthor(
                 id: currentUserID.isEmpty ? "ui-test-user" : currentUserID,
@@ -898,6 +987,7 @@ final class DirectChatStore {
                     deletedAt: message.deletedAt
                 )
             }
+            await publishPlanMutationEffects(didAccept: path.hasSuffix("/accept"))
             return true
         }
         #endif
@@ -909,11 +999,21 @@ final class DirectChatStore {
                 idempotencyKey: UUID().uuidString
             )
             await reloadHistory(using: session)
+            await publishPlanMutationEffects(didAccept: path.hasSuffix("/accept"))
             return true
         } catch {
             planIssue = error.localizedDescription
             return false
         }
+    }
+
+    private func publishPlanMutationEffects(didAccept: Bool) async {
+        if didAccept {
+            await HomeScheduleCache.shared.clear()
+            NotificationCenter.default.post(name: .sideSeatCalendarNeedsRefresh, object: nil)
+        }
+        NotificationCenter.default.post(name: .sideSeatPlansNeedsRefresh, object: nil)
+        NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
     }
 
     private func mutateLinkAction(
@@ -991,8 +1091,101 @@ final class DirectChatStore {
         )
     }
 
+    private func restore(_ snapshot: DirectChatCacheSnapshot) {
+        conversation = snapshot.conversation
+        messages = snapshot.messages
+        sendStatuses = snapshot.sendStatuses.mapValues { status in
+            status == .sending ? .failed : status
+        }
+        hasMoreOlder = snapshot.hasMoreOlder
+        nextCursor = snapshot.nextCursor
+        realtimeCursor = snapshot.realtimeCursor
+    }
+
+    private func applyNetworkPage(_ page: NativeDirectMessagePageResponse) {
+        conversation = page.data.connection
+        var merged = Dictionary(uniqueKeysWithValues: messages.map { ($0.id, $0) })
+        for remote in page.data.messages {
+            if remote.sender.id == currentUserID {
+                let echoedLocalIDs = merged.values.compactMap { local -> String? in
+                    guard local.id.hasPrefix("local-"),
+                          sendStatuses[local.id] == .sending,
+                          local.type == remote.type,
+                          local.body == remote.body
+                    else { return nil }
+                    return local.id
+                }
+                for localID in echoedLocalIDs {
+                    merged.removeValue(forKey: localID)
+                    sendStatuses.removeValue(forKey: localID)
+                }
+            }
+            merged[remote.id] = remote
+            sendStatuses[remote.id] = .sent
+        }
+        messages = merged.values.sorted(by: Self.messageOrder)
+        hasMoreOlder = page.meta.hasMore
+        nextCursor = page.meta.nextCursor
+        realtimeCursor = page.meta.realtimeCursor
+    }
+
+    private func scheduleInitialSideEffects(using session: SessionStore) {
+        initialSideEffectsTask?.cancel()
+        initialSideEffectsTask = Task { [weak self] in
+            guard let self else { return }
+            async let markRead: Void = self.markRead(using: session)
+            async let actions: Void = self.loadConnectionActions(using: session)
+            _ = await (markRead, actions)
+        }
+    }
+
+    private func cacheSnapshot(savedAt: Date = Date()) -> DirectChatCacheSnapshot? {
+        guard let conversation,
+              !currentUserID.isEmpty,
+              !connectionID.isEmpty,
+              !ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated")
+        else { return nil }
+        return DirectChatCacheSnapshot(
+            conversation: conversation,
+            messages: messages,
+            sendStatuses: sendStatuses,
+            hasMoreOlder: hasMoreOlder,
+            nextCursor: nextCursor,
+            realtimeCursor: realtimeCursor,
+            savedAt: savedAt
+        )
+    }
+
+    private func persistCache() async {
+        guard let snapshot = cacheSnapshot() else { return }
+        await cache.save(
+            accountID: currentUserID,
+            connectionID: connectionID,
+            snapshot: snapshot
+        )
+    }
+
+    private func scheduleCachePersist() {
+        guard let snapshot = cacheSnapshot() else { return }
+        let accountID = currentUserID
+        let connectionID = connectionID
+        let cache = cache
+        cacheWriteTask?.cancel()
+        cacheWriteTask = Task {
+            try? await Task.sleep(nanoseconds: 100_000_000)
+            guard !Task.isCancelled else { return }
+            await cache.save(
+                accountID: accountID,
+                connectionID: connectionID,
+                snapshot: snapshot
+            )
+        }
+    }
+
     private func fetchPage(cursor: String?, using session: SessionStore) async throws -> NativeDirectMessagePageResponse {
-        var queryItems: [URLQueryItem] = [URLQueryItem(name: "limit", value: "50")]
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "limit", value: cursor == nil ? "30" : "50")
+        ]
         if let cursor {
             queryItems.append(URLQueryItem(name: "cursor", value: cursor))
         }
@@ -1191,6 +1384,7 @@ final class DirectChatStore {
                 await reloadHistory(using: session)
             }
         }
+        scheduleCachePersist()
     }
 
     private func reloadHistory(using session: SessionStore) async {
@@ -1230,6 +1424,7 @@ final class DirectChatStore {
                 (lhs.createdDate ?? .distantPast) < (rhs.createdDate ?? .distantPast)
                     || ((lhs.createdDate == rhs.createdDate) && lhs.id < rhs.id)
             }
+            scheduleCachePersist()
             await markRead(using: session)
         } catch {
             issue = error.localizedDescription
@@ -1251,15 +1446,19 @@ final class DirectChatStore {
                 }
             }
             messages.append(message)
-            messages.sort { lhs, rhs in
-                (lhs.createdDate ?? .distantPast) < (rhs.createdDate ?? .distantPast)
-                    || ((lhs.createdDate == rhs.createdDate) && lhs.id < rhs.id)
-            }
+            messages.sort(by: Self.messageOrder)
         }
         sendStatuses[message.id] = .sent
         if message.sender.id == currentUserID || message.sender.id == "ui-test-user" {
             publishInboxPreview(for: message)
         }
+        scheduleCachePersist()
+    }
+
+    private static func messageOrder(_ lhs: NativeDirectMessage, _ rhs: NativeDirectMessage) -> Bool {
+        let left = lhs.createdDate ?? .distantPast
+        let right = rhs.createdDate ?? .distantPast
+        return left == right ? lhs.id < rhs.id : left < right
     }
 
     private func publishInboxPreview(for message: NativeDirectMessage) {

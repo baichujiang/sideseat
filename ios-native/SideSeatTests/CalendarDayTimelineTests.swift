@@ -50,6 +50,52 @@ struct CalendarDayTimelineTests {
         #expect(placement.endMinute == 45)
     }
 
+    @Test("Grid card time labels adapt to available card space")
+    func adaptiveEventCardTimeLabels() throws {
+        let calendar = Calendar.sideSeatBerlin
+        let day = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 7, day: 17, hour: 14))
+        )
+        let end = try #require(calendar.date(byAdding: .minute, value: 75, to: day))
+
+        #expect(
+            CalendarChrome.eventCardTimeLabel(
+                from: day,
+                to: end,
+                height: 24,
+                availableWidth: 100,
+                calendar: calendar
+            ) == nil
+        )
+        #expect(
+            CalendarChrome.eventCardTimeLabel(
+                from: day,
+                to: end,
+                height: 38,
+                availableWidth: 100,
+                calendar: calendar
+            ) == "14:00"
+        )
+        #expect(
+            CalendarChrome.eventCardTimeLabel(
+                from: day,
+                to: end,
+                height: 60,
+                availableWidth: 120,
+                calendar: calendar
+            ) == "14:00–15:15"
+        )
+        #expect(
+            CalendarChrome.eventCardTimeLabel(
+                from: day,
+                to: end,
+                height: 60,
+                availableWidth: 50,
+                calendar: calendar
+            ) == "14:00"
+        )
+    }
+
     @Test("Copy and duplicate preserve details and duration but create one-off events")
     func eventTransfer() throws {
         let calendar = Calendar.sideSeatBerlin

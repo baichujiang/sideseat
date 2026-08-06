@@ -36,6 +36,7 @@ struct ChatThreadSearchSheet: View {
                                 HStack {
                                     Text(row.senderName)
                                         .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(.primary)
                                     Spacer()
                                     if let date = row.createdAt {
                                         Text(InboxActivityFormatting.label(for: date))

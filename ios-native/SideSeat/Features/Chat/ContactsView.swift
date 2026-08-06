@@ -26,14 +26,14 @@ struct ContactsView: View {
 
             Group {
                 if store.isLoading && store.contacts.isEmpty && !isSearchingPeople {
-                    ProgressView("Loading contacts")
+                    SSLoadingState("Loading contacts")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if isSearchingPeople {
                     searchResults
                 } else if store.contacts.isEmpty {
                     SSEmptyState(
                         title: "Add friend",
-                        systemImage: "person.badge.plus",
+                        systemImage: ChatCreationSymbol.addFriend,
                         description: "Search by username or nickname to start a chat."
                     )
                 } else {
@@ -61,6 +61,7 @@ struct ContactsView: View {
                                         }
                                     }
                                 }
+                                .buttonStyle(.plain)
                                 .accessibilityIdentifier("contact-row-\(row.connectionId)")
                             }
                         }
@@ -118,7 +119,7 @@ struct ContactsView: View {
     @ViewBuilder
     private var searchResults: some View {
         if store.isSearching && store.searchHits.isEmpty {
-            ProgressView("Searching")
+            SSLoadingState("Searching")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if store.searchHits.isEmpty {
             SSEmptyState(
@@ -171,6 +172,7 @@ struct ContactsView: View {
                     .foregroundStyle(SideSeatTheme.accent)
             }
         }
+        .buttonStyle(.plain)
         .accessibilityIdentifier("contact-search-\(hit.id)")
     }
 }

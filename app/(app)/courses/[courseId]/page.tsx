@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { UsersRound } from "lucide-react";
 import { ConnectionStatus } from "@prisma/client";
 
@@ -25,7 +25,6 @@ import { prisma } from "@/lib/db/prisma";
 import { formatListRelativeTime, isListRelativeJustNow } from "@/lib/format/list-relative-time";
 import { formatMessage, getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
-import { resolveBackHref } from "@/lib/nav/back";
 import { coursesListReturnPath } from "@/lib/courses/courses-tab";
 import { inboxCourseUnreadCounts } from "@/lib/queries/inbox-unread-counts";
 import { weeklyOverlapMinutes, type SessionBlock } from "@/lib/queries/schedule-overlap";

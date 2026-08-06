@@ -1,58 +1,10 @@
-import { getClassScheduleDateRange } from "@/lib/constants/vorlesungszeit";
-import { buildSideSeatIcsExport } from "@/lib/calendar/ical-export";
 import { requireOnboardedUser } from "@/lib/auth/guards";
-import { prisma } from "@/lib/db/prisma";
+import { loadCalendarIcsExport } from "@/lib/calendar/load-calendar-ics-export";
 
 export async function GET() {
   try {
     const user = await requireOnboardedUser();
-    const now = new Date();
-    const { start: semesterStart, end: semesterEnd } = getClassScheduleDateRange({
-      school: user.school,
-      now,
-    });
-
-    const [memberships, entries] = await Promise.all([
-      prisma.userCourse.findMany({
-        where: { userId: user.id },
-        include: { course: true, sessions: true },
-      }),
-      prisma.calendarEntry.findMany({
-        where: {
-          userId: user.id,
-          startAt: { lte: semesterEnd },
-          endAt: { gte: semesterStart },
-        },
-        orderBy: { startAt: "asc" },
-      }),
-    ]);
-
-    const classBlocks = memberships.flatMap((m) =>
-      m.sessions.map((s) => ({
-        courseId: m.course.id,
-        courseName: m.course.name,
-        courseCode: m.course.code,
-        weekday: s.weekday,
-        startMinute: s.startMinute,
-        endMinute: s.endMinute,
-        location: s.location,
-      })),
-    );
-
-    const exportEntries = entries.map((e) => ({
-      startAt: e.startAt,
-      endAt: e.endAt,
-      title: e.title,
-      location: e.location,
-      note: e.note,
-    }));
-
-    const ics = buildSideSeatIcsExport({
-      semesterStart,
-      semesterEnd,
-      classBlocks,
-      entries: exportEntries,
-    });
+    const ics = await loadCalendarIcsExport(user);
 
     return new Response(ics, {
       status: 200,

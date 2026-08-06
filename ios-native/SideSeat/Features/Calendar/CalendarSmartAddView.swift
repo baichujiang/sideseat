@@ -8,7 +8,9 @@ struct CalendarSmartAddView: View {
     let onSaved: @MainActor () async -> Void
 
     @State private var store = CalendarSmartAddStore()
+    @State private var voiceInput = CalendarVoiceInput()
     @State private var text = ""
+    @State private var voicePrefix = ""
     @FocusState private var isInputFocused: Bool
 
     var body: some View {
@@ -21,7 +23,46 @@ struct CalendarSmartAddView: View {
                             .focused($isInputFocused)
                             .accessibilityIdentifier("smart-schedule-input")
 
+                        HStack(spacing: SideSeatTheme.spaceMD) {
+                            Button {
+                                toggleVoiceInput()
+                            } label: {
+                                Image(systemName: voiceInput.isRecording ? "stop.fill" : "mic.fill")
+                                    .font(.body.weight(.semibold))
+                                    .frame(width: 44, height: 44)
+                                    .foregroundStyle(voiceInput.isRecording ? .white : SideSeatTheme.accent)
+                                    .background(
+                                        voiceInput.isRecording ? SideSeatTheme.danger : SideSeatTheme.accent.opacity(0.12),
+                                        in: Circle()
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(voiceInput.isRecording ? "Stop dictation" : "Dictate event")
+                            .accessibilityIdentifier("smart-schedule-voice")
+
+                            if voiceInput.isRecording {
+                                Label("Listening", systemImage: "waveform")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            Spacer()
+                        }
+
+                        if let voiceIssue = voiceInput.issue {
+                            Label(voiceIssue, systemImage: "exclamationmark.triangle")
+                                .font(.footnote)
+                                .foregroundStyle(SideSeatTheme.danger)
+                            if voiceInput.needsSettings {
+                                Button("Open Settings") {
+                                    guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                        }
+
                         Button {
+                            voiceInput.stop()
                             isInputFocused = false
                             Task { await parse() }
                         } label: {
@@ -98,14 +139,31 @@ struct CalendarSmartAddView: View {
             }
             .overlay {
                 if store.isSaving {
-                    ProgressView("Adding events")
+                    SSLoadingState("Adding events")
                         .padding(18)
                         .background(.regularMaterial)
                         .clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
                 }
             }
+            .onChange(of: voiceInput.transcript) { _, transcript in
+                text = CalendarVoiceTranscript.merge(prefix: voicePrefix, transcript: transcript)
+            }
+            .onDisappear {
+                voiceInput.stop()
+            }
             .accessibilityIdentifier("smart-schedule-view")
         }
+    }
+
+    private func toggleVoiceInput() {
+        if voiceInput.isRecording {
+            voiceInput.stop()
+            return
+        }
+
+        voicePrefix = text
+        isInputFocused = false
+        Task { await voiceInput.start() }
     }
 
     private func parse() async {

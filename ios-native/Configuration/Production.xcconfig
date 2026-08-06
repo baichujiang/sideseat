@@ -2,5 +2,7 @@
 #include? "Local.xcconfig"
 
 SIDESEAT_ENVIRONMENT = production
-SIDESEAT_API_BASE_URL = https:/$()/api.sideseat.invalid
+SIDESEAT_API_BASE_URL = https:/$()/api.sideseat.de
+SIDESEAT_ASSOCIATED_DOMAIN = www.sideseat.de
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = PRODUCTION
+APS_ENVIRONMENT = production

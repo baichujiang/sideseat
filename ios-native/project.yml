@@ -24,6 +24,9 @@ packages:
   OpenAPIRuntime:
     url: https://github.com/apple/swift-openapi-runtime
     exactVersion: 1.12.0
+  Sentry:
+    url: https://github.com/getsentry/sentry-cocoa
+    exactVersion: 9.13.0
 targets:
   SideSeat:
     type: application
@@ -38,6 +41,10 @@ targets:
         CFBundleDisplayName: SideSeat
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleURLTypes:
+          - CFBundleURLName: app.sideseat.mobile
+            CFBundleURLSchemes:
+              - sideseat
         LSRequiresIPhoneOS: true
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
@@ -50,6 +57,9 @@ targets:
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
         NSLocationWhenInUseUsageDescription: SideSeat uses your location to share where you are in direct chats.
+        NSMicrophoneUsageDescription: SideSeat uses the microphone to turn your spoken event details into calendar text.
+        NSPhotoLibraryAddUsageDescription: SideSeat saves schedule images to your photo library when you choose Save to Photos.
+        NSSpeechRecognitionUsageDescription: SideSeat uses speech recognition to transcribe event details for smart calendar entry.
         SideSeatAPIBaseURL: $(SIDESEAT_API_BASE_URL)
         SideSeatEnvironment: $(SIDESEAT_ENVIRONMENT)
         SideSeatCrashDSN: $(SIDESEAT_CRASH_DSN)
@@ -61,8 +71,20 @@ targets:
         CODE_SIGN_ENTITLEMENTS: SideSeat/SideSeat.entitlements
     entitlements:
       path: SideSeat/SideSeat.entitlements
+      properties:
+        aps-environment: $(APS_ENVIRONMENT)
+        com.apple.developer.associated-domains:
+          - applinks:$(SIDESEAT_ASSOCIATED_DOMAIN)
     dependencies:
       - package: OpenAPIRuntime
+      - package: Sentry
+    preBuildScripts:
+      - name: Validate Production Configuration
+        basedOnDependencyAnalysis: false
+        inputFiles:
+          - $(SRCROOT)/scripts/validate-production-build.sh
+        script: |
+          /bin/sh "$SRCROOT/scripts/validate-production-build.sh"
     scheme:
       gatherCoverageData: true
       testTargets:

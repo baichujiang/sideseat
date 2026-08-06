@@ -198,7 +198,7 @@ struct ProductTutorialOverlay: View {
             HStack(spacing: 10) {
                 if controller.stepIndex > 0 {
                     SSSecondaryButton(
-                        title: "Back",
+                        title: String(localized: "Back"),
                         kind: .softFill,
                         fontWeight: .semibold,
                         accessibilityID: "product-tutorial-back"
@@ -214,7 +214,7 @@ struct ProductTutorialOverlay: View {
 
                 if controller.isLastStep {
                     SSPrimaryButton(
-                        title: "Done",
+                        title: String(localized: "Done"),
                         isLoading: controller.isDismissing,
                         fill: .brand,
                         chrome: .capsule,
@@ -226,7 +226,7 @@ struct ProductTutorialOverlay: View {
                     .disabled(controller.isDismissing)
                 } else {
                     SSPrimaryButton(
-                        title: "Next",
+                        title: String(localized: "Next"),
                         fill: .brand,
                         chrome: .capsule,
                         height: 44,

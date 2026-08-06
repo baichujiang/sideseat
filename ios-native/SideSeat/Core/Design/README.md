@@ -35,6 +35,7 @@
 | Token | 代码名 | 值 / 来源 | 用途 | 状态 |
 |-------|--------|-----------|------|------|
 | accent / Rose | `accent`, `rose` | `#FB4185`（`AccentColor`） | 链接、选中 Tab、开关、未读点、产品面主按钮 | ✅ |
+| verifiedSeal | `verifiedSeal` | 信任蓝（非 Rose） | 认证学生印章；勿与交互 accent 混用 | ✅ |
 | coral | `coral` | `#FB735F` | 品牌装饰、主 CTA 渐变 | ✅ |
 | peach | `peach` | `#FED097` | 同上 | ✅ |
 | magenta | `magenta` | `#DF25A1` | 同上、软阴影 | ✅ |
@@ -214,7 +215,8 @@
 - Home / Discover / Chats / Me：去掉零散自定义蓝、杂圆角；统一 tint 与卡片
 - 日期条 / 周头：**选中 = accent**，**今天未选 = calendarNow**（不再与选中共用红）
 - 聊天己方气泡、未读、强调 chip 统一 `SideSeatTheme.accent` / `Chat.*`
-- Me hub 行 tint 收敛到 `HubTint`；验证章统一 `verifiedSeal`
+- Me hub 行 tint 收敛到 `HubTint`；验证章统一 `verifiedSeal`（信任蓝，非 Rose）
+- 头像占位用 `AvatarPalette` 多色瓷砖，禁止用 `accent` 刷粉
 - 产品面错误文案批量改用 `danger`；课程无 hex 时用 `courseFallback`
 
 ### Phase D — 日历专项打磨（并行或紧随） ✅
@@ -268,7 +270,7 @@
 |----|--------|-----------|------|------|
 | **Auth** | 登录；注册/找回 Sheet | BrandMark + softWash + brand CTA | `SSScreen` / `SSCard` / `SSTextField` / `SSPrimaryButton` | ✅ |
 | **Home** | 日程周/日/列表 | 选中 accent；Now = `calendarNow`；无网格渐变 | `CalendarDayChipLabel` + Chrome | ✅ |
-| **Discover** | 找人/活动 | CTA/章 accent；列表无洗底 | `SSEmptyState` | ✅ |
+| **Discover** | 找人/活动 | CTA = accent；验证章 = `verifiedSeal`；列表无洗底；头像多色 | `SSEmptyState` | ✅ |
 | **Create** | 发帖入口 | 系统 confirmationDialog | Tab 占位 `bgGrouped` | ✅ |
 | **Chats** | 对话 | 未读/己方气泡 accent | `SSEmptyState`；`Chat.*` | ✅ |
 | **Me** | 个人枢纽 | Hero 轻 wash；hub `HubTint` | `SSListRow` / `SSGroupedSection` | ✅ |
@@ -279,7 +281,7 @@
 
 | 已有 | 可选后续 |
 |------|----------|
-| Theme + Components + CalendarChrome 冻结 | 真机（非模拟器）复跑 `capture-visual-qa.sh` |
+| Theme + Components + CalendarChrome 冻结 | 真机复跑：`ios-native/scripts/capture-visual-qa.sh --device` |
 | Auth / 5 Tab 走查通过；背景 / 空态二次收敛 | Me 底栏安全区 / 周历事件折行微调 |
 | Auth UITest id；danger / success / HubTint / Chat / fillTertiary | |
 | 模拟器 Light/Dark 截图归档：`docs/ios-native/visual-qa/` | |

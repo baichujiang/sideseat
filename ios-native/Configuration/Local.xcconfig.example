@@ -1,6 +1,11 @@
 // Optional overrides for Staging/Production builds (gitignored as Local.xcconfig).
 // Copy: cp Configuration/Local.xcconfig.example Configuration/Local.xcconfig
 //
+// Apple Team ID (Membership details in developer.apple.com) — required for device signing:
+// DEVELOPMENT_TEAM = ABCD123456
+//
 // Example — point a Production archive at a real HTTPS API without committing the host:
 // SIDESEAT_API_BASE_URL = https:/$()/api.your-domain.example
+// Host only, without scheme or path. It must serve /.well-known/apple-app-site-association.
+// SIDESEAT_ASSOCIATED_DOMAIN = app.your-domain.example
 // SIDESEAT_CRASH_DSN = https:/$()/o0.ingest.example/0

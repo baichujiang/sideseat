@@ -10,7 +10,7 @@ import { getServerAppLocale } from "@/lib/i18n/server-locale";
 
 export default async function InboxPage() {
   const sessionUser = await getSessionUser();
-  await getServerAppLocale();
+  const locale = await getServerAppLocale();
   if (!sessionUser) {
     return (
       <TabKeepAliveSnapshot tab="inbox">
@@ -21,7 +21,7 @@ export default async function InboxPage() {
   const user = sessionUser;
 
   const [, { merged: rawMerged, plansNeedingYourAction }] = await Promise.all([
-    ensureAssistantBotConnection(user.id),
+    ensureAssistantBotConnection(user.id, { locale }),
     getInboxMergeBundle(user.id),
   ]);
   const merged = prepareInboxListMerged(rawMerged);

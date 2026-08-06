@@ -11,7 +11,6 @@ import {
   isSameDay,
   isSameMonth,
   isSameYear,
-  startOfDay,
   startOfWeek,
 } from "date-fns";
 import {
@@ -22,7 +21,6 @@ import {
   Loader2,
   Plus,
   Share2,
-  Upload,
   X,
 } from "lucide-react";
 import {
@@ -42,7 +40,6 @@ import {
   WeekCalendar,
   WEEK_CALENDAR_HEADER_HEIGHT_PX,
   WEEK_CALENDAR_MINUTE_SCALE_DEFAULT,
-  clampWeekCalendarVisibleDayCount,
   type WeekCalendarBlock,
 } from "@/components/calendar/week-calendar";
 import { ScheduleDateNavControls } from "@/components/calendar/schedule-date-nav-controls";
@@ -392,8 +389,8 @@ export function ScheduleSurface({
     null,
   );
   const [recurringDeleteBusy, setRecurringDeleteBusy] = useState(false);
-  const semesterStart = new Date(semesterStartISO);
-  const semesterEnd = new Date(semesterEndISO);
+  const semesterStart = useMemo(() => new Date(semesterStartISO), [semesterStartISO]);
+  const semesterEnd = useMemo(() => new Date(semesterEndISO), [semesterEndISO]);
 
   const resetAddDraft = () => {
     setGridCreatePreview(false);
@@ -482,7 +479,7 @@ export function ScheduleSurface({
       );
     }, 180);
     return () => window.clearTimeout(timeoutId);
-  }, [weekMinuteScale]);
+  }, [weekMinuteScale, calendarPrefsHydrated]);
 
   useEffect(() => {
     if (!icsMenuOpen) return;
@@ -558,7 +555,7 @@ export function ScheduleSurface({
   }, [classBlocks]);
 
   /** All items for a given date, sorted by start time. */
-  const itemsForDate = (date: Date): DayTimelineItem[] => {
+  const itemsForDate = useCallback((date: Date): DayTimelineItem[] => {
     const weekday = WEEKDAY_BY_JS[date.getDay()];
     const inSemester = date >= semesterStart && date <= semesterEnd;
     const classItems: DayTimelineItem[] = (inSemester ? classesByWeekday.get(weekday) ?? [] : []).map(
@@ -613,7 +610,7 @@ export function ScheduleSurface({
     return [...classItems, ...studyItems].sort(
       (a, b) => a.startMinute - b.startMinute,
     );
-  };
+  }, [classesByWeekday, messages.schedule, semesterEnd, semesterStart, studies]);
 
   const weekStart = berlinStartOfWeek(selectedDate);
   const weekEnd = berlinEndOfWeek(selectedDate);
@@ -655,10 +652,6 @@ export function ScheduleSurface({
     return [...base, draftItem].sort((a, b) => a.startMinute - b.startMinute);
   }, [
     selectedDate,
-    studies,
-    classBlocks,
-    semesterStart,
-    semesterEnd,
     adding,
     gridCreatePreview,
     editingItem,
@@ -666,6 +659,7 @@ export function ScheduleSurface({
     draftEventEnd,
     draftCategoryMeta,
     messages.schedule,
+    itemsForDate,
   ]);
 
   const applyGridDraftRange = useCallback((start: Date, end: Date) => {
@@ -737,43 +731,6 @@ export function ScheduleSurface({
       discoverActivityId: item.discoverActivityId ?? null,
     });
   };
-
-  function openEditFromTimelineItem(item: DayTimelineItem, date: Date) {
-    if (item.id === "__draft-preview__") return;
-    if (item.source !== "calendar") {
-      openDetailFromTimelineItem(item, date);
-      return;
-    }
-    const start = new Date(date);
-    start.setHours(0, item.startMinute, 0, 0);
-    const end = new Date(date);
-    end.setHours(0, item.endMinute, 0, 0);
-    const detail: ScheduleDetailItem = {
-      id: item.id,
-      source: "calendar",
-      title: item.title,
-      startISO: start.toISOString(),
-      endISO: end.toISOString(),
-      location: item.location,
-      note: item.note ?? null,
-      repeatLabel: item.repeatLabel ?? messages.schedule.repeatNone,
-      repeatRule: item.repeatRule ?? "NONE",
-      repeatUntilISO: item.repeatUntilISO ?? null,
-      eventParticipants: item.eventParticipants ?? [],
-      eventType: item.eventType ?? null,
-      categoryId: item.categoryId ?? null,
-      categoryName: item.categoryName ?? null,
-      categoryColor: item.categoryColor ?? null,
-      discoverActivityId: item.discoverActivityId ?? null,
-    };
-    setInviteFlow(false);
-    setEditingItem(detail);
-    setDraftEventStart(format(start, "yyyy-MM-dd'T'HH:mm"));
-    setDraftEventEnd(format(end, "yyyy-MM-dd'T'HH:mm"));
-    setSelectedDate(date);
-    setDetailItem(null);
-    setAdding(true);
-  }
 
   function handleWeekCardTap(
     item: WeekCalendarBlock,
@@ -917,7 +874,7 @@ export function ScheduleSurface({
       resolve(true);
       refreshSchedule();
     },
-    [router],
+    [refreshSchedule],
   );
 
   async function deleteDetailItem() {
@@ -1169,7 +1126,7 @@ export function ScheduleSurface({
       refreshSchedule();
       return true;
     },
-    [studyEntries, router],
+    [studyEntries, refreshSchedule],
   );
 
   /**
@@ -1199,7 +1156,7 @@ export function ScheduleSurface({
         });
       });
     },
-    [router, studyEntries, messages.schedule.newEvent],
+    [refreshSchedule, studyEntries, messages.schedule.newEvent],
   );
 
   /**
@@ -1248,7 +1205,7 @@ export function ScheduleSurface({
       refreshSchedule();
       return true;
     },
-    [studyEntries, router],
+    [studyEntries, refreshSchedule],
   );
 
   /**
@@ -1270,7 +1227,7 @@ export function ScheduleSurface({
         return `${h}:${mm}`;
       };
       const date = format(occurrenceDate, "yyyy-MM-dd");
-      const title = block.courseName?.trim() || "Event";
+      const title = block.courseName?.trim() || messages.schedule.newEvent;
       const lines = [title, `${date} ${fmt(block.startMinute)} – ${fmt(block.endMinute)}`];
       if (block.location?.trim()) lines.push(block.location.trim());
       if (block.withLabel?.trim()) lines.push(block.withLabel.trim());
@@ -1298,7 +1255,7 @@ export function ScheduleSurface({
       document.body.removeChild(ta);
       return { summaryText: text };
     },
-    [],
+    [messages.schedule.newEvent],
   );
 
   const pasteCalendarEvent = useCallback(
@@ -1328,7 +1285,7 @@ export function ScheduleSurface({
       refreshSchedule();
       return true;
     },
-    [messages.schedule.newEvent, router],
+    [messages.schedule.newEvent, refreshSchedule],
   );
 
   const editToolbarLabels: WeekEventEditToolbarLabels = useMemo(
@@ -1885,6 +1842,10 @@ export function ScheduleSurface({
         }}
         onEdit={() => openEditSheetFromDetail(false)}
         onDelete={() => void deleteDetailItem()}
+        planInvitePeer={detailPlanInvitePeer}
+        onSendPlanInvite={() => void sendPlanInviteFromDetail()}
+        planInviteBusy={planInviteBusy}
+        planInviteError={planInviteError}
       />
 
       {slotActionMenu ? (

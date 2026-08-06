@@ -34,12 +34,15 @@ generated client compiles against an exact Swift OpenAPI Runtime 1.12.0 package.
 The app has Development, Staging and Production configurations in
 `ios-native/Configuration/`.
 
-- Development defaults to `http://127.0.0.1:3000` for Simulator use.
-- Staging and Production intentionally use `.invalid` hosts until their public
-  HTTPS API domains are approved.
+- Development defaults to the deployed `https://api.sideseat.de` backend so
+  Simulator and signed-device builds work without a LAN server.
+- Staging intentionally uses an `.invalid` host until its public HTTPS API
+  domain is approved. Production uses `https://api.sideseat.de`; its DNS and
+  Vercel certificate must be verified before distributing an archive.
 - Optional local overrides: copy `Configuration/Local.xcconfig.example` to
-  `Configuration/Local.xcconfig` (gitignored) and set `SIDESEAT_API_BASE_URL`.
-- A temporary local API can also be supplied at build time with
+  `Configuration/Local.xcconfig` (gitignored) and set the API URL, Associated
+  Domains host, Apple team and crash DSN.
+- A temporary local API can be supplied at build time with
   `SIDESEAT_API_BASE_URL=http://127.0.0.1:3104`.
 
 The Production runtime rejects non-HTTPS, loopback and `.invalid` API URLs.
@@ -51,14 +54,25 @@ The Production runtime rejects non-HTTPS, loopback and `.invalid` API URLs.
   (coral → magenta gradient wordmark). In-app logo asset: `BrandMark`.
 - Brand colors live in `SideSeat/Core/Design/SideSeatTheme.swift` and the
   `AccentColor` asset (#FB4185 rose).
-- `SideSeat.entitlements` with `aps-environment` + `applinks:sideseat.de`
-- `public/.well-known/apple-app-site-association` (replace `TEAMID` with Apple Team ID)
+- `SideSeat.entitlements`: generated from `project.yml` with
+  `aps-environment` (`$(APS_ENVIRONMENT)` - development in Development.xcconfig,
+  production in Staging/Production) and
+  `applinks:$(SIDESEAT_ASSOCIATED_DOMAIN)`
+- `/.well-known/apple-app-site-association` served by Next.js using
+  `APPLE_TEAM_ID` or `APNS_TEAM_ID` (set in production env; see `.env.example`)
 - Push token register via `POST /api/v1/push/devices` after sign-in
 - Settings Privacy / Help center links + StoreKit entry gated by `storeKitSupport`
-- Crash reporting entry point (`CrashReporting.start`) waits for `SIDESEAT_CRASH_DSN`
+- Sentry Cocoa crash reporting starts only when `SIDESEAT_CRASH_DSN` is set and
+  disables default PII collection
 
-Still external (not local): Apple signing/TestFlight, APNs `.p8` secrets, ASC
-consumable products, production API DNS, crash project DSN.
+Still external (not local): Apple signing/TestFlight (`DEVELOPMENT_TEAM` in
+`Configuration/Local.xcconfig`), APNs `.p8` secrets, ASC consumable products,
+production API DNS, crash project DSN, production `APPLE_TEAM_ID` for Universal Links.
+
+Before an archive is distributed, complete
+[`docs/ios-native/APP_STORE_RELEASE_CHECKLIST.md`](../docs/ios-native/APP_STORE_RELEASE_CHECKLIST.md)
+and keep App Store Connect answers aligned with
+[`docs/ios-native/APP_STORE_PRIVACY_MATRIX.md`](../docs/ios-native/APP_STORE_PRIVACY_MATRIX.md).
 
 ## Build and test
 
@@ -92,11 +106,11 @@ To exercise real login locally, run the Next.js API with the isolated test
 database and build the Development scheme against that server. Do not run native
 migration tests against a shared or production database.
 
-## Current scope
+## Release state
 
-The native target currently provides the authenticated app shell, Keychain-backed
-refresh sessions, API client foundation, independent tab navigation, deep-link
-parsing, localization, and deterministic unit/UI launch states. Feature screens
-are being migrated incrementally according to
-`docs/ios-native/IOS_NATIVE_MIGRATION_MASTER.md`; the shell is not yet an
-App Store-complete client.
+The native target now contains the main authentication, profile, student
+verification, calendar, course, discovery, chat, schedule sharing, reporting,
+feedback and account deletion flows. It is a release candidate, not a submitted
+App Store build: public infrastructure, Apple credentials, StoreKit products,
+privacy answers, signed-device validation and TestFlight review remain explicit
+release gates in the checklist above.

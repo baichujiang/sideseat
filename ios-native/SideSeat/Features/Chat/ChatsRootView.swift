@@ -1,13 +1,17 @@
 import SwiftUI
 
+enum ChatCreationSymbol {
+    static let addFriend = "person.crop.circle.badge.plus"
+    static let newGroup = "person.2.badge.plus"
+}
+
 struct ChatsRootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
-    @State private var store = InboxStore()
+    @Bindable var store: InboxStore
     @State private var showCreateGroup = false
 
     var body: some View {
-        @Bindable var store = store
         Group {
             if let payload = store.payload {
                 if payload.conversations.isEmpty {
@@ -47,9 +51,13 @@ struct ChatsRootView: View {
                                 }
                             }
                         }
-                        Section(store.pinned.isEmpty ? String(localized: "Chats") : String(localized: "Recent")) {
+                        Section {
                             ForEach(store.recent) { row in
                                 inboxRow(row)
+                            }
+                        } header: {
+                            if !store.pinned.isEmpty {
+                                Text("Recent")
                             }
                         }
                     }
@@ -57,7 +65,7 @@ struct ChatsRootView: View {
                     .accessibilityIdentifier("inbox-list")
                 }
             } else if store.isLoading {
-                ProgressView("Loading chats")
+                SSLoadingState("Loading chats")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ContentUnavailableView {
@@ -70,13 +78,13 @@ struct ChatsRootView: View {
                         fill: .product,
                         height: 44
                     ) {
-                        Task { await store.load(using: session) }
+                        Task { await loadInboxAndPrefetch() }
                     }
                     .frame(maxWidth: 220)
                 }
             }
         }
-        .navigationTitle("Chats")
+        .ssRootNavigationTitle("Chats")
         .searchable(
             text: $store.searchQuery,
             placement: .navigationBarDrawer(displayMode: .always),
@@ -88,22 +96,34 @@ struct ChatsRootView: View {
                     Button {
                         router.navigate(to: .contacts)
                     } label: {
-                        Label("Add friend", systemImage: "person.badge.plus")
+                        Label {
+                            Text("Add friend")
+                        } icon: {
+                            Image(systemName: ChatCreationSymbol.addFriend)
+                                .symbolRenderingMode(.hierarchical)
+                        }
                     }
                     .accessibilityIdentifier("inbox-toolbar-contacts")
 
                     Button {
                         showCreateGroup = true
                     } label: {
-                        Label("New group", systemImage: "person.3")
+                        Label {
+                            Text("New group")
+                        } icon: {
+                            Image(systemName: ChatCreationSymbol.newGroup)
+                                .symbolRenderingMode(.hierarchical)
+                        }
                     }
                     .accessibilityIdentifier("inbox-toolbar-new-group")
                 } label: {
-                    Image(systemName: "plus")
-                        .font(.body.weight(.semibold))
-                        .frame(minWidth: 28, minHeight: 28)
+                    Image(systemName: ChatCreationSymbol.newGroup)
+                        .symbolRenderingMode(.hierarchical)
+                        .font(.system(size: 17, weight: .semibold))
+                        .frame(width: 32, height: 32)
                         .contentShape(Rectangle())
                 }
+                .accessibilityLabel("Create chat")
                 .accessibilityIdentifier("inbox-toolbar-more")
             }
         }
@@ -113,24 +133,37 @@ struct ChatsRootView: View {
                 router.navigate(to: .groupChat(groupChatID: groupChatID))
             }
         }
-        .refreshable { await store.load(using: session) }
+        .refreshable { await loadInboxAndPrefetch() }
         // Initial load. Returning from a pushed chat does not re-fire `onAppear` (root stayed visible).
         .onAppear {
-            Task { await store.load(using: session) }
+            Task { await loadInboxAndPrefetch() }
         }
         // Popping back to inbox — refresh unread from server.
         .onChange(of: router.path.count) { previous, current in
             if previous > 0, current == 0 {
-                Task { await store.load(using: session) }
+                Task { await loadInboxAndPrefetch() }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .sideSeatInboxConversationRead)) { note in
-            if let id = note.userInfo?["conversationID"] as? String {
-                store.clearUnread(conversationID: id)
-            }
+    }
+
+    private func loadInboxAndPrefetch() async {
+        await store.load(using: session)
+        guard let payload = store.payload else { return }
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            return
         }
-        .onReceive(NotificationCenter.default.publisher(for: .sideSeatInboxConversationUpdated)) { note in
-            store.applyOutboundPreview(from: note)
+        #endif
+        Task {
+            async let directPrefetch: Void = DirectChatPreloader.primeAndPrefetch(
+                payload: payload,
+                using: session
+            )
+            async let communityPrefetch: Void = CommunityChatPreloader.primeAndPrefetch(
+                payload: payload,
+                using: session
+            )
+            _ = await (directPrefetch, communityPrefetch)
         }
     }
 
@@ -266,6 +299,26 @@ struct ChatsRootView: View {
         .disabled(row.route == nil)
         .opacity(row.route == nil ? 0.55 : 1)
         .accessibilityIdentifier("inbox-row-\(row.id)")
+        .contextMenu {
+            Button {
+                Task { await store.togglePin(row, using: session) }
+            } label: {
+                Label(
+                    row.pinned ? String(localized: "Unpin") : String(localized: "Pin"),
+                    systemImage: row.pinned ? "pin.slash.fill" : "pin.fill"
+                )
+            }
+            .accessibilityIdentifier("inbox-row-\(row.id)-pin-menu")
+
+            if row.supportsHide {
+                Button(role: .destructive) {
+                    Task { await store.hide(row, using: session) }
+                } label: {
+                    Label("Hide", systemImage: "eye.slash")
+                }
+                .accessibilityIdentifier("inbox-row-\(row.id)-hide-menu")
+            }
+        }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             Button {
                 Task { await store.togglePin(row, using: session) }

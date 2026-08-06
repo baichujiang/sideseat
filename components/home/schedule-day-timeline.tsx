@@ -25,6 +25,7 @@ import {
 import { isLongOrAllDayTimedMinutes } from "@/lib/calendar/long-calendar-block";
 import { deferAfterTapClick } from "@/lib/ui/suppress-ghost-click";
 import { cn } from "@/lib/utils";
+import { useAppMessages } from "@/hooks/use-app-locale";
 
 import type { ScheduleSlotActionPrompt } from "@/components/calendar/week-event-edit-toolbar";
 
@@ -168,6 +169,7 @@ export function ScheduleDayTimeline({
 }) {
   const holdTimerRef = useRef<number | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const { schedule: s } = useAppMessages();
   const visualStartMinute = -VISUAL_PADDING_TOP_MINUTES;
   const visualEndMinute = FULL_DAY_MINUTES + VISUAL_PADDING_BOTTOM_MINUTES;
   const totalMinutes = visualEndMinute - visualStartMinute;
@@ -375,7 +377,7 @@ export function ScheduleDayTimeline({
           <div className="relative border-l border-[#F3EFE8] bg-white/90 dark:border-white/[0.07] dark:bg-card/80">
             <button
               type="button"
-              aria-label="Create event"
+              aria-label={s.createEventAria}
                 onDoubleClick={(event) => {
                 createFromPointer(
                   event.clientY,
@@ -439,10 +441,10 @@ export function ScheduleDayTimeline({
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-4 text-center">
                 <p className="rounded-full bg-muted/70 px-3 py-1 text-[11px] font-medium text-muted-foreground">
                   {allDayItems.length > 0
-                    ? "No timed events — see All day above"
+                    ? s.noTimedEventsSeeAllDay
                     : isToday
-                      ? "Nothing scheduled today"
-                      : "Nothing scheduled"}
+                      ? s.nothingScheduledToday
+                      : s.nothingScheduled}
                 </p>
               </div>
             ) : null}
@@ -497,6 +499,7 @@ function TimelineBlock({
   nowMinute: number;
   onLongPress: (anchorEl: HTMLElement) => void;
 }) {
+  const { schedule: s } = useAppMessages();
   const top = ((item.startMinute - dayStart) / totalMinutes) * 100;
   const height = ((item.endMinute - item.startMinute) / totalMinutes) * 100;
 
@@ -585,7 +588,7 @@ function TimelineBlock({
           {item.source === "course" && item.courseShortLabel ? (
             <span
               className="inline-flex h-[1.125rem] min-w-[1.35rem] shrink-0 items-center justify-center rounded-md border border-blue-700/30 bg-white px-1 text-[10px] font-bold leading-none tracking-tight text-blue-900 shadow-sm tabular-nums dark:border-blue-400/40 dark:bg-blue-950/70 dark:text-blue-100"
-              title="Course tag"
+              title={s.courseTagTitle}
             >
               {item.courseShortLabel}
             </span>

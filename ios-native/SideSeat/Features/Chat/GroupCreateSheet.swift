@@ -44,6 +44,7 @@ struct GroupCreateSheet: View {
                                     }
                                 }
                             }
+                            .buttonStyle(.plain)
                             .accessibilityIdentifier("group-create-peer-\(row.id)")
                         }
                     }

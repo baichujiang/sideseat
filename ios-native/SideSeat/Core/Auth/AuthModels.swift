@@ -35,8 +35,14 @@ struct LoginRequest: Encodable, Sendable {
 }
 
 struct SignupRequest: Encodable, Sendable {
+    let displayName: String
     let username: String
     let password: String
+    let school: String
+    let studentStatus: String
+    let degreeLevel: String
+    let semester: Int?
+    let graduationYear: Int?
 }
 
 struct SignupResponseData: Decodable, Sendable {
@@ -178,9 +184,11 @@ struct CurrentUser: Codable, Hashable, Sendable {
     let avatarUrl: String?
     let tagline: String?
     let school: String?
+    let studentStatus: String?
     let degreeLevel: String?
     let major: String?
     let semester: Int?
+    let graduationYear: Int?
     let gender: String
     let onboardingComplete: Bool
     let isGuest: Bool

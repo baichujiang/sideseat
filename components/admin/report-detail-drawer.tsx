@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import type { Route } from "next";
 import { ReportStatus } from "@prisma/client";
 import { useMemo, useRef, useState } from "react";
 
@@ -22,6 +24,9 @@ type ReportRecord = {
   reporterLabel: string;
   reportedLabel: string;
   courseName: string | null;
+  targetKind: string;
+  targetPreview: string | null;
+  targetHref: string | null;
   isUserBlocked: boolean;
   actionLog: Array<{
     id: string;
@@ -71,6 +76,7 @@ export function ReportDetailDrawer({ reports }: { reports: ReportRecord[] }) {
             </div>
             <div className="grid gap-1 text-sm text-muted-foreground">
               <p>Submitted: {new Date(report.createdAt).toLocaleString()}</p>
+              <p>Target: {report.targetKind}</p>
               {report.courseName ? <p>Course context: {report.courseName}</p> : null}
               {report.handledByEmail ? <p>Last handled by: {report.handledByEmail}</p> : null}
               {report.isUserBlocked ? <p className="text-destructive">Platform block active</p> : null}
@@ -109,6 +115,17 @@ export function ReportDetailDrawer({ reports }: { reports: ReportRecord[] }) {
                   <p>Reporter: {detailReport.reporterLabel}</p>
                   <p>Reported user: {detailReport.reportedLabel}</p>
                   <p>Submitted: {new Date(detailReport.createdAt).toLocaleString()}</p>
+                  <p>Target: {detailReport.targetKind}</p>
+                  {detailReport.targetPreview ? (
+                    <p className="rounded-md border border-border/70 bg-muted/35 p-3 text-foreground">
+                      {detailReport.targetPreview}
+                    </p>
+                  ) : null}
+                  {detailReport.targetHref ? (
+                    <Link className="font-medium text-primary underline-offset-4 hover:underline" href={detailReport.targetHref as Route}>
+                      Open reported post
+                    </Link>
+                  ) : null}
                   {detailReport.courseName ? <p>Course: {detailReport.courseName}</p> : null}
                   {detailReport.connectionId ? <p>Connection: {detailReport.connectionId}</p> : null}
                   {detailReport.details ? (

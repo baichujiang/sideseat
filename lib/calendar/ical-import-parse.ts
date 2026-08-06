@@ -1,4 +1,5 @@
 import { unescapeIcsText, unfoldIcs } from "@/lib/calendar/ical-shared";
+import ical, { type ParameterValue, type VEvent } from "node-ical";
 
 export type ParsedIcsEvent = {
   start: Date;
@@ -175,113 +176,83 @@ export function parseIcsForImport(raw: string): { events: ParsedIcsEvent[]; skip
 const MAX_SUBSCRIPTION_EVENTS = 400;
 const MAX_DURATION_MS_SUB = 48 * 60 * 60 * 1000;
 
+function parameterText(value: ParameterValue | undefined): string | null {
+  if (value == null) return null;
+  return typeof value === "string" ? value : value.val;
+}
+
+function subscriptionText(value: ParameterValue | undefined, maxLength: number): string | null {
+  const normalized = parameterText(value)?.trim();
+  return normalized ? normalized.slice(0, maxLength) : null;
+}
+
 /**
- * Parses VEVENTs for read-only subscription display. Skips cancelled and RRULE
- * (recurrence expansion not implemented). Overlaps [windowStart, windowEnd].
+ * Parses VEVENTs for read-only subscription display. Recurrence expansion applies
+ * RRULE, EXDATE and RECURRENCE-ID overrides while preserving source time zones.
+ * All-day events remain unsupported by the timed schedule UI.
  */
 export function parseIcsForSubscriptionWindow(
   raw: string,
   windowStart: Date,
   windowEnd: Date,
 ): { events: ParsedIcsEvent[]; skipped: number } {
-  const unfolded = unfoldIcs(raw);
-  const blocks = extractVeventBlocks(unfolded);
+  const parsed = ical.sync.parseICS(raw);
   const events: ParsedIcsEvent[] = [];
   let skipped = 0;
-  const w0 = windowStart.getTime();
-  const w1 = windowEnd.getTime();
 
-  for (const block of blocks) {
-    if (blockStatusCancelled(block)) {
-      skipped += 1;
-      continue;
-    }
-    if (blockHasRrule(block)) {
+  for (const component of Object.values(parsed)) {
+    if (!component || component.type !== "VEVENT") continue;
+    const event = component as VEvent;
+    if (event.status === "CANCELLED" || event.datetype === "date" || event.start.dateOnly) {
       skipped += 1;
       continue;
     }
 
-    let dtStartLine: string | null = null;
-    let dtEndLine: string | null = null;
-    let summary: string | null = null;
-    let location: string | null = null;
-    let description: string | null = null;
-
-    for (const line of block.split("\n")) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
-      const prop = splitPropertyLine(trimmed);
-      if (!prop) continue;
-      if (prop.name === "DTSTART") dtStartLine = trimmed;
-      else if (prop.name === "DTEND") dtEndLine = trimmed;
-      else if (prop.name === "SUMMARY") summary = unescapeIcsText(prop.value);
-      else if (prop.name === "LOCATION") location = unescapeIcsText(prop.value);
-      else if (prop.name === "DESCRIPTION") description = unescapeIcsText(prop.value);
-    }
-
-    if (!dtStartLine) {
+    let instances;
+    try {
+      instances = ical.expandRecurringEvent(event, {
+        from: windowStart,
+        to: windowEnd,
+        includeOverrides: true,
+        excludeExdates: true,
+        expandOngoing: true,
+      });
+    } catch {
       skipped += 1;
       continue;
     }
 
-    const ds = splitPropertyLine(dtStartLine);
-    if (!ds) {
-      skipped += 1;
-      continue;
-    }
-    const start = parseDateTime(ds.params, ds.value);
-    if (!start) {
-      skipped += 1;
-      continue;
-    }
+    let accepted = 0;
+    for (const instance of instances) {
+      if (events.length >= MAX_SUBSCRIPTION_EVENTS) break;
+      if (instance.isFullDay || instance.event.status === "CANCELLED") continue;
 
-    if (ds.params.toUpperCase().includes("VALUE=DATE")) {
-      skipped += 1;
-      continue;
-    }
-
-    let end: Date | null = null;
-    if (dtEndLine) {
-      const de = splitPropertyLine(dtEndLine);
-      if (de) {
-        end = parseDateTime(de.params, de.value);
+      const start = new Date(instance.start);
+      const end = new Date(instance.end);
+      const duration = end.getTime() - start.getTime();
+      if (
+        !Number.isFinite(start.getTime()) ||
+        !Number.isFinite(end.getTime()) ||
+        duration <= 0 ||
+        duration > MAX_DURATION_MS_SUB
+      ) {
+        continue;
       }
-    }
-    if (!end) {
-      end = new Date(start.getTime() + 60 * 60 * 1000);
+
+      events.push({
+        start,
+        end,
+        title: subscriptionText(instance.summary, 120) ?? "Calendar event",
+        location: subscriptionText(instance.event.location, 120),
+        note: subscriptionText(instance.event.description, 500),
+      });
+      accepted += 1;
     }
 
-    if (!(end > start)) {
-      skipped += 1;
-      continue;
-    }
-
-    const dur = end.getTime() - start.getTime();
-    if (dur > MAX_DURATION_MS_SUB) {
-      skipped += 1;
-      continue;
-    }
-
-    const t0 = start.getTime();
-    const t1 = end.getTime();
-    if (t1 < w0 || t0 > w1) {
-      skipped += 1;
-      continue;
-    }
-
-    const title = (summary ?? "Calendar event").trim().slice(0, 120) || "Calendar event";
-    events.push({
-      start,
-      end,
-      title,
-      location: location?.trim() ? location.trim().slice(0, 120) : null,
-      note: description?.trim() ? description.trim().slice(0, 500) : null,
-    });
-
-    if (events.length >= MAX_SUBSCRIPTION_EVENTS) {
-      break;
-    }
+    if (accepted === 0) skipped += 1;
+    if (events.length >= MAX_SUBSCRIPTION_EVENTS) break;
   }
 
+  events.sort((a, b) => a.start.getTime() - b.start.getTime());
   return { events, skipped };
 }

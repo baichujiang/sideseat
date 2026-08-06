@@ -1,4 +1,4 @@
-import { getSchoolByCode, getSchoolLabel, schoolDirectory } from "@/lib/constants/schools";
+import { getSchoolByCode, schoolDirectory } from "@/lib/constants/schools";
 
 export const publicEmailDomains = new Set([
   "gmail.com",

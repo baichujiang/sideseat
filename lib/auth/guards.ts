@@ -9,6 +9,8 @@ import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
 import { getSessionUser, requireUser } from "@/lib/auth/session";
 import { isConfiguredAdmin } from "@/lib/constants/app";
 import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
+import { loadSharedActiveCourses } from "@/lib/courses/shared-active-courses";
 
 // Throttle window for lastActiveAt writes. Every page load calls
 // requireOnboardedUser(), but bumping a timestamp on every request is wasteful
@@ -274,14 +276,11 @@ export async function requireClassmateOrConnectionProfileAccess(peerUserId: stri
   }
 
   // Fall back to the "classmate" mode: same course at least once.
-  const sharedCourses = await prisma.course.findMany({
-    where: {
-      members: { some: { userId: user.id } },
-      AND: { members: { some: { userId: peerUserId } } },
-    },
-    select: { id: true, name: true, code: true },
-    orderBy: { name: "asc" },
-  });
+  const sharedCourses = await loadSharedActiveCourses(
+    prisma,
+    user.id,
+    peerUserId,
+  );
 
   if (sharedCourses.length === 0) {
     notFound();
@@ -415,16 +414,9 @@ export async function requirePublicProfileAccess(peerUserId: string) {
         },
       },
     }),
-    prisma.course.findMany({
-      where: {
-        members: { some: { userId: user.id } },
-        AND: { members: { some: { userId: peerUserId } } },
-      },
-      select: { id: true, name: true, code: true },
-      orderBy: { name: "asc" },
-    }),
+    loadSharedActiveCourses(prisma, user.id, peerUserId),
     prisma.userCourse.findMany({
-      where: { userId: peerUserId },
+      where: { userId: peerUserId, ...activeCourseMembershipWhere() },
       select: {
         courseId: true,
         course: {
@@ -491,7 +483,11 @@ export async function requireCourseChatMember(courseId: string) {
   const user = await requireOnboardedUser();
 
   const membership = await prisma.userCourse.findFirst({
-    where: { userId: user.id, courseId },
+    where: {
+      userId: user.id,
+      courseId,
+      ...activeCourseMembershipWhere(),
+    },
     include: {
       course: true,
     },

@@ -6,6 +6,17 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>SideSeat</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>app.sideseat.mobile</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>sideseat</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -29,6 +40,12 @@
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>SideSeat uses your location to share where you are in direct chats.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>SideSeat uses the microphone to turn your spoken event details into calendar text.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>SideSeat saves schedule images to your photo library when you choose Save to Photos.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>SideSeat uses speech recognition to transcribe event details for smart calendar entry.</string>
 	<key>SideSeatAPIBaseURL</key>
 	<string>$(SIDESEAT_API_BASE_URL)</string>
 	<key>SideSeatCrashDSN</key>

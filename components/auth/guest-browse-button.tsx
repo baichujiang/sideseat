@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { setAccessToken } from "@/lib/auth/client-access-token";
 import { Button } from "@/components/ui/button";
 
 export function GuestBrowseButton({ className }: { className?: string }) {
   const router = useRouter();
+  const { messages } = useLocaleContext();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -23,14 +25,13 @@ export function GuestBrowseButton({ className }: { className?: string }) {
       });
       const payload = await response.json();
       if (!response.ok) {
-        setError(payload.error ?? "Could not start guest session.");
+        setError(payload.error ?? messages.inbox.sessionBootstrapFailed);
         return;
       }
       if (payload.data?.accessToken) {
         setAccessToken(payload.data.accessToken);
       }
-      router.push("/courses");
-      router.refresh();
+      router.replace("/courses");
     } finally {
       setBusy(false);
     }
@@ -39,7 +40,7 @@ export function GuestBrowseButton({ className }: { className?: string }) {
   return (
     <div className="space-y-2">
       <Button className={className} disabled={busy} onClick={start} type="button" variant="outline">
-        {busy ? "Opening…" : "Browse courses as guest"}
+        {busy ? messages.guest.browseCoursesBusy : messages.guest.browseCoursesAsGuest}
       </Button>
       {error ? <p className="text-center text-sm text-destructive">{error}</p> : null}
     </div>

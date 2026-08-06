@@ -23,6 +23,8 @@ export default async function ProfileVerificationPage() {
     >
       <StudentVerificationForm
         currentStatus={user.studentVerificationStatus}
+        verificationMethod={user.studentVerificationMethod}
+        studentStatus={user.studentStatus}
         schoolCode={schoolCode}
         schoolShortLabel={schoolShort}
         notes={user.studentVerificationNotes}

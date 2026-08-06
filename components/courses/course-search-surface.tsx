@@ -90,7 +90,7 @@ export function CourseSearchSurface({
       controller.abort();
       window.clearTimeout(id);
     };
-  }, [trimmed, active]);
+  }, [trimmed, active, school]);
 
   return (
     <div className="space-y-5">

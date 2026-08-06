@@ -21,18 +21,31 @@ final class CommunityChatStore {
     private var nextCursor: String?
     private var realtimeCursor: String?
     private var streamTask: Task<Void, Never>?
+    private var initialSideEffectsTask: Task<Void, Never>?
+    private var cacheWriteTask: Task<Void, Never>?
     private var kind: NativeCommunityChatKind = .course
     private var conversationID: String = ""
     private var apiBaseURL: URL?
     private var currentUserID: String = ""
     private var suppressNextScrollDecision = false
     private var markReadTask: Task<Void, Never>?
+    private let cache: CommunityChatCache
+
+    init(cache: CommunityChatCache = .shared) {
+        self.cache = cache
+    }
 
     func stop() {
         streamTask?.cancel()
         streamTask = nil
+        initialSideEffectsTask?.cancel()
+        initialSideEffectsTask = nil
         markReadTask?.cancel()
         markReadTask = nil
+    }
+
+    func waitForInitialSideEffects() async {
+        await initialSideEffectsTask?.value
     }
 
     func load(
@@ -61,7 +74,6 @@ final class CommunityChatStore {
         issue = nil
         pendingRemoteCount = 0
         suppressNextScrollDecision = false
-        defer { isLoading = false }
 
         let stagedUnread = ChatUnreadLaunch.take(conversationID: conversationID)
 
@@ -76,24 +88,38 @@ final class CommunityChatStore {
             currentUserID = "ui-test-user"
             applyUnreadJump(unreadCount: stagedUnread)
             await markRead(using: session)
+            isLoading = false
             return
         }
         #endif
 
+        if !currentUserID.isEmpty,
+           let snapshot = await cache.load(
+               accountID: currentUserID,
+               kind: kind,
+               conversationID: conversationID
+           )
+        {
+            restore(snapshot)
+            applyUnreadJump(unreadCount: stagedUnread)
+            isLoading = false
+        }
+
+        if enableRealtime {
+            startRealtime(using: session)
+        }
+        scheduleInitialSideEffects(using: session)
+
         do {
             let page = try await fetchPage(cursor: nil, using: session)
-            conversation = page.data.conversation
-            messages = page.data.messages
-            hasMoreOlder = page.meta.hasMore
-            nextCursor = page.meta.nextCursor
-            realtimeCursor = page.meta.realtimeCursor
+            applyNetworkPage(page)
             applyUnreadJump(unreadCount: stagedUnread)
-            await markRead(using: session)
-            if enableRealtime {
-                startRealtime(using: session)
-            }
+            issue = nil
+            isLoading = false
+            await persistCache()
         } catch {
             issue = error.localizedDescription
+            isLoading = false
         }
     }
 
@@ -140,12 +166,14 @@ final class CommunityChatStore {
             guard !older.isEmpty else {
                 hasMoreOlder = page.meta.hasMore
                 self.nextCursor = page.meta.nextCursor
+                scheduleCachePersist()
                 return
             }
             suppressNextScrollDecision = true
             messages = older + messages
             hasMoreOlder = page.meta.hasMore
             self.nextCursor = page.meta.nextCursor
+            scheduleCachePersist()
         } catch {
             issue = error.localizedDescription
         }
@@ -164,6 +192,7 @@ final class CommunityChatStore {
         isSending = true
         sendIssue = nil
         sendStatuses[messageID] = .sending
+        scheduleCachePersist()
         defer { isSending = false }
 
         #if DEBUG
@@ -190,7 +219,10 @@ final class CommunityChatStore {
                 response = try await session.sendAuthorized(
                     "api/v1/group-chats/\(conversationID)/messages",
                     method: .post,
-                    body: NativeGroupTextMessageRequest(body: body),
+                    body: NativeCommunityTextMessageRequest(
+                        body: body,
+                        replyToId: kind.supportsReply ? message.replyTo?.id : nil
+                    ),
                     idempotencyKey: UUID().uuidString
                 )
             }
@@ -201,6 +233,7 @@ final class CommunityChatStore {
         } catch {
             sendStatuses[messageID] = .failed
             sendIssue = error.localizedDescription
+            scheduleCachePersist()
             return false
         }
     }
@@ -260,6 +293,7 @@ final class CommunityChatStore {
         messages.append(optimistic)
         sendStatuses[localID] = .sending
         pendingRemoteCount = 0
+        scheduleCachePersist()
 
         do {
             let response: APIEnvelope<NativeCommunityMessage>
@@ -275,7 +309,7 @@ final class CommunityChatStore {
                 response = try await session.sendAuthorized(
                     "api/v1/group-chats/\(conversationID)/messages",
                     method: .post,
-                    body: NativeGroupTextMessageRequest(body: body),
+                    body: NativeCommunityTextMessageRequest(body: body, replyToId: replyToId),
                     idempotencyKey: UUID().uuidString
                 )
             }
@@ -287,6 +321,7 @@ final class CommunityChatStore {
         } catch {
             sendStatuses[localID] = .failed
             sendIssue = error.localizedDescription
+            scheduleCachePersist()
             return false
         }
     }
@@ -309,8 +344,11 @@ final class CommunityChatStore {
 
         do {
             struct DeleteResult: Decodable, Sendable { let id: String }
+            let deletePath = kind == .course
+                ? "api/courses/\(conversationID)/chat/messages/\(messageID)"
+                : "api/group-chats/\(conversationID)/messages/\(messageID)"
             let _: APIEnvelope<DeleteResult> = try await session.sendAuthorized(
-                "api/courses/\(conversationID)/chat/messages/\(messageID)",
+                deletePath,
                 method: .delete
             )
             upsert(existing.tombstoned())
@@ -348,7 +386,8 @@ final class CommunityChatStore {
                 method: .post,
                 body: NativeMessageReportRequest(
                     reportedUserId: message.sender.id,
-                    courseRoomMessageId: message.id,
+                    courseRoomMessageId: kind == .course ? message.id : nil,
+                    groupChatMessageId: kind == .group ? message.id : nil,
                     reason: reason,
                     details: details
                 )
@@ -366,6 +405,7 @@ final class CommunityChatStore {
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             conversation = conversation?.withInboxHidden(false)
+            scheduleCachePersist()
             return true
         }
         #endif
@@ -380,6 +420,7 @@ final class CommunityChatStore {
                 method: .post
             )
             conversation = conversation?.withInboxHidden(false)
+            scheduleCachePersist()
             return true
         } catch {
             issue = error.localizedDescription
@@ -425,6 +466,107 @@ final class CommunityChatStore {
         )
     }
 
+    private func restore(_ snapshot: CommunityChatCacheSnapshot) {
+        conversation = snapshot.conversation
+        messages = snapshot.messages
+        sendStatuses = snapshot.sendStatuses.mapValues { status in
+            status == .sending ? .failed : status
+        }
+        hasMoreOlder = snapshot.hasMoreOlder
+        nextCursor = snapshot.nextCursor
+        realtimeCursor = snapshot.realtimeCursor
+    }
+
+    private func applyNetworkPage(_ page: NativeCommunityMessagePageResponse) {
+        conversation = page.data.conversation
+        var merged = Dictionary(uniqueKeysWithValues: messages.map { ($0.id, $0) })
+        for remote in page.data.messages {
+            if remote.sender.id == currentUserID {
+                let echoedLocalIDs = merged.values.compactMap { local -> String? in
+                    guard local.id.hasPrefix("local-"),
+                          sendStatuses[local.id] == .sending,
+                          local.type == remote.type,
+                          local.body == remote.body
+                    else { return nil }
+                    return local.id
+                }
+                for localID in echoedLocalIDs {
+                    merged.removeValue(forKey: localID)
+                    sendStatuses.removeValue(forKey: localID)
+                }
+            }
+            merged[remote.id] = remote
+            sendStatuses[remote.id] = .sent
+        }
+        messages = merged.values.sorted(by: Self.messageOrder)
+        hasMoreOlder = page.meta.hasMore
+        nextCursor = page.meta.nextCursor
+        realtimeCursor = page.meta.realtimeCursor
+    }
+
+    private func scheduleInitialSideEffects(using session: SessionStore) {
+        initialSideEffectsTask?.cancel()
+        initialSideEffectsTask = Task { [weak self] in
+            guard let self else { return }
+            await self.markRead(using: session)
+        }
+    }
+
+    private func cacheSnapshot(savedAt: Date = Date()) -> CommunityChatCacheSnapshot? {
+        guard let conversation,
+              !currentUserID.isEmpty,
+              !conversationID.isEmpty,
+              !ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated")
+        else { return nil }
+        return CommunityChatCacheSnapshot(
+            conversation: conversation,
+            messages: messages,
+            sendStatuses: sendStatuses,
+            hasMoreOlder: hasMoreOlder,
+            nextCursor: nextCursor,
+            realtimeCursor: realtimeCursor,
+            savedAt: savedAt
+        )
+    }
+
+    private func persistCache() async {
+        guard let snapshot = cacheSnapshot() else { return }
+        await cache.save(
+            accountID: currentUserID,
+            kind: kind,
+            conversationID: conversationID,
+            snapshot: snapshot
+        )
+    }
+
+    private func scheduleCachePersist() {
+        guard let snapshot = cacheSnapshot() else { return }
+        let accountID = currentUserID
+        let kind = kind
+        let conversationID = conversationID
+        let cache = cache
+        cacheWriteTask?.cancel()
+        cacheWriteTask = Task {
+            try? await Task.sleep(nanoseconds: 100_000_000)
+            guard !Task.isCancelled else { return }
+            await cache.save(
+                accountID: accountID,
+                kind: kind,
+                conversationID: conversationID,
+                snapshot: snapshot
+            )
+        }
+    }
+
+    private static func messageOrder(
+        _ lhs: NativeCommunityMessage,
+        _ rhs: NativeCommunityMessage
+    ) -> Bool {
+        let left = lhs.createdDate ?? .distantPast
+        let right = rhs.createdDate ?? .distantPast
+        return left == right ? lhs.id < rhs.id : left < right
+    }
+
     private var messagesPath: String {
         "api/v1/\(kind.pathSegment)/\(conversationID)/messages"
     }
@@ -438,7 +580,9 @@ final class CommunityChatStore {
     }
 
     private func fetchPage(cursor: String?, using session: SessionStore) async throws -> NativeCommunityMessagePageResponse {
-        var queryItems: [URLQueryItem] = [URLQueryItem(name: "limit", value: "50")]
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "limit", value: cursor == nil ? "30" : "50")
+        ]
         if let cursor {
             queryItems.append(URLQueryItem(name: "cursor", value: cursor))
         }
@@ -631,6 +775,7 @@ final class CommunityChatStore {
                 await reloadHistory(using: session)
             }
         }
+        scheduleCachePersist()
     }
 
     private func reloadHistory(using session: SessionStore) async {
@@ -667,7 +812,8 @@ final class CommunityChatStore {
                 (lhs.createdDate ?? .distantPast) < (rhs.createdDate ?? .distantPast)
                     || ((lhs.createdDate == rhs.createdDate) && lhs.id < rhs.id)
             }
-            await markRead(using: session)
+            await persistCache()
+            scheduleMarkRead(using: session)
         } catch {
             issue = error.localizedDescription
         }
@@ -692,5 +838,6 @@ final class CommunityChatStore {
             }
         }
         sendStatuses[message.id] = .sent
+        scheduleCachePersist()
     }
 }

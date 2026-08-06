@@ -57,7 +57,7 @@ export function DirectInboxRow({
   unreadCount: number;
   returnTo?: string;
 }) {
-  const { locale } = useLocaleContext();
+  const { locale, messages } = useLocaleContext();
   const isSelfNotes = connection.userAId === connection.userBId;
   const other = connection.userAId === userId ? connection.userB : connection.userA;
   const myRemark =
@@ -66,7 +66,7 @@ export function DirectInboxRow({
       : connection.contactRemarkByB?.trim();
   const displayName = isSelfNotes
     ? selfNotesDisplayTitle(other, myRemark)
-    : (myRemark || other.nickname?.trim() || "Student");
+    : (myRemark || other.nickname?.trim() || messages.common.studentFallback);
   const lastMessage = connection.messages[0];
   const fromMe = lastMessage?.senderId === userId;
   const contextCourseName =
@@ -94,8 +94,8 @@ export function DirectInboxRow({
     connection.planRequests?.find((p) => p.proposerUserId === userId);
   const planChipLine = pendingPlan
     ? pendingPlan.receiverUserId === userId
-      ? "Plan request · Waiting for your reply"
-      : "Plan request · Waiting for their reply"
+      ? messages.inbox.planChipWaitingYou
+      : messages.inbox.planChipWaitingThem
     : null;
 
   const lastMessageShowsPendingPlan =
@@ -135,7 +135,7 @@ export function DirectInboxRow({
                 isUnread && "font-semibold text-[#374151] dark:text-zinc-300",
               )}
             >
-              {contextCourseName ? contextCourseName : "Say hi"}
+              {contextCourseName ? contextCourseName : messages.discover.sayHiCta}
             </p>
           )}
           {showPendingPlanChip && pendingPlan ? (

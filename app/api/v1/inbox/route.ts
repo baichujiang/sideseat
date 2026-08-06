@@ -1,0 +1,40 @@
+import { requireV1User } from "@/lib/api/v1/auth";
+import { inboxConversationV1 } from "@/lib/api/v1/inbox-dto";
+import { v1Error, v1Success } from "@/lib/api/v1/http";
+import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
+import { prepareInboxListMerged } from "@/lib/inbox/inbox-list-version";
+import { getInboxMergeBundle } from "@/lib/queries/inbox-merge";
+
+export const dynamic = "force-dynamic";
+
+export async function GET(request: Request) {
+  const auth = await requireV1User(request);
+  if (!auth.ok) return auth.response;
+
+  try {
+    await ensureAssistantBotConnection(auth.user.id);
+    const { merged, unreadTotal, plansNeedingYourAction } = await getInboxMergeBundle(
+      auth.user.id,
+    );
+    const conversations = prepareInboxListMerged(merged).map((item) =>
+      inboxConversationV1(item, auth.user.id),
+    );
+
+    return v1Success(
+      {
+        conversations,
+        unreadTotal,
+        plansNeedingYourAction,
+      },
+      { request },
+    );
+  } catch (cause) {
+    console.error("GET /api/v1/inbox", cause);
+    return v1Error(request, {
+      code: "INTERNAL_ERROR",
+      message: "Unable to load the inbox.",
+      status: 500,
+      retryable: true,
+    });
+  }
+}

@@ -6,7 +6,41 @@ import {
   classmatePostForDiscoverInclude,
   prismaClassmatePostToDiscoverRow,
 } from "@/lib/discover/prisma-classmate-post-for-discover";
+import {
+  buildViewerCourseMatchIndex,
+  courseMatchesViewer,
+  type ViewerCourseMatchIndex,
+} from "@/lib/discover/viewer-course-match";
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
 import { prisma } from "@/lib/db/prisma";
+
+type DiscoverPostViewerScope = {
+  id: string;
+  school: string | null;
+  verifiedStudent: boolean;
+  courses: ViewerCourseMatchIndex;
+} | null;
+
+function canViewerSeePost(post: DiscoverPostRow, viewer: DiscoverPostViewerScope) {
+  if (!viewer) {
+    return post.visibility === "CITY_INTERNATIONALS";
+  }
+  if (post.isOwn) return true;
+
+  switch (post.visibility) {
+    case "CITY_INTERNATIONALS":
+      return true;
+    case "VERIFIED_ONLY":
+      return viewer.verifiedStudent;
+    case "COURSEMATES_ONLY":
+      return (post.linkedCourses ?? []).some((course) =>
+        courseMatchesViewer(course, viewer.courses),
+      );
+    case "SCHOOL_ONLY":
+    default:
+      return Boolean(viewer.school && post.school && viewer.school === post.school);
+  }
+}
 
 /** Active Discover posts for a city — browse without signing in. */
 export async function loadActiveDiscoverPostsForCity(
@@ -33,20 +67,49 @@ export async function loadActiveDiscoverPostsForCity(
     take: 120,
   });
 
+  const [savedRows, viewerProfile] = viewerUserId
+    ? await Promise.all([
+        prisma.classmatePostSave.findMany({
+          where: { userId: viewerUserId },
+          select: { classmatePostId: true },
+        }),
+        prisma.user.findUnique({
+          where: { id: viewerUserId },
+          select: {
+            id: true,
+            school: true,
+            verifiedStudent: true,
+            courses: {
+              where: activeCourseMembershipWhere(),
+              select: {
+                course: { select: { id: true, code: true } },
+              },
+            },
+          },
+        }),
+      ])
+    : [[], null] as const;
+
   const savedPostIdSet = new Set<string>();
   if (viewerUserId) {
-    const savedRows = await prisma.classmatePostSave.findMany({
-      where: { userId: viewerUserId },
-      select: { classmatePostId: true },
-    });
     for (const row of savedRows) savedPostIdSet.add(row.classmatePostId);
   }
+  const viewer: DiscoverPostViewerScope = viewerProfile
+    ? {
+        id: viewerProfile.id,
+        school: viewerProfile.school,
+        verifiedStudent: viewerProfile.verifiedStudent,
+        courses: buildViewerCourseMatchIndex(
+          viewerProfile.courses.map((row) => row.course),
+        ),
+      }
+    : null;
 
   const postsFromDb: DiscoverPostRow[] = activePosts.map((post) =>
     prismaClassmatePostToDiscoverRow(post, viewerUserId ?? null, {
       savedByViewer: viewerUserId ? savedPostIdSet.has(post.id) : false,
     }),
-  );
+  ).filter((post) => canViewerSeePost(post, viewer));
 
   return process.env.NEXT_PUBLIC_DISCOVER_DEV_EXAMPLE_POSTS === "1"
     ? [...getDevExampleDiscoverPosts(), ...postsFromDb]

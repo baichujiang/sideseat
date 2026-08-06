@@ -135,7 +135,7 @@ export function DiscoverCreateActivitySheet({
               onChange={(e) => setDescription(e.target.value)}
               placeholder={da.descriptionPlaceholder}
               maxLength={DISCOVER_ACTIVITY_DESCRIPTION_MAX}
-              className="min-h-24 w-full resize-none rounded-xl border border-input bg-background px-3 py-2.5 text-[14px] outline-none transition focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+              className="min-h-24 w-full resize-none rounded-xl border border-input bg-background px-3 py-2.5 text-[14px] text-foreground outline-none transition placeholder:text-muted-foreground/80 focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
             />
           </FieldGroup>
 
@@ -188,12 +188,17 @@ export function DiscoverCreateActivitySheet({
         </div>
 
         <div className="mt-4 flex shrink-0 gap-2">
-          <Button type="button" variant="ghost" className="h-11 flex-1 rounded-xl" onClick={onClose}>
+          <Button
+            type="button"
+            variant="ghost"
+            className="h-11 flex-1 rounded-xl transition active:scale-[0.98]"
+            onClick={onClose}
+          >
             {common.cancel}
           </Button>
           <Button
             type="button"
-            className="h-11 flex-1 rounded-xl"
+            className="h-11 flex-1 rounded-xl transition active:scale-[0.98]"
             onClick={() => void submit()}
             disabled={submitting || !canSubmit}
           >

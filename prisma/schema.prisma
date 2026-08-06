@@ -116,6 +116,11 @@ enum StudentVerificationStatus {
   REJECTED
 }
 
+enum StudentVerificationMethod {
+  SCHOOL_EMAIL
+  MANUAL_DOCUMENT
+}
+
 /// Shown on profile and user cards (icons + localized gender label).
 enum UserGender {
   MALE
@@ -135,6 +140,12 @@ enum DegreeLevel {
   BACHELOR
   MASTER
   OTHER
+}
+
+enum StudentStatus {
+  CURRENT_STUDENT
+  EXCHANGE_STUDENT
+  ALUMNI
 }
 
 enum Weekday {
@@ -215,6 +226,19 @@ enum ClassmatePostStatus {
   ACTIVE
   CLOSED
   EXPIRED
+}
+
+enum ClassmatePostVisibility {
+  SCHOOL_ONLY
+  CITY_INTERNATIONALS
+  VERIFIED_ONLY
+  COURSEMATES_ONLY
+}
+
+enum ClassmatePostReplyPreference {
+  DIRECT_MESSAGE
+  REQUEST_FIRST
+  VERIFIED_ONLY
 }
 
 /// Author-only analytics: one row per (post, viewer, kind); use createMany skipDuplicates.
@@ -305,97 +329,121 @@ enum ProductFeedbackVoteValue {
   DOWN
 }
 
+enum SessionClientKind {
+  WEB
+  IOS
+}
+
+enum SessionRevocationReason {
+  ROTATED
+  LOGOUT
+  DEVICE_REPLACED
+  DEVICE_MISMATCH
+  REUSE_DETECTED
+  EXPIRED
+  USER_REVOKED
+}
+
 model User {
-  id                           String                   @id @default(cuid())
-  username                     String                   @unique
-  email                        String?                  @unique
+  id                               String                       @id @default(cuid())
+  username                         String                       @unique
+  email                            String?                      @unique
   /// E.164, e.g. +8613800138000 — used for login when set.
-  phone                        String?                  @unique
-  usernameUpdatedAt            DateTime?
-  isGuest                      Boolean                  @default(false)
-  hashedPassword               String
-  nickname                     String?
+  phone                            String?                      @unique
+  usernameUpdatedAt                DateTime?
+  isGuest                          Boolean                      @default(false)
+  hashedPassword                   String
+  nickname                         String?
   /// Lowercase trimmed nickname for search (null for guests; display names are not unique).
-  nicknameKey                  String?
-  gender                       UserGender               @default(PRIVATE)
-  school                       String?
-  degreeLevel                  DegreeLevel?
-  major                        String?
-  semester                     Int?
-  avatarUrl                    String?
-  bio                          String?
-  discoverByCourse             Boolean                  @default(true)
-  discoverByMajor              Boolean                  @default(true)
-  discoverBySemester           Boolean                  @default(true)
-  allowInvitationNotes         Boolean                  @default(true)
-  contactInfoOptIn             Boolean                  @default(false)
-  hideFromCourseMembers        Boolean                  @default(false)
+  nicknameKey                      String?
+  gender                           UserGender                   @default(PRIVATE)
+  school                           String?
+  studentStatus                    StudentStatus?
+  degreeLevel                      DegreeLevel?
+  major                            String?
+  semester                         Int?
+  graduationYear                   Int?
+  avatarUrl                        String?
+  bio                              String?
+  discoverByCourse                 Boolean                      @default(true)
+  discoverByMajor                  Boolean                      @default(true)
+  discoverBySemester               Boolean                      @default(true)
+  allowInvitationNotes             Boolean                      @default(true)
+  contactInfoOptIn                 Boolean                      @default(false)
+  hideFromCourseMembers            Boolean                      @default(false)
   /// Excluded from Discover people search and matching lists.
-  hideFromDiscovery            Boolean                  @default(false)
+  hideFromDiscovery                Boolean                      @default(false)
   /// Legacy recommendation opt-out retained for existing profile data.
-  hideFromRecommendations      Boolean                  @default(false)
-  onboardingComplete           Boolean                  @default(false)
+  hideFromRecommendations          Boolean                      @default(false)
+  onboardingComplete               Boolean                      @default(false)
   /// First-run product tutorial (tab overview); set when user dismisses; optional cross-device sync.
-  productTutorialDismissedAt   DateTime?
-  verifiedStudent              Boolean                  @default(false)
-  studentVerificationStatus    StudentVerificationStatus @default(UNVERIFIED)
-  emailVerifiedAt              DateTime?
-  studentVerificationNotes     String?
-  manualReviewProofUrl         String?
-  manualReviewProofFilename    String?
-  manualReviewRequestedAt      DateTime?
-  wechatHandle                 String?
-  whatsappHandle               String?
-  telegramHandle               String?
-  instagramHandle              String?
-  createdAt                    DateTime                 @default(now())
-  updatedAt                    DateTime                 @updatedAt
-  lastActiveAt                 DateTime?
-  sessions                     Session[]
-  courses                      UserCourse[]
-  savedCourses                 SavedCourse[]
-  sentInvitations              Invitation[]             @relation("InvitationSender")
-  receivedInvitations          Invitation[]             @relation("InvitationReceiver")
-  sentMessages                 Message[]
-  courseRoomMessages           CourseRoomMessage[]
-  sentContactExchangeRequests  ContactExchangeRequest[] @relation("ContactRequester")
-  receivedContactExchangeRequests ContactExchangeRequest[] @relation("ContactResponder")
-  connectionsA                 Connection[]             @relation("ConnectionUserA")
-  connectionsB                 Connection[]             @relation("ConnectionUserB")
-  endedConnections             Connection[]             @relation("ConnectionEndedBy")
-  blocksInitiated              Block[]                  @relation("Blocker")
-  blocksReceived               Block[]                  @relation("Blocked")
-  reportsFiled                 Report[]                 @relation("Reporter")
-  reportsReceived              Report[]                 @relation("ReportedUser")
-  moderationBlocks             ModerationBlock[]
-  schoolEmailVerifications     SchoolEmailVerification[]
-  schoolVerificationStates     UserSchoolVerification[]
-  friendLinksRequested         FriendLink[]               @relation("FriendLinkRequester")
-  friendLinksToRespond         FriendLink[]               @relation("FriendLinkResponder")
-  pushSubscriptions            PushSubscription[]
-  nativePushDevices            NativePushDevice[]
-  studyProposalsCreated        StudySessionProposal[]     @relation("StudyProposer")
-  availabilitySharesOwned      AvailabilityShare[]        @relation("AvailabilityShareOwner")
-  planRequestsProposed         PlanRequest[]              @relation("PlanRequestProposer")
-  planRequestsReceived         PlanRequest[]              @relation("PlanRequestReceiver")
-  calendarEntries              CalendarEntry[]
-  calendarEntryCompanionships  CalendarEntryCompanion[]
-  userCalendarCategories       UserCalendarCategory[]
-  classmatePosts               ClassmatePost[]
-  classmatePostInsights        ClassmatePostInsight[]
-  classmatePostSaves           ClassmatePostSave[]
-  lifePhotos                   UserLifePhoto[]
-  discoverActivitiesOrganized DiscoverActivity[]       @relation("DiscoverActivityOrganizer")
-  discoverActivitySignups    DiscoverActivitySignup[]
-  userLanguages                UserLanguage[]
-  groupChatsCreated            GroupChat[]               @relation("GroupChatCreator")
-  groupChatParticipants        GroupChatParticipant[]
-  groupChatMessages            GroupChatMessage[]
-  productFeedback              ProductFeedback[]
-  productFeedbackVotes         ProductFeedbackVote[]
-  productFeedbackComments      ProductFeedbackComment[]
-  scheduleShareLinksOwned      ScheduleShareLink[]              @relation("ScheduleShareLinkOwner")
+  productTutorialDismissedAt       DateTime?
+  /// Last academic term for which the user reviewed expired course memberships.
+  courseReviewSemesterLabel        String?
+  verifiedStudent                  Boolean                      @default(false)
+  studentVerificationStatus        StudentVerificationStatus    @default(UNVERIFIED)
+  studentVerificationMethod        StudentVerificationMethod?
+  studentVerifiedAt                DateTime?
+  emailVerifiedAt                  DateTime?
+  studentVerificationNotes         String?
+  manualReviewProofUrl             String?
+  manualReviewProofFilename        String?
+  manualReviewRequestedAt          DateTime?
+  wechatHandle                     String?
+  whatsappHandle                   String?
+  telegramHandle                   String?
+  instagramHandle                  String?
+  createdAt                        DateTime                     @default(now())
+  updatedAt                        DateTime                     @updatedAt
+  lastActiveAt                     DateTime?
+  sessions                         Session[]
+  courses                          UserCourse[]
+  submittedCourses                 Course[]                     @relation("CourseSubmitter")
+  savedCourses                     SavedCourse[]
+  sentInvitations                  Invitation[]                 @relation("InvitationSender")
+  receivedInvitations              Invitation[]                 @relation("InvitationReceiver")
+  sentMessages                     Message[]
+  courseRoomMessages               CourseRoomMessage[]
+  sentContactExchangeRequests      ContactExchangeRequest[]     @relation("ContactRequester")
+  receivedContactExchangeRequests  ContactExchangeRequest[]     @relation("ContactResponder")
+  connectionsA                     Connection[]                 @relation("ConnectionUserA")
+  connectionsB                     Connection[]                 @relation("ConnectionUserB")
+  endedConnections                 Connection[]                 @relation("ConnectionEndedBy")
+  blocksInitiated                  Block[]                      @relation("Blocker")
+  blocksReceived                   Block[]                      @relation("Blocked")
+  reportsFiled                     Report[]                     @relation("Reporter")
+  reportsReceived                  Report[]                     @relation("ReportedUser")
+  moderationBlocks                 ModerationBlock[]
+  schoolEmailVerifications         SchoolEmailVerification[]
+  schoolVerificationStates         UserSchoolVerification[]
+  friendLinksRequested             FriendLink[]                 @relation("FriendLinkRequester")
+  friendLinksToRespond             FriendLink[]                 @relation("FriendLinkResponder")
+  pushSubscriptions                PushSubscription[]
+  nativePushDevices                NativePushDevice[]
+  studyProposalsCreated            StudySessionProposal[]       @relation("StudyProposer")
+  availabilitySharesOwned          AvailabilityShare[]          @relation("AvailabilityShareOwner")
+  planRequestsProposed             PlanRequest[]                @relation("PlanRequestProposer")
+  planRequestsReceived             PlanRequest[]                @relation("PlanRequestReceiver")
+  calendarEntries                  CalendarEntry[]
+  calendarEntryCompanionships      CalendarEntryCompanion[]
+  userCalendarCategories           UserCalendarCategory[]
+  classmatePosts                   ClassmatePost[]
+  classmatePostInsights            ClassmatePostInsight[]
+  classmatePostSaves               ClassmatePostSave[]
+  classmatePostComments            ClassmatePostComment[]
+  lifePhotos                       UserLifePhoto[]
+  discoverActivitiesOrganized      DiscoverActivity[]           @relation("DiscoverActivityOrganizer")
+  discoverActivitySignups          DiscoverActivitySignup[]
+  userLanguages                    UserLanguage[]
+  groupChatsCreated                GroupChat[]                  @relation("GroupChatCreator")
+  groupChatParticipants            GroupChatParticipant[]
+  groupChatMessages                GroupChatMessage[]
+  productFeedback                  ProductFeedback[]
+  productFeedbackVotes             ProductFeedbackVote[]
+  productFeedbackComments          ProductFeedbackComment[]
+  scheduleShareLinksOwned          ScheduleShareLink[]          @relation("ScheduleShareLinkOwner")
   scheduleShareProposalsAsProposer ScheduleShareGuestProposal[] @relation("ScheduleShareProposalProposer")
+  storeKitTransactions             StoreKitTransaction[]
 
   @@index([nicknameKey])
 }
@@ -425,16 +473,16 @@ model EmailOtpChallenge {
 }
 
 model ProductFeedback {
-  id              String               @id @default(cuid())
+  id              String                   @id @default(cuid())
   userId          String
-  user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  topic           ProductFeedbackTopic @default(OTHER)
+  user            User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic           ProductFeedbackTopic     @default(OTHER)
   title           String?
   message         String
   emailSentAt     DateTime?
   emailProviderId String?
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
   votes           ProductFeedbackVote[]
   comments        ProductFeedbackComment[]
 
@@ -471,51 +519,131 @@ model ProductFeedbackComment {
 }
 
 model UserLanguage {
-  userId        String
-  tag           LanguageTag
-  proficiency   LanguageProficiency
-  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  tag         LanguageTag
+  proficiency LanguageProficiency
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, tag])
   @@index([userId])
 }
 
 model Session {
-  id         String   @id @default(cuid())
-  userId     String
-  tokenHash  String   @unique
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  String                   @id @default(cuid())
+  userId              String
+  tokenHash           String                   @unique
+  expiresAt           DateTime
+  createdAt           DateTime                 @default(now())
+  clientKind          SessionClientKind        @default(WEB)
+  familyId            String?
+  familyExpiresAt     DateTime?
+  deviceId            String?
+  deviceName          String?
+  appVersion          String?
+  platformVersion     String?
+  lastUsedAt          DateTime                 @default(now())
+  revokedAt           DateTime?
+  revocationReason    SessionRevocationReason?
+  replacedBySessionId String?
+  user                User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
+  @@index([familyId])
+  @@index([userId, clientKind, revokedAt])
+}
+
+model ApiRateLimitCounter {
+  id              String   @id
+  scope           String
+  count           Int      @default(1)
+  windowStartedAt DateTime
+  expiresAt       DateTime
+  updatedAt       DateTime @updatedAt
+
+  @@index([expiresAt])
+  @@index([scope, windowStartedAt])
+}
+
+model ApiIdempotencyRecord {
+  id             String   @id
+  scope          String
+  requestHash    String
+  responseStatus Int?
+  responseBody   Json?
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([expiresAt])
+  @@index([scope, createdAt])
+}
+
+/// Durable, body-free change log for resumable native chat SSE streams.
+/// PostgreSQL triggers append rows for all direct, course and group message
+/// inserts, updates and deletes, including legacy Web write paths.
+model ChatRealtimeEvent {
+  sequence         BigInt   @id @default(autoincrement())
+  conversationKind String   @db.VarChar(16)
+  conversationId   String
+  messageId        String
+  senderId         String?
+  eventType        String   @db.VarChar(16)
+  occurredAt       DateTime @default(now())
+
+  @@index([conversationKind, conversationId, sequence])
+  @@index([senderId, occurredAt])
+  @@index([occurredAt])
+}
+
+/// Highest sequence removed from each conversation's realtime event log.
+/// Clients resuming below this boundary must reload message history before
+/// opening a new stream so retention can never cause silent message gaps.
+model ChatRealtimeRetention {
+  conversationKind      String   @db.VarChar(16)
+  conversationId        String
+  retainedAfterSequence BigInt
+  updatedAt             DateTime @updatedAt
+
+  @@id([conversationKind, conversationId])
+  @@index([updatedAt])
 }
 
 model ClassmatePost {
-  id         String                @id @default(cuid())
-  userId     String
-  city       String
-  category   ClassmatePostCategory
-  title      String
-  body       String?
-  status     ClassmatePostStatus   @default(ACTIVE)
-  expiresAt  DateTime
-  createdAt  DateTime              @default(now())
-  updatedAt  DateTime              @updatedAt
-  user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  courses    ClassmatePostCourse[]
-  insights   ClassmatePostInsight[]
-  saves      ClassmatePostSave[]
-  study      ClassmatePostStudy?
-  meals      ClassmatePostMeals?
-  language   ClassmatePostLanguage?
-  sport      ClassmatePostSport?
-  images     ClassmatePostImage[]
+  id              String                       @id @default(cuid())
+  userId          String
+  city            String
+  category        ClassmatePostCategory
+  title           String
+  body            String?
+  status          ClassmatePostStatus          @default(ACTIVE)
+  tags            String[]                     @default([])
+  visibility      ClassmatePostVisibility      @default(SCHOOL_ONLY)
+  replyPreference ClassmatePostReplyPreference @default(REQUEST_FIRST)
+  /// Optional schedule turns an open-ended request into a concrete public plan.
+  startsAt        DateTime?
+  endsAt          DateTime?
+  location        String?                      @db.VarChar(120)
+  capacity        Int?
+  expiresAt       DateTime
+  createdAt       DateTime                     @default(now())
+  updatedAt       DateTime                     @updatedAt
+  user            User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courses         ClassmatePostCourse[]
+  insights        ClassmatePostInsight[]
+  saves           ClassmatePostSave[]
+  study           ClassmatePostStudy?
+  meals           ClassmatePostMeals?
+  language        ClassmatePostLanguage?
+  sport           ClassmatePostSport?
+  images          ClassmatePostImage[]
+  comments        ClassmatePostComment[]
+  reports         Report[]                     @relation("ClassmatePostReports")
 
   @@index([category, status, city, createdAt])
   @@index([userId, category, status])
   @@index([expiresAt])
+  @@index([city, status, startsAt])
 }
 
 model ClassmatePostInsight {
@@ -544,52 +672,72 @@ model ClassmatePostSave {
   @@index([userId, createdAt])
 }
 
+/// Public Q&A under a buddy post. Top-level rows are questions; a post author
+/// may add one reply through the nullable self relation.
+model ClassmatePostComment {
+  id        String                @id @default(cuid())
+  postId    String
+  userId    String
+  parentId  String?               @unique
+  body      String                @db.VarChar(500)
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+  post      ClassmatePost         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent    ClassmatePostComment? @relation("ClassmatePostCommentReply", fields: [parentId], references: [id], onDelete: Cascade)
+  reply     ClassmatePostComment? @relation("ClassmatePostCommentReply")
+  reports   Report[]              @relation("ClassmatePostCommentReports")
+
+  @@index([postId, createdAt])
+  @@index([userId, createdAt])
+}
+
 /// Structured preferences on a STUDY Discover post (1:1).
 model ClassmatePostStudy {
-  postId           String          @id
-  purposes         StudyPurpose[]
-  timeSlots        StudyTimeSlot[]
-  venues           StudyVenue[]
+  postId         String          @id
+  purposes       StudyPurpose[]
+  timeSlots      StudyTimeSlot[]
+  venues         StudyVenue[]
   /// Required when `venues` contains OTHER; max length enforced in API (Zod).
-  venueOtherNote   String?         @db.VarChar(60)
-  post             ClassmatePost   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  venueOtherNote String?         @db.VarChar(60)
+  post           ClassmatePost   @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
 /// Structured preferences on a MEALS Discover post (1:1).
 model ClassmatePostMeals {
-  postId           String         @id
+  postId         String         @id
   /// Legacy preset chips; new posts use an empty array and store free text in `venueOtherNote`.
-  venueTags        MealVenueTag[]
+  venueTags      MealVenueTag[]
   /// Free-text “where to eat” for new posts; legacy rows may pair with `venueTags` (e.g. OTHER).
-  venueOtherNote   String?        @db.VarChar(60)
-  post             ClassmatePost  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  venueOtherNote String?        @db.VarChar(60)
+  post           ClassmatePost  @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
 /// Structured preferences on a LANGUAGE Discover post (1:1).
 model ClassmatePostLanguage {
-  postId           String         @id
+  postId  String        @id
   /// Array of `{ tag, proficiency }`; validated in API before persisting.
-  offers           Json           @default("[]")
-  targets          LanguageTag[]
-  post             ClassmatePost  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  offers  Json          @default("[]")
+  targets LanguageTag[]
+  post    ClassmatePost @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
 /// Structured preferences on a SPORTS Discover post (1:1).
 model ClassmatePostSport {
-  postId           String      @id
-  sportTags        SportTag[]
+  postId         String        @id
+  sportTags      SportTag[]
   /// Required when `sportTags` contains OTHER; max length enforced in API (Zod).
-  sportOtherNote   String?     @db.VarChar(60)
-  post             ClassmatePost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  sportOtherNote String?       @db.VarChar(60)
+  post           ClassmatePost @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
 /// Courses attached to a SHARED_COURSES post — "I'm looking for classmates in these courses".
 model ClassmatePostCourse {
-  id        String        @id @default(cuid())
-  postId    String
-  courseId   String
-  post      ClassmatePost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  course    Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  id       String        @id @default(cuid())
+  postId   String
+  courseId String
+  post     ClassmatePost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  course   Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([postId, courseId])
   @@index([courseId])
@@ -623,22 +771,22 @@ model ClassmatePostImage {
 
 /// Discover activities zone — fixed-time events with public RSVP.
 model DiscoverActivity {
-  id          String                   @id @default(cuid())
-  organizerId String
-  city        String
-  school      String
-  title       String                   @db.VarChar(120)
-  description String?                  @db.VarChar(1000)
-  category    DiscoverActivityCategory?
-  startAt     DateTime
-  endAt       DateTime
-  location    String                   @db.VarChar(120)
-  capacity    Int?
-  status      DiscoverActivityStatus   @default(OPEN)
-  createdAt   DateTime                 @default(now())
-  updatedAt   DateTime                 @updatedAt
-  organizer   User                     @relation("DiscoverActivityOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
-  signups     DiscoverActivitySignup[]
+  id              String                    @id @default(cuid())
+  organizerId     String
+  city            String
+  school          String
+  title           String                    @db.VarChar(120)
+  description     String?                   @db.VarChar(1000)
+  category        DiscoverActivityCategory?
+  startAt         DateTime
+  endAt           DateTime
+  location        String                    @db.VarChar(120)
+  capacity        Int?
+  status          DiscoverActivityStatus    @default(OPEN)
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  organizer       User                      @relation("DiscoverActivityOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
+  signups         DiscoverActivitySignup[]
   calendarEntries CalendarEntry[]
 
   @@index([city, status, startAt])
@@ -680,19 +828,21 @@ model SchoolEmailVerification {
 /// One persisted verification state per user per school. Switching the active
 /// school simply swaps which row is mirrored onto the User table.
 model UserSchoolVerification {
-  userId                  String
-  school                  String
-  email                   String?
-  verifiedStudent         Boolean                  @default(false)
-  studentVerificationStatus StudentVerificationStatus @default(UNVERIFIED)
-  emailVerifiedAt         DateTime?
-  studentVerificationNotes String?
-  manualReviewProofUrl    String?
-  manualReviewProofFilename String?
-  manualReviewRequestedAt DateTime?
-  createdAt               DateTime                 @default(now())
-  updatedAt               DateTime                 @updatedAt
-  user                    User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                       String
+  school                       String
+  email                        String?
+  verifiedStudent              Boolean                    @default(false)
+  studentVerificationStatus    StudentVerificationStatus  @default(UNVERIFIED)
+  studentVerificationMethod    StudentVerificationMethod?
+  studentVerifiedAt            DateTime?
+  emailVerifiedAt              DateTime?
+  studentVerificationNotes     String?
+  manualReviewProofUrl         String?
+  manualReviewProofFilename    String?
+  manualReviewRequestedAt      DateTime?
+  createdAt                    DateTime                   @default(now())
+  updatedAt                    DateTime                   @updatedAt
+  user                         User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, school])
   @@index([school, studentVerificationStatus])
@@ -703,42 +853,75 @@ enum CourseExternalSource {
   LMU_LSF
 }
 
+enum CourseCatalogSyncStatus {
+  RUNNING
+  SUCCEEDED
+  PARTIAL
+  FAILED
+}
 
-model Course {
-  id            String       @id @default(cuid())
-  name          String
-  code          String?
-  instructorSummary String?
+model CourseCatalogSyncRun {
+  id            String                  @id @default(cuid())
+  provider      CourseExternalSource
   school        String
   semesterLabel String
+  semesterKey   String
+  status        CourseCatalogSyncStatus @default(RUNNING)
+  trigger       String
+  fetchedCount  Int                     @default(0)
+  preparedCount Int                     @default(0)
+  upsertedCount Int                     @default(0)
+  failedCount   Int                     @default(0)
+  errorMessage  String?
+  startedAt     DateTime                @default(now())
+  completedAt   DateTime?
+
+  @@index([provider, semesterLabel, startedAt])
+  @@index([status, startedAt])
+}
+
+model Course {
+  id                       String                          @id @default(cuid())
+  name                     String
+  code                     String?
+  identityCode             String?
+  instructorSummary        String?
+  school                   String
+  semesterLabel            String
   /// External catalog id (e.g. TUM NAT course_id, LMU LSF publishId).
-  externalSource CourseExternalSource?
-  externalId     String?
+  externalSource           CourseExternalSource?
+  externalId               String?
+  /// Verified-student fallback for schools or courses without a public catalog.
+  submittedById            String?
+  submittedBy              User?                           @relation("CourseSubmitter", fields: [submittedById], references: [id], onDelete: SetNull)
   officialScheduleSyncedAt DateTime?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  members       UserCourse[]
-  savedBy       SavedCourse[]
-  invitations   Invitation[]
-  courseRoomMessages CourseRoomMessage[]
-  originConnections Connection[] @relation("ConnectionOriginCourse")
-  classmatePostCourses ClassmatePostCourse[]
+  createdAt                DateTime                        @default(now())
+  updatedAt                DateTime                        @updatedAt
+  members                  UserCourse[]
+  savedBy                  SavedCourse[]
+  invitations              Invitation[]
+  courseRoomMessages       CourseRoomMessage[]
+  originConnections        Connection[]                    @relation("ConnectionOriginCourse")
+  classmatePostCourses     ClassmatePostCourse[]
   officialScheduleVariants CourseOfficialScheduleVariant[]
 
   @@unique([name, school, semesterLabel])
   @@unique([code, school, semesterLabel])
+  @@index([school, code])
+  @@index([school, identityCode])
   @@index([school, semesterLabel, externalSource])
+  @@index([submittedById, createdAt])
 }
 
 /// Official weekly timetable from school catalog (TUM NAT, LMU LSF, …).
 model CourseOfficialScheduleVariant {
-  id          String   @id @default(cuid())
+  id          String                          @id @default(cuid())
   courseId    String
-  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course      Course                          @relation(fields: [courseId], references: [id], onDelete: Cascade)
   label       String
   fingerprint String
   externalKey String?
-  syncedAt    DateTime @default(now())
+  syncedAt    DateTime                        @default(now())
   sessions    CourseOfficialScheduleSession[]
 
   @@unique([courseId, fingerprint])
@@ -746,7 +929,7 @@ model CourseOfficialScheduleVariant {
 }
 
 model CourseOfficialScheduleSession {
-  id          String   @id @default(cuid())
+  id          String                        @id @default(cuid())
   variantId   String
   variant     CourseOfficialScheduleVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
   weekday     Weekday
@@ -772,24 +955,29 @@ model CourseSession {
 }
 
 model UserCourse {
-  id         String          @id @default(cuid())
-  userId     String
-  courseId   String
-  intentions CourseIntent[]
+  id               String          @id @default(cuid())
+  userId           String
+  courseId         String
+  intentions       CourseIntent[]
   /// When set, this course chat is sorted with pinned DMs in Contacts.
-  inboxPinnedAt DateTime?
+  inboxPinnedAt    DateTime?
   /// When set, the course row is hidden from Contacts (enrollment unchanged). Clear via course page.
-  inboxHiddenAt DateTime?
+  inboxHiddenAt    DateTime?
   /// Last time this user viewed the course room chat; drives unread counts.
   courseChatReadAt DateTime?
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
-  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course     Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  sessions   CourseSession[]
+  /// Current-course matching expires automatically at the academic term boundary.
+  /// Null is accepted for legacy/test rows and treated as active until backfilled.
+  activeUntil      DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course           Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  sessions         CourseSession[]
 
   @@unique([userId, courseId])
   @@index([courseId])
+  @@index([courseId, activeUntil])
+  @@index([userId, activeUntil])
 }
 
 /// Courses the user is interested in but has not added to their weekly schedule.
@@ -807,21 +995,21 @@ model SavedCourse {
 }
 
 model Invitation {
-  id          String           @id @default(cuid())
-  senderId    String
-  receiverId  String
-  courseId    String
-  type        InvitationType
-  note        String?
-  status      InvitationStatus @default(PENDING)
-  expiresAt   DateTime?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  sender      User             @relation("InvitationSender", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver    User             @relation("InvitationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
-  course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  connection  Connection?
-  reports     Report[]
+  id         String           @id @default(cuid())
+  senderId   String
+  receiverId String
+  courseId   String
+  type       InvitationType
+  note       String?
+  status     InvitationStatus @default(PENDING)
+  expiresAt  DateTime?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  sender     User             @relation("InvitationSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User             @relation("InvitationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  course     Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  connection Connection?
+  reports    Report[]
 
   @@index([receiverId, status])
   @@index([senderId, status])
@@ -829,44 +1017,47 @@ model Invitation {
 }
 
 model Connection {
-  id                     String                   @id @default(cuid())
+  id                      String                   @id @default(cuid())
   /// Legacy link to the accepted invitation this connection was born from.
   /// Null for connections created directly via the first-message flow.
-  invitationId           String?                  @unique
+  invitationId            String?                  @unique
   /// Course context that seeded this connection (for "Connected via …" UI).
   /// Set when the new-thread flow is initiated from a course or classmate
   /// profile; may also be backfilled from `invitation.courseId` for legacy rows.
-  originCourseId         String?
-  userAId                String
-  userBId                String
-  status                 ConnectionStatus         @default(ACTIVE)
-  pinnedByAAt            DateTime?
-  pinnedByBAt            DateTime?
+  originCourseId          String?
+  userAId                 String
+  userBId                 String
+  status                  ConnectionStatus         @default(ACTIVE)
+  pinnedByAAt             DateTime?
+  pinnedByBAt             DateTime?
   /// User A's private display name for this thread (only A sees it).
-  contactRemarkByA       String?                  @db.VarChar(64)
+  contactRemarkByA        String?                  @db.VarChar(64)
   /// User B's private display name for this thread (only B sees it).
-  contactRemarkByB       String?                  @db.VarChar(64)
+  contactRemarkByB        String?                  @db.VarChar(64)
   /// Last time user A viewed this thread; drives unread counts.
-  readByAAt              DateTime?
+  readByAAt               DateTime?
   /// Last time user B viewed this thread; drives unread counts.
-  readByBAt              DateTime?
-  endedById              String?
-  endedAt                DateTime?
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime                 @updatedAt
-  invitation             Invitation?              @relation(fields: [invitationId], references: [id], onDelete: SetNull)
-  originCourse           Course?                  @relation("ConnectionOriginCourse", fields: [originCourseId], references: [id], onDelete: SetNull)
-  userA                  User                     @relation("ConnectionUserA", fields: [userAId], references: [id], onDelete: Cascade)
-  userB                  User                     @relation("ConnectionUserB", fields: [userBId], references: [id], onDelete: Cascade)
-  endedBy                User?                    @relation("ConnectionEndedBy", fields: [endedById], references: [id], onDelete: SetNull)
-  messages               Message[]
+  readByBAt               DateTime?
+  /// Permanently set after both participants have sent a non-system message.
+  /// The two-message anti-spam gate only applies before this point.
+  replyLimitUnlockedAt    DateTime?
+  endedById               String?
+  endedAt                 DateTime?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  invitation              Invitation?              @relation(fields: [invitationId], references: [id], onDelete: SetNull)
+  originCourse            Course?                  @relation("ConnectionOriginCourse", fields: [originCourseId], references: [id], onDelete: SetNull)
+  userA                   User                     @relation("ConnectionUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB                   User                     @relation("ConnectionUserB", fields: [userBId], references: [id], onDelete: Cascade)
+  endedBy                 User?                    @relation("ConnectionEndedBy", fields: [endedById], references: [id], onDelete: SetNull)
+  messages                Message[]
   contactExchangeRequests ContactExchangeRequest[]
   friendLink              FriendLink?
-  blocks                 Block[]
-  reports                Report[]
-  studyProposals         StudySessionProposal[]
-  availabilityShares     AvailabilityShare[]
-  planRequests           PlanRequest[]
+  blocks                  Block[]
+  reports                 Report[]
+  studyProposals          StudySessionProposal[]
+  availabilityShares      AvailabilityShare[]
+  planRequests            PlanRequest[]
 
   @@index([userAId, status])
   @@index([userBId, status])
@@ -874,57 +1065,57 @@ model Connection {
 }
 
 model Message {
-  id           String     @id @default(cuid())
-  connectionId String
-  senderId     String
-  body         String
-  type         MessageType @default(TEXT)
+  id                  String             @id @default(cuid())
+  connectionId        String
+  senderId            String
+  body                String
+  type                MessageType        @default(TEXT)
   /// Set when `type` is IMAGE — public HTTPS blob URL or dev inline data URL from upload.
-  imageUrl     String?
+  imageUrl            String?
   /// Shared pin; used when `type` is LOCATION.
-  locationLat  Float?
-  locationLng  Float?
-  locationName String?
+  locationLat         Float?
+  locationLng         Float?
+  locationName        String?
   availabilityShareId String?
-  planRequestId String?
+  planRequestId       String?
   /// Optional reply pointer; null when the message is not a reply.
-  replyToId    String?
+  replyToId           String?
   /// Soft-delete timestamp. Non-null means the body should not be rendered
   /// directly — show a tombstone instead. We keep the row so replies that
   /// quoted this message don't lose their anchor.
-  deletedAt    DateTime?
-  createdAt    DateTime   @default(now())
-  connection   Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
-  sender       User       @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  availabilityShare AvailabilityShare? @relation(fields: [availabilityShareId], references: [id], onDelete: SetNull)
-  planRequest   PlanRequest? @relation(fields: [planRequestId], references: [id], onDelete: SetNull)
-  replyTo      Message?   @relation("MessageReply", fields: [replyToId], references: [id], onDelete: SetNull)
-  replies      Message[]  @relation("MessageReply")
-  reports      Report[]   @relation("MessageReports")
+  deletedAt           DateTime?
+  createdAt           DateTime           @default(now())
+  connection          Connection         @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  sender              User               @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  availabilityShare   AvailabilityShare? @relation(fields: [availabilityShareId], references: [id], onDelete: SetNull)
+  planRequest         PlanRequest?       @relation(fields: [planRequestId], references: [id], onDelete: SetNull)
+  replyTo             Message?           @relation("MessageReply", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies             Message[]          @relation("MessageReply")
+  reports             Report[]           @relation("MessageReports")
 
-  @@index([connectionId, createdAt])
+  @@index([connectionId, createdAt, id])
   @@index([replyToId])
   @@index([availabilityShareId])
   @@index([planRequestId])
 }
 
 model AvailabilityShare {
-  id             String                   @id @default(cuid())
-  ownerUserId     String
-  connectionId    String
-  visibilityMode  AvailabilityVisibilityMode @default(FREE_BUSY)
-  rangeStart      DateTime
-  rangeEnd        DateTime
+  id             String                     @id @default(cuid())
+  ownerUserId    String
+  connectionId   String
+  visibilityMode AvailabilityVisibilityMode @default(FREE_BUSY)
+  rangeStart     DateTime
+  rangeEnd       DateTime
   /// When set, only these calendar days (yyyy-MM-dd) are shared; otherwise all days in [rangeStart, rangeEnd].
-  includedDates   Json?
-  expiresAt       DateTime?
-  isRevoked       Boolean                  @default(false)
-  createdAt       DateTime                 @default(now())
-  updatedAt       DateTime                 @updatedAt
-  owner           User                     @relation("AvailabilityShareOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
-  connection      Connection               @relation(fields: [connectionId], references: [id], onDelete: Cascade)
-  messages        Message[]
-  planRequests    PlanRequest[]
+  includedDates  Json?
+  expiresAt      DateTime?
+  isRevoked      Boolean                    @default(false)
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+  owner          User                       @relation("AvailabilityShareOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  connection     Connection                 @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  messages       Message[]
+  planRequests   PlanRequest[]
 
   @@index([connectionId, createdAt])
   @@index([ownerUserId, createdAt])
@@ -937,21 +1128,21 @@ enum ScheduleShareUsageLimit {
 }
 
 model ScheduleShareLink {
-  id                  String                     @id @default(cuid())
+  id                  String                       @id @default(cuid())
   ownerUserId         String
-  owner               User                       @relation("ScheduleShareLinkOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
-  tokenHash           String                     @unique
+  owner               User                         @relation("ScheduleShareLinkOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  tokenHash           String                       @unique
   rangeStart          DateTime
   rangeEnd            DateTime
   revealConfig        Json
-  allowGuestProposals Boolean                    @default(true)
-  usageLimit          ScheduleShareUsageLimit    @default(SINGLE_USE)
+  allowGuestProposals Boolean                      @default(true)
+  usageLimit          ScheduleShareUsageLimit      @default(SINGLE_USE)
   consumedAt          DateTime?
   consumedByUserId    String?
   expiresAt           DateTime
   revokedAt           DateTime?
-  createdAt           DateTime                   @default(now())
-  updatedAt           DateTime                   @updatedAt
+  createdAt           DateTime                     @default(now())
+  updatedAt           DateTime                     @updatedAt
   proposals           ScheduleShareGuestProposal[]
   planRequests        PlanRequest[]
 
@@ -987,33 +1178,33 @@ model ScheduleShareGuestProposal {
 }
 
 model PlanRequest {
-  id                            String            @id @default(cuid())
-  connectionId                  String
-  availabilityShareId           String?
-  scheduleShareLinkId           String?
-  scheduleShareGuestProposalId  String?           @unique
-  counterOfId                   String?
-  proposerUserId                String
-  receiverUserId                String
-  planType                      PlanType
-  title                         String
-  location                      String?
-  message                       String?
-  startTime                     DateTime
-  endTime                       DateTime
-  status                        PlanRequestStatus @default(PENDING)
-  createdAt                     DateTime          @default(now())
-  updatedAt                     DateTime          @updatedAt
-  connection                    Connection        @relation(fields: [connectionId], references: [id], onDelete: Cascade)
-  availabilityShare             AvailabilityShare? @relation(fields: [availabilityShareId], references: [id], onDelete: SetNull)
-  scheduleShareLink             ScheduleShareLink? @relation(fields: [scheduleShareLinkId], references: [id], onDelete: SetNull)
-  scheduleShareGuestProposal    ScheduleShareGuestProposal? @relation(fields: [scheduleShareGuestProposalId], references: [id], onDelete: SetNull)
-  counterOf                     PlanRequest?      @relation("PlanRequestCounter", fields: [counterOfId], references: [id], onDelete: SetNull)
-  counters                      PlanRequest[]     @relation("PlanRequestCounter")
-  proposer                      User              @relation("PlanRequestProposer", fields: [proposerUserId], references: [id], onDelete: Cascade)
-  receiver                      User              @relation("PlanRequestReceiver", fields: [receiverUserId], references: [id], onDelete: Cascade)
-  messages                      Message[]
-  calendarEntries               CalendarEntry[]
+  id                           String                      @id @default(cuid())
+  connectionId                 String
+  availabilityShareId          String?
+  scheduleShareLinkId          String?
+  scheduleShareGuestProposalId String?                     @unique
+  counterOfId                  String?
+  proposerUserId               String
+  receiverUserId               String
+  planType                     PlanType
+  title                        String
+  location                     String?
+  message                      String?
+  startTime                    DateTime
+  endTime                      DateTime
+  status                       PlanRequestStatus           @default(PENDING)
+  createdAt                    DateTime                    @default(now())
+  updatedAt                    DateTime                    @updatedAt
+  connection                   Connection                  @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  availabilityShare            AvailabilityShare?          @relation(fields: [availabilityShareId], references: [id], onDelete: SetNull)
+  scheduleShareLink            ScheduleShareLink?          @relation(fields: [scheduleShareLinkId], references: [id], onDelete: SetNull)
+  scheduleShareGuestProposal   ScheduleShareGuestProposal? @relation(fields: [scheduleShareGuestProposalId], references: [id], onDelete: SetNull)
+  counterOf                    PlanRequest?                @relation("PlanRequestCounter", fields: [counterOfId], references: [id], onDelete: SetNull)
+  counters                     PlanRequest[]               @relation("PlanRequestCounter")
+  proposer                     User                        @relation("PlanRequestProposer", fields: [proposerUserId], references: [id], onDelete: Cascade)
+  receiver                     User                        @relation("PlanRequestReceiver", fields: [receiverUserId], references: [id], onDelete: Cascade)
+  messages                     Message[]
+  calendarEntries              CalendarEntry[]
 
   @@index([connectionId, createdAt])
   @@index([availabilityShareId, createdAt])
@@ -1025,18 +1216,18 @@ model PlanRequest {
 
 /// Public course chat — one timeline per course; only enrolled members (UserCourse) may read/post.
 model CourseRoomMessage {
-  id         String   @id @default(cuid())
-  courseId   String
-  senderId   String
-  body       String
-  replyToId  String?
-  deletedAt  DateTime?
-  createdAt  DateTime @default(now())
-  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  sender     User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  replyTo    CourseRoomMessage?  @relation("CRMReply", fields: [replyToId], references: [id], onDelete: SetNull)
-  replies    CourseRoomMessage[] @relation("CRMReply")
-  reports    Report[] @relation("CRMReports")
+  id        String              @id @default(cuid())
+  courseId  String
+  senderId  String
+  body      String
+  replyToId String?
+  deletedAt DateTime?
+  createdAt DateTime            @default(now())
+  course    Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  sender    User                @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  replyTo   CourseRoomMessage?  @relation("CRMReply", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies   CourseRoomMessage[] @relation("CRMReply")
+  reports   Report[]            @relation("CRMReports")
 
   @@index([courseId, createdAt])
   @@index([replyToId])
@@ -1045,47 +1236,52 @@ model CourseRoomMessage {
 /// Multi-person chat started from the Chats tab. Membership is explicit and
 /// independent from course enrollment.
 model GroupChat {
-  id          String                 @id @default(cuid())
-  title       String?                @db.VarChar(80)
-  createdById String
-  createdAt   DateTime               @default(now())
-  updatedAt   DateTime               @updatedAt
-  createdBy   User                   @relation("GroupChatCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  id           String                 @id @default(cuid())
+  title        String?                @db.VarChar(80)
+  createdById  String
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  createdBy    User                   @relation("GroupChatCreator", fields: [createdById], references: [id], onDelete: Cascade)
   participants GroupChatParticipant[]
-  messages    GroupChatMessage[]
+  messages     GroupChatMessage[]
 
   @@index([updatedAt])
   @@index([createdById, createdAt])
 }
 
 model GroupChatParticipant {
-  groupChatId String
-  userId      String
-  joinedAt    DateTime    @default(now())
-  lastReadAt  DateTime?
+  groupChatId   String
+  userId        String
+  joinedAt      DateTime  @default(now())
+  lastReadAt    DateTime?
   /// When set, this group is sorted with pinned DMs and course chats in Contacts.
   inboxPinnedAt DateTime?
   /// When set, the group row is hidden from Contacts (membership unchanged). Clear via group chat or restore action.
   inboxHiddenAt DateTime?
-  groupChat   GroupChat   @relation(fields: [groupChatId], references: [id], onDelete: Cascade)
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  groupChat     GroupChat @relation(fields: [groupChatId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([groupChatId, userId])
   @@index([userId, joinedAt])
 }
 
 model GroupChatMessage {
-  id          String     @id @default(cuid())
+  id          String             @id @default(cuid())
   groupChatId String
   senderId    String
   body        String
+  replyToId   String?
   deletedAt   DateTime?
-  createdAt   DateTime   @default(now())
-  groupChat   GroupChat  @relation(fields: [groupChatId], references: [id], onDelete: Cascade)
-  sender      User       @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  createdAt   DateTime           @default(now())
+  groupChat   GroupChat          @relation(fields: [groupChatId], references: [id], onDelete: Cascade)
+  sender      User               @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  replyTo     GroupChatMessage?  @relation("GroupChatMessageReply", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies     GroupChatMessage[] @relation("GroupChatMessageReply")
+  reports     Report[]           @relation("GroupChatMessageReports")
 
   @@index([groupChatId, createdAt])
   @@index([senderId, createdAt])
+  @@index([replyToId])
 }
 
 model ContactExchangeRequest {
@@ -1136,38 +1332,50 @@ model Block {
 }
 
 model Report {
-  id             String       @id @default(cuid())
-  reporterId     String
-  reportedUserId String
-  connectionId   String?
-  invitationId   String?
+  id                     String                @id @default(cuid())
+  reporterId             String
+  reportedUserId         String
+  connectionId           String?
+  invitationId           String?
   /// Optional pointer to a specific 1:1 message being reported. We keep the
   /// user-level fields too so admins still know who the report is about even
   /// if the source message is later deleted.
-  messageId           String?
+  messageId              String?
   /// Optional pointer to a specific course-room message being reported.
-  courseRoomMessageId String?
-  reason         ReportReason
-  status         ReportStatus @default(OPEN)
-  details        String?
-  adminNotes     String?
-  reviewedAt     DateTime?
-  resolvedAt     DateTime?
-  handledByEmail String?
-  createdAt      DateTime     @default(now())
-  reporter       User         @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
-  reportedUser   User         @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
-  connection     Connection?  @relation(fields: [connectionId], references: [id], onDelete: SetNull)
-  invitation     Invitation?  @relation(fields: [invitationId], references: [id], onDelete: SetNull)
-  message           Message?           @relation("MessageReports", fields: [messageId], references: [id], onDelete: SetNull)
-  courseRoomMessage CourseRoomMessage? @relation("CRMReports", fields: [courseRoomMessageId], references: [id], onDelete: SetNull)
-  actionLog      ReportAction[]
-  moderationBlocks ModerationBlock[]
+  courseRoomMessageId    String?
+  /// Optional pointer to a specific group-chat message being reported.
+  groupChatMessageId     String?
+  /// Optional pointer to a Discover buddy post being reported.
+  classmatePostId        String?
+  /// Optional pointer to a public question or host reply under a buddy post.
+  classmatePostCommentId String?
+  reason                 ReportReason
+  status                 ReportStatus          @default(OPEN)
+  details                String?
+  adminNotes             String?
+  reviewedAt             DateTime?
+  resolvedAt             DateTime?
+  handledByEmail         String?
+  createdAt              DateTime              @default(now())
+  reporter               User                  @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUser           User                  @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  connection             Connection?           @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+  invitation             Invitation?           @relation(fields: [invitationId], references: [id], onDelete: SetNull)
+  message                Message?              @relation("MessageReports", fields: [messageId], references: [id], onDelete: SetNull)
+  courseRoomMessage      CourseRoomMessage?    @relation("CRMReports", fields: [courseRoomMessageId], references: [id], onDelete: SetNull)
+  groupChatMessage       GroupChatMessage?     @relation("GroupChatMessageReports", fields: [groupChatMessageId], references: [id], onDelete: SetNull)
+  classmatePost          ClassmatePost?        @relation("ClassmatePostReports", fields: [classmatePostId], references: [id], onDelete: SetNull)
+  classmatePostComment   ClassmatePostComment? @relation("ClassmatePostCommentReports", fields: [classmatePostCommentId], references: [id], onDelete: SetNull)
+  actionLog              ReportAction[]
+  moderationBlocks       ModerationBlock[]
 
   @@index([reportedUserId])
   @@index([reason])
   @@index([messageId])
   @@index([courseRoomMessageId])
+  @@index([groupChatMessageId])
+  @@index([classmatePostId])
+  @@index([classmatePostCommentId])
 }
 
 model ReportAction {
@@ -1215,8 +1423,8 @@ model PushSubscription {
   @@index([userId])
 }
 
-/// APNs / FCM device token from the Capacitor native app (not Web Push).
-/// Server delivery via APNs is not wired yet — tokens are stored for future use.
+/// APNs / FCM device token from the Capacitor or native SwiftUI app.
+/// Server delivery via APNs is env-gated (`APNS_*`); see `lib/push/apns-send.ts`.
 model NativePushDevice {
   id        String   @id @default(cuid())
   userId    String
@@ -1230,6 +1438,28 @@ model NativePushDevice {
   @@index([userId])
 }
 
+/// Idempotent StoreKit 2 consumable tip/support ledger.
+/// App finishes the StoreKit transaction only after this row is persisted.
+/// Consumables do not grant permanent entitlements — rows are audit/idempotency only.
+model StoreKitTransaction {
+  id                    String   @id @default(cuid())
+  userId                String
+  transactionId         String   @unique
+  originalTransactionId String
+  productId             String
+  bundleId              String
+  environment           String
+  purchaseDate          DateTime
+  verificationMode      String
+  status                String   @default("VERIFIED")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([productId, createdAt])
+}
+
 /// A study-session proposal posted inside a 1:1 chat. Renders in the chat
 /// stream as a card interleaved by `createdAt` alongside normal messages.
 ///
@@ -1241,22 +1471,22 @@ model NativePushDevice {
 /// proposal marks the earlier ones in the chain as `SUPERSEDED` and creates
 /// `CalendarEntry` rows for both participants (idempotent).
 model StudySessionProposal {
-  id           String                     @id @default(cuid())
-  proposerId   String
-  connectionId String?
-  counterOfId  String?
-  activityType ActivityType               @default(STUDY_SESSION)
-  startAt      DateTime
-  endAt        DateTime
-  location     String?
-  note         String?
-  status       StudySessionProposalStatus @default(PROPOSED)
-  createdAt    DateTime                   @default(now())
-  updatedAt    DateTime                   @updatedAt
-  proposer     User                        @relation("StudyProposer", fields: [proposerId], references: [id], onDelete: Cascade)
-  connection   Connection?                 @relation(fields: [connectionId], references: [id], onDelete: Cascade)
-  counterOf    StudySessionProposal?       @relation("ProposalCounter", fields: [counterOfId], references: [id], onDelete: SetNull)
-  counters     StudySessionProposal[]      @relation("ProposalCounter")
+  id              String                     @id @default(cuid())
+  proposerId      String
+  connectionId    String?
+  counterOfId     String?
+  activityType    ActivityType               @default(STUDY_SESSION)
+  startAt         DateTime
+  endAt           DateTime
+  location        String?
+  note            String?
+  status          StudySessionProposalStatus @default(PROPOSED)
+  createdAt       DateTime                   @default(now())
+  updatedAt       DateTime                   @updatedAt
+  proposer        User                       @relation("StudyProposer", fields: [proposerId], references: [id], onDelete: Cascade)
+  connection      Connection?                @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  counterOf       StudySessionProposal?      @relation("ProposalCounter", fields: [counterOfId], references: [id], onDelete: SetNull)
+  counters        StudySessionProposal[]     @relation("ProposalCounter")
   calendarEntries CalendarEntry[]
 
   @@index([connectionId, createdAt])
@@ -1273,52 +1503,52 @@ model StudySessionProposal {
 /// not a live pointer.
 /// User-defined calendar groups (preset + custom) with color — like iOS calendar lists.
 model UserCalendarCategory {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String
+  id                 String          @id @default(cuid())
+  userId             String
+  user               User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name               String
   /// Hex RGB e.g. #2563EB
-  color     String
-  sortOrder Int      @default(0)
+  color              String
+  sortOrder          Int             @default(0)
   /// Built-in template key (course, study, …). Null = user-created; only one row per user per key when set.
-  presetKey String?
+  presetKey          String?
   /// Optional ICS/WebCal feed URL; events are merged on Home (server-fetched, not copied to DB).
   icsSubscriptionUrl String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  entries   CalendarEntry[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  entries            CalendarEntry[]
 
   @@unique([userId, presetKey])
   @@index([userId, sortOrder])
 }
 
 model CalendarEntry {
-  id         String   @id @default(cuid())
-  userId     String
-  proposalId String?
-  planRequestId String?
+  id                 String                   @id @default(cuid())
+  userId             String
+  proposalId         String?
+  planRequestId      String?
   discoverActivityId String?
-  title      String
-  eventType  PlanType?
-  source     String   @default("manual")
-  location   String?
-  note       String?
-  repeatRule CalendarRepeatRule @default(NONE)
-  repeatUntil DateTime?
+  title              String
+  eventType          PlanType?
+  source             String                   @default("manual")
+  location           String?
+  note               String?
+  repeatRule         CalendarRepeatRule       @default(NONE)
+  repeatUntil        DateTime?
   /// Shared id for rows created in one recurring POST — used for delete-all / delete-future.
-  recurrenceGroupId String?
-  startAt    DateTime
-  endAt      DateTime
+  recurrenceGroupId  String?
+  startAt            DateTime
+  endAt              DateTime
   /// When set, the 15-minute-before-start Web Push reminder was already sent.
-  reminder15mSentAt DateTime?
-  categoryId String?
-  category   UserCalendarCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  createdAt  DateTime @default(now())
-  user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  proposal   StudySessionProposal? @relation(fields: [proposalId], references: [id], onDelete: SetNull)
-  planRequest PlanRequest?         @relation(fields: [planRequestId], references: [id], onDelete: SetNull)
-  discoverActivity DiscoverActivity? @relation(fields: [discoverActivityId], references: [id], onDelete: SetNull)
-  companions CalendarEntryCompanion[]
+  reminder15mSentAt  DateTime?
+  categoryId         String?
+  category           UserCalendarCategory?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt          DateTime                 @default(now())
+  user               User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  proposal           StudySessionProposal?    @relation(fields: [proposalId], references: [id], onDelete: SetNull)
+  planRequest        PlanRequest?             @relation(fields: [planRequestId], references: [id], onDelete: SetNull)
+  discoverActivity   DiscoverActivity?        @relation(fields: [discoverActivityId], references: [id], onDelete: SetNull)
+  companions         CalendarEntryCompanion[]
 
   /// When set, this row mirrors a recurring course session so Home can show it as a draggable calendar event (dedupe key per slot).
   courseScheduleMirrorKey String?

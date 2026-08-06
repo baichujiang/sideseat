@@ -3,6 +3,8 @@ import { PrismaClient } from "@prisma/client";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { loginWithPassword } from "./helpers/login";
+
 const prisma = new PrismaClient();
 
 const E2E_USER = process.env.E2E_USER ?? "test_001";
@@ -13,18 +15,6 @@ const PNG_1X1_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=";
 
 let connectionId = "";
-
-async function loginWithPassword(page: Page) {
-  await page.goto("/login");
-  await expect(page.getByRole("heading", { name: /log in/i })).toBeVisible();
-  await page.getByLabel(/username/i).fill(E2E_USER);
-  await page.getByLabel(/password/i).fill(E2E_PASSWORD);
-  await page.getByRole("button", { name: "Log in" }).click();
-  await page.waitForURL(/\/(home|onboarding)/, { timeout: 30_000 });
-  if (page.url().includes("/onboarding")) {
-    throw new Error(`User "${E2E_USER}" landed on onboarding. Run npm run seed:test-accounts first.`);
-  }
-}
 
 async function openSeededDirectThread(page: Page) {
   await page.goto(`/connections/${connectionId}`);
@@ -75,7 +65,11 @@ test.describe.serial("Chat regression flow", () => {
   test("keeps the direct chat composer production-ready across text, keyboard, photo, and plan flows", async ({
     page,
   }, testInfo) => {
-    await loginWithPassword(page);
+    await loginWithPassword(page, {
+      identifier: E2E_USER,
+      password: E2E_PASSWORD,
+      onboardingError: `User "${E2E_USER}" landed on onboarding. Run npm run seed:test-accounts first.`,
+    });
     await openSeededDirectThread(page);
 
     const input = page.getByRole("textbox", { name: /message/i });

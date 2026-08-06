@@ -12,7 +12,7 @@ struct AppRootView: View {
             } else {
                 switch clientConfiguration.availability {
                 case .checking:
-                    ProgressView("Checking compatibility")
+                    SSLoadingState("Checking compatibility")
                         .accessibilityIdentifier("client-configuration-checking")
                 case .maintenance:
                     ClientGateView(
@@ -35,7 +35,7 @@ struct AppRootView: View {
     private var sessionContent: some View {
         switch session.phase {
         case .restoring:
-            ProgressView("Restoring session")
+            SSLoadingState("Restoring session")
                 .accessibilityIdentifier("session-restoring")
         case .signedOut:
             LoginView()

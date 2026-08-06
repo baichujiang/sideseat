@@ -13,9 +13,9 @@ struct SideSeatApp: App {
                 .environment(container.clientConfiguration)
                 .environment(container.deepLinkRouter)
                 .tint(SideSeatTheme.accent)
+                .preferredColorScheme(Self.uiTestingPreferredColorScheme)
                 .task {
                     SideSeatTheme.configureChrome()
-                    CrashReporting.start()
                     appDelegate.session = container.session
                     appDelegate.deepLinkRouter = container.deepLinkRouter
                     await container.session.restoreSession()
@@ -24,12 +24,38 @@ struct SideSeatApp: App {
                     await container.clientConfiguration.refresh()
                 }
                 .task(id: container.session.phase) {
-                    guard container.session.phase == .signedIn else { return }
-                    await PushRegistration.requestAndRegister(using: container.session)
+                    switch container.session.phase {
+                    case .signedIn:
+                        await PushRegistration.requestAndRegister(using: container.session)
+                    case .signedOut:
+                        await CalendarReminderScheduler.shared.clear()
+                        await HomeScheduleCache.shared.clear()
+                    case .restoring:
+                        break
+                    }
                 }
                 .onOpenURL { url in
                     container.deepLinkRouter.handle(url)
                 }
+                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
+                    guard let url = activity.webpageURL else { return }
+                    container.deepLinkRouter.handle(url)
+                }
+        }
+    }
+
+    /// Forced by Visual QA / UITests via `--ui-testing-appearance=light|dark` (needed on physical devices; simulators also honor it).
+    private static var uiTestingPreferredColorScheme: ColorScheme? {
+        let prefix = "--ui-testing-appearance="
+        guard let raw = ProcessInfo.processInfo.arguments
+            .first(where: { $0.hasPrefix(prefix) })?
+            .dropFirst(prefix.count)
+            .lowercased()
+        else { return nil }
+        switch raw {
+        case "dark": return .dark
+        case "light": return .light
+        default: return nil
         }
     }
 }

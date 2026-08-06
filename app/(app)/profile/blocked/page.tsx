@@ -7,9 +7,13 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
+import { formatMessage, getMessages } from "@/lib/i18n/messages";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
 
 export default async function BlockedUsersPage() {
   const user = await requireOnboardedUser();
+  const locale = await getServerAppLocale();
+  const ui = getMessages(locale).profile;
 
   const blockedUsers = await prisma.block.findMany({
     where: { blockerId: user.id },
@@ -20,10 +24,10 @@ export default async function BlockedUsersPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <BackLink fallback="/profile" label="Back to profile" />
+        <BackLink fallback="/profile" label={ui.blockedPageBack} />
         <div>
-          <h1 className="page-screen-title">Blocked users</h1>
-          <p className="text-xs text-muted-foreground">People you have blocked from contacting you</p>
+          <h1 className="page-screen-title">{ui.blockedPageTitle}</h1>
+          <p className="text-xs text-muted-foreground">{ui.blockedPageSubtitle}</p>
         </div>
       </div>
 
@@ -47,27 +51,26 @@ export default async function BlockedUsersPage() {
                   href={`/users/${block.blocked.id}?returnTo=%2Fprofile%2Fblocked`}
                   className="block truncate text-[15px] font-semibold leading-tight text-foreground"
                 >
-                  {block.blocked.nickname ?? "Student"}
+                  {block.blocked.nickname ?? ui.blockedPageStudentFallback}
                 </Link>
                 <p className="mt-0.5 text-[12px] text-muted-foreground">
-                  Blocked {formatDistanceToNowStrict(block.createdAt, { addSuffix: true })}
+                  {formatMessage(ui.blockedPageBlockedAt, {
+                    time: formatDistanceToNowStrict(block.createdAt, { addSuffix: true }),
+                  })}
                 </p>
               </div>
 
               <form action={`/api/blocks/${block.blockedId}`} method="post" className="shrink-0">
                 <input type="hidden" name="_method" value="DELETE" />
                 <Button type="submit" variant="outline" className="h-9 rounded-full px-3 text-[12px]">
-                  Unblock
+                  {ui.blockedPageUnblock}
                 </Button>
               </form>
             </li>
           ))}
         </ul>
       ) : (
-        <EmptyState
-          title="No blocked users"
-          description="If you block someone, they will appear here."
-        />
+        <EmptyState title={ui.blockedPageEmptyTitle} description={ui.blockedPageEmptyDescription} />
       )}
     </div>
   );

@@ -13,7 +13,8 @@ final class SessionStore {
     private let apiClient: APIClient
     private let credentialStore: any CredentialStore
     private let device: NativeDevice
-    private var refreshOperation: (id: UUID, task: Task<AuthPayload, Error>)?
+    private var refreshOperation: (id: UUID, epoch: UInt64, task: Task<AuthPayload, Error>)?
+    private var sessionEpoch: UInt64 = 0
 
     private(set) var phase: SessionPhase = .restoring
     private(set) var currentUser: CurrentUser?
@@ -47,13 +48,15 @@ final class SessionStore {
 
     func restoreSession() async {
         guard phase == .restoring else { return }
+        let epoch = sessionEpoch
         do {
             guard let token = try await credentialStore.refreshToken() else {
                 phase = .signedOut
                 return
             }
-            try await refresh(using: token)
+            try await refresh(using: token, expectedEpoch: epoch)
         } catch {
+            guard sessionEpoch == epoch else { return }
             try? await credentialStore.clear()
             currentUser = nil
             accessToken = nil
@@ -75,7 +78,16 @@ final class SessionStore {
 
     /// Creates an account via legacy signup, then exchanges for native tokens via v1 login.
     @discardableResult
-    func signup(username: String, password: String) async -> String? {
+    func signup(
+        displayName: String,
+        username: String,
+        password: String,
+        school: String,
+        studentStatus: String,
+        degreeLevel: String,
+        semester: Int?,
+        graduationYear: Int?
+    ) async -> String? {
         guard !isWorking else { return String(localized: "Please wait…") }
         if let usernameIssue = AuthFieldValidation.usernameIssue(username) {
             return usernameIssue
@@ -91,7 +103,16 @@ final class SessionStore {
             let _: APIEnvelope<SignupResponseData> = try await apiClient.send(
                 "api/auth/signup",
                 method: .post,
-                body: SignupRequest(username: normalized, password: password)
+                body: SignupRequest(
+                    displayName: displayName,
+                    username: normalized,
+                    password: password,
+                    school: school,
+                    studentStatus: studentStatus,
+                    degreeLevel: degreeLevel,
+                    semester: semester,
+                    graduationYear: graduationYear
+                )
             )
             try await performLogin(identifier: normalized, password: password)
             return nil
@@ -167,21 +188,35 @@ final class SessionStore {
     }
 
     private func performLogin(identifier: String, password: String) async throws {
+        sessionEpoch &+= 1
+        let epoch = sessionEpoch
+        refreshOperation?.task.cancel()
+        refreshOperation = nil
         let response: APIEnvelope<AuthPayload> = try await apiClient.send(
             "api/v1/auth/login",
             method: .post,
             body: LoginRequest(identifier: identifier, password: password, device: device)
         )
-        try await adopt(response.data)
+        try await adopt(response.data, expectedEpoch: epoch)
     }
 
     func logout() async {
         guard !isWorking else { return }
         isWorking = true
         defer { isWorking = false }
+        sessionEpoch &+= 1
         refreshOperation?.task.cancel()
         refreshOperation = nil
         let refreshToken = try? await credentialStore.refreshToken()
+
+        // Local identity must disappear before any network wait. This also
+        // prevents a stale screen or refresh response from surviving logout.
+        try? await credentialStore.clear()
+        currentUser = nil
+        accessToken = nil
+        issue = nil
+        phase = .signedOut
+
         if let refreshToken {
             let _: APIEnvelope<LogoutResponse>? = try? await apiClient.send(
                 "api/v1/auth/logout",
@@ -189,17 +224,15 @@ final class SessionStore {
                 body: LogoutRequest(refreshToken: refreshToken)
             )
         }
-        try? await credentialStore.clear()
-        currentUser = nil
-        accessToken = nil
-        issue = nil
-        phase = .signedOut
     }
 
     @discardableResult
     func deleteAccount(confirmUsername: String) async -> String? {
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            sessionEpoch &+= 1
+            refreshOperation?.task.cancel()
+            refreshOperation = nil
             try? await credentialStore.clear()
             currentUser = nil
             accessToken = nil
@@ -222,6 +255,9 @@ final class SessionStore {
                 body: DeleteBody(confirmUsername: confirmUsername),
                 idempotencyKey: UUID().uuidString
             )
+            sessionEpoch &+= 1
+            refreshOperation?.task.cancel()
+            refreshOperation = nil
             try? await credentialStore.clear()
             currentUser = nil
             accessToken = nil
@@ -300,23 +336,24 @@ final class SessionStore {
         )
     }
 
-    private func refresh(using token: String) async throws {
+    private func refresh(using token: String, expectedEpoch: UInt64) async throws {
         let response: APIEnvelope<AuthPayload> = try await apiClient.send(
             "api/v1/auth/refresh",
             method: .post,
             body: RefreshRequest(refreshToken: token, device: device)
         )
-        try await adopt(response.data)
+        try await adopt(response.data, expectedEpoch: expectedEpoch)
     }
 
     private func refreshAccessToken() async throws -> String {
-        let operation: (id: UUID, task: Task<AuthPayload, Error>)
+        let operation: (id: UUID, epoch: UInt64, task: Task<AuthPayload, Error>)
         if let existing = refreshOperation {
             operation = existing
         } else {
             let credentialStore = credentialStore
             let apiClient = apiClient
             let device = device
+            let epoch = sessionEpoch
             let task = Task<AuthPayload, Error> {
                 guard let refreshToken = try await credentialStore.refreshToken() else {
                     throw SessionError.authenticationRequired
@@ -328,13 +365,13 @@ final class SessionStore {
                 )
                 return response.data
             }
-            operation = (UUID(), task)
+            operation = (UUID(), epoch, task)
             refreshOperation = operation
         }
 
         do {
             let payload = try await operation.task.value
-            try await adopt(payload)
+            try await adopt(payload, expectedEpoch: operation.epoch)
             if refreshOperation?.id == operation.id {
                 refreshOperation = nil
             }
@@ -342,6 +379,9 @@ final class SessionStore {
         } catch {
             if refreshOperation?.id == operation.id {
                 refreshOperation = nil
+            }
+            guard sessionEpoch == operation.epoch else {
+                throw CancellationError()
             }
             try? await credentialStore.clear()
             currentUser = nil
@@ -351,8 +391,10 @@ final class SessionStore {
         }
     }
 
-    private func adopt(_ payload: AuthPayload) async throws {
+    private func adopt(_ payload: AuthPayload, expectedEpoch: UInt64) async throws {
+        guard sessionEpoch == expectedEpoch else { throw CancellationError() }
         try await credentialStore.save(refreshToken: payload.tokens.refreshToken)
+        guard sessionEpoch == expectedEpoch else { throw CancellationError() }
         accessToken = payload.tokens.accessToken
         currentUser = payload.user
         phase = .signedIn
@@ -360,6 +402,9 @@ final class SessionStore {
 
     #if DEBUG
     func installUITestingSession() {
+        sessionEpoch &+= 1
+        refreshOperation?.task.cancel()
+        refreshOperation = nil
         currentUser = CurrentUser(
             id: "ui-test-user",
             username: "test_001",
@@ -369,9 +414,11 @@ final class SessionStore {
             avatarUrl: nil,
             tagline: nil,
             school: "TUM",
+            studentStatus: "CURRENT_STUDENT",
             degreeLevel: nil,
             major: nil,
             semester: nil,
+            graduationYear: nil,
             gender: "UNSPECIFIED",
             onboardingComplete: true,
             isGuest: false,
@@ -386,6 +433,9 @@ final class SessionStore {
     }
 
     func installUITestingSignedOutState() {
+        sessionEpoch &+= 1
+        refreshOperation?.task.cancel()
+        refreshOperation = nil
         currentUser = nil
         accessToken = nil
         phase = .signedOut

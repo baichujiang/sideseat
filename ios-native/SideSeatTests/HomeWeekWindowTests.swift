@@ -102,6 +102,50 @@ struct HomeWeekWindowTests {
         )
     }
 
+    @Test("Event drag preview snaps to visible day and quarter-hour slots")
+    func eventDragSnap() {
+        let target = HomeWeekWindow.eventDragTarget(
+            originDayIndex: 1,
+            originStartMinute: 9 * 60 + 7,
+            translation: CGSize(width: 74, height: 37),
+            dayWidth: 70,
+            minuteHeight: 1,
+            dayCount: 5
+        )
+
+        #expect(target.dayIndex == 2)
+        #expect(target.startMinute == 9 * 60 + 45)
+    }
+
+    @Test("Event drag target cannot leave the visible calendar grid")
+    func eventDragClampsToGrid() {
+        let upper = HomeWeekWindow.eventDragTarget(
+            originDayIndex: 0,
+            originStartMinute: 30,
+            translation: CGSize(width: -500, height: -500),
+            dayWidth: 70,
+            minuteHeight: 1,
+            dayCount: 3
+        )
+        let lower = HomeWeekWindow.eventDragTarget(
+            originDayIndex: 2,
+            originStartMinute: 23 * 60,
+            translation: CGSize(width: 500, height: 500),
+            dayWidth: 70,
+            minuteHeight: 1,
+            dayCount: 3
+        )
+
+        #expect(upper == HomeWeekWindow.EventDragTarget(dayIndex: 0, startMinute: 0))
+        #expect(lower == HomeWeekWindow.EventDragTarget(dayIndex: 2, startMinute: 23 * 60 + 45))
+    }
+
+    @Test("Event drag ignores long-press jitter until movement is intentional")
+    func eventDragActivationThreshold() {
+        #expect(!HomeWeekWindow.isEventDragActivated(translation: CGSize(width: 3, height: 4)))
+        #expect(HomeWeekWindow.isEventDragActivated(translation: CGSize(width: 6, height: 6)))
+    }
+
     @Test("Clamps visible day counts to 3/5/7")
     func clampsVisibleDays() {
         #expect(HomeWeekWindow.clampVisibleDayCount(4) == 5)
@@ -109,12 +153,28 @@ struct HomeWeekWindowTests {
         #expect(HomeWeekWindow.clampVisibleDayCount(7) == 7)
     }
 
-    @Test("Pinch magnification maps to fewer or more visible days")
-    func pinchMapsVisibleDays() {
-        #expect(HomeWeekWindow.visibleDayCount(base: 5, magnification: 1.0) == 5)
-        #expect(HomeWeekWindow.visibleDayCount(base: 5, magnification: 1.3) == 3)
-        #expect(HomeWeekWindow.visibleDayCount(base: 5, magnification: 0.75) == 7)
-        #expect(HomeWeekWindow.visibleDayCount(base: 3, magnification: 1.4) == 3)
-        #expect(HomeWeekWindow.visibleDayCount(base: 7, magnification: 0.7) == 7)
+    @Test("Seven day columns fit inside an iPhone viewport")
+    func sevenDayColumnsFitViewport() {
+        let containerWidth: CGFloat = 402
+        let gutter = CalendarChrome.weekTimeGutter
+        let dayWidth = HomeWeekWindow.dayColumnWidth(
+            containerWidth: containerWidth,
+            timeGutter: gutter,
+            visibleDayCount: 7
+        )
+
+        #expect(dayWidth == 50)
+        #expect(dayWidth * 7 <= containerWidth - gutter)
+        #expect(dayWidth > CalendarChrome.dayChipDiameter)
+    }
+
+    @Test("Clamps timeline density to compact, standard, or spacious")
+    func clampsTimelineDensity() {
+        #expect(HomeWeekWindow.clampTimelineDensityLevel(-1) == 0)
+        #expect(HomeWeekWindow.clampTimelineDensityLevel(1) == 1)
+        #expect(HomeWeekWindow.clampTimelineDensityLevel(3) == 2)
+        #expect(HomeWeekWindow.timelineScale(for: 0) < 1)
+        #expect(HomeWeekWindow.timelineScale(for: 1) == 1)
+        #expect(HomeWeekWindow.timelineScale(for: 2) > 1)
     }
 }

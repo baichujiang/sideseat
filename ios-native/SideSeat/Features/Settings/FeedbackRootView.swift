@@ -217,7 +217,7 @@ struct FeedbackRootView: View {
     var body: some View {
         Group {
             if store.isLoading && store.posts.isEmpty {
-                ProgressView("Loading feedback")
+                SSLoadingState("Loading feedback")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let issue = store.issue, store.posts.isEmpty {
                 ContentUnavailableView {
@@ -264,6 +264,7 @@ struct FeedbackRootView: View {
                         }
                         .padding(.vertical, 4)
                     }
+                    .buttonStyle(.plain)
                     .accessibilityIdentifier("feedback-row-\(post.id)")
                 }
                 .listStyle(.plain)
@@ -338,10 +339,11 @@ struct FeedbackDetailView: View {
                                 HStack {
                                     Text(comment.author.displayName)
                                         .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.primary)
                                     if comment.isOfficial {
                                         Text("Official")
                                             .font(.caption2.weight(.bold))
-                                            .foregroundStyle(.tint)
+                                            .foregroundStyle(SideSeatTheme.HubTint.feedback)
                                     }
                                 }
                                 Text(comment.body)

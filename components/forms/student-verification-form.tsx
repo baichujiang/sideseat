@@ -2,7 +2,12 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import { StudentVerificationStatus } from "@prisma/client";
+import {
+  StudentVerificationStatus,
+  type StudentStatus,
+  type StudentVerificationMethod,
+} from "@prisma/client";
+import Image from "next/image";
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
@@ -22,7 +27,7 @@ import { studentVerificationStatusLabel } from "@/lib/verification/student-verif
 const verifiedChipClass =
   "shrink-0 self-center rounded-full bg-[#D1FAE5] px-2.5 py-1 text-xs font-semibold leading-none text-[#047857] dark:bg-emerald-900/40 dark:text-emerald-300";
 
-type DeliveryKind = "sent" | "failed" | "skipped" | "manual";
+type DeliveryKind = "sent" | "failed" | "skipped" | "manual" | "verified";
 
 function statusTone(status: StudentVerificationStatus) {
   if (status === StudentVerificationStatus.VERIFIED) return "calm";
@@ -34,6 +39,8 @@ function statusTone(status: StudentVerificationStatus) {
 
 export function StudentVerificationForm({
   currentStatus,
+  verificationMethod,
+  studentStatus,
   email,
   /** Profile school code — used to show the school logo next to verification. */
   schoolCode,
@@ -43,6 +50,8 @@ export function StudentVerificationForm({
   hasProofUploaded,
 }: {
   currentStatus: StudentVerificationStatus;
+  verificationMethod?: StudentVerificationMethod | null;
+  studentStatus?: StudentStatus | null;
   email?: string | null;
   schoolCode?: SchoolCode | null;
   schoolShortLabel?: string | null;
@@ -101,6 +110,7 @@ export function StudentVerificationForm({
       setMessage(payload.data?.message ?? "");
       setVerifyUrl(payload.data?.verifyUrl ?? "");
       setDelivery((payload.data?.delivery as DeliveryKind) ?? "");
+      if (payload.data?.delivery === "manual") setShowManual(true);
       router.refresh();
     });
 
@@ -148,6 +158,7 @@ export function StudentVerificationForm({
   };
 
   const isVerified = currentStatus === StudentVerificationStatus.VERIFIED;
+  const verifiedByDocument = verificationMethod === "MANUAL_DOCUMENT";
   const schoolLogoSrc = getSchoolLogoPath(schoolCode);
   const schoolConfig = getSchoolByCode(schoolCode);
   const verificationDomains = schoolConfig?.verificationDomains ?? [];
@@ -172,15 +183,19 @@ export function StudentVerificationForm({
         className="rounded-[20px] border border-emerald-200 bg-emerald-50/50 px-4 py-3.5 dark:border-emerald-900/40 dark:bg-emerald-950/25"
         role="status"
         aria-label={
-          schoolShortLabel
-            ? formatMessage(v.verifiedAriaWithSchool, { school: schoolShortLabel, email: displayEmail })
-            : formatMessage(v.verifiedAriaGeneric, { email: displayEmail })
+          verifiedByDocument
+            ? schoolShortLabel
+              ? formatMessage(v.verifiedAriaWithSchoolIdentity, { school: schoolShortLabel })
+              : v.verifiedAriaIdentityGeneric
+            : schoolShortLabel
+              ? formatMessage(v.verifiedAriaWithSchool, { school: schoolShortLabel, email: displayEmail })
+              : formatMessage(v.verifiedAriaGeneric, { email: displayEmail })
         }
       >
         <div className="flex items-center gap-3">
           {schoolLogoSrc ? (
             <div className="flex h-11 shrink-0 items-center justify-center rounded-xl border border-emerald-200/80 bg-white px-2 py-1 shadow-[0_1px_2px_rgba(15,23,42,0.06)] dark:border-emerald-800/50 dark:bg-emerald-950/40">
-              <img
+              <Image
                 src={schoolLogoSrc}
                 alt={logoAlt}
                 className="h-7 w-auto max-w-[5.75rem] object-contain object-left"
@@ -192,16 +207,27 @@ export function StudentVerificationForm({
           ) : null}
           <div className="min-w-0 flex-1 space-y-0.5">
             <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-classmates-sub">
-              {v.universityEmailLabel}
+              {verifiedByDocument ? v.verifiedSchoolIdentityLabel : v.universityEmailLabel}
             </p>
             {schoolShortLabel ? (
               <p className="text-sm font-semibold leading-tight text-classmates-success dark:text-emerald-400">
-                {formatMessage(v.verifiedLineWithSchool, { school: schoolShortLabel })}
+                {formatMessage(
+                  verifiedByDocument
+                    ? v.verifiedLineWithSchoolIdentity
+                    : v.verifiedLineWithSchool,
+                  { school: schoolShortLabel },
+                )}
               </p>
             ) : null}
-            <p className="truncate text-sm font-medium tabular-nums text-classmates-ink dark:text-foreground">
-              {displayEmail}
-            </p>
+            {verifiedByDocument ? (
+              <p className="text-sm text-classmates-ink dark:text-foreground">
+                {v.verifiedByDocument}
+              </p>
+            ) : (
+              <p className="truncate text-sm font-medium tabular-nums text-classmates-ink dark:text-foreground">
+                {displayEmail}
+              </p>
+            )}
           </div>
           <span className={verifiedChipClass}>{v.verifiedChip}</span>
         </div>
@@ -214,8 +240,8 @@ export function StudentVerificationForm({
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           {schoolLogoSrc ? (
-            <img
-              src={schoolLogoSrc}
+              <Image
+                src={schoolLogoSrc}
               alt={schoolShortLabel ? formatMessage(v.logoAltWithSchool, { school: schoolShortLabel }) : ""}
               className="h-7 w-auto max-w-[4.5rem] shrink-0 object-contain opacity-90 dark:opacity-95"
               width={72}
@@ -241,6 +267,9 @@ export function StudentVerificationForm({
           {isPending ? v.sending : v.verifyCta}
         </Button>
       </div>
+      <p className="text-[11px] leading-relaxed text-muted-foreground">
+        {v.emailPrimaryHint}
+      </p>
 
       {notes ? <p className="text-sm text-foreground">{notes}</p> : null}
       {message ? <p className={`text-sm ${deliveryTone}`}>{message}</p> : null}
@@ -276,7 +305,14 @@ export function StudentVerificationForm({
         <div className="space-y-2 rounded-[24px] border border-border bg-[#faf7f1] p-3 text-xs">
           <p className="font-medium">{v.manualReviewHeading}</p>
           <p className="text-[11px] text-muted-foreground">
-            {formatMessage(v.manualReviewBody, { school: schoolShortLabel ?? v.schoolWord })}
+            {formatMessage(v.manualReviewBody, {
+              school: schoolShortLabel ?? v.schoolWord,
+              identity:
+                studentStatus === "ALUMNI" ? v.alumniDocument : v.currentStudentDocument,
+            })}
+          </p>
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
+            {v.manualPrivacyNotice}
           </p>
           <Input
             ref={fileInputRef}

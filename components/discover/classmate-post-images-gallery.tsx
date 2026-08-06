@@ -13,22 +13,6 @@ function isDataUrl(url: string) {
 /** Caps very tall photos in feed cards without forcing a fixed strip height. */
 const CARD_IMAGE_CLASS = "block h-auto w-full max-h-72 object-contain";
 
-function DetailHeroImage({ url, alt, sizes }: { url: string; alt: string; sizes: string }) {
-  if (isDataUrl(url)) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element -- inline fallback when blob token unset
-      <img
-        src={url}
-        alt={alt}
-        className="absolute inset-0 h-full w-full object-cover"
-        loading="lazy"
-        decoding="async"
-      />
-    );
-  }
-  return <Image src={url} alt={alt} fill sizes={sizes} className="object-cover" />;
-}
-
 function CardFeedImage({ url, alt, sizes }: { url: string; alt: string; sizes: string }) {
   if (isDataUrl(url)) {
     return (

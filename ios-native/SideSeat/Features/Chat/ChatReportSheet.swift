@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ChatReportSheet: View {
+    var title = String(localized: "Report message")
     let onSubmit: (NativeReportReason, String) async -> String?
     @Environment(\.dismiss) private var dismiss
 
@@ -33,7 +34,7 @@ struct ChatReportSheet: View {
                     }
                 }
             }
-            .navigationTitle("Report message")
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

@@ -1,5 +1,5 @@
 import { resolveOnboardedUserForApi } from "@/lib/auth/guards";
-import { createCalendarEventForUser } from "@/lib/calendar/create-calendar-event";
+import { createCalendarEventsBatchForUser } from "@/lib/calendar/create-calendar-events-batch";
 import { prisma } from "@/lib/db/prisma";
 import { error, formatZodError, ok, parseBody } from "@/lib/http";
 import { batchCalendarEventsSchema } from "@/lib/validators/calendar-natural";
@@ -21,34 +21,17 @@ export async function POST(request: Request) {
     }
 
     const user = auth.user;
-    let totalCreated = 0;
+    const result = await prisma.$transaction((tx) =>
+      createCalendarEventsBatchForUser(user, parsed.data.events, tx),
+    );
 
-    await prisma.$transaction(async (tx) => {
-      for (const raw of parsed.data.events) {
-        const eventInput = { ...raw, repeat: raw.repeat ?? "NONE" as const, withUserIds: raw.withUserIds ?? [] };
-        try {
-          totalCreated += await createCalendarEventForUser(user, eventInput, tx);
-        } catch (e) {
-          if (e instanceof Error) {
-            if (e.message === "INVALID_COMPANIONS") {
-              throw new Error("COMPANIONS");
-            }
-            if (e.message === "INVALID_CATEGORY") {
-              throw new Error("CATEGORY");
-            }
-          }
-          throw e;
-        }
-      }
-    });
-
-    return ok({ count: totalCreated, events: parsed.data.events.length }, { status: 201 });
+    return ok(result, { status: 201 });
   } catch (cause) {
     if (cause instanceof Error) {
-      if (cause.message === "COMPANIONS") {
+      if (cause.message === "INVALID_COMPANIONS") {
         return error("Some classmates can no longer be added to an event.", 400);
       }
-      if (cause.message === "CATEGORY") {
+      if (cause.message === "INVALID_CATEGORY") {
         return error("Choose a valid calendar category.", 400);
       }
     }

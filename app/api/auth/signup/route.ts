@@ -1,12 +1,9 @@
 import { Prisma } from "@prisma/client";
 
 import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
+import { validateNicknameForUser } from "@/lib/auth/nickname-fields";
 import { hashPassword } from "@/lib/auth/password";
-import {
-  defaultNicknameFromUsername,
-  SIGNUP_DEFAULT_PROFILE,
-  signupDefaultUserLanguages,
-} from "@/lib/auth/signup-defaults";
+import { SIGNUP_DEFAULT_PROFILE } from "@/lib/auth/signup-defaults";
 import { createSession } from "@/lib/auth/session";
 import { SIGNUP_ERROR_CODES } from "@/lib/auth/signup-error-codes";
 import { randomAvatarId } from "@/lib/constants/avatars";
@@ -32,21 +29,45 @@ export async function POST(request: Request) {
       return error("That username is already taken.", 409, SIGNUP_ERROR_CODES.USERNAME_TAKEN);
     }
 
-    const defaultNick = defaultNicknameFromUsername(values.username);
+    const nicknameCheck = await validateNicknameForUser(values.displayName);
+    if (!nicknameCheck.ok) {
+      return error(
+        nicknameCheck.reason === "reserved"
+          ? "That display name is reserved."
+          : "That display name is not valid.",
+        422,
+        SIGNUP_ERROR_CODES.INVALID_REQUEST,
+      );
+    }
 
     const user = await prisma.user.create({
       data: {
         username: values.username,
         hashedPassword: await hashPassword(values.password),
         avatarUrl: randomAvatarId(),
-        nickname: defaultNick,
-        nicknameKey: null,
+        nickname: nicknameCheck.nickname,
+        nicknameKey: nicknameCheck.nicknameKey,
         ...SIGNUP_DEFAULT_PROFILE,
-        userLanguages: signupDefaultUserLanguages(),
+        school: values.school,
+        studentStatus: values.studentStatus,
+        degreeLevel: values.degreeLevel,
+        semester: values.studentStatus === "ALUMNI" ? null : values.semester,
+        graduationYear: values.studentStatus === "ALUMNI" ? values.graduationYear : null,
+        onboardingComplete: true,
       },
     });
 
     await ensureAssistantBotConnection(user.id);
+    if (request.headers.get("x-sideseat-platform")?.toLowerCase() === "ios") {
+      return ok(
+        {
+          userId: user.id,
+          onboardingComplete: user.onboardingComplete,
+        },
+        { status: 201 },
+      );
+    }
+
     const { accessToken, expiresIn } = await createSession(user.id);
 
     return ok(

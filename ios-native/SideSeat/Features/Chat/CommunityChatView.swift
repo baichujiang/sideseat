@@ -308,7 +308,7 @@ struct CommunityChatView: View {
         }
         .overlay {
             if store.isLoading && store.messages.isEmpty {
-                ProgressView("Loading conversation")
+                SSLoadingState("Loading conversation")
             } else if let issue = store.issue, store.messages.isEmpty {
                 ContentUnavailableView {
                     Label("Chat unavailable", systemImage: "exclamationmark.bubble")

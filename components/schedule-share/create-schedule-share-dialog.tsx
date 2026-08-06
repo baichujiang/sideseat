@@ -231,7 +231,7 @@ export function CreateScheduleShareDialog({
     try {
       const { rangeStart, rangeEnd } = shareRangeFromSelectedDateKeys(selectedShareDateKeys);
       const includedDates = sortedShareIncludedDates(selectedShareDateKeys);
-      const { categoryIds, presetKeys } = revealConfigFromRevealedCategoryIds(
+      const { categoryIds, presetKeys, hideAllDetails } = revealConfigFromRevealedCategoryIds(
         revealCategories,
         revealedCategoryIds,
       );
@@ -243,7 +243,7 @@ export function CreateScheduleShareDialog({
       const body = {
         rangeStart: rangeStart.toISOString(),
         rangeEnd: rangeEnd.toISOString(),
-        revealConfig: { categoryIds, presetKeys, includedDates },
+        revealConfig: { categoryIds, presetKeys, hideAllDetails, includedDates },
         allowGuestProposals: true,
         usageLimit,
         expiresAt,

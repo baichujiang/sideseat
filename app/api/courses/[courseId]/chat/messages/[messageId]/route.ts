@@ -1,4 +1,5 @@
 import { requireOnboardedUser } from "@/lib/auth/guards";
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok } from "@/lib/http";
 
@@ -20,7 +21,7 @@ export async function DELETE(
     const { courseId, messageId } = await params;
 
     const membership = await prisma.userCourse.findFirst({
-      where: { userId: user.id, courseId },
+      where: { userId: user.id, courseId, ...activeCourseMembershipWhere() },
       select: { id: true },
     });
     if (!membership) {

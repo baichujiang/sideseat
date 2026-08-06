@@ -30,9 +30,9 @@ struct SessionStoreTests {
         #expect(await credentialStore.refreshToken() == "refresh-new")
     }
 
-    @Test("Non-idempotent writes are not replayed after unauthorized")
+    @Test("Authorized writes refresh once after unauthorized")
     @MainActor
-    func nonIdempotentWriteIsNotRetried() async throws {
+    func authorizedWriteRefreshesOnce() async throws {
         let transport = AuthTestTransport()
         let store = SessionStore(
             apiClient: APIClient(environment: .test, transport: transport),
@@ -41,16 +41,45 @@ struct SessionStoreTests {
         )
         await store.login(identifier: "test_001", password: "Password123")
 
-        await #expect(throws: APIClientError.self) {
-            let _: APIEnvelope<TestValue> = try await store.sendAuthorized(
-                "api/v1/protected",
-                method: .post,
-                body: TestBody(value: "unsafe")
-            )
-        }
+        let response: APIEnvelope<TestValue> = try await store.sendAuthorized(
+            "api/v1/protected",
+            method: .post,
+            body: TestBody(value: "safe-after-refresh"),
+            idempotencyKey: "test-write-refresh"
+        )
 
-        #expect(await transport.refreshCount == 0)
+        #expect(response.data.value == "ok")
+        #expect(await transport.refreshCount == 1)
         #expect(await transport.expiredAccessCount == 1)
+    }
+
+    @Test("Logout followed by another login adopts only the new account")
+    @MainActor
+    func logoutThenLoginUsesNewAccount() async throws {
+        let transport = AuthTestTransport()
+        let credentialStore = MemoryCredentialStore()
+        let store = SessionStore(
+            apiClient: APIClient(environment: .test, transport: transport),
+            credentialStore: credentialStore,
+            device: .test
+        )
+
+        await store.login(identifier: "test_001", password: "Password123")
+        #expect(store.currentUser?.id == "user-1")
+        #expect(await credentialStore.refreshToken() == "refresh-old")
+
+        await store.logout()
+        #expect(store.phase == .signedOut)
+        #expect(store.currentUser == nil)
+        #expect(store.accessTokenForStreaming == nil)
+        #expect(await credentialStore.refreshToken() == nil)
+
+        await store.login(identifier: "test_002", password: "Password123")
+        #expect(store.phase == .signedIn)
+        #expect(store.currentUser?.id == "user-2")
+        #expect(store.currentUser?.username == "test_002")
+        #expect(store.accessTokenForStreaming == "access-user-2")
+        #expect(await credentialStore.refreshToken() == "refresh-user-2")
     }
 }
 
@@ -86,7 +115,21 @@ private actor AuthTestTransport: APITransport {
         let path = request.url?.path ?? ""
         switch path {
         case "/api/v1/auth/login":
+            if loginIdentifier(from: request) == "test_002" {
+                return response(
+                    for: request,
+                    status: 200,
+                    body: authBody(
+                        access: "access-user-2",
+                        refresh: "refresh-user-2",
+                        userID: "user-2",
+                        username: "test_002"
+                    )
+                )
+            }
             return response(for: request, status: 200, body: authBody(access: "access-old", refresh: "refresh-old"))
+        case "/api/v1/auth/logout":
+            return response(for: request, status: 200, body: #"{"data":{"revoked":true}}"#)
         case "/api/v1/auth/refresh":
             refreshCount += 1
             try await Task.sleep(for: .milliseconds(120))
@@ -121,9 +164,24 @@ private actor AuthTestTransport: APITransport {
         return (Data(body.utf8), response)
     }
 
-    private func authBody(access: String, refresh: String) -> String {
+    private func loginIdentifier(from request: URLRequest) -> String? {
+        guard
+            let data = request.httpBody,
+            let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else {
+            return nil
+        }
+        return object["identifier"] as? String
+    }
+
+    private func authBody(
+        access: String,
+        refresh: String,
+        userID: String = "user-1",
+        username: String = "test_001"
+    ) -> String {
         """
-        {"data":{"user":{"id":"user-1","username":"test_001","nickname":"Test User","gender":"UNSPECIFIED","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","locale":"en"},"tokens":{"accessToken":"\(access)","accessExpiresIn":900,"refreshToken":"\(refresh)","refreshExpiresAt":"2026-08-16T00:00:00.000Z"}}}
+        {"data":{"user":{"id":"\(userID)","username":"\(username)","nickname":"Test User","gender":"UNSPECIFIED","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","locale":"en"},"tokens":{"accessToken":"\(access)","accessExpiresIn":900,"refreshToken":"\(refresh)","refreshExpiresAt":"2026-08-16T00:00:00.000Z"}}}
         """
     }
 }

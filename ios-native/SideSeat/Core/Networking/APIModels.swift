@@ -43,10 +43,20 @@ enum APIClientError: LocalizedError, Sendable {
 }
 
 extension APIClientError {
-    var isUnauthorized: Bool {
-        guard case .server(let status, _) = self else { return false }
-        return status == 401
+    var statusCode: Int? {
+        switch self {
+        case .server(let status, _), .decoding(let status, _):
+            status
+        case .invalidResponse, .transport:
+            nil
+        }
     }
+
+    var isUnauthorized: Bool {
+        statusCode == 401
+    }
+
+    var isNotFound: Bool { statusCode == 404 }
 }
 
 enum HTTPMethod: String, Sendable {

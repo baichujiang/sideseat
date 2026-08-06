@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 import { DEFAULT_AVATAR_ID, getAvatarSrc, resolveAvatarImageSrc } from "@/lib/constants/avatars";
@@ -29,12 +30,13 @@ export function PresetAvatar({
   const src = broken ? fallbackSrc : primarySrc;
 
   return (
-    <img
+    <Image
       alt=""
       aria-hidden="true"
       className={cn("block rounded-full object-cover", className)}
       height={size}
       src={src}
+      unoptimized
       width={size}
       onError={() => setBroken(true)}
     />

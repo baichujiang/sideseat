@@ -46,11 +46,17 @@ struct CalendarChromeFormattingTests {
         #expect(todayNumber == CalendarChrome.nowRed)
     }
 
-    @Test("Week column floor stays readable for 5- and 7-day layouts")
-    func weekColumnFloor() {
-        #expect(CalendarChrome.weekMinDayWidth >= 56)
+    @Test("Week header dimensions keep compact day chips readable")
+    func weekHeaderDimensions() {
         #expect(CalendarChrome.dayChipDiameter == 34)
         #expect(CalendarChrome.weekHeaderHeight >= CalendarChrome.dayChipDiameter + 16)
+    }
+
+    @Test("Timeline ends with a compact day boundary")
+    func compactTimelineEndCap() {
+        #expect(CalendarChrome.timelineEndCapHeight > 0)
+        #expect(CalendarChrome.timelineEndCapHeight <= 16)
+        #expect(CalendarChrome.compactHour(24) == "24")
     }
 }
 

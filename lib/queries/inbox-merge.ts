@@ -9,6 +9,7 @@ import {
 } from "@/lib/queries/inbox-unread-counts";
 import { inboxMergedPinned } from "@/lib/inbox/inbox-merged-pinned";
 import { compareConnectionsForInbox } from "@/lib/queries/inbox-order";
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
 
 type ConnectionInbox = Awaited<
   ReturnType<
@@ -106,7 +107,7 @@ export async function getInboxUnreadTotal(userId: string): Promise<number> {
       select: { id: true },
     }),
     prisma.userCourse.findMany({
-      where: { userId, inboxHiddenAt: null },
+      where: { userId, inboxHiddenAt: null, ...activeCourseMembershipWhere() },
       select: { courseId: true },
     }),
     prisma.groupChatParticipant.findMany({
@@ -170,7 +171,7 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
       },
     }),
     prisma.userCourse.findMany({
-      where: { userId, inboxHiddenAt: null },
+      where: { userId, inboxHiddenAt: null, ...activeCourseMembershipWhere() },
       include: { course: true },
     }),
     prisma.groupChatParticipant.findMany({

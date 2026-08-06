@@ -1,6 +1,7 @@
 import { CourseIntent } from "@prisma/client";
 
 import { requireOnboardedUser } from "@/lib/auth/guards";
+import { courseMembershipActiveUntilForSemester } from "@/lib/courses/active-membership";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok } from "@/lib/http";
 
@@ -39,7 +40,7 @@ export async function POST(
 
     const course = await prisma.course.findUnique({
       where: { id: courseId },
-      select: { id: true },
+      select: { id: true, semesterLabel: true },
     });
     if (!course) {
       return error("Course not found.", 404);
@@ -64,9 +65,22 @@ export async function POST(
                 userId: user.id,
                 courseId: course.id,
                 intentions: [CourseIntent.STUDY_TOGETHER],
+                activeUntil: courseMembershipActiveUntilForSemester(course.semesterLabel),
               },
             }),
           ]),
+      ...(existing
+        ? [
+            prisma.userCourse.update({
+              where: { id: existing.id },
+              data: {
+                activeUntil: courseMembershipActiveUntilForSemester(
+                  course.semesterLabel,
+                ),
+              },
+            }),
+          ]
+        : []),
       prisma.savedCourse.deleteMany({
         where: { userId: user.id, courseId: course.id },
       }),

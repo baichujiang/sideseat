@@ -1,19 +1,20 @@
 import { expect, test } from "@playwright/test";
 
+import { loginWithPassword } from "./helpers/login";
+
 /**
  * Standard regression path: login → each main tab → common drill-ins.
  *
- * Prereqs: DB migrated + seeded onboarded user (`npm run prisma:seed` — default `lin` / `Password123`).
+ * Prereqs: DB migrated + seeded QA users (`npm run seed:test-accounts`).
  *
  * Env: E2E_USER, E2E_PASSWORD, PLAYWRIGHT_BASE_URL, E2E_COURSE_ID (optional course chat deep link),
  *      E2E_SIGNUP=1 to run the optional new-account smoke (creates a user in DB).
  */
 
-const E2E_USER = process.env.E2E_USER ?? "lin";
+const E2E_USER = process.env.E2E_USER ?? "test_001";
 const E2E_PASSWORD = process.env.E2E_PASSWORD ?? "Password123";
 
 function logStep(name: string) {
-  // eslint-disable-next-line no-console
   console.log(`\n[e2e] ${name}`);
 }
 
@@ -25,22 +26,6 @@ async function dismissProductTutorialIfPresent(page: import("@playwright/test").
   } catch {
     /* not shown or already dismissed */
   }
-}
-
-async function loginWithPassword(page: import("@playwright/test").Page) {
-  await page.goto("/login");
-  await expect(page.getByRole("heading", { name: /log in/i })).toBeVisible();
-  await page.getByLabel(/username/i).fill(E2E_USER);
-  await page.getByLabel(/password/i).fill(E2E_PASSWORD);
-  await page.getByRole("button", { name: "Log in" }).click();
-  await page.waitForURL(/\/(home|onboarding)/, { timeout: 30_000 });
-  if (page.url().includes("/onboarding")) {
-    throw new Error(
-      `User "${E2E_USER}" landed on /onboarding — use an account with onboarding already complete (e.g. prisma seed).`,
-    );
-  }
-  await expect(page).toHaveURL(/\/home/);
-  await dismissProductTutorialIfPresent(page);
 }
 
 async function goMainTab(page: import("@playwright/test").Page, label: string, urlRe: RegExp) {
@@ -60,7 +45,13 @@ async function goMainTab(page: import("@playwright/test").Page, label: string, u
 test.describe("Standard user flow (login + tabs + drill-ins)", () => {
   test("walks main surfaces after login", async ({ page }) => {
     logStep("Login");
-    await loginWithPassword(page);
+    await loginWithPassword(page, {
+      identifier: E2E_USER,
+      password: E2E_PASSWORD,
+      onboardingError: `User "${E2E_USER}" landed on /onboarding — use an account with onboarding already complete (e.g. prisma seed).`,
+    });
+    await expect(page).toHaveURL(/\/home/);
+    await dismissProductTutorialIfPresent(page);
 
     logStep("Tab: Home");
     await goMainTab(page, "Home", /\/home$/);

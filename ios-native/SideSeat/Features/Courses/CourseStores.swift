@@ -38,7 +38,8 @@ final class CourseListStore {
                 courses: query.isEmpty || fixture.courses[0].name.localizedCaseInsensitiveContains(query)
                     ? fixture.courses
                     : [],
-                nextCursor: nil
+                nextCursor: nil,
+                semesterReview: fixture.semesterReview
             )
             return
         }
@@ -62,6 +63,138 @@ final class CourseListStore {
         } catch {
             guard latestRequestID == requestID else { return }
             issue = error.localizedDescription
+        }
+    }
+}
+
+@MainActor
+@Observable
+final class CourseSemesterReviewStore {
+    private(set) var review: NativeCourseSemesterReview?
+    private(set) var selectedCourseIDs: Set<String> = []
+    private(set) var isLoading = false
+    private(set) var isSaving = false
+    private(set) var issue: String?
+
+    func load(using session: SessionStore) async {
+        guard !isLoading else { return }
+        isLoading = true
+        issue = nil
+        defer { isLoading = false }
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            let course = NativeCourseList.uiTestingFixture.courses[0]
+            let fixture = NativeCourseSemesterReview(
+                semesterLabel: "SS 2026",
+                required: true,
+                courseCount: 1,
+                courses: [
+                    NativeCourseSemesterReviewCourse(
+                        id: course.id,
+                        code: course.code,
+                        name: course.name,
+                        school: course.school,
+                        previousSemesterLabel: "WS 2025/26",
+                        activeUntil: "2026-03-31T21:59:59Z",
+                        sessions: course.sessions
+                    )
+                ]
+            )
+            review = fixture
+            selectedCourseIDs = Set(fixture.courses.map(\.id))
+            return
+        }
+        #endif
+
+        do {
+            let response: APIEnvelope<NativeCourseSemesterReview> = try await session.sendAuthorized(
+                "api/v1/courses/semester-review"
+            )
+            review = response.data
+            selectedCourseIDs = Set(response.data.courses.map(\.id))
+        } catch {
+            issue = error.localizedDescription
+        }
+    }
+
+    func toggle(_ courseID: String) {
+        if selectedCourseIDs.contains(courseID) {
+            selectedCourseIDs.remove(courseID)
+        } else {
+            selectedCourseIDs.insert(courseID)
+        }
+    }
+
+    func confirm(using session: SessionStore) async -> Bool {
+        guard !isSaving else { return false }
+        isSaving = true
+        issue = nil
+        defer { isSaving = false }
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            return true
+        }
+        #endif
+
+        do {
+            let _: APIEnvelope<NativeCourseSemesterReviewResult> = try await session.sendAuthorized(
+                "api/v1/courses/semester-review",
+                method: .post,
+                body: NativeCourseSemesterReviewRequest(
+                    courseIds: selectedCourseIDs.sorted()
+                ),
+                idempotencyKey: UUID().uuidString
+            )
+            return true
+        } catch {
+            issue = error.localizedDescription
+            return false
+        }
+    }
+}
+
+@MainActor
+@Observable
+final class CourseManualAddStore {
+    private(set) var isSaving = false
+    private(set) var issue: String?
+
+    func create(
+        name: String,
+        code: String,
+        using session: SessionStore
+    ) async -> String? {
+        guard !isSaving else { return nil }
+        let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let code = code.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard name.count >= 2 else {
+            issue = String(localized: "Enter the course name.")
+            return nil
+        }
+
+        isSaving = true
+        issue = nil
+        defer { isSaving = false }
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            return "ui-community-course"
+        }
+        #endif
+
+        do {
+            let response: APIEnvelope<NativeCourseManualCreateResult> = try await session.sendAuthorized(
+                "api/v1/courses/manual",
+                method: .post,
+                body: NativeCourseManualCreateRequest(name: name, code: code),
+                idempotencyKey: UUID().uuidString
+            )
+            return response.data.courseId
+        } catch {
+            issue = error.localizedDescription
+            return nil
         }
     }
 }

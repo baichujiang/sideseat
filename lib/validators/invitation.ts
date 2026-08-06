@@ -94,6 +94,12 @@ export const reportSchema = z.object({
   messageId: z.string().cuid().optional(),
   /** Report targets a specific course-room message. */
   courseRoomMessageId: z.string().cuid().optional(),
+  /** Report targets a specific multi-person group-chat message. */
+  groupChatMessageId: z.string().cuid().optional(),
+  /** Report targets a specific Discover buddy post. */
+  classmatePostId: z.string().cuid().optional(),
+  /** Report targets a public question or host answer under a buddy post. */
+  classmatePostCommentId: z.string().cuid().optional(),
   reason: z.nativeEnum(ReportReason),
   details: z.string().max(500).optional().or(z.literal("")),
 });

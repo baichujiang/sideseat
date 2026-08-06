@@ -43,6 +43,9 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `DELETE /api/v1/me`.
     /// - Remark: Generated from `#/paths//api/v1/me/delete(deleteAccount)`.
     func deleteAccount(_ input: Operations.DeleteAccount.Input) async throws -> Operations.DeleteAccount.Output
+    /// - Remark: HTTP `GET /api/v1/me/posts`.
+    /// - Remark: Generated from `#/paths//api/v1/me/posts/get(listCurrentUserDiscoverPosts)`.
+    func listCurrentUserDiscoverPosts(_ input: Operations.ListCurrentUserDiscoverPosts.Input) async throws -> Operations.ListCurrentUserDiscoverPosts.Output
     /// - Remark: HTTP `PATCH /api/v1/me/profile`.
     /// - Remark: Generated from `#/paths//api/v1/me/profile/patch(updateCurrentProfile)`.
     func updateCurrentProfile(_ input: Operations.UpdateCurrentProfile.Input) async throws -> Operations.UpdateCurrentProfile.Output
@@ -109,6 +112,21 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /api/v1/discover/posts/{postId}`.
     /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/get(getDiscoverBuddyPost)`.
     func getDiscoverBuddyPost(_ input: Operations.GetDiscoverBuddyPost.Input) async throws -> Operations.GetDiscoverBuddyPost.Output
+    /// - Remark: HTTP `PATCH /api/v1/discover/posts/{postId}`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/patch(updateDiscoverBuddyPost)`.
+    func updateDiscoverBuddyPost(_ input: Operations.UpdateDiscoverBuddyPost.Input) async throws -> Operations.UpdateDiscoverBuddyPost.Output
+    /// - Remark: HTTP `PATCH /api/v1/discover/posts/{postId}/status`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/status/patch(updateDiscoverBuddyPostStatus)`.
+    func updateDiscoverBuddyPostStatus(_ input: Operations.UpdateDiscoverBuddyPostStatus.Input) async throws -> Operations.UpdateDiscoverBuddyPostStatus.Output
+    /// - Remark: HTTP `GET /api/v1/discover/posts/{postId}/questions`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/get(listDiscoverBuddyPostQuestions)`.
+    func listDiscoverBuddyPostQuestions(_ input: Operations.ListDiscoverBuddyPostQuestions.Input) async throws -> Operations.ListDiscoverBuddyPostQuestions.Output
+    /// - Remark: HTTP `POST /api/v1/discover/posts/{postId}/questions`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/post(createDiscoverBuddyPostQuestionComment)`.
+    func createDiscoverBuddyPostQuestionComment(_ input: Operations.CreateDiscoverBuddyPostQuestionComment.Input) async throws -> Operations.CreateDiscoverBuddyPostQuestionComment.Output
+    /// - Remark: HTTP `DELETE /api/v1/discover/posts/{postId}/questions/{commentId}`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/{commentId}/delete(deleteDiscoverBuddyPostQuestionComment)`.
+    func deleteDiscoverBuddyPostQuestionComment(_ input: Operations.DeleteDiscoverBuddyPostQuestionComment.Input) async throws -> Operations.DeleteDiscoverBuddyPostQuestionComment.Output
     /// - Remark: HTTP `POST /api/v1/discover/posts/{postId}/saved`.
     /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/saved/post(saveDiscoverBuddyPost)`.
     func saveDiscoverBuddyPost(_ input: Operations.SaveDiscoverBuddyPost.Input) async throws -> Operations.SaveDiscoverBuddyPost.Output
@@ -142,6 +160,18 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /api/v1/courses`.
     /// - Remark: Generated from `#/paths//api/v1/courses/get(listCourses)`.
     func listCourses(_ input: Operations.ListCourses.Input) async throws -> Operations.ListCourses.Output
+    /// - Remark: HTTP `POST /api/v1/courses/manual`.
+    /// - Remark: Generated from `#/paths//api/v1/courses/manual/post(createCommunityCourse)`.
+    func createCommunityCourse(_ input: Operations.CreateCommunityCourse.Input) async throws -> Operations.CreateCommunityCourse.Output
+    /// - Remark: HTTP `POST /api/v1/courses/match`.
+    /// - Remark: Generated from `#/paths//api/v1/courses/match/post(matchCoursesFromTimetableText)`.
+    func matchCoursesFromTimetableText(_ input: Operations.MatchCoursesFromTimetableText.Input) async throws -> Operations.MatchCoursesFromTimetableText.Output
+    /// - Remark: HTTP `GET /api/v1/courses/semester-review`.
+    /// - Remark: Generated from `#/paths//api/v1/courses/semester-review/get(getCourseSemesterReview)`.
+    func getCourseSemesterReview(_ input: Operations.GetCourseSemesterReview.Input) async throws -> Operations.GetCourseSemesterReview.Output
+    /// - Remark: HTTP `POST /api/v1/courses/semester-review`.
+    /// - Remark: Generated from `#/paths//api/v1/courses/semester-review/post(confirmCourseSemesterReview)`.
+    func confirmCourseSemesterReview(_ input: Operations.ConfirmCourseSemesterReview.Input) async throws -> Operations.ConfirmCourseSemesterReview.Output
     /// - Remark: HTTP `GET /api/v1/courses/{courseId}`.
     /// - Remark: Generated from `#/paths//api/v1/courses/{courseId}/get(getCourseDetail)`.
     func getCourseDetail(_ input: Operations.GetCourseDetail.Input) async throws -> Operations.GetCourseDetail.Output
@@ -260,8 +290,8 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: Generated from `#/paths//api/v1/connections/{connectionId}/contact-exchange/post(mutateContactExchange)`.
     func mutateContactExchange(_ input: Operations.MutateContactExchange.Input) async throws -> Operations.MutateContactExchange.Output
     /// - Remark: HTTP `GET /api/v1/plans`.
-    /// - Remark: Generated from `#/paths//api/v1/plans/get(listPlansNeedingAction)`.
-    func listPlansNeedingAction(_ input: Operations.ListPlansNeedingAction.Input) async throws -> Operations.ListPlansNeedingAction.Output
+    /// - Remark: Generated from `#/paths//api/v1/plans/get(listPlans)`.
+    func listPlans(_ input: Operations.ListPlans.Input) async throws -> Operations.ListPlans.Output
     /// - Remark: HTTP `GET /api/v1/plans/{planId}`.
     /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/get(getPlan)`.
     func getPlan(_ input: Operations.GetPlan.Input) async throws -> Operations.GetPlan.Output
@@ -280,6 +310,9 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /api/v1/connections/{connectionId}/schedule-shares`.
     /// - Remark: Generated from `#/paths//api/v1/connections/{connectionId}/schedule-shares/post(createDirectScheduleShare)`.
     func createDirectScheduleShare(_ input: Operations.CreateDirectScheduleShare.Input) async throws -> Operations.CreateDirectScheduleShare.Output
+    /// - Remark: HTTP `POST /api/v1/schedule-shares`.
+    /// - Remark: Generated from `#/paths//api/v1/schedule-shares/post(createScheduleShareLink)`.
+    func createScheduleShareLink(_ input: Operations.CreateScheduleShareLink.Input) async throws -> Operations.CreateScheduleShareLink.Output
     /// - Remark: HTTP `GET /api/v1/schedule-shares/chat-preview/{token}`.
     /// - Remark: Generated from `#/paths//api/v1/schedule-shares/chat-preview/{token}/get(getScheduleShareChatPreview)`.
     func getScheduleShareChatPreview(_ input: Operations.GetScheduleShareChatPreview.Input) async throws -> Operations.GetScheduleShareChatPreview.Output
@@ -298,6 +331,9 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /api/v1/feedback/{feedbackId}/comments`.
     /// - Remark: Generated from `#/paths//api/v1/feedback/{feedbackId}/comments/post(commentFeedback)`.
     func commentFeedback(_ input: Operations.CommentFeedback.Input) async throws -> Operations.CommentFeedback.Output
+    /// - Remark: HTTP `DELETE /api/v1/schedule-shares/owner/{linkId}`.
+    /// - Remark: Generated from `#/paths//api/v1/schedule-shares/owner/{linkId}/delete(revokeScheduleShare)`.
+    func revokeScheduleShare(_ input: Operations.RevokeScheduleShare.Input) async throws -> Operations.RevokeScheduleShare.Output
     /// - Remark: HTTP `GET /api/v1/schedule-shares/owner-preview`.
     /// - Remark: Generated from `#/paths//api/v1/schedule-shares/owner-preview/get(getScheduleShareOwnerPreview)`.
     func getScheduleShareOwnerPreview(_ input: Operations.GetScheduleShareOwnerPreview.Input) async throws -> Operations.GetScheduleShareOwnerPreview.Output
@@ -420,6 +456,11 @@ extension APIProtocol {
             headers: headers,
             body: body
         ))
+    }
+    /// - Remark: HTTP `GET /api/v1/me/posts`.
+    /// - Remark: Generated from `#/paths//api/v1/me/posts/get(listCurrentUserDiscoverPosts)`.
+    internal func listCurrentUserDiscoverPosts(headers: Operations.ListCurrentUserDiscoverPosts.Input.Headers = .init()) async throws -> Operations.ListCurrentUserDiscoverPosts.Output {
+        try await listCurrentUserDiscoverPosts(Operations.ListCurrentUserDiscoverPosts.Input(headers: headers))
     }
     /// - Remark: HTTP `PATCH /api/v1/me/profile`.
     /// - Remark: Generated from `#/paths//api/v1/me/profile/patch(updateCurrentProfile)`.
@@ -653,6 +694,67 @@ extension APIProtocol {
             headers: headers
         ))
     }
+    /// - Remark: HTTP `PATCH /api/v1/discover/posts/{postId}`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/patch(updateDiscoverBuddyPost)`.
+    internal func updateDiscoverBuddyPost(
+        path: Operations.UpdateDiscoverBuddyPost.Input.Path,
+        headers: Operations.UpdateDiscoverBuddyPost.Input.Headers,
+        body: Operations.UpdateDiscoverBuddyPost.Input.Body
+    ) async throws -> Operations.UpdateDiscoverBuddyPost.Output {
+        try await updateDiscoverBuddyPost(Operations.UpdateDiscoverBuddyPost.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// - Remark: HTTP `PATCH /api/v1/discover/posts/{postId}/status`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/status/patch(updateDiscoverBuddyPostStatus)`.
+    internal func updateDiscoverBuddyPostStatus(
+        path: Operations.UpdateDiscoverBuddyPostStatus.Input.Path,
+        headers: Operations.UpdateDiscoverBuddyPostStatus.Input.Headers,
+        body: Operations.UpdateDiscoverBuddyPostStatus.Input.Body
+    ) async throws -> Operations.UpdateDiscoverBuddyPostStatus.Output {
+        try await updateDiscoverBuddyPostStatus(Operations.UpdateDiscoverBuddyPostStatus.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// - Remark: HTTP `GET /api/v1/discover/posts/{postId}/questions`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/get(listDiscoverBuddyPostQuestions)`.
+    internal func listDiscoverBuddyPostQuestions(
+        path: Operations.ListDiscoverBuddyPostQuestions.Input.Path,
+        headers: Operations.ListDiscoverBuddyPostQuestions.Input.Headers = .init()
+    ) async throws -> Operations.ListDiscoverBuddyPostQuestions.Output {
+        try await listDiscoverBuddyPostQuestions(Operations.ListDiscoverBuddyPostQuestions.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// - Remark: HTTP `POST /api/v1/discover/posts/{postId}/questions`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/post(createDiscoverBuddyPostQuestionComment)`.
+    internal func createDiscoverBuddyPostQuestionComment(
+        path: Operations.CreateDiscoverBuddyPostQuestionComment.Input.Path,
+        headers: Operations.CreateDiscoverBuddyPostQuestionComment.Input.Headers,
+        body: Operations.CreateDiscoverBuddyPostQuestionComment.Input.Body
+    ) async throws -> Operations.CreateDiscoverBuddyPostQuestionComment.Output {
+        try await createDiscoverBuddyPostQuestionComment(Operations.CreateDiscoverBuddyPostQuestionComment.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// - Remark: HTTP `DELETE /api/v1/discover/posts/{postId}/questions/{commentId}`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/{commentId}/delete(deleteDiscoverBuddyPostQuestionComment)`.
+    internal func deleteDiscoverBuddyPostQuestionComment(
+        path: Operations.DeleteDiscoverBuddyPostQuestionComment.Input.Path,
+        headers: Operations.DeleteDiscoverBuddyPostQuestionComment.Input.Headers
+    ) async throws -> Operations.DeleteDiscoverBuddyPostQuestionComment.Output {
+        try await deleteDiscoverBuddyPostQuestionComment(Operations.DeleteDiscoverBuddyPostQuestionComment.Input(
+            path: path,
+            headers: headers
+        ))
+    }
     /// - Remark: HTTP `POST /api/v1/discover/posts/{postId}/saved`.
     /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/saved/post(saveDiscoverBuddyPost)`.
     internal func saveDiscoverBuddyPost(
@@ -780,6 +882,44 @@ extension APIProtocol {
         try await listCourses(Operations.ListCourses.Input(
             query: query,
             headers: headers
+        ))
+    }
+    /// - Remark: HTTP `POST /api/v1/courses/manual`.
+    /// - Remark: Generated from `#/paths//api/v1/courses/manual/post(createCommunityCourse)`.
+    internal func createCommunityCourse(
+        headers: Operations.CreateCommunityCourse.Input.Headers,
+        body: Operations.CreateCommunityCourse.Input.Body
+    ) async throws -> Operations.CreateCommunityCourse.Output {
+        try await createCommunityCourse(Operations.CreateCommunityCourse.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// - Remark: HTTP `POST /api/v1/courses/match`.
+    /// - Remark: Generated from `#/paths//api/v1/courses/match/post(matchCoursesFromTimetableText)`.
+    internal func matchCoursesFromTimetableText(
+        headers: Operations.MatchCoursesFromTimetableText.Input.Headers = .init(),
+        body: Operations.MatchCoursesFromTimetableText.Input.Body
+    ) async throws -> Operations.MatchCoursesFromTimetableText.Output {
+        try await matchCoursesFromTimetableText(Operations.MatchCoursesFromTimetableText.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// - Remark: HTTP `GET /api/v1/courses/semester-review`.
+    /// - Remark: Generated from `#/paths//api/v1/courses/semester-review/get(getCourseSemesterReview)`.
+    internal func getCourseSemesterReview(headers: Operations.GetCourseSemesterReview.Input.Headers = .init()) async throws -> Operations.GetCourseSemesterReview.Output {
+        try await getCourseSemesterReview(Operations.GetCourseSemesterReview.Input(headers: headers))
+    }
+    /// - Remark: HTTP `POST /api/v1/courses/semester-review`.
+    /// - Remark: Generated from `#/paths//api/v1/courses/semester-review/post(confirmCourseSemesterReview)`.
+    internal func confirmCourseSemesterReview(
+        headers: Operations.ConfirmCourseSemesterReview.Input.Headers,
+        body: Operations.ConfirmCourseSemesterReview.Input.Body
+    ) async throws -> Operations.ConfirmCourseSemesterReview.Output {
+        try await confirmCourseSemesterReview(Operations.ConfirmCourseSemesterReview.Input(
+            headers: headers,
+            body: body
         ))
     }
     /// - Remark: HTTP `GET /api/v1/courses/{courseId}`.
@@ -1232,9 +1372,9 @@ extension APIProtocol {
         ))
     }
     /// - Remark: HTTP `GET /api/v1/plans`.
-    /// - Remark: Generated from `#/paths//api/v1/plans/get(listPlansNeedingAction)`.
-    internal func listPlansNeedingAction(headers: Operations.ListPlansNeedingAction.Input.Headers = .init()) async throws -> Operations.ListPlansNeedingAction.Output {
-        try await listPlansNeedingAction(Operations.ListPlansNeedingAction.Input(headers: headers))
+    /// - Remark: Generated from `#/paths//api/v1/plans/get(listPlans)`.
+    internal func listPlans(headers: Operations.ListPlans.Input.Headers = .init()) async throws -> Operations.ListPlans.Output {
+        try await listPlans(Operations.ListPlans.Input(headers: headers))
     }
     /// - Remark: HTTP `GET /api/v1/plans/{planId}`.
     /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/get(getPlan)`.
@@ -1308,6 +1448,17 @@ extension APIProtocol {
             body: body
         ))
     }
+    /// - Remark: HTTP `POST /api/v1/schedule-shares`.
+    /// - Remark: Generated from `#/paths//api/v1/schedule-shares/post(createScheduleShareLink)`.
+    internal func createScheduleShareLink(
+        headers: Operations.CreateScheduleShareLink.Input.Headers,
+        body: Operations.CreateScheduleShareLink.Input.Body
+    ) async throws -> Operations.CreateScheduleShareLink.Output {
+        try await createScheduleShareLink(Operations.CreateScheduleShareLink.Input(
+            headers: headers,
+            body: body
+        ))
+    }
     /// - Remark: HTTP `GET /api/v1/schedule-shares/chat-preview/{token}`.
     /// - Remark: Generated from `#/paths//api/v1/schedule-shares/chat-preview/{token}/get(getScheduleShareChatPreview)`.
     internal func getScheduleShareChatPreview(
@@ -1370,6 +1521,17 @@ extension APIProtocol {
             path: path,
             headers: headers,
             body: body
+        ))
+    }
+    /// - Remark: HTTP `DELETE /api/v1/schedule-shares/owner/{linkId}`.
+    /// - Remark: Generated from `#/paths//api/v1/schedule-shares/owner/{linkId}/delete(revokeScheduleShare)`.
+    internal func revokeScheduleShare(
+        path: Operations.RevokeScheduleShare.Input.Path,
+        headers: Operations.RevokeScheduleShare.Input.Headers = .init()
+    ) async throws -> Operations.RevokeScheduleShare.Output {
+        try await revokeScheduleShare(Operations.RevokeScheduleShare.Input(
+            path: path,
+            headers: headers
         ))
     }
     /// - Remark: HTTP `GET /api/v1/schedule-shares/owner-preview`.
@@ -2268,15 +2430,23 @@ internal enum Components {
         internal struct GroupTextMessageRequest: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/GroupTextMessageRequest/body`.
             internal var body: Swift.String
+            /// - Remark: Generated from `#/components/schemas/GroupTextMessageRequest/replyToId`.
+            internal var replyToId: Swift.String?
             /// Creates a new `GroupTextMessageRequest`.
             ///
             /// - Parameters:
             ///   - body:
-            internal init(body: Swift.String) {
+            ///   - replyToId:
+            internal init(
+                body: Swift.String,
+                replyToId: Swift.String? = nil
+            ) {
                 self.body = body
+                self.replyToId = replyToId
             }
             internal enum CodingKeys: String, CodingKey {
                 case body
+                case replyToId
             }
         }
         /// - Remark: Generated from `#/components/schemas/CommunityMessage`.
@@ -3581,6 +3751,17 @@ internal enum Components {
             internal var major: Swift.String?
             /// - Remark: Generated from `#/components/schemas/DiscoverBuddyAuthor/semester`.
             internal var semester: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyAuthor/studentStatus`.
+            internal enum StudentStatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case currentStudent = "CURRENT_STUDENT"
+                case exchangeStudent = "EXCHANGE_STUDENT"
+                case alumni = "ALUMNI"
+                case _empty_ = ""
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyAuthor/studentStatus`.
+            internal var studentStatus: Components.Schemas.DiscoverBuddyAuthor.StudentStatusPayload?
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyAuthor/graduationYear`.
+            internal var graduationYear: Swift.Int?
             /// - Remark: Generated from `#/components/schemas/DiscoverBuddyAuthor/school`.
             internal var school: Swift.String?
             /// - Remark: Generated from `#/components/schemas/DiscoverBuddyAuthor/verifiedStudent`.
@@ -3594,6 +3775,8 @@ internal enum Components {
             ///   - avatarUrl:
             ///   - major:
             ///   - semester:
+            ///   - studentStatus:
+            ///   - graduationYear:
             ///   - school:
             ///   - verifiedStudent:
             internal init(
@@ -3603,6 +3786,8 @@ internal enum Components {
                 avatarUrl: Swift.String? = nil,
                 major: Swift.String? = nil,
                 semester: Swift.Int? = nil,
+                studentStatus: Components.Schemas.DiscoverBuddyAuthor.StudentStatusPayload? = nil,
+                graduationYear: Swift.Int? = nil,
                 school: Swift.String? = nil,
                 verifiedStudent: Swift.Bool
             ) {
@@ -3612,6 +3797,8 @@ internal enum Components {
                 self.avatarUrl = avatarUrl
                 self.major = major
                 self.semester = semester
+                self.studentStatus = studentStatus
+                self.graduationYear = graduationYear
                 self.school = school
                 self.verifiedStudent = verifiedStudent
             }
@@ -3622,6 +3809,8 @@ internal enum Components {
                 case avatarUrl
                 case major
                 case semester
+                case studentStatus
+                case graduationYear
                 case school
                 case verifiedStudent
             }
@@ -3647,6 +3836,40 @@ internal enum Components {
             internal var title: Swift.String
             /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/body`.
             internal var body: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/status`.
+            internal enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case active = "ACTIVE"
+                case closed = "CLOSED"
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/status`.
+            internal var status: Components.Schemas.DiscoverBuddyPost.StatusPayload
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/tags`.
+            internal var tags: [Swift.String]
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/visibility`.
+            internal enum VisibilityPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case schoolOnly = "SCHOOL_ONLY"
+                case cityInternationals = "CITY_INTERNATIONALS"
+                case verifiedOnly = "VERIFIED_ONLY"
+                case coursematesOnly = "COURSEMATES_ONLY"
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/visibility`.
+            internal var visibility: Components.Schemas.DiscoverBuddyPost.VisibilityPayload
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/replyPreference`.
+            internal enum ReplyPreferencePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case directMessage = "DIRECT_MESSAGE"
+                case requestFirst = "REQUEST_FIRST"
+                case verifiedOnly = "VERIFIED_ONLY"
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/replyPreference`.
+            internal var replyPreference: Components.Schemas.DiscoverBuddyPost.ReplyPreferencePayload
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/startsAt`.
+            internal var startsAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/endsAt`.
+            internal var endsAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/location`.
+            internal var location: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/capacity`.
+            internal var capacity: Swift.Int?
             /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/createdAt`.
             internal var createdAt: Foundation.Date
             /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/expiresAt`.
@@ -3671,6 +3894,14 @@ internal enum Components {
             ///   - city:
             ///   - title:
             ///   - body:
+            ///   - status:
+            ///   - tags:
+            ///   - visibility:
+            ///   - replyPreference:
+            ///   - startsAt:
+            ///   - endsAt:
+            ///   - location:
+            ///   - capacity:
             ///   - createdAt:
             ///   - expiresAt:
             ///   - isOwn:
@@ -3685,6 +3916,14 @@ internal enum Components {
                 city: Swift.String,
                 title: Swift.String,
                 body: Swift.String? = nil,
+                status: Components.Schemas.DiscoverBuddyPost.StatusPayload,
+                tags: [Swift.String],
+                visibility: Components.Schemas.DiscoverBuddyPost.VisibilityPayload,
+                replyPreference: Components.Schemas.DiscoverBuddyPost.ReplyPreferencePayload,
+                startsAt: Foundation.Date? = nil,
+                endsAt: Foundation.Date? = nil,
+                location: Swift.String? = nil,
+                capacity: Swift.Int? = nil,
                 createdAt: Foundation.Date,
                 expiresAt: Foundation.Date,
                 isOwn: Swift.Bool,
@@ -3699,6 +3938,14 @@ internal enum Components {
                 self.city = city
                 self.title = title
                 self.body = body
+                self.status = status
+                self.tags = tags
+                self.visibility = visibility
+                self.replyPreference = replyPreference
+                self.startsAt = startsAt
+                self.endsAt = endsAt
+                self.location = location
+                self.capacity = capacity
                 self.createdAt = createdAt
                 self.expiresAt = expiresAt
                 self.isOwn = isOwn
@@ -3714,6 +3961,14 @@ internal enum Components {
                 case city
                 case title
                 case body
+                case status
+                case tags
+                case visibility
+                case replyPreference
+                case startsAt
+                case endsAt
+                case location
+                case capacity
                 case createdAt
                 case expiresAt
                 case isOwn
@@ -3722,6 +3977,103 @@ internal enum Components {
                 case imageUrls
                 case linkedCourses
                 case author
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostActionEnvelope`.
+        internal struct DiscoverBuddyPostActionEnvelope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostActionEnvelope/data`.
+            internal struct DataPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostActionEnvelope/data/post`.
+                internal var post: Components.Schemas.DiscoverBuddyPost
+                /// Creates a new `DataPayload`.
+                ///
+                /// - Parameters:
+                ///   - post:
+                internal init(post: Components.Schemas.DiscoverBuddyPost) {
+                    self.post = post
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case post
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostActionEnvelope/data`.
+            internal var data: Components.Schemas.DiscoverBuddyPostActionEnvelope.DataPayload
+            /// Creates a new `DiscoverBuddyPostActionEnvelope`.
+            ///
+            /// - Parameters:
+            ///   - data:
+            internal init(data: Components.Schemas.DiscoverBuddyPostActionEnvelope.DataPayload) {
+                self.data = data
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case data
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostStatusRequest`.
+        internal struct DiscoverBuddyPostStatusRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostStatusRequest/status`.
+            internal enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case closed = "CLOSED"
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostStatusRequest/status`.
+            internal var status: Components.Schemas.DiscoverBuddyPostStatusRequest.StatusPayload
+            /// Creates a new `DiscoverBuddyPostStatusRequest`.
+            ///
+            /// - Parameters:
+            ///   - status:
+            internal init(status: Components.Schemas.DiscoverBuddyPostStatusRequest.StatusPayload) {
+                self.status = status
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case status
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.status = try container.decode(
+                    Components.Schemas.DiscoverBuddyPostStatusRequest.StatusPayload.self,
+                    forKey: .status
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "status"
+                ])
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/DiscoverOwnedItems`.
+        internal struct DiscoverOwnedItems: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoverOwnedItems/posts`.
+            internal var posts: [Components.Schemas.DiscoverBuddyPost]
+            /// - Remark: Generated from `#/components/schemas/DiscoverOwnedItems/activities`.
+            internal var activities: [Components.Schemas.DiscoverActivity]
+            /// Creates a new `DiscoverOwnedItems`.
+            ///
+            /// - Parameters:
+            ///   - posts:
+            ///   - activities:
+            internal init(
+                posts: [Components.Schemas.DiscoverBuddyPost],
+                activities: [Components.Schemas.DiscoverActivity]
+            ) {
+                self.posts = posts
+                self.activities = activities
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case posts
+                case activities
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/DiscoverOwnedItemsEnvelope`.
+        internal struct DiscoverOwnedItemsEnvelope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoverOwnedItemsEnvelope/data`.
+            internal var data: Components.Schemas.DiscoverOwnedItems
+            /// Creates a new `DiscoverOwnedItemsEnvelope`.
+            ///
+            /// - Parameters:
+            ///   - data:
+            internal init(data: Components.Schemas.DiscoverOwnedItems) {
+                self.data = data
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case data
             }
         }
         /// - Remark: Generated from `#/components/schemas/DiscoverActivityOrganizer`.
@@ -3951,6 +4303,35 @@ internal enum Components {
             internal var title: Swift.String
             /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest/body`.
             internal var body: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest/tags`.
+            internal var tags: [Swift.String]?
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest/visibility`.
+            internal enum VisibilityPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case schoolOnly = "SCHOOL_ONLY"
+                case cityInternationals = "CITY_INTERNATIONALS"
+                case verifiedOnly = "VERIFIED_ONLY"
+                case coursematesOnly = "COURSEMATES_ONLY"
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest/visibility`.
+            internal var visibility: Components.Schemas.DiscoverBuddyPostRequest.VisibilityPayload?
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest/replyPreference`.
+            internal enum ReplyPreferencePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case directMessage = "DIRECT_MESSAGE"
+                case requestFirst = "REQUEST_FIRST"
+                case verifiedOnly = "VERIFIED_ONLY"
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest/replyPreference`.
+            internal var replyPreference: Components.Schemas.DiscoverBuddyPostRequest.ReplyPreferencePayload?
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest/courseIds`.
+            internal var courseIds: [Swift.String]?
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest/startsAt`.
+            internal var startsAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest/endsAt`.
+            internal var endsAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest/location`.
+            internal var location: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest/capacity`.
+            internal var capacity: Swift.Int?
             /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest/expiresAt`.
             internal var expiresAt: Foundation.Date
             /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest/imageUrls`.
@@ -3961,18 +4342,42 @@ internal enum Components {
             ///   - city:
             ///   - title:
             ///   - body:
+            ///   - tags:
+            ///   - visibility:
+            ///   - replyPreference:
+            ///   - courseIds:
+            ///   - startsAt:
+            ///   - endsAt:
+            ///   - location:
+            ///   - capacity:
             ///   - expiresAt:
             ///   - imageUrls:
             internal init(
                 city: Components.Schemas.DiscoverBuddyPostRequest.CityPayload? = nil,
                 title: Swift.String,
                 body: Swift.String? = nil,
+                tags: [Swift.String]? = nil,
+                visibility: Components.Schemas.DiscoverBuddyPostRequest.VisibilityPayload? = nil,
+                replyPreference: Components.Schemas.DiscoverBuddyPostRequest.ReplyPreferencePayload? = nil,
+                courseIds: [Swift.String]? = nil,
+                startsAt: Foundation.Date? = nil,
+                endsAt: Foundation.Date? = nil,
+                location: Swift.String? = nil,
+                capacity: Swift.Int? = nil,
                 expiresAt: Foundation.Date,
                 imageUrls: [Swift.String]? = nil
             ) {
                 self.city = city
                 self.title = title
                 self.body = body
+                self.tags = tags
+                self.visibility = visibility
+                self.replyPreference = replyPreference
+                self.courseIds = courseIds
+                self.startsAt = startsAt
+                self.endsAt = endsAt
+                self.location = location
+                self.capacity = capacity
                 self.expiresAt = expiresAt
                 self.imageUrls = imageUrls
             }
@@ -3980,6 +4385,14 @@ internal enum Components {
                 case city
                 case title
                 case body
+                case tags
+                case visibility
+                case replyPreference
+                case courseIds
+                case startsAt
+                case endsAt
+                case location
+                case capacity
                 case expiresAt
                 case imageUrls
             }
@@ -3997,6 +4410,38 @@ internal enum Components {
                     Swift.String.self,
                     forKey: .body
                 )
+                self.tags = try container.decodeIfPresent(
+                    [Swift.String].self,
+                    forKey: .tags
+                )
+                self.visibility = try container.decodeIfPresent(
+                    Components.Schemas.DiscoverBuddyPostRequest.VisibilityPayload.self,
+                    forKey: .visibility
+                )
+                self.replyPreference = try container.decodeIfPresent(
+                    Components.Schemas.DiscoverBuddyPostRequest.ReplyPreferencePayload.self,
+                    forKey: .replyPreference
+                )
+                self.courseIds = try container.decodeIfPresent(
+                    [Swift.String].self,
+                    forKey: .courseIds
+                )
+                self.startsAt = try container.decodeIfPresent(
+                    Foundation.Date.self,
+                    forKey: .startsAt
+                )
+                self.endsAt = try container.decodeIfPresent(
+                    Foundation.Date.self,
+                    forKey: .endsAt
+                )
+                self.location = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .location
+                )
+                self.capacity = try container.decodeIfPresent(
+                    Swift.Int.self,
+                    forKey: .capacity
+                )
                 self.expiresAt = try container.decode(
                     Foundation.Date.self,
                     forKey: .expiresAt
@@ -4009,6 +4454,14 @@ internal enum Components {
                     "city",
                     "title",
                     "body",
+                    "tags",
+                    "visibility",
+                    "replyPreference",
+                    "courseIds",
+                    "startsAt",
+                    "endsAt",
+                    "location",
+                    "capacity",
                     "expiresAt",
                     "imageUrls"
                 ])
@@ -4171,6 +4624,288 @@ internal enum Components {
             /// - Parameters:
             ///   - data:
             internal init(data: Components.Schemas.DiscoverBuddyPostDetail) {
+                self.data = data
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case data
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/DiscoverQuestionAuthor`.
+        internal struct DiscoverQuestionAuthor: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionAuthor/id`.
+            internal var id: Swift.String
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionAuthor/displayName`.
+            internal var displayName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionAuthor/avatarUrl`.
+            internal var avatarUrl: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionAuthor/school`.
+            internal var school: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionAuthor/verifiedStudent`.
+            internal var verifiedStudent: Swift.Bool
+            /// Creates a new `DiscoverQuestionAuthor`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - displayName:
+            ///   - avatarUrl:
+            ///   - school:
+            ///   - verifiedStudent:
+            internal init(
+                id: Swift.String,
+                displayName: Swift.String,
+                avatarUrl: Swift.String? = nil,
+                school: Swift.String? = nil,
+                verifiedStudent: Swift.Bool
+            ) {
+                self.id = id
+                self.displayName = displayName
+                self.avatarUrl = avatarUrl
+                self.school = school
+                self.verifiedStudent = verifiedStudent
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case id
+                case displayName
+                case avatarUrl
+                case school
+                case verifiedStudent
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/DiscoverQuestionReply`.
+        internal struct DiscoverQuestionReply: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionReply/id`.
+            internal var id: Swift.String
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionReply/body`.
+            internal var body: Swift.String
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionReply/createdAt`.
+            internal var createdAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionReply/isOwn`.
+            internal var isOwn: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionReply/canDelete`.
+            internal var canDelete: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionReply/author`.
+            internal var author: Components.Schemas.DiscoverQuestionAuthor
+            /// Creates a new `DiscoverQuestionReply`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - body:
+            ///   - createdAt:
+            ///   - isOwn:
+            ///   - canDelete:
+            ///   - author:
+            internal init(
+                id: Swift.String,
+                body: Swift.String,
+                createdAt: Foundation.Date,
+                isOwn: Swift.Bool,
+                canDelete: Swift.Bool,
+                author: Components.Schemas.DiscoverQuestionAuthor
+            ) {
+                self.id = id
+                self.body = body
+                self.createdAt = createdAt
+                self.isOwn = isOwn
+                self.canDelete = canDelete
+                self.author = author
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case id
+                case body
+                case createdAt
+                case isOwn
+                case canDelete
+                case author
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/DiscoverQuestion`.
+        internal struct DiscoverQuestion: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestion/value1`.
+            internal var value1: Components.Schemas.DiscoverQuestionReply
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestion/value2`.
+            internal struct Value2Payload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/DiscoverQuestion/value2/canReply`.
+                internal var canReply: Swift.Bool
+                /// - Remark: Generated from `#/components/schemas/DiscoverQuestion/value2/reply`.
+                internal var reply: Components.Schemas.DiscoverQuestionReply?
+                /// Creates a new `Value2Payload`.
+                ///
+                /// - Parameters:
+                ///   - canReply:
+                ///   - reply:
+                internal init(
+                    canReply: Swift.Bool,
+                    reply: Components.Schemas.DiscoverQuestionReply? = nil
+                ) {
+                    self.canReply = canReply
+                    self.reply = reply
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case canReply
+                    case reply
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestion/value2`.
+            internal var value2: Components.Schemas.DiscoverQuestion.Value2Payload
+            /// Creates a new `DiscoverQuestion`.
+            ///
+            /// - Parameters:
+            ///   - value1:
+            ///   - value2:
+            internal init(
+                value1: Components.Schemas.DiscoverQuestionReply,
+                value2: Components.Schemas.DiscoverQuestion.Value2Payload
+            ) {
+                self.value1 = value1
+                self.value2 = value2
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                self.value1 = try .init(from: decoder)
+                self.value2 = try .init(from: decoder)
+            }
+            internal func encode(to encoder: any Swift.Encoder) throws {
+                try self.value1.encode(to: encoder)
+                try self.value2.encode(to: encoder)
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/DiscoverQuestionListEnvelope`.
+        internal struct DiscoverQuestionListEnvelope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionListEnvelope/data`.
+            internal struct DataPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/DiscoverQuestionListEnvelope/data/questions`.
+                internal var questions: [Components.Schemas.DiscoverQuestion]
+                /// Creates a new `DataPayload`.
+                ///
+                /// - Parameters:
+                ///   - questions:
+                internal init(questions: [Components.Schemas.DiscoverQuestion]) {
+                    self.questions = questions
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case questions
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionListEnvelope/data`.
+            internal var data: Components.Schemas.DiscoverQuestionListEnvelope.DataPayload
+            /// Creates a new `DiscoverQuestionListEnvelope`.
+            ///
+            /// - Parameters:
+            ///   - data:
+            internal init(data: Components.Schemas.DiscoverQuestionListEnvelope.DataPayload) {
+                self.data = data
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case data
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/DiscoverQuestionWriteRequest`.
+        internal struct DiscoverQuestionWriteRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionWriteRequest/body`.
+            internal var body: Swift.String
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionWriteRequest/parentId`.
+            internal var parentId: Swift.String?
+            /// Creates a new `DiscoverQuestionWriteRequest`.
+            ///
+            /// - Parameters:
+            ///   - body:
+            ///   - parentId:
+            internal init(
+                body: Swift.String,
+                parentId: Swift.String? = nil
+            ) {
+                self.body = body
+                self.parentId = parentId
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case body
+                case parentId
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.body = try container.decode(
+                    Swift.String.self,
+                    forKey: .body
+                )
+                self.parentId = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .parentId
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "body",
+                    "parentId"
+                ])
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/DiscoverQuestionMutationEnvelope`.
+        internal struct DiscoverQuestionMutationEnvelope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionMutationEnvelope/data`.
+            internal struct DataPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/DiscoverQuestionMutationEnvelope/data/commentId`.
+                internal var commentId: Swift.String
+                /// - Remark: Generated from `#/components/schemas/DiscoverQuestionMutationEnvelope/data/questionId`.
+                internal var questionId: Swift.String
+                /// Creates a new `DataPayload`.
+                ///
+                /// - Parameters:
+                ///   - commentId:
+                ///   - questionId:
+                internal init(
+                    commentId: Swift.String,
+                    questionId: Swift.String
+                ) {
+                    self.commentId = commentId
+                    self.questionId = questionId
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case commentId
+                    case questionId
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionMutationEnvelope/data`.
+            internal var data: Components.Schemas.DiscoverQuestionMutationEnvelope.DataPayload
+            /// Creates a new `DiscoverQuestionMutationEnvelope`.
+            ///
+            /// - Parameters:
+            ///   - data:
+            internal init(data: Components.Schemas.DiscoverQuestionMutationEnvelope.DataPayload) {
+                self.data = data
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case data
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/DiscoverQuestionDeletionEnvelope`.
+        internal struct DiscoverQuestionDeletionEnvelope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionDeletionEnvelope/data`.
+            internal struct DataPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/DiscoverQuestionDeletionEnvelope/data/commentId`.
+                internal var commentId: Swift.String
+                /// - Remark: Generated from `#/components/schemas/DiscoverQuestionDeletionEnvelope/data/deleted`.
+                internal var deleted: Swift.Bool
+                /// Creates a new `DataPayload`.
+                ///
+                /// - Parameters:
+                ///   - commentId:
+                ///   - deleted:
+                internal init(
+                    commentId: Swift.String,
+                    deleted: Swift.Bool
+                ) {
+                    self.commentId = commentId
+                    self.deleted = deleted
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case commentId
+                    case deleted
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoverQuestionDeletionEnvelope/data`.
+            internal var data: Components.Schemas.DiscoverQuestionDeletionEnvelope.DataPayload
+            /// Creates a new `DiscoverQuestionDeletionEnvelope`.
+            ///
+            /// - Parameters:
+            ///   - data:
+            internal init(data: Components.Schemas.DiscoverQuestionDeletionEnvelope.DataPayload) {
                 self.data = data
             }
             internal enum CodingKeys: String, CodingKey {
@@ -4719,6 +5454,8 @@ internal enum Components {
             internal var viewer: Components.Schemas.CourseViewerState
             /// - Remark: Generated from `#/components/schemas/CourseSummary/sessions`.
             internal var sessions: [Components.Schemas.CourseSession]
+            /// - Remark: Generated from `#/components/schemas/CourseSummary/communitySubmitted`.
+            internal var communitySubmitted: Swift.Bool
             /// Creates a new `CourseSummary`.
             ///
             /// - Parameters:
@@ -4731,6 +5468,7 @@ internal enum Components {
             ///   - memberCount:
             ///   - viewer:
             ///   - sessions:
+            ///   - communitySubmitted:
             internal init(
                 id: Swift.String,
                 code: Swift.String? = nil,
@@ -4740,7 +5478,8 @@ internal enum Components {
                 semesterLabel: Swift.String,
                 memberCount: Swift.Int,
                 viewer: Components.Schemas.CourseViewerState,
-                sessions: [Components.Schemas.CourseSession]
+                sessions: [Components.Schemas.CourseSession],
+                communitySubmitted: Swift.Bool
             ) {
                 self.id = id
                 self.code = code
@@ -4751,6 +5490,7 @@ internal enum Components {
                 self.memberCount = memberCount
                 self.viewer = viewer
                 self.sessions = sessions
+                self.communitySubmitted = communitySubmitted
             }
             internal enum CodingKeys: String, CodingKey {
                 case id
@@ -4762,6 +5502,7 @@ internal enum Components {
                 case memberCount
                 case viewer
                 case sessions
+                case communitySubmitted
             }
         }
         /// - Remark: Generated from `#/components/schemas/CourseSchool`.
@@ -4793,6 +5534,214 @@ internal enum Components {
                 case name
             }
         }
+        /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewSummary`.
+        internal struct CourseSemesterReviewSummary: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewSummary/semesterLabel`.
+            internal var semesterLabel: Swift.String
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewSummary/required`.
+            internal var required: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewSummary/courseCount`.
+            internal var courseCount: Swift.Int
+            /// Creates a new `CourseSemesterReviewSummary`.
+            ///
+            /// - Parameters:
+            ///   - semesterLabel:
+            ///   - required:
+            ///   - courseCount:
+            internal init(
+                semesterLabel: Swift.String,
+                required: Swift.Bool,
+                courseCount: Swift.Int
+            ) {
+                self.semesterLabel = semesterLabel
+                self.required = required
+                self.courseCount = courseCount
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case semesterLabel
+                case required
+                case courseCount
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewCourse`.
+        internal struct CourseSemesterReviewCourse: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewCourse/id`.
+            internal var id: Swift.String
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewCourse/code`.
+            internal var code: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewCourse/name`.
+            internal var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewCourse/school`.
+            internal var school: Swift.String
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewCourse/previousSemesterLabel`.
+            internal var previousSemesterLabel: Swift.String
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewCourse/activeUntil`.
+            internal var activeUntil: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewCourse/sessions`.
+            internal var sessions: [Components.Schemas.CourseSession]
+            /// Creates a new `CourseSemesterReviewCourse`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - code:
+            ///   - name:
+            ///   - school:
+            ///   - previousSemesterLabel:
+            ///   - activeUntil:
+            ///   - sessions:
+            internal init(
+                id: Swift.String,
+                code: Swift.String? = nil,
+                name: Swift.String,
+                school: Swift.String,
+                previousSemesterLabel: Swift.String,
+                activeUntil: Foundation.Date,
+                sessions: [Components.Schemas.CourseSession]
+            ) {
+                self.id = id
+                self.code = code
+                self.name = name
+                self.school = school
+                self.previousSemesterLabel = previousSemesterLabel
+                self.activeUntil = activeUntil
+                self.sessions = sessions
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case id
+                case code
+                case name
+                case school
+                case previousSemesterLabel
+                case activeUntil
+                case sessions
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CourseSemesterReview`.
+        internal struct CourseSemesterReview: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReview/value1`.
+            internal var value1: Components.Schemas.CourseSemesterReviewSummary
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReview/value2`.
+            internal struct Value2Payload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/CourseSemesterReview/value2/courses`.
+                internal var courses: [Components.Schemas.CourseSemesterReviewCourse]
+                /// Creates a new `Value2Payload`.
+                ///
+                /// - Parameters:
+                ///   - courses:
+                internal init(courses: [Components.Schemas.CourseSemesterReviewCourse]) {
+                    self.courses = courses
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case courses
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReview/value2`.
+            internal var value2: Components.Schemas.CourseSemesterReview.Value2Payload
+            /// Creates a new `CourseSemesterReview`.
+            ///
+            /// - Parameters:
+            ///   - value1:
+            ///   - value2:
+            internal init(
+                value1: Components.Schemas.CourseSemesterReviewSummary,
+                value2: Components.Schemas.CourseSemesterReview.Value2Payload
+            ) {
+                self.value1 = value1
+                self.value2 = value2
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                self.value1 = try .init(from: decoder)
+                self.value2 = try .init(from: decoder)
+            }
+            internal func encode(to encoder: any Swift.Encoder) throws {
+                try self.value1.encode(to: encoder)
+                try self.value2.encode(to: encoder)
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewEnvelope`.
+        internal struct CourseSemesterReviewEnvelope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewEnvelope/data`.
+            internal var data: Components.Schemas.CourseSemesterReview
+            /// Creates a new `CourseSemesterReviewEnvelope`.
+            ///
+            /// - Parameters:
+            ///   - data:
+            internal init(data: Components.Schemas.CourseSemesterReview) {
+                self.data = data
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case data
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewRequest`.
+        internal struct CourseSemesterReviewRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewRequest/courseIds`.
+            internal var courseIds: [Swift.String]
+            /// Creates a new `CourseSemesterReviewRequest`.
+            ///
+            /// - Parameters:
+            ///   - courseIds:
+            internal init(courseIds: [Swift.String]) {
+                self.courseIds = courseIds
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case courseIds
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.courseIds = try container.decode(
+                    [Swift.String].self,
+                    forKey: .courseIds
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "courseIds"
+                ])
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewResultEnvelope`.
+        internal struct CourseSemesterReviewResultEnvelope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewResultEnvelope/data`.
+            internal struct DataPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewResultEnvelope/data/semesterLabel`.
+                internal var semesterLabel: Swift.String
+                /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewResultEnvelope/data/renewedCount`.
+                internal var renewedCount: Swift.Int
+                /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewResultEnvelope/data/archivedCount`.
+                internal var archivedCount: Swift.Int
+                /// Creates a new `DataPayload`.
+                ///
+                /// - Parameters:
+                ///   - semesterLabel:
+                ///   - renewedCount:
+                ///   - archivedCount:
+                internal init(
+                    semesterLabel: Swift.String,
+                    renewedCount: Swift.Int,
+                    archivedCount: Swift.Int
+                ) {
+                    self.semesterLabel = semesterLabel
+                    self.renewedCount = renewedCount
+                    self.archivedCount = archivedCount
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case semesterLabel
+                    case renewedCount
+                    case archivedCount
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/CourseSemesterReviewResultEnvelope/data`.
+            internal var data: Components.Schemas.CourseSemesterReviewResultEnvelope.DataPayload
+            /// Creates a new `CourseSemesterReviewResultEnvelope`.
+            ///
+            /// - Parameters:
+            ///   - data:
+            internal init(data: Components.Schemas.CourseSemesterReviewResultEnvelope.DataPayload) {
+                self.data = data
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case data
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/CourseList`.
         internal struct CourseList: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/CourseList/school`.
@@ -4815,6 +5764,8 @@ internal enum Components {
             internal var courses: [Components.Schemas.CourseSummary]
             /// - Remark: Generated from `#/components/schemas/CourseList/nextCursor`.
             internal var nextCursor: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/CourseList/semesterReview`.
+            internal var semesterReview: Components.Schemas.CourseSemesterReviewSummary
             /// Creates a new `CourseList`.
             ///
             /// - Parameters:
@@ -4825,6 +5776,7 @@ internal enum Components {
             ///   - schools:
             ///   - courses:
             ///   - nextCursor:
+            ///   - semesterReview:
             internal init(
                 school: Swift.String,
                 semesterLabel: Swift.String,
@@ -4832,7 +5784,8 @@ internal enum Components {
                 query: Swift.String,
                 schools: [Components.Schemas.CourseSchool],
                 courses: [Components.Schemas.CourseSummary],
-                nextCursor: Swift.String? = nil
+                nextCursor: Swift.String? = nil,
+                semesterReview: Components.Schemas.CourseSemesterReviewSummary
             ) {
                 self.school = school
                 self.semesterLabel = semesterLabel
@@ -4841,6 +5794,7 @@ internal enum Components {
                 self.schools = schools
                 self.courses = courses
                 self.nextCursor = nextCursor
+                self.semesterReview = semesterReview
             }
             internal enum CodingKeys: String, CodingKey {
                 case school
@@ -4850,6 +5804,7 @@ internal enum Components {
                 case schools
                 case courses
                 case nextCursor
+                case semesterReview
             }
         }
         /// - Remark: Generated from `#/components/schemas/CourseListEnvelope`.
@@ -5187,6 +6142,158 @@ internal enum Components {
             /// - Parameters:
             ///   - data:
             internal init(data: Components.Schemas.CourseEnrollmentMutationEnvelope.DataPayload) {
+                self.data = data
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case data
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CourseManualCreateRequest`.
+        internal struct CourseManualCreateRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CourseManualCreateRequest/name`.
+            internal var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/CourseManualCreateRequest/code`.
+            internal var code: Swift.String
+            /// Creates a new `CourseManualCreateRequest`.
+            ///
+            /// - Parameters:
+            ///   - name:
+            ///   - code:
+            internal init(
+                name: Swift.String,
+                code: Swift.String
+            ) {
+                self.name = name
+                self.code = code
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case name
+                case code
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CourseManualCreateEnvelope`.
+        internal struct CourseManualCreateEnvelope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CourseManualCreateEnvelope/data`.
+            internal struct DataPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/CourseManualCreateEnvelope/data/courseId`.
+                internal var courseId: Swift.String
+                /// - Remark: Generated from `#/components/schemas/CourseManualCreateEnvelope/data/name`.
+                internal var name: Swift.String
+                /// - Remark: Generated from `#/components/schemas/CourseManualCreateEnvelope/data/code`.
+                internal var code: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/CourseManualCreateEnvelope/data/school`.
+                internal var school: Swift.String
+                /// - Remark: Generated from `#/components/schemas/CourseManualCreateEnvelope/data/semesterLabel`.
+                internal var semesterLabel: Swift.String
+                /// - Remark: Generated from `#/components/schemas/CourseManualCreateEnvelope/data/communitySubmitted`.
+                internal var communitySubmitted: Swift.Bool
+                /// Creates a new `DataPayload`.
+                ///
+                /// - Parameters:
+                ///   - courseId:
+                ///   - name:
+                ///   - code:
+                ///   - school:
+                ///   - semesterLabel:
+                ///   - communitySubmitted:
+                internal init(
+                    courseId: Swift.String,
+                    name: Swift.String,
+                    code: Swift.String? = nil,
+                    school: Swift.String,
+                    semesterLabel: Swift.String,
+                    communitySubmitted: Swift.Bool
+                ) {
+                    self.courseId = courseId
+                    self.name = name
+                    self.code = code
+                    self.school = school
+                    self.semesterLabel = semesterLabel
+                    self.communitySubmitted = communitySubmitted
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case courseId
+                    case name
+                    case code
+                    case school
+                    case semesterLabel
+                    case communitySubmitted
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/CourseManualCreateEnvelope/data`.
+            internal var data: Components.Schemas.CourseManualCreateEnvelope.DataPayload
+            /// Creates a new `CourseManualCreateEnvelope`.
+            ///
+            /// - Parameters:
+            ///   - data:
+            internal init(data: Components.Schemas.CourseManualCreateEnvelope.DataPayload) {
+                self.data = data
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case data
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CourseMatchRequest`.
+        internal struct CourseMatchRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CourseMatchRequest/school`.
+            internal var school: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/CourseMatchRequest/terms`.
+            internal var terms: [Swift.String]
+            /// Creates a new `CourseMatchRequest`.
+            ///
+            /// - Parameters:
+            ///   - school:
+            ///   - terms:
+            internal init(
+                school: Swift.String? = nil,
+                terms: [Swift.String]
+            ) {
+                self.school = school
+                self.terms = terms
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case school
+                case terms
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CourseMatchEnvelope`.
+        internal struct CourseMatchEnvelope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CourseMatchEnvelope/data`.
+            internal struct DataPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/CourseMatchEnvelope/data/school`.
+                internal var school: Swift.String
+                /// - Remark: Generated from `#/components/schemas/CourseMatchEnvelope/data/semesterLabel`.
+                internal var semesterLabel: Swift.String
+                /// - Remark: Generated from `#/components/schemas/CourseMatchEnvelope/data/courses`.
+                internal var courses: [Components.Schemas.CourseSummary]
+                /// Creates a new `DataPayload`.
+                ///
+                /// - Parameters:
+                ///   - school:
+                ///   - semesterLabel:
+                ///   - courses:
+                internal init(
+                    school: Swift.String,
+                    semesterLabel: Swift.String,
+                    courses: [Components.Schemas.CourseSummary]
+                ) {
+                    self.school = school
+                    self.semesterLabel = semesterLabel
+                    self.courses = courses
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case school
+                    case semesterLabel
+                    case courses
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/CourseMatchEnvelope/data`.
+            internal var data: Components.Schemas.CourseMatchEnvelope.DataPayload
+            /// Creates a new `CourseMatchEnvelope`.
+            ///
+            /// - Parameters:
+            ///   - data:
+            internal init(data: Components.Schemas.CourseMatchEnvelope.DataPayload) {
                 self.data = data
             }
             internal enum CodingKeys: String, CodingKey {
@@ -5682,6 +6789,17 @@ internal enum Components {
             internal var tagline: Swift.String?
             /// - Remark: Generated from `#/components/schemas/CurrentUser/school`.
             internal var school: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/CurrentUser/studentStatus`.
+            internal enum StudentStatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case currentStudent = "CURRENT_STUDENT"
+                case exchangeStudent = "EXCHANGE_STUDENT"
+                case alumni = "ALUMNI"
+                case _empty_ = ""
+            }
+            /// - Remark: Generated from `#/components/schemas/CurrentUser/studentStatus`.
+            internal var studentStatus: Components.Schemas.CurrentUser.StudentStatusPayload?
+            /// - Remark: Generated from `#/components/schemas/CurrentUser/graduationYear`.
+            internal var graduationYear: Swift.Int?
             /// - Remark: Generated from `#/components/schemas/CurrentUser/degreeLevel`.
             internal var degreeLevel: Swift.String?
             /// - Remark: Generated from `#/components/schemas/CurrentUser/major`.
@@ -5720,6 +6838,8 @@ internal enum Components {
             ///   - avatarUrl:
             ///   - tagline:
             ///   - school:
+            ///   - studentStatus:
+            ///   - graduationYear:
             ///   - degreeLevel:
             ///   - major:
             ///   - semester:
@@ -5740,6 +6860,8 @@ internal enum Components {
                 avatarUrl: Swift.String? = nil,
                 tagline: Swift.String? = nil,
                 school: Swift.String? = nil,
+                studentStatus: Components.Schemas.CurrentUser.StudentStatusPayload? = nil,
+                graduationYear: Swift.Int? = nil,
                 degreeLevel: Swift.String? = nil,
                 major: Swift.String? = nil,
                 semester: Swift.Int? = nil,
@@ -5760,6 +6882,8 @@ internal enum Components {
                 self.avatarUrl = avatarUrl
                 self.tagline = tagline
                 self.school = school
+                self.studentStatus = studentStatus
+                self.graduationYear = graduationYear
                 self.degreeLevel = degreeLevel
                 self.major = major
                 self.semester = semester
@@ -5781,6 +6905,8 @@ internal enum Components {
                 case avatarUrl
                 case tagline
                 case school
+                case studentStatus
+                case graduationYear
                 case degreeLevel
                 case major
                 case semester
@@ -5914,6 +7040,14 @@ internal enum Components {
             }
             /// - Remark: Generated from `#/components/schemas/ProfileUpdateRequest/school`.
             internal var school: Components.Schemas.ProfileUpdateRequest.SchoolPayload?
+            /// - Remark: Generated from `#/components/schemas/ProfileUpdateRequest/studentStatus`.
+            internal enum StudentStatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case currentStudent = "CURRENT_STUDENT"
+                case exchangeStudent = "EXCHANGE_STUDENT"
+                case alumni = "ALUMNI"
+            }
+            /// - Remark: Generated from `#/components/schemas/ProfileUpdateRequest/studentStatus`.
+            internal var studentStatus: Components.Schemas.ProfileUpdateRequest.StudentStatusPayload?
             /// - Remark: Generated from `#/components/schemas/ProfileUpdateRequest/degreeLevel`.
             internal enum DegreeLevelPayload: String, Codable, Hashable, Sendable, CaseIterable {
                 case bachelor = "BACHELOR"
@@ -5926,6 +7060,8 @@ internal enum Components {
             internal var major: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ProfileUpdateRequest/semester`.
             internal var semester: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/ProfileUpdateRequest/graduationYear`.
+            internal var graduationYear: Swift.Int?
             /// - Remark: Generated from `#/components/schemas/ProfileUpdateRequest/languages`.
             internal var languages: [Components.Schemas.ProfileLanguage]?
             /// - Remark: Generated from `#/components/schemas/ProfileUpdateRequest/wechatHandle`.
@@ -5959,9 +7095,11 @@ internal enum Components {
             ///   - bio:
             ///   - gender:
             ///   - school:
+            ///   - studentStatus:
             ///   - degreeLevel:
             ///   - major:
             ///   - semester:
+            ///   - graduationYear:
             ///   - languages:
             ///   - wechatHandle:
             ///   - whatsappHandle:
@@ -5980,9 +7118,11 @@ internal enum Components {
                 bio: Swift.String? = nil,
                 gender: Components.Schemas.ProfileUpdateRequest.GenderPayload? = nil,
                 school: Components.Schemas.ProfileUpdateRequest.SchoolPayload? = nil,
+                studentStatus: Components.Schemas.ProfileUpdateRequest.StudentStatusPayload? = nil,
                 degreeLevel: Components.Schemas.ProfileUpdateRequest.DegreeLevelPayload? = nil,
                 major: Swift.String? = nil,
                 semester: Swift.Int? = nil,
+                graduationYear: Swift.Int? = nil,
                 languages: [Components.Schemas.ProfileLanguage]? = nil,
                 wechatHandle: Swift.String? = nil,
                 whatsappHandle: Swift.String? = nil,
@@ -6001,9 +7141,11 @@ internal enum Components {
                 self.bio = bio
                 self.gender = gender
                 self.school = school
+                self.studentStatus = studentStatus
                 self.degreeLevel = degreeLevel
                 self.major = major
                 self.semester = semester
+                self.graduationYear = graduationYear
                 self.languages = languages
                 self.wechatHandle = wechatHandle
                 self.whatsappHandle = whatsappHandle
@@ -6023,9 +7165,11 @@ internal enum Components {
                 case bio
                 case gender
                 case school
+                case studentStatus
                 case degreeLevel
                 case major
                 case semester
+                case graduationYear
                 case languages
                 case wechatHandle
                 case whatsappHandle
@@ -6058,6 +7202,10 @@ internal enum Components {
                     Components.Schemas.ProfileUpdateRequest.SchoolPayload.self,
                     forKey: .school
                 )
+                self.studentStatus = try container.decodeIfPresent(
+                    Components.Schemas.ProfileUpdateRequest.StudentStatusPayload.self,
+                    forKey: .studentStatus
+                )
                 self.degreeLevel = try container.decodeIfPresent(
                     Components.Schemas.ProfileUpdateRequest.DegreeLevelPayload.self,
                     forKey: .degreeLevel
@@ -6069,6 +7217,10 @@ internal enum Components {
                 self.semester = try container.decodeIfPresent(
                     Swift.Int.self,
                     forKey: .semester
+                )
+                self.graduationYear = try container.decodeIfPresent(
+                    Swift.Int.self,
+                    forKey: .graduationYear
                 )
                 self.languages = try container.decodeIfPresent(
                     [Components.Schemas.ProfileLanguage].self,
@@ -6127,9 +7279,11 @@ internal enum Components {
                     "bio",
                     "gender",
                     "school",
+                    "studentStatus",
                     "degreeLevel",
                     "major",
                     "semester",
+                    "graduationYear",
                     "languages",
                     "wechatHandle",
                     "whatsappHandle",
@@ -6181,6 +7335,17 @@ internal enum Components {
             internal var major: Swift.String
             /// - Remark: Generated from `#/components/schemas/ProfileSchoolSummary/semester`.
             internal var semester: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ProfileSchoolSummary/studentStatus`.
+            internal enum StudentStatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case currentStudent = "CURRENT_STUDENT"
+                case exchangeStudent = "EXCHANGE_STUDENT"
+                case alumni = "ALUMNI"
+                case _empty_ = ""
+            }
+            /// - Remark: Generated from `#/components/schemas/ProfileSchoolSummary/studentStatus`.
+            internal var studentStatus: Components.Schemas.ProfileSchoolSummary.StudentStatusPayload?
+            /// - Remark: Generated from `#/components/schemas/ProfileSchoolSummary/graduationYear`.
+            internal var graduationYear: Swift.Int?
             /// Creates a new `ProfileSchoolSummary`.
             ///
             /// - Parameters:
@@ -6188,22 +7353,30 @@ internal enum Components {
             ///   - degreeLabel:
             ///   - major:
             ///   - semester:
+            ///   - studentStatus:
+            ///   - graduationYear:
             internal init(
                 schoolShort: Swift.String,
                 degreeLabel: Swift.String,
                 major: Swift.String,
-                semester: Swift.Int
+                semester: Swift.Int,
+                studentStatus: Components.Schemas.ProfileSchoolSummary.StudentStatusPayload? = nil,
+                graduationYear: Swift.Int? = nil
             ) {
                 self.schoolShort = schoolShort
                 self.degreeLabel = degreeLabel
                 self.major = major
                 self.semester = semester
+                self.studentStatus = studentStatus
+                self.graduationYear = graduationYear
             }
             internal enum CodingKeys: String, CodingKey {
                 case schoolShort
                 case degreeLabel
                 case major
                 case semester
+                case studentStatus
+                case graduationYear
             }
         }
         /// - Remark: Generated from `#/components/schemas/CurrentProfile`.
@@ -6565,6 +7738,17 @@ internal enum Components {
             internal var major: Swift.String?
             /// - Remark: Generated from `#/components/schemas/PublicProfileUser/semester`.
             internal var semester: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/PublicProfileUser/studentStatus`.
+            internal enum StudentStatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case currentStudent = "CURRENT_STUDENT"
+                case exchangeStudent = "EXCHANGE_STUDENT"
+                case alumni = "ALUMNI"
+                case _empty_ = ""
+            }
+            /// - Remark: Generated from `#/components/schemas/PublicProfileUser/studentStatus`.
+            internal var studentStatus: Components.Schemas.PublicProfileUser.StudentStatusPayload?
+            /// - Remark: Generated from `#/components/schemas/PublicProfileUser/graduationYear`.
+            internal var graduationYear: Swift.Int?
             /// - Remark: Generated from `#/components/schemas/PublicProfileUser/verifiedStudent`.
             internal var verifiedStudent: Swift.Bool
             /// - Remark: Generated from `#/components/schemas/PublicProfileUser/studentVerificationStatus`.
@@ -6589,6 +7773,8 @@ internal enum Components {
             ///   - degreeLevel:
             ///   - major:
             ///   - semester:
+            ///   - studentStatus:
+            ///   - graduationYear:
             ///   - verifiedStudent:
             ///   - studentVerificationStatus:
             ///   - schoolSummary:
@@ -6606,6 +7792,8 @@ internal enum Components {
                 degreeLevel: Swift.String? = nil,
                 major: Swift.String? = nil,
                 semester: Swift.Int? = nil,
+                studentStatus: Components.Schemas.PublicProfileUser.StudentStatusPayload? = nil,
+                graduationYear: Swift.Int? = nil,
                 verifiedStudent: Swift.Bool,
                 studentVerificationStatus: Swift.String,
                 schoolSummary: Components.Schemas.ProfileSchoolSummary,
@@ -6623,6 +7811,8 @@ internal enum Components {
                 self.degreeLevel = degreeLevel
                 self.major = major
                 self.semester = semester
+                self.studentStatus = studentStatus
+                self.graduationYear = graduationYear
                 self.verifiedStudent = verifiedStudent
                 self.studentVerificationStatus = studentVerificationStatus
                 self.schoolSummary = schoolSummary
@@ -6641,6 +7831,8 @@ internal enum Components {
                 case degreeLevel
                 case major
                 case semester
+                case studentStatus
+                case graduationYear
                 case verifiedStudent
                 case studentVerificationStatus
                 case schoolSummary
@@ -7812,6 +9004,50 @@ internal enum Components {
                 case data
             }
         }
+        /// - Remark: Generated from `#/components/schemas/ScheduleShareLinkCreateResult`.
+        internal struct ScheduleShareLinkCreateResult: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ScheduleShareLinkCreateResult/shareUrl`.
+            internal var shareUrl: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ScheduleShareLinkCreateResult/token`.
+            internal var token: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ScheduleShareLinkCreateResult/linkId`.
+            internal var linkId: Swift.String
+            /// Creates a new `ScheduleShareLinkCreateResult`.
+            ///
+            /// - Parameters:
+            ///   - shareUrl:
+            ///   - token:
+            ///   - linkId:
+            internal init(
+                shareUrl: Swift.String,
+                token: Swift.String? = nil,
+                linkId: Swift.String
+            ) {
+                self.shareUrl = shareUrl
+                self.token = token
+                self.linkId = linkId
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case shareUrl
+                case token
+                case linkId
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ScheduleShareLinkCreateEnvelope`.
+        internal struct ScheduleShareLinkCreateEnvelope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ScheduleShareLinkCreateEnvelope/data`.
+            internal var data: Components.Schemas.ScheduleShareLinkCreateResult
+            /// Creates a new `ScheduleShareLinkCreateEnvelope`.
+            ///
+            /// - Parameters:
+            ///   - data:
+            internal init(data: Components.Schemas.ScheduleShareLinkCreateResult) {
+                self.data = data
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case data
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/ScheduleShareChatPreview`.
         internal struct ScheduleShareChatPreview: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/ScheduleShareChatPreview/snapshot`.
@@ -7838,25 +9074,37 @@ internal enum Components {
             internal var expired: Swift.Bool
             /// - Remark: Generated from `#/components/schemas/ScheduleShareChatPreview/ownerDisplayLabel`.
             internal var ownerDisplayLabel: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ScheduleShareChatPreview/linkId`.
+            internal var linkId: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ScheduleShareChatPreview/ownedByViewer`.
+            internal var ownedByViewer: Swift.Bool
             /// Creates a new `ScheduleShareChatPreview`.
             ///
             /// - Parameters:
             ///   - snapshot:
             ///   - expired:
             ///   - ownerDisplayLabel:
+            ///   - linkId:
+            ///   - ownedByViewer:
             internal init(
                 snapshot: Components.Schemas.ScheduleShareChatPreview.SnapshotPayload,
                 expired: Swift.Bool,
-                ownerDisplayLabel: Swift.String
+                ownerDisplayLabel: Swift.String,
+                linkId: Swift.String,
+                ownedByViewer: Swift.Bool
             ) {
                 self.snapshot = snapshot
                 self.expired = expired
                 self.ownerDisplayLabel = ownerDisplayLabel
+                self.linkId = linkId
+                self.ownedByViewer = ownedByViewer
             }
             internal enum CodingKeys: String, CodingKey {
                 case snapshot
                 case expired
                 case ownerDisplayLabel
+                case linkId
+                case ownedByViewer
             }
         }
         /// - Remark: Generated from `#/components/schemas/ScheduleShareChatPreviewEnvelope`.
@@ -7868,6 +9116,44 @@ internal enum Components {
             /// - Parameters:
             ///   - data:
             internal init(data: Components.Schemas.ScheduleShareChatPreview) {
+                self.data = data
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case data
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ScheduleShareRevokeEnvelope`.
+        internal struct ScheduleShareRevokeEnvelope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ScheduleShareRevokeEnvelope/data`.
+            internal struct DataPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/ScheduleShareRevokeEnvelope/data/linkId`.
+                internal var linkId: Swift.String
+                /// - Remark: Generated from `#/components/schemas/ScheduleShareRevokeEnvelope/data/revokedAt`.
+                internal var revokedAt: Foundation.Date
+                /// Creates a new `DataPayload`.
+                ///
+                /// - Parameters:
+                ///   - linkId:
+                ///   - revokedAt:
+                internal init(
+                    linkId: Swift.String,
+                    revokedAt: Foundation.Date
+                ) {
+                    self.linkId = linkId
+                    self.revokedAt = revokedAt
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case linkId
+                    case revokedAt
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/ScheduleShareRevokeEnvelope/data`.
+            internal var data: Components.Schemas.ScheduleShareRevokeEnvelope.DataPayload
+            /// Creates a new `ScheduleShareRevokeEnvelope`.
+            ///
+            /// - Parameters:
+            ///   - data:
+            internal init(data: Components.Schemas.ScheduleShareRevokeEnvelope.DataPayload) {
                 self.data = data
             }
             internal enum CodingKeys: String, CodingKey {
@@ -10718,6 +12004,160 @@ internal enum Operations {
             /// Stable API error.
             ///
             /// - Remark: Generated from `#/paths//api/v1/me/delete(deleteAccount)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `GET /api/v1/me/posts`.
+    /// - Remark: Generated from `#/paths//api/v1/me/posts/get(listCurrentUserDiscoverPosts)`.
+    internal enum ListCurrentUserDiscoverPosts {
+        internal static let id: Swift.String = "listCurrentUserDiscoverPosts"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/me/posts/GET/header`.
+            internal struct Headers: Sendable, Hashable {
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListCurrentUserDiscoverPosts.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListCurrentUserDiscoverPosts.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.ListCurrentUserDiscoverPosts.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            internal init(headers: Operations.ListCurrentUserDiscoverPosts.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/posts/GET/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/me/posts/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.DiscoverOwnedItemsEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.DiscoverOwnedItemsEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.ListCurrentUserDiscoverPosts.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.ListCurrentUserDiscoverPosts.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The current user's published buddy posts and legacy activities.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/posts/get(listCurrentUserDiscoverPosts)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListCurrentUserDiscoverPosts.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.ListCurrentUserDiscoverPosts.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/posts/get(listCurrentUserDiscoverPosts)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/posts/get(listCurrentUserDiscoverPosts)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses._Error)
@@ -16634,6 +18074,1434 @@ internal enum Operations {
             }
         }
     }
+    /// - Remark: HTTP `PATCH /api/v1/discover/posts/{postId}`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/patch(updateDiscoverBuddyPost)`.
+    internal enum UpdateDiscoverBuddyPost {
+        internal static let id: Swift.String = "updateDiscoverBuddyPost"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/PATCH/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/PATCH/path/postId`.
+                internal var postId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - postId:
+                internal init(postId: Swift.String) {
+                    self.postId = postId
+                }
+            }
+            internal var path: Operations.UpdateDiscoverBuddyPost.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/PATCH/header`.
+            internal struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/PATCH/header/Idempotency-Key`.
+                internal var idempotencyKey: Swift.String
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateDiscoverBuddyPost.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                internal init(
+                    idempotencyKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateDiscoverBuddyPost.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.UpdateDiscoverBuddyPost.Input.Headers
+            /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/PATCH/requestBody`.
+            internal enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/PATCH/requestBody/content/application\/json`.
+                case json(Components.Schemas.DiscoverBuddyPostRequest)
+            }
+            internal var body: Operations.UpdateDiscoverBuddyPost.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            internal init(
+                path: Operations.UpdateDiscoverBuddyPost.Input.Path,
+                headers: Operations.UpdateDiscoverBuddyPost.Input.Headers,
+                body: Operations.UpdateDiscoverBuddyPost.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/PATCH/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/PATCH/responses/200/content/application\/json`.
+                    case json(Components.Schemas.DiscoverBuddyPostActionEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.DiscoverBuddyPostActionEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.UpdateDiscoverBuddyPost.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.UpdateDiscoverBuddyPost.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The author's active buddy post was updated in place.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/patch(updateDiscoverBuddyPost)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.UpdateDiscoverBuddyPost.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.UpdateDiscoverBuddyPost.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/patch(updateDiscoverBuddyPost)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/patch(updateDiscoverBuddyPost)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            internal var forbidden: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/patch(updateDiscoverBuddyPost)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/patch(updateDiscoverBuddyPost)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            internal var conflict: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/patch(updateDiscoverBuddyPost)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// The request exceeded a server-side rate limit.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/patch(updateDiscoverBuddyPost)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.RateLimited)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            internal var tooManyRequests: Components.Responses.RateLimited {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/patch(updateDiscoverBuddyPost)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `PATCH /api/v1/discover/posts/{postId}/status`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/status/patch(updateDiscoverBuddyPostStatus)`.
+    internal enum UpdateDiscoverBuddyPostStatus {
+        internal static let id: Swift.String = "updateDiscoverBuddyPostStatus"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/status/PATCH/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/status/PATCH/path/postId`.
+                internal var postId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - postId:
+                internal init(postId: Swift.String) {
+                    self.postId = postId
+                }
+            }
+            internal var path: Operations.UpdateDiscoverBuddyPostStatus.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/status/PATCH/header`.
+            internal struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/status/PATCH/header/Idempotency-Key`.
+                internal var idempotencyKey: Swift.String
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateDiscoverBuddyPostStatus.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                internal init(
+                    idempotencyKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateDiscoverBuddyPostStatus.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.UpdateDiscoverBuddyPostStatus.Input.Headers
+            /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/status/PATCH/requestBody`.
+            internal enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/status/PATCH/requestBody/content/application\/json`.
+                case json(Components.Schemas.DiscoverBuddyPostStatusRequest)
+            }
+            internal var body: Operations.UpdateDiscoverBuddyPostStatus.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            internal init(
+                path: Operations.UpdateDiscoverBuddyPostStatus.Input.Path,
+                headers: Operations.UpdateDiscoverBuddyPostStatus.Input.Headers,
+                body: Operations.UpdateDiscoverBuddyPostStatus.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/status/PATCH/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/status/PATCH/responses/200/content/application\/json`.
+                    case json(Components.Schemas.DiscoverBuddyPostActionEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.DiscoverBuddyPostActionEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.UpdateDiscoverBuddyPostStatus.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.UpdateDiscoverBuddyPostStatus.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The author closed the buddy post, or a completed retry was replayed.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/status/patch(updateDiscoverBuddyPostStatus)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.UpdateDiscoverBuddyPostStatus.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.UpdateDiscoverBuddyPostStatus.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/status/patch(updateDiscoverBuddyPostStatus)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/status/patch(updateDiscoverBuddyPostStatus)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            internal var forbidden: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/status/patch(updateDiscoverBuddyPostStatus)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/status/patch(updateDiscoverBuddyPostStatus)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            internal var conflict: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/status/patch(updateDiscoverBuddyPostStatus)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// The request exceeded a server-side rate limit.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/status/patch(updateDiscoverBuddyPostStatus)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.RateLimited)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            internal var tooManyRequests: Components.Responses.RateLimited {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/status/patch(updateDiscoverBuddyPostStatus)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `GET /api/v1/discover/posts/{postId}/questions`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/get(listDiscoverBuddyPostQuestions)`.
+    internal enum ListDiscoverBuddyPostQuestions {
+        internal static let id: Swift.String = "listDiscoverBuddyPostQuestions"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/GET/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/GET/path/postId`.
+                internal var postId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - postId:
+                internal init(postId: Swift.String) {
+                    self.postId = postId
+                }
+            }
+            internal var path: Operations.ListDiscoverBuddyPostQuestions.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/GET/header`.
+            internal struct Headers: Sendable, Hashable {
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListDiscoverBuddyPostQuestions.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListDiscoverBuddyPostQuestions.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.ListDiscoverBuddyPostQuestions.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            internal init(
+                path: Operations.ListDiscoverBuddyPostQuestions.Input.Path,
+                headers: Operations.ListDiscoverBuddyPostQuestions.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/GET/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.DiscoverQuestionListEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.DiscoverQuestionListEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.ListDiscoverBuddyPostQuestions.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.ListDiscoverBuddyPostQuestions.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Public questions and host answers for a visible buddy post.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/get(listDiscoverBuddyPostQuestions)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListDiscoverBuddyPostQuestions.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.ListDiscoverBuddyPostQuestions.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/get(listDiscoverBuddyPostQuestions)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/get(listDiscoverBuddyPostQuestions)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/get(listDiscoverBuddyPostQuestions)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/get(listDiscoverBuddyPostQuestions)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `POST /api/v1/discover/posts/{postId}/questions`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/post(createDiscoverBuddyPostQuestionComment)`.
+    internal enum CreateDiscoverBuddyPostQuestionComment {
+        internal static let id: Swift.String = "createDiscoverBuddyPostQuestionComment"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/POST/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/POST/path/postId`.
+                internal var postId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - postId:
+                internal init(postId: Swift.String) {
+                    self.postId = postId
+                }
+            }
+            internal var path: Operations.CreateDiscoverBuddyPostQuestionComment.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/POST/header`.
+            internal struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/POST/header/Idempotency-Key`.
+                internal var idempotencyKey: Swift.String
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateDiscoverBuddyPostQuestionComment.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                internal init(
+                    idempotencyKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateDiscoverBuddyPostQuestionComment.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.CreateDiscoverBuddyPostQuestionComment.Input.Headers
+            /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/POST/requestBody`.
+            internal enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.DiscoverQuestionWriteRequest)
+            }
+            internal var body: Operations.CreateDiscoverBuddyPostQuestionComment.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            internal init(
+                path: Operations.CreateDiscoverBuddyPostQuestionComment.Input.Path,
+                headers: Operations.CreateDiscoverBuddyPostQuestionComment.Input.Headers,
+                body: Operations.CreateDiscoverBuddyPostQuestionComment.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/POST/responses/201/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.DiscoverQuestionMutationEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.DiscoverQuestionMutationEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.CreateDiscoverBuddyPostQuestionComment.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.CreateDiscoverBuddyPostQuestionComment.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// A question or host answer was created.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/post(createDiscoverBuddyPostQuestionComment)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateDiscoverBuddyPostQuestionComment.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            internal var created: Operations.CreateDiscoverBuddyPostQuestionComment.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/post(createDiscoverBuddyPostQuestionComment)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/post(createDiscoverBuddyPostQuestionComment)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            internal var forbidden: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/post(createDiscoverBuddyPostQuestionComment)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/post(createDiscoverBuddyPostQuestionComment)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            internal var conflict: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/post(createDiscoverBuddyPostQuestionComment)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// The request exceeded a server-side rate limit.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/post(createDiscoverBuddyPostQuestionComment)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.RateLimited)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            internal var tooManyRequests: Components.Responses.RateLimited {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/post(createDiscoverBuddyPostQuestionComment)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `DELETE /api/v1/discover/posts/{postId}/questions/{commentId}`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/{commentId}/delete(deleteDiscoverBuddyPostQuestionComment)`.
+    internal enum DeleteDiscoverBuddyPostQuestionComment {
+        internal static let id: Swift.String = "deleteDiscoverBuddyPostQuestionComment"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/{commentId}/DELETE/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/{commentId}/DELETE/path/postId`.
+                internal var postId: Swift.String
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/{commentId}/DELETE/path/commentId`.
+                internal var commentId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - postId:
+                ///   - commentId:
+                internal init(
+                    postId: Swift.String,
+                    commentId: Swift.String
+                ) {
+                    self.postId = postId
+                    self.commentId = commentId
+                }
+            }
+            internal var path: Operations.DeleteDiscoverBuddyPostQuestionComment.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/{commentId}/DELETE/header`.
+            internal struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/{commentId}/DELETE/header/Idempotency-Key`.
+                internal var idempotencyKey: Swift.String
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteDiscoverBuddyPostQuestionComment.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                internal init(
+                    idempotencyKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteDiscoverBuddyPostQuestionComment.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.DeleteDiscoverBuddyPostQuestionComment.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            internal init(
+                path: Operations.DeleteDiscoverBuddyPostQuestionComment.Input.Path,
+                headers: Operations.DeleteDiscoverBuddyPostQuestionComment.Input.Headers
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/{commentId}/DELETE/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/discover/posts/{postId}/questions/{commentId}/DELETE/responses/200/content/application\/json`.
+                    case json(Components.Schemas.DiscoverQuestionDeletionEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.DiscoverQuestionDeletionEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.DeleteDiscoverBuddyPostQuestionComment.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.DeleteDiscoverBuddyPostQuestionComment.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The question or answer was deleted.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/{commentId}/delete(deleteDiscoverBuddyPostQuestionComment)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.DeleteDiscoverBuddyPostQuestionComment.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.DeleteDiscoverBuddyPostQuestionComment.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/{commentId}/delete(deleteDiscoverBuddyPostQuestionComment)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/{commentId}/delete(deleteDiscoverBuddyPostQuestionComment)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            internal var forbidden: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/{commentId}/delete(deleteDiscoverBuddyPostQuestionComment)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/{commentId}/delete(deleteDiscoverBuddyPostQuestionComment)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            internal var conflict: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/{commentId}/delete(deleteDiscoverBuddyPostQuestionComment)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// The request exceeded a server-side rate limit.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/{commentId}/delete(deleteDiscoverBuddyPostQuestionComment)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.RateLimited)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            internal var tooManyRequests: Components.Responses.RateLimited {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/questions/{commentId}/delete(deleteDiscoverBuddyPostQuestionComment)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
     /// - Remark: HTTP `POST /api/v1/discover/posts/{postId}/saved`.
     /// - Remark: Generated from `#/paths//api/v1/discover/posts/{postId}/saved/post(saveDiscoverBuddyPost)`.
     internal enum SaveDiscoverBuddyPost {
@@ -19617,6 +22485,876 @@ internal enum Operations {
             /// Stable API error.
             ///
             /// - Remark: Generated from `#/paths//api/v1/courses/get(listCourses)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `POST /api/v1/courses/manual`.
+    /// - Remark: Generated from `#/paths//api/v1/courses/manual/post(createCommunityCourse)`.
+    internal enum CreateCommunityCourse {
+        internal static let id: Swift.String = "createCommunityCourse"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/courses/manual/POST/header`.
+            internal struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/courses/manual/POST/header/Idempotency-Key`.
+                internal var idempotencyKey: Swift.String
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateCommunityCourse.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                internal init(
+                    idempotencyKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateCommunityCourse.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.CreateCommunityCourse.Input.Headers
+            /// - Remark: Generated from `#/paths/api/v1/courses/manual/POST/requestBody`.
+            internal enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/courses/manual/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.CourseManualCreateRequest)
+            }
+            internal var body: Operations.CreateCommunityCourse.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            internal init(
+                headers: Operations.CreateCommunityCourse.Input.Headers,
+                body: Operations.CreateCommunityCourse.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/courses/manual/POST/responses/201/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/courses/manual/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.CourseManualCreateEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.CourseManualCreateEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.CreateCommunityCourse.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.CreateCommunityCourse.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// A verified student created or reused a community course and joined it.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/manual/post(createCommunityCourse)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateCommunityCourse.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            internal var created: Operations.CreateCommunityCourse.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/manual/post(createCommunityCourse)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/manual/post(createCommunityCourse)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            internal var forbidden: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/manual/post(createCommunityCourse)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            internal var conflict: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/manual/post(createCommunityCourse)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// The request exceeded a server-side rate limit.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/manual/post(createCommunityCourse)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.RateLimited)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            internal var tooManyRequests: Components.Responses.RateLimited {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/manual/post(createCommunityCourse)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `POST /api/v1/courses/match`.
+    /// - Remark: Generated from `#/paths//api/v1/courses/match/post(matchCoursesFromTimetableText)`.
+    internal enum MatchCoursesFromTimetableText {
+        internal static let id: Swift.String = "matchCoursesFromTimetableText"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/courses/match/POST/header`.
+            internal struct Headers: Sendable, Hashable {
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.MatchCoursesFromTimetableText.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.MatchCoursesFromTimetableText.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.MatchCoursesFromTimetableText.Input.Headers
+            /// - Remark: Generated from `#/paths/api/v1/courses/match/POST/requestBody`.
+            internal enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/courses/match/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.CourseMatchRequest)
+            }
+            internal var body: Operations.MatchCoursesFromTimetableText.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            internal init(
+                headers: Operations.MatchCoursesFromTimetableText.Input.Headers = .init(),
+                body: Operations.MatchCoursesFromTimetableText.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/courses/match/POST/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/courses/match/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.CourseMatchEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.CourseMatchEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.MatchCoursesFromTimetableText.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.MatchCoursesFromTimetableText.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Current-semester courses matching locally extracted timetable text.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/match/post(matchCoursesFromTimetableText)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.MatchCoursesFromTimetableText.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.MatchCoursesFromTimetableText.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/match/post(matchCoursesFromTimetableText)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/match/post(matchCoursesFromTimetableText)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            internal var forbidden: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/match/post(matchCoursesFromTimetableText)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/match/post(matchCoursesFromTimetableText)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `GET /api/v1/courses/semester-review`.
+    /// - Remark: Generated from `#/paths//api/v1/courses/semester-review/get(getCourseSemesterReview)`.
+    internal enum GetCourseSemesterReview {
+        internal static let id: Swift.String = "getCourseSemesterReview"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/courses/semester-review/GET/header`.
+            internal struct Headers: Sendable, Hashable {
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetCourseSemesterReview.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetCourseSemesterReview.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.GetCourseSemesterReview.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            internal init(headers: Operations.GetCourseSemesterReview.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/courses/semester-review/GET/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/courses/semester-review/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.CourseSemesterReviewEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.CourseSemesterReviewEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.GetCourseSemesterReview.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.GetCourseSemesterReview.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Expired course memberships awaiting this semester's review.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/semester-review/get(getCourseSemesterReview)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetCourseSemesterReview.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.GetCourseSemesterReview.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/semester-review/get(getCourseSemesterReview)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/semester-review/get(getCourseSemesterReview)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `POST /api/v1/courses/semester-review`.
+    /// - Remark: Generated from `#/paths//api/v1/courses/semester-review/post(confirmCourseSemesterReview)`.
+    internal enum ConfirmCourseSemesterReview {
+        internal static let id: Swift.String = "confirmCourseSemesterReview"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/courses/semester-review/POST/header`.
+            internal struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/courses/semester-review/POST/header/Idempotency-Key`.
+                internal var idempotencyKey: Swift.String
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ConfirmCourseSemesterReview.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                internal init(
+                    idempotencyKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ConfirmCourseSemesterReview.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.ConfirmCourseSemesterReview.Input.Headers
+            /// - Remark: Generated from `#/paths/api/v1/courses/semester-review/POST/requestBody`.
+            internal enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/courses/semester-review/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.CourseSemesterReviewRequest)
+            }
+            internal var body: Operations.ConfirmCourseSemesterReview.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            internal init(
+                headers: Operations.ConfirmCourseSemesterReview.Input.Headers,
+                body: Operations.ConfirmCourseSemesterReview.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/courses/semester-review/POST/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/courses/semester-review/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.CourseSemesterReviewResultEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.CourseSemesterReviewResultEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.ConfirmCourseSemesterReview.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.ConfirmCourseSemesterReview.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Selected courses were renewed and the remaining courses archived.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/semester-review/post(confirmCourseSemesterReview)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ConfirmCourseSemesterReview.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.ConfirmCourseSemesterReview.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/semester-review/post(confirmCourseSemesterReview)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/semester-review/post(confirmCourseSemesterReview)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            internal var conflict: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/semester-review/post(confirmCourseSemesterReview)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// The request exceeded a server-side rate limit.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/semester-review/post(confirmCourseSemesterReview)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.RateLimited)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            internal var tooManyRequests: Components.Responses.RateLimited {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/semester-review/post(confirmCourseSemesterReview)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses._Error)
@@ -29159,27 +32897,27 @@ internal enum Operations {
         }
     }
     /// - Remark: HTTP `GET /api/v1/plans`.
-    /// - Remark: Generated from `#/paths//api/v1/plans/get(listPlansNeedingAction)`.
-    internal enum ListPlansNeedingAction {
-        internal static let id: Swift.String = "listPlansNeedingAction"
+    /// - Remark: Generated from `#/paths//api/v1/plans/get(listPlans)`.
+    internal enum ListPlans {
+        internal static let id: Swift.String = "listPlans"
         internal struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/api/v1/plans/GET/header`.
             internal struct Headers: Sendable, Hashable {
-                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListPlansNeedingAction.AcceptableContentType>]
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListPlans.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListPlansNeedingAction.AcceptableContentType>] = .defaultValues()) {
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListPlans.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            internal var headers: Operations.ListPlansNeedingAction.Input.Headers
+            internal var headers: Operations.ListPlans.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - headers:
-            internal init(headers: Operations.ListPlansNeedingAction.Input.Headers = .init()) {
+            internal init(headers: Operations.ListPlans.Input.Headers = .init()) {
                 self.headers = headers
             }
         }
@@ -29203,26 +32941,26 @@ internal enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                internal var body: Operations.ListPlansNeedingAction.Output.Ok.Body
+                internal var body: Operations.ListPlans.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                internal init(body: Operations.ListPlansNeedingAction.Output.Ok.Body) {
+                internal init(body: Operations.ListPlans.Output.Ok.Body) {
                     self.body = body
                 }
             }
-            /// Pending plan requests needing the viewer action.
+            /// Pending invitations and upcoming confirmed plans involving the viewer.
             ///
-            /// - Remark: Generated from `#/paths//api/v1/plans/get(listPlansNeedingAction)/responses/200`.
+            /// - Remark: Generated from `#/paths//api/v1/plans/get(listPlans)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.ListPlansNeedingAction.Output.Ok)
+            case ok(Operations.ListPlans.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            internal var ok: Operations.ListPlansNeedingAction.Output.Ok {
+            internal var ok: Operations.ListPlans.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -29237,7 +32975,7 @@ internal enum Operations {
             }
             /// Stable API error.
             ///
-            /// - Remark: Generated from `#/paths//api/v1/plans/get(listPlansNeedingAction)/responses/401`.
+            /// - Remark: Generated from `#/paths//api/v1/plans/get(listPlans)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses._Error)
@@ -29260,7 +32998,7 @@ internal enum Operations {
             }
             /// Stable API error.
             ///
-            /// - Remark: Generated from `#/paths//api/v1/plans/get(listPlansNeedingAction)/responses/500`.
+            /// - Remark: Generated from `#/paths//api/v1/plans/get(listPlans)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses._Error)
@@ -30886,6 +34624,244 @@ internal enum Operations {
             }
         }
     }
+    /// - Remark: HTTP `POST /api/v1/schedule-shares`.
+    /// - Remark: Generated from `#/paths//api/v1/schedule-shares/post(createScheduleShareLink)`.
+    internal enum CreateScheduleShareLink {
+        internal static let id: Swift.String = "createScheduleShareLink"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/schedule-shares/POST/header`.
+            internal struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/schedule-shares/POST/header/Idempotency-Key`.
+                internal var idempotencyKey: Swift.String
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateScheduleShareLink.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                internal init(
+                    idempotencyKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateScheduleShareLink.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.CreateScheduleShareLink.Input.Headers
+            /// - Remark: Generated from `#/paths/api/v1/schedule-shares/POST/requestBody`.
+            internal enum Body: Sendable, Hashable {
+                /// Schedule range, privacy reveal configuration, usage limit, and expiry.
+                ///
+                /// - Remark: Generated from `#/paths/api/v1/schedule-shares/POST/requestBody/json`.
+                internal struct JsonPayload: Codable, Hashable, Sendable {
+                    /// A container of undocumented properties.
+                    internal var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - additionalProperties: A container of undocumented properties.
+                    internal init(additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()) {
+                        self.additionalProperties = additionalProperties
+                    }
+                    internal init(from decoder: any Swift.Decoder) throws {
+                        additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
+                    }
+                    internal func encode(to encoder: any Swift.Encoder) throws {
+                        try encoder.encodeAdditionalProperties(additionalProperties)
+                    }
+                }
+                /// - Remark: Generated from `#/paths/api/v1/schedule-shares/POST/requestBody/content/application\/json`.
+                case json(Operations.CreateScheduleShareLink.Input.Body.JsonPayload)
+            }
+            internal var body: Operations.CreateScheduleShareLink.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            internal init(
+                headers: Operations.CreateScheduleShareLink.Input.Headers,
+                body: Operations.CreateScheduleShareLink.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/schedule-shares/POST/responses/201/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/schedule-shares/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.ScheduleShareLinkCreateEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.ScheduleShareLinkCreateEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.CreateScheduleShareLink.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.CreateScheduleShareLink.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Standalone schedule share link created.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/schedule-shares/post(createScheduleShareLink)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateScheduleShareLink.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            internal var created: Operations.CreateScheduleShareLink.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/schedule-shares/post(createScheduleShareLink)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/schedule-shares/post(createScheduleShareLink)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            internal var conflict: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/schedule-shares/post(createScheduleShareLink)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/schedule-shares/post(createScheduleShareLink)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
     /// - Remark: HTTP `GET /api/v1/schedule-shares/chat-preview/{token}`.
     /// - Remark: Generated from `#/paths//api/v1/schedule-shares/chat-preview/{token}/get(getScheduleShareChatPreview)`.
     internal enum GetScheduleShareChatPreview {
@@ -32297,6 +36273,224 @@ internal enum Operations {
             /// Stable API error.
             ///
             /// - Remark: Generated from `#/paths//api/v1/feedback/{feedbackId}/comments/post(commentFeedback)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `DELETE /api/v1/schedule-shares/owner/{linkId}`.
+    /// - Remark: Generated from `#/paths//api/v1/schedule-shares/owner/{linkId}/delete(revokeScheduleShare)`.
+    internal enum RevokeScheduleShare {
+        internal static let id: Swift.String = "revokeScheduleShare"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/schedule-shares/owner/{linkId}/DELETE/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/schedule-shares/owner/{linkId}/DELETE/path/linkId`.
+                internal var linkId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - linkId:
+                internal init(linkId: Swift.String) {
+                    self.linkId = linkId
+                }
+            }
+            internal var path: Operations.RevokeScheduleShare.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/schedule-shares/owner/{linkId}/DELETE/header`.
+            internal struct Headers: Sendable, Hashable {
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RevokeScheduleShare.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RevokeScheduleShare.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.RevokeScheduleShare.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            internal init(
+                path: Operations.RevokeScheduleShare.Input.Path,
+                headers: Operations.RevokeScheduleShare.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/schedule-shares/owner/{linkId}/DELETE/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/schedule-shares/owner/{linkId}/DELETE/responses/200/content/application\/json`.
+                    case json(Components.Schemas.ScheduleShareRevokeEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.ScheduleShareRevokeEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.RevokeScheduleShare.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.RevokeScheduleShare.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The owner revoked the schedule link, or replayed the same revoke.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/schedule-shares/owner/{linkId}/delete(revokeScheduleShare)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.RevokeScheduleShare.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.RevokeScheduleShare.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/schedule-shares/owner/{linkId}/delete(revokeScheduleShare)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/schedule-shares/owner/{linkId}/delete(revokeScheduleShare)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/schedule-shares/owner/{linkId}/delete(revokeScheduleShare)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/schedule-shares/owner/{linkId}/delete(revokeScheduleShare)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses._Error)

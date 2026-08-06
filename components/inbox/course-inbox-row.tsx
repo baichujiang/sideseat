@@ -1,3 +1,5 @@
+"use client";
+
 import type { Route } from "next";
 import type { Course } from "@prisma/client";
 import { ChevronRight } from "lucide-react";
@@ -6,6 +8,7 @@ import { inboxConversationTileClassName } from "@/components/inbox/inbox-convers
 import { InboxRowTimestamp } from "@/components/inbox/inbox-row-timestamp";
 import { InboxUnreadBadge } from "@/components/inbox/inbox-unread-badge";
 import { InboxSwipeRow } from "@/components/inbox/inbox-swipe-row";
+import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { CourseAvatar } from "@/components/ui/course-avatar";
 import { courseChatHeadline } from "@/lib/courses/course-code-label";
 import { cn } from "@/lib/utils";
@@ -33,11 +36,13 @@ export function CourseInboxRow({
   unreadCount: number;
   returnTo?: string;
 }) {
+  const { messages } = useLocaleContext();
+  const inbox = messages.inbox;
   const when = last?.createdAt ?? userCourse.updatedAt;
   const fromMe = last?.senderId === userId;
   const preview = last?.body
-    ? `${fromMe ? "You: " : `${last.sender.nickname ?? "Someone"}: `}${last.body}`
-    : "Course chat — say hi to the class";
+    ? `${fromMe ? `${inbox.youPrefix} ` : `${last.sender.nickname ?? inbox.someoneFallback}: `}${last.body}`
+    : inbox.courseChatEmptyPreview;
   const isUnread = unreadCount > 0;
   const returnEnc = encodeURIComponent(returnTo);
   const href = `/courses/${course.id}/chat?returnTo=${returnEnc}` as Route;

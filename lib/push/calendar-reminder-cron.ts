@@ -3,7 +3,7 @@ import "server-only";
 import { format } from "date-fns";
 
 import { prisma } from "@/lib/db/prisma";
-import { notifyUserPush } from "@/lib/push/notify-user";
+import { notifyUserWebPush } from "@/lib/push/notify-user";
 
 /** Minutes before `startAt` when we try to fire the reminder. */
 const LEAD_MINUTES = 15;
@@ -50,7 +50,9 @@ export async function runCalendarReminderCron(now = new Date()): Promise<{ claim
     const place = entry.location?.trim();
     const body = place ? `${when} · ${place}` : `${when} · starting soon`;
 
-    await notifyUserPush(entry.userId, {
+    // Native iOS reminders are scheduled locally during calendar sync. Keep
+    // this scan browser-only so enabling a recovery cron cannot notify twice.
+    await notifyUserWebPush(entry.userId, {
       title: `Soon: ${entry.title}`,
       body,
       url: "/home",

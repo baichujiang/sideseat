@@ -207,7 +207,7 @@ export default async function AdminUserDetailPage({
           <p className="text-sm text-muted-foreground">
             <a
               className="font-medium underline"
-              href={user.manualReviewProofUrl}
+              href={`/api/admin/verifications/${encodeURIComponent(user.id)}/proof`}
               rel="noreferrer"
               target="_blank"
             >

@@ -15,6 +15,9 @@ final class PlansStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            let formatter = ISO8601DateFormatter()
+            let pendingStart = Date().addingTimeInterval(24 * 60 * 60)
+            let acceptedStart = Date().addingTimeInterval(48 * 60 * 60)
             plans = [
                 NativePlanRequest(
                     id: "ui-plan-1",
@@ -24,15 +27,33 @@ final class PlansStore {
                     title: "Library study",
                     location: "Central Library",
                     message: "Bring notes",
-                    startTime: "2026-07-18T14:00:00.000Z",
-                    endTime: "2026-07-18T15:00:00.000Z",
+                    startTime: formatter.string(from: pendingStart),
+                    endTime: formatter.string(from: pendingStart.addingTimeInterval(60 * 60)),
                     proposer: NativePlanAuthor(id: "ui-peer", username: "test_002", nickname: "Mina", avatarUrl: nil),
                     receiver: NativePlanAuthor(id: "ui-test-user", username: "test_001", nickname: "Test User", avatarUrl: nil),
                     counterOfId: nil,
                     availabilityShareId: nil,
                     scheduleShareLinkId: nil,
-                    createdAt: "2026-07-17T12:04:00.000Z",
-                    updatedAt: "2026-07-17T12:04:00.000Z"
+                    createdAt: formatter.string(from: Date()),
+                    updatedAt: formatter.string(from: Date())
+                ),
+                NativePlanRequest(
+                    id: "ui-plan-accepted",
+                    connectionId: "ui-connection",
+                    status: "ACCEPTED",
+                    planType: "CUSTOM",
+                    title: "Dinner in town",
+                    location: "Maxvorstadt",
+                    message: nil,
+                    startTime: formatter.string(from: acceptedStart),
+                    endTime: formatter.string(from: acceptedStart.addingTimeInterval(90 * 60)),
+                    proposer: NativePlanAuthor(id: "ui-test-user", username: "test_001", nickname: "Test User", avatarUrl: nil),
+                    receiver: NativePlanAuthor(id: "ui-peer", username: "test_002", nickname: "Mina", avatarUrl: nil),
+                    counterOfId: nil,
+                    availabilityShareId: nil,
+                    scheduleShareLinkId: nil,
+                    createdAt: formatter.string(from: Date()),
+                    updatedAt: formatter.string(from: Date())
                 )
             ]
             return

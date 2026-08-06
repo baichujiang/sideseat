@@ -1,8 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent } from "react";
 
+import { useChatMessageSelection } from "@/components/chat/chat-message-selection";
 import { cn } from "@/lib/utils";
+
+const BACKGROUND_DISMISS_SELECTOR =
+  "[data-chat-composer-root], [data-chat-composer-footer], a, button, input, textarea, select, [role='dialog'], [role='menu'], [data-chat-message-bubble], [data-chat-message-actions]";
 
 export type DirectMessageListItemMeta = {
   id: string;
@@ -28,6 +32,17 @@ export function DirectMessageList({
   const isAtBottomRef = useRef(true);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { dismissInputMode } = useChatMessageSelection();
+
+  const onListPointerDown = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest(BACKGROUND_DISMISS_SELECTOR)) return;
+      dismissInputMode();
+    },
+    [dismissInputMode],
+  );
 
   const checkIsAtBottom = useCallback(() => {
     const el = listRef.current;
@@ -99,6 +114,7 @@ export function DirectMessageList({
       <div
         ref={listRef}
         className="h-full overflow-y-auto overscroll-y-contain px-3 py-2"
+        onPointerDown={onListPointerDown}
       >
         {children}
         <div ref={bottomRef} aria-hidden />

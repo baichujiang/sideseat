@@ -38,6 +38,8 @@ enum SideSeatTheme {
     static let ink = Color(red: 0.14, green: 0.10, blue: 0.16)
 
     /// Links, selected tab, switches, unread dots, product primary fill.
+    /// Do **not** use for avatar fills, display names, or non-unread status badges —
+    /// those inherit pink from root `.tint` if left on default/accent styles.
     static let accent = Color.accentColor
 
     // MARK: - Semantic (product)
@@ -58,8 +60,9 @@ enum SideSeatTheme {
     static let calendarNow = Color(red: 1, green: 0.23, blue: 0.19)
     /// Course tiles without a custom hex — distinct from accent (not system `.blue`).
     static let courseFallback = Color(red: 0.20, green: 0.52, blue: 0.86)
-    /// Verified student seal — same rose family as interactive accent.
-    static var verifiedSeal: Color { accent }
+    /// Verified student seal — trust blue, distinct from interactive Rose accent.
+    /// Keep this off ``accent`` so identity chrome never reads as a product-wide pink wash.
+    static let verifiedSeal = Color(red: 0.18, green: 0.48, blue: 0.88)
     /// Pin / restore / soft caution — never use for selection or errors.
     static let warning = Color.orange
     /// Non-grouped elevated fill (chat peer bubbles, soft chips).
@@ -75,6 +78,7 @@ enum SideSeatTheme {
     enum HubTint {
         static let courses = Color(red: 0.18, green: 0.62, blue: 0.42)
         static let plans = Color(red: 0.20, green: 0.52, blue: 0.86)
+        static let posts = Color(red: 0.08, green: 0.58, blue: 0.62)
         static let contacts = Color(red: 0.55, green: 0.35, blue: 0.82)
         static let settings = Color(red: 0.42, green: 0.45, blue: 0.50)
         static let feedback = Color(red: 0.18, green: 0.55, blue: 0.86)
@@ -86,18 +90,24 @@ enum SideSeatTheme {
         static let privacyChat = Color(red: 0.55, green: 0.40, blue: 0.75)
     }
 
-    /// Deterministic collage / multi-avatar tile colors (not brand chrome).
+    /// Deterministic collage / multi-avatar tile colors (not brand chrome / not Rose accent).
     enum AvatarPalette {
         static let tiles: [Color] = [
             Color(red: 0.35, green: 0.62, blue: 0.95),
             Color(red: 0.38, green: 0.76, blue: 0.52),
             Color(red: 0.95, green: 0.62, blue: 0.30),
-            Color(red: 0.88, green: 0.42, blue: 0.48),
+            Color(red: 0.78, green: 0.45, blue: 0.42),
             Color(red: 0.58, green: 0.48, blue: 0.90),
             Color(red: 0.30, green: 0.72, blue: 0.78),
             Color(red: 0.72, green: 0.55, blue: 0.38),
             Color(red: 0.55, green: 0.62, blue: 0.70),
         ]
+
+        /// Stable tile color from a display name (shared by `InitialAvatar` / group collage).
+        static func color(for name: String) -> Color {
+            let sum = name.unicodeScalars.reduce(0) { $0 + Int($1.value) }
+            return tiles[sum % tiles.count]
+        }
     }
 
     /// Chat bubble / composer chrome (product surface).
@@ -249,6 +259,7 @@ enum SideSeatTheme {
 
     // MARK: - Chrome
 
+    @MainActor
     static func configureChrome() {
         let accent = UIColor(red: 0.984, green: 0.255, blue: 0.522, alpha: 1)
         UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = accent
@@ -261,6 +272,7 @@ enum SideSeatTheme {
 
         let nav = UINavigationBarAppearance()
         nav.configureWithDefaultBackground()
+        nav.shadowColor = .clear
         UINavigationBar.appearance().standardAppearance = nav
         UINavigationBar.appearance().scrollEdgeAppearance = nav
         UINavigationBar.appearance().tintColor = accent

@@ -116,14 +116,20 @@ After changing `capacitor.config.ts` plugins, run `npm run cap:sync`.
 
 The Me tab uses `@capacitor/push-notifications`: request permission, register for APNs, and POST the device token to `/api/push/native-register`.
 
-**You must finish in Xcode** (cannot be done from this repo alone):
+This section describes the legacy Capacitor rollback client in `ios/`. For that
+target, finish the capabilities in Xcode:
 
 1. Target **App** → **Signing & Capabilities** → **+ Capability** → **Push Notifications**
 2. Same screen → **Background Modes** → enable **Remote notifications** (if not already on)
 3. Use a **paid Apple Developer** team for real devices / TestFlight (simulator tokens are limited)
 4. `AppDelegate.swift` already forwards `didRegisterForRemoteNotificationsWithDeviceToken` to Capacitor
 
-**Server (still TODO):** tokens are stored in `NativePushDevice`. Sending via APNs (`.p8` key, `node-apn` or similar) is not implemented — see `notifyUserPush` in `lib/push/notify-user.ts`.
+The shared backend now sends APNs notifications with token-based `.p8`
+authentication through `lib/push/apns-send.ts`. Set `APNS_KEY_ID`,
+`APNS_TEAM_ID`, `APNS_KEY_P8`, `APNS_BUNDLE_ID`, and `APNS_USE_SANDBOX` for the
+deployment. The new SwiftUI client in `ios-native/` generates Push and Associated
+Domains entitlements from `ios-native/project.yml`; do not maintain those by hand
+in the generated Xcode project.
 
 Web/PWA continues to use Web Push + VAPID (`/api/push/subscribe`).
 

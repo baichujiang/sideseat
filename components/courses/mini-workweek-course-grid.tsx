@@ -176,6 +176,25 @@ export function MiniWorkweekCourseGrid({
 
 
   function addAtSlot(weekday: Weekday, slotStartMin: number) {
+    if (clipboard) {
+      const sourceBounds = sessionBounds(clipboard.session);
+      const duration = sourceBounds
+        ? sourceBounds.end - sourceBounds.start
+        : DEFAULT_SESSION_LENGTH_MIN;
+      const pasted: MiniSessionDraft = {
+        ...clipboard.session,
+        weekday,
+        start: formatMinutes(slotStartMin),
+        end: formatMinutes(clampEndSameDay(slotStartMin, slotStartMin + duration)),
+      };
+      onSessionsChange([...sessions, pasted]);
+      if (clipboard.isCut) setClipboard(null);
+      setToolbarIndex(null);
+      setDragSelectedIndex(null);
+      setSelectedIndex(sessions.length);
+      return;
+    }
+
     const startMin = slotStartMin;
     const endMin = clampEndSameDay(startMin, startMin + DEFAULT_SESSION_LENGTH_MIN);
     const next: MiniSessionDraft = {

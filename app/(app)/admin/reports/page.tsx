@@ -71,6 +71,10 @@ export default async function AdminReportsPage({
               course: true,
             },
           },
+          message: { select: { id: true, body: true, deletedAt: true } },
+          courseRoomMessage: { select: { id: true, body: true, deletedAt: true } },
+          groupChatMessage: { select: { id: true, body: true, deletedAt: true } },
+          classmatePost: { select: { id: true, title: true, body: true, status: true } },
         },
         orderBy: {
           createdAt: "desc",
@@ -140,6 +144,24 @@ export default async function AdminReportsPage({
             reportedLabel:
               report.reportedUser.nickname ?? report.reportedUser.email ?? report.reportedUser.username,
             courseName: report.invitation?.course?.name ?? null,
+            targetKind: report.classmatePost
+              ? "Discover post"
+              : report.groupChatMessage
+                ? "Group message"
+                : report.courseRoomMessage
+                  ? "Course message"
+                  : report.message
+                    ? "Direct message"
+                    : "User or removed content",
+            targetPreview:
+              report.classmatePost?.title ??
+              report.groupChatMessage?.body ??
+              report.courseRoomMessage?.body ??
+              report.message?.body ??
+              null,
+            targetHref: report.classmatePost
+              ? `/discover/posts/${report.classmatePost.id}`
+              : null,
             isUserBlocked: report.moderationBlocks.length > 0,
             actionLog: report.actionLog.map((entry) => ({
               id: entry.id,

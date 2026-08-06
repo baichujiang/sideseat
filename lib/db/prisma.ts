@@ -27,6 +27,7 @@ function getPrisma(): PrismaClient {
     scheduleShareLink?: unknown;
     discoverActivity?: unknown;
     userLifePhoto?: unknown;
+    courseCatalogSyncRun?: unknown;
   } | undefined;
   const staleDevSingleton =
     process.env.NODE_ENV !== "production" &&
@@ -35,7 +36,8 @@ function getPrisma(): PrismaClient {
       typeof delegates?.classmatePostSave === "undefined" ||
       typeof delegates?.scheduleShareLink === "undefined" ||
       typeof delegates?.discoverActivity === "undefined" ||
-      typeof delegates?.userLifePhoto === "undefined");
+      typeof delegates?.userLifePhoto === "undefined" ||
+      typeof delegates?.courseCatalogSyncRun === "undefined");
 
   if (existing && !staleDevSingleton) {
     return existing;
@@ -47,9 +49,10 @@ function getPrisma(): PrismaClient {
 
   const client = createPrismaClient();
 
-  if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.prisma = client;
-  }
+  // The lazy proxy resolves through this slot on every property access. It must
+  // be populated in production too; otherwise each `prisma.user`/`prisma.$transaction`
+  // lookup constructs another pool and quickly exhausts database connections.
+  globalForPrisma.prisma = client;
 
   return client;
 }

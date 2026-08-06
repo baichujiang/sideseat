@@ -8,6 +8,7 @@ export const REVEAL_PRESET_KEYS_ALLOWLIST = [
   "course",
   "personal",
   "work",
+  "important",
   "other",
   UNCATEGORIZED_REVEAL_PRESET_KEY,
 ] as const;
@@ -18,6 +19,8 @@ const isoDateOnly = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 export type NormalizedRevealConfig = {
   categoryIds: string[];
   presetKeys: string[];
+  /** Explicit privacy mode for new links. Missing stays false for legacy unrestricted links. */
+  hideAllDetails: boolean;
   /** Berlin yyyy-MM-dd keys; when set, only these days within [rangeStart, rangeEnd] are shared. */
   includedDates: string[];
 };
@@ -27,16 +30,18 @@ const presetEnum = z.enum(REVEAL_PRESET_KEYS_ALLOWLIST);
 export const revealConfigSchema = z.object({
   categoryIds: z.array(z.string().trim().min(1)).default([]),
   presetKeys: z.array(presetEnum).default([]),
+  hideAllDetails: z.boolean().optional().default(false),
   includedDates: z.array(isoDateOnly).max(SCHEDULE_SHARE_MAX_RANGE_DAYS).optional(),
 });
 
-export function normalizeRevealConfig(raw: z.infer<typeof revealConfigSchema>): NormalizedRevealConfig {
-  const categoryIds = [...new Set(raw.categoryIds.map((id) => id.trim()))].filter(Boolean).sort();
-  const presetKeys = [...new Set(raw.presetKeys)].sort();
+export function normalizeRevealConfig(raw: z.input<typeof revealConfigSchema>): NormalizedRevealConfig {
+  const categoryIds = [...new Set((raw.categoryIds ?? []).map((id) => id.trim()))].filter(Boolean).sort();
+  const presetKeys = [...new Set(raw.presetKeys ?? [])].sort();
+  const hideAllDetails = raw.hideAllDetails ?? false;
   const includedDates = raw.includedDates?.length
     ? [...new Set(raw.includedDates)].sort()
     : [];
-  return { categoryIds, presetKeys, includedDates };
+  return { categoryIds, presetKeys, hideAllDetails, includedDates };
 }
 
 /** Parse untrusted JSON (e.g. from DB). Throws ZodError if invalid. */
@@ -69,11 +74,14 @@ export function shareIncludedDateKeySet(
 }
 
 /** Legacy links with empty reveal lists are treated as “show everything”. */
-export function isRevealUnrestricted(reveal: Pick<NormalizedRevealConfig, "categoryIds" | "presetKeys">): boolean {
-  return reveal.categoryIds.length === 0 && reveal.presetKeys.length === 0;
+export function isRevealUnrestricted(
+  reveal: Pick<NormalizedRevealConfig, "categoryIds" | "presetKeys" | "hideAllDetails">,
+): boolean {
+  return !reveal.hideAllDetails && reveal.categoryIds.length === 0 && reveal.presetKeys.length === 0;
 }
 
 export function isBlockRevealed(block: InternalBlockRevealFields, reveal: NormalizedRevealConfig): boolean {
+  if (reveal.hideAllDetails) return false;
   if (isRevealUnrestricted(reveal)) return true;
   if (block.internalCategoryId && reveal.categoryIds.includes(block.internalCategoryId)) return true;
   const pk = block.internalPresetKey;

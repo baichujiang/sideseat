@@ -1,14 +1,25 @@
 import SwiftUI
 
-/// Single Home date navigator shared by Week / Day / List.
+/// Compact date navigator for Day and List. Week uses its timetable headers.
 /// Selection uses accent; today / now markers use `calendarNow` — never the same role.
 struct HomeDateStripView: View {
     @Binding var selectedDate: Date
-    var onOpenDay: ((Date) -> Void)? = nil
+    var recenterToken: String
+    var onOpenDay: ((Date) -> Void)?
 
     private let calendar = Calendar.sideSeatBerlin
     private let leadingDays = 21
     private let trailingDays = 42
+
+    init(
+        selectedDate: Binding<Date>,
+        recenterToken: String = "",
+        onOpenDay: ((Date) -> Void)? = nil
+    ) {
+        _selectedDate = selectedDate
+        self.recenterToken = recenterToken
+        self.onOpenDay = onOpenDay
+    }
 
     var body: some View {
         let days = Self.days(
@@ -30,13 +41,23 @@ struct HomeDateStripView: View {
                 .padding(.vertical, 6)
             }
             .accessibilityIdentifier("home-date-strip")
-            .task(id: Self.dayID(selectedDate, calendar: calendar)) {
+            .task(id: scrollRequestID) {
                 await Task.yield()
-                withAnimation(.easeInOut(duration: 0.22)) {
-                    proxy.scrollTo(Self.dayID(selectedDate, calendar: calendar), anchor: .center)
+                guard !Task.isCancelled else { return }
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+                withTransaction(transaction) {
+                    proxy.scrollTo(
+                        Self.dayID(selectedDate, calendar: calendar),
+                        anchor: .center
+                    )
                 }
             }
         }
+    }
+
+    private var scrollRequestID: String {
+        "\(recenterToken)|\(Self.dayID(selectedDate, calendar: calendar))"
     }
 
     private func dayChip(_ day: Date) -> some View {

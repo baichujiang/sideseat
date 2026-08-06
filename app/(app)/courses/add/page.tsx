@@ -3,7 +3,6 @@ import { BackLink } from "@/components/nav/back-link";
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
-import { resolveBackHref } from "@/lib/nav/back";
 
 export default async function AddCoursePage({
   searchParams,

@@ -9,6 +9,8 @@ import {
   startOfWeek,
 } from "date-fns";
 
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
+
 type DbClient = Prisma.TransactionClient;
 
 const DAY_START_MINUTE = 8 * 60;
@@ -179,7 +181,10 @@ async function getBusyIntervalsForUser(
       orderBy: { startAt: "asc" },
     }),
     db.userCourse.findMany({
-      where: { userId },
+      where: {
+        userId,
+        ...activeCourseMembershipWhere(rangeStart),
+      },
       include: {
         sessions: {
           orderBy: [{ weekday: "asc" }, { startMinute: "asc" }],

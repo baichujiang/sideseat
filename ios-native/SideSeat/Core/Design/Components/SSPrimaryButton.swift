@@ -25,11 +25,15 @@ struct SSPrimaryButton: View {
                         .tint(.white)
                 } else {
                     Text(title)
-                        .fontWeight(.semibold)
+                        .font(.body.weight(.semibold))
+                        .lineLimit(1)
                 }
             }
+            // Content-sized CTAs (empty states) must keep inset; full-width forms stay centered.
+            .padding(.horizontal, SideSeatTheme.spaceXL)
             .frame(maxWidth: .infinity)
-            .frame(height: height)
+            .frame(minHeight: height)
+            .contentShape(Rectangle())
         }
         .buttonStyle(SSPrimaryButtonStyle(fill: fill, chrome: chrome))
         .ssAccessibilityIdentifier(accessibilityID)

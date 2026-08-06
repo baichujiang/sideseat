@@ -170,6 +170,7 @@ export function AvatarCropEditor({
             onPointerCancel={endPointer}
           >
             {src && geometry ? (
+              /* eslint-disable-next-line @next/next/no-img-element -- exact pixel geometry is required for cropping */
               <img
                 alt=""
                 aria-hidden="true"

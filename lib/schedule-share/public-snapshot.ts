@@ -48,6 +48,7 @@ export async function buildOwnerPreviewSnapshotForUserId(
     reveal: {
       categoryIds: [],
       presetKeys: [...REVEAL_PRESET_KEYS_ALLOWLIST],
+      hideAllDetails: false,
       includedDates: [],
     },
     ownerDisplayLabel: "",

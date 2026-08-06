@@ -4,6 +4,9 @@ import { WebPushError } from "web-push";
 
 import { isAssistantBotUser } from "@/lib/auth/assistant-bot";
 import { prisma } from "@/lib/db/prisma";
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
+import { isApnsConfigured } from "@/lib/push/apns-env";
+import { sendApnsNotification } from "@/lib/push/apns-send";
 import { isWebPushConfigured } from "@/lib/push/vapid-env";
 import { sendWebPushNotification } from "@/lib/push/web-push-server";
 
@@ -13,21 +16,37 @@ function truncate(s: string, max: number) {
   return `${t.slice(0, max - 1)}…`;
 }
 
-/**
- * Sends the same payload to every stored Web Push subscription for the user.
- * Removes subscriptions that the push service reports as gone (410/404).
- *
- * TODO: Also send via APNs/FCM using `NativePushDevice` rows once server credentials exist.
- */
-export async function notifyUserPush(
+async function notifyNativeDevices(
+  userId: string,
+  payload: { title: string; body: string; url?: string },
+): Promise<void> {
+  if (!isApnsConfigured()) return;
+
+  const devices = await prisma.nativePushDevice.findMany({
+    where: { userId, platform: "ios" },
+    select: { id: true, token: true },
+  });
+  if (devices.length === 0) return;
+
+  await Promise.all(
+    devices.map(async (device) => {
+      const result = await sendApnsNotification(device.token, payload);
+      if (!result.ok && result.invalidateToken) {
+        await prisma.nativePushDevice.deleteMany({ where: { id: device.id } }).catch(() => {});
+      } else if (!result.ok) {
+        console.error("APNs push failed", device.token.slice(0, 12), result.reason);
+      }
+    }),
+  );
+}
+
+async function notifyWebDevices(
   userId: string,
   payload: { title: string; body: string; url?: string },
 ): Promise<void> {
   if (!isWebPushConfigured()) return;
 
-  const subs = await prisma.pushSubscription.findMany({
-    where: { userId },
-  });
+  const subs = await prisma.pushSubscription.findMany({ where: { userId } });
   if (subs.length === 0) return;
 
   await Promise.all(
@@ -39,13 +58,37 @@ export async function notifyUserPush(
         );
       } catch (err: unknown) {
         if (err instanceof WebPushError && (err.statusCode === 410 || err.statusCode === 404)) {
-          await prisma.pushSubscription.deleteMany({ where: { endpoint: sub.endpoint } }).catch(() => {});
+          await prisma.pushSubscription
+            .deleteMany({ where: { endpoint: sub.endpoint } })
+            .catch(() => {});
         } else {
           console.error("Web push failed", sub.endpoint.slice(0, 48), err);
         }
       }
     }),
   );
+}
+
+/** Sends a notification only to browser subscriptions. */
+export async function notifyUserWebPush(
+  userId: string,
+  payload: { title: string; body: string; url?: string },
+): Promise<void> {
+  await notifyWebDevices(userId, payload);
+}
+
+/**
+ * Sends the same payload to every stored Web Push subscription and native APNs
+ * device for the user. Removes subscriptions/tokens the push service reports as gone.
+ */
+export async function notifyUserPush(
+  userId: string,
+  payload: { title: string; body: string; url?: string },
+): Promise<void> {
+  await Promise.all([
+    notifyWebDevices(userId, payload),
+    notifyNativeDevices(userId, payload),
+  ]);
 }
 
 export async function notifyNewDirectChatMessage(params: {
@@ -89,7 +132,11 @@ export async function notifyNewCourseRoomMessage(params: {
   bodyPreview: string;
 }): Promise<void> {
   const members = await prisma.userCourse.findMany({
-    where: { courseId: params.courseId, userId: { not: params.senderId } },
+    where: {
+      courseId: params.courseId,
+      userId: { not: params.senderId },
+      ...activeCourseMembershipWhere(),
+    },
     select: { userId: true },
   });
   if (members.length === 0) return;

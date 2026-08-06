@@ -1,20 +1,17 @@
 import type { PrismaClient } from "@prisma/client";
 
 import type {
-  CalendarCategoryLite,
-  ClassBlock,
-  CompanionOption,
-  StudyEntry,
-} from "@/components/home/schedule-surface";
+  HomeCalendarCategory,
+  HomeClassBlock,
+  HomeCompanionOption,
+  HomeSchedulePayload,
+  HomeStudyEntry,
+} from "@/lib/home/home-schedule-dto";
 import { isCalendarCourseMirrorRow } from "@/lib/calendar/calendar-course-mirror";
 import { ensureUserCalendarCategories } from "@/lib/calendar/default-user-calendar-categories";
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
 
-export type HomeSchedulePayload = {
-  classBlocks: ClassBlock[];
-  studyEntries: StudyEntry[];
-  companionOptions: CompanionOption[];
-  initialCalendarCategories: CalendarCategoryLite[];
-};
+export type { HomeSchedulePayload } from "@/lib/home/home-schedule-dto";
 
 export async function loadHomeSchedulePayload(args: {
   prisma: PrismaClient;
@@ -28,7 +25,7 @@ export async function loadHomeSchedulePayload(args: {
     await Promise.all([
       ensureUserCalendarCategories(prisma, userId),
       prisma.userCourse.findMany({
-        where: { userId },
+        where: { userId, ...activeCourseMembershipWhere() },
         include: { course: true, sessions: true },
       }),
       prisma.calendarEntry.findMany({
@@ -85,7 +82,7 @@ export async function loadHomeSchedulePayload(args: {
       .filter((k): k is string => Boolean(k)),
   );
 
-  const classBlocks: ClassBlock[] = memberships.flatMap((m) =>
+  const classBlocks: HomeClassBlock[] = memberships.flatMap((m) =>
     m.sessions
       .filter((s) => {
         const key = `${m.course.id}_${s.weekday}_${s.startMinute}`;
@@ -105,7 +102,7 @@ export async function loadHomeSchedulePayload(args: {
       })),
   );
 
-  const studyEntries: StudyEntry[] = calendarEntries.map((e) => {
+  const studyEntries: HomeStudyEntry[] = calendarEntries.map((e) => {
     const mirrorCourse = isCalendarCourseMirrorRow(e);
     return {
       id: e.id,
@@ -129,7 +126,7 @@ export async function loadHomeSchedulePayload(args: {
     };
   });
 
-  const initialCalendarCategories: CalendarCategoryLite[] = calendarCategories.map((c) => ({
+  const initialCalendarCategories: HomeCalendarCategory[] = calendarCategories.map((c) => ({
     id: c.id,
     name: c.name,
     color: c.color,
@@ -137,7 +134,7 @@ export async function loadHomeSchedulePayload(args: {
     icsSubscriptionUrl: c.icsSubscriptionUrl,
   }));
 
-  const companionOptions: CompanionOption[] = connections.map((connection) => {
+  const companionOptions: HomeCompanionOption[] = connections.map((connection) => {
     const other = connection.userAId === userId ? connection.userB : connection.userA;
     return {
       id: other.id,

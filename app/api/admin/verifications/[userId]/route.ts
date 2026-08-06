@@ -1,9 +1,9 @@
 import { StudentVerificationStatus } from "@prisma/client";
-import { del } from "@vercel/blob";
 
 import { requireAdminUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
+import { deleteVerificationProof } from "@/lib/media/verification-proof-storage";
 import { mirrorSchoolVerificationToUser, upsertSchoolVerificationState } from "@/lib/verification/school-state";
 import { adminVerificationDecisionSchema } from "@/lib/validators/verification";
 
@@ -18,7 +18,11 @@ export async function PATCH(
 
     const existing = await prisma.user.findUnique({
       where: { id: userId },
-      select: { school: true, manualReviewProofUrl: true, email: true },
+      select: {
+        school: true,
+        manualReviewProofUrl: true,
+        email: true,
+      },
     });
     if (!existing?.school) {
       return error("User has no active school selected.", 400);
@@ -27,14 +31,16 @@ export async function PATCH(
     const isFinalDecision =
       status === StudentVerificationStatus.VERIFIED ||
       status === StudentVerificationStatus.REJECTED;
+    const verifiedAt = status === StudentVerificationStatus.VERIFIED ? new Date() : null;
 
     await prisma.$transaction(async (tx) => {
       await upsertSchoolVerificationState(tx, userId, existing.school!, {
         email: existing.email ?? null,
         verifiedStudent: status === StudentVerificationStatus.VERIFIED,
         studentVerificationStatus: status,
-        emailVerifiedAt:
-          status === StudentVerificationStatus.VERIFIED ? new Date() : null,
+        studentVerificationMethod: verifiedAt ? "MANUAL_DOCUMENT" : null,
+        studentVerifiedAt: verifiedAt,
+        emailVerifiedAt: null,
         studentVerificationNotes: note || `Last reviewed by ${admin.adminActor}.`,
         ...(isFinalDecision
           ? {
@@ -51,7 +57,7 @@ export async function PATCH(
     // is made, so sensitive PII doesn't linger.
     if (isFinalDecision && existing?.manualReviewProofUrl) {
       try {
-        await del(existing.manualReviewProofUrl);
+        await deleteVerificationProof(existing.manualReviewProofUrl);
       } catch (cause) {
         console.error("[admin-verification] failed to delete blob", cause);
       }

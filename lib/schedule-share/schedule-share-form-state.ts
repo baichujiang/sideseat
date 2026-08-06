@@ -1,6 +1,5 @@
 import { parseRevealConfigJson } from "@/lib/schedule-share/reveal-config";
 import {
-  allRevealedCategoryIds,
   initialRevealedCategoryIds,
   revealConfigFromRevealedCategoryIds,
   type ShareRevealCategoryInput,
@@ -79,14 +78,14 @@ export function scheduleShareFormToPayload(
       expiresAt = exp.toISOString();
     }
   }
-  const { categoryIds, presetKeys } = revealConfigFromRevealedCategoryIds(
+  const { categoryIds, presetKeys, hideAllDetails } = revealConfigFromRevealedCategoryIds(
     categories,
     form.revealedCategoryIds,
   );
   return {
     rangeStart: rangeStart.toISOString(),
     rangeEnd: rangeEnd.toISOString(),
-    revealConfig: { categoryIds, presetKeys },
+    revealConfig: { categoryIds, presetKeys, hideAllDetails },
     allowGuestProposals: form.allowGuestProposals,
     usageLimit: form.usageLimit,
     expiresAt,

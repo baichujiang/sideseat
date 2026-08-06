@@ -31,8 +31,10 @@ export function uncategorizedRevealCategory(name: string): ShareRevealCategoryIn
 
 export function initialRevealedCategoryIds(
   categories: readonly ShareRevealCategoryInput[],
-  reveal: Pick<NormalizedRevealConfig, "categoryIds" | "presetKeys">,
+  reveal: Pick<NormalizedRevealConfig, "categoryIds" | "presetKeys">
+    & Partial<Pick<NormalizedRevealConfig, "hideAllDetails">>,
 ): string[] {
+  if (reveal.hideAllDetails) return [];
   if (reveal.categoryIds.length === 0 && reveal.presetKeys.length === 0) {
     return allRevealedCategoryIds(categories);
   }
@@ -48,7 +50,7 @@ export function initialRevealedCategoryIds(
 export function revealConfigFromRevealedCategoryIds(
   categories: readonly ShareRevealCategoryInput[],
   revealedCategoryIds: readonly string[],
-): { categoryIds: string[]; presetKeys: RevealPresetKeyAllowlisted[] } {
+): { categoryIds: string[]; presetKeys: RevealPresetKeyAllowlisted[]; hideAllDetails: boolean } {
   const idSet = new Set(revealedCategoryIds);
   const categoryIds: string[] = [];
   const presetKeys: RevealPresetKeyAllowlisted[] = [];
@@ -66,6 +68,7 @@ export function revealConfigFromRevealedCategoryIds(
   return {
     categoryIds: [...new Set(categoryIds)].sort(),
     presetKeys: [...new Set(presetKeys)].sort(),
+    hideAllDetails: categories.length > 0 && revealedCategoryIds.length === 0,
   };
 }
 
@@ -94,6 +97,6 @@ export function isNoCategoriesRevealed(
 /** Default create payload: reveal every preset; custom calendars added when known. */
 export function defaultRevealConfigForCategories(
   categories: readonly ShareRevealCategoryInput[],
-): { categoryIds: string[]; presetKeys: RevealPresetKeyAllowlisted[] } {
+): { categoryIds: string[]; presetKeys: RevealPresetKeyAllowlisted[]; hideAllDetails: boolean } {
   return revealConfigFromRevealedCategoryIds(categories, allRevealedCategoryIds(categories));
 }

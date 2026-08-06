@@ -1,9 +1,12 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { addDays, max as maxDate, min as minDate, startOfDay } from "date-fns";
+import { fromZonedTime } from "date-fns-tz";
 
 import { normalizeCalendarCategoryHex } from "@/lib/calendar/calendar-category-colors";
 import { isCalendarCourseMirrorRow } from "@/lib/calendar/calendar-course-mirror";
-import { scheduleDateKeyInBerlin } from "@/lib/calendar/schedule-berlin";
+import { SCHEDULE_DISPLAY_TZ } from "@/lib/calendar/schedule-berlin";
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
+import { SCHEDULE_SHARE_MIN_PROPOSAL_MINUTES } from "@/lib/schedule-share/constants";
 import { shareDateKeysInInclusiveRange } from "@/lib/schedule-share/share-selected-days";
 import { loadIcsSubscriptionStudyEntries } from "@/lib/calendar/load-ics-subscription-entries";
 import {
@@ -120,6 +123,54 @@ function computeFreeRanges(
   return free.filter((f) => f.end.getTime() > f.start.getTime());
 }
 
+function berlinStartOfDateKey(dateKey: string): Date {
+  return fromZonedTime(`${dateKey}T00:00:00`, SCHEDULE_DISPLAY_TZ);
+}
+
+function nextDateKey(dateKey: string): string {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(Date.UTC(year!, month! - 1, day! + 1)).toISOString().slice(0, 10);
+}
+
+function scheduleShareAvailabilityWindows(args: {
+  rangeStart: Date;
+  rangeEnd: Date;
+  includedDates?: readonly string[];
+}): Array<{ start: Date; end: Date }> {
+  const keys = args.includedDates?.length
+    ? [...new Set(args.includedDates)].sort()
+    : [...shareDateKeysInInclusiveRange(args.rangeStart, args.rangeEnd)].sort();
+
+  return keys.flatMap((dateKey) => {
+    const start = maxDate([
+      berlinStartOfDateKey(dateKey),
+      args.rangeStart,
+    ]);
+    const end = minDate([
+      berlinStartOfDateKey(nextDateKey(dateKey)),
+      args.rangeEnd,
+    ]);
+    return end.getTime() > start.getTime() ? [{ start, end }] : [];
+  });
+}
+
+export function computeScheduleShareFreeRanges(args: {
+  rangeStart: Date;
+  rangeEnd: Date;
+  busy: Array<{ start: Date; end: Date }>;
+  includedDates?: readonly string[];
+}): Array<{ start: Date; end: Date }> {
+  const busyMerged = mergeIntervals(args.busy);
+  const minimumSpanMs = SCHEDULE_SHARE_MIN_PROPOSAL_MINUTES * 60_000;
+
+  const free = scheduleShareAvailabilityWindows(args).flatMap((window) =>
+    computeFreeRanges(window.start, window.end, busyMerged),
+  );
+  return mergeIntervals(free).filter(
+    (slot) => slot.end.getTime() - slot.start.getTime() >= minimumSpanMs,
+  );
+}
+
 export function scheduleShareOwnerDisplayLabel(user: {
   nickname: string | null;
   username: string;
@@ -154,7 +205,7 @@ export async function collectInternalScheduleBlocks(
       select: { courseScheduleMirrorKey: true },
     }),
     db.userCourse.findMany({
-      where: { userId: ownerUserId },
+      where: { userId: ownerUserId, ...activeCourseMembershipWhere(rangeStart) },
       include: {
         course: true,
         sessions: { orderBy: [{ weekday: "asc" }, { startMinute: "asc" }] },
@@ -319,15 +370,26 @@ export function internalBlocksToPublicSnapshot(args: {
     includedKeys && includedKeys.size > 0
       ? [...includedKeys].sort()
       : [...shareDateKeysInInclusiveRange(rangeStart, rangeEnd)].sort();
+  const sharedDayWindows = scheduleShareAvailabilityWindows({
+    rangeStart,
+    rangeEnd,
+    includedDates,
+  });
   const scopedInternal = includedKeys
-    ? internal.filter((b) => includedKeys.has(scheduleDateKeyInBerlin(b.start)))
+    ? internal.filter((block) =>
+        sharedDayWindows.some(
+          (window) => block.start.getTime() < window.end.getTime()
+            && block.end.getTime() > window.start.getTime(),
+        ),
+      )
     : internal;
 
-  const busyMerged = mergeIntervals(scopedInternal.map((b) => ({ start: b.start, end: b.end })));
-  let freeRanges = computeFreeRanges(rangeStart, rangeEnd, busyMerged);
-  if (includedKeys && includedKeys.size > 0) {
-    freeRanges = freeRanges.filter((f) => includedKeys.has(scheduleDateKeyInBerlin(f.start)));
-  }
+  const freeRanges = computeScheduleShareFreeRanges({
+    rangeStart,
+    rangeEnd,
+    busy: scopedInternal.map((b) => ({ start: b.start, end: b.end })),
+    includedDates,
+  });
   const freeSlots = freeRanges.map((f) => ({ start: f.start.toISOString(), end: f.end.toISOString() }));
 
   const detailBlocks: PublicScheduleBlock[] = [];
@@ -369,11 +431,16 @@ export async function rangeFitsScheduleShareSnapshot(
     rangeEnd: Date;
     proposalStart: Date;
     proposalEnd: Date;
+    includedDates?: readonly string[];
   },
 ): Promise<boolean> {
   const internal = await collectInternalScheduleBlocks(db, args.ownerUserId, args.rangeStart, args.rangeEnd);
-  const busyMerged = mergeIntervals(internal.map((b) => ({ start: b.start, end: b.end })));
-  const freeRanges = computeFreeRanges(args.rangeStart, args.rangeEnd, busyMerged);
+  const freeRanges = computeScheduleShareFreeRanges({
+    rangeStart: args.rangeStart,
+    rangeEnd: args.rangeEnd,
+    busy: internal.map((b) => ({ start: b.start, end: b.end })),
+    includedDates: args.includedDates,
+  });
   const ps = args.proposalStart.getTime();
   const pe = args.proposalEnd.getTime();
   return freeRanges.some((slot) => ps >= slot.start.getTime() && pe <= slot.end.getTime());

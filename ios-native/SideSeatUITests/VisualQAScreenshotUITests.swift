@@ -1,7 +1,8 @@
 import XCTest
 
 /// Captures Auth + 5-tab screenshots for design-freeze visual QA (README §8).
-/// Appearance is controlled by the host via `simctl ui appearance` + `VISUAL_QA_APPEARANCE`.
+/// Appearance: host writes `.appearance` (and optionally `simctl ui`); tests also pass
+/// `--ui-testing-appearance=` so physical devices force light/dark without simctl.
 final class VisualQAScreenshotUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
@@ -21,11 +22,65 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
+    func testCaptureDiscoverPlanShare() throws {
+        let appearance = Self.resolvedAppearance()
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-skip-tutorial",
+            "--ui-testing-appearance=\(appearance)",
+        ]
+        app.launch()
+
+        let discover = tabButton(in: app, labels: ["Discover", "发现"])
+        XCTAssertTrue(discover.waitForExistence(timeout: 8))
+        discover.tap()
+        XCTAssertTrue(app.staticTexts["Library study buddy"].waitForExistence(timeout: 5))
+        app.staticTexts["Library study buddy"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["discover-post-detail"].waitForExistence(timeout: 5))
+        RunLoop.current.run(until: Date().addingTimeInterval(0.35))
+        saveScreenshot(app: app, name: "discover-plan-\(appearance)")
+
+        let share = app.buttons["discover-plan-share"]
+        XCTAssertTrue(share.waitForExistence(timeout: 3))
+        share.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["discover-plan-share-preview"].waitForExistence(timeout: 5))
+        RunLoop.current.run(until: Date().addingTimeInterval(0.35))
+        saveScreenshot(app: app, name: "discover-plan-share-\(appearance)")
+        app.terminate()
+    }
+
+    @MainActor
+    func testCaptureSideSeatAppShare() throws {
+        let appearance = Self.resolvedAppearance()
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-skip-tutorial",
+            "--ui-testing-appearance=\(appearance)",
+        ]
+        app.launch()
+
+        let me = tabButton(in: app, labels: ["Me", "我"])
+        XCTAssertTrue(me.waitForExistence(timeout: 8))
+        me.tap()
+
+        let share = app.buttons["me-share-sideseat"]
+        XCTAssertTrue(share.waitForExistence(timeout: 5))
+        share.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["sideseat-app-share-preview"].waitForExistence(timeout: 5))
+        RunLoop.current.run(until: Date().addingTimeInterval(0.35))
+        saveScreenshot(app: app, name: "sideseat-app-share-\(appearance)")
+        app.terminate()
+    }
+
+    @MainActor
     private func captureAuth(appearance: String) {
         let app = XCUIApplication()
         app.launchArguments = [
             "--ui-testing-signed-out",
             "--ui-testing-skip-tutorial",
+            "--ui-testing-appearance=\(appearance)",
         ]
         app.launch()
         XCTAssertTrue(app.textFields["login-identifier"].waitForExistence(timeout: 8))
@@ -37,14 +92,15 @@ final class VisualQAScreenshotUITests: XCTestCase {
     @MainActor
     private func captureAuthenticatedTabs(appearance: String) {
         let app = XCUIApplication()
-        // Stay on Home first — do not pass --ui-testing-chats (that forces Chats as initial tab).
+        // Stay on Calendar first — do not pass --ui-testing-chats (that forces Chats as initial tab).
         app.launchArguments = [
             "--ui-testing-authenticated",
             "--ui-testing-skip-tutorial",
+            "--ui-testing-appearance=\(appearance)",
         ]
         app.launch()
 
-        XCTAssertTrue(tabButton(in: app, labels: ["Home", "首页"]).waitForExistence(timeout: 8))
+        XCTAssertTrue(tabButton(in: app, labels: ["Calendar", "日历"]).waitForExistence(timeout: 8))
         XCTAssertTrue(app.descendants(matching: .any)["home-week-timetable"].waitForExistence(timeout: 6)
             || app.descendants(matching: .any)["home-date-strip"].waitForExistence(timeout: 6))
         RunLoop.current.run(until: Date().addingTimeInterval(0.45))
@@ -59,11 +115,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
         saveScreenshot(app: app, name: "discover-\(appearance)")
 
         tabButton(in: app, labels: ["Create", "发布"]).tap()
-        XCTAssertTrue(
-            app.buttons["create-buddy-post"].waitForExistence(timeout: 4)
-                || app.buttons.matching(NSPredicate(format: "label IN %@", ["Find buddies", "找搭子"])).firstMatch
-                    .waitForExistence(timeout: 4)
-        )
+        XCTAssertTrue(app.descendants(matching: .any)["buddy-create-view"].waitForExistence(timeout: 5))
         RunLoop.current.run(until: Date().addingTimeInterval(0.3))
         saveScreenshot(app: app, name: "create-\(appearance)")
         if app.buttons.matching(NSPredicate(format: "label IN %@", ["Cancel", "取消"])).firstMatch.exists {

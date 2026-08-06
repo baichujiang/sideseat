@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import SwiftData
 
 struct NativeInboxPreferenceResult: Decodable, Sendable {
     let pinned: Bool
@@ -15,10 +16,17 @@ final class InboxStore {
     private(set) var issue: String?
     var searchQuery = ""
     private var latestRequestID: UUID?
-    /// Conversation IDs cleared locally (UI-testing fixtures + optimistic clears).
-    private var locallyReadIDs: Set<String> = []
+    private var accountID = ""
+    private var cacheWriteTask: Task<Void, Never>?
+    private let cache: InboxCache
+    /// Last-message markers cleared locally while the server read cursor catches up.
+    private var locallyReadMessageIDs: [String: String] = [:]
     /// Last outbound preview overlays so fixture/API reloads keep Photo/Location/Plan snippets.
     private static var outboundPreviews: [String: (lastMessage: NativeInboxLastMessage, lastActivityAt: String)] = [:]
+
+    init(cache: InboxCache = .shared) {
+        self.cache = cache
+    }
 
     var filteredConversations: [NativeInboxConversation] {
         (payload?.conversations ?? []).filter { InboxChatSearch.matches($0, query: searchQuery) }
@@ -39,9 +47,37 @@ final class InboxStore {
             && filteredConversations.isEmpty
     }
 
+    var unreadBadgeLabel: String? {
+        Self.unreadBadgeLabel(for: payload?.unreadTotal ?? 0)
+    }
+
+    nonisolated static func unreadBadgeLabel(for total: Int) -> String? {
+        guard total > 0 else { return nil }
+        return total > 99 ? "99+" : String(total)
+    }
+
+    func reset() {
+        latestRequestID = UUID()
+        cacheWriteTask?.cancel()
+        cacheWriteTask = nil
+        payload = nil
+        isLoading = false
+        isMutating = false
+        issue = nil
+        searchQuery = ""
+        accountID = ""
+        locallyReadMessageIDs = [:]
+    }
+
     func load(using session: SessionStore) async {
         let requestID = UUID()
         latestRequestID = requestID
+        let nextAccountID = session.currentUser?.id ?? ""
+        if accountID != nextAccountID {
+            payload = nil
+            locallyReadMessageIDs = [:]
+        }
+        accountID = nextAccountID
         isLoading = true
         issue = nil
         defer {
@@ -51,15 +87,34 @@ final class InboxStore {
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             guard latestRequestID == requestID else { return }
-            payload = Self.applyLocalState(to: .uiTestingFixture, readIDs: locallyReadIDs)
+            payload = Self.applyLocalState(
+                to: .uiTestingFixture,
+                readMessageIDs: locallyReadMessageIDs
+            )
             return
         }
         #endif
 
+        if !accountID.isEmpty,
+           let snapshot = await cache.load(accountID: accountID)
+        {
+            guard latestRequestID == requestID else { return }
+            payload = Self.applyLocalState(
+                to: snapshot.payload,
+                readMessageIDs: locallyReadMessageIDs
+            )
+            isLoading = false
+        }
+
         do {
             let response: APIEnvelope<NativeInboxPayload> = try await session.sendAuthorized("api/v1/inbox")
             guard latestRequestID == requestID else { return }
-            payload = Self.applyLocalState(to: response.data, readIDs: locallyReadIDs)
+            reconcileLocalReadMarkers(with: response.data)
+            payload = Self.applyLocalState(
+                to: response.data,
+                readMessageIDs: locallyReadMessageIDs
+            )
+            await persistCache()
         } catch is CancellationError {
             return
         } catch {
@@ -70,7 +125,9 @@ final class InboxStore {
 
     /// Clears the unread badge immediately (opening a thread / mark-read success).
     func clearUnread(conversationID: String) {
-        locallyReadIDs.insert(conversationID)
+        if let row = payload?.conversations.first(where: { $0.id == conversationID }) {
+            locallyReadMessageIDs[conversationID] = row.lastMessage?.id ?? ""
+        }
         replaceConversations { rows in
             rows.map { row in
                 row.id == conversationID ? row.withUnreadCount(0) : row
@@ -238,18 +295,40 @@ final class InboxStore {
             unreadTotal: conversations.reduce(0) { $0 + $1.unreadCount },
             plansNeedingYourAction: current.plansNeedingYourAction
         )
+        scheduleCachePersist()
+    }
+
+    private func persistCache() async {
+        guard let payload, !accountID.isEmpty else { return }
+        await cache.save(
+            accountID: accountID,
+            snapshot: InboxCacheSnapshot(payload: payload)
+        )
+    }
+
+    private func scheduleCachePersist() {
+        guard let payload, !accountID.isEmpty else { return }
+        let accountID = accountID
+        let cache = cache
+        let snapshot = InboxCacheSnapshot(payload: payload)
+        cacheWriteTask?.cancel()
+        cacheWriteTask = Task {
+            try? await Task.sleep(nanoseconds: 100_000_000)
+            guard !Task.isCancelled else { return }
+            await cache.save(accountID: accountID, snapshot: snapshot)
+        }
     }
 
     private static func applyLocalState(
         to payload: NativeInboxPayload,
-        readIDs: Set<String>
+        readMessageIDs: [String: String]
     ) -> NativeInboxPayload {
         let conversations = payload.conversations.map { row -> NativeInboxConversation in
             var next = row
             if let overlay = outboundPreviews[row.id] {
                 next = next.withLastMessage(overlay.lastMessage, lastActivityAt: overlay.lastActivityAt)
             }
-            if readIDs.contains(row.id) {
+            if readMessageIDs[row.id] == (row.lastMessage?.id ?? "") {
                 next = next.withUnreadCount(0)
             }
             return next
@@ -263,6 +342,16 @@ final class InboxStore {
             unreadTotal: conversations.reduce(0) { $0 + $1.unreadCount },
             plansNeedingYourAction: payload.plansNeedingYourAction
         )
+    }
+
+    private func reconcileLocalReadMarkers(with next: NativeInboxPayload) {
+        for row in next.conversations {
+            guard let marker = locallyReadMessageIDs[row.id] else { continue }
+            let lastMessageID = row.lastMessage?.id ?? ""
+            if row.unreadCount == 0 || lastMessageID != marker {
+                locallyReadMessageIDs.removeValue(forKey: row.id)
+            }
+        }
     }
 
     private func pinPath(for conversation: NativeInboxConversation) -> String {
@@ -287,5 +376,101 @@ final class InboxStore {
         case .group: return "api/v1/group-chats/\(conversationID)/inbox-restore"
         case .direct: return ""
         }
+    }
+}
+
+struct InboxCacheSnapshot: Codable, Sendable {
+    let payload: NativeInboxPayload
+    let savedAt: Date
+
+    init(payload: NativeInboxPayload, savedAt: Date = Date()) {
+        self.payload = payload
+        self.savedAt = savedAt
+    }
+}
+
+@Model
+final class CachedInboxRecord {
+    @Attribute(.unique) var accountID: String
+    @Attribute(.externalStorage) var snapshotData: Data
+    var updatedAt: Date
+
+    init(accountID: String, snapshotData: Data, updatedAt: Date) {
+        self.accountID = accountID
+        self.snapshotData = snapshotData
+        self.updatedAt = updatedAt
+    }
+}
+
+actor InboxCache {
+    static let shared = InboxCache()
+
+    private let container: ModelContainer
+    private let encoder = JSONEncoder()
+    private let decoder = JSONDecoder()
+
+    init(inMemoryOnly: Bool = false) {
+        let schema = Schema([CachedInboxRecord.self])
+        let configuration = ModelConfiguration(
+            "SideSeatInboxCache",
+            schema: schema,
+            isStoredInMemoryOnly: inMemoryOnly
+        )
+        do {
+            container = try ModelContainer(for: schema, configurations: [configuration])
+        } catch {
+            let fallback = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+            container = try! ModelContainer(for: schema, configurations: [fallback])
+            #if DEBUG
+            print("[inbox-cache] Persistent store unavailable; using memory cache: \(error)")
+            #endif
+        }
+    }
+
+    func load(accountID: String) -> InboxCacheSnapshot? {
+        let context = ModelContext(container)
+        var descriptor = FetchDescriptor<CachedInboxRecord>(
+            predicate: #Predicate { $0.accountID == accountID }
+        )
+        descriptor.fetchLimit = 1
+        guard let record = try? context.fetch(descriptor).first else { return nil }
+        guard let snapshot = try? decoder.decode(InboxCacheSnapshot.self, from: record.snapshotData) else {
+            context.delete(record)
+            try? context.save()
+            return nil
+        }
+        return snapshot
+    }
+
+    func save(accountID: String, snapshot: InboxCacheSnapshot) {
+        guard let data = try? encoder.encode(snapshot) else { return }
+        let context = ModelContext(container)
+        var descriptor = FetchDescriptor<CachedInboxRecord>(
+            predicate: #Predicate { $0.accountID == accountID }
+        )
+        descriptor.fetchLimit = 1
+        if let record = try? context.fetch(descriptor).first {
+            record.snapshotData = data
+            record.updatedAt = snapshot.savedAt
+        } else {
+            context.insert(
+                CachedInboxRecord(
+                    accountID: accountID,
+                    snapshotData: data,
+                    updatedAt: snapshot.savedAt
+                )
+            )
+        }
+        try? context.save()
+    }
+
+    func removeAccount(_ accountID: String) {
+        let context = ModelContext(container)
+        let descriptor = FetchDescriptor<CachedInboxRecord>(
+            predicate: #Predicate { $0.accountID == accountID }
+        )
+        guard let rows = try? context.fetch(descriptor) else { return }
+        for row in rows { context.delete(row) }
+        try? context.save()
     }
 }

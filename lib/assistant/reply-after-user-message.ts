@@ -3,13 +3,13 @@ import "server-only";
 import { ConnectionStatus, MessageType } from "@prisma/client";
 
 import { getOrCreateAssistantBotUser, isAssistantBotUser } from "@/lib/auth/assistant-bot";
-import { resolveAssistantReply } from "@/lib/assistant/resolve-reply";
+import { resolveAssistantReplyAsync } from "@/lib/assistant/resolve-reply";
 import { serializeAssistantMessage } from "@/lib/assistant/message-payload";
 import type { AppLocale } from "@/lib/i18n/app-locale";
 import { prisma } from "@/lib/db/prisma";
 import { notifyNewDirectChatMessage } from "@/lib/push/notify-user";
 
-/** Creates a FAQ-based assistant reply after the user sends TEXT in the bot DM. */
+/** Creates an assistant reply (AI when configured, else FAQ) after user TEXT in the bot DM. */
 export async function replyAfterUserMessageToAssistant(params: {
   connectionId: string;
   senderUserId: string;
@@ -60,7 +60,7 @@ export async function replyAfterUserMessageToAssistant(params: {
 
   if (!isAssistantBotUser(peer) || viewer.id !== params.senderUserId) return;
 
-  const payload = resolveAssistantReply({
+  const payload = await resolveAssistantReplyAsync({
     body: trimmed,
     locale: params.locale,
     viewer: {

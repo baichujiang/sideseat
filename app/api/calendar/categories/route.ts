@@ -1,9 +1,11 @@
 import { requireOnboardedUser } from "@/lib/auth/guards";
-import { ensureUserCalendarCategories } from "@/lib/calendar/default-user-calendar-categories";
 import {
-  assertPublicHttpUrlForIcsFetch,
-  normalizeCalendarSubscriptionUrl,
-} from "@/lib/calendar/subscription-url";
+  createCalendarCategoryForUser,
+  InvalidCalendarSubscriptionError,
+  listCalendarCategoriesForUser,
+  normalizeCalendarCategoryCreateInput,
+} from "@/lib/calendar/calendar-category-service";
+import { ensureUserCalendarCategories } from "@/lib/calendar/default-user-calendar-categories";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
 import { calendarCategoryCreateSchema } from "@/lib/validators/calendar";
@@ -11,19 +13,7 @@ import { calendarCategoryCreateSchema } from "@/lib/validators/calendar";
 export async function GET() {
   try {
     const user = await requireOnboardedUser();
-    await ensureUserCalendarCategories(prisma, user.id);
-    const rows = await prisma.userCalendarCategory.findMany({
-      where: { userId: user.id },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-      select: {
-        id: true,
-        name: true,
-        color: true,
-        sortOrder: true,
-        presetKey: true,
-        icsSubscriptionUrl: true,
-      },
-    });
+    const rows = await listCalendarCategoriesForUser(prisma, user.id);
     return ok(rows);
   } catch (cause) {
     console.error(cause);
@@ -35,41 +25,16 @@ export async function POST(request: Request) {
   try {
     const user = await requireOnboardedUser();
     const body = await parseJson(request, calendarCategoryCreateSchema);
-    const rawSub = body.icsSubscriptionUrl?.trim();
-    const icsSubscriptionUrl = rawSub ? normalizeCalendarSubscriptionUrl(rawSub) : undefined;
-    if (icsSubscriptionUrl) {
-      try {
-        assertPublicHttpUrlForIcsFetch(icsSubscriptionUrl);
-      } catch (e) {
-        return error(e instanceof Error ? e.message : "Invalid calendar URL.");
-      }
-    }
-    const last = await prisma.userCalendarCategory.findFirst({
-      where: { userId: user.id },
-      orderBy: { sortOrder: "desc" },
-      select: { sortOrder: true },
-    });
-    const sortOrder = (last?.sortOrder ?? -1) + 1;
-    const row = await prisma.userCalendarCategory.create({
-      data: {
-        userId: user.id,
-        name: body.name,
-        color: body.color,
-        sortOrder,
-        presetKey: null,
-        ...(icsSubscriptionUrl ? { icsSubscriptionUrl } : {}),
-      },
-      select: {
-        id: true,
-        name: true,
-        color: true,
-        sortOrder: true,
-        presetKey: true,
-        icsSubscriptionUrl: true,
-      },
+    await ensureUserCalendarCategories(prisma, user.id);
+    const row = await createCalendarCategoryForUser(prisma, {
+      userId: user.id,
+      input: normalizeCalendarCategoryCreateInput(body),
     });
     return ok(row, { status: 201 });
   } catch (cause) {
+    if (cause instanceof InvalidCalendarSubscriptionError) {
+      return error(cause.message);
+    }
     console.error(cause);
     return error("Could not create calendar.");
   }

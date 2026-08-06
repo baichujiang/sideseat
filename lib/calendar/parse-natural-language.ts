@@ -85,7 +85,7 @@ export async function parseNaturalLanguageSchedule(params: {
   try {
     json = extractJsonFromModelText(content);
   } catch {
-    console.error("LLM non-JSON", content.slice(0, 400));
+    console.error("Natural-language calendar model returned invalid JSON.");
     return {
       ok: false,
       code: "PARSE_FAILED",

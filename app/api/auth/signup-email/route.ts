@@ -5,7 +5,7 @@ import { hashPassword } from "@/lib/auth/password";
 import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
 import { validateNicknameForUser } from "@/lib/auth/nickname-fields";
 import { isUsernameAvailable } from "@/lib/auth/username-availability";
-import { SIGNUP_DEFAULT_PROFILE, signupDefaultUserLanguages } from "@/lib/auth/signup-defaults";
+import { SIGNUP_DEFAULT_PROFILE } from "@/lib/auth/signup-defaults";
 import { createSession } from "@/lib/auth/session";
 import { randomAvatarId } from "@/lib/constants/avatars";
 import { isDatabaseUnreachable, warnDatabaseUnreachableThrottled } from "@/lib/db/prisma-errors";
@@ -76,7 +76,6 @@ export async function POST(request: Request) {
         nickname: nicknameCheck.nickname,
         nicknameKey: nicknameCheck.nicknameKey,
         ...SIGNUP_DEFAULT_PROFILE,
-        userLanguages: signupDefaultUserLanguages(),
       },
     });
 

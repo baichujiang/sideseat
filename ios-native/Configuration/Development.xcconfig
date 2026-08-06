@@ -1,5 +1,6 @@
 #include "Base.xcconfig"
 
 SIDESEAT_ENVIRONMENT = development
-SIDESEAT_API_BASE_URL = http:/$()/127.0.0.1:3000
+SIDESEAT_API_BASE_URL = https:/$()/api.sideseat.de
+SIDESEAT_ASSOCIATED_DOMAIN = www.sideseat.de
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG DEVELOPMENT

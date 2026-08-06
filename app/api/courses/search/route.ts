@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
 import { getCurrentSemesterLabel } from "@/lib/constants/semester";
 import { getSessionUser } from "@/lib/auth/session";
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
 import { prisma } from "@/lib/db/prisma";
 import { ok } from "@/lib/http";
 
@@ -24,6 +25,7 @@ export async function GET(request: NextRequest) {
     requestedSchool ??
     (user ? (normalizeSchoolCode(user.school) ?? DEFAULT_SCHOOL) : DEFAULT_SCHOOL);
   const semesterLabel = getCurrentSemesterLabel();
+  const activeMembership = activeCourseMembershipWhere();
 
   if (raw.length < 2) {
     return ok({ hits: [] as CourseHit[] });
@@ -41,7 +43,9 @@ export async function GET(request: NextRequest) {
   const [exactCodeRow, broadRows] = await Promise.all([
     prisma.course.findFirst({
       where: { school, semesterLabel, code: upper },
-      include: { _count: { select: { members: true } } },
+      include: {
+        _count: { select: { members: { where: activeMembership } } },
+      },
     }),
     prisma.course.findMany({
       where: {
@@ -53,7 +57,7 @@ export async function GET(request: NextRequest) {
         ],
       },
       include: {
-        _count: { select: { members: true } },
+        _count: { select: { members: { where: activeMembership } } },
       },
       orderBy: [{ code: "asc" }, { name: "asc" }],
       take: 40,
@@ -74,7 +78,11 @@ export async function GET(request: NextRequest) {
     user
       ? await Promise.all([
           prisma.userCourse.findMany({
-            where: { userId: user.id, courseId: { in: ids } },
+            where: {
+              userId: user.id,
+              courseId: { in: ids },
+              ...activeMembership,
+            },
             select: { courseId: true },
           }),
           prisma.savedCourse.findMany({

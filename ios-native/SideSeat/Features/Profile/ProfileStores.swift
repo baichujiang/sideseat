@@ -16,7 +16,9 @@ final class CurrentProfileStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            profile = .uiTestingFixture
+            profile = ProcessInfo.processInfo.arguments.contains("--ui-testing-unverified-profile")
+                ? .uiTestingUnverifiedFixture
+                : .uiTestingFixture
             return
         }
         #endif
@@ -87,6 +89,89 @@ final class CurrentProfileStore {
         } catch {
             issue = error.localizedDescription
             return false
+        }
+    }
+
+    func requestStudentVerification(email: String, using session: SessionStore) async -> NativeStudentVerificationResult? {
+        guard !isSaving else { return nil }
+        isSaving = true
+        issue = nil
+        defer { isSaving = false }
+
+        let normalized = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            let result = NativeStudentVerificationResult(
+                status: "EMAIL_PENDING",
+                delivery: "skipped",
+                verifyUrl: "http://127.0.0.1:3000/api/student-verification/verify?token=ui-testing",
+                message: String(localized: "Email delivery is disabled in this test build. Use the verification link below to finish now.")
+            )
+            profile = (profile ?? .uiTestingFixture).applyingVerification(status: result.status, verifiedStudent: false)
+            return result
+        }
+        #endif
+
+        do {
+            let response: APIEnvelope<NativeStudentVerificationResult> = try await session.sendAuthorized(
+                "api/student-verification/request",
+                method: .post,
+                body: NativeStudentVerificationRequest(email: normalized),
+                idempotencyKey: UUID().uuidString
+            )
+            profile = profile?.applyingVerification(
+                status: response.data.status,
+                verifiedStudent: response.data.status.uppercased() == "VERIFIED"
+            )
+            return response.data
+        } catch {
+            issue = error.localizedDescription
+            return nil
+        }
+    }
+
+    func submitStudentProof(
+        _ proof: NativeStudentProofDraft,
+        email: String,
+        using session: SessionStore
+    ) async -> NativeStudentVerificationResult? {
+        guard !isSaving else { return nil }
+        isSaving = true
+        issue = nil
+        defer { isSaving = false }
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            let result = NativeStudentVerificationResult(
+                status: "MANUAL_REVIEW_REQUIRED",
+                delivery: nil,
+                verifyUrl: nil,
+                message: String(localized: "Your school document was submitted for review.")
+            )
+            profile = (profile ?? .uiTestingFixture).applyingVerification(status: result.status, verifiedStudent: false)
+            return result
+        }
+        #endif
+
+        do {
+            let normalizedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            let response: APIEnvelope<NativeStudentVerificationResult> = try await session.uploadAuthorized(
+                "api/student-verification/manual-review",
+                file: MultipartUploadFile(
+                    fieldName: "file",
+                    fileName: proof.fileName,
+                    mimeType: proof.mimeType,
+                    data: proof.data
+                ),
+                fields: normalizedEmail.isEmpty ? [:] : ["email": normalizedEmail],
+                idempotencyKey: UUID().uuidString
+            )
+            profile = profile?.applyingVerification(status: response.data.status, verifiedStudent: false)
+            return response.data
+        } catch {
+            issue = error.localizedDescription
+            return nil
         }
     }
 
@@ -175,7 +260,7 @@ final class CurrentProfileStore {
                 return NativeProfileLifePhoto(id: photo.id, url: photo.url, sortOrder: index)
             }
             guard reordered.count == existing.lifePhotos.count else {
-                issue = "The life photo order could not be saved."
+                issue = String(localized: "The life photo order could not be saved.")
                 return false
             }
             profile = existing.applyingLifePhotos(reordered)

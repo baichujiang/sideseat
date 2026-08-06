@@ -2,6 +2,7 @@ import { CourseIntent, Weekday } from "@prisma/client";
 
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
+import { courseMembershipActiveUntilForSemester } from "@/lib/courses/active-membership";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
 import { calendarCourseAddSchema } from "@/lib/validators/calendar";
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
 
     const course = await prisma.course.findFirst({
       where: { id: values.courseId, school },
-      select: { id: true },
+      select: { id: true, semesterLabel: true },
     });
 
     if (!course) {
@@ -45,8 +46,11 @@ export async function POST(request: Request) {
         userId: user.id,
         courseId: course.id,
         intentions: [CourseIntent.STUDY_TOGETHER],
+        activeUntil: courseMembershipActiveUntilForSemester(course.semesterLabel),
       },
-      update: {},
+      update: {
+        activeUntil: courseMembershipActiveUntilForSemester(course.semesterLabel),
+      },
       select: {
         id: true,
       },

@@ -3,12 +3,17 @@ import SwiftUI
 struct AppShellView: View {
     @Environment(SessionStore.self) private var session
     @Environment(DeepLinkRouter.self) private var deepLinkRouter
+    @Environment(\.scenePhase) private var scenePhase
     @State private var selectedTab: AppTab = .home
-    @State private var previousTab: AppTab = .home
     @State private var routers = TabRouter()
-    @State private var showCreateChooser = false
-    @State private var createDestination: CreateDestination?
+    @State private var inboxStore = InboxStore()
+    /// Single create flow sheet — chooser and form share one presentation so option → form
+    /// never dismisses/re-presents (avoids the 0.28s double-sheet flash).
+    @State private var isCreateFlowPresented = false
+    @State private var createFlowDestination: CreateDestination?
     @State private var productTutorial = ProductTutorialController()
+
+    private static let tabOrder: [AppTab] = [.home, .discover, .create, .chats, .me]
 
     init() {
         #if DEBUG
@@ -26,32 +31,46 @@ struct AppShellView: View {
                 .home
             }
         _selectedTab = State(initialValue: initialTab)
-        _previousTab = State(initialValue: initialTab)
         #endif
     }
 
     var body: some View {
         TabView(selection: tabSelection) {
-            tab(.home, title: "Home", systemImage: "house") {
+            tab(.home, title: "Calendar", systemImage: "calendar") {
                 HomeRootView()
             }
             tab(.discover, title: "Discover", systemImage: "safari") {
-                DiscoverRootView(createDestination: $createDestination)
+                DiscoverRootView(createDestination: createDestinationBinding)
             }
 
-            // Placeholder only — selection never stays here (see `tabSelection`).
-            SideSeatTheme.bgGrouped
+            // Placeholder only — UIKit intercept never lets this page become visible.
+            Color.clear
                 .ignoresSafeArea()
                 .tabItem { Label("Create", systemImage: "plus.circle.fill") }
                 .tag(AppTab.create)
                 .accessibilityIdentifier("create-action")
 
-            tab(.chats, title: "Chats", systemImage: "bubble.left.and.bubble.right") {
-                ChatsRootView()
+            tab(
+                .chats,
+                title: "Chats",
+                systemImage: "bubble.left.and.bubble.right",
+                badge: inboxStore.unreadBadgeLabel
+            ) {
+                ChatsRootView(store: inboxStore)
             }
             tab(.me, title: "Me", systemImage: "person") {
                 MeRootView()
             }
+        }
+        .background {
+            CreateTabBarInterceptor(
+                tabOrder: Self.tabOrder,
+                createTab: .create,
+                onCreateTap: openCreatePlan,
+                onSelectTab: { tab in
+                    selectedTab = tab
+                }
+            )
         }
         .overlay {
             if productTutorial.isPresented {
@@ -61,7 +80,6 @@ struct AppShellView: View {
                     selectTab: { tab in
                         withAnimation(.spring(response: 0.32, dampingFraction: 0.9)) {
                             selectedTab = tab
-                            previousTab = tab
                         }
                     }
                 )
@@ -75,58 +93,58 @@ struct AppShellView: View {
             }
         }
         .animation(.spring(response: 0.36, dampingFraction: 0.88), value: productTutorial.isPresented)
-        .confirmationDialog("Create", isPresented: $showCreateChooser, titleVisibility: .visible) {
-            Button("Find buddies") {
-                createDestination = .buddyPost
-            }
-            .accessibilityIdentifier("create-buddy-post")
-
-            Button("Activity") {
-                createDestination = .activity
-            }
-            .accessibilityIdentifier("create-activity")
-
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("What do you want to post?")
+        .sheet(isPresented: $isCreateFlowPresented, onDismiss: {
+            createFlowDestination = nil
+        }) {
+            createFlowSheet
         }
-        .sheet(item: $createDestination) { destination in
-            NavigationStack {
-                switch destination {
-                case .buddyPost:
-                    DiscoverBuddyCreateView {
-                        createDestination = nil
-                    }
-                case .activity:
-                    DiscoverActivityCreateView {
-                        createDestination = nil
-                    }
-                }
-            }
+        .task {
+            routePendingDeepLink()
         }
         .onChange(of: deepLinkRouter.pendingRoute) {
             routePendingDeepLink()
         }
+        .onChange(of: deepLinkRouter.navigationEpoch) {
+            routePendingDeepLink()
+        }
         .onChange(of: session.phase) {
             if session.phase == .signedOut {
+                inboxStore.reset()
                 routers.resetAll()
                 selectedTab = .home
-                previousTab = .home
+                isCreateFlowPresented = false
+                createFlowDestination = nil
                 productTutorial.evaluateAutoShow(for: nil)
             } else if session.phase == .signedIn {
                 productTutorial.evaluateAutoShow(for: session.currentUser)
+                routePendingDeepLink()
             }
         }
         .onChange(of: session.currentUser?.id) {
             guard session.phase == .signedIn else { return }
             productTutorial.evaluateAutoShow(for: session.currentUser)
         }
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active, session.phase == .signedIn else { return }
+            Task { await inboxStore.load(using: session) }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .sideSeatInboxConversationRead)) { note in
+            if let id = note.userInfo?["conversationID"] as? String {
+                inboxStore.clearUnread(conversationID: id)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .sideSeatInboxConversationUpdated)) { note in
+            inboxStore.applyOutboundPreview(from: note)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .sideSeatInboxNeedsRefresh)) { _ in
+            guard session.phase == .signedIn else { return }
+            Task { await inboxStore.load(using: session) }
+        }
         .onReceive(NotificationCenter.default.publisher(for: .sideseatReplayProductTutorial)) { note in
             let userID = (note.userInfo?["userID"] as? String) ?? session.currentUser?.id
             guard let userID else { return }
             productTutorial.replay(for: userID) { tab in
                 selectedTab = tab
-                previousTab = tab
             }
         }
         .task {
@@ -136,6 +154,10 @@ struct AppShellView: View {
             if arguments.contains("--ui-testing-public-profile") {
                 await Task.yield()
                 routers.router(for: .discover).navigate(to: .profile(userID: "ui-peer"))
+            } else if arguments.contains("--ui-testing-create-plan") {
+                await Task.yield()
+                createFlowDestination = .plan
+                isCreateFlowPresented = true
             } else if arguments.contains("--ui-testing-unread-jump") {
                 await Task.yield()
                 ChatUnreadLaunch.stage(conversationID: "ui-connection", unreadCount: 12)
@@ -146,6 +168,57 @@ struct AppShellView: View {
                 productTutorial.evaluateAutoShow(for: session.currentUser)
             }
         }
+        .task(id: session.currentUser?.id) {
+            guard session.phase == .signedIn else { return }
+            await inboxStore.load(using: session)
+        }
+    }
+
+    @ViewBuilder
+    private var createFlowSheet: some View {
+        Group {
+            if let createFlowDestination {
+                NavigationStack {
+                    switch createFlowDestination {
+                    case .plan:
+                        DiscoverPlanCreateView {
+                            dismissCreateFlow()
+                        }
+                    }
+                }
+            } else {
+                CreateChooserSheet(
+                    onChoose: { destination in
+                        withAnimation(.easeInOut(duration: 0.22)) {
+                            createFlowDestination = destination
+                        }
+                    },
+                    onCancel: dismissCreateFlow
+                )
+            }
+        }
+        .presentationDetents(createFlowDestination == nil ? [.height(360)] : [.large])
+        .presentationDragIndicator(createFlowDestination == nil ? .hidden : .visible)
+        .presentationCornerRadius(SideSeatTheme.cardRadius)
+        .presentationBackground(
+            createFlowDestination == nil ? SideSeatTheme.bg : SideSeatTheme.bgGrouped
+        )
+        .animation(.easeInOut(duration: 0.22), value: createFlowDestination)
+    }
+
+    /// Discover toolbar create menu writes the form destination directly.
+    private var createDestinationBinding: Binding<CreateDestination?> {
+        Binding(
+            get: { createFlowDestination },
+            set: { newValue in
+                if let newValue {
+                    createFlowDestination = newValue
+                    isCreateFlowPresented = true
+                } else {
+                    dismissCreateFlow()
+                }
+            }
+        )
     }
 
     /// Create is an action, not a destination — never leave the current tab.
@@ -154,21 +227,29 @@ struct AppShellView: View {
             get: { selectedTab },
             set: { next in
                 if next == .create {
-                    // Re-assert the current tab so TabView does not settle on the blank Create page.
-                    selectedTab = previousTab
-                    showCreateChooser = true
+                    openCreatePlan()
                 } else {
                     selectedTab = next
-                    previousTab = next
                 }
             }
         )
+    }
+
+    private func openCreatePlan() {
+        createFlowDestination = .plan
+        isCreateFlowPresented = true
+    }
+
+    private func dismissCreateFlow() {
+        isCreateFlowPresented = false
+        createFlowDestination = nil
     }
 
     private func tab<Content: View>(
         _ tab: AppTab,
         title: LocalizedStringKey,
         systemImage: String,
+        badge: String? = nil,
         @ViewBuilder content: () -> Content
     ) -> some View {
         NavigationStack(path: routers.binding(for: tab)) {
@@ -177,31 +258,40 @@ struct AppShellView: View {
         }
         .environment(routers.router(for: tab))
         .tabItem { Label(title, systemImage: systemImage) }
+        .badge(badge.map { Text(verbatim: $0) })
         .tag(tab)
     }
 
     private func routePendingDeepLink() {
-        guard session.phase == .signedIn, let route = deepLinkRouter.consumePendingRoute() else {
+        guard session.phase == .signedIn else { return }
+        let route = deepLinkRouter.consumePendingRoute()
+        let explicitTab = deepLinkRouter.consumePendingTab()
+        guard route != nil || explicitTab != nil else { return }
+        let tab: AppTab
+        if let explicitTab {
+            tab = explicitTab
+        } else if let route {
+            tab = tabForRoute(route)
+        } else {
             return
         }
-        let tab: AppTab
-        switch route {
-        case .courses:
-            tab = .home
-        case .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .plans, .scheduleShare:
-            tab = .chats
-        case .profile, .settings, .blockedUsers, .supportStore, .feedback, .feedbackDetail:
-            tab = .me
-        case .course:
-            tab = .home
-        case .discoverPost:
-            tab = .discover
-        case .activity:
-            tab = .discover
-        }
         selectedTab = tab
-        previousTab = tab
-        routers.router(for: tab).navigate(to: route)
+        if let route {
+            routers.router(for: tab).navigate(to: route)
+        }
+    }
+
+    private func tabForRoute(_ route: AppRoute) -> AppTab {
+        switch route {
+        case .courses, .course:
+            return .home
+        case .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .plans, .scheduleShare:
+            return .chats
+        case .myPosts, .profile, .settings, .blockedUsers, .supportStore, .feedback, .feedbackDetail:
+            return .me
+        case .discoverPost, .activity:
+            return .discover
+        }
     }
 }
 
@@ -211,6 +301,8 @@ private extension View {
             switch route {
             case .courses:
                 CourseListView()
+            case .myPosts:
+                MyPostsView()
             case .profile(let id):
                 PublicProfileView(userID: id)
             case .contacts:

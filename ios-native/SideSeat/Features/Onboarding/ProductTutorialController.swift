@@ -28,33 +28,33 @@ final class ProductTutorialController {
     static let steps: [ProductTutorialStep] = [
         ProductTutorialStep(
             id: "home",
-            title: String(localized: "Home"),
-            body: String(localized: "Start with today's schedule, study blocks, and calendar at a glance."),
-            hint: String(localized: "The guide stays small so you can keep using the page."),
+            title: String(localized: "Calendar"),
+            body: String(localized: "Keep personal events and confirmed plans in one schedule."),
+            hint: String(localized: "Know what your week looks like before you commit to another plan."),
             tab: .home,
-            systemImage: "house.fill"
+            systemImage: "calendar"
         ),
         ProductTutorialStep(
             id: "discover",
             title: String(localized: "Discover"),
-            body: String(localized: "Find study partners, meal plans, language practice, sports, and shared-class posts."),
-            hint: String(localized: "The app switches tabs for each step, so you can compare the note with the screen."),
+            body: String(localized: "Find verified international students through real plans in your school or city."),
+            hint: String(localized: "School verification and visibility controls help you choose who can respond."),
             tab: .discover,
             systemImage: "safari.fill"
         ),
         ProductTutorialStep(
             id: "chats",
             title: String(localized: "Chats"),
-            body: String(localized: "Keep direct messages, course rooms, and planning threads in one inbox."),
-            hint: String(localized: "The app switches tabs for each step, so you can compare the note with the screen."),
+            body: String(localized: "Ask questions, confirm a plan, and keep the conversation in one place."),
+            hint: String(localized: "Turn a conversation into a shared plan without losing the details."),
             tab: .chats,
             systemImage: "bubble.left.and.bubble.right.fill"
         ),
         ProductTutorialStep(
             id: "me",
             title: String(localized: "Me"),
-            body: String(localized: "Update your profile, courses, student verification, language, and account settings."),
-            hint: String(localized: "Replay this anytime from Settings."),
+            body: String(localized: "Manage your school identity, profile, courses, plans, and account settings."),
+            hint: String(localized: "A verified school identity helps people know who they are meeting."),
             tab: .me,
             systemImage: "person.fill"
         ),
@@ -80,15 +80,18 @@ final class ProductTutorialController {
         }
         activeUserID = user.id
         #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated")
-            || ProcessInfo.processInfo.arguments.contains("--ui-testing-skip-tutorial")
-        {
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-skip-tutorial") {
             isPresented = false
             hasEntered = false
             return
         }
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-product-tutorial") {
             present(restoringStepFor: user.id)
+            return
+        }
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            isPresented = false
+            hasEntered = false
             return
         }
         #endif
@@ -162,9 +165,11 @@ final class ProductTutorialController {
                         avatarUrl: user.avatarUrl,
                         tagline: user.tagline,
                         school: user.school,
+                        studentStatus: user.studentStatus,
                         degreeLevel: user.degreeLevel,
                         major: user.major,
                         semester: user.semester,
+                        graduationYear: user.graduationYear,
                         gender: user.gender,
                         onboardingComplete: user.onboardingComplete,
                         isGuest: user.isGuest,

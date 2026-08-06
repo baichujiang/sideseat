@@ -16,6 +16,7 @@ export function buildDefaultScheduleShareCreatePayload(baseNow = new Date()) {
     revealConfig: {
       categoryIds: [] as string[],
       presetKeys: [...REVEAL_PRESET_KEYS_ALLOWLIST],
+      hideAllDetails: false,
       includedDates: sortedShareIncludedDates(selected),
     },
     allowGuestProposals: true,

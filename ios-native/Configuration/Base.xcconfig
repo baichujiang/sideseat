@@ -9,5 +9,9 @@ CURRENT_PROJECT_VERSION = 1
 CODE_SIGN_STYLE = Automatic
 PRODUCT_BUNDLE_IDENTIFIER = app.sideseat.mobile
 ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor
+// Push: Development.xcconfig → development; Staging/Production → production
+APS_ENVIRONMENT = development
+// Override with the public HTTPS host serving the AASA file before release.
+SIDESEAT_ASSOCIATED_DOMAIN = sideseat.invalid
 // Optional crash DSN (empty = CrashReporting no-op)
 SIDESEAT_CRASH_DSN =

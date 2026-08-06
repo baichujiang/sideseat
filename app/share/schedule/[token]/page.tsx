@@ -25,11 +25,9 @@ const ScheduleShareOwnerClient = dynamic(
 );
 
 export async function generateMetadata({
-  params,
 }: {
   params: Promise<{ token: string }>;
 }): Promise<Metadata> {
-  const { token } = await params;
   const locale = await getServerAppLocale();
   const messages = getMessages(locale);
   return {

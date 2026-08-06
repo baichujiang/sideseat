@@ -1,9 +1,14 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent } from "react";
 import { ChevronDown } from "lucide-react";
 
+import { useChatMessageSelection } from "@/components/chat/chat-message-selection";
+import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { cn } from "@/lib/utils";
+
+const BACKGROUND_DISMISS_SELECTOR =
+  "[data-chat-composer-root], [data-chat-composer-footer], a, button, input, textarea, select, [role='dialog'], [role='menu'], [data-chat-message-bubble], [data-chat-message-actions]";
 
 /**
  * Keeps the viewport pinned to the latest messages (standard chat behavior),
@@ -27,6 +32,18 @@ export function ChatScrollContainer({
   /** `null` until the first layout pass for this mount (avoids treating every run as "initial"). */
   const prevCount = useRef<number | null>(null);
   const [showFab, setShowFab] = useState(false);
+  const { dismissInputMode } = useChatMessageSelection();
+  const { messages } = useLocaleContext();
+
+  const onListPointerDown = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest(BACKGROUND_DISMISS_SELECTOR)) return;
+      dismissInputMode();
+    },
+    [dismissInputMode],
+  );
 
   const nearBottom = (el: HTMLDivElement) =>
     el.scrollHeight - el.scrollTop - el.clientHeight < 160;
@@ -70,13 +87,14 @@ export function ChatScrollContainer({
       <div
         ref={ref}
         className="h-full overflow-y-auto overscroll-y-contain px-3 pt-2"
+        onPointerDown={onListPointerDown}
       >
         {children}
       </div>
       <button
         type="button"
         onClick={scrollToBottom}
-        aria-label="Scroll to latest"
+        aria-label={messages.chat.scrollToLatestAria}
         className={cn(
           "absolute bottom-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-lg transition",
           "hover:text-foreground",

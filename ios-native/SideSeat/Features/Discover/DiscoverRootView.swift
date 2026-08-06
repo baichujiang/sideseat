@@ -4,7 +4,6 @@ struct DiscoverRootView: View {
     @Environment(SessionStore.self) private var session
     @Binding private var createDestination: CreateDestination?
     @State private var store = DiscoverFeedStore()
-    @State private var selectedKind: DiscoverFeedKind = .buddies
     @State private var query = ""
 
     init(createDestination: Binding<CreateDestination?>) {
@@ -13,15 +12,6 @@ struct DiscoverRootView: View {
 
     var body: some View {
         List {
-            Picker("Discover view", selection: $selectedKind) {
-                ForEach(DiscoverFeedKind.allCases) { kind in
-                    Text(kind.title).tag(kind)
-                }
-            }
-            .pickerStyle(.segmented)
-            .listRowBackground(Color.clear)
-            .accessibilityIdentifier("discover-kind")
-
             if let issue = store.issue, store.payload == nil {
                 ContentUnavailableView {
                     Label("Could not load Discover", systemImage: "wifi.exclamationmark")
@@ -30,45 +20,31 @@ struct DiscoverRootView: View {
                 } actions: {
                     Button("Try again") { Task { await load() } }
                 }
-                .listRowBackground(Color.clear)
+                .ssListPageStateRow()
             } else if store.isLoading, store.payload == nil {
-                ProgressView("Loading Discover")
+                SSLoadingState("Loading Discover")
                     .frame(maxWidth: .infinity)
-                    .listRowBackground(Color.clear)
+                    .ssListPageStateRow()
             } else {
                 feedContent
             }
         }
         .listStyle(.plain)
-        .navigationTitle("Discover")
+        .ssRootNavigationTitle(
+            "Discover",
+            subtitle: DiscoverCityPreferenceStore.shared.selectedCity
+        )
         .searchable(text: $query, prompt: "People, plans, or places")
         .refreshable { await load() }
         .toolbar {
-            ToolbarItem(placement: .principal) {
-                VStack(spacing: 0) {
-                    Text("Discover").font(.headline)
-                    Text(DiscoverCityPreferenceStore.shared.selectedCity)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .accessibilityIdentifier("discover-city-label")
-                }
-            }
             ToolbarItem(placement: .primaryAction) {
-                Menu {
-                    Button {
-                        createDestination = .buddyPost
-                    } label: {
-                        Label("Find buddies", systemImage: "person.2")
-                    }
-                    Button {
-                        createDestination = .activity
-                    } label: {
-                        Label("Activity", systemImage: "calendar.badge.plus")
-                    }
+                Button {
+                    createDestination = .plan
                 } label: {
                     Image(systemName: "plus")
                 }
-                .accessibilityIdentifier("discover-create-menu")
+                .accessibilityLabel("Create plan")
+                .accessibilityIdentifier("discover-create-plan")
             }
         }
         // Create forms are presented by `AppShellView` so the center Create action
@@ -76,11 +52,7 @@ struct DiscoverRootView: View {
         .onChange(of: createDestination) { previous, destination in
             if destination == nil {
                 switch previous {
-                case .buddyPost:
-                    selectedKind = .buddies
-                    query = ""
-                case .activity:
-                    selectedKind = .activities
+                case .plan:
                     query = ""
                 case .none:
                     break
@@ -100,27 +72,23 @@ struct DiscoverRootView: View {
 
     @ViewBuilder
     private var feedContent: some View {
-        switch selectedKind {
-        case .buddies:
-            if buddies.isEmpty {
-                emptyView(title: "No buddy posts", description: "Try another search or create a post.")
-            } else {
-                ForEach(buddies) { post in
+        if plans.isEmpty {
+            emptyView(title: "No plans yet", description: "Try another search or create a plan.")
+        } else {
+            ForEach(plans) { item in
+                switch item {
+                case .post(let post):
                     NavigationLink(value: AppRoute.discoverPost(postID: post.id)) {
                         DiscoverBuddyRow(post: post)
                     }
-                    .accessibilityIdentifier("discover-buddy-\(post.id)")
-                }
-            }
-        case .activities:
-            if activities.isEmpty {
-                emptyView(title: "No activities", description: "Try another search or create an activity.")
-            } else {
-                ForEach(activities) { activity in
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("discover-plan-\(post.id)")
+                case .activity(let activity):
                     NavigationLink(value: AppRoute.activity(activityID: activity.id)) {
                         DiscoverActivityRow(activity: activity)
                     }
-                    .accessibilityIdentifier("discover-activity-\(activity.id)")
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("discover-plan-legacy-\(activity.id)")
                 }
             }
         }
@@ -129,17 +97,42 @@ struct DiscoverRootView: View {
     private func emptyView(title: LocalizedStringKey, description: LocalizedStringKey) -> some View {
         SSEmptyState(
             title: title,
-            systemImage: selectedKind == .buddies ? "person.2" : "calendar",
+            systemImage: "person.2",
             description: description
         )
-        .listRowBackground(Color.clear)
+        .ssListPageStateRow()
     }
 
     private var buddies: [NativeDiscoverBuddyPost] { store.payload?.buddies ?? [] }
     private var activities: [NativeDiscoverActivity] { store.payload?.activities ?? [] }
+    private var plans: [DiscoverPlanFeedItem] {
+        (buddies.map(DiscoverPlanFeedItem.post) + activities.map(DiscoverPlanFeedItem.activity))
+            .sorted { $0.sortDate > $1.sortDate }
+    }
 
     private func load() async {
         await store.load(using: session, query: query)
+    }
+}
+
+private enum DiscoverPlanFeedItem: Identifiable {
+    case post(NativeDiscoverBuddyPost)
+    case activity(NativeDiscoverActivity)
+
+    var id: String {
+        switch self {
+        case .post(let post): "post-\(post.id)"
+        case .activity(let activity): "activity-\(activity.id)"
+        }
+    }
+
+    var sortDate: Date {
+        switch self {
+        case .post(let post):
+            return post.startDate ?? (try? Date(post.createdAt, strategy: .iso8601)) ?? .distantPast
+        case .activity(let activity):
+            return activity.startDate ?? .distantPast
+        }
     }
 }
 
@@ -149,26 +142,72 @@ private struct DiscoverBuddyRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 10) {
-                InitialAvatar(name: post.author.displayName)
+                InitialAvatar(name: post.author.displayName, url: post.author.avatarUrl)
                 VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 4) {
-                        Text(post.author.displayName).font(.subheadline.weight(.semibold))
-                        if post.author.verifiedStudent {
-                            Image(systemName: "checkmark.seal.fill").foregroundStyle(SideSeatTheme.verifiedSeal)
-                        }
+                    HStack(spacing: 6) {
+                        Text(post.author.displayName)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
+                        SchoolIdentityBadge(
+                            school: post.author.school,
+                            verifiedStudent: post.author.verifiedStudent,
+                            status: post.author.verifiedStudent ? "VERIFIED" : "UNVERIFIED",
+                            compact: true
+                        )
+                    }
+                    if let studentRoleLabel = post.author.studentRoleLabel {
+                        Text(studentRoleLabel)
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.accent)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 3)
+                            .background(SideSeatTheme.accent.opacity(0.10), in: Capsule())
+                            .lineLimit(1)
                     }
                     if let tagline = post.author.tagline, !tagline.isEmpty {
                         Text(tagline).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    } else if let major = post.author.major, !major.isEmpty {
+                        Text(major).font(.caption).foregroundStyle(.secondary).lineLimit(1)
                     }
                 }
                 Spacer()
                 if post.isOwn { Text("You").font(.caption).foregroundStyle(.secondary) }
             }
-            Text(post.title).font(.body.weight(.semibold))
+            Text(post.title)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(.primary)
             if let body = post.body, !body.isEmpty {
                 Text(body).font(.subheadline).foregroundStyle(.secondary).lineLimit(3)
             }
+            if !post.tags.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(post.tags.prefix(6), id: \.self) { tag in
+                            Text("#\(tag)")
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(SideSeatTheme.textSecondary)
+                                .padding(.horizontal, 7)
+                                .padding(.vertical, 3)
+                                .background(SideSeatTheme.fillTertiary, in: Capsule())
+                        }
+                    }
+                }
+            }
+            if post.startDate != nil || post.location != nil {
+                HStack(spacing: 12) {
+                    if let start = post.startDate {
+                        Label(start.formatted(date: .abbreviated, time: .shortened), systemImage: "calendar")
+                    }
+                    if let location = post.location, !location.isEmpty {
+                        Label(location, systemImage: "mappin.and.ellipse")
+                            .lineLimit(1)
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
             HStack(spacing: 12) {
+                Label(BuddyPostDisplay.statusLabel(post.status), systemImage: post.status == "ACTIVE" ? "circle.fill" : "checkmark.circle")
                 if let expiry = post.expiryDate {
                     Label {
                         Text(expiry, format: .dateTime.month().day())
@@ -182,6 +221,9 @@ private struct DiscoverBuddyRow: View {
             }
             .font(.caption)
             .foregroundStyle(.secondary)
+            Label(BuddyPostDisplay.visibilityLabel(post.visibility), systemImage: "eye")
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
         .padding(.vertical, 6)
     }
@@ -192,7 +234,9 @@ private struct DiscoverActivityRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(activity.title).font(.body.weight(.semibold))
+            Text(activity.title)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(.primary)
             if let start = activity.startDate {
                 Label(start.formatted(date: .abbreviated, time: .shortened), systemImage: "calendar")
             }
@@ -218,10 +262,14 @@ struct InitialAvatar: View {
     var url: String? = nil
     var size: CGFloat = 36
 
+    private var tileColor: Color {
+        SideSeatTheme.AvatarPalette.color(for: name)
+    }
+
     var body: some View {
         ZStack {
             Circle()
-                .fill(SideSeatTheme.accent.opacity(0.14))
+                .fill(tileColor)
             if let url, let imageURL = URL(string: url), !url.isEmpty {
                 AsyncImage(url: imageURL) { phase in
                     switch phase {
@@ -247,7 +295,7 @@ struct InitialAvatar: View {
     private var initialsText: some View {
         Text(String(name.first ?? "?"))
             .font(size >= 40 ? .title3.weight(.semibold) : .subheadline.weight(.semibold))
-            .foregroundStyle(SideSeatTheme.accent)
+            .foregroundStyle(.white)
     }
 }
 
@@ -337,8 +385,6 @@ struct GroupCompositeAvatar: View {
     }
 
     private static func tileColor(for name: String) -> Color {
-        let palette = SideSeatTheme.AvatarPalette.tiles
-        let sum = name.unicodeScalars.reduce(0) { $0 + Int($1.value) }
-        return palette[sum % palette.count]
+        SideSeatTheme.AvatarPalette.color(for: name)
     }
 }

@@ -6,6 +6,7 @@ import type { CalendarRepeatRule, PlanType } from "@prisma/client";
 import Link from "next/link";
 import type { Route } from "next";
 import { format } from "date-fns";
+import { enUS, zhCN } from "date-fns/locale";
 import {
   Clock3,
   Loader2,
@@ -24,7 +25,7 @@ import { AppPushLayer, APP_PUSH_TRANSITION_MS } from "@/components/ui/app-push-l
 import { Button } from "@/components/ui/button";
 import { isIcsFeedStudyEntryId } from "@/lib/calendar/ics-feed-event-id";
 import { formatMessage } from "@/lib/i18n/messages";
-import { useAppMessages } from "@/hooks/use-app-locale";
+import { useAppLocale, useAppMessages } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
 
 export type ScheduleDetailItem = {
@@ -79,11 +80,14 @@ export function ScheduleItemDetailSheet({
   planInviteError?: string | null;
 }) {
   const router = useRouter();
+  const { locale } = useAppLocale();
   const { schedule: s } = useAppMessages();
+  const dfLocale = locale === "zh-CN" ? zhCN : enUS;
   const [openingChatUserId, setOpeningChatUserId] = useState<string | null>(null);
   const [chatError, setChatError] = useState<string | null>(null);
   /** Keeps row data through close animation after parent clears `item`. */
   const [heldItem, setHeldItem] = useState<ScheduleDetailItem | null>(null);
+  const itemId = item?.id;
 
   useEffect(() => {
     if (open && item) setHeldItem(item);
@@ -97,26 +101,29 @@ export function ScheduleItemDetailSheet({
   }, [open, heldItem]);
 
   useEffect(() => {
-    if (!open || !item) return;
+    if (!open || !itemId) return;
     setChatError(null);
     setOpeningChatUserId(null);
-  }, [open, item?.id]);
+  }, [open, itemId]);
 
   const displayItem = open && item ? item : heldItem;
   if (!displayItem) return null;
 
   const start = new Date(displayItem.startISO);
   const end = new Date(displayItem.endISO);
-  const timeLabel = `${format(start, "EEE, d MMM · HH:mm")} - ${format(end, "HH:mm")}`;
+  const timeLabel =
+    locale === "zh-CN"
+      ? `${format(start, "M月d日 EEE · HH:mm", { locale: dfLocale })} - ${format(end, "HH:mm")}`
+      : `${format(start, "EEE, d MMM · HH:mm", { locale: dfLocale })} - ${format(end, "HH:mm")}`;
   const canEdit = displayItem.source === "calendar" && !isIcsFeedStudyEntryId(displayItem.id);
   const fromSubscribedCalendar = isIcsFeedStudyEntryId(displayItem.id);
-  const locationValue = displayItem.location?.trim() ? displayItem.location : "No location";
+  const locationValue = displayItem.location?.trim() ? displayItem.location : s.detailNoLocation;
   const repeatValue = displayItem.repeatLabel;
-  const noteValue = displayItem.note?.trim() ? displayItem.note : "No notes";
+  const noteValue = displayItem.note?.trim() ? displayItem.note : s.detailNoNotes;
   const categoryDisplay = displayItem.categoryName?.trim()
     ? displayItem.categoryName
     : displayItem.categoryColor
-      ? "Custom"
+      ? s.detailCustomCategory
       : s.addPanelNone;
 
   const participants = displayItem.eventParticipants;
@@ -137,14 +144,14 @@ export function ScheduleItemDetailSheet({
       if (!res.ok) {
         setOpeningChatUserId(null);
         setChatError(
-          typeof payload?.error === "string" ? payload.error : "Unable to open chat.",
+          typeof payload?.error === "string" ? payload.error : s.detailOpenChatFailed,
         );
         return;
       }
       const data = payload?.data as { connectionId?: string } | undefined;
       if (!data?.connectionId) {
         setOpeningChatUserId(null);
-        setChatError("Unexpected server response.");
+        setChatError(s.detailUnexpectedResponse);
         return;
       }
       const suffix = `?returnTo=${encodeURIComponent(chatReturnTo)}`;
@@ -153,7 +160,7 @@ export function ScheduleItemDetailSheet({
       onClose();
     } catch {
       setOpeningChatUserId(null);
-      setChatError("Network error. Try again.");
+      setChatError(s.sendPlanInviteNetwork);
     }
   }
 
@@ -172,7 +179,7 @@ export function ScheduleItemDetailSheet({
                 <p className="text-[17px] font-semibold leading-tight text-foreground">{displayItem.title}</p>
                 {fromSubscribedCalendar ? (
                   <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
-                    From a subscribed calendar (read-only).
+                    {s.detailPopoverReadOnlyFeed}
                   </p>
                 ) : null}
                 <div className="mt-2 inline-flex max-w-full items-center gap-2 rounded-full bg-muted/[0.4] px-3 py-1.5 text-[12px] text-muted-foreground">
@@ -183,7 +190,7 @@ export function ScheduleItemDetailSheet({
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="Close schedule details"
+                aria-label={s.detailPopoverDismissAria}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 bg-background text-muted-foreground transition hover:text-foreground"
               >
                 <X className="h-4 w-4" strokeWidth={2.25} />
@@ -220,14 +227,14 @@ export function ScheduleItemDetailSheet({
                   />
                   <DetailRow
                     icon={<MapPin className="h-4 w-4" strokeWidth={2.1} />}
-                    label="Location"
+                    label={s.addPanelLocationPlaceholder}
                     value={locationValue}
                     compact
                     divider
                   />
                   <DetailRow
                     icon={<Repeat2 className="h-4 w-4" strokeWidth={2.1} />}
-                    label="Repeat"
+                    label={s.addPanelRepeat}
                     value={repeatValue}
                     compact
                     divider
@@ -242,9 +249,9 @@ export function ScheduleItemDetailSheet({
                       <UsersRound className="h-4 w-4" strokeWidth={2.1} />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[12px] font-medium text-muted-foreground">People</p>
+                      <p className="text-[12px] font-medium text-muted-foreground">{s.detailPeople}</p>
                       {!hasPeople ? (
-                        <p className="mt-0.5 text-[13px] leading-relaxed text-foreground">No people added</p>
+                        <p className="mt-0.5 text-[13px] leading-relaxed text-foreground">{s.detailNoPeople}</p>
                       ) : (
                         <div className="mt-2 flex flex-wrap gap-2">
                           {participants.map((p, idx) =>
@@ -276,7 +283,7 @@ export function ScheduleItemDetailSheet({
                       )}
                       {chatable.length > 0 ? (
                         <p className="mt-2 text-[11px] text-muted-foreground">
-                          Tap a name to open your chat thread.
+                          {s.detailTapNameToChat}
                         </p>
                       ) : null}
                       {canEdit ? (
@@ -317,7 +324,7 @@ export function ScheduleItemDetailSheet({
                 </div>
 
                 <div className="rounded-2xl border border-border/70 bg-muted/[0.035] px-4 py-3">
-                  <p className="text-[12px] font-medium text-muted-foreground">Notes</p>
+                  <p className="text-[12px] font-medium text-muted-foreground">{s.addPanelNotesPlaceholder}</p>
                   <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-foreground">
                     {noteValue}
                   </p>
@@ -336,7 +343,7 @@ export function ScheduleItemDetailSheet({
                   <div className="mt-1 border-t border-border/50 pt-3">
                     <div className="grid grid-cols-2 gap-2">
                       <Button type="button" className="h-11 rounded-full" onClick={onEdit}>
-                        Edit
+                        {s.detailPopoverEdit}
                       </Button>
                       <Button
                         type="button"
@@ -345,7 +352,7 @@ export function ScheduleItemDetailSheet({
                         onClick={onDelete}
                         disabled={deleting}
                       >
-                        {deleting ? "Deleting…" : "Delete"}
+                        {deleting ? s.detailPopoverDeleting : s.detailPopoverDelete}
                       </Button>
                     </div>
                   </div>

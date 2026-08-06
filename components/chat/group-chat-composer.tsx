@@ -12,6 +12,7 @@ import {
 } from "@/components/chat/chat-composer-chrome";
 import { ChatMessageInput } from "@/components/chat/chat-message-input";
 import { scheduleChatInputRefocus } from "@/components/chat/refocus-chat-input";
+import { useAppMessages } from "@/hooks/use-app-locale";
 
 export function GroupChatComposer({
   groupChatId,
@@ -19,6 +20,8 @@ export function GroupChatComposer({
   groupChatId: string;
 }) {
   const router = useRouter();
+  const messages = useAppMessages();
+  const chat = messages.chat;
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const inputId = `group-chat-input-${groupChatId}`;
   const [body, setBody] = useState("");
@@ -42,7 +45,7 @@ export function GroupChatComposer({
 
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
-      setError(typeof payload.error === "string" ? payload.error : "Unable to send.");
+      setError(typeof payload.error === "string" ? payload.error : chat.unableToSend);
       setBody((current) => (current.trim() ? current : text));
       setSubmitting(false);
       return;
@@ -58,7 +61,7 @@ export function GroupChatComposer({
       <div className="flex items-end gap-2">
         <ChatComposerBar>
           <label className="sr-only" htmlFor={inputId}>
-            Message
+            {chat.messageInputLabel}
           </label>
           <ChatMessageInput
             ref={inputRef}
@@ -66,12 +69,12 @@ export function GroupChatComposer({
             value={body}
             onChange={(e) => setBody(e.target.value)}
             onSend={() => void submit()}
-            placeholder="Message the group…"
+            placeholder={chat.groupPlaceholder}
           />
           <ChatComposerSendButton
             disabled={submitting || !body.trim()}
             onClick={() => void submit()}
-            ariaLabel="Send"
+            ariaLabel={chat.sendAria}
           />
         </ChatComposerBar>
       </div>

@@ -10,6 +10,8 @@ import {
   normalizeCalendarCategoryHex,
   rgbToHex,
 } from "@/lib/calendar/calendar-category-colors";
+import { formatMessage } from "@/lib/i18n/messages";
+import { useAppMessages } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
 
 type ColorMode = "grid" | "spectrum" | "custom";
@@ -25,10 +27,11 @@ function ColorModeTabs({
   onModeChange: (m: ColorMode) => void;
   labelId: string;
 }) {
+  const { schedule: s } = useAppMessages();
   const tabs: { id: ColorMode; label: string }[] = [
-    { id: "grid", label: "Grid" },
-    { id: "spectrum", label: "Spectrum" },
-    { id: "custom", label: "Custom" },
+    { id: "grid", label: s.calendarsColorModeGrid },
+    { id: "spectrum", label: s.calendarsColorModeSpectrum },
+    { id: "custom", label: s.calendarsColorModeCustom },
   ];
   return (
     <div
@@ -68,12 +71,13 @@ function ColorGrid({
   value: string;
   onPick: (hex: string) => void;
 }) {
+  const { schedule: s } = useAppMessages();
   const normalized = normalizeCalendarCategoryHex(value);
   return (
     <div
       className="grid grid-cols-12 gap-px rounded-md border border-border/40 bg-border/30 p-px"
       role="listbox"
-      aria-label="Calendar colors"
+      aria-label={s.calendarsColorsAria}
     >
       {GRID_SWATCHES.map((hex, index) => {
         const selected = hex === normalized;
@@ -92,7 +96,7 @@ function ColorGrid({
             )}
             style={{ backgroundColor: hex }}
             title={hex}
-            aria-label={`Color ${hex}`}
+            aria-label={formatMessage(s.calendarsColorSwatchAria, { hex })}
           >
             {selected ? (
               <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -117,14 +121,13 @@ function ColorSpectrum({
   onChange: (hex: string) => void;
   disabled?: boolean;
 }) {
+  const { schedule: s } = useAppMessages();
   const hex = normalizeCalendarCategoryHex(value);
   return (
     <div className="space-y-3">
-      <p className="text-[12px] text-muted-foreground">
-        Use your device color picker (often includes a wheel and sliders).
-      </p>
+      <p className="text-[12px] text-muted-foreground">{s.calendarsColorSpectrumHint}</p>
       <label className="flex flex-col gap-2">
-        <span className="sr-only">Spectrum color</span>
+        <span className="sr-only">{s.calendarsColorSpectrumAria}</span>
         <input
           type="color"
           value={hex}
@@ -154,6 +157,7 @@ function ColorCustom({
   onChange: (hex: string) => void;
   disabled?: boolean;
 }) {
+  const { schedule: s } = useAppMessages();
   const hex = normalizeCalendarCategoryHex(value);
   const { r, g, b } = useMemo(() => hexToRgb(hex), [hex]);
   const [hexDraft, setHexDraft] = useState(hex);
@@ -198,7 +202,7 @@ function ColorCustom({
         ))}
       </div>
       <label className="block space-y-1">
-        <span className="text-[12px] font-medium text-muted-foreground">Hex</span>
+        <span className="text-[12px] font-medium text-muted-foreground">{s.calendarsColorHexLabel}</span>
         <input
           type="text"
           value={hexDraft}
@@ -235,6 +239,7 @@ export function CalendarCategoryColorPopover({
   /** Inner color disc size. */
   previewSizeClassName?: string;
 }) {
+  const { schedule: s } = useAppMessages();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<ColorMode>("grid");
   const headingId = useId();
@@ -278,7 +283,7 @@ export function CalendarCategoryColorPopover({
       >
         <div className="space-y-3">
           <p id={headingId} className="text-[13px] font-semibold text-foreground">
-            Calendar color
+            {s.calendarsColorHeading}
           </p>
           <ColorModeTabs mode={mode} onModeChange={setMode} labelId={headingId} />
 

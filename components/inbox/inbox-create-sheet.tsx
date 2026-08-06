@@ -10,6 +10,8 @@ import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
+import { useLocaleContext } from "@/components/i18n/locale-provider";
+import { formatMessage } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 type ContactRow = {
@@ -81,6 +83,9 @@ export function InboxCreateSheet({
   initialContacts: ContactRow[];
 }) {
   const router = useRouter();
+  const { messages } = useLocaleContext();
+  const inbox = messages.inbox;
+  const common = messages.common;
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<Mode>("contact");
   const [contacts, setContacts] = useState(initialContacts);
@@ -117,7 +122,7 @@ export function InboxCreateSheet({
 
       if (!response?.ok) {
         if (!cancelled) {
-          setSearchError("Unable to search right now.");
+          setSearchError(inbox.createSearchFailed);
           setSearching(false);
         }
         return;
@@ -134,7 +139,7 @@ export function InboxCreateSheet({
       cancelled = true;
       window.clearTimeout(id);
     };
-  }, [mode, open, query]);
+  }, [mode, open, query, inbox.createSearchFailed]);
 
   const contactsByPeerId = useMemo(
     () => new Map(contacts.map((contact) => [contact.peerId, contact])),
@@ -164,7 +169,7 @@ export function InboxCreateSheet({
 
     const payload = await response?.json().catch(() => null);
     if (!response?.ok || !payload?.success) {
-      setSearchError(payload?.error || "Unable to add contact.");
+      setSearchError(payload?.error || inbox.createAddContactFailed);
       setBusyPeerId(null);
       return;
     }
@@ -205,7 +210,7 @@ export function InboxCreateSheet({
 
     const payload = await response?.json().catch(() => null);
     if (!response?.ok || !payload?.success || typeof payload?.data?.groupChatId !== "string") {
-      setGroupError(payload?.error || "Unable to create group chat.");
+      setGroupError(payload?.error || inbox.createGroupFailed);
       setGroupSubmitting(false);
       return;
     }
@@ -236,7 +241,7 @@ export function InboxCreateSheet({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Add contact or create group chat"
+        aria-label={inbox.createSheetAria}
         className={cn(
           "inline-flex h-9 w-9 items-center justify-center rounded-full border border-classmates-blue-border bg-gradient-to-br from-classmates-blue-soft to-white text-classmates-blue shadow-[0_4px_16px_-6px_rgba(37,99,235,0.45)] transition",
           "hover:border-classmates-blue/40 hover:shadow-[0_6px_20px_-6px_rgba(37,99,235,0.5)] active:scale-[0.97]",
@@ -251,16 +256,16 @@ export function InboxCreateSheet({
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
             <div className="mb-3 flex shrink-0 items-start justify-between gap-3">
               <div>
-                <h3 className="text-[15px] font-semibold text-foreground">New chat</h3>
+                <h3 className="text-[15px] font-semibold text-foreground">{inbox.createSheetTitle}</h3>
                 <p className="mt-1 text-[12px] leading-snug text-muted-foreground">
-                  Search by user ID, username, or verified email. Then add contacts or start a group.
+                  {inbox.createSheetSubtitle}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={close}
                 className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
-                aria-label="Close"
+                aria-label={common.close}
               >
                 <X className="h-4 w-4" strokeWidth={2.25} />
               </button>
@@ -277,14 +282,14 @@ export function InboxCreateSheet({
                 onClick={() => setMode("contact")}
                 icon={<UserPlus className="h-3.5 w-3.5 shrink-0 opacity-90" strokeWidth={2.25} aria-hidden />}
               >
-                Add contact
+                {inbox.modeAddContact}
               </Segment>
               <Segment
                 active={mode === "group"}
                 onClick={() => setMode("group")}
                 icon={<UsersRound className="h-3.5 w-3.5 shrink-0 opacity-90" strokeWidth={2.25} aria-hidden />}
               >
-                New group
+                {inbox.modeNewGroup}
               </Segment>
             </div>
 
@@ -295,7 +300,7 @@ export function InboxCreateSheet({
                   <Input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search by user ID, username, or email"
+                    placeholder={inbox.createSearchPlaceholder}
                     className="h-auto border-0 bg-transparent p-0 text-[14px] shadow-none focus-visible:ring-0"
                   />
                 </div>
@@ -304,12 +309,12 @@ export function InboxCreateSheet({
                   {query.trim().length >= 2 ? (
                     <section className="space-y-2">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                        Search results
+                        {inbox.searchResultsHeading}
                       </p>
                       {searching ? (
-                        <p className="text-[13px] text-muted-foreground">Searching…</p>
+                        <p className="text-[13px] text-muted-foreground">{inbox.searchingUsers}</p>
                       ) : searchHits.length === 0 ? (
-                        <p className="text-[13px] text-muted-foreground">No matching users yet.</p>
+                        <p className="text-[13px] text-muted-foreground">{inbox.noMatchingUsers}</p>
                       ) : (
                         <div className="space-y-0">
                           {groupedSearchHits.map(({ key, rows }) => (
@@ -346,7 +351,7 @@ export function InboxCreateSheet({
                                             )
                                           }
                                         >
-                                          Open
+                                          {common.open}
                                         </Button>
                                       ) : (
                                         <Button
@@ -356,7 +361,7 @@ export function InboxCreateSheet({
                                           disabled={busyPeerId === hit.id}
                                           onClick={() => void addContact(hit)}
                                         >
-                                          {busyPeerId === hit.id ? "Adding…" : "Add"}
+                                          {busyPeerId === hit.id ? common.adding : common.add}
                                         </Button>
                                       )}
                                     </li>
@@ -372,10 +377,10 @@ export function InboxCreateSheet({
 
                   <section className="space-y-2">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                      Contacts
+                      {inbox.contactsHeading}
                     </p>
                     {contacts.length === 0 ? (
-                      <p className="text-[13px] text-muted-foreground">No contacts yet.</p>
+                      <p className="text-[13px] text-muted-foreground">{inbox.noContactsYet}</p>
                     ) : (
                       <div className="space-y-2">
                         {groupedContacts.map(({ key, rows }) => (
@@ -400,7 +405,7 @@ export function InboxCreateSheet({
                                       router.push(`/connections/${contact.connectionId}?returnTo=%2Finbox`)
                                     }
                                   >
-                                    Chat
+                                    {inbox.chatAction}
                                   </Button>
                                 </li>
                               ))}
@@ -419,11 +424,11 @@ export function InboxCreateSheet({
             ) : (
               <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
                 <div className="shrink-0 rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
-                  <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">Optional group name</p>
+                  <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">{inbox.optionalGroupName}</p>
                   <Input
                     value={groupTitle}
                     onChange={(e) => setGroupTitle(e.target.value)}
-                    placeholder="Study plans, Project team, Friday dinner…"
+                    placeholder={inbox.groupNamePlaceholder}
                     maxLength={80}
                     className="h-11 rounded-xl border-border/70 text-[14px]"
                   />
@@ -432,14 +437,14 @@ export function InboxCreateSheet({
                 <div className="flex shrink-0 items-center justify-between rounded-2xl border border-border/70 bg-card/50 px-3 py-2.5">
                   <div className="flex items-center gap-2">
                     <UsersRound className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-[13px] font-medium text-foreground">Select contacts</p>
+                    <p className="text-[13px] font-medium text-foreground">{inbox.selectContacts}</p>
                   </div>
-                  <p className="text-[12px] text-muted-foreground">{selectedIds.length} selected</p>
+                  <p className="text-[12px] text-muted-foreground">{formatMessage(inbox.selectedCount, { count: selectedIds.length })}</p>
                 </div>
 
                 <div className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-y-contain pr-1 pb-4 [scrollbar-gutter:stable]">
                   {contacts.length === 0 ? (
-                    <p className="text-[13px] text-muted-foreground">Add contacts first, then you can create a group.</p>
+                    <p className="text-[13px] text-muted-foreground">{inbox.addContactsFirst}</p>
                   ) : (
                     groupedContacts.map(({ key, rows }) => (
                       <div key={key}>
@@ -496,7 +501,7 @@ export function InboxCreateSheet({
 
                 <div className="flex shrink-0 gap-2">
                   <Button type="button" variant="ghost" className="h-11 flex-1 rounded-xl font-medium" onClick={close}>
-                    Cancel
+                    {common.cancel}
                   </Button>
                   <Button
                     type="button"
@@ -508,7 +513,7 @@ export function InboxCreateSheet({
                       "disabled:opacity-45 disabled:shadow-none dark:bg-blue-600 dark:hover:bg-blue-600/90",
                     )}
                   >
-                    {groupSubmitting ? "Creating…" : "Create group"}
+                    {groupSubmitting ? inbox.creatingGroup : inbox.createGroup}
                   </Button>
                 </div>
               </div>

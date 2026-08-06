@@ -9,7 +9,7 @@ struct BlockedUsersView: View {
     var body: some View {
         Group {
             if store.isLoading && store.blocks.isEmpty {
-                ProgressView("Loading blocked users")
+                SSLoadingState("Loading blocked users")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if store.blocks.isEmpty {
                 SSEmptyState(

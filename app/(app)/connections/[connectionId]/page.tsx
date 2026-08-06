@@ -6,9 +6,11 @@ import { MessageCircle } from "lucide-react";
 
 import { AvailabilityCardMessage } from "@/components/chat/availability-card-message";
 import { ScheduleShareCardMessage } from "@/components/chat/schedule-share-card-message";
+import { AssistantChatFooter } from "@/components/chat/assistant-chat-footer";
 import { AssistantMessageBody } from "@/components/chat/assistant-message-body";
-import { AssistantQuickReplies } from "@/components/chat/assistant-quick-replies";
 import { ChatComposer } from "@/components/chat/chat-composer";
+import { ChatMessageBubble } from "@/components/chat/chat-message-bubble";
+import { ChatMessageSelectionProvider } from "@/components/chat/chat-message-selection";
 import { ChatReplyProvider } from "@/components/chat/chat-reply-context";
 import { ChatRealtimeRefresh } from "@/components/chat/chat-realtime-refresh";
 import { DirectMessageList } from "@/components/chat/direct-message-list";
@@ -25,9 +27,13 @@ import { isAssistantBotUser } from "@/lib/auth/assistant-bot";
 import { displayUserMessageBody } from "@/lib/assistant/display-user-message";
 import { requireConnection } from "@/lib/auth/guards";
 import { directMessageActionSnippet } from "@/lib/chat/direct-message-preview";
+import {
+  countUnrepliedDirectStreak,
+  isUnrepliedDirectSendBlocked,
+  shouldShowUnrepliedDirectHint,
+} from "@/lib/chat/unreplied-direct-message-limit";
 import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
 import { selfNotesDisplayTitle } from "@/lib/connections/self-notes-title";
-import { resolveBackHref } from "@/lib/nav/back";
 import { formatMessage, getMessages, type AppMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { chatMessageDomId } from "@/lib/chat/chat-message-dom-id";
@@ -76,9 +82,11 @@ export default async function ConnectionPage({
   const myRemark = contactRemarkForViewer(connection, user.id);
   const peerNickname = otherUser.nickname?.trim() ?? "";
   const selfBaseLabel = selfNotesDisplayTitle(user, null);
-  const headerTitle = isSelfNotes
-    ? selfNotesDisplayTitle(user, myRemark)
-    : (myRemark || peerNickname || "Student");
+  const headerTitle = isAssistantChat
+    ? ui.assistant.displayName
+    : isSelfNotes
+      ? selfNotesDisplayTitle(user, myRemark)
+      : (myRemark || peerNickname || "Student");
   const showPeerNicknameLine =
     !isSelfNotes && Boolean(myRemark) && myRemark !== peerNickname && peerNickname.length > 0;
   const showSelfBaseLine = isSelfNotes && Boolean(myRemark) && headerTitle !== selfBaseLabel;
@@ -87,6 +95,22 @@ export default async function ConnectionPage({
       ? courseName || (showPeerNicknameLine ? peerNickname : `@${otherUser.username}`)
       : null;
   const messages = connection.messages;
+  const messagesNewestFirst = [...messages].reverse().map((message) => ({
+    senderId: message.senderId,
+    type: message.type,
+  }));
+  const unrepliedStreak =
+    isSelfNotes || isAssistantChat
+      ? 0
+      : countUnrepliedDirectStreak(messagesNewestFirst, user.id, otherUser.id);
+  const unrepliedSendBlocked =
+    !isSelfNotes &&
+    !isAssistantChat &&
+    isUnrepliedDirectSendBlocked(unrepliedStreak);
+  const showUnrepliedHint =
+    !isSelfNotes &&
+    !isAssistantChat &&
+    shouldShowUnrepliedDirectHint(messagesNewestFirst, user.id, otherUser.id);
   const scheduleSharePreviewByToken = await loadScheduleShareChatPreviewsForMessages(
     prisma,
     messages,
@@ -94,13 +118,6 @@ export default async function ConnectionPage({
   );
   const threadSearchEntries = indexConnectionMessagesForSearch(messages);
   const latestMessageId = messages.at(-1)?.id ?? null;
-  const hasViewerMessage = isAssistantChat
-    ? messages.some((message) => message.senderId === user.id)
-    : false;
-  const firstAssistantQuickReplyMessageId =
-    isAssistantChat && !hasViewerMessage
-      ? (messages.find((message) => message.type === "TEXT" && isAssistantBotUser(message.sender))?.id ?? null)
-      : null;
   const profileLinkHref = isAssistantChat
     ? null
     : isSelfNotes
@@ -113,6 +130,7 @@ export default async function ConnectionPage({
   }));
 
   return (
+    <ChatMessageSelectionProvider>
     <ChatReplyProvider>
     <ChatRealtimeRefresh
       kind="direct"
@@ -370,11 +388,6 @@ export default async function ConnectionPage({
                 message.deletedAt == null &&
                 message.type === "IMAGE" &&
                 Boolean(message.imageUrl);
-              const showAssistantQuickReplies =
-                firstAssistantQuickReplyMessageId === message.id &&
-                fromAssistant &&
-                bubblePayload.kind === "text" &&
-                message.deletedAt == null;
               const showPeerAvatar = !isOwn && !canGroupWithNext;
 
               return (
@@ -386,6 +399,7 @@ export default async function ConnectionPage({
                   {dayStrip}
                   {timeStrip}
                   <div
+                    data-chat-message-row
                     className={cn(
                       "group flex items-end gap-2",
                       isOwn ? "justify-end" : "justify-start",
@@ -427,14 +441,12 @@ export default async function ConnectionPage({
                     ) : null}
                     <div
                       className={cn(
-                        "shrink text-sm leading-5",
-                        showAssistantQuickReplies
-                          ? "max-w-[78%] sm:max-w-[22rem]"
-                          : "max-w-[78%] sm:max-w-[20rem]",
+                        "max-w-[78%] shrink text-sm leading-5 sm:max-w-[20rem]",
                         isOwn ? "text-right" : "text-left",
                       )}
                     >
-                      <div
+                      <ChatMessageBubble
+                        messageId={message.id}
                         className={cn(
                           "inline-block text-left text-sm leading-5",
                           bareImageChrome
@@ -456,16 +468,7 @@ export default async function ConnectionPage({
                         )}
                       >
                         {fromAssistant && bubblePayload.kind === "text" && message.deletedAt == null ? (
-                          <>
-                            <AssistantMessageBody rawBody={bubblePayload.body} />
-                            {showAssistantQuickReplies ? (
-                              <AssistantQuickReplies
-                                connectionId={connection.id}
-                                surface="bubble"
-                                className="mt-3 border-t border-border/60 pt-2.5"
-                              />
-                            ) : null}
-                          </>
+                          <AssistantMessageBody rawBody={bubblePayload.body} />
                         ) : (
                           <MessageBubbleContent
                             isOwn={isOwn}
@@ -487,7 +490,7 @@ export default async function ConnectionPage({
                             }
                           />
                         )}
-                      </div>
+                      </ChatMessageBubble>
                     </div>
                     {!isOwn ? (
                       <MessageActionMenu
@@ -518,14 +521,27 @@ export default async function ConnectionPage({
         data-testid="chat-composer-footer"
         className="shrink-0 border-t border-slate-200/75 bg-white/95 px-3 pb-[var(--chat-composer-padding-bottom)] pt-2.5 shadow-[0_-4px_24px_rgba(15,23,42,0.045)] backdrop-blur-sm dark:border-border/60 dark:bg-background/90 dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]"
       >
-        <ChatComposer
-          connectionId={connection.id}
-          peerName={otherUser.nickname ?? "Student"}
-          hideAttachments={isSelfNotes || isAssistantChat}
-          placeholder={isAssistantChat ? ui.assistant.composerPlaceholder : undefined}
-        />
+        {isAssistantChat ? (
+          <AssistantChatFooter
+            connectionId={connection.id}
+            peerName={otherUser.nickname ?? "Student"}
+            isGuest={user.isGuest}
+            verifiedStudent={user.verifiedStudent}
+            placeholder={ui.assistant.composerPlaceholder}
+          />
+        ) : (
+          <ChatComposer
+            connectionId={connection.id}
+            peerName={otherUser.nickname ?? "Student"}
+            hideAttachments={isSelfNotes}
+            unrepliedSendBlocked={unrepliedSendBlocked}
+            showUnrepliedHint={showUnrepliedHint}
+            unrepliedStreak={unrepliedStreak}
+          />
+        )}
       </div>
     </div>
     </ChatReplyProvider>
+    </ChatMessageSelectionProvider>
   );
 }

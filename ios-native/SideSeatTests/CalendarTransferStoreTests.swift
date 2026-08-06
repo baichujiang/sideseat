@@ -59,6 +59,79 @@ struct CalendarTransferStoreTests {
     }
 }
 
+@Suite("Schedule share proposal time")
+struct ScheduleShareProposalTimeTests {
+    @Test("Selecting a free window creates a snapped 90 minute proposal")
+    func createsDefaultSubrange() throws {
+        let bounds = NativeScheduleShareSlot(
+            start: "2026-08-10T08:10:00.000Z",
+            end: "2026-08-10T14:00:00.000Z"
+        )
+
+        let selection = try #require(ScheduleShareProposalTime.initialSelection(in: bounds))
+
+        #expect(selection.start == Date.sideSeatChatISO8601("2026-08-10T08:30:00.000Z"))
+        #expect(selection.end == Date.sideSeatChatISO8601("2026-08-10T10:00:00.000Z"))
+        #expect(selection.bounds == bounds)
+    }
+
+    @Test("Changing the start preserves duration without leaving the free window")
+    func clampsEditedRange() throws {
+        let bounds = NativeScheduleShareSlot(
+            start: "2026-08-10T08:00:00.000Z",
+            end: "2026-08-10T11:00:00.000Z"
+        )
+        let original = try #require(ScheduleShareProposalTime.initialSelection(in: bounds))
+        let requestedStart = try #require(Date.sideSeatChatISO8601("2026-08-10T10:30:00.000Z"))
+
+        let updated = ScheduleShareProposalTime.updatingStart(original, to: requestedStart)
+
+        #expect(updated.start == requestedStart)
+        #expect(updated.end == Date.sideSeatChatISO8601("2026-08-10T11:00:00.000Z"))
+        #expect(ScheduleShareProposalTime.fits(start: updated.start, end: updated.end, in: bounds))
+    }
+
+    @Test("A proposal cannot exceed four hours")
+    func rejectsOversizedRange() throws {
+        let bounds = NativeScheduleShareSlot(
+            start: "2026-08-10T08:00:00.000Z",
+            end: "2026-08-10T22:00:00.000Z"
+        )
+        let start = try #require(Date.sideSeatChatISO8601("2026-08-10T08:00:00.000Z"))
+        let end = try #require(Date.sideSeatChatISO8601("2026-08-10T13:00:00.000Z"))
+
+        #expect(ScheduleShareProposalTime.selection(in: bounds, start: start, end: end) == nil)
+    }
+
+    @Test("A proposal can cross midnight inside one continuous free window")
+    func acceptsCrossMidnightRange() throws {
+        let bounds = NativeScheduleShareSlot(
+            start: "2026-08-10T20:00:00.000Z",
+            end: "2026-08-11T03:00:00.000Z"
+        )
+        let start = try #require(Date.sideSeatChatISO8601("2026-08-10T21:00:00.000Z"))
+        let end = try #require(Date.sideSeatChatISO8601("2026-08-11T00:00:00.000Z"))
+
+        let selection = ScheduleShareProposalTime.selection(in: bounds, start: start, end: end)
+
+        #expect(selection?.start == start)
+        #expect(selection?.end == end)
+    }
+
+    @Test("A full-day free window defaults to a daytime suggestion")
+    func fullDayWindowUsesDaytimeDefault() throws {
+        let bounds = NativeScheduleShareSlot(
+            start: "2026-08-09T22:00:00.000Z",
+            end: "2026-08-10T22:00:00.000Z"
+        )
+
+        let selection = try #require(ScheduleShareProposalTime.initialSelection(in: bounds))
+
+        #expect(selection.start == Date.sideSeatChatISO8601("2026-08-10T06:00:00.000Z"))
+        #expect(selection.end == Date.sideSeatChatISO8601("2026-08-10T07:30:00.000Z"))
+    }
+}
+
 private actor CalendarTransferMemoryCredentialStore: CredentialStore {
     private var token: String?
 

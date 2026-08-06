@@ -16,13 +16,81 @@ struct NativeProfileSchoolSummary: Decodable, Hashable, Sendable {
     let degreeLabel: String
     let major: String
     let semester: Int
+    let studentStatus: String?
+    let graduationYear: Int?
 
     var displayLine: String {
         let majorText = major.trimmingCharacters(in: .whitespacesAndNewlines)
+        let studyText = majorText.isEmpty ? degreeLabel : majorText
+        if studentStatus == "ALUMNI" {
+            let year = graduationYear.map(String.init) ?? String(localized: "Alumni")
+            return "\(schoolShort) · \(studyText) · \(year)"
+        }
+        if studentStatus == "EXCHANGE_STUDENT" {
+            return "\(schoolShort) · \(studyText) · \(String(localized: "Exchange"))"
+        }
         if majorText.isEmpty {
             return "\(schoolShort) · \(degreeLabel) · Semester \(semester)"
         }
         return "\(schoolShort) · \(majorText) · Semester \(semester)"
+    }
+}
+
+enum StudentIdentityTone {
+    case verified
+    case pending
+    case warning
+    case neutral
+}
+
+enum StudentIdentityDisplay {
+    static func schoolText(_ school: String?) -> String {
+        let trimmed = school?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? String(localized: "School") : trimmed.uppercased()
+    }
+
+    static func label(school: String?, verifiedStudent: Bool, status: String) -> String {
+        let school = schoolText(school)
+        switch status.uppercased() {
+        case "VERIFIED":
+            return String(localized: "\(school) verified")
+        case "EMAIL_PENDING":
+            return String(localized: "School email pending")
+        case "MANUAL_REVIEW_REQUIRED":
+            return String(localized: "Manual review")
+        case "REJECTED":
+            return String(localized: "Verification rejected")
+        default:
+            return verifiedStudent ? String(localized: "\(school) verified") : String(localized: "Not school verified")
+        }
+    }
+
+    static func systemImage(verifiedStudent: Bool, status: String) -> String {
+        switch status.uppercased() {
+        case "VERIFIED":
+            return "checkmark.seal.fill"
+        case "EMAIL_PENDING":
+            return "envelope.badge"
+        case "MANUAL_REVIEW_REQUIRED":
+            return "doc.badge.clock"
+        case "REJECTED":
+            return "exclamationmark.triangle.fill"
+        default:
+            return verifiedStudent ? "checkmark.seal.fill" : "person.crop.circle.badge.questionmark"
+        }
+    }
+
+    static func tone(verifiedStudent: Bool, status: String) -> StudentIdentityTone {
+        switch status.uppercased() {
+        case "VERIFIED":
+            return .verified
+        case "EMAIL_PENDING", "MANUAL_REVIEW_REQUIRED":
+            return .pending
+        case "REJECTED":
+            return .warning
+        default:
+            return verifiedStudent ? .verified : .neutral
+        }
     }
 }
 
@@ -35,9 +103,11 @@ struct NativeCurrentProfile: Decodable, Identifiable, Sendable {
     let avatarUrl: String?
     let tagline: String?
     let school: String?
+    let studentStatus: String?
     let degreeLevel: String?
     let major: String?
     let semester: Int?
+    let graduationYear: Int?
     let gender: String
     let onboardingComplete: Bool
     let isGuest: Bool
@@ -53,6 +123,23 @@ struct NativeCurrentProfile: Decodable, Identifiable, Sendable {
     let contacts: NativeProfileContacts
     let privacy: NativeProfilePrivacy
     let counts: NativeProfileCounts
+}
+
+struct NativeStudentVerificationRequest: Encodable, Sendable {
+    let email: String
+}
+
+struct NativeStudentProofDraft: Sendable {
+    let fileName: String
+    let mimeType: String
+    let data: Data
+}
+
+struct NativeStudentVerificationResult: Decodable, Sendable {
+    let status: String
+    let delivery: String?
+    let verifyUrl: String?
+    let message: String
 }
 
 struct NativeProfileContacts: Decodable, Hashable, Sendable {
@@ -71,8 +158,12 @@ struct NativeProfileUpdateRequest: Encodable, Sendable {
     var nickname: String?
     var bio: String?
     var gender: String?
+    var school: String?
+    var studentStatus: String?
+    var degreeLevel: String?
     var major: String?
     var semester: Int?
+    var graduationYear: Int?
     var wechatHandle: String?
     var whatsappHandle: String?
     var telegramHandle: String?
@@ -120,9 +211,11 @@ struct NativePublicProfileUser: Decodable, Sendable {
     let avatarUrl: String?
     let tagline: String?
     let school: String?
+    let studentStatus: String?
     let degreeLevel: String?
     let major: String?
     let semester: Int?
+    let graduationYear: Int?
     let verifiedStudent: Bool
     let studentVerificationStatus: String
     let schoolSummary: NativeProfileSchoolSummary
@@ -193,9 +286,11 @@ extension NativeCurrentProfile {
         avatarUrl: nil,
         tagline: "Usually at the main library",
         school: "TUM",
+        studentStatus: "CURRENT_STUDENT",
         degreeLevel: "BACHELOR",
         major: "Informatics",
         semester: 3,
+        graduationYear: nil,
         gender: "PRIVATE",
         onboardingComplete: true,
         isGuest: false,
@@ -209,7 +304,9 @@ extension NativeCurrentProfile {
             schoolShort: "TUM",
             degreeLabel: "Bachelor",
             major: "Informatics",
-            semester: 3
+            semester: 3,
+            studentStatus: "CURRENT_STUDENT",
+            graduationYear: nil
         ),
         languages: [
             NativeProfileLanguage(tag: "ENGLISH", proficiency: "FLUENT"),
@@ -233,6 +330,10 @@ extension NativeCurrentProfile {
         ),
         counts: NativeProfileCounts(blocked: 0)
     )
+
+    static var uiTestingUnverifiedFixture: NativeCurrentProfile {
+        uiTestingFixture.applyingVerification(status: "UNVERIFIED", verifiedStudent: false)
+    }
 }
 
 extension NativePublicProfile {
@@ -251,16 +352,20 @@ extension NativePublicProfile {
             avatarUrl: nil,
             tagline: "Usually at the main library",
             school: "TUM",
+            studentStatus: "CURRENT_STUDENT",
             degreeLevel: "BACHELOR",
             major: "Informatics",
             semester: 3,
+            graduationYear: nil,
             verifiedStudent: true,
             studentVerificationStatus: "VERIFIED",
             schoolSummary: NativeProfileSchoolSummary(
                 schoolShort: "TUM",
                 degreeLabel: "Bachelor",
                 major: "Informatics",
-                semester: 3
+                semester: 3,
+                studentStatus: "CURRENT_STUDENT",
+                graduationYear: nil
             ),
             languages: [NativeProfileLanguage(tag: "ENGLISH", proficiency: "FLUENT")],
             lifePhotos: []
@@ -294,10 +399,12 @@ extension NativeCurrentProfile {
             phone: phone,
             avatarUrl: avatarUrl,
             tagline: request.bio ?? tagline,
-            school: school,
-            degreeLevel: degreeLevel,
+            school: request.school ?? school,
+            studentStatus: request.studentStatus ?? studentStatus,
+            degreeLevel: request.degreeLevel ?? degreeLevel,
             major: request.major ?? major,
             semester: request.semester ?? semester,
+            graduationYear: request.graduationYear ?? graduationYear,
             gender: request.gender ?? gender,
             onboardingComplete: onboardingComplete,
             isGuest: isGuest,
@@ -314,7 +421,9 @@ extension NativeCurrentProfile {
                 schoolShort: schoolSummary.schoolShort,
                 degreeLabel: schoolSummary.degreeLabel,
                 major: request.major ?? schoolSummary.major,
-                semester: request.semester ?? schoolSummary.semester
+                semester: request.semester ?? schoolSummary.semester,
+                studentStatus: request.studentStatus ?? schoolSummary.studentStatus,
+                graduationYear: request.graduationYear ?? schoolSummary.graduationYear
             ),
             languages: languages,
             lifePhotos: lifePhotos,
@@ -347,9 +456,11 @@ extension NativeCurrentProfile {
             avatarUrl: avatarUrl,
             tagline: tagline,
             school: school,
+            studentStatus: studentStatus,
             degreeLevel: degreeLevel,
             major: major,
             semester: semester,
+            graduationYear: graduationYear,
             gender: gender,
             onboardingComplete: onboardingComplete,
             isGuest: isGuest,
@@ -371,6 +482,39 @@ extension NativeCurrentProfile {
         )
     }
 
+    func applyingVerification(status: String, verifiedStudent: Bool) -> NativeCurrentProfile {
+        NativeCurrentProfile(
+            id: id,
+            username: username,
+            nickname: nickname,
+            email: email,
+            phone: phone,
+            avatarUrl: avatarUrl,
+            tagline: tagline,
+            school: school,
+            studentStatus: studentStatus,
+            degreeLevel: degreeLevel,
+            major: major,
+            semester: semester,
+            graduationYear: graduationYear,
+            gender: gender,
+            onboardingComplete: onboardingComplete,
+            isGuest: isGuest,
+            verifiedStudent: verifiedStudent,
+            studentVerificationStatus: status,
+            usernameUpdatedAt: usernameUpdatedAt,
+            productTutorialDismissedAt: productTutorialDismissedAt,
+            locale: locale,
+            displayName: displayName,
+            schoolSummary: schoolSummary,
+            languages: languages,
+            lifePhotos: lifePhotos,
+            contacts: contacts,
+            privacy: privacy,
+            counts: counts
+        )
+    }
+
     func applyingAvatar(url: String) -> NativeCurrentProfile {
         NativeCurrentProfile(
             id: id,
@@ -381,9 +525,11 @@ extension NativeCurrentProfile {
             avatarUrl: url,
             tagline: tagline,
             school: school,
+            studentStatus: studentStatus,
             degreeLevel: degreeLevel,
             major: major,
             semester: semester,
+            graduationYear: graduationYear,
             gender: gender,
             onboardingComplete: onboardingComplete,
             isGuest: isGuest,
@@ -412,9 +558,11 @@ extension NativeCurrentProfile {
             avatarUrl: avatarUrl,
             tagline: tagline,
             school: school,
+            studentStatus: studentStatus,
             degreeLevel: degreeLevel,
             major: major,
             semester: semester,
+            graduationYear: graduationYear,
             gender: gender,
             onboardingComplete: onboardingComplete,
             isGuest: isGuest,

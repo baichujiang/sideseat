@@ -1,3 +1,4 @@
+import MapKit
 import PhotosUI
 import SwiftUI
 import UIKit
@@ -6,6 +7,7 @@ struct DirectChatView: View {
     @Environment(SessionStore.self) private var session
     @Environment(AppContainer.self) private var container
     @Environment(RouterPath.self) private var router
+    @Environment(DeepLinkRouter.self) private var deepLinkRouter
     @Environment(\.scenePhase) private var scenePhase
 
     let connectionID: String
@@ -20,6 +22,7 @@ struct DirectChatView: View {
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var previewImageURL: URL?
     @State private var locationCapture = ChatLocationCapture()
+    @State private var showLocationPicker = false
     @State private var showThreadSearch = false
     @State private var showRemarkEditor = false
     @State private var remarkDraft = ""
@@ -31,6 +34,7 @@ struct DirectChatView: View {
     @State private var counterPlan: NativePlanRequest?
     @State private var scrollToMessageID: String?
     @State private var showComposerTools = false
+    @State private var showAllAssistantChips = false
     @FocusState private var composerFocused: Bool
     @Environment(\.dismiss) private var dismiss
 
@@ -48,6 +52,28 @@ struct DirectChatView: View {
             .background(SideSeatTheme.bgGrouped)
             .navigationTitle(store.conversation?.displayName ?? String(localized: "Chat"))
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                if store.isAssistantChat {
+                    ToolbarItem(placement: .principal) {
+                        VStack(spacing: 2) {
+                            HStack(spacing: 6) {
+                                Text(store.conversation?.displayName ?? String(localized: "SideSeat Assistant"))
+                                    .font(.headline)
+                                    .lineLimit(1)
+                                Text(String(localized: "Official"))
+                                    .font(.caption2.weight(.semibold))
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(SideSeatTheme.accent.opacity(0.14), in: Capsule())
+                            }
+                            Text(String(localized: "Product help · not a classmate"))
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
+                }
+            }
             .accessibilityIdentifier("direct-chat")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -204,7 +230,10 @@ struct DirectChatView: View {
                 }
             }
             .sheet(isPresented: $showPlanCreate) {
-                PlanCreateSheet(connectionID: connectionID) {
+                PlanCreateSheet(
+                    connectionID: connectionID,
+                    recipientName: store.conversation?.displayName
+                ) {
                     Task {
                         #if DEBUG
                         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
@@ -225,8 +254,32 @@ struct DirectChatView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showLocationPicker) {
+                ChatLocationShareSheet(capture: locationCapture) { location in
+                    let sent = await store.sendLocation(
+                        latitude: location.latitude,
+                        longitude: location.longitude,
+                        name: location.name,
+                        using: session
+                    )
+                    if sent {
+                        replyDraft = nil
+                        isNearBottom = true
+                        NotificationCenter.default.post(
+                            name: .sideSeatChatScrollToBottom,
+                            object: nil,
+                            userInfo: ["animated": true]
+                        )
+                    }
+                    return sent
+                }
+            }
             .sheet(item: $counterPlan) { plan in
-                PlanCreateSheet(connectionID: connectionID, counterOf: plan) {
+                PlanCreateSheet(
+                    connectionID: connectionID,
+                    recipientName: store.conversation?.displayName,
+                    counterOf: plan
+                ) {
                     Task {
                         #if DEBUG
                         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
@@ -248,7 +301,10 @@ struct DirectChatView: View {
                 }
             }
             .sheet(isPresented: $showScheduleShare) {
-                ScheduleShareComposeSheet(connectionID: connectionID) {
+                ScheduleShareComposeSheet(
+                    connectionID: connectionID,
+                    recipientName: store.conversation?.displayName
+                ) {
                     Task {
                         #if DEBUG
                         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
@@ -311,6 +367,7 @@ struct DirectChatView: View {
                             }
 
                             let isMine = message.sender.id == (session.currentUser?.id ?? "ui-test-user")
+                            let fromAssistant = store.isAssistantChat && AssistantBot.isBot(message.sender)
                             let peer = store.conversation?.peer
                             let avatarURL: String? = {
                                 if let url = message.sender.avatarUrl, !url.isEmpty { return url }
@@ -325,7 +382,10 @@ struct DirectChatView: View {
                                 currentUserID: session.currentUser?.id ?? "ui-test-user",
                                 status: store.sendStatuses[message.id],
                                 isActingOnPlan: store.isActingOnPlan,
+                                isAssistantChat: store.isAssistantChat,
+                                fromAssistant: fromAssistant,
                                 onOpenProfile: {
+                                    guard !fromAssistant else { return }
                                     router.navigate(to: .profile(userID: message.sender.id))
                                 },
                                 onReply: {
@@ -354,8 +414,14 @@ struct DirectChatView: View {
                                 onCounterPlan: { plan in
                                     counterPlan = plan
                                 },
+                                onOpenCalendar: {
+                                    deepLinkRouter.handleAppPath("/home")
+                                },
                                 onOpenScheduleShare: { token in
                                     openedScheduleShareToken = ScheduleShareNavToken(id: token)
+                                },
+                                onOpenAssistantLink: { href in
+                                    deepLinkRouter.handleAppPath(href)
                                 }
                             )
                             .id(message.id)
@@ -431,7 +497,7 @@ struct DirectChatView: View {
         }
         .overlay {
             if store.isLoading && store.messages.isEmpty {
-                ProgressView("Loading conversation")
+                SSLoadingState("Loading conversation")
             } else if let issue = store.issue, store.messages.isEmpty {
                 ContentUnavailableView {
                     Label("Chat unavailable", systemImage: "exclamationmark.bubble")
@@ -491,19 +557,65 @@ struct DirectChatView: View {
                 .padding(.top, 8)
             }
 
-            if showComposerTools {
-                HStack(spacing: 8) {
+            if store.isAssistantChat {
+                AssistantQuickRepliesView(
+                    keys: AssistantFaqKey.suggested(
+                        isGuest: session.currentUser?.isGuest ?? false,
+                        verifiedStudent: session.currentUser?.verifiedStudent ?? false,
+                        compact: !showAllAssistantChips
+                    ),
+                    showMore: !showAllAssistantChips,
+                    onSelect: { key in
+                        Task {
+                            _ = await store.sendFaq(key, using: session)
+                            NotificationCenter.default.post(
+                                name: .sideSeatChatScrollToBottom,
+                                object: nil,
+                                userInfo: ["animated": true]
+                            )
+                        }
+                    },
+                    onMore: { showAllAssistantChips = true }
+                )
+                .padding(.horizontal, 12)
+                .padding(.top, 4)
+                .disabled(store.isSending)
+                .opacity(store.isSending ? 0.55 : 1)
+
+                if store.isSending {
+                    AssistantTypingIndicatorView()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 12)
+                }
+            }
+
+            if !store.isAssistantChat {
+                LazyVGrid(
+                    columns: [
+                        GridItem(.flexible(), spacing: 8),
+                        GridItem(.flexible(), spacing: 8),
+                    ],
+                    spacing: 8
+                ) {
                     PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                        ComposerToolLabel(title: String(localized: "Photo"), systemImage: "photo")
+                        ComposerToolLabel(
+                            title: String(localized: "Photo"),
+                            systemImage: "photo",
+                            accessibilityID: "chat-composer-photo"
+                        )
                     }
                     .disabled(store.isSending || store.isUnrepliedSendBlocked)
                     .accessibilityIdentifier("chat-composer-photo")
 
                     Button {
                         showComposerTools = false
-                        Task { await sendLocation() }
+                        showLocationPicker = true
                     } label: {
-                        ComposerToolLabel(title: String(localized: "Location"), systemImage: "mappin.and.ellipse")
+                        ComposerToolLabel(
+                            title: String(localized: "Location"),
+                            systemImage: "mappin.and.ellipse",
+                            accessibilityID: "chat-composer-location"
+                        )
                     }
                     .disabled(store.isSending || store.isUnrepliedSendBlocked)
                     .accessibilityIdentifier("chat-composer-location")
@@ -512,7 +624,11 @@ struct DirectChatView: View {
                         showComposerTools = false
                         showPlanCreate = true
                     } label: {
-                        ComposerToolLabel(title: String(localized: "Plan"), systemImage: "calendar.badge.plus")
+                        ComposerToolLabel(
+                            title: String(localized: "Plan"),
+                            systemImage: "calendar.badge.plus",
+                            accessibilityID: "chat-composer-plan"
+                        )
                     }
                     .disabled(store.isSending || store.isUnrepliedSendBlocked)
                     .accessibilityIdentifier("chat-composer-plan")
@@ -521,23 +637,35 @@ struct DirectChatView: View {
                         showComposerTools = false
                         showScheduleShare = true
                     } label: {
-                        ComposerToolLabel(title: String(localized: "Schedule"), systemImage: "calendar")
+                        ComposerToolLabel(
+                            title: String(localized: "Share schedule"),
+                            systemImage: "calendar.badge.clock",
+                            accessibilityID: "chat-composer-schedule-share"
+                        )
                     }
                     .disabled(store.isSending || store.isUnrepliedSendBlocked)
                     .accessibilityIdentifier("chat-composer-schedule-share")
                 }
                 .padding(.horizontal, 12)
-                .padding(.top, 10)
+                .padding(.top, showComposerTools ? 10 : 0)
+                .frame(height: showComposerTools ? 120 : 0)
+                .opacity(showComposerTools ? 1 : 0)
+                .allowsHitTesting(showComposerTools)
+                .accessibilityHidden(!showComposerTools)
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("chat-composer-tools")
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
 
             HStack(alignment: .bottom, spacing: 10) {
                 Button {
-                    withAnimation(.easeOut(duration: 0.18)) {
-                        showComposerTools.toggle()
-                    }
-                    if showComposerTools {
+                    guard !store.isAssistantChat else { return }
+                    let shouldOpen = !showComposerTools
+                    if shouldOpen {
                         composerFocused = false
+                    }
+                    withAnimation(.easeOut(duration: 0.18)) {
+                        showComposerTools = shouldOpen
                     }
                 } label: {
                     Image(systemName: showComposerTools ? "xmark.circle.fill" : "plus.circle.fill")
@@ -545,12 +673,17 @@ struct DirectChatView: View {
                         .symbolRenderingMode(.hierarchical)
                         .foregroundStyle(.secondary)
                 }
-                .disabled(store.isUnrepliedSendBlocked)
+                .disabled(store.isUnrepliedSendBlocked || store.isAssistantChat)
+                .opacity(store.isAssistantChat ? 0.35 : 1)
                 .accessibilityIdentifier("chat-composer-attach")
                 .accessibilityLabel(showComposerTools ? String(localized: "Close attachments") : String(localized: "Attachments"))
 
                 TextField(
-                    replyDraft == nil ? String(localized: "Message") : String(localized: "Reply"),
+                    replyDraft == nil
+                        ? (store.isAssistantChat
+                            ? String(localized: "Ask how SideSeat works…")
+                            : String(localized: "Message"))
+                        : String(localized: "Reply"),
                     text: $draft,
                     axis: .vertical
                 )
@@ -601,8 +734,9 @@ struct DirectChatView: View {
         let exchange = store.connectionActions?.contactExchange
         let isSelfNotes = store.conversation?.isSelfNotes == true
             || store.connectionActions?.isSelfNotes == true
+        let isAssistant = store.isAssistantChat
 
-        if !isSelfNotes {
+        if !isSelfNotes && !isAssistant {
             if let peerID = store.conversation?.peer.id {
                 Button("View profile") {
                     router.navigate(to: .profile(userID: peerID))
@@ -709,28 +843,6 @@ struct DirectChatView: View {
         )
     }
 
-    private func sendLocation() async {
-        do {
-            let coordinate = try await locationCapture.captureCurrentLocation()
-            isNearBottom = true
-            let ok = await store.sendLocation(
-                latitude: coordinate.latitude,
-                longitude: coordinate.longitude,
-                using: session
-            )
-            if ok {
-                replyDraft = nil
-            }
-            NotificationCenter.default.post(
-                name: .sideSeatChatScrollToBottom,
-                object: nil,
-                userInfo: ["animated": true]
-            )
-        } catch {
-            store.noteSendIssue(error.localizedDescription)
-        }
-    }
-
     private func handleMessageChange() {
         let decision = store.consumeScrollDecision(
             previousIDs: knownMessageIDs,
@@ -755,20 +867,30 @@ struct DirectChatView: View {
 private struct ComposerToolLabel: View {
     let title: String
     let systemImage: String
+    let accessibilityID: String
 
     var body: some View {
-        VStack(spacing: 6) {
+        HStack(spacing: 10) {
             Image(systemName: systemImage)
-                .font(.system(size: 20, weight: .medium))
-                .foregroundStyle(.primary)
-                .frame(width: 52, height: 52)
-                .background(SideSeatTheme.Chat.peerBubble, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(SideSeatTheme.accent)
+                .frame(width: 34, height: 34)
+                .background(SideSeatTheme.accent.opacity(0.10), in: Circle())
             Text(title)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.primary)
                 .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Spacer(minLength: 0)
         }
-        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 10)
+        .frame(maxWidth: .infinity, minHeight: 52, maxHeight: 52)
+        .background(
+            SideSeatTheme.Chat.peerBubble,
+            in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+        )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(title)
     }
 }
 
@@ -780,6 +902,8 @@ private struct DirectMessageBubble: View {
     let currentUserID: String
     let status: NativeMessageSendStatus?
     let isActingOnPlan: Bool
+    var isAssistantChat: Bool = false
+    var fromAssistant: Bool = false
     let onOpenProfile: () -> Void
     let onReply: () -> Void
     let onRetry: () -> Void
@@ -789,7 +913,9 @@ private struct DirectMessageBubble: View {
     let onAcceptPlan: (String) -> Void
     let onDeclinePlan: (String) -> Void
     let onCounterPlan: (NativePlanRequest) -> Void
+    let onOpenCalendar: () -> Void
     let onOpenScheduleShare: (String) -> Void
+    var onOpenAssistantLink: (String) -> Void = { _ in }
 
     private var canRetrySend: Bool {
         status == .failed && message.type == "TEXT" && !(message.body?.isEmpty ?? true)
@@ -805,7 +931,8 @@ private struct DirectMessageBubble: View {
                         size: 32
                     )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(fromAssistant ? .plain : .plain)
+                .disabled(fromAssistant)
                 .accessibilityIdentifier("chat-avatar-\(message.id)")
                 .accessibilityLabel(String(localized: "\(message.sender.displayName) profile"))
             }
@@ -867,7 +994,13 @@ private struct DirectMessageBubble: View {
                    !body.isEmpty
                 {
                     Button {
-                        UIPasteboard.general.string = body
+                        let paste =
+                            fromAssistant
+                            ? AssistantMessageParser.parse(body).text
+                            : (isAssistantChat && isMine
+                                ? AssistantMessageParser.displayUserBody(body)
+                                : body)
+                        UIPasteboard.general.string = paste
                     } label: {
                         Label("Copy", systemImage: "doc.on.doc")
                     }
@@ -946,9 +1079,9 @@ private struct DirectMessageBubble: View {
                         .padding(.vertical, 8)
                         .background(SideSeatTheme.fillTertiary, in: Capsule())
                         .foregroundStyle(.secondary)
-                        .accessibilityIdentifier("chat-location-\(message.id)")
                 }
             }
+            .accessibilityIdentifier("chat-location-\(message.id)")
         } else if (message.type == "PLAN_REQUEST_CARD" || message.type == "PLAN_CONFIRMED_CARD"),
                   let plan = message.planRequest {
             PlanCardView(
@@ -957,7 +1090,8 @@ private struct DirectMessageBubble: View {
                 isActing: isActingOnPlan,
                 onAccept: { onAcceptPlan(plan.id) },
                 onDecline: { onDeclinePlan(plan.id) },
-                onCounter: { onCounterPlan(plan) }
+                onCounter: { onCounterPlan(plan) },
+                onOpenCalendar: onOpenCalendar
             )
         } else if message.type == "SCHEDULE_SHARE_CARD",
                   let shareURL = message.body?.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -980,13 +1114,28 @@ private struct DirectMessageBubble: View {
                 if let reply = message.replyTo {
                     replyStrip(reply)
                 }
-                Text(message.body ?? "")
+                if fromAssistant, let body = message.body, message.deletedAt == nil {
+                    AssistantMessageBodyView(
+                        rawBody: body,
+                        onOpenLink: onOpenAssistantLink
+                    )
+                } else {
+                    Text(displayBody)
+                }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(bubbleFill, in: RoundedRectangle(cornerRadius: SideSeatTheme.Chat.bubbleRadius, style: .continuous))
             .foregroundStyle(isMine ? Color.white : Color.primary)
         }
+    }
+
+    private var displayBody: String {
+        guard let body = message.body else { return "" }
+        if isAssistantChat, isMine {
+            return AssistantMessageParser.displayUserBody(body)
+        }
+        return body
     }
 
     private func cardPreviewText(for message: NativeDirectMessage) -> String {
@@ -1032,13 +1181,151 @@ private struct DirectMessageBubble: View {
     }
 }
 
+private struct AssistantMessageBodyView: View {
+    let rawBody: String
+    let onOpenLink: (String) -> Void
+
+    var body: some View {
+        let payload = AssistantMessageParser.parse(rawBody)
+        VStack(alignment: .leading, spacing: 8) {
+            Text(payload.text)
+                .font(.body)
+                .multilineTextAlignment(.leading)
+            if !payload.links.isEmpty {
+                FlowLayout(spacing: 6) {
+                    ForEach(payload.links, id: \.href) { link in
+                        Button(link.label) {
+                            onOpenLink(link.href)
+                        }
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.accent)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(SideSeatTheme.accent.opacity(0.12), in: Capsule())
+                        .overlay(Capsule().strokeBorder(SideSeatTheme.accent.opacity(0.22), lineWidth: 1))
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+        .accessibilityIdentifier("assistant-message-body")
+    }
+}
+
+private struct AssistantQuickRepliesView: View {
+    let keys: [AssistantFaqKey]
+    let showMore: Bool
+    let onSelect: (AssistantFaqKey) -> Void
+    let onMore: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(String(localized: "Quick questions"))
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                Spacer(minLength: 8)
+                if showMore {
+                    Button(String(localized: "More"), action: onMore)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.accent)
+                        .buttonStyle(.plain)
+                }
+            }
+            FlowLayout(spacing: 6) {
+                ForEach(keys, id: \.self) { key in
+                    Button(key.chipTitle) {
+                        onSelect(key)
+                    }
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(SideSeatTheme.accent)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(SideSeatTheme.accent.opacity(0.10), in: Capsule())
+                    .overlay(Capsule().strokeBorder(SideSeatTheme.accent.opacity(0.18), lineWidth: 1))
+                    .buttonStyle(.plain)
+                    .disabled(false)
+                    .accessibilityIdentifier("assistant-faq-\(key.rawValue)")
+                }
+            }
+        }
+        .accessibilityIdentifier("assistant-quick-replies")
+    }
+}
+
+private struct AssistantTypingIndicatorView: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            HStack(spacing: 4) {
+                ForEach(0..<3, id: \.self) { index in
+                    Circle()
+                        .fill(SideSeatTheme.accent.opacity(0.75))
+                        .frame(width: 6, height: 6)
+                        .opacity(0.45 + Double(index) * 0.15)
+                }
+            }
+            Text(String(localized: "Assistant is typing…"))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(SideSeatTheme.Chat.peerBubble, in: Capsule())
+        .accessibilityIdentifier("assistant-typing")
+        .accessibilityLabel(String(localized: "Assistant is typing…"))
+    }
+}
+
+/// Simple horizontal wrapping layout for assistant chips and links.
+private struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let width = proposal.width ?? 0
+        var x: CGFloat = 0
+        var y: CGFloat = 0
+        var rowHeight: CGFloat = 0
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if x > 0, x + size.width > width {
+                x = 0
+                y += rowHeight + spacing
+                rowHeight = 0
+            }
+            rowHeight = max(rowHeight, size.height)
+            x += size.width + spacing
+        }
+        return CGSize(width: width, height: y + rowHeight)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var x = bounds.minX
+        var y = bounds.minY
+        var rowHeight: CGFloat = 0
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if x > bounds.minX, x + size.width > bounds.maxX {
+                x = bounds.minX
+                y += rowHeight + spacing
+                rowHeight = 0
+            }
+            subview.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
+            rowHeight = max(rowHeight, size.height)
+            x += size.width + spacing
+        }
+    }
+}
+
 private struct ChatMessageImageView: View {
     let imageURL: String?
     let onTap: () -> Void
 
     var body: some View {
         Group {
-            if let imageURL, let url = URL(string: imageURL), url.scheme == "http" || url.scheme == "https" {
+            if isUITesting {
+                placeholder
+            } else if let imageURL, let url = URL(string: imageURL), url.scheme == "http" || url.scheme == "https" {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .success(let image):
@@ -1048,8 +1335,7 @@ private struct ChatMessageImageView: View {
                     case .failure:
                         placeholder
                     case .empty:
-                        ProgressView()
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        placeholder
                     @unknown default:
                         placeholder
                     }
@@ -1066,6 +1352,14 @@ private struct ChatMessageImageView: View {
         .accessibilityIdentifier("chat-image")
     }
 
+    private var isUITesting: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated")
+        #else
+        false
+        #endif
+    }
+
     private var placeholder: some View {
         ZStack {
             SideSeatTheme.fillTertiary
@@ -1073,6 +1367,223 @@ private struct ChatMessageImageView: View {
                 .font(.title2)
                 .foregroundStyle(.secondary)
         }
+    }
+}
+
+private struct ChatLocationShareSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    let capture: ChatLocationCapture
+    let onSend: (NativeChatLocation) async -> Bool
+
+    @State private var position: MapCameraPosition = .automatic
+    @State private var coordinate: CLLocationCoordinate2D?
+    @State private var locationName = ""
+    @State private var isLoading = true
+    @State private var isSending = false
+    @State private var issue: String?
+    @State private var hasLoadedCoordinate = false
+    @State private var lookupID = UUID()
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                ZStack {
+                    mapSurface
+
+                    Image(systemName: "mappin.circle.fill")
+                        .font(.system(size: 38, weight: .semibold))
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(SideSeatTheme.accent, Color.white)
+                        .shadow(color: .black.opacity(0.18), radius: 4, y: 2)
+                        .offset(y: -18)
+
+                    if isLoading {
+                        ProgressView()
+                            .padding(14)
+                            .background(.regularMaterial, in: Circle())
+                    }
+
+                    VStack {
+                        HStack {
+                            Spacer()
+                            Button {
+                                Task { await loadCurrentLocation() }
+                            } label: {
+                                Image(systemName: "location.fill")
+                                    .font(.body.weight(.semibold))
+                                    .frame(width: 42, height: 42)
+                                    .background(.regularMaterial, in: Circle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Current location")
+                            .accessibilityIdentifier("chat-location-current")
+                        }
+                        Spacer()
+                    }
+                    .padding(14)
+                }
+                .frame(maxHeight: .infinity)
+
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(locationName.isEmpty ? String(localized: "Pinned location") : locationName)
+                        .font(.headline)
+                        .lineLimit(2)
+                    if let coordinate {
+                        Text(Self.coordinateLabel(coordinate))
+                            .font(.caption.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                    }
+                    if let issue {
+                        Text(issue)
+                            .font(.caption)
+                            .foregroundStyle(SideSeatTheme.danger)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                .padding(.vertical, SideSeatTheme.spaceMD)
+                .background(SideSeatTheme.surface)
+            }
+            .background(SideSeatTheme.bgGrouped)
+            .navigationTitle("Share location")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                SSPrimaryButton(
+                    title: String(localized: "Send location"),
+                    isLoading: isSending,
+                    fill: .product,
+                    height: 48,
+                    accessibilityID: "chat-location-send"
+                ) {
+                    Task { await send() }
+                }
+                .disabled(coordinate == nil || isLoading || isSending)
+                .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                .padding(.vertical, SideSeatTheme.spaceSM)
+                .background(.bar)
+            }
+            .task { await loadCurrentLocation() }
+        }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
+        .accessibilityIdentifier("chat-location-picker")
+    }
+
+    @ViewBuilder
+    private var mapSurface: some View {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            ZStack {
+                SideSeatTheme.fillTertiary
+                Image(systemName: "map")
+                    .font(.system(size: 74, weight: .ultraLight))
+                    .foregroundStyle(SideSeatTheme.accent.opacity(0.22))
+            }
+        } else {
+            interactiveMap
+        }
+        #else
+        interactiveMap
+        #endif
+    }
+
+    private var interactiveMap: some View {
+        Map(position: $position, interactionModes: [.pan, .zoom])
+            .mapStyle(.standard(elevation: .flat))
+            .onMapCameraChange(frequency: .onEnd) { context in
+                guard hasLoadedCoordinate else { return }
+                let next = context.region.center
+                coordinate = next
+                locationName = ""
+                Task { await resolveName(for: next) }
+            }
+    }
+
+    @MainActor
+    private func loadCurrentLocation() async {
+        guard !isLoading || coordinate == nil else { return }
+        isLoading = true
+        issue = nil
+        do {
+            let captured = try await capture.captureCurrentLocation()
+            let next = CLLocationCoordinate2D(
+                latitude: captured.latitude,
+                longitude: captured.longitude
+            )
+            coordinate = next
+            position = .region(
+                MKCoordinateRegion(
+                    center: next,
+                    span: MKCoordinateSpan(latitudeDelta: 0.012, longitudeDelta: 0.012)
+                )
+            )
+            await resolveName(for: next)
+            hasLoadedCoordinate = true
+        } catch {
+            issue = error.localizedDescription
+        }
+        isLoading = false
+    }
+
+    @MainActor
+    private func resolveName(for coordinate: CLLocationCoordinate2D) async {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            locationName = "Marienplatz, Munich"
+            return
+        }
+        #endif
+
+        let requestID = UUID()
+        lookupID = requestID
+        do {
+            let placemark = try await CLGeocoder()
+                .reverseGeocodeLocation(CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude))
+                .first
+            guard lookupID == requestID else { return }
+            let parts = [placemark?.name, placemark?.locality]
+                .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+            locationName = parts.reduce(into: [String]()) { unique, part in
+                if !unique.contains(part) { unique.append(part) }
+            }
+            .prefix(2)
+            .joined(separator: ", ")
+        } catch {
+            guard lookupID == requestID else { return }
+            locationName = ""
+        }
+    }
+
+    @MainActor
+    private func send() async {
+        guard let coordinate, !isSending else { return }
+        isSending = true
+        issue = nil
+        let trimmedName = locationName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let sent = await onSend(
+            NativeChatLocation(
+                latitude: coordinate.latitude,
+                longitude: coordinate.longitude,
+                name: trimmedName.isEmpty ? nil : trimmedName
+            )
+        )
+        isSending = false
+        if sent {
+            dismiss()
+        } else {
+            issue = String(localized: "Could not share this location. Try again.")
+        }
+    }
+
+    private static func coordinateLabel(_ coordinate: CLLocationCoordinate2D) -> String {
+        String(format: "%.5f, %.5f", coordinate.latitude, coordinate.longitude)
     }
 }
 
@@ -1085,13 +1596,7 @@ private struct ChatLocationBubble: View {
             openInMaps()
         } label: {
             VStack(alignment: .leading, spacing: 6) {
-                ZStack {
-                    SideSeatTheme.accent.opacity(isMine ? 0.35 : 0.18)
-                    Image(systemName: "mappin.circle.fill")
-                        .font(.system(size: 34))
-                        .foregroundStyle(isMine ? Color.white : SideSeatTheme.accent)
-                        .shadow(radius: 2)
-                }
+                ChatLocationSnapshotView(location: location)
                 .frame(width: 220, height: 120)
                 .clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
 
@@ -1121,6 +1626,61 @@ private struct ChatLocationBubble: View {
         if let url = components?.url {
             UIApplication.shared.open(url)
         }
+    }
+}
+
+private struct ChatLocationSnapshotView: View {
+    let location: NativeChatLocation
+    @State private var image: UIImage?
+
+    var body: some View {
+        ZStack {
+            if let image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                ZStack {
+                    Color(red: 0.90, green: 0.93, blue: 0.92)
+                    Image(systemName: "map")
+                        .font(.system(size: 62, weight: .ultraLight))
+                        .foregroundStyle(SideSeatTheme.accent.opacity(0.20))
+                }
+            }
+
+            Image(systemName: "mappin.circle.fill")
+                .font(.system(size: 32, weight: .semibold))
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(SideSeatTheme.accent, Color.white)
+                .shadow(color: .black.opacity(0.18), radius: 3, y: 2)
+                .offset(y: -14)
+        }
+        .clipped()
+        .task(id: "\(location.latitude),\(location.longitude)") {
+            await loadSnapshot()
+        }
+        .accessibilityHidden(true)
+    }
+
+    @MainActor
+    private func loadSnapshot() async {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") { return }
+        #endif
+
+        let options = MKMapSnapshotter.Options()
+        options.region = MKCoordinateRegion(
+            center: CLLocationCoordinate2D(
+                latitude: location.latitude,
+                longitude: location.longitude
+            ),
+            span: MKCoordinateSpan(latitudeDelta: 0.012, longitudeDelta: 0.012)
+        )
+        options.size = CGSize(width: 220, height: 120)
+        options.scale = UIScreen.main.scale
+        options.mapType = .standard
+        guard let snapshot = try? await MKMapSnapshotter(options: options).start() else { return }
+        image = snapshot.image
     }
 }
 
@@ -1241,5 +1801,11 @@ extension Notification.Name {
     static let sideSeatInboxConversationRead = Notification.Name("sideSeatInboxConversationRead")
     /// Outbound (or inbound) message should refresh the matching inbox row preview.
     static let sideSeatInboxConversationUpdated = Notification.Name("sideSeatInboxConversationUpdated")
+    /// A chat push arrived while the app is active or was opened by the user.
+    static let sideSeatInboxNeedsRefresh = Notification.Name("sideSeatInboxNeedsRefresh")
+    /// A confirmed plan changed the signed-in user's calendar.
+    static let sideSeatCalendarNeedsRefresh = Notification.Name("sideSeatCalendarNeedsRefresh")
+    /// A plan was accepted or declined and the plan center should reload.
+    static let sideSeatPlansNeedsRefresh = Notification.Name("sideSeatPlansNeedsRefresh")
     static let sideseatReplayProductTutorial = Notification.Name("sideseatReplayProductTutorial")
 }

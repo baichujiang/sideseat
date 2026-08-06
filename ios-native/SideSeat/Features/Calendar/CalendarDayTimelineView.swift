@@ -4,6 +4,7 @@ struct CalendarDayTimelineView: View {
     let date: Date
     let items: [HomeAgendaItem]
     let onOpen: (HomeAgendaItem) -> Void
+    let onEdit: (HomeAgendaItem) -> Void
     let onCopy: (HomeAgendaItem) -> Void
     let onDuplicate: (HomeAgendaItem) -> Void
     let movingEventID: String?
@@ -40,13 +41,23 @@ struct CalendarDayTimelineView: View {
                         .frame(width: timeGutter, alignment: .trailing)
                         .padding(.trailing, 6)
                         .padding(.top, 8)
-                    CalendarAllDayBand(items: allDayItems, onOpen: onOpen)
+                    CalendarAllDayBand(
+                        items: allDayItems,
+                        onOpen: onOpen,
+                        onLongPress: { item in
+                            guard movingEventID == nil else { return }
+                            menuEvent = item
+                        }
+                    )
                 }
                 .padding(.bottom, 4)
                 Divider().opacity(0.35)
             }
 
             GeometryReader { geometry in
+                let gridHeight = minuteHeight * 24 * 60
+                let contentHeight = gridHeight + CalendarChrome.timelineEndCapHeight
+
                 ScrollViewReader { reader in
                     ScrollView(.vertical) {
                         ZStack(alignment: .topLeading) {
@@ -65,7 +76,7 @@ struct CalendarDayTimelineView: View {
                         }
                         .frame(
                             width: geometry.size.width,
-                            height: minuteHeight * 24 * 60,
+                            height: contentHeight,
                             alignment: .topLeading
                         )
                     }
@@ -81,22 +92,15 @@ struct CalendarDayTimelineView: View {
         }
         .frame(minHeight: 420, maxHeight: .infinity)
         .background(SideSeatTheme.bg)
-        .confirmationDialog(
-            menuEvent?.title ?? "",
-            isPresented: Binding(
-                get: { menuEvent != nil },
-                set: { if !$0 { menuEvent = nil } }
-            ),
-            titleVisibility: .visible,
-            presenting: menuEvent
-        ) { item in
-            Button("Edit event") { onOpen(item) }
-            Button("Copy") { onCopy(item) }
-            Button("Duplicate after event") { onDuplicate(item) }
-            Button("Move event") { onStartMove(item) }
-                .accessibilityIdentifier("calendar-event-context-move")
-            Button("Cancel", role: .cancel) {}
-        }
+        .calendarItemActions(
+            item: $menuEvent,
+            onOpen: onOpen,
+            onEdit: onEdit,
+            onCopy: onCopy,
+            onDuplicate: onDuplicate,
+            onStartMove: onStartMove,
+            moveAccessibilityIdentifier: "calendar-event-context-move"
+        )
         .confirmationDialog(
             menuSlot.map(newEventLabel(for:)) ?? "",
             isPresented: Binding(
@@ -144,34 +148,30 @@ struct CalendarDayTimelineView: View {
                     .offset(y: CGFloat(hour * 60) * minuteHeight - 7)
             }
 
+            Text(CalendarChrome.compactHour(24))
+                .font(CalendarChrome.Typography.hourRail)
+                .foregroundStyle(SideSeatTheme.textSecondary)
+                .lineLimit(1)
+                .frame(width: timeGutter - 8, alignment: .trailing)
+                .offset(y: CGFloat(24 * 60) * minuteHeight - 7)
+                .accessibilityHidden(true)
+
             ForEach(0..<48, id: \.self) { index in
                 let minute = index * 30
                 Color.clear
                     .contentShape(Rectangle())
                     .frame(width: max(0, width - timeGutter), height: CGFloat(30) * minuteHeight)
                     .offset(x: timeGutter, y: CGFloat(minute) * minuteHeight)
-                    .onTapGesture {
-                        guard movingEventID == nil else { return }
-                        guard let slot = calendar.date(
-                            byAdding: .minute,
-                            value: minute,
-                            to: calendar.startOfDay(for: date)
-                        ) else {
-                            return
+                    .calendarTapOrLongPress(
+                        onTap: {
+                            guard movingEventID == nil, let slot = slotDate(minute: minute) else { return }
+                            onCreateAtSlot(slot)
+                        },
+                        onLongPress: {
+                            guard movingEventID == nil, let slot = slotDate(minute: minute) else { return }
+                            menuSlot = slot
                         }
-                        onCreateAtSlot(slot)
-                    }
-                    .onLongPressGesture {
-                        guard movingEventID == nil else { return }
-                        guard let slot = calendar.date(
-                            byAdding: .minute,
-                            value: minute,
-                            to: calendar.startOfDay(for: date)
-                        ) else {
-                            return
-                        }
-                        menuSlot = slot
-                    }
+                    )
                     .allowsHitTesting(movingEventID == nil)
                     .accessibilityElement()
                     .accessibilityLabel(slotAccessibilityLabel(minute: minute))
@@ -230,27 +230,38 @@ struct CalendarDayTimelineView: View {
         let x = timeGutter + CGFloat(placement.lane) * (laneWidth + spacing)
         let height = max(30, CGFloat(placement.endMinute - placement.startMinute) * minuteHeight - 2)
         let color = CalendarChrome.eventColor(for: placement.item)
-        let subtitle = height >= 46 ? timeRange(for: placement.item) : nil
+        let subtitle = eventSubtitle(
+            for: placement.item,
+            height: height,
+            availableWidth: laneWidth
+        )
 
         return CalendarEventBlockLabel(
             title: placement.item.title,
             subtitle: subtitle,
             color: color,
             height: height,
-            emphasized: placement.item.id == movingEventID
+            emphasized: placement.item.id == movingEventID,
+            context: placement.item.context,
+            contextSymbol: CalendarChrome.eventContextSymbol(for: placement.item)
         )
         .frame(width: laneWidth, height: height)
         .contentShape(Rectangle())
-        .onTapGesture {
-            onOpen(placement.item)
-        }
-        .onLongPressGesture {
-            guard movingEventID == nil, placement.item.source == .event else { return }
-            menuEvent = placement.item
-        }
+        .calendarTapOrLongPress(
+            onTap: {
+                guard movingEventID == nil else { return }
+                onOpen(placement.item)
+            },
+            onLongPress: {
+                guard movingEventID == nil else { return }
+                menuEvent = placement.item
+            }
+        )
         .offset(x: x, y: CGFloat(placement.startMinute) * minuteHeight + 1)
         .allowsHitTesting(movingEventID == nil)
+        .accessibilityElement(children: .ignore)
         .accessibilityIdentifier("calendar-timeline-event-\(placement.item.id)")
+        .accessibilityLabel(placement.item.title)
         .accessibilityValue(timeRange(for: placement.item))
         .accessibilityAddTraits(.isButton)
     }
@@ -282,6 +293,14 @@ struct CalendarDayTimelineView: View {
         .accessibilityLabel(moveTargetAccessibilityLabel(minute: minute))
         .accessibilityHint("Moves the selected event to this time")
         .accessibilityIdentifier("calendar-move-target-\(minute)")
+    }
+
+    private func slotDate(minute: Int) -> Date? {
+        calendar.date(
+            byAdding: .minute,
+            value: minute,
+            to: calendar.startOfDay(for: date)
+        )
     }
 
     private var scrollTargetID: String {
@@ -326,6 +345,36 @@ struct CalendarDayTimelineView: View {
 
     private func timeRange(for item: HomeAgendaItem) -> String {
         "\(item.start.formatted(date: .omitted, time: .shortened)) - \(item.end.formatted(date: .omitted, time: .shortened))"
+    }
+
+    private func eventSubtitle(
+        for item: HomeAgendaItem,
+        height: CGFloat,
+        availableWidth: CGFloat
+    ) -> String? {
+        guard let time = CalendarChrome.eventCardTimeLabel(
+            from: item.start,
+            to: item.end,
+            height: height,
+            availableWidth: availableWidth,
+            calendar: calendar
+        ) else { return nil }
+        guard height >= 46, availableWidth >= 150 else { return time }
+
+        switch item.context {
+        case .publicPlan where !item.participantNames.isEmpty:
+            let people = String(
+                format: String(localized: "%lld people"),
+                Int64(item.participantNames.count)
+            )
+            return "\(time) · \(people)"
+        case .shared:
+            let companion = item.withLabel ?? item.participantNames.first
+            guard let companion, !companion.isEmpty else { return time }
+            return "\(time) · \(companion)"
+        default:
+            return time
+        }
     }
 
 }

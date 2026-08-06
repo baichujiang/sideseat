@@ -1,0 +1,147 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  web-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: sideseat_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d sideseat_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:password@127.0.0.1:5432/sideseat_ci?schema=public
+      DATABASE_URL_UNPOOLED: postgresql://postgres:password@127.0.0.1:5432/sideseat_ci?schema=public
+      SESSION_SECRET: ci-session-secret-at-least-32-characters
+      ACCESS_TOKEN_SECRET: ci-access-secret-at-least-32-characters
+      CRON_SECRET: ci-playwright-cron-secret
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+      E2E_USER: test_001
+      E2E_PEER: test_002
+      E2E_PASSWORD: Password123
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit --incremental false
+      - run: npm run test:release:config
+      - run: npm run check:openapi:v1
+      - run: node scripts/verify-chat-realtime-migrations.mjs
+      - run: npx prisma migrate deploy
+      - run: npm run seed:test-accounts
+      - run: npx playwright install --with-deps chromium
+      - name: API and Web integration tests
+        run: >-
+          npx playwright test
+          e2e/api-v1-auth.spec.ts
+          e2e/api-v1-direct-messages.spec.ts
+          e2e/api-v1-inbox.spec.ts
+          e2e/api-v1-community-chat.spec.ts
+          e2e/api-v1-realtime.spec.ts
+          e2e/api-v1-home.spec.ts
+          e2e/api-v1-calendar.spec.ts
+          e2e/api-v1-courses.spec.ts
+          e2e/user-standard-flow.spec.ts
+          e2e/chat-regression.spec.ts
+      - run: npm run build
+      - name: Production runtime API regression
+        run: |
+          npx next start --port 3000 > /tmp/sideseat-next-production.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+
+          ready=0
+          for _ in $(seq 1 60); do
+            if curl --fail --silent --show-error http://127.0.0.1:3000/api/v1/client-config >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/sideseat-next-production.log
+            exit 1
+          fi
+
+          PLAYWRIGHT_SKIP_WEBSERVER=1 npm run test:api:v1
+      - name: Upload Playwright evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-evidence
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 14
+
+  native-ios:
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select an available iPhone simulator
+        run: |
+          simulator_id=$(xcrun simctl list devices available --json | ruby -rjson -e '
+            devices = JSON.parse(STDIN.read).fetch("devices")
+            runtime = devices.keys
+              .select { |key| key.include?("iOS") }
+              .max_by { |key| key.scan(/\d+/).map(&:to_i) }
+            device = runtime && devices.fetch(runtime).find do |candidate|
+              candidate["isAvailable"] && candidate.fetch("name", "").start_with?("iPhone")
+            end
+            abort "No available iPhone simulator was found" unless device
+            puts device.fetch("udid")
+          ')
+          echo "SIMULATOR_ID=$simulator_id" >> "$GITHUB_ENV"
+          xcodebuild -version
+          xcrun simctl boot "$simulator_id" || true
+          xcrun simctl bootstatus "$simulator_id" -b
+      - name: Generate deterministic Xcode project
+        run: |
+          ios-native/scripts/generate-openapi-client.sh
+          ios-native/scripts/generate-project.sh
+          git diff --exit-code -- ios-native/SideSeat/Generated/OpenAPI
+          git diff --exit-code -- ios-native/SideSeat.xcodeproj
+      - name: Build and test native iOS app
+        run: |
+          mkdir -p ios-native/TestResults
+          xcodebuild test \
+            -project ios-native/SideSeat.xcodeproj \
+            -scheme SideSeat-Development \
+            -configuration Development \
+            -destination "platform=iOS Simulator,id=$SIMULATOR_ID" \
+            -derivedDataPath ios-native/DerivedData \
+            -resultBundlePath ios-native/TestResults/SideSeat.xcresult \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Upload native iOS test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-ios-test-evidence
+          path: ios-native/TestResults/SideSeat.xcresult
+          if-no-files-found: ignore
+          retention-days: 14

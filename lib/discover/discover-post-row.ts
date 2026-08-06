@@ -1,5 +1,8 @@
 import {
   ClassmatePostCategory,
+  type ClassmatePostReplyPreference,
+  type ClassmatePostStatus,
+  type ClassmatePostVisibility,
   type MealVenueTag,
   type Prisma,
   type LanguageProficiency,
@@ -8,6 +11,7 @@ import {
   type StudyPurpose,
   type StudyTimeSlot,
   type StudyVenue,
+  type StudentStatus,
   type UserGender,
 } from "@prisma/client";
 
@@ -53,6 +57,14 @@ export type DiscoverPostRow = {
   city: string;
   title: string;
   body: string | null;
+  status: ClassmatePostStatus;
+  tags: string[];
+  visibility: ClassmatePostVisibility;
+  replyPreference: ClassmatePostReplyPreference;
+  startsAt: Date | null;
+  endsAt: Date | null;
+  location: string | null;
+  capacity: number | null;
   createdAt: Date;
   expiresAt: Date;
   isOwn: boolean;
@@ -63,6 +75,8 @@ export type DiscoverPostRow = {
   avatarUrl: string | null;
   major: string | null;
   semester: number | null;
+  studentStatus: StudentStatus | null;
+  graduationYear: number | null;
   school: string | null;
   languages: Array<{ tag: LanguageTag; proficiency: LanguageProficiency }>;
   verifiedStudent: boolean;

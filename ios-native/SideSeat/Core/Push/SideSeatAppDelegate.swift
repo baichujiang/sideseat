@@ -10,6 +10,7 @@ final class SideSeatAppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        CrashReporting.start()
         UNUserNotificationCenter.current().delegate = self
         return true
     }
@@ -38,6 +39,7 @@ extension SideSeatAppDelegate: UNUserNotificationCenterDelegate {
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
+        Self.refreshInboxIfChatNotification(notification.request.content.userInfo)
         completionHandler([.banner, .sound, .badge])
     }
 
@@ -46,11 +48,12 @@ extension SideSeatAppDelegate: UNUserNotificationCenterDelegate {
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        let url = Self.notificationURL(from: response.notification.request.content.userInfo)
-        let router = deepLinkRouter
-        Task { @MainActor in
+        let userInfo = response.notification.request.content.userInfo
+        let url = Self.notificationURL(from: userInfo)
+        Self.refreshInboxIfChatNotification(userInfo)
+        Task { @MainActor [weak self] in
             if let url {
-                router?.handleNotificationURL(url)
+                self?.deepLinkRouter?.handleNotificationURL(url)
             }
         }
         completionHandler()
@@ -64,5 +67,19 @@ extension SideSeatAppDelegate: UNUserNotificationCenterDelegate {
             return url
         }
         return nil
+    }
+
+    nonisolated private static func refreshInboxIfChatNotification(
+        _ userInfo: [AnyHashable: Any]
+    ) {
+        guard let rawURL = notificationURL(from: userInfo) else { return }
+        let path = URL(string: rawURL)?.path ?? rawURL
+        let isChat = path.hasPrefix("/connections/")
+            || (path.hasPrefix("/courses/") && path.hasSuffix("/chat"))
+            || path.hasPrefix("/groups/")
+        guard isChat else { return }
+        Task { @MainActor in
+            NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
+        }
     }
 }

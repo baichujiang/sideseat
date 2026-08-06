@@ -10,6 +10,8 @@ import {
 } from "@prisma/client";
 
 import { getSchoolMatchValues } from "@/lib/constants/schools";
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
+import { courseIdentityKey, normalizeCourseIdentityCode } from "@/lib/courses/course-identity";
 import { prisma } from "@/lib/db/prisma";
 import { weeklyOverlapMinutes, type SessionBlock } from "@/lib/queries/schedule-overlap";
 
@@ -98,25 +100,30 @@ export async function getDiscoverPeople(
     where: { id: userId },
     include: {
       courses: {
+        where: activeCourseMembershipWhere(),
         include: { course: true, sessions: true },
-      },
-      savedCourses: {
-        include: { course: true },
       },
     },
   });
 
-  const enrolledIds = me?.courses.map((m) => m.courseId) ?? [];
-  const savedIds = me?.savedCourses.map((s) => s.courseId) ?? [];
-  const myCourseIds = [...new Set([...enrolledIds, ...savedIds])];
+  const courseQuery = opts?.courseQuery?.trim().toLocaleLowerCase() ?? "";
+  const matchingMemberships =
+    me?.courses.filter((membership) => {
+      if (!courseQuery) return true;
+      const searchable = [membership.course.code, membership.course.name]
+        .filter((value): value is string => Boolean(value))
+        .join(" ")
+        .toLocaleLowerCase();
+      return searchable.includes(courseQuery);
+    }) ?? [];
 
-  if (!me || myCourseIds.length === 0) {
+  if (!me || matchingMemberships.length === 0) {
     return [];
   }
 
   const myByCourse = new Map<string, MembershipLite>(
-    me.courses.map((m) => [
-      m.courseId,
+    matchingMemberships.map((m) => [
+      courseIdentityKey(m.course),
       {
         courseId: m.courseId,
         intentions: m.intentions,
@@ -128,7 +135,7 @@ export async function getDiscoverPeople(
       },
     ]),
   );
-  const mySessions: SessionBlock[] = me.courses.flatMap((m) =>
+  const mySessions: SessionBlock[] = matchingMemberships.flatMap((m) =>
     m.sessions.map((s) => ({
       weekday: s.weekday,
       startMinute: s.startMinute,
@@ -137,6 +144,16 @@ export async function getDiscoverPeople(
   );
 
   const schoolValues = getSchoolMatchValues(me.school);
+  const myCourseCodes = Array.from(
+    new Set(
+      matchingMemberships
+        .map((membership) => normalizeCourseIdentityCode(membership.course.code))
+        .filter((code): code is string => Boolean(code)),
+    ),
+  );
+  const myFallbackCourseIds = matchingMemberships
+    .filter((membership) => !normalizeCourseIdentityCode(membership.course.code))
+    .map((membership) => membership.courseId);
 
   const where: Prisma.UserWhereInput = {
     id: { not: userId },
@@ -146,10 +163,22 @@ export async function getDiscoverPeople(
     blocksReceived: { none: { blockerId: userId } },
     blocksInitiated: { none: { blockedId: userId } },
     // M3 eligibility: must share at least one course with me.
-    courses: { some: { courseId: { in: myCourseIds } } },
+    courses: {
+      some: {
+        ...activeCourseMembershipWhere(),
+        course: {
+          OR: [
+            ...(myCourseCodes.length ? [{ code: { in: myCourseCodes } }] : []),
+            ...(myFallbackCourseIds.length ? [{ id: { in: myFallbackCourseIds } }] : []),
+          ],
+        },
+      },
+    },
   };
 
-  const myCourseIdsSet = new Set(myCourseIds);
+  const myCourseIdentitySet = new Set(
+    matchingMemberships.map((membership) => courseIdentityKey(membership.course)),
+  );
 
   // Pull a generous window; we'll rescore and slice after. Note: we include
   // ALL of each candidate's courses (not just the ones shared with me) so we
@@ -159,6 +188,7 @@ export async function getDiscoverPeople(
     where,
     include: {
       courses: {
+        where: activeCourseMembershipWhere(),
         include: { course: true, sessions: true },
       },
       userLanguages: true,
@@ -169,11 +199,17 @@ export async function getDiscoverPeople(
   const hits: DiscoverHit[] = [];
 
   for (const person of candidates) {
-    const sharedMemberships = person.courses.filter((c) =>
-      myCourseIdsSet.has(c.courseId),
+    const sharedByIdentity = new Map(
+      person.courses
+        .filter((membership) =>
+          myCourseIdentitySet.has(courseIdentityKey(membership.course)),
+        )
+        .map((membership) => [courseIdentityKey(membership.course), membership]),
     );
+    const sharedMemberships = [...sharedByIdentity.values()];
     const otherMemberships = person.courses.filter(
-      (c) => !myCourseIdsSet.has(c.courseId),
+      (membership) =>
+        !myCourseIdentitySet.has(courseIdentityKey(membership.course)),
     );
 
     if (sharedMemberships.length === 0) continue; // where-clause guarantees this
@@ -191,7 +227,7 @@ export async function getDiscoverPeople(
 
     const sharedCourses: DiscoverSharedCourse[] = sharedMemberships.map(
       (theirMembership, idx) => {
-        const mine = myByCourse.get(theirMembership.courseId) ?? {
+        const mine = myByCourse.get(courseIdentityKey(theirMembership.course)) ?? {
           courseId: theirMembership.courseId,
           intentions: [] as CourseIntent[],
           sessions: [] as MembershipLite["sessions"],
@@ -288,7 +324,7 @@ export async function getDiscoverPeople(
           endMinute: s.endMinute,
           courseCode: m.course.code,
           courseName: m.course.name,
-          shared: myCourseIdsSet.has(m.courseId),
+          shared: myCourseIdentitySet.has(courseIdentityKey(m.course)),
         })),
       )
       .sort(weeklySlotSort);

@@ -7,7 +7,7 @@ struct SupportStoreView: View {
     var body: some View {
         Group {
             if store.isLoading && store.catalog.isEmpty {
-                ProgressView("Loading support options")
+                SSLoadingState("Loading support options")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let issue = store.issue, store.catalog.isEmpty {
                 ContentUnavailableView("Support unavailable", systemImage: "heart.slash", description: Text(issue))

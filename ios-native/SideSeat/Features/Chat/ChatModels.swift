@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-struct NativeInboxPayload: Decodable, Sendable {
+struct NativeInboxPayload: Codable, Sendable {
     let conversations: [NativeInboxConversation]
     let unreadTotal: Int
     let plansNeedingYourAction: Int
@@ -17,8 +17,8 @@ struct NativeInboxPayload: Decodable, Sendable {
     }
 }
 
-struct NativeInboxConversation: Decodable, Identifiable, Hashable, Sendable {
-    enum Kind: String, Decodable, Sendable {
+struct NativeInboxConversation: Codable, Identifiable, Hashable, Sendable {
+    enum Kind: String, Codable, Sendable {
         case direct = "DIRECT"
         case course = "COURSE"
         case group = "GROUP"
@@ -84,7 +84,15 @@ struct NativeInboxConversation: Decodable, Identifiable, Hashable, Sendable {
             return body.isEmpty ? String(localized: "Update") : body
         default:
             let body = lastMessage.body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            return body.isEmpty ? String(localized: "New message") : body
+            if body.isEmpty { return String(localized: "New message") }
+            if body.hasPrefix("[[faq:") {
+                return AssistantMessageParser.displayUserBody(body)
+            }
+            if body.contains("[sideseat-actions]") {
+                let text = AssistantMessageParser.parse(body).text.trimmingCharacters(in: .whitespacesAndNewlines)
+                return text.isEmpty ? String(localized: "New message") : text
+            }
+            return body
         }
     }
 
@@ -196,7 +204,7 @@ struct NativeInboxConversation: Decodable, Identifiable, Hashable, Sendable {
     }
 }
 
-struct NativeInboxCourseRef: Decodable, Hashable, Sendable {
+struct NativeInboxCourseRef: Codable, Hashable, Sendable {
     let id: String
     let name: String
     let code: String?
@@ -204,13 +212,13 @@ struct NativeInboxCourseRef: Decodable, Hashable, Sendable {
     let semesterLabel: String?
 }
 
-struct NativeInboxGroupRef: Decodable, Hashable, Sendable {
+struct NativeInboxGroupRef: Codable, Hashable, Sendable {
     let id: String
     let participantCount: Int
     let participants: [NativeChatAuthor]
 }
 
-struct NativeInboxLastMessage: Decodable, Hashable, Sendable {
+struct NativeInboxLastMessage: Codable, Hashable, Sendable {
     let id: String
     let sender: NativeChatAuthor
     let type: String
@@ -220,7 +228,7 @@ struct NativeInboxLastMessage: Decodable, Hashable, Sendable {
     let createdAt: String
 }
 
-struct NativeChatAuthor: Decodable, Hashable, Sendable, Identifiable {
+struct NativeChatAuthor: Codable, Hashable, Sendable, Identifiable {
     let id: String
     let username: String
     let nickname: String?
@@ -248,14 +256,29 @@ struct NativeDirectMessagePageResponse: Decodable, Sendable {
     let meta: NativeDirectMessagePageMeta
 }
 
-struct NativeDirectConversation: Decodable, Sendable {
+struct NativeDirectConversation: Codable, Sendable {
     let id: String
     let isSelfNotes: Bool
+    let replyLimitUnlocked: Bool?
     let displayName: String
     let peer: NativeChatAuthor
+
+    init(
+        id: String,
+        isSelfNotes: Bool,
+        replyLimitUnlocked: Bool? = nil,
+        displayName: String,
+        peer: NativeChatAuthor
+    ) {
+        self.id = id
+        self.isSelfNotes = isSelfNotes
+        self.replyLimitUnlocked = replyLimitUnlocked
+        self.displayName = displayName
+        self.peer = peer
+    }
 }
 
-struct NativePlanAuthor: Decodable, Hashable, Sendable {
+struct NativePlanAuthor: Codable, Hashable, Sendable {
     let id: String
     let username: String
     let nickname: String?
@@ -267,7 +290,7 @@ struct NativePlanAuthor: Decodable, Hashable, Sendable {
     }
 }
 
-struct NativePlanRequest: Decodable, Identifiable, Hashable, Sendable {
+struct NativePlanRequest: Codable, Identifiable, Hashable, Sendable {
     let id: String
     let connectionId: String
     let status: String
@@ -286,6 +309,7 @@ struct NativePlanRequest: Decodable, Identifiable, Hashable, Sendable {
     let updatedAt: String
 
     var isPending: Bool { status == "PENDING" }
+    var isAccepted: Bool { status == "ACCEPTED" }
 
     var startDate: Date? { Date.sideSeatChatISO8601(startTime) }
     var endDate: Date? { Date.sideSeatChatISO8601(endTime) }
@@ -313,7 +337,7 @@ struct NativePlanCreateRequest: Encodable, Sendable {
     let planType: String
 }
 
-struct NativeDirectMessage: Decodable, Identifiable, Hashable, Sendable {
+struct NativeDirectMessage: Codable, Identifiable, Hashable, Sendable {
     let id: String
     let connectionId: String
     let sender: NativeChatAuthor
@@ -377,19 +401,19 @@ struct NativeDirectMessage: Decodable, Identifiable, Hashable, Sendable {
     }
 }
 
-enum NativeMessageSendStatus: String, Hashable, Sendable {
+enum NativeMessageSendStatus: String, Codable, Hashable, Sendable {
     case sending
     case sent
     case failed
 }
 
-struct NativeChatLocation: Decodable, Hashable, Sendable {
+struct NativeChatLocation: Codable, Hashable, Sendable {
     let latitude: Double
     let longitude: Double
     let name: String?
 }
 
-struct NativeDirectMessageReply: Decodable, Hashable, Sendable {
+struct NativeDirectMessageReply: Codable, Hashable, Sendable {
     let id: String
     let sender: NativeChatAuthor
     let type: String
@@ -405,7 +429,15 @@ struct NativeDirectMessageReply: Decodable, Hashable, Sendable {
         case "LOCATION": return String(localized: "Location")
         default:
             let trimmed = body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            return trimmed.isEmpty ? String(localized: "Message") : trimmed
+            if trimmed.isEmpty { return String(localized: "Message") }
+            if trimmed.hasPrefix("[[faq:") {
+                return AssistantMessageParser.displayUserBody(trimmed)
+            }
+            if trimmed.contains("[sideseat-actions]") {
+                let text = AssistantMessageParser.parse(trimmed).text.trimmingCharacters(in: .whitespacesAndNewlines)
+                return text.isEmpty ? String(localized: "Message") : text
+            }
+            return trimmed
         }
     }
 }
@@ -461,16 +493,23 @@ struct NativeDirectLocationMessageRequest: Encodable, Sendable {
     let type = "LOCATION"
     let locationLat: Double
     let locationLng: Double
+    let locationName: String?
     let replyToId: String?
 
-    init(locationLat: Double, locationLng: Double, replyToId: String? = nil) {
+    init(
+        locationLat: Double,
+        locationLng: Double,
+        locationName: String? = nil,
+        replyToId: String? = nil
+    ) {
         self.locationLat = locationLat
         self.locationLng = locationLng
+        self.locationName = locationName
         self.replyToId = replyToId
     }
 
     private enum CodingKeys: String, CodingKey {
-        case type, locationLat, locationLng, replyToId
+        case type, locationLat, locationLng, locationName, replyToId
     }
 
     func encode(to encoder: Encoder) throws {
@@ -478,6 +517,7 @@ struct NativeDirectLocationMessageRequest: Encodable, Sendable {
         try container.encode(type, forKey: .type)
         try container.encode(locationLat, forKey: .locationLat)
         try container.encode(locationLng, forKey: .locationLng)
+        try container.encodeIfPresent(locationName, forKey: .locationName)
         try container.encodeIfPresent(replyToId, forKey: .replyToId)
     }
 }
@@ -512,6 +552,9 @@ struct NativeMessageReportRequest: Encodable, Sendable {
     let reportedUserId: String
     let messageId: String?
     let courseRoomMessageId: String?
+    let groupChatMessageId: String?
+    let classmatePostId: String?
+    let classmatePostCommentId: String?
     let reason: String
     let details: String
 
@@ -519,12 +562,18 @@ struct NativeMessageReportRequest: Encodable, Sendable {
         reportedUserId: String,
         messageId: String? = nil,
         courseRoomMessageId: String? = nil,
+        groupChatMessageId: String? = nil,
+        classmatePostId: String? = nil,
+        classmatePostCommentId: String? = nil,
         reason: NativeReportReason,
         details: String = ""
     ) {
         self.reportedUserId = reportedUserId
         self.messageId = messageId
         self.courseRoomMessageId = courseRoomMessageId
+        self.groupChatMessageId = groupChatMessageId
+        self.classmatePostId = classmatePostId
+        self.classmatePostCommentId = classmatePostCommentId
         self.reason = reason.rawValue
         self.details = details
     }
@@ -542,7 +591,15 @@ extension NativeDirectMessage {
         case "LOCATION": return location?.name ?? String(localized: "Location")
         default:
             let trimmed = body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            return trimmed.isEmpty ? String(localized: "Message") : trimmed
+            if trimmed.isEmpty { return String(localized: "Message") }
+            if trimmed.hasPrefix("[[faq:") {
+                return AssistantMessageParser.displayUserBody(trimmed)
+            }
+            if trimmed.contains("[sideseat-actions]") {
+                let text = AssistantMessageParser.parse(trimmed).text.trimmingCharacters(in: .whitespacesAndNewlines)
+                return text.isEmpty ? String(localized: "Message") : text
+            }
+            return trimmed
         }
     }
 
@@ -707,10 +764,12 @@ enum ChatScrollPolicy {
 enum InboxActivityFormatting {
     /// Today → time; yesterday → label; this week → weekday; older → short date.
     static func label(for date: Date, now: Date = Date(), calendar: Calendar = .current) -> String {
-        if calendar.isDateInToday(date) {
+        if calendar.isDate(date, inSameDayAs: now) {
             return date.formatted(date: .omitted, time: .shortened)
         }
-        if calendar.isDateInYesterday(date) {
+        if let yesterday = calendar.date(byAdding: .day, value: -1, to: now),
+           calendar.isDate(date, inSameDayAs: yesterday)
+        {
             return String(localized: "Yesterday")
         }
         if let weekAgo = calendar.date(byAdding: .day, value: -6, to: calendar.startOfDay(for: now)),
@@ -880,5 +939,108 @@ extension Date {
         let fractional = ISO8601DateFormatter()
         fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return fractional.date(from: value) ?? ISO8601DateFormatter().date(from: value)
+    }
+}
+
+// MARK: - SideSeat Assistant (FAQ bot DM)
+
+enum AssistantBot {
+    static let username = "sideseat_assistant"
+
+    static func isBot(_ user: NativeChatAuthor) -> Bool {
+        user.username == username
+    }
+}
+
+enum AssistantFaqKey: String, CaseIterable, Sendable {
+    case gettingStarted = "getting_started"
+    case discover
+    case verification
+    case guestSignup = "guest_signup"
+    case schedule
+    case inbox
+
+    var chipTitle: String {
+        switch self {
+        case .gettingStarted:
+            return String(localized: "How do I start?")
+        case .discover:
+            return String(localized: "How does Discover work?")
+        case .verification:
+            return String(localized: "School email verification")
+        case .guestSignup:
+            return String(localized: "Guest vs sign up")
+        case .schedule:
+            return String(localized: "Calendar & plans")
+        case .inbox:
+            return String(localized: "Chats & inbox")
+        }
+    }
+
+    var triggerBody: String {
+        "[[faq:\(rawValue)]]"
+    }
+
+    /// Contextual chip order (guest / unverified / verified) — matches web `suggestedFaqChips`.
+    static func suggested(isGuest: Bool, verifiedStudent: Bool, compact: Bool = true) -> [AssistantFaqKey] {
+        let ordered: [AssistantFaqKey]
+        if isGuest {
+            ordered = [.gettingStarted, .guestSignup, .discover, .schedule, .inbox, .verification]
+        } else if !verifiedStudent {
+            ordered = [.verification, .schedule, .discover, .gettingStarted, .inbox, .guestSignup]
+        } else {
+            ordered = [.schedule, .discover, .inbox, .gettingStarted, .verification, .guestSignup]
+        }
+        return compact ? Array(ordered.prefix(4)) : ordered
+    }
+}
+
+struct AssistantActionLink: Hashable, Sendable, Codable {
+    let label: String
+    let href: String
+}
+
+struct AssistantMessagePayload: Hashable, Sendable {
+    let text: String
+    let links: [AssistantActionLink]
+}
+
+enum AssistantMessageParser {
+    private static let actionsOpen = "[sideseat-actions]"
+    private static let actionsClose = "[/sideseat-actions]"
+
+    static func parse(_ raw: String) -> AssistantMessagePayload {
+        guard let openRange = raw.range(of: actionsOpen) else {
+            return AssistantMessagePayload(text: raw.trimmingCharacters(in: .whitespacesAndNewlines), links: [])
+        }
+        let text = String(raw[..<openRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+        let afterOpen = raw[openRange.upperBound...]
+        let jsonText: String
+        if let closeRange = afterOpen.range(of: actionsClose) {
+            jsonText = String(afterOpen[..<closeRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+        } else {
+            jsonText = String(afterOpen).trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        guard let data = jsonText.data(using: .utf8),
+              let decoded = try? JSONDecoder().decode(AssistantActionsEnvelope.self, from: data)
+        else {
+            return AssistantMessagePayload(text: text.isEmpty ? raw.trimmingCharacters(in: .whitespacesAndNewlines) : text, links: [])
+        }
+        let links = decoded.links.filter { link in
+            link.href.hasPrefix("/") && !link.label.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+        return AssistantMessagePayload(text: text, links: links)
+    }
+
+    static func displayUserBody(_ body: String) -> String {
+        let trimmed = body.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.hasPrefix("[[faq:"), trimmed.hasSuffix("]]") else { return body }
+        let inner = String(trimmed.dropFirst(6).dropLast(2))
+        guard let key = AssistantFaqKey(rawValue: inner) else { return body }
+        return key.chipTitle
+    }
+
+    private struct AssistantActionsEnvelope: Decodable {
+        let links: [AssistantActionLink]
     }
 }

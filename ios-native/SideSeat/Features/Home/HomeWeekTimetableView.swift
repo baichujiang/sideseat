@@ -1,15 +1,20 @@
 import SwiftUI
+import UIKit
 
 /// Native phone week timetable: configurable day columns, shared time axis.
-/// Date selection lives in `HomeDateStripView`; column headers only label + drill into Day.
+/// Column headers are the week date navigator and drill into Day view.
 struct HomeWeekTimetableView: View {
     let focusDate: Date
     let visibleDayCount: Int
+    let timelineDensityLevel: Int
     let schedule: NativeHomeSchedule?
     let onFocusDate: (Date) -> Void
+    /// Reports horizontal viewport movement without turning it into date selection.
+    let onViewportDateChange: (Date) -> Void
     /// Tap a column header to leave Week and open Day for that date.
     let onOpenDay: (Date) -> Void
     let onOpen: (HomeAgendaItem) -> Void
+    let onEdit: (HomeAgendaItem) -> Void
     let onCopy: (HomeAgendaItem) -> Void
     let onDuplicate: (HomeAgendaItem) -> Void
     let movingEventID: String?
@@ -18,6 +23,7 @@ struct HomeWeekTimetableView: View {
     /// Direct drag-move from an event card to a new start time.
     let onDragMove: (HomeAgendaItem, Date) -> Void
     let onVisibleDayCountChange: (Int) -> Void
+    let onTimelineDensityChange: (Int) -> Void
     let canPaste: Bool
     let onCreateAtSlot: (Date) -> Void
     let onPasteAtSlot: (Date) -> Void
@@ -28,21 +34,26 @@ struct HomeWeekTimetableView: View {
     @State private var menuEvent: HomeAgendaItem?
     @State private var menuSlot: Date?
     @State private var dragPreview: WeekDragPreview?
-    @State private var pinchBaseDayCount: Int?
-    @State private var visibleDaysHint: String?
-    @State private var visibleDaysHintTask: Task<Void, Never>?
+    @State private var armedEventID: String?
     /// Live horizontal day-shift offset (positive = reveal previous days).
     @State private var panOffset: CGFloat = 0
     @State private var isCommittingDayShift = false
     @State private var isHorizontalPanLocked = false
 
     private let calendar = Calendar.sideSeatBerlin
-    private let minuteHeight = CalendarChrome.weekMinuteHeight
     private let timeGutter = CalendarChrome.weekTimeGutter
     private let headerHeight = CalendarChrome.weekHeaderHeight
 
     private var dayCount: Int {
         HomeWeekWindow.clampVisibleDayCount(visibleDayCount)
+    }
+
+    private var densityLevel: Int {
+        HomeWeekWindow.clampTimelineDensityLevel(timelineDensityLevel)
+    }
+
+    private var minuteHeight: CGFloat {
+        CalendarChrome.weekMinuteHeight * HomeWeekWindow.timelineScale(for: densityLevel)
     }
 
     var body: some View {
@@ -65,17 +76,22 @@ struct HomeWeekTimetableView: View {
 
         GeometryReader { geometry in
             // Floor widths so header + grid columns share exact pixel sizes.
-            let usableWidth = max(0, geometry.size.width - timeGutter)
-            let dayWidth = max(CalendarChrome.weekMinDayWidth, floor(usableWidth / CGFloat(dayCount)))
+            let dayWidth = HomeWeekWindow.dayColumnWidth(
+                containerWidth: geometry.size.width,
+                timeGutter: timeGutter,
+                visibleDayCount: dayCount
+            )
             let daysWidth = dayWidth * CGFloat(dayCount)
             let stripWidth = dayWidth * CGFloat(strip.count)
             let gridHeight = minuteHeight * 24 * 60
+            let contentHeight = gridHeight + CalendarChrome.timelineEndCapHeight
             let stripX = -dayWidth + panOffset
 
             ZStack(alignment: .topTrailing) {
                 VStack(spacing: 0) {
                     headerRow(
                         strip: strip,
+                        visibleDays: days,
                         dayWidth: dayWidth,
                         daysWidth: daysWidth,
                         stripWidth: stripWidth,
@@ -96,7 +112,7 @@ struct HomeWeekTimetableView: View {
                         ScrollView(.vertical) {
                             ZStack(alignment: .topLeading) {
                                 HStack(alignment: .top, spacing: 0) {
-                                    timeGutterColumn(height: gridHeight)
+                                    timeGutterColumn(gridHeight: gridHeight, contentHeight: contentHeight)
                                     HStack(alignment: .top, spacing: 0) {
                                         ForEach(strip, id: \.self) { day in
                                             dayColumn(
@@ -126,17 +142,32 @@ struct HomeWeekTimetableView: View {
                                 }
 
                                 if let dragPreview {
-                                    dragPreviewCard(dragPreview, dayWidth: dayWidth)
+                                    dragTargetGuide(dragPreview, dayWidth: dayWidth)
+                                    dragPreviewCard(
+                                        dragPreview,
+                                        dayWidth: dayWidth,
+                                        days: days
+                                    )
                                 }
                             }
-                            .frame(width: timeGutter + daysWidth, height: gridHeight, alignment: .topLeading)
+                            .frame(
+                                width: timeGutter + daysWidth,
+                                height: contentHeight,
+                                alignment: .topLeading
+                            )
                             .contentShape(Rectangle())
                             .simultaneousGesture(dayShiftGesture(from: start, dayWidth: dayWidth))
-                            .simultaneousGesture(visibleDaysPinchGesture)
                         }
-                        .scrollDisabled(isHorizontalPanLocked || abs(panOffset) > 0.5)
+                        .scrollDisabled(
+                            armedEventID != nil
+                                || dragPreview != nil
+                                || isHorizontalPanLocked
+                                || abs(panOffset) > 0.5
+                        )
                         .scrollIndicators(.hidden)
-                        .task(id: "\(dayID(start))-\(dayID(focusDate))-\(scrollAnchorToken)-\(dayCount)") {
+                        .task(
+                            id: "\(dayID(start))-\(dayID(focusDate))-\(scrollAnchorToken)-\(dayCount)-\(densityLevel)"
+                        ) {
                             await Task.yield()
                             try? await Task.sleep(nanoseconds: 50_000_000)
                             proxy.scrollTo(verticalScrollSlotID(for: focusDate), anchor: .top)
@@ -144,39 +175,24 @@ struct HomeWeekTimetableView: View {
                     }
                 }
 
-                if let visibleDaysHint {
-                    Text(visibleDaysHint)
-                        .font(.caption.weight(.semibold))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 7)
-                        .background(.ultraThinMaterial, in: Capsule())
-                        .padding(.top, 10)
-                        .padding(.trailing, 12)
-                        .transition(.opacity)
-                        .accessibilityIdentifier("home-week-visible-days-hint")
-                }
             }
         }
         .frame(minHeight: 420, maxHeight: .infinity)
         .background(SideSeatTheme.bg)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            weekDisplayBar
+        }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("home-week-timetable")
-        .confirmationDialog(
-            menuEvent?.title ?? "",
-            isPresented: Binding(
-                get: { menuEvent != nil },
-                set: { if !$0 { menuEvent = nil } }
-            ),
-            titleVisibility: .visible,
-            presenting: menuEvent
-        ) { item in
-            Button("Edit event") { onOpen(item) }
-            Button("Copy") { onCopy(item) }
-            Button("Duplicate after event") { onDuplicate(item) }
-            Button("Move event") { onStartMove(item) }
-                .accessibilityIdentifier("home-week-event-context-move")
-            Button("Cancel", role: .cancel) {}
-        }
+        .calendarItemActions(
+            item: $menuEvent,
+            onOpen: onOpen,
+            onEdit: onEdit,
+            onCopy: onCopy,
+            onDuplicate: onDuplicate,
+            onStartMove: onStartMove,
+            moveAccessibilityIdentifier: "home-week-event-context-move"
+        )
         .confirmationDialog(
             menuSlot.map { slotMenuTitle(for: $0) } ?? "",
             isPresented: Binding(
@@ -200,11 +216,13 @@ struct HomeWeekTimetableView: View {
         }
         .onAppear {
             if viewportStart == nil {
-                viewportStart = HomeWeekWindow.viewportStart(
+                let initialStart = HomeWeekWindow.viewportStart(
                     containing: focusDate,
                     visibleDayCount: dayCount,
                     calendar: calendar
                 )
+                viewportStart = initialStart
+                onViewportDateChange(initialStart)
             }
         }
         .onChange(of: focusDate) { _, newValue in
@@ -227,21 +245,48 @@ struct HomeWeekTimetableView: View {
                     viewportStart = next
                     panOffset = 0
                 }
+                onViewportDateChange(next)
             }
         }
         .onChange(of: dayCount) { _, _ in
+            let next = HomeWeekWindow.viewportStart(
+                containing: focusDate,
+                visibleDayCount: dayCount,
+                calendar: calendar
+            )
             var transaction = Transaction()
             transaction.disablesAnimations = true
             withTransaction(transaction) {
-                viewportStart = HomeWeekWindow.viewportStart(
-                    containing: focusDate,
-                    visibleDayCount: dayCount,
-                    calendar: calendar
-                )
+                viewportStart = next
                 panOffset = 0
                 isHorizontalPanLocked = false
                 isCommittingDayShift = false
+                armedEventID = nil
+                dragPreview = nil
             }
+            onViewportDateChange(next)
+        }
+        .onChange(of: scrollAnchorToken) { _, _ in
+            let next = HomeWeekWindow.viewportStart(
+                containing: focusDate,
+                visibleDayCount: dayCount,
+                calendar: calendar
+            )
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                viewportStart = next
+                panOffset = 0
+                isHorizontalPanLocked = false
+                isCommittingDayShift = false
+                armedEventID = nil
+                dragPreview = nil
+            }
+            onViewportDateChange(next)
+        }
+        .onChange(of: movingEventID) { _, _ in
+            armedEventID = nil
+            dragPreview = nil
         }
     }
 
@@ -262,6 +307,7 @@ struct HomeWeekTimetableView: View {
 
     private func headerRow(
         strip: [Date],
+        visibleDays: [Date],
         dayWidth: CGFloat,
         daysWidth: CGFloat,
         stripWidth: CGFloat,
@@ -271,7 +317,10 @@ struct HomeWeekTimetableView: View {
             Color.clear.frame(width: timeGutter, height: headerHeight)
             HStack(spacing: 0) {
                 ForEach(strip, id: \.self) { day in
-                    dayHeader(day: day)
+                    let isVisible = visibleDays.contains {
+                        calendar.isDate($0, inSameDayAs: day)
+                    }
+                    dayHeader(day: day, isVisible: isVisible)
                         .frame(width: dayWidth, height: headerHeight)
                 }
             }
@@ -283,8 +332,7 @@ struct HomeWeekTimetableView: View {
         .frame(width: timeGutter + daysWidth, alignment: .leading)
     }
 
-    private func dayHeader(day: Date) -> some View {
-        let selected = calendar.isDate(day, inSameDayAs: focusDate)
+    private func dayHeader(day: Date, isVisible: Bool) -> some View {
         let isToday = calendar.isDateInToday(day)
 
         return Button {
@@ -292,7 +340,7 @@ struct HomeWeekTimetableView: View {
         } label: {
             CalendarDayChipLabel(
                 day: day,
-                selected: selected,
+                selected: false,
                 isToday: isToday,
                 style: .weekHeader,
                 calendar: calendar
@@ -306,11 +354,13 @@ struct HomeWeekTimetableView: View {
             )
         )
         .accessibilityHint("Switches to Day view")
-        .accessibilityAddTraits(selected ? .isSelected : [])
-        .accessibilityIdentifier("home-week-day-\(dayID(day))")
+        .accessibilityHidden(!isVisible)
+        .accessibilityIdentifier(
+            "home-week-\(isVisible ? "day" : "buffer-day")-\(dayID(day))"
+        )
     }
 
-    private func timeGutterColumn(height: CGFloat) -> some View {
+    private func timeGutterColumn(gridHeight: CGFloat, contentHeight: CGFloat) -> some View {
         ZStack(alignment: .topTrailing) {
             VStack(spacing: 0) {
                 ForEach(0..<48, id: \.self) { index in
@@ -329,8 +379,16 @@ struct HomeWeekTimetableView: View {
                     .frame(width: timeGutter - 8, alignment: .trailing)
                     .offset(y: CGFloat(hour * 60) * minuteHeight - 7)
             }
+
+            Text(CalendarChrome.compactHour(24))
+                .font(CalendarChrome.Typography.hourRail)
+                .foregroundStyle(SideSeatTheme.textSecondary)
+                .lineLimit(1)
+                .frame(width: timeGutter - 8, alignment: .trailing)
+                .offset(y: gridHeight - 7)
+                .accessibilityHidden(true)
         }
-        .frame(width: timeGutter, height: height, alignment: .top)
+        .frame(width: timeGutter, height: contentHeight, alignment: .top)
     }
 
     private func allDayRow(
@@ -353,7 +411,15 @@ struct HomeWeekTimetableView: View {
                     let items = (schedule?.items(on: day, calendar: calendar) ?? []).filter {
                         $0.isAllDayStyle(on: day, calendar: calendar)
                     }
-                    CalendarAllDayBand(items: items, onOpen: onOpen)
+                    CalendarAllDayBand(
+                        items: items,
+                        onOpen: onOpen,
+                        onLongPress: { item in
+                            guard movingEventID == nil, dragPreview == nil else { return }
+                            onFocusDate(day)
+                            menuEvent = item
+                        }
+                    )
                         .frame(width: dayWidth, alignment: .topLeading)
                         .clipped()
                 }
@@ -397,14 +463,10 @@ struct HomeWeekTimetableView: View {
         }
         let placements = CalendarDayLayout.placements(items: timedItems, on: day, calendar: calendar)
         let isToday = calendar.isDateInToday(day)
-        let selected = calendar.isDate(day, inSameDayAs: focusDate)
 
         return ZStack(alignment: .topLeading) {
             if isToday {
                 CalendarChrome.todayWash
-                    .frame(width: width, height: height)
-            } else if selected {
-                CalendarChrome.selectedWash
                     .frame(width: width, height: height)
             }
 
@@ -427,26 +489,18 @@ struct HomeWeekTimetableView: View {
                     .frame(width: width, height: CGFloat(30) * minuteHeight)
                     .offset(y: CGFloat(minute) * minuteHeight)
                     .id("week-slot-\(dayID(day))-\(minute)")
-                    .onTapGesture {
-                        guard movingEventID == nil, dragPreview == nil else { return }
-                        guard let slot = calendar.date(
-                            byAdding: .minute,
-                            value: minute,
-                            to: calendar.startOfDay(for: day)
-                        ) else { return }
-                        onFocusDate(day)
-                        onCreateAtSlot(slot)
-                    }
-                    .onLongPressGesture {
-                        guard movingEventID == nil, dragPreview == nil else { return }
-                        guard let slot = calendar.date(
-                            byAdding: .minute,
-                            value: minute,
-                            to: calendar.startOfDay(for: day)
-                        ) else { return }
-                        onFocusDate(day)
-                        menuSlot = slot
-                    }
+                    .calendarTapOrLongPress(
+                        onTap: {
+                            guard canUseEmptySlots, let slot = slotDate(on: day, minute: minute) else { return }
+                            onFocusDate(day)
+                            onCreateAtSlot(slot)
+                        },
+                        onLongPress: {
+                            guard canUseEmptySlots, let slot = slotDate(on: day, minute: minute) else { return }
+                            onFocusDate(day)
+                            menuSlot = slot
+                        }
+                    )
                     .allowsHitTesting(movingEventID == nil && dragPreview == nil)
                     .accessibilityHidden(true)
             }
@@ -454,6 +508,7 @@ struct HomeWeekTimetableView: View {
             ForEach(placements) { placement in
                 weekEventCard(
                     placement,
+                    renderedDay: day,
                     columnWidth: width - 3,
                     dayWidth: dayWidth,
                     days: days
@@ -467,6 +522,12 @@ struct HomeWeekTimetableView: View {
             }
         }
         .frame(width: width, height: height, alignment: .topLeading)
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(CalendarChrome.hourLine)
+                .frame(height: 0.66)
+                .allowsHitTesting(false)
+        }
         .clipped()
     }
 
@@ -548,6 +609,7 @@ struct HomeWeekTimetableView: View {
 
     private func weekEventCard(
         _ placement: CalendarDayPlacement,
+        renderedDay: Date,
         columnWidth: CGFloat,
         dayWidth: CGFloat,
         days: [Date]
@@ -561,127 +623,306 @@ struct HomeWeekTimetableView: View {
         let height = max(18, CGFloat(placement.endMinute - placement.startMinute) * minuteHeight - 1.5)
         let color = CalendarChrome.eventColor(for: placement.item)
         let isDragging = dragPreview?.item.id == placement.item.id
+        let timeLabel = CalendarChrome.eventCardTimeLabel(
+            from: placement.item.start,
+            to: placement.item.end,
+            height: height,
+            availableWidth: laneWidth,
+            calendar: calendar
+        )
 
         return CalendarEventBlockLabel(
             title: placement.item.title,
-            subtitle: nil,
+            subtitle: timeLabel,
             color: color,
             height: height,
-            emphasized: placement.item.id == movingEventID || isDragging
+            emphasized: placement.item.id == movingEventID || isDragging,
+            context: placement.item.context,
+            contextSymbol: CalendarChrome.eventContextSymbol(for: placement.item),
+            compact: true
         )
-        .opacity(isDragging ? 0.35 : 1)
+        .opacity(isDragging ? 0.16 : 1)
+        .scaleEffect(isDragging ? 0.97 : 1)
         .frame(width: laneWidth, height: height, alignment: .topLeading)
         .contentShape(Rectangle())
-        .onTapGesture {
-            guard movingEventID == nil, dragPreview == nil else { return }
-            onFocusDate(placement.item.start)
-            onOpen(placement.item)
-        }
-        .onLongPressGesture {
-            guard movingEventID == nil, dragPreview == nil, placement.item.source == .event else { return }
-            onFocusDate(placement.item.start)
-            menuEvent = placement.item
-        }
-        .gesture(eventDragGesture(for: placement, dayWidth: dayWidth, days: days))
+        .gesture(
+            eventCardInteractionGesture(
+                for: placement,
+                renderedDay: renderedDay,
+                dayWidth: dayWidth,
+                days: days
+            )
+        )
         .offset(x: x, y: CGFloat(placement.startMinute) * minuteHeight + 0.5)
-        .allowsHitTesting(movingEventID == nil)
-        .accessibilityIdentifier("home-week-event-\(placement.item.id)")
+        .allowsHitTesting(movingEventID == nil && (dragPreview == nil || isDragging))
+        .accessibilityElement(children: .ignore)
+        .accessibilityIdentifier(weekEventAccessibilityID(for: placement.item, renderedDay: renderedDay))
+        .accessibilityLabel(placement.item.title)
+        .accessibilityValue(
+            "\(CalendarChrome.compactClock(placement.item.start)) - \(CalendarChrome.compactClock(placement.item.end))"
+        )
         .accessibilityAddTraits(.isButton)
     }
 
-    private func eventDragGesture(
+    private func weekEventAccessibilityID(for item: HomeAgendaItem, renderedDay: Date) -> String {
+        let base = "home-week-event-\(item.id)"
+        guard !calendar.isDate(item.start, inSameDayAs: renderedDay) else { return base }
+        return "\(base)-continuation-\(dayID(renderedDay))"
+    }
+
+    private func eventCardInteractionGesture(
         for placement: CalendarDayPlacement,
+        renderedDay: Date,
         dayWidth: CGFloat,
         days: [Date]
     ) -> some Gesture {
-        LongPressGesture(minimumDuration: 0.28)
-            .sequenced(before: DragGesture(minimumDistance: 2))
-            .onChanged { value in
-                guard placement.item.source == .event, movingEventID == nil else { return }
-                switch value {
-                case .second(true, let drag):
-                    let translation = drag?.translation ?? .zero
-                    if dragPreview == nil {
-                        dragPreview = WeekDragPreview(
-                            item: placement.item,
-                            originStartMinute: placement.startMinute,
-                            originDayIndex: days.firstIndex(where: {
-                                calendar.isDate($0, inSameDayAs: placement.item.start)
-                            }) ?? 0,
-                            translation: translation
-                        )
-                    } else if var preview = dragPreview {
-                        preview.translation = translation
-                        dragPreview = preview
-                    }
-                default:
-                    break
-                }
+        let tap = TapGesture()
+            .onEnded {
+                guard movingEventID == nil, armedEventID == nil, dragPreview == nil else { return }
+                onFocusDate(renderedDay)
+                onOpen(placement.item)
             }
-            .onEnded { value in
-                guard placement.item.source == .event else {
-                    dragPreview = nil
-                    return
-                }
-                defer { dragPreview = nil }
-                guard case .second(true, let drag?) = value else { return }
-                guard let target = dragTargetDate(
+        let longPressDrag = LongPressGesture(minimumDuration: 0.25, maximumDistance: 14)
+            .sequenced(before: DragGesture(minimumDistance: 0, coordinateSpace: .local))
+            .onChanged { value in
+                guard case .second(true, let drag) = value, movingEventID == nil else { return }
+                armEventGestureIfNeeded(placement.item)
+
+                guard
+                    canDirectDrag(placement.item, renderedDay: renderedDay, visibleDays: days),
+                    let drag,
+                    HomeWeekWindow.isEventDragActivated(translation: drag.translation)
+                else { return }
+
+                updateDragPreview(
                     for: placement,
                     translation: drag.translation,
                     dayWidth: dayWidth,
                     days: days
-                ) else { return }
+                )
+            }
+            .onEnded { value in
+                defer {
+                    dragPreview = nil
+                    releaseEventGestureLock(for: placement.item.id)
+                }
+                guard case .second(true, let drag) = value else { return }
+
+                let canMove = canDirectDrag(
+                    placement.item,
+                    renderedDay: renderedDay,
+                    visibleDays: days
+                )
+                let didDrag = drag.map {
+                    HomeWeekWindow.isEventDragActivated(translation: $0.translation)
+                } ?? false
+
+                guard canMove, didDrag else {
+                    showEventActions(placement.item, renderedDay: renderedDay)
+                    return
+                }
+                guard let preview = dragPreview else { return }
+                guard let target = dragTargetDate(for: preview, days: days) else { return }
+                guard abs(target.timeIntervalSince(placement.item.start)) >= 60 else { return }
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 onFocusDate(target)
                 onDragMove(placement.item, target)
             }
+
+        return longPressDrag.simultaneously(with: tap)
     }
 
-    private func dragTargetDate(
+    private var canUseEmptySlots: Bool {
+        movingEventID == nil && armedEventID == nil && dragPreview == nil
+    }
+
+    private func slotDate(on day: Date, minute: Int) -> Date? {
+        calendar.date(
+            byAdding: .minute,
+            value: minute,
+            to: calendar.startOfDay(for: day)
+        )
+    }
+
+    private func canDirectDrag(
+        _ item: HomeAgendaItem,
+        renderedDay: Date,
+        visibleDays: [Date]
+    ) -> Bool {
+        item.source == .event
+            && calendar.isDate(item.start, inSameDayAs: renderedDay)
+            && visibleDays.contains { calendar.isDate($0, inSameDayAs: renderedDay) }
+    }
+
+    private func armEventGestureIfNeeded(_ item: HomeAgendaItem) {
+        guard armedEventID != item.id else { return }
+        armedEventID = item.id
+        menuEvent = nil
+        menuSlot = nil
+        panOffset = 0
+        isHorizontalPanLocked = false
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+    }
+
+    private func releaseEventGestureLock(for eventID: String) {
+        Task { @MainActor in
+            await Task.yield()
+            if armedEventID == eventID {
+                armedEventID = nil
+            }
+        }
+    }
+
+    private func showEventActions(_ item: HomeAgendaItem, renderedDay: Date) {
+        onFocusDate(renderedDay)
+        menuEvent = item
+    }
+
+    private func updateDragPreview(
         for placement: CalendarDayPlacement,
         translation: CGSize,
         dayWidth: CGFloat,
         days: [Date]
-    ) -> Date? {
-        let originIndex = days.firstIndex(where: {
+    ) {
+        guard let originDayIndex = days.firstIndex(where: {
             calendar.isDate($0, inSameDayAs: placement.item.start)
-        }) ?? 0
-        let dayDelta = Int((translation.width / max(dayWidth, 1)).rounded())
-        let minuteDelta = Int((translation.height / minuteHeight / 15).rounded()) * 15
-        let targetIndex = min(max(originIndex + dayDelta, 0), max(days.count - 1, 0))
-        let targetDay = days[targetIndex]
-        let targetMinute = min(max(placement.startMinute + minuteDelta, 0), 24 * 60 - 15)
-        return calendar.date(byAdding: .minute, value: targetMinute, to: calendar.startOfDay(for: targetDay))
+        }) else { return }
+        let target = HomeWeekWindow.eventDragTarget(
+            originDayIndex: originDayIndex,
+            originStartMinute: placement.startMinute,
+            translation: translation,
+            dayWidth: dayWidth,
+            minuteHeight: minuteHeight,
+            dayCount: days.count
+        )
+
+        if dragPreview == nil {
+            dragPreview = WeekDragPreview(
+                item: placement.item,
+                targetDayIndex: target.dayIndex,
+                targetStartMinute: target.startMinute
+            )
+            return
+        }
+        guard var preview = dragPreview else { return }
+        let targetChanged = preview.targetDayIndex != target.dayIndex
+            || preview.targetStartMinute != target.startMinute
+        guard targetChanged else { return }
+        preview.targetDayIndex = target.dayIndex
+        preview.targetStartMinute = target.startMinute
+        withAnimation(.interactiveSpring(response: 0.16, dampingFraction: 0.88)) {
+            dragPreview = preview
+        }
+        UISelectionFeedbackGenerator().selectionChanged()
+    }
+
+    private func dragTargetDate(
+        for preview: WeekDragPreview,
+        days: [Date]
+    ) -> Date? {
+        guard days.indices.contains(preview.targetDayIndex) else { return nil }
+        let targetDay = days[preview.targetDayIndex]
+        return calendar.date(
+            byAdding: .minute,
+            value: preview.targetStartMinute,
+            to: calendar.startOfDay(for: targetDay)
+        )
+    }
+
+    private func dragTargetGuide(
+        _ preview: WeekDragPreview,
+        dayWidth: CGFloat
+    ) -> some View {
+        let height = dragPreviewHeight(preview)
+        let x = timeGutter + CGFloat(preview.targetDayIndex) * dayWidth + 2
+        let y = CGFloat(preview.targetStartMinute) * minuteHeight + 1
+
+        return RoundedRectangle(cornerRadius: 5, style: .continuous)
+            .fill(SideSeatTheme.accent.opacity(0.08))
+            .overlay {
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .stroke(
+                        SideSeatTheme.accent.opacity(0.72),
+                        style: StrokeStyle(lineWidth: 1.5, dash: [5, 3])
+                    )
+            }
+            .frame(width: max(36, dayWidth - 4), height: height)
+            .offset(x: x, y: y)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
     }
 
     private func dragPreviewCard(
         _ preview: WeekDragPreview,
-        dayWidth: CGFloat
+        dayWidth: CGFloat,
+        days: [Date]
     ) -> some View {
+        let height = dragPreviewHeight(preview)
+        let targetX = timeGutter + CGFloat(preview.targetDayIndex) * dayWidth + 3
+        let targetY = CGFloat(preview.targetStartMinute) * minuteHeight + 1
+        let badgeWidth = min(170, max(132, dayWidth * 2.35))
+        let gridMaxX = timeGutter + CGFloat(days.count) * dayWidth
+        let badgeX = min(
+            max(timeGutter + 3, targetX),
+            max(timeGutter + 3, gridMaxX - badgeWidth - 3)
+        )
+        let badgeY = max(4, targetY - 31)
+
+        return ZStack(alignment: .topLeading) {
+            CalendarEventBlockLabel(
+                title: preview.item.title,
+                subtitle: nil,
+                color: CalendarChrome.eventColor(for: preview.item),
+                height: height,
+                emphasized: true,
+                context: preview.item.context,
+                contextSymbol: CalendarChrome.eventContextSymbol(for: preview.item),
+                compact: true
+            )
+            .frame(width: max(36, dayWidth - 6), height: height, alignment: .topLeading)
+            .scaleEffect(1.025)
+            .shadow(color: .black.opacity(0.22), radius: 10, y: 5)
+            .offset(x: targetX, y: targetY)
+            .accessibilityIdentifier("week-drag-preview")
+
+            Text(dragPreviewTimeLabel(preview, days: days))
+                .font(.caption2.weight(.semibold))
+                .monospacedDigit()
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.78)
+                .padding(.horizontal, 8)
+                .frame(width: badgeWidth, height: 25)
+                .background(SideSeatTheme.textPrimary, in: Capsule())
+                .shadow(color: .black.opacity(0.14), radius: 4, y: 2)
+                .offset(x: badgeX, y: badgeY)
+                .accessibilityIdentifier("week-drag-target-time")
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private func dragPreviewHeight(_ preview: WeekDragPreview) -> CGFloat {
         let durationMinutes = max(
             15,
             Int(preview.item.end.timeIntervalSince(preview.item.start) / 60)
         )
-        let height = max(18, CGFloat(durationMinutes) * minuteHeight - 1.5)
-        let originX = timeGutter + CGFloat(preview.originDayIndex) * dayWidth + 1
-        let originY = CGFloat(preview.originStartMinute) * minuteHeight + 0.5
-        return CalendarEventBlockLabel(
-            title: preview.item.title,
-            subtitle: nil,
-            color: CalendarChrome.eventColor(for: preview.item),
-            height: height,
-            emphasized: true
-        )
-        .frame(width: max(40, dayWidth - 6), height: height, alignment: .topLeading)
-        .shadow(color: .black.opacity(0.18), radius: 8, y: 4)
-        .offset(x: originX + preview.translation.width, y: originY + preview.translation.height)
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
+        return max(18, CGFloat(durationMinutes) * minuteHeight - 1.5)
+    }
+
+    private func dragPreviewTimeLabel(_ preview: WeekDragPreview, days: [Date]) -> String {
+        guard let start = dragTargetDate(for: preview, days: days) else {
+            return CalendarChrome.compactClock(preview.item.start)
+        }
+        let end = start.addingTimeInterval(preview.item.end.timeIntervalSince(preview.item.start))
+        let day = start.formatted(.dateTime.weekday(.abbreviated).day())
+        return "\(day)  \(CalendarChrome.compactClock(start))–\(CalendarChrome.compactClock(end))"
     }
 
     private func dayShiftGesture(from start: Date, dayWidth: CGFloat) -> some Gesture {
         DragGesture(minimumDistance: 16, coordinateSpace: .local)
             .onChanged { value in
-                guard dragPreview == nil, pinchBaseDayCount == nil, !isCommittingDayShift else { return }
+                guard armedEventID == nil, dragPreview == nil, !isCommittingDayShift else { return }
 
                 let dx = value.translation.width
                 let dy = value.translation.height
@@ -704,7 +945,7 @@ struct HomeWeekTimetableView: View {
                 defer {
                     isHorizontalPanLocked = false
                 }
-                guard dragPreview == nil, pinchBaseDayCount == nil, !isCommittingDayShift else {
+                guard armedEventID == nil, dragPreview == nil, !isCommittingDayShift else {
                     withAnimation(.interactiveSpring(response: 0.28, dampingFraction: 0.9)) {
                         panOffset = 0
                     }
@@ -736,11 +977,10 @@ struct HomeWeekTimetableView: View {
                     transaction.disablesAnimations = true
                     withTransaction(transaction) {
                         if delta != 0,
-                           let next = calendar.date(byAdding: .day, value: delta, to: start),
-                           let focus = calendar.date(byAdding: .day, value: delta, to: focusDate)
+                           let next = calendar.date(byAdding: .day, value: delta, to: start)
                         {
                             viewportStart = next
-                            onFocusDate(focus)
+                            onViewportDateChange(next)
                         }
                         panOffset = 0
                         isCommittingDayShift = false
@@ -749,38 +989,76 @@ struct HomeWeekTimetableView: View {
             }
     }
 
-    private var visibleDaysPinchGesture: some Gesture {
-        MagnificationGesture()
-            .onChanged { magnification in
-                guard dragPreview == nil else { return }
-                if pinchBaseDayCount == nil {
-                    pinchBaseDayCount = dayCount
-                }
-                guard let base = pinchBaseDayCount else { return }
-                let next = HomeWeekWindow.visibleDayCount(base: base, magnification: magnification)
-                if next != dayCount {
-                    onVisibleDayCountChange(next)
-                    showVisibleDaysHint(next)
-                }
-            }
-            .onEnded { magnification in
-                let base = pinchBaseDayCount ?? dayCount
-                let next = HomeWeekWindow.visibleDayCount(base: base, magnification: magnification)
-                onVisibleDayCountChange(next)
-                showVisibleDaysHint(next)
-                pinchBaseDayCount = nil
-            }
-    }
+    private var weekDisplayBar: some View {
+        HStack(spacing: SideSeatTheme.spaceSM) {
+            Image(systemName: "rectangle.split.3x1")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(SideSeatTheme.textSecondary)
+                .accessibilityHidden(true)
 
-    private func showVisibleDaysHint(_ count: Int) {
-        let text = String(format: String(localized: "%lld days"), Int64(count))
-        visibleDaysHint = text
-        visibleDaysHintTask?.cancel()
-        visibleDaysHintTask = Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 900_000_000)
-            guard !Task.isCancelled else { return }
-            visibleDaysHint = nil
+            Picker(
+                "Visible days",
+                selection: Binding(
+                    get: { dayCount },
+                    set: { next in
+                        guard next != dayCount else { return }
+                        onVisibleDayCountChange(next)
+                    }
+                )
+            ) {
+                ForEach(HomeWeekWindow.allowedVisibleDayCounts, id: \.self) { count in
+                    Text(verbatim: "\(count)")
+                        .tag(count)
+                        .accessibilityLabel(
+                            String(format: String(localized: "%lld days"), Int64(count))
+                        )
+                }
+            }
+            .pickerStyle(.segmented)
+            .frame(maxWidth: 180)
+
+            Divider()
+                .frame(height: 24)
+
+            Button {
+                onTimelineDensityChange(
+                    HomeWeekWindow.clampTimelineDensityLevel(densityLevel - 1)
+                )
+            } label: {
+                Image(systemName: "minus.magnifyingglass")
+                    .frame(width: 32, height: 32)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(SideSeatTheme.textPrimary)
+            .disabled(densityLevel == 0)
+            .accessibilityLabel("Decrease time spacing")
+            .accessibilityIdentifier("home-week-time-density-decrease")
+
+            Button {
+                onTimelineDensityChange(
+                    HomeWeekWindow.clampTimelineDensityLevel(densityLevel + 1)
+                )
+            } label: {
+                Image(systemName: "plus.magnifyingglass")
+                    .frame(width: 32, height: 32)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(SideSeatTheme.textPrimary)
+            .disabled(densityLevel == 2)
+            .accessibilityLabel("Increase time spacing")
+            .accessibilityIdentifier("home-week-time-density-increase")
         }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, SideSeatTheme.screenHorizontal)
+        .padding(.vertical, 7)
+        .background(.bar)
+        .overlay(alignment: .top) {
+            Divider().opacity(0.35)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("home-week-visible-day-count")
     }
 
     private func dayID(_ day: Date) -> String {
@@ -796,7 +1074,6 @@ struct HomeWeekTimetableView: View {
 
 private struct WeekDragPreview {
     let item: HomeAgendaItem
-    let originStartMinute: Int
-    let originDayIndex: Int
-    var translation: CGSize
+    var targetDayIndex: Int
+    var targetStartMinute: Int
 }

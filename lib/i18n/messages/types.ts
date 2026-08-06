@@ -19,6 +19,14 @@ export type AppMessages = {
     loading: string;
     search: string;
     reset: string;
+    sending: string;
+    deleting: string;
+    open: string;
+    add: string;
+    adding: string;
+    pin: string;
+    unpin: string;
+    delete: string;
     /** Generic display when a name is missing (UI chrome only). */
     studentFallback: string;
     /** Chat list / compact timestamps — `{count}` in minute/hour templates. */
@@ -58,6 +66,8 @@ export type AppMessages = {
     profileBody: string;
     signInPromptTitle: string;
     signInPromptBody: string;
+    browseCoursesAsGuest: string;
+    browseCoursesBusy: string;
   };
   onboarding: {
     genericTitle: string;
@@ -94,6 +104,10 @@ export type AppMessages = {
     cityContextOnly: string;
     /** Keys match stored `ClassmatePost.city` English names; UI labels only. */
     cityNames: Record<DiscoverCityNameKey, string>;
+    /** Discover / inbox CTA when no prior thread. */
+    sayHiCta: string;
+    /** Discover CTA when a thread already exists. */
+    messageCta: string;
   };
   /** Discover top-level zones and create-action sheet. */
   discoverZone: {
@@ -316,6 +330,29 @@ export type AppMessages = {
     postCharCountRemaining: string;
     postSheetDetailsLabel: string;
     postSheetDetailsPlaceholder: string;
+    planScheduleToggle: string;
+    planScheduleHint: string;
+    planStartsLabel: string;
+    planEndsLabel: string;
+    planLocationLabel: string;
+    planLocationPlaceholder: string;
+    planCapacityToggle: string;
+    /** `{count}` — maximum participant count for a scheduled plan. */
+    planCapacityLabel: string;
+    planScheduleError: string;
+    postSheetTagsLabel: string;
+    /** `{max}` — maximum tags shown in the create sheet hint. */
+    postSheetTagsHint: string;
+    postSheetTagsPlaceholder: string;
+    postSheetVisibilityLabel: string;
+    postVisibilitySchoolOnly: string;
+    postVisibilityCityInternationals: string;
+    postVisibilityVerifiedOnly: string;
+    postVisibilityCoursematesOnly: string;
+    postSheetReplyLabel: string;
+    postReplyRequestFirst: string;
+    postReplyDirectMessage: string;
+    postReplyVerifiedOnly: string;
     postSheetPhotosLabel: string;
     /** `{max}` — max images per post. */
     postSheetPhotosHint: string;
@@ -357,6 +394,9 @@ export type AppMessages = {
     postCardOwnPostManageCtaAria: string;
     /** Discover post card — pill next to the author name when the viewer owns the post. */
     postCardYourPostBadge: string;
+    postCardViewYourPostAria: string;
+    /** `{name}` — author display name. */
+    postCardViewPeerPostAria: string;
     /** Inner panel — heading above the author’s language tags on LANGUAGE posts. */
     postCardSpeaksLabel: string;
     /** Inner panel — short hint under the body on SPORTS posts (no separate sport fields in data). */
@@ -540,6 +580,42 @@ export type AppMessages = {
       location: string;
       reply: string;
     };
+    planChipWaitingYou: string;
+    planChipWaitingThem: string;
+    /** Prefix for own messages in chat list previews — include trailing colon/space as needed. */
+    youPrefix: string;
+    someoneFallback: string;
+    courseChatEmptyPreview: string;
+    createSheetAria: string;
+    createSheetTitle: string;
+    createSheetSubtitle: string;
+    modeAddContact: string;
+    modeNewGroup: string;
+    createSearchPlaceholder: string;
+    searchResultsHeading: string;
+    searchingUsers: string;
+    noMatchingUsers: string;
+    contactsHeading: string;
+    noContactsYet: string;
+    chatAction: string;
+    optionalGroupName: string;
+    groupNamePlaceholder: string;
+    selectContacts: string;
+    /** `{count}` selected members. */
+    selectedCount: string;
+    addContactsFirst: string;
+    createGroup: string;
+    creatingGroup: string;
+    swipeHideCourseTitle: string;
+    swipeHideGroupTitle: string;
+    pinnedConversationAria: string;
+    contactsTitle: string;
+    contactsBackLabel: string;
+    contactsEmptyTitle: string;
+    contactsEmptyDesc: string;
+    createSearchFailed: string;
+    createAddContactFailed: string;
+    createGroupFailed: string;
   };
   me: {
     screenTitle: string;
@@ -581,6 +657,29 @@ export type AppMessages = {
     availabilityOrphan: string;
     attachmentScheduleCaption: string;
     attachmentScheduleAria: string;
+    attachmentPhotoCaption: string;
+    attachmentPhotoAria: string;
+    attachmentLocationCaption: string;
+    attachmentLocationAria: string;
+    attachmentPlanCaption: string;
+    attachmentPlanAria: string;
+    attachmentMenuAria: string;
+    attachmentMenuOpenAria: string;
+    attachmentMenuCloseAria: string;
+    uploadFailed: string;
+    couldNotSendPhoto: string;
+    locationUnsupported: string;
+    couldNotSendLocation: string;
+    locationPermissionDenied: string;
+    sayHiPlaceholder: string;
+    firstMessageUnlockHint: string;
+    /** `{count}` — current character count when over limit. */
+    firstMessageTooLong: string;
+    /** `{count}` — current character count while typing. */
+    firstMessageCharCount: string;
+    unableToSendMessage: string;
+    unexpectedServerResponse: string;
+    networkErrorTryAgain: string;
     scheduleShareCardTitleOwn: string;
     /** `{name}` placeholder. */
     scheduleShareCardTitlePeer: string;
@@ -607,6 +706,18 @@ export type AppMessages = {
     /** `{name}` placeholder. */
     replyingTo: string;
     unableToSend: string;
+    /** Short title while under the unreplied send limit. */
+    awaitingPeerReplyTitle: string;
+    /** Shown while awaiting a peer reply and under the unreplied send limit. */
+    awaitingPeerReplyHint: string;
+    /** Short title when the unreplied send limit is reached. */
+    awaitingPeerReplyLimitTitle: string;
+    /** Shown when the unreplied send limit is reached (composer disabled). */
+    awaitingPeerReplyLimit: string;
+    /** API / toast when send is rejected for unreplied limit. */
+    awaitingPeerReplyError: string;
+    /** `{sent}` / `{max}` progress chip on the unreplied banner. */
+    awaitingPeerReplyProgress: string;
     /** Icon button in composer row — opens in-thread search. */
     searchThreadAria: string;
     searchThreadTitle: string;
@@ -614,13 +725,68 @@ export type AppMessages = {
     searchThreadNoMatches: string;
     searchThreadHint: string;
     searchThreadCloseAria: string;
+    messageDeleted: string;
+    scrollToLatestAria: string;
+    messageActionsAria: string;
+    actionReply: string;
+    actionCopy: string;
+    actionDelete: string;
+    actionReport: string;
+    deleteMessageConfirm: string;
+    copyFailed: string;
+    deleteFailed: string;
+    reportMessageTitle: string;
+    reportReasonLabel: string;
+    reportNotePlaceholder: string;
+    reportReasonHarassment: string;
+    reportReasonRepeated: string;
+    reportReasonOffensive: string;
+    reportReasonSpam: string;
+    reportReasonFakeIdentity: string;
+    reportReasonOther: string;
+    groupPlaceholder: string;
+    tomorrow: string;
+    planConfirmed: string;
+    /** `{name}` — proposer display name. */
+    planSuggestedBy: string;
+    /** `{location}` — place label. */
+    planLocationLine: string;
+    planDecline: string;
+    planSuggestAnother: string;
+    planAcceptAdd: string;
+    /** `{name}` — receiver waiting on. */
+    planWaitingReply: string;
+    planAddedBoth: string;
+    planDeclined: string;
+    planCounterSuggested: string;
+    planModalCounterTitle: string;
+    /** `{name}` — peer display name. */
+    planModalWithPeer: string;
+    planModalSubtitle: string;
+    planFieldTitle: string;
+    planFieldLocation: string;
+    planFieldTime: string;
+    planFieldMessage: string;
+    planLocationPlaceholder: string;
+    planMessagePlaceholder: string;
+    planDefaultTitle: string;
+    planSendRequest: string;
+    planUnableSend: string;
   };
   /** SideSeat Assistant DM (FAQ + quick chips). */
   assistant: {
     officialBadge: string;
     headerSubtitle: string;
+    /** Display name in chat header / empty states. */
+    displayName: string;
     composerPlaceholder: string;
+    /** First-run welcome bubble body (capabilities overview). */
+    welcomeBody: string;
     chipsAria: string;
+    /** Expand compact suggestion row. */
+    chipsMore: string;
+    /** Label while waiting for an AI/FAQ reply. */
+    typingLabel: string;
     chips: {
       gettingStarted: string;
       discover: string;
@@ -628,6 +794,12 @@ export type AppMessages = {
       guestSignup: string;
       schedule: string;
       inbox: string;
+    };
+    chipGroups: {
+      start: string;
+      schedule: string;
+      social: string;
+      account: string;
     };
     faqLinks: {
       home: string;
@@ -673,6 +845,14 @@ export type AppMessages = {
     signupDisplayNameHint: string;
     signupDisplayNameTaken: string;
     signupDisplayNameReserved: string;
+    signupSchoolLabel: string;
+    signupStatusLabel: string;
+    signupStatusCurrent: string;
+    signupStatusExchange: string;
+    signupStatusAlumni: string;
+    signupDegreeLabel: string;
+    signupSemesterLabel: string;
+    signupGraduationYearLabel: string;
     usernameLabel: string;
     usernamePlaceholder: string;
     usernameHint: string;
@@ -824,6 +1004,12 @@ export type AppMessages = {
     timeColumnLabel: string;
     /** Row label for all-day events band in week grid. */
     allDayRowLabel: string;
+    nothingScheduled: string;
+    nothingScheduledToday: string;
+    noTimedEventsSeeAllDay: string;
+    noEventsThisDay: string;
+    courseTagTitle: string;
+    createEventAria: string;
     /** `{when}` — localized weekday + date, e.g. “Create event on Mon, Apr 22”. */
     createEventOnDayAria: string;
     /** `{when}` — long date for month grid cell accessibility. */
@@ -880,6 +1066,47 @@ export type AppMessages = {
     naturalConfirmCta: string;
     naturalSaving: string;
     naturalSaveError: string;
+    /** Event detail sheet — empty location. */
+    detailNoLocation: string;
+    detailNoNotes: string;
+    /** Category chip when only a custom color is set. */
+    detailCustomCategory: string;
+    detailPeople: string;
+    detailNoPeople: string;
+    detailTapNameToChat: string;
+    detailOpenChatFailed: string;
+    detailUnexpectedResponse: string;
+    /** Manage-calendars sheet (opened from Home). */
+    calendarsSheetTitle: string;
+    calendarsSubscriptionSection: string;
+    calendarsNamePlaceholder: string;
+    calendarsSubscriptionUrlPlaceholder: string;
+    calendarsFeedUrlOptionalPlaceholder: string;
+    calendarsPickSubscriptionColorAria: string;
+    calendarsPickNewColorAria: string;
+    calendarsSaveSubscriptionAria: string;
+    calendarsSaveAria: string;
+    calendarsNew: string;
+    calendarsAddSubscription: string;
+    calendarsAddSubscriptionUrl: string;
+    calendarsDeleteConfirm: string;
+    calendarsUpdateFailed: string;
+    calendarsUpdateFeedFailed: string;
+    calendarsDeleteFailed: string;
+    calendarsAddFailed: string;
+    calendarsAddSubscriptionFailed: string;
+    /** `{name}` */
+    calendarsColorForAria: string;
+    calendarsColorModeGrid: string;
+    calendarsColorModeSpectrum: string;
+    calendarsColorModeCustom: string;
+    calendarsColorsAria: string;
+    /** `{hex}` */
+    calendarsColorSwatchAria: string;
+    calendarsColorHeading: string;
+    calendarsColorSpectrumHint: string;
+    calendarsColorSpectrumAria: string;
+    calendarsColorHexLabel: string;
   };
   /** Schedule Share — Home share link + public viewer + proposals */
   scheduleShare: {
@@ -1107,6 +1334,15 @@ export type AppMessages = {
     aboutSubtitle: string;
     deleteTitle: string;
     deleteSubtitle: string;
+    deleteBulletProfile: string;
+    deleteBulletGroups: string;
+    deleteBulletUndo: string;
+    deleteUnderstand: string;
+    /** `{username}` — must type to confirm. */
+    deleteConfirmLabel: string;
+    deleteSubmit: string;
+    deleteErrorGeneric: string;
+    deleteErrorNetwork: string;
     logOut: string;
     replayTutorialTitle: string;
     replayTutorialSubtitle: string;
@@ -1200,6 +1436,15 @@ export type AppMessages = {
     myPostsOpenDiscover: string;
     myPostsSectionLive: string;
     myPostsSectionPast: string;
+    blockedPageTitle: string;
+    blockedPageSubtitle: string;
+    blockedPageBack: string;
+    blockedPageEmptyTitle: string;
+    blockedPageEmptyDescription: string;
+    blockedPageUnblock: string;
+    /** `{time}` — relative time */
+    blockedPageBlockedAt: string;
+    blockedPageStudentFallback: string;
   };
   profileLifePhotos: {
     pageTitle: string;
@@ -1286,6 +1531,7 @@ export type AppMessages = {
   };
   /** Me profile card, rows, and edit sheets (`ProfileIdentitySheets`). */
   meIdentity: {
+    pageTitle: string;
     displayNamePlaceholder: string;
     taglineEmpty: string;
     /** `{semester}` — number only. */
@@ -1342,8 +1588,11 @@ export type AppMessages = {
     manualEmailOptionalGeneric: string;
     manualEmailOptionalWithDomain: string;
     universityEmailLabel: string;
+    verifiedSchoolIdentityLabel: string;
     /** `{school}` — short school code/label from config. */
     verifiedLineWithSchool: string;
+    verifiedLineWithSchoolIdentity: string;
+    verifiedByDocument: string;
     verifiedChip: string;
     /** `{school}` — short label or empty for generic alt. */
     logoAltWithSchool: string;
@@ -1351,13 +1600,17 @@ export type AppMessages = {
     heading: string;
     sending: string;
     verifyCta: string;
+    emailPrimaryHint: string;
     verificationLinkHeading: string;
     openLink: string;
     copy: string;
     copied: string;
     manualReviewHeading: string;
-    /** `{school}` — short label; use neutral word in locale when school missing. */
+    /** `{school}` and `{identity}` — selected school and accepted identity document. */
     manualReviewBody: string;
+    currentStudentDocument: string;
+    alumniDocument: string;
+    manualPrivacyNotice: string;
     uploading: string;
     resubmit: string;
     submitForReview: string;
@@ -1367,6 +1620,9 @@ export type AppMessages = {
     /** `{school}` and `{email}` — trust card aria. */
     verifiedAriaWithSchool: string;
     verifiedAriaGeneric: string;
+    /** `{school}` — manually reviewed trust card aria. */
+    verifiedAriaWithSchoolIdentity: string;
+    verifiedAriaIdentityGeneric: string;
   };
   /** Shared profile editor copy (`ProfileForm`) — sheet, full, and academic variants. */
   profileForm: {
@@ -1376,9 +1632,14 @@ export type AppMessages = {
     schoolProgramHeading: string;
     schoolProgramBlurb: string;
     labelSchool: string;
+    labelStudentStatus: string;
+    statusCurrentStudent: string;
+    statusExchangeStudent: string;
+    statusAlumni: string;
     labelDegree: string;
     labelMajor: string;
     labelSemester: string;
+    labelGraduationYear: string;
     majorPlaceholder: string;
     majorNotSpecified: string;
     majorFreeTextOk: string;
@@ -1521,6 +1782,19 @@ export type AppMessages = {
     /** `{name}` */
     menuBlockUser: string;
     contactRemarkPlaceholder: string;
+  };
+  /** Public /privacy and /support pages (App Store / web). */
+  legal: {
+    privacyTitle: string;
+    privacyMetaDescription: string;
+    supportTitle: string;
+    supportMetaDescription: string;
+    supportIntro: string;
+    supportEmailLabel: string;
+    supportInAppLabel: string;
+    supportInAppBody: string;
+    supportPoliciesLabel: string;
+    supportPrivacyLink: string;
   };
   courses: CoursesMessages;
 };

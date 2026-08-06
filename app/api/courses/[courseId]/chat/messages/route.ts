@@ -1,4 +1,5 @@
 import { requireOnboardedUser } from "@/lib/auth/guards";
+import { createCourseRoomMessageRecord } from "@/lib/chat/community-chat-service";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
 import { notifyNewCourseRoomMessage } from "@/lib/push/notify-user";
@@ -13,55 +14,26 @@ export async function POST(
     const { courseId } = await params;
     const values = await parseJson(request, messageSchema);
 
-    const membership = await prisma.userCourse.findFirst({
-      where: { userId: user.id, courseId },
+    const result = await createCourseRoomMessageRecord(prisma, {
+      courseId,
+      senderId: user.id,
+      body: values.body,
+      replyToId: values.replyToId,
     });
-
-    if (!membership) {
+    if (result.kind === "not_found") {
       return error("Course not found or you are not enrolled.", 404);
     }
-
-    const moderated = await prisma.moderationBlock.findFirst({
-      where: { userId: user.id, isActive: true },
-    });
-    if (moderated) {
+    if (result.kind === "restricted") {
       return error("Your account cannot send messages right now.", 403);
     }
-
-    let replyToId: string | null = null;
-    if (values.replyToId) {
-      const target = await prisma.courseRoomMessage.findFirst({
-        where: {
-          id: values.replyToId,
-          courseId,
-          deletedAt: null,
-        },
-        select: { id: true },
-      });
-      if (target) replyToId = target.id;
-    }
-
-    const message = await prisma.courseRoomMessage.create({
-      data: {
-        courseId,
-        senderId: user.id,
-        body: values.body.trim(),
-        replyToId,
-      },
-    });
-
-    const course = await prisma.course.findUnique({
-      where: { id: courseId },
-      select: { name: true },
-    });
     void notifyNewCourseRoomMessage({
       courseId,
-      courseName: course?.name ?? "Course chat",
+      courseName: result.notificationTitle ?? "Course chat",
       senderId: user.id,
       bodyPreview: values.body.trim(),
     }).catch(() => {});
 
-    return ok(message, { status: 201 });
+    return ok(result.message, { status: 201 });
   } catch (cause) {
     console.error(cause);
     return error("Unable to send message.");

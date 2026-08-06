@@ -51,7 +51,7 @@ final class CalendarLiveUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 10))
 
         let dayMode = app.buttons.matching(
-            NSPredicate(format: "label IN %@", ["Day", "日视图"])
+            NSPredicate(format: "label IN %@", ["Day", "日", "日视图"])
         ).firstMatch
         XCTAssertTrue(dayMode.waitForExistence(timeout: 3))
         dayMode.tap()

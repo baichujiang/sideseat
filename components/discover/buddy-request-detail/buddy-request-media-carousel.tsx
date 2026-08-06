@@ -23,8 +23,6 @@ function SlideImage({ url, sizes }: { url: string; sizes: string }) {
 
 export function BuddyRequestMediaCarousel({
   urls,
-  category: _category,
-  title: _title,
   ariaLabel,
 }: {
   urls: string[];

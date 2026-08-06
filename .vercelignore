@@ -1,0 +1,15 @@
+.local-postgres/
+.next/
+node_modules/
+
+ios-native/
+ios/
+ios-shell/
+
+docs/ios-native/visual-qa/
+playwright-report/
+test-results/
+
+*.xcarchive
+*.ipa
+.DS_Store

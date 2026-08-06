@@ -1,8 +1,10 @@
+"use client";
+
 import { CornerUpLeft } from "lucide-react";
 
 import { ChatLocationLinkPreview } from "@/components/chat/chat-location-link-preview";
 import { ChatMessageImage } from "@/components/chat/chat-message-image";
-import { chatLocationMapPreviewMode } from "@/lib/maps/static-preview-config";
+import { useAppMessages } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
 
 /** `bareMedia` — image without outer chat tint; quote/caption read on page background. */
@@ -39,9 +41,10 @@ export function MessageBubbleContent({
   /** When `bareMedia`, image is shown without outer bubble chrome (direct chats). */
   surface?: MessageBubbleSurface;
 }) {
+  const messages = useAppMessages();
   if (deleted) {
     return (
-      <p className="italic text-[13px] text-muted-foreground">Message deleted</p>
+      <p className="italic text-[13px] text-muted-foreground">{messages.chat.messageDeleted}</p>
     );
   }
   const bare = surface === "bareMedia" && payload.kind === "image";
@@ -79,7 +82,6 @@ export function MessageBubbleContent({
             lat={payload.lat}
             lng={payload.lng}
             name={payload.name}
-            previewMode={chatLocationMapPreviewMode()}
           />
           {payload.caption ? (
             <p className="whitespace-pre-wrap break-words text-[15px] leading-snug">
@@ -101,7 +103,8 @@ function QuoteStrip({
   isOwn: boolean;
   surface: MessageBubbleSurface;
 }) {
-  const preview = reply.deleted ? "Message deleted" : reply.body;
+  const { chat, common } = useAppMessages();
+  const preview = reply.deleted ? chat.messageDeleted : reply.body;
   const bare = surface === "bareMedia";
   return (
     <div
@@ -122,7 +125,7 @@ function QuoteStrip({
             isOwn && !bare ? "text-primary-foreground" : "text-primary",
           )}
         >
-          {reply.senderName?.trim() || "Student"}
+          {reply.senderName?.trim() || common.studentFallback}
         </p>
         <p
           className={cn(

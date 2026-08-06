@@ -1,12 +1,13 @@
 "use client";
 
-import { ClassmatePostInsightKind } from "@prisma/client";
 import { apiFetch } from "@/lib/auth/api-fetch";
 
+import { ClassmatePostInsightKind } from "@prisma/client";
 import { Loader2, MessageCircle, NotebookPen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useAppMessages } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -16,9 +17,9 @@ type Props = {
   returnTo?: string;
   /** `soft` — list chip; `subtle` — light brand pill (discover rows); `outline` — bordered pill (post card footer); `solid` — high-contrast CTA (e.g. post detail). */
   tone?: "soft" | "subtle" | "solid" | "outline";
-  /** Override button label. Defaults to "Say hi" when `hasExistingChat` is false, "Message" when true. */
+  /** Override button label. Defaults to say-hi / message CTAs from locale messages. */
   label?: string;
-  /** When false (no prior thread), default label becomes "Say hi". When true, becomes "Message". */
+  /** When false (no prior thread), default label becomes say-hi. When true, becomes message. */
   hasExistingChat?: boolean;
   /** `notes` — notebook icon (e.g. self-notes from post detail). */
   icon?: "message" | "notes";
@@ -66,7 +67,8 @@ export function DiscoverMessageButton({
   iconOnly = false,
   className,
 }: Props) {
-  const buttonLabel = label ?? (hasExistingChat ? "Message" : "Say hi");
+  const { discover } = useAppMessages();
+  const buttonLabel = label ?? (hasExistingChat ? discover.messageCta : discover.sayHiCta);
   const router = useRouter();
   const [opening, setOpening] = useState(false);
 

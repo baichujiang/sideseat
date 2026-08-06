@@ -4,6 +4,46 @@ import Testing
 
 @Suite("Calendar smart add")
 struct CalendarSmartAddStoreTests {
+    @Test("Voice transcript keeps existing event details")
+    func mergesVoiceTranscript() {
+        #expect(
+            CalendarVoiceTranscript.merge(
+                prefix: "Lunch with Lin tomorrow",
+                transcript: "at twelve thirty"
+            ) == "Lunch with Lin tomorrow at twelve thirty"
+        )
+        #expect(CalendarVoiceTranscript.merge(prefix: "", transcript: "  Friday at nine  ") == "Friday at nine")
+        #expect(CalendarVoiceTranscript.merge(prefix: "Monday", transcript: "") == "Monday")
+    }
+
+    @Test("Timetable OCR extracts course searches and ranks exact course codes")
+    func timetableScreenshotMatching() throws {
+        let lines = [
+            "Tuesday 10:00 IN2346 Introduction to Deep Learning",
+            "Room 01.07.023",
+            "Computer Vision Thursday 14:00"
+        ]
+        let terms = CourseScreenshotText.searchTerms(from: lines)
+        #expect(terms.contains("IN2346"))
+        #expect(terms.contains(where: { $0.localizedCaseInsensitiveContains("Introduction to Deep Learning") }))
+        #expect(terms.contains(where: { $0.localizedCaseInsensitiveContains("Computer Vision") }))
+
+        let course = NativeCourseSummary(
+            id: "course-1",
+            code: "IN2346",
+            name: "Introduction to Deep Learning",
+            instructorSummary: nil,
+            school: "TUM",
+            semesterLabel: "SS 2026",
+            memberCount: 0,
+            viewer: NativeCourseViewerState(enrolled: false, saved: false),
+            sessions: []
+        )
+        let result = CourseScreenshotText.score(course: course, lines: lines)
+        #expect(result.score == 1)
+        #expect(result.evidence == lines[0])
+    }
+
     @Test("Parses drafts, updates their calendar and saves one idempotent batch")
     @MainActor
     func parseAndSave() async throws {

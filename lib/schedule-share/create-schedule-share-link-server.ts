@@ -3,6 +3,7 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 
 import { SCHEDULE_SHARE_DEFAULT_TTL_DAYS, SCHEDULE_SHARE_MAX_TTL_DAYS } from "@/lib/schedule-share/constants";
 import { normalizeRevealConfig, validateRevealCategoryOwnership } from "@/lib/schedule-share/reveal-config";
+import { publicScheduleShareOrigin } from "@/lib/schedule-share/public-share-origin";
 import { scheduleShareRecipientViewUrl } from "@/lib/schedule-share/share-link-urls";
 import { generateScheduleShareToken, hashScheduleShareToken } from "@/lib/schedule-share/token";
 import { createScheduleShareSchema } from "@/lib/schedule-share/validation";
@@ -22,6 +23,7 @@ export async function createScheduleShareLinkForUser(
   const normalizedReveal = normalizeRevealConfig({
     categoryIds: rc.categoryIds ?? [],
     presetKeys: rc.presetKeys ?? [],
+    hideAllDetails: rc.hideAllDetails ?? false,
     includedDates: rc.includedDates,
   });
 
@@ -65,6 +67,12 @@ export async function createScheduleShareLinkForUser(
     select: { id: true },
   });
 
-  const shareUrl = scheduleShareRecipientViewUrl(args.appOrigin, plaintext);
+  const shareUrl = scheduleShareRecipientViewUrl(
+    publicScheduleShareOrigin({
+      requestOrigin: args.appOrigin,
+      configuredOrigin: process.env.SIDESEAT_PUBLIC_SHARE_ORIGIN,
+    }),
+    plaintext,
+  );
   return { shareUrl, linkId: link.id };
 }

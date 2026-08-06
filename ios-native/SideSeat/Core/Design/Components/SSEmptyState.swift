@@ -22,11 +22,12 @@ struct SSEmptyState: View {
                 SSPrimaryButton(
                     title: actionTitle,
                     fill: .product,
-                    height: 44,
+                    height: 48,
                     accessibilityID: actionAccessibilityID,
                     action: action
                 )
-                .frame(maxWidth: 280)
+                // Intrinsic width + label padding; avoid a skinny pill around short CJK labels.
+                .frame(minWidth: 168, maxWidth: 280)
             }
         }
     }

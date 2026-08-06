@@ -86,10 +86,6 @@ import {
   clampWeekCalendarVisibleDayCount,
   fitWeekCalendarDayColumnWidth,
   WEEK_CALENDAR_MINUTE_SCALE_DEFAULT,
-  WEEK_CALENDAR_MINUTE_SCALE_MAX,
-  WEEK_CALENDAR_MINUTE_SCALE_MIN,
-  WEEK_CALENDAR_VISIBLE_DAY_MAX,
-  WEEK_CALENDAR_VISIBLE_DAY_MIN,
   WEEK_CALENDAR_VIRTUAL_EXTEND_THRESHOLD_DAYS,
 } from "@/lib/calendar/week-calendar-constants";
 import { cn } from "@/lib/utils";
@@ -260,7 +256,6 @@ function ShareSelectionRunOverlayLayer({
  * - All event z-index values stay below `Z_TIME_RAIL_BODY` so they cannot cover the rails.
  */
 const Z_DAY_CREATE_HIT = 0;
-const Z_DAY_HOUR_LINES = 1;
 const Z_DAY_NOW_LINE_SPAN = 33;
 const Z_EVENT_CARD_BASE = 3;
 /** Dragging + resize — must stay < Z_TIME_RAIL_BODY. */
@@ -363,14 +358,6 @@ function formatTime(minutes: number): string {
   const h = Math.floor(minutes / 60).toString().padStart(2, "0");
   const m = (minutes % 60).toString().padStart(2, "0");
   return `${h}:${m}`;
-}
-
-function horizontalStartIndexForDay(day: Weekday | undefined, visibleWeekDays: number) {
-  if (!day) return 0;
-  const dayIndex = DAY_ORDER.indexOf(day);
-  if (dayIndex < 0) return 0;
-  const maxStartIndex = Math.max(DAY_ORDER.length - visibleWeekDays, 0);
-  return Math.min(Math.max(dayIndex - (visibleWeekDays - 1), 0), maxStartIndex);
 }
 
 export function WeekCalendar({
@@ -783,7 +770,7 @@ export function WeekCalendar({
       previousMinutePxRef.current = MINUTE_PX;
       minuteScaleAnchorRef.current = null;
     }
-  }, [visualStartMinute, weekStartBerlinKey, focusBerlinKey, DEFAULT_VIEW_START, density, frameWidth]);
+  }, [visualStartMinute, weekStartBerlinKey, focusBerlinKey, DEFAULT_VIEW_START, density, frameWidth, MINUTE_PX]);
 
   useLayoutEffect(() => {
     const node = scrollContainerRef.current;
@@ -1511,6 +1498,7 @@ export function WeekCalendar({
     revealDateNonce,
     todayBerlinKey,
     weekStartDate,
+    TIME_COLUMN_PX,
     VISIBLE_WEEK_DAYS,
     visibleDaysWidthAdjusting,
   ]);
@@ -1600,7 +1588,7 @@ export function WeekCalendar({
     startMinute: number,
     endMinute: number,
   ): { start: Date; end: Date } {
-    let sm = Math.min(startMinute, endMinute);
+    const sm = Math.min(startMinute, endMinute);
     let em = Math.max(startMinute, endMinute);
     if (em - sm < MIN_EVENT_MINUTES) {
       em = Math.min(FULL_DAY_MINUTES, sm + MIN_EVENT_MINUTES);
@@ -1618,38 +1606,41 @@ export function WeekCalendar({
     onCreateRangePreview(createRangeFromMinutes(column, startMinute, endMinute));
   }
 
-  function slotMenuClientPointForStart(
-    start: Date,
-    fallbackX: number,
-    fallbackY: number,
-  ): Pick<
-    ScheduleSlotActionPrompt,
-    "clientX" | "clientY" | "slotLeft" | "slotTop" | "slotWidth" | "slotHeight"
-  > {
-    const dateKey = scheduleDateKeyInBerlin(start);
-    const el = dayBodyElRef.current.get(dateKey);
-    if (!el) return { clientX: fallbackX, clientY: fallbackY };
-    const rect = el.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) {
-      return { clientX: fallbackX, clientY: fallbackY };
-    }
-    const startMinute = berlinClockMinutes(start);
-    const clampedMinute = Math.max(
-      visualStartMinute,
-      Math.min(visualStartMinute + totalMinutes, startMinute),
-    );
-    const frac = (clampedMinute - visualStartMinute) / totalMinutes;
-    const hourPx = Math.max(28, (60 / totalMinutes) * rect.height);
-    const top = rect.top + frac * rect.height;
-    return {
-      clientX: rect.left + rect.width / 2,
-      clientY: top,
-      slotLeft: rect.left + 2,
-      slotTop: top,
-      slotWidth: Math.max(0, rect.width - 4),
-      slotHeight: Math.min(hourPx, Math.max(24, rect.bottom - top)),
-    };
-  }
+  const slotMenuClientPointForStart = useCallback(
+    (
+      start: Date,
+      fallbackX: number,
+      fallbackY: number,
+    ): Pick<
+      ScheduleSlotActionPrompt,
+      "clientX" | "clientY" | "slotLeft" | "slotTop" | "slotWidth" | "slotHeight"
+    > => {
+      const dateKey = scheduleDateKeyInBerlin(start);
+      const el = dayBodyElRef.current.get(dateKey);
+      if (!el) return { clientX: fallbackX, clientY: fallbackY };
+      const rect = el.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) {
+        return { clientX: fallbackX, clientY: fallbackY };
+      }
+      const startMinute = berlinClockMinutes(start);
+      const clampedMinute = Math.max(
+        visualStartMinute,
+        Math.min(visualStartMinute + totalMinutes, startMinute),
+      );
+      const frac = (clampedMinute - visualStartMinute) / totalMinutes;
+      const hourPx = Math.max(28, (60 / totalMinutes) * rect.height);
+      const top = rect.top + frac * rect.height;
+      return {
+        clientX: rect.left + rect.width / 2,
+        clientY: top,
+        slotLeft: rect.left + 2,
+        slotTop: top,
+        slotWidth: Math.max(0, rect.width - 4),
+        slotHeight: Math.min(hourPx, Math.max(24, rect.bottom - top)),
+      };
+    },
+    [totalMinutes, visualStartMinute],
+  );
 
   const promptCreateOrPaste = useCallback(
     (start: Date, end: Date, clientX: number, clientY: number) => {
@@ -1661,7 +1652,7 @@ export function WeekCalendar({
       }
       onCreateEvent?.(start, end);
     },
-    [onCreateEvent, onCreateRangePreview, onSlotActionPrompt, totalMinutes, visualStartMinute],
+    [onCreateEvent, onCreateRangePreview, onSlotActionPrompt, slotMenuClientPointForStart],
   );
 
   function startCreatePointerSession(
@@ -1678,7 +1669,7 @@ export function WeekCalendar({
     const x0 = e.clientX;
     const y0 = e.clientY;
     const captureEl = e.currentTarget as HTMLElement;
-    let anchorMinute = minuteFromClientYInRect(y0, rect);
+    const anchorMinute = minuteFromClientYInRect(y0, rect);
     let currentMinute = anchorMinute;
     /** Long-press completed — same gate as day timeline / course grid. */
     let createArmed = false;
@@ -2914,7 +2905,7 @@ export function WeekCalendar({
                             );
                           })}
 
-                          {dayBlocks.map((block, index) => {
+                          {dayBlocks.map((block) => {
                             const top = ((block.startMinute - visualStartMinute) / totalMinutes) * 100;
                             const height = ((block.endMinute - block.startMinute) / totalMinutes) * 100;
                             const effectiveHeight = Math.max(4, height);
@@ -2961,9 +2952,6 @@ export function WeekCalendar({
                             const startMinuteShown = draggingThis
                               ? snapMinute(block.startMinute)
                               : block.startMinute;
-                            const endMinuteShown = draggingThis
-                              ? snapMinute(block.endMinute)
-                              : block.endMinute;
                             const eventCardVisualClassName = cn(
                               "absolute p-0 text-left leading-tight transition",
                               SCHEDULE_EVENT_CARD_RADIUS,
@@ -3254,7 +3242,7 @@ export function WeekCalendar({
                                   style={surfaceStyle}
                                   title={title}
                                   role="group"
-                                  aria-selected={isSelectedForEdit || undefined}
+                                  aria-current={isSelectedForEdit ? "true" : undefined}
                                 >
                                   <div className="relative h-full min-h-0 w-full overflow-hidden rounded-[inherit]">
                                     <div

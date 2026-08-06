@@ -92,8 +92,17 @@ function readPersistentHomeScheduleCache(userId: string): HomeScheduleCache | nu
     if (!raw) return null;
     const parsed = JSON.parse(raw) as unknown;
     if (!isHomeScheduleStorageRecord(parsed, userId)) return null;
-    const { version: _version, ...cache } = parsed;
-    return cache;
+    return {
+      userId: parsed.userId,
+      classBlocks: parsed.classBlocks,
+      dbStudyEntries: parsed.dbStudyEntries,
+      icsStudyEntries: parsed.icsStudyEntries,
+      companionOptions: parsed.companionOptions,
+      initialCalendarCategories: parsed.initialCalendarCategories,
+      loadedRangeStartMs: parsed.loadedRangeStartMs,
+      loadedRangeEndMs: parsed.loadedRangeEndMs,
+      fetchedAt: parsed.fetchedAt,
+    };
   } catch {
     return null;
   }

@@ -6,7 +6,12 @@ import {
   NEW_THREAD_RATE_LIMIT_WINDOW_MINUTES,
 } from "@/lib/constants/app";
 import { requireOnboardedUser } from "@/lib/auth/guards";
+import {
+  createDirectMessageRecord,
+  PeerReplyRequiredError,
+} from "@/lib/chat/direct-message-service";
 import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
+import { findSharedActiveCourse } from "@/lib/courses/shared-active-courses";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
 import { startConversationSchema } from "@/lib/validators/invitation";
@@ -29,8 +34,7 @@ import { findOrCreateSelfNotesConnection } from "@/lib/queries/self-notes-connec
  *   - ModerationBlock on either side → blocked
  *   - Mutual Block (either direction) → blocked
  *   - Rate limit: NEW_THREAD_RATE_LIMIT_COUNT new connections per window.
- *     Re-sending into an already-opened thread is unlimited (that path goes
- *     through /api/connections/[id]/messages instead).
+ *   - Unreplied send limit on reuse of an ACTIVE thread (same as /messages).
  *
  * Returns the resulting `connectionId` and a `created` flag so the client can
  * decide whether to navigate straight to the thread.
@@ -83,14 +87,7 @@ export async function POST(request: Request) {
           },
           select: { id: true },
         }),
-        prisma.userCourse.findFirst({
-          where: {
-            userId: user.id,
-            course: { members: { some: { userId: values.peerId } } },
-            ...(values.courseId ? { courseId: values.courseId } : {}),
-          },
-          select: { courseId: true },
-        }),
+        findSharedActiveCourse(prisma, user.id, values.peerId, values.courseId),
         prisma.connection.findFirst({
           where: {
             OR: [
@@ -119,17 +116,24 @@ export async function POST(request: Request) {
     // Reusing an existing ACTIVE connection: just insert the message and bail.
     // This keeps the "Message" button idempotent from every surface.
     if (existingConnection && existingConnection.status === ConnectionStatus.ACTIVE) {
-      const message = await prisma.message.create({
-        data: {
-          connectionId: existingConnection.id,
-          senderId: user.id,
-          body,
-        },
-      });
-      await prisma.connection.update({
-        where: { id: existingConnection.id },
-        data: { updatedAt: message.createdAt },
-      });
+      try {
+        await prisma.$transaction(async (tx) => {
+          const { message } = await createDirectMessageRecord(tx, {
+            connectionId: existingConnection.id,
+            senderId: user.id,
+            input: { type: "TEXT", body },
+          });
+          await tx.connection.update({
+            where: { id: existingConnection.id },
+            data: { updatedAt: message.createdAt },
+          });
+        });
+      } catch (cause) {
+        if (cause instanceof PeerReplyRequiredError) {
+          return error(cause.message, 403, "PEER_REPLY_REQUIRED");
+        }
+        throw cause;
+      }
       return ok(
         { connectionId: existingConnection.id, created: false },
         { status: 200 },
@@ -168,7 +172,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const originCourseId = sharedCourse?.courseId ?? null;
+    const originCourseId = sharedCourse?.id ?? null;
 
     const { connectionId } = await prisma.$transaction(async (tx) => {
       const connection = await tx.connection.create({

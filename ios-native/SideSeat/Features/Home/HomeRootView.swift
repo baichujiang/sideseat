@@ -7,17 +7,10 @@ private enum HomeCalendarMode: String, CaseIterable, Identifiable {
     case list
 
     var id: String { rawValue }
-
-    var label: LocalizedStringKey {
-        switch self {
-        case .week: "Week"
-        case .day: "Day"
-        case .list: "List"
-        }
-    }
 }
 
 struct HomeRootView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
     @Environment(ClientConfigurationStore.self) private var clientConfiguration
@@ -28,13 +21,18 @@ struct HomeRootView: View {
     @State private var calendarClipboard: CalendarEventTransfer?
     @State private var movingEvent: NativeHomeStudyEntry?
     @State private var pendingMove: CalendarMoveDestination?
+    @State private var activeMoveDestination: CalendarMoveDestination?
     @State private var isMovingEvent = false
     @State private var operationIssue: String?
     /// Apple-like Today: re-anchor the time grid near now without continuous chase.
     @State private var timelineScrollToken = 0
     @State private var readOnlyItem: HomeAgendaItem?
-    @State private var copyNotice: String?
+    @State private var pendingEditorEvent: NativeHomeStudyEntry?
+    @State private var calendarNotice: CalendarNotice?
+    @State private var pendingScheduleShareNotice: String?
     @State private var weekVisibleDayCount = HomeWeekWindow.storedVisibleDayCount()
+    @State private var weekTimelineDensityLevel = HomeWeekWindow.storedTimelineDensityLevel()
+    @State private var weekViewportDate = Date()
 
     private let calendar = Calendar.sideSeatBerlin
 
@@ -45,27 +43,24 @@ struct HomeRootView: View {
                 .padding(.top, 4)
                 .padding(.bottom, 8)
 
-            // Single date navigator for all modes.
-            HomeDateStripView(selectedDate: $selectedDate) { day in
-                selectedDate = day
-                calendarMode = .day
-            }
-            .padding(.bottom, 10)
-
-            Picker("Calendar view", selection: $calendarMode) {
-                ForEach(HomeCalendarMode.allCases) { mode in
-                    Text(mode.label).tag(mode)
-                }
+            Picker(String(localized: "Calendar view"), selection: $calendarMode) {
+                Text("Week").tag(HomeCalendarMode.week)
+                Text("Day").tag(HomeCalendarMode.day)
+                Text("List").tag(HomeCalendarMode.list)
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, 20)
             .padding(.bottom, 10)
             .accessibilityIdentifier("calendar-view-mode")
 
-            if let movingEvent {
-                moveBanner(for: movingEvent)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 8)
+            if calendarMode != .week {
+                HomeDateStripView(
+                    selectedDate: $selectedDate,
+                    recenterToken: calendarMode.rawValue
+                ) { day in
+                    selectedDate = day
+                }
+                .padding(.bottom, 10)
             }
 
             switch calendarMode {
@@ -73,13 +68,19 @@ struct HomeRootView: View {
                 HomeWeekTimetableView(
                     focusDate: selectedDate,
                     visibleDayCount: weekVisibleDayCount,
+                    timelineDensityLevel: weekTimelineDensityLevel,
                     schedule: store.schedule,
                     onFocusDate: { selectedDate = $0 },
+                    onViewportDateChange: { date in
+                        weekViewportDate = date
+                        Task { await store.ensureCovers(date, using: session) }
+                    },
                     onOpenDay: { day in
                         selectedDate = day
                         calendarMode = .day
                     },
                     onOpen: openAgendaItem,
+                    onEdit: editAgendaItem,
                     onCopy: copyAgendaItem,
                     onDuplicate: duplicateAgendaItem,
                     movingEventID: movingEvent?.id,
@@ -91,6 +92,11 @@ struct HomeRootView: View {
                         weekVisibleDayCount = next
                         HomeWeekWindow.storeVisibleDayCount(next)
                     },
+                    onTimelineDensityChange: { next in
+                        guard next != weekTimelineDensityLevel else { return }
+                        weekTimelineDensityLevel = next
+                        HomeWeekWindow.storeTimelineDensityLevel(next)
+                    },
                     canPaste: calendarClipboard != nil,
                     onCreateAtSlot: openNewEvent,
                     onPasteAtSlot: { slot in
@@ -99,13 +105,14 @@ struct HomeRootView: View {
                     scrollAnchorToken: timelineScrollToken
                 )
                 .refreshable {
-                    await store.load(using: session, around: selectedDate)
+                    await store.load(using: session, around: weekViewportDate)
                 }
             case .day:
                 CalendarDayTimelineView(
                     date: selectedDate,
                     items: agendaItems,
                     onOpen: openAgendaItem,
+                    onEdit: editAgendaItem,
                     onCopy: copyAgendaItem,
                     onDuplicate: duplicateAgendaItem,
                     movingEventID: movingEvent?.id,
@@ -122,21 +129,48 @@ struct HomeRootView: View {
                     await store.load(using: session, around: selectedDate)
                 }
             case .list:
-                ScrollView {
-                    agenda
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 24)
-                }
+                CalendarAgendaListView(
+                    schedule: store.schedule,
+                    startDate: selectedDate,
+                    isLoading: store.isLoading,
+                    issue: store.issue,
+                    onRetry: {
+                        Task { await store.load(using: session, around: selectedDate) }
+                    },
+                    onOpenDay: { day in
+                        selectedDate = day
+                        calendarMode = .day
+                    },
+                    onOpen: { item, renderedDay in
+                        selectedDate = renderedDay
+                        openAgendaItem(item)
+                    },
+                    onEdit: editAgendaItem,
+                    onCopy: copyAgendaItem,
+                    onDuplicate: duplicateAgendaItem,
+                    onStartMove: startMovingAgendaItem,
+                    onCreate: openNewEvent
+                )
                 .refreshable {
                     await store.load(using: session, around: selectedDate)
                 }
             }
         }
         .background(SideSeatTheme.bg)
-        .navigationTitle("Home")
-        .navigationBarTitleDisplayMode(.inline)
+        .ssRootNavigationTitle("Calendar")
         .onChange(of: selectedDate) { _, newValue in
             Task { await store.ensureCovers(newValue, using: session) }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active else { return }
+            Task {
+                await store.refreshIfStale(using: session, around: calendarActionDate)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .sideSeatCalendarNeedsRefresh)) { _ in
+            Task {
+                await store.load(using: session, around: calendarActionDate)
+            }
         }
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
@@ -159,7 +193,7 @@ struct HomeRootView: View {
                 if smartScheduleEnabled {
                     Menu {
                         Button {
-                            openNewEvent(at: selectedDate)
+                            openNewEvent(at: calendarActionDate)
                         } label: {
                             Label("New event", systemImage: "calendar.badge.plus")
                         }
@@ -178,7 +212,7 @@ struct HomeRootView: View {
                     .disabled(store.schedule == nil)
                 } else {
                     Button {
-                        openNewEvent(at: selectedDate)
+                        openNewEvent(at: calendarActionDate)
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -188,7 +222,7 @@ struct HomeRootView: View {
                 }
             }
         }
-        .sheet(item: $sheet) { destination in
+        .sheet(item: $sheet, onDismiss: showPendingScheduleShareNotice) { destination in
             switch destination {
             case .event(let context):
                 CalendarEventEditorView(context: context) {
@@ -204,74 +238,36 @@ struct HomeRootView: View {
                 ) {
                     await store.load(using: session, around: selectedDate)
                 }
+            case .shareSchedule(let initialDates):
+                ScheduleShareComposeSheet(initialDates: initialDates) { recipientName in
+                    pendingScheduleShareNotice = String(
+                        format: String(localized: "Schedule sent to %@"),
+                        recipientName
+                    )
+                }
             }
         }
-        .sheet(item: $readOnlyItem) { item in
-            NavigationStack {
-                List {
-                    Section {
-                        Text(item.title)
-                            .font(.headline)
-                        Text(
-                            "\(CalendarChrome.compactClock(item.start)) – \(CalendarChrome.compactClock(item.end))"
-                        )
-                        .foregroundStyle(.secondary)
-                        if let location = item.location, !location.isEmpty {
-                            Label(location, systemImage: "mappin.and.ellipse")
-                        }
-                    } footer: {
-                        Text(readOnlyFooter(for: item))
-                    }
+        .sheet(item: $readOnlyItem, onDismiss: openPendingEditor) { item in
+            HomeAgendaDetailView(
+                item: item,
+                footer: readOnlyFooter(for: item),
+                canEdit: item.source == .event && event(withID: item.id) != nil,
+                onDone: { readOnlyItem = nil },
+                onEdit: {
+                    pendingEditorEvent = event(withID: item.id)
+                    readOnlyItem = nil
+                },
+                onOpenPlan: {
+                    guard let activityID = item.discoverActivityID else { return }
+                    readOnlyItem = nil
+                    router.navigate(to: .activity(activityID: activityID))
                 }
-                .navigationTitle(readOnlyTitle(for: item))
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Done") { readOnlyItem = nil }
-                    }
-                }
-            }
+            )
             .presentationDetents([.medium])
             .accessibilityIdentifier("calendar-readonly-detail")
         }
-        .overlay(alignment: .bottom) {
-            if let copyNotice {
-                Text(copyNotice)
-                    .font(.footnote.weight(.semibold))
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(.ultraThinMaterial, in: Capsule())
-                    .padding(.bottom, 12)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .accessibilityIdentifier("calendar-copy-notice")
-            }
-        }
-        .confirmationDialog(
-            moveActionTitle,
-            isPresented: moveDialogBinding,
-            titleVisibility: .visible,
-            presenting: pendingMove
-        ) { destination in
-            if let transfer = CalendarEventTransfer(event: destination.event), transfer.isRecurring {
-                Button("Only this event") {
-                    Task { await moveEvent(destination, scope: "this") }
-                }
-                .accessibilityIdentifier("calendar-move-this")
-                Button("This and future events") {
-                    Task { await moveEvent(destination, scope: "future") }
-                }
-                .accessibilityIdentifier("calendar-move-future")
-                Button("All events") {
-                    Task { await moveEvent(destination, scope: "all") }
-                }
-                .accessibilityIdentifier("calendar-move-all")
-            } else {
-                Button("Move event") {
-                    Task { await moveEvent(destination, scope: "this") }
-                }
-                .accessibilityIdentifier("calendar-move-confirm")
-            }
-            Button("Cancel", role: .cancel) {}
+        .overlay {
+            calendarFeedbackLayer
         }
         .alert("Calendar update failed", isPresented: operationIssueBinding) {
             Button("OK", role: .cancel) {
@@ -288,15 +284,27 @@ struct HomeRootView: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline) {
             // Month is the primary calendar landmark (Apple Calendar pattern).
-            Text(selectedDate, format: .dateTime.month(.wide).year())
+            Text(calendarMode == .week ? weekViewportDate : selectedDate, format: .dateTime.month(.wide).year())
                 .font(SideSeatTheme.Text.title)
                 .foregroundStyle(SideSeatTheme.textPrimary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .layoutPriority(1)
             Spacer(minLength: 12)
+            Button {
+                sheet = .shareSchedule(scheduleShareInitialDates)
+            } label: {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.body.weight(.semibold))
+                    .frame(width: 34, height: 34)
+                    .contentShape(Rectangle())
+            }
+            .accessibilityLabel("Share schedule")
+            .accessibilityIdentifier("calendar-share-schedule")
             Button("Today") {
-                selectedDate = Date()
+                let today = Date()
+                selectedDate = today
+                weekViewportDate = today
                 timelineScrollToken += 1
             }
             .font(.body.weight(.semibold))
@@ -306,104 +314,36 @@ struct HomeRootView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    @ViewBuilder
-    private var agenda: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text(calendar.isDateInToday(selectedDate) ? "Today" : "Schedule")
-                    .font(.headline)
-                Spacer()
-                if store.isLoading {
-                    ProgressView()
-                        .controlSize(.small)
-                }
-            }
-
-            if let issue = store.issue, store.schedule == nil {
-                ContentUnavailableView {
-                    Label("Could not load schedule", systemImage: "wifi.exclamationmark")
-                } description: {
-                    Text(issue)
-                } actions: {
-                    Button("Try again") {
-                        Task { await store.load(using: session) }
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-                .frame(maxWidth: .infinity)
-            } else if store.isLoading, store.schedule == nil {
-                ProgressView("Loading schedule")
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 40)
-            } else if agendaItems.isEmpty {
-                SSEmptyState(
-                    title: "No events",
-                    systemImage: "calendar",
-                    description: "This day is open.",
-                    actionTitle: String(localized: "New event"),
-                    actionAccessibilityID: "agenda-empty-new-event"
-                ) {
-                    openNewEvent(at: selectedDate)
-                }
-                .frame(maxWidth: .infinity)
-            } else {
-                VStack(spacing: 0) {
-                    ForEach(Array(agendaItems.enumerated()), id: \.element.id) { index, item in
-                        if item.source == .event, let event = event(withID: item.id) {
-                            Button {
-                                sheet = .event(
-                                    CalendarEventEditorContext(
-                                        proposedStart: item.start,
-                                        event: event,
-                                        schedule: store.schedule
-                                    )
-                                )
-                            } label: {
-                                HomeAgendaRow(item: item)
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier("agenda-event-\(item.id)")
-                            .contextMenu {
-                                Button {
-                                    openEvent(event)
-                                } label: {
-                                    Label("Edit event", systemImage: "pencil")
-                                }
-                                Button {
-                                    copyEvent(event)
-                                } label: {
-                                    Label("Copy", systemImage: "doc.on.doc")
-                                }
-                                Button {
-                                    duplicateEvent(event)
-                                } label: {
-                                    Label("Duplicate after event", systemImage: "plus.square.on.square")
-                                }
-                                Button {
-                                    startMovingEvent(event)
-                                } label: {
-                                    Label("Move event", systemImage: "arrow.up.and.down.and.arrow.left.and.right")
-                                }
-                            }
-                        } else {
-                            HomeAgendaRow(item: item)
-                        }
-                        if index < agendaItems.count - 1 {
-                            Divider().padding(.leading, 76)
-                        }
-                    }
-                }
-                .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
-            }
-        }
-    }
-
     private var agendaItems: [HomeAgendaItem] {
         store.schedule?.items(on: selectedDate, calendar: calendar) ?? []
     }
 
     private var smartScheduleEnabled: Bool {
         clientConfiguration.configuration?.features["naturalLanguageSchedule"] == true
+    }
+
+    private var calendarActionDate: Date {
+        calendarMode == .week ? weekViewportDate : selectedDate
+    }
+
+    private var scheduleShareInitialDates: [Date] {
+        switch calendarMode {
+        case .week:
+            let start = HomeWeekWindow.viewportStart(
+                containing: weekViewportDate,
+                visibleDayCount: weekVisibleDayCount,
+                calendar: calendar
+            )
+            return HomeWeekWindow.days(
+                from: start,
+                count: weekVisibleDayCount,
+                calendar: calendar
+            )
+        case .day:
+            return [selectedDate]
+        case .list:
+            return HomeWeekWindow.days(from: selectedDate, count: 7, calendar: calendar)
+        }
     }
 
     private func event(withID id: String) -> NativeHomeStudyEntry? {
@@ -417,18 +357,10 @@ struct HomeRootView: View {
         )
     }
 
-    private var moveDialogBinding: Binding<Bool> {
-        Binding(
-            get: { pendingMove != nil },
-            set: { if !$0 { pendingMove = nil } }
-        )
-    }
-
-    private var moveActionTitle: String {
-        guard let pendingMove else { return String(localized: "Move event") }
+    private func moveActionTitle(for destination: CalendarMoveDestination) -> String {
         return String(
             format: String(localized: "Move to %@?"),
-            pendingMove.start.formatted(date: .omitted, time: .shortened)
+            destination.start.formatted(date: .abbreviated, time: .shortened)
         )
     }
 
@@ -453,27 +385,28 @@ struct HomeRootView: View {
     }
 
     private func openAgendaItem(_ item: HomeAgendaItem) {
-        if item.source == .event, let event = event(withID: item.id) {
-            openEvent(event)
-        } else {
-            readOnlyItem = item
-        }
+        readOnlyItem = item
     }
 
-    private func readOnlyTitle(for item: HomeAgendaItem) -> LocalizedStringKey {
-        switch item.source {
-        case .course: "Course"
-        case .subscription: "Subscribed event"
-        case .event: "Event"
-        }
+    private func editAgendaItem(_ item: HomeAgendaItem) {
+        guard item.source == .event, let event = event(withID: item.id) else { return }
+        openEvent(event)
     }
 
-    private func readOnlyFooter(for item: HomeAgendaItem) -> LocalizedStringKey {
-        switch item.source {
+    private func readOnlyFooter(for item: HomeAgendaItem) -> LocalizedStringKey? {
+        if item.context == .publicPlan { return "A plan from the SideSeat community." }
+        if item.context == .shared { return "This event includes other people." }
+        return switch item.source {
         case .course: "Course blocks are read-only on Home."
         case .subscription: "Subscribed events are read-only."
-        case .event: "Event"
+        case .event: nil
         }
+    }
+
+    private func openPendingEditor() {
+        guard let event = pendingEditorEvent else { return }
+        pendingEditorEvent = nil
+        openEvent(event)
     }
 
     private func copyAgendaItem(_ item: HomeAgendaItem) {
@@ -493,13 +426,19 @@ struct HomeRootView: View {
 
     private func dragMoveAgendaItem(_ item: HomeAgendaItem, to start: Date) {
         guard item.source == .event, let event = event(withID: item.id) else { return }
-        movingEvent = nil
-        pendingMove = CalendarMoveDestination(event: event, start: start)
+        withAnimation(.snappy(duration: 0.2)) {
+            calendarNotice = nil
+            movingEvent = nil
+            pendingMove = CalendarMoveDestination(event: event, start: start)
+        }
     }
 
     private func startMovingEvent(_ event: NativeHomeStudyEntry) {
-        pendingMove = nil
-        movingEvent = event
+        withAnimation(.snappy(duration: 0.2)) {
+            calendarNotice = nil
+            pendingMove = nil
+            movingEvent = event
+        }
         if let start = Date.sideSeatISO8601(event.startISO) {
             selectedDate = start
         }
@@ -511,57 +450,306 @@ struct HomeRootView: View {
 
     private func chooseMoveTarget(_ start: Date) {
         guard !isMovingEvent, let movingEvent else { return }
-        pendingMove = CalendarMoveDestination(event: movingEvent, start: start)
+        withAnimation(.snappy(duration: 0.2)) {
+            pendingMove = CalendarMoveDestination(event: movingEvent, start: start)
+        }
     }
 
     @ViewBuilder
-    private func moveBanner(for event: NativeHomeStudyEntry) -> some View {
-        HStack(spacing: 10) {
-            Image(systemName: "arrow.up.and.down.and.arrow.left.and.right")
-                .foregroundStyle(SideSeatTheme.accent)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(String(format: String(localized: "Moving %@"), event.title))
-                    .font(.subheadline.weight(.semibold))
-                    .lineLimit(1)
-                Text("Choose a new time")
-                    .font(.caption)
-                    .foregroundStyle(SideSeatTheme.textSecondary)
+    private var calendarFeedbackLayer: some View {
+        ZStack(alignment: .bottom) {
+            if pendingMove != nil || isMovingEvent {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        guard !isMovingEvent else { return }
+                        cancelMove()
+                    }
+            } else if movingEvent != nil {
+                Color.clear
+                    .allowsHitTesting(false)
             }
-            Spacer(minLength: 0)
-            if isMovingEvent {
-                ProgressView()
-                    .controlSize(.small)
-            } else {
-                Button("Cancel") {
-                    movingEvent = nil
-                    pendingMove = nil
+
+            Group {
+                if isMovingEvent, let activeMoveDestination {
+                    moveProgressPanel(for: activeMoveDestination)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                } else if let pendingMove {
+                    moveConfirmationPanel(for: pendingMove)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                } else if let movingEvent {
+                    moveSelectionPanel(for: movingEvent)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                } else if let calendarNotice {
+                    calendarNoticePanel(calendarNotice)
+                        .transition(.scale(scale: 0.96).combined(with: .opacity))
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
+            }
+            .padding(.horizontal, SideSeatTheme.spaceLG)
+            .padding(.bottom, 72)
+        }
+        .animation(.snappy(duration: 0.24), value: calendarFeedbackIdentity)
+    }
+
+    private var calendarFeedbackIdentity: String {
+        if isMovingEvent { return "moving-\(activeMoveDestination?.id.uuidString ?? "")" }
+        if let pendingMove { return "confirm-\(pendingMove.id.uuidString)" }
+        if let movingEvent { return "select-\(movingEvent.id)" }
+        if let calendarNotice { return "notice-\(calendarNotice.id.uuidString)" }
+        return "none"
+    }
+
+    private func moveSelectionPanel(for event: NativeHomeStudyEntry) -> some View {
+        calendarFloatingPanel {
+            HStack(spacing: SideSeatTheme.spaceMD) {
+                Image(systemName: "arrow.up.and.down.and.arrow.left.and.right")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.accent)
+                    .frame(width: 36, height: 36)
+                    .background(SideSeatTheme.accent.opacity(0.10), in: Circle())
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(String(format: String(localized: "Moving %@"), event.title))
+                        .font(.subheadline.weight(.semibold))
+                        .lineLimit(1)
+                    Text("Choose a new time")
+                        .font(.caption)
+                        .foregroundStyle(SideSeatTheme.textSecondary)
+                }
+
+                Spacer(minLength: SideSeatTheme.spaceSM)
+
+                Button {
+                    cancelMove()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.caption.weight(.bold))
+                        .frame(width: 36, height: 36)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(SideSeatTheme.textSecondary)
+                .accessibilityLabel("Cancel")
                 .accessibilityIdentifier("calendar-move-cancel")
             }
         }
-        .padding(.horizontal, SideSeatTheme.spaceMD)
-        .padding(.vertical, 9)
-        .background(SideSeatTheme.accent.opacity(0.09))
-        .clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("calendar-move-banner")
+    }
+
+    private func moveConfirmationPanel(for destination: CalendarMoveDestination) -> some View {
+        let isRecurring = CalendarEventTransfer(event: destination.event)?.isRecurring == true
+        return calendarFloatingPanel {
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
+                    Image(systemName: "calendar.badge.clock")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.accent)
+                        .frame(width: 38, height: 38)
+                        .background(SideSeatTheme.accent.opacity(0.10), in: Circle())
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(destination.event.title)
+                            .font(.subheadline.weight(.semibold))
+                            .lineLimit(1)
+                        Text(moveActionTitle(for: destination))
+                            .font(.footnote)
+                            .foregroundStyle(SideSeatTheme.textSecondary)
+                    }
+
+                    Spacer(minLength: SideSeatTheme.spaceSM)
+
+                    Button {
+                        cancelMove()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.caption.weight(.bold))
+                            .frame(width: 32, height: 32)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(SideSeatTheme.textSecondary)
+                    .accessibilityLabel("Cancel")
+                }
+
+                HStack(spacing: SideSeatTheme.spaceSM) {
+                    SSSecondaryButton(
+                        title: String(localized: "Cancel"),
+                        kind: .softFill,
+                        fontWeight: .semibold,
+                        accessibilityID: "calendar-move-cancel-confirmation"
+                    ) {
+                        cancelMove()
+                    }
+
+                    SSPrimaryButton(
+                        title: isRecurring
+                            ? String(localized: "Only this event")
+                            : String(localized: "Move event"),
+                        fill: .product,
+                        height: 44,
+                        accessibilityID: isRecurring ? "calendar-move-this" : "calendar-move-confirm"
+                    ) {
+                        performMove(destination, scope: "this")
+                    }
+                }
+
+                if isRecurring {
+                    HStack(spacing: SideSeatTheme.spaceSM) {
+                        moveSeriesScopeButton(
+                            title: String(localized: "This and future events"),
+                            accessibilityID: "calendar-move-future"
+                        ) {
+                            performMove(destination, scope: "future")
+                        }
+                        moveSeriesScopeButton(
+                            title: String(localized: "All events"),
+                            accessibilityID: "calendar-move-all"
+                        ) {
+                            performMove(destination, scope: "all")
+                        }
+                    }
+                }
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("calendar-move-confirmation")
+    }
+
+    private func moveProgressPanel(for destination: CalendarMoveDestination) -> some View {
+        calendarFloatingPanel {
+            HStack(spacing: SideSeatTheme.spaceMD) {
+                ProgressView()
+                    .controlSize(.regular)
+                    .tint(SideSeatTheme.accent)
+                    .frame(width: 38, height: 38)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(String(format: String(localized: "Moving %@"), destination.event.title))
+                        .font(.subheadline.weight(.semibold))
+                        .lineLimit(1)
+                    Text(
+                        String(
+                            format: String(localized: "Move event to %@"),
+                            destination.start.formatted(date: .abbreviated, time: .shortened)
+                        )
+                    )
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondary)
+                    .lineLimit(1)
+                }
+
+                Spacer(minLength: SideSeatTheme.spaceSM)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("calendar-move-progress")
+    }
+
+    private func calendarNoticePanel(_ notice: CalendarNotice) -> some View {
+        calendarFloatingPanel {
+            HStack(spacing: SideSeatTheme.spaceMD) {
+                Image(systemName: notice.systemImage)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(notice.isSuccess ? SideSeatTheme.success : SideSeatTheme.accent)
+                    .symbolEffect(.bounce, value: notice.id)
+                Text(notice.text)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.textPrimary)
+                    .lineLimit(2)
+                Spacer(minLength: SideSeatTheme.spaceSM)
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("calendar-notice")
+    }
+
+    private func moveSeriesScopeButton(
+        title: String,
+        accessibilityID: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: 40)
+                .padding(.horizontal, SideSeatTheme.spaceSM)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(SideSeatTheme.textPrimary)
+        .background(SideSeatTheme.fillTertiary, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+        .accessibilityIdentifier(accessibilityID)
+    }
+
+    private func calendarFloatingPanel<Content: View>(
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        content()
+            .padding(SideSeatTheme.spaceLG)
+            .frame(maxWidth: 390)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.10), lineWidth: 0.75)
+            }
+            .shadow(color: Color.black.opacity(0.12), radius: 18, y: 8)
+    }
+
+    private func performMove(_ destination: CalendarMoveDestination, scope: String) {
+        Task { await moveEvent(destination, scope: scope) }
+    }
+
+    private func cancelMove() {
+        withAnimation(.snappy(duration: 0.2)) {
+            movingEvent = nil
+            pendingMove = nil
+            activeMoveDestination = nil
+        }
     }
 
     private func copyEvent(_ event: NativeHomeStudyEntry) {
         guard let transfer = CalendarEventTransfer(event: event) else { return }
         calendarClipboard = transfer
         UIPasteboard.general.string = transfer.plainText(timeZone: calendar.timeZone)
+        showCalendarNotice(
+            String(localized: "Copied"),
+            systemImage: "doc.on.doc.fill",
+            isSuccess: false
+        )
+    }
+
+    private func showCalendarNotice(
+        _ text: String,
+        systemImage: String = "checkmark.circle.fill",
+        isSuccess: Bool = true
+    ) {
+        let notice = CalendarNotice(
+            text: text,
+            systemImage: systemImage,
+            isSuccess: isSuccess
+        )
         withAnimation(.easeOut(duration: 0.2)) {
-            copyNotice = String(localized: "Copied")
+            calendarNotice = notice
         }
         Task {
-            try? await Task.sleep(nanoseconds: 1_400_000_000)
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
             withAnimation(.easeIn(duration: 0.2)) {
-                copyNotice = nil
+                if calendarNotice?.id == notice.id {
+                    calendarNotice = nil
+                }
             }
         }
+    }
+
+    private func showPendingScheduleShareNotice() {
+        guard let notice = pendingScheduleShareNotice else { return }
+        pendingScheduleShareNotice = nil
+        showCalendarNotice(notice, systemImage: "paperplane.fill")
     }
 
     private func duplicateEvent(_ event: NativeHomeStudyEntry) {
@@ -603,13 +791,22 @@ struct HomeRootView: View {
     @MainActor
     private func moveEvent(_ destination: CalendarMoveDestination, scope: String) async {
         guard !isMovingEvent, let transfer = CalendarEventTransfer(event: destination.event) else { return }
+        movingEvent = destination.event
+        activeMoveDestination = destination
         isMovingEvent = true
         pendingMove = nil
+        calendarNotice = nil
         operationIssue = nil
-        defer { isMovingEvent = false }
+        defer {
+            isMovingEvent = false
+            activeMoveDestination = nil
+        }
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-calendar-move-delay") {
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+            }
             store.applyUITestingMove(
                 eventID: destination.event.id,
                 start: destination.start,
@@ -618,6 +815,7 @@ struct HomeRootView: View {
             )
             selectedDate = destination.start
             movingEvent = nil
+            showMovedNotice(destination.start)
             return
         }
         #endif
@@ -630,12 +828,25 @@ struct HomeRootView: View {
                 queryItems: [URLQueryItem(name: "scope", value: scope)],
                 idempotencyKey: UUID().uuidString
             )
-            await store.load(using: session, around: selectedDate)
+            await store.load(using: session, around: destination.start)
             selectedDate = destination.start
             movingEvent = nil
+            showMovedNotice(destination.start)
         } catch {
+            movingEvent = nil
             operationIssue = error.localizedDescription
         }
+    }
+
+    private func showMovedNotice(_ start: Date) {
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        showCalendarNotice(
+            String(
+                format: String(localized: "Moved to %@"),
+                start.formatted(date: .abbreviated, time: .shortened)
+            ),
+            systemImage: "checkmark.circle.fill"
+        )
     }
 }
 
@@ -654,64 +865,109 @@ private struct CalendarMoveDestination: Identifiable {
     let start: Date
 }
 
+private struct CalendarNotice: Identifiable {
+    let id = UUID()
+    let text: String
+    let systemImage: String
+    let isSuccess: Bool
+}
+
 private enum HomeSheet: Identifiable {
     case event(CalendarEventEditorContext)
     case calendars
     case smartSchedule
+    case shareSchedule([Date])
 
     var id: String {
         switch self {
         case .event(let context): "event-\(context.id.uuidString)"
         case .calendars: "calendars"
         case .smartSchedule: "smart-schedule"
+        case .shareSchedule: "share-schedule"
         }
     }
 }
 
-private struct HomeAgendaRow: View {
+private struct HomeAgendaDetailView: View {
     let item: HomeAgendaItem
+    let footer: LocalizedStringKey?
+    let canEdit: Bool
+    let onDone: () -> Void
+    let onEdit: () -> Void
+    let onOpenPlan: () -> Void
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(CalendarChrome.compactClock(item.start))
-                    .font(.subheadline.weight(.semibold))
-                    .monospacedDigit()
-                Text(CalendarChrome.compactClock(item.end))
-                    .font(.caption)
-                    .monospacedDigit()
-                    .foregroundStyle(SideSeatTheme.textSecondary)
-            }
-            .fixedSize(horizontal: true, vertical: false)
+        NavigationStack {
+            List {
+                Section {
+                    Text(item.title)
+                        .font(.headline)
 
-            Capsule()
-                .fill(Color(hex: item.colorHex) ?? (item.source == .course ? SideSeatTheme.courseFallback : SideSeatTheme.accent))
-                .frame(width: 3, height: 42)
+                    Label {
+                        Text(CalendarChrome.eventContextLabel(for: item))
+                    } icon: {
+                        Image(systemName: CalendarChrome.eventContextSymbol(for: item) ?? "calendar")
+                            .foregroundStyle(CalendarChrome.eventColor(for: item))
+                    }
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(item.title)
-                    .font(.subheadline.weight(.semibold))
-                    .lineLimit(3)
-                    .minimumScaleFactor(0.85)
-                    .fixedSize(horizontal: false, vertical: true)
-                if let location = item.location, !location.isEmpty {
-                    Label(location, systemImage: "mappin.and.ellipse")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.85)
+                    Label(
+                        "\(CalendarChrome.compactClock(item.start)) – \(CalendarChrome.compactClock(item.end))",
+                        systemImage: "clock"
+                    )
+                    .foregroundStyle(.secondary)
+
+                    if let location = item.location, !location.isEmpty {
+                        Label(location, systemImage: "mappin.and.ellipse")
+                    }
+                } footer: {
+                    if let footer {
+                        Text(footer)
+                    }
                 }
-                if item.source == .subscription {
-                    Label("Subscribed", systemImage: "link")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+
+                if item.discoverActivityID != nil {
+                    Section {
+                        Button(action: onOpenPlan) {
+                            Label("Open plan", systemImage: "arrow.up.right.square")
+                        }
+                        .accessibilityIdentifier("calendar-open-plan")
+                    }
+                }
+
+                if !people.isEmpty {
+                    Section("People") {
+                        ForEach(people, id: \.self) { name in
+                            HStack(spacing: 10) {
+                                InitialAvatar(name: name, size: 30)
+                                Text(name)
+                            }
+                        }
+                    }
                 }
             }
-            Spacer(minLength: 0)
+            .navigationTitle(CalendarChrome.eventContextLabel(for: item))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done", action: onDone)
+                }
+                if canEdit {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Edit", action: onEdit)
+                            .accessibilityIdentifier("calendar-detail-edit")
+                    }
+                }
+            }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 12)
-        .accessibilityElement(children: .combine)
+    }
+
+    private var people: [String] {
+        if !item.participantNames.isEmpty {
+            var seen = Set<String>()
+            return item.participantNames.filter { seen.insert($0).inserted }
+        }
+        guard let withLabel = item.withLabel, !withLabel.isEmpty else { return [] }
+        return [withLabel]
     }
 }
 

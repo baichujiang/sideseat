@@ -2,21 +2,21 @@ import { ReportStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 import { requireOnboardedUser } from "@/lib/auth/guards";
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
+import { getClassmatePostDetailForViewer } from "@/lib/queries/classmate-post-detail";
 import { reportSchema } from "@/lib/validators/invitation";
 
 /**
  * Report submission. The MVP stance is "reports are about messages, not
  * people" — the peer profile no longer exposes a reporter, and the UI
- * always submits a `messageId` or `courseRoomMessageId`. We still require
+ * always submits a concrete message or post identifier. We still require
  * `reportedUserId` so admins can group reports per user; it's automatically
  * filled from the message when possible (TODO: once no client posts
  * user-level reports, make `reportedUserId` derivable server-side).
  *
- * Mutual exclusivity is enforced: exactly one of `messageId` /
- * `courseRoomMessageId` can be set per report, otherwise it's treated as a
- * user-level report.
+ * Mutual exclusivity is enforced across all supported content targets.
  */
 export async function POST(request: Request) {
   try {
@@ -35,12 +35,24 @@ export async function POST(request: Request) {
           messageId: formData?.get("messageId") || undefined,
           courseRoomMessageId:
             formData?.get("courseRoomMessageId") || undefined,
+          groupChatMessageId:
+            formData?.get("groupChatMessageId") || undefined,
+          classmatePostId: formData?.get("classmatePostId") || undefined,
+          classmatePostCommentId:
+            formData?.get("classmatePostCommentId") || undefined,
           reason: formData?.get("reason"),
           details: formData?.get("details") || "",
         });
 
-    if (values.messageId && values.courseRoomMessageId) {
-      return error("Report can target only one message.", 400);
+    const targetCount = [
+      values.messageId,
+      values.courseRoomMessageId,
+      values.groupChatMessageId,
+      values.classmatePostId,
+      values.classmatePostCommentId,
+    ].filter(Boolean).length;
+    if (targetCount > 1) {
+      return error("Report can target only one item.", 400);
     }
 
     // Authorize that the reporter can actually see the target message. We
@@ -49,6 +61,9 @@ export async function POST(request: Request) {
     // honest even if the client lies).
     let verifiedMessageId: string | null = null;
     let verifiedCourseRoomMessageId: string | null = null;
+    let verifiedGroupChatMessageId: string | null = null;
+    let verifiedClassmatePostId: string | null = null;
+    let verifiedClassmatePostCommentId: string | null = null;
     let reportedUserId = values.reportedUserId;
 
     if (values.messageId) {
@@ -69,7 +84,12 @@ export async function POST(request: Request) {
         where: {
           id: values.courseRoomMessageId,
           course: {
-            members: { some: { userId: user.id } },
+            members: {
+              some: {
+                userId: user.id,
+                ...activeCourseMembershipWhere(),
+              },
+            },
           },
         },
         select: { id: true, senderId: true },
@@ -77,6 +97,32 @@ export async function POST(request: Request) {
       if (!msg) return error("Message not found.", 404);
       verifiedCourseRoomMessageId = msg.id;
       reportedUserId = msg.senderId;
+    } else if (values.groupChatMessageId) {
+      const msg = await prisma.groupChatMessage.findFirst({
+        where: {
+          id: values.groupChatMessageId,
+          groupChat: { participants: { some: { userId: user.id } } },
+        },
+        select: { id: true, senderId: true },
+      });
+      if (!msg) return error("Message not found.", 404);
+      verifiedGroupChatMessageId = msg.id;
+      reportedUserId = msg.senderId;
+    } else if (values.classmatePostId) {
+      const detail = await getClassmatePostDetailForViewer(values.classmatePostId, user.id);
+      if (!detail.ok) return error("Post not found.", 404);
+      verifiedClassmatePostId = detail.post.id;
+      reportedUserId = detail.author.id;
+    } else if (values.classmatePostCommentId) {
+      const comment = await prisma.classmatePostComment.findUnique({
+        where: { id: values.classmatePostCommentId },
+        select: { id: true, userId: true, postId: true },
+      });
+      if (!comment) return error("Question not found.", 404);
+      const detail = await getClassmatePostDetailForViewer(comment.postId, user.id);
+      if (!detail.ok) return error("Question not found.", 404);
+      verifiedClassmatePostCommentId = comment.id;
+      reportedUserId = comment.userId;
     }
 
     if (reportedUserId === user.id) {
@@ -91,6 +137,9 @@ export async function POST(request: Request) {
         invitationId: values.invitationId,
         messageId: verifiedMessageId,
         courseRoomMessageId: verifiedCourseRoomMessageId,
+        groupChatMessageId: verifiedGroupChatMessageId,
+        classmatePostId: verifiedClassmatePostId,
+        classmatePostCommentId: verifiedClassmatePostCommentId,
         reason: values.reason,
         status: ReportStatus.OPEN,
         details: values.details || null,

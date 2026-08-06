@@ -2,55 +2,290 @@ import PhotosUI
 import SwiftUI
 import UIKit
 
-struct DiscoverBuddyCreateView: View {
+private enum BuddyExpiryPreset: String, CaseIterable, Identifiable {
+    case threeDays
+    case oneWeek
+    case oneMonth
+    case never
+
+    var id: String { rawValue }
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .threeDays: "3d"
+        case .oneWeek: "1w"
+        case .oneMonth: "1m"
+        case .never: "Never"
+        }
+    }
+
+    var hint: LocalizedStringKey {
+        switch self {
+        case .threeDays: "Visible for about 3 days."
+        case .oneWeek: "Visible for about 1 week."
+        case .oneMonth: "Visible for about 1 month."
+        case .never: "Stays visible until you remove it."
+        }
+    }
+
+    func expiresAt(from now: Date = .now) -> Date {
+        let calendar = Calendar.current
+        switch self {
+        case .threeDays:
+            return calendar.date(byAdding: .day, value: 3, to: now)?.endOfDay ?? now
+        case .oneWeek:
+            return calendar.date(byAdding: .day, value: 7, to: now)?.endOfDay ?? now
+        case .oneMonth:
+            return calendar.date(byAdding: .day, value: 30, to: now)?.endOfDay ?? now
+        case .never:
+            return Date(timeIntervalSince1970: 4_102_444_799) // 2099-12-31
+        }
+    }
+
+    static func preset(for expiry: Date?, now: Date = .now) -> BuddyExpiryPreset {
+        guard let expiry else { return .oneWeek }
+        if Calendar.current.component(.year, from: expiry) >= 2090 { return .never }
+        let remainingDays = max(0, expiry.timeIntervalSince(now) / 86_400)
+        if remainingDays <= 4 { return .threeDays }
+        if remainingDays <= 14 { return .oneWeek }
+        return .oneMonth
+    }
+}
+
+private enum BuddyVisibilityPreset: String, CaseIterable, Identifiable {
+    case everyone = "CITY_INTERNATIONALS"
+    case verifiedStudents = "VERIFIED_ONLY"
+    case sameSchool = "SCHOOL_ONLY"
+    case coursemates = "COURSEMATES_ONLY"
+
+    var id: String { rawValue }
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .everyone: "Everyone"
+        case .verifiedStudents: "Verified students"
+        case .sameSchool: "Same school"
+        case .coursemates: "Coursemates"
+        }
+    }
+
+    var hint: LocalizedStringKey {
+        switch self {
+        case .everyone: "Anyone in your city can discover this plan."
+        case .verifiedStudents: "Only users with a verified student identity."
+        case .sameSchool: "Only students from your school."
+        case .coursemates: "Only students in the courses you select."
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .everyone: "globe"
+        case .verifiedStudents: "checkmark.seal.fill"
+        case .sameSchool: "building.columns.fill"
+        case .coursemates: "person.2.fill"
+        }
+    }
+}
+
+private extension Date {
+    var endOfDay: Date {
+        Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: self) ?? self
+    }
+}
+
+struct DiscoverPlanCreateView: View {
     @Environment(SessionStore.self) private var session
     @Environment(\.dismiss) private var dismiss
     @State private var store = DiscoverCreateStore()
+    @State private var courseStore = CourseListStore()
     @State private var title = ""
     @State private var bodyText = ""
-    @State private var expiresAt = Calendar.current.date(byAdding: .day, value: 7, to: .now) ?? .now
+    @State private var visibilityPreset: BuddyVisibilityPreset = .everyone
+    @State private var selectedCourseIds = Set<String>()
+    @State private var hasSchedule = false
+    @State private var startsAt = Date().addingTimeInterval(60 * 60)
+    @State private var endsAt = Date().addingTimeInterval(2 * 60 * 60)
+    @State private var location = ""
+    @State private var hasCapacityLimit = false
+    @State private var capacity = 4
+    @State private var expiryPreset: BuddyExpiryPreset = .oneWeek
     @State private var selectedPhotos: [PhotosPickerItem] = []
     @State private var imageDrafts: [NativeDiscoverBuddyImageDraft] = []
+    @State private var existingImageURLs: [String] = []
     @State private var isPreparingImages = false
     @State private var localIssue: String?
+    @State private var submitIssue: String?
+    @State private var didSucceed = false
+    @FocusState private var focusedField: BuddyField?
+
+    private enum BuddyField { case title, body }
+
+    private let titleMax = 120
+    private let bodyMax = 280
+
+    private let editingPost: NativeDiscoverBuddyPost?
+    private let originalExpiryDate: Date?
+    private let initialExpiryPreset: BuddyExpiryPreset
     let onCreated: () async -> Void
+
+    init(
+        editingPost: NativeDiscoverBuddyPost? = nil,
+        onCreated: @escaping () async -> Void
+    ) {
+        self.editingPost = editingPost
+        self.onCreated = onCreated
+
+        let defaultStart = Date().addingTimeInterval(60 * 60)
+        let start = editingPost?.startDate ?? defaultStart
+        let end = editingPost?.endDate ?? start.addingTimeInterval(60 * 60)
+        let expiry = editingPost?.expiryDate
+        let expiryPreset = BuddyExpiryPreset.preset(for: expiry)
+        originalExpiryDate = expiry
+        initialExpiryPreset = expiryPreset
+
+        _title = State(initialValue: editingPost?.title ?? "")
+        _bodyText = State(initialValue: editingPost?.body ?? "")
+        _visibilityPreset = State(
+            initialValue: editingPost.flatMap { BuddyVisibilityPreset(rawValue: $0.visibility) } ?? .everyone
+        )
+        _selectedCourseIds = State(initialValue: Set(editingPost?.linkedCourses.map(\.id) ?? []))
+        _hasSchedule = State(initialValue: editingPost?.startDate != nil && editingPost?.endDate != nil)
+        _startsAt = State(initialValue: start)
+        _endsAt = State(initialValue: end)
+        _location = State(initialValue: editingPost?.location ?? "")
+        _hasCapacityLimit = State(initialValue: editingPost?.capacity != nil)
+        _capacity = State(initialValue: editingPost?.capacity ?? 4)
+        _expiryPreset = State(initialValue: expiryPreset)
+        _existingImageURLs = State(initialValue: editingPost?.imageUrls ?? [])
+    }
+
+    private var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var enrolledCourses: [NativeCourseSummary] { courseStore.payload?.courses ?? [] }
+    private var visibilityPresets: [BuddyVisibilityPreset] {
+        enrolledCourses.isEmpty
+            ? [.everyone, .verifiedStudents, .sameSchool]
+            : BuddyVisibilityPreset.allCases
+    }
+    private var normalizedTags: [String] {
+        BuddyHashtagParser.tags(in: "\(title)\n\(bodyText)")
+    }
+    private var isEditing: Bool { editingPost != nil }
+    private var totalImageCount: Int { existingImageURLs.count + imageDrafts.count }
+    private var earliestStart: Date { isEditing ? min(Date(), startsAt) : Date() }
+    private var selectedExpiryDate: Date {
+        if isEditing,
+           expiryPreset == initialExpiryPreset,
+           let originalExpiryDate,
+           originalExpiryDate > Date() {
+            return originalExpiryDate
+        }
+        return expiryPreset.expiresAt()
+    }
+
+    private var canSubmit: Bool {
+        !trimmedTitle.isEmpty &&
+            trimmedTitle.count <= titleMax &&
+            bodyText.count <= bodyMax &&
+            (visibilityPreset != .coursemates || !selectedCourseIds.isEmpty) &&
+            (!hasSchedule || endsAt > startsAt) &&
+            !isPreparingImages &&
+            !store.isSaving
+    }
 
     var body: some View {
         Form {
             Section {
-                TextField(
-                    "Title",
-                    text: $title,
-                    prompt: Text("e.g. someone to study with, a lunch buddy on weekdays")
-                )
-                .accessibilityIdentifier("buddy-title")
-                PlaceholderTextEditor(
-                    text: $bodyText,
-                    placeholder: "Add timing, location, preferences, or anything else helpful."
-                )
-                .frame(minHeight: 100)
-                .accessibilityIdentifier("buddy-body")
-            }
-            Section {
-                DatePicker("Expires", selection: $expiresAt, in: Date.now..., displayedComponents: [.date, .hourAndMinute])
-            }
-            Section("Photos") {
-                PhotosPicker(
-                    selection: $selectedPhotos,
-                    maxSelectionCount: max(0, 3 - imageDrafts.count),
-                    matching: .images
-                ) {
-                    Label("Add photos", systemImage: "photo.badge.plus")
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text("Title")
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(SideSeatTheme.textSecondary)
+                        Spacer()
+                        Text("\(title.count)/\(titleMax)")
+                            .font(SideSeatTheme.Text.monoDigitCaption)
+                            .foregroundStyle(charCountColor(title.count, limit: titleMax))
+                    }
+                    TextField(
+                        "Title",
+                        text: $title,
+                        prompt: Text("e.g. someone to study with, a lunch buddy on weekdays")
+                    )
+                    .focused($focusedField, equals: .title)
+                    .onChange(of: title) { _, next in
+                        if next.count > titleMax {
+                            title = String(next.prefix(titleMax))
+                        }
+                    }
+                    .accessibilityIdentifier("buddy-title")
                 }
-                .disabled(imageDrafts.count >= 3 || isPreparingImages || store.isSaving)
-                .accessibilityIdentifier("buddy-add-photos")
+                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
 
-                if !imageDrafts.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text("Details")
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(SideSeatTheme.textSecondary)
+                        Spacer()
+                        Text("\(bodyText.count)/\(bodyMax)")
+                            .font(SideSeatTheme.Text.monoDigitCaption)
+                            .foregroundStyle(charCountColor(bodyText.count, limit: bodyMax))
+                    }
+                    PlaceholderTextEditor(
+                        text: $bodyText,
+                        placeholder: "Describe your plan and add #tags, for example #study or #coffee.",
+                        focusValue: BuddyField.body,
+                        focusedField: $focusedField
+                    )
+                    .frame(minHeight: 110)
+                    .onChange(of: bodyText) { _, next in
+                        if next.count > bodyMax {
+                            bodyText = String(next.prefix(bodyMax))
+                        }
+                    }
+                    .accessibilityIdentifier("buddy-body")
+
+                    if !normalizedTags.isEmpty {
+                        BuddyDetectedTagChips(tags: normalizedTags)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+                }
+                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+
+                HStack(spacing: SideSeatTheme.spaceMD) {
+                    PhotosPicker(
+                        selection: $selectedPhotos,
+                        maxSelectionCount: max(0, 3 - totalImageCount),
+                        matching: .images
+                    ) {
+                        Label("Add photos", systemImage: "photo.badge.plus")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.accent)
+                    }
+                    .disabled(totalImageCount >= 3 || isPreparingImages || store.isSaving)
+                    .accessibilityIdentifier("buddy-add-photos")
+
+                    Spacer()
+                    Text("\(totalImageCount)/3")
+                        .font(SideSeatTheme.Text.monoDigitCaption)
+                        .foregroundStyle(SideSeatTheme.textSecondary)
+                }
+
+                if totalImageCount > 0 {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
+                            ForEach(existingImageURLs, id: \.self) { url in
+                                BuddyExistingImageThumbnail(url: url) {
+                                    withAnimation(.easeOut(duration: 0.18)) {
+                                        existingImageURLs.removeAll { $0 == url }
+                                    }
+                                }
+                            }
                             ForEach(imageDrafts) { draft in
                                 BuddyImageDraftThumbnail(draft: draft) {
-                                    imageDrafts.removeAll { $0.id == draft.id }
+                                    withAnimation(.easeOut(duration: 0.18)) {
+                                        imageDrafts.removeAll { $0.id == draft.id }
+                                    }
                                 }
                             }
                         }
@@ -59,9 +294,90 @@ struct DiscoverBuddyCreateView: View {
                     .accessibilityIdentifier("buddy-photo-preview-list")
                 }
                 if isPreparingImages {
-                    ProgressView("Preparing photos")
+                    SSLoadingState("Preparing photos")
                 }
             }
+
+            Section {
+                Toggle("Set time and place", isOn: $hasSchedule)
+                    .accessibilityIdentifier("plan-has-schedule")
+                if hasSchedule {
+                    DatePicker("Starts", selection: $startsAt, in: earliestStart...)
+                        .accessibilityIdentifier("plan-starts-at")
+                    DatePicker("Ends", selection: $endsAt, in: startsAt...)
+                        .accessibilityIdentifier("plan-ends-at")
+                    TextField("Location (optional)", text: $location)
+                        .accessibilityIdentifier("plan-location")
+                    Toggle("Limit participants", isOn: $hasCapacityLimit)
+                    if hasCapacityLimit {
+                        Stepper("Up to \(capacity) people", value: $capacity, in: 2...500)
+                            .accessibilityIdentifier("plan-capacity")
+                    }
+                }
+            } header: {
+                Text("Plan details")
+            } footer: {
+                Text("Leave this off when you are still looking for people before choosing a time.")
+            }
+
+            Section {
+                BuddyVisibilitySelector(
+                    selection: $visibilityPreset,
+                    presets: visibilityPresets
+                )
+                if visibilityPreset == .coursemates {
+                    if courseStore.isLoading {
+                        SSLoadingState("Loading courses")
+                    } else if enrolledCourses.isEmpty {
+                        Text("Join at least one course to use coursemate visibility.")
+                            .font(.footnote)
+                            .foregroundStyle(SideSeatTheme.textSecondary)
+                    } else {
+                        HStack {
+                            Text("\(selectedCourseIds.count)/\(enrolledCourses.count) selected")
+                                .font(.caption)
+                                .foregroundStyle(SideSeatTheme.textSecondary)
+                            Spacer()
+                            Button(selectedCourseIds.count == enrolledCourses.count ? "Deselect all" : "Select all") {
+                                if selectedCourseIds.count == enrolledCourses.count {
+                                    selectedCourseIds.removeAll()
+                                } else {
+                                    selectedCourseIds = Set(enrolledCourses.map(\.id))
+                                }
+                            }
+                            .font(.caption.weight(.semibold))
+                        }
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(enrolledCourses) { course in
+                                    CourseVisibilityChip(
+                                        course: course,
+                                        isSelected: selectedCourseIds.contains(course.id)
+                                    ) {
+                                        if selectedCourseIds.contains(course.id) {
+                                            selectedCourseIds.remove(course.id)
+                                        } else {
+                                            selectedCourseIds.insert(course.id)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.vertical, 2)
+                        }
+                    }
+                }
+            } header: {
+                Text("Who can see this")
+            }
+
+            Section {
+                FlowExpiryChips(selection: $expiryPreset)
+            } header: {
+                Text("Expires")
+            } footer: {
+                Text(expiryPreset.hint)
+            }
+
             if let localIssue {
                 Section { Text(localIssue).foregroundStyle(SideSeatTheme.danger) }
             }
@@ -69,35 +385,125 @@ struct DiscoverBuddyCreateView: View {
                 Section { Text(issue).foregroundStyle(SideSeatTheme.danger) }
             }
         }
-        .navigationTitle("Find buddies")
+        .accessibilityIdentifier(isEditing ? "buddy-edit-view" : "buddy-create-view")
+        .navigationTitle(isEditing ? "Edit plan" : "Create plan")
         .navigationBarTitleDisplayMode(.inline)
+        .scrollDismissesKeyboard(.interactively)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
+                    .disabled(store.isSaving)
             }
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Post") {
-                    Task {
-                        if await store.createBuddy(
-                            title: title,
-                            body: bodyText,
-                            expiresAt: expiresAt,
-                            images: imageDrafts,
-                            using: session
-                        ) {
-                            await onCreated()
-                        }
-                    }
-                }
-                .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isPreparingImages || store.isSaving)
-                .accessibilityIdentifier("buddy-submit")
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { focusedField = nil }
+                    .accessibilityIdentifier("buddy-keyboard-done")
             }
         }
+        .safeAreaInset(edge: .bottom) {
+            SSPrimaryButton(
+                title: store.isSaving
+                    ? String(localized: isEditing ? "Saving…" : "Posting…")
+                    : String(localized: isEditing ? "Save changes" : "Post"),
+                isLoading: store.isSaving,
+                fill: .product,
+                chrome: .rounded,
+                accessibilityID: "buddy-submit"
+            ) {
+                Task { await submit() }
+            }
+            .disabled(!canSubmit)
+            .padding(.horizontal, SideSeatTheme.screenHorizontal)
+            .padding(.vertical, SideSeatTheme.spaceMD)
+            .background(.bar)
+            .accessibilityIdentifier("buddy-submit")
+        }
         .interactiveDismissDisabled(store.isSaving)
-        .accessibilityIdentifier("buddy-create-view")
+        .sensoryFeedback(.success, trigger: didSucceed)
+        .alert(
+            isEditing ? "Couldn't save changes" : "Couldn't create plan",
+            isPresented: Binding(
+                get: { submitIssue != nil },
+                set: { isPresented in
+                    if !isPresented { submitIssue = nil }
+                }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(submitIssue ?? "Please try again.")
+        }
         .onChange(of: selectedPhotos) { _, items in
             Task { await prepareSelectedPhotos(items) }
         }
+        .task {
+            await courseStore.load(using: session, scope: .enrolled, school: nil, query: "")
+            if selectedCourseIds.isEmpty, editingPost == nil {
+                selectedCourseIds = Set(enrolledCourses.map(\.id))
+            }
+        }
+    }
+
+    private func submit() async {
+        guard canSubmit else { return }
+        focusedField = nil
+        let courseIDs = visibilityPreset == .coursemates || editingPost?.category == "SHARED_COURSES"
+            ? Array(selectedCourseIds)
+            : []
+        let ok: Bool
+        if let editingPost {
+            ok = await store.updateBuddy(
+                post: editingPost,
+                title: title,
+                body: bodyText,
+                tags: normalizedTags,
+                visibility: visibilityPreset.rawValue,
+                courseIds: courseIDs,
+                startsAt: hasSchedule ? startsAt : nil,
+                endsAt: hasSchedule ? endsAt : nil,
+                location: hasSchedule ? location : nil,
+                capacity: hasSchedule && hasCapacityLimit ? capacity : nil,
+                expiresAt: selectedExpiryDate,
+                existingImageURLs: existingImageURLs,
+                images: imageDrafts,
+                using: session
+            )
+        } else {
+            ok = await store.createBuddy(
+                title: title,
+                body: bodyText,
+                tags: normalizedTags,
+                visibility: visibilityPreset.rawValue,
+                replyPreference: "DIRECT_MESSAGE",
+                courseIds: courseIDs,
+                startsAt: hasSchedule ? startsAt : nil,
+                endsAt: hasSchedule ? endsAt : nil,
+                location: hasSchedule ? location : nil,
+                capacity: hasSchedule && hasCapacityLimit ? capacity : nil,
+                expiresAt: selectedExpiryDate,
+                images: imageDrafts,
+                using: session
+            )
+        }
+        if ok {
+            didSucceed = true
+            await onCreated()
+        } else {
+            submitIssue = store.issue ?? String(
+                localized: isEditing
+                    ? "The plan could not be updated. Please try again."
+                    : "The plan could not be created. Please try again."
+            )
+        }
+    }
+
+    private func charCountColor(_ count: Int, limit: Int) -> Color {
+        if count > limit { return SideSeatTheme.danger }
+        let remaining = limit - count
+        if remaining <= Swift.max(1, Int(ceil(Double(limit) * 0.12))) {
+            return SideSeatTheme.warning
+        }
+        return SideSeatTheme.textSecondary
     }
 
     private func prepareSelectedPhotos(_ items: [PhotosPickerItem]) async {
@@ -123,7 +529,163 @@ struct DiscoverBuddyCreateView: View {
                 localIssue = "That photo could not be read."
             }
         }
-        imageDrafts = nextDrafts
+        withAnimation(.easeOut(duration: 0.2)) {
+            imageDrafts = nextDrafts
+        }
+    }
+}
+
+private struct BuddyExistingImageThumbnail: View {
+    let url: String
+    let onRemove: () -> Void
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            AsyncImage(url: URL(string: url)) { phase in
+                if let image = phase.image {
+                    image.resizable().scaledToFill()
+                } else if phase.error != nil {
+                    Image(systemName: "photo")
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+                } else {
+                    ProgressView()
+                }
+            }
+            .frame(width: 76, height: 76)
+            .background(SideSeatTheme.fillTertiary)
+            .clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.mediaRadius, style: .continuous))
+
+            Button(action: onRemove) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.title3)
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(.white, .black.opacity(0.45))
+            }
+            .buttonStyle(.plain)
+            .offset(x: 4, y: -4)
+            .accessibilityLabel("Remove photo")
+        }
+    }
+}
+
+private struct BuddyDetectedTagChips: View {
+    let tags: [String]
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                ForEach(tags, id: \.self) { tag in
+                    Text("#\(tag)")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.accent)
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 5)
+                        .background(SideSeatTheme.accent.opacity(0.10), in: Capsule())
+                }
+            }
+        }
+        .accessibilityIdentifier("buddy-detected-tags")
+    }
+}
+
+private struct BuddyVisibilitySelector: View {
+    @Binding var selection: BuddyVisibilityPreset
+    let presets: [BuddyVisibilityPreset]
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(Array(presets.enumerated()), id: \.element.id) { index, preset in
+                Button {
+                    withAnimation(.easeOut(duration: 0.15)) {
+                        selection = preset
+                    }
+                } label: {
+                    HStack(spacing: SideSeatTheme.spaceMD) {
+                        Image(systemName: preset.systemImage)
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(selection == preset ? SideSeatTheme.accent : SideSeatTheme.textSecondary)
+                            .frame(width: 28, height: 28)
+                            .background(
+                                selection == preset
+                                    ? SideSeatTheme.accent.opacity(0.10)
+                                    : SideSeatTheme.fillTertiary,
+                                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            )
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(preset.title)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(SideSeatTheme.textPrimary)
+                            Text(preset.hint)
+                                .font(.caption)
+                                .foregroundStyle(SideSeatTheme.textSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Spacer(minLength: SideSeatTheme.spaceSM)
+                        Image(systemName: selection == preset ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(
+                                selection == preset ? SideSeatTheme.accent : SideSeatTheme.textSecondary.opacity(0.45)
+                            )
+                    }
+                    .contentShape(Rectangle())
+                    .padding(.vertical, 10)
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(selection == preset ? .isSelected : [])
+
+                if index < presets.count - 1 {
+                    Divider()
+                        .padding(.leading, 40)
+                }
+            }
+        }
+    }
+}
+
+private struct FlowExpiryChips: View {
+    @Binding var selection: BuddyExpiryPreset
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                ForEach(BuddyExpiryPreset.allCases) { preset in
+                    Button {
+                        withAnimation(.easeOut(duration: 0.15)) {
+                            selection = preset
+                        }
+                    } label: {
+                        Text(preset.title)
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
+                                    .fill(
+                                        selection == preset
+                                            ? SideSeatTheme.accent.opacity(0.14)
+                                            : SideSeatTheme.fillTertiary
+                                    )
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
+                                    .strokeBorder(
+                                        selection == preset
+                                            ? SideSeatTheme.accent.opacity(0.45)
+                                            : Color.clear,
+                                        lineWidth: 1
+                                    )
+                            )
+                            .foregroundStyle(
+                                selection == preset ? SideSeatTheme.accent : SideSeatTheme.textPrimary
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(selection == preset ? .isSelected : [])
+                }
+            }
+        }
+        .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
     }
 }
 
@@ -144,8 +706,8 @@ private struct BuddyImageDraftThumbnail: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .frame(width: 72, height: 72)
-            .clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
+            .frame(width: 76, height: 76)
+            .clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.mediaRadius, style: .continuous))
 
             Button(action: onRemove) {
                 Image(systemName: "xmark.circle.fill")
@@ -154,8 +716,42 @@ private struct BuddyImageDraftThumbnail: View {
                     .foregroundStyle(.white, .black.opacity(0.45))
             }
             .buttonStyle(.plain)
+            .offset(x: 4, y: -4)
             .accessibilityLabel("Remove photo")
         }
+    }
+}
+
+private struct CourseVisibilityChip: View {
+    let course: NativeCourseSummary
+    let isSelected: Bool
+    let action: () -> Void
+
+    private var title: String {
+        if let code = course.code, !code.isEmpty {
+            return "\(code) · \(course.name)"
+        }
+        return course.name
+    }
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .lineLimit(1)
+                .foregroundStyle(isSelected ? SideSeatTheme.accent : SideSeatTheme.textSecondary)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(
+                    isSelected ? SideSeatTheme.accent.opacity(0.12) : SideSeatTheme.fillTertiary,
+                    in: Capsule()
+                )
+                .overlay {
+                    Capsule()
+                        .stroke(isSelected ? SideSeatTheme.accent.opacity(0.3) : .clear, lineWidth: 1)
+                }
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -169,7 +765,19 @@ struct DiscoverActivityCreateView: View {
     @State private var location = ""
     @State private var unlimitedCapacity = true
     @State private var capacity = 8
+    @State private var didSucceed = false
+    @FocusState private var focusedField: ActivityField?
+
+    private enum ActivityField { case title, description, location }
+
     let onCreated: () async -> Void
+
+    private var canSubmit: Bool {
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            !descriptionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            !location.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            !store.isSaving
+    }
 
     var body: some View {
         Form {
@@ -179,14 +787,21 @@ struct DiscoverActivityCreateView: View {
                     text: $title,
                     prompt: Text("e.g. Sunday coffee study session")
                 )
+                .focused($focusedField, equals: .title)
                 .accessibilityIdentifier("activity-title")
+
                 PlaceholderTextEditor(
                     text: $descriptionText,
-                    placeholder: "What to bring, who it's for, meetup spot…"
+                    placeholder: "What to bring, who it's for, meetup spot…",
+                    focusValue: ActivityField.description,
+                    focusedField: $focusedField
                 )
                 .frame(minHeight: 100)
                 .accessibilityIdentifier("activity-description")
+            } header: {
+                Text("Activity")
             }
+
             Section {
                 DatePicker(
                     "Starts",
@@ -199,58 +814,80 @@ struct DiscoverActivityCreateView: View {
                     text: $location,
                     prompt: Text("Campus café, library, park…")
                 )
+                .focused($focusedField, equals: .location)
                 .accessibilityIdentifier("activity-location")
             }
+
             Section {
                 Toggle("Unlimited capacity", isOn: $unlimitedCapacity)
+                    .tint(SideSeatTheme.accent)
                 if !unlimitedCapacity {
                     Stepper("Capacity: \(capacity)", value: $capacity, in: 2...50)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
                 }
+            } header: {
+                Text("Capacity")
             }
+
             if let issue = store.issue {
                 Section { Text(issue).foregroundStyle(SideSeatTheme.danger) }
             }
         }
+        .animation(.easeOut(duration: 0.2), value: unlimitedCapacity)
         .navigationTitle("New activity")
         .navigationBarTitleDisplayMode(.inline)
+        .scrollDismissesKeyboard(.interactively)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
-            }
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Create") {
-                    Task {
-                        if await store.createActivity(
-                            title: title,
-                            description: descriptionText,
-                            startAt: startAt,
-                            location: location,
-                            unlimitedCapacity: unlimitedCapacity,
-                            capacity: capacity,
-                            using: session
-                        ) {
-                            await onCreated()
-                        }
-                    }
-                }
-                .disabled(!canSubmit || store.isSaving)
-                .accessibilityIdentifier("activity-submit")
+                    .disabled(store.isSaving)
             }
         }
+        .safeAreaInset(edge: .bottom) {
+            SSPrimaryButton(
+                title: store.isSaving ? "Creating…" : "Create",
+                isLoading: store.isSaving,
+                fill: .product,
+                chrome: .rounded,
+                accessibilityID: "activity-submit"
+            ) {
+                Task { await submit() }
+            }
+            .disabled(!canSubmit)
+            .padding(.horizontal, SideSeatTheme.screenHorizontal)
+            .padding(.vertical, SideSeatTheme.spaceMD)
+            .background(.bar)
+        }
         .interactiveDismissDisabled(store.isSaving)
+        .sensoryFeedback(.success, trigger: didSucceed)
         .accessibilityIdentifier("activity-create-view")
+        .task { focusedField = .title }
     }
 
-    private var canSubmit: Bool {
-        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-            !descriptionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-            !location.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    private func submit() async {
+        guard canSubmit else { return }
+        focusedField = nil
+        let ok = await store.createActivity(
+            title: title,
+            description: descriptionText,
+            startAt: startAt,
+            location: location,
+            unlimitedCapacity: unlimitedCapacity,
+            capacity: capacity,
+            using: session
+        )
+        if ok {
+            didSucceed = true
+            await onCreated()
+        }
     }
 }
 
-private struct PlaceholderTextEditor: View {
+private struct PlaceholderTextEditor<FocusValue: Hashable>: View {
     @Binding var text: String
     let placeholder: LocalizedStringKey
+    var focusValue: FocusValue
+    var focusedField: FocusState<FocusValue?>.Binding
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -262,7 +899,10 @@ private struct PlaceholderTextEditor: View {
                     .allowsHitTesting(false)
             }
             TextEditor(text: $text)
+                .focused(focusedField, equals: focusValue)
                 .scrollContentBackground(.hidden)
+                .frame(minHeight: focusedField.wrappedValue == focusValue ? 130 : 100)
+                .animation(.easeOut(duration: 0.2), value: focusedField.wrappedValue == focusValue)
         }
     }
 }

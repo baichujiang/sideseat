@@ -54,7 +54,9 @@ export function InboxDirectMessagePreview({
   const { messages: m } = useLocaleContext();
   const p = m.inbox.preview;
   const youPrefix = fromMe ? (
-    <span className="shrink-0 text-[12px] font-medium text-[#6B7280] dark:text-zinc-500">You:</span>
+    <span className="shrink-0 text-[12px] font-medium text-[#6B7280] dark:text-zinc-500">
+      {m.inbox.youPrefix}
+    </span>
   ) : null;
 
   if (preview.kind === "text") {
@@ -65,7 +67,7 @@ export function InboxDirectMessagePreview({
           emphasize && "font-semibold text-[#374151] dark:text-zinc-300",
         )}
       >
-        {fromMe ? `You: ${preview.text}` : preview.text}
+        {fromMe ? `${m.inbox.youPrefix} ${preview.text}` : preview.text}
       </p>
     );
   }

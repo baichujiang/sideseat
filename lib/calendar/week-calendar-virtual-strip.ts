@@ -2,8 +2,6 @@ import { addDays, differenceInCalendarDays } from "date-fns";
 
 import { berlinCalendarDayStart } from "@/lib/calendar/week-calendar-day-columns";
 import {
-  HOME_CALENDAR_DATA_WINDOW_FUTURE_DAYS,
-  HOME_CALENDAR_DATA_WINDOW_PAST_DAYS,
   WEEK_CALENDAR_VIRTUAL_EXTEND_CHUNK_DAYS,
   WEEK_CALENDAR_VIRTUAL_INITIAL_BUFFER_DAYS,
   WEEK_CALENDAR_VIRTUAL_MAX_COLUMNS,

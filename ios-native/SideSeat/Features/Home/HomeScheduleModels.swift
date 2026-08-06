@@ -1,6 +1,6 @@
 import Foundation
 
-struct NativeHomeSchedule: Decodable, Sendable {
+struct NativeHomeSchedule: Codable, Sendable {
     let window: NativeHomeScheduleWindow
     let classBlocks: [NativeHomeClassBlock]
     let studyEntries: [NativeHomeStudyEntry]
@@ -44,7 +44,10 @@ struct NativeHomeSchedule: Decodable, Sendable {
                 end: end,
                 location: entry.location,
                 colorHex: entry.categoryColor,
-                source: entry.id.hasPrefix("icsfeed:") ? .subscription : .event
+                source: entry.id.hasPrefix("icsfeed:") ? .subscription : .event,
+                withLabel: entry.withLabel,
+                participantNames: entry.eventParticipants.map(\.name),
+                discoverActivityID: entry.discoverActivityId
             )
         }
 
@@ -72,19 +75,60 @@ struct NativeHomeSchedule: Decodable, Sendable {
             return $0.start < $1.start
         }
     }
+
+    func agendaSections(
+        startingAt startDate: Date,
+        dayCount: Int = HomeAgendaWindow.defaultDayCount,
+        calendar: Calendar = .sideSeatBerlin
+    ) -> [HomeAgendaSection] {
+        HomeAgendaWindow.sections(
+            schedule: self,
+            startingAt: startDate,
+            dayCount: dayCount,
+            calendar: calendar
+        )
+    }
 }
 
-struct NativeHomeScheduleWindow: Decodable, Sendable {
+struct HomeAgendaSection: Identifiable, Hashable, Sendable {
+    let day: Date
+    let items: [HomeAgendaItem]
+
+    var id: Date { day }
+}
+
+enum HomeAgendaWindow {
+    static let defaultDayCount = 14
+
+    static func sections(
+        schedule: NativeHomeSchedule,
+        startingAt startDate: Date,
+        dayCount: Int = defaultDayCount,
+        calendar: Calendar = .sideSeatBerlin
+    ) -> [HomeAgendaSection] {
+        let start = calendar.startOfDay(for: startDate)
+        return (0..<max(1, dayCount)).compactMap { offset in
+            guard let day = calendar.date(byAdding: .day, value: offset, to: start) else {
+                return nil
+            }
+            let items = schedule.items(on: day, calendar: calendar)
+            guard !items.isEmpty else { return nil }
+            return HomeAgendaSection(day: day, items: items)
+        }
+    }
+}
+
+struct NativeHomeScheduleWindow: Codable, Sendable {
     let start: String
     let end: String
     let timeZone: String
 }
 
-struct NativeHomeSubscriptionSchedule: Decodable, Sendable {
+struct NativeHomeSubscriptionSchedule: Codable, Sendable {
     let studyEntries: [NativeHomeStudyEntry]
 }
 
-struct NativeHomeClassBlock: Decodable, Sendable {
+struct NativeHomeClassBlock: Codable, Sendable {
     let courseId: String
     let courseName: String
     let courseCode: String?
@@ -95,7 +139,7 @@ struct NativeHomeClassBlock: Decodable, Sendable {
     let categoryColor: String?
 }
 
-struct NativeHomeStudyEntry: Decodable, Hashable, Sendable {
+struct NativeHomeStudyEntry: Codable, Hashable, Sendable {
     let id: String
     let title: String
     let location: String?
@@ -112,12 +156,12 @@ struct NativeHomeStudyEntry: Decodable, Hashable, Sendable {
     let discoverActivityId: String?
 }
 
-struct NativeHomeEventParticipant: Decodable, Hashable, Sendable {
+struct NativeHomeEventParticipant: Codable, Hashable, Sendable {
     let userId: String?
     let name: String
 }
 
-struct NativeHomeCalendarCategory: Decodable, Hashable, Identifiable, Sendable {
+struct NativeHomeCalendarCategory: Codable, Hashable, Identifiable, Sendable {
     let id: String
     let name: String
     let color: String
@@ -125,7 +169,7 @@ struct NativeHomeCalendarCategory: Decodable, Hashable, Identifiable, Sendable {
     let icsSubscriptionUrl: String?
 }
 
-struct NativeHomeCompanionOption: Decodable, Hashable, Identifiable, Sendable {
+struct NativeHomeCompanionOption: Codable, Hashable, Identifiable, Sendable {
     let id: String
     let name: String
     let avatarUrl: String?
@@ -138,6 +182,14 @@ struct HomeAgendaItem: Identifiable, Hashable, Sendable {
         case course
     }
 
+    enum Context: Hashable, Sendable {
+        case personal
+        case shared
+        case publicPlan
+        case subscription
+        case course
+    }
+
     let id: String
     let title: String
     let start: Date
@@ -145,6 +197,52 @@ struct HomeAgendaItem: Identifiable, Hashable, Sendable {
     let location: String?
     let colorHex: String?
     let source: Source
+    let withLabel: String?
+    let participantNames: [String]
+    let discoverActivityID: String?
+
+    init(
+        id: String,
+        title: String,
+        start: Date,
+        end: Date,
+        location: String?,
+        colorHex: String?,
+        source: Source,
+        withLabel: String? = nil,
+        participantNames: [String] = [],
+        discoverActivityID: String? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.start = start
+        self.end = end
+        self.location = location
+        self.colorHex = colorHex
+        self.source = source
+        self.withLabel = withLabel
+        self.participantNames = participantNames
+        self.discoverActivityID = discoverActivityID
+    }
+
+    var context: Context {
+        switch source {
+        case .course:
+            return .course
+        case .subscription:
+            return .subscription
+        case .event:
+            if discoverActivityID != nil { return .publicPlan }
+            if !participantNames.isEmpty || !(withLabel?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) {
+                return .shared
+            }
+            return .personal
+        }
+    }
+
+    var isSocial: Bool {
+        context == .shared || context == .publicPlan
+    }
 
     /// Matches Web `isLongOrAllDayTimedMinutes` — long blocks belong in the all-day band.
     func isAllDayStyle(on day: Date, calendar: Calendar = .sideSeatBerlin) -> Bool {
@@ -212,6 +310,10 @@ extension Calendar {
 extension NativeHomeSchedule {
     static func uiTestingFixture(now: Date) -> NativeHomeSchedule {
         let end = Calendar.sideSeatBerlin.date(byAdding: .hour, value: 1, to: now) ?? now
+        let planStart = Calendar.sideSeatBerlin.date(byAdding: .hour, value: 2, to: now) ?? now
+        let planEnd = Calendar.sideSeatBerlin.date(byAdding: .minute, value: 75, to: planStart) ?? planStart
+        let tomorrowStart = Calendar.sideSeatBerlin.date(byAdding: .day, value: 1, to: now) ?? now
+        let tomorrowEnd = Calendar.sideSeatBerlin.date(byAdding: .hour, value: 1, to: tomorrowStart) ?? tomorrowStart
         return NativeHomeSchedule(
             window: NativeHomeScheduleWindow(
                 start: now.ISO8601Format(),
@@ -231,6 +333,41 @@ extension NativeHomeSchedule {
                     eventParticipants: [],
                     startISO: now.ISO8601Format(),
                     endISO: end.ISO8601Format(),
+                    categoryId: "ui-test-category",
+                    categoryColor: "#2563EB",
+                    categoryName: "Study",
+                    discoverActivityId: nil
+                ),
+                NativeHomeStudyEntry(
+                    id: "ui-social-plan",
+                    title: "Coffee meetup",
+                    location: "Campus cafe",
+                    withLabel: "Test Peer",
+                    note: nil,
+                    repeatRule: "NONE",
+                    repeatUntilISO: nil,
+                    eventParticipants: [
+                        NativeHomeEventParticipant(userId: "ui-test-peer", name: "Test Peer"),
+                        NativeHomeEventParticipant(userId: "ui-test-peer-2", name: "Mina")
+                    ],
+                    startISO: planStart.ISO8601Format(),
+                    endISO: planEnd.ISO8601Format(),
+                    categoryId: nil,
+                    categoryColor: "#0F766E",
+                    categoryName: nil,
+                    discoverActivityId: "ui-plan-1"
+                ),
+                NativeHomeStudyEntry(
+                    id: "ui-tomorrow-event",
+                    title: "Tomorrow review",
+                    location: "Study room",
+                    withLabel: nil,
+                    note: nil,
+                    repeatRule: "NONE",
+                    repeatUntilISO: nil,
+                    eventParticipants: [],
+                    startISO: tomorrowStart.ISO8601Format(),
+                    endISO: tomorrowEnd.ISO8601Format(),
                     categoryId: "ui-test-category",
                     categoryColor: "#2563EB",
                     categoryName: "Study",

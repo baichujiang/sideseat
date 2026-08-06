@@ -33,11 +33,11 @@ struct CalendarCategoryListView: View {
                     } actions: {
                         Button("Try again") { Task { await store.load(using: session) } }
                     }
-                    .listRowBackground(Color.clear)
+                    .ssListPageStateRow()
                 } else if store.isLoading, store.categories.isEmpty {
-                    ProgressView("Loading calendars")
+                    SSLoadingState("Loading calendars")
                         .frame(maxWidth: .infinity)
-                        .listRowBackground(Color.clear)
+                        .ssListPageStateRow()
                 } else {
                     categorySection("Built-in", categories: store.categories.filter(\.isBuiltIn))
                     categorySection("Custom", categories: store.categories.filter { !$0.isBuiltIn })

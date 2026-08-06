@@ -21,19 +21,19 @@ struct CourseDetailView: View {
                     Button("Try again") { Task { await load() } }
                 }
             } else {
-                ProgressView("Loading course")
+                SSLoadingState("Loading course")
             }
         }
         .navigationTitle("Course")
         .navigationBarTitleDisplayMode(.inline)
         .task { if store.detail == nil { await load() } }
-        .confirmationDialog("Leave this course?", isPresented: $confirmingLeave) {
-            Button("Leave course", role: .destructive) {
+        .confirmationDialog("Remove this course?", isPresented: $confirmingLeave) {
+            Button("Remove course", role: .destructive) {
                 Task { _ = await store.setEnrolled(false, courseID: courseID, using: session) }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Your personal timetable for this course will be removed.")
+            Text("It will be removed from your current courses and classmate matching.")
         }
         .accessibilityIdentifier("course-detail")
     }
@@ -100,14 +100,14 @@ struct CourseDetailView: View {
                 if let code = course.code, !code.isEmpty {
                     Text(code)
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.verifiedSeal)
+                        .foregroundStyle(SideSeatTheme.courseFallback)
                 }
                 Text(course.name)
                     .font(.title2.weight(.semibold))
+                    .foregroundStyle(.primary)
                 HStack(spacing: 12) {
                     Text(course.school)
-                    Text(course.semesterLabel)
-                    Label("\(course.memberCount)", systemImage: "person.2")
+                    Label("\(course.memberCount) currently taking", systemImage: "person.2")
                 }
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -115,6 +115,11 @@ struct CourseDetailView: View {
                     Text(instructor)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                }
+                if course.communitySubmitted == true {
+                    Label("Community-added course", systemImage: "person.2.badge.plus")
+                        .font(.caption)
+                        .foregroundStyle(SideSeatTheme.HubTint.courses)
                 }
             }
             .padding(.vertical, 5)
@@ -125,11 +130,10 @@ struct CourseDetailView: View {
     private func actions(_ detail: NativeCourseDetail) -> some View {
         Section {
             if detail.chat.available {
-                Button {
-                    router.navigate(to: .courseChat(courseID: courseID))
-                } label: {
+                NavigationLink(value: AppRoute.courseChat(courseID: courseID)) {
                     HStack {
                         Label("Course chat", systemImage: "bubble.left.and.bubble.right")
+                            .foregroundStyle(.primary)
                         Spacer()
                         if detail.chat.unreadCount > 0 {
                             Text(detail.chat.unreadCount > 99 ? "99+" : "\(detail.chat.unreadCount)")
@@ -142,17 +146,18 @@ struct CourseDetailView: View {
                         }
                     }
                 }
+                .buttonStyle(.plain)
                 .accessibilityIdentifier("course-open-chat")
             }
 
             if detail.course.viewer.enrolled {
-                Button("Leave course", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
+                Button("Remove from my courses", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
                     confirmingLeave = true
                 }
                 .disabled(store.isMutating)
                 .accessibilityIdentifier("course-leave")
             } else {
-                Button("Join course", systemImage: "plus.circle.fill") {
+                Button("Add to my courses", systemImage: "plus.circle.fill") {
                     Task { _ = await store.setEnrolled(true, courseID: courseID, using: session) }
                 }
                 .disabled(store.isMutating)
@@ -229,8 +234,12 @@ private struct CourseMemberRow: View {
                 image.resizable().scaledToFill()
             } placeholder: {
                 Circle()
-                    .fill(SideSeatTheme.fillSubtle)
-                    .overlay(Text(String(member.displayName.prefix(1))).font(.headline))
+                    .fill(SideSeatTheme.AvatarPalette.color(for: member.displayName))
+                    .overlay(
+                        Text(String(member.displayName.prefix(1)))
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                    )
             }
             .frame(width: 42, height: 42)
             .clipShape(Circle())
@@ -238,6 +247,7 @@ private struct CourseMemberRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(member.displayName)
                     .font(.body.weight(.medium))
+                    .foregroundStyle(.primary)
                 if let tagline = member.tagline, !tagline.isEmpty {
                     Text(tagline)
                         .font(.caption)

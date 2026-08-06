@@ -63,7 +63,7 @@ export function DiscoverCreateActionSheet({
         aria-label={common.close}
         onClick={guardGhostClick(onClose)}
       />
-      <div className="relative z-[61] w-full max-w-lg rounded-t-[1.25rem] border border-border/70 bg-background px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 shadow-2xl">
+      <div className="relative z-[61] w-full max-w-lg translate-y-0 rounded-t-[1.25rem] border border-border/70 bg-background px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 shadow-2xl animate-in slide-in-from-bottom-4 fade-in duration-300">
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-muted" aria-hidden />
         <div className="mb-3 flex items-start justify-between gap-3">
           <h2 id="discover-create-action-title" className="text-[15px] font-semibold text-foreground">
@@ -72,7 +72,7 @@ export function DiscoverCreateActionSheet({
           <button
             type="button"
             onClick={guardGhostClick(onClose)}
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition active:scale-95 hover:bg-muted"
             aria-label={common.close}
           >
             <X className="h-4 w-4" strokeWidth={2.25} />
@@ -103,7 +103,7 @@ export function DiscoverCreateActionSheet({
         <button
           type="button"
           onClick={guardGhostClick(onClose)}
-          className="mt-3 w-full rounded-xl py-2.5 text-center text-[13px] font-medium text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
+          className="mt-3 w-full rounded-xl py-2.5 text-center text-[13px] font-medium text-muted-foreground transition active:scale-[0.99] hover:bg-muted/50 hover:text-foreground"
         >
           {dz.createSheetCancel}
         </button>
@@ -129,12 +129,11 @@ function ActionOption({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full items-start gap-3 rounded-2xl border border-[#E7E0D6]/90 bg-white px-3.5 py-3 text-left shadow-[0_2px_10px_rgba(15,23,42,0.04)] transition",
-        "hover:border-classmates-blue-border/70 hover:bg-classmates-blue-soft/30 active:scale-[0.99]",
-        "dark:border-border/80 dark:bg-card dark:hover:bg-muted/40",
+        "flex w-full items-start gap-3 rounded-2xl border border-border/80 bg-card px-3.5 py-3 text-left shadow-[0_2px_10px_rgba(15,23,42,0.04)] transition",
+        "hover:border-primary/30 hover:bg-primary/[0.04] active:scale-[0.99]",
       )}
     >
-      <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-classmates-blue-soft text-classmates-blue">
+      <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
         <Icon className="h-4 w-4" strokeWidth={2.25} aria-hidden />
       </span>
       <span className="min-w-0 flex-1">

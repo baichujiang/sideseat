@@ -2,6 +2,8 @@ import { execSync, spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { buildMigrationPolicy } from "./build-database-policy.mjs";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..");
@@ -29,6 +31,28 @@ function run(command, args, { allowFailure = false } = {}) {
 
   if (result.status !== 0 && !allowFailure) {
     process.exit(result.status ?? 1);
+  }
+}
+
+function assertNoConcurrentNextDev() {
+  if (process.platform === "win32" || process.env.CI || process.env.VERCEL) return;
+
+  const result = spawnSync("ps", ["-ax", "-o", "command="], {
+    encoding: "utf8",
+    cwd: repoRoot,
+  });
+  if (result.status !== 0) return;
+
+  const nextBinary = path.join(repoRoot, "node_modules", ".bin", "next");
+  const hasConcurrentDevServer = result.stdout
+    .split("\n")
+    .some((command) => command.includes(nextBinary) && /\bnext dev\b/.test(command));
+
+  if (hasConcurrentDevServer) {
+    console.error(
+      "[build] A Next.js development server is using this repository. Stop it before running npm run build so dev and production do not corrupt the shared .next directory.",
+    );
+    process.exit(1);
   }
 }
 
@@ -68,7 +92,10 @@ function migrateDeployWithRetries() {
   }
 }
 
-if (process.env.VERCEL) {
+assertNoConcurrentNextDev();
+const migrationPolicy = buildMigrationPolicy(buildEnv);
+
+if (migrationPolicy.run && process.env.VERCEL) {
   /** Clear failed migration rows so deploy can continue (allowFailure: prior resolve may noop). */
   const vercelMigrationResolves = [
     ["--rolled-back", "20260511130000_user_calendar_ics_subscription_url"],
@@ -81,7 +108,19 @@ if (process.env.VERCEL) {
   }
 }
 
-migrateDeployWithRetries();
+if (migrationPolicy.run) {
+  migrateDeployWithRetries();
+} else if (migrationPolicy.reason === "remote-local-build") {
+  console.warn(
+    `[build] Skipping prisma migrate deploy for remote database ${migrationPolicy.host}. Local builds require ALLOW_REMOTE_DATABASE_MIGRATIONS=1 before they may migrate a remote database.\n`,
+  );
+} else if (migrationPolicy.reason === "explicit-skip") {
+  console.warn("[build] Skipping prisma migrate deploy because SKIP_DATABASE_MIGRATIONS=1.\n");
+} else {
+  console.warn(
+    "[build] Skipping prisma migrate deploy because the local build process cannot verify its database target. Export a local DATABASE_URL or use the controlled CI/Vercel deployment pipeline.\n",
+  );
+}
 // Ensure generated client matches schema even if install/postinstall was skipped or cached oddly.
 run("npx", ["prisma", "generate"]);
 run("npx", ["next", "build"]);

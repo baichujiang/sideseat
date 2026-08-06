@@ -1,5 +1,8 @@
 import { getSessionUser } from "@/lib/auth/session";
-import { prisma } from "@/lib/db/prisma";
+import {
+  addNativeDiscoverActivityToCalendar,
+  NativeDiscoverActivityCalendarError,
+} from "@/lib/api/v1/discover-service";
 import {
   discoverActivityErrorMessage,
   discoverActivityErrorStatus,
@@ -22,34 +25,16 @@ export async function POST(
     return error(discoverActivityErrorMessage("AUTH_REQUIRED"), 401, "AUTH_REQUIRED");
   }
 
-  const activity = await prisma.discoverActivity.findUnique({
-    where: { id: activityId },
-    select: { id: true, title: true, location: true, startAt: true, endAt: true },
-  });
-  if (!activity) {
-    return error("Activity not found.", 404);
-  }
-
-  const existing = await prisma.calendarEntry.findFirst({
-    where: { userId: user.id, discoverActivityId: activity.id },
-    select: { id: true },
-  });
-  if (existing) {
-    return ok({ calendarEntryId: existing.id, created: false });
-  }
-
-  const entry = await prisma.calendarEntry.create({
-    data: {
+  try {
+    const data = await addNativeDiscoverActivityToCalendar({
       userId: user.id,
-      discoverActivityId: activity.id,
-      title: activity.title,
-      location: activity.location,
-      startAt: activity.startAt,
-      endAt: activity.endAt,
-      source: "discover_activity",
-    },
-    select: { id: true },
-  });
-
-  return ok({ calendarEntryId: entry.id, created: true }, { status: 201 });
+      activityId,
+    });
+    return ok(data, { status: data.created ? 201 : 200 });
+  } catch (cause) {
+    if (cause instanceof NativeDiscoverActivityCalendarError) {
+      return error("Activity not found.", 404);
+    }
+    throw cause;
+  }
 }

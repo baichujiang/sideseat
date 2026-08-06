@@ -1,9 +1,11 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { PwaUpdatePrompt } from "@/components/pwa/pwa-update-prompt";
 import { useCapacitorNative } from "@/hooks/use-capacitor-native";
+import { isNativeWebPath } from "@/lib/nav/legacy-web-freeze";
 import { registerBeforeInstallPromptCapture } from "@/lib/pwa/deferred-install";
 
 /**
@@ -12,16 +14,18 @@ import { registerBeforeInstallPromptCapture } from "@/lib/pwa/deferred-install";
  * manifest + meta tags only; SW is ignored but harmless.
  */
 export function PwaRegister() {
+  const pathname = usePathname();
   const isNativeApp = useCapacitorNative();
+  const isNativeHandoff = isNativeWebPath(pathname);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
-    if (isNativeApp) return;
+    if (isNativeApp || isNativeHandoff) return;
     return registerBeforeInstallPromptCapture();
-  }, [isNativeApp]);
+  }, [isNativeApp, isNativeHandoff]);
 
   useEffect(() => {
-    if (isNativeApp) return;
+    if (isNativeApp || isNativeHandoff) return;
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
       return;
     }
@@ -54,9 +58,9 @@ export function PwaRegister() {
     return () => {
       navigator.serviceWorker.removeEventListener("message", onSwMessage);
     };
-  }, [isNativeApp]);
+  }, [isNativeApp, isNativeHandoff]);
 
-  if (isNativeApp) return null;
+  if (isNativeApp || isNativeHandoff) return null;
 
   return <PwaUpdatePrompt registration={registration} />;
 }

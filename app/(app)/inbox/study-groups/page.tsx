@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-
 import { GuestAppCta } from "@/components/app/guest-app-cta";
 import { InboxChatsView } from "@/components/inbox/inbox-chats-view";
 import { BackLink } from "@/components/nav/back-link";

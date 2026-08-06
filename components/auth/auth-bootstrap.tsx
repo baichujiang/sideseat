@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { getAccessToken, setAccessToken } from "@/lib/auth/client-access-token";
 import { shouldAutoGuestSession } from "@/lib/nav/auto-guest-path";
+import { isNativeWebPath } from "@/lib/nav/legacy-web-freeze";
 import { isPublicAppPath } from "@/lib/nav/public-app-path";
 
 async function refreshAccessToken(): Promise<"ok" | "guest" | "unauthorized" | "unavailable"> {
@@ -50,6 +51,11 @@ export function AuthBootstrap() {
 
     let cancelled = false;
     const pathAtMount = pathnameRef.current;
+
+    if (isNativeWebPath(pathAtMount)) {
+      setSessionReady(true);
+      return;
+    }
 
     const run = async () => {
       try {

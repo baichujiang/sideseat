@@ -5,6 +5,8 @@ import { z } from "zod";
 export const CLASSMATE_POST_CITY_MAX_LEN = 60;
 export const CLASSMATE_POST_TITLE_MAX_LEN = 120;
 export const CLASSMATE_POST_BODY_MAX_LEN = 280;
+export const CLASSMATE_POST_TAG_MAX_LEN = 24;
+export const CLASSMATE_POST_MAX_TAGS = 8;
 
 export const CLASSMATE_POST_META_OTHER_NOTE_MAX = 40;
 export const CLASSMATE_POST_STUDY_VENUE_OTHER_NOTE_MAX = CLASSMATE_POST_META_OTHER_NOTE_MAX;
@@ -69,6 +71,37 @@ function dedupePreserveOrder<T extends string>(values: T[]): T[] {
   }
   return out;
 }
+
+function normalizeBuddyTag(value: string) {
+  return value
+    .trim()
+    .replace(/^#+/, "")
+    .replace(/\s+/g, " ")
+    .toLocaleLowerCase();
+}
+
+export function extractClassmatePostHashtags(value: string) {
+  const tags: string[] = [];
+  for (const match of value.matchAll(/#([\p{L}\p{N}_-]+)/gu)) {
+    const tag = normalizeBuddyTag(match[1] ?? "");
+    if (!tag || tag.length > CLASSMATE_POST_TAG_MAX_LEN || tags.includes(tag)) continue;
+    tags.push(tag);
+    if (tags.length === CLASSMATE_POST_MAX_TAGS) break;
+  }
+  return tags;
+}
+
+const classmatePostTagsSchema = z
+  .array(z.string().trim().min(1).max(CLASSMATE_POST_TAG_MAX_LEN))
+  .max(CLASSMATE_POST_MAX_TAGS)
+  .optional()
+  .transform((values) =>
+    dedupePreserveOrder(
+      (values ?? [])
+        .map(normalizeBuddyTag)
+        .filter((value) => value.length > 0 && value.length <= CLASSMATE_POST_TAG_MAX_LEN),
+    ),
+  );
 
 function dedupeOffersPreserveOrder<
   T extends {
@@ -188,6 +221,20 @@ const classmatePostCategorySchema = z.enum([
   "LANGUAGE",
   "SPORTS",
   "SHARED_COURSES",
+  "OTHER",
+]);
+
+const classmatePostVisibilitySchema = z.enum([
+  "SCHOOL_ONLY",
+  "CITY_INTERNATIONALS",
+  "VERIFIED_ONLY",
+  "COURSEMATES_ONLY",
+]);
+
+const classmatePostReplyPreferenceSchema = z.enum([
+  "DIRECT_MESSAGE",
+  "REQUEST_FIRST",
+  "VERIFIED_ONLY",
 ]);
 
 /** Legacy: max images on existing Discover posts (`ClassmatePostImage.sortOrder` is 0..2). */
@@ -202,6 +249,19 @@ export const createClassmatePostSchema = z
       (v) => (v == null ? undefined : v),
       z.string().trim().max(CLASSMATE_POST_BODY_MAX_LEN).optional(),
     ),
+    tags: classmatePostTagsSchema,
+    visibility: classmatePostVisibilitySchema.default("CITY_INTERNATIONALS"),
+    replyPreference: classmatePostReplyPreferenceSchema.default("DIRECT_MESSAGE"),
+    startsAt: z
+      .string()
+      .refine((s) => !Number.isNaN(Date.parse(s)), "Choose a valid start time.")
+      .optional(),
+    endsAt: z
+      .string()
+      .refine((s) => !Number.isNaN(Date.parse(s)), "Choose a valid end time.")
+      .optional(),
+    location: z.string().trim().max(120).optional(),
+    capacity: z.number().int().min(2).max(500).optional(),
     /** ISO-8601 instant; accept any string `Date` can parse. */
     expiresAt: z
       .string()
@@ -214,6 +274,10 @@ export const createClassmatePostSchema = z
     meals: mealsPayloadSchema.optional(),
     language: languagePayloadSchema.optional(),
     sport: sportPayloadSchema.optional(),
+    imageUrls: z
+      .array(z.string().min(1).max(4_000_000))
+      .max(CLASSMATE_POST_MAX_IMAGES)
+      .optional(),
   })
   .strict()
   .refine(
@@ -221,6 +285,24 @@ export const createClassmatePostSchema = z
       data.category !== "SHARED_COURSES" ||
       (Array.isArray(data.courseIds) && data.courseIds.length > 0),
     { message: "Select at least one course to share.", path: ["courseIds"] },
+  )
+  .refine(
+    (data) =>
+      data.visibility !== "COURSEMATES_ONLY" ||
+      (Array.isArray(data.courseIds) && data.courseIds.length > 0),
+    { message: "Select at least one course for coursemates-only visibility.", path: ["courseIds"] },
+  )
+  .refine(
+    (data) => (data.startsAt == null) === (data.endsAt == null),
+    { message: "Choose both a start and end time.", path: ["endsAt"] },
+  )
+  .refine(
+    (data) => data.startsAt == null || Date.parse(data.endsAt!) > Date.parse(data.startsAt),
+    { message: "End time must be after the start time.", path: ["endsAt"] },
+  )
+  .refine(
+    (data) => data.startsAt == null || Date.parse(data.startsAt) > Date.now() - 60_000,
+    { message: "Choose a future start time.", path: ["startsAt"] },
   )
   .superRefine((data, ctx) => {
     if (data.study != null && data.category !== "STUDY") {
@@ -288,9 +370,72 @@ export const createClassmatePostSchema = z
         });
       }
     }
-  });
+  })
+  .transform((data) => ({
+    ...data,
+    tags: dedupePreserveOrder([
+      ...data.tags,
+      ...extractClassmatePostHashtags(`${data.title}\n${data.body ?? ""}`),
+    ]).slice(0, CLASSMATE_POST_MAX_TAGS),
+  }));
 
 export type CreateClassmatePostInput = z.infer<typeof createClassmatePostSchema>;
+
+export const updateClassmatePostSchema = z
+  .object({
+    city: z.string().trim().min(1).max(CLASSMATE_POST_CITY_MAX_LEN),
+    title: z.string().trim().min(1, "Add a short title.").max(CLASSMATE_POST_TITLE_MAX_LEN),
+    body: z.preprocess(
+      (v) => (v == null ? undefined : v),
+      z.string().trim().max(CLASSMATE_POST_BODY_MAX_LEN).optional(),
+    ),
+    tags: classmatePostTagsSchema,
+    visibility: classmatePostVisibilitySchema,
+    replyPreference: classmatePostReplyPreferenceSchema,
+    startsAt: z
+      .string()
+      .refine((s) => !Number.isNaN(Date.parse(s)), "Choose a valid start time.")
+      .optional(),
+    endsAt: z
+      .string()
+      .refine((s) => !Number.isNaN(Date.parse(s)), "Choose a valid end time.")
+      .optional(),
+    location: z.string().trim().max(120).optional(),
+    capacity: z.number().int().min(2).max(500).optional(),
+    expiresAt: z
+      .string()
+      .min(1)
+      .refine((s) => !Number.isNaN(Date.parse(s)), "Choose a valid expiry."),
+    courseIds: z.array(z.string().min(1)).max(20).optional(),
+    imageUrls: z
+      .array(z.string().min(1).max(4_000_000))
+      .max(CLASSMATE_POST_MAX_IMAGES)
+      .optional(),
+  })
+  .strict()
+  .refine(
+    (data) =>
+      data.visibility !== "COURSEMATES_ONLY" ||
+      (Array.isArray(data.courseIds) && data.courseIds.length > 0),
+    { message: "Select at least one course for coursemates-only visibility.", path: ["courseIds"] },
+  )
+  .refine(
+    (data) => (data.startsAt == null) === (data.endsAt == null),
+    { message: "Choose both a start and end time.", path: ["endsAt"] },
+  )
+  .refine(
+    (data) => data.startsAt == null || Date.parse(data.endsAt!) > Date.parse(data.startsAt),
+    { message: "End time must be after the start time.", path: ["endsAt"] },
+  )
+  .transform((data) => ({
+    ...data,
+    tags: dedupePreserveOrder([
+      ...data.tags,
+      ...extractClassmatePostHashtags(`${data.title}\n${data.body ?? ""}`),
+    ]).slice(0, CLASSMATE_POST_MAX_TAGS),
+  }));
+
+export type UpdateClassmatePostInput = z.infer<typeof updateClassmatePostSchema>;
 
 export const classmatePostInsightBodySchema = z.object({
   kind: z.nativeEnum(ClassmatePostInsightKind),

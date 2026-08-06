@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 
 import { loadAvailabilityShare } from "@/lib/api/chat-planning";
 import { AppPushLayer } from "@/components/ui/app-push-layer";
-import { Button } from "@/components/ui/button";
 import { PlanRequestModal } from "@/components/chat/plan-request-modal";
 import { cn } from "@/lib/utils";
 
@@ -69,7 +68,7 @@ export function AvailabilityViewer({
           <div className="shrink-0 px-4 pb-3 pt-2">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-sm font-semibold">{peerName}'s availability</h2>
+                <h2 className="text-sm font-semibold">{peerName}&apos;s availability</h2>
                 <p className="mt-0.5 text-[12px] text-muted-foreground">
                   Pick a time to plan something together.
                 </p>

@@ -12,6 +12,7 @@ enum AppTab: String, CaseIterable, Hashable, Identifiable {
 
 enum AppRoute: Hashable, Sendable {
     case courses
+    case myPosts
     case profile(userID: String)
     case contacts
     case plans
@@ -31,8 +32,7 @@ enum AppRoute: Hashable, Sendable {
 }
 
 enum CreateDestination: String, Identifiable, CaseIterable {
-    case buddyPost
-    case activity
+    case plan
 
     var id: String { rawValue }
 }

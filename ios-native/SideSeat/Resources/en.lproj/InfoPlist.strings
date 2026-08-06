@@ -1,0 +1,4 @@
+"NSLocationWhenInUseUsageDescription" = "SideSeat uses your location only when you choose to share it in a direct chat.";
+"NSMicrophoneUsageDescription" = "SideSeat uses the microphone to turn your spoken event details into calendar text.";
+"NSPhotoLibraryAddUsageDescription" = "SideSeat saves a schedule image to your photo library only when you choose Save to Photos.";
+"NSSpeechRecognitionUsageDescription" = "SideSeat uses speech recognition to transcribe event details for smart calendar entry.";

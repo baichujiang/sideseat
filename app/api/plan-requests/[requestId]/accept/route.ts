@@ -9,6 +9,7 @@ import {
   rangeFitsAvailability,
 } from "@/lib/queries/chat-planning";
 import { rangeFitsScheduleShareSnapshot } from "@/lib/schedule-share/build-schedule-share-snapshot";
+import { parseRevealConfigJson } from "@/lib/schedule-share/reveal-config";
 import { syncScheduleShareGuestProposalStatus } from "@/lib/schedule-share/create-plan-from-guest-proposal";
 import { PUBLIC_SCHEDULE_TIME_UNAVAILABLE } from "@/lib/schedule-share/public-errors";
 
@@ -58,6 +59,7 @@ export async function POST(
         rangeEnd: link.rangeEnd,
         proposalStart: planRequest.startTime,
         proposalEnd: planRequest.endTime,
+        includedDates: parseRevealConfigJson(link.revealConfig).includedDates,
       });
       if (!fits) {
         return error(PUBLIC_SCHEDULE_TIME_UNAVAILABLE, 409);

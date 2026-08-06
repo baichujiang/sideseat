@@ -23,6 +23,12 @@ export const NEW_THREAD_RATE_LIMIT_WINDOW_MINUTES = 60;
 export const NEW_THREAD_RATE_LIMIT_COUNT = 10;
 
 /**
+ * Unreplied direct-message gate: a user may send at most this many messages
+ * in a 1:1 thread before the peer replies. Soft-deleted rows still count.
+ */
+export const UNREPLIED_DIRECT_MESSAGE_LIMIT = 2;
+
+/**
  * Contact exchange cooldown: after a contact-exchange request is declined or
  * canceled, the other side has to wait this long before re-requesting. Keeps
  * the flow from becoming a "spam until they accept" channel without permanently

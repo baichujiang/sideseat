@@ -3,6 +3,9 @@ import {
   resolveInboxDirectPreview,
   type InboxDirectPreviewMessage,
 } from "@/lib/chat/inbox-direct-preview";
+import { displayUserMessageBody } from "@/lib/assistant/display-user-message";
+import { parseAssistantMessage } from "@/lib/assistant/message-payload";
+import { parseFaqTrigger } from "@/lib/assistant/faq-keys";
 import type { AppLocale } from "@/lib/i18n/app-locale";
 import type { AppMessages } from "@/lib/i18n/messages";
 
@@ -39,6 +42,12 @@ export function directMessageActionSnippet(
   if (message.type === "PLAN_CONFIRMED_CARD" && message.planRequest) {
     const title = message.planRequest.title.trim() || "Plan";
     return copy?.planConfirmed ? `${copy.planConfirmed} · ${title}` : `Plan confirmed · ${title}`;
+  }
+  if (parseFaqTrigger(message.body)) {
+    return displayUserMessageBody(message.body, appLocale);
+  }
+  if (message.body.includes("[sideseat-actions]")) {
+    return parseAssistantMessage(message.body).text.trim() || "…";
   }
   return message.body.trim() || "…";
 }

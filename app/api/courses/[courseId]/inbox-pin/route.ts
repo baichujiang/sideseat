@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { requireOnboardedUser } from "@/lib/auth/guards";
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
 import { prisma } from "@/lib/db/prisma";
 import { safeReturnPath } from "@/lib/nav/back";
 
@@ -25,7 +26,11 @@ export async function POST(
   }
 
   const membership = await prisma.userCourse.findFirst({
-    where: { userId: user.id, courseId },
+    where: {
+      userId: user.id,
+      courseId,
+      ...activeCourseMembershipWhere(),
+    },
     select: { id: true, inboxPinnedAt: true },
   });
 

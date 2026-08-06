@@ -1,17 +1,26 @@
 import { ConnectionStatus, LanguageProficiency, LanguageTag } from "@prisma/client";
 
+import { serializeAssistantMessage } from "@/lib/assistant/message-payload";
+import { buildAssistantWelcomePayload } from "@/lib/assistant/welcome";
 import { nicknameToKey } from "@/lib/auth/nickname-key";
 import { hashPassword } from "@/lib/auth/password";
 import { DEFAULT_SCHOOL } from "@/lib/constants/schools";
 import { prisma } from "@/lib/db/prisma";
+import type { AppLocale } from "@/lib/i18n/app-locale";
 
 /** Stable system account for the default Chats assistant thread. */
 export const ASSISTANT_BOT_USERNAME = "sideseat_assistant";
 
-const WELCOME_MESSAGE_EN =
-  "Hi! I'm the SideSeat assistant — product help only, not a real classmate.\n\nTap a quick question here or type your own. I'll point you to the right place in the app.";
-const WELCOME_MESSAGE_ZH =
-  "你好！我是 SideSeat 小助手，只做产品说明，不是真人同学。\n\n点这里的快捷问题，或直接输入；我会告诉你在应用里该怎么操作。";
+async function resolveWelcomeLocale(explicit?: AppLocale): Promise<AppLocale> {
+  if (explicit) return explicit;
+  try {
+    const { getServerAppLocale } = await import("@/lib/i18n/server-locale");
+    return await getServerAppLocale();
+  } catch {
+    // Chinese-first when locale cookie/header is unavailable (scripts, some API paths).
+    return "zh-CN";
+  }
+}
 
 export async function getOrCreateAssistantBotUser() {
   const existing = await prisma.user.findUnique({
@@ -94,24 +103,48 @@ async function absorbDuplicateAssistantConnections(primaryId: string, duplicateI
   });
 }
 
-async function ensureWelcomeOnConnection(connectionId: string, botUserId: string) {
+async function ensureWelcomeOnConnection(
+  connectionId: string,
+  botUserId: string,
+  viewerUserId: string,
+  localeHint?: AppLocale,
+) {
   const hasMessage = await prisma.message.findFirst({
     where: { connectionId },
     select: { id: true },
   });
   if (hasMessage) return;
 
+  const [locale, viewer] = await Promise.all([
+    resolveWelcomeLocale(localeHint),
+    prisma.user.findUnique({
+      where: { id: viewerUserId },
+      select: {
+        isGuest: true,
+        verifiedStudent: true,
+      },
+    }),
+  ]);
+
+  const payload = buildAssistantWelcomePayload(locale, {
+    isGuest: viewer?.isGuest ?? true,
+    verifiedStudent: viewer?.verifiedStudent ?? false,
+  });
+
   await prisma.message.create({
     data: {
       connectionId,
       senderId: botUserId,
-      body: `${WELCOME_MESSAGE_EN}\n\n${WELCOME_MESSAGE_ZH}`,
+      body: serializeAssistantMessage(payload),
     },
   });
 }
 
 /** Ensures a single ACTIVE DM with the assistant bot and a welcome message on first open. */
-export async function ensureAssistantBotConnection(viewerUserId: string): Promise<string> {
+export async function ensureAssistantBotConnection(
+  viewerUserId: string,
+  options?: { locale?: AppLocale },
+): Promise<string> {
   const bot = await getOrCreateAssistantBotUser();
   if (bot.id === viewerUserId) {
     const self = await prisma.connection.findFirst({
@@ -148,7 +181,7 @@ export async function ensureAssistantBotConnection(viewerUserId: string): Promis
     await absorbDuplicateAssistantConnections(primary.id, duplicateIds);
   }
 
-  await ensureWelcomeOnConnection(primary.id, bot.id);
+  await ensureWelcomeOnConnection(primary.id, bot.id, viewerUserId, options?.locale);
   return primary.id;
 }
 

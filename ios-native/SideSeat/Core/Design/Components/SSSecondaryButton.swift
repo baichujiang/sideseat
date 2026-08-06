@@ -20,8 +20,11 @@ struct SSSecondaryButton: View {
         Button(action: action) {
             Text(title)
                 .font(.subheadline.weight(fontWeight))
+                .lineLimit(1)
+                .padding(.horizontal, kind == .softFill ? SideSeatTheme.spaceLG : 0)
                 .frame(maxWidth: expands ? .infinity : nil)
                 .frame(minHeight: kind == .softFill ? 44 : nil)
+                .contentShape(Rectangle())
         }
         .buttonStyle(SSSecondaryButtonStyle(kind: kind))
         .ssAccessibilityIdentifier(accessibilityID)

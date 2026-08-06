@@ -47,6 +47,7 @@ export async function persistScheduleShareLinkUpdate(
   const normalizedReveal = normalizeRevealConfig({
     categoryIds: rc.categoryIds ?? [],
     presetKeys: rc.presetKeys ?? [],
+    hideAllDetails: rc.hideAllDetails ?? false,
     includedDates: rc.includedDates,
   });
 

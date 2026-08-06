@@ -37,6 +37,8 @@ actor APIClient {
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
         request.timeoutInterval = 30
+        request.httpShouldHandleCookies = false
+        request.cachePolicy = .reloadIgnoringLocalCacheData
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("ios", forHTTPHeaderField: "X-SideSeat-Platform")
         request.setValue(environment.appVersion, forHTTPHeaderField: "X-SideSeat-App-Version")
@@ -94,6 +96,8 @@ actor APIClient {
         var request = URLRequest(url: url)
         request.httpMethod = HTTPMethod.post.rawValue
         request.timeoutInterval = 60
+        request.httpShouldHandleCookies = false
+        request.cachePolicy = .reloadIgnoringLocalCacheData
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         request.setValue("ios", forHTTPHeaderField: "X-SideSeat-Platform")
@@ -190,8 +194,18 @@ protocol APITransport: Sendable {
 struct URLSessionTransport: APITransport {
     private let session: URLSession
 
-    init(session: URLSession = .shared) {
-        self.session = session
+    init(session: URLSession? = nil) {
+        if let session {
+            self.session = session
+            return
+        }
+
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.httpCookieStorage = nil
+        configuration.httpShouldSetCookies = false
+        configuration.urlCache = nil
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        self.session = URLSession(configuration: configuration)
     }
 
     func data(for request: URLRequest) async throws -> (Data, URLResponse) {
