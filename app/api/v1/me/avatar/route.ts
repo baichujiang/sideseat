@@ -146,10 +146,6 @@ export async function POST(request: Request) {
         where: { id: auth.user.id },
         data: { avatarUrl: uploaded.url },
         include: {
-          userLanguages: {
-            orderBy: { tag: "asc" },
-            select: { tag: true, proficiency: true },
-          },
           lifePhotos: {
             orderBy: { sortOrder: "asc" },
             select: { id: true, url: true, sortOrder: true },

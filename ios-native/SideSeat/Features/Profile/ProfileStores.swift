@@ -5,6 +5,7 @@ import Observation
 @Observable
 final class CurrentProfileStore {
     private(set) var profile: NativeCurrentProfile?
+    private(set) var lastSchoolChange: NativeProfileSchoolChangeSummary?
     private(set) var isLoading = false
     private(set) var isSaving = false
     private(set) var issue: String?
@@ -16,9 +17,16 @@ final class CurrentProfileStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            profile = ProcessInfo.processInfo.arguments.contains("--ui-testing-unverified-profile")
-                ? .uiTestingUnverifiedFixture
-                : .uiTestingFixture
+            let arguments = ProcessInfo.processInfo.arguments
+            if arguments.contains("--ui-testing-pending-profile") {
+                profile = .uiTestingPendingFixture
+            } else if arguments.contains("--ui-testing-rejected-profile") {
+                profile = .uiTestingRejectedFixture
+            } else if arguments.contains("--ui-testing-unverified-profile") {
+                profile = .uiTestingUnverifiedFixture
+            } else {
+                profile = .uiTestingFixture
+            }
             return
         }
         #endif
@@ -37,23 +45,37 @@ final class CurrentProfileStore {
         guard !isSaving else { return false }
         isSaving = true
         issue = nil
+        lastSchoolChange = nil
         defer { isSaving = false }
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            profile = (profile ?? .uiTestingFixture).applying(request)
+            let current = profile ?? .uiTestingFixture
+            let changedSchool = request.school.map {
+                StudentIdentityDisplay.schoolCode($0) != StudentIdentityDisplay.schoolCode(current.school)
+            } ?? false
+            profile = current.applying(request)
+            if changedSchool {
+                lastSchoolChange = NativeProfileSchoolChangeSummary(
+                    archivedCourseCount: 2,
+                    removedCalendarEntryCount: 2,
+                    closedPostCount: 1,
+                    expiredInvitationCount: 0
+                )
+            }
             return true
         }
         #endif
 
         do {
-            let response: APIEnvelope<NativeCurrentProfile> = try await session.sendAuthorized(
+            let response: APIEnvelope<NativeProfileUpdateResult> = try await session.sendAuthorized(
                 "api/v1/me/profile",
                 method: .patch,
                 body: request,
                 idempotencyKey: UUID().uuidString
             )
-            profile = response.data
+            profile = response.data.profile
+            lastSchoolChange = response.data.schoolChange
             return true
         } catch {
             issue = error.localizedDescription
@@ -207,115 +229,6 @@ final class CurrentProfileStore {
         }
     }
 
-    func uploadLifePhoto(_ draft: NativeProfileLifePhotoDraft, using session: SessionStore) async -> Bool {
-        guard !isSaving else { return false }
-        isSaving = true
-        issue = nil
-        defer { isSaving = false }
-
-        #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            let existing = profile ?? .uiTestingFixture
-            let nextPhoto = NativeProfileLifePhoto(
-                id: draft.id.uuidString,
-                url: "https://cdn.sideseat.test/life-photos/\(draft.id.uuidString).jpg",
-                sortOrder: existing.lifePhotos.count
-            )
-            profile = existing.applyingLifePhotos(existing.lifePhotos + [nextPhoto])
-            return true
-        }
-        #endif
-
-        do {
-            let response: APIEnvelope<NativeProfileLifePhotoUpload> = try await session.uploadAuthorized(
-                "api/v1/me/life-photos",
-                file: MultipartUploadFile(
-                    fieldName: "file",
-                    fileName: draft.fileName,
-                    mimeType: draft.mimeType,
-                    data: draft.data
-                ),
-                idempotencyKey: UUID().uuidString
-            )
-            profile = response.data.profile
-            return true
-        } catch {
-            issue = error.localizedDescription
-            return false
-        }
-    }
-
-    func reorderLifePhotos(photoIds: [String], using session: SessionStore) async -> Bool {
-        guard !isSaving else { return false }
-        isSaving = true
-        issue = nil
-        defer { isSaving = false }
-
-        #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            let existing = profile ?? .uiTestingFixture
-            let photosByID = Dictionary(uniqueKeysWithValues: existing.lifePhotos.map { ($0.id, $0) })
-            let reordered = photoIds.enumerated().compactMap { index, id -> NativeProfileLifePhoto? in
-                guard let photo = photosByID[id] else { return nil }
-                return NativeProfileLifePhoto(id: photo.id, url: photo.url, sortOrder: index)
-            }
-            guard reordered.count == existing.lifePhotos.count else {
-                issue = String(localized: "The life photo order could not be saved.")
-                return false
-            }
-            profile = existing.applyingLifePhotos(reordered)
-            return true
-        }
-        #endif
-
-        do {
-            let response: APIEnvelope<NativeProfileLifePhotosMutation> = try await session.sendAuthorized(
-                "api/v1/me/life-photos",
-                method: .patch,
-                body: NativeProfileLifePhotosReorderRequest(photoIds: photoIds),
-                idempotencyKey: UUID().uuidString
-            )
-            profile = response.data.profile
-            return true
-        } catch {
-            issue = error.localizedDescription
-            return false
-        }
-    }
-
-    func deleteLifePhoto(photoId: String, using session: SessionStore) async -> Bool {
-        guard !isSaving else { return false }
-        isSaving = true
-        issue = nil
-        defer { isSaving = false }
-
-        #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            let existing = profile ?? .uiTestingFixture
-            let nextPhotos = existing.lifePhotos
-                .filter { $0.id != photoId }
-                .enumerated()
-                .map { index, photo in
-                    NativeProfileLifePhoto(id: photo.id, url: photo.url, sortOrder: index)
-                }
-            profile = existing.applyingLifePhotos(nextPhotos)
-            return true
-        }
-        #endif
-
-        do {
-            let response: APIEnvelope<NativeProfileLifePhotoDelete> = try await session.sendAuthorized(
-                "api/v1/me/life-photos/\(photoId)",
-                method: .delete,
-                idempotencyKey: UUID().uuidString
-            )
-            profile = response.data.profile
-            return true
-        } catch {
-            issue = error.localizedDescription
-            return false
-        }
-    }
 }
 
 @MainActor

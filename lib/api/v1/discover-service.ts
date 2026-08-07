@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  ClassmatePostClosureReason,
   ClassmatePostStatus,
   DiscoverActivityStatus,
   ConnectionStatus,
@@ -72,6 +73,8 @@ export function toNativeDiscoverPost(row: DiscoverPostRow) {
     title: row.title,
     body: row.body,
     status: row.status,
+    closureReason: row.closureReason,
+    closedAt: row.closedAt?.toISOString() ?? null,
     tags: row.tags,
     visibility: row.visibility,
     replyPreference: row.replyPreference,
@@ -152,6 +155,8 @@ export async function loadNativeDiscoverPostDetail(options: {
       title: post.title,
       body: post.body,
       status: post.status,
+      closureReason: post.closureReason,
+      closedAt: post.closedAt?.toISOString() ?? null,
       tags: post.tags,
       visibility: post.visibility,
       replyPreference: post.replyPreference,
@@ -468,7 +473,11 @@ export async function setNativeDiscoverPostStatus(options: {
       ? post
       : await options.tx.classmatePost.update({
           where: { id: options.postId },
-          data: { status: ClassmatePostStatus.CLOSED },
+          data: {
+            status: ClassmatePostStatus.CLOSED,
+            closureReason: ClassmatePostClosureReason.AUTHOR_CLOSED,
+            closedAt: new Date(),
+          },
           include: classmatePostForDiscoverInclude,
         });
 

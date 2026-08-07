@@ -5,6 +5,7 @@ import Observation
 @Observable
 final class HomeScheduleStore {
     private(set) var schedule: NativeHomeSchedule?
+    private(set) var agendaItemsByDay: [Date: [HomeAgendaItem]] = [:]
     /// Berlin-local interval currently covered by `schedule` (inclusive start, exclusive end).
     private(set) var loadedWindow: DateInterval?
     private(set) var isLoading = false
@@ -33,7 +34,10 @@ final class HomeScheduleStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            schedule = .uiTestingFixture(now: focus)
+            let fixture = ProcessInfo.processInfo.arguments.contains("--ui-testing-dense-calendar")
+                ? NativeHomeSchedule.uiTestingDenseFixture(now: focus)
+                : NativeHomeSchedule.uiTestingFixture(now: focus)
+            replaceSchedule(fixture)
             let calendar = Calendar.sideSeatBerlin
             let day = calendar.startOfDay(for: focus)
             if
@@ -92,7 +96,7 @@ final class HomeScheduleStore {
             }
 
             let refreshedWindow = DateInterval(start: start, end: end)
-            schedule = refreshedSchedule
+            replaceSchedule(refreshedSchedule)
             loadedWindow = refreshedWindow
             lastSyncedAt = Date()
             await CalendarReminderScheduler.shared.synchronize(with: refreshedSchedule)
@@ -141,7 +145,7 @@ final class HomeScheduleStore {
         guard restoredCacheForUserID != userID else { return }
         restoredCacheForUserID = userID
         guard let cached = await HomeScheduleCache.shared.load(for: userID) else { return }
-        schedule = cached.schedule
+        replaceSchedule(cached.schedule)
         loadedWindow = DateInterval(start: cached.windowStart, end: cached.windowEnd)
         lastSyncedAt = cached.savedAt
         await CalendarReminderScheduler.shared.synchronize(with: cached.schedule)
@@ -188,13 +192,13 @@ final class HomeScheduleStore {
             categoryName: old.categoryName,
             discoverActivityId: old.discoverActivityId
         )
-        self.schedule = NativeHomeSchedule(
+        replaceSchedule(NativeHomeSchedule(
             window: schedule.window,
             classBlocks: schedule.classBlocks,
             studyEntries: entries,
             companionOptions: schedule.companionOptions,
             initialCalendarCategories: schedule.initialCalendarCategories
-        )
+        ))
     }
 
     /// Inserts an in-memory event for hermetic UI tests (paste / duplicate).
@@ -227,15 +231,20 @@ final class HomeScheduleStore {
                 discoverActivityId: nil
             )
         )
-        self.schedule = NativeHomeSchedule(
+        replaceSchedule(NativeHomeSchedule(
             window: schedule.window,
             classBlocks: schedule.classBlocks,
             studyEntries: entries.sorted { $0.startISO < $1.startISO },
             companionOptions: schedule.companionOptions,
             initialCalendarCategories: schedule.initialCalendarCategories
-        )
+        ))
     }
     #endif
+
+    private func replaceSchedule(_ next: NativeHomeSchedule) {
+        schedule = next
+        agendaItemsByDay = next.indexedItemsByDay()
+    }
 }
 
 struct CachedHomeSchedule: Codable, Sendable {

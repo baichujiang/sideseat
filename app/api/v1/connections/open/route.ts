@@ -144,6 +144,13 @@ export async function POST(request: Request) {
             status: 403,
             field: "courseId",
           });
+        case "POST_CONTEXT_INVALID":
+          return v1Error(request, {
+            code: "CONTENT_RESTRICTED",
+            message: "That plan is no longer available for contact.",
+            status: 403,
+            field: "postId",
+          });
         case "RATE_LIMITED":
           return v1Error(request, {
             code: "RATE_LIMITED",

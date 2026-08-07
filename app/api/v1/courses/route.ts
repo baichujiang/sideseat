@@ -10,7 +10,7 @@ import { prisma } from "@/lib/db/prisma";
 
 export const dynamic = "force-dynamic";
 
-const scopeSchema = z.enum(["popular", "enrolled", "saved"]);
+const scopeSchema = z.enum(["popular", "enrolled", "saved", "archived"]);
 
 export async function GET(request: Request) {
   const auth = await requireV1User(request);
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
   if (!parsedScope.success) {
     return v1Error(request, {
       code: "INVALID_REQUEST",
-      message: "scope must be popular, enrolled, or saved.",
+      message: "scope must be popular, enrolled, saved, or archived.",
       status: 422,
       field: "scope",
     });

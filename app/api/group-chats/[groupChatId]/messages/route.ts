@@ -2,7 +2,7 @@ import { requireGroupChatParticipant } from "@/lib/auth/guards";
 import { createGroupChatMessageRecord } from "@/lib/chat/community-chat-service";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
-import { notifyNewGroupChatMessage } from "@/lib/push/notify-user";
+import { scheduleNewGroupChatMessageNotification } from "@/lib/push/notify-user";
 import { messageSchema } from "@/lib/validators/invitation";
 
 export async function POST(
@@ -25,12 +25,12 @@ export async function POST(
       return error("Your account cannot send messages right now.", 403);
     }
     const body = values.body.trim();
-    void notifyNewGroupChatMessage({
+    scheduleNewGroupChatMessageNotification({
       groupChatId,
       title: result.notificationTitle,
       senderId: user.id,
       bodyPreview: body,
-    }).catch(() => {});
+    });
 
     return ok(result.message, { status: 201 });
   } catch (cause) {

@@ -69,7 +69,9 @@ enum SideSeatTheme {
     static let fillSubtle = Color(uiColor: .secondarySystemBackground)
     /// Control / chip wells (`tertiarySystemFill`).
     static let fillTertiary = Color(uiColor: .tertiarySystemFill)
-    /// Compact media thumbs (life photos, create pickers).
+    /// Hairline borders that adapt to light, dark, and increased-contrast appearances.
+    static let separator = Color(uiColor: .separator)
+    /// Compact media thumbnails used by create pickers.
     static let mediaRadius: CGFloat = 10
 
     // MARK: - Hub / avatar (functional tints — shape unified via SSListRow)
@@ -84,7 +86,6 @@ enum SideSeatTheme {
         static let feedback = Color(red: 0.18, green: 0.55, blue: 0.86)
         static let blocked = SideSeatTheme.danger
         static let username = Color(red: 0.35, green: 0.40, blue: 0.55)
-        static let moments = Color(red: 0.86, green: 0.48, blue: 0.22)
         static let privacySchedule = Color(red: 0.20, green: 0.55, blue: 0.78)
         static let privacyDiscover = Color(red: 0.35, green: 0.55, blue: 0.42)
         static let privacyChat = Color(red: 0.55, green: 0.40, blue: 0.75)
@@ -110,12 +111,20 @@ enum SideSeatTheme {
         }
     }
 
+    /// Institution identity colors are limited to verified school marks.
+    /// They must not replace SideSeat's interaction or semantic colors.
+    enum SchoolBrand {
+        static let tum = Color(red: 0.0, green: 0.396, blue: 0.741) // #0065BD
+        static let lmu = Color(red: 0.0, green: 0.533, blue: 0.227) // #00883A
+    }
+
     /// Chat bubble / composer chrome (product surface).
     enum Chat {
         static let bubbleRadius: CGFloat = 16
         static let composerRadius: CGFloat = 20
         static var ownBubble: Color { SideSeatTheme.accent }
-        static var peerBubble: Color { SideSeatTheme.fillSubtle }
+        static var peerBubble: Color { Color(uiColor: .systemGray5) }
+        static var controlFill: Color { SideSeatTheme.fillSubtle }
         static var selectedChipFill: Color { SideSeatTheme.accent.opacity(0.12) }
     }
 

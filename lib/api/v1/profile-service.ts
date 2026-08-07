@@ -11,10 +11,13 @@ import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
 import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
 import { loadSharedActiveCourses } from "@/lib/courses/shared-active-courses";
 import { prisma } from "@/lib/db/prisma";
+import { archivePreviousSchoolSocialState, schoolIdentityChanged } from "@/lib/profile/school-change";
+import { usernameChangePolicyDto } from "@/lib/profile/username-change-policy";
 import { mirrorSchoolVerificationToUser } from "@/lib/verification/school-state";
 import { profileObjectSchema } from "@/lib/validators/profile";
 
 export const nativeProfileUpdateSchema = profileObjectSchema
+  .omit({ languages: true })
   .partial()
   .strict()
   .superRefine((values, ctx) => {
@@ -91,7 +94,6 @@ function profileUserDto(user: {
   graduationYear: number | null;
   verifiedStudent: boolean;
   studentVerificationStatus: string;
-  userLanguages: Array<{ tag: string; proficiency: string }>;
   lifePhotos: Array<{ id: string; url: string; sortOrder: number }>;
 }) {
   return {
@@ -111,10 +113,6 @@ function profileUserDto(user: {
     verifiedStudent: user.verifiedStudent,
     studentVerificationStatus: user.studentVerificationStatus,
     schoolSummary: schoolSummary(user),
-    languages: user.userLanguages.map((row) => ({
-      tag: row.tag,
-      proficiency: row.proficiency,
-    })),
     lifePhotos: user.lifePhotos.map((row) => ({
       id: row.id,
       url: row.url,
@@ -125,7 +123,6 @@ function profileUserDto(user: {
 
 export function currentProfileDto(
   profile: User & {
-    userLanguages: Array<{ tag: string; proficiency: string }>;
     lifePhotos: Array<{ id: string; url: string; sortOrder: number }>;
   },
   options: { blockedCount: number; locale: "en" | "zh-CN" },
@@ -134,10 +131,6 @@ export function currentProfileDto(
     ...currentUserV1(profile, options.locale),
     displayName: profile.nickname?.trim() || profile.username,
     schoolSummary: schoolSummary(profile),
-    languages: profile.userLanguages.map((row) => ({
-      tag: row.tag,
-      proficiency: row.proficiency,
-    })),
     lifePhotos: profile.lifePhotos,
     contacts: {
       wechatHandle: profile.wechatHandle,
@@ -154,6 +147,7 @@ export function currentProfileDto(
       hideFromCourseMembers: profile.hideFromCourseMembers,
       hideFromDiscovery: profile.hideFromDiscovery,
     },
+    usernameChangePolicy: usernameChangePolicyDto(profile),
     counts: { blocked: options.blockedCount },
   };
 }
@@ -166,10 +160,6 @@ export async function loadNativeCurrentProfile(options: {
     prisma.user.findUnique({
       where: { id: options.user.id },
       include: {
-        userLanguages: {
-          orderBy: { tag: "asc" },
-          select: { tag: true, proficiency: true },
-        },
         lifePhotos: {
           orderBy: { sortOrder: "asc" },
           select: { id: true, url: true, sortOrder: true },
@@ -194,6 +184,7 @@ export async function updateNativeCurrentProfile(options: {
 }) {
   const db = options.tx ?? prisma;
   const values = options.values;
+  let schoolChange: Awaited<ReturnType<typeof archivePreviousSchoolSocialState>> | null = null;
 
   const data: Prisma.UserUpdateInput = {};
   if (values.nickname !== undefined) {
@@ -213,7 +204,12 @@ export async function updateNativeCurrentProfile(options: {
     data.nicknameKey = nicknameCheck.nicknameKey;
   }
   if (values.gender !== undefined) data.gender = values.gender;
-  if (values.school !== undefined) data.school = values.school;
+  if (values.school !== undefined) {
+    data.school = values.school;
+    if (schoolIdentityChanged(options.user.school, values.school)) {
+      data.courseReviewSemesterLabel = null;
+    }
+  }
   if (values.studentStatus !== undefined) data.studentStatus = values.studentStatus;
   if (values.degreeLevel !== undefined) data.degreeLevel = values.degreeLevel;
   if (values.major !== undefined) data.major = values.major.trim() ? values.major.trim() : null;
@@ -246,17 +242,14 @@ export async function updateNativeCurrentProfile(options: {
     data,
   });
 
-  if (values.languages !== undefined) {
-    await db.userLanguage.deleteMany({ where: { userId: options.user.id } });
-    await db.userLanguage.createMany({
-      data: values.languages.map((language) => ({
-        userId: options.user.id,
-        tag: language.tag,
-        proficiency: language.proficiency,
-      })),
-    });
-  }
   if (values.school !== undefined) {
+    if (schoolIdentityChanged(options.user.school, values.school) && options.tx) {
+      schoolChange = await archivePreviousSchoolSocialState(options.tx, {
+        userId: options.user.id,
+        previousSchool: options.user.school,
+        nextSchool: values.school,
+      });
+    }
     await mirrorSchoolVerificationToUser(db, options.user.id, values.school);
   }
 
@@ -264,10 +257,6 @@ export async function updateNativeCurrentProfile(options: {
     db.user.findUnique({
       where: { id: options.user.id },
       include: {
-        userLanguages: {
-          orderBy: { tag: "asc" },
-          select: { tag: true, proficiency: true },
-        },
         lifePhotos: {
           orderBy: { sortOrder: "asc" },
           select: { id: true, url: true, sortOrder: true },
@@ -277,10 +266,13 @@ export async function updateNativeCurrentProfile(options: {
     db.block.count({ where: { blockerId: options.user.id } }),
   ]);
   if (!profile) throw new NativeProfileUpdateError("PROFILE_NOT_FOUND");
-  return currentProfileDto(profile, {
-    blockedCount,
-    locale: options.locale,
-  });
+  return {
+    ...currentProfileDto(profile, {
+      blockedCount,
+      locale: options.locale,
+    }),
+    ...(schoolChange ? { schoolChange } : {}),
+  };
 }
 
 export async function loadNativePublicProfile(options: {
@@ -308,10 +300,6 @@ export async function loadNativePublicProfile(options: {
       verifiedStudent: true,
       studentVerificationStatus: true,
       onboardingComplete: true,
-      userLanguages: {
-        orderBy: { tag: "asc" },
-        select: { tag: true, proficiency: true },
-      },
       lifePhotos: {
         orderBy: { sortOrder: "asc" },
         select: { id: true, url: true, sortOrder: true },
@@ -353,10 +341,6 @@ export async function loadNativePublicProfile(options: {
         invitation: { include: { course: true } },
         userA: {
           include: {
-            userLanguages: {
-              orderBy: { tag: "asc" },
-              select: { tag: true, proficiency: true },
-            },
             lifePhotos: {
               orderBy: { sortOrder: "asc" },
               select: { id: true, url: true, sortOrder: true },
@@ -365,10 +349,6 @@ export async function loadNativePublicProfile(options: {
         },
         userB: {
           include: {
-            userLanguages: {
-              orderBy: { tag: "asc" },
-              select: { tag: true, proficiency: true },
-            },
             lifePhotos: {
               orderBy: { sortOrder: "asc" },
               select: { id: true, url: true, sortOrder: true },

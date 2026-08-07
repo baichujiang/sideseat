@@ -2,7 +2,7 @@ import { requireOnboardedUser } from "@/lib/auth/guards";
 import { createCourseRoomMessageRecord } from "@/lib/chat/community-chat-service";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
-import { notifyNewCourseRoomMessage } from "@/lib/push/notify-user";
+import { scheduleNewCourseRoomMessageNotification } from "@/lib/push/notify-user";
 import { messageSchema } from "@/lib/validators/invitation";
 
 export async function POST(
@@ -26,12 +26,12 @@ export async function POST(
     if (result.kind === "restricted") {
       return error("Your account cannot send messages right now.", 403);
     }
-    void notifyNewCourseRoomMessage({
+    scheduleNewCourseRoomMessageNotification({
       courseId,
       courseName: result.notificationTitle ?? "Course chat",
       senderId: user.id,
       bodyPreview: values.body.trim(),
-    }).catch(() => {});
+    });
 
     return ok(result.message, { status: 201 });
   } catch (cause) {

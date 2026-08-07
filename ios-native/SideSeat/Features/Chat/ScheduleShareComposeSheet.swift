@@ -1,3 +1,4 @@
+import OSLog
 import Photos
 import SwiftUI
 import UIKit
@@ -14,6 +15,11 @@ struct ScheduleShareRevealOption: Identifiable, Hashable {
 
     static let uncategorizedID = "__sideseat_uncategorized__"
     static let courseSourceID = "__sideseat_course_source__"
+}
+
+struct ScheduleShareRevealRequestSelection: Equatable {
+    let categoryIDs: [String]
+    let presetKeys: [String]
 }
 
 enum ScheduleShareRevealSelection {
@@ -62,6 +68,36 @@ enum ScheduleShareRevealSelection {
         if isCourseSource(block) { return ScheduleShareRevealOption.courseSourceID }
         if isUncategorized(block) { return ScheduleShareRevealOption.uncategorizedID }
         return nil
+    }
+
+    static func requestSelection(
+        options: [ScheduleShareRevealOption],
+        selectedOptionIDs: Set<String>
+    ) -> ScheduleShareRevealRequestSelection {
+        let selected = options.filter { selectedOptionIDs.contains($0.id) }
+        let categoryIDs = selected.compactMap { option -> String? in
+            switch option.id {
+            case ScheduleShareRevealOption.courseSourceID,
+                 ScheduleShareRevealOption.uncategorizedID:
+                return nil
+            default:
+                return option.id
+            }
+        }
+        let presetKeys = selected.compactMap { option -> String? in
+            switch option.id {
+            case ScheduleShareRevealOption.courseSourceID:
+                return "course"
+            case ScheduleShareRevealOption.uncategorizedID:
+                return "none"
+            default:
+                return nil
+            }
+        }
+        return ScheduleShareRevealRequestSelection(
+            categoryIDs: Array(Set(categoryIDs)).sorted(),
+            presetKeys: Array(Set(presetKeys)).sorted()
+        )
     }
 
     private static func normalized(_ value: String?) -> String? {
@@ -144,6 +180,9 @@ struct ScheduleShareComposeSheet: View {
     @State private var isLinkSettingsExpanded = false
     @State private var shareNotice: String?
     @State private var sendingConnectionID: String?
+    @State private var imageSaveTask: Task<Void, Never>?
+    @State private var imageSaveOperationID: UUID?
+    @State private var isSavingImage = false
 
     private let calendar = Calendar.sideSeatBerlin
 
@@ -331,9 +370,13 @@ struct ScheduleShareComposeSheet: View {
                             title: "Save image to Photos",
                             subtitle: "Save the schedule preview directly to your photo library.",
                             systemImage: "photo.badge.arrow.down",
-                            accessibilityID: "schedule-share-destination-save-image"
+                            accessibilityID: "schedule-share-destination-save-image",
+                            isDisabled: isSavingImage
                         ) {
                             selectShareDestination(.saveImage)
+                        }
+                        if isSavingImage {
+                            imageSaveProgressRow
                         }
                     }
                     .background(
@@ -347,6 +390,10 @@ struct ScheduleShareComposeSheet: View {
                     )
                     .font(.footnote)
                     .foregroundStyle(SideSeatTheme.textSecondary)
+
+                    if let issue {
+                        issueText(issue)
+                    }
                 }
                 .padding(.horizontal, SideSeatTheme.screenHorizontal)
                 .padding(.vertical, SideSeatTheme.spaceLG)
@@ -356,13 +403,48 @@ struct ScheduleShareComposeSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { showShareDestinations = false }
+                    Button("Cancel") {
+                        cancelScheduleImageSave()
+                        showShareDestinations = false
+                    }
                 }
             }
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
+        .onDisappear {
+            if isSavingImage {
+                cancelScheduleImageSave()
+            }
+        }
         .accessibilityIdentifier("schedule-share-destination-picker")
+    }
+
+    private var imageSaveProgressRow: some View {
+        HStack(spacing: SideSeatTheme.spaceMD) {
+            ProgressView()
+                .controlSize(.small)
+                .ssNeutralProgressTint()
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Saving image…")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.textPrimary)
+                Text("You can cancel if Photos takes too long.")
+                    .font(.caption)
+                    .foregroundStyle(SideSeatTheme.textSecondary)
+            }
+            Spacer(minLength: SideSeatTheme.spaceSM)
+            Button("Cancel") {
+                cancelScheduleImageSave()
+            }
+            .font(.subheadline.weight(.semibold))
+            .accessibilityIdentifier("schedule-share-image-save-cancel")
+        }
+        .padding(.horizontal, SideSeatTheme.spaceMD)
+        .padding(.vertical, 10)
+        .background(SideSeatTheme.accent.opacity(0.06))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("schedule-share-image-saving")
     }
 
     private func shareDestinationRow(
@@ -370,6 +452,7 @@ struct ScheduleShareComposeSheet: View {
         subtitle: LocalizedStringKey,
         systemImage: String,
         accessibilityID: String,
+        isDisabled: Bool = false,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
@@ -398,7 +481,7 @@ struct ScheduleShareComposeSheet: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .disabled(isSending)
+        .disabled(isSending || isDisabled)
         .accessibilityIdentifier(accessibilityID)
     }
 
@@ -1433,6 +1516,11 @@ struct ScheduleShareComposeSheet: View {
 
     @MainActor
     private func selectShareDestination(_ destination: ScheduleShareDestination) {
+        if case .saveImage = destination {
+            startScheduleImageSave()
+            return
+        }
+
         showShareDestinations = false
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 250_000_000)
@@ -1444,7 +1532,7 @@ struct ScheduleShareComposeSheet: View {
             case .shareLink:
                 await useShareLink(copyOnly: false)
             case .saveImage:
-                await saveScheduleImageToPhotos()
+                break
             }
         }
     }
@@ -1466,9 +1554,10 @@ struct ScheduleShareComposeSheet: View {
             return nil
         }
 
-        let selectedOptions = revealOptions.filter { selectedRevealOptionIDs.contains($0.id) }
-        let categoryIDs = selectedOptions.filter { $0.presetKey == nil }.map(\.id).sorted()
-        let presetKeys = Array(Set(selectedOptions.compactMap(\.presetKey))).sorted()
+        let revealSelection = ScheduleShareRevealSelection.requestSelection(
+            options: revealOptions,
+            selectedOptionIDs: selectedRevealOptionIDs
+        )
         let expiration = calendar.date(
             byAdding: .day,
             value: usageLimit == "SINGLE_USE" ? 14 : expiryDays,
@@ -1480,8 +1569,8 @@ struct ScheduleShareComposeSheet: View {
             rangeStart: formatter.string(from: range.start),
             rangeEnd: formatter.string(from: range.end),
             revealConfig: NativeScheduleShareRevealConfigRequest(
-                categoryIds: categoryIDs,
-                presetKeys: presetKeys,
+                categoryIds: revealSelection.categoryIDs,
+                presetKeys: revealSelection.presetKeys,
                 hideAllDetails: effectiveSelectedRevealOptionIDs.isEmpty,
                 includedDates: selectedDateKeys.sorted()
             ),
@@ -1557,7 +1646,7 @@ struct ScheduleShareComposeSheet: View {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            let url = URL(string: "https://sideseat.de/share/view/ui-schedule-share")!
+            let url = URL(string: "https://www.sideseat.de/share/view/ui-schedule-share")!
             createdShareURL = url
             return url
         }
@@ -1588,59 +1677,191 @@ struct ScheduleShareComposeSheet: View {
     }
 
     @MainActor
-    private func saveScheduleImageToPhotos() async {
-        guard !isSending else { return }
-        isSending = true
+    private func startScheduleImageSave() {
+        guard imageSaveTask == nil, !isSending else { return }
+        let operationID = UUID()
+        imageSaveOperationID = operationID
+        isSavingImage = true
         issue = nil
-        defer { isSending = false }
 
-        let entries = visiblePreviewBlocks.prefix(8).compactMap { block -> ScheduleSharePosterEntry? in
+        imageSaveTask = Task { @MainActor in
+            let posterShareURL: URL
+            if let createdShareURL {
+                posterShareURL = createdShareURL
+            } else if let createdURL = await createShareLink() {
+                posterShareURL = createdURL
+            } else {
+                guard imageSaveOperationID == operationID else { return }
+                imageSaveTask = nil
+                imageSaveOperationID = nil
+                isSavingImage = false
+                return
+            }
+
+            guard !Task.isCancelled else { return }
+            let didSave = await saveScheduleImageToPhotos(shareURL: posterShareURL)
+            guard imageSaveOperationID == operationID else { return }
+            imageSaveTask = nil
+            imageSaveOperationID = nil
+            isSavingImage = false
+            if didSave {
+                showShareDestinations = false
+            }
+        }
+    }
+
+    private func cancelScheduleImageSave() {
+        imageSaveTask?.cancel()
+        imageSaveTask = nil
+        imageSaveOperationID = nil
+        isSavingImage = false
+    }
+
+    @MainActor
+    private func saveScheduleImageToPhotos(shareURL: URL) async -> Bool {
+        guard !Task.isCancelled else { return false }
+
+        let totalStartedAt = ProcessInfo.processInfo.systemUptime
+        ScheduleSharePhotoSaveDiagnostics.logger.notice(
+            "event=started event_count=\(self.visiblePreviewBlocks.count) selected_day_count=\(self.selectedDateKeys.count)"
+        )
+
+        let entries = visiblePreviewBlocks.compactMap { block -> ScheduleSharePosterEntry? in
             guard let start = Date.sideSeatChatISO8601(block.start),
                   let end = Date.sideSeatChatISO8601(block.end) else { return nil }
             let revealsDetails = isBlockDetailRevealed(block)
             return ScheduleSharePosterEntry(
                 id: block.id,
-                day: start.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day()),
-                time: "\(start.formatted(date: .omitted, time: .shortened))–\(end.formatted(date: .omitted, time: .shortened))",
+                start: start,
+                end: end,
                 title: revealsDetails ? (block.title ?? String(localized: "Busy")) : String(localized: "Busy"),
                 location: revealsDetails ? block.location : nil,
-                color: revealsDetails ? blockColor(block) : SideSeatTheme.textSecondary.opacity(0.55)
+                color: revealsDetails ? blockColor(block) : SideSeatTheme.textSecondary.opacity(0.55),
+                isHidden: !revealsDetails
             )
         }
         let selectedDates = selectedDateKeys.compactMap {
             ScheduleShareDateSelection.date(from: $0, calendar: calendar)
         }.sorted()
+        let freeSlots = (preview?.freeSlots ?? []).compactMap { slot -> ScheduleSharePosterFreeSlot? in
+            guard let start = Date.sideSeatChatISO8601(slot.start),
+                  let end = Date.sideSeatChatISO8601(slot.end),
+                  selectedDateKeys.contains(ScheduleShareDateSelection.dateKey(for: start, calendar: calendar))
+            else { return nil }
+            return ScheduleSharePosterFreeSlot(id: slot.id, start: start, end: end)
+        }
+        let renderStartedAt = ProcessInfo.processInfo.systemUptime
         let image = ScheduleSharePosterRenderer.image(
             entries: entries,
+            freeSlots: freeSlots,
             selectedDates: selectedDates,
-            totalEventCount: visiblePreviewBlocks.count,
-            hiddenCount: visiblePreviewBlocks.filter { !isBlockDetailRevealed($0) }.count
+            totalEventCount: entries.count,
+            hiddenCount: entries.filter(\.isHidden).count,
+            shareURL: shareURL
         )
         guard let image else {
+            let renderDuration = ScheduleSharePhotoSaveDiagnostics.elapsedMilliseconds(since: renderStartedAt)
+            ScheduleSharePhotoSaveDiagnostics.logger.error(
+                "stage=render outcome=failure duration_ms=\(renderDuration)"
+            )
             issue = String(localized: "The schedule image could not be created.")
-            return
+            return false
         }
+        let renderDuration = ScheduleSharePhotoSaveDiagnostics.elapsedMilliseconds(since: renderStartedAt)
+        let pixelWidth = Int(image.size.width * image.scale)
+        let pixelHeight = Int(image.size.height * image.scale)
+        ScheduleSharePhotoSaveDiagnostics.logger.notice(
+            "stage=render outcome=success duration_ms=\(renderDuration) pixel_width=\(pixelWidth) pixel_height=\(pixelHeight)"
+        )
+
+        guard !Task.isCancelled else { return false }
 
         #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("--ui-testing-authenticated"),
+           !arguments.contains("--ui-testing-real-photo-save") {
+            let delay: UInt64 = arguments.contains("--ui-testing-slow-photo-save")
+                ? 5_000_000_000
+                : 800_000_000
+            try? await Task.sleep(nanoseconds: delay)
+            guard !Task.isCancelled else { return false }
+            let totalDuration = ScheduleSharePhotoSaveDiagnostics.elapsedMilliseconds(since: totalStartedAt)
+            ScheduleSharePhotoSaveDiagnostics.logger.notice(
+                "event=finished outcome=simulated_success duration_ms=\(totalDuration)"
+            )
             showShareNotice(String(localized: "Saved to Photos"))
-            return
+            return true
         }
         #endif
 
-        let authorization = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
+        let encodeStartedAt = ProcessInfo.processInfo.systemUptime
+        guard let imageData = image.pngData() else {
+            let encodeDuration = ScheduleSharePhotoSaveDiagnostics.elapsedMilliseconds(since: encodeStartedAt)
+            ScheduleSharePhotoSaveDiagnostics.logger.error(
+                "stage=encode outcome=failure duration_ms=\(encodeDuration)"
+            )
+            issue = String(localized: "The schedule image could not be created.")
+            return false
+        }
+        let encodeDuration = ScheduleSharePhotoSaveDiagnostics.elapsedMilliseconds(since: encodeStartedAt)
+        ScheduleSharePhotoSaveDiagnostics.logger.notice(
+            "stage=encode outcome=success duration_ms=\(encodeDuration) byte_count=\(imageData.count)"
+        )
+
+        let photoLibrary = SystemScheduleSharePhotoLibraryClient()
+        let authorizationStartedAt = ProcessInfo.processInfo.systemUptime
+        let initialAuthorization = photoLibrary.authorizationStatus()
+        let authorization: PHAuthorizationStatus
+        if initialAuthorization == .notDetermined {
+            authorization = await photoLibrary.requestAuthorization()
+        } else {
+            authorization = initialAuthorization
+        }
+        let authorizationDuration = ScheduleSharePhotoSaveDiagnostics.elapsedMilliseconds(since: authorizationStartedAt)
+        ScheduleSharePhotoSaveDiagnostics.logger.notice(
+            "stage=authorization initial=\(ScheduleSharePhotoSaveDiagnostics.label(for: initialAuthorization), privacy: .public) final=\(ScheduleSharePhotoSaveDiagnostics.label(for: authorization), privacy: .public) duration_ms=\(authorizationDuration)"
+        )
+        guard !Task.isCancelled else { return false }
         guard authorization == .authorized || authorization == .limited else {
+            let totalDuration = ScheduleSharePhotoSaveDiagnostics.elapsedMilliseconds(since: totalStartedAt)
+            ScheduleSharePhotoSaveDiagnostics.logger.error(
+                "event=finished outcome=authorization_denied duration_ms=\(totalDuration)"
+            )
             issue = String(localized: "Photo access is required to save this image.")
-            return
+            return false
         }
 
+        let writeStartedAt = ProcessInfo.processInfo.systemUptime
         do {
-            try await PHPhotoLibrary.shared().performChanges {
-                PHAssetChangeRequest.creationRequestForAsset(from: image)
-            }
+            try await photoLibrary.save(imageData)
+            let writeDuration = ScheduleSharePhotoSaveDiagnostics.elapsedMilliseconds(since: writeStartedAt)
+            let totalDuration = ScheduleSharePhotoSaveDiagnostics.elapsedMilliseconds(since: totalStartedAt)
+            ScheduleSharePhotoSaveDiagnostics.logger.notice(
+                "stage=photo_write outcome=success duration_ms=\(writeDuration) total_duration_ms=\(totalDuration)"
+            )
+            guard !Task.isCancelled else { return false }
             showShareNotice(String(localized: "Saved to Photos"))
+            return true
+        } catch is CancellationError {
+            let totalDuration = ScheduleSharePhotoSaveDiagnostics.elapsedMilliseconds(since: totalStartedAt)
+            ScheduleSharePhotoSaveDiagnostics.logger.notice(
+                "event=finished outcome=cancelled duration_ms=\(totalDuration)"
+            )
+            return false
+        } catch ScheduleSharePhotoLibraryError.timedOut {
+            let writeDuration = ScheduleSharePhotoSaveDiagnostics.elapsedMilliseconds(since: writeStartedAt)
+            ScheduleSharePhotoSaveDiagnostics.logger.error(
+                "stage=photo_write outcome=timeout duration_ms=\(writeDuration)"
+            )
+            issue = String(localized: "Saving took too long. Please try again.")
+            return false
         } catch {
+            let writeDuration = ScheduleSharePhotoSaveDiagnostics.elapsedMilliseconds(since: writeStartedAt)
+            ScheduleSharePhotoSaveDiagnostics.logger.error(
+                "stage=photo_write outcome=failure duration_ms=\(writeDuration) error=\(String(describing: error), privacy: .public)"
+            )
             issue = String(localized: "The schedule image could not be saved.")
+            return false
         }
     }
 
@@ -1675,7 +1896,8 @@ struct ScheduleShareComposeSheet: View {
 
     #if DEBUG
     private static func uiTestingPreview(calendar: Calendar) -> NativeScheduleShareSnapshot {
-        let tomorrow = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: Date())) ?? Date()
+        let today = calendar.startOfDay(for: Date())
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: today) ?? Date()
         let nextDay = calendar.date(byAdding: .day, value: 1, to: tomorrow) ?? tomorrow
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -1686,7 +1908,7 @@ struct ScheduleShareComposeSheet: View {
 
         return NativeScheduleShareSnapshot(
             ownerDisplayLabel: "You",
-            rangeStart: at(0, on: tomorrow),
+            rangeStart: at(0, on: today),
             rangeEnd: at(23, on: calendar.date(byAdding: .day, value: 30, to: tomorrow) ?? nextDay),
             includedDates: [],
             expiresAt: nil,
@@ -1695,8 +1917,8 @@ struct ScheduleShareComposeSheet: View {
             blocks: [
                 NativeScheduleShareBlock(
                     kind: "busy_detail",
-                    start: at(9, on: tomorrow),
-                    end: at(11, on: tomorrow),
+                    start: at(9, on: today),
+                    end: at(11, on: today),
                     title: "Project seminar",
                     location: "Library",
                     categoryId: "ui-calendar-custom",
@@ -1734,26 +1956,37 @@ struct ScheduleShareComposeSheet: View {
 
 private struct ScheduleSharePosterEntry: Identifiable {
     let id: String
-    let day: String
-    let time: String
+    let start: Date
+    let end: Date
     let title: String
     let location: String?
     let color: Color
+    let isHidden: Bool
+}
+
+private struct ScheduleSharePosterFreeSlot: Identifiable {
+    let id: String
+    let start: Date
+    let end: Date
 }
 
 @MainActor
 private enum ScheduleSharePosterRenderer {
     static func image(
         entries: [ScheduleSharePosterEntry],
+        freeSlots: [ScheduleSharePosterFreeSlot],
         selectedDates: [Date],
         totalEventCount: Int,
-        hiddenCount: Int
+        hiddenCount: Int,
+        shareURL: URL
     ) -> UIImage? {
         let poster = ScheduleSharePoster(
             entries: entries,
+            freeSlots: freeSlots,
             selectedDates: selectedDates,
             totalEventCount: totalEventCount,
-            hiddenCount: hiddenCount
+            hiddenCount: hiddenCount,
+            shareURL: shareURL
         )
         .frame(width: 360, height: 480)
         .environment(\.colorScheme, .light)
@@ -1766,18 +1999,23 @@ private enum ScheduleSharePosterRenderer {
 
 private struct ScheduleSharePoster: View {
     let entries: [ScheduleSharePosterEntry]
+    let freeSlots: [ScheduleSharePosterFreeSlot]
     let selectedDates: [Date]
     let totalEventCount: Int
     let hiddenCount: Int
+    let shareURL: URL
 
     private let ink = Color(red: 0.11, green: 0.10, blue: 0.14)
     private let secondary = Color(red: 0.38, green: 0.37, blue: 0.42)
+    private let canvas = Color(red: 0.97, green: 0.97, blue: 0.98)
+    private let green = Color(red: 0.16, green: 0.50, blue: 0.34)
+    private let calendar = Calendar.sideSeatBerlin
 
     var body: some View {
         ZStack {
-            Color.white
+            canvas
             VStack(alignment: .leading, spacing: 0) {
-                HStack {
+                HStack(spacing: 8) {
                     SSShareMark()
                     Spacer(minLength: 8)
                     Label("Shared schedule", systemImage: "calendar")
@@ -1785,92 +2023,368 @@ private struct ScheduleSharePoster: View {
                         .foregroundStyle(secondary)
                 }
 
+                Text("My schedule")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(SideSeatTheme.rose)
+                    .padding(.top, 17)
+
                 Text(dateRangeLabel)
-                    .font(.system(size: 25, weight: .bold, design: .rounded))
+                    .font(.system(size: 26, weight: .bold, design: .rounded))
                     .foregroundStyle(ink)
                     .lineLimit(2)
                     .minimumScaleFactor(0.8)
-                    .padding(.top, 22)
+                    .padding(.top, 3)
 
-                Rectangle()
-                    .fill(Color(red: 0.90, green: 0.90, blue: 0.92))
-                    .frame(height: 1)
-                    .padding(.vertical, 14)
+                availabilityCalendar
+                    .padding(.top, 14)
+
+                Text("Agenda")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(ink)
+                .padding(.top, 8)
 
                 if entries.isEmpty {
-                    VStack(spacing: 10) {
-                        Image(systemName: "calendar.badge.checkmark")
-                            .font(.system(size: 30))
-                            .foregroundStyle(Color(red: 0.18, green: 0.55, blue: 0.39))
-                        Text("No events on these days")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundStyle(ink)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    Text("No events on these days")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(green)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, 5)
                 } else {
-                    VStack(spacing: 0) {
-                        ForEach(Array(entries.prefix(6).enumerated()), id: \.element.id) { index, entry in
-                            posterRow(entry)
-                            if index < min(entries.count, 6) - 1 {
-                                Divider().padding(.leading, 11)
-                            }
+                    VStack(spacing: 3) {
+                        ForEach(displayedAgendaEntries) { entry in
+                            posterAgendaEntry(entry)
                         }
-                        if totalEventCount > 6 {
-                            Text(String(localized: "And \(totalEventCount - 6) more events"))
-                                .font(.system(size: 11, weight: .semibold))
+                        if remainingEventCount > 0 {
+                            Text(String(localized: "And \(remainingEventCount) more events"))
+                                .font(.system(size: 9, weight: .semibold))
                                 .foregroundStyle(secondary)
-                                .padding(.top, 7)
+                                .padding(.top, 2)
                         }
                     }
+                    .padding(.top, 4)
                 }
 
-                Spacer(minLength: 10)
-                HStack(spacing: 5) {
-                    Image(systemName: hiddenCount > 0 ? "lock.fill" : "checkmark.shield.fill")
-                    Text(
-                        hiddenCount > 0
-                            ? String(localized: "Hidden details are shown as Busy")
-                            : String(localized: "Only selected days are included")
-                    )
-                }
-                .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(secondary)
+                Spacer(minLength: 5)
+                footer
             }
-            .padding(24)
+            .padding(22)
         }
         .frame(width: 360, height: 480)
         .clipped()
     }
 
-    private func posterRow(_ entry: ScheduleSharePosterEntry) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Capsule()
-                .fill(entry.color)
-                .frame(width: 3, height: 34)
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text(entry.title)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(ink)
-                        .lineLimit(1)
-                    Spacer(minLength: 4)
-                    Text(entry.time)
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundStyle(secondary)
-                        .lineLimit(1)
-                }
-                HStack(spacing: 6) {
-                    Text(entry.day)
-                    if let location = entry.location, !location.isEmpty {
-                        Text("·")
-                        Text(location).lineLimit(1)
+    private var availabilityCalendar: some View {
+        VStack(spacing: 5) {
+            HStack(spacing: 8) {
+                Text("Available times")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(ink)
+                Spacer(minLength: 4)
+                timelineLegend(color: green, label: "Free")
+                timelineLegend(color: secondary.opacity(0.55), label: "Busy")
+            }
+
+            HStack(spacing: 3) {
+                Color.clear.frame(width: 24, height: 24)
+                ForEach(timelineDates, id: \.self) { date in
+                    let isSelected = isSelected(date)
+                    VStack(spacing: 0) {
+                        Text(date.formatted(.dateTime.weekday(.narrow)))
+                            .font(.system(size: 7, weight: .semibold))
+                        Text(date.formatted(.dateTime.day()))
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .monospacedDigit()
                     }
+                    .foregroundStyle(isSelected ? ink : secondary.opacity(0.45))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 24)
+                    .background(
+                        isSelected ? SideSeatTheme.rose.opacity(0.10) : Color.clear,
+                        in: RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    )
                 }
-                .font(.system(size: 10))
-                .foregroundStyle(secondary)
+            }
+
+            HStack(spacing: 3) {
+                timelineAxis
+                    .frame(width: 24, height: timelineHeight)
+                ForEach(timelineDates, id: \.self) { date in
+                    posterTimelineDay(date)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: timelineHeight)
+                }
             }
         }
-        .padding(.vertical, 6)
+    }
+
+    private func timelineLegend(color: Color, label: LocalizedStringKey) -> some View {
+        HStack(spacing: 3) {
+            RoundedRectangle(cornerRadius: 2, style: .continuous)
+                .fill(color)
+                .frame(width: 8, height: 8)
+            Text(label)
+                .font(.system(size: 7, weight: .semibold))
+                .foregroundStyle(secondary)
+        }
+    }
+
+    private var timelineAxis: some View {
+        GeometryReader { proxy in
+            ForEach(timelineTicks, id: \.self) { hour in
+                Text(hour.formatted())
+                    .font(.system(size: 6, weight: .medium, design: .rounded))
+                    .foregroundStyle(secondary)
+                    .monospacedDigit()
+                    .position(x: 9, y: timelineY(forHour: Double(hour), height: proxy.size.height))
+            }
+        }
+    }
+
+    private func posterTimelineDay(_ date: Date) -> some View {
+        let selected = isSelected(date)
+        return GeometryReader { proxy in
+            ZStack(alignment: .topLeading) {
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .fill(selected ? Color.white : Color.white.opacity(0.32))
+
+                ForEach(timelineTicks, id: \.self) { hour in
+                    Rectangle()
+                        .fill(secondary.opacity(0.10))
+                        .frame(height: 0.5)
+                        .offset(y: timelineY(forHour: Double(hour), height: proxy.size.height))
+                }
+
+                if selected {
+                    ForEach(timelineFreeSlots(on: date)) { slot in
+                        timelineBlock(
+                            start: slot.start,
+                            end: slot.end,
+                            on: date,
+                            color: green.opacity(0.80),
+                            height: proxy.size.height
+                        )
+                    }
+                    ForEach(timelineEvents(on: date)) { entry in
+                        timelineBlock(
+                            start: entry.start,
+                            end: entry.end,
+                            on: date,
+                            color: entry.isHidden ? secondary.opacity(0.55) : entry.color.opacity(0.82),
+                            height: proxy.size.height
+                        )
+                    }
+                } else {
+                    Image(systemName: "minus")
+                        .font(.system(size: 7, weight: .bold))
+                        .foregroundStyle(secondary.opacity(0.30))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+        }
+    }
+
+    private func timelineBlock(
+        start: Date,
+        end: Date,
+        on date: Date,
+        color: Color,
+        height: CGFloat
+    ) -> some View {
+        let dayStart = calendar.startOfDay(for: date)
+        let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) ?? dayStart
+        let startValue = start <= dayStart ? 0 : timelineHourValue(start)
+        let rawEndValue = end >= dayEnd ? 24 : timelineHourValue(end)
+        let endValue = max(rawEndValue, startValue + 0.25)
+        let top = timelineY(forHour: startValue, height: height)
+        let bottom = timelineY(forHour: endValue, height: height)
+        return RoundedRectangle(cornerRadius: 2, style: .continuous)
+            .fill(color)
+            .overlay(alignment: .leading) {
+                Rectangle()
+                    .fill(Color.white.opacity(0.48))
+                    .frame(width: 1)
+            }
+            .frame(height: max(bottom - top, 2))
+            .padding(.horizontal, 2)
+            .offset(y: top)
+    }
+
+    private func posterAgendaEntry(_ entry: ScheduleSharePosterEntry) -> some View {
+        HStack(spacing: 7) {
+            VStack(spacing: 0) {
+                Text(entry.start.formatted(.dateTime.weekday(.narrow)))
+                    .font(.system(size: 7, weight: .bold))
+                    .foregroundStyle(secondary)
+                Text(entry.start.formatted(.dateTime.day()))
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .foregroundStyle(ink)
+                    .monospacedDigit()
+            }
+            .frame(width: 22)
+            Capsule()
+                .fill(entry.color)
+                .frame(width: 3, height: 23)
+            VStack(alignment: .leading, spacing: 1) {
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
+                    Text(entry.title)
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(ink)
+                        .lineLimit(1)
+                    Spacer(minLength: 3)
+                    Text(timeLabel(entry.start, entry.end))
+                        .font(.system(size: 8, weight: .semibold))
+                        .foregroundStyle(secondary)
+                        .lineLimit(1)
+                        .monospacedDigit()
+                }
+                if let location = entry.location, !location.isEmpty {
+                    Label(location, systemImage: "mappin.and.ellipse")
+                        .font(.system(size: 8, weight: .medium))
+                        .foregroundStyle(secondary)
+                        .lineLimit(1)
+                } else if entry.isHidden {
+                    Label("Hidden as Busy", systemImage: "lock.fill")
+                        .font(.system(size: 8, weight: .medium))
+                        .foregroundStyle(secondary)
+                        .lineLimit(1)
+                } else {
+                    Text(" ")
+                        .font(.system(size: 8))
+                }
+            }
+        }
+        .padding(.horizontal, 7)
+        .padding(.vertical, 3)
+        .background(Color.white, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+    }
+
+    private var footer: some View {
+        HStack(alignment: .center, spacing: 10) {
+            VStack(alignment: .leading, spacing: 4) {
+                Label(
+                    hiddenCount > 0
+                        ? String(localized: "Hidden details are shown as Busy")
+                        : String(localized: "Only selected days are included"),
+                    systemImage: hiddenCount > 0 ? "lock.fill" : "checkmark.shield.fill"
+                )
+                .font(.system(size: 8, weight: .medium))
+                .foregroundStyle(secondary)
+
+                Text("Plan together on SideSeat")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(ink)
+                Text("sideseat.de")
+                    .font(.system(size: 8, weight: .medium))
+                    .foregroundStyle(secondary)
+            }
+            Spacer(minLength: 0)
+            SSQRCode(url: shareURL)
+                .frame(width: 42, height: 42)
+        }
+        .padding(.top, 8)
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(Color(red: 0.88, green: 0.88, blue: 0.90))
+                .frame(height: 1)
+        }
+    }
+
+    private var timelineDates: [Date] {
+        guard let first = selectedDates.first, let last = selectedDates.last else { return [] }
+        let start = calendar.startOfDay(for: first)
+        let end = calendar.startOfDay(for: last)
+        let span = (calendar.dateComponents([.day], from: start, to: end).day ?? 0) + 1
+        if span <= 7 {
+            return (0..<span).compactMap { calendar.date(byAdding: .day, value: $0, to: start) }
+        }
+        guard selectedDates.count > 7 else { return selectedDates }
+        return Array(selectedDates.prefix(6)) + [last]
+    }
+
+    private var displayedAgendaEntries: [ScheduleSharePosterEntry] {
+        Array(entries.sorted { $0.start < $1.start }.prefix(2))
+    }
+
+    private var remainingEventCount: Int {
+        max(totalEventCount - displayedAgendaEntries.count, 0)
+    }
+
+    private func events(on date: Date) -> [ScheduleSharePosterEntry] {
+        entries
+            .filter { calendar.isDate($0.start, inSameDayAs: date) }
+            .sorted { $0.start < $1.start }
+    }
+
+    private func eventCount(on date: Date) -> Int {
+        events(on: date).count
+    }
+
+    private func timelineFreeSlots(on date: Date) -> [ScheduleSharePosterFreeSlot] {
+        guard let interval = calendar.dateInterval(of: .day, for: date) else { return [] }
+        return freeSlots.filter { $0.start < interval.end && $0.end > interval.start }
+    }
+
+    private func timelineEvents(on date: Date) -> [ScheduleSharePosterEntry] {
+        guard let interval = calendar.dateInterval(of: .day, for: date) else { return [] }
+        return entries.filter { $0.start < interval.end && $0.end > interval.start }
+    }
+
+    private func isSelected(_ date: Date) -> Bool {
+        selectedDates.contains { calendar.isDate($0, inSameDayAs: date) }
+    }
+
+    private let timelineHeight: CGFloat = 128
+
+    private var timelineStartHour: Int {
+        let earliest = allTimelineDates.map {
+            calendar.component(.hour, from: $0)
+        }.min() ?? ScheduleShareProposalTime.defaultDisplayStartHour
+        return max(0, min(ScheduleShareProposalTime.defaultDisplayStartHour, earliest))
+    }
+
+    private var timelineEndHour: Int {
+        let latest = allTimelineEndDates.map { date -> Int in
+            let components = calendar.dateComponents([.hour, .minute], from: date)
+            let hour = components.hour ?? ScheduleShareProposalTime.defaultDisplayEndHour
+            return hour + ((components.minute ?? 0) > 0 ? 1 : 0)
+        }.max() ?? ScheduleShareProposalTime.defaultDisplayEndHour
+        let latestStart = allTimelineDates.map { date -> Int in
+            let components = calendar.dateComponents([.hour, .minute], from: date)
+            return min((components.hour ?? 0) + 1, 24)
+        }.max() ?? ScheduleShareProposalTime.defaultDisplayEndHour
+        return min(24, max(ScheduleShareProposalTime.defaultDisplayEndHour, latest, latestStart))
+    }
+
+    private var timelineTicks: [Int] {
+        var ticks = Array(stride(from: timelineStartHour, through: timelineEndHour, by: 4))
+        if ticks.last != timelineEndHour {
+            ticks.append(timelineEndHour)
+        }
+        return ticks
+    }
+
+    private var allTimelineDates: [Date] {
+        entries.map(\.start) + freeSlots.map(\.start)
+    }
+
+    private var allTimelineEndDates: [Date] {
+        entries.map(\.end) + freeSlots.map(\.end)
+    }
+
+    private func timelineHourValue(_ date: Date) -> Double {
+        let components = calendar.dateComponents([.hour, .minute], from: date)
+        return Double(components.hour ?? 0) + (Double(components.minute ?? 0) / 60)
+    }
+
+    private func timelineY(forHour hour: Double, height: CGFloat) -> CGFloat {
+        let duration = max(Double(timelineEndHour - timelineStartHour), 1)
+        let clamped = min(max(hour, Double(timelineStartHour)), Double(timelineEndHour))
+        return CGFloat((clamped - Double(timelineStartHour)) / duration) * height
+    }
+
+    private func timeLabel(_ start: Date, _ end: Date) -> String {
+        "\(start.formatted(date: .omitted, time: .shortened))–\(end.formatted(date: .omitted, time: .shortened))"
     }
 
     private var dateRangeLabel: String {

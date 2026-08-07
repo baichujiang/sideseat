@@ -1,6 +1,5 @@
 import { Prisma } from "@prisma/client";
 
-import { replyAfterUserMessageToAssistant } from "@/lib/assistant/reply-after-user-message";
 import { requireV1User } from "@/lib/api/v1/auth";
 import { directMessagePageQuerySchema } from "@/lib/api/v1/chat-schemas";
 import { directMessageV1, directMessageV1Include } from "@/lib/api/v1/chat-dto";
@@ -25,8 +24,7 @@ import {
   PeerReplyRequiredError,
 } from "@/lib/chat/direct-message-service";
 import { prisma } from "@/lib/db/prisma";
-import { getServerAppLocale } from "@/lib/i18n/server-locale";
-import { notifyNewDirectChatMessage } from "@/lib/push/notify-user";
+import { scheduleNewDirectChatMessageNotification } from "@/lib/push/notify-user";
 import { directMessageSchema, type DirectMessageInput } from "@/lib/validators/invitation";
 
 const MESSAGE_SEND_LIMIT = 60;
@@ -253,22 +251,11 @@ export async function POST(
       });
     }
 
-    void notifyNewDirectChatMessage({
+    scheduleNewDirectChatMessageNotification({
       connectionId,
       senderId: auth.user.id,
       bodyPreview: result.bodyPreview,
-    }).catch(() => {});
-    if (values.type === "TEXT") {
-      const locale = await getServerAppLocale();
-      await replyAfterUserMessageToAssistant({
-        connectionId,
-        senderUserId: auth.user.id,
-        messageBody: values.body.trim(),
-        locale,
-      }).catch((cause) => {
-        console.error("[assistant] native reply failed", cause);
-      });
-    }
+    });
     return v1Success(result.body, { request, status: 201 });
   } catch (cause) {
     if (cause instanceof InvalidDirectMessageImageError) {

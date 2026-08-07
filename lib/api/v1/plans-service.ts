@@ -3,7 +3,13 @@ import "server-only";
 import { ConnectionStatus, type PlanType } from "@prisma/client";
 
 import { planRequestV1, planRequestV1Include } from "@/lib/api/v1/plans-dto";
+import {
+  assertDirectUnrepliedSendAllowed,
+  completeDirectReplyGateAfterSend,
+  PeerReplyRequiredError,
+} from "@/lib/chat/direct-message-service";
 import { prisma } from "@/lib/db/prisma";
+import { scheduleNewDirectChatMessageNotification } from "@/lib/push/notify-user";
 import {
   getAvailabilityDaysForUser,
   isAvailabilityShareActive,
@@ -23,7 +29,8 @@ export class PlansServiceError extends Error {
       | "FORBIDDEN"
       | "INVALID_REQUEST"
       | "CONFLICT"
-      | "CONTENT_RESTRICTED",
+      | "CONTENT_RESTRICTED"
+      | "PEER_REPLY_REQUIRED",
     readonly messageText: string,
   ) {
     super(messageText);
@@ -86,58 +93,88 @@ export async function createDirectPlanRequest(options: {
   planType?: PlanType;
   receiverUserId?: string;
 }) {
-  const connection = await prisma.connection.findFirst({
-    where: {
-      id: options.connectionId,
-      status: ConnectionStatus.ACTIVE,
-      OR: [{ userAId: options.userId }, { userBId: options.userId }],
-    },
-    select: { id: true, userAId: true, userBId: true },
-  });
-  if (!connection) {
-    throw new PlansServiceError("NOT_FOUND", "Conversation not found.");
-  }
-
-  const receiverUserId =
-    options.receiverUserId ??
-    (connection.userAId === options.userId ? connection.userBId : connection.userAId);
-  if (receiverUserId === options.userId) {
-    throw new PlansServiceError(
-      "INVALID_REQUEST",
-      "Choose another person for this plan.",
-    );
-  }
-
   const startTime = new Date(options.startTime);
   const endTime = new Date(options.endTime);
 
-  const result = await prisma.$transaction(async (tx) => {
-    const planRequest = await tx.planRequest.create({
-      data: {
-        connectionId: options.connectionId,
-        proposerUserId: options.userId,
-        receiverUserId,
-        planType: options.planType ?? "CUSTOM",
-        title: options.title.trim(),
-        location: options.location?.trim() || null,
-        message: options.message?.trim() || null,
-        startTime,
-        endTime,
-      },
-      include: planRequestV1Include,
-    });
-
-    const message = await tx.message.create({
-      data: {
+  let result;
+  try {
+    result = await prisma.$transaction(async (tx) => {
+      const gate = await assertDirectUnrepliedSendAllowed(tx, {
         connectionId: options.connectionId,
         senderId: options.userId,
-        body: "",
-        type: "PLAN_REQUEST_CARD",
-        planRequestId: planRequest.id,
-      },
-    });
+      });
+      const connection = await tx.connection.findFirst({
+        where: {
+          id: options.connectionId,
+          status: ConnectionStatus.ACTIVE,
+          OR: [{ userAId: options.userId }, { userBId: options.userId }],
+        },
+        select: { id: true, userAId: true, userBId: true },
+      });
+      if (!connection) {
+        throw new PlansServiceError("NOT_FOUND", "Conversation not found.");
+      }
 
-    return { planRequest, messageId: message.id };
+      const peerUserId =
+        connection.userAId === options.userId
+          ? connection.userBId
+          : connection.userAId;
+      if (options.receiverUserId && options.receiverUserId !== peerUserId) {
+        throw new PlansServiceError(
+          "INVALID_REQUEST",
+          "The plan receiver must be the other person in this chat.",
+        );
+      }
+
+      const receiverUserId = peerUserId;
+      const planRequest = await tx.planRequest.create({
+        data: {
+          connectionId: options.connectionId,
+          proposerUserId: options.userId,
+          receiverUserId,
+          planType: options.planType ?? "CUSTOM",
+          title: options.title.trim(),
+          location: options.location?.trim() || null,
+          message: options.message?.trim() || null,
+          startTime,
+          endTime,
+        },
+        include: planRequestV1Include,
+      });
+
+      const message = await tx.message.create({
+        data: {
+          connectionId: options.connectionId,
+          senderId: options.userId,
+          body: "",
+          type: "PLAN_REQUEST_CARD",
+          planRequestId: planRequest.id,
+        },
+      });
+
+      await completeDirectReplyGateAfterSend(
+        tx,
+        options.connectionId,
+        message.createdAt,
+        gate,
+      );
+
+      return { planRequest, messageId: message.id };
+    });
+  } catch (cause) {
+    if (cause instanceof PeerReplyRequiredError) {
+      throw new PlansServiceError("PEER_REPLY_REQUIRED", cause.message);
+    }
+    throw cause;
+  }
+
+  scheduleNewDirectChatMessageNotification({
+    connectionId: options.connectionId,
+    senderId: options.userId,
+    bodyPreview: `Plan invite: ${result.planRequest.title}`,
+    kind: "plan_invite",
+    planId: result.planRequest.id,
+    planTitle: result.planRequest.title,
   });
 
   return {
@@ -221,6 +258,19 @@ export async function acceptPlanRequest(options: {
   }
 
   const accepted = await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT id FROM "PlanRequest" WHERE id = ${planRequest.id} FOR UPDATE`;
+    const current = await tx.planRequest.findUnique({
+      where: { id: planRequest.id },
+      select: { status: true },
+    });
+    if (current?.status !== "PENDING") {
+      throw new PlansServiceError("CONFLICT", "This request is no longer pending.");
+    }
+
+    const gate = await assertDirectUnrepliedSendAllowed(tx, {
+      connectionId: planRequest.connectionId,
+      senderId: options.userId,
+    });
     const updated = await tx.planRequest.update({
       where: { id: planRequest.id },
       data: { status: "ACCEPTED" },
@@ -247,7 +297,7 @@ export async function acceptPlanRequest(options: {
       "ACCEPTED",
     );
 
-    await tx.message.create({
+    const confirmation = await tx.message.create({
       data: {
         connectionId: planRequest.connectionId,
         senderId: options.userId,
@@ -257,7 +307,23 @@ export async function acceptPlanRequest(options: {
       },
     });
 
+    await completeDirectReplyGateAfterSend(
+      tx,
+      planRequest.connectionId,
+      confirmation.createdAt,
+      gate,
+    );
+
     return updated;
+  });
+
+  scheduleNewDirectChatMessageNotification({
+    connectionId: planRequest.connectionId,
+    senderId: options.userId,
+    bodyPreview: `Plan confirmed: ${planRequest.title}`,
+    kind: "plan_accepted",
+    planId: planRequest.id,
+    planTitle: planRequest.title,
   });
 
   return planRequestV1(accepted);
@@ -291,6 +357,15 @@ export async function declinePlanRequest(options: {
   }
 
   const declined = await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT id FROM "PlanRequest" WHERE id = ${planRequest.id} FOR UPDATE`;
+    const current = await tx.planRequest.findUnique({
+      where: { id: planRequest.id },
+      select: { status: true },
+    });
+    if (current?.status !== "PENDING") {
+      throw new PlansServiceError("CONFLICT", "This request is no longer pending.");
+    }
+
     const updated = await tx.planRequest.update({
       where: { id: planRequest.id },
       data: { status: "DECLINED" },
@@ -314,6 +389,15 @@ export async function declinePlanRequest(options: {
     });
 
     return updated;
+  });
+
+  scheduleNewDirectChatMessageNotification({
+    connectionId: planRequest.connectionId,
+    senderId: options.userId,
+    bodyPreview: `Plan declined: ${planRequest.title}`,
+    kind: "plan_declined",
+    planId: planRequest.id,
+    planTitle: planRequest.title,
   });
 
   return planRequestV1(declined);
@@ -355,6 +439,19 @@ export async function counterProposePlanRequest(options: {
   const endTime = new Date(options.endTime);
 
   const counter = await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT id FROM "PlanRequest" WHERE id = ${planRequest.id} FOR UPDATE`;
+    const current = await tx.planRequest.findUnique({
+      where: { id: planRequest.id },
+      select: { status: true },
+    });
+    if (current?.status !== "PENDING") {
+      throw new PlansServiceError("CONFLICT", "This request is no longer pending.");
+    }
+
+    const gate = await assertDirectUnrepliedSendAllowed(tx, {
+      connectionId: planRequest.connectionId,
+      senderId: options.userId,
+    });
     await tx.planRequest.update({
       where: { id: planRequest.id },
       data: { status: "COUNTER_PROPOSED" },
@@ -377,7 +474,7 @@ export async function counterProposePlanRequest(options: {
       include: planRequestV1Include,
     });
 
-    await tx.message.create({
+    const message = await tx.message.create({
       data: {
         connectionId: planRequest.connectionId,
         senderId: options.userId,
@@ -387,14 +484,34 @@ export async function counterProposePlanRequest(options: {
       },
     });
 
+    await completeDirectReplyGateAfterSend(
+      tx,
+      planRequest.connectionId,
+      message.createdAt,
+      gate,
+    );
+
     return created;
+  });
+
+  scheduleNewDirectChatMessageNotification({
+    connectionId: planRequest.connectionId,
+    senderId: options.userId,
+    bodyPreview: `New plan time: ${counter.title}`,
+    kind: "plan_counter",
+    planId: counter.id,
+    planTitle: counter.title,
   });
 
   return planRequestV1(counter);
 }
 
 export function mapPlansError(cause: PlansServiceError): {
-  code: "NOT_FOUND" | "CONTENT_RESTRICTED" | "INVALID_REQUEST";
+  code:
+    | "NOT_FOUND"
+    | "CONTENT_RESTRICTED"
+    | "PEER_REPLY_REQUIRED"
+    | "INVALID_REQUEST";
   status: number;
   message: string;
 } {
@@ -404,6 +521,13 @@ export function mapPlansError(cause: PlansServiceError): {
   if (cause.code === "FORBIDDEN" || cause.code === "CONTENT_RESTRICTED") {
     return {
       code: "CONTENT_RESTRICTED",
+      status: 403,
+      message: cause.messageText,
+    };
+  }
+  if (cause.code === "PEER_REPLY_REQUIRED") {
+    return {
+      code: "PEER_REPLY_REQUIRED",
       status: 403,
       message: cause.messageText,
     };

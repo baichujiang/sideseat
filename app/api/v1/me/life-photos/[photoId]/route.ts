@@ -37,10 +37,6 @@ async function loadCurrentProfileBody(
     tx.user.findUnique({
       where: { id: userId },
       include: {
-        userLanguages: {
-          orderBy: { tag: "asc" },
-          select: { tag: true, proficiency: true },
-        },
         lifePhotos: {
           orderBy: { sortOrder: "asc" },
           select: { id: true, url: true, sortOrder: true },

@@ -504,7 +504,7 @@ export const enMessages: AppMessages = {
     dbUnavailableBody:
       "Check DATABASE_URL in .env (Neon awake, or run npm run db:start for local Postgres on port 5433).",
     sessionBootstrapFailed: "Could not start a guest session. Try again.",
-    sessionBootstrapHint: "Preparing your assistant chat…",
+    sessionBootstrapHint: "Preparing your chats…",
     retryBootstrap: "Try again",
     onboardingTitle: "Finish setup when you're ready",
     onboardingBody:
@@ -749,63 +749,6 @@ export const enMessages: AppMessages = {
     planDefaultTitle: "Plan together",
     planSendRequest: "Send request",
     planUnableSend: "Unable to send request.",
-  },
-  assistant: {
-    officialBadge: "Official",
-    headerSubtitle: "Product help · not a classmate",
-    displayName: "SideSeat Assistant",
-    composerPlaceholder: "Ask how SideSeat works…",
-    welcomeBody:
-      "Hi! I'm the SideSeat assistant — official product help, not a real classmate.\n\nI can help with:\n• Schedule — add events on Home with “Describe in plain language”\n• Discover — find classmates and buddy posts at your school\n• Chats — DMs, course rooms, and study plans\n• Account — sign up / log in and school email verification\n\nTap a quick question below, or type your own — I'll include jump links.",
-    chipsAria: "Quick questions",
-    chipsMore: "More",
-    typingLabel: "Assistant is typing…",
-    chips: {
-      gettingStarted: "How do I start?",
-      discover: "How does Discover work?",
-      verification: "School email verification",
-      guestSignup: "Guest vs sign up",
-      schedule: "Calendar & plans",
-      inbox: "Chats & inbox",
-    },
-    chipGroups: {
-      start: "Start",
-      schedule: "Schedule",
-      social: "Social",
-      account: "Account",
-    },
-    faqLinks: {
-      home: "Open Home",
-      discover: "Open Discover",
-      inbox: "Open Chats",
-      courses: "Open Courses",
-      profile: "Open Me",
-      profileInfo: "Edit profile",
-      verification: "School verification",
-      signup: "Sign up",
-      login: "Log in",
-      account: "Account settings",
-    },
-    faq: {
-      gettingStartedBody:
-        "SideSeat helps you manage your schedule, find classmates, and chat to make study plans.\n\n• Home — calendar and natural-language scheduling (tap +, then “Describe in plain language”).\n• Discover — posts and people at your school.\n• Center + — create a Find Buddies post.\n• Chats — direct messages and groups.\n• Me — profile, Courses, verification, and settings.",
-      discoverBody:
-        "Discover shows classmates and posts scoped to your school and city. Complete your profile (school, major, languages) for better matches. Guests can browse; sign up to post and message.",
-      verificationBody:
-        "Student verification uses your school email (not your login email). Open Me → profile info → School verification, enter your @school address, and confirm via the link we send.",
-      verificationDoneBody:
-        "You're already verified for your school. You can update profile details anytime under Me → profile info.",
-      guestSignupBody:
-        "Guest mode lets you explore Home, Discover, and this assistant chat without signing up. To post, match, and message real classmates, create an account — your data stays on the same servers once you log in.",
-      guestSignupRegisteredBody:
-        "You're signed in. Use Discover and Courses to meet classmates; Chats is for plans and DMs.",
-      scheduleBody:
-        "On Home, tap + and choose “Describe in plain language” to add events from text, review drafts, then save to your calendar. You can also fill in details manually and share availability from chat (+ menu) with people you know.",
-      inboxBody:
-        "Chats lists course rooms, direct messages, and groups. Pin important threads from the row menu. Plan invites appear as cards inside the chat — accept or decline there.",
-      fallbackBody:
-        "I'm not sure I got that. Try rephrasing, or tap a quick question below. You can also open Home / Discover / Me. For bugs or ideas, use Feedback under Me.",
-    },
   },
   auth: {
     forgotPassword: "Forgot password?",

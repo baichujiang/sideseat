@@ -14,6 +14,7 @@ import { prisma } from "@/lib/db/prisma";
 export type OpenConversationInput = {
   peerId: string;
   courseId?: string;
+  postId?: string;
 };
 
 export type OpenConversationResult = {
@@ -29,6 +30,7 @@ export class OpenConversationError extends Error {
       | "CONTENT_RESTRICTED"
       | "CONVERSATION_ENDED"
       | "COURSE_CONTEXT_INVALID"
+      | "POST_CONTEXT_INVALID"
       | "RATE_LIMITED",
   ) {
     super(code);
@@ -36,6 +38,46 @@ export class OpenConversationError extends Error {
 }
 
 type DbClient = Prisma.TransactionClient | typeof prisma;
+
+async function resolvePostMessageContext(
+  db: DbClient,
+  postId: string | undefined,
+  peerId: string,
+) {
+  if (!postId) return null;
+  const post = await db.classmatePost.findFirst({
+    where: {
+      id: postId,
+      userId: peerId,
+      status: "ACTIVE",
+      expiresAt: { gt: new Date() },
+    },
+    select: { id: true },
+  });
+  if (!post) {
+    throw new OpenConversationError("POST_CONTEXT_INVALID");
+  }
+  return post;
+}
+
+async function recordPostMessageIntent(
+  db: DbClient,
+  postId: string | undefined,
+  actorId: string,
+) {
+  if (!postId) return;
+  await db.classmatePostInsight.upsert({
+    where: {
+      postId_actorId_kind: {
+        postId,
+        actorId,
+        kind: "MESSAGE_INTENT",
+      },
+    },
+    create: { postId, actorId, kind: "MESSAGE_INTENT" },
+    update: {},
+  });
+}
 
 /**
  * Open-chat flow shared by Web and native clients:
@@ -50,6 +92,9 @@ export async function openConversationForUser(
   db: DbClient = prisma,
 ): Promise<OpenConversationResult> {
   if (values.peerId === user.id) {
+    if (values.postId) {
+      throw new OpenConversationError("POST_CONTEXT_INVALID");
+    }
     const existing = await db.connection.findFirst({
       where: {
         userAId: user.id,
@@ -120,7 +165,14 @@ export async function openConversationForUser(
     throw new OpenConversationError("CONTENT_RESTRICTED");
   }
 
+  const postContext = await resolvePostMessageContext(
+    db,
+    values.postId,
+    values.peerId,
+  );
+
   if (existingConnection && existingConnection.status === ConnectionStatus.ACTIVE) {
+    await recordPostMessageIntent(db, postContext?.id, user.id);
     return { connectionId: existingConnection.id, created: false };
   }
 
@@ -152,6 +204,8 @@ export async function openConversationForUser(
     },
     select: { id: true },
   });
+
+  await recordPostMessageIntent(db, postContext?.id, user.id);
 
   return { connectionId: connection.id, created: true };
 }

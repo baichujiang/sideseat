@@ -20,6 +20,7 @@ export const nativeRefreshRequestSchema = z.object({
 
 export const nativeLogoutRequestSchema = z.object({
   refreshToken: z.string().trim().min(32).max(512),
+  pushToken: z.string().trim().min(1).max(512).optional(),
 });
 
 export type NativeDevice = z.infer<typeof nativeDeviceSchema>;

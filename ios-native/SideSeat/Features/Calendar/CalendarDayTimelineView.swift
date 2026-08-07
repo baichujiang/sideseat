@@ -82,7 +82,9 @@ struct CalendarDayTimelineView: View {
                     }
                     .scrollIndicators(.hidden)
                     .accessibilityIdentifier("calendar-day-timeline")
-                    .task(id: "\(calendar.startOfDay(for: date).timeIntervalSince1970)-\(scrollAnchorToken)") {
+                    // Changing the visible day must keep the same vertical time position.
+                    // Only an explicit re-anchor request (for example, Today) scrolls again.
+                    .task(id: scrollAnchorToken) {
                         await Task.yield()
                         try? await Task.sleep(nanoseconds: 50_000_000)
                         reader.scrollTo(scrollTargetID, anchor: .top)

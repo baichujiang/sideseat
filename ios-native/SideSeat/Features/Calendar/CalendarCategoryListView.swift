@@ -50,7 +50,7 @@ struct CalendarCategoryListView: View {
                     }
                 }
             }
-            .navigationTitle("Calendars")
+            .navigationTitle("Calendar categories")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

@@ -299,6 +299,48 @@ test.describe.serial("API v1 Courses", () => {
       expect.arrayContaining([expect.objectContaining({ id: courseId })]),
     );
 
+    const archived = await request.get(
+      `/api/v1/courses?scope=archived&q=${encodeURIComponent("Native Course API")}`,
+      { headers: auth(token) },
+    );
+    expect(archived.status()).toBe(200);
+    expect((await archived.json()).data.courses).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: courseId,
+          viewer: expect.objectContaining({
+            enrolled: false,
+            canRestore: true,
+            restoreBlockReason: null,
+          }),
+        }),
+      ]),
+    );
+
+    const removeArchived = await request.delete(
+      `/api/v1/courses/${courseId}/archive`,
+      { headers: auth(token, `courses-archive-remove-${Date.now()}`) },
+    );
+    expect(removeArchived.status()).toBe(200);
+    expect((await removeArchived.json()).data).toMatchObject({
+      courseId,
+      enrolled: false,
+      changed: true,
+    });
+    expect(
+      await prisma.userCourse.count({ where: { userId: viewerId, courseId } }),
+    ).toBe(0);
+
+    const restoreArchived = await request.post(
+      `/api/v1/courses/${courseId}/enrollment`,
+      { headers: auth(token, `courses-archive-restore-${Date.now()}`) },
+    );
+    expect(restoreArchived.status()).toBe(200);
+    await prisma.userCourse.update({
+      where: { userId_courseId: { userId: viewerId, courseId } },
+      data: { activeUntil: new Date("2020-01-01T00:00:00.000Z") },
+    });
+
     const expiredDetail = await request.get(`/api/v1/courses/${courseId}`, {
       headers: auth(token),
     });
@@ -344,6 +386,14 @@ test.describe.serial("API v1 Courses", () => {
       select: { activeUntil: true },
     });
     expect(renewed.activeUntil?.getTime()).toBeGreaterThan(Date.now());
+    const staleArchiveRemoval = await request.delete(
+      `/api/v1/courses/${courseId}/archive`,
+      { headers: auth(token, `courses-archive-stale-${Date.now()}`) },
+    );
+    expect(staleArchiveRemoval.status()).toBe(409);
+    expect(
+      await prisma.userCourse.count({ where: { userId: viewerId, courseId } }),
+    ).toBe(1);
     expect(
       (
         await prisma.user.findUniqueOrThrow({

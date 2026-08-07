@@ -125,6 +125,11 @@ struct ScheduleShareCardView: View {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-delayed-chat-card") {
+                isLoading = true
+                try? await Task.sleep(nanoseconds: 500_000_000)
+                isLoading = false
+            }
             preview = NativeScheduleShareChatPreview(
                 snapshot: NativeScheduleShareSnapshot(
                     ownerDisplayLabel: "Mina",

@@ -55,10 +55,27 @@ struct HomeScheduleTests {
 
         let mondayItems = schedule.items(on: monday, calendar: calendar)
         let tuesdayItems = schedule.items(on: tuesday, calendar: calendar)
+        let indexedItems = schedule.indexedItemsByDay(calendar: calendar)
 
         #expect(mondayItems.map(\.id).contains("event-1"))
         #expect(mondayItems.contains { $0.source == .course })
         #expect(tuesdayItems.map(\.id) == ["event-1"])
+        #expect(indexedItems[calendar.startOfDay(for: monday)]?.map(\.id) == mondayItems.map(\.id))
+        #expect(indexedItems[calendar.startOfDay(for: tuesday)]?.map(\.id) == tuesdayItems.map(\.id))
+    }
+
+    @Test("Dense calendar fixture fills every half-hour slot across the loaded window")
+    func denseCalendarFixture() throws {
+        let calendar = Calendar.sideSeatBerlin
+        let now = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 7, hour: 12))
+        )
+        let schedule = NativeHomeSchedule.uiTestingDenseFixture(now: now)
+        let indexedItems = schedule.indexedItemsByDay(calendar: calendar)
+
+        #expect(schedule.studyEntries.count == 59 * 48)
+        #expect(indexedItems.count == 59)
+        #expect(indexedItems.values.allSatisfy { $0.count == 48 })
     }
 
     @Test("Merges synthetic subscription entries and marks them read-only")

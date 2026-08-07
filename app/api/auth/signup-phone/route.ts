@@ -1,7 +1,6 @@
 import { normalizePhone } from "@/lib/auth/phone";
 import { verifyPhoneSignupOtp } from "@/lib/auth/phone-otp";
 import { hashPassword } from "@/lib/auth/password";
-import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
 import { validateNicknameForUser } from "@/lib/auth/nickname-fields";
 import { isUsernameAvailable } from "@/lib/auth/username-availability";
 import { SIGNUP_EMAIL_ERROR_CODES } from "@/lib/auth/email-otp-error-codes";
@@ -65,7 +64,6 @@ export async function POST(request: Request) {
       },
     });
 
-    await ensureAssistantBotConnection(user.id);
     const { accessToken, expiresIn } = await createSession(user.id);
 
     return ok(

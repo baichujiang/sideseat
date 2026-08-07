@@ -2,6 +2,47 @@ import Foundation
 import UIKit
 import UserNotifications
 
+@MainActor
+enum PushBadgeController {
+    static func update(_ count: Int) {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            return
+        }
+        #endif
+        let normalized = max(0, count)
+        Task {
+            try? await UNUserNotificationCenter.current().setBadgeCount(normalized)
+        }
+    }
+}
+
+enum PushDeviceTokenStore {
+    private static let key = "sideseat.apns-device-token"
+
+    static var currentToken: String? {
+        UserDefaults.standard.string(forKey: key)?.nilIfEmpty
+    }
+
+    static func remember(_ token: String) {
+        guard !token.isEmpty else { return }
+        UserDefaults.standard.set(token, forKey: key)
+    }
+}
+
+enum NativeAPNsEnvironment: String, Encodable, Sendable {
+    case sandbox
+    case production
+
+    static var current: Self {
+        #if DEBUG
+        return .sandbox
+        #else
+        return .production
+        #endif
+    }
+}
+
 /// Registers for remote notifications and syncs the APNs device token to `/api/v1/push/devices`.
 @MainActor
 enum PushRegistration {
@@ -28,6 +69,10 @@ enum PushRegistration {
 
         await CalendarReminderScheduler.shared.rescheduleLatest()
 
+        if let token = PushDeviceTokenStore.currentToken {
+            await syncToken(token, using: session)
+        }
+
         await MainActor.run {
             UIApplication.shared.registerForRemoteNotifications()
         }
@@ -37,11 +82,21 @@ enum PushRegistration {
         guard session.phase == .signedIn else { return }
         let token = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
         guard !token.isEmpty else { return }
+        PushDeviceTokenStore.remember(token)
+        await syncToken(token, using: session)
+    }
+
+    private static func syncToken(_ token: String, using session: SessionStore) async {
+        guard session.phase == .signedIn else { return }
         do {
             let _: APIEnvelope<NativePushDeviceSaveResult> = try await session.sendAuthorized(
                 "api/v1/push/devices",
                 method: .post,
-                body: NativePushDeviceRegisterRequest(token: token, platform: "ios")
+                body: NativePushDeviceRegisterRequest(
+                    token: token,
+                    platform: "ios",
+                    environment: NativeAPNsEnvironment.current
+                )
             )
         } catch {
             // Soft-fail: push is optional until APNs delivery is enabled server-side.
@@ -264,6 +319,7 @@ private extension String {
 struct NativePushDeviceRegisterRequest: Encodable, Sendable {
     let token: String
     let platform: String
+    let environment: NativeAPNsEnvironment
 }
 
 struct NativePushDeviceUnregisterRequest: Encodable, Sendable {

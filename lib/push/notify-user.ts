@@ -1,14 +1,24 @@
 import "server-only";
 
+import { after } from "next/server";
 import { WebPushError } from "web-push";
 
-import { isAssistantBotUser } from "@/lib/auth/assistant-bot";
+import { isRetiredSystemUser } from "@/lib/auth/retired-system-users";
 import { prisma } from "@/lib/db/prisma";
 import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
-import { isApnsConfigured } from "@/lib/push/apns-env";
+import {
+  type ApnsEnvironment,
+  isApnsConfigured,
+  normalizeApnsEnvironment,
+} from "@/lib/push/apns-env";
+import {
+  type PushNotificationKind,
+  type UserPushPayload,
+} from "@/lib/push/apns-payload";
 import { sendApnsNotification } from "@/lib/push/apns-send";
 import { isWebPushConfigured } from "@/lib/push/vapid-env";
 import { sendWebPushNotification } from "@/lib/push/web-push-server";
+import { getInboxUnreadTotal } from "@/lib/queries/inbox-merge";
 
 function truncate(s: string, max: number) {
   const t = s.trim();
@@ -16,21 +26,39 @@ function truncate(s: string, max: number) {
   return `${t.slice(0, max - 1)}…`;
 }
 
+async function sendNativePushWithRetry(
+  token: string,
+  payload: UserPushPayload,
+  environment: ApnsEnvironment,
+) {
+  let result = await sendApnsNotification(token, payload, environment);
+  if (
+    !result.ok &&
+    !result.invalidateToken &&
+    (result.status === 0 || result.status === 429 || result.status >= 500)
+  ) {
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    result = await sendApnsNotification(token, payload, environment);
+  }
+  return result;
+}
+
 async function notifyNativeDevices(
   userId: string,
-  payload: { title: string; body: string; url?: string },
+  payload: UserPushPayload,
 ): Promise<void> {
   if (!isApnsConfigured()) return;
 
   const devices = await prisma.nativePushDevice.findMany({
     where: { userId, platform: "ios" },
-    select: { id: true, token: true },
+    select: { id: true, token: true, environment: true },
   });
   if (devices.length === 0) return;
 
   await Promise.all(
     devices.map(async (device) => {
-      const result = await sendApnsNotification(device.token, payload);
+      const environment = normalizeApnsEnvironment(device.environment);
+      const result = await sendNativePushWithRetry(device.token, payload, environment);
       if (!result.ok && result.invalidateToken) {
         await prisma.nativePushDevice.deleteMany({ where: { id: device.id } }).catch(() => {});
       } else if (!result.ok) {
@@ -83,7 +111,7 @@ export async function notifyUserWebPush(
  */
 export async function notifyUserPush(
   userId: string,
-  payload: { title: string; body: string; url?: string },
+  payload: UserPushPayload,
 ): Promise<void> {
   await Promise.all([
     notifyWebDevices(userId, payload),
@@ -91,11 +119,31 @@ export async function notifyUserPush(
   ]);
 }
 
-export async function notifyNewDirectChatMessage(params: {
+export type DirectChatNotificationParams = {
   connectionId: string;
   senderId: string;
   bodyPreview: string;
-}): Promise<void> {
+  kind?: Extract<
+    PushNotificationKind,
+    "direct_message" | "plan_invite" | "plan_counter" | "plan_accepted" | "plan_declined"
+  >;
+  planId?: string;
+  planTitle?: string;
+};
+
+export function scheduleNewDirectChatMessageNotification(
+  params: DirectChatNotificationParams,
+): void {
+  after(async () => {
+    await notifyNewDirectChatMessage(params).catch((cause) => {
+      console.error("Direct chat push failed", cause);
+    });
+  });
+}
+
+export async function notifyNewDirectChatMessage(
+  params: DirectChatNotificationParams,
+): Promise<void> {
   const connection = await prisma.connection.findUnique({
     where: { id: params.connectionId },
     select: { userAId: true, userBId: true },
@@ -110,27 +158,96 @@ export async function notifyNewDirectChatMessage(params: {
     where: { id: peerId },
     select: { username: true },
   });
-  if (peer && isAssistantBotUser(peer)) return;
+  if (peer && isRetiredSystemUser(peer)) return;
 
   const sender = await prisma.user.findUnique({
     where: { id: params.senderId },
     select: { nickname: true, username: true },
   });
   const name = sender?.nickname?.trim() || sender?.username || "New message";
+  const kind = params.kind ?? "direct_message";
+  const planTitle = params.planTitle?.trim();
+  const content = directNotificationContent({
+    kind,
+    senderName: name,
+    bodyPreview: params.bodyPreview,
+    planTitle,
+  });
+  const badge = await getInboxUnreadTotal(peerId).catch(() => undefined);
 
   await notifyUserPush(peerId, {
-    title: name,
-    body: truncate(params.bodyPreview, 140),
+    ...content,
     url: `/connections/${params.connectionId}`,
+    badge,
+    threadId: `connection:${params.connectionId}`,
+    category: kind === "direct_message" ? "DIRECT_MESSAGE" : "PLAN_UPDATE",
+    data: {
+      kind,
+      connectionId: params.connectionId,
+      ...(params.planId ? { planId: params.planId } : {}),
+    },
   });
 }
 
-export async function notifyNewCourseRoomMessage(params: {
+function directNotificationContent(options: {
+  kind: Extract<
+    PushNotificationKind,
+    "direct_message" | "plan_invite" | "plan_counter" | "plan_accepted" | "plan_declined"
+  >;
+  senderName: string;
+  bodyPreview: string;
+  planTitle?: string;
+}): { title: string; body: string } {
+  const planTitle = options.planTitle || "your plan";
+  switch (options.kind) {
+    case "plan_invite":
+      return {
+        title: "New plan invitation",
+        body: truncate(`${options.senderName}: ${planTitle}`, 140),
+      };
+    case "plan_counter":
+      return {
+        title: "New plan time",
+        body: truncate(`${options.senderName}: ${planTitle}`, 140),
+      };
+    case "plan_accepted":
+      return {
+        title: "Plan accepted",
+        body: truncate(`${options.senderName} accepted ${planTitle}`, 140),
+      };
+    case "plan_declined":
+      return {
+        title: "Plan declined",
+        body: truncate(`${options.senderName} declined ${planTitle}`, 140),
+      };
+    case "direct_message":
+      return {
+        title: options.senderName,
+        body: truncate(options.bodyPreview, 140),
+      };
+  }
+}
+
+export type CourseRoomNotificationParams = {
   courseId: string;
   courseName: string;
   senderId: string;
   bodyPreview: string;
-}): Promise<void> {
+};
+
+export function scheduleNewCourseRoomMessageNotification(
+  params: CourseRoomNotificationParams,
+): void {
+  after(async () => {
+    await notifyNewCourseRoomMessage(params).catch((cause) => {
+      console.error("Course chat push failed", cause);
+    });
+  });
+}
+
+export async function notifyNewCourseRoomMessage(
+  params: CourseRoomNotificationParams,
+): Promise<void> {
   const members = await prisma.userCourse.findMany({
     where: {
       courseId: params.courseId,
@@ -149,22 +266,41 @@ export async function notifyNewCourseRoomMessage(params: {
   const body = `${name}: ${truncate(params.bodyPreview, 100)}`;
 
   await Promise.all(
-    members.map((m) =>
-      notifyUserPush(m.userId, {
+    members.map(async (m) => {
+      const badge = await getInboxUnreadTotal(m.userId).catch(() => undefined);
+      return notifyUserPush(m.userId, {
         title: params.courseName,
         body,
         url: `/courses/${params.courseId}/chat`,
-      }),
-    ),
+        badge,
+        threadId: `course:${params.courseId}`,
+        category: "COURSE_MESSAGE",
+        data: { kind: "course_message", courseId: params.courseId },
+      });
+    }),
   );
 }
 
-export async function notifyNewGroupChatMessage(params: {
+export type GroupChatNotificationParams = {
   groupChatId: string;
   title: string | null;
   senderId: string;
   bodyPreview: string;
-}): Promise<void> {
+};
+
+export function scheduleNewGroupChatMessageNotification(
+  params: GroupChatNotificationParams,
+): void {
+  after(async () => {
+    await notifyNewGroupChatMessage(params).catch((cause) => {
+      console.error("Group chat push failed", cause);
+    });
+  });
+}
+
+export async function notifyNewGroupChatMessage(
+  params: GroupChatNotificationParams,
+): Promise<void> {
   const members = await prisma.groupChatParticipant.findMany({
     where: { groupChatId: params.groupChatId, userId: { not: params.senderId } },
     select: { userId: true },
@@ -179,12 +315,17 @@ export async function notifyNewGroupChatMessage(params: {
   const body = `${senderName}: ${truncate(params.bodyPreview, 100)}`;
 
   await Promise.all(
-    members.map((member) =>
-      notifyUserPush(member.userId, {
+    members.map(async (member) => {
+      const badge = await getInboxUnreadTotal(member.userId).catch(() => undefined);
+      return notifyUserPush(member.userId, {
         title: params.title?.trim() || "Group chat",
         body,
         url: `/groups/${params.groupChatId}`,
-      }),
-    ),
+        badge,
+        threadId: `group:${params.groupChatId}`,
+        category: "GROUP_MESSAGE",
+        data: { kind: "group_message", groupChatId: params.groupChatId },
+      });
+    }),
   );
 }

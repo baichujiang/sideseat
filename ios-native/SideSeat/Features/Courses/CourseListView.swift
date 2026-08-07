@@ -8,12 +8,14 @@ struct CourseListView: View {
     @State private var selectedSchool: String?
     @State private var query = ""
     @State private var showsSemesterReview = false
+    @State private var showsArchivedCourses = false
     @State private var showsScreenshotImport = false
     @State private var showsManualAdd = false
 
     var body: some View {
         List {
             controls
+            archivedCoursesEntry
 
             if let review = store.payload?.semesterReview, review.required {
                 semesterReviewPrompt(review)
@@ -67,6 +69,11 @@ struct CourseListView: View {
                 await load()
             }
         }
+        .sheet(isPresented: $showsArchivedCourses) {
+            NavigationStack {
+                ArchivedCourseListView(showsDoneButton: true)
+            }
+        }
         .sheet(isPresented: $showsScreenshotImport) {
             CourseScreenshotImportView(
                 school: selectedSchool ?? store.payload?.school,
@@ -117,7 +124,7 @@ struct CourseListView: View {
     private var controls: some View {
         Section {
             Picker("Course list", selection: $scope) {
-                ForEach(NativeCourseScope.allCases) { value in
+                ForEach(NativeCourseScope.primaryCases) { value in
                     Text(value.title).tag(value)
                 }
             }
@@ -132,6 +139,36 @@ struct CourseListView: View {
                 }
                 .accessibilityIdentifier("course-school")
             }
+        }
+    }
+
+    private var archivedCoursesEntry: some View {
+        Section {
+            Button {
+                showsArchivedCourses = true
+            } label: {
+                HStack(spacing: SideSeatTheme.spaceMD) {
+                    Image(systemName: "archivebox.fill")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.HubTint.courses)
+                        .frame(width: 28, height: 28)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Archived courses")
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(.primary)
+                        Text("Restore or remove inactive courses")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.tertiary)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("course-archived-entry")
         }
     }
 
@@ -187,6 +224,152 @@ struct CourseListView: View {
             using: session,
             scope: scope,
             school: selectedSchool,
+            query: query.trimmingCharacters(in: .whitespacesAndNewlines)
+        )
+    }
+}
+
+struct ArchivedCourseListView: View {
+    @Environment(SessionStore.self) private var session
+    @Environment(\.dismiss) private var dismiss
+    var showsDoneButton = false
+    @State private var store = CourseListStore()
+    @State private var query = ""
+    @State private var pendingRemoval: NativeCourseSummary?
+
+    var body: some View {
+        List {
+            Section {
+                Text("Archived courses keep their history but stay out of matching, course chat, and your calendar.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            if let issue = store.issue, store.payload == nil {
+                ContentUnavailableView {
+                    Label("Could not load courses", systemImage: "wifi.exclamationmark")
+                } description: {
+                    Text(issue)
+                } actions: {
+                    Button("Try again") { Task { await load() } }
+                }
+                .ssListPageStateRow()
+            } else if store.isLoading, store.payload == nil {
+                SSLoadingState("Loading courses")
+                    .frame(maxWidth: .infinity)
+                    .ssListPageStateRow()
+            } else if courses.isEmpty {
+                SSEmptyState(
+                    title: query.isEmpty ? "No archived courses" : "No results",
+                    systemImage: "archivebox",
+                    description: query.isEmpty
+                        ? "Courses you archive or leave will appear here."
+                        : "Try another course code or name."
+                )
+                .ssListPageStateRow()
+            } else {
+                Section {
+                    ForEach(courses) { course in
+                        archivedCourseRow(course)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    pendingRemoval = course
+                                } label: {
+                                    Label("Remove from archive", systemImage: "trash")
+                                }
+                                .accessibilityIdentifier("course-archived-remove-\(course.id)")
+                            }
+                    }
+                }
+            }
+
+            if let issue = store.issue, store.payload != nil {
+                Section {
+                    Label(issue, systemImage: "exclamationmark.triangle")
+                        .font(.footnote)
+                        .foregroundStyle(SideSeatTheme.danger)
+                }
+            }
+        }
+        .listStyle(.insetGrouped)
+        .navigationTitle("Archived courses")
+        .navigationBarTitleDisplayMode(.inline)
+        .searchable(text: $query, prompt: "Course code or name")
+        .toolbar {
+            if showsDoneButton {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                        .accessibilityIdentifier("course-archived-done")
+                }
+            }
+        }
+        .task(id: query.trimmingCharacters(in: .whitespacesAndNewlines)) {
+            if !query.isEmpty {
+                try? await Task.sleep(for: .milliseconds(300))
+                guard !Task.isCancelled else { return }
+            }
+            await load()
+        }
+        .alert(
+            "Remove archived course?",
+            isPresented: removalConfirmationPresented
+        ) {
+            Button("Cancel", role: .cancel) { pendingRemoval = nil }
+            Button("Remove from archive", role: .destructive) {
+                guard let courseID = pendingRemoval?.id else { return }
+                pendingRemoval = nil
+                Task { _ = await store.removeArchivedCourse(courseID, using: session) }
+            }
+            .accessibilityIdentifier("course-archived-confirm-remove")
+        } message: {
+            Text("This removes the course from your archive. Existing message history is not deleted.")
+        }
+        .accessibilityIdentifier("course-archived-list")
+    }
+
+    private var courses: [NativeCourseSummary] { store.payload?.courses ?? [] }
+
+    private var removalConfirmationPresented: Binding<Bool> {
+        Binding(
+            get: { pendingRemoval != nil },
+            set: { if !$0 { pendingRemoval = nil } }
+        )
+    }
+
+    private func archivedCourseRow(_ course: NativeCourseSummary) -> some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            CourseSummaryRow(course: course, showsArchivedStatus: true)
+            if course.viewer.canRestore == true {
+                Button {
+                    Task { _ = await store.restoreArchivedCourse(course.id, using: session) }
+                } label: {
+                    Label("Restore", systemImage: "arrow.counterclockwise")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .buttonStyle(.borderless)
+                .disabled(store.mutatingCourseID != nil)
+                .accessibilityIdentifier("course-archived-restore-\(course.id)")
+            } else if course.viewer.restoreBlockReason == "ACTIVE_EQUIVALENT" {
+                Label("A current version of this course is already active.", systemImage: "checkmark.circle.fill")
+                    .font(.caption)
+                    .foregroundStyle(SideSeatTheme.success)
+            } else {
+                Label(
+                    String(format: String(localized: "Switch to %@ to restore"), course.school),
+                    systemImage: "building.columns"
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+        }
+        .padding(.vertical, 3)
+    }
+
+    private func load() async {
+        await store.load(
+            using: session,
+            scope: .archived,
+            school: nil,
             query: query.trimmingCharacters(in: .whitespacesAndNewlines)
         )
     }
@@ -304,6 +487,7 @@ private struct CourseListLoadKey: Hashable {
 
 private struct CourseSummaryRow: View {
     let course: NativeCourseSummary
+    var showsArchivedStatus = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -320,7 +504,10 @@ private struct CourseSummaryRow: View {
             }
             HStack(spacing: 10) {
                 Label("\(course.memberCount)", systemImage: "person.2")
-                if course.viewer.enrolled {
+                if showsArchivedStatus {
+                    Label("Archived", systemImage: "archivebox.fill")
+                        .foregroundStyle(.secondary)
+                } else if course.viewer.enrolled {
                     Label("Joined", systemImage: "checkmark.circle.fill")
                         .foregroundStyle(SideSeatTheme.success)
                 } else if course.viewer.saved {

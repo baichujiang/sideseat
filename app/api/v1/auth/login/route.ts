@@ -1,4 +1,3 @@
-import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
 import { findUserForLogin } from "@/lib/auth/lookup-user";
 import { createNativeSession } from "@/lib/auth/native-session";
 import { verifyPassword } from "@/lib/auth/password";
@@ -66,7 +65,6 @@ export async function POST(request: Request) {
       });
     }
 
-    await ensureAssistantBotConnection(user.id);
     const [refresh, access] = await Promise.all([
       createNativeSession(user.id, parsed.data.device),
       signAccessToken(user.id),

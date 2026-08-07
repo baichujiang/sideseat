@@ -228,6 +228,11 @@ enum ClassmatePostStatus {
   EXPIRED
 }
 
+enum ClassmatePostClosureReason {
+  AUTHOR_CLOSED
+  SCHOOL_CHANGED
+}
+
 enum ClassmatePostVisibility {
   SCHOOL_ONLY
   CITY_INTERNATIONALS
@@ -351,6 +356,8 @@ model User {
   /// E.164, e.g. +8613800138000 — used for login when set.
   phone                            String?                      @unique
   usernameUpdatedAt                DateTime?
+  usernameChangeWindowStartedAt    DateTime?
+  usernameChangeCount              Int                          @default(0)
   isGuest                          Boolean                      @default(false)
   hashedPassword                   String
   nickname                         String?
@@ -617,6 +624,8 @@ model ClassmatePost {
   title           String
   body            String?
   status          ClassmatePostStatus          @default(ACTIVE)
+  closureReason   ClassmatePostClosureReason?
+  closedAt        DateTime?
   tags            String[]                     @default([])
   visibility      ClassmatePostVisibility      @default(SCHOOL_ONLY)
   replyPreference ClassmatePostReplyPreference @default(REQUEST_FIRST)
@@ -828,21 +837,21 @@ model SchoolEmailVerification {
 /// One persisted verification state per user per school. Switching the active
 /// school simply swaps which row is mirrored onto the User table.
 model UserSchoolVerification {
-  userId                       String
-  school                       String
-  email                        String?
-  verifiedStudent              Boolean                    @default(false)
-  studentVerificationStatus    StudentVerificationStatus  @default(UNVERIFIED)
-  studentVerificationMethod    StudentVerificationMethod?
-  studentVerifiedAt            DateTime?
-  emailVerifiedAt              DateTime?
-  studentVerificationNotes     String?
-  manualReviewProofUrl         String?
-  manualReviewProofFilename    String?
-  manualReviewRequestedAt      DateTime?
-  createdAt                    DateTime                   @default(now())
-  updatedAt                    DateTime                   @updatedAt
-  user                         User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                    String
+  school                    String
+  email                     String?
+  verifiedStudent           Boolean                    @default(false)
+  studentVerificationStatus StudentVerificationStatus  @default(UNVERIFIED)
+  studentVerificationMethod StudentVerificationMethod?
+  studentVerifiedAt         DateTime?
+  emailVerifiedAt           DateTime?
+  studentVerificationNotes  String?
+  manualReviewProofUrl      String?
+  manualReviewProofFilename String?
+  manualReviewRequestedAt   DateTime?
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  user                      User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, school])
   @@index([school, studentVerificationStatus])
@@ -1426,14 +1435,15 @@ model PushSubscription {
 /// APNs / FCM device token from the Capacitor or native SwiftUI app.
 /// Server delivery via APNs is env-gated (`APNS_*`); see `lib/push/apns-send.ts`.
 model NativePushDevice {
-  id        String   @id @default(cuid())
-  userId    String
-  token     String   @unique
-  platform  String
-  userAgent String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  userId      String
+  token       String   @unique
+  platform    String
+  environment String   @default("production")
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }

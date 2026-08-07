@@ -11,6 +11,7 @@ import { isConfiguredAdmin } from "@/lib/constants/app";
 import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
 import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
 import { loadSharedActiveCourses } from "@/lib/courses/shared-active-courses";
+import { RETIRED_SYSTEM_USERNAMES } from "@/lib/auth/retired-system-users";
 
 // Throttle window for lastActiveAt writes. Every page load calls
 // requireOnboardedUser(), but bumping a timestamp on every request is wasteful
@@ -59,6 +60,7 @@ export async function requireConnection(connectionId: string) {
       id: connectionId,
       status: ConnectionStatus.ACTIVE,
       userA: {
+        username: { notIn: [...RETIRED_SYSTEM_USERNAMES] },
         moderationBlocks: {
           none: {
             isActive: true,
@@ -66,6 +68,7 @@ export async function requireConnection(connectionId: string) {
         },
       },
       userB: {
+        username: { notIn: [...RETIRED_SYSTEM_USERNAMES] },
         moderationBlocks: {
           none: {
             isActive: true,

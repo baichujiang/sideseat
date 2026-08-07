@@ -1,7 +1,7 @@
 import { DiscoverActivityStatus } from "@prisma/client";
 
 import type { DiscoverActivityRow } from "@/lib/discover/discover-activity-row";
-import { isVisibleInFeed } from "@/lib/discover/discover-activity-state";
+import { isVisibleToSchoolInFeed } from "@/lib/discover/discover-activity-state";
 import {
   discoverActivityForFeedInclude,
   prismaDiscoverActivityToRow,
@@ -15,27 +15,37 @@ export async function loadActiveDiscoverActivitiesForCity(
 ): Promise<DiscoverActivityRow[]> {
   const now = new Date();
 
-  const rows = await prisma.discoverActivity.findMany({
-    where: {
-      city: servedCity,
-      status: { in: [DiscoverActivityStatus.OPEN, DiscoverActivityStatus.FULL] },
-      startAt: { gt: now },
-      organizer: {
-        moderationBlocks: { none: { isActive: true } },
-        ...(viewerUserId
-          ? {
-              blocksReceived: { none: { blockerId: viewerUserId } },
-              blocksInitiated: { none: { blockedId: viewerUserId } },
-            }
-          : {}),
+  const [rows, viewer] = await Promise.all([
+    prisma.discoverActivity.findMany({
+      where: {
+        city: servedCity,
+        status: { in: [DiscoverActivityStatus.OPEN, DiscoverActivityStatus.FULL] },
+        startAt: { gt: now },
+        organizer: {
+          moderationBlocks: { none: { isActive: true } },
+          ...(viewerUserId
+            ? {
+                blocksReceived: { none: { blockerId: viewerUserId } },
+                blocksInitiated: { none: { blockedId: viewerUserId } },
+              }
+            : {}),
+        },
       },
-    },
-    include: discoverActivityForFeedInclude,
-    orderBy: { startAt: "asc" },
-    take: 120,
-  });
+      include: discoverActivityForFeedInclude,
+      orderBy: { startAt: "asc" },
+      take: 120,
+    }),
+    viewerUserId
+      ? prisma.user.findUnique({
+          where: { id: viewerUserId },
+          select: { school: true },
+        })
+      : Promise.resolve(null),
+  ]);
 
   return rows
-    .filter((activity) => isVisibleInFeed(activity, now))
+    .filter((activity) =>
+      isVisibleToSchoolInFeed(activity, viewer ? viewer.school : undefined, now),
+    )
     .map((activity) => prismaDiscoverActivityToRow(activity, viewerUserId ?? null, now));
 }

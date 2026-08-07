@@ -10,6 +10,7 @@ final class OpenConversationStore {
     func open(
         peerID: String,
         courseID: String? = nil,
+        postID: String? = nil,
         using session: SessionStore
     ) async -> String? {
         guard !isOpening else { return nil }
@@ -29,7 +30,11 @@ final class OpenConversationStore {
             let response: APIEnvelope<NativeOpenConversationResult> = try await session.sendAuthorized(
                 "api/v1/connections/open",
                 method: .post,
-                body: NativeOpenConversationRequest(peerId: peerID, courseId: courseID),
+                body: NativeOpenConversationRequest(
+                    peerId: peerID,
+                    courseId: courseID,
+                    postId: postID
+                ),
                 idempotencyKey: UUID().uuidString
             )
             return response.data.connectionId

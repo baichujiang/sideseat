@@ -1,6 +1,7 @@
 import { requireV1User } from "@/lib/api/v1/auth";
 import { parseV1Json, v1Success } from "@/lib/api/v1/http";
 import { prisma } from "@/lib/db/prisma";
+import { defaultApnsEnvironment } from "@/lib/push/apns-env";
 import {
   nativePushRegisterSchema,
   nativePushUnregisterSchema,
@@ -16,18 +17,21 @@ export async function POST(request: Request) {
   const parsed = await parseV1Json(request, nativePushRegisterSchema);
   if (!parsed.ok) return parsed.response;
 
-  const { token, platform, userAgent } = parsed.data;
+  const { token, platform, environment, userAgent } = parsed.data;
+  const resolvedEnvironment = environment ?? defaultApnsEnvironment();
   await prisma.nativePushDevice.upsert({
     where: { token },
     create: {
       userId: auth.user.id,
       token,
       platform,
+      environment: resolvedEnvironment,
       userAgent: userAgent ?? request.headers.get("user-agent")?.slice(0, 512) ?? null,
     },
     update: {
       userId: auth.user.id,
       platform,
+      environment: resolvedEnvironment,
       userAgent: userAgent ?? request.headers.get("user-agent")?.slice(0, 512) ?? null,
     },
   });

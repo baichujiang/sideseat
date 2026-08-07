@@ -7,14 +7,53 @@ struct NativeInboxPreferenceResult: Decodable, Sendable {
     let hidden: Bool
 }
 
+enum InboxConversationFilter: String, CaseIterable, Sendable {
+    case all
+    case direct
+    case course
+    case group
+
+    var kind: NativeInboxConversation.Kind? {
+        switch self {
+        case .all: nil
+        case .direct: .direct
+        case .course: .course
+        case .group: .group
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .all: String(localized: "All")
+        case .direct: String(localized: "Direct")
+        case .course: String(localized: "Courses")
+        case .group: String(localized: "Groups")
+        }
+    }
+
+    var accessibilityIdentifier: String {
+        switch self {
+        case .all: "inbox-chip-all"
+        case .direct: "inbox-chip-direct"
+        case .course: "inbox-chip-courses"
+        case .group: "inbox-chip-groups"
+        }
+    }
+}
+
 @MainActor
 @Observable
 final class InboxStore {
-    private(set) var payload: NativeInboxPayload?
+    private(set) var payload: NativeInboxPayload? {
+        didSet {
+            PushBadgeController.update(payload?.unreadTotal ?? 0)
+        }
+    }
     private(set) var isLoading = false
     private(set) var isMutating = false
     private(set) var issue: String?
     var searchQuery = ""
+    var conversationFilter: InboxConversationFilter = .all
     private var latestRequestID: UUID?
     private var accountID = ""
     private var cacheWriteTask: Task<Void, Never>?
@@ -29,7 +68,10 @@ final class InboxStore {
     }
 
     var filteredConversations: [NativeInboxConversation] {
-        (payload?.conversations ?? []).filter { InboxChatSearch.matches($0, query: searchQuery) }
+        (payload?.conversations ?? []).filter { conversation in
+            let matchesKind = conversationFilter.kind.map { conversation.kind == $0 } ?? true
+            return matchesKind && InboxChatSearch.matches(conversation, query: searchQuery)
+        }
     }
 
     var pinned: [NativeInboxConversation] {
@@ -43,6 +85,13 @@ final class InboxStore {
     var hasNoSearchMatches: Bool {
         let trimmed = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         return !trimmed.isEmpty
+            && !(payload?.conversations.isEmpty ?? true)
+            && filteredConversations.isEmpty
+    }
+
+    var hasNoFilterMatches: Bool {
+        searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && conversationFilter != .all
             && !(payload?.conversations.isEmpty ?? true)
             && filteredConversations.isEmpty
     }
@@ -65,6 +114,7 @@ final class InboxStore {
         isMutating = false
         issue = nil
         searchQuery = ""
+        conversationFilter = .all
         accountID = ""
         locallyReadMessageIDs = [:]
     }
@@ -76,6 +126,7 @@ final class InboxStore {
         if accountID != nextAccountID {
             payload = nil
             locallyReadMessageIDs = [:]
+            conversationFilter = .all
         }
         accountID = nextAccountID
         isLoading = true
@@ -91,6 +142,7 @@ final class InboxStore {
                 to: .uiTestingFixture,
                 readMessageIDs: locallyReadMessageIDs
             )
+            normalizeConversationFilter()
             return
         }
         #endif
@@ -103,6 +155,7 @@ final class InboxStore {
                 to: snapshot.payload,
                 readMessageIDs: locallyReadMessageIDs
             )
+            normalizeConversationFilter()
             isLoading = false
         }
 
@@ -114,6 +167,7 @@ final class InboxStore {
                 to: response.data,
                 readMessageIDs: locallyReadMessageIDs
             )
+            normalizeConversationFilter()
             await persistCache()
         } catch is CancellationError {
             return
@@ -295,7 +349,15 @@ final class InboxStore {
             unreadTotal: conversations.reduce(0) { $0 + $1.unreadCount },
             plansNeedingYourAction: current.plansNeedingYourAction
         )
+        normalizeConversationFilter()
         scheduleCachePersist()
+    }
+
+    private func normalizeConversationFilter() {
+        guard let kind = conversationFilter.kind else { return }
+        if payload?.conversations.contains(where: { $0.kind == kind }) != true {
+            conversationFilter = .all
+        }
     }
 
     private func persistCache() async {

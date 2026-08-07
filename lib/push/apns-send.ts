@@ -3,13 +3,13 @@ import "server-only";
 import { createSign } from "node:crypto";
 import http2 from "node:http2";
 
-import { apnsBundleId, apnsUseSandbox, isApnsConfigured } from "@/lib/push/apns-env";
-
-type ApnsPayload = {
-  title: string;
-  body: string;
-  url?: string;
-};
+import {
+  apnsBundleId,
+  apnsHostForEnvironment,
+  type ApnsEnvironment,
+  isApnsConfigured,
+} from "@/lib/push/apns-env";
+import { buildApnsPayload, type UserPushPayload } from "@/lib/push/apns-payload";
 
 function normalizeP8Key(raw: string): string {
   const trimmed = raw.trim();
@@ -55,10 +55,6 @@ function createApnsProviderToken(): string {
   return token;
 }
 
-function apnsHost(): string {
-  return apnsUseSandbox() ? "api.sandbox.push.apple.com" : "api.push.apple.com";
-}
-
 export type ApnsSendResult =
   | { ok: true }
   | { ok: false; status: number; reason: string; invalidateToken: boolean };
@@ -69,22 +65,17 @@ export type ApnsSendResult =
  */
 export async function sendApnsNotification(
   deviceToken: string,
-  payload: ApnsPayload,
+  payload: UserPushPayload,
+  environment: ApnsEnvironment,
 ): Promise<ApnsSendResult> {
   if (!isApnsConfigured()) {
     return { ok: false, status: 0, reason: "APNs is not configured.", invalidateToken: false };
   }
 
   const token = createApnsProviderToken();
-  const host = apnsHost();
+  const host = apnsHostForEnvironment(environment);
   const topic = apnsBundleId();
-  const body = JSON.stringify({
-    aps: {
-      alert: { title: payload.title, body: payload.body },
-      sound: "default",
-    },
-    ...(payload.url ? { url: payload.url } : {}),
-  });
+  const body = JSON.stringify(buildApnsPayload(payload));
 
   return await new Promise<ApnsSendResult>((resolve) => {
     const client = http2.connect(`https://${host}`);

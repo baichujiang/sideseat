@@ -139,46 +139,79 @@ private enum DiscoverPlanFeedItem: Identifiable {
 private struct DiscoverBuddyRow: View {
     let post: NativeDiscoverBuddyPost
 
+    private var status: DiscoverStatusPresentation {
+        BuddyPostDisplay.status(post)
+    }
+
+    private var academicLine: String? {
+        let values = [post.author.studentRoleLabel, post.author.major]
+            .compactMap { value -> String? in
+                guard let value = value?.trimmingCharacters(in: .whitespacesAndNewlines), !value.isEmpty else {
+                    return nil
+                }
+                return value
+            }
+        return values.isEmpty ? nil : values.joined(separator: " · ")
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
             HStack(spacing: 10) {
-                InitialAvatar(name: post.author.displayName, url: post.author.avatarUrl)
+                InitialAvatar(name: post.author.displayName, url: post.author.avatarUrl, size: 40)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
                         Text(post.author.displayName)
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(.primary)
-                        SchoolIdentityBadge(
-                            school: post.author.school,
-                            verifiedStudent: post.author.verifiedStudent,
-                            status: post.author.verifiedStudent ? "VERIFIED" : "UNVERIFIED",
-                            compact: true
-                        )
+                            .lineLimit(1)
+                            .layoutPriority(1)
+                        if post.author.verifiedStudent {
+                            SchoolIdentityBadge(
+                                school: post.author.school,
+                                verifiedStudent: true,
+                                status: "VERIFIED",
+                                compact: true
+                            )
+                            .accessibilityIdentifier("discover-school-verification-\(post.id)")
+                        }
                     }
-                    if let studentRoleLabel = post.author.studentRoleLabel {
-                        Text(studentRoleLabel)
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(SideSeatTheme.accent)
-                            .padding(.horizontal, 7)
-                            .padding(.vertical, 3)
-                            .background(SideSeatTheme.accent.opacity(0.10), in: Capsule())
+
+                    if let academicLine {
+                        Text(academicLine)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
+
                     if let tagline = post.author.tagline, !tagline.isEmpty {
-                        Text(tagline).font(.caption).foregroundStyle(.secondary).lineLimit(1)
-                    } else if let major = post.author.major, !major.isEmpty {
-                        Text(major).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                        Text(tagline)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
                     }
                 }
                 Spacer()
-                if post.isOwn { Text("You").font(.caption).foregroundStyle(.secondary) }
+                if post.isOwn {
+                    Text("You")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                }
             }
-            Text(post.title)
-                .font(.body.weight(.semibold))
-                .foregroundStyle(.primary)
-            if let body = post.body, !body.isEmpty {
-                Text(body).font(.subheadline).foregroundStyle(.secondary).lineLimit(3)
+
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                Text(post.title)
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if let body = post.body, !body.isEmpty {
+                    Text(body)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(3)
+                }
             }
+
             if !post.tags.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
@@ -193,6 +226,7 @@ private struct DiscoverBuddyRow: View {
                     }
                 }
             }
+
             if post.startDate != nil || post.location != nil {
                 HStack(spacing: 12) {
                     if let start = post.startDate {
@@ -206,54 +240,168 @@ private struct DiscoverBuddyRow: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             }
-            HStack(spacing: 12) {
-                Label(BuddyPostDisplay.statusLabel(post.status), systemImage: post.status == "ACTIVE" ? "circle.fill" : "checkmark.circle")
-                if let expiry = post.expiryDate {
-                    Label {
-                        Text(expiry, format: .dateTime.month().day())
-                    } icon: {
-                        Image(systemName: "clock")
-                    }
+
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: SideSeatTheme.spaceSM) {
+                    footerBadges
                 }
-                if post.interestedCount > 0 {
-                    Label("\(post.interestedCount)", systemImage: "heart")
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    footerBadges
                 }
             }
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            Label(BuddyPostDisplay.visibilityLabel(post.visibility), systemImage: "eye")
-            .font(.caption)
-            .foregroundStyle(.secondary)
+
+            if status.isOpen, let expiry = post.expiryDate {
+                Label {
+                    Text("Plan closes \(expiry.formatted(date: .abbreviated, time: .omitted))")
+                } icon: {
+                    Image(systemName: "clock")
+                }
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            }
         }
-        .padding(.vertical, 6)
+        .padding(.vertical, 10)
+        .contentShape(Rectangle())
+    }
+
+    @ViewBuilder
+    private var footerBadges: some View {
+        DiscoverStatusBadge(status: status)
+            .accessibilityIdentifier("discover-status-\(post.id)")
+        DiscoverMetadataBadge(
+            BuddyPostDisplay.visibilityLabel(post.visibility),
+            systemImage: BuddyPostDisplay.visibilitySystemImage(post.visibility)
+        )
+        Spacer(minLength: 0)
+        if post.interestedCount > 0 {
+            Label("\(post.interestedCount)", systemImage: "heart")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
     }
 }
 
 private struct DiscoverActivityRow: View {
     let activity: NativeDiscoverActivity
 
+    private var status: DiscoverStatusPresentation {
+        DiscoverActivityDisplay.status(activity)
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(activity.title)
-                .font(.body.weight(.semibold))
-                .foregroundStyle(.primary)
-            if let start = activity.startDate {
-                Label(start.formatted(date: .abbreviated, time: .shortened), systemImage: "calendar")
-            }
-            Label(activity.location, systemImage: "mappin.and.ellipse")
-            HStack {
-                Text(activity.organizer.displayName)
-                Spacer()
-                if let capacity = activity.capacity {
-                    Text("\(activity.goingCount)/\(capacity) going")
-                } else {
-                    Text("\(activity.goingCount) going")
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+            HStack(spacing: 10) {
+                InitialAvatar(name: activity.organizer.displayName, url: activity.organizer.avatarUrl, size: 40)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(activity.organizer.displayName)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                    Text(activity.school)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+                Spacer(minLength: 0)
+                if activity.isOrganizer {
+                    Text("You")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
                 }
             }
+
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                Text(activity.title)
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let description = activity.description, !description.isEmpty {
+                    Text(description)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(3)
+                }
+            }
+
+            HStack(spacing: 12) {
+                if let start = activity.startDate {
+                    Label(start.formatted(date: .abbreviated, time: .shortened), systemImage: "calendar")
+                }
+                Label(activity.location, systemImage: "mappin.and.ellipse")
+                    .lineLimit(1)
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                DiscoverStatusBadge(status: status)
+                    .accessibilityIdentifier("discover-status-activity-\(activity.id)")
+                Spacer(minLength: 0)
+                if let capacity = activity.capacity {
+                    Label("\(activity.goingCount)/\(capacity) going", systemImage: "person.2")
+                } else {
+                    Label("\(activity.goingCount) going", systemImage: "person.2")
+                }
+            }
+            .font(.caption)
             .foregroundStyle(.secondary)
         }
-        .font(.subheadline)
-        .padding(.vertical, 6)
+        .padding(.vertical, 10)
+        .contentShape(Rectangle())
+    }
+}
+
+struct DiscoverStatusBadge: View {
+    let status: DiscoverStatusPresentation
+
+    private var foreground: Color {
+        switch status.tone {
+        case .success: SideSeatTheme.success
+        case .warning: SideSeatTheme.warning
+        case .danger: SideSeatTheme.danger
+        case .neutral: SideSeatTheme.textSecondary
+        }
+    }
+
+    private var fill: Color {
+        switch status.tone {
+        case .success: SideSeatTheme.success.opacity(0.12)
+        case .warning: SideSeatTheme.warning.opacity(0.14)
+        case .danger: SideSeatTheme.danger.opacity(0.12)
+        case .neutral: SideSeatTheme.fillTertiary
+        }
+    }
+
+    var body: some View {
+        Label(status.label, systemImage: status.systemImage)
+            .labelStyle(.titleAndIcon)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(foreground)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(fill, in: Capsule())
+            .fixedSize(horizontal: true, vertical: false)
+    }
+}
+
+private struct DiscoverMetadataBadge: View {
+    let label: String
+    let systemImage: String
+
+    init(_ label: String, systemImage: String) {
+        self.label = label
+        self.systemImage = systemImage
+    }
+
+    var body: some View {
+        Label(label, systemImage: systemImage)
+            .labelStyle(.titleAndIcon)
+            .font(.caption2.weight(.medium))
+            .foregroundStyle(SideSeatTheme.textSecondary)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(SideSeatTheme.fillTertiary, in: Capsule())
+            .fixedSize(horizontal: true, vertical: false)
     }
 }
 

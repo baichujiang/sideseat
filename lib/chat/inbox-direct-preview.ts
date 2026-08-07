@@ -1,8 +1,5 @@
 import type { PlanRequestStatus } from "@prisma/client";
 
-import { displayUserMessageBody } from "@/lib/assistant/display-user-message";
-import { parseFaqTrigger } from "@/lib/assistant/faq-keys";
-import { parseAssistantMessage } from "@/lib/assistant/message-payload";
 import { formatPlanWhenCompact } from "@/lib/chat/format-plan-when";
 import type { AppLocale } from "@/lib/i18n/app-locale";
 import type { AppMessages } from "@/lib/i18n/messages";
@@ -65,11 +62,7 @@ export function resolveInboxDirectPreview(
       needsYourReply: pr.status === "PENDING" && pr.receiverUserId === viewerUserId,
     };
   }
-  // Hide FAQ trigger tokens and serialized [sideseat-actions] blocks in list previews.
-  if (parseFaqTrigger(message.body)) {
-    return { kind: "text", text: displayUserMessageBody(message.body, appLocale) };
-  }
-  const text = parseAssistantMessage(message.body).text.trim();
+  const text = message.body.trim();
   return { kind: "text", text: text || "…" };
 }
 

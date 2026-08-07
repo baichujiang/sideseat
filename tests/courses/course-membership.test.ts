@@ -9,6 +9,7 @@ import {
   courseIdentityKey,
   normalizeCourseIdentityCode,
 } from "../../lib/courses/course-identity";
+import { archivedCourseRestoreBlockReason } from "../../lib/courses/archived-course";
 
 describe("course social identity", () => {
   it("normalizes code formatting without merging different schools", () => {
@@ -59,6 +60,34 @@ describe("course social identity", () => {
         now,
       ),
       false,
+    );
+  });
+
+  it("only restores archived courses for the current school without an active equivalent", () => {
+    const course = { id: "old", school: "TUM", code: "IN 0001" };
+    assert.equal(
+      archivedCourseRestoreBlockReason({
+        userSchool: "Technical University of Munich",
+        course,
+        activeCourseIdentities: new Set(),
+      }),
+      null,
+    );
+    assert.equal(
+      archivedCourseRestoreBlockReason({
+        userSchool: "LMU",
+        course,
+        activeCourseIdentities: new Set(),
+      }),
+      "SCHOOL_MISMATCH",
+    );
+    assert.equal(
+      archivedCourseRestoreBlockReason({
+        userSchool: "TUM",
+        course,
+        activeCourseIdentities: new Set([courseIdentityKey(course)]),
+      }),
+      "ACTIVE_EQUIVALENT",
     );
   });
 });

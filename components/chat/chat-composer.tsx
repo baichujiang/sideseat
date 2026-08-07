@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CornerUpLeft, Hourglass, MessageCircleMore, Plus, X } from "lucide-react";
 
-import { AssistantTypingIndicator } from "@/components/chat/assistant-typing-indicator";
 import { FormMessage } from "@/components/forms/form-message";
 import { useChatReply } from "@/components/chat/chat-reply-context";
 import { useAppMessages } from "@/hooks/use-app-locale";
@@ -31,8 +30,6 @@ export function ChatComposer({
   showUnrepliedHint = false,
   unrepliedStreak = 0,
   unrepliedLimit = UNREPLIED_DIRECT_MESSAGE_LIMIT,
-  isAssistantChat = false,
-  externalAssistantPending = false,
 }: {
   connectionId: string;
   peerName: string;
@@ -46,10 +43,6 @@ export function ChatComposer({
   /** Viewer messages since the peer's last reply. */
   unrepliedStreak?: number;
   unrepliedLimit?: number;
-  /** SideSeat Assistant DM — show typing while the server builds a reply. */
-  isAssistantChat?: boolean;
-  /** Chip sends that await an assistant reply outside this composer. */
-  externalAssistantPending?: boolean;
 }) {
   const router = useRouter();
   const { chat: c } = useAppMessages();
@@ -123,9 +116,6 @@ export function ChatComposer({
     if (sendBlocked) setAttachOpen(false);
   }, [sendBlocked]);
 
-  const showAssistantTyping =
-    isAssistantChat && (submitting || externalAssistantPending);
-
   return (
     <div ref={composerRootRef} data-chat-composer-root className="relative space-y-2">
       {sendBlocked || showUnrepliedHint ? (
@@ -142,7 +132,6 @@ export function ChatComposer({
           onCancel={() => setReplyTo(null)}
         />
       ) : null}
-      {showAssistantTyping ? <AssistantTypingIndicator /> : null}
       <div className="flex min-h-0 items-end gap-2">
         <ChatComposerBar>
           {hideAttachments || sendBlocked ? (
@@ -168,7 +157,7 @@ export function ChatComposer({
             onChange={(e) => setBody(e.target.value)}
             onSend={() => void submit()}
             placeholder={placeholder ?? (replyTo ? c.placeholderReply : c.placeholderWrite)}
-            disabled={sendBlocked || (isAssistantChat && submitting)}
+            disabled={sendBlocked}
           />
           <ChatComposerSendButton
             disabled={submitting || sendBlocked || !body.trim()}

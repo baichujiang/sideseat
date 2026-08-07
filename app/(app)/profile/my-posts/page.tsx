@@ -47,6 +47,8 @@ function toDiscoverPostRow(post: PostWithAuthorCourses, currentUserId: string): 
     title: post.title,
     body: post.body,
     status: post.status,
+    closureReason: post.closureReason,
+    closedAt: post.closedAt,
     tags: post.tags,
     visibility: post.visibility,
     replyPreference: post.replyPreference,

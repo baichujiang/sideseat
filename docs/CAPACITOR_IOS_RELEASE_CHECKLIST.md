@@ -74,7 +74,8 @@
 
 - [ ] **Web Push**：在 App 内订阅/收通知（WKWebView 常与 Safari 不同，需真机验证）
 - [ ] Xcode：**Push Notifications** capability + **Remote notifications** background mode；真机/TestFlight 需付费开发者账号
-- [ ] 数据库已跑迁移 `NativePushDevice`；服务端 APNs 发送仍未实现（勿在上架文案承诺推送已可用）
+- [ ] 数据库已跑 `NativePushDevice` 及 APNs 环境迁移；Debug 与 TestFlight
+  真机已分别验证 sandbox/production 前台、后台和冷启动通知
 - [ ] 相机/相册上传头像（若有）：考虑后续插件；当前若仅 `<input type="file">` 需在真机点一次上传
 
 ---

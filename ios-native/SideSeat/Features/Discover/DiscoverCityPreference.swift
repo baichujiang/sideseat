@@ -36,6 +36,9 @@ final class DiscoverCityPreferenceStore {
         defer { isLoadingConfig = false }
 
         #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-slow-city-config") {
+            try? await Task.sleep(for: .seconds(4))
+        }
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") ||
             ProcessInfo.processInfo.arguments.contains("--ui-testing")
         {

@@ -37,7 +37,6 @@ final class DirectChatStore {
     private let cache: DirectChatCache
 
     private static let unrepliedDirectMessageLimit = 2
-    static let assistantBotUsername = AssistantBot.username
 
     init(cache: DirectChatCache = .shared) {
         self.cache = cache
@@ -69,13 +68,8 @@ final class DirectChatStore {
         return newest.sender.id != peerID
     }
 
-    var isAssistantChat: Bool {
-        conversation?.peer.username == Self.assistantBotUsername
-    }
-
     private var isUnrepliedGateExempt: Bool {
         if conversation?.isSelfNotes == true { return true }
-        if isAssistantChat { return true }
         if conversation?.replyLimitUnlocked == true { return true }
         if let peerID = conversation?.peer.id, !currentUserID.isEmpty {
             let countable = messages.filter { sendStatuses[$0.id] != .failed }
@@ -88,12 +82,6 @@ final class DirectChatStore {
             }
         }
         return false
-    }
-
-    /// First assistant welcome bubble (kept for tests / future first-run affordances).
-    var assistantWelcomeMessageID: String? {
-        guard isAssistantChat, !currentUserID.isEmpty else { return nil }
-        return messages.first(where: { $0.type == "TEXT" && AssistantBot.isBot($0.sender) })?.id
     }
 
     nonisolated static func countUnrepliedStreak(
@@ -311,9 +299,6 @@ final class DirectChatStore {
             messages.removeAll { $0.id == messageID }
             sendStatuses.removeValue(forKey: messageID)
             upsert(response.data)
-            if isAssistantChat {
-                await reloadHistory(using: session)
-            }
             return true
         } catch {
             sendStatuses[messageID] = .failed
@@ -395,9 +380,6 @@ final class DirectChatStore {
             sendStatuses.removeValue(forKey: localID)
             upsert(response.data)
             clearReply()
-            if isAssistantChat {
-                await reloadHistory(using: session)
-            }
             return true
         } catch {
             sendStatuses[localID] = .failed
@@ -405,11 +387,6 @@ final class DirectChatStore {
             noteSendFailure(error)
             return false
         }
-    }
-
-    @discardableResult
-    func sendFaq(_ key: AssistantFaqKey, using session: SessionStore) async -> Bool {
-        await sendText(key.triggerBody, using: session)
     }
 
     @discardableResult

@@ -1,12 +1,12 @@
 import { normalizeCalendarCategoryHex } from "@/lib/calendar/calendar-category-colors";
 import {
-  REVEAL_PRESET_KEYS_ALLOWLIST,
   UNCATEGORIZED_REVEAL_PRESET_KEY,
   type NormalizedRevealConfig,
-  type RevealPresetKeyAllowlisted,
+  type RevealVirtualSourceKey,
 } from "@/lib/schedule-share/reveal-config";
 
 export const UNCATEGORIZED_REVEAL_CATEGORY_ID = "__sideseat_uncategorized__";
+export const COURSE_REVEAL_CATEGORY_ID = "__sideseat_course_source__";
 
 export type ShareRevealCategoryInput = {
   id: string;
@@ -50,17 +50,19 @@ export function initialRevealedCategoryIds(
 export function revealConfigFromRevealedCategoryIds(
   categories: readonly ShareRevealCategoryInput[],
   revealedCategoryIds: readonly string[],
-): { categoryIds: string[]; presetKeys: RevealPresetKeyAllowlisted[]; hideAllDetails: boolean } {
+): { categoryIds: string[]; presetKeys: RevealVirtualSourceKey[]; hideAllDetails: boolean } {
   const idSet = new Set(revealedCategoryIds);
   const categoryIds: string[] = [];
-  const presetKeys: RevealPresetKeyAllowlisted[] = [];
+  const presetKeys: RevealVirtualSourceKey[] = [];
 
   for (const c of categories) {
     if (!idSet.has(c.id)) continue;
-    const pk = c.presetKey;
-    if (pk && (REVEAL_PRESET_KEYS_ALLOWLIST as readonly string[]).includes(pk)) {
-      presetKeys.push(pk as RevealPresetKeyAllowlisted);
+    if (c.id === UNCATEGORIZED_REVEAL_CATEGORY_ID) {
+      presetKeys.push(UNCATEGORIZED_REVEAL_PRESET_KEY);
+    } else if (c.id === COURSE_REVEAL_CATEGORY_ID) {
+      presetKeys.push("course");
     } else {
+      // Every real calendar category, including legacy built-ins, is selected by its live ID.
       categoryIds.push(c.id);
     }
   }
@@ -97,6 +99,6 @@ export function isNoCategoriesRevealed(
 /** Default create payload: reveal every preset; custom calendars added when known. */
 export function defaultRevealConfigForCategories(
   categories: readonly ShareRevealCategoryInput[],
-): { categoryIds: string[]; presetKeys: RevealPresetKeyAllowlisted[]; hideAllDetails: boolean } {
+): { categoryIds: string[]; presetKeys: RevealVirtualSourceKey[]; hideAllDetails: boolean } {
   return revealConfigFromRevealedCategoryIds(categories, allRevealedCategoryIds(categories));
 }

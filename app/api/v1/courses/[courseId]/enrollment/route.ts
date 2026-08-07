@@ -11,9 +11,12 @@ import {
 import { v1Error } from "@/lib/api/v1/http";
 import { hashIdempotencyRequest } from "@/lib/api/v1/idempotency";
 import {
+  activeCourseMembershipWhere,
   courseMembershipActiveUntilForSemester,
   isCourseMembershipActive,
 } from "@/lib/courses/active-membership";
+import { sameCourseIdentityWhere } from "@/lib/courses/course-identity";
+import { schoolIdentityChanged } from "@/lib/profile/school-change";
 
 export const dynamic = "force-dynamic";
 
@@ -48,9 +51,27 @@ async function mutate(
       execute: async (tx) => {
         const course = await tx.course.findUnique({
           where: { id: courseId },
-          select: { id: true, semesterLabel: true },
+          select: { id: true, school: true, code: true, semesterLabel: true },
         });
         if (!course) return null;
+        if (
+          action === "enroll" &&
+          schoolIdentityChanged(auth.user.school, course.school)
+        ) {
+          throw new CourseSchoolMismatchError();
+        }
+        if (action === "enroll") {
+          const activeEquivalent = await tx.userCourse.findFirst({
+            where: {
+              userId: auth.user.id,
+              courseId: { not: course.id },
+              ...activeCourseMembershipWhere(),
+              course: sameCourseIdentityWhere(course),
+            },
+            select: { id: true },
+          });
+          if (activeEquivalent) throw new ActiveEquivalentCourseError();
+        }
         const existing = await tx.userCourse.findUnique({
           where: { userId_courseId: { userId: auth.user.id, courseId } },
           select: { id: true, activeUntil: true },
@@ -93,6 +114,20 @@ async function mutate(
     });
     return courseMutationResponse(request, result);
   } catch (cause) {
+    if (cause instanceof CourseSchoolMismatchError) {
+      return v1Error(request, {
+        code: "CONTENT_RESTRICTED",
+        message: "You can only join courses from your current school.",
+        status: 403,
+      });
+    }
+    if (cause instanceof ActiveEquivalentCourseError) {
+      return v1Error(request, {
+        code: "INVALID_REQUEST",
+        message: "A current version of this course is already active.",
+        status: 409,
+      });
+    }
     console.error(`${request.method} /api/v1/courses/[courseId]/enrollment`, cause);
     return v1Error(request, {
       code: "INTERNAL_ERROR",
@@ -102,6 +137,9 @@ async function mutate(
     });
   }
 }
+
+class CourseSchoolMismatchError extends Error {}
+class ActiveEquivalentCourseError extends Error {}
 
 export async function POST(
   request: Request,

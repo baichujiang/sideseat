@@ -28,6 +28,7 @@ struct SideSeatApp: App {
                     case .signedIn:
                         await PushRegistration.requestAndRegister(using: container.session)
                     case .signedOut:
+                        PushBadgeController.update(0)
                         await CalendarReminderScheduler.shared.clear()
                         await HomeScheduleCache.shared.clear()
                     case .restoring:

@@ -32,6 +32,8 @@ struct NativeDiscoverBuddyPost: Decodable, Identifiable, Sendable {
     let title: String
     let body: String?
     let status: String
+    let closureReason: String?
+    let closedAt: String?
     let tags: [String]
     let visibility: String
     let replyPreference: String
@@ -60,6 +62,8 @@ struct NativeDiscoverBuddyPost: Decodable, Identifiable, Sendable {
             title: title,
             body: body,
             status: status,
+            closureReason: closureReason,
+            closedAt: closedAt,
             tags: tags,
             visibility: visibility,
             replyPreference: replyPreference,
@@ -78,7 +82,11 @@ struct NativeDiscoverBuddyPost: Decodable, Identifiable, Sendable {
         )
     }
 
-    func withStatus(_ status: String) -> NativeDiscoverBuddyPost {
+    func withStatus(
+        _ status: String,
+        closureReason: String? = nil,
+        closedAt: Date? = nil
+    ) -> NativeDiscoverBuddyPost {
         NativeDiscoverBuddyPost(
             id: id,
             category: category,
@@ -86,6 +94,8 @@ struct NativeDiscoverBuddyPost: Decodable, Identifiable, Sendable {
             title: title,
             body: body,
             status: status,
+            closureReason: closureReason,
+            closedAt: closedAt?.formatted(.iso8601),
             tags: tags,
             visibility: visibility,
             replyPreference: replyPreference,
@@ -123,6 +133,8 @@ struct NativeDiscoverBuddyPost: Decodable, Identifiable, Sendable {
             title: title,
             body: body,
             status: status,
+            closureReason: closureReason,
+            closedAt: closedAt,
             tags: tags,
             visibility: visibility,
             replyPreference: replyPreference,
@@ -142,18 +154,89 @@ struct NativeDiscoverBuddyPost: Decodable, Identifiable, Sendable {
     }
 }
 
+struct DiscoverStatusPresentation: Equatable, Sendable {
+    enum Tone: Equatable, Sendable {
+        case success
+        case warning
+        case danger
+        case neutral
+    }
+
+    let label: String
+    let systemImage: String
+    let tone: Tone
+    let isOpen: Bool
+}
+
 enum BuddyPostDisplay {
-    static func statusLabel(_ status: String) -> String {
-        switch status.uppercased() {
-        case "ACTIVE":
-            return String(localized: "Open plan")
-        case "CLOSED":
-            return String(localized: "Matched")
-        case "EXPIRED":
-            return String(localized: "Expired")
-        default:
-            return status.capitalized
+    static func status(
+        _ status: String,
+        closureReason: String? = nil,
+        expiryDate: Date? = nil,
+        now: Date = Date()
+    ) -> DiscoverStatusPresentation {
+        let normalizedStatus = status.uppercased()
+
+        if normalizedStatus == "ACTIVE", let expiryDate, expiryDate <= now {
+            return expiredStatus
         }
+
+        switch normalizedStatus {
+        case "ACTIVE":
+            return DiscoverStatusPresentation(
+                label: String(localized: "Open plan"),
+                systemImage: "circle.fill",
+                tone: .success,
+                isOpen: true
+            )
+        case "CLOSED" where closureReason?.uppercased() == "SCHOOL_CHANGED":
+            return DiscoverStatusPresentation(
+                label: String(localized: "School changed"),
+                systemImage: "building.columns.fill",
+                tone: .warning,
+                isOpen: false
+            )
+        case "CLOSED":
+            return DiscoverStatusPresentation(
+                label: String(localized: "Closed"),
+                systemImage: "lock.fill",
+                tone: .neutral,
+                isOpen: false
+            )
+        case "MATCHED":
+            return DiscoverStatusPresentation(
+                label: String(localized: "Matched"),
+                systemImage: "checkmark.circle.fill",
+                tone: .neutral,
+                isOpen: false
+            )
+        case "EXPIRED":
+            return expiredStatus
+        default:
+            return DiscoverStatusPresentation(
+                label: status.capitalized,
+                systemImage: "circle",
+                tone: .neutral,
+                isOpen: false
+            )
+        }
+    }
+
+    static func status(_ post: NativeDiscoverBuddyPost, now: Date = Date()) -> DiscoverStatusPresentation {
+        status(
+            post.status,
+            closureReason: post.closureReason,
+            expiryDate: post.expiryDate,
+            now: now
+        )
+    }
+
+    static func statusLabel(_ status: String) -> String {
+        self.status(status).label
+    }
+
+    static func statusLabel(_ post: NativeDiscoverBuddyPost, now: Date = Date()) -> String {
+        status(post, now: now).label
     }
 
     static func visibilityLabel(_ visibility: String) -> String {
@@ -171,6 +254,21 @@ enum BuddyPostDisplay {
         }
     }
 
+    static func visibilitySystemImage(_ visibility: String) -> String {
+        switch visibility.uppercased() {
+        case "CITY_INTERNATIONALS":
+            return "globe.europe.africa"
+        case "VERIFIED_ONLY":
+            return "checkmark.seal"
+        case "SCHOOL_ONLY":
+            return "building.columns"
+        case "COURSEMATES_ONLY":
+            return "book.closed"
+        default:
+            return "eye"
+        }
+    }
+
     static func replyLabel(_ preference: String) -> String {
         switch preference.uppercased() {
         case "DIRECT_MESSAGE":
@@ -181,6 +279,61 @@ enum BuddyPostDisplay {
             return String(localized: "Request first")
         default:
             return String(localized: "Replies")
+        }
+    }
+
+    private static var expiredStatus: DiscoverStatusPresentation {
+        DiscoverStatusPresentation(
+            label: String(localized: "Expired"),
+            systemImage: "clock.badge.exclamationmark",
+            tone: .neutral,
+            isOpen: false
+        )
+    }
+}
+
+enum DiscoverActivityDisplay {
+    static func status(_ activity: NativeDiscoverActivity) -> DiscoverStatusPresentation {
+        status(phase: activity.phase)
+    }
+
+    static func status(phase: String) -> DiscoverStatusPresentation {
+        switch phase.lowercased() {
+        case "bookable":
+            return DiscoverStatusPresentation(
+                label: String(localized: "Open sign-ups"),
+                systemImage: "circle.fill",
+                tone: .success,
+                isOpen: true
+            )
+        case "full":
+            return DiscoverStatusPresentation(
+                label: String(localized: "Full"),
+                systemImage: "person.2.slash",
+                tone: .warning,
+                isOpen: false
+            )
+        case "canceled":
+            return DiscoverStatusPresentation(
+                label: String(localized: "Canceled"),
+                systemImage: "xmark.circle.fill",
+                tone: .danger,
+                isOpen: false
+            )
+        case "closed":
+            return DiscoverStatusPresentation(
+                label: String(localized: "Closed"),
+                systemImage: "checkmark.circle.fill",
+                tone: .neutral,
+                isOpen: false
+            )
+        default:
+            return DiscoverStatusPresentation(
+                label: String(localized: "Ended"),
+                systemImage: "clock.badge.checkmark",
+                tone: .neutral,
+                isOpen: false
+            )
         }
     }
 }
@@ -256,7 +409,7 @@ struct NativeDiscoverBuddyAuthor: Decodable, Sendable {
             return String(localized: "Exchange student")
         case "ALUMNI":
             if let graduationYear {
-                return String(localized: "Alumni \(graduationYear)")
+                return String(format: String(localized: "Alumni %@"), String(graduationYear))
             }
             return String(localized: "Alumni")
         default:
@@ -314,6 +467,7 @@ struct NativeDiscoverActivityOrganizer: Decodable, Sendable {
 }
 
 struct NativeDiscoverBuddyRequest: Encodable, Sendable {
+    let category: String?
     let city: String
     let title: String
     let body: String?
@@ -474,6 +628,8 @@ extension NativeDiscoverFeed {
                 title: "Library study buddy",
                 body: "Looking for someone to study with this week.",
                 status: "ACTIVE",
+                closureReason: nil,
+                closedAt: nil,
                 tags: ["study", "library"],
                 visibility: "SCHOOL_ONLY",
                 replyPreference: "REQUEST_FIRST",
@@ -530,6 +686,47 @@ extension NativeDiscoverFeed {
 }
 
 #if DEBUG
+extension NativeDiscoverBuddyPost {
+    static let uiTestingSchoolChangedFixture = NativeDiscoverBuddyPost(
+        id: "ui-school-changed-post",
+        category: "SHARED_COURSES",
+        city: "Munich",
+        title: "Find classmates for algorithms",
+        body: "Looking for classmates to review problem sets together. #study",
+        status: "CLOSED",
+        closureReason: "SCHOOL_CHANGED",
+        closedAt: "2026-08-07T12:00:00Z",
+        tags: ["study"],
+        visibility: "SCHOOL_ONLY",
+        replyPreference: "DIRECT_MESSAGE",
+        startsAt: nil,
+        endsAt: nil,
+        location: "University library",
+        capacity: 4,
+        createdAt: "2026-08-01T10:00:00Z",
+        expiresAt: "2099-12-31T23:59:59Z",
+        isOwn: true,
+        savedByViewer: false,
+        interestedCount: 3,
+        imageUrls: [],
+        linkedCourses: [
+            NativeDiscoverLinkedCourse(id: "archived-course", code: "IN0001", name: "Algorithms")
+        ],
+        author: NativeDiscoverBuddyAuthor(
+            id: "ui-test-user",
+            displayName: "测试用户",
+            tagline: nil,
+            avatarUrl: nil,
+            major: nil,
+            semester: nil,
+            studentStatus: "ALUMNI",
+            graduationYear: 2025,
+            school: "TUM",
+            verifiedStudent: true
+        )
+    )
+}
+
 /// Mutable Discover feed for `--ui-testing-authenticated` so fake creates show up in the list.
 @MainActor
 enum UITestingDiscoverFixture {
@@ -541,16 +738,24 @@ enum UITestingDiscoverFixture {
         feedStorage = .uiTestingFixture
     }
 
-    static func prependBuddy(title: String, body: String?, expiresAt: Date) {
+    static func prependBuddy(
+        category: String,
+        title: String,
+        body: String?,
+        visibility: String,
+        expiresAt: Date
+    ) {
         let post = NativeDiscoverBuddyPost(
             id: "ui-buddy-local-\(UUID().uuidString)",
-            category: "OTHER",
+            category: category,
             city: "Munich",
             title: title,
             body: body,
             status: "ACTIVE",
+            closureReason: nil,
+            closedAt: nil,
             tags: BuddyHashtagParser.tags(in: "\(title) \(body ?? "")"),
-            visibility: "CITY_INTERNATIONALS",
+            visibility: visibility,
             replyPreference: "DIRECT_MESSAGE",
             startsAt: nil,
             endsAt: nil,

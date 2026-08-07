@@ -107,8 +107,10 @@ export async function getDiscoverPeople(
   });
 
   const courseQuery = opts?.courseQuery?.trim().toLocaleLowerCase() ?? "";
+  const schoolValues = getSchoolMatchValues(me?.school);
   const matchingMemberships =
     me?.courses.filter((membership) => {
+      if (!schoolValues.includes(membership.course.school)) return false;
       if (!courseQuery) return true;
       const searchable = [membership.course.code, membership.course.name]
         .filter((value): value is string => Boolean(value))
@@ -143,7 +145,6 @@ export async function getDiscoverPeople(
     })),
   );
 
-  const schoolValues = getSchoolMatchValues(me.school);
   const myCourseCodes = Array.from(
     new Set(
       matchingMemberships
@@ -167,6 +168,7 @@ export async function getDiscoverPeople(
       some: {
         ...activeCourseMembershipWhere(),
         course: {
+          school: schoolValues.length ? { in: schoolValues } : undefined,
           OR: [
             ...(myCourseCodes.length ? [{ code: { in: myCourseCodes } }] : []),
             ...(myFallbackCourseIds.length ? [{ id: { in: myFallbackCourseIds } }] : []),
@@ -188,7 +190,10 @@ export async function getDiscoverPeople(
     where,
     include: {
       courses: {
-        where: activeCourseMembershipWhere(),
+        where: {
+          ...activeCourseMembershipWhere(),
+          course: { school: { in: schoolValues } },
+        },
         include: { course: true, sessions: true },
       },
       userLanguages: true,

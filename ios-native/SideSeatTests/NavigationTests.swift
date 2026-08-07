@@ -43,6 +43,31 @@ struct NavigationTests {
         #expect(DeepLinkRouter.route(forPath: "/profile/blocked") == .blockedUsers)
     }
 
+    @Test("Parses structured plan pushes and suppresses duplicate notice in the open chat")
+    @MainActor
+    func parsesStructuredPlanPush() {
+        let notice = ForegroundPushNotice(
+            title: "Plan accepted",
+            body: "Mina accepted Library study",
+            url: "/connections/connection-123",
+            userInfo: [
+                "kind": "plan_accepted",
+                "connectionId": "connection-123",
+                "planId": "plan-123",
+            ]
+        )
+
+        #expect(notice.isPlanUpdate)
+        #expect(notice.updatesCalendar)
+        #expect(notice.conversationKey == "connection:connection-123")
+        #expect(!ActiveChatPresentation.isDisplaying(notice))
+
+        ActiveChatPresentation.begin("connection:connection-123")
+        #expect(ActiveChatPresentation.isDisplaying(notice))
+        ActiveChatPresentation.end("connection:connection-123")
+        #expect(!ActiveChatPresentation.isDisplaying(notice))
+    }
+
     @Test("Rejects unknown and unsafe links")
     func rejectsUnknownLinks() throws {
         let unknown = try #require(URL(string: "https://sideseat.example/admin/users/123"))

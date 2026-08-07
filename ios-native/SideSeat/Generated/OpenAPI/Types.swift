@@ -187,6 +187,9 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `DELETE /api/v1/courses/{courseId}/enrollment`.
     /// - Remark: Generated from `#/paths//api/v1/courses/{courseId}/enrollment/delete(leaveCourse)`.
     func leaveCourse(_ input: Operations.LeaveCourse.Input) async throws -> Operations.LeaveCourse.Output
+    /// - Remark: HTTP `DELETE /api/v1/courses/{courseId}/archive`.
+    /// - Remark: Generated from `#/paths//api/v1/courses/{courseId}/archive/delete(removeArchivedCourse)`.
+    func removeArchivedCourse(_ input: Operations.RemoveArchivedCourse.Input) async throws -> Operations.RemoveArchivedCourse.Output
     /// - Remark: HTTP `PATCH /api/v1/courses/{courseId}/schedule`.
     /// - Remark: Generated from `#/paths//api/v1/courses/{courseId}/schedule/patch(applyCourseSchedule)`.
     func applyCourseSchedule(_ input: Operations.ApplyCourseSchedule.Input) async throws -> Operations.ApplyCourseSchedule.Output
@@ -973,6 +976,17 @@ extension APIProtocol {
         headers: Operations.LeaveCourse.Input.Headers
     ) async throws -> Operations.LeaveCourse.Output {
         try await leaveCourse(Operations.LeaveCourse.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// - Remark: HTTP `DELETE /api/v1/courses/{courseId}/archive`.
+    /// - Remark: Generated from `#/paths//api/v1/courses/{courseId}/archive/delete(removeArchivedCourse)`.
+    internal func removeArchivedCourse(
+        path: Operations.RemoveArchivedCourse.Input.Path,
+        headers: Operations.RemoveArchivedCourse.Input.Headers
+    ) async throws -> Operations.RemoveArchivedCourse.Output {
+        try await removeArchivedCourse(Operations.RemoveArchivedCourse.Input(
             path: path,
             headers: headers
         ))
@@ -2076,21 +2090,27 @@ internal enum Components {
             internal var peerId: Swift.String
             /// - Remark: Generated from `#/components/schemas/OpenConversationRequest/courseId`.
             internal var courseId: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/OpenConversationRequest/postId`.
+            internal var postId: Swift.String?
             /// Creates a new `OpenConversationRequest`.
             ///
             /// - Parameters:
             ///   - peerId:
             ///   - courseId:
+            ///   - postId:
             internal init(
                 peerId: Swift.String,
-                courseId: Swift.String? = nil
+                courseId: Swift.String? = nil,
+                postId: Swift.String? = nil
             ) {
                 self.peerId = peerId
                 self.courseId = courseId
+                self.postId = postId
             }
             internal enum CodingKeys: String, CodingKey {
                 case peerId
                 case courseId
+                case postId
             }
             internal init(from decoder: any Swift.Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -2102,9 +2122,14 @@ internal enum Components {
                     Swift.String.self,
                     forKey: .courseId
                 )
+                self.postId = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .postId
+                )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
                     "peerId",
-                    "courseId"
+                    "courseId",
+                    "postId"
                 ])
             }
         }
@@ -3840,9 +3865,20 @@ internal enum Components {
             internal enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
                 case active = "ACTIVE"
                 case closed = "CLOSED"
+                case expired = "EXPIRED"
             }
             /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/status`.
             internal var status: Components.Schemas.DiscoverBuddyPost.StatusPayload
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/closureReason`.
+            internal enum ClosureReasonPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case authorClosed = "AUTHOR_CLOSED"
+                case schoolChanged = "SCHOOL_CHANGED"
+                case _empty_ = ""
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/closureReason`.
+            internal var closureReason: Components.Schemas.DiscoverBuddyPost.ClosureReasonPayload?
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/closedAt`.
+            internal var closedAt: Foundation.Date?
             /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/tags`.
             internal var tags: [Swift.String]
             /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPost/visibility`.
@@ -3895,6 +3931,8 @@ internal enum Components {
             ///   - title:
             ///   - body:
             ///   - status:
+            ///   - closureReason:
+            ///   - closedAt:
             ///   - tags:
             ///   - visibility:
             ///   - replyPreference:
@@ -3917,6 +3955,8 @@ internal enum Components {
                 title: Swift.String,
                 body: Swift.String? = nil,
                 status: Components.Schemas.DiscoverBuddyPost.StatusPayload,
+                closureReason: Components.Schemas.DiscoverBuddyPost.ClosureReasonPayload? = nil,
+                closedAt: Foundation.Date? = nil,
                 tags: [Swift.String],
                 visibility: Components.Schemas.DiscoverBuddyPost.VisibilityPayload,
                 replyPreference: Components.Schemas.DiscoverBuddyPost.ReplyPreferencePayload,
@@ -3939,6 +3979,8 @@ internal enum Components {
                 self.title = title
                 self.body = body
                 self.status = status
+                self.closureReason = closureReason
+                self.closedAt = closedAt
                 self.tags = tags
                 self.visibility = visibility
                 self.replyPreference = replyPreference
@@ -3962,6 +4004,8 @@ internal enum Components {
                 case title
                 case body
                 case status
+                case closureReason
+                case closedAt
                 case tags
                 case visibility
                 case replyPreference
@@ -4293,6 +4337,17 @@ internal enum Components {
         }
         /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest`.
         internal struct DiscoverBuddyPostRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest/category`.
+            internal enum CategoryPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case study = "STUDY"
+                case meals = "MEALS"
+                case language = "LANGUAGE"
+                case sports = "SPORTS"
+                case sharedCourses = "SHARED_COURSES"
+                case other = "OTHER"
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest/category`.
+            internal var category: Components.Schemas.DiscoverBuddyPostRequest.CategoryPayload?
             /// - Remark: Generated from `#/components/schemas/DiscoverBuddyPostRequest/city`.
             internal enum CityPayload: String, Codable, Hashable, Sendable, CaseIterable {
                 case munich = "Munich"
@@ -4339,6 +4394,7 @@ internal enum Components {
             /// Creates a new `DiscoverBuddyPostRequest`.
             ///
             /// - Parameters:
+            ///   - category:
             ///   - city:
             ///   - title:
             ///   - body:
@@ -4353,6 +4409,7 @@ internal enum Components {
             ///   - expiresAt:
             ///   - imageUrls:
             internal init(
+                category: Components.Schemas.DiscoverBuddyPostRequest.CategoryPayload? = nil,
                 city: Components.Schemas.DiscoverBuddyPostRequest.CityPayload? = nil,
                 title: Swift.String,
                 body: Swift.String? = nil,
@@ -4367,6 +4424,7 @@ internal enum Components {
                 expiresAt: Foundation.Date,
                 imageUrls: [Swift.String]? = nil
             ) {
+                self.category = category
                 self.city = city
                 self.title = title
                 self.body = body
@@ -4382,6 +4440,7 @@ internal enum Components {
                 self.imageUrls = imageUrls
             }
             internal enum CodingKeys: String, CodingKey {
+                case category
                 case city
                 case title
                 case body
@@ -4398,6 +4457,10 @@ internal enum Components {
             }
             internal init(from decoder: any Swift.Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.category = try container.decodeIfPresent(
+                    Components.Schemas.DiscoverBuddyPostRequest.CategoryPayload.self,
+                    forKey: .category
+                )
                 self.city = try container.decodeIfPresent(
                     Components.Schemas.DiscoverBuddyPostRequest.CityPayload.self,
                     forKey: .city
@@ -4451,6 +4514,7 @@ internal enum Components {
                     forKey: .imageUrls
                 )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "category",
                     "city",
                     "title",
                     "body",
@@ -5417,21 +5481,39 @@ internal enum Components {
             internal var enrolled: Swift.Bool
             /// - Remark: Generated from `#/components/schemas/CourseViewerState/saved`.
             internal var saved: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/CourseViewerState/canRestore`.
+            internal var canRestore: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/CourseViewerState/restoreBlockReason`.
+            internal enum RestoreBlockReasonPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case schoolMismatch = "SCHOOL_MISMATCH"
+                case activeEquivalent = "ACTIVE_EQUIVALENT"
+                case _empty_ = ""
+            }
+            /// - Remark: Generated from `#/components/schemas/CourseViewerState/restoreBlockReason`.
+            internal var restoreBlockReason: Components.Schemas.CourseViewerState.RestoreBlockReasonPayload?
             /// Creates a new `CourseViewerState`.
             ///
             /// - Parameters:
             ///   - enrolled:
             ///   - saved:
+            ///   - canRestore:
+            ///   - restoreBlockReason:
             internal init(
                 enrolled: Swift.Bool,
-                saved: Swift.Bool
+                saved: Swift.Bool,
+                canRestore: Swift.Bool? = nil,
+                restoreBlockReason: Components.Schemas.CourseViewerState.RestoreBlockReasonPayload? = nil
             ) {
                 self.enrolled = enrolled
                 self.saved = saved
+                self.canRestore = canRestore
+                self.restoreBlockReason = restoreBlockReason
             }
             internal enum CodingKeys: String, CodingKey {
                 case enrolled
                 case saved
+                case canRestore
+                case restoreBlockReason
             }
         }
         /// - Remark: Generated from `#/components/schemas/CourseSummary`.
@@ -6920,29 +7002,6 @@ internal enum Components {
                 case productTutorialDismissedAt
             }
         }
-        /// - Remark: Generated from `#/components/schemas/ProfileLanguage`.
-        internal struct ProfileLanguage: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/ProfileLanguage/tag`.
-            internal var tag: Swift.String
-            /// - Remark: Generated from `#/components/schemas/ProfileLanguage/proficiency`.
-            internal var proficiency: Swift.String
-            /// Creates a new `ProfileLanguage`.
-            ///
-            /// - Parameters:
-            ///   - tag:
-            ///   - proficiency:
-            internal init(
-                tag: Swift.String,
-                proficiency: Swift.String
-            ) {
-                self.tag = tag
-                self.proficiency = proficiency
-            }
-            internal enum CodingKeys: String, CodingKey {
-                case tag
-                case proficiency
-            }
-        }
         /// - Remark: Generated from `#/components/schemas/ProfileLifePhoto`.
         internal struct ProfileLifePhoto: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/ProfileLifePhoto/id`.
@@ -7062,8 +7121,6 @@ internal enum Components {
             internal var semester: Swift.Int?
             /// - Remark: Generated from `#/components/schemas/ProfileUpdateRequest/graduationYear`.
             internal var graduationYear: Swift.Int?
-            /// - Remark: Generated from `#/components/schemas/ProfileUpdateRequest/languages`.
-            internal var languages: [Components.Schemas.ProfileLanguage]?
             /// - Remark: Generated from `#/components/schemas/ProfileUpdateRequest/wechatHandle`.
             internal var wechatHandle: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ProfileUpdateRequest/whatsappHandle`.
@@ -7100,7 +7157,6 @@ internal enum Components {
             ///   - major:
             ///   - semester:
             ///   - graduationYear:
-            ///   - languages:
             ///   - wechatHandle:
             ///   - whatsappHandle:
             ///   - telegramHandle:
@@ -7123,7 +7179,6 @@ internal enum Components {
                 major: Swift.String? = nil,
                 semester: Swift.Int? = nil,
                 graduationYear: Swift.Int? = nil,
-                languages: [Components.Schemas.ProfileLanguage]? = nil,
                 wechatHandle: Swift.String? = nil,
                 whatsappHandle: Swift.String? = nil,
                 telegramHandle: Swift.String? = nil,
@@ -7146,7 +7201,6 @@ internal enum Components {
                 self.major = major
                 self.semester = semester
                 self.graduationYear = graduationYear
-                self.languages = languages
                 self.wechatHandle = wechatHandle
                 self.whatsappHandle = whatsappHandle
                 self.telegramHandle = telegramHandle
@@ -7170,7 +7224,6 @@ internal enum Components {
                 case major
                 case semester
                 case graduationYear
-                case languages
                 case wechatHandle
                 case whatsappHandle
                 case telegramHandle
@@ -7221,10 +7274,6 @@ internal enum Components {
                 self.graduationYear = try container.decodeIfPresent(
                     Swift.Int.self,
                     forKey: .graduationYear
-                )
-                self.languages = try container.decodeIfPresent(
-                    [Components.Schemas.ProfileLanguage].self,
-                    forKey: .languages
                 )
                 self.wechatHandle = try container.decodeIfPresent(
                     Swift.String.self,
@@ -7284,7 +7333,6 @@ internal enum Components {
                     "major",
                     "semester",
                     "graduationYear",
-                    "languages",
                     "wechatHandle",
                     "whatsappHandle",
                     "telegramHandle",
@@ -7389,8 +7437,6 @@ internal enum Components {
                 internal var displayName: Swift.String
                 /// - Remark: Generated from `#/components/schemas/CurrentProfile/value2/schoolSummary`.
                 internal var schoolSummary: Components.Schemas.ProfileSchoolSummary
-                /// - Remark: Generated from `#/components/schemas/CurrentProfile/value2/languages`.
-                internal var languages: [Components.Schemas.ProfileLanguage]
                 /// - Remark: Generated from `#/components/schemas/CurrentProfile/value2/lifePhotos`.
                 internal var lifePhotos: [Components.Schemas.ProfileLifePhoto]
                 /// - Remark: Generated from `#/components/schemas/CurrentProfile/value2/contacts`.
@@ -7485,6 +7531,8 @@ internal enum Components {
                 }
                 /// - Remark: Generated from `#/components/schemas/CurrentProfile/value2/privacy`.
                 internal var privacy: Components.Schemas.CurrentProfile.Value2Payload.PrivacyPayload
+                /// - Remark: Generated from `#/components/schemas/CurrentProfile/value2/usernameChangePolicy`.
+                internal var usernameChangePolicy: Components.Schemas.UsernameChangePolicy
                 /// - Remark: Generated from `#/components/schemas/CurrentProfile/value2/counts`.
                 internal struct CountsPayload: Codable, Hashable, Sendable {
                     /// - Remark: Generated from `#/components/schemas/CurrentProfile/value2/counts/blocked`.
@@ -7507,35 +7555,35 @@ internal enum Components {
                 /// - Parameters:
                 ///   - displayName:
                 ///   - schoolSummary:
-                ///   - languages:
                 ///   - lifePhotos:
                 ///   - contacts:
                 ///   - privacy:
+                ///   - usernameChangePolicy:
                 ///   - counts:
                 internal init(
                     displayName: Swift.String,
                     schoolSummary: Components.Schemas.ProfileSchoolSummary,
-                    languages: [Components.Schemas.ProfileLanguage],
                     lifePhotos: [Components.Schemas.ProfileLifePhoto],
                     contacts: Components.Schemas.CurrentProfile.Value2Payload.ContactsPayload,
                     privacy: Components.Schemas.CurrentProfile.Value2Payload.PrivacyPayload,
+                    usernameChangePolicy: Components.Schemas.UsernameChangePolicy,
                     counts: Components.Schemas.CurrentProfile.Value2Payload.CountsPayload
                 ) {
                     self.displayName = displayName
                     self.schoolSummary = schoolSummary
-                    self.languages = languages
                     self.lifePhotos = lifePhotos
                     self.contacts = contacts
                     self.privacy = privacy
+                    self.usernameChangePolicy = usernameChangePolicy
                     self.counts = counts
                 }
                 internal enum CodingKeys: String, CodingKey {
                     case displayName
                     case schoolSummary
-                    case languages
                     case lifePhotos
                     case contacts
                     case privacy
+                    case usernameChangePolicy
                     case counts
                 }
             }
@@ -7560,6 +7608,124 @@ internal enum Components {
             internal func encode(to encoder: any Swift.Encoder) throws {
                 try self.value1.encode(to: encoder)
                 try self.value2.encode(to: encoder)
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ProfileSchoolChangeSummary`.
+        internal struct ProfileSchoolChangeSummary: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ProfileSchoolChangeSummary/archivedCourseCount`.
+            internal var archivedCourseCount: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ProfileSchoolChangeSummary/removedCalendarEntryCount`.
+            internal var removedCalendarEntryCount: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ProfileSchoolChangeSummary/closedPostCount`.
+            internal var closedPostCount: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ProfileSchoolChangeSummary/expiredInvitationCount`.
+            internal var expiredInvitationCount: Swift.Int
+            /// Creates a new `ProfileSchoolChangeSummary`.
+            ///
+            /// - Parameters:
+            ///   - archivedCourseCount:
+            ///   - removedCalendarEntryCount:
+            ///   - closedPostCount:
+            ///   - expiredInvitationCount:
+            internal init(
+                archivedCourseCount: Swift.Int,
+                removedCalendarEntryCount: Swift.Int,
+                closedPostCount: Swift.Int,
+                expiredInvitationCount: Swift.Int
+            ) {
+                self.archivedCourseCount = archivedCourseCount
+                self.removedCalendarEntryCount = removedCalendarEntryCount
+                self.closedPostCount = closedPostCount
+                self.expiredInvitationCount = expiredInvitationCount
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case archivedCourseCount
+                case removedCalendarEntryCount
+                case closedPostCount
+                case expiredInvitationCount
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CurrentProfileUpdateResult`.
+        internal struct CurrentProfileUpdateResult: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CurrentProfileUpdateResult/value1`.
+            internal var value1: Components.Schemas.CurrentProfile
+            /// - Remark: Generated from `#/components/schemas/CurrentProfileUpdateResult/value2`.
+            internal struct Value2Payload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/CurrentProfileUpdateResult/value2/schoolChange`.
+                internal var schoolChange: Components.Schemas.ProfileSchoolChangeSummary?
+                /// Creates a new `Value2Payload`.
+                ///
+                /// - Parameters:
+                ///   - schoolChange:
+                internal init(schoolChange: Components.Schemas.ProfileSchoolChangeSummary? = nil) {
+                    self.schoolChange = schoolChange
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case schoolChange
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/CurrentProfileUpdateResult/value2`.
+            internal var value2: Components.Schemas.CurrentProfileUpdateResult.Value2Payload
+            /// Creates a new `CurrentProfileUpdateResult`.
+            ///
+            /// - Parameters:
+            ///   - value1:
+            ///   - value2:
+            internal init(
+                value1: Components.Schemas.CurrentProfile,
+                value2: Components.Schemas.CurrentProfileUpdateResult.Value2Payload
+            ) {
+                self.value1 = value1
+                self.value2 = value2
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                self.value1 = try .init(from: decoder)
+                self.value2 = try .init(from: decoder)
+            }
+            internal func encode(to encoder: any Swift.Encoder) throws {
+                try self.value1.encode(to: encoder)
+                try self.value2.encode(to: encoder)
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/UsernameChangePolicy`.
+        internal struct UsernameChangePolicy: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/UsernameChangePolicy/limit`.
+            internal var limit: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/UsernameChangePolicy/windowDays`.
+            internal var windowDays: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/UsernameChangePolicy/changesUsed`.
+            internal var changesUsed: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/UsernameChangePolicy/changesRemaining`.
+            internal var changesRemaining: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/UsernameChangePolicy/nextAllowedAt`.
+            internal var nextAllowedAt: Foundation.Date?
+            /// Creates a new `UsernameChangePolicy`.
+            ///
+            /// - Parameters:
+            ///   - limit:
+            ///   - windowDays:
+            ///   - changesUsed:
+            ///   - changesRemaining:
+            ///   - nextAllowedAt:
+            internal init(
+                limit: Swift.Int,
+                windowDays: Swift.Int,
+                changesUsed: Swift.Int,
+                changesRemaining: Swift.Int,
+                nextAllowedAt: Foundation.Date? = nil
+            ) {
+                self.limit = limit
+                self.windowDays = windowDays
+                self.changesUsed = changesUsed
+                self.changesRemaining = changesRemaining
+                self.nextAllowedAt = nextAllowedAt
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case limit
+                case windowDays
+                case changesUsed
+                case changesRemaining
+                case nextAllowedAt
             }
         }
         /// - Remark: Generated from `#/components/schemas/ProfileAvatarUpload`.
@@ -7755,8 +7921,6 @@ internal enum Components {
             internal var studentVerificationStatus: Swift.String
             /// - Remark: Generated from `#/components/schemas/PublicProfileUser/schoolSummary`.
             internal var schoolSummary: Components.Schemas.ProfileSchoolSummary
-            /// - Remark: Generated from `#/components/schemas/PublicProfileUser/languages`.
-            internal var languages: [Components.Schemas.ProfileLanguage]
             /// - Remark: Generated from `#/components/schemas/PublicProfileUser/lifePhotos`.
             internal var lifePhotos: [Components.Schemas.ProfileLifePhoto]
             /// Creates a new `PublicProfileUser`.
@@ -7778,7 +7942,6 @@ internal enum Components {
             ///   - verifiedStudent:
             ///   - studentVerificationStatus:
             ///   - schoolSummary:
-            ///   - languages:
             ///   - lifePhotos:
             internal init(
                 id: Swift.String,
@@ -7797,7 +7960,6 @@ internal enum Components {
                 verifiedStudent: Swift.Bool,
                 studentVerificationStatus: Swift.String,
                 schoolSummary: Components.Schemas.ProfileSchoolSummary,
-                languages: [Components.Schemas.ProfileLanguage],
                 lifePhotos: [Components.Schemas.ProfileLifePhoto]
             ) {
                 self.id = id
@@ -7816,7 +7978,6 @@ internal enum Components {
                 self.verifiedStudent = verifiedStudent
                 self.studentVerificationStatus = studentVerificationStatus
                 self.schoolSummary = schoolSummary
-                self.languages = languages
                 self.lifePhotos = lifePhotos
             }
             internal enum CodingKeys: String, CodingKey {
@@ -7836,7 +7997,6 @@ internal enum Components {
                 case verifiedStudent
                 case studentVerificationStatus
                 case schoolSummary
-                case languages
                 case lifePhotos
             }
         }
@@ -8060,6 +8220,13 @@ internal enum Components {
             }
             /// - Remark: Generated from `#/components/schemas/NativePushDeviceRegisterRequest/platform`.
             internal var platform: Components.Schemas.NativePushDeviceRegisterRequest.PlatformPayload
+            /// - Remark: Generated from `#/components/schemas/NativePushDeviceRegisterRequest/environment`.
+            internal enum EnvironmentPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case sandbox = "sandbox"
+                case production = "production"
+            }
+            /// - Remark: Generated from `#/components/schemas/NativePushDeviceRegisterRequest/environment`.
+            internal var environment: Components.Schemas.NativePushDeviceRegisterRequest.EnvironmentPayload
             /// - Remark: Generated from `#/components/schemas/NativePushDeviceRegisterRequest/userAgent`.
             internal var userAgent: Swift.String?
             /// Creates a new `NativePushDeviceRegisterRequest`.
@@ -8067,19 +8234,23 @@ internal enum Components {
             /// - Parameters:
             ///   - token:
             ///   - platform:
+            ///   - environment:
             ///   - userAgent:
             internal init(
                 token: Swift.String,
                 platform: Components.Schemas.NativePushDeviceRegisterRequest.PlatformPayload,
+                environment: Components.Schemas.NativePushDeviceRegisterRequest.EnvironmentPayload,
                 userAgent: Swift.String? = nil
             ) {
                 self.token = token
                 self.platform = platform
+                self.environment = environment
                 self.userAgent = userAgent
             }
             internal enum CodingKeys: String, CodingKey {
                 case token
                 case platform
+                case environment
                 case userAgent
             }
         }
@@ -11189,15 +11360,23 @@ internal enum Operations {
                 internal struct JsonPayload: Codable, Hashable, Sendable {
                     /// - Remark: Generated from `#/paths/api/v1/auth/logout/POST/requestBody/json/refreshToken`.
                     internal var refreshToken: Swift.String
+                    /// - Remark: Generated from `#/paths/api/v1/auth/logout/POST/requestBody/json/pushToken`.
+                    internal var pushToken: Swift.String?
                     /// Creates a new `JsonPayload`.
                     ///
                     /// - Parameters:
                     ///   - refreshToken:
-                    internal init(refreshToken: Swift.String) {
+                    ///   - pushToken:
+                    internal init(
+                        refreshToken: Swift.String,
+                        pushToken: Swift.String? = nil
+                    ) {
                         self.refreshToken = refreshToken
+                        self.pushToken = pushToken
                     }
                     internal enum CodingKeys: String, CodingKey {
                         case refreshToken
+                        case pushToken
                     }
                 }
                 /// - Remark: Generated from `#/paths/api/v1/auth/logout/POST/requestBody/content/application\/json`.
@@ -12263,12 +12442,12 @@ internal enum Operations {
                         /// - Remark: Generated from `#/paths/api/v1/me/profile/PATCH/responses/200/content/json/value2`.
                         internal struct Value2Payload: Codable, Hashable, Sendable {
                             /// - Remark: Generated from `#/paths/api/v1/me/profile/PATCH/responses/200/content/json/value2/data`.
-                            internal var data: Components.Schemas.CurrentProfile
+                            internal var data: Components.Schemas.CurrentProfileUpdateResult
                             /// Creates a new `Value2Payload`.
                             ///
                             /// - Parameters:
                             ///   - data:
-                            internal init(data: Components.Schemas.CurrentProfile) {
+                            internal init(data: Components.Schemas.CurrentProfileUpdateResult) {
                                 self.data = data
                             }
                             internal enum CodingKeys: String, CodingKey {
@@ -22302,6 +22481,7 @@ internal enum Operations {
                     case popular = "popular"
                     case enrolled = "enrolled"
                     case saved = "saved"
+                    case archived = "archived"
                 }
                 /// - Remark: Generated from `#/paths/api/v1/courses/GET/query/scope`.
                 internal var scope: Operations.ListCourses.Input.Query.ScopePayload?
@@ -22390,7 +22570,7 @@ internal enum Operations {
                     self.body = body
                 }
             }
-            /// A paginated native course catalog, enrollment list, or saved list.
+            /// A paginated native course catalog, enrollment, saved, or archived list.
             ///
             /// - Remark: Generated from `#/paths//api/v1/courses/get(listCourses)/responses/200`.
             ///
@@ -24680,6 +24860,277 @@ internal enum Operations {
             /// Stable API error.
             ///
             /// - Remark: Generated from `#/paths//api/v1/courses/{courseId}/enrollment/delete(leaveCourse)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `DELETE /api/v1/courses/{courseId}/archive`.
+    /// - Remark: Generated from `#/paths//api/v1/courses/{courseId}/archive/delete(removeArchivedCourse)`.
+    internal enum RemoveArchivedCourse {
+        internal static let id: Swift.String = "removeArchivedCourse"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/courses/{courseId}/archive/DELETE/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/courses/{courseId}/archive/DELETE/path/courseId`.
+                internal var courseId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - courseId:
+                internal init(courseId: Swift.String) {
+                    self.courseId = courseId
+                }
+            }
+            internal var path: Operations.RemoveArchivedCourse.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/courses/{courseId}/archive/DELETE/header`.
+            internal struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/courses/{courseId}/archive/DELETE/header/Idempotency-Key`.
+                internal var idempotencyKey: Swift.String
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RemoveArchivedCourse.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                internal init(
+                    idempotencyKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RemoveArchivedCourse.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.RemoveArchivedCourse.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            internal init(
+                path: Operations.RemoveArchivedCourse.Input.Path,
+                headers: Operations.RemoveArchivedCourse.Input.Headers
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/courses/{courseId}/archive/DELETE/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/courses/{courseId}/archive/DELETE/responses/200/content/application\/json`.
+                    case json(Components.Schemas.CourseEnrollmentMutationEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.CourseEnrollmentMutationEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.RemoveArchivedCourse.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.RemoveArchivedCourse.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Archived membership removed or a completed retry replayed.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/{courseId}/archive/delete(removeArchivedCourse)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.RemoveArchivedCourse.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.RemoveArchivedCourse.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/{courseId}/archive/delete(removeArchivedCourse)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/{courseId}/archive/delete(removeArchivedCourse)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/{courseId}/archive/delete(removeArchivedCourse)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            internal var conflict: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/{courseId}/archive/delete(removeArchivedCourse)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// The request exceeded a server-side rate limit.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/{courseId}/archive/delete(removeArchivedCourse)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.RateLimited)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            internal var tooManyRequests: Components.Responses.RateLimited {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/courses/{courseId}/archive/delete(removeArchivedCourse)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses._Error)

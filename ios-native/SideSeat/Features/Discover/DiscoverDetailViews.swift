@@ -216,14 +216,11 @@ struct DiscoverBuddyDetailView: View {
     }
 
     private func planSummary(_ post: NativeDiscoverBuddyPost) -> some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+        let status = BuddyPostDisplay.status(post)
+
+        return VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
             HStack(spacing: SideSeatTheme.spaceSM) {
-                Label(
-                    BuddyPostDisplay.statusLabel(post.status),
-                    systemImage: post.status == "ACTIVE" ? "circle.fill" : "checkmark.circle.fill"
-                )
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(post.status == "ACTIVE" ? SideSeatTheme.success : SideSeatTheme.textSecondary)
+                DiscoverStatusBadge(status: status)
 
                 Spacer(minLength: 0)
 
@@ -266,7 +263,7 @@ struct DiscoverBuddyDetailView: View {
                 accessibilityID: "discover-plan-group"
             )
             DiscoverPlanDetailRow(
-                systemImage: "eye",
+                systemImage: BuddyPostDisplay.visibilitySystemImage(post.visibility),
                 title: "Who can see this",
                 value: BuddyPostDisplay.visibilityLabel(post.visibility)
             )
@@ -278,7 +275,7 @@ struct DiscoverBuddyDetailView: View {
                 )
             }
 
-            if let expiry = post.expiryDate {
+            if BuddyPostDisplay.status(post).isOpen, let expiry = post.expiryDate {
                 Text("Plan closes \(expiry.formatted(date: .abbreviated, time: .shortened))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -306,12 +303,15 @@ struct DiscoverBuddyDetailView: View {
                                 .font(.body.weight(.semibold))
                                 .foregroundStyle(.primary)
                                 .lineLimit(1)
-                            SchoolIdentityBadge(
-                                school: author.school,
-                                verifiedStudent: author.verifiedStudent,
-                                status: author.verifiedStudent ? "VERIFIED" : "UNVERIFIED",
-                                compact: true
-                            )
+                            if author.verifiedStudent {
+                                SchoolIdentityBadge(
+                                    school: author.school,
+                                    verifiedStudent: true,
+                                    status: "VERIFIED",
+                                    compact: true
+                                )
+                                .accessibilityIdentifier("discover-plan-verified-host")
+                            }
                         }
 
                         Text(hostAcademicLine(author))
@@ -333,19 +333,6 @@ struct DiscoverBuddyDetailView: View {
                 }
             }
             .buttonStyle(.plain)
-
-            if author.verifiedStudent {
-                Label("Student identity verified", systemImage: "checkmark.shield.fill")
-                    .font(.footnote.weight(.medium))
-                    .foregroundStyle(SideSeatTheme.verifiedSeal)
-                    .padding(.horizontal, SideSeatTheme.spaceMD)
-                    .padding(.vertical, SideSeatTheme.spaceSM)
-                    .background(
-                        SideSeatTheme.verifiedSeal.opacity(0.10),
-                        in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
-                    )
-                    .accessibilityIdentifier("discover-plan-verified-host")
-            }
         }
         .padding(.horizontal, SideSeatTheme.screenHorizontal)
         .padding(.vertical, SideSeatTheme.spaceXL)
@@ -781,11 +768,15 @@ struct DiscoverBuddyDetailView: View {
     }
 
     private func canEdit(_ post: NativeDiscoverBuddyPost) -> Bool {
-        post.isOwn && post.status == "ACTIVE" && (post.expiryDate ?? .distantPast) > Date()
+        post.isOwn && BuddyPostDisplay.status(post).isOpen
     }
 
     private func openChat(peerID: String) async {
-        guard let connectionID = await openConversation.open(peerID: peerID, using: session) else {
+        guard let connectionID = await openConversation.open(
+            peerID: peerID,
+            postID: postID,
+            using: session
+        ) else {
             return
         }
         router.navigate(to: .directChat(connectionID: connectionID))
@@ -1072,11 +1063,13 @@ struct DiscoverActivityDetailView: View {
     }
 
     private func canClose(_ activity: NativeDiscoverActivity) -> Bool {
-        activity.phase == "bookable" || activity.phase == "full"
+        let phase = activity.phase.lowercased()
+        return phase == "bookable" || phase == "full"
     }
 
     private func canContactOrganizer(_ activity: NativeDiscoverActivity) -> Bool {
-        !activity.isOrganizer && activity.phase != "canceled" && activity.phase != "expired"
+        let phase = activity.phase.lowercased()
+        return !activity.isOrganizer && phase != "canceled" && phase != "expired"
     }
 
     private func canAddToCalendar(_ detail: NativeDiscoverActivityDetail) -> Bool {

@@ -235,6 +235,11 @@
                   "refreshToken": {
                     "type": "string",
                     "minLength": 32
+                  },
+                  "pushToken": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 512
                   }
                 },
                 "required": [
@@ -503,7 +508,7 @@
                       "type": "object",
                       "properties": {
                         "data": {
-                          "$ref": "#/components/schemas/CurrentProfile"
+                          "$ref": "#/components/schemas/CurrentProfileUpdateResult"
                         }
                       },
                       "required": [
@@ -2830,7 +2835,8 @@
               "enum": [
                 "popular",
                 "enrolled",
-                "saved"
+                "saved",
+                "archived"
               ],
               "default": "popular"
             }
@@ -2874,7 +2880,7 @@
         ],
         "responses": {
           "200": {
-            "description": "A paginated native course catalog, enrollment list, or saved list.",
+            "description": "A paginated native course catalog, enrollment, saved, or archived list.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3343,6 +3349,66 @@
         "responses": {
           "200": {
             "description": "Viewer left the course or a completed retry replayed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseEnrollmentMutationEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{courseId}/archive": {
+      "delete": {
+        "operationId": "removeArchivedCourse",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Archived membership removed or a completed retry replayed.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7161,6 +7227,10 @@
           "courseId": {
             "type": "string",
             "minLength": 1
+          },
+          "postId": {
+            "type": "string",
+            "minLength": 1
           }
         },
         "required": [
@@ -8355,8 +8425,27 @@
             "type": "string",
             "enum": [
               "ACTIVE",
-              "CLOSED"
+              "CLOSED",
+              "EXPIRED"
             ]
+          },
+          "closureReason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "AUTHOR_CLOSED",
+              "SCHOOL_CHANGED",
+              null
+            ]
+          },
+          "closedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
           },
           "tags": {
             "type": "array",
@@ -8455,6 +8544,8 @@
           "title",
           "body",
           "status",
+          "closureReason",
+          "closedAt",
           "tags",
           "visibility",
           "replyPreference",
@@ -8716,6 +8807,17 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "STUDY",
+              "MEALS",
+              "LANGUAGE",
+              "SPORTS",
+              "SHARED_COURSES",
+              "OTHER"
+            ]
+          },
           "city": {
             "type": "string",
             "enum": [
@@ -9430,6 +9532,20 @@
           },
           "saved": {
             "type": "boolean"
+          },
+          "canRestore": {
+            "type": "boolean"
+          },
+          "restoreBlockReason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "SCHOOL_MISMATCH",
+              "ACTIVE_EQUIVALENT",
+              null
+            ]
           }
         },
         "required": [
@@ -10616,21 +10732,6 @@
           "productTutorialDismissedAt"
         ]
       },
-      "ProfileLanguage": {
-        "type": "object",
-        "properties": {
-          "tag": {
-            "type": "string"
-          },
-          "proficiency": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "tag",
-          "proficiency"
-        ]
-      },
       "ProfileLifePhoto": {
         "type": "object",
         "properties": {
@@ -10747,13 +10848,6 @@
             "minimum": 1950,
             "maximum": 2100
           },
-          "languages": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "$ref": "#/components/schemas/ProfileLanguage"
-            }
-          },
           "wechatHandle": {
             "type": "string",
             "maxLength": 80
@@ -10868,12 +10962,6 @@
               "schoolSummary": {
                 "$ref": "#/components/schemas/ProfileSchoolSummary"
               },
-              "languages": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ProfileLanguage"
-                }
-              },
               "lifePhotos": {
                 "type": "array",
                 "items": {
@@ -10950,6 +11038,9 @@
                   "hideFromDiscovery"
                 ]
               },
+              "usernameChangePolicy": {
+                "$ref": "#/components/schemas/UsernameChangePolicy"
+              },
               "counts": {
                 "type": "object",
                 "properties": {
@@ -10966,13 +11057,90 @@
             "required": [
               "displayName",
               "schoolSummary",
-              "languages",
               "lifePhotos",
               "contacts",
               "privacy",
+              "usernameChangePolicy",
               "counts"
             ]
           }
+        ]
+      },
+      "ProfileSchoolChangeSummary": {
+        "type": "object",
+        "properties": {
+          "archivedCourseCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "removedCalendarEntryCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "closedPostCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "expiredInvitationCount": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "archivedCourseCount",
+          "removedCalendarEntryCount",
+          "closedPostCount",
+          "expiredInvitationCount"
+        ]
+      },
+      "CurrentProfileUpdateResult": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CurrentProfile"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "schoolChange": {
+                "$ref": "#/components/schemas/ProfileSchoolChangeSummary"
+              }
+            }
+          }
+        ]
+      },
+      "UsernameChangePolicy": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "windowDays": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "changesUsed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "changesRemaining": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "nextAllowedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "limit",
+          "windowDays",
+          "changesUsed",
+          "changesRemaining",
+          "nextAllowedAt"
         ]
       },
       "ProfileAvatarUpload": {
@@ -11165,12 +11333,6 @@
           "schoolSummary": {
             "$ref": "#/components/schemas/ProfileSchoolSummary"
           },
-          "languages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProfileLanguage"
-            }
-          },
           "lifePhotos": {
             "type": "array",
             "items": {
@@ -11195,7 +11357,6 @@
           "verifiedStudent",
           "studentVerificationStatus",
           "schoolSummary",
-          "languages",
           "lifePhotos"
         ]
       },
@@ -11358,6 +11519,13 @@
               "android"
             ]
           },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "sandbox",
+              "production"
+            ]
+          },
           "userAgent": {
             "type": "string",
             "maxLength": 512
@@ -11365,7 +11533,8 @@
         },
         "required": [
           "token",
-          "platform"
+          "platform",
+          "environment"
         ]
       },
       "NativePushDeviceUnregisterRequest": {

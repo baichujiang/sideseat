@@ -6,8 +6,6 @@ import { MessageCircle } from "lucide-react";
 
 import { AvailabilityCardMessage } from "@/components/chat/availability-card-message";
 import { ScheduleShareCardMessage } from "@/components/chat/schedule-share-card-message";
-import { AssistantChatFooter } from "@/components/chat/assistant-chat-footer";
-import { AssistantMessageBody } from "@/components/chat/assistant-message-body";
 import { ChatComposer } from "@/components/chat/chat-composer";
 import { ChatMessageBubble } from "@/components/chat/chat-message-bubble";
 import { ChatMessageSelectionProvider } from "@/components/chat/chat-message-selection";
@@ -23,8 +21,6 @@ import {
 } from "@/components/chat/plan-request-card-message";
 import { BackLink } from "@/components/nav/back-link";
 import { PresetAvatar } from "@/components/ui/preset-avatar";
-import { isAssistantBotUser } from "@/lib/auth/assistant-bot";
-import { displayUserMessageBody } from "@/lib/assistant/display-user-message";
 import { requireConnection } from "@/lib/auth/guards";
 import { directMessageActionSnippet } from "@/lib/chat/direct-message-preview";
 import {
@@ -76,40 +72,33 @@ export default async function ConnectionPage({
   const dfLocale = locale === "zh-CN" ? zhCN : enUS;
   const isSelfNotes = connection.userAId === connection.userBId;
   const otherUser = connection.userAId === user.id ? connection.userB : connection.userA;
-  const isAssistantChat = !isSelfNotes && isAssistantBotUser(otherUser);
 
   const courseName = connection.invitation?.course?.name ?? null;
   const myRemark = contactRemarkForViewer(connection, user.id);
   const peerNickname = otherUser.nickname?.trim() ?? "";
   const selfBaseLabel = selfNotesDisplayTitle(user, null);
-  const headerTitle = isAssistantChat
-    ? ui.assistant.displayName
-    : isSelfNotes
-      ? selfNotesDisplayTitle(user, myRemark)
-      : (myRemark || peerNickname || "Student");
+  const headerTitle = isSelfNotes
+    ? selfNotesDisplayTitle(user, myRemark)
+    : (myRemark || peerNickname || "Student");
   const showPeerNicknameLine =
     !isSelfNotes && Boolean(myRemark) && myRemark !== peerNickname && peerNickname.length > 0;
   const showSelfBaseLine = isSelfNotes && Boolean(myRemark) && headerTitle !== selfBaseLabel;
-  const peerStatusLine =
-    !isAssistantChat && !isSelfNotes
-      ? courseName || (showPeerNicknameLine ? peerNickname : `@${otherUser.username}`)
-      : null;
+  const peerStatusLine = !isSelfNotes
+    ? courseName || (showPeerNicknameLine ? peerNickname : `@${otherUser.username}`)
+    : null;
   const messages = connection.messages;
   const messagesNewestFirst = [...messages].reverse().map((message) => ({
     senderId: message.senderId,
     type: message.type,
   }));
-  const unrepliedStreak =
-    isSelfNotes || isAssistantChat
-      ? 0
-      : countUnrepliedDirectStreak(messagesNewestFirst, user.id, otherUser.id);
+  const unrepliedStreak = isSelfNotes
+    ? 0
+    : countUnrepliedDirectStreak(messagesNewestFirst, user.id, otherUser.id);
   const unrepliedSendBlocked =
     !isSelfNotes &&
-    !isAssistantChat &&
     isUnrepliedDirectSendBlocked(unrepliedStreak);
   const showUnrepliedHint =
     !isSelfNotes &&
-    !isAssistantChat &&
     shouldShowUnrepliedDirectHint(messagesNewestFirst, user.id, otherUser.id);
   const scheduleSharePreviewByToken = await loadScheduleShareChatPreviewsForMessages(
     prisma,
@@ -118,11 +107,9 @@ export default async function ConnectionPage({
   );
   const threadSearchEntries = indexConnectionMessagesForSearch(messages);
   const latestMessageId = messages.at(-1)?.id ?? null;
-  const profileLinkHref = isAssistantChat
-    ? null
-    : isSelfNotes
-      ? (`/profile?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route)
-      : (`/users/${otherUser.id}?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route);
+  const profileLinkHref = isSelfNotes
+    ? (`/profile?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route)
+    : (`/users/${otherUser.id}?returnTo=${encodeURIComponent(`/connections/${connectionId}`)}` as Route);
   const peerHref = profileLinkHref;
   const messageMetas = messages.map((message) => ({
     id: message.id,
@@ -170,9 +157,6 @@ export default async function ConnectionPage({
             ) : (
               <p className="truncate text-sm font-semibold leading-tight">{headerTitle}</p>
             )}
-            {isAssistantChat ? (
-              <p className="truncate text-[11px] text-muted-foreground">{ui.assistant.headerSubtitle}</p>
-            ) : null}
             {showSelfBaseLine ? (
               <p className="truncate text-[11px] text-muted-foreground">{selfBaseLabel}</p>
             ) : null}
@@ -180,11 +164,6 @@ export default async function ConnectionPage({
               <p className="truncate text-[11px] text-muted-foreground">{peerStatusLine}</p>
             ) : null}
           </div>
-          {isAssistantChat ? (
-            <span className="shrink-0 rounded-full bg-classmates-azure/10 px-2 py-0.5 text-[10px] font-semibold text-classmates-azure dark:bg-sky-900/30 dark:text-sky-300">
-              {ui.assistant.officialBadge}
-            </span>
-          ) : null}
         </div>
         <ChatThreadSearchButton entries={threadSearchEntries} />
       </header>
@@ -201,7 +180,7 @@ export default async function ConnectionPage({
             </span>
             <p className="text-sm font-medium text-foreground">{ui.chat.noMessagesYet}</p>
             <p className="max-w-[14rem] text-xs leading-relaxed text-muted-foreground">
-              {isAssistantChat ? ui.assistant.composerPlaceholder : ui.chat.placeholderWrite}
+              {ui.chat.placeholderWrite}
             </p>
           </div>
         ) : (
@@ -356,7 +335,6 @@ export default async function ConnectionPage({
               }
 
               const isOwn = message.senderId === user.id;
-              const fromAssistant = isAssistantBotUser(message.sender);
               const actionSnippet = directMessageActionSnippet({
                 type: message.type,
                 body: message.body,
@@ -381,7 +359,7 @@ export default async function ConnectionPage({
                       }
                     : {
                         kind: "text" as const,
-                        body: isOwn ? displayUserMessageBody(message.body, locale) : message.body,
+                        body: message.body,
                       };
 
               const bareImageChrome =
@@ -467,29 +445,25 @@ export default async function ConnectionPage({
                               ),
                         )}
                       >
-                        {fromAssistant && bubblePayload.kind === "text" && message.deletedAt == null ? (
-                          <AssistantMessageBody rawBody={bubblePayload.body} />
-                        ) : (
-                          <MessageBubbleContent
-                            isOwn={isOwn}
-                            surface={bareImageChrome ? "bareMedia" : "inBubble"}
-                            payload={bubblePayload}
-                            deleted={message.deletedAt != null}
-                            reply={
-                              message.replyTo
-                                ? {
-                                    senderName: message.replyTo.sender?.nickname ?? null,
-                                    body: directMessageActionSnippet({
-                                      type: message.replyTo.type,
-                                      body: message.replyTo.body,
-                                      locationName: message.replyTo.locationName,
-                                    }),
-                                    deleted: message.replyTo.deletedAt != null,
-                                  }
-                                : null
-                            }
-                          />
-                        )}
+                        <MessageBubbleContent
+                          isOwn={isOwn}
+                          surface={bareImageChrome ? "bareMedia" : "inBubble"}
+                          payload={bubblePayload}
+                          deleted={message.deletedAt != null}
+                          reply={
+                            message.replyTo
+                              ? {
+                                  senderName: message.replyTo.sender?.nickname ?? null,
+                                  body: directMessageActionSnippet({
+                                    type: message.replyTo.type,
+                                    body: message.replyTo.body,
+                                    locationName: message.replyTo.locationName,
+                                  }),
+                                  deleted: message.replyTo.deletedAt != null,
+                                }
+                              : null
+                          }
+                        />
                       </ChatMessageBubble>
                     </div>
                     {!isOwn ? (
@@ -521,24 +495,14 @@ export default async function ConnectionPage({
         data-testid="chat-composer-footer"
         className="shrink-0 border-t border-slate-200/75 bg-white/95 px-3 pb-[var(--chat-composer-padding-bottom)] pt-2.5 shadow-[0_-4px_24px_rgba(15,23,42,0.045)] backdrop-blur-sm dark:border-border/60 dark:bg-background/90 dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]"
       >
-        {isAssistantChat ? (
-          <AssistantChatFooter
-            connectionId={connection.id}
-            peerName={otherUser.nickname ?? "Student"}
-            isGuest={user.isGuest}
-            verifiedStudent={user.verifiedStudent}
-            placeholder={ui.assistant.composerPlaceholder}
-          />
-        ) : (
-          <ChatComposer
-            connectionId={connection.id}
-            peerName={otherUser.nickname ?? "Student"}
-            hideAttachments={isSelfNotes}
-            unrepliedSendBlocked={unrepliedSendBlocked}
-            showUnrepliedHint={showUnrepliedHint}
-            unrepliedStreak={unrepliedStreak}
-          />
-        )}
+        <ChatComposer
+          connectionId={connection.id}
+          peerName={otherUser.nickname ?? "Student"}
+          hideAttachments={isSelfNotes}
+          unrepliedSendBlocked={unrepliedSendBlocked}
+          showUnrepliedHint={showUnrepliedHint}
+          unrepliedStreak={unrepliedStreak}
+        />
       </div>
     </div>
     </ChatReplyProvider>

@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 
 enum SideSeatAppShareContent {
-    static let url = URL(string: "https://sideseat.de")!
+    static let url = URL(string: "https://www.sideseat.de")!
 
     static var text: String {
         [

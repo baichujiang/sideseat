@@ -208,6 +208,7 @@ final class SessionStore {
         refreshOperation?.task.cancel()
         refreshOperation = nil
         let refreshToken = try? await credentialStore.refreshToken()
+        let pushToken = PushDeviceTokenStore.currentToken
 
         // Local identity must disappear before any network wait. This also
         // prevents a stale screen or refresh response from surviving logout.
@@ -221,7 +222,7 @@ final class SessionStore {
             let _: APIEnvelope<LogoutResponse>? = try? await apiClient.send(
                 "api/v1/auth/logout",
                 method: .post,
-                body: LogoutRequest(refreshToken: refreshToken)
+                body: LogoutRequest(refreshToken: refreshToken, pushToken: pushToken)
             )
         }
     }

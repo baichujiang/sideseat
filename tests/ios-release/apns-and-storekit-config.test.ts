@@ -2,7 +2,14 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it, before, after } from "node:test";
 
-import { isApnsConfigured, apnsBundleId, apnsUseSandbox } from "../../lib/push/apns-env";
+import {
+  isApnsConfigured,
+  apnsBundleId,
+  apnsHostForEnvironment,
+  apnsUseSandbox,
+  normalizeApnsEnvironment,
+} from "../../lib/push/apns-env";
+import { buildApnsPayload } from "../../lib/push/apns-payload";
 import { isStoreKitAppleApiConfigured } from "../../lib/api/v1/storekit-apple-env";
 
 function readRepoFile(path: string) {
@@ -42,6 +49,54 @@ describe("isApnsConfigured", () => {
     assert.equal(apnsUseSandbox(), false);
     process.env.APNS_USE_SANDBOX = "1";
     assert.equal(apnsUseSandbox(), true);
+  });
+
+  it("routes each device token to its own APNs environment", () => {
+    assert.equal(apnsHostForEnvironment("sandbox"), "api.sandbox.push.apple.com");
+    assert.equal(apnsHostForEnvironment("production"), "api.push.apple.com");
+    assert.equal(normalizeApnsEnvironment("sandbox"), "sandbox");
+    assert.equal(normalizeApnsEnvironment("unexpected"), "production");
+  });
+});
+
+describe("APNs payload", () => {
+  it("carries routing, grouping, event context, and an exact unread badge", () => {
+    assert.deepEqual(
+      buildApnsPayload({
+        title: "Plan accepted",
+        body: "Mina accepted Library study",
+        url: "/connections/connection-1",
+        badge: 7.9,
+        threadId: "connection:connection-1",
+        category: "PLAN_UPDATE",
+        data: {
+          kind: "plan_accepted",
+          connectionId: "connection-1",
+          planId: "plan-1",
+        },
+      }),
+      {
+        aps: {
+          alert: {
+            title: "Plan accepted",
+            body: "Mina accepted Library study",
+          },
+          sound: "default",
+          badge: 7,
+          "thread-id": "connection:connection-1",
+          category: "PLAN_UPDATE",
+        },
+        url: "/connections/connection-1",
+        kind: "plan_accepted",
+        connectionId: "connection-1",
+        planId: "plan-1",
+      },
+    );
+  });
+
+  it("normalizes negative badge counts to zero", () => {
+    const payload = buildApnsPayload({ title: "SideSeat", body: "Hello", badge: -2 });
+    assert.equal(payload.aps.badge, 0);
   });
 });
 
@@ -91,6 +146,13 @@ describe("native iOS release assets", () => {
     assert.match(entitlements, /applinks:\$\(SIDESEAT_ASSOCIATED_DOMAIN\)/);
     assert.match(project, /aps-environment: \$\(APS_ENVIRONMENT\)/);
     assert.match(project, /com\.apple\.developer\.associated-domains:/);
+  });
+
+  it("registers Debug and Release device tokens with explicit APNs environments", () => {
+    const source = readRepoFile("ios-native/SideSeat/Core/Push/PushRegistration.swift");
+
+    assert.match(source, /#if DEBUG[\s\S]*return \.sandbox[\s\S]*return \.production/);
+    assert.match(source, /environment: NativeAPNsEnvironment\.current/);
   });
 
   it("serves only the Universal Link paths understood by the native router", () => {

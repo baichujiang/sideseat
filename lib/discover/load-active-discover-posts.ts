@@ -12,6 +12,7 @@ import {
   type ViewerCourseMatchIndex,
 } from "@/lib/discover/viewer-course-match";
 import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
+import { getSchoolMatchValues } from "@/lib/constants/schools";
 import { prisma } from "@/lib/db/prisma";
 
 type DiscoverPostViewerScope = {
@@ -82,7 +83,7 @@ export async function loadActiveDiscoverPostsForCity(
             courses: {
               where: activeCourseMembershipWhere(),
               select: {
-                course: { select: { id: true, code: true } },
+                course: { select: { id: true, code: true, school: true } },
               },
             },
           },
@@ -100,7 +101,9 @@ export async function loadActiveDiscoverPostsForCity(
         school: viewerProfile.school,
         verifiedStudent: viewerProfile.verifiedStudent,
         courses: buildViewerCourseMatchIndex(
-          viewerProfile.courses.map((row) => row.course),
+          viewerProfile.courses
+            .map((row) => row.course)
+            .filter((course) => getSchoolMatchValues(viewerProfile.school).includes(course.school)),
         ),
       }
     : null;

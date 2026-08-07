@@ -29,7 +29,7 @@ import {
 } from "@/lib/chat/community-chat-service";
 import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
 import { prisma } from "@/lib/db/prisma";
-import { notifyNewCourseRoomMessage } from "@/lib/push/notify-user";
+import { scheduleNewCourseRoomMessageNotification } from "@/lib/push/notify-user";
 
 const SEND_LIMIT = 60;
 const SEND_WINDOW_MS = 60_000;
@@ -248,12 +248,12 @@ export async function POST(
       return v1Success(result.body, { request, status: result.status, headers: { "Idempotency-Replayed": "true" } });
     }
 
-    void notifyNewCourseRoomMessage({
+    scheduleNewCourseRoomMessageNotification({
       courseId,
       courseName: result.notificationTitle ?? "Course chat",
       senderId: auth.user.id,
       bodyPreview: parsed.data.body,
-    }).catch(() => {});
+    });
     return v1Success(result.body, { request, status: 201 });
   } catch (cause) {
     console.error("POST /api/v1/courses/[courseId]/messages", cause);

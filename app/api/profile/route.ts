@@ -8,6 +8,7 @@ import {
 } from "@/lib/profile/nickname-api-errors";
 import { mirrorSchoolVerificationToUser } from "@/lib/verification/school-state";
 import { profileSchema } from "@/lib/validators/profile";
+import { archivePreviousSchoolSocialState, schoolIdentityChanged } from "@/lib/profile/school-change";
 
 export async function PUT(request: Request) {
   try {
@@ -67,6 +68,13 @@ export async function PUT(request: Request) {
           onboardingComplete: true,
         },
       });
+      if (schoolIdentityChanged(user.school, values.school)) {
+        await archivePreviousSchoolSocialState(tx, {
+          userId: user.id,
+          previousSchool: user.school,
+          nextSchool: values.school,
+        });
+      }
       await mirrorSchoolVerificationToUser(tx, user.id, values.school);
     });
 

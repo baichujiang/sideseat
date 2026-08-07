@@ -1,6 +1,5 @@
 import { Prisma } from "@prisma/client";
 
-import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
 import { validateNicknameForUser } from "@/lib/auth/nickname-fields";
 import { hashPassword } from "@/lib/auth/password";
 import { SIGNUP_DEFAULT_PROFILE } from "@/lib/auth/signup-defaults";
@@ -57,7 +56,6 @@ export async function POST(request: Request) {
       },
     });
 
-    await ensureAssistantBotConnection(user.id);
     if (request.headers.get("x-sideseat-platform")?.toLowerCase() === "ios") {
       return ok(
         {

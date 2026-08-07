@@ -3,7 +3,7 @@ import UIKit
 
 enum DiscoverPlanShareContent {
     static func url(for post: NativeDiscoverBuddyPost) -> URL {
-        URL(string: "https://sideseat.de")!
+        URL(string: "https://www.sideseat.de")!
             .appendingPathComponent("discover")
             .appendingPathComponent("posts")
             .appendingPathComponent(post.id)
@@ -111,15 +111,20 @@ private struct DiscoverPlanShareCard: View {
     }
 
     private var header: some View {
-        HStack(spacing: 8) {
+        let status = BuddyPostDisplay.status(post)
+
+        return HStack(spacing: 8) {
             SSShareMark()
             Spacer(minLength: 0)
-            Label(BuddyPostDisplay.statusLabel(post.status), systemImage: "circle.fill")
+            Label(status.label, systemImage: status.systemImage)
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(Color(red: 0.12, green: 0.48, blue: 0.28))
+                .foregroundStyle(status.isOpen ? Color(red: 0.12, green: 0.48, blue: 0.28) : Color.secondary)
                 .padding(.horizontal, 9)
                 .padding(.vertical, 5)
-                .background(Color(red: 0.90, green: 0.97, blue: 0.92), in: Capsule())
+                .background(
+                    status.isOpen ? Color(red: 0.90, green: 0.97, blue: 0.92) : Color(uiColor: .tertiarySystemFill),
+                    in: Capsule()
+                )
         }
     }
 

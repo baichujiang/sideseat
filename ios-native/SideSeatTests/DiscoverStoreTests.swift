@@ -4,6 +4,45 @@ import Testing
 
 @Suite("Discover stores")
 struct DiscoverStoreTests {
+    @Test("Derives plan status from both API state and expiry")
+    func planStatusPresentation() {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let future = Date(timeIntervalSince1970: 1_800_003_600)
+        let past = Date(timeIntervalSince1970: 1_799_996_400)
+
+        let open = BuddyPostDisplay.status("active", expiryDate: future, now: now)
+        #expect(open.isOpen)
+        #expect(open.tone == .success)
+        #expect(open.systemImage == "circle.fill")
+
+        let expired = BuddyPostDisplay.status("ACTIVE", expiryDate: past, now: now)
+        #expect(!expired.isOpen)
+        #expect(expired.systemImage == "clock.badge.exclamationmark")
+
+        let closed = BuddyPostDisplay.status("closed", expiryDate: future, now: now)
+        #expect(!closed.isOpen)
+        #expect(closed.systemImage == "lock.fill")
+
+        let schoolChanged = BuddyPostDisplay.status(
+            "closed",
+            closureReason: "SCHOOL_CHANGED",
+            expiryDate: future,
+            now: now
+        )
+        #expect(!schoolChanged.isOpen)
+        #expect(schoolChanged.tone == .warning)
+        #expect(schoolChanged.systemImage == "building.columns.fill")
+    }
+
+    @Test("Normalizes activity phase and visibility icon semantics")
+    func activityAndVisibilityPresentation() {
+        #expect(DiscoverActivityDisplay.status(phase: "BOOKABLE").isOpen)
+        #expect(DiscoverActivityDisplay.status(phase: "FULL").tone == .warning)
+        #expect(DiscoverActivityDisplay.status(phase: "CANCELED").tone == .danger)
+        #expect(BuddyPostDisplay.visibilitySystemImage("SCHOOL_ONLY") == "building.columns")
+        #expect(BuddyPostDisplay.visibilitySystemImage("VERIFIED_ONLY") == "checkmark.seal")
+    }
+
     @Test("Extracts unique Unicode hashtags from plan copy")
     func planHashtags() {
         #expect(
@@ -16,7 +55,7 @@ struct DiscoverStoreTests {
 
     @Test("Builds a public SideSeat invite caption")
     func appShareContent() {
-        #expect(SideSeatAppShareContent.url.absoluteString == "https://sideseat.de")
+        #expect(SideSeatAppShareContent.url.absoluteString == "https://www.sideseat.de")
         #expect(SideSeatAppShareContent.text.contains("SideSeat"))
         #expect(SideSeatAppShareContent.text.contains("#留学生社交"))
         #expect(SideSeatAppShareContent.text.contains(SideSeatAppShareContent.url.absoluteString))
@@ -28,7 +67,7 @@ struct DiscoverStoreTests {
         let url = DiscoverPlanShareContent.url(for: post)
         let text = DiscoverPlanShareContent.text(for: post)
 
-        #expect(url.absoluteString == "https://sideseat.de/discover/posts/ui-buddy")
+        #expect(url.absoluteString == "https://www.sideseat.de/discover/posts/ui-buddy")
         #expect(text.contains("Library study buddy"))
         #expect(text.contains("Main Library, Munich"))
         #expect(text.contains("#留学生找搭子"))
@@ -79,6 +118,33 @@ struct DiscoverStoreTests {
         #expect(await transport.activityCapacity == 8)
         #expect(await transport.writeKeys.count == 3)
         #expect(await Set(transport.writeKeys).count == 3)
+    }
+
+    @Test("Creates a fresh shared-course post when reposting")
+    @MainActor
+    func repostSharedCoursePlan() async throws {
+        let transport = DiscoverTestTransport()
+        let session = makeSession(transport: transport)
+        await session.login(identifier: "test_001", password: "Password123")
+
+        let store = DiscoverCreateStore()
+        #expect(await store.createBuddy(
+            category: "SHARED_COURSES",
+            title: "Find classmates for algorithms",
+            body: "Review problem sets together",
+            visibility: "SCHOOL_ONLY",
+            courseIds: ["current-course"],
+            expiresAt: Date(timeIntervalSince1970: 1_900_000_000),
+            existingImageURLs: ["https://cdn.sideseat.test/classmate-posts/user-1/existing.jpg"],
+            using: session
+        ))
+        #expect(await transport.buddyCategory == "SHARED_COURSES")
+        #expect(await transport.buddyCourseIds == ["current-course"])
+        #expect(
+            await transport.buddyImageUrls == [
+                "https://cdn.sideseat.test/classmate-posts/user-1/existing.jpg"
+            ]
+        )
     }
 
     @Test("Updates an existing buddy post in place")
@@ -239,6 +305,8 @@ private actor DiscoverTestTransport: APITransport {
     private(set) var discoverRequestCount = 0
     private(set) var myPostsRequestCount = 0
     private(set) var buddyTitle: String?
+    private(set) var buddyCategory: String?
+    private(set) var buddyCourseIds: [String] = []
     private(set) var buddyImageUrls: [String] = []
     private(set) var buddyVisibility: String?
     private(set) var buddyReplyPreference: String?
@@ -300,6 +368,8 @@ private actor DiscoverTestTransport: APITransport {
         case "/api/v1/discover/posts":
             let json = try bodyJSON(request)
             buddyTitle = json["title"] as? String
+            buddyCategory = json["category"] as? String
+            buddyCourseIds = (json["courseIds"] as? [String]) ?? []
             buddyImageUrls = (json["imageUrls"] as? [String]) ?? []
             buddyVisibility = json["visibility"] as? String
             buddyReplyPreference = json["replyPreference"] as? String

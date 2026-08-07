@@ -1,13 +1,16 @@
 import "server-only";
 
-import { MessageType, Prisma, type PrismaClient } from "@prisma/client";
+import { MessageType, Prisma } from "@prisma/client";
 
-import { isAssistantBotUser } from "@/lib/auth/assistant-bot";
+import { RETIRED_SYSTEM_USERNAMES } from "@/lib/auth/retired-system-users";
 import { UNREPLIED_DIRECT_MESSAGE_LIMIT } from "@/lib/chat/unreplied-direct-message-limit";
 import { isAllowedChatImageUrl } from "@/lib/constants/chat-media";
 import type { DirectMessageInput } from "@/lib/validators/invitation";
 
-type DirectMessageDb = Pick<PrismaClient, "message" | "connection">;
+type DirectMessageDb = Pick<
+  Prisma.TransactionClient,
+  "message" | "connection" | "$executeRaw"
+>;
 
 type DirectReplyGateDecision = {
   unlockAfterSend: boolean;
@@ -29,14 +32,20 @@ export function activeDirectConnectionWhere(
   return {
     id: connectionId,
     status: "ACTIVE",
-    userA: { moderationBlocks: { none: { isActive: true } } },
-    userB: { moderationBlocks: { none: { isActive: true } } },
+    userA: {
+      username: { notIn: [...RETIRED_SYSTEM_USERNAMES] },
+      moderationBlocks: { none: { isActive: true } },
+    },
+    userB: {
+      username: { notIn: [...RETIRED_SYSTEM_USERNAMES] },
+      moderationBlocks: { none: { isActive: true } },
+    },
     OR: [{ userAId: userId }, { userBId: userId }],
   };
 }
 
 async function resolveReplyToId(
-  db: Pick<PrismaClient, "message">,
+  db: Pick<Prisma.TransactionClient, "message">,
   connectionId: string,
   requestedId: string | undefined,
 ) {
@@ -58,23 +67,23 @@ export async function assertDirectUnrepliedSendAllowed(
   },
 ): Promise<DirectReplyGateDecision> {
   const max = options.max ?? UNREPLIED_DIRECT_MESSAGE_LIMIT;
+  // Serialize every outbound item in a direct thread so concurrent text and
+  // plan-card requests cannot both slip past the two-message first-contact gate.
+  await db.$executeRaw`SELECT id FROM "Connection" WHERE id = ${options.connectionId} FOR UPDATE`;
   const connection = await db.connection.findUnique({
     where: { id: options.connectionId },
     select: {
       userAId: true,
       userBId: true,
       replyLimitUnlockedAt: true,
-      userA: { select: { username: true } },
-      userB: { select: { username: true } },
     },
   });
   if (!connection) return { unlockAfterSend: false };
   if (connection.userAId === connection.userBId) return { unlockAfterSend: false };
 
-  const peerIsA = connection.userBId === options.senderId;
-  const peerId = peerIsA ? connection.userAId : connection.userBId;
-  const peer = peerIsA ? connection.userA : connection.userB;
-  if (isAssistantBotUser(peer) || connection.replyLimitUnlockedAt) {
+  const peerId =
+    connection.userBId === options.senderId ? connection.userAId : connection.userBId;
+  if (connection.replyLimitUnlockedAt) {
     return { unlockAfterSend: false };
   }
 
@@ -137,7 +146,7 @@ export async function createDirectMessageRecord(
         replyToId,
       },
     });
-    await unlockDirectReplyGateIfNeeded(db, options.connectionId, message.createdAt, gate);
+    await completeDirectReplyGateAfterSend(db, options.connectionId, message.createdAt, gate);
     return { message, bodyPreview: body };
   }
 
@@ -156,7 +165,7 @@ export async function createDirectMessageRecord(
         replyToId,
       },
     });
-    await unlockDirectReplyGateIfNeeded(db, options.connectionId, message.createdAt, gate);
+    await completeDirectReplyGateAfterSend(db, options.connectionId, message.createdAt, gate);
     return { message, bodyPreview: caption || "Photo" };
   }
 
@@ -174,11 +183,11 @@ export async function createDirectMessageRecord(
       replyToId,
     },
   });
-  await unlockDirectReplyGateIfNeeded(db, options.connectionId, message.createdAt, gate);
+  await completeDirectReplyGateAfterSend(db, options.connectionId, message.createdAt, gate);
   return { message, bodyPreview: caption || locationName || "Location" };
 }
 
-async function unlockDirectReplyGateIfNeeded(
+export async function completeDirectReplyGateAfterSend(
   db: DirectMessageDb,
   connectionId: string,
   createdAt: Date,

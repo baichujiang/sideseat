@@ -2,7 +2,6 @@ import { SIGNUP_EMAIL_ERROR_CODES } from "@/lib/auth/email-otp-error-codes";
 import { verifyEmailSignupOtp } from "@/lib/auth/email-otp";
 import { normalizeSignupEmail } from "@/lib/auth/normalize-email";
 import { hashPassword } from "@/lib/auth/password";
-import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
 import { validateNicknameForUser } from "@/lib/auth/nickname-fields";
 import { isUsernameAvailable } from "@/lib/auth/username-availability";
 import { SIGNUP_DEFAULT_PROFILE } from "@/lib/auth/signup-defaults";
@@ -79,7 +78,6 @@ export async function POST(request: Request) {
       },
     });
 
-    await ensureAssistantBotConnection(user.id);
     const { accessToken, expiresIn } = await createSession(user.id);
 
     return ok(

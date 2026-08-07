@@ -20,13 +20,6 @@ struct ChatsRootView: View {
                         systemImage: "bubble.left.and.bubble.right",
                         description: "Message someone from Discover or a profile to start chatting."
                     )
-                } else if store.hasNoSearchMatches {
-                    SSEmptyState(
-                        title: "No matches",
-                        systemImage: "magnifyingglass",
-                        description: "Try a different name or message."
-                    )
-                    .accessibilityIdentifier("inbox-empty-no-matches")
                 } else {
                     List {
                         if let issue = store.issue {
@@ -44,20 +37,34 @@ struct ChatsRootView: View {
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
 
-                        if !store.pinned.isEmpty {
-                            Section("Pinned") {
-                                ForEach(store.pinned) { row in
-                                    inboxRow(row)
+                        if store.hasNoSearchMatches || store.hasNoFilterMatches {
+                            Section {
+                                SSEmptyState(
+                                    title: "No matches",
+                                    systemImage: "magnifyingglass",
+                                    description: "Try a different name or message."
+                                )
+                                .frame(maxWidth: .infinity, minHeight: 260)
+                                .accessibilityIdentifier("inbox-empty-no-matches")
+                            }
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                        } else {
+                            if !store.pinned.isEmpty {
+                                Section("Pinned") {
+                                    ForEach(store.pinned) { row in
+                                        inboxRow(row)
+                                    }
                                 }
                             }
-                        }
-                        Section {
-                            ForEach(store.recent) { row in
-                                inboxRow(row)
-                            }
-                        } header: {
-                            if !store.pinned.isEmpty {
-                                Text("Recent")
+                            Section {
+                                ForEach(store.recent) { row in
+                                    inboxRow(row)
+                                }
+                            } header: {
+                                if !store.pinned.isEmpty {
+                                    Text("Recent")
+                                }
                             }
                         }
                     }
@@ -171,28 +178,35 @@ struct ChatsRootView: View {
     private func inboxQuickChips(payload: NativeInboxPayload) -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                chip(
-                    title: String(localized: "Direct"),
-                    count: payload.conversations.filter { $0.kind == .direct }.count,
-                    identifier: "inbox-chip-direct"
-                )
-                chip(
-                    title: String(localized: "Courses"),
-                    count: payload.conversations.filter { $0.kind == .course }.count,
-                    identifier: "inbox-chip-courses"
-                )
-                chip(
-                    title: String(localized: "Groups"),
-                    count: payload.conversations.filter { $0.kind == .group }.count,
-                    identifier: "inbox-chip-groups"
-                )
+                ForEach(InboxConversationFilter.allCases, id: \.self) { filter in
+                    let count = conversationCount(for: filter, payload: payload)
+                    Button {
+                        withAnimation(.easeOut(duration: 0.16)) {
+                            store.conversationFilter = filter
+                        }
+                    } label: {
+                        chipLabel(
+                            title: filter.title,
+                            count: count,
+                            selected: store.conversationFilter == filter
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(filter != .all && count == 0)
+                    .opacity(filter != .all && count == 0 ? 0.45 : 1)
+                    .accessibilityIdentifier(filter.accessibilityIdentifier)
+                    .accessibilityLabel(String(localized: "\(filter.title), \(count)"))
+                    .accessibilityAddTraits(store.conversationFilter == filter ? .isSelected : [])
+                }
+
                 Button {
                     router.navigate(to: .plans)
                 } label: {
                     chipLabel(
                         title: String(localized: "Plans"),
                         count: payload.plansNeedingYourAction,
-                        emphasized: payload.plansNeedingYourAction > 0
+                        emphasized: payload.plansNeedingYourAction > 0,
+                        systemImage: "calendar"
                     )
                 }
                 .buttonStyle(.plain)
@@ -205,14 +219,26 @@ struct ChatsRootView: View {
         .accessibilityIdentifier("inbox-quick-chips")
     }
 
-    private func chip(title: String, count: Int, identifier: String, emphasized: Bool = false) -> some View {
-        chipLabel(title: title, count: count, emphasized: emphasized)
-            .accessibilityIdentifier(identifier)
-            .accessibilityLabel(String(localized: "\(title), \(count)"))
+    private func conversationCount(
+        for filter: InboxConversationFilter,
+        payload: NativeInboxPayload
+    ) -> Int {
+        guard let kind = filter.kind else { return payload.conversations.count }
+        return payload.conversations.filter { $0.kind == kind }.count
     }
 
-    private func chipLabel(title: String, count: Int, emphasized: Bool = false) -> some View {
+    private func chipLabel(
+        title: String,
+        count: Int,
+        emphasized: Bool = false,
+        selected: Bool = false,
+        systemImage: String? = nil
+    ) -> some View {
         HStack(spacing: 6) {
+            if let systemImage {
+                Image(systemName: systemImage)
+                    .font(.caption.weight(.semibold))
+            }
             Text(title)
                 .font(.caption.weight(.semibold))
             if count > 0 {
@@ -220,14 +246,21 @@ struct ChatsRootView: View {
                     .font(.caption2.weight(.bold))
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(Capsule().fill(emphasized ? SideSeatTheme.accent : SideSeatTheme.fillSubtle))
-                    .foregroundStyle(emphasized ? Color.white : Color.primary)
+                    .background(
+                        Capsule().fill(
+                            selected
+                                ? Color.white.opacity(0.22)
+                                : (emphasized ? SideSeatTheme.accent : SideSeatTheme.fillSubtle)
+                        )
+                    )
+                    .foregroundStyle(selected || emphasized ? Color.white : Color.primary)
             }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
+        .foregroundStyle(selected ? Color.white : Color.primary)
         .background(
-            Capsule().fill(SideSeatTheme.Chat.peerBubble)
+            Capsule().fill(selected ? SideSeatTheme.accent : SideSeatTheme.Chat.controlFill)
         )
     }
 

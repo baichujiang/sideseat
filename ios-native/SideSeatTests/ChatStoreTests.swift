@@ -2,6 +2,62 @@ import Foundation
 import Testing
 @testable import SideSeat
 
+@Suite("Chat composer return key")
+struct ChatComposerReturnKeyTests {
+    @Test("Detects Return inserted at the end or cursor position")
+    func detectsSingleInsertedReturn() {
+        #expect(
+            ChatComposerReturnKey.textBeforeInsertedReturn(
+                previous: "Meet at six",
+                current: "Meet at six\n"
+            ) == "Meet at six"
+        )
+        #expect(
+            ChatComposerReturnKey.textBeforeInsertedReturn(
+                previous: "Meet six",
+                current: "Meet\n six"
+            ) == "Meet six"
+        )
+    }
+
+    @Test("Does not treat IME commits or multiline paste as Return")
+    func ignoresNonReturnTextChanges() {
+        #expect(
+            ChatComposerReturnKey.textBeforeInsertedReturn(
+                previous: "ni",
+                current: "你"
+            ) == nil
+        )
+        #expect(
+            ChatComposerReturnKey.textBeforeInsertedReturn(
+                previous: "",
+                current: "Line one\nLine two"
+            ) == nil
+        )
+    }
+}
+
+@Suite("Chat date parsing")
+struct ChatDateParsingTests {
+    @Test("Parses fractional and standard ISO 8601 timestamps")
+    func parsesSupportedTimestamps() {
+        #expect(Date.sideSeatChatISO8601("2026-08-07T13:30:45.123Z") != nil)
+        #expect(Date.sideSeatChatISO8601("2026-08-07T13:30:45Z") != nil)
+        #expect(Date.sideSeatChatISO8601("not-a-date") == nil)
+    }
+
+    @Test("Dense chat fixture contains a parseable multi-day history")
+    func denseFixtureIsComplete() {
+        let page = UITestingChatFixtures.denseDirectPage()
+
+        #expect(page.messages.count == 960)
+        #expect(page.messages.first?.id == "ui-dense-0000")
+        #expect(page.messages.last?.id == "ui-dense-0959")
+        #expect(page.messages.allSatisfy { $0.createdDate != nil })
+        #expect(page.messages.contains { $0.replyTo != nil })
+    }
+}
+
 @Suite("Chat scroll policy")
 struct ChatScrollPolicyTests {
     private let me = NativeChatAuthor(id: "me", username: "me", nickname: "Me", avatarUrl: nil)
@@ -59,6 +115,72 @@ struct ChatScrollPolicyTests {
     @Test("Pagination ignore helper returns none")
     func paginationIgnored() {
         #expect(ChatScrollPolicy.decisionIgnoringPagination() == .none)
+    }
+
+    @Test("Keyboard resize keeps a bottom thread pinned")
+    func keyboardResizeKeepsBottomPinned() {
+        var state = ChatKeyboardBottomAnchorState()
+
+        let focusShouldPin = state.composerFocusChanged(isFocused: true, isNearBottom: true)
+        let resizeShouldPin = state.keyboardWillChange(isNearBottom: true)
+        state.nearBottomChanged(false)
+        let stayedPinnedDuringTransition = state.isPinned
+        let wasTransitioning = state.isKeyboardTransitioning
+        let settledShouldPin = state.keyboardDidChange(isNearBottom: false)
+
+        #expect(focusShouldPin)
+        #expect(resizeShouldPin)
+        #expect(stayedPinnedDuringTransition)
+        #expect(wasTransitioning)
+        #expect(state.isPinned)
+        #expect(!state.isKeyboardTransitioning)
+        #expect(settledShouldPin)
+    }
+
+    @Test("A user scroll after keyboard resize releases the bottom pin")
+    func userScrollAfterKeyboardResizeReleasesPin() {
+        var state = ChatKeyboardBottomAnchorState()
+
+        _ = state.composerFocusChanged(isFocused: true, isNearBottom: true)
+        _ = state.keyboardWillChange(isNearBottom: true)
+        _ = state.keyboardDidChange(isNearBottom: true)
+        state.userScrollBegan()
+
+        let dismissShouldPin = state.composerFocusChanged(isFocused: false, isNearBottom: false)
+
+        #expect(!state.isPinned)
+        #expect(!dismissShouldPin)
+    }
+
+    @Test("Focusing the composer while reading history preserves position")
+    func composerFocusWhileReadingHistoryPreservesPosition() {
+        var state = ChatKeyboardBottomAnchorState()
+
+        state.userScrollBegan()
+        state.nearBottomChanged(false)
+        let focusShouldPin = state.composerFocusChanged(isFocused: true, isNearBottom: false)
+        let resizeShouldPin = state.keyboardWillChange(isNearBottom: false)
+        let settledShouldPin = state.keyboardDidChange(isNearBottom: false)
+
+        #expect(!focusShouldPin)
+        #expect(!resizeShouldPin)
+        #expect(!settledShouldPin)
+    }
+
+    @Test("Keyboard layout settling does not break the next composer focus")
+    func keyboardLayoutSettlingKeepsNextFocusPinned() {
+        var state = ChatKeyboardBottomAnchorState()
+
+        _ = state.composerFocusChanged(isFocused: true, isNearBottom: true)
+        _ = state.keyboardWillChange(isNearBottom: true)
+        _ = state.keyboardDidChange(isNearBottom: false)
+        state.nearBottomChanged(false)
+        let dismissShouldPin = state.composerFocusChanged(isFocused: false, isNearBottom: false)
+        let secondFocusShouldPin = state.composerFocusChanged(isFocused: true, isNearBottom: false)
+
+        #expect(state.isPinned)
+        #expect(dismissShouldPin)
+        #expect(secondFocusShouldPin)
     }
 
     @Test("Unread jump shows only when unread exceeds one screen")
@@ -247,6 +369,43 @@ struct ScheduleShareCompositionTests {
         #expect(!options.contains { $0.name == "Work" || $0.name == "Unused" })
     }
 
+    @Test("Share requests use live category IDs and only virtual source presets")
+    func revealRequestUsesLiveCategoryIDs() {
+        let categories = [
+            NativeCalendarCategory(
+                id: "personal-id",
+                name: "Personal",
+                color: "#EA580C",
+                sortOrder: 0,
+                presetKey: "personal",
+                icsSubscriptionUrl: nil
+            ),
+            NativeCalendarCategory(
+                id: "project-id",
+                name: "Project",
+                color: "#2563EB",
+                sortOrder: 1,
+                presetKey: nil,
+                icsSubscriptionUrl: nil
+            ),
+        ]
+        let blocks = [
+            scheduleBlock(categoryID: "personal-id", presetKey: "personal"),
+            scheduleBlock(categoryID: "project-id", presetKey: nil),
+            scheduleBlock(categoryID: nil, presetKey: "course"),
+            scheduleBlock(categoryID: nil, presetKey: "none"),
+        ]
+        let options = ScheduleShareRevealSelection.options(categories: categories, blocks: blocks)
+
+        let selection = ScheduleShareRevealSelection.requestSelection(
+            options: options,
+            selectedOptionIDs: Set(options.map(\.id))
+        )
+
+        #expect(selection.categoryIDs == ["personal-id", "project-id"])
+        #expect(selection.presetKeys == ["course", "none"])
+    }
+
     private func scheduleBlock(categoryID: String?, presetKey: String?) -> NativeScheduleShareBlock {
         NativeScheduleShareBlock(
             kind: "busy_detail",
@@ -333,30 +492,6 @@ struct ChatSSEClientTests {
     }
 }
 
-@Suite("Assistant message parser")
-struct AssistantMessageParserTests {
-    @Test("Parses action links from serialized assistant payload")
-    func parsesActionLinks() {
-        let raw = """
-        Hello from SideSeat.
-
-        [sideseat-actions]
-        {"links":[{"label":"Open Home","href":"/home"},{"label":"Open Discover","href":"/discover"}]}
-        [/sideseat-actions]
-        """
-        let payload = AssistantMessageParser.parse(raw)
-        #expect(payload.text == "Hello from SideSeat.")
-        #expect(payload.links.count == 2)
-        #expect(payload.links[0].href == "/home")
-    }
-
-    @Test("Maps FAQ trigger bodies to chip labels for the viewer bubble")
-    func mapsFaqTriggerToChipLabel() {
-        let display = AssistantMessageParser.displayUserBody("[[faq:getting_started]]")
-        #expect(display == AssistantFaqKey.gettingStarted.chipTitle)
-    }
-}
-
 @Suite("Inbox store")
 struct InboxStoreTests {
     @Test("Formats the Chats tab badge from 1 through 99+")
@@ -429,6 +564,28 @@ struct InboxStoreTests {
         store.searchQuery = "zzzz-no-match"
         #expect(store.filteredConversations.isEmpty)
         #expect(store.hasNoSearchMatches)
+    }
+
+    @Test("Filters conversations by kind and combines with search")
+    @MainActor
+    func filtersConversationKinds() async throws {
+        let session = try await chatSession(transport: ChatTestTransport())
+        let store = InboxStore(cache: InboxCache(inMemoryOnly: true))
+        await store.load(using: session)
+
+        store.conversationFilter = .direct
+        #expect(store.filteredConversations.map(\.id) == ["connection-1"])
+
+        store.conversationFilter = .course
+        #expect(store.filteredConversations.map(\.id) == ["course-1"])
+
+        store.searchQuery = "mina"
+        #expect(store.filteredConversations.isEmpty)
+        #expect(store.hasNoSearchMatches)
+
+        store.searchQuery = ""
+        store.conversationFilter = .all
+        #expect(store.filteredConversations.count == 3)
     }
 
     @Test("Toggles pin and hides course rows")

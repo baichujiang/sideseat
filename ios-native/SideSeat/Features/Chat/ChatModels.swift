@@ -1,5 +1,21 @@
 import Foundation
 import SwiftUI
+import UIKit
+
+enum ChatComposerReturnKey {
+    static func textBeforeInsertedReturn(previous: String, current: String) -> String? {
+        guard current.count == previous.count + 1 else { return nil }
+
+        for index in current.indices where current[index] == "\n" {
+            var candidate = current
+            candidate.remove(at: index)
+            if candidate == previous {
+                return candidate
+            }
+        }
+        return nil
+    }
+}
 
 struct NativeInboxPayload: Codable, Sendable {
     let conversations: [NativeInboxConversation]
@@ -85,13 +101,6 @@ struct NativeInboxConversation: Codable, Identifiable, Hashable, Sendable {
         default:
             let body = lastMessage.body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             if body.isEmpty { return String(localized: "New message") }
-            if body.hasPrefix("[[faq:") {
-                return AssistantMessageParser.displayUserBody(body)
-            }
-            if body.contains("[sideseat-actions]") {
-                let text = AssistantMessageParser.parse(body).text.trimmingCharacters(in: .whitespacesAndNewlines)
-                return text.isEmpty ? String(localized: "New message") : text
-            }
             return body
         }
     }
@@ -430,13 +439,6 @@ struct NativeDirectMessageReply: Codable, Hashable, Sendable {
         default:
             let trimmed = body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             if trimmed.isEmpty { return String(localized: "Message") }
-            if trimmed.hasPrefix("[[faq:") {
-                return AssistantMessageParser.displayUserBody(trimmed)
-            }
-            if trimmed.contains("[sideseat-actions]") {
-                let text = AssistantMessageParser.parse(trimmed).text.trimmingCharacters(in: .whitespacesAndNewlines)
-                return text.isEmpty ? String(localized: "Message") : text
-            }
             return trimmed
         }
     }
@@ -592,13 +594,6 @@ extension NativeDirectMessage {
         default:
             let trimmed = body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             if trimmed.isEmpty { return String(localized: "Message") }
-            if trimmed.hasPrefix("[[faq:") {
-                return AssistantMessageParser.displayUserBody(trimmed)
-            }
-            if trimmed.contains("[sideseat-actions]") {
-                let text = AssistantMessageParser.parse(trimmed).text.trimmingCharacters(in: .whitespacesAndNewlines)
-                return text.isEmpty ? String(localized: "Message") : text
-            }
             return trimmed
         }
     }
@@ -761,6 +756,54 @@ enum ChatScrollPolicy {
     static func decisionIgnoringPagination() -> ChatScrollDecision { .none }
 }
 
+/// Keeps a thread pinned to its latest message while the software keyboard changes
+/// the available height. A real user scroll after the transition releases the pin.
+struct ChatKeyboardBottomAnchorState: Equatable, Sendable {
+    private(set) var isPinned = true
+    private(set) var isKeyboardTransitioning = false
+
+    mutating func nearBottomChanged(_ isNearBottom: Bool) {
+        if isNearBottom {
+            isPinned = true
+        }
+    }
+
+    mutating func pinToBottom() {
+        isPinned = true
+    }
+
+    mutating func userScrollBegan() {
+        isPinned = false
+    }
+
+    @discardableResult
+    mutating func composerFocusChanged(isFocused: Bool, isNearBottom: Bool) -> Bool {
+        _ = isFocused
+        if isNearBottom {
+            isPinned = true
+        }
+        return isPinned
+    }
+
+    @discardableResult
+    mutating func keyboardWillChange(isNearBottom: Bool) -> Bool {
+        if isNearBottom {
+            isPinned = true
+        }
+        isKeyboardTransitioning = true
+        return isPinned
+    }
+
+    @discardableResult
+    mutating func keyboardDidChange(isNearBottom: Bool) -> Bool {
+        if isNearBottom {
+            isPinned = true
+        }
+        isKeyboardTransitioning = false
+        return isPinned
+    }
+}
+
 enum InboxActivityFormatting {
     /// Today → time; yesterday → label; this week → weekday; older → short date.
     static func label(for date: Date, now: Date = Date(), calendar: Calendar = .current) -> String {
@@ -818,6 +861,64 @@ struct ChatNearBottomTracker: ViewModifier {
     private func apply(_ nearBottom: Bool) {
         isNearBottom = nearBottom
         if nearBottom { onReachedBottom() }
+    }
+}
+
+private struct ChatKeyboardBottomAnchorModifier: ViewModifier {
+    @Binding var state: ChatKeyboardBottomAnchorState
+    let isNearBottom: Bool
+    let isComposerFocused: Bool
+    let requestBottom: (_ animated: Bool) -> Void
+
+    func body(content: Content) -> some View {
+        content
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 6).onChanged { _ in
+                    var updated = state
+                    updated.userScrollBegan()
+                    state = updated
+                }
+            )
+            .onChange(of: isNearBottom) { _, nearBottom in
+                var updated = state
+                updated.nearBottomChanged(nearBottom)
+                state = updated
+            }
+            .onChange(of: isComposerFocused) { _, focused in
+                var updated = state
+                let shouldPin = updated.composerFocusChanged(
+                    isFocused: focused,
+                    isNearBottom: isNearBottom
+                )
+                state = updated
+                if shouldPin {
+                    requestBottom(false)
+                }
+            }
+            .onReceive(
+                NotificationCenter.default.publisher(
+                    for: UIResponder.keyboardWillChangeFrameNotification
+                )
+            ) { _ in
+                var updated = state
+                let shouldPin = updated.keyboardWillChange(isNearBottom: isNearBottom)
+                state = updated
+                if shouldPin {
+                    requestBottom(false)
+                }
+            }
+            .onReceive(
+                NotificationCenter.default.publisher(
+                    for: UIResponder.keyboardDidChangeFrameNotification
+                )
+            ) { _ in
+                var updated = state
+                let shouldPin = updated.keyboardDidChange(isNearBottom: isNearBottom)
+                state = updated
+                if shouldPin {
+                    requestBottom(false)
+                }
+            }
     }
 }
 
@@ -882,6 +983,22 @@ extension View {
     ) -> some View {
         modifier(ChatNearBottomTracker(isNearBottom: isNearBottom, onReachedBottom: onReachedBottom))
     }
+
+    func chatKeyboardBottomAnchor(
+        state: Binding<ChatKeyboardBottomAnchorState>,
+        isNearBottom: Bool,
+        isComposerFocused: Bool,
+        requestBottom: @escaping (_ animated: Bool) -> Void
+    ) -> some View {
+        modifier(
+            ChatKeyboardBottomAnchorModifier(
+                state: state,
+                isNearBottom: isNearBottom,
+                isComposerFocused: isComposerFocused,
+                requestBottom: requestBottom
+            )
+        )
+    }
 }
 
 struct ChatUnreadJumpButton: View {
@@ -935,112 +1052,15 @@ extension NativeDirectMessagePageData {
 }
 
 extension Date {
+    private static let sideSeatChatFractionalISO8601 = Date.ISO8601FormatStyle(
+        includingFractionalSeconds: true
+    )
+    private static let sideSeatChatStandardISO8601 = Date.ISO8601FormatStyle()
+
     static func sideSeatChatISO8601(_ value: String) -> Date? {
-        let fractional = ISO8601DateFormatter()
-        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return fractional.date(from: value) ?? ISO8601DateFormatter().date(from: value)
-    }
-}
-
-// MARK: - SideSeat Assistant (FAQ bot DM)
-
-enum AssistantBot {
-    static let username = "sideseat_assistant"
-
-    static func isBot(_ user: NativeChatAuthor) -> Bool {
-        user.username == username
-    }
-}
-
-enum AssistantFaqKey: String, CaseIterable, Sendable {
-    case gettingStarted = "getting_started"
-    case discover
-    case verification
-    case guestSignup = "guest_signup"
-    case schedule
-    case inbox
-
-    var chipTitle: String {
-        switch self {
-        case .gettingStarted:
-            return String(localized: "How do I start?")
-        case .discover:
-            return String(localized: "How does Discover work?")
-        case .verification:
-            return String(localized: "School email verification")
-        case .guestSignup:
-            return String(localized: "Guest vs sign up")
-        case .schedule:
-            return String(localized: "Calendar & plans")
-        case .inbox:
-            return String(localized: "Chats & inbox")
+        if let date = try? Date(value, strategy: sideSeatChatFractionalISO8601) {
+            return date
         }
-    }
-
-    var triggerBody: String {
-        "[[faq:\(rawValue)]]"
-    }
-
-    /// Contextual chip order (guest / unverified / verified) — matches web `suggestedFaqChips`.
-    static func suggested(isGuest: Bool, verifiedStudent: Bool, compact: Bool = true) -> [AssistantFaqKey] {
-        let ordered: [AssistantFaqKey]
-        if isGuest {
-            ordered = [.gettingStarted, .guestSignup, .discover, .schedule, .inbox, .verification]
-        } else if !verifiedStudent {
-            ordered = [.verification, .schedule, .discover, .gettingStarted, .inbox, .guestSignup]
-        } else {
-            ordered = [.schedule, .discover, .inbox, .gettingStarted, .verification, .guestSignup]
-        }
-        return compact ? Array(ordered.prefix(4)) : ordered
-    }
-}
-
-struct AssistantActionLink: Hashable, Sendable, Codable {
-    let label: String
-    let href: String
-}
-
-struct AssistantMessagePayload: Hashable, Sendable {
-    let text: String
-    let links: [AssistantActionLink]
-}
-
-enum AssistantMessageParser {
-    private static let actionsOpen = "[sideseat-actions]"
-    private static let actionsClose = "[/sideseat-actions]"
-
-    static func parse(_ raw: String) -> AssistantMessagePayload {
-        guard let openRange = raw.range(of: actionsOpen) else {
-            return AssistantMessagePayload(text: raw.trimmingCharacters(in: .whitespacesAndNewlines), links: [])
-        }
-        let text = String(raw[..<openRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
-        let afterOpen = raw[openRange.upperBound...]
-        let jsonText: String
-        if let closeRange = afterOpen.range(of: actionsClose) {
-            jsonText = String(afterOpen[..<closeRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
-        } else {
-            jsonText = String(afterOpen).trimmingCharacters(in: .whitespacesAndNewlines)
-        }
-        guard let data = jsonText.data(using: .utf8),
-              let decoded = try? JSONDecoder().decode(AssistantActionsEnvelope.self, from: data)
-        else {
-            return AssistantMessagePayload(text: text.isEmpty ? raw.trimmingCharacters(in: .whitespacesAndNewlines) : text, links: [])
-        }
-        let links = decoded.links.filter { link in
-            link.href.hasPrefix("/") && !link.label.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        }
-        return AssistantMessagePayload(text: text, links: links)
-    }
-
-    static func displayUserBody(_ body: String) -> String {
-        let trimmed = body.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmed.hasPrefix("[[faq:"), trimmed.hasSuffix("]]") else { return body }
-        let inner = String(trimmed.dropFirst(6).dropLast(2))
-        guard let key = AssistantFaqKey(rawValue: inner) else { return body }
-        return key.chipTitle
-    }
-
-    private struct AssistantActionsEnvelope: Decodable {
-        let links: [AssistantActionLink]
+        return try? Date(value, strategy: sideSeatChatStandardISO8601)
     }
 }

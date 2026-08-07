@@ -7,7 +7,7 @@ struct HomeWeekTimetableView: View {
     let focusDate: Date
     let visibleDayCount: Int
     let timelineDensityLevel: Int
-    let schedule: NativeHomeSchedule?
+    let itemsByDay: [Date: [HomeAgendaItem]]
     let onFocusDate: (Date) -> Void
     /// Reports horizontal viewport movement without turning it into date selection.
     let onViewportDateChange: (Date) -> Void
@@ -43,6 +43,8 @@ struct HomeWeekTimetableView: View {
     private let calendar = Calendar.sideSeatBerlin
     private let timeGutter = CalendarChrome.weekTimeGutter
     private let headerHeight = CalendarChrome.weekHeaderHeight
+    private static let denseCalendarStressTestEnabled =
+        ProcessInfo.processInfo.arguments.contains("--ui-testing-dense-calendar")
 
     private var dayCount: Int {
         HomeWeekWindow.clampVisibleDayCount(visibleDayCount)
@@ -69,7 +71,7 @@ struct HomeWeekTimetableView: View {
         )
         let strip = stripDays(from: start)
         let hasAllDay = strip.contains { day in
-            !(schedule?.items(on: day, calendar: calendar) ?? []).filter {
+            !items(on: day).filter {
                 $0.isAllDayStyle(on: day, calendar: calendar)
             }.isEmpty
         }
@@ -165,9 +167,10 @@ struct HomeWeekTimetableView: View {
                                 || abs(panOffset) > 0.5
                         )
                         .scrollIndicators(.hidden)
-                        .task(
-                            id: "\(dayID(start))-\(dayID(focusDate))-\(scrollAnchorToken)-\(dayCount)-\(densityLevel)"
-                        ) {
+                        // Horizontal paging updates `start`, but must not reset the
+                        // vertical time position. Density changes alter the Y scale,
+                        // while Today explicitly bumps `scrollAnchorToken`.
+                        .task(id: "\(scrollAnchorToken)-\(densityLevel)") {
                             await Task.yield()
                             try? await Task.sleep(nanoseconds: 50_000_000)
                             proxy.scrollTo(verticalScrollSlotID(for: focusDate), anchor: .top)
@@ -408,7 +411,7 @@ struct HomeWeekTimetableView: View {
 
             HStack(alignment: .top, spacing: 0) {
                 ForEach(strip, id: \.self) { day in
-                    let items = (schedule?.items(on: day, calendar: calendar) ?? []).filter {
+                    let items = items(on: day).filter {
                         $0.isAllDayStyle(on: day, calendar: calendar)
                     }
                     CalendarAllDayBand(
@@ -435,7 +438,7 @@ struct HomeWeekTimetableView: View {
     }
 
     private func verticalScrollSlotID(for day: Date) -> String {
-        let items = (schedule?.items(on: day, calendar: calendar) ?? []).filter {
+        let items = items(on: day).filter {
             !$0.isAllDayStyle(on: day, calendar: calendar)
         }
         let firstEventMinute = CalendarTimelineScrollAnchor.firstEventMinute(
@@ -458,7 +461,7 @@ struct HomeWeekTimetableView: View {
         days: [Date],
         dayWidth: CGFloat
     ) -> some View {
-        let timedItems = (schedule?.items(on: day, calendar: calendar) ?? []).filter {
+        let timedItems = items(on: day).filter {
             !$0.isAllDayStyle(on: day, calendar: calendar)
         }
         let placements = CalendarDayLayout.placements(items: timedItems, on: day, calendar: calendar)
@@ -662,6 +665,7 @@ struct HomeWeekTimetableView: View {
             "\(CalendarChrome.compactClock(placement.item.start)) - \(CalendarChrome.compactClock(placement.item.end))"
         )
         .accessibilityAddTraits(.isButton)
+        .accessibilityHidden(isDenseCalendarStressTest)
     }
 
     private func weekEventAccessibilityID(for item: HomeAgendaItem, renderedDay: Date) -> String {
@@ -734,6 +738,14 @@ struct HomeWeekTimetableView: View {
 
     private var canUseEmptySlots: Bool {
         movingEventID == nil && armedEventID == nil && dragPreview == nil
+    }
+
+    private var isDenseCalendarStressTest: Bool {
+        Self.denseCalendarStressTestEnabled
+    }
+
+    private func items(on day: Date) -> [HomeAgendaItem] {
+        itemsByDay[calendar.startOfDay(for: day)] ?? []
     }
 
     private func slotDate(on day: Date, minute: Int) -> Date? {

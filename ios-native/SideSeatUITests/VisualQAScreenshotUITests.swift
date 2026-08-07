@@ -65,7 +65,17 @@ final class VisualQAScreenshotUITests: XCTestCase {
         XCTAssertTrue(me.waitForExistence(timeout: 8))
         me.tap()
 
-        let share = app.buttons["me-share-sideseat"]
+        let settings = app.buttons["me-settings"]
+        if !settings.waitForExistence(timeout: 2) {
+            app.swipeUp()
+        }
+        XCTAssertTrue(settings.waitForExistence(timeout: 5))
+        settings.tap()
+
+        let share = app.buttons["settings-share-sideseat"]
+        if !share.waitForExistence(timeout: 2) || !share.isHittable {
+            app.swipeUp()
+        }
         XCTAssertTrue(share.waitForExistence(timeout: 5))
         share.tap()
         XCTAssertTrue(app.descendants(matching: .any)["sideseat-app-share-preview"].waitForExistence(timeout: 5))

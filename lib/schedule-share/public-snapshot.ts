@@ -1,7 +1,7 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 
 import type { ScheduleShareLinkWithOwner } from "@/lib/schedule-share/resolve-link";
-import { parseRevealConfigJson, REVEAL_PRESET_KEYS_ALLOWLIST } from "@/lib/schedule-share/reveal-config";
+import { parseRevealConfigJson } from "@/lib/schedule-share/reveal-config";
 import { defaultShareExpiresAt } from "@/lib/schedule-share/share-range-presets";
 import { shareOwnerCalendarPickerRange } from "@/lib/schedule-share/share-selected-days";
 import {
@@ -47,7 +47,7 @@ export async function buildOwnerPreviewSnapshotForUserId(
     rangeEnd,
     reveal: {
       categoryIds: [],
-      presetKeys: [...REVEAL_PRESET_KEYS_ALLOWLIST],
+      presetKeys: [],
       hideAllDetails: false,
       includedDates: [],
     },

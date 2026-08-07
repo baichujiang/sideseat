@@ -1,4 +1,11 @@
-import type { Course, CourseRoomMessage, GroupChat, GroupChatMessage, User } from "@prisma/client";
+import type {
+  Course,
+  CourseRoomMessage,
+  GroupChat,
+  GroupChatMessage,
+  Prisma,
+  User,
+} from "@prisma/client";
 import { ConnectionStatus, PlanRequestStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
@@ -10,6 +17,16 @@ import {
 import { inboxMergedPinned } from "@/lib/inbox/inbox-merged-pinned";
 import { compareConnectionsForInbox } from "@/lib/queries/inbox-order";
 import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
+import { RETIRED_SYSTEM_USERNAMES } from "@/lib/auth/retired-system-users";
+
+function activeUserConnectionWhere(userId: string): Prisma.ConnectionWhereInput {
+  return {
+    status: ConnectionStatus.ACTIVE,
+    userA: { username: { notIn: [...RETIRED_SYSTEM_USERNAMES] } },
+    userB: { username: { notIn: [...RETIRED_SYSTEM_USERNAMES] } },
+    OR: [{ userAId: userId }, { userBId: userId }],
+  };
+}
 
 type ConnectionInbox = Awaited<
   ReturnType<
@@ -100,10 +117,7 @@ export type InboxMergeBundle = {
 export async function getInboxUnreadTotal(userId: string): Promise<number> {
   const [connections, userCourses, groupParticipants] = await Promise.all([
     prisma.connection.findMany({
-      where: {
-        status: ConnectionStatus.ACTIVE,
-        OR: [{ userAId: userId }, { userBId: userId }],
-      },
+      where: activeUserConnectionWhere(userId),
       select: { id: true },
     }),
     prisma.userCourse.findMany({
@@ -135,10 +149,7 @@ export async function getInboxUnreadTotal(userId: string): Promise<number> {
 export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBundle> {
   const [connections, userCourses, groupParticipants, plansNeedingYourAction] = await Promise.all([
     prisma.connection.findMany({
-      where: {
-        status: ConnectionStatus.ACTIVE,
-        OR: [{ userAId: userId }, { userBId: userId }],
-      },
+      where: activeUserConnectionWhere(userId),
       include: {
         userA: true,
         userB: true,
@@ -195,8 +206,7 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
     prisma.planRequest.count({
       where: {
         connection: {
-          status: ConnectionStatus.ACTIVE,
-          OR: [{ userAId: userId }, { userBId: userId }],
+          ...activeUserConnectionWhere(userId),
         },
         receiverUserId: userId,
         status: PlanRequestStatus.PENDING,

@@ -22,7 +22,7 @@ import {
 } from "@/lib/schedule-share/public-errors";
 import { buildPublicScheduleShareSnapshotForActiveLink } from "@/lib/schedule-share/public-snapshot";
 import { scheduleShareProposerDisplayName } from "@/lib/schedule-share/proposer-display-name";
-import { notifyNewDirectChatMessage } from "@/lib/push/notify-user";
+import { scheduleNewDirectChatMessageNotification } from "@/lib/push/notify-user";
 import { assertScheduleShareProposalRateLimit } from "@/lib/schedule-share/rate-limit";
 import { parseRevealConfigJson } from "@/lib/schedule-share/reveal-config";
 import { findScheduleShareLinkByPlainToken } from "@/lib/schedule-share/resolve-link";
@@ -108,11 +108,11 @@ export async function createAndSendScheduleShare(options: {
     include: directMessageV1Include,
   });
 
-  void notifyNewDirectChatMessage({
+  scheduleNewDirectChatMessageNotification({
     connectionId: options.connectionId,
     senderId: options.userId,
     bodyPreview: "Shared schedule",
-  }).catch(() => {});
+  });
 
   return {
     shareUrl,

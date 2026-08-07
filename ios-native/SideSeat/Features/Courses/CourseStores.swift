@@ -6,6 +6,7 @@ import Observation
 final class CourseListStore {
     private(set) var payload: NativeCourseList?
     private(set) var isLoading = false
+    private(set) var mutatingCourseID: String?
     private(set) var issue: String?
     private var latestRequestID: UUID?
 
@@ -29,14 +30,33 @@ final class CourseListStore {
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             let fixture = NativeCourseList.uiTestingFixture
             guard latestRequestID == requestID else { return }
+            let fixtureCourses = fixture.courses.map { course in
+                guard scope == .archived else { return course }
+                return NativeCourseSummary(
+                    id: course.id,
+                    code: course.code,
+                    name: course.name,
+                    instructorSummary: course.instructorSummary,
+                    school: course.school,
+                    semesterLabel: "WS 2025/26",
+                    memberCount: course.memberCount,
+                    viewer: NativeCourseViewerState(
+                        enrolled: false,
+                        saved: false,
+                        canRestore: true
+                    ),
+                    sessions: course.sessions,
+                    communitySubmitted: course.communitySubmitted
+                )
+            }
             payload = NativeCourseList(
                 school: school ?? fixture.school,
                 semesterLabel: fixture.semesterLabel,
                 scope: scope,
                 query: query,
                 schools: fixture.schools,
-                courses: query.isEmpty || fixture.courses[0].name.localizedCaseInsensitiveContains(query)
-                    ? fixture.courses
+                courses: query.isEmpty || fixtureCourses[0].name.localizedCaseInsensitiveContains(query)
+                    ? fixtureCourses
                     : [],
                 nextCursor: nil,
                 semesterReview: fixture.semesterReview
@@ -64,6 +84,65 @@ final class CourseListStore {
             guard latestRequestID == requestID else { return }
             issue = error.localizedDescription
         }
+    }
+
+    func restoreArchivedCourse(_ courseID: String, using session: SessionStore) async -> Bool {
+        await mutateArchivedCourse(courseID, method: .post, using: session)
+    }
+
+    func removeArchivedCourse(_ courseID: String, using session: SessionStore) async -> Bool {
+        await mutateArchivedCourse(
+            courseID,
+            method: .delete,
+            pathSuffix: "archive",
+            using: session
+        )
+    }
+
+    private func mutateArchivedCourse(
+        _ courseID: String,
+        method: HTTPMethod,
+        pathSuffix: String = "enrollment",
+        using session: SessionStore
+    ) async -> Bool {
+        guard mutatingCourseID == nil else { return false }
+        mutatingCourseID = courseID
+        issue = nil
+        defer { mutatingCourseID = nil }
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            removeCourseFromPayload(courseID)
+            return true
+        }
+        #endif
+
+        do {
+            let _: APIEnvelope<LooseMutationResponse> = try await session.sendAuthorized(
+                "api/v1/courses/\(courseID)/\(pathSuffix)",
+                method: method,
+                idempotencyKey: UUID().uuidString
+            )
+            removeCourseFromPayload(courseID)
+            return true
+        } catch {
+            issue = error.localizedDescription
+            return false
+        }
+    }
+
+    private func removeCourseFromPayload(_ courseID: String) {
+        guard let payload else { return }
+        self.payload = NativeCourseList(
+            school: payload.school,
+            semesterLabel: payload.semesterLabel,
+            scope: payload.scope,
+            query: payload.query,
+            schools: payload.schools,
+            courses: payload.courses.filter { $0.id != courseID },
+            nextCursor: payload.nextCursor,
+            semesterReview: payload.semesterReview
+        )
     }
 }
 

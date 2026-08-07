@@ -6,7 +6,7 @@ import { createScheduleShareLinkForUser } from "@/lib/schedule-share/create-sche
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseBody } from "@/lib/http";
 import { requestAppOrigin } from "@/lib/http/request-app-origin";
-import { notifyNewDirectChatMessage } from "@/lib/push/notify-user";
+import { scheduleNewDirectChatMessageNotification } from "@/lib/push/notify-user";
 import { createScheduleShareSchema } from "@/lib/schedule-share/validation";
 
 export async function POST(
@@ -80,11 +80,11 @@ export async function POST(
       },
     });
 
-    void notifyNewDirectChatMessage({
+    scheduleNewDirectChatMessageNotification({
       connectionId,
       senderId: auth.user.id,
       bodyPreview: "Shared schedule",
-    }).catch(() => {});
+    });
 
     return ok({ shareUrl, message }, { status: 201 });
   } catch (cause) {

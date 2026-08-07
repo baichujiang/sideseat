@@ -12,6 +12,7 @@ enum AppTab: String, CaseIterable, Hashable, Identifiable {
 
 enum AppRoute: Hashable, Sendable {
     case courses
+    case archivedCourses
     case myPosts
     case profile(userID: String)
     case contacts

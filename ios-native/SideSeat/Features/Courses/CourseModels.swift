@@ -4,6 +4,7 @@ enum NativeCourseScope: String, CaseIterable, Codable, Sendable, Identifiable {
     case popular
     case enrolled
     case saved
+    case archived
 
     var id: String { rawValue }
 
@@ -12,8 +13,11 @@ enum NativeCourseScope: String, CaseIterable, Codable, Sendable, Identifiable {
         case .popular: "Popular"
         case .enrolled: "My courses"
         case .saved: "Saved"
+        case .archived: "Archived"
         }
     }
+
+    static let primaryCases: [NativeCourseScope] = [.popular, .enrolled, .saved]
 }
 
 struct NativeCourseList: Decodable, Sendable {
@@ -111,6 +115,20 @@ struct NativeCourseSummary: Decodable, Sendable, Identifiable {
 struct NativeCourseViewerState: Decodable, Sendable {
     let enrolled: Bool
     let saved: Bool
+    let canRestore: Bool?
+    let restoreBlockReason: String?
+
+    init(
+        enrolled: Bool,
+        saved: Bool,
+        canRestore: Bool? = nil,
+        restoreBlockReason: String? = nil
+    ) {
+        self.enrolled = enrolled
+        self.saved = saved
+        self.canRestore = canRestore
+        self.restoreBlockReason = restoreBlockReason
+    }
 }
 
 struct NativeCourseSession: Decodable, Sendable, Hashable {

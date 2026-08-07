@@ -1,9 +1,7 @@
-import { replyAfterUserMessageToAssistant } from "@/lib/assistant/reply-after-user-message";
 import { requireOnboardedUser } from "@/lib/auth/guards";
-import { getServerAppLocale } from "@/lib/i18n/server-locale";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
-import { notifyNewDirectChatMessage } from "@/lib/push/notify-user";
+import { scheduleNewDirectChatMessageNotification } from "@/lib/push/notify-user";
 import { directMessageSchema, type DirectMessageInput } from "@/lib/validators/invitation";
 import {
   activeDirectConnectionWhere,
@@ -40,23 +38,11 @@ export async function POST(
         input: values,
       }),
     );
-    void notifyNewDirectChatMessage({
+    scheduleNewDirectChatMessageNotification({
       connectionId,
       senderId: user.id,
       bodyPreview,
-    }).catch(() => {});
-
-    if (values.type === "TEXT") {
-      const locale = await getServerAppLocale();
-      await replyAfterUserMessageToAssistant({
-        connectionId,
-        senderUserId: user.id,
-        messageBody: values.body.trim(),
-        locale,
-      }).catch((err) => {
-        console.error("[assistant] reply failed", err);
-      });
-    }
+    });
 
     return ok(message, { status: 201 });
   } catch (cause) {

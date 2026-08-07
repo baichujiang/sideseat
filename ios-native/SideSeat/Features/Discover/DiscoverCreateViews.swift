@@ -125,39 +125,51 @@ struct DiscoverPlanCreateView: View {
     private let bodyMax = 280
 
     private let editingPost: NativeDiscoverBuddyPost?
+    private let repostingPost: NativeDiscoverBuddyPost?
     private let originalExpiryDate: Date?
     private let initialExpiryPreset: BuddyExpiryPreset
     let onCreated: () async -> Void
 
     init(
         editingPost: NativeDiscoverBuddyPost? = nil,
+        repostingPost: NativeDiscoverBuddyPost? = nil,
         onCreated: @escaping () async -> Void
     ) {
+        precondition(editingPost == nil || repostingPost == nil)
         self.editingPost = editingPost
+        self.repostingPost = repostingPost
         self.onCreated = onCreated
 
+        let sourcePost = editingPost ?? repostingPost
+        let now = Date()
         let defaultStart = Date().addingTimeInterval(60 * 60)
-        let start = editingPost?.startDate ?? defaultStart
-        let end = editingPost?.endDate ?? start.addingTimeInterval(60 * 60)
+        let sourceStart = sourcePost?.startDate
+        let sourceEnd = sourcePost?.endDate
+        let canReuseSchedule = editingPost != nil || (
+            sourceStart.map { $0 > now } == true &&
+            sourceEnd.map { end in sourceStart.map { end > $0 } == true } == true
+        )
+        let start = canReuseSchedule ? (sourceStart ?? defaultStart) : defaultStart
+        let end = canReuseSchedule ? (sourceEnd ?? start.addingTimeInterval(60 * 60)) : start.addingTimeInterval(60 * 60)
         let expiry = editingPost?.expiryDate
         let expiryPreset = BuddyExpiryPreset.preset(for: expiry)
         originalExpiryDate = expiry
         initialExpiryPreset = expiryPreset
 
-        _title = State(initialValue: editingPost?.title ?? "")
-        _bodyText = State(initialValue: editingPost?.body ?? "")
+        _title = State(initialValue: sourcePost?.title ?? "")
+        _bodyText = State(initialValue: sourcePost?.body ?? "")
         _visibilityPreset = State(
-            initialValue: editingPost.flatMap { BuddyVisibilityPreset(rawValue: $0.visibility) } ?? .everyone
+            initialValue: sourcePost.flatMap { BuddyVisibilityPreset(rawValue: $0.visibility) } ?? .everyone
         )
-        _selectedCourseIds = State(initialValue: Set(editingPost?.linkedCourses.map(\.id) ?? []))
-        _hasSchedule = State(initialValue: editingPost?.startDate != nil && editingPost?.endDate != nil)
+        _selectedCourseIds = State(initialValue: Set(sourcePost?.linkedCourses.map(\.id) ?? []))
+        _hasSchedule = State(initialValue: canReuseSchedule && sourceStart != nil && sourceEnd != nil)
         _startsAt = State(initialValue: start)
         _endsAt = State(initialValue: end)
-        _location = State(initialValue: editingPost?.location ?? "")
-        _hasCapacityLimit = State(initialValue: editingPost?.capacity != nil)
-        _capacity = State(initialValue: editingPost?.capacity ?? 4)
+        _location = State(initialValue: sourcePost?.location ?? "")
+        _hasCapacityLimit = State(initialValue: sourcePost?.capacity != nil)
+        _capacity = State(initialValue: sourcePost?.capacity ?? 4)
         _expiryPreset = State(initialValue: expiryPreset)
-        _existingImageURLs = State(initialValue: editingPost?.imageUrls ?? [])
+        _existingImageURLs = State(initialValue: sourcePost?.imageUrls ?? [])
     }
 
     private var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -171,6 +183,14 @@ struct DiscoverPlanCreateView: View {
         BuddyHashtagParser.tags(in: "\(title)\n\(bodyText)")
     }
     private var isEditing: Bool { editingPost != nil }
+    private var isReposting: Bool { repostingPost != nil }
+    private var sourcePost: NativeDiscoverBuddyPost? { editingPost ?? repostingPost }
+    private var needsCourseSelection: Bool {
+        visibilityPreset == .coursemates || sourcePost?.category == "SHARED_COURSES"
+    }
+    private var createCategory: String {
+        repostingPost?.category == "SHARED_COURSES" ? "SHARED_COURSES" : "OTHER"
+    }
     private var totalImageCount: Int { existingImageURLs.count + imageDrafts.count }
     private var earliestStart: Date { isEditing ? min(Date(), startsAt) : Date() }
     private var selectedExpiryDate: Date {
@@ -187,7 +207,7 @@ struct DiscoverPlanCreateView: View {
         !trimmedTitle.isEmpty &&
             trimmedTitle.count <= titleMax &&
             bodyText.count <= bodyMax &&
-            (visibilityPreset != .coursemates || !selectedCourseIds.isEmpty) &&
+            (!needsCourseSelection || !selectedCourseIds.isEmpty) &&
             (!hasSchedule || endsAt > startsAt) &&
             !isPreparingImages &&
             !store.isSaving
@@ -195,6 +215,18 @@ struct DiscoverPlanCreateView: View {
 
     var body: some View {
         Form {
+            if isReposting {
+                Section {
+                    Label("Ready to repost", systemImage: "arrow.clockwise.circle.fill")
+                        .font(.headline)
+                        .foregroundStyle(SideSeatTheme.accent)
+                    Text("Review who can see this plan and choose current courses before posting.")
+                        .font(.footnote)
+                        .foregroundStyle(SideSeatTheme.textSecondary)
+                }
+                .accessibilityIdentifier("buddy-repost-notice")
+            }
+
             Section {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
@@ -325,7 +357,7 @@ struct DiscoverPlanCreateView: View {
                     selection: $visibilityPreset,
                     presets: visibilityPresets
                 )
-                if visibilityPreset == .coursemates {
+                if needsCourseSelection {
                     if courseStore.isLoading {
                         SSLoadingState("Loading courses")
                     } else if enrolledCourses.isEmpty {
@@ -385,8 +417,10 @@ struct DiscoverPlanCreateView: View {
                 Section { Text(issue).foregroundStyle(SideSeatTheme.danger) }
             }
         }
-        .accessibilityIdentifier(isEditing ? "buddy-edit-view" : "buddy-create-view")
-        .navigationTitle(isEditing ? "Edit plan" : "Create plan")
+        .accessibilityIdentifier(
+            isEditing ? "buddy-edit-view" : (isReposting ? "buddy-repost-view" : "buddy-create-view")
+        )
+        .navigationTitle(isEditing ? "Edit plan" : (isReposting ? "Repost plan" : "Create plan"))
         .navigationBarTitleDisplayMode(.inline)
         .scrollDismissesKeyboard(.interactively)
         .toolbar {
@@ -403,8 +437,8 @@ struct DiscoverPlanCreateView: View {
         .safeAreaInset(edge: .bottom) {
             SSPrimaryButton(
                 title: store.isSaving
-                    ? String(localized: isEditing ? "Saving…" : "Posting…")
-                    : String(localized: isEditing ? "Save changes" : "Post"),
+                    ? String(localized: isEditing ? "Saving…" : (isReposting ? "Reposting…" : "Posting…"))
+                    : String(localized: isEditing ? "Save changes" : (isReposting ? "Repost" : "Post")),
                 isLoading: store.isSaving,
                 fill: .product,
                 chrome: .rounded,
@@ -421,7 +455,7 @@ struct DiscoverPlanCreateView: View {
         .interactiveDismissDisabled(store.isSaving)
         .sensoryFeedback(.success, trigger: didSucceed)
         .alert(
-            isEditing ? "Couldn't save changes" : "Couldn't create plan",
+            isEditing ? "Couldn't save changes" : (isReposting ? "Couldn't repost plan" : "Couldn't create plan"),
             isPresented: Binding(
                 get: { submitIssue != nil },
                 set: { isPresented in
@@ -438,7 +472,9 @@ struct DiscoverPlanCreateView: View {
         }
         .task {
             await courseStore.load(using: session, scope: .enrolled, school: nil, query: "")
-            if selectedCourseIds.isEmpty, editingPost == nil {
+            if isReposting {
+                selectedCourseIds.formIntersection(Set(enrolledCourses.map(\.id)))
+            } else if selectedCourseIds.isEmpty, editingPost == nil {
                 selectedCourseIds = Set(enrolledCourses.map(\.id))
             }
         }
@@ -447,7 +483,7 @@ struct DiscoverPlanCreateView: View {
     private func submit() async {
         guard canSubmit else { return }
         focusedField = nil
-        let courseIDs = visibilityPreset == .coursemates || editingPost?.category == "SHARED_COURSES"
+        let courseIDs = needsCourseSelection
             ? Array(selectedCourseIds)
             : []
         let ok: Bool
@@ -470,6 +506,7 @@ struct DiscoverPlanCreateView: View {
             )
         } else {
             ok = await store.createBuddy(
+                category: createCategory,
                 title: title,
                 body: bodyText,
                 tags: normalizedTags,
@@ -481,6 +518,7 @@ struct DiscoverPlanCreateView: View {
                 location: hasSchedule ? location : nil,
                 capacity: hasSchedule && hasCapacityLimit ? capacity : nil,
                 expiresAt: selectedExpiryDate,
+                existingImageURLs: existingImageURLs,
                 images: imageDrafts,
                 using: session
             )
@@ -492,7 +530,9 @@ struct DiscoverPlanCreateView: View {
             submitIssue = store.issue ?? String(
                 localized: isEditing
                     ? "The plan could not be updated. Please try again."
-                    : "The plan could not be created. Please try again."
+                    : (isReposting
+                        ? "The plan could not be reposted. Please try again."
+                        : "The plan could not be created. Please try again.")
             )
         }
     }
@@ -752,6 +792,7 @@ private struct CourseVisibilityChip: View {
                 }
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("buddy-course-\(course.id)")
     }
 }
 

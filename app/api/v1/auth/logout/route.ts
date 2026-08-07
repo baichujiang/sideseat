@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   if (!parsed.ok) return parsed.response;
 
   try {
-    await revokeNativeSession(parsed.data.refreshToken);
+    await revokeNativeSession(parsed.data.refreshToken, parsed.data.pushToken);
     return v1Success({ revoked: true }, { request });
   } catch (cause) {
     console.error("POST /api/v1/auth/logout", cause);

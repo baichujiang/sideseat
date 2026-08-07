@@ -5,10 +5,12 @@ import {
   isBlockRevealed,
   isRevealUnrestricted,
   normalizeRevealConfig,
+  parseRevealConfigJson,
 } from "../../lib/schedule-share/reveal-config";
 import {
   initialRevealedCategoryIds,
   revealConfigFromRevealedCategoryIds,
+  uncategorizedRevealCategory,
 } from "../../lib/schedule-share/reveal-category-selection";
 
 describe("schedule-share detail privacy", () => {
@@ -50,7 +52,7 @@ describe("schedule-share detail privacy", () => {
     });
   });
 
-  it("accepts and reveals the active Important calendar preset", () => {
+  it("writes real calendar categories by ID instead of fixed preset names", () => {
     const categories = [
       { id: "important-id", name: "Important", presetKey: "important", color: "#DC2626" },
     ];
@@ -58,10 +60,30 @@ describe("schedule-share detail privacy", () => {
     const reveal = normalizeRevealConfig(config);
 
     assert.deepEqual(config, {
-      categoryIds: [],
-      presetKeys: ["important"],
+      categoryIds: ["important-id"],
+      presetKeys: [],
       hideAllDetails: false,
     });
-    assert.equal(isBlockRevealed({ internalPresetKey: "important" }, reveal), true);
+    assert.equal(isBlockRevealed({ internalCategoryId: "important-id" }, reveal), true);
+  });
+
+  it("keeps virtual uncategorized events in presetKeys", () => {
+    const uncategorized = uncategorizedRevealCategory("No category");
+    assert.deepEqual(revealConfigFromRevealedCategoryIds([uncategorized], [uncategorized.id]), {
+      categoryIds: [],
+      presetKeys: ["none"],
+      hideAllDetails: false,
+    });
+  });
+
+  it("reads legacy presets and future virtual source keys", () => {
+    const categories = [
+      { id: "personal-id", name: "Personal", presetKey: "personal", color: "#EA580C" },
+    ];
+    const legacy = parseRevealConfigJson({ categoryIds: [], presetKeys: ["personal"] });
+    const future = parseRevealConfigJson({ categoryIds: [], presetKeys: ["campus_feed"] });
+
+    assert.deepEqual(initialRevealedCategoryIds(categories, legacy), ["personal-id"]);
+    assert.deepEqual(future.presetKeys, ["campus_feed"]);
   });
 });

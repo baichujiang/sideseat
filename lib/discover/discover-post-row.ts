@@ -1,5 +1,6 @@
 import {
   ClassmatePostCategory,
+  type ClassmatePostClosureReason,
   type ClassmatePostReplyPreference,
   type ClassmatePostStatus,
   type ClassmatePostVisibility,
@@ -58,6 +59,8 @@ export type DiscoverPostRow = {
   title: string;
   body: string | null;
   status: ClassmatePostStatus;
+  closureReason: ClassmatePostClosureReason | null;
+  closedAt: Date | null;
   tags: string[];
   visibility: ClassmatePostVisibility;
   replyPreference: ClassmatePostReplyPreference;

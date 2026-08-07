@@ -773,58 +773,6 @@ export type AppMessages = {
     planSendRequest: string;
     planUnableSend: string;
   };
-  /** SideSeat Assistant DM (FAQ + quick chips). */
-  assistant: {
-    officialBadge: string;
-    headerSubtitle: string;
-    /** Display name in chat header / empty states. */
-    displayName: string;
-    composerPlaceholder: string;
-    /** First-run welcome bubble body (capabilities overview). */
-    welcomeBody: string;
-    chipsAria: string;
-    /** Expand compact suggestion row. */
-    chipsMore: string;
-    /** Label while waiting for an AI/FAQ reply. */
-    typingLabel: string;
-    chips: {
-      gettingStarted: string;
-      discover: string;
-      verification: string;
-      guestSignup: string;
-      schedule: string;
-      inbox: string;
-    };
-    chipGroups: {
-      start: string;
-      schedule: string;
-      social: string;
-      account: string;
-    };
-    faqLinks: {
-      home: string;
-      discover: string;
-      inbox: string;
-      courses: string;
-      profile: string;
-      profileInfo: string;
-      verification: string;
-      signup: string;
-      login: string;
-      account: string;
-    };
-    faq: {
-      gettingStartedBody: string;
-      discoverBody: string;
-      verificationBody: string;
-      verificationDoneBody: string;
-      guestSignupBody: string;
-      guestSignupRegisteredBody: string;
-      scheduleBody: string;
-      inboxBody: string;
-      fallbackBody: string;
-    };
-  };
   auth: {
     forgotPassword: string;
     signUpLink: string;

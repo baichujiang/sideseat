@@ -212,6 +212,10 @@ enum UITestingChatFixtures {
     ]
 
     static func directPage(connectionID: String) -> NativeDirectMessagePageData {
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-dense-chat") {
+            return denseDirectPage(connectionID: connectionID)
+        }
+
         switch connectionID {
         case mina.connectionID:
             return minaDirectPage
@@ -275,6 +279,56 @@ enum UITestingChatFixtures {
             ),
             messages: messages
         )
+    }
+
+    /// A long, multi-day text thread that keeps UI performance tests hermetic.
+    /// This approximates a user who has paged deeply into an active conversation.
+    static func denseDirectPage(
+        connectionID: String = mina.connectionID,
+        messageCount: Int = 960
+    ) -> NativeDirectMessagePageData {
+        let selectedPeer = peer(connectionID: connectionID) ?? mina
+        let baseDate = Date(timeIntervalSince1970: 1_752_758_400)
+        let iso8601 = Date.ISO8601FormatStyle(includingFractionalSeconds: true)
+        var messages: [NativeDirectMessage] = []
+        messages.reserveCapacity(messageCount)
+
+        for index in 0..<messageCount {
+            let fromMe = index.isMultiple(of: 2)
+            let body: String
+            if index.isMultiple(of: 19) {
+                body = "压力测试长消息 \(index)：这是一段用于检查聊天列表布局、自动换行和连续滚动性能的较长文本。"
+            } else {
+                body = "压力测试消息 \(index)"
+            }
+            let reply: NativeDirectMessageReply? = if index > 0, index.isMultiple(of: 23) {
+                NativeDirectMessageReply(
+                    id: String(format: "ui-dense-%04d", index - 1),
+                    sender: fromMe ? selectedPeer.author : me,
+                    type: "TEXT",
+                    body: "压力测试消息 \(index - 1)",
+                    deletedAt: nil
+                )
+            } else {
+                nil
+            }
+
+            messages.append(
+                NativeDirectMessage(
+                    id: String(format: "ui-dense-%04d", index),
+                    connectionId: selectedPeer.connectionID,
+                    sender: fromMe ? me : selectedPeer.author,
+                    type: "TEXT",
+                    body: body,
+                    createdAt: baseDate
+                        .addingTimeInterval(Double(index) * 15 * 60)
+                        .formatted(iso8601),
+                    replyTo: reply
+                )
+            )
+        }
+
+        return simpleDirectPage(peer: selectedPeer, messages: messages)
     }
 
     private static func text(

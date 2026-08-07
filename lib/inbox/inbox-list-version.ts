@@ -1,10 +1,14 @@
-import { dedupeAssistantInboxRows } from "@/lib/inbox/dedupe-assistant-inbox-rows";
-import { pinAssistantBotInbox } from "@/lib/inbox/pin-assistant-bot";
+import { isRetiredSystemUser } from "@/lib/auth/retired-system-users";
 import type { InboxMerged } from "@/lib/queries/inbox-merge";
 
 /** Same ordering/filtering as the inbox page list before version or render. */
 export function prepareInboxListMerged(merged: InboxMerged[]): InboxMerged[] {
-  return pinAssistantBotInbox(dedupeAssistantInboxRows(merged));
+  return merged.filter(
+    (item) =>
+      item.kind !== "direct" ||
+      (!isRetiredSystemUser(item.connection.userA) &&
+        !isRetiredSystemUser(item.connection.userB)),
+  );
 }
 
 /** Stable fingerprint for poll vs SSR — must use {@link prepareInboxListMerged} first. */

@@ -75,7 +75,7 @@ final class MyPostsStore {
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             let fixture = UITestingDiscoverFixture.feed
             payload = NativeMyPostsPayload(
-                posts: fixture.buddies,
+                posts: fixture.buddies + [.uiTestingSchoolChangedFixture],
                 activities: fixture.activities
             )
             return
@@ -115,7 +115,13 @@ final class MyPostsStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            updatePost(id: postID) { $0.withStatus("CLOSED") }
+            updatePost(id: postID) {
+                $0.withStatus(
+                    "CLOSED",
+                    closureReason: "AUTHOR_CLOSED",
+                    closedAt: Date()
+                )
+            }
             return true
         }
         #endif
@@ -204,6 +210,7 @@ final class DiscoverCreateStore {
     private(set) var issue: String?
 
     func createBuddy(
+        category: String = "OTHER",
         title: String,
         body: String,
         tags: [String] = [],
@@ -215,6 +222,7 @@ final class DiscoverCreateStore {
         location: String? = nil,
         capacity: Int? = nil,
         expiresAt: Date,
+        existingImageURLs: [String] = [],
         images: [NativeDiscoverBuddyImageDraft] = [],
         using session: SessionStore
     ) async -> Bool {
@@ -224,8 +232,10 @@ final class DiscoverCreateStore {
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             UITestingDiscoverFixture.prependBuddy(
+                category: category,
                 title: trimmedTitle,
                 body: trimmedBody,
+                visibility: visibility,
                 expiresAt: expiresAt
             )
             return true
@@ -233,9 +243,11 @@ final class DiscoverCreateStore {
         #endif
 
         return await save(using: session) {
-            let imageUrls = try await uploadBuddyImages(images, using: session)
+            let uploadedImageURLs = try await uploadBuddyImages(images, using: session)
+            let imageUrls = Array((existingImageURLs + uploadedImageURLs).prefix(3))
             await DiscoverCityPreferenceStore.shared.refreshConfig(using: session)
             let request = NativeDiscoverBuddyRequest(
+                category: category,
                 city: DiscoverCityPreferenceStore.shared.selectedCity,
                 title: trimmedTitle,
                 body: trimmedBody,
@@ -305,6 +317,7 @@ final class DiscoverCreateStore {
             let uploadedImageURLs = try await uploadBuddyImages(images, using: session)
             let imageURLs = Array((existingImageURLs + uploadedImageURLs).prefix(3))
             let request = NativeDiscoverBuddyRequest(
+                category: post.category,
                 city: post.city,
                 title: trimmedTitle,
                 body: trimmedBody,
@@ -612,7 +625,11 @@ final class DiscoverPostDetailStore {
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated"), let current = detail {
             detail = NativeDiscoverBuddyPostDetail(
-                post: current.post.withStatus("CLOSED"),
+                post: current.post.withStatus(
+                    "CLOSED",
+                    closureReason: "AUTHOR_CLOSED",
+                    closedAt: Date()
+                ),
                 viewerCanMessage: current.viewerCanMessage
             )
             return true

@@ -1,4 +1,3 @@
-import { REVEAL_PRESET_KEYS_ALLOWLIST } from "@/lib/schedule-share/reveal-config";
 import { defaultShareExpiresAt } from "@/lib/schedule-share/share-range-presets";
 import {
   shareDateKeysForNextDayCount,
@@ -15,7 +14,8 @@ export function buildDefaultScheduleShareCreatePayload(baseNow = new Date()) {
     rangeEnd: rangeEnd.toISOString(),
     revealConfig: {
       categoryIds: [] as string[],
-      presetKeys: [...REVEAL_PRESET_KEYS_ALLOWLIST],
+      // Empty lists with hideAllDetails=false retain the legacy "show all" meaning.
+      presetKeys: [] as string[],
       hideAllDetails: false,
       includedDates: sortedShareIncludedDates(selected),
     },

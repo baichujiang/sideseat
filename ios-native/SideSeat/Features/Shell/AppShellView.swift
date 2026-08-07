@@ -12,6 +12,8 @@ struct AppShellView: View {
     @State private var isCreateFlowPresented = false
     @State private var createFlowDestination: CreateDestination?
     @State private var productTutorial = ProductTutorialController()
+    @State private var foregroundPushNotice: ForegroundPushNotice?
+    @State private var foregroundPushDismissTask: Task<Void, Never>?
 
     private static let tabOrder: [AppTab] = [.home, .discover, .create, .chats, .me]
 
@@ -35,6 +37,96 @@ struct AppShellView: View {
     }
 
     var body: some View {
+        shellSurface
+        .sheet(isPresented: $isCreateFlowPresented, onDismiss: {
+            createFlowDestination = nil
+        }) {
+            createFlowSheet
+        }
+        .task {
+            routePendingDeepLink()
+        }
+        .onChange(of: deepLinkRouter.pendingRoute) {
+            routePendingDeepLink()
+        }
+        .onChange(of: deepLinkRouter.navigationEpoch) {
+            routePendingDeepLink()
+        }
+        .onChange(of: session.phase) {
+            if session.phase == .signedOut {
+                dismissForegroundPush()
+                inboxStore.reset()
+                routers.resetAll()
+                selectedTab = .home
+                isCreateFlowPresented = false
+                createFlowDestination = nil
+                productTutorial.evaluateAutoShow(for: nil)
+            } else if session.phase == .signedIn {
+                productTutorial.evaluateAutoShow(for: session.currentUser)
+                routePendingDeepLink()
+            }
+        }
+        .onChange(of: session.currentUser?.id) {
+            guard session.phase == .signedIn else { return }
+            productTutorial.evaluateAutoShow(for: session.currentUser)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active, session.phase == .signedIn else { return }
+            Task { await inboxStore.load(using: session) }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .sideSeatInboxConversationRead)) { note in
+            if let id = note.userInfo?["conversationID"] as? String {
+                inboxStore.clearUnread(conversationID: id)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .sideSeatInboxConversationUpdated)) { note in
+            inboxStore.applyOutboundPreview(from: note)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .sideSeatInboxNeedsRefresh)) { _ in
+            guard session.phase == .signedIn else { return }
+            Task { await inboxStore.load(using: session) }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .sideSeatForegroundPushReceived)) { note in
+            guard let notice = note.object as? ForegroundPushNotice,
+                  !ActiveChatPresentation.isDisplaying(notice)
+            else { return }
+            presentForegroundPush(notice)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .sideseatReplayProductTutorial)) { note in
+            let userID = (note.userInfo?["userID"] as? String) ?? session.currentUser?.id
+            guard let userID else { return }
+            productTutorial.replay(for: userID) { tab in
+                selectedTab = tab
+            }
+        }
+        .task {
+            #if DEBUG
+            guard session.phase == .signedIn else { return }
+            let arguments = ProcessInfo.processInfo.arguments
+            if arguments.contains("--ui-testing-public-profile") {
+                await Task.yield()
+                routers.router(for: .discover).navigate(to: .profile(userID: "ui-peer"))
+            } else if arguments.contains("--ui-testing-create-plan") {
+                await Task.yield()
+                createFlowDestination = .plan
+                isCreateFlowPresented = true
+            } else if arguments.contains("--ui-testing-unread-jump") {
+                await Task.yield()
+                ChatUnreadLaunch.stage(conversationID: "ui-connection", unreadCount: 12)
+                routers.router(for: .chats).navigate(to: .directChat(connectionID: "ui-connection"))
+            }
+            #endif
+            if session.phase == .signedIn {
+                productTutorial.evaluateAutoShow(for: session.currentUser)
+            }
+        }
+        .task(id: session.currentUser?.id) {
+            guard session.phase == .signedIn else { return }
+            await inboxStore.load(using: session)
+        }
+    }
+
+    private var shellSurface: some View {
         TabView(selection: tabSelection) {
             tab(.home, title: "Calendar", systemImage: "calendar") {
                 HomeRootView()
@@ -92,86 +184,86 @@ struct AppShellView: View {
                 .zIndex(20)
             }
         }
+        .overlay(alignment: .top) {
+            if let foregroundPushNotice {
+                foregroundPushBanner(foregroundPushNotice)
+                    .padding(.horizontal, 12)
+                    .padding(.top, 8)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .zIndex(30)
+            }
+        }
         .animation(.spring(response: 0.36, dampingFraction: 0.88), value: productTutorial.isPresented)
-        .sheet(isPresented: $isCreateFlowPresented, onDismiss: {
-            createFlowDestination = nil
-        }) {
-            createFlowSheet
+        .animation(.spring(response: 0.32, dampingFraction: 0.9), value: foregroundPushNotice)
+    }
+
+    private func foregroundPushBanner(_ notice: ForegroundPushNotice) -> some View {
+        Button {
+            if let url = notice.url {
+                deepLinkRouter.handleNotificationURL(url)
+            }
+            dismissForegroundPush()
+        } label: {
+            HStack(spacing: 11) {
+                Image(systemName: notice.isPlanUpdate ? "calendar.badge.clock" : "bubble.left.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(SideSeatTheme.accent)
+                    .frame(width: 32, height: 32)
+                    .background(SideSeatTheme.accent.opacity(0.12), in: Circle())
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(notice.title.isEmpty ? String(localized: "SideSeat") : notice.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                    if !notice.body.isEmpty {
+                        Text(notice.body)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                if notice.url != nil {
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .stroke(SideSeatTheme.separator.opacity(0.7), lineWidth: 0.5)
+            }
+            .shadow(color: .black.opacity(0.12), radius: 14, y: 5)
+            .contentShape(Rectangle())
         }
-        .task {
-            routePendingDeepLink()
-        }
-        .onChange(of: deepLinkRouter.pendingRoute) {
-            routePendingDeepLink()
-        }
-        .onChange(of: deepLinkRouter.navigationEpoch) {
-            routePendingDeepLink()
-        }
-        .onChange(of: session.phase) {
-            if session.phase == .signedOut {
-                inboxStore.reset()
-                routers.resetAll()
-                selectedTab = .home
-                isCreateFlowPresented = false
-                createFlowDestination = nil
-                productTutorial.evaluateAutoShow(for: nil)
-            } else if session.phase == .signedIn {
-                productTutorial.evaluateAutoShow(for: session.currentUser)
-                routePendingDeepLink()
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("foreground-push-notice")
+        .accessibilityLabel("\(notice.title), \(notice.body)")
+    }
+
+    private func presentForegroundPush(_ notice: ForegroundPushNotice) {
+        foregroundPushDismissTask?.cancel()
+        foregroundPushNotice = notice
+        foregroundPushDismissTask = Task {
+            try? await Task.sleep(for: .seconds(4))
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                if foregroundPushNotice == notice {
+                    foregroundPushNotice = nil
+                }
             }
         }
-        .onChange(of: session.currentUser?.id) {
-            guard session.phase == .signedIn else { return }
-            productTutorial.evaluateAutoShow(for: session.currentUser)
-        }
-        .onChange(of: scenePhase) { _, phase in
-            guard phase == .active, session.phase == .signedIn else { return }
-            Task { await inboxStore.load(using: session) }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .sideSeatInboxConversationRead)) { note in
-            if let id = note.userInfo?["conversationID"] as? String {
-                inboxStore.clearUnread(conversationID: id)
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .sideSeatInboxConversationUpdated)) { note in
-            inboxStore.applyOutboundPreview(from: note)
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .sideSeatInboxNeedsRefresh)) { _ in
-            guard session.phase == .signedIn else { return }
-            Task { await inboxStore.load(using: session) }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .sideseatReplayProductTutorial)) { note in
-            let userID = (note.userInfo?["userID"] as? String) ?? session.currentUser?.id
-            guard let userID else { return }
-            productTutorial.replay(for: userID) { tab in
-                selectedTab = tab
-            }
-        }
-        .task {
-            #if DEBUG
-            guard session.phase == .signedIn else { return }
-            let arguments = ProcessInfo.processInfo.arguments
-            if arguments.contains("--ui-testing-public-profile") {
-                await Task.yield()
-                routers.router(for: .discover).navigate(to: .profile(userID: "ui-peer"))
-            } else if arguments.contains("--ui-testing-create-plan") {
-                await Task.yield()
-                createFlowDestination = .plan
-                isCreateFlowPresented = true
-            } else if arguments.contains("--ui-testing-unread-jump") {
-                await Task.yield()
-                ChatUnreadLaunch.stage(conversationID: "ui-connection", unreadCount: 12)
-                routers.router(for: .chats).navigate(to: .directChat(connectionID: "ui-connection"))
-            }
-            #endif
-            if session.phase == .signedIn {
-                productTutorial.evaluateAutoShow(for: session.currentUser)
-            }
-        }
-        .task(id: session.currentUser?.id) {
-            guard session.phase == .signedIn else { return }
-            await inboxStore.load(using: session)
-        }
+    }
+
+    private func dismissForegroundPush() {
+        foregroundPushDismissTask?.cancel()
+        foregroundPushDismissTask = nil
+        foregroundPushNotice = nil
     }
 
     @ViewBuilder
@@ -283,7 +375,7 @@ struct AppShellView: View {
 
     private func tabForRoute(_ route: AppRoute) -> AppTab {
         switch route {
-        case .courses, .course:
+        case .courses, .archivedCourses, .course:
             return .home
         case .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .plans, .scheduleShare:
             return .chats
@@ -301,6 +393,8 @@ private extension View {
             switch route {
             case .courses:
                 CourseListView()
+            case .archivedCourses:
+                ArchivedCourseListView()
             case .myPosts:
                 MyPostsView()
             case .profile(let id):

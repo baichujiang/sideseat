@@ -19,7 +19,6 @@ import {
   StudentVerificationStatus,
 } from "@prisma/client";
 
-import { getOrCreateAssistantBotUser } from "@/lib/auth/assistant-bot";
 import { nicknameToKey } from "@/lib/auth/nickname-key";
 import { hashPassword } from "@/lib/auth/password";
 import { getCurrentSemesterLabel } from "@/lib/constants/semester";
@@ -468,7 +467,6 @@ async function removeLegacyTestAccounts() {
 }
 
 async function main() {
-  await getOrCreateAssistantBotUser();
   await removeLegacyTestAccounts();
 
   const users = await Promise.all(ACCOUNTS.map(upsertTestUser));

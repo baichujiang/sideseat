@@ -4,7 +4,6 @@ import { verifyEmailOtp } from "@/lib/auth/email-otp";
 import { hashPassword } from "@/lib/auth/password";
 import { PASSWORD_RESET_ERROR_CODES } from "@/lib/auth/password-reset-error-codes";
 import { normalizeSignupEmail } from "@/lib/auth/normalize-email";
-import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
 import { createSession } from "@/lib/auth/session";
 import { isDatabaseUnreachable, warnDatabaseUnreachableThrottled } from "@/lib/db/prisma-errors";
 import { prisma } from "@/lib/db/prisma";
@@ -62,7 +61,6 @@ export async function POST(request: Request) {
       prisma.session.deleteMany({ where: { userId: user.id } }),
     ]);
 
-    await ensureAssistantBotConnection(user.id);
     const { accessToken, expiresIn } = await createSession(user.id);
 
     return ok({

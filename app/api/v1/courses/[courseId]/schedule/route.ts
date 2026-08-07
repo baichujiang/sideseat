@@ -11,6 +11,7 @@ import {
 import { parseV1Json, v1Error } from "@/lib/api/v1/http";
 import { hashIdempotencyRequest } from "@/lib/api/v1/idempotency";
 import { courseMembershipActiveUntilForSemester } from "@/lib/courses/active-membership";
+import { schoolIdentityChanged } from "@/lib/profile/school-change";
 
 export const dynamic = "force-dynamic";
 
@@ -50,9 +51,12 @@ export async function PATCH(
       execute: async (tx) => {
         const course = await tx.course.findUnique({
           where: { id: courseId },
-          select: { id: true, semesterLabel: true },
+          select: { id: true, school: true, semesterLabel: true },
         });
         if (!course) return null;
+        if (schoolIdentityChanged(auth.user.school, course.school)) {
+          throw new CourseSchoolMismatchError();
+        }
         const membership = await tx.userCourse.findUnique({
           where: { userId_courseId: { userId: auth.user.id, courseId } },
           select: { id: true },
@@ -98,6 +102,13 @@ export async function PATCH(
     });
     return courseMutationResponse(request, result);
   } catch (cause) {
+    if (cause instanceof CourseSchoolMismatchError) {
+      return v1Error(request, {
+        code: "CONTENT_RESTRICTED",
+        message: "This timetable belongs to another school.",
+        status: 403,
+      });
+    }
     if (cause instanceof CourseEnrollmentRequiredError) {
       return v1Error(request, {
         code: "INVALID_REQUEST",
@@ -125,3 +136,4 @@ export async function PATCH(
 
 class CourseEnrollmentRequiredError extends Error {}
 class InvalidCourseScheduleError extends Error {}
+class CourseSchoolMismatchError extends Error {}

@@ -68,11 +68,13 @@ struct SessionStoreTests {
         #expect(store.currentUser?.id == "user-1")
         #expect(await credentialStore.refreshToken() == "refresh-old")
 
+        PushDeviceTokenStore.remember("test-apns-token")
         await store.logout()
         #expect(store.phase == .signedOut)
         #expect(store.currentUser == nil)
         #expect(store.accessTokenForStreaming == nil)
         #expect(await credentialStore.refreshToken() == nil)
+        #expect(await transport.logoutPushToken == "test-apns-token")
 
         await store.login(identifier: "test_002", password: "Password123")
         #expect(store.phase == .signedIn)
@@ -110,6 +112,7 @@ private actor MemoryCredentialStore: CredentialStore {
 private actor AuthTestTransport: APITransport {
     private(set) var refreshCount = 0
     private(set) var expiredAccessCount = 0
+    private(set) var logoutPushToken: String?
 
     func data(for request: URLRequest) async throws -> (Data, URLResponse) {
         let path = request.url?.path ?? ""
@@ -129,6 +132,7 @@ private actor AuthTestTransport: APITransport {
             }
             return response(for: request, status: 200, body: authBody(access: "access-old", refresh: "refresh-old"))
         case "/api/v1/auth/logout":
+            logoutPushToken = jsonBody(from: request)?["pushToken"] as? String
             return response(for: request, status: 200, body: #"{"data":{"revoked":true}}"#)
         case "/api/v1/auth/refresh":
             refreshCount += 1
@@ -165,13 +169,12 @@ private actor AuthTestTransport: APITransport {
     }
 
     private func loginIdentifier(from request: URLRequest) -> String? {
-        guard
-            let data = request.httpBody,
-            let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        else {
-            return nil
-        }
-        return object["identifier"] as? String
+        jsonBody(from: request)?["identifier"] as? String
+    }
+
+    private func jsonBody(from request: URLRequest) -> [String: Any]? {
+        guard let data = request.httpBody else { return nil }
+        return try? JSONSerialization.jsonObject(with: data) as? [String: Any]
     }
 
     private func authBody(

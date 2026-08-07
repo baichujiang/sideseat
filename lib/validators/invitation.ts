@@ -68,6 +68,7 @@ export const startConversationSchema = z.object({
 export const openConversationSchema = z.object({
   peerId: z.string().cuid(),
   courseId: z.string().cuid().optional(),
+  postId: z.string().cuid().optional(),
 });
 
 export const contactExchangeSchema = z.object({

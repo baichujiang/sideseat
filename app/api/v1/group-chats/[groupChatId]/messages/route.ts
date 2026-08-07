@@ -19,7 +19,7 @@ import {
 } from "@/lib/chat/community-chat-service";
 import { prisma } from "@/lib/db/prisma";
 import { groupChatDisplayTitle } from "@/lib/group-chats/title";
-import { notifyNewGroupChatMessage } from "@/lib/push/notify-user";
+import { scheduleNewGroupChatMessageNotification } from "@/lib/push/notify-user";
 
 const SEND_LIMIT = 60;
 const SEND_WINDOW_MS = 60_000;
@@ -207,12 +207,12 @@ export async function POST(
       return v1Success(result.body, { request, status: result.status, headers: { "Idempotency-Replayed": "true" } });
     }
 
-    void notifyNewGroupChatMessage({
+    scheduleNewGroupChatMessageNotification({
       groupChatId,
       title: result.notificationTitle,
       senderId: auth.user.id,
       bodyPreview: parsed.data.body,
-    }).catch(() => {});
+    });
     return v1Success(result.body, { request, status: 201 });
   } catch (cause) {
     console.error("POST /api/v1/group-chats/[groupChatId]/messages", cause);

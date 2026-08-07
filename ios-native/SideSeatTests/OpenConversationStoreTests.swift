@@ -30,10 +30,15 @@ struct OpenConversationStoreTests {
         await session.login(identifier: "test_001", password: "Password123")
 
         let store = OpenConversationStore()
-        let connectionID = await store.open(peerID: "peer-1", using: session)
+        let connectionID = await store.open(
+            peerID: "peer-1",
+            postID: "post-1",
+            using: session
+        )
         #expect(connectionID == "connection-1")
         #expect(await transport.openPath == "/api/v1/connections/open")
         #expect(await transport.openPeerID == "peer-1")
+        #expect(await transport.openPostID == "post-1")
         #expect(await transport.writeKeys.count == 1)
     }
 }
@@ -48,6 +53,7 @@ private actor OpenConversationMemoryCredentialStore: CredentialStore {
 private actor OpenConversationTestTransport: APITransport {
     private(set) var openPath: String?
     private(set) var openPeerID: String?
+    private(set) var openPostID: String?
     private(set) var writeKeys: [String] = []
 
     func data(for request: URLRequest) async throws -> (Data, URLResponse) {
@@ -65,6 +71,7 @@ private actor OpenConversationTestTransport: APITransport {
             }
             let body = try JSONSerialization.jsonObject(with: request.httpBody ?? Data()) as? [String: Any]
             openPeerID = body?["peerId"] as? String
+            openPostID = body?["postId"] as? String
             return response(
                 request,
                 200,

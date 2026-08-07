@@ -96,7 +96,6 @@ test.describe.serial("API v1 Profile", () => {
           schoolShort: expect.any(String),
           degreeLabel: expect.any(String),
         }),
-        languages: expect.any(Array),
         lifePhotos: expect.any(Array),
         contacts: expect.objectContaining({
           wechatHandle: null,
@@ -124,6 +123,7 @@ test.describe.serial("API v1 Profile", () => {
       "whatsappHandle",
     ]);
     expect(payload.data).not.toHaveProperty("hashedPassword");
+    expect(payload.data).not.toHaveProperty("languages");
     expect(payload.data).not.toHaveProperty("sessions");
   });
 
@@ -162,7 +162,6 @@ test.describe.serial("API v1 Profile", () => {
           username: E2E_PEER,
           displayName: expect.any(String),
           schoolSummary: expect.any(Object),
-          languages: expect.any(Array),
           lifePhotos: expect.any(Array),
         }),
         sharedCourses: expect.any(Array),
@@ -170,6 +169,7 @@ test.describe.serial("API v1 Profile", () => {
       }),
     );
     expect(payload.data.profile).not.toHaveProperty("email");
+    expect(payload.data.profile).not.toHaveProperty("languages");
     expect(payload.data.profile).not.toHaveProperty("phone");
     expect(payload.data.profile).not.toHaveProperty("hashedPassword");
 
@@ -273,7 +273,6 @@ test.describe.serial("API v1 Profile", () => {
     const token = await accessToken(request);
     const original = await prisma.user.findUnique({
       where: { username: E2E_USER },
-      include: { userLanguages: { select: { tag: true, proficiency: true } } },
     });
     if (!original) throw new Error("Seeded profile user is missing.");
 
@@ -283,10 +282,6 @@ test.describe.serial("API v1 Profile", () => {
       gender: "PRIVATE",
       major: "Informatics",
       semester: 4,
-      languages: [
-        { tag: "ENGLISH", proficiency: "FLUENT" },
-        { tag: "GERMAN", proficiency: "BASIC" },
-      ],
       wechatHandle: `wx_native_${process.pid}`,
       whatsappHandle: `+49151${String(process.pid).slice(-8).padStart(8, "0")}`,
       telegramHandle: `@tg_native_${process.pid}`,
@@ -319,7 +314,6 @@ test.describe.serial("API v1 Profile", () => {
           gender: update.gender,
           major: update.major,
           semester: update.semester,
-          languages: update.languages,
           contacts: {
             wechatHandle: update.wechatHandle,
             whatsappHandle: update.whatsappHandle,
@@ -334,6 +328,7 @@ test.describe.serial("API v1 Profile", () => {
         }),
       );
       expect(payload.data).not.toHaveProperty("hashedPassword");
+      expect(payload.data).not.toHaveProperty("schoolChange");
 
       const replay = await request.patch("/api/v1/me/profile", {
         headers: { ...auth(token), "Idempotency-Key": key },
@@ -354,56 +349,56 @@ test.describe.serial("API v1 Profile", () => {
       expect(currentPayload.data.nickname).toBe(update.nickname);
       expect(currentPayload.data.privacy.hideFromDiscovery).toBe(update.hideFromDiscovery);
     } finally {
-      await prisma.$transaction(async (tx) => {
-        await tx.userLanguage.deleteMany({ where: { userId: original.id } });
-        if (original.userLanguages.length > 0) {
-          await tx.userLanguage.createMany({
-            data: original.userLanguages.map((language) => ({
-              userId: original.id,
-              tag: language.tag,
-              proficiency: language.proficiency,
-            })),
-          });
-        }
-        await tx.user.update({
-          where: { id: original.id },
-          data: {
-            nickname: original.nickname,
-            nicknameKey: original.nicknameKey,
-            gender: original.gender,
-            major: original.major,
-            semester: original.semester,
-            bio: original.bio,
-            wechatHandle: original.wechatHandle,
-            whatsappHandle: original.whatsappHandle,
-            telegramHandle: original.telegramHandle,
-            instagramHandle: original.instagramHandle,
-            contactInfoOptIn: original.contactInfoOptIn,
-            hideFromDiscovery: original.hideFromDiscovery,
-            hideFromCourseMembers: original.hideFromCourseMembers,
-          },
-        });
+      await prisma.user.update({
+        where: { id: original.id },
+        data: {
+          nickname: original.nickname,
+          nicknameKey: original.nicknameKey,
+          gender: original.gender,
+          major: original.major,
+          semester: original.semester,
+          bio: original.bio,
+          wechatHandle: original.wechatHandle,
+          whatsappHandle: original.whatsappHandle,
+          telegramHandle: original.telegramHandle,
+          instagramHandle: original.instagramHandle,
+          contactInfoOptIn: original.contactInfoOptIn,
+          hideFromDiscovery: original.hideFromDiscovery,
+          hideFromCourseMembers: original.hideFromCourseMembers,
+        },
       });
     }
   });
 
-  test("updates the login username with cooldown, uniqueness and idempotency rules", async ({
+  test("updates the login username with a three-per-week limit, uniqueness and idempotency", async ({
     request,
   }) => {
     const token = await accessToken(request);
     const original = await prisma.user.findUnique({
       where: { username: E2E_USER },
-      select: { id: true, username: true, usernameUpdatedAt: true },
+      select: {
+        id: true,
+        username: true,
+        usernameUpdatedAt: true,
+        usernameChangeWindowStartedAt: true,
+        usernameChangeCount: true,
+      },
     });
     if (!original) throw new Error("Seeded profile user is missing.");
 
     const nextUsername = `native_${process.pid}_${Date.now()}`.slice(0, 32);
-    const cooldownUsername = `cool_${process.pid}_${Date.now()}`.slice(0, 32);
+    const secondUsername = `second_${process.pid}_${Date.now()}`.slice(0, 32);
+    const thirdUsername = `third_${process.pid}_${Date.now()}`.slice(0, 32);
+    const limitedUsername = `limit_${process.pid}_${Date.now()}`.slice(0, 32);
 
     try {
       await prisma.user.update({
         where: { id: original.id },
-        data: { usernameUpdatedAt: null },
+        data: {
+          usernameUpdatedAt: null,
+          usernameChangeWindowStartedAt: null,
+          usernameChangeCount: 0,
+        },
       });
 
       const missingKey = await request.patch("/api/v1/me/username", {
@@ -438,6 +433,13 @@ test.describe.serial("API v1 Profile", () => {
           id: original.id,
           username: nextUsername,
           usernameUpdatedAt: expect.any(String),
+          usernameChangePolicy: expect.objectContaining({
+            limit: 3,
+            windowDays: 7,
+            changesUsed: 1,
+            changesRemaining: 2,
+            nextAllowedAt: null,
+          }),
         }),
       );
 
@@ -450,7 +452,7 @@ test.describe.serial("API v1 Profile", () => {
 
       const conflict = await request.patch("/api/v1/me/username", {
         headers: { ...auth(token), "Idempotency-Key": key },
-        data: { username: cooldownUsername },
+        data: { username: secondUsername },
       });
       expect(conflict.status()).toBe(409);
 
@@ -459,21 +461,43 @@ test.describe.serial("API v1 Profile", () => {
       const currentPayload = await current.json();
       expect(currentPayload.data.username).toBe(nextUsername);
 
-      const cooldown = await request.patch("/api/v1/me/username", {
-        headers: { ...auth(token), "Idempotency-Key": `username-cooldown-${Date.now()}` },
-        data: { username: cooldownUsername },
+      const second = await request.patch("/api/v1/me/username", {
+        headers: { ...auth(token), "Idempotency-Key": `username-second-${Date.now()}` },
+        data: { username: secondUsername },
       });
-      expect(cooldown.status()).toBe(429);
-      expect(cooldown.headers()["x-username-next-allowed-at"]).toEqual(expect.any(String));
-      const cooldownPayload = await cooldown.json();
-      expect(cooldownPayload.error.code).toBe("USERNAME_CHANGE_COOLDOWN");
-      expect(cooldownPayload.error.field).toBe("username");
+      expect(second.status()).toBe(200);
+      expect((await second.json()).data.usernameChangePolicy.changesRemaining).toBe(1);
+
+      const third = await request.patch("/api/v1/me/username", {
+        headers: { ...auth(token), "Idempotency-Key": `username-third-${Date.now()}` },
+        data: { username: thirdUsername },
+      });
+      expect(third.status()).toBe(200);
+      expect((await third.json()).data.usernameChangePolicy).toEqual(
+        expect.objectContaining({
+          changesUsed: 3,
+          changesRemaining: 0,
+          nextAllowedAt: expect.any(String),
+        }),
+      );
+
+      const limited = await request.patch("/api/v1/me/username", {
+        headers: { ...auth(token), "Idempotency-Key": `username-limited-${Date.now()}` },
+        data: { username: limitedUsername },
+      });
+      expect(limited.status()).toBe(429);
+      expect(limited.headers()["x-username-next-allowed-at"]).toEqual(expect.any(String));
+      const limitedPayload = await limited.json();
+      expect(limitedPayload.error.code).toBe("USERNAME_CHANGE_COOLDOWN");
+      expect(limitedPayload.error.field).toBe("username");
     } finally {
       await prisma.user.update({
         where: { id: original.id },
         data: {
           username: original.username,
           usernameUpdatedAt: original.usernameUpdatedAt,
+          usernameChangeWindowStartedAt: original.usernameChangeWindowStartedAt,
+          usernameChangeCount: original.usernameChangeCount,
         },
       });
     }

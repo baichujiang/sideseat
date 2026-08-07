@@ -490,7 +490,7 @@ export const zhCnMessages: AppMessages = {
     dbUnavailableBody:
       "请检查 .env 中的 DATABASE_URL（Neon 需唤醒，或本地执行 npm run db:start 启动 5433 端口 Postgres）。",
     sessionBootstrapFailed: "无法启动访客会话，请重试。",
-    sessionBootstrapHint: "正在准备助手对话…",
+    sessionBootstrapHint: "正在准备聊天…",
     retryBootstrap: "重试",
     onboardingTitle: "有空再继续完善资料",
     onboardingBody: "收件箱已可用。完善资料让同学更容易认出你。",
@@ -729,61 +729,6 @@ export const zhCnMessages: AppMessages = {
     planDefaultTitle: "一起约个计划",
     planSendRequest: "发送邀请",
     planUnableSend: "无法发送邀请。",
-  },
-  assistant: {
-    officialBadge: "官方",
-    headerSubtitle: "产品帮助 · 非真人同学",
-    displayName: "SideSeat 小助手",
-    composerPlaceholder: "问我 SideSeat 怎么用…",
-    welcomeBody:
-      "你好！我是 SideSeat 小助手 —— 官方产品帮助，不是真人同学。\n\n我可以帮你：\n• 课表 — 首页用「一句话添加」排课与计划\n• 发现 — 找同校同学、发搭子帖\n• 聊天 — 私信、课程群、约学习计划\n• 账号 — 注册登录、学校邮箱验证\n\n点下方快捷问题，或直接打字；我会附上跳转入口。",
-    chipsAria: "快捷问题",
-    chipsMore: "更多",
-    typingLabel: "小助手正在回复…",
-    chips: {
-      gettingStarted: "怎么开始用？",
-      discover: "发现页怎么用？",
-      verification: "学校邮箱验证",
-      guestSignup: "访客和注册区别",
-      schedule: "课表与计划",
-      inbox: "聊天与收件箱",
-    },
-    chipGroups: {
-      start: "入门",
-      schedule: "课表",
-      social: "社交",
-      account: "账号",
-    },
-    faqLinks: {
-      home: "打开首页",
-      discover: "打开发现",
-      inbox: "打开聊天",
-      courses: "打开课程",
-      profile: "打开我的",
-      profileInfo: "编辑资料",
-      verification: "学校验证",
-      signup: "注册",
-      login: "登录",
-      account: "账号设置",
-    },
-    faq: {
-      gettingStartedBody:
-        "SideSeat 帮你管理课表、发现同学、聊天约学习计划。\n\n• 首页 — 日历与自然语言排课（点 + 选择「一句话添加」）。\n• 发现 — 本校同学与帖子。\n• 中间 + — 发布找搭子帖子。\n• 消息 — 私信与群聊。\n• 我的 — 资料、课程、验证与设置。",
-      discoverBody:
-        "发现页展示本校、本城的同学与帖子。完善资料（学校、专业、语言）匹配更准。访客可浏览；注册后可发帖和私信。",
-      verificationBody:
-        "学校验证使用学校邮箱（不是登录邮箱）。打开 我的 → 资料信息 → 学校验证，填写 @学校 邮箱并按邮件或页面链接确认。",
-      verificationDoneBody: "你已完成本校学生验证。可在 我的 → 资料信息 中更新资料。",
-      guestSignupBody:
-        "访客模式无需注册即可浏览首页、发现和本助手。发帖、匹配、与真实同学私信需注册；同一账号登录后数据在同一服务器上。",
-      guestSignupRegisteredBody: "你已登录。用发现和课程认识同学；聊天用于约计划和私信。",
-      scheduleBody:
-        "在首页点 +，选择「一句话添加」，用自然语言描述事件，预览后保存到日历。也可选手动填写，并在聊天「+」中向熟人分享空闲时间。",
-      inboxBody:
-        "聊天列表包含课程群、私信与群聊。可在会话菜单置顶。计划邀请以卡片形式出现在对话中，可直接接受或拒绝。",
-      fallbackBody:
-        "我还不太确定你的意思。可以换个说法，或点下方快捷问题。也可以直接打开首页 / 发现 / 我的。反馈问题或建议请用 我的 → 反馈。",
-    },
   },
   auth: {
     forgotPassword: "忘记密码？",

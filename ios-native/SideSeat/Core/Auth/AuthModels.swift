@@ -75,6 +75,7 @@ struct RefreshRequest: Encodable, Sendable {
 
 struct LogoutRequest: Encodable, Sendable {
     let refreshToken: String
+    let pushToken: String?
 }
 
 enum AuthIssueMapper {

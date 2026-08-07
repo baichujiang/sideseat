@@ -113,7 +113,7 @@ struct ContactsView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .background(SideSeatTheme.Chat.peerBubble, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
+        .background(SideSeatTheme.Chat.controlFill, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
     }
 
     @ViewBuilder

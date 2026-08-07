@@ -4,6 +4,52 @@ import Testing
 
 @Suite("Profile stores")
 struct ProfileStoreTests {
+    @Test("Normalizes school identity codes for branded verified badges")
+    func schoolIdentityCodes() {
+        #expect(StudentIdentityDisplay.schoolCode("TUM") == "TUM")
+        #expect(StudentIdentityDisplay.schoolCode("Technical University of Munich") == "TUM")
+        #expect(StudentIdentityDisplay.schoolCode("Ludwig-Maximilians-Universität München") == "LMU")
+        #expect(StudentIdentityDisplay.logoAssetName("LMU") == "SchoolLogoLMU")
+    }
+
+    @Test("Maps every school verification state to one consistent presentation")
+    func schoolIdentityStates() {
+        #expect(StudentIdentityDisplay.tone(verifiedStudent: true, status: "VERIFIED") == .verified)
+        #expect(StudentIdentityDisplay.tone(verifiedStudent: false, status: "EMAIL_PENDING") == .pending)
+        #expect(StudentIdentityDisplay.tone(verifiedStudent: false, status: "MANUAL_REVIEW_REQUIRED") == .pending)
+        #expect(StudentIdentityDisplay.tone(verifiedStudent: false, status: "REJECTED") == .rejected)
+        #expect(StudentIdentityDisplay.tone(verifiedStudent: false, status: "UNVERIFIED") == .neutral)
+        #expect(!StudentIdentityDisplay.canManageVerification(verifiedStudent: true, status: "VERIFIED"))
+        #expect(StudentIdentityDisplay.canManageVerification(verifiedStudent: false, status: "EMAIL_PENDING"))
+        #expect(StudentIdentityDisplay.canManageVerification(verifiedStudent: false, status: "REJECTED"))
+        #expect(StudentIdentityDisplay.canManageVerification(verifiedStudent: false, status: "UNVERIFIED"))
+    }
+
+    @Test("Changing school clears the locally mirrored verification identity")
+    func changingSchoolClearsVerificationIdentity() {
+        let changed = NativeCurrentProfile.uiTestingFixture.applying(
+            NativeProfileUpdateRequest(school: "LMU")
+        )
+
+        #expect(changed.school == "LMU")
+        #expect(changed.schoolSummary.schoolShort == "LMU")
+        #expect(changed.email == nil)
+        #expect(!changed.verifiedStudent)
+        #expect(changed.studentVerificationStatus == "UNVERIFIED")
+    }
+
+    @Test("Editing the same school keeps the locally mirrored verification identity")
+    func keepingSchoolKeepsVerificationIdentity() {
+        let unchanged = NativeCurrentProfile.uiTestingFixture.applying(
+            NativeProfileUpdateRequest(school: "Technical University of Munich")
+        )
+
+        #expect(unchanged.schoolSummary.schoolShort == "TUM")
+        #expect(unchanged.email == "test-001@tum.de")
+        #expect(unchanged.verifiedStudent)
+        #expect(unchanged.studentVerificationStatus == "VERIFIED")
+    }
+
     @Test("Loads current and public profile DTOs")
     @MainActor
     func loadProfiles() async throws {
@@ -15,7 +61,6 @@ struct ProfileStoreTests {
         await current.load(using: session)
         #expect(current.profile?.username == "test_001")
         #expect(current.profile?.schoolSummary.schoolShort == "TUM")
-        #expect(current.profile?.languages.first?.tag == "ENGLISH")
         #expect(await transport.loadedMe)
         #expect(await current.save(
             NativeProfileUpdateRequest(
@@ -48,6 +93,47 @@ struct ProfileStoreTests {
         #expect(publicStore.profile?.profile.username == "test_002")
         #expect(publicStore.profile?.mode == "connection")
         #expect(await transport.loadedPublicProfilePath == "/api/v1/users/peer-1/profile")
+    }
+
+    @Test("Surfaces archived course counts after a school change")
+    @MainActor
+    func capturesSchoolChangeSummary() async throws {
+        let transport = ProfileTestTransport()
+        let session = makeSession(transport: transport)
+        await session.login(identifier: "test_001", password: "Password123")
+
+        let current = CurrentProfileStore()
+        await current.load(using: session)
+        #expect(await current.save(
+            NativeProfileUpdateRequest(school: "LMU"),
+            using: session
+        ))
+        #expect(current.profile?.school == "LMU")
+        #expect(current.lastSchoolChange == NativeProfileSchoolChangeSummary(
+            archivedCourseCount: 2,
+            removedCalendarEntryCount: 2,
+            closedPostCount: 1,
+            expiredInvitationCount: 0
+        ))
+    }
+
+    @Test("Keeps the cached profile when a refresh fails")
+    @MainActor
+    func keepCachedProfileAfterRefreshFailure() async throws {
+        let transport = ProfileTestTransport()
+        let session = makeSession(transport: transport)
+        await session.login(identifier: "test_001", password: "Password123")
+
+        let current = CurrentProfileStore()
+        await current.load(using: session)
+        let cachedProfileID = try #require(current.profile?.id)
+
+        await transport.failFutureProfileLoads()
+        await current.load(using: session)
+
+        #expect(current.profile?.id == cachedProfileID)
+        #expect(current.issue != nil)
+        #expect(!current.isLoading)
     }
 
     @Test("Uploads the current profile avatar")
@@ -86,51 +172,28 @@ struct ProfileStoreTests {
 
         #expect(await current.updateUsername("native_001", using: session))
         #expect(current.profile?.username == "native_001")
-        #expect(current.profile?.canChangeUsernameNow == false)
-        #expect(current.profile?.usernameNextAllowedAt != nil)
+        #expect(current.profile?.canChangeUsernameNow == true)
+        #expect(current.profile?.usernameChangesRemaining == 2)
+        #expect(current.profile?.usernameNextAllowedAt == nil)
         #expect(await transport.updatedUsernamePath == "/api/v1/me/username")
         #expect(await transport.updatedUsername == "native_001")
         #expect(await transport.writeKeys.count == 1)
     }
 
-    @Test("Manages current profile life photos")
-    @MainActor
-    func manageLifePhotos() async throws {
-        let transport = ProfileTestTransport()
-        let session = makeSession(transport: transport)
-        await session.login(identifier: "test_001", password: "Password123")
+    @Test("Tracks the three-change weekly username allowance")
+    func tracksWeeklyUsernameAllowance() {
+        let changedAt = Date().ISO8601Format()
+        var profile = NativeCurrentProfile.uiTestingFixture
 
-        let current = CurrentProfileStore()
-        await current.load(using: session)
-        let firstDraft = NativeProfileLifePhotoDraft(
-            id: UUID(uuidString: "33333333-3333-3333-3333-333333333333")!,
-            data: Data([1, 2, 3]),
-            mimeType: "image/jpeg",
-            fileName: "life-a.jpg"
-        )
-        let secondDraft = NativeProfileLifePhotoDraft(
-            id: UUID(uuidString: "44444444-4444-4444-4444-444444444444")!,
-            data: Data([4, 5, 6]),
-            mimeType: "image/jpeg",
-            fileName: "life-b.jpg"
-        )
+        profile = profile.applyingUsername("test_001a", updatedAt: changedAt)
+        #expect(profile.usernameChangesRemaining == 2)
+        #expect(profile.canChangeUsernameNow)
 
-        #expect(await current.uploadLifePhoto(firstDraft, using: session))
-        #expect(await current.uploadLifePhoto(secondDraft, using: session))
-        #expect(current.profile?.lifePhotos.map(\.id) == ["photo-1", "photo-2"])
-        #expect(await transport.uploadedLifePhotoPath == "/api/v1/me/life-photos")
-        #expect(await transport.uploadedLifePhotoContentType == "multipart/form-data")
-        #expect(await transport.uploadedLifePhotoBodyContainsFilename)
-
-        #expect(await current.reorderLifePhotos(photoIds: ["photo-2", "photo-1"], using: session))
-        #expect(current.profile?.lifePhotos.map(\.id) == ["photo-2", "photo-1"])
-        #expect(await transport.reorderedLifePhotoIds == ["photo-2", "photo-1"])
-
-        #expect(await current.deleteLifePhoto(photoId: "photo-2", using: session))
-        #expect(current.profile?.lifePhotos.map(\.id) == ["photo-1"])
-        #expect(await transport.deletedLifePhotoPath == "/api/v1/me/life-photos/photo-2")
-        #expect(await transport.writeKeys.count == 4)
-        #expect(await Set(transport.writeKeys).count == 4)
+        profile = profile.applyingUsername("test_001b", updatedAt: changedAt)
+        profile = profile.applyingUsername("test_001c", updatedAt: changedAt)
+        #expect(profile.usernameChangesRemaining == 0)
+        #expect(!profile.canChangeUsernameNow)
+        #expect(profile.usernameNextAllowedAt != nil)
     }
 
     @MainActor
@@ -174,13 +237,12 @@ private actor ProfileTestTransport: APITransport {
     private(set) var uploadedAvatarBodyContainsFilename = false
     private(set) var updatedUsernamePath: String?
     private(set) var updatedUsername: String?
-    private(set) var uploadedLifePhotoPath: String?
-    private(set) var uploadedLifePhotoContentType: String?
-    private(set) var uploadedLifePhotoBodyContainsFilename = false
-    private(set) var reorderedLifePhotoIds: [String] = []
-    private(set) var deletedLifePhotoPath: String?
     private(set) var writeKeys: [String] = []
-    private var lifePhotoUploadCount = 0
+    private var shouldFailProfileLoads = false
+
+    func failFutureProfileLoads() {
+        shouldFailProfileLoads = true
+    }
 
     func data(for request: URLRequest) async throws -> (Data, URLResponse) {
         switch request.url?.path {
@@ -192,19 +254,31 @@ private actor ProfileTestTransport: APITransport {
             )
         case "/api/v1/me":
             loadedMe = true
+            if shouldFailProfileLoads {
+                throw URLError(.timedOut)
+            }
             return response(
                 request,
                 200,
-                #"{"data":{"id":"user-1","username":"test_001","nickname":"Test User","email":"test-001@tum.de","phone":null,"avatarUrl":null,"tagline":"Library regular","school":"TUM","degreeLevel":"BACHELOR","major":"Informatics","semester":3,"gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","usernameUpdatedAt":null,"locale":"en","displayName":"Test User","schoolSummary":{"schoolShort":"TUM","degreeLabel":"Bachelor","major":"Informatics","semester":3},"languages":[{"tag":"ENGLISH","proficiency":"FLUENT"}],"lifePhotos":[],"contacts":{"wechatHandle":null,"whatsappHandle":null,"telegramHandle":null,"instagramHandle":null},"privacy":{"discoverByCourse":true,"discoverByMajor":true,"discoverBySemester":true,"allowInvitationNotes":true,"contactInfoOptIn":false,"hideFromCourseMembers":false,"hideFromDiscovery":false},"counts":{"blocked":0}}}"#
+                #"{"data":{"id":"user-1","username":"test_001","nickname":"Test User","email":"test-001@tum.de","phone":null,"avatarUrl":null,"tagline":"Library regular","school":"TUM","degreeLevel":"BACHELOR","major":"Informatics","semester":3,"gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","usernameUpdatedAt":null,"locale":"en","displayName":"Test User","schoolSummary":{"schoolShort":"TUM","degreeLabel":"Bachelor","major":"Informatics","semester":3},"lifePhotos":[],"contacts":{"wechatHandle":null,"whatsappHandle":null,"telegramHandle":null,"instagramHandle":null},"privacy":{"discoverByCourse":true,"discoverByMajor":true,"discoverBySemester":true,"allowInvitationNotes":true,"contactInfoOptIn":false,"hideFromCourseMembers":false,"hideFromDiscovery":false},"counts":{"blocked":0}}}"#
             )
         case "/api/v1/me/profile":
             updatedProfilePath = request.url?.path
-            updatedNickname = try bodyJSON(request)["nickname"] as? String
+            let requestBody = try bodyJSON(request)
+            updatedNickname = requestBody["nickname"] as? String
             recordKey(request)
+            let changedSchool = requestBody["school"] as? String == "LMU"
+            let school = changedSchool ? "LMU" : "TUM"
+            let schoolChange = changedSchool
+                ? #"{"archivedCourseCount":2,"removedCalendarEntryCount":2,"closedPostCount":1,"expiredInvitationCount":0}"#
+                : nil
+            let schoolChangeField = schoolChange.map { ",\"schoolChange\":\($0)" } ?? ""
             return response(
                 request,
                 200,
-                #"{"data":{"id":"user-1","username":"test_001","nickname":"Native Edited","email":"test-001@tum.de","phone":null,"avatarUrl":null,"tagline":"Updated from Swift","school":"TUM","degreeLevel":"BACHELOR","major":"Mathematics","semester":4,"gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","usernameUpdatedAt":null,"locale":"en","displayName":"Native Edited","schoolSummary":{"schoolShort":"TUM","degreeLabel":"Bachelor","major":"Mathematics","semester":4},"languages":[{"tag":"ENGLISH","proficiency":"FLUENT"}],"lifePhotos":[],"contacts":{"wechatHandle":"wx_native","whatsappHandle":"+4915112345678","telegramHandle":"@tg_native","instagramHandle":"ig_native"},"privacy":{"discoverByCourse":true,"discoverByMajor":true,"discoverBySemester":true,"allowInvitationNotes":true,"contactInfoOptIn":true,"hideFromCourseMembers":true,"hideFromDiscovery":true},"counts":{"blocked":0}}}"#
+                """
+                {"data":{"id":"user-1","username":"test_001","nickname":"Native Edited","email":"test-001@tum.de","phone":null,"avatarUrl":null,"tagline":"Updated from Swift","school":"\(school)","degreeLevel":"BACHELOR","major":"Mathematics","semester":4,"gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","usernameUpdatedAt":null,"locale":"en","displayName":"Native Edited","schoolSummary":{"schoolShort":"\(school)","degreeLabel":"Bachelor","major":"Mathematics","semester":4},"lifePhotos":[],"contacts":{"wechatHandle":"wx_native","whatsappHandle":"+4915112345678","telegramHandle":"@tg_native","instagramHandle":"ig_native"},"privacy":{"discoverByCourse":true,"discoverByMajor":true,"discoverBySemester":true,"allowInvitationNotes":true,"contactInfoOptIn":true,"hideFromCourseMembers":true,"hideFromDiscovery":true},"counts":{"blocked":0}\(schoolChangeField)}}
+                """
             )
         case "/api/v1/me/avatar":
             uploadedAvatarPath = request.url?.path
@@ -219,7 +293,7 @@ private actor ProfileTestTransport: APITransport {
             return response(
                 request,
                 201,
-                #"{"data":{"avatar":{"url":"https://cdn.sideseat.test/avatars/user-1/avatar.jpg","contentType":"image/jpeg","width":512,"height":512,"byteSize":5},"profile":{"id":"user-1","username":"test_001","nickname":"Test User","email":"test-001@tum.de","phone":null,"avatarUrl":"https://cdn.sideseat.test/avatars/user-1/avatar.jpg","tagline":"Library regular","school":"TUM","degreeLevel":"BACHELOR","major":"Informatics","semester":3,"gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","usernameUpdatedAt":null,"locale":"en","displayName":"Test User","schoolSummary":{"schoolShort":"TUM","degreeLabel":"Bachelor","major":"Informatics","semester":3},"languages":[{"tag":"ENGLISH","proficiency":"FLUENT"}],"lifePhotos":[],"contacts":{"wechatHandle":null,"whatsappHandle":null,"telegramHandle":null,"instagramHandle":null},"privacy":{"discoverByCourse":true,"discoverByMajor":true,"discoverBySemester":true,"allowInvitationNotes":true,"contactInfoOptIn":false,"hideFromCourseMembers":false,"hideFromDiscovery":false},"counts":{"blocked":0}}}}"#
+                #"{"data":{"avatar":{"url":"https://cdn.sideseat.test/avatars/user-1/avatar.jpg","contentType":"image/jpeg","width":512,"height":512,"byteSize":5},"profile":{"id":"user-1","username":"test_001","nickname":"Test User","email":"test-001@tum.de","phone":null,"avatarUrl":"https://cdn.sideseat.test/avatars/user-1/avatar.jpg","tagline":"Library regular","school":"TUM","degreeLevel":"BACHELOR","major":"Informatics","semester":3,"gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","usernameUpdatedAt":null,"locale":"en","displayName":"Test User","schoolSummary":{"schoolShort":"TUM","degreeLabel":"Bachelor","major":"Informatics","semester":3},"lifePhotos":[],"contacts":{"wechatHandle":null,"whatsappHandle":null,"telegramHandle":null,"instagramHandle":null},"privacy":{"discoverByCourse":true,"discoverByMajor":true,"discoverBySemester":true,"allowInvitationNotes":true,"contactInfoOptIn":false,"hideFromCourseMembers":false,"hideFromDiscovery":false},"counts":{"blocked":0}}}}"#
             )
         case "/api/v1/me/username":
             updatedUsernamePath = request.url?.path
@@ -228,53 +302,14 @@ private actor ProfileTestTransport: APITransport {
             return response(
                 request,
                 200,
-                #"{"data":{"id":"user-1","username":"native_001","nickname":"Test User","email":"test-001@tum.de","phone":null,"avatarUrl":null,"tagline":"Library regular","school":"TUM","degreeLevel":"BACHELOR","major":"Informatics","semester":3,"gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","usernameUpdatedAt":"2026-07-17T02:00:00.000Z","locale":"en","displayName":"Test User","schoolSummary":{"schoolShort":"TUM","degreeLabel":"Bachelor","major":"Informatics","semester":3},"languages":[{"tag":"ENGLISH","proficiency":"FLUENT"}],"lifePhotos":[],"contacts":{"wechatHandle":null,"whatsappHandle":null,"telegramHandle":null,"instagramHandle":null},"privacy":{"discoverByCourse":true,"discoverByMajor":true,"discoverBySemester":true,"allowInvitationNotes":true,"contactInfoOptIn":false,"hideFromCourseMembers":false,"hideFromDiscovery":false},"counts":{"blocked":0}}}"#
-            )
-        case "/api/v1/me/life-photos":
-            recordKey(request)
-            if request.httpMethod == "PATCH" {
-                reorderedLifePhotoIds = try #require(bodyJSON(request)["photoIds"] as? [String])
-                return response(
-                    request,
-                    200,
-                    #"{"data":{"photos":[{"id":"photo-2","url":"https://cdn.sideseat.test/life/photo-2.jpg","sortOrder":0},{"id":"photo-1","url":"https://cdn.sideseat.test/life/photo-1.jpg","sortOrder":1}],"profile":{"id":"user-1","username":"test_001","nickname":"Test User","email":"test-001@tum.de","phone":null,"avatarUrl":null,"tagline":"Library regular","school":"TUM","degreeLevel":"BACHELOR","major":"Informatics","semester":3,"gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","usernameUpdatedAt":null,"locale":"en","displayName":"Test User","schoolSummary":{"schoolShort":"TUM","degreeLabel":"Bachelor","major":"Informatics","semester":3},"languages":[{"tag":"ENGLISH","proficiency":"FLUENT"}],"lifePhotos":[{"id":"photo-2","url":"https://cdn.sideseat.test/life/photo-2.jpg","sortOrder":0},{"id":"photo-1","url":"https://cdn.sideseat.test/life/photo-1.jpg","sortOrder":1}],"contacts":{"wechatHandle":null,"whatsappHandle":null,"telegramHandle":null,"instagramHandle":null},"privacy":{"discoverByCourse":true,"discoverByMajor":true,"discoverBySemester":true,"allowInvitationNotes":true,"contactInfoOptIn":false,"hideFromCourseMembers":false,"hideFromDiscovery":false},"counts":{"blocked":0}}}}"#
-                )
-            }
-            lifePhotoUploadCount += 1
-            uploadedLifePhotoPath = request.url?.path
-            uploadedLifePhotoContentType = request.value(forHTTPHeaderField: "Content-Type")?
-                .split(separator: ";")
-                .first
-                .map(String.init)
-            uploadedLifePhotoBodyContainsFilename = request.httpBody.flatMap { body in
-                String(data: body, encoding: .utf8)?.contains(#"filename="life-b.jpg""#)
-            } ?? false
-            if lifePhotoUploadCount == 1 {
-                return response(
-                    request,
-                    201,
-                    #"{"data":{"photo":{"id":"photo-1","url":"https://cdn.sideseat.test/life/photo-1.jpg","sortOrder":0},"upload":{"url":"https://cdn.sideseat.test/life/photo-1.jpg","contentType":"image/jpeg","width":800,"height":600,"byteSize":3},"profile":{"id":"user-1","username":"test_001","nickname":"Test User","email":"test-001@tum.de","phone":null,"avatarUrl":null,"tagline":"Library regular","school":"TUM","degreeLevel":"BACHELOR","major":"Informatics","semester":3,"gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","usernameUpdatedAt":null,"locale":"en","displayName":"Test User","schoolSummary":{"schoolShort":"TUM","degreeLabel":"Bachelor","major":"Informatics","semester":3},"languages":[{"tag":"ENGLISH","proficiency":"FLUENT"}],"lifePhotos":[{"id":"photo-1","url":"https://cdn.sideseat.test/life/photo-1.jpg","sortOrder":0}],"contacts":{"wechatHandle":null,"whatsappHandle":null,"telegramHandle":null,"instagramHandle":null},"privacy":{"discoverByCourse":true,"discoverByMajor":true,"discoverBySemester":true,"allowInvitationNotes":true,"contactInfoOptIn":false,"hideFromCourseMembers":false,"hideFromDiscovery":false},"counts":{"blocked":0}}}}"#
-                )
-            }
-            return response(
-                request,
-                201,
-                #"{"data":{"photo":{"id":"photo-2","url":"https://cdn.sideseat.test/life/photo-2.jpg","sortOrder":1},"upload":{"url":"https://cdn.sideseat.test/life/photo-2.jpg","contentType":"image/jpeg","width":800,"height":600,"byteSize":3},"profile":{"id":"user-1","username":"test_001","nickname":"Test User","email":"test-001@tum.de","phone":null,"avatarUrl":null,"tagline":"Library regular","school":"TUM","degreeLevel":"BACHELOR","major":"Informatics","semester":3,"gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","usernameUpdatedAt":null,"locale":"en","displayName":"Test User","schoolSummary":{"schoolShort":"TUM","degreeLabel":"Bachelor","major":"Informatics","semester":3},"languages":[{"tag":"ENGLISH","proficiency":"FLUENT"}],"lifePhotos":[{"id":"photo-1","url":"https://cdn.sideseat.test/life/photo-1.jpg","sortOrder":0},{"id":"photo-2","url":"https://cdn.sideseat.test/life/photo-2.jpg","sortOrder":1}],"contacts":{"wechatHandle":null,"whatsappHandle":null,"telegramHandle":null,"instagramHandle":null},"privacy":{"discoverByCourse":true,"discoverByMajor":true,"discoverBySemester":true,"allowInvitationNotes":true,"contactInfoOptIn":false,"hideFromCourseMembers":false,"hideFromDiscovery":false},"counts":{"blocked":0}}}}"#
-            )
-        case "/api/v1/me/life-photos/photo-2":
-            deletedLifePhotoPath = request.url?.path
-            recordKey(request)
-            return response(
-                request,
-                200,
-                #"{"data":{"deletedPhotoId":"photo-2","profile":{"id":"user-1","username":"test_001","nickname":"Test User","email":"test-001@tum.de","phone":null,"avatarUrl":null,"tagline":"Library regular","school":"TUM","degreeLevel":"BACHELOR","major":"Informatics","semester":3,"gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","usernameUpdatedAt":null,"locale":"en","displayName":"Test User","schoolSummary":{"schoolShort":"TUM","degreeLabel":"Bachelor","major":"Informatics","semester":3},"languages":[{"tag":"ENGLISH","proficiency":"FLUENT"}],"lifePhotos":[{"id":"photo-1","url":"https://cdn.sideseat.test/life/photo-1.jpg","sortOrder":0}],"contacts":{"wechatHandle":null,"whatsappHandle":null,"telegramHandle":null,"instagramHandle":null},"privacy":{"discoverByCourse":true,"discoverByMajor":true,"discoverBySemester":true,"allowInvitationNotes":true,"contactInfoOptIn":false,"hideFromCourseMembers":false,"hideFromDiscovery":false},"counts":{"blocked":0}}}}"#
+                #"{"data":{"id":"user-1","username":"native_001","nickname":"Test User","email":"test-001@tum.de","phone":null,"avatarUrl":null,"tagline":"Library regular","school":"TUM","degreeLevel":"BACHELOR","major":"Informatics","semester":3,"gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","usernameUpdatedAt":"2026-08-07T02:00:00.000Z","usernameChangePolicy":{"limit":3,"windowDays":7,"changesUsed":1,"changesRemaining":2,"nextAllowedAt":null},"locale":"en","displayName":"Test User","schoolSummary":{"schoolShort":"TUM","degreeLabel":"Bachelor","major":"Informatics","semester":3},"lifePhotos":[],"contacts":{"wechatHandle":null,"whatsappHandle":null,"telegramHandle":null,"instagramHandle":null},"privacy":{"discoverByCourse":true,"discoverByMajor":true,"discoverBySemester":true,"allowInvitationNotes":true,"contactInfoOptIn":false,"hideFromCourseMembers":false,"hideFromDiscovery":false},"counts":{"blocked":0}}}"#
             )
         case "/api/v1/users/peer-1/profile":
             loadedPublicProfilePath = request.url?.path
             return response(
                 request,
                 200,
-                #"{"data":{"mode":"connection","connectionId":"connection-1","metVia":"Software Engineering","viewerCanMessage":true,"myContactRemark":null,"profile":{"id":"peer-1","username":"test_002","displayName":"Mina","nickname":"Mina","gender":"PRIVATE","avatarUrl":null,"tagline":"At the library","school":"TUM","degreeLevel":"BACHELOR","major":"Informatics","semester":3,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","schoolSummary":{"schoolShort":"TUM","degreeLabel":"Bachelor","major":"Informatics","semester":3},"languages":[{"tag":"ENGLISH","proficiency":"FLUENT"}],"lifePhotos":[]},"sharedCourses":[{"id":"course-1","code":"IN0001","name":"Software Engineering"}],"peerCourses":[{"id":"course-1","code":"IN0001","name":"Software Engineering"}]}}"#
+                #"{"data":{"mode":"connection","connectionId":"connection-1","metVia":"Software Engineering","viewerCanMessage":true,"myContactRemark":null,"profile":{"id":"peer-1","username":"test_002","displayName":"Mina","nickname":"Mina","gender":"PRIVATE","avatarUrl":null,"tagline":"At the library","school":"TUM","degreeLevel":"BACHELOR","major":"Informatics","semester":3,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","schoolSummary":{"schoolShort":"TUM","degreeLabel":"Bachelor","major":"Informatics","semester":3},"lifePhotos":[]},"sharedCourses":[{"id":"course-1","code":"IN0001","name":"Software Engineering"}],"peerCourses":[{"id":"course-1","code":"IN0001","name":"Software Engineering"}]}}"#
             )
         default:
             return response(

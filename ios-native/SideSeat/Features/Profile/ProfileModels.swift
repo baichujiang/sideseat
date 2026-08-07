@@ -1,16 +1,5 @@
 import Foundation
 
-struct NativeProfileLanguage: Decodable, Hashable, Sendable {
-    let tag: String
-    let proficiency: String
-}
-
-struct NativeProfileLifePhoto: Decodable, Hashable, Sendable, Identifiable {
-    let id: String
-    let url: String
-    let sortOrder: Int
-}
-
 struct NativeProfileSchoolSummary: Decodable, Hashable, Sendable {
     let schoolShort: String
     let degreeLabel: String
@@ -36,10 +25,10 @@ struct NativeProfileSchoolSummary: Decodable, Hashable, Sendable {
     }
 }
 
-enum StudentIdentityTone {
+enum StudentIdentityTone: Equatable {
     case verified
     case pending
-    case warning
+    case rejected
     case neutral
 }
 
@@ -47,6 +36,30 @@ enum StudentIdentityDisplay {
     static func schoolText(_ school: String?) -> String {
         let trimmed = school?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         return trimmed.isEmpty ? String(localized: "School") : trimmed.uppercased()
+    }
+
+    static func schoolCode(_ school: String?) -> String {
+        let raw = school?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let normalized = raw
+            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+            .uppercased()
+
+        switch normalized {
+        case "TUM", "TECHNISCHE UNIVERSITAT MUNCHEN", "TECHNICAL UNIVERSITY OF MUNICH":
+            return "TUM"
+        case "LMU", "LMU MUNCHEN", "LUDWIG-MAXIMILIANS-UNIVERSITAT MUNCHEN":
+            return "LMU"
+        default:
+            let words = normalized.split(whereSeparator: { !$0.isLetter && !$0.isNumber })
+            if words.count > 1 {
+                return String(words.prefix(4).compactMap(\.first))
+            }
+            return String((words.first ?? Substring("SCHOOL")).prefix(4))
+        }
+    }
+
+    static func logoAssetName(_ school: String?) -> String {
+        "SchoolLogo\(schoolCode(school))"
     }
 
     static func label(school: String?, verifiedStudent: Bool, status: String) -> String {
@@ -87,10 +100,14 @@ enum StudentIdentityDisplay {
         case "EMAIL_PENDING", "MANUAL_REVIEW_REQUIRED":
             return .pending
         case "REJECTED":
-            return .warning
+            return .rejected
         default:
             return verifiedStudent ? .verified : .neutral
         }
+    }
+
+    static func canManageVerification(verifiedStudent: Bool, status: String) -> Bool {
+        tone(verifiedStudent: verifiedStudent, status: status) != .verified
     }
 }
 
@@ -114,15 +131,47 @@ struct NativeCurrentProfile: Decodable, Identifiable, Sendable {
     let verifiedStudent: Bool
     let studentVerificationStatus: String
     let usernameUpdatedAt: String?
+    let usernameChangePolicy: NativeUsernameChangePolicy?
     let productTutorialDismissedAt: String?
     let locale: String
     let displayName: String
     let schoolSummary: NativeProfileSchoolSummary
-    let languages: [NativeProfileLanguage]
-    let lifePhotos: [NativeProfileLifePhoto]
     let contacts: NativeProfileContacts
     let privacy: NativeProfilePrivacy
     let counts: NativeProfileCounts
+}
+
+struct NativeProfileSchoolChangeSummary: Decodable, Equatable, Sendable {
+    let archivedCourseCount: Int
+    let removedCalendarEntryCount: Int
+    let closedPostCount: Int
+    let expiredInvitationCount: Int
+}
+
+struct NativeProfileUpdateResult: Decodable, Sendable {
+    let profile: NativeCurrentProfile
+    let schoolChange: NativeProfileSchoolChangeSummary?
+
+    private enum CodingKeys: String, CodingKey {
+        case schoolChange
+    }
+
+    init(from decoder: Decoder) throws {
+        profile = try NativeCurrentProfile(from: decoder)
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        schoolChange = try container.decodeIfPresent(
+            NativeProfileSchoolChangeSummary.self,
+            forKey: .schoolChange
+        )
+    }
+}
+
+struct NativeUsernameChangePolicy: Decodable, Sendable {
+    let limit: Int
+    let windowDays: Int
+    let changesUsed: Int
+    let changesRemaining: Int
+    let nextAllowedAt: String?
 }
 
 struct NativeStudentVerificationRequest: Encodable, Sendable {
@@ -219,8 +268,6 @@ struct NativePublicProfileUser: Decodable, Sendable {
     let verifiedStudent: Bool
     let studentVerificationStatus: String
     let schoolSummary: NativeProfileSchoolSummary
-    let languages: [NativeProfileLanguage]
-    let lifePhotos: [NativeProfileLifePhoto]
 }
 
 struct NativeProfileCourse: Decodable, Identifiable, Hashable, Sendable {
@@ -249,33 +296,6 @@ struct NativeProfileAvatarDraft: Identifiable, Sendable {
     let fileName: String
 }
 
-struct NativeProfileLifePhotoUpload: Decodable, Sendable {
-    let photo: NativeProfileLifePhoto
-    let upload: NativeProfileUploadedImage
-    let profile: NativeCurrentProfile
-}
-
-struct NativeProfileLifePhotosMutation: Decodable, Sendable {
-    let photos: [NativeProfileLifePhoto]
-    let profile: NativeCurrentProfile
-}
-
-struct NativeProfileLifePhotoDelete: Decodable, Sendable {
-    let deletedPhotoId: String
-    let profile: NativeCurrentProfile
-}
-
-struct NativeProfileLifePhotosReorderRequest: Encodable, Sendable {
-    let photoIds: [String]
-}
-
-struct NativeProfileLifePhotoDraft: Identifiable, Sendable {
-    let id: UUID
-    let data: Data
-    let mimeType: String
-    let fileName: String
-}
-
 extension NativeCurrentProfile {
     static let uiTestingFixture = NativeCurrentProfile(
         id: "ui-test-user",
@@ -297,6 +317,13 @@ extension NativeCurrentProfile {
         verifiedStudent: true,
         studentVerificationStatus: "VERIFIED",
         usernameUpdatedAt: nil,
+        usernameChangePolicy: NativeUsernameChangePolicy(
+            limit: 3,
+            windowDays: 7,
+            changesUsed: 0,
+            changesRemaining: 3,
+            nextAllowedAt: nil
+        ),
         productTutorialDismissedAt: "2026-01-01T00:00:00.000Z",
         locale: "en",
         displayName: "Test User",
@@ -308,11 +335,6 @@ extension NativeCurrentProfile {
             studentStatus: "CURRENT_STUDENT",
             graduationYear: nil
         ),
-        languages: [
-            NativeProfileLanguage(tag: "ENGLISH", proficiency: "FLUENT"),
-            NativeProfileLanguage(tag: "GERMAN", proficiency: "CONVERSATIONAL")
-        ],
-        lifePhotos: [],
         contacts: NativeProfileContacts(
             wechatHandle: nil,
             whatsappHandle: nil,
@@ -333,6 +355,14 @@ extension NativeCurrentProfile {
 
     static var uiTestingUnverifiedFixture: NativeCurrentProfile {
         uiTestingFixture.applyingVerification(status: "UNVERIFIED", verifiedStudent: false)
+    }
+
+    static var uiTestingPendingFixture: NativeCurrentProfile {
+        uiTestingFixture.applyingVerification(status: "EMAIL_PENDING", verifiedStudent: false)
+    }
+
+    static var uiTestingRejectedFixture: NativeCurrentProfile {
+        uiTestingFixture.applyingVerification(status: "REJECTED", verifiedStudent: false)
     }
 }
 
@@ -366,9 +396,7 @@ extension NativePublicProfile {
                 semester: 3,
                 studentStatus: "CURRENT_STUDENT",
                 graduationYear: nil
-            ),
-            languages: [NativeProfileLanguage(tag: "ENGLISH", proficiency: "FLUENT")],
-            lifePhotos: []
+            )
         ),
         sharedCourses: [NativeProfileCourse(id: "ui-course", code: "IN0001", name: "Software Engineering")],
         peerCourses: [NativeProfileCourse(id: "ui-course", code: "IN0001", name: "Software Engineering")]
@@ -376,30 +404,40 @@ extension NativePublicProfile {
 }
 
 extension NativeCurrentProfile {
-    private static let usernameCooldownSeconds: TimeInterval = 30 * 24 * 60 * 60
-
     var usernameNextAllowedAt: Date? {
-        guard let usernameUpdatedAt,
-              let updatedAt = Date.sideSeatProfileISO8601(usernameUpdatedAt)
+        guard let nextAllowedAt = usernameChangePolicy?.nextAllowedAt,
+              let date = Date.sideSeatProfileISO8601(nextAllowedAt),
+              date > Date()
         else { return nil }
-        return updatedAt.addingTimeInterval(Self.usernameCooldownSeconds)
+        return date
+    }
+
+    var usernameChangesRemaining: Int {
+        if let nextAllowedAt = usernameChangePolicy?.nextAllowedAt,
+           let date = Date.sideSeatProfileISO8601(nextAllowedAt),
+           date <= Date() {
+            return usernameChangePolicy?.limit ?? 3
+        }
+        return usernameChangePolicy?.changesRemaining ?? 3
     }
 
     var canChangeUsernameNow: Bool {
-        guard let usernameNextAllowedAt else { return true }
-        return usernameNextAllowedAt <= Date()
+        usernameChangesRemaining > 0
     }
 
     func applying(_ request: NativeProfileUpdateRequest) -> NativeCurrentProfile {
-        NativeCurrentProfile(
+        let nextSchool = request.school ?? school
+        let changedSchool = StudentIdentityDisplay.schoolCode(nextSchool) != StudentIdentityDisplay.schoolCode(school)
+
+        return NativeCurrentProfile(
             id: id,
             username: username,
             nickname: request.nickname ?? nickname,
-            email: email,
+            email: changedSchool ? nil : email,
             phone: phone,
             avatarUrl: avatarUrl,
             tagline: request.bio ?? tagline,
-            school: request.school ?? school,
+            school: nextSchool,
             studentStatus: request.studentStatus ?? studentStatus,
             degreeLevel: request.degreeLevel ?? degreeLevel,
             major: request.major ?? major,
@@ -408,9 +446,10 @@ extension NativeCurrentProfile {
             gender: request.gender ?? gender,
             onboardingComplete: onboardingComplete,
             isGuest: isGuest,
-            verifiedStudent: verifiedStudent,
-            studentVerificationStatus: studentVerificationStatus,
+            verifiedStudent: changedSchool ? false : verifiedStudent,
+            studentVerificationStatus: changedSchool ? "UNVERIFIED" : studentVerificationStatus,
             usernameUpdatedAt: usernameUpdatedAt,
+            usernameChangePolicy: usernameChangePolicy,
             productTutorialDismissedAt: productTutorialDismissedAt,
             locale: locale,
             displayName: {
@@ -418,15 +457,13 @@ extension NativeCurrentProfile {
                 return trimmed.isEmpty ? username : trimmed
             }(),
             schoolSummary: NativeProfileSchoolSummary(
-                schoolShort: schoolSummary.schoolShort,
+                schoolShort: StudentIdentityDisplay.schoolCode(nextSchool),
                 degreeLabel: schoolSummary.degreeLabel,
                 major: request.major ?? schoolSummary.major,
                 semester: request.semester ?? schoolSummary.semester,
                 studentStatus: request.studentStatus ?? schoolSummary.studentStatus,
                 graduationYear: request.graduationYear ?? schoolSummary.graduationYear
             ),
-            languages: languages,
-            lifePhotos: lifePhotos,
             contacts: NativeProfileContacts(
                 wechatHandle: request.wechatHandle ?? contacts.wechatHandle,
                 whatsappHandle: request.whatsappHandle ?? contacts.whatsappHandle,
@@ -447,7 +484,16 @@ extension NativeCurrentProfile {
     }
 
     func applyingUsername(_ nextUsername: String, updatedAt: String) -> NativeCurrentProfile {
-        NativeCurrentProfile(
+        let limit = usernameChangePolicy?.limit ?? 3
+        let windowDays = usernameChangePolicy?.windowDays ?? 7
+        let nextChangesUsed = min(limit, (usernameChangePolicy?.changesUsed ?? 0) + 1)
+        let nextAllowedAt = nextChangesUsed == limit
+            ? Date.sideSeatProfileISO8601(updatedAt)?
+                .addingTimeInterval(TimeInterval(windowDays * 24 * 60 * 60))
+                .ISO8601Format()
+            : nil
+
+        return NativeCurrentProfile(
             id: id,
             username: nextUsername,
             nickname: nickname,
@@ -467,6 +513,13 @@ extension NativeCurrentProfile {
             verifiedStudent: verifiedStudent,
             studentVerificationStatus: studentVerificationStatus,
             usernameUpdatedAt: updatedAt,
+            usernameChangePolicy: NativeUsernameChangePolicy(
+                limit: limit,
+                windowDays: windowDays,
+                changesUsed: nextChangesUsed,
+                changesRemaining: max(0, limit - nextChangesUsed),
+                nextAllowedAt: nextAllowedAt
+            ),
             productTutorialDismissedAt: productTutorialDismissedAt,
             locale: locale,
             displayName: {
@@ -474,8 +527,6 @@ extension NativeCurrentProfile {
                 return trimmed.isEmpty ? nextUsername : trimmed
             }(),
             schoolSummary: schoolSummary,
-            languages: languages,
-            lifePhotos: lifePhotos,
             contacts: contacts,
             privacy: privacy,
             counts: counts
@@ -503,12 +554,11 @@ extension NativeCurrentProfile {
             verifiedStudent: verifiedStudent,
             studentVerificationStatus: status,
             usernameUpdatedAt: usernameUpdatedAt,
+            usernameChangePolicy: usernameChangePolicy,
             productTutorialDismissedAt: productTutorialDismissedAt,
             locale: locale,
             displayName: displayName,
             schoolSummary: schoolSummary,
-            languages: languages,
-            lifePhotos: lifePhotos,
             contacts: contacts,
             privacy: privacy,
             counts: counts
@@ -536,45 +586,11 @@ extension NativeCurrentProfile {
             verifiedStudent: verifiedStudent,
             studentVerificationStatus: studentVerificationStatus,
             usernameUpdatedAt: usernameUpdatedAt,
+            usernameChangePolicy: usernameChangePolicy,
             productTutorialDismissedAt: productTutorialDismissedAt,
             locale: locale,
             displayName: displayName,
             schoolSummary: schoolSummary,
-            languages: languages,
-            lifePhotos: lifePhotos,
-            contacts: contacts,
-            privacy: privacy,
-            counts: counts
-        )
-    }
-
-    func applyingLifePhotos(_ nextLifePhotos: [NativeProfileLifePhoto]) -> NativeCurrentProfile {
-        NativeCurrentProfile(
-            id: id,
-            username: username,
-            nickname: nickname,
-            email: email,
-            phone: phone,
-            avatarUrl: avatarUrl,
-            tagline: tagline,
-            school: school,
-            studentStatus: studentStatus,
-            degreeLevel: degreeLevel,
-            major: major,
-            semester: semester,
-            graduationYear: graduationYear,
-            gender: gender,
-            onboardingComplete: onboardingComplete,
-            isGuest: isGuest,
-            verifiedStudent: verifiedStudent,
-            studentVerificationStatus: studentVerificationStatus,
-            usernameUpdatedAt: usernameUpdatedAt,
-            productTutorialDismissedAt: productTutorialDismissedAt,
-            locale: locale,
-            displayName: displayName,
-            schoolSummary: schoolSummary,
-            languages: languages,
-            lifePhotos: nextLifePhotos,
             contacts: contacts,
             privacy: privacy,
             counts: counts

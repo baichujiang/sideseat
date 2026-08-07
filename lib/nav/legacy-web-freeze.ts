@@ -1,4 +1,5 @@
-const NATIVE_WEB_PATHS = ["/ios", "/privacy", "/support"] as const;
+const NATIVE_WEB_PATHS = ["/", "/ios", "/privacy", "/support"] as const;
+const ADMIN_WEB_PATHS = ["/admin", "/login", "/forgot-password"] as const;
 
 export function isLegacyWebFrozen(
   nodeEnv = process.env.NODE_ENV,
@@ -8,7 +9,11 @@ export function isLegacyWebFrozen(
 }
 
 export function isNativeWebPath(pathname: string): boolean {
-  if (NATIVE_WEB_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))) {
+  if (
+    [...NATIVE_WEB_PATHS, ...ADMIN_WEB_PATHS].some(
+      (path) => pathname === path || pathname.startsWith(`${path}/`),
+    )
+  ) {
     return true;
   }
   return (

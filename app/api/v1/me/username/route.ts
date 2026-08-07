@@ -15,14 +15,18 @@ import {
   rateLimitSubject,
 } from "@/lib/api/v1/rate-limit";
 import { prisma } from "@/lib/db/prisma";
+import {
+  nextUsernameChangeWindow,
+  USERNAME_CHANGE_LIMIT,
+  USERNAME_CHANGE_WINDOW_DAYS,
+  usernameChangePolicy,
+} from "@/lib/profile/username-change-policy";
 import { profileUsernameChangeSchema } from "@/lib/validators/profile";
 
 export const dynamic = "force-dynamic";
 
 const USERNAME_WRITE_LIMIT = 8;
 const USERNAME_WRITE_WINDOW_MS = 60_000;
-const USERNAME_CHANGE_COOLDOWN_DAYS = 30;
-const USERNAME_CHANGE_COOLDOWN_MS = USERNAME_CHANGE_COOLDOWN_DAYS * 24 * 60 * 60_000;
 
 function localeFromRequest(request: Request): "en" | "zh-CN" {
   const language = request.headers.get("accept-language")?.toLowerCase() ?? "";
@@ -80,13 +84,13 @@ export async function PATCH(request: Request) {
       });
       if (claim.kind !== "owner") return claim;
 
+      await tx.$queryRaw(
+        Prisma.sql`SELECT "id" FROM "User" WHERE "id" = ${auth.user.id} FOR UPDATE`,
+      );
+
       const current = await tx.user.findUnique({
         where: { id: auth.user.id },
         include: {
-          userLanguages: {
-            orderBy: { tag: "asc" },
-            select: { tag: true, proficiency: true },
-          },
           lifePhotos: {
             orderBy: { sortOrder: "asc" },
             select: { id: true, url: true, sortOrder: true },
@@ -99,13 +103,11 @@ export async function PATCH(request: Request) {
       }
 
       const username = parsed.data.username;
-      if (username !== current.username && current.usernameUpdatedAt) {
-        const nextAllowedAt = new Date(
-          current.usernameUpdatedAt.getTime() + USERNAME_CHANGE_COOLDOWN_MS,
-        );
-        if (nextAllowedAt.getTime() > now.getTime()) {
+      if (username !== current.username) {
+        const policy = usernameChangePolicy(current, now);
+        if (policy.changesRemaining === 0 && policy.nextAllowedAt) {
           await tx.apiIdempotencyRecord.delete({ where: { id: claim.recordId } });
-          return { kind: "cooldown", nextAllowedAt } as const;
+          return { kind: "cooldown", nextAllowedAt: policy.nextAllowedAt } as const;
         }
       }
 
@@ -125,12 +127,12 @@ export async function PATCH(request: Request) {
         try {
           profile = await tx.user.update({
             where: { id: auth.user.id },
-            data: { username, usernameUpdatedAt: now },
+            data: {
+              username,
+              usernameUpdatedAt: now,
+              ...nextUsernameChangeWindow(current, now),
+            },
             include: {
-              userLanguages: {
-                orderBy: { tag: "asc" },
-                select: { tag: true, proficiency: true },
-              },
               lifePhotos: {
                 orderBy: { sortOrder: "asc" },
                 select: { id: true, url: true, sortOrder: true },
@@ -196,7 +198,7 @@ export async function PATCH(request: Request) {
     if (result.kind === "cooldown") {
       return v1Error(request, {
         code: "USERNAME_CHANGE_COOLDOWN",
-        message: `Username can only be changed once every ${USERNAME_CHANGE_COOLDOWN_DAYS} days.`,
+        message: `Username can be changed up to ${USERNAME_CHANGE_LIMIT} times every ${USERNAME_CHANGE_WINDOW_DAYS} days.`,
         status: 429,
         field: "username",
         retryable: true,

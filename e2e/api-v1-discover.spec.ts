@@ -866,7 +866,13 @@ test.describe.serial("API v1 Discover", () => {
     expect(mine.status()).toBe(200);
     const mineData = (await mine.json()).data;
     expect(mineData.posts).toContainEqual(
-      expect.objectContaining({ id: postId, status: "ACTIVE", isOwn: true }),
+      expect.objectContaining({
+        id: postId,
+        status: "ACTIVE",
+        closureReason: null,
+        closedAt: null,
+        isOwn: true,
+      }),
     );
     expect(mineData.activities).toContainEqual(
       expect.objectContaining({
@@ -894,9 +900,15 @@ test.describe.serial("API v1 Discover", () => {
       },
     );
     expect(closed.status()).toBe(200);
-    expect((await closed.json()).data.post).toEqual(
-      expect.objectContaining({ id: postId, status: "CLOSED" }),
+    const closedPost = (await closed.json()).data.post;
+    expect(closedPost).toEqual(
+      expect.objectContaining({
+        id: postId,
+        status: "CLOSED",
+        closureReason: "AUTHOR_CLOSED",
+      }),
     );
+    expect(new Date(closedPost.closedAt).toString()).not.toBe("Invalid Date");
 
     const replay = await request.patch(
       `/api/v1/discover/posts/${postId}/status`,

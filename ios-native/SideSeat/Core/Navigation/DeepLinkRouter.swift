@@ -115,6 +115,8 @@ final class DeepLinkRouter {
             return (.chats, nil)
         case "/courses":
             return (.home, .courses)
+        case "/courses/archived":
+            return (.home, .archivedCourses)
         case "/profile":
             return (.me, nil)
         case "/profile/info", "/profile/verification":
@@ -128,7 +130,7 @@ final class DeepLinkRouter {
 
     nonisolated private static func tab(for route: AppRoute) -> AppTab {
         switch route {
-        case .courses, .course:
+        case .courses, .archivedCourses, .course:
             return .home
         case .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .plans, .scheduleShare:
             return .chats

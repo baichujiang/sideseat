@@ -13,6 +13,7 @@ struct CommunityChatView: View {
     @State private var draft = ""
     @State private var replyDraft: NativeCommunityMessage?
     @State private var isNearBottom = true
+    @State private var keyboardBottomAnchor = ChatKeyboardBottomAnchorState()
     @State private var knownMessageIDs: Set<String> = []
     @State private var pendingDelete: NativeCommunityMessage?
     @State private var pendingReport: NativeCommunityMessage?
@@ -53,22 +54,26 @@ struct CommunityChatView: View {
                             }
                             .accessibilityIdentifier("group-chat-info")
                         } label: {
-                            Image(systemName: "ellipsis")
-                                .font(.body.weight(.semibold))
-                                .frame(minWidth: 28, minHeight: 28)
-                                .contentShape(Rectangle())
+                            Image(systemName: "ellipsis.circle")
+                                .symbolRenderingMode(.hierarchical)
+                                .font(.system(size: 17, weight: .semibold))
+                                .frame(width: 32, height: 32)
+                                .contentShape(Circle())
                         }
                         .accessibilityIdentifier("group-chat-actions")
+                        .accessibilityLabel("Chat actions")
                     } else {
                         Button {
                             showThreadSearch = true
                         } label: {
                             Image(systemName: "magnifyingglass")
-                                .font(.body.weight(.medium))
-                                .frame(minWidth: 28, minHeight: 28)
-                                .contentShape(Rectangle())
+                                .symbolRenderingMode(.hierarchical)
+                                .font(.system(size: 17, weight: .semibold))
+                                .frame(width: 32, height: 32)
+                                .contentShape(Circle())
                         }
                         .accessibilityIdentifier("\(kind.accessibilityRootID)-search")
+                        .accessibilityLabel("Search chat")
                     }
                 }
             }
@@ -83,6 +88,7 @@ struct CommunityChatView: View {
                 )
             }
             .task(id: "\(kind.rawValue)-\(conversationID)") {
+                ActiveChatPresentation.begin(activeConversationKey)
                 await store.load(
                     kind: kind,
                     conversationID: conversationID,
@@ -97,7 +103,10 @@ struct CommunityChatView: View {
                     userInfo: ["animated": false]
                 )
             }
-            .onDisappear { store.stop() }
+            .onDisappear {
+                ActiveChatPresentation.end(activeConversationKey)
+                store.stop()
+            }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active {
                     store.resumeRealtimeIfNeeded(using: session)
@@ -148,6 +157,10 @@ struct CommunityChatView: View {
                     return failure
                 }
             }
+    }
+
+    private var activeConversationKey: String {
+        kind == .course ? "course:\(conversationID)" : "group:\(conversationID)"
     }
 
     private var restoreBanner: some View {
@@ -244,10 +257,18 @@ struct CommunityChatView: View {
                     .padding(.horizontal, 12)
                     .padding(.vertical, 10)
                 }
+                .contentShape(Rectangle())
+                .simultaneousGesture(
+                    TapGesture().onEnded {
+                        guard composerFocused else { return }
+                        composerFocused = false
+                    }
+                )
                 .scrollDismissesKeyboard(.interactively)
                 .chatNearBottomTracker(isNearBottom: $isNearBottom) {
                     store.clearPendingRemoteCount()
                 }
+                .accessibilityIdentifier("chat-message-list")
 
                 if store.pendingRemoteCount > 0 {
                     Button {
@@ -305,6 +326,19 @@ struct CommunityChatView: View {
                     )
                 }
             }
+            .chatKeyboardBottomAnchor(
+                state: $keyboardBottomAnchor,
+                isNearBottom: isNearBottom,
+                isComposerFocused: composerFocused
+            ) { animated in
+                Task {
+                    await ChatScrollAnchor.scrollToBottom(
+                        proxy: proxy,
+                        latestMessageID: { store.messages.last?.id },
+                        animated: animated
+                    )
+                }
+            }
         }
         .overlay {
             if store.isLoading && store.messages.isEmpty {
@@ -333,7 +367,7 @@ struct CommunityChatView: View {
                 HStack(alignment: .top, spacing: 10) {
                     RoundedRectangle(cornerRadius: 1.5)
                         .fill(SideSeatTheme.accent)
-                        .frame(width: 3)
+                        .frame(width: 3, height: 38)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Replying to \(reply.sender.displayName)")
                             .font(.caption.weight(.semibold))
@@ -352,6 +386,7 @@ struct CommunityChatView: View {
                     }
                     .accessibilityIdentifier("chat-reply-cancel")
                 }
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 12)
                 .padding(.top, 8)
             }
@@ -366,10 +401,13 @@ struct CommunityChatView: View {
                     .textFieldStyle(.plain)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 10)
-                    .background(SideSeatTheme.Chat.peerBubble, in: RoundedRectangle(cornerRadius: SideSeatTheme.Chat.composerRadius, style: .continuous))
+                    .background(SideSeatTheme.Chat.controlFill, in: RoundedRectangle(cornerRadius: SideSeatTheme.Chat.composerRadius, style: .continuous))
                     .focused($composerFocused)
                     .submitLabel(.send)
                     .onSubmit { Task { await send() } }
+                    .onChange(of: draft) { previous, current in
+                        sendAfterInsertedReturn(previous: previous, current: current)
+                    }
                     .accessibilityIdentifier("chat-composer-field")
 
                 Button {
@@ -394,9 +432,19 @@ struct CommunityChatView: View {
         !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    private func sendAfterInsertedReturn(previous: String, current: String) {
+        guard let message = ChatComposerReturnKey.textBeforeInsertedReturn(
+            previous: previous,
+            current: current
+        ) else { return }
+
+        draft = message
+        Task { await send() }
+    }
+
     private func send() async {
         let text = draft
-        guard canSend else { return }
+        guard canSend, !store.isSending else { return }
         let reply = replyDraft
         draft = ""
         replyDraft = nil
@@ -504,6 +552,10 @@ private struct CommunityMessageBubble: View {
                         .fill(isMine ? SideSeatTheme.Chat.ownBubble : SideSeatTheme.Chat.peerBubble)
                 )
                 .foregroundStyle(isMine ? Color.white : Color.primary)
+                .contentShape(Rectangle())
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("chat-bubble-\(message.id)")
+                .contextMenu { messageContextMenu }
 
                 if let created = message.createdDate, status != .sending, status != .failed {
                     Text(created, style: .time)
@@ -529,42 +581,43 @@ private struct CommunityMessageBubble: View {
             if !isMine { Spacer(minLength: 48) }
         }
         .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("chat-bubble-\(message.id)")
-        .contextMenu {
-            if supportsReply && !message.isDeleted {
-                Button {
-                    onReply()
-                } label: {
-                    Label("Reply", systemImage: "arrowshape.turn.up.left")
-                }
-                .accessibilityIdentifier("chat-reply-\(message.id)")
+    }
+
+    @ViewBuilder
+    private var messageContextMenu: some View {
+        if supportsReply && !message.isDeleted {
+            Button {
+                onReply()
+            } label: {
+                Label("Reply", systemImage: "arrowshape.turn.up.left")
             }
-            if !message.isDeleted,
-               let body = message.body?.trimmingCharacters(in: .whitespacesAndNewlines),
-               !body.isEmpty
-            {
-                Button {
-                    UIPasteboard.general.string = body
-                } label: {
-                    Label("Copy", systemImage: "doc.on.doc")
-                }
+            .accessibilityIdentifier("chat-reply-\(message.id)")
+        }
+        if !message.isDeleted,
+           let body = message.body?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !body.isEmpty
+        {
+            Button {
+                UIPasteboard.general.string = body
+            } label: {
+                Label("Copy", systemImage: "doc.on.doc")
             }
-            if supportsReport && !isMine && !message.isDeleted {
-                Button(role: .destructive) {
-                    onReport()
-                } label: {
-                    Label("Report", systemImage: "flag")
-                }
-                .accessibilityIdentifier("chat-report-\(message.id)")
+        }
+        if supportsReport && !isMine && !message.isDeleted {
+            Button(role: .destructive) {
+                onReport()
+            } label: {
+                Label("Report", systemImage: "flag")
             }
-            if supportsDelete && isMine && !message.isDeleted {
-                Button(role: .destructive) {
-                    onDelete()
-                } label: {
-                    Label("Delete", systemImage: "trash")
-                }
-                .accessibilityIdentifier("chat-delete-\(message.id)")
+            .accessibilityIdentifier("chat-report-\(message.id)")
+        }
+        if supportsDelete && isMine && !message.isDeleted {
+            Button(role: .destructive) {
+                onDelete()
+            } label: {
+                Label("Delete", systemImage: "trash")
             }
+            .accessibilityIdentifier("chat-delete-\(message.id)")
         }
     }
 }

@@ -2,15 +2,12 @@ import { InboxChatsShell } from "@/components/inbox/inbox-quick-chips";
 import { InboxRealtimeRefresh } from "@/components/inbox/inbox-realtime-refresh";
 import { InboxSessionBootstrap } from "@/components/inbox/inbox-session-bootstrap";
 import { TabKeepAliveSnapshot } from "@/components/layout/tab-keep-alive";
-import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
 import { getSessionUser } from "@/lib/auth/session";
 import { buildInboxListVersion, prepareInboxListMerged } from "@/lib/inbox/inbox-list-version";
 import { getInboxMergeBundle } from "@/lib/queries/inbox-merge";
-import { getServerAppLocale } from "@/lib/i18n/server-locale";
 
 export default async function InboxPage() {
   const sessionUser = await getSessionUser();
-  const locale = await getServerAppLocale();
   if (!sessionUser) {
     return (
       <TabKeepAliveSnapshot tab="inbox">
@@ -20,10 +17,7 @@ export default async function InboxPage() {
   }
   const user = sessionUser;
 
-  const [, { merged: rawMerged, plansNeedingYourAction }] = await Promise.all([
-    ensureAssistantBotConnection(user.id, { locale }),
-    getInboxMergeBundle(user.id),
-  ]);
+  const { merged: rawMerged, plansNeedingYourAction } = await getInboxMergeBundle(user.id);
   const merged = prepareInboxListMerged(rawMerged);
   const directContacts = merged
     .filter((item): item is Extract<(typeof merged)[number], { kind: "direct" }> => item.kind === "direct")

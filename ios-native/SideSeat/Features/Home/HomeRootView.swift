@@ -69,7 +69,7 @@ struct HomeRootView: View {
                     focusDate: selectedDate,
                     visibleDayCount: weekVisibleDayCount,
                     timelineDensityLevel: weekTimelineDensityLevel,
-                    schedule: store.schedule,
+                    itemsByDay: store.agendaItemsByDay,
                     onFocusDate: { selectedDate = $0 },
                     onViewportDateChange: { date in
                         weekViewportDate = date
@@ -174,21 +174,26 @@ struct HomeRootView: View {
         }
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
-                Button {
-                    sheet = .calendars
-                } label: {
-                    Image(systemName: "calendar")
-                }
-                .accessibilityLabel("Calendars")
-                .accessibilityIdentifier("manage-calendars")
+                Menu {
+                    Button {
+                        sheet = .calendars
+                    } label: {
+                        Label("Calendar categories", systemImage: "calendar")
+                    }
+                    .accessibilityIdentifier("manage-calendars")
 
-                Button {
-                    router.navigate(to: .courses)
+                    Button {
+                        router.navigate(to: .courses)
+                    } label: {
+                        Label("Courses", systemImage: "books.vertical")
+                    }
+                    .accessibilityIdentifier("open-courses")
                 } label: {
-                    Image(systemName: "books.vertical")
+                    Text("More")
+                        .font(.subheadline.weight(.semibold))
                 }
-                .accessibilityLabel("Courses")
-                .accessibilityIdentifier("open-courses")
+                .accessibilityLabel("More")
+                .accessibilityIdentifier("calendar-more-menu")
 
                 if smartScheduleEnabled {
                     Menu {
@@ -282,23 +287,32 @@ struct HomeRootView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .firstTextBaseline) {
+        HStack(alignment: .center, spacing: 8) {
             // Month is the primary calendar landmark (Apple Calendar pattern).
             Text(calendarMode == .week ? weekViewportDate : selectedDate, format: .dateTime.month(.wide).year())
                 .font(SideSeatTheme.Text.title)
                 .foregroundStyle(SideSeatTheme.textPrimary)
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(0.62)
                 .layoutPriority(1)
-            Spacer(minLength: 12)
+                .accessibilityIdentifier("calendar-month-title")
+            Spacer(minLength: 4)
             Button {
                 sheet = .shareSchedule(scheduleShareInitialDates)
             } label: {
-                Image(systemName: "square.and.arrow.up")
-                    .font(.body.weight(.semibold))
-                    .frame(width: 34, height: 34)
-                    .contentShape(Rectangle())
+                Label("Share", systemImage: "square.and.arrow.up")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 11)
+                    .frame(height: 40)
+                    .background(
+                        SideSeatTheme.accent,
+                        in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    )
             }
+            .buttonStyle(.plain)
+            .frame(minWidth: 76, minHeight: 44)
+            .contentShape(Rectangle())
             .accessibilityLabel("Share schedule")
             .accessibilityIdentifier("calendar-share-schedule")
             Button("Today") {
@@ -309,13 +323,15 @@ struct HomeRootView: View {
             }
             .font(.body.weight(.semibold))
             .foregroundStyle(CalendarChrome.nowRed)
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
             .accessibilityIdentifier("home-jump-today")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var agendaItems: [HomeAgendaItem] {
-        store.schedule?.items(on: selectedDate, calendar: calendar) ?? []
+        store.agendaItemsByDay[calendar.startOfDay(for: selectedDate)] ?? []
     }
 
     private var smartScheduleEnabled: Bool {

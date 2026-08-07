@@ -1,7 +1,6 @@
 import { requireV1User } from "@/lib/api/v1/auth";
 import { inboxConversationV1 } from "@/lib/api/v1/inbox-dto";
 import { v1Error, v1Success } from "@/lib/api/v1/http";
-import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
 import { prepareInboxListMerged } from "@/lib/inbox/inbox-list-version";
 import { getInboxMergeBundle } from "@/lib/queries/inbox-merge";
 
@@ -12,7 +11,6 @@ export async function GET(request: Request) {
   if (!auth.ok) return auth.response;
 
   try {
-    await ensureAssistantBotConnection(auth.user.id);
     const { merged, unreadTotal, plansNeedingYourAction } = await getInboxMergeBundle(
       auth.user.id,
     );

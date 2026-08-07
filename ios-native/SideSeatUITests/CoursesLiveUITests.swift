@@ -35,6 +35,9 @@ final class CoursesLiveUITests: XCTestCase {
         passwordField.typeText(password)
         app.buttons["login-submit"].tap()
 
+        let more = app.buttons["calendar-more-menu"]
+        XCTAssertTrue(more.waitForExistence(timeout: 10))
+        more.tap()
         let courses = app.buttons["open-courses"]
         XCTAssertTrue(courses.waitForExistence(timeout: 10))
         courses.tap()

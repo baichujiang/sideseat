@@ -6,7 +6,11 @@ import type {
   LanguageProficiency,
   LanguageTag,
 } from "@prisma/client";
-import { ClassmatePostCategory, ClassmatePostStatus } from "@prisma/client";
+import {
+  ClassmatePostCategory,
+  type ClassmatePostClosureReason,
+  ClassmatePostStatus,
+} from "@prisma/client";
 
 import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
 import {
@@ -22,6 +26,7 @@ import {
 } from "@/lib/discover/discover-post-row";
 import { prisma } from "@/lib/db/prisma";
 import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
+import { getSchoolMatchValues } from "@/lib/constants/schools";
 import {
   buildViewerCourseMatchIndex,
   courseMatchesViewer,
@@ -55,6 +60,8 @@ export type ClassmatePostDetail = {
   title: string;
   body: string | null;
   status: ClassmatePostStatus;
+  closureReason: ClassmatePostClosureReason | null;
+  closedAt: Date | null;
   tags: string[];
   visibility: ClassmatePostVisibility;
   replyPreference: ClassmatePostReplyPreference;
@@ -104,7 +111,7 @@ type DetailViewerSelect = {
   id: string;
   school: string | null;
   verifiedStudent: boolean;
-  courses: Array<{ course: { id: string; code: string | null } }>;
+  courses: Array<{ course: { id: string; code: string | null; school: string } }>;
 };
 
 function canViewerSeePostDetail(
@@ -119,7 +126,9 @@ function canViewerSeePostDetail(
       return viewer.verifiedStudent;
     case "COURSEMATES_ONLY": {
       const viewerCourses = buildViewerCourseMatchIndex(
-        viewer.courses.map((row) => row.course),
+        viewer.courses
+          .map((row) => row.course)
+          .filter((course) => getSchoolMatchValues(viewer.school).includes(course.school)),
       );
       return post.linkedCourses.some((course) =>
         courseMatchesViewer(course, viewerCourses),
@@ -210,6 +219,8 @@ export async function getClassmatePostDetailForViewer(
     title: post.title,
     body: post.body,
     status: post.status,
+    closureReason: post.closureReason,
+    closedAt: post.closedAt,
     tags: post.tags,
     visibility: post.visibility,
     replyPreference: post.replyPreference,
@@ -256,7 +267,7 @@ export async function getClassmatePostDetailForViewer(
         verifiedStudent: true,
         courses: {
           where: activeCourseMembershipWhere(now),
-          select: { course: { select: { id: true, code: true } } },
+          select: { course: { select: { id: true, code: true, school: true } } },
         },
       },
     }),

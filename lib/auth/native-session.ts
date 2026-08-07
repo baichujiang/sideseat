@@ -199,13 +199,23 @@ export async function rotateNativeSession(
   };
 }
 
-export async function revokeNativeSession(refreshToken: string): Promise<void> {
+export async function revokeNativeSession(
+  refreshToken: string,
+  pushToken?: string,
+): Promise<void> {
   const existing = await prisma.session.findUnique({
     where: { tokenHash: hashRefreshToken(refreshToken) },
-    select: { familyId: true, clientKind: true },
+    select: { familyId: true, clientKind: true, userId: true },
   });
   if (existing?.clientKind === SessionClientKind.IOS && existing.familyId) {
-    await revokeFamily(existing.familyId, SessionRevocationReason.LOGOUT);
+    await Promise.all([
+      revokeFamily(existing.familyId, SessionRevocationReason.LOGOUT),
+      pushToken
+        ? prisma.nativePushDevice.deleteMany({
+            where: { userId: existing.userId, token: pushToken },
+          })
+        : Promise.resolve(),
+    ]);
   }
 }
 

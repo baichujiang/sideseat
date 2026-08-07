@@ -2,12 +2,13 @@ import "server-only";
 
 import type { CourseIntent, Prisma, PrismaClient, Weekday } from "@prisma/client";
 
-import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
+import { DEFAULT_SCHOOL, getSchoolMatchValues, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
 import { getCurrentSemesterLabel } from "@/lib/constants/semester";
 import {
   activeCourseMembershipWhere,
   courseMembershipActiveUntil,
 } from "@/lib/courses/active-membership";
+import { archivedCourseRestoreBlockReason } from "@/lib/courses/archived-course";
 import { courseIdentityKey, sameCourseIdentityWhere } from "@/lib/courses/course-identity";
 import { inboxCourseUnreadCounts } from "@/lib/queries/inbox-unread-counts";
 
@@ -15,7 +16,7 @@ type CourseDb = PrismaClient | Prisma.TransactionClient;
 
 export const COURSE_LIST_LIMIT_MAX = 50;
 
-export type CourseListScope = "popular" | "enrolled" | "saved";
+export type CourseListScope = "popular" | "enrolled" | "saved" | "archived";
 
 export type NativeCourseSession = {
   weekday: Weekday;
@@ -35,6 +36,8 @@ export type NativeCourseSummary = {
   viewer: {
     enrolled: boolean;
     saved: boolean;
+    canRestore?: boolean;
+    restoreBlockReason?: "SCHOOL_MISMATCH" | "ACTIVE_EQUIVALENT" | null;
   };
   sessions: NativeCourseSession[];
   communitySubmitted: boolean;
@@ -61,13 +64,21 @@ export async function loadCourseSemesterReview(
 ): Promise<NativeCourseSemesterReview> {
   const now = options.now ?? new Date();
   const semesterLabel = getCurrentSemesterLabel(now);
-  const [user, expired, active] = await Promise.all([
-    db.user.findUnique({
-      where: { id: options.userId },
-      select: { courseReviewSemesterLabel: true },
-    }),
+  const user = await db.user.findUnique({
+    where: { id: options.userId },
+    select: { courseReviewSemesterLabel: true, school: true },
+  });
+  const schoolValues = getSchoolMatchValues(user?.school);
+  const schoolScope = schoolValues.length
+    ? { course: { school: { in: schoolValues } } }
+    : {};
+  const [expired, active] = await Promise.all([
     db.userCourse.findMany({
-      where: { userId: options.userId, activeUntil: { lt: now } },
+      where: {
+        userId: options.userId,
+        activeUntil: { lt: now },
+        ...schoolScope,
+      },
       include: {
         course: true,
         sessions: { orderBy: [{ weekday: "asc" }, { startMinute: "asc" }] },
@@ -75,7 +86,11 @@ export async function loadCourseSemesterReview(
       orderBy: [{ activeUntil: "desc" }, { createdAt: "desc" }],
     }),
     db.userCourse.findMany({
-      where: { userId: options.userId, ...activeCourseMembershipWhere(now) },
+      where: {
+        userId: options.userId,
+        ...activeCourseMembershipWhere(now),
+        ...schoolScope,
+      },
       select: { course: { select: { id: true, school: true, code: true } } },
     }),
   ]);
@@ -209,7 +224,8 @@ export async function listCoursesForNative(
     limit: number;
   },
 ) {
-  const activeMembership = activeCourseMembershipWhere();
+  const now = new Date();
+  const activeMembership = activeCourseMembershipWhere(now);
   const school = normalizeCourseSchool(options.school, options.userSchool);
   const semesterLabel = getCurrentSemesterLabel();
   const query = options.query?.trim().slice(0, 120) ?? "";
@@ -218,7 +234,70 @@ export async function listCoursesForNative(
   const take = Math.min(COURSE_LIST_LIMIT_MAX, Math.max(1, options.limit));
 
   let rows: NativeCourseSummary[];
-  if (options.scope === "enrolled") {
+  if (options.scope === "archived") {
+    const archivedSchoolFilter = options.school?.trim()
+      ? { school }
+      : {};
+    const [memberships, activeMemberships] = await Promise.all([
+      db.userCourse.findMany({
+        where: {
+          userId: options.userId,
+          activeUntil: { lt: now },
+          course: { ...archivedSchoolFilter, ...courseSearchWhere(query) },
+        },
+        include: {
+          course: {
+            include: {
+              _count: { select: { members: { where: activeMembership } } },
+            },
+          },
+          sessions: { orderBy: [{ weekday: "asc" }, { startMinute: "asc" }] },
+        },
+        orderBy: [{ activeUntil: "desc" }, { createdAt: "desc" }, { id: "desc" }],
+        skip: offset,
+        take: take + 1,
+      }),
+      db.userCourse.findMany({
+        where: { userId: options.userId, ...activeMembership },
+        select: { course: { select: { id: true, school: true, code: true } } },
+      }),
+    ]);
+    const saved = await db.savedCourse.findMany({
+      where: {
+        userId: options.userId,
+        courseId: { in: memberships.map((membership) => membership.courseId) },
+      },
+      select: { courseId: true },
+    });
+    const savedIds = new Set(saved.map((row) => row.courseId));
+    const activeCourseIdentities = new Set(
+      activeMemberships.map((membership) => courseIdentityKey(membership.course)),
+    );
+    rows = memberships.map((membership) => {
+      const restoreBlockReason = archivedCourseRestoreBlockReason({
+        userSchool: options.userSchool,
+        course: membership.course,
+        activeCourseIdentities,
+      });
+      return {
+        id: membership.course.id,
+        code: membership.course.code,
+        name: membership.course.name,
+        instructorSummary: membership.course.instructorSummary,
+        school: membership.course.school,
+        semesterLabel: membership.course.semesterLabel,
+        memberCount: membership.course._count.members,
+        viewer: {
+          enrolled: false,
+          saved: savedIds.has(membership.course.id),
+          canRestore: restoreBlockReason === null,
+          restoreBlockReason,
+        },
+        sessions: membership.sessions.map(toSessionDto),
+        communitySubmitted: Boolean(membership.course.submittedById),
+      };
+    });
+  } else if (options.scope === "enrolled") {
     const memberships = await db.userCourse.findMany({
       where: {
         userId: options.userId,

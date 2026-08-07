@@ -23,8 +23,10 @@ item is complete and the evidence is attached to the release ticket.
 - [ ] `DEVELOPMENT_TEAM` is set locally or in CI; secrets are not committed.
 - [ ] APNs production key values are deployed: `APNS_KEY_ID`, `APNS_TEAM_ID`,
   `APNS_KEY_P8`, `APNS_BUNDLE_ID=app.sideseat.mobile`, `APNS_USE_SANDBOX=0`.
-- [ ] A signed physical-device build registers a token and receives foreground,
-  background and cold-launch notifications.
+- [ ] The native push-device environment migration is deployed. A Debug device
+  registers as `sandbox`, and a Release/TestFlight device registers as `production`.
+- [ ] Signed Debug and TestFlight physical-device builds receive foreground,
+  background and cold-launch notifications through their matching APNs endpoints.
 - [ ] Export-compliance answers match the app's actual encryption use; attach any
   documentation App Store Connect requests.
 
@@ -64,8 +66,10 @@ item is complete and the evidence is attached to the release ticket.
 - [ ] Production migrations run only in the controlled deployment pipeline. Local
   remote-database migration requires the explicit one-shot
   `ALLOW_REMOTE_DATABASE_MIGRATIONS=1` approval.
-- [ ] The Vercel plan supports the 10-minute calendar reminder cron. Hobby's
-  once-daily cron limit is insufficient.
+- [ ] Native calendar reminders are reconciled as iOS local notifications after
+  schedule sync; they do not depend on a minute-level server cron.
+- [ ] Remote plan/activity changes send event-driven APNs updates. Daily Hobby
+  cron is reserved for retention, catalog maintenance and browser recovery work.
 - [ ] `CRON_MONITOR_URL` alerts on both failed runs and missing expected runs for
   reminders, realtime retention and course catalog jobs.
 - [ ] Database provider, retention and last restore drill are recorded in

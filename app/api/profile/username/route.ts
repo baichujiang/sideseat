@@ -1,11 +1,15 @@
+import { Prisma } from "@prisma/client";
+
 import { requireUser } from "@/lib/auth/session";
-import { isUsernameAvailable } from "@/lib/auth/username-availability";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseBody } from "@/lib/http";
+import {
+  nextUsernameChangeWindow,
+  USERNAME_CHANGE_LIMIT,
+  USERNAME_CHANGE_WINDOW_DAYS,
+  usernameChangePolicy,
+} from "@/lib/profile/username-change-policy";
 import { profileUsernameChangeSchema } from "@/lib/validators/profile";
-
-const USERNAME_CHANGE_COOLDOWN_DAYS = 30;
-const USERNAME_CHANGE_COOLDOWN_MS = USERNAME_CHANGE_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
 
 export async function PATCH(request: Request) {
   try {
@@ -25,26 +29,57 @@ export async function PATCH(request: Request) {
       return ok({ saved: true, username });
     }
 
-    if (user.usernameUpdatedAt) {
-      const nextAllowedAt = new Date(user.usernameUpdatedAt.getTime() + USERNAME_CHANGE_COOLDOWN_MS);
-      if (nextAllowedAt.getTime() > Date.now()) {
-        return error(
-          `Username can only be changed once every ${USERNAME_CHANGE_COOLDOWN_DAYS} days.`,
-          429,
-          "USERNAME_CHANGE_COOLDOWN",
-        );
-      }
-    }
+    const now = new Date();
+    const result = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw(
+        Prisma.sql`SELECT "id" FROM "User" WHERE "id" = ${user.id} FOR UPDATE`,
+      );
+      const current = await tx.user.findUnique({ where: { id: user.id } });
+      if (!current) return { kind: "not_found" } as const;
 
-    const available = await isUsernameAvailable(username, user.id);
-    if (!available) {
+      const policy = usernameChangePolicy(current, now);
+      if (policy.changesRemaining === 0) {
+        return { kind: "cooldown" } as const;
+      }
+
+      const taken = await tx.user.findFirst({
+        where: { username, NOT: { id: user.id } },
+        select: { id: true },
+      });
+      if (taken) return { kind: "taken" } as const;
+
+      try {
+        await tx.user.update({
+          where: { id: user.id },
+          data: {
+            username,
+            usernameUpdatedAt: now,
+            ...nextUsernameChangeWindow(current, now),
+          },
+        });
+      } catch (cause) {
+        if (cause instanceof Prisma.PrismaClientKnownRequestError && cause.code === "P2002") {
+          return { kind: "taken" } as const;
+        }
+        throw cause;
+      }
+
+      return { kind: "updated" } as const;
+    });
+
+    if (result.kind === "not_found") {
+      return error("The current profile was not found.", 404, "NOT_FOUND");
+    }
+    if (result.kind === "taken") {
       return error("That username is already taken.", 409, "USERNAME_TAKEN");
     }
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { username, usernameUpdatedAt: new Date() },
-    });
+    if (result.kind === "cooldown") {
+      return error(
+        `Username can be changed up to ${USERNAME_CHANGE_LIMIT} times every ${USERNAME_CHANGE_WINDOW_DAYS} days.`,
+        429,
+        "USERNAME_CHANGE_COOLDOWN",
+      );
+    }
 
     return ok({ saved: true, username });
   } catch (cause) {

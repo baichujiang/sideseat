@@ -35,15 +35,22 @@ test("AASA advertises the signed iPhone app and schedule links", async () => {
   assert.ok(details.components.some((entry: { "/": string }) => entry["/"] === "/share/view/*"));
 });
 
-test("legacy web is frozen in production while native support routes remain", () => {
+test("legacy web is frozen in production while native and admin routes remain", () => {
   assert.equal(isLegacyWebFrozen("production"), true);
   assert.equal(isLegacyWebFrozen("development"), false);
   assert.equal(isLegacyWebFrozen("production", "true"), false);
 
+  assert.equal(isNativeWebPath("/"), true);
   assert.equal(isNativeWebPath("/ios"), true);
   assert.equal(isNativeWebPath("/share/view/token"), true);
   assert.equal(isNativeWebPath("/privacy"), true);
   assert.equal(isNativeWebPath("/support"), true);
+  assert.equal(isNativeWebPath("/admin/verifications"), true);
+  assert.equal(isNativeWebPath("/admin/users/user-1"), true);
+  assert.equal(isNativeWebPath("/login"), true);
+  assert.equal(isNativeWebPath("/login/callback"), true);
+  assert.equal(isNativeWebPath("/forgot-password"), true);
   assert.equal(isNativeWebPath("/discover"), false);
-  assert.equal(isNativeWebPath("/login"), false);
+  assert.equal(isNativeWebPath("/profile"), false);
+  assert.equal(isNativeWebPath("/signup"), false);
 });

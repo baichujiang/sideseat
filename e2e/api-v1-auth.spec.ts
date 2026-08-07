@@ -1,4 +1,10 @@
 import { expect, test, type APIRequestContext } from "@playwright/test";
+import { PrismaClient } from "@prisma/client";
+
+import { assertLocalTestDatabase } from "./helpers/local-test-database";
+
+assertLocalTestDatabase();
+const prisma = new PrismaClient();
 
 const E2E_USER = process.env.E2E_USER ?? "test_001";
 const E2E_PEER = process.env.E2E_PEER ?? "test_002";
@@ -39,6 +45,10 @@ async function login(
 }
 
 test.describe.serial("API v1 native authentication", () => {
+  test.afterAll(async () => {
+    await prisma.$disconnect();
+  });
+
   test("returns stable config, validation, auth, rotation and replay protection", async ({ request }) => {
     const requestId = "e2e-api-v1-config";
     const config = await request.get("/api/v1/client-config", {
@@ -130,6 +140,39 @@ test.describe.serial("API v1 native authentication", () => {
       data: { refreshToken: another.data.tokens.refreshToken },
     });
     expect(logoutAgain.status()).toBe(200);
+  });
+
+  test("removes this iPhone push token from the old account on logout", async ({ request }) => {
+    const logoutDevice = {
+      ...device,
+      id: "playwright-ios-push-logout",
+      name: "Push Logout iPhone",
+    };
+    const signedIn = await login(request, logoutDevice);
+    const pushToken = `e2e-apns-${process.pid}-${Date.now()}`;
+
+    const registered = await request.post("/api/v1/push/devices", {
+      headers: { Authorization: `Bearer ${signedIn.data.tokens.accessToken}` },
+      data: { token: pushToken, platform: "ios", environment: "sandbox" },
+    });
+    expect(registered.status()).toBe(201);
+    await expect(
+      prisma.nativePushDevice.findUnique({ where: { token: pushToken } }),
+    ).resolves.toMatchObject({
+      userId: signedIn.data.user.id,
+      environment: "sandbox",
+    });
+
+    const logout = await request.post("/api/v1/auth/logout", {
+      data: {
+        refreshToken: signedIn.data.tokens.refreshToken,
+        pushToken,
+      },
+    });
+    expect(logout.status()).toBe(200);
+    await expect(
+      prisma.nativePushDevice.findUnique({ where: { token: pushToken } }),
+    ).resolves.toBeNull();
   });
 
   test("uses the new bearer account instead of a stale web cookie", async ({ request }) => {

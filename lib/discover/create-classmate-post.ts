@@ -9,6 +9,7 @@ import {
 
 import { MAX_ACTIVE_CLASSMATE_POSTS_PER_CATEGORY } from "@/lib/constants/app";
 import { isAllowedClassmatePostImageUrl } from "@/lib/constants/classmate-post-media";
+import { getSchoolMatchValues } from "@/lib/constants/schools";
 import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
 import { classmatePostForDiscoverInclude } from "@/lib/discover/prisma-classmate-post-for-discover";
 import {
@@ -42,7 +43,7 @@ export class ClassmatePostCreateError extends Error {
 }
 
 export async function createClassmatePostForUser(
-  user: Pick<User, "id">,
+  user: Pick<User, "id" | "school">,
   input: unknown,
   tx: Prisma.TransactionClient,
 ) {
@@ -71,6 +72,7 @@ export async function createClassmatePostForUser(
         userId: user.id,
         courseId: { in: courseIds },
         ...activeCourseMembershipWhere(),
+        course: { school: { in: getSchoolMatchValues(user.school) } },
       },
     });
     if (enrolled !== courseIds.length) {
@@ -183,7 +185,7 @@ export async function createClassmatePostForUser(
 }
 
 export async function updateClassmatePostForUser(
-  user: Pick<User, "id">,
+  user: Pick<User, "id" | "school">,
   postId: string,
   input: unknown,
   tx: Prisma.TransactionClient,
@@ -219,6 +221,7 @@ export async function updateClassmatePostForUser(
         userId: user.id,
         courseId: { in: courseIds },
         ...activeCourseMembershipWhere(),
+        course: { school: { in: getSchoolMatchValues(user.school) } },
       },
     });
     if (enrolled !== courseIds.length) {

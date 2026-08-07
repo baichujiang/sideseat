@@ -1,6 +1,6 @@
 # SideSeat Native iOS Migration Master
 
-Last verified: 2026-07-17  
+Last verified: 2026-08-08
 Repository: `baichujiang/sideseat`  
 Native bundle identifier: `app.sideseat.mobile`  
 Native deployment target: iOS 17+, iPhone (`TARGETED_DEVICE_FAMILY = 1`)
@@ -20,12 +20,12 @@ This document is the source of truth for the native iOS migration. A checked pla
 
 ## Current Execution Point
 
-- Current stage: **Stage 6 nearly complete**; Auth login UI + signup/forgot-password wired; Stage 5 chat/inbox/contacts remains automated verified; Stage 4 Discover/Activities/Profiles remains open only for optional Activity media/attendee polish (no Activity image schema yet).
-- Current verified slice: **Native blocked-users list + push-tap → chat deep link + product tutorial + Home week P1 + branded login/signup/forgot-password**. Prior Stage 6 slices remain green.
-- Latest gate evidence: OpenAPI v1 check green for new me/blocks + tutorial dismiss ops; native app build green; week-window + navigation unit tests updated with this slice.
-- Next slice: Availability native, rich media for group/course chat, Discover polish, guest browse on native, or Stage 7 release gates.
-- Next verification: full `test:api:v1` matrix + hermetic Settings→Blocked users / tutorial UI.
-- External blockers: App Store Connect consumable products + Apple verification credentials for Production StoreKit; signing/APNs remain release-gate items.
+- Current stage: **Stage 7 in progress** after the main native feature slices and APNs implementation.
+- Current verified slice: **APNs structured payloads, token cleanup/retry, deep-link routing, exact badges, local calendar reminders, and per-device sandbox/production routing**.
+- Latest gate evidence: 15 APNs/release tests, 92 API v1 scenarios and 128 Swift unit tests pass; TypeScript, lint, Next production build and Development/Production Swift compilation are green.
+- Next slice: deploy the push-device environment migration, then verify Debug sandbox and TestFlight production delivery on physical iPhones.
+- Next verification: foreground/background/cold-launch push acceptance on Debug and TestFlight physical-device builds.
+- External blockers: physical-device/TestFlight APNs acceptance, App Store Connect consumable products and Apple verification credentials for Production StoreKit.
 
 ## 1. Repository Baseline
 
@@ -216,7 +216,7 @@ All native statuses in this baseline are `Not started` because `ios-native/` did
 | Calendar writes              | existing calendar routes                | Event create/update/delete, atomic batch creation and category list/create/update/delete are implemented with ownership validation, built-in protection, companion/category validation, idempotent replay and native editors; recurring updates and explicit native moves support `this`, `future` and `all` with detached exceptions and Berlin-local DST handling; the day timeline supports exact-slot creation and one-off copy/paste/duplication; bounded idempotent ICS import, semester export, delayed read-only subscription-event merge and reviewed natural-language batch creation are implemented; optional direct drag remains | P1       |
 | Plans/shares                 | existing route state transitions        | explicit state machine and public/authenticated DTOs                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | P1       |
 | Feedback/safety              | feedback/report/block APIs              | paginated DTOs and stable moderation codes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | P1       |
-| APNs                         | native registration only                | send service, device cleanup and deep-link route payload                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | P2       |
+| APNs                         | registration, send and routing implemented | per-device sandbox/production routing, retry, invalid-token cleanup, structured deep links and exact badges implemented; production observability and physical-device acceptance remain                                                                                                                                                                                                                                                                                                                                                                                        | P2       |
 | StoreKit                     | tip Stripe path (Web only)              | Initial products/acknowledge ledger + native Support Store implemented; Production Apple JWS/App Store Server API verification remains                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | P2       |
 
 ## 7. Native Architecture Decisions
@@ -354,7 +354,7 @@ The current Playwright suite includes:
 | 4     | Discover, Activities, Profiles                                                        | feature/API/UI tests                                  | In progress        |
 | 5     | Inbox and all chat types                                                              | two-account realtime/read/delete API gates recorded   | Automated verified |
 | 6     | Plans, Schedule Share, Feedback, Settings, account deletion, StoreKit                 | state machine, sandbox and UI tests                   | In progress        |
-| 7     | APNs, moderation, accessibility, performance, privacy, monitoring and release         | full automated matrix plus physical-device acceptance | Not started        |
+| 7     | APNs, moderation, accessibility, performance, privacy, monitoring and release         | full automated matrix plus physical-device acceptance | In progress        |
 
 ## 11. Risks and Decisions
 
@@ -368,7 +368,7 @@ The current Playwright suite includes:
 | Production Prisma pool exhaustion | lazy proxy previously created a client on every delegate lookup in production                                                                                 | production now uses one process-level client; production API regression added to CI                                                                              |
 | Dependency advisories             | the baseline contained production and development dependency advisories                                                                                       | compatible patch upgrades now produce a full `npm audit` result of 0 vulnerabilities; retain audit in CI/release checks                                          |
 | Lint warning debt                 | ESLint CLI now exits 0 with 92 warnings                                                                                                                       | keep zero-error CI gate and reduce warnings in scoped changes                                                                                                    |
-| APNs incomplete                   | token table only                                                                                                                                              | implement provider, routing, cleanup and observability                                                                                                           |
+| APNs acceptance incomplete        | provider, routing, retry, token cleanup and environment-aware delivery are implemented; no physical-device acceptance or production alert evidence yet        | deploy migration, test Debug/TestFlight foreground/background/cold launch, then connect APNs failure monitoring                                                   |
 | UGC review rejection              | report/block exists, no provider moderation                                                                                                                   | server moderation abstraction, queue and published support contact                                                                                               |
 | Payment rejection                 | iOS cannot use current Stripe support flow                                                                                                                    | StoreKit 2 consumables and server ledger                                                                                                                         |
 | Privacy mismatch                  | no native privacy manifest                                                                                                                                    | inventory APIs/SDKs and generate Privacy Report before release                                                                                                   |
