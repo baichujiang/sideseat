@@ -15,6 +15,7 @@ import {
 import { parseV1Json, v1Error, v1Success } from "@/lib/api/v1/http";
 import { hashIdempotencyRequest } from "@/lib/api/v1/idempotency";
 import { runV1Mutation } from "@/lib/api/v1/mutation";
+import { scheduleDiscoverDiscussionNotification } from "@/lib/push/notify-user";
 import { getClassmatePostDetailForViewer } from "@/lib/queries/classmate-post-detail";
 
 export const dynamic = "force-dynamic";
@@ -105,22 +106,39 @@ export async function POST(
     const limited = await limitDiscoverWrite(request, auth.user.id);
     if (limited) return limited;
 
+    let notification: { recipientUserId: string; isReply: boolean } | undefined;
     const result = await runV1Mutation({
       actorId: auth.user.id,
       key: idempotency.key,
       scope: `native-discover-question-create:${postId}`,
       requestHash: hashIdempotencyRequest({ postId, ...values }),
-      execute: async (tx) => ({
-        status: 201,
-        body: (await createNativeDiscoverPostComment({
+      execute: async (tx) => {
+        const created = await createNativeDiscoverPostComment({
           userId: auth.user.id,
           postId,
           body: values.body,
           parentId: values.parentId,
           tx,
-        })) as Prisma.InputJsonObject,
-      }),
+        });
+        notification = created.notification;
+        const body = {
+          commentId: created.commentId,
+          questionId: created.questionId,
+          thread: created.thread,
+        };
+        return { status: 201, body: body as Prisma.InputJsonObject };
+      },
     });
+    if (result.kind === "completed" && notification) {
+      scheduleDiscoverDiscussionNotification({
+        ...notification,
+        actorId: auth.user.id,
+        resource: "post",
+        resourceId: postId,
+        resourceTitle: detail.post.title,
+        bodyPreview: values.body,
+      });
+    }
     return discoverMutationResponse(request, result);
   } catch (cause) {
     if (
@@ -134,10 +152,27 @@ export async function POST(
       });
     }
     if (cause instanceof DiscoverQuestionMutationError) {
-      const status = cause.code === "AUTHOR_ONLY" || cause.code === "FORBIDDEN" ? 403 : cause.code === "ALREADY_ANSWERED" ? 409 : 404;
+      const status =
+        cause.code === "AUTHOR_ONLY" || cause.code === "FORBIDDEN"
+          ? 403
+          : cause.code === "ALREADY_ANSWERED" || cause.code === "CLOSED"
+            ? 409
+            : 404;
       return v1Error(request, {
-        code: cause.code === "ALREADY_ANSWERED" ? "INVALID_REQUEST" : cause.code === "NOT_FOUND" ? "NOT_FOUND" : "CONTENT_RESTRICTED",
-        message: cause.code === "ALREADY_ANSWERED" ? "This question already has an answer." : cause.code === "NOT_FOUND" ? "The question was not found." : "Only the post author can answer a question.",
+        code:
+          cause.code === "ALREADY_ANSWERED" || cause.code === "CLOSED"
+            ? "INVALID_REQUEST"
+            : cause.code === "NOT_FOUND"
+              ? "NOT_FOUND"
+              : "CONTENT_RESTRICTED",
+        message:
+          cause.code === "ALREADY_ANSWERED"
+            ? "This comment already has an author reply."
+            : cause.code === "CLOSED"
+              ? "This plan is no longer accepting comments."
+              : cause.code === "NOT_FOUND"
+                ? "The comment was not found."
+                : "Only the post author can reply to a comment.",
         status,
       });
     }

@@ -530,10 +530,12 @@ struct NativeDiscoverBuddyPostDetail: Decodable, Sendable {
 }
 
 struct NativeDiscoverQuestionList: Decodable, Sendable {
+    let total: Int
     let questions: [NativeDiscoverPostQuestion]
 }
 
 struct NativeDiscoverMessageList: Decodable, Sendable {
+    let total: Int
     let messages: [NativeDiscoverPostQuestion]
 }
 
@@ -548,6 +550,22 @@ struct NativeDiscoverPostQuestion: Decodable, Identifiable, Sendable {
     let reply: NativeDiscoverPostReply?
 
     var createdDate: Date? { try? Date(createdAt, strategy: .iso8601) }
+
+    func replacingReply(
+        _ nextReply: NativeDiscoverPostReply?,
+        canReply nextCanReply: Bool? = nil
+    ) -> NativeDiscoverPostQuestion {
+        NativeDiscoverPostQuestion(
+            id: id,
+            body: body,
+            createdAt: createdAt,
+            isOwn: isOwn,
+            canDelete: canDelete,
+            canReply: nextCanReply ?? canReply,
+            author: author,
+            reply: nextReply
+        )
+    }
 }
 
 struct NativeDiscoverPostReply: Decodable, Identifiable, Sendable {
@@ -577,15 +595,19 @@ struct NativeDiscoverQuestionWriteRequest: Encodable, Sendable {
 struct NativeDiscoverQuestionMutation: Decodable, Sendable {
     let commentId: String
     let questionId: String
+    let thread: NativeDiscoverPostQuestion
 }
 
 struct NativeDiscoverMessageMutation: Decodable, Sendable {
     let commentId: String
     let messageId: String
+    let thread: NativeDiscoverPostQuestion
 }
 
 struct NativeDiscoverQuestionDeletion: Decodable, Sendable {
     let commentId: String
+    let threadId: String
+    let deletedReply: Bool
     let deleted: Bool
 }
 

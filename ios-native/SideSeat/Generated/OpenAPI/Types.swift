@@ -139,6 +139,15 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /api/v1/discover/activities/{activityId}`.
     /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/get(getDiscoverActivity)`.
     func getDiscoverActivity(_ input: Operations.GetDiscoverActivity.Input) async throws -> Operations.GetDiscoverActivity.Output
+    /// - Remark: HTTP `GET /api/v1/discover/activities/{activityId}/messages`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/get(listDiscoverActivityMessages)`.
+    func listDiscoverActivityMessages(_ input: Operations.ListDiscoverActivityMessages.Input) async throws -> Operations.ListDiscoverActivityMessages.Output
+    /// - Remark: HTTP `POST /api/v1/discover/activities/{activityId}/messages`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/post(createDiscoverActivityMessage)`.
+    func createDiscoverActivityMessage(_ input: Operations.CreateDiscoverActivityMessage.Input) async throws -> Operations.CreateDiscoverActivityMessage.Output
+    /// - Remark: HTTP `DELETE /api/v1/discover/activities/{activityId}/messages/{commentId}`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/{commentId}/delete(deleteDiscoverActivityMessage)`.
+    func deleteDiscoverActivityMessage(_ input: Operations.DeleteDiscoverActivityMessage.Input) async throws -> Operations.DeleteDiscoverActivityMessage.Output
     /// - Remark: HTTP `POST /api/v1/discover/activities/{activityId}/signup`.
     /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/signup/post(joinDiscoverActivity)`.
     func joinDiscoverActivity(_ input: Operations.JoinDiscoverActivity.Input) async throws -> Operations.JoinDiscoverActivity.Output
@@ -798,6 +807,41 @@ extension APIProtocol {
         headers: Operations.GetDiscoverActivity.Input.Headers = .init()
     ) async throws -> Operations.GetDiscoverActivity.Output {
         try await getDiscoverActivity(Operations.GetDiscoverActivity.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// - Remark: HTTP `GET /api/v1/discover/activities/{activityId}/messages`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/get(listDiscoverActivityMessages)`.
+    internal func listDiscoverActivityMessages(
+        path: Operations.ListDiscoverActivityMessages.Input.Path,
+        headers: Operations.ListDiscoverActivityMessages.Input.Headers = .init()
+    ) async throws -> Operations.ListDiscoverActivityMessages.Output {
+        try await listDiscoverActivityMessages(Operations.ListDiscoverActivityMessages.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// - Remark: HTTP `POST /api/v1/discover/activities/{activityId}/messages`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/post(createDiscoverActivityMessage)`.
+    internal func createDiscoverActivityMessage(
+        path: Operations.CreateDiscoverActivityMessage.Input.Path,
+        headers: Operations.CreateDiscoverActivityMessage.Input.Headers,
+        body: Operations.CreateDiscoverActivityMessage.Input.Body
+    ) async throws -> Operations.CreateDiscoverActivityMessage.Output {
+        try await createDiscoverActivityMessage(Operations.CreateDiscoverActivityMessage.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// - Remark: HTTP `DELETE /api/v1/discover/activities/{activityId}/messages/{commentId}`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/{commentId}/delete(deleteDiscoverActivityMessage)`.
+    internal func deleteDiscoverActivityMessage(
+        path: Operations.DeleteDiscoverActivityMessage.Input.Path,
+        headers: Operations.DeleteDiscoverActivityMessage.Input.Headers
+    ) async throws -> Operations.DeleteDiscoverActivityMessage.Output {
+        try await deleteDiscoverActivityMessage(Operations.DeleteDiscoverActivityMessage.Input(
             path: path,
             headers: headers
         ))
@@ -4836,16 +4880,24 @@ internal enum Components {
         internal struct DiscoverQuestionListEnvelope: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/DiscoverQuestionListEnvelope/data`.
             internal struct DataPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/DiscoverQuestionListEnvelope/data/total`.
+                internal var total: Swift.Int
                 /// - Remark: Generated from `#/components/schemas/DiscoverQuestionListEnvelope/data/questions`.
                 internal var questions: [Components.Schemas.DiscoverQuestion]
                 /// Creates a new `DataPayload`.
                 ///
                 /// - Parameters:
+                ///   - total:
                 ///   - questions:
-                internal init(questions: [Components.Schemas.DiscoverQuestion]) {
+                internal init(
+                    total: Swift.Int,
+                    questions: [Components.Schemas.DiscoverQuestion]
+                ) {
+                    self.total = total
                     self.questions = questions
                 }
                 internal enum CodingKeys: String, CodingKey {
+                    case total
                     case questions
                 }
             }
@@ -4908,21 +4960,27 @@ internal enum Components {
                 internal var commentId: Swift.String
                 /// - Remark: Generated from `#/components/schemas/DiscoverQuestionMutationEnvelope/data/questionId`.
                 internal var questionId: Swift.String
+                /// - Remark: Generated from `#/components/schemas/DiscoverQuestionMutationEnvelope/data/thread`.
+                internal var thread: Components.Schemas.DiscoverQuestion
                 /// Creates a new `DataPayload`.
                 ///
                 /// - Parameters:
                 ///   - commentId:
                 ///   - questionId:
+                ///   - thread:
                 internal init(
                     commentId: Swift.String,
-                    questionId: Swift.String
+                    questionId: Swift.String,
+                    thread: Components.Schemas.DiscoverQuestion
                 ) {
                     self.commentId = commentId
                     self.questionId = questionId
+                    self.thread = thread
                 }
                 internal enum CodingKeys: String, CodingKey {
                     case commentId
                     case questionId
+                    case thread
                 }
             }
             /// - Remark: Generated from `#/components/schemas/DiscoverQuestionMutationEnvelope/data`.
@@ -4944,22 +5002,34 @@ internal enum Components {
             internal struct DataPayload: Codable, Hashable, Sendable {
                 /// - Remark: Generated from `#/components/schemas/DiscoverQuestionDeletionEnvelope/data/commentId`.
                 internal var commentId: Swift.String
+                /// - Remark: Generated from `#/components/schemas/DiscoverQuestionDeletionEnvelope/data/threadId`.
+                internal var threadId: Swift.String
+                /// - Remark: Generated from `#/components/schemas/DiscoverQuestionDeletionEnvelope/data/deletedReply`.
+                internal var deletedReply: Swift.Bool
                 /// - Remark: Generated from `#/components/schemas/DiscoverQuestionDeletionEnvelope/data/deleted`.
                 internal var deleted: Swift.Bool
                 /// Creates a new `DataPayload`.
                 ///
                 /// - Parameters:
                 ///   - commentId:
+                ///   - threadId:
+                ///   - deletedReply:
                 ///   - deleted:
                 internal init(
                     commentId: Swift.String,
+                    threadId: Swift.String,
+                    deletedReply: Swift.Bool,
                     deleted: Swift.Bool
                 ) {
                     self.commentId = commentId
+                    self.threadId = threadId
+                    self.deletedReply = deletedReply
                     self.deleted = deleted
                 }
                 internal enum CodingKeys: String, CodingKey {
                     case commentId
+                    case threadId
+                    case deletedReply
                     case deleted
                 }
             }
@@ -4970,6 +5040,88 @@ internal enum Components {
             /// - Parameters:
             ///   - data:
             internal init(data: Components.Schemas.DiscoverQuestionDeletionEnvelope.DataPayload) {
+                self.data = data
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case data
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/DiscoverActivityMessageListEnvelope`.
+        internal struct DiscoverActivityMessageListEnvelope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoverActivityMessageListEnvelope/data`.
+            internal struct DataPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/DiscoverActivityMessageListEnvelope/data/total`.
+                internal var total: Swift.Int
+                /// - Remark: Generated from `#/components/schemas/DiscoverActivityMessageListEnvelope/data/messages`.
+                internal var messages: [Components.Schemas.DiscoverQuestion]
+                /// Creates a new `DataPayload`.
+                ///
+                /// - Parameters:
+                ///   - total:
+                ///   - messages:
+                internal init(
+                    total: Swift.Int,
+                    messages: [Components.Schemas.DiscoverQuestion]
+                ) {
+                    self.total = total
+                    self.messages = messages
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case total
+                    case messages
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoverActivityMessageListEnvelope/data`.
+            internal var data: Components.Schemas.DiscoverActivityMessageListEnvelope.DataPayload
+            /// Creates a new `DiscoverActivityMessageListEnvelope`.
+            ///
+            /// - Parameters:
+            ///   - data:
+            internal init(data: Components.Schemas.DiscoverActivityMessageListEnvelope.DataPayload) {
+                self.data = data
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case data
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/DiscoverActivityMessageMutationEnvelope`.
+        internal struct DiscoverActivityMessageMutationEnvelope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoverActivityMessageMutationEnvelope/data`.
+            internal struct DataPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/DiscoverActivityMessageMutationEnvelope/data/commentId`.
+                internal var commentId: Swift.String
+                /// - Remark: Generated from `#/components/schemas/DiscoverActivityMessageMutationEnvelope/data/messageId`.
+                internal var messageId: Swift.String
+                /// - Remark: Generated from `#/components/schemas/DiscoverActivityMessageMutationEnvelope/data/thread`.
+                internal var thread: Components.Schemas.DiscoverQuestion
+                /// Creates a new `DataPayload`.
+                ///
+                /// - Parameters:
+                ///   - commentId:
+                ///   - messageId:
+                ///   - thread:
+                internal init(
+                    commentId: Swift.String,
+                    messageId: Swift.String,
+                    thread: Components.Schemas.DiscoverQuestion
+                ) {
+                    self.commentId = commentId
+                    self.messageId = messageId
+                    self.thread = thread
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case commentId
+                    case messageId
+                    case thread
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoverActivityMessageMutationEnvelope/data`.
+            internal var data: Components.Schemas.DiscoverActivityMessageMutationEnvelope.DataPayload
+            /// Creates a new `DiscoverActivityMessageMutationEnvelope`.
+            ///
+            /// - Parameters:
+            ///   - data:
+            internal init(data: Components.Schemas.DiscoverActivityMessageMutationEnvelope.DataPayload) {
                 self.data = data
             }
             internal enum CodingKeys: String, CodingKey {
@@ -20631,6 +20783,828 @@ internal enum Operations {
             /// Stable API error.
             ///
             /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/get(getDiscoverActivity)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `GET /api/v1/discover/activities/{activityId}/messages`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/get(listDiscoverActivityMessages)`.
+    internal enum ListDiscoverActivityMessages {
+        internal static let id: Swift.String = "listDiscoverActivityMessages"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/GET/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/GET/path/activityId`.
+                internal var activityId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - activityId:
+                internal init(activityId: Swift.String) {
+                    self.activityId = activityId
+                }
+            }
+            internal var path: Operations.ListDiscoverActivityMessages.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/GET/header`.
+            internal struct Headers: Sendable, Hashable {
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListDiscoverActivityMessages.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListDiscoverActivityMessages.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.ListDiscoverActivityMessages.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            internal init(
+                path: Operations.ListDiscoverActivityMessages.Input.Path,
+                headers: Operations.ListDiscoverActivityMessages.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/GET/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.DiscoverActivityMessageListEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.DiscoverActivityMessageListEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.ListDiscoverActivityMessages.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.ListDiscoverActivityMessages.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Public comments and organizer replies for a visible activity.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/get(listDiscoverActivityMessages)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListDiscoverActivityMessages.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.ListDiscoverActivityMessages.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/get(listDiscoverActivityMessages)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/get(listDiscoverActivityMessages)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/get(listDiscoverActivityMessages)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/get(listDiscoverActivityMessages)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `POST /api/v1/discover/activities/{activityId}/messages`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/post(createDiscoverActivityMessage)`.
+    internal enum CreateDiscoverActivityMessage {
+        internal static let id: Swift.String = "createDiscoverActivityMessage"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/POST/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/POST/path/activityId`.
+                internal var activityId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - activityId:
+                internal init(activityId: Swift.String) {
+                    self.activityId = activityId
+                }
+            }
+            internal var path: Operations.CreateDiscoverActivityMessage.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/POST/header`.
+            internal struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/POST/header/Idempotency-Key`.
+                internal var idempotencyKey: Swift.String
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateDiscoverActivityMessage.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                internal init(
+                    idempotencyKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateDiscoverActivityMessage.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.CreateDiscoverActivityMessage.Input.Headers
+            /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/POST/requestBody`.
+            internal enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.DiscoverQuestionWriteRequest)
+            }
+            internal var body: Operations.CreateDiscoverActivityMessage.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            internal init(
+                path: Operations.CreateDiscoverActivityMessage.Input.Path,
+                headers: Operations.CreateDiscoverActivityMessage.Input.Headers,
+                body: Operations.CreateDiscoverActivityMessage.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/POST/responses/201/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.DiscoverActivityMessageMutationEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.DiscoverActivityMessageMutationEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.CreateDiscoverActivityMessage.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.CreateDiscoverActivityMessage.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// An activity comment or organizer reply was created.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/post(createDiscoverActivityMessage)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateDiscoverActivityMessage.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            internal var created: Operations.CreateDiscoverActivityMessage.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/post(createDiscoverActivityMessage)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/post(createDiscoverActivityMessage)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            internal var forbidden: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/post(createDiscoverActivityMessage)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/post(createDiscoverActivityMessage)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            internal var conflict: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/post(createDiscoverActivityMessage)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// The request exceeded a server-side rate limit.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/post(createDiscoverActivityMessage)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.RateLimited)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            internal var tooManyRequests: Components.Responses.RateLimited {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/post(createDiscoverActivityMessage)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `DELETE /api/v1/discover/activities/{activityId}/messages/{commentId}`.
+    /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/{commentId}/delete(deleteDiscoverActivityMessage)`.
+    internal enum DeleteDiscoverActivityMessage {
+        internal static let id: Swift.String = "deleteDiscoverActivityMessage"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/{commentId}/DELETE/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/{commentId}/DELETE/path/activityId`.
+                internal var activityId: Swift.String
+                /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/{commentId}/DELETE/path/commentId`.
+                internal var commentId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - activityId:
+                ///   - commentId:
+                internal init(
+                    activityId: Swift.String,
+                    commentId: Swift.String
+                ) {
+                    self.activityId = activityId
+                    self.commentId = commentId
+                }
+            }
+            internal var path: Operations.DeleteDiscoverActivityMessage.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/{commentId}/DELETE/header`.
+            internal struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/{commentId}/DELETE/header/Idempotency-Key`.
+                internal var idempotencyKey: Swift.String
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteDiscoverActivityMessage.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                internal init(
+                    idempotencyKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteDiscoverActivityMessage.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.DeleteDiscoverActivityMessage.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            internal init(
+                path: Operations.DeleteDiscoverActivityMessage.Input.Path,
+                headers: Operations.DeleteDiscoverActivityMessage.Input.Headers
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/{commentId}/DELETE/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/discover/activities/{activityId}/messages/{commentId}/DELETE/responses/200/content/application\/json`.
+                    case json(Components.Schemas.DiscoverQuestionDeletionEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.DiscoverQuestionDeletionEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.DeleteDiscoverActivityMessage.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.DeleteDiscoverActivityMessage.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The activity comment or organizer reply was deleted.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/{commentId}/delete(deleteDiscoverActivityMessage)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.DeleteDiscoverActivityMessage.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.DeleteDiscoverActivityMessage.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/{commentId}/delete(deleteDiscoverActivityMessage)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/{commentId}/delete(deleteDiscoverActivityMessage)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            internal var forbidden: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/{commentId}/delete(deleteDiscoverActivityMessage)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/{commentId}/delete(deleteDiscoverActivityMessage)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            internal var conflict: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/{commentId}/delete(deleteDiscoverActivityMessage)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// The request exceeded a server-side rate limit.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/{commentId}/delete(deleteDiscoverActivityMessage)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.RateLimited)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            internal var tooManyRequests: Components.Responses.RateLimited {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/discover/activities/{activityId}/messages/{commentId}/delete(deleteDiscoverActivityMessage)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses._Error)

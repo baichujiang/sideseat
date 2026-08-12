@@ -338,11 +338,16 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(plan.waitForExistence(timeout: 3))
         app.staticTexts["Library study buddy"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["discover-post-detail"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["discover-plan-host"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["Main Library, Munich"].waitForExistence(timeout: 3))
         let group = app.staticTexts["discover-plan-group"]
         XCTAssertTrue(group.waitForExistence(timeout: 3))
         XCTAssertTrue(group.label.contains("2"))
         XCTAssertTrue(app.descendants(matching: .any)["discover-plan-verified-host"].exists)
+        let detailHeaderScreenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        detailHeaderScreenshot.name = "Discover compact author header"
+        detailHeaderScreenshot.lifetime = .keepAlways
+        add(detailHeaderScreenshot)
 
         let share = app.buttons["discover-plan-share"]
         XCTAssertTrue(share.waitForExistence(timeout: 3))
@@ -364,22 +369,40 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(activity.waitForExistence(timeout: 3))
         app.staticTexts["English conversation meetup"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["discover-activity-detail"].waitForExistence(timeout: 3))
-        let messages = app.descendants(matching: .any)["discover-activity-messages"]
-        let messageInput = app.textFields["discover-activity-message-input"]
+        XCTAssertTrue(app.buttons["discover-activity-organizer"].waitForExistence(timeout: 3))
+        let openComments = app.buttons["discover-activity-comments-open"]
         let activityScrollView = app.scrollViews["discover-activity-detail"]
-        for _ in 0..<3 where !messages.exists {
+        for _ in 0..<4 where !openComments.isHittable {
             activityScrollView.swipeUp()
         }
-        XCTAssertTrue(messages.waitForExistence(timeout: 3))
-        for _ in 0..<2 where !messageInput.isHittable {
-            activityScrollView.swipeUp()
-        }
-        XCTAssertTrue(messageInput.waitForExistence(timeout: 3))
+        XCTAssertTrue(openComments.waitForExistence(timeout: 3))
+        XCTAssertTrue(openComments.isHittable)
+        openComments.tap()
+
         XCTAssertTrue(
-            app.descendants(matching: .any)["discover-activity-organizer-reply"]
+            app.descendants(matching: .any)["discover-comments-sheet"]
                 .waitForExistence(timeout: 3)
         )
-        XCTAssertTrue(app.buttons["discover-activity-message"].waitForExistence(timeout: 3))
+        XCTAssertTrue(
+            app.descendants(matching: .any)["discover-comment-organizer-reply"]
+                .waitForExistence(timeout: 3)
+        )
+        let commentInput = app.textFields["discover-comment-input"]
+        XCTAssertTrue(commentInput.waitForExistence(timeout: 3))
+        commentInput.tap()
+        commentInput.typeText("Can I bring a friend?")
+        app.buttons["discover-comment-send"].tap()
+        XCTAssertTrue(app.staticTexts["Can I bring a friend?"].waitForExistence(timeout: 3))
+        let commentsScreenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        commentsScreenshot.name = "Discover comments after posting"
+        commentsScreenshot.lifetime = .keepAlways
+        add(commentsScreenshot)
+        app.buttons["discover-comments-done"].tap()
+        XCTAssertTrue(
+            app.descendants(matching: .any)["discover-comments-sheet"]
+                .waitForNonExistence(timeout: 3)
+        )
+
         let join = app.buttons["discover-activity-join"]
         XCTAssertTrue(join.exists)
         join.tap()

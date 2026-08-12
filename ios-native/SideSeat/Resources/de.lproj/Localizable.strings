@@ -713,6 +713,22 @@
 "Would love a darker calendar view for late-night planning." = "Ich würde mir eine dunklere Kalenderansicht für die Planung am Abend wünschen.";
 "Your support means a lot. There’s nothing to restore — tips are one-time only." = "Vielen Dank für deine Unterstützung. Es gibt nichts wiederherzustellen – Beiträge sind immer einmalig.";
 
+/* Discover comments */
+"View all" = "Alle anzeigen";
+"Loading comments" = "Kommentare werden geladen";
+"No comments yet" = "Noch keine Kommentare";
+"Start the conversation about this plan." = "Beginne ein Gespräch über diesen Plan.";
+"Comments from interested people will appear here." = "Kommentare von Interessierten erscheinen hier.";
+"Comments are closed for this plan." = "Kommentare für diesen Plan sind geschlossen.";
+"Add a public comment" = "Öffentlichen Kommentar hinzufügen";
+"Report comment" = "Kommentar melden";
+"Delete this comment?" = "Diesen Kommentar löschen?";
+"Delete this reply?" = "Diese Antwort löschen?";
+"Reply as organizer" = "Als Organisator antworten";
+"Showing the latest %lld comments" = "Die neuesten %lld Kommentare werden angezeigt";
+"Comment actions" = "Kommentaraktionen";
+"Organizer: %@" = "Organisator: %@";
+
 /* Profile & Settings detail flows */
 "If you block someone, they will appear here." = "Wenn du jemanden blockierst, erscheint die Person hier.";
 "Unblock %@?" = "Blockierung von %@ aufheben?";

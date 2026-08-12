@@ -2010,5 +2010,6 @@ extension Notification.Name {
     static let sideSeatCalendarNeedsRefresh = Notification.Name("sideSeatCalendarNeedsRefresh")
     /// A plan was accepted or declined and the plan center should reload.
     static let sideSeatPlansNeedsRefresh = Notification.Name("sideSeatPlansNeedsRefresh")
+    static let sideSeatDiscoverNeedsRefresh = Notification.Name("sideSeatDiscoverNeedsRefresh")
     static let sideseatReplayProductTutorial = Notification.Name("sideseatReplayProductTutorial")
 }

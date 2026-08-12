@@ -5,7 +5,9 @@ export type PushNotificationKind =
   | "plan_invite"
   | "plan_counter"
   | "plan_accepted"
-  | "plan_declined";
+  | "plan_declined"
+  | "discover_comment"
+  | "discover_reply";
 
 export type UserPushPayload = {
   title: string;

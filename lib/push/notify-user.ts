@@ -59,11 +59,21 @@ async function notifyNativeDevices(
     devices.map(async (device) => {
       const environment = normalizeApnsEnvironment(device.environment);
       if (!isApnsConfigured(environment)) return;
-      const result = await sendNativePushWithRetry(device.token, payload, environment);
+      const result = await sendNativePushWithRetry(
+        device.token,
+        payload,
+        environment,
+      );
       if (!result.ok && result.invalidateToken) {
-        await prisma.nativePushDevice.deleteMany({ where: { id: device.id } }).catch(() => {});
+        await prisma.nativePushDevice
+          .deleteMany({ where: { id: device.id } })
+          .catch(() => {});
       } else if (!result.ok) {
-        console.error("APNs push failed", device.token.slice(0, 12), result.reason);
+        console.error(
+          "APNs push failed",
+          device.token.slice(0, 12),
+          result.reason,
+        );
       }
     }),
   );
@@ -86,7 +96,10 @@ async function notifyWebDevices(
           payload,
         );
       } catch (err: unknown) {
-        if (err instanceof WebPushError && (err.statusCode === 410 || err.statusCode === 404)) {
+        if (
+          err instanceof WebPushError &&
+          (err.statusCode === 410 || err.statusCode === 404)
+        ) {
           await prisma.pushSubscription
             .deleteMany({ where: { endpoint: sub.endpoint } })
             .catch(() => {});
@@ -120,13 +133,82 @@ export async function notifyUserPush(
   ]);
 }
 
+export type DiscoverDiscussionNotificationParams = {
+  recipientUserId: string;
+  actorId: string;
+  resource: "post" | "activity";
+  resourceId: string;
+  resourceTitle: string;
+  bodyPreview: string;
+  isReply: boolean;
+};
+
+export function scheduleDiscoverDiscussionNotification(
+  params: DiscoverDiscussionNotificationParams,
+): void {
+  if (params.recipientUserId === params.actorId) return;
+  after(async () => {
+    await notifyDiscoverDiscussion(params).catch((cause) => {
+      console.error("Discover discussion push failed", cause);
+    });
+  });
+}
+
+export async function notifyDiscoverDiscussion(
+  params: DiscoverDiscussionNotificationParams,
+): Promise<void> {
+  const [actor, blocked] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: params.actorId },
+      select: { nickname: true, username: true },
+    }),
+    prisma.block.findFirst({
+      where: {
+        OR: [
+          { blockerId: params.recipientUserId, blockedId: params.actorId },
+          { blockerId: params.actorId, blockedId: params.recipientUserId },
+        ],
+      },
+      select: { id: true },
+    }),
+  ]);
+  if (!actor || blocked) return;
+
+  const actorName = actor.nickname?.trim() || actor.username;
+  const kind: Extract<
+    PushNotificationKind,
+    "discover_comment" | "discover_reply"
+  > = params.isReply ? "discover_reply" : "discover_comment";
+  const resourcePath = params.resource === "post" ? "posts" : "activities";
+  const url = `/discover/${resourcePath}/${params.resourceId}`;
+
+  await notifyUserPush(params.recipientUserId, {
+    title: params.isReply
+      ? `${actorName} replied to you`
+      : `New comment on ${truncate(params.resourceTitle, 60)}`,
+    body: truncate(params.bodyPreview, 140),
+    url,
+    threadId: `discover:${params.resource}:${params.resourceId}`,
+    category: "DISCOVER_COMMENT",
+    data: {
+      kind,
+      resource: params.resource,
+      resourceId: params.resourceId,
+    },
+  });
+}
+
 export type DirectChatNotificationParams = {
   connectionId: string;
   senderId: string;
   bodyPreview: string;
   kind?: Extract<
     PushNotificationKind,
-    "direct_message" | "plan_invite" | "plan_counter" | "plan_accepted" | "plan_declined"
+    | "direct_message"
+    | "plan_invite"
+    | "plan_counter"
+    | "plan_accepted"
+    | "plan_declined"
   >;
   planId?: string;
   planTitle?: string;
@@ -153,7 +235,9 @@ export async function notifyNewDirectChatMessage(
   if (connection.userAId === connection.userBId) return;
 
   const peerId =
-    connection.userAId === params.senderId ? connection.userBId : connection.userAId;
+    connection.userAId === params.senderId
+      ? connection.userBId
+      : connection.userAId;
 
   const peer = await prisma.user.findUnique({
     where: { id: peerId },
@@ -193,7 +277,11 @@ export async function notifyNewDirectChatMessage(
 function directNotificationContent(options: {
   kind: Extract<
     PushNotificationKind,
-    "direct_message" | "plan_invite" | "plan_counter" | "plan_accepted" | "plan_declined"
+    | "direct_message"
+    | "plan_invite"
+    | "plan_counter"
+    | "plan_accepted"
+    | "plan_declined"
   >;
   senderName: string;
   bodyPreview: string;
@@ -303,7 +391,10 @@ export async function notifyNewGroupChatMessage(
   params: GroupChatNotificationParams,
 ): Promise<void> {
   const members = await prisma.groupChatParticipant.findMany({
-    where: { groupChatId: params.groupChatId, userId: { not: params.senderId } },
+    where: {
+      groupChatId: params.groupChatId,
+      userId: { not: params.senderId },
+    },
     select: { userId: true },
   });
   if (members.length === 0) return;
@@ -317,7 +408,9 @@ export async function notifyNewGroupChatMessage(
 
   await Promise.all(
     members.map(async (member) => {
-      const badge = await getInboxUnreadTotal(member.userId).catch(() => undefined);
+      const badge = await getInboxUnreadTotal(member.userId).catch(
+        () => undefined,
+      );
       return notifyUserPush(member.userId, {
         title: params.title?.trim() || "Group chat",
         body,

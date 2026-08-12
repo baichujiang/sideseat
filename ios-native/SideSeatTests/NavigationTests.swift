@@ -83,6 +83,14 @@ struct NavigationTests {
             DeepLinkRouter.route(forPath: "/groups/group-123")
                 == .groupChat(groupChatID: "group-123")
         )
+        #expect(
+            DeepLinkRouter.route(forPath: "/discover/posts/post-123")
+                == .discoverPost(postID: "post-123")
+        )
+        #expect(
+            DeepLinkRouter.route(forPath: "/discover/activities/activity-123")
+                == .activity(activityID: "activity-123")
+        )
         #expect(DeepLinkRouter.route(forPath: "/profile/blocked") == .blockedUsers)
     }
 

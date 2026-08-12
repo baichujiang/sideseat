@@ -200,6 +200,7 @@ struct DiscoverStoreTests {
         #expect(post.detail?.post.title == "Library study buddy")
         #expect(post.detail?.post.savedByViewer == false)
         #expect(post.questions.first?.body == "Is the library card required?")
+        #expect(post.questionTotal == 1)
         await post.setSaved(true, postID: "post-1", using: session)
         #expect(post.detail?.post.savedByViewer == true)
         #expect(post.detail?.post.interestedCount == 3)
@@ -208,11 +209,15 @@ struct DiscoverStoreTests {
             postID: "post-1",
             using: session
         ))
+        #expect(post.questions.first?.body == "Can exchange students join?")
+        #expect(post.questionTotal == 2)
         await post.deleteQuestionComment(
             commentID: "question-1",
             postID: "post-1",
             using: session
         )
+        #expect(post.questions.map(\.id) == ["question-new"])
+        #expect(post.questionTotal == 1)
 
         let activity = DiscoverActivityDetailStore()
         await activity.load(activityID: "activity-1", using: session)
@@ -220,16 +225,21 @@ struct DiscoverStoreTests {
         #expect(activity.detail?.activity.viewerSignupStatus == nil)
         #expect(activity.detail?.calendarEntryId == nil)
         #expect(activity.messages.first?.body == "Is the table reserved?")
+        #expect(activity.messageTotal == 1)
         #expect(await activity.submitMessage(
             body: "Can I arrive late?",
             activityID: "activity-1",
             using: session
         ))
+        #expect(activity.messages.first?.body == "Can I arrive late?")
+        #expect(activity.messageTotal == 2)
         await activity.deleteMessage(
             commentID: "activity-message-1",
             activityID: "activity-1",
             using: session
         )
+        #expect(activity.messages.map(\.id) == ["activity-message-new"])
+        #expect(activity.messageTotal == 1)
         await activity.setSignup(true, activityID: "activity-1", using: session)
         #expect(activity.detail?.activity.viewerSignupStatus == "GOING")
         #expect(activity.detail?.activity.goingCount == 5)
@@ -489,13 +499,13 @@ private actor DiscoverTestTransport: APITransport {
                 return response(
                     request,
                     201,
-                    #"{"data":{"commentId":"question-new","questionId":"question-new"}}"#
+                    #"{"data":{"commentId":"question-new","questionId":"question-new","thread":{"id":"question-new","body":"Can exchange students join?","createdAt":"2026-07-17T12:00:00Z","isOwn":true,"canDelete":true,"canReply":false,"author":{"id":"user-1","displayName":"Test User","avatarUrl":null,"school":"TUM","verifiedStudent":true},"reply":null}}}"#
                 )
             }
             return response(
                 request,
                 200,
-                #"{"data":{"questions":[{"id":"question-1","body":"Is the library card required?","createdAt":"2026-07-17T11:00:00Z","isOwn":true,"canDelete":true,"canReply":false,"author":{"id":"user-1","displayName":"Test User","avatarUrl":null,"school":"TUM","verifiedStudent":true},"reply":{"id":"answer-1","body":"No, meet at the entrance.","createdAt":"2026-07-17T11:10:00Z","isOwn":false,"canDelete":false,"author":{"id":"peer-1","displayName":"Mina","avatarUrl":null,"school":"TUM","verifiedStudent":true}}}]}}"#
+                #"{"data":{"total":1,"questions":[{"id":"question-1","body":"Is the library card required?","createdAt":"2026-07-17T11:00:00Z","isOwn":true,"canDelete":true,"canReply":false,"author":{"id":"user-1","displayName":"Test User","avatarUrl":null,"school":"TUM","verifiedStudent":true},"reply":{"id":"answer-1","body":"No, meet at the entrance.","createdAt":"2026-07-17T11:10:00Z","isOwn":false,"canDelete":false,"author":{"id":"peer-1","displayName":"Mina","avatarUrl":null,"school":"TUM","verifiedStudent":true}}}]}}"#
             )
         case "/api/v1/discover/posts/post-1/questions/question-1":
             lastQuestionDeletePath = request.url?.path
@@ -503,7 +513,7 @@ private actor DiscoverTestTransport: APITransport {
             return response(
                 request,
                 200,
-                #"{"data":{"commentId":"question-1","deleted":true}}"#
+                #"{"data":{"commentId":"question-1","threadId":"question-1","deletedReply":false,"deleted":true}}"#
             )
         case "/api/v1/discover/activities":
             let json = try bodyJSON(request)
@@ -529,13 +539,13 @@ private actor DiscoverTestTransport: APITransport {
                 return response(
                     request,
                     201,
-                    #"{"data":{"commentId":"activity-message-new","messageId":"activity-message-new"}}"#
+                    #"{"data":{"commentId":"activity-message-new","messageId":"activity-message-new","thread":{"id":"activity-message-new","body":"Can I arrive late?","createdAt":"2026-07-17T12:00:00Z","isOwn":true,"canDelete":true,"canReply":false,"author":{"id":"user-1","displayName":"Test User","avatarUrl":null,"school":"TUM","verifiedStudent":true},"reply":null}}}"#
                 )
             }
             return response(
                 request,
                 200,
-                #"{"data":{"messages":[{"id":"activity-message-1","body":"Is the table reserved?","createdAt":"2026-07-17T11:00:00Z","isOwn":true,"canDelete":true,"canReply":false,"author":{"id":"user-1","displayName":"Test User","avatarUrl":null,"school":"TUM","verifiedStudent":true},"reply":{"id":"activity-reply-1","body":"Yes, it is reserved.","createdAt":"2026-07-17T11:10:00Z","isOwn":false,"canDelete":false,"author":{"id":"peer-2","displayName":"Noah","avatarUrl":null,"school":"TUM","verifiedStudent":true}}}]}}"#
+                #"{"data":{"total":1,"messages":[{"id":"activity-message-1","body":"Is the table reserved?","createdAt":"2026-07-17T11:00:00Z","isOwn":true,"canDelete":true,"canReply":false,"author":{"id":"user-1","displayName":"Test User","avatarUrl":null,"school":"TUM","verifiedStudent":true},"reply":{"id":"activity-reply-1","body":"Yes, it is reserved.","createdAt":"2026-07-17T11:10:00Z","isOwn":false,"canDelete":false,"author":{"id":"peer-2","displayName":"Noah","avatarUrl":null,"school":"TUM","verifiedStudent":true}}}]}}"#
             )
         case "/api/v1/discover/activities/activity-1/messages/activity-message-1":
             lastActivityMessageDeletePath = request.url?.path
@@ -543,7 +553,7 @@ private actor DiscoverTestTransport: APITransport {
             return response(
                 request,
                 200,
-                #"{"data":{"commentId":"activity-message-1","deleted":true}}"#
+                #"{"data":{"commentId":"activity-message-1","threadId":"activity-message-1","deletedReply":false,"deleted":true}}"#
             )
         case "/api/v1/discover/activities/activity-1/signup":
             lastSignupPath = request.url?.path

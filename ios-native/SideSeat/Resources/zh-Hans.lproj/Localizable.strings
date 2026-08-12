@@ -707,6 +707,23 @@
 "Would love a darker calendar view for late-night planning." = "希望有更适合夜间规划的深色日历。";
 "Your support means a lot. There’s nothing to restore — tips are one-time only." = "感谢你的支持。无需恢复购买 — 打赏为一次性。";
 
+/* Discover comments */
+"View all" = "查看全部";
+"Loading comments" = "正在加载评论";
+"No comments yet" = "还没有评论";
+"Start the conversation about this plan." = "聊聊这个计划的时间、地点或其他细节。";
+"Comments from interested people will appear here." = "感兴趣的人留下的评论会显示在这里。";
+"Comments are closed for this plan." = "这个计划已关闭评论。";
+"Add a public comment" = "添加公开评论";
+"Report comment" = "举报评论";
+"Delete this comment?" = "删除这条评论？";
+"Delete this reply?" = "删除这条回复？";
+"Reply as organizer" = "以发起人身份回复";
+"Showing the latest %lld comments" = "正在显示最新 %lld 条评论";
+"%lld comments" = "%lld 条评论";
+"Comment actions" = "评论操作";
+"Organizer: %@" = "发起人：%@";
+
 /* Create / publish post polish */
 "Never" = "永久";
 "Optional — up to 3." = "可选，最多 3 张。";

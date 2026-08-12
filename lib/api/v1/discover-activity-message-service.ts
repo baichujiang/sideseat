@@ -69,45 +69,46 @@ export async function loadNativeDiscoverActivityMessages(options: {
   );
   blockedUserIds.delete(options.userId);
 
-  const rows = await prisma.discoverActivityComment.findMany({
-    where: {
-      activityId: options.activityId,
-      parentId: null,
-      userId: { notIn: [...blockedUserIds] },
-      user: { moderationBlocks: { none: { isActive: true } } },
-    },
-    select: {
-      id: true,
-      userId: true,
-      body: true,
-      createdAt: true,
-      user: { select: messageAuthorSelect },
-      reply: {
-        select: {
-          id: true,
-          userId: true,
-          body: true,
-          createdAt: true,
-          user: { select: messageAuthorSelect },
+  const where = {
+    activityId: options.activityId,
+    parentId: null,
+    userId: { notIn: [...blockedUserIds] },
+    user: { moderationBlocks: { none: { isActive: true } } },
+  } satisfies Prisma.DiscoverActivityCommentWhereInput;
+  const [rows, total] = await Promise.all([
+    prisma.discoverActivityComment.findMany({
+      where,
+      select: {
+        id: true,
+        userId: true,
+        body: true,
+        createdAt: true,
+        user: { select: messageAuthorSelect },
+        reply: {
+          select: {
+            id: true,
+            userId: true,
+            body: true,
+            createdAt: true,
+            user: { select: messageAuthorSelect },
+          },
         },
       },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    }),
+    prisma.discoverActivityComment.count({ where }),
+  ]);
 
   const organizerId = detail.activity.organizer.id;
   return {
+    total,
     messages: rows.map((row) => ({
       ...messagePayload(row, options.userId, organizerId),
       canReply: detail.activity.isOrganizer && !row.reply,
       ...(row.reply
         ? {
-            reply: messagePayload(
-              row.reply,
-              options.userId,
-              organizerId,
-            ),
+            reply: messagePayload(row.reply, options.userId, organizerId),
           }
         : {}),
     })),
@@ -147,6 +148,7 @@ export async function createNativeDiscoverActivityMessage(options: {
   }
 
   let messageId: string | null = null;
+  let recipientUserId = activity.organizerId;
   if (options.parentId) {
     if (activity.organizerId !== options.userId) {
       throw new DiscoverActivityMessageMutationError("ORGANIZER_ONLY");
@@ -157,7 +159,7 @@ export async function createNativeDiscoverActivityMessage(options: {
         activityId: options.activityId,
         parentId: null,
       },
-      select: { id: true, reply: { select: { id: true } } },
+      select: { id: true, userId: true, reply: { select: { id: true } } },
     });
     if (!parent) {
       throw new DiscoverActivityMessageMutationError("NOT_FOUND");
@@ -166,6 +168,7 @@ export async function createNativeDiscoverActivityMessage(options: {
       throw new DiscoverActivityMessageMutationError("ALREADY_ANSWERED");
     }
     messageId = parent.id;
+    recipientUserId = parent.userId;
   }
 
   const comment = await options.tx.discoverActivityComment.create({
@@ -178,7 +181,47 @@ export async function createNativeDiscoverActivityMessage(options: {
     select: { id: true },
   });
 
-  return { commentId: comment.id, messageId: messageId ?? comment.id };
+  const threadId = messageId ?? comment.id;
+  const thread = await options.tx.discoverActivityComment.findUniqueOrThrow({
+    where: { id: threadId },
+    select: {
+      id: true,
+      userId: true,
+      body: true,
+      createdAt: true,
+      user: { select: messageAuthorSelect },
+      reply: {
+        select: {
+          id: true,
+          userId: true,
+          body: true,
+          createdAt: true,
+          user: { select: messageAuthorSelect },
+        },
+      },
+    },
+  });
+  return {
+    commentId: comment.id,
+    messageId: threadId,
+    thread: {
+      ...messagePayload(thread, options.userId, activity.organizerId),
+      canReply: activity.organizerId === options.userId && !thread.reply,
+      ...(thread.reply
+        ? {
+            reply: messagePayload(
+              thread.reply,
+              options.userId,
+              activity.organizerId,
+            ),
+          }
+        : {}),
+    },
+    notification: {
+      recipientUserId,
+      isReply: Boolean(messageId),
+    },
+  };
 }
 
 export async function deleteNativeDiscoverActivityMessage(options: {
@@ -192,6 +235,7 @@ export async function deleteNativeDiscoverActivityMessage(options: {
     select: {
       id: true,
       userId: true,
+      parentId: true,
       activity: { select: { organizerId: true } },
     },
   });
@@ -208,5 +252,10 @@ export async function deleteNativeDiscoverActivityMessage(options: {
   await options.tx.discoverActivityComment.delete({
     where: { id: comment.id },
   });
-  return { commentId: comment.id, deleted: true };
+  return {
+    commentId: comment.id,
+    threadId: comment.parentId ?? comment.id,
+    deletedReply: Boolean(comment.parentId),
+    deleted: true,
+  };
 }

@@ -123,7 +123,11 @@ test.describe.serial("API v1 Discover", () => {
     });
     expect(response.status()).toBe(201);
     const payload = (await response.json()) as {
-      data: { id: string; reportedUserId: string; classmatePostId: string | null };
+      data: {
+        id: string;
+        reportedUserId: string;
+        classmatePostId: string | null;
+      };
     };
     createdReportIds.push(payload.data.id);
     expect(payload.data.reportedUserId).toBe(peer.id);
@@ -161,7 +165,15 @@ test.describe.serial("API v1 Discover", () => {
       },
     );
     expect(asked.status()).toBe(201);
-    const questionId = (await asked.json()).data.questionId as string;
+    const askedData = (await asked.json()).data;
+    const questionId = askedData.questionId as string;
+    expect(askedData.thread).toEqual(
+      expect.objectContaining({
+        id: questionId,
+        body: "Should I bring anything?",
+        isOwn: true,
+      }),
+    );
 
     const replay = await request.post(
       `/api/v1/discover/posts/${post.id}/questions`,
@@ -206,7 +218,9 @@ test.describe.serial("API v1 Discover", () => {
       { headers: auth(askerToken) },
     );
     expect(list.status()).toBe(200);
-    expect((await list.json()).data.questions).toEqual([
+    const listedQuestions = (await list.json()).data;
+    expect(listedQuestions.total).toBe(1);
+    expect(listedQuestions.questions).toEqual([
       expect.objectContaining({
         id: questionId,
         body: "Should I bring anything?",
@@ -238,6 +252,35 @@ test.describe.serial("API v1 Discover", () => {
     createdReportIds.push(reportBody.id);
     expect(reportBody.classmatePostCommentId).toBe(answerId);
 
+    const deletedAnswer = await request.delete(
+      `/api/v1/discover/posts/${post.id}/questions/${answerId}`,
+      {
+        headers: auth(hostToken, `discover-answer-delete-${Date.now()}`),
+      },
+    );
+    expect(deletedAnswer.status()).toBe(200);
+    expect((await deletedAnswer.json()).data).toEqual(
+      expect.objectContaining({
+        commentId: answerId,
+        threadId: questionId,
+        deletedReply: true,
+        deleted: true,
+      }),
+    );
+    const afterAnswerDelete = await request.get(
+      `/api/v1/discover/posts/${post.id}/questions`,
+      { headers: auth(hostToken) },
+    );
+    const remainingQuestion = (await afterAnswerDelete.json()).data;
+    expect(remainingQuestion.total).toBe(1);
+    expect(remainingQuestion.questions).toEqual([
+      expect.objectContaining({
+        id: questionId,
+        canReply: true,
+      }),
+    ]);
+    expect(remainingQuestion.questions[0].reply).toBeUndefined();
+
     const deleted = await request.delete(
       `/api/v1/discover/posts/${post.id}/questions/${questionId}`,
       {
@@ -245,7 +288,9 @@ test.describe.serial("API v1 Discover", () => {
       },
     );
     expect(deleted.status()).toBe(200);
-    expect(await prisma.classmatePostComment.count({ where: { postId: post.id } })).toBe(0);
+    expect(
+      await prisma.classmatePostComment.count({ where: { postId: post.id } }),
+    ).toBe(0);
   });
 
   test("supports lightweight activity messages with one organizer reply", async ({
@@ -284,7 +329,15 @@ test.describe.serial("API v1 Discover", () => {
       },
     );
     expect(posted.status()).toBe(201);
-    const messageId = (await posted.json()).data.messageId as string;
+    const postedData = (await posted.json()).data;
+    const messageId = postedData.messageId as string;
+    expect(postedData.thread).toEqual(
+      expect.objectContaining({
+        id: messageId,
+        body: "Should I bring anything?",
+        isOwn: true,
+      }),
+    );
 
     const replay = await request.post(
       `/api/v1/discover/activities/${activity.id}/messages`,
@@ -329,7 +382,9 @@ test.describe.serial("API v1 Discover", () => {
       { headers: auth(senderToken) },
     );
     expect(list.status()).toBe(200);
-    expect((await list.json()).data.messages).toEqual([
+    const listedMessages = (await list.json()).data;
+    expect(listedMessages.total).toBe(1);
+    expect(listedMessages.messages).toEqual([
       expect.objectContaining({
         id: messageId,
         body: "Should I bring anything?",
@@ -361,13 +416,39 @@ test.describe.serial("API v1 Discover", () => {
     createdReportIds.push(reportBody.id);
     expect(reportBody.discoverActivityCommentId).toBe(replyId);
 
+    const deletedReply = await request.delete(
+      `/api/v1/discover/activities/${activity.id}/messages/${replyId}`,
+      {
+        headers: auth(organizerToken, `activity-reply-delete-${Date.now()}`),
+      },
+    );
+    expect(deletedReply.status()).toBe(200);
+    expect((await deletedReply.json()).data).toEqual(
+      expect.objectContaining({
+        commentId: replyId,
+        threadId: messageId,
+        deletedReply: true,
+        deleted: true,
+      }),
+    );
+    const afterReplyDelete = await request.get(
+      `/api/v1/discover/activities/${activity.id}/messages`,
+      { headers: auth(organizerToken) },
+    );
+    const remainingMessage = (await afterReplyDelete.json()).data;
+    expect(remainingMessage.total).toBe(1);
+    expect(remainingMessage.messages).toEqual([
+      expect.objectContaining({
+        id: messageId,
+        canReply: true,
+      }),
+    ]);
+    expect(remainingMessage.messages[0].reply).toBeUndefined();
+
     const deleted = await request.delete(
       `/api/v1/discover/activities/${activity.id}/messages/${messageId}`,
       {
-        headers: auth(
-          senderToken,
-          `activity-message-delete-${Date.now()}`,
-        ),
+        headers: auth(senderToken, `activity-message-delete-${Date.now()}`),
       },
     );
     expect(deleted.status()).toBe(200);
@@ -727,6 +808,14 @@ test.describe.serial("API v1 Discover", () => {
       data: updateData,
     });
     expect(editClosed.status()).toBe(409);
+    const commentOnClosed = await request.post(
+      `/api/v1/discover/posts/${postId}/questions`,
+      {
+        headers: auth(ownerToken, `discover-comment-closed-${nonce}`),
+        data: { body: "Can I still join?" },
+      },
+    );
+    expect(commentOnClosed.status()).toBe(409);
   });
 
   test("creates one activity and exposes it through search", async ({
@@ -955,9 +1044,9 @@ test.describe.serial("API v1 Discover", () => {
       },
     );
     expect(activityDetailAfterCalendar.status()).toBe(200);
-    expect((await activityDetailAfterCalendar.json()).data.calendarEntryId).toBe(
-      calendarBody.data.calendarEntryId,
-    );
+    expect(
+      (await activityDetailAfterCalendar.json()).data.calendarEntryId,
+    ).toBe(calendarBody.data.calendarEntryId);
 
     const left = await request.delete(
       `/api/v1/discover/activities/${activityId}/signup`,
@@ -1035,21 +1124,19 @@ test.describe.serial("API v1 Discover", () => {
     const postId = (await postResponse.json()).data.postId as string;
     createdPostIds.push(postId);
 
-    const activityResponse = await request.post(
-      "/api/v1/discover/activities",
-      {
-        headers: auth(ownerToken, `discover-my-activity-${nonce}`),
-        data: {
-          title: `My published activity ${nonce}`,
-          description: "Also visible from the publishing manager.",
-          startAt: new Date(Date.now() + 6 * 60 * 60_000).toISOString(),
-          location: "Student Center",
-          unlimitedCapacity: true,
-        },
+    const activityResponse = await request.post("/api/v1/discover/activities", {
+      headers: auth(ownerToken, `discover-my-activity-${nonce}`),
+      data: {
+        title: `My published activity ${nonce}`,
+        description: "Also visible from the publishing manager.",
+        startAt: new Date(Date.now() + 6 * 60 * 60_000).toISOString(),
+        location: "Student Center",
+        unlimitedCapacity: true,
       },
-    );
+    });
     expect(activityResponse.status()).toBe(201);
-    const activityId = (await activityResponse.json()).data.activityId as string;
+    const activityId = (await activityResponse.json()).data
+      .activityId as string;
     createdActivityIds.push(activityId);
 
     expect((await request.get("/api/v1/me/posts")).status()).toBe(401);

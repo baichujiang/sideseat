@@ -459,6 +459,7 @@ final class DiscoverCreateStore {
 final class DiscoverPostDetailStore {
     private(set) var detail: NativeDiscoverBuddyPostDetail?
     private(set) var questions: [NativeDiscoverPostQuestion] = []
+    private(set) var questionTotal = 0
     private(set) var isLoading = false
     private(set) var isMutating = false
     private(set) var isLoadingQuestions = false
@@ -476,7 +477,38 @@ final class DiscoverPostDetailStore {
             let post = UITestingDiscoverFixture.feed.buddies.first { $0.id == postID }
                 ?? UITestingDiscoverFixture.feed.buddies[0]
             detail = NativeDiscoverBuddyPostDetail(post: post, viewerCanMessage: true)
-            questions = []
+            questions = [
+                NativeDiscoverPostQuestion(
+                    id: "ui-post-comment",
+                    body: "Is it okay if I join after class?",
+                    createdAt: "2026-08-12T14:00:00Z",
+                    isOwn: true,
+                    canDelete: true,
+                    canReply: false,
+                    author: NativeDiscoverQuestionAuthor(
+                        id: "ui-test-user",
+                        displayName: "Test User",
+                        avatarUrl: nil,
+                        school: "TUM",
+                        verifiedStudent: true
+                    ),
+                    reply: NativeDiscoverPostReply(
+                        id: "ui-post-reply",
+                        body: "Yes, just send me a message when you arrive.",
+                        createdAt: "2026-08-12T14:05:00Z",
+                        isOwn: false,
+                        canDelete: false,
+                        author: NativeDiscoverQuestionAuthor(
+                            id: post.author.id,
+                            displayName: post.author.displayName,
+                            avatarUrl: post.author.avatarUrl,
+                            school: post.author.school,
+                            verifiedStudent: post.author.verifiedStudent
+                        )
+                    )
+                )
+            ]
+            questionTotal = questions.count
             return
         }
         #endif
@@ -500,7 +532,6 @@ final class DiscoverPostDetailStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            questions = []
             return
         }
         #endif
@@ -510,6 +541,7 @@ final class DiscoverPostDetailStore {
                 "api/v1/discover/posts/\(postID)/questions"
             )
             questions = response.data.questions
+            questionTotal = response.data.total
         } catch {
             questionIssue = error.localizedDescription
         }
@@ -530,18 +562,56 @@ final class DiscoverPostDetailStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            guard let user = session.currentUser else { return false }
+            let author = NativeDiscoverQuestionAuthor(
+                id: user.id,
+                displayName: user.displayName,
+                avatarUrl: user.avatarUrl,
+                school: user.school,
+                verifiedStudent: user.verifiedStudent
+            )
+            if let parentID,
+               let index = questions.firstIndex(where: { $0.id == parentID }) {
+                let reply = NativeDiscoverPostReply(
+                    id: "ui-post-reply-\(UUID().uuidString)",
+                    body: trimmed,
+                    createdAt: Date().formatted(.iso8601),
+                    isOwn: true,
+                    canDelete: true,
+                    author: author
+                )
+                questions[index] = questions[index].replacingReply(reply, canReply: false)
+            } else {
+                questions.insert(
+                    NativeDiscoverPostQuestion(
+                        id: "ui-post-comment-\(UUID().uuidString)",
+                        body: trimmed,
+                        createdAt: Date().formatted(.iso8601),
+                        isOwn: true,
+                        canDelete: true,
+                        canReply: false,
+                        author: author,
+                        reply: nil
+                    ),
+                    at: 0
+                )
+                questionTotal += 1
+            }
             return true
         }
         #endif
 
         do {
-            let _: APIEnvelope<NativeDiscoverQuestionMutation> = try await session.sendAuthorized(
+            let response: APIEnvelope<NativeDiscoverQuestionMutation> = try await session.sendAuthorized(
                 "api/v1/discover/posts/\(postID)/questions",
                 method: .post,
                 body: NativeDiscoverQuestionWriteRequest(body: trimmed, parentId: parentID),
                 idempotencyKey: UUID().uuidString
             )
-            await loadQuestions(postID: postID, using: session)
+            upsertQuestionThread(response.data.thread)
+            if parentID == nil {
+                questionTotal += 1
+            }
             return true
         } catch {
             questionIssue = error.localizedDescription
@@ -559,15 +629,49 @@ final class DiscoverPostDetailStore {
         questionIssue = nil
         defer { isMutatingQuestion = false }
 
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            if let index = questions.firstIndex(where: { $0.reply?.id == commentID }) {
+                questions[index] = questions[index].replacingReply(
+                    nil,
+                    canReply: detail?.post.isOwn == true
+                )
+            } else {
+                questions.removeAll { $0.id == commentID }
+                questionTotal = max(0, questionTotal - 1)
+            }
+            return
+        }
+        #endif
+
         do {
-            let _: APIEnvelope<NativeDiscoverQuestionDeletion> = try await session.sendAuthorized(
+            let response: APIEnvelope<NativeDiscoverQuestionDeletion> = try await session.sendAuthorized(
                 "api/v1/discover/posts/\(postID)/questions/\(commentID)",
                 method: .delete,
                 idempotencyKey: UUID().uuidString
             )
-            await loadQuestions(postID: postID, using: session)
+            applyQuestionDeletion(response.data)
         } catch {
             questionIssue = error.localizedDescription
+        }
+    }
+
+    private func upsertQuestionThread(_ thread: NativeDiscoverPostQuestion) {
+        questions.removeAll { $0.id == thread.id }
+        questions.append(thread)
+        questions.sort { ($0.createdDate ?? .distantPast) > ($1.createdDate ?? .distantPast) }
+    }
+
+    private func applyQuestionDeletion(_ deletion: NativeDiscoverQuestionDeletion) {
+        if deletion.deletedReply,
+           let index = questions.firstIndex(where: { $0.id == deletion.threadId }) {
+            questions[index] = questions[index].replacingReply(
+                nil,
+                canReply: detail?.post.isOwn == true
+            )
+        } else {
+            questions.removeAll { $0.id == deletion.threadId }
+            questionTotal = max(0, questionTotal - 1)
         }
     }
 
@@ -717,6 +821,7 @@ final class DiscoverPostDetailStore {
 final class DiscoverActivityDetailStore {
     private(set) var detail: NativeDiscoverActivityDetail?
     private(set) var messages: [NativeDiscoverPostQuestion] = []
+    private(set) var messageTotal = 0
     private(set) var isLoading = false
     private(set) var isMutating = false
     private(set) var isLoadingMessages = false
@@ -772,6 +877,7 @@ final class DiscoverActivityDetailStore {
                     )
                 )
             ]
+            messageTotal = messages.count
             return
         }
         #endif
@@ -804,6 +910,7 @@ final class DiscoverActivityDetailStore {
                 "api/v1/discover/activities/\(activityID)/messages"
             )
             messages = response.data.messages
+            messageTotal = response.data.total
         } catch {
             messageIssue = error.localizedDescription
         }
@@ -824,18 +931,56 @@ final class DiscoverActivityDetailStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            guard let user = session.currentUser else { return false }
+            let author = NativeDiscoverQuestionAuthor(
+                id: user.id,
+                displayName: user.displayName,
+                avatarUrl: user.avatarUrl,
+                school: user.school,
+                verifiedStudent: user.verifiedStudent
+            )
+            if let parentID,
+               let index = messages.firstIndex(where: { $0.id == parentID }) {
+                let reply = NativeDiscoverPostReply(
+                    id: "ui-activity-reply-\(UUID().uuidString)",
+                    body: trimmed,
+                    createdAt: Date().formatted(.iso8601),
+                    isOwn: true,
+                    canDelete: true,
+                    author: author
+                )
+                messages[index] = messages[index].replacingReply(reply, canReply: false)
+            } else {
+                messages.insert(
+                    NativeDiscoverPostQuestion(
+                        id: "ui-activity-comment-\(UUID().uuidString)",
+                        body: trimmed,
+                        createdAt: Date().formatted(.iso8601),
+                        isOwn: true,
+                        canDelete: true,
+                        canReply: false,
+                        author: author,
+                        reply: nil
+                    ),
+                    at: 0
+                )
+                messageTotal += 1
+            }
             return true
         }
         #endif
 
         do {
-            let _: APIEnvelope<NativeDiscoverMessageMutation> = try await session.sendAuthorized(
+            let response: APIEnvelope<NativeDiscoverMessageMutation> = try await session.sendAuthorized(
                 "api/v1/discover/activities/\(activityID)/messages",
                 method: .post,
                 body: NativeDiscoverQuestionWriteRequest(body: trimmed, parentId: parentID),
                 idempotencyKey: UUID().uuidString
             )
-            await loadMessages(activityID: activityID, using: session)
+            upsertMessageThread(response.data.thread)
+            if parentID == nil {
+                messageTotal += 1
+            }
             return true
         } catch {
             messageIssue = error.localizedDescription
@@ -855,20 +1000,47 @@ final class DiscoverActivityDetailStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            messages.removeAll { $0.id == commentID || $0.reply?.id == commentID }
+            if let index = messages.firstIndex(where: { $0.reply?.id == commentID }) {
+                messages[index] = messages[index].replacingReply(
+                    nil,
+                    canReply: detail?.activity.isOrganizer == true
+                )
+            } else {
+                messages.removeAll { $0.id == commentID }
+                messageTotal = max(0, messageTotal - 1)
+            }
             return
         }
         #endif
 
         do {
-            let _: APIEnvelope<NativeDiscoverQuestionDeletion> = try await session.sendAuthorized(
+            let response: APIEnvelope<NativeDiscoverQuestionDeletion> = try await session.sendAuthorized(
                 "api/v1/discover/activities/\(activityID)/messages/\(commentID)",
                 method: .delete,
                 idempotencyKey: UUID().uuidString
             )
-            await loadMessages(activityID: activityID, using: session)
+            applyMessageDeletion(response.data)
         } catch {
             messageIssue = error.localizedDescription
+        }
+    }
+
+    private func upsertMessageThread(_ thread: NativeDiscoverPostQuestion) {
+        messages.removeAll { $0.id == thread.id }
+        messages.append(thread)
+        messages.sort { ($0.createdDate ?? .distantPast) > ($1.createdDate ?? .distantPast) }
+    }
+
+    private func applyMessageDeletion(_ deletion: NativeDiscoverQuestionDeletion) {
+        if deletion.deletedReply,
+           let index = messages.firstIndex(where: { $0.id == deletion.threadId }) {
+            messages[index] = messages[index].replacingReply(
+                nil,
+                canReply: detail?.activity.isOrganizer == true
+            )
+        } else {
+            messages.removeAll { $0.id == deletion.threadId }
+            messageTotal = max(0, messageTotal - 1)
         }
     }
 

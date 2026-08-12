@@ -197,6 +197,8 @@ extension SideSeatAppDelegate: UNUserNotificationCenterDelegate {
         let isChat = path.hasPrefix("/connections/")
             || (path.hasPrefix("/courses/") && path.hasSuffix("/chat"))
             || path.hasPrefix("/groups/")
+        let isDiscover = path.hasPrefix("/discover/posts/")
+            || path.hasPrefix("/discover/activities/")
         Task { @MainActor in
             if isChat {
                 NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
@@ -206,6 +208,9 @@ extension SideSeatAppDelegate: UNUserNotificationCenterDelegate {
             }
             if notice.updatesCalendar {
                 NotificationCenter.default.post(name: .sideSeatCalendarNeedsRefresh, object: nil)
+            }
+            if isDiscover {
+                NotificationCenter.default.post(name: .sideSeatDiscoverNeedsRefresh, object: nil)
             }
         }
     }

@@ -706,6 +706,23 @@
 "Would love a darker calendar view for late-night planning." = "Would love a darker calendar view for late-night planning.";
 "Your support means a lot. There’s nothing to restore — tips are one-time only." = "Your support means a lot. There’s nothing to restore — tips are one-time only.";
 
+/* Discover comments */
+"View all" = "View all";
+"Loading comments" = "Loading comments";
+"No comments yet" = "No comments yet";
+"Start the conversation about this plan." = "Start the conversation about this plan.";
+"Comments from interested people will appear here." = "Comments from interested people will appear here.";
+"Comments are closed for this plan." = "Comments are closed for this plan.";
+"Add a public comment" = "Add a public comment";
+"Report comment" = "Report comment";
+"Delete this comment?" = "Delete this comment?";
+"Delete this reply?" = "Delete this reply?";
+"Reply as organizer" = "Reply as organizer";
+"Showing the latest %lld comments" = "Showing the latest %lld comments";
+"%lld comments" = "%lld comments";
+"Comment actions" = "Comment actions";
+"Organizer: %@" = "Organizer: %@";
+
 /* Create / publish post polish */
 "Never" = "Never";
 "Optional — up to 3." = "Optional — up to 3.";

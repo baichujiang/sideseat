@@ -16,6 +16,7 @@ import { loadNativeDiscoverActivityDetail } from "@/lib/api/v1/discover-service"
 import { parseV1Json, v1Error, v1Success } from "@/lib/api/v1/http";
 import { hashIdempotencyRequest } from "@/lib/api/v1/idempotency";
 import { runV1Mutation } from "@/lib/api/v1/mutation";
+import { scheduleDiscoverDiscussionNotification } from "@/lib/push/notify-user";
 
 export const dynamic = "force-dynamic";
 
@@ -111,22 +112,39 @@ export async function POST(
     const limited = await limitDiscoverWrite(request, auth.user.id);
     if (limited) return limited;
 
+    let notification: { recipientUserId: string; isReply: boolean } | undefined;
     const result = await runV1Mutation({
       actorId: auth.user.id,
       key: idempotency.key,
       scope: `native-discover-activity-message-create:${activityId}`,
       requestHash: hashIdempotencyRequest({ activityId, ...values }),
-      execute: async (tx) => ({
-        status: 201,
-        body: (await createNativeDiscoverActivityMessage({
+      execute: async (tx) => {
+        const created = await createNativeDiscoverActivityMessage({
           userId: auth.user.id,
           activityId,
           body: values.body,
           parentId: values.parentId,
           tx,
-        })) as Prisma.InputJsonObject,
-      }),
+        });
+        notification = created.notification;
+        const body = {
+          commentId: created.commentId,
+          messageId: created.messageId,
+          thread: created.thread,
+        };
+        return { status: 201, body: body as Prisma.InputJsonObject };
+      },
     });
+    if (result.kind === "completed" && notification) {
+      scheduleDiscoverDiscussionNotification({
+        ...notification,
+        actorId: auth.user.id,
+        resource: "activity",
+        resourceId: activityId,
+        resourceTitle: detail.activity.title,
+        bodyPreview: values.body,
+      });
+    }
     return discoverMutationResponse(request, result);
   } catch (cause) {
     if (

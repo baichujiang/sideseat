@@ -2396,6 +2396,192 @@
         }
       }
     },
+    "/api/v1/discover/activities/{activityId}/messages": {
+      "get": {
+        "operationId": "listDiscoverActivityMessages",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public comments and organizer replies for a visible activity.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoverActivityMessageListEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createDiscoverActivityMessage",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscoverQuestionWriteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "An activity comment or organizer reply was created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoverActivityMessageMutationEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/api/v1/discover/activities/{activityId}/messages/{commentId}": {
+      "delete": {
+        "operationId": "deleteDiscoverActivityMessage",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The activity comment or organizer reply was deleted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoverQuestionDeletionEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
     "/api/v1/discover/activities/{activityId}/signup": {
       "post": {
         "operationId": "joinDiscoverActivity",
@@ -9107,6 +9293,10 @@
           "data": {
             "type": "object",
             "properties": {
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
               "questions": {
                 "type": "array",
                 "items": {
@@ -9115,6 +9305,7 @@
               }
             },
             "required": [
+              "total",
               "questions"
             ]
           }
@@ -9151,11 +9342,15 @@
               },
               "questionId": {
                 "type": "string"
+              },
+              "thread": {
+                "$ref": "#/components/schemas/DiscoverQuestion"
               }
             },
             "required": [
               "commentId",
-              "questionId"
+              "questionId",
+              "thread"
             ]
           }
         },
@@ -9172,6 +9367,12 @@
               "commentId": {
                 "type": "string"
               },
+              "threadId": {
+                "type": "string"
+              },
+              "deletedReply": {
+                "type": "boolean"
+              },
               "deleted": {
                 "type": "boolean",
                 "const": true
@@ -9179,7 +9380,63 @@
             },
             "required": [
               "commentId",
+              "threadId",
+              "deletedReply",
               "deleted"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DiscoverActivityMessageListEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "messages": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DiscoverQuestion"
+                }
+              }
+            },
+            "required": [
+              "total",
+              "messages"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DiscoverActivityMessageMutationEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "commentId": {
+                "type": "string"
+              },
+              "messageId": {
+                "type": "string"
+              },
+              "thread": {
+                "$ref": "#/components/schemas/DiscoverQuestion"
+              }
+            },
+            "required": [
+              "commentId",
+              "messageId",
+              "thread"
             ]
           }
         },
