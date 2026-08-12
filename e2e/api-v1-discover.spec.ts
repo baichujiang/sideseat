@@ -12,6 +12,7 @@ const DISCOVER_TEST_IP = `198.51.100.${(process.pid % 180) + 60}`;
 const createdPostIds: string[] = [];
 const createdActivityIds: string[] = [];
 const createdReportIds: string[] = [];
+const createdConnectionIds: string[] = [];
 const ONE_PIXEL_PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=",
   "base64",
@@ -51,6 +52,9 @@ test.afterAll(async () => {
   });
   await prisma.discoverActivity.deleteMany({
     where: { id: { in: createdActivityIds } },
+  });
+  await prisma.connection.deleteMany({
+    where: { id: { in: createdConnectionIds } },
   });
   await prisma.apiIdempotencyRecord.deleteMany({
     where: {
@@ -315,6 +319,62 @@ test.describe.serial("API v1 Discover", () => {
     ]);
     expect(payload.activities).toEqual([]);
     await prisma.classmatePost.delete({ where: { id: body.postId } });
+  });
+
+  test("keeps public buddy posts visible after users connect", async ({
+    request,
+  }) => {
+    const token = await accessToken(request);
+    const [viewer, peer] = await Promise.all([
+      prisma.user.findUniqueOrThrow({
+        where: { username: E2E_USER },
+        select: { id: true },
+      }),
+      prisma.user.findUniqueOrThrow({
+        where: { username: E2E_PEER },
+        select: { id: true },
+      }),
+    ]);
+    const existingConnection = await prisma.connection.findFirst({
+      where: {
+        status: "ACTIVE",
+        OR: [
+          { userAId: viewer.id, userBId: peer.id },
+          { userAId: peer.id, userBId: viewer.id },
+        ],
+      },
+      select: { id: true },
+    });
+    if (!existingConnection) {
+      const connection = await prisma.connection.create({
+        data: { userAId: viewer.id, userBId: peer.id, status: "ACTIVE" },
+        select: { id: true },
+      });
+      createdConnectionIds.push(connection.id);
+    }
+
+    const nonce = `Connected peer post ${Date.now()}-${process.pid}`;
+    const post = await prisma.classmatePost.create({
+      data: {
+        userId: peer.id,
+        city: "Munich",
+        category: "OTHER",
+        title: nonce,
+        visibility: "CITY_INTERNATIONALS",
+        expiresAt: new Date(Date.now() + 24 * 60 * 60_000),
+      },
+      select: { id: true },
+    });
+    createdPostIds.push(post.id);
+
+    const feed = await request.get(
+      `/api/v1/discover?q=${encodeURIComponent(nonce)}`,
+      { headers: auth(token) },
+    );
+    expect(feed.status()).toBe(200);
+    expect((await feed.json()).data.buddies).toEqual([
+      expect.objectContaining({ id: post.id, isOwn: false }),
+    ]);
   });
 
   test("uploads a bounded buddy image and attaches it to a created post", async ({

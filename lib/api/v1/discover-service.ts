@@ -527,29 +527,14 @@ export async function loadNativeDiscoverFeed(options: {
   query?: string | null;
 }) {
   const query = options.query?.trim().toLocaleLowerCase() ?? "";
-  const [posts, activities, connections] = await Promise.all([
+  const [posts, activities] = await Promise.all([
     loadActiveDiscoverPostsForCity(options.city, options.userId),
     loadActiveDiscoverActivitiesForCity(options.city, options.userId),
-    prisma.connection.findMany({
-      where: {
-        status: ConnectionStatus.ACTIVE,
-        OR: [{ userAId: options.userId }, { userBId: options.userId }],
-      },
-      select: { userAId: true, userBId: true },
-    }),
   ]);
-  const connectedUserIds = new Set(
-    connections.map((connection) =>
-      connection.userAId === options.userId
-        ? connection.userBId
-        : connection.userAId,
-    ),
-  );
 
   return {
     city: options.city,
     buddies: posts
-      .filter((post) => post.isOwn || !connectedUserIds.has(post.userId))
       .filter((post) => postMatchesQuery(post, query))
       .map(toNativeDiscoverPost),
     activities: activities
