@@ -291,6 +291,33 @@ struct HomeScheduleTests {
         #expect(originalSecond.identifier != movedSecond.identifier)
     }
 
+    @Test("Schedules all-day events at nine on their Berlin calendar day")
+    func allDayReminderPlanning() throws {
+        let calendar = Calendar.sideSeatBerlin
+        let now = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 10, day: 24, hour: 12))
+        )
+        let start = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 10, day: 25))
+        )
+        let end = try #require(calendar.date(byAdding: .day, value: 2, to: start))
+        let schedule = reminderSchedule(entries: [entry(id: "reading-week", start: start, end: end)])
+
+        let reminder = try #require(
+            CalendarReminderPlanner.candidates(
+                for: schedule,
+                now: now,
+                calendar: calendar
+            ).first
+        )
+        let expected = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 10, day: 25, hour: 9))
+        )
+
+        #expect(reminder.fireDate == expected)
+        #expect(reminder.isAllDay)
+    }
+
     private func reminderSchedule(entries: [NativeHomeStudyEntry]) -> NativeHomeSchedule {
         NativeHomeSchedule(
             window: NativeHomeScheduleWindow(start: "", end: "", timeZone: "Europe/Berlin"),

@@ -27,8 +27,9 @@ export type ContactExchangeState =
  *    handles from /me).
  *  - Else, if the newest row is PENDING, it's `incoming_pending` for the
  *    responder and `outgoing_pending` for the requester.
- *  - Else, if the newest row was DECLINED or CANCELED within the cooldown
- *    window, we're in `cooldown` (until `row.updatedAt + cooldown`).
+ *  - Else, if the newest row was DECLINED within the cooldown window, we're
+ *    in `cooldown` (until `row.updatedAt + cooldown`). A requester cancel is
+ *    not a rejection and immediately returns the exchange to `none`.
  *  - Otherwise `none` — anyone can kick off a new request.
  */
 export function deriveContactExchangeState(
@@ -53,7 +54,7 @@ export function deriveContactExchangeState(
       : { kind: "incoming_pending", requestId: latest.id };
   }
 
-  if (latest.status === "DECLINED" || latest.status === "CANCELED") {
+  if (latest.status === "DECLINED") {
     const cooldownMs = CONTACT_EXCHANGE_DECLINE_COOLDOWN_HOURS * 60 * 60 * 1000;
     const until = new Date(latest.updatedAt.getTime() + cooldownMs);
     if (until.getTime() > Date.now()) {

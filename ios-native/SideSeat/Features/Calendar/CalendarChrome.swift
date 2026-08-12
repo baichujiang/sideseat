@@ -5,6 +5,13 @@ import SwiftUI
 /// Selection uses ``SideSeatTheme/accent``; “now” / today markers use ``nowRed`` /
 /// ``SideSeatTheme/calendarNow``. Never paint brand gradients into the grid.
 enum CalendarChrome {
+    struct EventHitTargetLayout: Equatable {
+        let top: CGFloat
+        let topInset: CGFloat
+        let bottomInset: CGFloat
+        let targetHeight: CGFloat
+    }
+
     // MARK: - Grid metrics
 
     static let weekMinuteHeight: CGFloat = 0.94
@@ -36,6 +43,8 @@ enum CalendarChrome {
     static let columnDivider = Color.primary.opacity(0.08)
     /// Alias of `SideSeatTheme.calendarNow` — kept separate from accent selection.
     static let nowRed = SideSeatTheme.calendarNow
+    /// Solid surface for white text in Today / current-time controls.
+    static let nowFill = SideSeatTheme.calendarNowFill
 
     // MARK: - Typography
 
@@ -47,16 +56,16 @@ enum CalendarChrome {
         static let allDayLabel = Font.caption2.weight(.semibold)
         static let nowBadge = Font.system(size: 10, weight: .semibold, design: .rounded)
         static let eventTitle = Font.caption.weight(.semibold)
-        static let eventTitleCompact = Font.system(size: 10, weight: .semibold)
+        static let eventTitleCompact = Font.caption2.weight(.semibold)
         static let eventSubtitle = Font.caption2.monospacedDigit()
     }
 
     // MARK: - Selection vs today colors
 
     static func weekdayForeground(selected: Bool, isToday: Bool) -> Color {
-        if selected { return SideSeatTheme.accent }
+        if selected { return SideSeatTheme.textPrimary }
         if isToday { return nowRed }
-        return SideSeatTheme.textSecondary
+        return SideSeatTheme.textSecondaryStrong
     }
 
     static func dayNumberForeground(selected: Bool, isToday: Bool) -> Color {
@@ -121,6 +130,28 @@ enum CalendarChrome {
         return compactTimeRange(from: start, to: end, calendar: calendar)
     }
 
+    /// Expands short timeline events to a 44pt interaction target without changing their
+    /// visible duration. Near midnight boundaries, expansion stays inside the day grid.
+    static func eventHitTargetLayout(
+        visualTop: CGFloat,
+        visualHeight: CGFloat,
+        gridHeight: CGFloat,
+        minimumTargetHeight: CGFloat = 44
+    ) -> EventHitTargetLayout {
+        let targetHeight = max(minimumTargetHeight, visualHeight)
+        let maximumTop = max(0, gridHeight - targetHeight)
+        let preferredTop = visualTop - (targetHeight - visualHeight) / 2
+        let top = min(max(0, preferredTop), maximumTop)
+        let topInset = max(0, visualTop - top)
+        let bottomInset = max(0, targetHeight - topInset - visualHeight)
+        return EventHitTargetLayout(
+            top: top,
+            topInset: topInset,
+            bottomInset: bottomInset,
+            targetHeight: targetHeight
+        )
+    }
+
     /// Hour rail labels — plain digits, never localized "9时" / "9 AM".
     static func compactHour(_ hour: Int) -> String {
         String(hour)
@@ -155,6 +186,8 @@ struct CalendarDayChipLabel: View {
                 .font(CalendarChrome.Typography.weekday)
                 .foregroundStyle(CalendarChrome.weekdayForeground(selected: selected, isToday: isToday))
                 .textCase(.uppercase)
+                .accessibilityIdentifier("calendar-weekday-visual")
+                .accessibilityHidden(true)
 
             Text(CalendarChrome.dayNumber(day, calendar: calendar))
                 .font(dayNumberFont)
@@ -173,6 +206,8 @@ struct CalendarDayChipLabel: View {
                         Circle().fill(CalendarChrome.nowRed.opacity(0.12))
                     }
                 }
+                .accessibilityIdentifier("calendar-day-number-visual")
+                .accessibilityHidden(true)
         }
         .modifier(CalendarDayChipFrame(style: style))
     }
@@ -255,15 +290,17 @@ struct CalendarEventBlockLabel: View {
                     .font(titleFont)
                     .foregroundStyle(SideSeatTheme.textPrimary)
                     .lineLimit(titleLineLimit)
-                    .minimumScaleFactor(0.72)
                     .truncationMode(.tail)
+                    .accessibilityIdentifier("calendar-event-title-visual")
+                    .accessibilityHidden(true)
 
                 if let subtitle, displaysSubtitle {
                     Text(subtitle)
                         .font(CalendarChrome.Typography.eventSubtitle)
-                        .foregroundStyle(SideSeatTheme.textSecondary)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.8)
+                        .accessibilityIdentifier("calendar-event-subtitle-visual")
+                        .accessibilityHidden(true)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

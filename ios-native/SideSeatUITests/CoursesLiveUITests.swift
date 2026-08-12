@@ -13,17 +13,19 @@ final class CoursesLiveUITests: XCTestCase {
         )
     }
 
-    func testSearchSaveJoinAndApplyOfficialTimetable() {
+    func testSearchCurrentCourseAndApplyOfficialTimetable() {
         let environment = ProcessInfo.processInfo.environment
-        let username = environment["E2E_USER"] ?? "test_001"
-        let password = environment["E2E_PASSWORD"] ?? "Password123"
+        let username = sideSeatLiveEnvironmentValue("E2E_USER", fallback: "test_001")
+        let password = sideSeatLiveEnvironmentValue("E2E_PASSWORD", fallback: "Password123")
         let courseID = environment["E2E_COURSE_ID"]!
         let courseName = environment["E2E_COURSE_NAME"]!
         let app = XCUIApplication()
         app.launchArguments = [
             "--ui-testing-signed-out",
             "--ui-testing-ephemeral-credentials",
+            "--ui-testing-skip-tutorial",
         ]
+        app.configureForSideSeatLiveAPI()
         app.launch()
 
         let identifier = app.textFields["login-identifier"]
@@ -35,9 +37,6 @@ final class CoursesLiveUITests: XCTestCase {
         passwordField.typeText(password)
         app.buttons["login-submit"].tap()
 
-        let more = app.buttons["calendar-more-menu"]
-        XCTAssertTrue(more.waitForExistence(timeout: 10))
-        more.tap()
         let courses = app.buttons["open-courses"]
         XCTAssertTrue(courses.waitForExistence(timeout: 10))
         courses.tap()
@@ -51,13 +50,8 @@ final class CoursesLiveUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10))
         row.tap()
 
-        let save = app.buttons["course-save"]
-        XCTAssertTrue(save.waitForExistence(timeout: 5))
-        save.tap()
-        XCTAssertTrue(app.buttons["course-save"].waitForExistence(timeout: 5))
-
-        app.buttons["course-join"].tap()
         XCTAssertTrue(app.buttons["course-leave"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["course-open-chat"].exists)
 
         let timetable = app.buttons.matching(
             NSPredicate(format: "identifier BEGINSWITH 'course-use-schedule-'")

@@ -17,6 +17,7 @@ import {
   LanguageProficiency,
   LanguageTag,
   StudentVerificationStatus,
+  Weekday,
 } from "@prisma/client";
 
 import { nicknameToKey } from "@/lib/auth/nickname-key";
@@ -326,6 +327,113 @@ async function enrollInMlIfAvailable(userId: string) {
   return course.id;
 }
 
+async function seedMlOfficialSchedule(courseId: string) {
+  const fingerprint = "test-fixture:in2064:lecture-and-tutorial";
+  const variant = await prisma.courseOfficialScheduleVariant.upsert({
+    where: { courseId_fingerprint: { courseId, fingerprint } },
+    update: {
+      label: "Lecture + tutorial",
+      externalKey: "test-fixture-in2064",
+      syncedAt: new Date(),
+    },
+    create: {
+      courseId,
+      label: "Lecture + tutorial",
+      fingerprint,
+      externalKey: "test-fixture-in2064",
+    },
+  });
+
+  await prisma.courseOfficialScheduleSession.deleteMany({
+    where: { variantId: variant.id },
+  });
+  await prisma.courseOfficialScheduleSession.createMany({
+    data: [
+      {
+        variantId: variant.id,
+        weekday: Weekday.MON,
+        startMinute: 10 * 60,
+        endMinute: 12 * 60,
+        location: "MI HS 1",
+      },
+      {
+        variantId: variant.id,
+        weekday: Weekday.WED,
+        startMinute: 14 * 60,
+        endMinute: 16 * 60,
+        location: "MI 00.13.009A",
+      },
+    ],
+  });
+  await prisma.course.update({
+    where: { id: courseId },
+    data: { officialScheduleSyncedAt: new Date() },
+  });
+}
+
+async function resetLiveUITestArtifacts() {
+  // API rate-limit counters live in PostgreSQL, so restarting Next.js is not
+  // enough to isolate repeated local regression runs.
+  const rateLimits = await prisma.apiRateLimitCounter.deleteMany();
+  const plans = await prisma.planRequest.findMany({
+    where: { title: { startsWith: "[live-ui]" } },
+    select: { id: true },
+  });
+  const planIds = plans.map((plan) => plan.id);
+  if (planIds.length > 0) {
+    await prisma.calendarEntry.deleteMany({
+      where: { planRequestId: { in: planIds } },
+    });
+    await prisma.message.deleteMany({
+      where: { planRequestId: { in: planIds } },
+    });
+    await prisma.planRequest.deleteMany({
+      where: { id: { in: planIds } },
+    });
+  }
+
+  const [messages, posts] = await Promise.all([
+    prisma.message.deleteMany({
+      where: { body: { startsWith: "[live-ui]" } },
+    }),
+    prisma.classmatePost.deleteMany({
+      where: { title: { startsWith: "[live-ui]" } },
+    }),
+  ]);
+  const [groups, feedback] = await Promise.all([
+    prisma.groupChat.deleteMany({
+      where: { title: { startsWith: "[live-ui]" } },
+    }),
+    prisma.productFeedback.deleteMany({
+      where: { title: { startsWith: "[live-ui]" } },
+    }),
+  ]);
+  const calendarEntries = await prisma.calendarEntry.deleteMany({
+    where: { title: { startsWith: "Native live event " } },
+  });
+  const calendarCategories = await prisma.userCalendarCategory.deleteMany({
+    where: { name: { startsWith: "Native live calendar " } },
+  });
+  const signupAccounts = await prisma.user.deleteMany({
+    where: { username: { startsWith: "liveui_" } },
+  });
+  const removed =
+    planIds.length +
+    messages.count +
+    posts.count +
+    groups.count +
+    feedback.count +
+    calendarEntries.count +
+    calendarCategories.count +
+    signupAccounts.count;
+  if (removed > 0) {
+    console.log(`  Live UI cleanup: removed ${removed} prior artifact(s)`);
+  }
+  if (rateLimits.count > 0) {
+    console.log(`  Test rate limits: reset ${rateLimits.count} counter(s)`);
+  }
+}
+
 async function seedDiscoverActivitiesIfMissing(organizerId: string, participantId: string) {
   const marker = "[test]";
   const existing = await prisma.discoverActivity.findFirst({
@@ -475,8 +583,11 @@ async function main() {
   const u002 = byName.test_002;
   const u003 = byName.test_003;
 
+  await resetLiveUITestArtifacts();
+
   const mlCourseId = await enrollInMlIfAvailable(u001.id);
   if (mlCourseId) {
+    await seedMlOfficialSchedule(mlCourseId);
     await enrollInMlIfAvailable(u002.id);
     await enrollInMlIfAvailable(u003.id);
   }
@@ -486,6 +597,15 @@ async function main() {
 
   await seedDmIfEmpty(conn001002.id, u001.id, u002.id);
   await seedDmIfEmpty(conn001003.id, u003.id, u001.id);
+  const readAt = new Date();
+  await prisma.connection.update({
+    where: { id: conn001002.id },
+    data: { readByAAt: readAt, readByBAt: readAt },
+  });
+  await prisma.connection.update({
+    where: { id: conn001003.id },
+    data: { readByAAt: readAt, readByBAt: readAt },
+  });
 
   await seedFriendLinkIfMissing(
     conn001002.id,

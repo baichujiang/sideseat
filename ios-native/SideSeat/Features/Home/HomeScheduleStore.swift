@@ -34,9 +34,15 @@ final class HomeScheduleStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            let fixture = ProcessInfo.processInfo.arguments.contains("--ui-testing-dense-calendar")
-                ? NativeHomeSchedule.uiTestingDenseFixture(now: focus)
-                : NativeHomeSchedule.uiTestingFixture(now: focus)
+            let arguments = ProcessInfo.processInfo.arguments
+            let fixture: NativeHomeSchedule
+            if arguments.contains("--ui-testing-dense-calendar") {
+                fixture = NativeHomeSchedule.uiTestingDenseFixture(now: focus)
+            } else if arguments.contains("--ui-testing-all-day-calendar") {
+                fixture = NativeHomeSchedule.uiTestingAllDayFixture(now: focus)
+            } else {
+                fixture = NativeHomeSchedule.uiTestingFixture(now: focus)
+            }
             replaceSchedule(fixture)
             let calendar = Calendar.sideSeatBerlin
             let day = calendar.startOfDay(for: focus)

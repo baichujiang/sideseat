@@ -8,7 +8,8 @@ const prisma = new PrismaClient();
 const E2E_USER = process.env.E2E_USER ?? "test_001";
 const E2E_PEER = process.env.E2E_PEER ?? "test_002";
 const E2E_PASSWORD = process.env.E2E_PASSWORD ?? "Password123";
-const DISCOVER_TEST_IP = `198.51.100.${(process.pid % 180) + 60}`;
+// Keep each Discover test login isolated from fixed-window rate-limit state.
+let discoverLoginSequence = 0;
 const createdPostIds: string[] = [];
 const createdActivityIds: string[] = [];
 const createdReportIds: string[] = [];
@@ -19,8 +20,10 @@ const ONE_PIXEL_PNG = Buffer.from(
 );
 
 async function accessToken(request: APIRequestContext, identifier = E2E_USER) {
+  discoverLoginSequence += 1;
+  const loginIp = `198.19.${10 + (process.pid % 100)}.${(discoverLoginSequence % 200) + 1}`;
   const response = await request.post("/api/v1/auth/login", {
-    headers: { "x-forwarded-for": DISCOVER_TEST_IP },
+    headers: { "x-forwarded-for": loginIp },
     data: {
       identifier,
       password: E2E_PASSWORD,
@@ -243,6 +246,136 @@ test.describe.serial("API v1 Discover", () => {
     );
     expect(deleted.status()).toBe(200);
     expect(await prisma.classmatePostComment.count({ where: { postId: post.id } })).toBe(0);
+  });
+
+  test("supports lightweight activity messages with one organizer reply", async ({
+    request,
+  }) => {
+    const senderToken = await accessToken(request);
+    const organizerToken = await accessToken(request, E2E_PEER);
+    const organizer = await prisma.user.findUniqueOrThrow({
+      where: { username: E2E_PEER },
+      select: { id: true },
+    });
+    const sender = await prisma.user.findUniqueOrThrow({
+      where: { username: E2E_USER },
+      select: { id: true },
+    });
+    const activity = await prisma.discoverActivity.create({
+      data: {
+        organizerId: organizer.id,
+        city: "Munich",
+        school: "TUM",
+        title: `Message target ${Date.now()}`,
+        startAt: new Date(Date.now() + 6 * 60 * 60_000),
+        endAt: new Date(Date.now() + 8 * 60 * 60_000),
+        location: "Main Library",
+      },
+      select: { id: true },
+    });
+    createdActivityIds.push(activity.id);
+
+    const messageKey = `discover-activity-message-${Date.now()}`;
+    const posted = await request.post(
+      `/api/v1/discover/activities/${activity.id}/messages`,
+      {
+        headers: auth(senderToken, messageKey),
+        data: { body: "Should I bring anything?" },
+      },
+    );
+    expect(posted.status()).toBe(201);
+    const messageId = (await posted.json()).data.messageId as string;
+
+    const replay = await request.post(
+      `/api/v1/discover/activities/${activity.id}/messages`,
+      {
+        headers: auth(senderToken, messageKey),
+        data: { body: "Should I bring anything?" },
+      },
+    );
+    expect(replay.status()).toBe(201);
+    expect(replay.headers()["idempotency-replayed"]).toBe("true");
+
+    const unauthorizedReply = await request.post(
+      `/api/v1/discover/activities/${activity.id}/messages`,
+      {
+        headers: auth(senderToken, `activity-reply-denied-${Date.now()}`),
+        data: { body: "I am not the organizer.", parentId: messageId },
+      },
+    );
+    expect(unauthorizedReply.status()).toBe(403);
+
+    const reply = await request.post(
+      `/api/v1/discover/activities/${activity.id}/messages`,
+      {
+        headers: auth(organizerToken, `activity-reply-${Date.now()}`),
+        data: { body: "Nothing special.", parentId: messageId },
+      },
+    );
+    expect(reply.status()).toBe(201);
+    const replyId = (await reply.json()).data.commentId as string;
+
+    const duplicateReply = await request.post(
+      `/api/v1/discover/activities/${activity.id}/messages`,
+      {
+        headers: auth(organizerToken, `activity-reply-duplicate-${Date.now()}`),
+        data: { body: "A second reply.", parentId: messageId },
+      },
+    );
+    expect(duplicateReply.status()).toBe(409);
+
+    const list = await request.get(
+      `/api/v1/discover/activities/${activity.id}/messages`,
+      { headers: auth(senderToken) },
+    );
+    expect(list.status()).toBe(200);
+    expect((await list.json()).data.messages).toEqual([
+      expect.objectContaining({
+        id: messageId,
+        body: "Should I bring anything?",
+        isOwn: true,
+        canDelete: true,
+        canReply: false,
+        reply: expect.objectContaining({
+          id: replyId,
+          body: "Nothing special.",
+          isOwn: false,
+        }),
+      }),
+    ]);
+
+    const report = await request.post("/api/reports", {
+      headers: auth(senderToken),
+      data: {
+        reportedUserId: sender.id,
+        discoverActivityCommentId: replyId,
+        reason: "SPAM",
+        details: "activity organizer reply report",
+      },
+    });
+    expect(report.status()).toBe(201);
+    const reportBody = (await report.json()).data as {
+      id: string;
+      discoverActivityCommentId: string | null;
+    };
+    createdReportIds.push(reportBody.id);
+    expect(reportBody.discoverActivityCommentId).toBe(replyId);
+
+    const deleted = await request.delete(
+      `/api/v1/discover/activities/${activity.id}/messages/${messageId}`,
+      {
+        headers: auth(
+          senderToken,
+          `activity-message-delete-${Date.now()}`,
+        ),
+      },
+    );
+    expect(deleted.status()).toBe(200);
+    expect(
+      await prisma.discoverActivityComment.count({
+        where: { activityId: activity.id },
+      }),
+    ).toBe(0);
   });
 
   test("creates one scheduled plan and exposes it through search", async ({

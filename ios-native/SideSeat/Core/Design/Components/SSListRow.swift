@@ -58,9 +58,10 @@ extension SSListRow {
                             .foregroundStyle(SideSeatTheme.textPrimary)
                         Text(subtitle)
                             .font(SideSeatTheme.Text.footnote)
-                            .foregroundStyle(SideSeatTheme.textSecondary)
-                            .lineLimit(2)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
+                    .layoutPriority(1)
 
                     Spacer(minLength: SideSeatTheme.spaceSM)
 

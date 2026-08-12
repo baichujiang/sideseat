@@ -18,6 +18,12 @@ final class CourseListStore {
     ) async {
         let requestID = UUID()
         latestRequestID = requestID
+        if payload?.scope != scope
+            || payload?.query != query
+            || (school != nil && payload?.school != school)
+        {
+            payload = nil
+        }
         isLoading = true
         issue = nil
         defer {
@@ -30,6 +36,7 @@ final class CourseListStore {
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             let fixture = NativeCourseList.uiTestingFixture
             guard latestRequestID == requestID else { return }
+            let showsEmptyFixture = ProcessInfo.processInfo.arguments.contains("--ui-testing-empty-courses")
             let fixtureCourses = fixture.courses.map { course in
                 guard scope == .archived else { return course }
                 return NativeCourseSummary(
@@ -55,7 +62,11 @@ final class CourseListStore {
                 scope: scope,
                 query: query,
                 schools: fixture.schools,
-                courses: query.isEmpty || fixtureCourses[0].name.localizedCaseInsensitiveContains(query)
+                courses: !showsEmptyFixture
+                    && (query.isEmpty || fixtureCourses.contains {
+                        $0.name.localizedCaseInsensitiveContains(query)
+                            || $0.code?.localizedCaseInsensitiveContains(query) == true
+                    })
                     ? fixtureCourses
                     : [],
                 nextCursor: nil,

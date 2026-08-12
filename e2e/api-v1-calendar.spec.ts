@@ -114,8 +114,8 @@ test.describe.serial("API v1 Calendar categories", () => {
     const presets = payload.data.categories
       .map((category) => category.presetKey)
       .filter((value): value is string => Boolean(value));
-    expect(presets).toEqual(["personal", "work", "important", "other"]);
-    expect(presets).not.toEqual(expect.arrayContaining(["study", "meal", "language", "sports"]));
+    expect(presets).toEqual(["study", "work", "personal"]);
+    expect(presets).not.toEqual(expect.arrayContaining(["important", "other", "meal", "sports"]));
   });
 
   test("creates exactly once and normalizes a WebCal subscription", async ({ request }) => {
@@ -152,7 +152,7 @@ test.describe.serial("API v1 Calendar categories", () => {
     expect((await conflict.json()).error.code).toBe("IDEMPOTENCY_CONFLICT");
   });
 
-  test("updates custom calendars but protects built-in subscription and deletion rules", async ({
+  test("updates custom calendars, protects starter subscriptions, and permits deletion", async ({
     request,
   }) => {
     const token = await accessToken(request);
@@ -177,16 +177,31 @@ test.describe.serial("API v1 Calendar categories", () => {
     expect(builtInSubscription.status()).toBe(409);
     expect((await builtInSubscription.json()).error.code).toBe("BUILT_IN_CALENDAR");
 
-    const builtInDelete = await request.delete(
-      `/api/v1/calendar/categories/${builtIn!.id}`,
+    const deletableStarter = await prisma.userCalendarCategory.create({
+      data: {
+        userId,
+        name: `Deletable starter ${TEST_RUN}`,
+        color: "#0284C7",
+        sortOrder: 1002,
+        presetKey: `starter-test-${TEST_RUN}`,
+      },
+    });
+    const starterDelete = await request.delete(
+      `/api/v1/calendar/categories/${deletableStarter.id}`,
       {
         headers: {
           ...auth,
-          "Idempotency-Key": `calendar-category-built-in-delete-${TEST_RUN}`,
+          "Idempotency-Key": `calendar-category-starter-delete-${TEST_RUN}`,
         },
       },
     );
-    expect(builtInDelete.status()).toBe(409);
+    expect(starterDelete.status()).toBe(200);
+    expect(await prisma.userCalendarCategory.count({ where: { id: deletableStarter.id } })).toBe(0);
+    const afterDelete = await request.get("/api/v1/calendar/categories", { headers: auth });
+    const afterDeletePayload = (await afterDelete.json()) as {
+      data: { categories: Array<{ id: string }> };
+    };
+    expect(afterDeletePayload.data.categories.some((category) => category.id === deletableStarter.id)).toBe(false);
 
     const headers = {
       ...auth,

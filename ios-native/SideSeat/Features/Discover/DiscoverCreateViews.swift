@@ -128,12 +128,12 @@ struct DiscoverPlanCreateView: View {
     private let repostingPost: NativeDiscoverBuddyPost?
     private let originalExpiryDate: Date?
     private let initialExpiryPreset: BuddyExpiryPreset
-    let onCreated: () async -> Void
+    let onCreated: (String) async -> Void
 
     init(
         editingPost: NativeDiscoverBuddyPost? = nil,
         repostingPost: NativeDiscoverBuddyPost? = nil,
-        onCreated: @escaping () async -> Void
+        onCreated: @escaping (String) async -> Void
     ) {
         precondition(editingPost == nil || repostingPost == nil)
         self.editingPost = editingPost
@@ -214,15 +214,68 @@ struct DiscoverPlanCreateView: View {
     }
 
     var body: some View {
+        VStack(spacing: 0) {
+            planForm
+            submitBar
+        }
+        .navigationTitle(isEditing ? "Edit plan" : (isReposting ? "Repost plan" : "Create plan"))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") { dismiss() }
+                    .tint(SideSeatTheme.textPrimary)
+                    .disabled(store.isSaving)
+                    .accessibilityIdentifier("buddy-cancel")
+            }
+            if focusedField != nil {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { focusedField = nil }
+                        .accessibilityIdentifier("buddy-keyboard-done")
+                }
+            }
+        }
+        .interactiveDismissDisabled(store.isSaving)
+        .sensoryFeedback(.success, trigger: didSucceed)
+        .alert(
+            isEditing ? "Couldn't save changes" : (isReposting ? "Couldn't repost plan" : "Couldn't create plan"),
+            isPresented: Binding(
+                get: { submitIssue != nil },
+                set: { isPresented in
+                    if !isPresented { submitIssue = nil }
+                }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(submitIssue ?? "Please try again.")
+        }
+        .onChange(of: selectedPhotos) { _, items in
+            Task { await prepareSelectedPhotos(items) }
+        }
+        .task {
+            await courseStore.load(using: session, scope: .enrolled, school: nil, query: "")
+            if isReposting {
+                selectedCourseIds.formIntersection(Set(enrolledCourses.map(\.id)))
+            } else if selectedCourseIds.isEmpty, editingPost == nil {
+                selectedCourseIds = Set(enrolledCourses.map(\.id))
+            }
+        }
+    }
+
+    private var planForm: some View {
         Form {
             if isReposting {
                 Section {
-                    Label("Ready to repost", systemImage: "arrow.clockwise.circle.fill")
+                    HStack(spacing: SideSeatTheme.spaceSM) {
+                        Image(systemName: "arrow.clockwise.circle.fill")
+                            .foregroundStyle(SideSeatTheme.accent)
+                        Text("Ready to repost")
+                            .foregroundStyle(SideSeatTheme.textPrimary)
+                    }
                         .font(.headline)
-                        .foregroundStyle(SideSeatTheme.accent)
                     Text("Review who can see this plan and choose current courses before posting.")
                         .font(.footnote)
-                        .foregroundStyle(SideSeatTheme.textSecondary)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 }
                 .accessibilityIdentifier("buddy-repost-notice")
             }
@@ -232,21 +285,25 @@ struct DiscoverPlanCreateView: View {
                     HStack {
                         Text("Title")
                             .font(.caption.weight(.medium))
-                            .foregroundStyle(SideSeatTheme.textSecondary)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         Spacer()
                         Text("\(title.count)/\(titleMax)")
                             .font(SideSeatTheme.Text.monoDigitCaption)
                             .foregroundStyle(charCountColor(title.count, limit: titleMax))
                     }
-                    TextField(
-                        "Title",
+                    PlaceholderTextEditor(
                         text: $title,
-                        prompt: Text("e.g. someone to study with, a lunch buddy on weekdays")
+                        placeholder: "Plan title",
+                        accessibilityLabel: "Title",
+                        focusValue: BuddyField.title,
+                        focusedField: $focusedField,
+                        minimumHeight: 56,
+                        focusedMinimumHeight: 88
                     )
-                    .focused($focusedField, equals: .title)
                     .onChange(of: title) { _, next in
-                        if next.count > titleMax {
-                            title = String(next.prefix(titleMax))
+                        let normalized = next.replacingOccurrences(of: "\n", with: " ")
+                        if normalized != next || normalized.count > titleMax {
+                            title = String(normalized.prefix(titleMax))
                         }
                     }
                     .accessibilityIdentifier("buddy-title")
@@ -257,7 +314,7 @@ struct DiscoverPlanCreateView: View {
                     HStack {
                         Text("Details")
                             .font(.caption.weight(.medium))
-                            .foregroundStyle(SideSeatTheme.textSecondary)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         Spacer()
                         Text("\(bodyText.count)/\(bodyMax)")
                             .font(SideSeatTheme.Text.monoDigitCaption)
@@ -266,6 +323,7 @@ struct DiscoverPlanCreateView: View {
                     PlaceholderTextEditor(
                         text: $bodyText,
                         placeholder: "Describe your plan and add #tags, for example #study or #coffee.",
+                        accessibilityLabel: "Details",
                         focusValue: BuddyField.body,
                         focusedField: $focusedField
                     )
@@ -290,17 +348,26 @@ struct DiscoverPlanCreateView: View {
                         maxSelectionCount: max(0, 3 - totalImageCount),
                         matching: .images
                     ) {
-                        Label("Add photos", systemImage: "photo.badge.plus")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(SideSeatTheme.accent)
+                        HStack(spacing: SideSeatTheme.spaceSM) {
+                            Image(systemName: "photo.badge.plus")
+                                .foregroundStyle(SideSeatTheme.accent)
+                            Text("Add photos")
+                                .foregroundStyle(SideSeatTheme.textPrimary)
+                                .accessibilityIdentifier("buddy-add-photos-label")
+                        }
+                        .font(.subheadline.weight(.semibold))
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
                     }
+                    .frame(minHeight: 44)
                     .disabled(totalImageCount >= 3 || isPreparingImages || store.isSaving)
                     .accessibilityIdentifier("buddy-add-photos")
 
                     Spacer()
                     Text("\(totalImageCount)/3")
                         .font(SideSeatTheme.Text.monoDigitCaption)
-                        .foregroundStyle(SideSeatTheme.textSecondary)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .accessibilityIdentifier("buddy-photo-count")
                 }
 
                 if totalImageCount > 0 {
@@ -348,8 +415,16 @@ struct DiscoverPlanCreateView: View {
                 }
             } header: {
                 Text("Plan details")
+                    .font(.headline)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .textCase(nil)
+                    .accessibilityIdentifier("buddy-section-plan-details")
             } footer: {
                 Text("Leave this off when you are still looking for people before choosing a time.")
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("buddy-footer-plan-details")
             }
 
             Section {
@@ -363,12 +438,12 @@ struct DiscoverPlanCreateView: View {
                     } else if enrolledCourses.isEmpty {
                         Text("Join at least one course to use coursemate visibility.")
                             .font(.footnote)
-                            .foregroundStyle(SideSeatTheme.textSecondary)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     } else {
                         HStack {
                             Text("\(selectedCourseIds.count)/\(enrolledCourses.count) selected")
                                 .font(.caption)
-                                .foregroundStyle(SideSeatTheme.textSecondary)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                             Spacer()
                             Button(selectedCourseIds.count == enrolledCourses.count ? "Deselect all" : "Select all") {
                                 if selectedCourseIds.count == enrolledCourses.count {
@@ -400,14 +475,26 @@ struct DiscoverPlanCreateView: View {
                 }
             } header: {
                 Text("Who can see this")
+                    .font(.headline)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .textCase(nil)
+                    .accessibilityIdentifier("buddy-section-visibility")
             }
 
             Section {
                 FlowExpiryChips(selection: $expiryPreset)
             } header: {
                 Text("Expires")
+                    .font(.headline)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .textCase(nil)
+                    .accessibilityIdentifier("buddy-section-expiry")
             } footer: {
                 Text(expiryPreset.hint)
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("buddy-footer-expiry")
             }
 
             if let localIssue {
@@ -417,67 +504,28 @@ struct DiscoverPlanCreateView: View {
                 Section { Text(issue).foregroundStyle(SideSeatTheme.danger) }
             }
         }
+        .scrollDismissesKeyboard(.interactively)
         .accessibilityIdentifier(
             isEditing ? "buddy-edit-view" : (isReposting ? "buddy-repost-view" : "buddy-create-view")
         )
-        .navigationTitle(isEditing ? "Edit plan" : (isReposting ? "Repost plan" : "Create plan"))
-        .navigationBarTitleDisplayMode(.inline)
-        .scrollDismissesKeyboard(.interactively)
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") { dismiss() }
-                    .disabled(store.isSaving)
-            }
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("Done") { focusedField = nil }
-                    .accessibilityIdentifier("buddy-keyboard-done")
-            }
-        }
-        .safeAreaInset(edge: .bottom) {
-            SSPrimaryButton(
-                title: store.isSaving
-                    ? String(localized: isEditing ? "Saving…" : (isReposting ? "Reposting…" : "Posting…"))
-                    : String(localized: isEditing ? "Save changes" : (isReposting ? "Repost" : "Post")),
-                isLoading: store.isSaving,
-                fill: .product,
-                chrome: .rounded,
-                accessibilityID: "buddy-submit"
-            ) {
-                Task { await submit() }
-            }
-            .disabled(!canSubmit)
-            .padding(.horizontal, SideSeatTheme.screenHorizontal)
-            .padding(.vertical, SideSeatTheme.spaceMD)
-            .background(.bar)
-            .accessibilityIdentifier("buddy-submit")
-        }
-        .interactiveDismissDisabled(store.isSaving)
-        .sensoryFeedback(.success, trigger: didSucceed)
-        .alert(
-            isEditing ? "Couldn't save changes" : (isReposting ? "Couldn't repost plan" : "Couldn't create plan"),
-            isPresented: Binding(
-                get: { submitIssue != nil },
-                set: { isPresented in
-                    if !isPresented { submitIssue = nil }
-                }
-            )
+    }
+
+    private var submitBar: some View {
+        SSPrimaryButton(
+            title: store.isSaving
+                ? String(localized: isEditing ? "Saving…" : (isReposting ? "Reposting…" : "Posting…"))
+                : String(localized: isEditing ? "Save changes" : (isReposting ? "Repost" : "Post")),
+            isLoading: store.isSaving,
+            fill: .product,
+            chrome: .rounded,
+            accessibilityID: "buddy-submit"
         ) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(submitIssue ?? "Please try again.")
+            Task { await submit() }
         }
-        .onChange(of: selectedPhotos) { _, items in
-            Task { await prepareSelectedPhotos(items) }
-        }
-        .task {
-            await courseStore.load(using: session, scope: .enrolled, school: nil, query: "")
-            if isReposting {
-                selectedCourseIds.formIntersection(Set(enrolledCourses.map(\.id)))
-            } else if selectedCourseIds.isEmpty, editingPost == nil {
-                selectedCourseIds = Set(enrolledCourses.map(\.id))
-            }
-        }
+        .disabled(!canSubmit)
+        .padding(.horizontal, SideSeatTheme.screenHorizontal)
+        .padding(.vertical, SideSeatTheme.spaceMD)
+        .background(.bar)
     }
 
     private func submit() async {
@@ -524,8 +572,12 @@ struct DiscoverPlanCreateView: View {
             )
         }
         if ok {
+            guard let savedPostID = store.savedPostID else {
+                submitIssue = String(localized: "The saved plan could not be opened. Please refresh Discover.")
+                return
+            }
             didSucceed = true
-            await onCreated()
+            await onCreated(savedPostID)
         } else {
             submitIssue = store.issue ?? String(
                 localized: isEditing
@@ -538,12 +590,12 @@ struct DiscoverPlanCreateView: View {
     }
 
     private func charCountColor(_ count: Int, limit: Int) -> Color {
-        if count > limit { return SideSeatTheme.danger }
+        if count > limit { return SideSeatTheme.statusDangerText }
         let remaining = limit - count
         if remaining <= Swift.max(1, Int(ceil(Double(limit) * 0.12))) {
-            return SideSeatTheme.warning
+            return SideSeatTheme.statusWarningText
         }
-        return SideSeatTheme.textSecondary
+        return SideSeatTheme.textSecondaryStrong
     }
 
     private func prepareSelectedPhotos(_ items: [PhotosPickerItem]) async {
@@ -559,7 +611,7 @@ struct DiscoverPlanCreateView: View {
         for item in items where nextDrafts.count < 3 {
             do {
                 guard let data = try await item.loadTransferable(type: Data.self),
-                      let draft = DiscoverImagePreprocessor.makeDraft(from: data)
+                      let draft = await DiscoverImagePreprocessor.makeDraftAsync(from: data)
                 else {
                     localIssue = "That photo could not be read."
                     continue
@@ -618,7 +670,7 @@ private struct BuddyDetectedTagChips: View {
                 ForEach(tags, id: \.self) { tag in
                     Text("#\(tag)")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.accent)
+                        .foregroundStyle(SideSeatTheme.textPrimary)
                         .padding(.horizontal, 9)
                         .padding(.vertical, 5)
                         .background(SideSeatTheme.accent.opacity(0.10), in: Capsule())
@@ -659,7 +711,7 @@ private struct BuddyVisibilitySelector: View {
                                 .foregroundStyle(SideSeatTheme.textPrimary)
                             Text(preset.hint)
                                 .font(.caption)
-                                .foregroundStyle(SideSeatTheme.textSecondary)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         Spacer(minLength: SideSeatTheme.spaceSM)
@@ -717,7 +769,7 @@ private struct FlowExpiryChips: View {
                                     )
                             )
                             .foregroundStyle(
-                                selection == preset ? SideSeatTheme.accent : SideSeatTheme.textPrimary
+                                SideSeatTheme.textPrimary
                             )
                     }
                     .buttonStyle(.plain)
@@ -779,7 +831,7 @@ private struct CourseVisibilityChip: View {
             Text(title)
                 .font(.caption.weight(.semibold))
                 .lineLimit(1)
-                .foregroundStyle(isSelected ? SideSeatTheme.accent : SideSeatTheme.textSecondary)
+                .foregroundStyle(isSelected ? SideSeatTheme.textPrimary : SideSeatTheme.textSecondary)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(
@@ -821,6 +873,32 @@ struct DiscoverActivityCreateView: View {
     }
 
     var body: some View {
+        VStack(spacing: 0) {
+            activityForm
+            submitBar
+        }
+        .navigationTitle("New activity")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") { dismiss() }
+                    .tint(SideSeatTheme.textPrimary)
+                    .disabled(store.isSaving)
+                    .accessibilityIdentifier("activity-cancel")
+            }
+            if focusedField != nil {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { focusedField = nil }
+                        .accessibilityIdentifier("activity-keyboard-done")
+                }
+            }
+        }
+        .interactiveDismissDisabled(store.isSaving)
+        .sensoryFeedback(.success, trigger: didSucceed)
+        .task { focusedField = .title }
+    }
+
+    private var activityForm: some View {
         Form {
             Section {
                 TextField(
@@ -834,6 +912,7 @@ struct DiscoverActivityCreateView: View {
                 PlaceholderTextEditor(
                     text: $descriptionText,
                     placeholder: "What to bring, who it's for, meetup spot…",
+                    accessibilityLabel: "Description",
                     focusValue: ActivityField.description,
                     focusedField: $focusedField
                 )
@@ -875,34 +954,24 @@ struct DiscoverActivityCreateView: View {
             }
         }
         .animation(.easeOut(duration: 0.2), value: unlimitedCapacity)
-        .navigationTitle("New activity")
-        .navigationBarTitleDisplayMode(.inline)
         .scrollDismissesKeyboard(.interactively)
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") { dismiss() }
-                    .disabled(store.isSaving)
-            }
-        }
-        .safeAreaInset(edge: .bottom) {
-            SSPrimaryButton(
-                title: store.isSaving ? "Creating…" : "Create",
-                isLoading: store.isSaving,
-                fill: .product,
-                chrome: .rounded,
-                accessibilityID: "activity-submit"
-            ) {
-                Task { await submit() }
-            }
-            .disabled(!canSubmit)
-            .padding(.horizontal, SideSeatTheme.screenHorizontal)
-            .padding(.vertical, SideSeatTheme.spaceMD)
-            .background(.bar)
-        }
-        .interactiveDismissDisabled(store.isSaving)
-        .sensoryFeedback(.success, trigger: didSucceed)
         .accessibilityIdentifier("activity-create-view")
-        .task { focusedField = .title }
+    }
+
+    private var submitBar: some View {
+        SSPrimaryButton(
+            title: store.isSaving ? "Creating…" : "Create",
+            isLoading: store.isSaving,
+            fill: .product,
+            chrome: .rounded,
+            accessibilityID: "activity-submit"
+        ) {
+            Task { await submit() }
+        }
+        .disabled(!canSubmit)
+        .padding(.horizontal, SideSeatTheme.screenHorizontal)
+        .padding(.vertical, SideSeatTheme.spaceMD)
+        .background(.bar)
     }
 
     private func submit() async {
@@ -927,22 +996,31 @@ struct DiscoverActivityCreateView: View {
 private struct PlaceholderTextEditor<FocusValue: Hashable>: View {
     @Binding var text: String
     let placeholder: LocalizedStringKey
+    let accessibilityLabel: LocalizedStringKey
     var focusValue: FocusValue
     var focusedField: FocusState<FocusValue?>.Binding
+    var minimumHeight: CGFloat = 100
+    var focusedMinimumHeight: CGFloat = 130
 
     var body: some View {
         ZStack(alignment: .topLeading) {
             if text.isEmpty {
                 Text(placeholder)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(SideSeatTheme.placeholderText)
                     .padding(.top, 8)
                     .padding(.leading, 5)
                     .allowsHitTesting(false)
             }
             TextEditor(text: $text)
+                .font(.body)
+                .accessibilityLabel(Text(accessibilityLabel))
                 .focused(focusedField, equals: focusValue)
                 .scrollContentBackground(.hidden)
-                .frame(minHeight: focusedField.wrappedValue == focusValue ? 130 : 100)
+                .frame(
+                    minHeight: focusedField.wrappedValue == focusValue
+                        ? focusedMinimumHeight
+                        : minimumHeight
+                )
                 .animation(.easeOut(duration: 0.2), value: focusedField.wrappedValue == focusValue)
         }
     }

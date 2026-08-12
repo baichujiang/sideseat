@@ -25,7 +25,6 @@ export type CalendarCategoryDto = Prisma.UserCalendarCategoryGetPayload<{
 }>;
 
 export class CalendarCategoryNotFoundError extends Error {}
-export class BuiltInCalendarDeleteError extends Error {}
 export class BuiltInCalendarSubscriptionError extends Error {}
 export class InvalidCalendarSubscriptionError extends Error {}
 
@@ -140,7 +139,6 @@ export async function deleteCalendarCategoryForUser(
     select: { id: true, presetKey: true, _count: { select: { entries: true } } },
   });
   if (!existing) throw new CalendarCategoryNotFoundError();
-  if (existing.presetKey) throw new BuiltInCalendarDeleteError();
   await db.userCalendarCategory.delete({ where: { id: existing.id } });
   return {
     categoryId: existing.id,

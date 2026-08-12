@@ -7,7 +7,7 @@ struct PlansRootView: View {
 
     var body: some View {
         Group {
-            if store.isLoading && store.plans.isEmpty {
+            if (!store.hasLoaded || store.isLoading) && store.plans.isEmpty {
                 SSLoadingState("Loading plans")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let issue = store.issue, store.plans.isEmpty {
@@ -87,10 +87,10 @@ struct PlansRootView: View {
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: plan.isAccepted ? "calendar.badge.checkmark" : "calendar.badge.clock")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(plan.isAccepted ? SideSeatTheme.success : SideSeatTheme.accent)
+                    .foregroundStyle(plan.isAccepted ? SideSeatTheme.success : SideSeatTheme.warning)
                     .frame(width: 34, height: 34)
                     .background(
-                        (plan.isAccepted ? SideSeatTheme.success : SideSeatTheme.accent).opacity(0.12),
+                        (plan.isAccepted ? SideSeatTheme.success : SideSeatTheme.warning).opacity(0.12),
                         in: Circle()
                     )
 

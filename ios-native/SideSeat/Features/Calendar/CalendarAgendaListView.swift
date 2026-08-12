@@ -41,7 +41,7 @@ struct CalendarAgendaListView: View {
                     Button("Try again", action: onRetry)
                         .buttonStyle(.borderedProminent)
                 }
-            } else if isLoading, schedule == nil {
+            } else if schedule == nil {
                 SSLoadingState("Loading schedule")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if sections.isEmpty {

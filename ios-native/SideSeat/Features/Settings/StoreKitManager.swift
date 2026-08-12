@@ -7,6 +7,7 @@ final class StoreKitManager {
     private(set) var catalog: [NativeStoreKitProduct] = []
     private(set) var storeProducts: [Product] = []
     private(set) var isLoading = false
+    private(set) var hasLoaded = false
     private(set) var purchasingProductID: String?
     private(set) var issue: String?
     private(set) var thankYouVisible = false
@@ -31,7 +32,10 @@ final class StoreKitManager {
     func load(using session: SessionStore) async {
         isLoading = true
         issue = nil
-        defer { isLoading = false }
+        defer {
+            isLoading = false
+            hasLoaded = true
+        }
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {

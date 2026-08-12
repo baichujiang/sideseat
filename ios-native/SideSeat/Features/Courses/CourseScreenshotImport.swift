@@ -64,14 +64,20 @@ enum CourseScreenshotText {
         let normalizedLines = lines.map { (raw: $0, normalized: normalized($0)) }
         if let code = course.code {
             let normalizedCode = normalized(code)
-            if let line = normalizedLines.first(where: { $0.normalized.contains(normalizedCode) }) {
+            if normalizedCode.count >= 2,
+               let line = normalizedLines.first(where: {
+                   !$0.normalized.isEmpty && $0.normalized.contains(normalizedCode)
+               })
+            {
                 return (1, line.raw)
             }
         }
 
         let courseName = normalized(course.name)
         if let line = normalizedLines.first(where: {
-            $0.normalized.contains(courseName) || courseName.contains($0.normalized)
+            !$0.normalized.isEmpty
+                && !courseName.isEmpty
+                && ($0.normalized.contains(courseName) || courseName.contains($0.normalized))
         }) {
             return (0.92, line.raw)
         }
@@ -147,6 +153,7 @@ final class CourseScreenshotImportStore {
         guard !isAnalyzing, !isImporting else { return }
         isAnalyzing = true
         issue = nil
+        recognizedLines = []
         matches = []
         selectedCourseIDs = []
         defer { isAnalyzing = false }

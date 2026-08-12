@@ -47,7 +47,7 @@ private struct SSPrimaryButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .foregroundStyle(.white)
+            .foregroundStyle(isEnabled ? Color.white : SideSeatTheme.textPrimary)
             .background(background(isPressed: configuration.isPressed))
             .opacity(configuration.isPressed ? SideSeatTheme.Interaction.pressedOpacity : 1)
             .scaleEffect(configuration.isPressed ? SideSeatTheme.Interaction.pressedScale : 1)

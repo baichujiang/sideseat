@@ -21,9 +21,10 @@ export async function loadHomeSchedulePayload(args: {
 }): Promise<HomeSchedulePayload> {
   const { prisma, userId, windowStart, windowEnd } = args;
 
-  const [, memberships, calendarEntries, calendarCategories, mirroredScheduleKeys, connections] =
+  await ensureUserCalendarCategories(prisma, userId);
+
+  const [memberships, calendarEntries, calendarCategories, mirroredScheduleKeys, connections] =
     await Promise.all([
-      ensureUserCalendarCategories(prisma, userId),
       prisma.userCourse.findMany({
         where: { userId, ...activeCourseMembershipWhere() },
         include: { course: true, sessions: true },

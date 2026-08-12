@@ -58,23 +58,25 @@ struct PlanCreateSheet: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
-            }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                SSPrimaryButton(
-                    title: counterOf == nil
-                        ? String(localized: "Send plan")
-                        : String(localized: "Send new time"),
-                    isLoading: isCreating,
-                    fill: .product,
-                    height: 48,
-                    accessibilityID: "plan-create-submit"
-                ) {
-                    Task { await create() }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        focusedField = nil
+                        Task { await create() }
+                    } label: {
+                        if isCreating {
+                            ProgressView()
+                        } else {
+                            Text(
+                                counterOf == nil
+                                    ? String(localized: "Send plan")
+                                    : String(localized: "Send new time")
+                            )
+                            .fontWeight(.semibold)
+                        }
+                    }
+                    .disabled(!canSend || isCreating)
+                    .accessibilityIdentifier("plan-create-submit")
                 }
-                .disabled(!canSend || isCreating)
-                .padding(.horizontal, SideSeatTheme.screenHorizontal)
-                .padding(.vertical, SideSeatTheme.spaceSM)
-                .background(.bar)
             }
             .onAppear { seedFromCounterIfNeeded() }
             .onChange(of: start) { oldValue, newValue in

@@ -2,6 +2,135 @@ import Foundation
 import SwiftUI
 import UIKit
 
+struct ChatTransientNotice: Identifiable, Equatable {
+    let id = UUID()
+    let text: String
+    let systemImage: String
+}
+
+struct ChatTransientNoticeView: View {
+    let notice: ChatTransientNotice
+
+    var body: some View {
+        Label(notice.text, systemImage: notice.systemImage)
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(SideSeatTheme.textPrimary)
+            .padding(.horizontal, 13)
+            .padding(.vertical, 9)
+            .background(.regularMaterial, in: Capsule())
+            .overlay {
+                Capsule()
+                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+            }
+            .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
+            .transition(.move(edge: .bottom).combined(with: .opacity))
+            .allowsHitTesting(false)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(notice.text)
+            .accessibilityIdentifier("chat-action-notice")
+    }
+}
+
+struct ChatMessageContextMenuTarget<Content: View, Menu: View>: View {
+    let isEnabled: Bool
+    private let content: Content
+    private let menu: Menu
+
+    init(
+        isEnabled: Bool,
+        @ViewBuilder content: () -> Content,
+        @ViewBuilder menu: () -> Menu
+    ) {
+        self.isEnabled = isEnabled
+        self.content = content()
+        self.menu = menu()
+    }
+
+    @ViewBuilder
+    var body: some View {
+        if isEnabled {
+            content
+                .contentShape(.interaction, Rectangle())
+                .contentShape(
+                    .contextMenuPreview,
+                    RoundedRectangle(cornerRadius: SideSeatTheme.Chat.bubbleRadius, style: .continuous)
+                )
+                .contextMenu { menu }
+        } else {
+            content
+        }
+    }
+}
+
+@MainActor
+@Observable
+final class ChatComposerDraft {
+    private enum PresentationState: Equatable {
+        case empty
+        case whitespaceOnly
+        case sendable
+    }
+
+    @ObservationIgnored private(set) var text = ""
+    private var presentationState = PresentationState.empty
+    private(set) var resetVersion = 0
+
+    var isEmpty: Bool { presentationState == .empty }
+    var canSend: Bool { presentationState == .sendable }
+
+    var trimmedText: String {
+        text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    func updateText(_ value: String) {
+        text = value
+        let nextState: PresentationState
+        if value.isEmpty {
+            nextState = .empty
+        } else if value.contains(where: { !$0.isWhitespace }) {
+            nextState = .sendable
+        } else {
+            nextState = .whitespaceOnly
+        }
+        if presentationState != nextState {
+            presentationState = nextState
+        }
+    }
+
+    func clear() {
+        guard !text.isEmpty else { return }
+        text = ""
+        presentationState = .empty
+        resetVersion &+= 1
+    }
+}
+
+@MainActor
+final class ChatComposerFocusController {
+    private weak var textView: UITextView?
+
+    var isFocused: Bool {
+        textView?.isFirstResponder == true
+    }
+
+    func attach(_ textView: UITextView) {
+        self.textView = textView
+    }
+
+    func detach(_ textView: UITextView) {
+        guard self.textView === textView else { return }
+        self.textView = nil
+    }
+
+    func focus() {
+        textView?.becomeFirstResponder()
+    }
+
+    func blur() {
+        textView?.resignFirstResponder()
+    }
+}
+
 enum ChatComposerReturnKey {
     static func textBeforeInsertedReturn(previous: String, current: String) -> String? {
         guard current.count == previous.count + 1 else { return nil }
@@ -93,8 +222,10 @@ struct NativeInboxConversation: Codable, Identifiable, Hashable, Sendable {
         case "LOCATION": return String(localized: "Location")
         case "SCHEDULE_SHARE_CARD": return String(localized: "Shared schedule")
         case "AVAILABILITY_CARD": return String(localized: "Shared availability")
-        case "PLAN_REQUEST_CARD": return String(localized: "Plan invite")
-        case "PLAN_CONFIRMED_CARD": return String(localized: "Plan confirmed")
+        case "PLAN_REQUEST_CARD":
+            return titledPreview(prefix: String(localized: "Plan invite"), body: lastMessage.body)
+        case "PLAN_CONFIRMED_CARD":
+            return titledPreview(prefix: String(localized: "Plan confirmed"), body: lastMessage.body)
         case "SYSTEM":
             let body = lastMessage.body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             return body.isEmpty ? String(localized: "Update") : body
@@ -103,6 +234,11 @@ struct NativeInboxConversation: Codable, Identifiable, Hashable, Sendable {
             if body.isEmpty { return String(localized: "New message") }
             return body
         }
+    }
+
+    private func titledPreview(prefix: String, body: String?) -> String {
+        let title = body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return title.isEmpty ? prefix : "\(prefix) · \(title)"
     }
 
     var supportsHide: Bool { kind == .course || kind == .group }
@@ -557,6 +693,7 @@ struct NativeMessageReportRequest: Encodable, Sendable {
     let groupChatMessageId: String?
     let classmatePostId: String?
     let classmatePostCommentId: String?
+    let discoverActivityCommentId: String?
     let reason: String
     let details: String
 
@@ -567,6 +704,7 @@ struct NativeMessageReportRequest: Encodable, Sendable {
         groupChatMessageId: String? = nil,
         classmatePostId: String? = nil,
         classmatePostCommentId: String? = nil,
+        discoverActivityCommentId: String? = nil,
         reason: NativeReportReason,
         details: String = ""
     ) {
@@ -576,6 +714,7 @@ struct NativeMessageReportRequest: Encodable, Sendable {
         self.groupChatMessageId = groupChatMessageId
         self.classmatePostId = classmatePostId
         self.classmatePostCommentId = classmatePostCommentId
+        self.discoverActivityCommentId = discoverActivityCommentId
         self.reason = reason.rawValue
         self.details = details
     }
@@ -760,7 +899,7 @@ enum ChatScrollPolicy {
 /// the available height. A real user scroll after the transition releases the pin.
 struct ChatKeyboardBottomAnchorState: Equatable, Sendable {
     private(set) var isPinned = true
-    private(set) var isKeyboardTransitioning = false
+    private(set) var isKeyboardVisible = false
 
     mutating func nearBottomChanged(_ isNearBottom: Bool) {
         if isNearBottom {
@@ -785,22 +924,34 @@ struct ChatKeyboardBottomAnchorState: Equatable, Sendable {
         return isPinned
     }
 
-    @discardableResult
-    mutating func keyboardWillChange(isNearBottom: Bool) -> Bool {
+    mutating func keyboardVisibilityChanged(
+        isVisible: Bool,
+        isNearBottom: Bool
+    ) -> Bool? {
+        guard isVisible != isKeyboardVisible else { return nil }
+        isKeyboardVisible = isVisible
         if isNearBottom {
             isPinned = true
         }
-        isKeyboardTransitioning = true
         return isPinned
     }
+}
 
-    @discardableResult
-    mutating func keyboardDidChange(isNearBottom: Bool) -> Bool {
-        if isNearBottom {
-            isPinned = true
-        }
-        isKeyboardTransitioning = false
-        return isPinned
+enum ChatKeyboardTransition {
+    static func isVisible(endFrame: CGRect, screenBounds: CGRect) -> Bool {
+        guard endFrame.height > 1 else { return false }
+        return endFrame.intersection(screenBounds).height > 1
+    }
+
+    @MainActor
+    static func visibility(from notification: Notification) -> Bool? {
+        guard let endFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+              let screenBounds = UIApplication.shared.connectedScenes
+                  .compactMap({ ($0 as? UIWindowScene)?.screen.bounds })
+                  .first
+        else { return nil }
+
+        return isVisible(endFrame: endFrame, screenBounds: screenBounds)
     }
 }
 
@@ -837,37 +988,115 @@ enum ChatDaySeparatorFormatting {
     }
 }
 
-/// Sticky-scroll helper: iOS 18 uses geometry; iOS 17 uses bottom-sentinel visibility.
-struct ChatNearBottomTracker: ViewModifier {
-    @Binding var isNearBottom: Bool
-    var threshold: CGFloat = ChatScrollPolicy.bottomThreshold
-    let onReachedBottom: () -> Void
+enum ChatMessageGrouping {
+    static let continuationInterval: TimeInterval = 2 * 60
+    static let timestampInterval: TimeInterval = 15 * 60
 
-    func body(content: Content) -> some View {
-        if #available(iOS 18.0, *) {
-            content.onScrollGeometryChange(for: Bool.self) { geometry in
-                let distance = geometry.contentSize.height
-                    - geometry.contentOffset.y
-                    - geometry.containerSize.height
-                return distance < threshold
-            } action: { _, nearBottom in
-                apply(nearBottom)
-            }
-        } else {
-            content
-        }
+    static func isContinuation(
+        previousSenderID: String?,
+        previousDate: Date?,
+        senderID: String,
+        date: Date?
+    ) -> Bool {
+        guard previousSenderID == senderID,
+              let previousDate,
+              let date
+        else { return false }
+
+        let interval = date.timeIntervalSince(previousDate)
+        return interval >= 0 && interval <= continuationInterval
     }
 
-    private func apply(_ nearBottom: Bool) {
-        isNearBottom = nearBottom
-        if nearBottom { onReachedBottom() }
+    static func shouldShowTimestamp(
+        previousDate: Date?,
+        date: Date?,
+        calendar: Calendar = .current
+    ) -> Bool {
+        guard let date else { return false }
+        guard let previousDate else { return true }
+        guard calendar.isDate(previousDate, inSameDayAs: date) else { return true }
+        return date.timeIntervalSince(previousDate) >= timestampInterval
+    }
+
+    static func timestampLabel(
+        for date: Date,
+        calendar: Calendar = .current
+    ) -> String {
+        let time = date.formatted(date: .omitted, time: .shortened)
+        if calendar.isDateInToday(date) {
+            return String(localized: "Today, \(time)")
+        }
+        if calendar.isDateInYesterday(date) {
+            return String(localized: "Yesterday, \(time)")
+        }
+        return date.formatted(date: .abbreviated, time: .shortened)
+    }
+}
+
+struct ChatTimelineTimestamp: View {
+    let date: Date
+
+    var body: some View {
+        Text(ChatMessageGrouping.timestampLabel(for: date))
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 12)
+            .padding(.bottom, 6)
+            .accessibilityIdentifier("chat-timestamp-\(date.timeIntervalSince1970)")
+    }
+}
+
+struct ChatMessageStack<Content: View>: View {
+    static var eagerMessageLimit: Int { 160 }
+
+    let usesLazyLayout: Bool
+    private let content: () -> Content
+
+    init(
+        usesLazyLayout: Bool,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.usesLazyLayout = usesLazyLayout
+        self.content = content
+    }
+
+    @ViewBuilder
+    var body: some View {
+        if usesLazyLayout {
+            LazyVStack(spacing: 0) {
+                content()
+            }
+        } else {
+            VStack(spacing: 0) {
+                content()
+            }
+        }
+    }
+}
+
+struct ChatBubbleShape: Shape {
+    let isMine: Bool
+    let connectsAbove: Bool
+    let connectsBelow: Bool
+
+    func path(in rect: CGRect) -> Path {
+        let radius = SideSeatTheme.Chat.bubbleRadius
+        let joinedRadius: CGFloat = 5
+        return UnevenRoundedRectangle(
+            topLeadingRadius: !isMine && connectsAbove ? joinedRadius : radius,
+            bottomLeadingRadius: !isMine && connectsBelow ? joinedRadius : radius,
+            bottomTrailingRadius: isMine && connectsBelow ? joinedRadius : radius,
+            topTrailingRadius: isMine && connectsAbove ? joinedRadius : radius,
+            style: .continuous
+        )
+        .path(in: rect)
     }
 }
 
 private struct ChatKeyboardBottomAnchorModifier: ViewModifier {
     @Binding var state: ChatKeyboardBottomAnchorState
-    let isNearBottom: Bool
-    let isComposerFocused: Bool
+    @Binding var isNearBottom: Bool
     let requestBottom: (_ animated: Bool) -> Void
 
     func body(content: Content) -> some View {
@@ -877,6 +1106,7 @@ private struct ChatKeyboardBottomAnchorModifier: ViewModifier {
                     var updated = state
                     updated.userScrollBegan()
                     state = updated
+                    isNearBottom = false
                 }
             )
             .onChange(of: isNearBottom) { _, nearBottom in
@@ -884,40 +1114,26 @@ private struct ChatKeyboardBottomAnchorModifier: ViewModifier {
                 updated.nearBottomChanged(nearBottom)
                 state = updated
             }
-            .onChange(of: isComposerFocused) { _, focused in
+            // Scroll only after UIKit has committed the keyboard's final frame. Asking a
+            // LazyVStack to scroll while an attachment tray is leaving can create a layout loop.
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidShowNotification)) { _ in
                 var updated = state
-                let shouldPin = updated.composerFocusChanged(
-                    isFocused: focused,
+                let shouldPin = updated.keyboardVisibilityChanged(
+                    isVisible: true,
                     isNearBottom: isNearBottom
                 )
                 state = updated
-                if shouldPin {
+                if shouldPin == true {
                     requestBottom(false)
                 }
             }
-            .onReceive(
-                NotificationCenter.default.publisher(
-                    for: UIResponder.keyboardWillChangeFrameNotification
-                )
-            ) { _ in
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidHideNotification)) { _ in
                 var updated = state
-                let shouldPin = updated.keyboardWillChange(isNearBottom: isNearBottom)
-                state = updated
-                if shouldPin {
-                    requestBottom(false)
-                }
-            }
-            .onReceive(
-                NotificationCenter.default.publisher(
-                    for: UIResponder.keyboardDidChangeFrameNotification
+                _ = updated.keyboardVisibilityChanged(
+                    isVisible: false,
+                    isNearBottom: isNearBottom
                 )
-            ) { _ in
-                var updated = state
-                let shouldPin = updated.keyboardDidChange(isNearBottom: isNearBottom)
                 state = updated
-                if shouldPin {
-                    requestBottom(false)
-                }
             }
     }
 }
@@ -925,22 +1141,15 @@ private struct ChatKeyboardBottomAnchorModifier: ViewModifier {
 enum ChatScrollAnchor {
     static let bottomID = "chat-bottom"
 
-    /// Scroll after LazyVStack commits new rows.
-    /// Always prefer the bottom sentinel — pinning the last message with `.bottom` undershoots
-    /// by roughly one row when a composer sits in `safeAreaInset` / after optimistic ID swaps.
+    /// Scroll once after LazyVStack commits new rows. Keyboard candidate-bar frame
+    /// changes must never start additional scroll passes while the user is typing.
     @MainActor
     static func scrollToBottom(
         proxy: ScrollViewProxy,
-        latestMessageID: @MainActor @escaping () -> String?,
         animated: Bool
     ) async {
         func jump() {
             proxy.scrollTo(bottomID, anchor: .bottom)
-            // If the sentinel is not mounted yet, land on the latest row then re-pin bottom.
-            if let id = latestMessageID() {
-                proxy.scrollTo(id, anchor: .bottom)
-                proxy.scrollTo(bottomID, anchor: .bottom)
-            }
         }
 
         await Task.yield()
@@ -949,9 +1158,17 @@ enum ChatScrollAnchor {
         } else {
             jump()
         }
-        await Task.yield()
-        try? await Task.sleep(nanoseconds: 80_000_000)
-        jump()
+    }
+}
+
+enum ChatInitialViewportPolicy {
+    static func canReveal(
+        hasPreparedViewport: Bool,
+        hasCompletedInitialLoad: Bool,
+        hasCachedSnapshot: Bool,
+        isVisible: Bool
+    ) -> Bool {
+        hasPreparedViewport && (hasCompletedInitialLoad || hasCachedSnapshot) && !isVisible
     }
 }
 
@@ -969,36 +1186,26 @@ struct ChatBottomSentinel: View {
                 onReachedBottom()
             }
             .onDisappear {
-                if #unavailable(iOS 18.0) {
-                    isNearBottom = false
-                }
+                isNearBottom = false
             }
     }
 }
 
 extension View {
-    func chatNearBottomTracker(
-        isNearBottom: Binding<Bool>,
-        onReachedBottom: @escaping () -> Void
-    ) -> some View {
-        modifier(ChatNearBottomTracker(isNearBottom: isNearBottom, onReachedBottom: onReachedBottom))
-    }
-
     func chatKeyboardBottomAnchor(
         state: Binding<ChatKeyboardBottomAnchorState>,
-        isNearBottom: Bool,
-        isComposerFocused: Bool,
+        isNearBottom: Binding<Bool>,
         requestBottom: @escaping (_ animated: Bool) -> Void
     ) -> some View {
         modifier(
             ChatKeyboardBottomAnchorModifier(
                 state: state,
                 isNearBottom: isNearBottom,
-                isComposerFocused: isComposerFocused,
                 requestBottom: requestBottom
             )
         )
     }
+
 }
 
 struct ChatUnreadJumpButton: View {

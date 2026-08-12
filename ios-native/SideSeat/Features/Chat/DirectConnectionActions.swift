@@ -17,6 +17,30 @@ struct NativeConnectionExchangeState: Decodable, Sendable {
     let status: String
     let role: String
     let cooldownUntil: String?
+
+    var phase: NativeContactExchangePhase {
+        switch status {
+        case "PENDING" where role == "requester":
+            .outgoingPending
+        case "PENDING" where role == "responder":
+            .incomingPending
+        case "ACCEPTED":
+            .accepted
+        case "DECLINED" where cooldownUntil != nil:
+            .declined(cooldownUntil: cooldownUntil)
+        default:
+            // NONE, CANCELED, and an elapsed decline are all immediately actionable.
+            .available
+        }
+    }
+}
+
+enum NativeContactExchangePhase: Equatable, Sendable {
+    case available
+    case outgoingPending
+    case incomingPending
+    case accepted
+    case declined(cooldownUntil: String?)
 }
 
 struct NativeConnectionActionRequest: Encodable, Sendable {

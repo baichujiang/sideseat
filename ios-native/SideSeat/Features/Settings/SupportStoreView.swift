@@ -6,7 +6,7 @@ struct SupportStoreView: View {
 
     var body: some View {
         Group {
-            if store.isLoading && store.catalog.isEmpty {
+            if (!store.hasLoaded || store.isLoading) && store.catalog.isEmpty {
                 SSLoadingState("Loading support options")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let issue = store.issue, store.catalog.isEmpty {

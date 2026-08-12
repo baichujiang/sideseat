@@ -6,12 +6,16 @@ import Observation
 final class PlansStore {
     private(set) var plans: [NativePlanRequest] = []
     private(set) var isLoading = false
+    private(set) var hasLoaded = false
     private(set) var issue: String?
 
     func load(using session: SessionStore) async {
         isLoading = true
         issue = nil
-        defer { isLoading = false }
+        defer {
+            isLoading = false
+            hasLoaded = true
+        }
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {

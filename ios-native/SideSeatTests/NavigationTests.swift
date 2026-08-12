@@ -24,6 +24,49 @@ struct NavigationTests {
             URL(string: "https://sideseat.example/discover/activities/activity-123")
         )
         #expect(DeepLinkRouter.route(for: activityURL) == .activity(activityID: "activity-123"))
+        let profileURL = try #require(URL(string: "https://sideseat.example/users/user-123"))
+        let postURL = try #require(
+            URL(string: "https://sideseat.example/discover/posts/post-123")
+        )
+        let legacyActivityURL = try #require(
+            URL(string: "https://sideseat.example/activities/activity-123")
+        )
+        #expect(DeepLinkRouter.route(for: profileURL) == .profile(userID: "user-123"))
+        #expect(DeepLinkRouter.route(for: postURL) == .discoverPost(postID: "post-123"))
+        #expect(DeepLinkRouter.route(for: legacyActivityURL) == .activity(activityID: "activity-123"))
+    }
+
+    @Test("Universal links route profile handoffs to the Me tab")
+    @MainActor
+    func routesProfileHandoffs() throws {
+        let router = DeepLinkRouter()
+        let profile = try #require(URL(string: "https://sideseat.example/profile"))
+        let info = try #require(URL(string: "https://sideseat.example/profile/info"))
+        let verification = try #require(
+            URL(string: "sideseat://profile/verification")
+        )
+        let account = try #require(URL(string: "https://sideseat.example/profile/account"))
+        let blocked = try #require(URL(string: "https://sideseat.example/profile/blocked"))
+
+        router.handle(profile)
+        #expect(router.consumePendingTab() == .me)
+        #expect(router.consumePendingRoute() == nil)
+
+        router.handle(info)
+        #expect(router.consumePendingTab() == .me)
+        #expect(router.consumePendingRoute() == nil)
+
+        router.handle(verification)
+        #expect(router.consumePendingTab() == .me)
+        #expect(router.consumePendingRoute() == nil)
+
+        router.handle(account)
+        #expect(router.consumePendingTab() == .me)
+        #expect(router.consumePendingRoute() == .settings)
+
+        router.handle(blocked)
+        #expect(router.consumePendingTab() == .me)
+        #expect(router.consumePendingRoute() == .blockedUsers)
     }
 
     @Test("Routes relative push notification paths")
@@ -66,6 +109,48 @@ struct NavigationTests {
         #expect(ActiveChatPresentation.isDisplaying(notice))
         ActiveChatPresentation.end("connection:connection-123")
         #expect(!ActiveChatPresentation.isDisplaying(notice))
+    }
+
+    @Test("Builds notification routes from structured conversation identifiers")
+    func buildsStructuredNotificationRoutes() {
+        let direct = ForegroundPushNotice(
+            title: "New message",
+            body: "Hello",
+            url: nil,
+            userInfo: ["kind": "direct_message", "connectionId": "connection-123"]
+        )
+        let course = ForegroundPushNotice(
+            title: "Course message",
+            body: "New reply",
+            url: nil,
+            userInfo: ["data": ["kind": "course_message", "courseId": "course-123"]]
+        )
+        let group = ForegroundPushNotice(
+            title: "Group message",
+            body: "New reply",
+            url: "  ",
+            userInfo: ["groupChatId": "group-123"]
+        )
+
+        #expect(direct.navigationURL == "/connections/connection-123")
+        #expect(course.navigationURL == "/courses/course-123/chat")
+        #expect(group.navigationURL == "/groups/group-123")
+    }
+
+    @Test("Replays a notification tap received before the app router is installed")
+    @MainActor
+    func replaysColdLaunchNotificationTap() {
+        let delegate = SideSeatAppDelegate()
+        let router = DeepLinkRouter()
+
+        delegate.routeNotification("/connections/cold-launch-connection")
+        #expect(router.pendingRoute == nil)
+
+        delegate.installDeepLinkRouter(router)
+
+        #expect(router.pendingRoute == .directChat(connectionID: "cold-launch-connection"))
+        #expect(router.pendingTab == .chats)
+        #expect(router.navigationEpoch == 1)
     }
 
     @Test("Rejects unknown and unsafe links")

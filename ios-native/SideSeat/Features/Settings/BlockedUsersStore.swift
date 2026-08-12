@@ -29,6 +29,7 @@ struct NativeUnblockUserResult: Decodable, Sendable {
 final class BlockedUsersStore {
     private(set) var blocks: [NativeBlockedUser] = []
     private(set) var isLoading = false
+    private(set) var hasLoaded = false
     private(set) var isMutating = false
     private(set) var issue: String?
 
@@ -40,7 +41,10 @@ final class BlockedUsersStore {
         guard !isLoading else { return }
         isLoading = true
         issue = nil
-        defer { isLoading = false }
+        defer {
+            isLoading = false
+            hasLoaded = true
+        }
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {

@@ -133,10 +133,7 @@ struct ScheduleShareRecipientView: View {
 
     var body: some View {
         Group {
-            if store.isLoading && store.snapshot == nil {
-                SSLoadingState("Loading schedule")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if let issue = store.issue, store.snapshot == nil {
+            if let issue = store.issue, store.snapshot == nil {
                 ContentUnavailableView("Schedule unavailable", systemImage: "calendar.badge.exclamationmark", description: Text(issue))
             } else if let snapshot = store.snapshot {
                 ScrollView {
@@ -160,13 +157,20 @@ struct ScheduleShareRecipientView: View {
                                     .font(.footnote)
                                     .foregroundStyle(.secondary)
                             }
-                                Label(proposalStatus(proposal.status), systemImage: "hourglass")
+                                Label(proposalStatus(proposal.status), systemImage: proposalStatusIcon(proposal.status))
                                     .font(.caption.weight(.semibold))
-                                    .foregroundStyle(SideSeatTheme.accent)
-                        }
+                                    .foregroundStyle(proposalStatusColor(proposal.status))
+                            }
                             .padding(SideSeatTheme.spaceMD)
                             .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                        .accessibilityIdentifier("schedule-share-my-proposal")
+                            .accessibilityRepresentation {
+                                Text(proposal.title)
+                                    .accessibilityLabel("Your proposal")
+                                    .accessibilityValue(
+                                        "\(proposal.title), \(proposalStatus(proposal.status))"
+                                    )
+                                    .accessibilityIdentifier("schedule-share-my-proposal")
+                            }
                     }
 
                     if store.allowGuestProposals {
@@ -183,8 +187,12 @@ struct ScheduleShareRecipientView: View {
                     .padding(.vertical, SideSeatTheme.spaceLG)
                 }
                 .background(SideSeatTheme.bgGrouped)
+            } else {
+                SSLoadingState("Loading schedule")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .background(SideSeatTheme.bgGrouped)
         .navigationTitle("Shared schedule")
         .navigationBarTitleDisplayMode(.inline)
         .task {
@@ -262,14 +270,15 @@ struct ScheduleShareRecipientView: View {
                         showsFullDay.toggle()
                     }
                 } label: {
-                    Label(
-                        showsFullDay ? String(localized: "Day view") : String(localized: "24 hours"),
-                        systemImage: showsFullDay ? "sun.max" : "clock"
-                    )
+                    HStack(spacing: SideSeatTheme.spaceXS) {
+                        Image(systemName: showsFullDay ? "sun.max" : "clock")
+                            .foregroundStyle(SideSeatTheme.accent)
+                        Text(showsFullDay ? String(localized: "Day view") : String(localized: "24 hours"))
+                            .foregroundStyle(SideSeatTheme.textPrimary)
+                    }
                     .font(.caption.weight(.semibold))
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(SideSeatTheme.accent)
                 .accessibilityIdentifier("schedule-share-full-day-toggle")
             }
         }
@@ -396,12 +405,13 @@ struct ScheduleShareRecipientView: View {
         if let boundsStart = Date.sideSeatChatISO8601(selection.bounds.start),
            let boundsEnd = Date.sideSeatChatISO8601(selection.bounds.end) {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                Label(
-                    "\(selection.start.formatted(date: .abbreviated, time: .shortened)) – \(selection.end.formatted(date: .omitted, time: .shortened))",
-                    systemImage: "calendar.badge.checkmark"
-                )
+                HStack(spacing: SideSeatTheme.spaceSM) {
+                    Image(systemName: "calendar.badge.checkmark")
+                        .foregroundStyle(SideSeatTheme.accent)
+                    Text("\(selection.start.formatted(date: .abbreviated, time: .shortened)) – \(selection.end.formatted(date: .omitted, time: .shortened))")
+                        .foregroundStyle(SideSeatTheme.textPrimary)
+                }
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(SideSeatTheme.accent)
 
                 Text(
                     "\(String(localized: "Free window")) \(boundsStart.formatted(date: .omitted, time: .shortened))–\(boundsEnd.formatted(date: .omitted, time: .shortened))"
@@ -540,6 +550,22 @@ struct ScheduleShareRecipientView: View {
         case "ACCEPTED": String(localized: "Accepted")
         case "DECLINED": String(localized: "Declined")
         default: String(localized: "Waiting for a response")
+        }
+    }
+
+    private func proposalStatusIcon(_ status: String) -> String {
+        switch status {
+        case "ACCEPTED": "checkmark.circle.fill"
+        case "DECLINED": "xmark.circle.fill"
+        default: "hourglass"
+        }
+    }
+
+    private func proposalStatusColor(_ status: String) -> Color {
+        switch status {
+        case "ACCEPTED": SideSeatTheme.success
+        case "DECLINED": SideSeatTheme.danger
+        default: SideSeatTheme.warning
         }
     }
 

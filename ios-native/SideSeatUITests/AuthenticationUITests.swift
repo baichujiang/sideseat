@@ -16,6 +16,79 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.buttons["login-submit"].exists)
     }
 
+    func testAuthenticatedProcessColdLaunchReachesFirstFrameWithinBudget() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-skip-tutorial",
+        ]
+        app.terminate()
+        RunLoop.current.run(until: Date().addingTimeInterval(0.5))
+
+        let duration = assertInteractionDuration(
+            "Authenticated process-cold launch",
+            atMost: PerformanceBudget.authenticatedProcessColdLaunch
+        ) {
+            app.launch()
+        }
+        XCTAssertTrue(
+            app.descendants(matching: .any)["home-week-timetable"].waitForExistence(timeout: 6)
+        )
+
+        let result = XCTAttachment(string: "process-cold-first-frame-seconds=\(duration)")
+        result.name = "Authenticated process-cold launch"
+        result.lifetime = .keepAlways
+        add(result)
+    }
+
+    func testAuthenticatedWarmResumePerformance() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-skip-tutorial",
+        ]
+        app.launch()
+        XCTAssertTrue(
+            app.descendants(matching: .any)["home-week-timetable"].waitForExistence(timeout: 6)
+        )
+
+        var durations: [TimeInterval] = []
+        for _ in 0..<3 {
+            XCUIDevice.shared.press(.home)
+            let backgroundDeadline = Date().addingTimeInterval(3)
+            while app.state == .runningForeground && Date() < backgroundDeadline {
+                RunLoop.current.run(until: Date().addingTimeInterval(0.05))
+            }
+            XCTAssertNotEqual(app.state, .runningForeground)
+
+            durations.append(
+                assertInteractionDuration(
+                    "Authenticated warm resume",
+                    atMost: PerformanceBudget.authenticatedWarmResume
+                ) {
+                    app.activate()
+                    XCTAssertTrue(
+                        app.wait(
+                            for: .runningForeground,
+                            timeout: PerformanceBudget.authenticatedWarmResume
+                        )
+                    )
+                }
+            )
+        }
+        XCTAssertTrue(
+            app.descendants(matching: .any)["home-week-timetable"].waitForExistence(timeout: 6)
+        )
+
+        let formattedDurations = durations
+            .map { String(format: "%.3f", $0) }
+            .joined(separator: ",")
+        let result = XCTAttachment(string: "warm-resume-seconds=\(formattedDurations)")
+        result.name = "Authenticated warm resume"
+        result.lifetime = .keepAlways
+        add(result)
+    }
+
     func testCreateActionOpensPlanWithoutChangingTabs() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-authenticated"]
@@ -42,7 +115,9 @@ final class AuthenticationUITests: XCTestCase {
         ]
         app.launch()
 
-        let title = app.descendants(matching: .any)["root-navigation-title"]
+        let title = app.navigationBars.staticTexts.matching(
+            NSPredicate(format: "label IN %@", ["Discover", "发现"])
+        ).firstMatch
         XCTAssertTrue(title.waitForExistence(timeout: 5))
         XCTAssertTrue(title.label.contains("Discover") || title.label.contains("发现"))
         XCTAssertLessThanOrEqual(title.frame.height, 44)
@@ -103,7 +178,7 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["discover-status-activity-ui-activity"].exists)
 
         app.tabBars.buttons["发布"].tap()
-        let title = app.textFields["buddy-title"]
+        let title = app.textViews["buddy-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 5))
         title.tap()
         title.typeText("Museum buddy")
@@ -112,10 +187,16 @@ final class AuthenticationUITests: XCTestCase {
         body.tap()
         body.typeText("Looking for someone to visit the museum this weekend. #museum")
         XCTAssertTrue(app.staticTexts["#museum"].waitForExistence(timeout: 2))
-        XCTAssertTrue(app.staticTexts["所有人"].waitForExistence(timeout: 2))
         let keyboardDone = app.buttons["buddy-keyboard-done"].firstMatch
         XCTAssertTrue(keyboardDone.waitForExistence(timeout: 2))
         keyboardDone.tap()
+        let everyone = app.staticTexts.matching(
+            NSPredicate(format: "label IN %@", ["Everyone", "所有人", "Alle"])
+        ).firstMatch
+        for _ in 0..<5 where !everyone.exists {
+            app.swipeUp()
+        }
+        XCTAssertTrue(everyone.waitForExistence(timeout: 2))
         let submit = app.buttons.matching(
             NSPredicate(format: "label == 'Post' OR label == '发布'")
         ).firstMatch
@@ -124,6 +205,124 @@ final class AuthenticationUITests: XCTestCase {
         submit.tap()
         XCTAssertTrue(app.descendants(matching: .any)["buddy-create-view"].waitForNonExistence(timeout: 5))
         XCTAssertTrue(discoverTab.isSelected)
+        XCTAssertTrue(app.descendants(matching: .any)["discover-post-detail"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Museum buddy"].exists)
+    }
+
+    func testDenseDiscoverFeedScrollPerformance() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-discover",
+            "--ui-testing-dense-discover",
+        ]
+        app.launch()
+
+        let list = app.descendants(matching: .any)["discover-list"]
+        XCTAssertTrue(list.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Study plan 79"].waitForExistence(timeout: 3))
+
+        let options = XCTMeasureOptions()
+        options.iterationCount = 3
+        var metrics: [any XCTMetric] = [
+            XCTClockMetric(),
+            XCTCPUMetric(application: app),
+            XCTMemoryMetric(application: app),
+        ]
+        if #available(iOS 26.0, *) {
+            metrics.append(XCTHitchMetric(application: app))
+        }
+        measure(metrics: metrics, options: options) {
+            assertInteractionDuration(
+                "Dense Discover feed round trip",
+                atMost: PerformanceBudget.denseDiscoverFeedRoundTrip
+            ) {
+                for _ in 0..<3 { list.swipeUp(velocity: .fast) }
+                for _ in 0..<3 { list.swipeDown(velocity: .fast) }
+            }
+        }
+    }
+
+    func testDenseDiscoverSearchRemainsResponsive() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-discover",
+            "--ui-testing-dense-discover",
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.descendants(matching: .any)["discover-list"].waitForExistence(timeout: 5))
+        let search = app.searchFields.firstMatch
+        XCTAssertTrue(search.waitForExistence(timeout: 3))
+        search.tap()
+
+        let options = XCTMeasureOptions()
+        options.iterationCount = 3
+        measure(metrics: [XCTClockMetric()], options: options) {
+            assertInteractionDuration(
+                "Dense Discover search round trip",
+                atMost: PerformanceBudget.denseDiscoverSearchRoundTrip
+            ) {
+                search.typeText("plan 79")
+                XCTAssertTrue(app.staticTexts["Study plan 79"].waitForExistence(timeout: 2))
+                search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 7))
+                XCTAssertTrue(app.staticTexts["Study plan 79"].waitForExistence(timeout: 2))
+            }
+        }
+    }
+
+    func testDenseDiscoverBrowseInteractionStress() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-discover",
+            "--ui-testing-dense-discover",
+        ]
+        app.launch()
+
+        let list = app.descendants(matching: .any)["discover-list"]
+        XCTAssertTrue(list.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Study plan 79"].waitForExistence(timeout: 3))
+
+        let options = XCTMeasureOptions()
+        options.iterationCount = 3
+        measure(metrics: appPerformanceMetrics(for: app), options: options) {
+            assertInteractionDuration(
+                "Dense Discover browse interaction",
+                atMost: PerformanceBudget.denseDiscoverBrowseInteraction
+            ) {
+                list.swipeUp(velocity: .fast)
+                list.swipeDown(velocity: .fast)
+
+                let search = app.searchFields.firstMatch
+                for _ in 0..<2 where !search.exists {
+                    list.swipeDown(velocity: .fast)
+                }
+                XCTAssertTrue(search.waitForExistence(timeout: 2))
+                search.tap()
+                search.typeText("plan 79")
+
+                let result = app.descendants(matching: .any)["discover-plan-ui-dense-buddy-79"]
+                XCTAssertTrue(result.waitForExistence(timeout: 2))
+                result.tap()
+                XCTAssertTrue(
+                    app.descendants(matching: .any)["discover-post-detail"]
+                        .waitForExistence(timeout: 3)
+                )
+
+                app.navigationBars.buttons.element(boundBy: 0).tap()
+                XCTAssertTrue(list.waitForExistence(timeout: 3))
+
+                let restoredSearch = app.searchFields.firstMatch
+                XCTAssertTrue(restoredSearch.waitForExistence(timeout: 2))
+                restoredSearch.tap()
+                restoredSearch.typeText(
+                    String(repeating: XCUIKeyboardKey.delete.rawValue, count: 7)
+                )
+                XCTAssertTrue(app.staticTexts["Study plan 79"].waitForExistence(timeout: 2))
+            }
+        }
     }
 
     func testDiscoverDetailActionsAreReachable() {
@@ -165,6 +364,21 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(activity.waitForExistence(timeout: 3))
         app.staticTexts["English conversation meetup"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["discover-activity-detail"].waitForExistence(timeout: 3))
+        let messages = app.descendants(matching: .any)["discover-activity-messages"]
+        let messageInput = app.textFields["discover-activity-message-input"]
+        let activityScrollView = app.scrollViews["discover-activity-detail"]
+        for _ in 0..<3 where !messages.exists {
+            activityScrollView.swipeUp()
+        }
+        XCTAssertTrue(messages.waitForExistence(timeout: 3))
+        for _ in 0..<2 where !messageInput.isHittable {
+            activityScrollView.swipeUp()
+        }
+        XCTAssertTrue(messageInput.waitForExistence(timeout: 3))
+        XCTAssertTrue(
+            app.descendants(matching: .any)["discover-activity-organizer-reply"]
+                .waitForExistence(timeout: 3)
+        )
         XCTAssertTrue(app.buttons["discover-activity-message"].waitForExistence(timeout: 3))
         let join = app.buttons["discover-activity-join"]
         XCTAssertTrue(join.exists)
@@ -173,7 +387,10 @@ final class AuthenticationUITests: XCTestCase {
         let addCalendar = app.buttons["discover-activity-add-calendar"]
         XCTAssertTrue(addCalendar.waitForExistence(timeout: 3))
         addCalendar.tap()
-        XCTAssertTrue(app.staticTexts["On SideSeat calendar"].waitForExistence(timeout: 3))
+        XCTAssertTrue(
+            app.descendants(matching: .any)["discover-activity-calendar-status"]
+                .waitForExistence(timeout: 3)
+        )
     }
 
     func testMeTabShowsNativeProfileSummary() {
@@ -371,9 +588,9 @@ final class AuthenticationUITests: XCTestCase {
         edit.tap()
         XCTAssertTrue(app.descendants(matching: .any)["buddy-edit-view"].waitForExistence(timeout: 3))
 
-        let title = app.textFields["buddy-title"]
+        let title = app.textViews["buddy-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 3))
-        title.tap()
+        title.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
         title.typeText(" Updated")
         let keyboardDone = app.buttons["buddy-keyboard-done"]
         XCTAssertTrue(keyboardDone.waitForExistence(timeout: 2))
@@ -433,10 +650,8 @@ final class AuthenticationUITests: XCTestCase {
         submit.tap()
 
         XCTAssertTrue(app.descendants(matching: .any)["buddy-repost-view"].waitForNonExistence(timeout: 5))
-        XCTAssertGreaterThanOrEqual(
-            app.staticTexts.matching(identifier: "Find classmates for algorithms").count,
-            2
-        )
+        XCTAssertTrue(app.descendants(matching: .any)["discover-post-detail"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Find classmates for algorithms"].exists)
     }
 
     func testSettingsCanPrepareSideSeatInviteForXiaohongshu() {
@@ -500,8 +715,7 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(save.isEnabled)
         save.tap()
         let confirm = app.buttons["profile-edit-confirm-school-change"].firstMatch
-        XCTAssertTrue(confirm.waitForExistence(timeout: 3))
-        confirm.tap()
+        XCTAssertFalse(confirm.waitForExistence(timeout: 1))
 
         XCTAssertTrue(app.descendants(matching: .any)["profile-edit"].waitForNonExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["Test User Native"].waitForExistence(timeout: 3))
@@ -585,7 +799,8 @@ final class AuthenticationUITests: XCTestCase {
 
         XCTAssertTrue(app.descendants(matching: .any)["profile-edit"].waitForNonExistence(timeout: 3))
         XCTAssertTrue(app.buttons["me-school-verification"].waitForExistence(timeout: 3))
-        XCTAssertFalse(app.descendants(matching: .any)["me-school-identity"].exists)
+        XCTAssertTrue(app.staticTexts["me-school-identity"].label.contains("LMU"))
+        XCTAssertTrue(app.staticTexts["me-school-status-visual"].exists)
         XCTAssertTrue(app.descendants(matching: .any)["me-school-change-result"].waitForExistence(timeout: 3))
 
         let viewArchive = app.buttons["me-school-change-view-archive"]
@@ -634,7 +849,8 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(pendingMeTab.waitForExistence(timeout: 5))
         pendingMeTab.tap()
         XCTAssertTrue(pendingApp.buttons["me-school-verification"].waitForExistence(timeout: 3))
-        XCTAssertFalse(pendingApp.descendants(matching: .any)["me-school-identity"].exists)
+        XCTAssertTrue(pendingApp.staticTexts["me-school-identity"].exists)
+        XCTAssertTrue(pendingApp.staticTexts["me-school-status-visual"].exists)
         pendingApp.terminate()
 
         let rejectedApp = XCUIApplication()
@@ -902,7 +1118,10 @@ final class AuthenticationUITests: XCTestCase {
 
     func testWeekHorizontalSwipePreservesVerticalTimePosition() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing-authenticated"]
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-expose-scroll-anchors",
+        ]
         app.launch()
 
         let timetable = app.descendants(matching: .any)["home-week-timetable"]
@@ -948,15 +1167,49 @@ final class AuthenticationUITests: XCTestCase {
         let options = XCTMeasureOptions()
         options.iterationCount = 3
 
+        var metrics: [any XCTMetric] = [
+            XCTClockMetric(),
+            XCTCPUMetric(application: app),
+            XCTMemoryMetric(application: app),
+        ]
+        if #available(iOS 26.0, *) {
+            metrics.append(XCTHitchMetric(application: app))
+        }
+
         measure(
-            metrics: [XCTClockMetric(), XCTCPUMetric(), XCTMemoryMetric()],
+            metrics: metrics,
             options: options
         ) {
-            for _ in 0..<2 {
-                leftStart.press(forDuration: 0.04, thenDragTo: leftEnd)
-                rightStart.press(forDuration: 0.04, thenDragTo: rightEnd)
+            assertInteractionDuration(
+                "Dense calendar paging round trip",
+                atMost: PerformanceBudget.denseCalendarPagingRoundTrip
+            ) {
+                for _ in 0..<2 {
+                    leftStart.press(forDuration: 0.04, thenDragTo: leftEnd)
+                    rightStart.press(forDuration: 0.04, thenDragTo: rightEnd)
+                }
             }
         }
+    }
+
+    func testCalendarRendersImportedAllDayEventInWeekBand() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-all-day-calendar",
+        ]
+        app.launch()
+
+        let row = app.descendants(matching: .any)["home-week-all-day-row"]
+        XCTAssertTrue(row.waitForExistence(timeout: 5))
+        let event = app.buttons["Reading week"].firstMatch
+        XCTAssertTrue(event.waitForExistence(timeout: 3))
+        XCTAssertGreaterThan(event.frame.width, 1)
+        event.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        XCTAssertTrue(
+            app.descendants(matching: .any)["calendar-readonly-detail"]
+                .waitForExistence(timeout: 3)
+        )
     }
 
     func testWeekVisibleDaysUseExplicitBottomControl() {
@@ -1073,7 +1326,10 @@ final class AuthenticationUITests: XCTestCase {
 
     func testHomeWeekTimetableAnchorsNearCurrentTimeOnToday() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing-authenticated"]
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-expose-scroll-anchors",
+        ]
         app.launch()
 
         let timetable = app.descendants(matching: .any)["home-week-timetable"]
@@ -1154,12 +1410,8 @@ final class AuthenticationUITests: XCTestCase {
         app.launch()
 
         let addEvent = app.buttons["new-event"]
-        let addMenu = app.buttons["calendar-add-menu"]
-        if addMenu.waitForExistence(timeout: 2) {
-            addMenu.tap()
-        }
-
         XCTAssertTrue(addEvent.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["calendar-add-menu"].exists)
         addEvent.tap()
 
         let title = app.textFields["event-title"]
@@ -1170,6 +1422,7 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.buttons["event-save"].isEnabled)
         XCTAssertTrue(app.descendants(matching: .any)["event-start"].exists)
         XCTAssertTrue(app.descendants(matching: .any)["event-end"].exists)
+        XCTAssertTrue(app.buttons["event-smart-fill"].exists)
     }
 
     func testCalendarSharesScheduleToAContact() {
@@ -1218,21 +1471,28 @@ final class AuthenticationUITests: XCTestCase {
 
         let share = app.buttons["calendar-share-schedule"]
         XCTAssertTrue(share.waitForExistence(timeout: 5))
-        XCTAssertGreaterThanOrEqual(share.frame.width, 76)
+        XCTAssertGreaterThanOrEqual(share.frame.width, 40)
         XCTAssertGreaterThanOrEqual(share.frame.height, 40)
         let month = app.staticTexts["calendar-month-title"]
+        let courses = app.buttons["open-courses"]
         let today = app.buttons["home-jump-today"]
         XCTAssertTrue(month.exists)
+        XCTAssertTrue(courses.exists)
         XCTAssertTrue(today.exists)
-        XCTAssertLessThanOrEqual(month.frame.maxX, share.frame.minX)
+        XCTAssertGreaterThanOrEqual(courses.frame.height, 40)
+        XCTAssertLessThanOrEqual(month.frame.maxX, courses.frame.minX)
+        XCTAssertLessThanOrEqual(courses.frame.maxX, share.frame.minX)
         XCTAssertLessThanOrEqual(share.frame.maxX, today.frame.minX)
-        XCTAssertTrue(app.buttons["calendar-add-menu"].exists || app.buttons["new-event"].exists)
+        let add = app.buttons["new-event"]
+        XCTAssertTrue(add.exists)
+        XCTAssertFalse(app.buttons["calendar-add-menu"].exists)
 
-        let more = app.buttons["calendar-more-menu"]
-        XCTAssertTrue(more.waitForExistence(timeout: 3))
-        more.tap()
-        XCTAssertTrue(app.buttons["manage-calendars"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.buttons["open-courses"].exists)
+        let calendars = app.buttons["manage-calendars"]
+        XCTAssertTrue(calendars.waitForExistence(timeout: 3))
+        let viewMode = app.descendants(matching: .any)["calendar-view-mode"]
+        XCTAssertTrue(viewMode.exists)
+        XCTAssertGreaterThan(calendars.frame.minY, add.frame.maxY)
+        XCTAssertLessThan(abs(calendars.frame.midY - viewMode.frame.midY), 4)
     }
 
     func testCalendarOffersLinkAndImageScheduleSharing() {
@@ -1335,7 +1595,7 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(saveImage.waitForExistence(timeout: 3))
         saveImage.tap()
 
-        XCTAssertTrue(app.descendants(matching: .any)["schedule-share-notice"].waitForExistence(timeout: 5))
+        assertScheduleImageSaved(in: app, timeout: 5)
     }
 
     func testCalendarSavesScheduleImageUsingRealPhotoLibrary() throws {
@@ -1359,7 +1619,17 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(saveImage.waitForExistence(timeout: 3))
         saveImage.tap()
 
-        XCTAssertTrue(app.descendants(matching: .any)["schedule-share-notice"].waitForExistence(timeout: 20))
+        assertScheduleImageSaved(in: app, timeout: 20)
+    }
+
+    private func assertScheduleImageSaved(in app: XCUIApplication, timeout: TimeInterval) {
+        let savedNotice = app.staticTexts.matching(
+            NSPredicate(
+                format: "label IN %@",
+                ["Saved to Photos", "已保存到相册", "In Fotos gespeichert"]
+            )
+        ).firstMatch
+        XCTAssertTrue(savedNotice.waitForExistence(timeout: timeout))
     }
 
     func testCalendarCanCancelScheduleImageSave() {
@@ -1390,19 +1660,56 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(saveImage.isEnabled)
     }
 
+    func testDenseScheduleImageGenerationRemainsCancelable() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-dense-schedule-share",
+            "--ui-testing-slow-photo-save",
+        ]
+        app.launch()
+
+        let share = app.buttons["calendar-share-schedule"]
+        XCTAssertTrue(share.waitForExistence(timeout: 5))
+        share.tap()
+        let openDestinations = app.buttons["schedule-share-open-destinations"]
+        XCTAssertTrue(openDestinations.waitForExistence(timeout: 3))
+        openDestinations.tap()
+
+        let saveImage = app.buttons["schedule-share-destination-save-image"]
+        let saving = app.descendants(matching: .any)["schedule-share-image-saving"]
+        let cancel = app.buttons["schedule-share-image-save-cancel"]
+        XCTAssertTrue(saveImage.waitForExistence(timeout: 3))
+
+        let options = XCTMeasureOptions()
+        options.iterationCount = 3
+        measure(metrics: appPerformanceMetrics(for: app), options: options) {
+            assertInteractionDuration(
+                "Dense schedule image cancellation",
+                atMost: PerformanceBudget.denseScheduleImageCancellation
+            ) {
+                saveImage.tap()
+                XCTAssertTrue(saving.waitForExistence(timeout: 2))
+                RunLoop.current.run(until: Date().addingTimeInterval(0.35))
+                XCTAssertTrue(cancel.waitForExistence(timeout: 2))
+                cancel.tap()
+                XCTAssertTrue(saving.waitForNonExistence(timeout: 2))
+                XCTAssertTrue(saveImage.isEnabled)
+            }
+        }
+    }
+
     func testSmartSchedulePreviewsAndSavesAParsedDraft() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-smart-schedule"]
         app.launch()
 
-        let addMenu = app.buttons["calendar-add-menu"]
-        XCTAssertTrue(addMenu.waitForExistence(timeout: 5))
-        addMenu.tap()
-        let smartAdd = app.buttons.matching(
-            NSPredicate(format: "label IN %@", ["Smart add", "智能添加"])
-        ).firstMatch
-        XCTAssertTrue(smartAdd.waitForExistence(timeout: 3))
-        smartAdd.tap()
+        let addEvent = app.buttons["new-event"]
+        XCTAssertTrue(addEvent.waitForExistence(timeout: 5))
+        addEvent.tap()
+        let smartFill = app.buttons["event-smart-fill"]
+        XCTAssertTrue(smartFill.waitForExistence(timeout: 3))
+        smartFill.tap()
 
         let input = app.textViews["smart-schedule-input"]
         XCTAssertTrue(input.waitForExistence(timeout: 3))
@@ -1415,6 +1722,84 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(save.exists)
         save.tap()
         XCTAssertTrue(app.descendants(matching: .any)["smart-schedule-view"].waitForNonExistence(timeout: 3))
+        XCTAssertTrue(app.textFields["event-title"].waitForNonExistence(timeout: 3))
+    }
+
+    func testSmartScheduleVoiceStartsWithoutBlockingAndCanBeStopped() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-smart-schedule",
+            "--ui-testing-smart-voice",
+        ]
+        app.launch()
+
+        let addEvent = app.buttons["new-event"]
+        XCTAssertTrue(addEvent.waitForExistence(timeout: 5))
+        addEvent.tap()
+        let smartFill = app.buttons["event-smart-fill"]
+        XCTAssertTrue(smartFill.waitForExistence(timeout: 3))
+        smartFill.tap()
+
+        let voice = app.buttons["smart-schedule-voice"]
+        XCTAssertTrue(voice.waitForExistence(timeout: 3))
+
+        let inputScreenshot = XCTAttachment(screenshot: app.screenshot())
+        inputScreenshot.name = "Smart fill input"
+        inputScreenshot.lifetime = .keepAlways
+        add(inputScreenshot)
+
+        voice.tap()
+
+        let cancel = app.buttons["smart-schedule-cancel"]
+        XCTAssertTrue(cancel.waitForExistence(timeout: 1))
+        XCTAssertTrue(cancel.isHittable)
+
+        let listening = app.staticTexts.matching(
+            NSPredicate(format: "label IN %@", ["Listening", "正在聆听"])
+        ).firstMatch
+        XCTAssertTrue(listening.waitForExistence(timeout: 3))
+        voice.tap()
+        XCTAssertTrue(listening.waitForNonExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["smart-schedule-view"].exists)
+    }
+
+    func testSmartScheduleDensePreviewIsGroupedAndKeepsWarningsCollapsed() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-smart-schedule-dense",
+        ]
+        app.launch()
+
+        let addEvent = app.buttons["new-event"]
+        XCTAssertTrue(addEvent.waitForExistence(timeout: 5))
+        addEvent.tap()
+        let smartFill = app.buttons["event-smart-fill"]
+        XCTAssertTrue(smartFill.waitForExistence(timeout: 3))
+        smartFill.tap()
+
+        let input = app.textViews["smart-schedule-input"]
+        XCTAssertTrue(input.waitForExistence(timeout: 3))
+        input.tap()
+        input.typeText("Study for three days")
+        app.buttons["smart-schedule-parse"].tap()
+
+        let summary = app.descendants(matching: .any)["smart-schedule-result-summary"]
+        XCTAssertTrue(summary.waitForExistence(timeout: 3))
+        let warning = app.descendants(matching: .any)["smart-schedule-warning-summary"]
+        XCTAssertTrue(warning.waitForExistence(timeout: 3))
+        XCTAssertLessThan(warning.frame.height, 90)
+        XCTAssertFalse(app.staticTexts["The title may need review."].exists)
+
+        let save = app.buttons["smart-schedule-save"]
+        XCTAssertTrue(save.waitForExistence(timeout: 3))
+        XCTAssertTrue(save.isHittable)
+
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Smart schedule grouped preview"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
     }
 
     func testRecurringEventSaveOffersThreeUpdateScopes() {
@@ -1585,12 +1970,16 @@ final class AuthenticationUITests: XCTestCase {
         app.launchArguments = ["--ui-testing-authenticated"]
         app.launch()
 
-        app.buttons["calendar-more-menu"].tap()
         let courses = app.buttons["open-courses"]
         XCTAssertTrue(courses.waitForExistence(timeout: 5))
         courses.tap()
 
         XCTAssertTrue(app.descendants(matching: .any)["courses-list"].waitForExistence(timeout: 3))
+        let myCourses = app.buttons.matching(
+            NSPredicate(format: "label IN %@", ["My courses", "我的课程", "Meine Kurse"])
+        ).firstMatch
+        XCTAssertTrue(myCourses.waitForExistence(timeout: 3))
+        XCTAssertTrue(myCourses.isSelected)
         let course = app.descendants(matching: .any)["course-row-ui-course"]
         XCTAssertTrue(course.waitForExistence(timeout: 3))
         course.tap()
@@ -1610,12 +1999,34 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["course-chat"].waitForExistence(timeout: 6))
     }
 
+    func testEmptyMyCoursesOffersCatalogWithoutDeadEnd() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-empty-courses",
+        ]
+        app.launch()
+
+        let courses = app.buttons["open-courses"]
+        XCTAssertTrue(courses.waitForExistence(timeout: 5))
+        courses.tap()
+
+        let browse = app.buttons["course-empty-browse"]
+        XCTAssertTrue(browse.waitForExistence(timeout: 3))
+        browse.tap()
+
+        let popular = app.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Popular", "热门", "Beliebt"])
+        ).firstMatch
+        XCTAssertTrue(popular.waitForExistence(timeout: 3))
+        XCTAssertTrue(popular.isSelected)
+    }
+
     func testCourseReviewAndImportEntryPoints() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-authenticated"]
         app.launch()
 
-        app.buttons["calendar-more-menu"].tap()
         let courses = app.buttons["open-courses"]
         XCTAssertTrue(courses.waitForExistence(timeout: 5))
         courses.tap()
@@ -1645,7 +2056,6 @@ final class AuthenticationUITests: XCTestCase {
         app.launchArguments = ["--ui-testing-authenticated"]
         app.launch()
 
-        app.buttons["calendar-more-menu"].tap()
         let courses = app.buttons["open-courses"]
         XCTAssertTrue(courses.waitForExistence(timeout: 5))
         courses.tap()
@@ -1671,7 +2081,6 @@ final class AuthenticationUITests: XCTestCase {
         app.launchArguments = ["--ui-testing-authenticated"]
         app.launch()
 
-        app.buttons["calendar-more-menu"].tap()
         let calendars = app.buttons["manage-calendars"]
         XCTAssertTrue(calendars.waitForExistence(timeout: 5))
         calendars.tap()
@@ -1692,7 +2101,6 @@ final class AuthenticationUITests: XCTestCase {
         app.launchArguments = ["--ui-testing-authenticated"]
         app.launch()
 
-        app.buttons["calendar-more-menu"].tap()
         let calendars = app.buttons["manage-calendars"]
         XCTAssertTrue(calendars.waitForExistence(timeout: 5))
         calendars.tap()
@@ -1727,6 +2135,71 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["chat-composer-field"].firstMatch.waitForExistence(timeout: 3))
     }
 
+    func testProfileAccountUniversalLinkRoutesThroughShellToSettings() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-skip-tutorial",
+            "--ui-testing-deep-link=/profile/account",
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.descendants(matching: .any)["settings-root"].waitForExistence(timeout: 5))
+        let meTab = app.tabBars.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Me", "我", "Ich"])
+        ).firstMatch
+        XCTAssertTrue(meTab.waitForExistence(timeout: 3))
+        XCTAssertTrue(meTab.isSelected)
+        XCTAssertTrue(app.buttons["settings-language"].waitForExistence(timeout: 3))
+    }
+
+    func testUniversalLinkRouteMatrixReachesNativeDestinations() {
+        let destinations: [(path: String, rootID: String)] = [
+            ("/connections/ui-connection", "direct-chat"),
+            ("/courses/ui-course", "course-detail"),
+            ("/courses/ui-course/chat", "course-chat"),
+            ("/groups/ui-group", "group-chat"),
+            ("/discover/posts/ui-buddy", "discover-post-detail"),
+            ("/discover/activities/ui-activity", "discover-activity-detail"),
+            ("/users/ui-peer", "public-profile"),
+        ]
+
+        for destination in destinations {
+            XCTContext.runActivity(named: destination.path) { _ in
+                let app = XCUIApplication()
+                app.launchArguments = [
+                    "--ui-testing-authenticated",
+                    "--ui-testing-skip-tutorial",
+                    "--ui-testing-deep-link=\(destination.path)",
+                ]
+                app.launch()
+
+                XCTAssertTrue(
+                    app.descendants(matching: .any)[destination.rootID]
+                        .waitForExistence(timeout: 5),
+                    "Universal link \(destination.path) did not reach \(destination.rootID)."
+                )
+                app.terminate()
+            }
+        }
+    }
+
+    func testScheduleShareUniversalLinkColdLaunchShowsRecipientSchedule() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-skip-tutorial",
+            "--ui-testing-deep-link=/share/view/ui-token",
+        ]
+        app.launch()
+
+        XCTAssertTrue(
+            app.descendants(matching: .any)["schedule-share-recipient"]
+                .waitForExistence(timeout: 5)
+        )
+        XCTAssertTrue(app.staticTexts["Mina"].waitForExistence(timeout: 3))
+    }
+
     func testInboxOpensDirectChatAndSendsMessage() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-chats"]
@@ -1744,6 +2217,181 @@ final class AuthenticationUITests: XCTestCase {
         field.typeText("我在路上了")
         field.typeText("\n")
         XCTAssertTrue(app.staticTexts["我在路上了"].waitForExistence(timeout: 3))
+    }
+
+    func testDirectChatUsesSystemNavigationAndEdgeSwipeBack() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-chats"]
+        app.launch()
+
+        XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 5))
+        app.descendants(matching: .any)["inbox-row-ui-connection"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.tabBars.firstMatch.isHittable)
+
+        let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.001, dy: 0.5))
+        let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5))
+        start.press(forDuration: 0.12, thenDragTo: end)
+
+        XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.tabBars.firstMatch.isHittable)
+    }
+
+    func testDenseDirectChatKeepsKeyboardForRapidConsecutiveSends() {
+        let app = launchDenseDirectChat()
+        let field = app.descendants(matching: .any)["chat-composer-field"].firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 8))
+
+        field.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
+        field.typeText("连续发送第一条")
+        app.buttons["chat-composer-send"].tap()
+
+        XCTAssertTrue(app.staticTexts["连续发送第一条"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.keyboards.firstMatch.exists)
+        XCTAssertTrue((field.value as? String ?? "").isEmpty)
+
+        field.typeText("连续发送第二条")
+        field.typeText("\n")
+
+        XCTAssertTrue(app.staticTexts["连续发送第二条"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.keyboards.firstMatch.exists)
+        XCTAssertTrue((field.value as? String ?? "").isEmpty)
+    }
+
+    func testDenseDirectChatFirstFrameStartsAtLatestMessage() {
+        let app = launchDenseDirectChat()
+        let oldest = app.descendants(matching: .any)["chat-bubble-ui-dense-0000"].firstMatch
+        XCTAssertFalse(
+            oldest.waitForExistence(timeout: 0.5),
+            "Opening a conversation must not expose the oldest message before bottom anchoring finishes."
+        )
+
+        let latest = app.descendants(matching: .any)["chat-bubble-ui-dense-0959"].firstMatch
+        XCTAssertTrue(latest.waitForExistence(timeout: 8))
+        XCTAssertTrue(latest.isHittable)
+
+        XCTAssertFalse(oldest.isHittable)
+    }
+
+    func testDirectChatShowsCachedLatestMessageBeforeHistoryRefresh() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-chats",
+            "--ui-testing-cached-chat-refresh",
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 5))
+        app.descendants(matching: .any)["inbox-row-ui-connection"].tap()
+
+        let latest = app.descendants(matching: .any)["chat-bubble-ui-unread-12"].firstMatch
+        XCTAssertTrue(
+            latest.waitForExistence(timeout: 0.7),
+            "The cached latest message should render before the delayed network refresh finishes."
+        )
+        XCTAssertTrue(latest.isHittable)
+        XCTAssertFalse(app.descendants(matching: .any)["chat-initial-loading"].exists)
+        let cachedLatestY = latest.frame.maxY
+
+        RunLoop.current.run(until: Date().addingTimeInterval(1.6))
+
+        XCTAssertTrue(latest.isHittable)
+        XCTAssertLessThanOrEqual(
+            abs(latest.frame.maxY - cachedLatestY),
+            12,
+            "Prepending refreshed history must keep the cached latest message anchored in place."
+        )
+    }
+
+    func testDenseDirectChatComposerHandlesRapidTypingAndDeletion() {
+        let app = launchDenseDirectChat()
+        let field = app.descendants(matching: .any)["chat-composer-field"].firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 8))
+
+        field.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
+
+        let message = "Rapid typing and delete 1234567890"
+        field.typeText(message)
+        XCTAssertEqual(field.value as? String, message)
+
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 10))
+
+        XCTAssertEqual(field.value as? String, "Rapid typing and delete ")
+        XCTAssertTrue(app.keyboards.firstMatch.exists)
+    }
+
+    func testDenseDirectChatFirstCharacterLatency() {
+        let app = launchDenseDirectChat(
+            extraArguments: ["--ui-testing-chat-input-diagnostics"]
+        )
+        let field = app.descendants(matching: .any)["chat-composer-field"].firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 8))
+
+        field.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
+
+        let firstStart = CACurrentMediaTime()
+        field.typeText("A")
+        let firstCharacterDuration = CACurrentMediaTime() - firstStart
+        let firstAppLatency = requireChatInputLatency(field, sequence: 1)
+
+        let secondStart = CACurrentMediaTime()
+        field.typeText("B")
+        let secondCharacterDuration = CACurrentMediaTime() - secondStart
+        let secondAppLatency = requireChatInputLatency(field, sequence: 2)
+
+        let chat = app.descendants(matching: .any)["direct-chat"].firstMatch
+        chat.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.35)).tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 3))
+
+        field.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
+        let refocusStart = CACurrentMediaTime()
+        field.typeText("C")
+        let refocusCharacterDuration = CACurrentMediaTime() - refocusStart
+        let refocusAppLatency = requireChatInputLatency(field, sequence: 3)
+
+        XCTAssertEqual(field.value as? String, "ABC")
+        let result = XCTAttachment(
+            string: "automation(first=\(firstCharacterDuration), second=\(secondCharacterDuration), refocus=\(refocusCharacterDuration)); app-ms(first=\(firstAppLatency), second=\(secondAppLatency), refocus=\(refocusAppLatency))"
+        )
+        result.name = "Chat first-character latency"
+        result.lifetime = .keepAlways
+        add(result)
+
+        XCTAssertLessThanOrEqual(
+            firstCharacterDuration,
+            PerformanceBudget.chatCharacterAutomationRoundTrip,
+            "The first character after the initial focus was delayed."
+        )
+        XCTAssertLessThanOrEqual(
+            secondCharacterDuration,
+            PerformanceBudget.chatCharacterAutomationRoundTrip,
+            "A warm composer character was delayed."
+        )
+        XCTAssertLessThanOrEqual(
+            refocusCharacterDuration,
+            PerformanceBudget.chatCharacterAutomationRoundTrip,
+            "The first character after refocusing the composer was delayed."
+        )
+        XCTAssertLessThanOrEqual(
+            firstAppLatency,
+            PerformanceBudget.chatInputMainLoopMilliseconds,
+            "The app delayed processing the first character after initial focus."
+        )
+        XCTAssertLessThanOrEqual(
+            secondAppLatency,
+            PerformanceBudget.chatInputMainLoopMilliseconds,
+            "The app delayed processing a continuous character."
+        )
+        XCTAssertLessThanOrEqual(
+            refocusAppLatency,
+            PerformanceBudget.chatInputMainLoopMilliseconds,
+            "The app delayed processing the first character after refocus."
+        )
     }
 
     func testDirectChatBackgroundDismissesKeyboardAndKeepsLatestMessageVisible() {
@@ -1768,7 +2416,12 @@ final class AuthenticationUITests: XCTestCase {
 
         field.tap()
         field.typeText("保留的草稿")
-        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
+        let keyboard = app.keyboards.firstMatch
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 3))
+        let composerKeyboardGap = keyboard.frame.minY - field.frame.maxY
+        XCTAssertGreaterThanOrEqual(composerKeyboardGap, -2)
+        // XCUI's keyboard frame starts below the system prediction row on iPhone.
+        XCTAssertLessThanOrEqual(composerKeyboardGap, 70)
 
         let chat = app.descendants(matching: .any)["direct-chat"].firstMatch
         XCTAssertTrue(chat.waitForExistence(timeout: 3))
@@ -1782,11 +2435,69 @@ final class AuthenticationUITests: XCTestCase {
 
         retainedField.tap()
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
+        retainedField.typeText("继续")
+        XCTAssertEqual(retainedField.value as? String, "保留的草稿继续")
         let visible = XCTNSPredicateExpectation(
             predicate: NSPredicate(format: "hittable == true"),
             object: latest
         )
         XCTAssertEqual(XCTWaiter.wait(for: [visible], timeout: 3), .completed)
+
+        chat.coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.45)).tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 3))
+        XCTAssertEqual(retainedField.value as? String, "保留的草稿继续")
+        XCTAssertTrue(latest.isHittable)
+    }
+
+    func testDirectChatAttachmentMenuPreservesComposerAndDraft() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-chats"]
+        app.launch()
+
+        XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 5))
+        app.descendants(matching: .any)["inbox-row-ui-connection"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 3))
+
+        let field = app.descendants(matching: .any)["chat-composer-field"].firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 3))
+        field.tap()
+        field.typeText("保留附件草稿")
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
+        let composerY = field.frame.midY
+
+        app.buttons["chat-composer-attach"].tap()
+        let location = app.descendants(matching: .any)["chat-composer-location"].firstMatch
+        XCTAssertTrue(location.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.keyboards.firstMatch.exists)
+        XCTAssertLessThan(abs(field.frame.midY - composerY), 40)
+        XCTAssertEqual(field.value as? String, "保留附件草稿")
+
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.25)).tap()
+        XCTAssertTrue(location.waitForNonExistence(timeout: 3))
+        field.typeText("继续")
+        XCTAssertTrue(app.keyboards.firstMatch.exists)
+        XCTAssertEqual(field.value as? String, "保留附件草稿继续")
+    }
+
+    func testDirectChatComposerPreservesHistoryPosition() {
+        let app = launchDenseDirectChat()
+        let chat = app.descendants(matching: .any)["direct-chat"].firstMatch
+        XCTAssertTrue(chat.waitForExistence(timeout: 8))
+        let latest = app.descendants(matching: .any)["chat-bubble-ui-dense-0959"].firstMatch
+        XCTAssertTrue(latest.waitForExistence(timeout: 8))
+
+        chat.swipeDown()
+        chat.swipeDown()
+        XCTAssertFalse(latest.isHittable)
+
+        let field = app.descendants(matching: .any)["chat-composer-field"].firstMatch
+        field.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
+        XCTAssertFalse(latest.isHittable)
+
+        chat.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.35)).tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 3))
+        XCTAssertFalse(latest.isHittable)
     }
 
     func testDenseDirectChatScrollingPerformance() {
@@ -1804,12 +2515,17 @@ final class AuthenticationUITests: XCTestCase {
         options.iterationCount = 3
 
         measure(
-            metrics: [XCTClockMetric(), XCTCPUMetric(), XCTMemoryMetric()],
+            metrics: appPerformanceMetrics(for: app),
             options: options
         ) {
-            for _ in 0..<3 {
-                upwardStart.press(forDuration: 0.04, thenDragTo: upwardEnd)
-                downwardStart.press(forDuration: 0.04, thenDragTo: downwardEnd)
+            assertInteractionDuration(
+                "Dense direct-chat scrolling round trip",
+                atMost: PerformanceBudget.denseChatScrollingRoundTrip
+            ) {
+                for _ in 0..<3 {
+                    upwardStart.press(forDuration: 0.04, thenDragTo: upwardEnd)
+                    downwardStart.press(forDuration: 0.04, thenDragTo: downwardEnd)
+                }
             }
         }
 
@@ -1826,15 +2542,20 @@ final class AuthenticationUITests: XCTestCase {
         options.iterationCount = 3
 
         measure(
-            metrics: [XCTClockMetric(), XCTCPUMetric(), XCTMemoryMetric()],
+            metrics: appPerformanceMetrics(for: app),
             options: options
         ) {
-            field.tap()
-            field.typeText("Typing stress message with multiple words")
-            app.buttons["chat-composer-send"].tap()
-            XCTAssertTrue(app.keyboards.firstMatch.exists)
-            chat.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.35)).tap()
-            XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 3))
+            assertInteractionDuration(
+                "Dense direct-chat composer round trip",
+                atMost: PerformanceBudget.denseChatComposerRoundTrip
+            ) {
+                field.tap()
+                field.typeText("Typing stress message with multiple words")
+                app.buttons["chat-composer-send"].tap()
+                XCTAssertTrue(app.keyboards.firstMatch.exists)
+                chat.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.35)).tap()
+                XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 3))
+            }
         }
 
         XCTAssertFalse((field.value as? String ?? "").contains("Typing stress"))
@@ -1855,15 +2576,20 @@ final class AuthenticationUITests: XCTestCase {
         options.iterationCount = 3
 
         measure(
-            metrics: [XCTClockMetric(), XCTCPUMetric(), XCTMemoryMetric()],
+            metrics: appPerformanceMetrics(for: app),
             options: options
         ) {
-            let row = app.descendants(matching: .any)["inbox-row-ui-connection"]
-            XCTAssertTrue(row.waitForExistence(timeout: 3))
-            row.tap()
-            XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 5))
-            app.navigationBars.buttons.firstMatch.tap()
-            XCTAssertTrue(inbox.waitForExistence(timeout: 5))
+            assertInteractionDuration(
+                "Dense direct-chat enter and exit",
+                atMost: PerformanceBudget.denseChatEnterExit
+            ) {
+                let row = app.descendants(matching: .any)["inbox-row-ui-connection"]
+                XCTAssertTrue(row.waitForExistence(timeout: 3))
+                row.tap()
+                XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 5))
+                app.navigationBars.buttons.firstMatch.tap()
+                XCTAssertTrue(inbox.waitForExistence(timeout: 5))
+            }
         }
     }
 
@@ -1875,6 +2601,13 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 5))
         app.descendants(matching: .any)["inbox-row-ui-connection"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 3))
+
+        openChatContextAction(
+            in: app,
+            bubbleID: "chat-bubble-ui-msg-1",
+            actionID: "chat-copy-ui-msg-1",
+            actionLabels: ["Copy", "复制"]
+        )
 
         openChatContextAction(
             in: app,
@@ -2109,7 +2842,7 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["inbox-empty-no-matches"].waitForExistence(timeout: 3))
     }
 
-    func testInboxPinAndHideCourseRow() throws {
+    func testInboxPinAndHideCourseRow() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-chats"]
         app.launch()
@@ -2117,22 +2850,23 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 5))
         let course = app.descendants(matching: .any)["inbox-row-ui-course"]
         XCTAssertTrue(course.waitForExistence(timeout: 3))
-        course.swipeLeft()
-        let pin = app.buttons.matching(NSPredicate(format: "label IN %@", ["Pin", "置顶"])).firstMatch
-        if !pin.waitForExistence(timeout: 2) {
-            throw XCTSkip("SwiftUI swipe actions are not consistently exposed to XCTest on this simulator runtime.")
-        }
+        course.press(forDuration: 0.8)
+        let pin = app.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Pin", "置顶", "Anheften"])
+        ).firstMatch
         XCTAssertTrue(pin.waitForExistence(timeout: 3))
         pin.tap()
-        XCTAssertTrue(app.staticTexts["置顶"].waitForExistence(timeout: 3))
 
         let pinnedCourse = app.descendants(matching: .any)["inbox-row-ui-course"]
         XCTAssertTrue(pinnedCourse.waitForExistence(timeout: 3))
-        pinnedCourse.swipeLeft()
-        let hide = app.buttons.matching(NSPredicate(format: "label IN %@", ["Hide", "隐藏"])).firstMatch
-        if !hide.waitForExistence(timeout: 2) {
-            throw XCTSkip("SwiftUI swipe actions are not consistently exposed to XCTest on this simulator runtime.")
-        }
+        pinnedCourse.press(forDuration: 0.8)
+        let unpin = app.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Unpin", "取消置顶", "Lösen"])
+        ).firstMatch
+        XCTAssertTrue(unpin.waitForExistence(timeout: 3))
+        let hide = app.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Hide", "隐藏", "Ausblenden"])
+        ).firstMatch
         XCTAssertTrue(hide.waitForExistence(timeout: 3))
         hide.tap()
         let gone = XCTNSPredicateExpectation(
@@ -2229,6 +2963,83 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.buttons["schedule-share-duration-90"].exists)
     }
 
+    func testScheduleShareRecipientSelectsAndSubmitsAConcreteTime() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-chats"]
+        app.launch()
+
+        XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 5))
+        app.buttons["inbox-chip-plans"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["plans-root"].waitForExistence(timeout: 3))
+        app.descendants(matching: .any)["plans-row-ui-plan-1"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 3))
+
+        app.swipeUp()
+        let scheduleCard = app.descendants(matching: .any)["schedule-share-card"]
+        XCTAssertTrue(scheduleCard.waitForExistence(timeout: 3))
+        scheduleCard.tap()
+
+        let recipient = app.descendants(matching: .any)["schedule-share-recipient"]
+        XCTAssertTrue(recipient.waitForExistence(timeout: 3))
+        app.buttons["schedule-share-full-day-toggle"].tap()
+
+        let freeWindow = app.buttons.matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "schedule-share-slot-")
+        ).firstMatch
+        XCTAssertTrue(freeWindow.waitForExistence(timeout: 3))
+        freeWindow.tap()
+
+        let submit = app.buttons["schedule-share-proposal-submit"]
+        for _ in 0..<5 where !submit.isHittable {
+            app.swipeUp()
+        }
+        XCTAssertTrue(submit.waitForExistence(timeout: 3))
+        XCTAssertTrue(submit.isEnabled)
+        XCTAssertTrue(app.descendants(matching: .any)["schedule-share-proposal-start"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["schedule-share-proposal-end"].exists)
+        submit.tap()
+
+        let proposal = app.descendants(matching: .any)["schedule-share-my-proposal"]
+        XCTAssertTrue(proposal.waitForExistence(timeout: 3))
+        let proposalText = "\(proposal.label) \(String(describing: proposal.value))"
+        XCTAssertTrue(
+            ["Meet up", "见面", "Treffen"].contains { proposalText.contains($0) },
+            "Unexpected proposal accessibility text: \(proposalText)"
+        )
+    }
+
+    func testAcceptingPlanUpdatesTheCardAndOpensCalendar() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-chats"]
+        app.launch()
+
+        XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 5))
+        app.buttons["inbox-chip-plans"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["plans-root"].waitForExistence(timeout: 3))
+        app.descendants(matching: .any)["plans-row-ui-plan-1"].tap()
+
+        let planCard = app.descendants(matching: .any)["plan-card-ui-plan-1"]
+        XCTAssertTrue(planCard.waitForExistence(timeout: 3))
+        let accept = app.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Accept", "接受", "Annehmen"])
+        ).firstMatch
+        XCTAssertTrue(accept.waitForExistence(timeout: 3))
+        accept.tap()
+
+        XCTAssertTrue(
+            app.descendants(matching: .any)["plan-card-actions-ui-plan-1"]
+                .waitForNonExistence(timeout: 3)
+        )
+        let viewCalendar = app.buttons.matching(
+            NSPredicate(format: "label IN %@", ["View calendar", "查看日历", "Kalender anzeigen"])
+        ).firstMatch
+        XCTAssertTrue(viewCalendar.waitForExistence(timeout: 3))
+        viewCalendar.tap()
+
+        XCTAssertTrue(app.buttons["calendar-share-schedule"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["home-week-timetable"].exists)
+    }
+
     func testMeSettingsAndFeedbackScaffold() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-authenticated"]
@@ -2274,34 +3085,190 @@ final class AuthenticationUITests: XCTestCase {
         app.buttons["delete-account-cancel"].tap()
     }
 
-    func testDirectChatSearchAndActionsMenu() {
+    func testFeedbackForumCreatesVotesAndCommentsWithoutStaleState() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated"]
+        app.launch()
+
+        func reveal(_ element: XCUIElement) {
+            for _ in 0..<5 where !element.isHittable {
+                app.swipeUp()
+            }
+        }
+
+        app.tabBars.buttons["我"].tap()
+        let settings = app.descendants(matching: .any)["me-settings"]
+        XCTAssertTrue(settings.waitForExistence(timeout: 5))
+        settings.tap()
+        let feedback = app.descendants(matching: .any)["settings-feedback"]
+        reveal(feedback)
+        feedback.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["feedback-root"].waitForExistence(timeout: 3))
+
+        app.buttons["feedback-compose"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["feedback-compose-sheet"].waitForExistence(timeout: 3))
+        let title = app.textFields["feedback-title"]
+        let message = app.textFields["feedback-message"]
+        title.tap()
+        title.typeText("Keyboard responsiveness")
+        message.tap()
+        message.typeText("Typing and deleting should remain smooth in every form.")
+        let send = app.buttons["feedback-submit"]
+        XCTAssertTrue(send.isEnabled)
+        send.tap()
+        XCTAssertTrue(
+            app.descendants(matching: .any)["feedback-compose-sheet"]
+                .waitForNonExistence(timeout: 3)
+        )
+        XCTAssertTrue(app.staticTexts["Keyboard responsiveness"].waitForExistence(timeout: 3))
+
+        let existing = app.descendants(matching: .any)["feedback-row-ui-feedback-1"]
+        XCTAssertTrue(existing.waitForExistence(timeout: 3))
+        existing.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["feedback-detail"].waitForExistence(timeout: 3))
+
+        let upvote = app.buttons["feedback-upvote"]
+        let downvote = app.buttons["feedback-downvote"]
+        XCTAssertTrue(upvote.waitForExistence(timeout: 3))
+        upvote.tap()
+        XCTAssertTrue(waitForValue(upvote, in: ["Selected", "已选择", "Ausgewählt"], timeout: 3))
+        upvote.tap()
+        XCTAssertTrue(waitForValue(upvote, in: ["Not selected", "未选择", "Nicht ausgewählt"], timeout: 3))
+        downvote.tap()
+        XCTAssertTrue(waitForValue(downvote, in: ["Selected", "已选择", "Ausgewählt"], timeout: 3))
+
+        let comment = app.textFields["feedback-comment-field"]
+        comment.tap()
+        comment.typeText("I can reproduce this issue consistently.")
+        let submitComment = app.buttons["feedback-comment-submit"]
+        XCTAssertTrue(submitComment.isEnabled)
+        submitComment.tap()
+        XCTAssertTrue(
+            app.staticTexts["I can reproduce this issue consistently."]
+                .waitForExistence(timeout: 3)
+        )
+        XCTAssertTrue(waitForEnabled(submitComment, equals: false, timeout: 3))
+
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(app.staticTexts["Keyboard responsiveness"].waitForExistence(timeout: 3))
+    }
+
+    func testSettingsUnblocksUserAndShowsEmptyState() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated"]
+        app.launch()
+
+        app.tabBars.buttons["我"].tap()
+        let settings = app.descendants(matching: .any)["me-settings"]
+        XCTAssertTrue(settings.waitForExistence(timeout: 5))
+        settings.tap()
+        let blocked = app.descendants(matching: .any)["settings-blocked-users"]
+        for _ in 0..<5 where !blocked.isHittable { app.swipeUp() }
+        blocked.tap()
+
+        let row = app.descendants(matching: .any)["blocked-users-row-ui-blocked-user"]
+        XCTAssertTrue(row.waitForExistence(timeout: 3))
+        app.buttons["blocked-users-unblock-ui-blocked-user"].tap()
+        let confirm = app.buttons["blocked-users-confirm-unblock"].firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 3))
+        confirm.tap()
+        XCTAssertTrue(row.waitForNonExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["blocked-users-empty"].waitForExistence(timeout: 3))
+    }
+
+    func testDeleteAccountRequiresConfirmationAndSignsOut() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated"]
+        app.launch()
+
+        app.tabBars.buttons["我"].tap()
+        let settings = app.descendants(matching: .any)["me-settings"]
+        XCTAssertTrue(settings.waitForExistence(timeout: 5))
+        settings.tap()
+        let deleteAccount = app.descendants(matching: .any)["settings-delete-account"]
+        for _ in 0..<5 where !deleteAccount.isHittable { app.swipeUp() }
+        deleteAccount.tap()
+
+        XCTAssertTrue(app.descendants(matching: .any)["delete-account-sheet"].waitForExistence(timeout: 3))
+        let submit = app.buttons["delete-account-submit"]
+        XCTAssertFalse(submit.isEnabled)
+        let understood = app.switches["delete-account-understood"]
+        understood.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+        let confirmation = app.textFields["delete-account-confirm"]
+        confirmation.tap()
+        confirmation.typeText("test_001")
+        XCTAssertTrue(
+            waitForEnabled(submit, equals: true, timeout: 3),
+            "Delete remained disabled; toggle=\(String(describing: understood.value)), confirmation=\(String(describing: confirmation.value))"
+        )
+        submit.tap()
+        XCTAssertTrue(app.textFields["login-identifier"].waitForExistence(timeout: 5))
+    }
+
+    func testSettingsLogoutImmediatelyReturnsToLogin() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated"]
+        app.launch()
+
+        app.tabBars.buttons["我"].tap()
+        let settings = app.descendants(matching: .any)["me-settings"]
+        XCTAssertTrue(settings.waitForExistence(timeout: 5))
+        settings.tap()
+        let logout = app.descendants(matching: .any)["settings-logout"]
+        for _ in 0..<5 where !logout.isHittable { app.swipeUp() }
+        logout.tap()
+        XCTAssertTrue(app.textFields["login-identifier"].waitForExistence(timeout: 5))
+    }
+
+    func testDirectChatInfoAndContactExchangeFeedback() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-chats"]
         app.launch()
+
+        func reveal(_ element: XCUIElement) {
+            for _ in 0..<5 {
+                if element.exists, element.isHittable {
+                    return
+                }
+                app.swipeUp()
+            }
+        }
 
         XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 5))
         app.descendants(matching: .any)["inbox-row-ui-connection"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 3))
 
         app.buttons["direct-chat-actions"].tap()
-        let searchItem = app.descendants(matching: .any)["direct-chat-search"].firstMatch
-        if searchItem.waitForExistence(timeout: 2) {
-            searchItem.tap()
-        } else if app.buttons["Search chat"].waitForExistence(timeout: 1) {
-            app.buttons["Search chat"].tap()
-        } else {
-            app.buttons["搜索聊天"].tap()
-        }
+        XCTAssertTrue(app.descendants(matching: .any)["direct-chat-info"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["direct-info-profile"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["direct-info-remark"].waitForExistence(timeout: 3))
+
+        let searchItem = app.descendants(matching: .any)["direct-info-search"].firstMatch
+        XCTAssertTrue(searchItem.waitForExistence(timeout: 3))
+        searchItem.tap()
         XCTAssertTrue(app.descendants(matching: .any)["thread-search-sheet"].waitForExistence(timeout: 3))
         let done = app.buttons["thread-search-done"]
         XCTAssertTrue(done.waitForExistence(timeout: 3))
         done.tap()
 
-        app.buttons["direct-chat-actions"].tap()
-        XCTAssertTrue(
-            app.buttons["Edit remark"].waitForExistence(timeout: 3)
-                || app.buttons["编辑备注"].waitForExistence(timeout: 1)
-        )
+        let request = app.descendants(matching: .any)["direct-contact-request"].firstMatch
+        reveal(request)
+        XCTAssertTrue(request.waitForExistence(timeout: 3))
+        request.tap()
+
+        let pending = app.descendants(matching: .any)["direct-contact-status-pending"].firstMatch
+        XCTAssertTrue(pending.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["chat-action-notice"].waitForExistence(timeout: 3))
+
+        let cancel = app.descendants(matching: .any)["direct-contact-cancel"].firstMatch
+        reveal(cancel)
+        XCTAssertTrue(cancel.waitForExistence(timeout: 3))
+        cancel.tap()
+
+        reveal(request)
+        XCTAssertTrue(request.waitForExistence(timeout: 3))
+        request.tap()
+        XCTAssertTrue(pending.waitForExistence(timeout: 3))
     }
 
     func testGroupChatInfoFromToolbar() {
@@ -2386,13 +3353,13 @@ final class AuthenticationUITests: XCTestCase {
         byLabel.tap()
     }
 
-    private func launchDenseDirectChat() -> XCUIApplication {
+    private func launchDenseDirectChat(extraArguments: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
             "--ui-testing-authenticated",
             "--ui-testing-chats",
             "--ui-testing-dense-chat",
-        ]
+        ] + extraArguments
         app.launch()
 
         XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 8))
@@ -2401,6 +3368,114 @@ final class AuthenticationUITests: XCTestCase {
         row.tap()
         XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 8))
         return app
+    }
+
+    private func appPerformanceMetrics(for app: XCUIApplication) -> [any XCTMetric] {
+        var metrics: [any XCTMetric] = [
+            XCTClockMetric(),
+            XCTCPUMetric(application: app),
+            XCTMemoryMetric(application: app),
+        ]
+        if #available(iOS 26.0, *) {
+            metrics.append(XCTHitchMetric(application: app))
+        }
+        return metrics
+    }
+
+    private enum PerformanceBudget {
+        static let authenticatedProcessColdLaunch: TimeInterval = 5
+        static let authenticatedWarmResume: TimeInterval = 2
+        static let denseDiscoverFeedRoundTrip: TimeInterval = 26
+        static let denseDiscoverSearchRoundTrip: TimeInterval = 6
+        static let denseDiscoverBrowseInteraction: TimeInterval = 20
+        static let denseCalendarPagingRoundTrip: TimeInterval = 12
+        static let denseScheduleImageCancellation: TimeInterval = 10
+        #if targetEnvironment(simulator)
+        static let denseChatScrollingRoundTrip: TimeInterval = 20
+        #else
+        // Physical-device XCUI gesture synthesis adds a repeatable idle wait to
+        // every drag. Keep all six stress gestures while allowing that overhead.
+        static let denseChatScrollingRoundTrip: TimeInterval = 22
+        #endif
+        static let denseChatComposerRoundTrip: TimeInterval = 10
+        static let denseChatEnterExit: TimeInterval = 10
+        static let chatCharacterAutomationRoundTrip: TimeInterval = 2.5
+        static let chatInputMainLoopMilliseconds = 50.0
+    }
+
+    @discardableResult
+    private func assertInteractionDuration(
+        _ name: String,
+        atMost budget: TimeInterval,
+        file: StaticString = #filePath,
+        line: UInt = #line,
+        action: () -> Void
+    ) -> TimeInterval {
+        let startedAt = CACurrentMediaTime()
+        action()
+        let duration = CACurrentMediaTime() - startedAt
+        XCTAssertLessThanOrEqual(
+            duration,
+            budget,
+            "\(name) took \(String(format: "%.3f", duration))s; budget is \(String(format: "%.3f", budget))s.",
+            file: file,
+            line: line
+        )
+        return duration
+    }
+
+    private func requireChatInputLatency(
+        _ field: XCUIElement,
+        sequence: Int,
+        timeout: TimeInterval = 2
+    ) -> Double {
+        let marker = "input-sequence=\(sequence);input-latency-ms="
+        let expectation = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "label CONTAINS %@", marker),
+            object: field
+        )
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [expectation], timeout: timeout),
+            .completed,
+            "Missing chat input latency diagnostic for sequence \(sequence)."
+        )
+
+        let label = field.label
+        guard let markerRange = label.range(of: marker) else {
+            XCTFail("Malformed chat input latency diagnostic: \(label)")
+            return .infinity
+        }
+        let suffix = label[markerRange.upperBound...]
+        let value = suffix.prefix { $0.isNumber || $0 == "." }
+        guard let latency = Double(value) else {
+            XCTFail("Malformed chat input latency value: \(label)")
+            return .infinity
+        }
+        return latency
+    }
+
+    private func waitForValue(
+        _ element: XCUIElement,
+        in values: [String],
+        timeout: TimeInterval
+    ) -> Bool {
+        let expectation = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "value IN %@", values),
+            object: element
+        )
+        return XCTWaiter.wait(for: [expectation], timeout: timeout) == .completed
+    }
+
+    private func waitForEnabled(
+        _ element: XCUIElement,
+        equals value: Bool,
+        timeout: TimeInterval
+    ) -> Bool {
+        let expectation = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "enabled == %@", NSNumber(value: value)),
+            object: element
+        )
+        return XCTWaiter.wait(for: [expectation], timeout: timeout) == .completed
     }
 
     /// The fixture occupies now through +1h and +2h through +3h15m. Choose

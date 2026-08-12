@@ -58,6 +58,7 @@ async function notifyNativeDevices(
   await Promise.all(
     devices.map(async (device) => {
       const environment = normalizeApnsEnvironment(device.environment);
+      if (!isApnsConfigured(environment)) return;
       const result = await sendNativePushWithRetry(device.token, payload, environment);
       if (!result.ok && result.invalidateToken) {
         await prisma.nativePushDevice.deleteMany({ where: { id: device.id } }).catch(() => {});

@@ -1,6 +1,5 @@
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import {
-  BuiltInCalendarDeleteError,
   BuiltInCalendarSubscriptionError,
   CalendarCategoryNotFoundError,
   deleteCalendarCategoryForUser,
@@ -62,9 +61,6 @@ export async function DELETE(
   } catch (cause) {
     if (cause instanceof CalendarCategoryNotFoundError) {
       return error("Calendar not found.", 404);
-    }
-    if (cause instanceof BuiltInCalendarDeleteError) {
-      return error("Built-in calendars cannot be deleted. You can rename or change their color.");
     }
     console.error(cause);
     return error("Could not delete calendar.");

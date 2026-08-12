@@ -125,6 +125,7 @@ struct CalendarReminderCandidate: Hashable, Sendable {
     let location: String?
     let eventStart: Date
     let fireDate: Date
+    let isAllDay: Bool
 }
 
 enum CalendarReminderPlanner {
@@ -144,13 +145,24 @@ enum CalendarReminderPlanner {
         else { return [] }
 
         var candidates: [CalendarReminderCandidate] = schedule.studyEntries.compactMap { entry in
-            guard let start = parseISO8601(entry.startISO), start <= horizon else { return nil }
+            guard let start = parseISO8601(entry.startISO),
+                  let end = parseISO8601(entry.endISO),
+                  start <= horizon
+            else { return nil }
+            let isAllDay = CalendarAllDayStyle.contains(
+                start: start,
+                end: end,
+                on: start,
+                calendar: calendar
+            )
             return candidate(
                 identity: "event:\(entry.id)",
                 title: entry.title,
                 location: entry.location,
                 start: start,
-                now: now
+                now: now,
+                allDay: isAllDay,
+                calendar: calendar
             )
         }
 
@@ -168,7 +180,9 @@ enum CalendarReminderPlanner {
                     title: title,
                     location: block.location,
                     start: start,
-                    now: now
+                    now: now,
+                    allDay: false,
+                    calendar: calendar
                 ) {
                     candidates.append(reminder)
                 }
@@ -193,9 +207,22 @@ enum CalendarReminderPlanner {
         title: String,
         location: String?,
         start: Date,
-        now: Date
+        now: Date,
+        allDay: Bool,
+        calendar: Calendar
     ) -> CalendarReminderCandidate? {
-        let fireDate = start.addingTimeInterval(-leadTime)
+        let fireDate: Date
+        if allDay {
+            guard let morning = calendar.date(
+                bySettingHour: 9,
+                minute: 0,
+                second: 0,
+                of: start
+            ) else { return nil }
+            fireDate = morning
+        } else {
+            fireDate = start.addingTimeInterval(-leadTime)
+        }
         guard fireDate > now else { return nil }
         let occurrence = String(Int(start.timeIntervalSince1970))
         return CalendarReminderCandidate(
@@ -203,7 +230,8 @@ enum CalendarReminderPlanner {
             title: title,
             location: location?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
             eventStart: start,
-            fireDate: fireDate
+            fireDate: fireDate,
+            isAllDay: allDay
         )
     }
 
@@ -266,8 +294,10 @@ final class CalendarReminderScheduler {
         for candidate in desired {
             let content = UNMutableNotificationContent()
             content.title = candidate.title
-            let startsSoon = String(localized: "Starts in 15 minutes")
-            content.body = candidate.location.map { "\(startsSoon) · \($0)" } ?? startsSoon
+            let reminderText = candidate.isAllDay
+                ? String(localized: "All day today")
+                : String(localized: "Starts in 15 minutes")
+            content.body = candidate.location.map { "\(reminderText) · \($0)" } ?? reminderText
             content.sound = .default
             content.threadIdentifier = "calendar"
             content.userInfo = ["url": "/home"]

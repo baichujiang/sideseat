@@ -78,17 +78,17 @@ struct PublicProfileView: View {
                     }
                 }
                 .accessibilityIdentifier("public-profile")
-            } else if store.isLoading {
-                SSLoadingState("Loading profile")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
+            } else if let issue = store.issue {
                 ContentUnavailableView {
                     Label("Profile unavailable", systemImage: "person.crop.circle.badge.exclamationmark")
                 } description: {
-                    Text(store.issue ?? String(localized: "This profile is not available."))
+                    Text(issue)
                 } actions: {
                     Button("Try again") { Task { await load() } }
                 }
+            } else {
+                SSLoadingState("Loading profile")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .navigationTitle("Profile")

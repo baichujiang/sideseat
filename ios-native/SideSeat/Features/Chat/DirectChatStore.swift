@@ -20,8 +20,10 @@ final class DirectChatStore {
     private(set) var replyTarget: NativeDirectMessage?
     private(set) var connectionActions: NativeConnectionActionsPayload?
     private(set) var actionIssue: String?
+    private(set) var isMutatingConnectionAction = false
     private(set) var isActingOnPlan = false
     private(set) var planIssue: String?
+    private(set) var hasCachedSnapshot = false
 
     private var nextCursor: String?
     private var realtimeCursor: String?
@@ -156,6 +158,7 @@ final class DirectChatStore {
         self.connectionID = connectionID
         self.apiBaseURL = apiBaseURL
         currentUserID = session.currentUser?.id ?? ""
+        hasCachedSnapshot = false
         isLoading = true
         issue = nil
         pendingRemoteCount = 0
@@ -167,7 +170,13 @@ final class DirectChatStore {
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             let fixture = NativeDirectMessagePageData.uiTestingFixture(connectionID: connectionID)
             conversation = fixture.connection
-            messages = fixture.messages
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-cached-chat-refresh") {
+                messages = Array(fixture.messages.suffix(2))
+                hasCachedSnapshot = true
+                isLoading = false
+            } else {
+                messages = fixture.messages
+            }
             hasMoreOlder = false
             nextCursor = nil
             realtimeCursor = "ui-cursor"
@@ -175,6 +184,11 @@ final class DirectChatStore {
             applyUnreadJump(unreadCount: stagedUnread)
             await markRead(using: session)
             await loadConnectionActions(using: session)
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-cached-chat-refresh") {
+                try? await Task.sleep(for: .milliseconds(1_200))
+                guard !Task.isCancelled else { return }
+                messages = fixture.messages
+            }
             isLoading = false
             return
         }
@@ -187,6 +201,7 @@ final class DirectChatStore {
            )
         {
             restore(snapshot)
+            hasCachedSnapshot = true
             applyUnreadJump(unreadCount: stagedUnread)
             isLoading = false
         }
@@ -311,14 +326,12 @@ final class DirectChatStore {
     @discardableResult
     func sendText(_ raw: String, replyTo: NativeDirectMessage? = nil, using session: SessionStore) async -> Bool {
         let body = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !body.isEmpty, !isSending else { return false }
+        guard !body.isEmpty else { return false }
         if isUnrepliedSendBlocked {
             sendIssue = String(localized: "Wait for a reply before sending more messages.")
             return false
         }
-        isSending = true
         sendIssue = nil
-        defer { isSending = false }
 
         let reply = replyTo ?? replyTarget
         let replyToId = reply?.id
@@ -342,7 +355,7 @@ final class DirectChatStore {
             messages.append(optimistic)
             sendStatuses[optimistic.id] = .sent
             pendingRemoteCount = 0
-            clearReply()
+            clearReply(ifMatching: replyToId)
             publishInboxPreview(for: optimistic)
             return true
         }
@@ -366,6 +379,7 @@ final class DirectChatStore {
         messages.append(optimistic)
         sendStatuses[localID] = .sending
         pendingRemoteCount = 0
+        clearReply(ifMatching: replyToId)
         publishInboxPreview(for: optimistic)
         scheduleCachePersist()
 
@@ -376,10 +390,12 @@ final class DirectChatStore {
                 body: NativeDirectTextMessageRequest(body: body, replyToId: replyToId),
                 idempotencyKey: UUID().uuidString
             )
+            // The optimistic row already handled the visible scroll. Replacing its
+            // local ID with the server ID must not start a second animation.
+            suppressNextScrollDecision = true
             messages.removeAll { $0.id == localID }
             sendStatuses.removeValue(forKey: localID)
             upsert(response.data)
-            clearReply()
             return true
         } catch {
             sendStatuses[localID] = .failed
@@ -427,6 +443,7 @@ final class DirectChatStore {
         messages.append(optimistic)
         sendStatuses[localID] = .sending
         pendingRemoteCount = 0
+        clearReply(ifMatching: replyToId)
         publishInboxPreview(for: optimistic)
         scheduleCachePersist()
 
@@ -444,7 +461,6 @@ final class DirectChatStore {
             )
             messages.removeAll { $0.id == localID }
             upsert(sent)
-            clearReply()
             return true
         }
         #endif
@@ -473,7 +489,6 @@ final class DirectChatStore {
             messages.removeAll { $0.id == localID }
             sendStatuses.removeValue(forKey: localID)
             upsert(response.data)
-            clearReply()
             return true
         } catch {
             sendStatuses[localID] = .failed
@@ -520,6 +535,7 @@ final class DirectChatStore {
         messages.append(optimistic)
         sendStatuses[localID] = .sending
         pendingRemoteCount = 0
+        clearReply(ifMatching: replyToId)
         publishInboxPreview(for: optimistic)
         scheduleCachePersist()
 
@@ -537,7 +553,6 @@ final class DirectChatStore {
             )
             messages.removeAll { $0.id == localID }
             upsert(sent)
-            clearReply()
             return true
         }
         #endif
@@ -557,7 +572,6 @@ final class DirectChatStore {
             messages.removeAll { $0.id == localID }
             sendStatuses.removeValue(forKey: localID)
             upsert(response.data)
-            clearReply()
             return true
         } catch {
             sendStatuses[localID] = .failed
@@ -643,6 +657,7 @@ final class DirectChatStore {
     }
 
     func loadConnectionActions(using session: SessionStore) async {
+        actionIssue = nil
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             connectionActions = NativeConnectionActionsPayload(
@@ -667,6 +682,10 @@ final class DirectChatStore {
 
     @discardableResult
     func updateRemark(_ remark: String?, using session: SessionStore) async -> Bool {
+        guard !isMutatingConnectionAction else { return false }
+        isMutatingConnectionAction = true
+        actionIssue = nil
+        defer { isMutatingConnectionAction = false }
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             connectionActions = NativeConnectionActionsPayload(
@@ -702,7 +721,11 @@ final class DirectChatStore {
 
     @discardableResult
     func performFriendLink(action: String, using session: SessionStore) async -> Bool {
-        await mutateLinkAction(
+        guard !isMutatingConnectionAction else { return false }
+        isMutatingConnectionAction = true
+        actionIssue = nil
+        defer { isMutatingConnectionAction = false }
+        return await mutateLinkAction(
             path: "api/v1/connections/\(connectionID)/friend-link",
             action: action,
             using: session
@@ -719,16 +742,27 @@ final class DirectChatStore {
 
     @discardableResult
     func performContactExchange(action: String, using session: SessionStore) async -> Bool {
+        guard !isMutatingConnectionAction else { return false }
+        isMutatingConnectionAction = true
+        actionIssue = nil
+        defer { isMutatingConnectionAction = false }
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            let state: (status: String, role: String) = switch action {
+            case "request": ("PENDING", "requester")
+            case "accept": ("ACCEPTED", "responder")
+            case "decline": ("DECLINED", "responder")
+            case "cancel": ("CANCELED", "requester")
+            default: ("NONE", "none")
+            }
             connectionActions = NativeConnectionActionsPayload(
                 remark: connectionActions?.remark,
                 peerId: connectionActions?.peerId,
                 isSelfNotes: connectionActions?.isSelfNotes,
                 friendLink: connectionActions?.friendLink,
                 contactExchange: NativeConnectionExchangeState(
-                    status: action == "request" ? "PENDING" : "NONE",
-                    role: action == "request" ? "requester" : "none",
+                    status: state.status,
+                    role: state.role,
                     cooldownUntil: nil
                 )
             )
@@ -1032,8 +1066,17 @@ final class DirectChatStore {
         replyTarget = nil
     }
 
+    private func clearReply(ifMatching messageID: String?) {
+        guard let messageID, replyTarget?.id == messageID else { return }
+        replyTarget = nil
+    }
+
     func noteSendIssue(_ message: String) {
         sendIssue = message
+    }
+
+    func clearActionIssue() {
+        actionIssue = nil
     }
 
     /// After Plan/Schedule sheets reload history, push the newest outbound card into the inbox row.
@@ -1081,26 +1124,15 @@ final class DirectChatStore {
 
     private func applyNetworkPage(_ page: NativeDirectMessagePageResponse) {
         conversation = page.data.connection
-        var merged = Dictionary(uniqueKeysWithValues: messages.map { ($0.id, $0) })
-        for remote in page.data.messages {
-            if remote.sender.id == currentUserID {
-                let echoedLocalIDs = merged.values.compactMap { local -> String? in
-                    guard local.id.hasPrefix("local-"),
-                          sendStatuses[local.id] == .sending,
-                          local.type == remote.type,
-                          local.body == remote.body
-                    else { return nil }
-                    return local.id
-                }
-                for localID in echoedLocalIDs {
-                    merged.removeValue(forKey: localID)
-                    sendStatuses.removeValue(forKey: localID)
-                }
-            }
-            merged[remote.id] = remote
-            sendStatuses[remote.id] = .sent
-        }
-        messages = merged.values.sorted(by: Self.messageOrder)
+        let reconciled = DirectChatPageReconciler.reconcile(
+            cached: messages,
+            sendStatuses: sendStatuses,
+            remote: page.data.messages,
+            hasMore: page.meta.hasMore,
+            accountID: currentUserID
+        )
+        messages = reconciled.messages
+        sendStatuses = reconciled.sendStatuses
         hasMoreOlder = page.meta.hasMore
         nextCursor = page.meta.nextCursor
         realtimeCursor = page.meta.realtimeCursor

@@ -31,6 +31,10 @@ function buildSystemPrompt(locale: AppLocale, referenceTime: Date): string {
     locale === "zh-CN"
       ? "用户可能用中文描述时间（明天、后天、下周三、各一小时、主图书馆等）。"
       : "The user may write in English (tomorrow, next Wed, 90 minutes, etc.).";
+  const outputLanguage =
+    locale === "zh-CN"
+      ? "Simplified Chinese. Do not mix English into titles, notes, or warnings unless it is a proper noun from the user's text."
+      : "English. Do not mix another language into titles, notes, or warnings unless it is a proper noun from the user's text.";
 
   return `You are SideSeat's calendar parser. ${localeHint}
 
@@ -38,13 +42,14 @@ Rules:
 - Timezone for all datetimes: Europe/Berlin (${SCHEDULE_DISPLAY_TZ}). Use ISO 8601 with offset (e.g. 2026-05-20T15:00:00+02:00).
 - Reference "now" for relative phrases: ${refLabel} (${refIso}).
 - Output ONLY valid JSON (no markdown): { "events": [...], "warnings": [...] }.
+- All user-visible text must be in ${outputLanguage}
 - "events": 1 to 10 items. Each item: title (required), startAt, endAt, optional location, note, repeat (NONE|DAILY|WEEKLY|BIWEEKLY|MONTHLY|YEARLY), repeatUntil (ISO date or datetime when repeat is not NONE).
 - If duration is missing, default to 60 minutes after startAt.
 - If the user gives multiple events in one sentence, split into separate events.
-- Put ambiguity notes in "warnings" (same language as user input when possible).
+- Add a warning only when the user must verify an inferred date, time, duration, title, or category. Return at most 3 concise warnings, with one assumption per warning. Do not quote or restate the full request.
 - Do not invent courses or classmates. Only schedule-like items (study, meetings, sports, meals as calendar blocks).
 - Titles should be short (max 120 chars).
-- Optional per event: categoryPreset — one of ${CALENDAR_CATEGORY_PRESET_KEYS.join("|")}. Use only broad calendar lists: work meetings → work, personal errands/social/health → personal, must-do/deadline/urgent priority → important, anything else → other. Omit or null if unclear; add a short warning when category is ambiguous.
+- Optional per event: categoryPreset — one of ${CALENDAR_CATEGORY_PRESET_KEYS.join("|")}. Use only broad calendar lists: classes, exams, assignments, or focused study → study; interviews, internships, part-time work, or career events → work; errands, social, health, or private plans → personal. Importance is not a category. Omit or null if unclear; add a short warning when category is ambiguous.
 - Do not output categoryId; only categoryPreset.`;
 }
 

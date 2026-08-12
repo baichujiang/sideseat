@@ -5,9 +5,10 @@ import http2 from "node:http2";
 
 import {
   apnsBundleId,
+  apnsCredentialsForEnvironment,
   apnsHostForEnvironment,
+  type ApnsCredentials,
   type ApnsEnvironment,
-  isApnsConfigured,
 } from "@/lib/push/apns-env";
 import { buildApnsPayload, type UserPushPayload } from "@/lib/push/apns-payload";
 
@@ -30,18 +31,21 @@ function base64Url(input: Buffer | string): string {
     .replace(/\//g, "_");
 }
 
-let cachedToken: { value: string; expiresAtMs: number } | null = null;
+const cachedTokens = new Map<string, { value: string; expiresAtMs: number }>();
 
-function createApnsProviderToken(): string {
+function createApnsProviderToken(
+  credentials: ApnsCredentials,
+  environment: ApnsEnvironment,
+): string {
   const now = Math.floor(Date.now() / 1000);
+  const cacheKey = `${environment}:${credentials.teamId}:${credentials.keyId}`;
+  const cachedToken = cachedTokens.get(cacheKey);
   if (cachedToken && cachedToken.expiresAtMs > Date.now() + 30_000) {
     return cachedToken.value;
   }
-  const keyId = process.env.APNS_KEY_ID!.trim();
-  const teamId = process.env.APNS_TEAM_ID!.trim();
-  const key = normalizeP8Key(process.env.APNS_KEY_P8!);
-  const header = base64Url(JSON.stringify({ alg: "ES256", kid: keyId }));
-  const payload = base64Url(JSON.stringify({ iss: teamId, iat: now }));
+  const key = normalizeP8Key(credentials.keyP8);
+  const header = base64Url(JSON.stringify({ alg: "ES256", kid: credentials.keyId }));
+  const payload = base64Url(JSON.stringify({ iss: credentials.teamId, iat: now }));
   const unsigned = `${header}.${payload}`;
   const signer = createSign("SHA256");
   signer.update(unsigned);
@@ -51,7 +55,7 @@ function createApnsProviderToken(): string {
     dsaEncoding: "ieee-p1363",
   });
   const token = `${unsigned}.${base64Url(signature)}`;
-  cachedToken = { value: token, expiresAtMs: (now + 50 * 60) * 1000 };
+  cachedTokens.set(cacheKey, { value: token, expiresAtMs: (now + 50 * 60) * 1000 });
   return token;
 }
 
@@ -68,11 +72,17 @@ export async function sendApnsNotification(
   payload: UserPushPayload,
   environment: ApnsEnvironment,
 ): Promise<ApnsSendResult> {
-  if (!isApnsConfigured()) {
-    return { ok: false, status: 0, reason: "APNs is not configured.", invalidateToken: false };
+  const credentials = apnsCredentialsForEnvironment(environment);
+  if (!credentials) {
+    return {
+      ok: false,
+      status: 0,
+      reason: `APNs is not configured for ${environment}.`,
+      invalidateToken: false,
+    };
   }
 
-  const token = createApnsProviderToken();
+  const token = createApnsProviderToken(credentials, environment);
   const host = apnsHostForEnvironment(environment);
   const topic = apnsBundleId();
   const body = JSON.stringify(buildApnsPayload(payload));

@@ -1,172 +1,107 @@
-import { unescapeIcsText, unfoldIcs } from "@/lib/calendar/ical-shared";
+import { fromZonedTime } from "date-fns-tz";
 import ical, { type ParameterValue, type VEvent } from "node-ical";
+
+import { SCHEDULE_DISPLAY_TZ } from "@/lib/calendar/schedule-berlin";
 
 export type ParsedIcsEvent = {
   start: Date;
   end: Date;
+  allDay: boolean;
   title: string;
   location: string | null;
   note: string | null;
 };
 
-function splitPropertyLine(line: string): { name: string; params: string; value: string } | null {
-  const colon = line.indexOf(":");
-  if (colon === -1) return null;
-  const left = line.slice(0, colon);
-  const value = line.slice(colon + 1);
-  const semi = left.indexOf(";");
-  if (semi === -1) {
-    return { name: left.toUpperCase(), params: "", value };
-  }
-  return { name: left.slice(0, semi).toUpperCase(), params: left.slice(semi + 1), value };
+function isAllDayEvent(event: VEvent): boolean {
+  return event.datetype === "date" || event.start.dateOnly === true;
 }
 
-function parseDateTime(params: string, raw: string): Date | null {
-  const upperParams = params.toUpperCase();
-  const v = raw.trim();
-  if (upperParams.includes("VALUE=DATE") || /^\d{8}$/.test(v)) {
-    if (v.length !== 8) return null;
-    const y = Number(v.slice(0, 4));
-    const m = Number(v.slice(4, 6)) - 1;
-    const d = Number(v.slice(6, 8));
-    if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) return null;
-    return new Date(Date.UTC(y, m, d, 0, 0, 0, 0));
-  }
-  if (/^\d{8}T\d{6}Z$/i.test(v)) {
-    const y = Number(v.slice(0, 4));
-    const mo = Number(v.slice(4, 6)) - 1;
-    const d = Number(v.slice(6, 8));
-    const H = Number(v.slice(9, 11));
-    const M = Number(v.slice(11, 13));
-    const S = Number(v.slice(13, 15));
-    return new Date(Date.UTC(y, mo, d, H, M, S));
-  }
-  if (/^\d{8}T\d{6}$/.test(v)) {
-    const y = Number(v.slice(0, 4));
-    const mo = Number(v.slice(4, 6)) - 1;
-    const d = Number(v.slice(6, 8));
-    const H = Number(v.slice(9, 11));
-    const M = Number(v.slice(11, 13));
-    const S = Number(v.slice(13, 15));
-    return new Date(y, mo, d, H, M, S);
-  }
-  if (/^\d{8}T\d{4}$/.test(v)) {
-    const y = Number(v.slice(0, 4));
-    const mo = Number(v.slice(4, 6)) - 1;
-    const d = Number(v.slice(6, 8));
-    const H = Number(v.slice(9, 11));
-    const M = Number(v.slice(11, 13));
-    return new Date(y, mo, d, H, M, 0);
-  }
-  return null;
+function localDateKey(date: Date): string {
+  const year = String(date.getFullYear()).padStart(4, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
-function extractVeventBlocks(unfolded: string): string[] {
-  const blocks: string[] = [];
-  let cursor = 0;
-  while (cursor < unfolded.length) {
-    const start = unfolded.indexOf("BEGIN:VEVENT", cursor);
-    if (start === -1) break;
-    const end = unfolded.indexOf("END:VEVENT", start);
-    if (end === -1) break;
-    blocks.push(unfolded.slice(start + "BEGIN:VEVENT".length, end).trim());
-    cursor = end + "END:VEVENT".length;
+/** node-ical exposes date-only values at process-local midnight; pin that civil day to Berlin. */
+function normalizeAllDayBoundary(date: Date): Date {
+  return fromZonedTime(`${localDateKey(date)}T00:00:00`, SCHEDULE_DISPLAY_TZ);
+}
+
+function nextAllDayBoundary(date: Date): Date {
+    const next = new Date(date);
+    next.setDate(next.getDate() + 1);
+    return normalizeAllDayBoundary(next);
+}
+
+function localDayOrdinal(date: Date): number {
+  return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / (24 * 60 * 60 * 1_000);
+}
+
+function allDaySpanDays(event: VEvent): number {
+  if (!event.start || !event.end) return 1;
+  const span = Math.round(localDayOrdinal(event.end) - localDayOrdinal(event.start));
+  return Math.max(1, span);
+}
+
+function recurringAllDayEnd(start: Date, event: VEvent): Date {
+  const endDate = new Date(start);
+  endDate.setDate(endDate.getDate() + allDaySpanDays(event));
+  return normalizeAllDayBoundary(endDate);
+}
+
+function eventInterval(event: VEvent): { start: Date; end: Date; allDay: boolean } | null {
+  if (!event.start) return null;
+  const allDay = isAllDayEvent(event);
+  const start = allDay ? normalizeAllDayBoundary(event.start) : new Date(event.start);
+  const end = event.end
+    ? allDay
+      ? normalizeAllDayBoundary(event.end)
+      : new Date(event.end)
+    : allDay
+      ? nextAllDayBoundary(event.start)
+      : new Date(start.getTime() + 60 * 60 * 1_000);
+
+  if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || end <= start) {
+    return null;
   }
-  return blocks;
-}
-
-function blockHasRrule(block: string): boolean {
-  return /(^|\n)RRULE[^:]*:/i.test(block);
-}
-
-function blockStatusCancelled(block: string): boolean {
-  const m = block.match(/(^|\n)STATUS[^:]*:([^\n]+)/i);
-  if (!m) return false;
-  return m[2]!.trim().toUpperCase() === "CANCELLED";
+  return { start, end, allDay };
 }
 
 /**
- * Parses VEVENTs from raw .ics text. Skips all-day-only, cancelled, and RRULE
- * events (recurring imports are not supported yet).
+ * Parses non-recurring VEVENTs from raw .ics text. node-ical preserves TZID
+ * semantics; date-only values are normalized to the calendar's Berlin civil day.
  */
 export function parseIcsForImport(raw: string): { events: ParsedIcsEvent[]; skipped: number } {
-  const unfolded = unfoldIcs(raw);
-  const blocks = extractVeventBlocks(unfolded);
   const events: ParsedIcsEvent[] = [];
   let skipped = 0;
+  let parsed: ReturnType<typeof ical.sync.parseICS>;
 
-  for (const block of blocks) {
-    if (blockStatusCancelled(block)) {
-      skipped += 1;
-      continue;
-    }
-    if (blockHasRrule(block)) {
-      skipped += 1;
-      continue;
-    }
+  try {
+    parsed = ical.sync.parseICS(raw);
+  } catch {
+    return { events, skipped: 1 };
+  }
 
-    let dtStartLine: string | null = null;
-    let dtEndLine: string | null = null;
-    let summary: string | null = null;
-    let location: string | null = null;
-    let description: string | null = null;
-
-    for (const line of block.split("\n")) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
-      const prop = splitPropertyLine(trimmed);
-      if (!prop) continue;
-      if (prop.name === "DTSTART") dtStartLine = trimmed;
-      else if (prop.name === "DTEND") dtEndLine = trimmed;
-      else if (prop.name === "SUMMARY") summary = unescapeIcsText(prop.value);
-      else if (prop.name === "LOCATION") location = unescapeIcsText(prop.value);
-      else if (prop.name === "DESCRIPTION") description = unescapeIcsText(prop.value);
-    }
-
-    if (!dtStartLine) {
+  for (const component of Object.values(parsed)) {
+    if (!component || component.type !== "VEVENT") continue;
+    const event = component as VEvent;
+    if (event.status === "CANCELLED" || event.rrule) {
       skipped += 1;
       continue;
     }
 
-    const ds = splitPropertyLine(dtStartLine);
-    if (!ds) {
-      skipped += 1;
-      continue;
-    }
-    const start = parseDateTime(ds.params, ds.value);
-    if (!start) {
+    const interval = eventInterval(event);
+    if (!interval) {
       skipped += 1;
       continue;
     }
 
-    if (ds.params.toUpperCase().includes("VALUE=DATE")) {
-      skipped += 1;
-      continue;
-    }
-
-    let end: Date | null = null;
-    if (dtEndLine) {
-      const de = splitPropertyLine(dtEndLine);
-      if (de) {
-        end = parseDateTime(de.params, de.value);
-      }
-    }
-    if (!end) {
-      end = new Date(start.getTime() + 60 * 60 * 1000);
-    }
-
-    if (!(end > start)) {
-      skipped += 1;
-      continue;
-    }
-
-    const title = (summary ?? "Imported event").trim().slice(0, 120) || "Imported event";
     events.push({
-      start,
-      end,
-      title,
-      location: location?.trim() ? location.trim().slice(0, 120) : null,
-      note: description?.trim() ? description.trim().slice(0, 500) : null,
+      ...interval,
+      title: subscriptionText(event.summary, 120) ?? "Imported event",
+      location: subscriptionText(event.location, 120),
+      note: subscriptionText(event.description, 500),
     });
   }
 
@@ -175,6 +110,7 @@ export function parseIcsForImport(raw: string): { events: ParsedIcsEvent[]; skip
 
 const MAX_SUBSCRIPTION_EVENTS = 400;
 const MAX_DURATION_MS_SUB = 48 * 60 * 60 * 1000;
+const MAX_ALL_DAY_DURATION_MS_SUB = (31 * 24 + 2) * 60 * 60 * 1000;
 
 function parameterText(value: ParameterValue | undefined): string | null {
   if (value == null) return null;
@@ -189,7 +125,7 @@ function subscriptionText(value: ParameterValue | undefined, maxLength: number):
 /**
  * Parses VEVENTs for read-only subscription display. Recurrence expansion applies
  * RRULE, EXDATE and RECURRENCE-ID overrides while preserving source time zones.
- * All-day events remain unsupported by the timed schedule UI.
+ * Date-only events are normalized to Berlin midnight for the native all-day band.
  */
 export function parseIcsForSubscriptionWindow(
   raw: string,
@@ -203,7 +139,7 @@ export function parseIcsForSubscriptionWindow(
   for (const component of Object.values(parsed)) {
     if (!component || component.type !== "VEVENT") continue;
     const event = component as VEvent;
-    if (event.status === "CANCELLED" || event.datetype === "date" || event.start.dateOnly) {
+    if (event.status === "CANCELLED") {
       skipped += 1;
       continue;
     }
@@ -225,16 +161,23 @@ export function parseIcsForSubscriptionWindow(
     let accepted = 0;
     for (const instance of instances) {
       if (events.length >= MAX_SUBSCRIPTION_EVENTS) break;
-      if (instance.isFullDay || instance.event.status === "CANCELLED") continue;
+      if (instance.event.status === "CANCELLED") continue;
 
-      const start = new Date(instance.start);
-      const end = new Date(instance.end);
+      const allDay = instance.isFullDay || instance.start.dateOnly === true;
+      const start = allDay ? normalizeAllDayBoundary(instance.start) : new Date(instance.start);
+      // node-ical expands recurring date-only DTEND by elapsed milliseconds. Around
+      // a process-local DST boundary that can land at 23:00 or 01:00 and change the
+      // apparent civil date. Preserve the source event's day span instead.
+      const end = allDay
+        ? recurringAllDayEnd(instance.start, instance.event)
+        : new Date(instance.end);
       const duration = end.getTime() - start.getTime();
+      const maximumDuration = allDay ? MAX_ALL_DAY_DURATION_MS_SUB : MAX_DURATION_MS_SUB;
       if (
         !Number.isFinite(start.getTime()) ||
         !Number.isFinite(end.getTime()) ||
         duration <= 0 ||
-        duration > MAX_DURATION_MS_SUB
+        duration > maximumDuration
       ) {
         continue;
       }
@@ -242,6 +185,7 @@ export function parseIcsForSubscriptionWindow(
       events.push({
         start,
         end,
+        allDay,
         title: subscriptionText(instance.summary, 120) ?? "Calendar event",
         location: subscriptionText(instance.event.location, 120),
         note: subscriptionText(instance.event.description, 500),

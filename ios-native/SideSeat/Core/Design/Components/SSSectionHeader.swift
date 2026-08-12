@@ -3,14 +3,16 @@ import SwiftUI
 /// Uppercase caption used above Me / Settings / Discover grouped blocks.
 struct SSSectionHeader: View {
     let title: String
+    var accessibilityID: String? = nil
 
     var body: some View {
         Text(title)
             .font(.caption.weight(.bold))
-            .tracking(0.6)
             .textCase(.uppercase)
-            .foregroundStyle(SideSeatTheme.textSecondary)
+            .foregroundStyle(SideSeatTheme.textPrimary)
+            .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, SideSeatTheme.spaceXS)
+            .ssAccessibilityIdentifier(accessibilityID)
     }
 }
 
@@ -18,11 +20,12 @@ struct SSSectionHeader: View {
 struct SSGroupedSection<Content: View>: View {
     let title: String
     var cornerRadius: CGFloat = 18
+    var accessibilityID: String? = nil
     @ViewBuilder var content: () -> Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            SSSectionHeader(title: title)
+            SSSectionHeader(title: title, accessibilityID: accessibilityID)
 
             VStack(spacing: 0) {
                 content()

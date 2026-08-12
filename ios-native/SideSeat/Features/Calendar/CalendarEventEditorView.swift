@@ -55,6 +55,7 @@ struct CalendarEventEditorView: View {
     @Environment(SessionStore.self) private var session
 
     private let context: CalendarEventEditorContext
+    private let smartScheduleEnabled: Bool
     private let onSaved: @MainActor () async -> Void
 
     @State private var title: String
@@ -71,14 +72,17 @@ struct CalendarEventEditorView: View {
     @State private var confirmation: CalendarEventConfirmation?
     @State private var showConfirmation = false
     @State private var pendingSaveRequest: NativeCalendarEventRequest?
-    @State private var sheetDetent: PresentationDetent
+    @State private var showsSmartFill = false
+    @State private var smartFillDidSave = false
     @FocusState private var isTitleFocused: Bool
 
     init(
         context: CalendarEventEditorContext,
+        smartScheduleEnabled: Bool = false,
         onSaved: @escaping @MainActor () async -> Void
     ) {
         self.context = context
+        self.smartScheduleEnabled = smartScheduleEnabled
         self.onSaved = onSaved
 
         let calendar = Calendar.sideSeatBerlin
@@ -111,13 +115,47 @@ struct CalendarEventEditorView: View {
         _companionIDs = State(
             initialValue: Set(context.event?.eventParticipants.compactMap(\.userId) ?? [])
         )
-        // New events start half-height so the timetable stays in view; edit opens taller.
-        _sheetDetent = State(initialValue: context.event == nil ? .medium : .large)
     }
 
     var body: some View {
         NavigationStack {
             Form {
+                if context.event == nil, smartScheduleEnabled {
+                    Section {
+                        Button {
+                            isTitleFocused = false
+                            showsSmartFill = true
+                        } label: {
+                            HStack(spacing: SideSeatTheme.spaceMD) {
+                                Image(systemName: "sparkles")
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(SideSeatTheme.accent)
+                                    .frame(width: 38, height: 38)
+                                    .background(SideSeatTheme.accent.opacity(0.12), in: Circle())
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Smart fill")
+                                        .font(.body.weight(.semibold))
+                                        .foregroundStyle(SideSeatTheme.textPrimary)
+                                    Text("Describe or dictate your schedule")
+                                        .font(.footnote)
+                                        .foregroundStyle(SideSeatTheme.textSecondary)
+                                }
+
+                                Spacer(minLength: SideSeatTheme.spaceSM)
+
+                                Image(systemName: "chevron.right")
+                                    .font(.footnote.weight(.semibold))
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .contentShape(Rectangle())
+                            .padding(.vertical, 2)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("event-smart-fill")
+                    }
+                }
+
                 Section {
                     TextField("Title", text: $title)
                         .textInputAutocapitalization(.sentences)
@@ -146,7 +184,7 @@ struct CalendarEventEditorView: View {
                         Text("None").tag(String?.none)
                         ForEach(context.categories) { category in
                             Label {
-                                Text(category.name)
+                                Text(category.displayName)
                             } icon: {
                                 Circle()
                                     .fill(Color(hex: category.color) ?? SideSeatTheme.accent)
@@ -245,16 +283,23 @@ struct CalendarEventEditorView: View {
                     confirmation = nil
                 }
             }
-        }
-        // Half-sheet by default — full page sheet left a thin strip of calendar at the top and felt awkward.
-        .presentationDetents([.medium, .large], selection: $sheetDetent)
-        .presentationDragIndicator(.visible)
-        .presentationContentInteraction(.scrolls)
-        .onChange(of: isTitleFocused) { _, focused in
-            if focused {
-                sheetDetent = .large
+            .sheet(isPresented: $showsSmartFill, onDismiss: finishSmartFillIfNeeded) {
+                CalendarSmartAddView(categories: context.categories) {
+                    smartFillDidSave = true
+                    await onSaved()
+                }
             }
         }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
+        .presentationContentInteraction(.scrolls)
+    }
+
+    @MainActor
+    private func finishSmartFillIfNeeded() {
+        guard smartFillDidSave else { return }
+        smartFillDidSave = false
+        dismiss()
     }
 
     private func companionBinding(_ id: String) -> Binding<Bool> {

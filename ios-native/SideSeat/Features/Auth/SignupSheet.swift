@@ -16,6 +16,7 @@ struct SignupSheet: View {
     @State private var semester = 1
     @State private var graduationYear = Calendar.current.component(.year, from: Date())
     @State private var isPasswordVisible = false
+    @State private var isConfirmPasswordVisible = false
     @State private var issue: String?
     @State private var isWorking = false
     @FocusState private var focusedField: Field?
@@ -62,6 +63,7 @@ struct SignupSheet: View {
                             title: String(localized: "Password"),
                             text: $password,
                             isVisible: $isPasswordVisible,
+                            contentType: .newPassword,
                             submitLabel: .next,
                             accessibilityID: "signup-password"
                         )
@@ -71,7 +73,8 @@ struct SignupSheet: View {
                         SSSecureField(
                             title: String(localized: "Confirm password"),
                             text: $confirmPassword,
-                            isVisible: $isPasswordVisible,
+                            isVisible: $isConfirmPasswordVisible,
+                            contentType: .newPassword,
                             submitLabel: .go,
                             accessibilityID: "signup-confirm-password"
                         )
@@ -133,14 +136,6 @@ struct SignupSheet: View {
                             SSFieldMessage(text: issue, accessibilityID: "signup-error")
                         }
 
-                        SSPrimaryButton(
-                            title: String(localized: "Create account"),
-                            isLoading: isWorking || session.isWorking,
-                            fill: .brand,
-                            accessibilityID: "signup-submit",
-                            action: submit
-                        )
-                        .disabled(!canSubmit || isWorking || session.isWorking)
                     }
                     .padding(22)
                     .padding(.top, SideSeatTheme.spaceSM)
@@ -152,6 +147,18 @@ struct SignupSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(String(localized: "Cancel")) { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(action: submit) {
+                        if isWorking || session.isWorking {
+                            ProgressView()
+                        } else {
+                            Text(String(localized: "Create account"))
+                                .fontWeight(.semibold)
+                        }
+                    }
+                    .disabled(!canSubmit || isWorking || session.isWorking)
+                    .accessibilityIdentifier("signup-submit")
                 }
             }
             .onAppear { focusedField = .displayName }

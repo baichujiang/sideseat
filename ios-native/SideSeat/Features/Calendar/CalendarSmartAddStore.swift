@@ -25,6 +25,15 @@ final class CalendarSmartAddStore {
         defer { isParsing = false }
 
         #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-smart-schedule-dense") {
+            drafts = NativeCalendarNaturalDraft.uiTestingDenseFixtures
+            warnings = [
+                "The title may need review.",
+                "The date range was inferred from the next three days.",
+                "Two study blocks were created for each day.",
+            ]
+            return
+        }
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-smart-schedule")
             || ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated")
         {
@@ -61,6 +70,7 @@ final class CalendarSmartAddStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-smart-schedule")
+            || ProcessInfo.processInfo.arguments.contains("--ui-testing-smart-schedule-dense")
             || ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated")
         {
             return true
@@ -111,6 +121,29 @@ final class CalendarSmartAddStore {
 }
 
 private extension NativeCalendarNaturalDraft {
+    static var uiTestingDenseFixtures: [Self] {
+        let calendar = Calendar.sideSeatBerlin
+        let firstDay = calendar.startOfDay(for: Date().addingTimeInterval(24 * 60 * 60))
+        return (0..<3).flatMap { dayOffset in
+            [9, 14].compactMap { hour in
+                guard let day = calendar.date(byAdding: .day, value: dayOffset, to: firstDay),
+                      let start = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: day)
+                else { return nil }
+                return NativeCalendarNaturalDraft(
+                    uiTestingTitle: "Focused study",
+                    location: "",
+                    note: "",
+                    startAt: start.ISO8601Format(),
+                    endAt: start.addingTimeInterval(3 * 60 * 60).ISO8601Format(),
+                    repeatRule: "NONE",
+                    repeatUntil: "",
+                    categoryId: nil,
+                    categoryPreset: "personal"
+                )
+            }
+        }
+    }
+
     static var uiTestingFixture: Self {
         let start = Date().addingTimeInterval(24 * 60 * 60)
         return NativeCalendarNaturalDraft(

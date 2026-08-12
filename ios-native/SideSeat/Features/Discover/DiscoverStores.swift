@@ -4,14 +4,21 @@ import Observation
 @MainActor
 @Observable
 final class DiscoverFeedStore {
+    private struct FeedContext: Equatable {
+        let city: String
+        let query: String
+    }
+
     private(set) var payload: NativeDiscoverFeed?
     private(set) var isLoading = false
     private(set) var issue: String?
     private var latestRequestID: UUID?
+    private var payloadContext: FeedContext?
 
     func load(using session: SessionStore, query: String = "") async {
         let requestID = UUID()
         latestRequestID = requestID
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
         isLoading = true
         issue = nil
         defer {
@@ -22,7 +29,7 @@ final class DiscoverFeedStore {
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             guard latestRequestID == requestID else { return }
             let fixture = UITestingDiscoverFixture.feed
-            let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            let needle = trimmedQuery.lowercased()
             payload = NativeDiscoverFeed(
                 city: fixture.city,
                 buddies: needle.isEmpty
@@ -32,26 +39,34 @@ final class DiscoverFeedStore {
                     ? fixture.activities
                     : fixture.activities.filter { ($0.title + " " + ($0.description ?? "")).lowercased().contains(needle) }
             )
+            payloadContext = FeedContext(city: fixture.city, query: trimmedQuery)
             return
         }
         #endif
 
+        await DiscoverCityPreferenceStore.shared.refreshConfig(using: session)
+        guard latestRequestID == requestID else { return }
+        let city = DiscoverCityPreferenceStore.shared.selectedCity
+        let requestContext = FeedContext(city: city, query: trimmedQuery)
+
         do {
-            await DiscoverCityPreferenceStore.shared.refreshConfig(using: session)
-            let city = DiscoverCityPreferenceStore.shared.selectedCity
             var queryItems = [URLQueryItem(name: "city", value: city)]
-            let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty { queryItems.append(URLQueryItem(name: "q", value: trimmed)) }
+            if !trimmedQuery.isEmpty { queryItems.append(URLQueryItem(name: "q", value: trimmedQuery)) }
             let response: APIEnvelope<NativeDiscoverFeed> = try await session.sendAuthorized(
                 "api/v1/discover",
                 queryItems: queryItems
             )
             guard latestRequestID == requestID else { return }
             payload = response.data
+            payloadContext = requestContext
         } catch is CancellationError {
             return
         } catch {
             guard latestRequestID == requestID else { return }
+            if payloadContext != requestContext {
+                payload = nil
+                payloadContext = nil
+            }
             issue = error.localizedDescription
         }
     }
@@ -208,6 +223,7 @@ final class MyPostsStore {
 final class DiscoverCreateStore {
     private(set) var isSaving = false
     private(set) var issue: String?
+    private(set) var savedPostID: String?
 
     func createBuddy(
         category: String = "OTHER",
@@ -226,12 +242,13 @@ final class DiscoverCreateStore {
         images: [NativeDiscoverBuddyImageDraft] = [],
         using session: SessionStore
     ) async -> Bool {
+        savedPostID = nil
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedBody = body.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            UITestingDiscoverFixture.prependBuddy(
+            savedPostID = UITestingDiscoverFixture.prependBuddy(
                 category: category,
                 title: trimmedTitle,
                 body: trimmedBody,
@@ -262,12 +279,13 @@ final class DiscoverCreateStore {
                 expiresAt: expiresAt.formatted(.iso8601),
                 imageUrls: imageUrls.isEmpty ? nil : imageUrls
             )
-            let _: APIEnvelope<NativeDiscoverBuddyCreation> = try await session.sendAuthorized(
+            let response: APIEnvelope<NativeDiscoverBuddyCreation> = try await session.sendAuthorized(
                 "api/v1/discover/posts",
                 method: .post,
                 body: request,
                 idempotencyKey: UUID().uuidString
             )
+            self.savedPostID = response.data.postId
         }
     }
 
@@ -287,6 +305,7 @@ final class DiscoverCreateStore {
         images: [NativeDiscoverBuddyImageDraft],
         using session: SessionStore
     ) async -> Bool {
+        savedPostID = nil
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedBody = body.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
 
@@ -304,6 +323,7 @@ final class DiscoverCreateStore {
                 capacity: capacity,
                 expiresAt: expiresAt
             )
+            savedPostID = post.id
             return true
         }
         #endif
@@ -317,7 +337,7 @@ final class DiscoverCreateStore {
             let uploadedImageURLs = try await uploadBuddyImages(images, using: session)
             let imageURLs = Array((existingImageURLs + uploadedImageURLs).prefix(3))
             let request = NativeDiscoverBuddyRequest(
-                category: post.category,
+                category: nil,
                 city: post.city,
                 title: trimmedTitle,
                 body: trimmedBody,
@@ -338,6 +358,7 @@ final class DiscoverCreateStore {
                 body: request,
                 idempotencyKey: UUID().uuidString
             )
+            self.savedPostID = post.id
         }
     }
 
@@ -695,9 +716,13 @@ final class DiscoverPostDetailStore {
 @Observable
 final class DiscoverActivityDetailStore {
     private(set) var detail: NativeDiscoverActivityDetail?
+    private(set) var messages: [NativeDiscoverPostQuestion] = []
     private(set) var isLoading = false
     private(set) var isMutating = false
+    private(set) var isLoadingMessages = false
+    private(set) var isMutatingMessage = false
     private(set) var issue: String?
+    private(set) var messageIssue: String?
 
     func load(activityID: String, using session: SessionStore) async {
         isLoading = true
@@ -716,6 +741,37 @@ final class DiscoverActivityDetailStore {
                 viewerHasExistingChat: false,
                 calendarEntryId: nil
             )
+            messages = [
+                NativeDiscoverPostQuestion(
+                    id: "ui-activity-message",
+                    body: "Should I bring anything?",
+                    createdAt: "2026-08-12T14:00:00Z",
+                    isOwn: true,
+                    canDelete: true,
+                    canReply: false,
+                    author: NativeDiscoverQuestionAuthor(
+                        id: "ui-peer",
+                        displayName: "Mina",
+                        avatarUrl: nil,
+                        school: "TUM",
+                        verifiedStudent: true
+                    ),
+                    reply: NativeDiscoverPostReply(
+                        id: "ui-activity-reply",
+                        body: "Nothing special. I have reserved the table.",
+                        createdAt: "2026-08-12T14:05:00Z",
+                        isOwn: false,
+                        canDelete: false,
+                        author: NativeDiscoverQuestionAuthor(
+                            id: activity.organizer.id,
+                            displayName: activity.organizer.displayName,
+                            avatarUrl: activity.organizer.avatarUrl,
+                            school: activity.school,
+                            verifiedStudent: true
+                        )
+                    )
+                )
+            ]
             return
         }
         #endif
@@ -725,8 +781,129 @@ final class DiscoverActivityDetailStore {
                 "api/v1/discover/activities/\(activityID)"
             )
             detail = response.data
+            await loadMessages(activityID: activityID, using: session)
         } catch {
             issue = error.localizedDescription
+        }
+    }
+
+    func loadMessages(activityID: String, using session: SessionStore) async {
+        guard !isLoadingMessages else { return }
+        isLoadingMessages = true
+        messageIssue = nil
+        defer { isLoadingMessages = false }
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            return
+        }
+        #endif
+
+        do {
+            let response: APIEnvelope<NativeDiscoverMessageList> = try await session.sendAuthorized(
+                "api/v1/discover/activities/\(activityID)/messages"
+            )
+            messages = response.data.messages
+        } catch {
+            messageIssue = error.localizedDescription
+        }
+    }
+
+    @discardableResult
+    func submitMessage(
+        body: String,
+        parentID: String? = nil,
+        activityID: String,
+        using session: SessionStore
+    ) async -> Bool {
+        let trimmed = body.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !isMutatingMessage else { return false }
+        isMutatingMessage = true
+        messageIssue = nil
+        defer { isMutatingMessage = false }
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            return true
+        }
+        #endif
+
+        do {
+            let _: APIEnvelope<NativeDiscoverMessageMutation> = try await session.sendAuthorized(
+                "api/v1/discover/activities/\(activityID)/messages",
+                method: .post,
+                body: NativeDiscoverQuestionWriteRequest(body: trimmed, parentId: parentID),
+                idempotencyKey: UUID().uuidString
+            )
+            await loadMessages(activityID: activityID, using: session)
+            return true
+        } catch {
+            messageIssue = error.localizedDescription
+            return false
+        }
+    }
+
+    func deleteMessage(
+        commentID: String,
+        activityID: String,
+        using session: SessionStore
+    ) async {
+        guard !isMutatingMessage else { return }
+        isMutatingMessage = true
+        messageIssue = nil
+        defer { isMutatingMessage = false }
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            messages.removeAll { $0.id == commentID || $0.reply?.id == commentID }
+            return
+        }
+        #endif
+
+        do {
+            let _: APIEnvelope<NativeDiscoverQuestionDeletion> = try await session.sendAuthorized(
+                "api/v1/discover/activities/\(activityID)/messages/\(commentID)",
+                method: .delete,
+                idempotencyKey: UUID().uuidString
+            )
+            await loadMessages(activityID: activityID, using: session)
+        } catch {
+            messageIssue = error.localizedDescription
+        }
+    }
+
+    func reportMessage(
+        commentID: String,
+        authorID: String,
+        isOwn: Bool,
+        reason: NativeReportReason,
+        details: String,
+        using session: SessionStore
+    ) async -> String? {
+        guard !isOwn else {
+            return String(localized: "You can't report your own content.")
+        }
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            return nil
+        }
+        #endif
+
+        do {
+            let _: APIEnvelope<NativeReportResult> = try await session.sendAuthorized(
+                "api/reports",
+                method: .post,
+                body: NativeMessageReportRequest(
+                    reportedUserId: authorID,
+                    discoverActivityCommentId: commentID,
+                    reason: reason,
+                    details: details
+                )
+            )
+            return nil
+        } catch {
+            return error.localizedDescription
         }
     }
 

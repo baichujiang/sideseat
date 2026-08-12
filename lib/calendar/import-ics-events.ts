@@ -8,6 +8,7 @@ export const MAX_ICS_IMPORT_EVENTS = 200;
 const TEN_YEARS_MS = 10 * 365 * 24 * 60 * 60 * 1000;
 const FOUR_YEARS_MS = 4 * 365 * 24 * 60 * 60 * 1000;
 const MAX_DURATION_MS = 48 * 60 * 60 * 1000;
+const MAX_ALL_DAY_DURATION_MS = (31 * 24 + 2) * 60 * 60 * 1000;
 
 export type CalendarIcsImportIssue =
   | "EMPTY"
@@ -53,7 +54,7 @@ export function prepareCalendarIcsImport(
     throw new CalendarIcsImportError(
       "NO_EVENTS",
       parseSkipped > 0
-        ? "No importable events found (skipped all-day, recurring, or cancelled items)."
+        ? "No importable events found (skipped recurring, cancelled, or invalid items)."
         : "No events found in this file.",
     );
   }
@@ -64,7 +65,8 @@ export function prepareCalendarIcsImport(
   let skipped = parseSkipped;
   const validEvents = events.filter((event) => {
     const duration = event.end.getTime() - event.start.getTime();
-    if (duration <= 0 || duration > MAX_DURATION_MS) {
+    const maximumDuration = event.allDay ? MAX_ALL_DAY_DURATION_MS : MAX_DURATION_MS;
+    if (duration <= 0 || duration > maximumDuration) {
       skipped += 1;
       return false;
     }
@@ -81,7 +83,7 @@ export function prepareCalendarIcsImport(
   if (limitedEvents.length === 0) {
     throw new CalendarIcsImportError(
       "NO_IMPORTABLE_EVENTS",
-      "No importable events (wrong date range, too long, or skipped all-day/recurring/cancelled items).",
+      "No importable events (wrong date range, too long, recurring, cancelled, or invalid).",
     );
   }
 

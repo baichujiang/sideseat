@@ -7,6 +7,7 @@ final class ContactsStore {
     private(set) var contacts: [NativeContactRow] = []
     private(set) var searchHits: [NativeContactSearchHit] = []
     private(set) var isLoading = false
+    private(set) var hasLoaded = false
     private(set) var isSearching = false
     private(set) var isMutating = false
     private(set) var issue: String?
@@ -15,7 +16,10 @@ final class ContactsStore {
     func load(using session: SessionStore) async {
         isLoading = true
         issue = nil
-        defer { isLoading = false }
+        defer {
+            isLoading = false
+            hasLoaded = true
+        }
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {

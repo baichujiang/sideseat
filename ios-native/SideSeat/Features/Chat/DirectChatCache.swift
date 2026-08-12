@@ -30,6 +30,71 @@ struct DirectChatCacheSnapshot: Codable, Sendable {
 
 }
 
+enum DirectChatPageReconciler {
+    nonisolated static func reconcile(
+        cached: [NativeDirectMessage],
+        sendStatuses: [String: NativeMessageSendStatus],
+        remote: [NativeDirectMessage],
+        hasMore: Bool,
+        accountID: String
+    ) -> (messages: [NativeDirectMessage], sendStatuses: [String: NativeMessageSendStatus]) {
+        var statuses = sendStatuses
+        let remoteIDs = Set(remote.map(\.id))
+        let oldestRemoteDate = remote.compactMap(\.createdDate).min()
+        var merged: [String: NativeDirectMessage] = [:]
+
+        for message in cached {
+            if message.id.hasPrefix("local-") {
+                merged[message.id] = message
+                continue
+            }
+            guard !remoteIDs.contains(message.id) else { continue }
+            if hasMore,
+               let oldestRemoteDate,
+               let messageDate = message.createdDate,
+               messageDate < oldestRemoteDate
+            {
+                merged[message.id] = message
+            } else {
+                statuses.removeValue(forKey: message.id)
+            }
+        }
+
+        for message in remote {
+            if message.sender.id == accountID {
+                let echoedLocalIDs = merged.values.compactMap { local -> String? in
+                    guard local.id.hasPrefix("local-"),
+                          statuses[local.id] == .sending,
+                          local.type == message.type,
+                          local.body == message.body
+                    else { return nil }
+                    return local.id
+                }
+                for localID in echoedLocalIDs {
+                    merged.removeValue(forKey: localID)
+                    statuses.removeValue(forKey: localID)
+                }
+            }
+            merged[message.id] = message
+            statuses[message.id] = .sent
+        }
+
+        return (
+            merged.values.sorted(by: messageOrder),
+            statuses
+        )
+    }
+
+    private nonisolated static func messageOrder(
+        _ lhs: NativeDirectMessage,
+        _ rhs: NativeDirectMessage
+    ) -> Bool {
+        let left = lhs.createdDate ?? .distantPast
+        let right = rhs.createdDate ?? .distantPast
+        return left == right ? lhs.id < rhs.id : left < right
+    }
+}
+
 @Model
 final class CachedDirectChatRecord {
     @Attribute(.unique) var key: String
@@ -132,35 +197,20 @@ actor DirectChatCache {
         page: NativeDirectMessagePageResponse
     ) {
         let previous = load(accountID: accountID, connectionID: connectionID)
-        var statuses = previous?.sendStatuses ?? [:]
-        var merged = Dictionary(
-            uniqueKeysWithValues: (previous?.messages ?? []).map { ($0.id, $0) }
+        let reconciled = DirectChatPageReconciler.reconcile(
+            cached: previous?.messages ?? [],
+            sendStatuses: previous?.sendStatuses ?? [:],
+            remote: page.data.messages,
+            hasMore: page.meta.hasMore,
+            accountID: accountID
         )
-        for remote in page.data.messages {
-            if remote.sender.id == accountID {
-                let echoedLocalIDs = merged.values.compactMap { local -> String? in
-                    guard local.id.hasPrefix("local-"),
-                          statuses[local.id] == .sending,
-                          local.type == remote.type,
-                          local.body == remote.body
-                    else { return nil }
-                    return local.id
-                }
-                for localID in echoedLocalIDs {
-                    merged.removeValue(forKey: localID)
-                    statuses.removeValue(forKey: localID)
-                }
-            }
-            merged[remote.id] = remote
-            statuses[remote.id] = .sent
-        }
         save(
             accountID: accountID,
             connectionID: connectionID,
             snapshot: DirectChatCacheSnapshot(
                 conversation: page.data.connection,
-                messages: merged.values.sorted(by: Self.messageOrder),
-                sendStatuses: statuses,
+                messages: reconciled.messages,
+                sendStatuses: reconciled.sendStatuses,
                 hasMoreOlder: page.meta.hasMore,
                 nextCursor: page.meta.nextCursor,
                 realtimeCursor: page.meta.realtimeCursor

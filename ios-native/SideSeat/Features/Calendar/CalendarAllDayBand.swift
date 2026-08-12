@@ -38,7 +38,8 @@ struct CalendarAllDayBand: View {
                             onTap: { onOpen(item) },
                             onLongPress: { onLongPress?(item) }
                         )
-                        .accessibilityElement(children: .combine)
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(item.title)
                         .accessibilityAddTraits(.isButton)
                         .accessibilityIdentifier("calendar-all-day-\(item.id)")
                         .accessibilityHint("Opens event details. Long press for more actions.")

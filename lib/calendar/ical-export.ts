@@ -2,7 +2,14 @@ import { addDays, startOfDay } from "date-fns";
 import type { Weekday } from "@prisma/client";
 import { randomUUID } from "crypto";
 
-import { escapeIcsText, foldIcsLine, formatIcsFloatingLocal, formatIcsUtc } from "@/lib/calendar/ical-shared";
+import {
+  escapeIcsText,
+  foldIcsLine,
+  formatIcsDate,
+  formatIcsFloatingLocal,
+  formatIcsUtc,
+  isBerlinAllDayRange,
+} from "@/lib/calendar/ical-shared";
 
 const WEEKDAY_TO_JS: Record<Weekday, number> = {
   MON: 1,
@@ -84,13 +91,15 @@ function pushVevent(
     summary: string;
     location: string | null;
     description: string | null;
+    allDay?: boolean;
   },
 ): void {
   body.push("BEGIN:VEVENT");
   body.push(foldIcsLine(`UID:${opts.uid}`));
   body.push(foldIcsLine(`DTSTAMP:${formatIcsUtc(opts.dtstamp)}`));
-  body.push(foldIcsLine(`DTSTART:${opts.dtstart}`));
-  body.push(foldIcsLine(`DTEND:${opts.dtend}`));
+  const valueType = opts.allDay ? ";VALUE=DATE" : "";
+  body.push(foldIcsLine(`DTSTART${valueType}:${opts.dtstart}`));
+  body.push(foldIcsLine(`DTEND${valueType}:${opts.dtend}`));
   body.push(foldIcsLine(`SUMMARY:${escapeIcsText(opts.summary)}`));
   if (opts.location) {
     body.push(foldIcsLine(`LOCATION:${escapeIcsText(opts.location)}`));
@@ -135,14 +144,16 @@ export function buildSideSeatIcsExport(opts: {
   }
 
   for (const e of opts.entries) {
+    const allDay = isBerlinAllDayRange(e.startAt, e.endAt);
     pushVevent(body, {
       uid: `${randomUUID()}@sideseat`,
       dtstamp,
-      dtstart: formatIcsUtc(e.startAt),
-      dtend: formatIcsUtc(e.endAt),
+      dtstart: allDay ? formatIcsDate(e.startAt) : formatIcsUtc(e.startAt),
+      dtend: allDay ? formatIcsDate(e.endAt) : formatIcsUtc(e.endAt),
       summary: e.title,
       location: e.location,
       description: e.note,
+      allDay,
     });
   }
 

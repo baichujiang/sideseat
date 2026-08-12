@@ -85,6 +85,19 @@ targets:
           - $(SRCROOT)/scripts/validate-production-build.sh
         script: |
           /bin/sh "$SRCROOT/scripts/validate-production-build.sh"
+    postBuildScripts:
+      - name: Upload Production dSYMs to Sentry
+        basedOnDependencyAnalysis: false
+        inputFiles:
+          - $(SRCROOT)/scripts/upload-sentry-dsyms.sh
+          - $(SENTRY_CLI_PATH)
+          - $(DWARF_DSYM_FOLDER_PATH)/$(DWARF_DSYM_FILE_NAME)
+          - $(DWARF_DSYM_FOLDER_PATH)/$(DWARF_DSYM_FILE_NAME)/Contents/Resources/DWARF/$(PRODUCT_NAME)
+          - $(DWARF_DSYM_FOLDER_PATH)/$(DWARF_DSYM_FILE_NAME)/Contents/Info.plist
+          - $(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Info.plist
+          - $(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)
+        script: |
+          /bin/sh "$SRCROOT/scripts/upload-sentry-dsyms.sh"
     scheme:
       gatherCoverageData: true
       testTargets:
@@ -131,6 +144,7 @@ schemes:
       gatherCoverageData: true
       environmentVariables:
         SIDESEAT_LIVE_UI_TESTS: $(SIDESEAT_LIVE_UI_TESTS)
+        SIDESEAT_RUN_REAL_PHOTO_TEST: $(SIDESEAT_RUN_REAL_PHOTO_TEST)
         E2E_USER: $(E2E_USER)
         E2E_PASSWORD: $(E2E_PASSWORD)
         E2E_COURSE_ID: $(E2E_COURSE_ID)

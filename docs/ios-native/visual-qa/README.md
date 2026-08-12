@@ -1,6 +1,6 @@
 # Native Visual QA — Design Freeze (§8)
 
-**Date:** 2026-07-22  
+**Date:** 2026-08-10
 **Device:** iPhone 17 Pro Simulator (iOS 26.5) — no physical iPhone was connected  
 **Build:** SideSeat-Development  
 **Capture:** `ios-native/scripts/capture-visual-qa.sh` → `VisualQAScreenshotUITests`
@@ -25,21 +25,22 @@ Screenshots live in this folder (`*-light.png` / `*-dark.png`).
 | Auth | `auth-light.png` | `auth-dark.png` | Pass — brand surface OK |
 | Home (Week) | `home-light.png` | `home-dark.png` | Pass — accent selection + now red |
 | Discover | `discover-light.png` | `discover-dark.png` | Pass — list + rose accents |
-| Discover plan | — | `discover-plan-dark.png` | Pass — decision details, verified host, persistent actions |
-| Plan share | — | `discover-plan-share-dark.png` | Pass — 3:4 Xiaohongshu card + QR deep link |
-| SideSeat share | — | `sideseat-app-share-dark.png` | Pass — localized invite poster + QR landing link |
+| Discover plan | `discover-plan-light.png` | `discover-plan-dark.png` | Pass — decision details, verified host, persistent actions |
+| Plan share | `discover-plan-share-light.png` | `discover-plan-share-dark.png` | Pass — 3:4 Xiaohongshu card + QR deep link |
+| SideSeat share | `sideseat-app-share-light.png` | `sideseat-app-share-dark.png` | Pass — localized invite poster + QR landing link |
 | Create sheet | `create-light.png` | `create-dark.png` | Pass — system confirmationDialog |
 | Chats | `chats-light.png` | `chats-dark.png` | Pass — unread Rose pills |
 | Me | `me-light.png` | `me-dark.png` | Pass — hub rows + hero wash |
+| Courses | `courses-light.png` | `courses-dark.png` | Pass — neutral school text + compact enrollment rows |
 
-## Follow-ups (non-blocking)
+## Follow-up (non-blocking)
 
 1. **Physical device** — still outstanding for §8 quality sign-off. Plug in an iPhone, then:
    `ios-native/scripts/capture-visual-qa.sh --device`
    Appearance is forced via `--ui-testing-appearance=` (no `simctl` on hardware). Overwrite this folder’s PNGs and update the Device line above.
-2. **Home event tile wrap** — “Weekly planning” can break mid-word in narrow week columns (calendar density; not a token issue).
-3. **Me bottom inset** — last hub row can sit under the floating tab bar in dark; consider extra list bottom padding.
-4. **Today control color** — keep `CalendarChrome.nowRed` (not Rose) so “今天” stays tied to now, not selection.
+
+The simulator matrix has no unresolved clipping or overlap findings. Keep
+`CalendarChrome.nowRed` (not Rose) so “今天” remains tied to now rather than selection.
 
 ## Re-run
 
@@ -51,3 +52,8 @@ ios-native/scripts/capture-visual-qa.sh
 ios-native/scripts/capture-visual-qa.sh --device
 # or: DEVICE_UDID=<udid> ios-native/scripts/capture-visual-qa.sh --device
 ```
+
+Automatic device discovery intentionally selects only a hardware iPhone listed
+by Xcode before the Simulator section. iPad and CoreDevice UUID fallbacks are not
+accepted because this app targets iPhone only and `xcodebuild` requires the
+hardware UDID.

@@ -101,6 +101,7 @@ struct DiscoverStoreTests {
             images: [draft],
             using: session
         ))
+        #expect(create.savedPostID == "post-new")
         #expect(await create.createActivity(
             title: "Meetup",
             description: "Conversation practice",
@@ -138,6 +139,7 @@ struct DiscoverStoreTests {
             existingImageURLs: ["https://cdn.sideseat.test/classmate-posts/user-1/existing.jpg"],
             using: session
         ))
+        #expect(store.savedPostID == "post-new")
         #expect(await transport.buddyCategory == "SHARED_COURSES")
         #expect(await transport.buddyCourseIds == ["current-course"])
         #expect(
@@ -176,8 +178,10 @@ struct DiscoverStoreTests {
             images: [],
             using: session
         ))
+        #expect(store.savedPostID == "post-1")
         #expect(await transport.lastPostUpdatePath == "/api/v1/discover/posts/post-1")
         #expect(await transport.updatedBuddyTitle == "Updated study plan")
+        #expect(await transport.updatedBuddyCategory == nil)
         #expect(await transport.updatedBuddyTags == ["focus"])
         #expect(await transport.updatedBuddyVisibility == "VERIFIED_ONLY")
         #expect(await transport.updatedBuddyReplyPreference == "REQUEST_FIRST")
@@ -215,6 +219,17 @@ struct DiscoverStoreTests {
         #expect(activity.detail?.activity.title == "Conversation meetup")
         #expect(activity.detail?.activity.viewerSignupStatus == nil)
         #expect(activity.detail?.calendarEntryId == nil)
+        #expect(activity.messages.first?.body == "Is the table reserved?")
+        #expect(await activity.submitMessage(
+            body: "Can I arrive late?",
+            activityID: "activity-1",
+            using: session
+        ))
+        await activity.deleteMessage(
+            commentID: "activity-message-1",
+            activityID: "activity-1",
+            using: session
+        )
         await activity.setSignup(true, activityID: "activity-1", using: session)
         #expect(activity.detail?.activity.viewerSignupStatus == "GOING")
         #expect(activity.detail?.activity.goingCount == 5)
@@ -225,9 +240,12 @@ struct DiscoverStoreTests {
         #expect(await transport.lastQuestionWritePath == "/api/v1/discover/posts/post-1/questions")
         #expect(await transport.lastQuestionBody == "Can exchange students join?")
         #expect(await transport.lastQuestionDeletePath == "/api/v1/discover/posts/post-1/questions/question-1")
+        #expect(await transport.lastActivityMessageWritePath == "/api/v1/discover/activities/activity-1/messages")
+        #expect(await transport.lastActivityMessageBody == "Can I arrive late?")
+        #expect(await transport.lastActivityMessageDeletePath == "/api/v1/discover/activities/activity-1/messages/activity-message-1")
         #expect(await transport.lastSignupPath == "/api/v1/discover/activities/activity-1/signup")
         #expect(await transport.lastCalendarPath == "/api/v1/discover/activities/activity-1/calendar")
-        #expect(await transport.writeKeys.count == 5)
+        #expect(await transport.writeKeys.count == 7)
     }
 
     @Test("Loads and manages the current user's published plans")
@@ -266,6 +284,28 @@ struct DiscoverStoreTests {
         #expect(store.payload?.activities.map(\.id) == ["activity-owned"])
         #expect(await transport.myPostsRequestCount == 1)
         #expect(await transport.discoverRequestCount == 1)
+    }
+
+    @Test("Clears stale results for a failed new search but preserves a failed refresh")
+    @MainActor
+    func feedFailureUsesOnlyMatchingCachedResults() async throws {
+        let transport = DiscoverTestTransport()
+        let session = makeSession(transport: transport)
+        await session.login(identifier: "test_001", password: "Password123")
+
+        let store = DiscoverFeedStore()
+        await store.load(using: session, query: "library")
+        #expect(store.payload?.buddies.first?.title == "Library study buddy")
+
+        await transport.failFeed(query: "library")
+        await store.load(using: session, query: "library")
+        #expect(store.payload?.buddies.first?.title == "Library study buddy")
+        #expect(store.issue != nil)
+
+        await transport.failFeed(query: "museum")
+        await store.load(using: session, query: "museum")
+        #expect(store.payload == nil)
+        #expect(store.issue != nil)
     }
 
     @MainActor
@@ -319,16 +359,25 @@ private actor DiscoverTestTransport: APITransport {
     private(set) var lastQuestionWritePath: String?
     private(set) var lastQuestionDeletePath: String?
     private(set) var lastQuestionBody: String?
+    private(set) var lastActivityMessageWritePath: String?
+    private(set) var lastActivityMessageDeletePath: String?
+    private(set) var lastActivityMessageBody: String?
     private(set) var lastPostStatusPath: String?
     private(set) var lastActivityStatusPath: String?
     private(set) var lastPostUpdatePath: String?
     private(set) var updatedBuddyTitle: String?
+    private(set) var updatedBuddyCategory: String?
     private(set) var updatedBuddyTags: [String] = []
     private(set) var updatedBuddyVisibility: String?
     private(set) var updatedBuddyReplyPreference: String?
+    private var failingFeedQueries = Set<String>()
 
     init(myPostsUnavailable: Bool = false) {
         self.myPostsUnavailable = myPostsUnavailable
+    }
+
+    func failFeed(query: String) {
+        failingFeedQueries.insert(query)
     }
 
     func data(for request: URLRequest) async throws -> (Data, URLResponse) {
@@ -341,8 +390,12 @@ private actor DiscoverTestTransport: APITransport {
             )
         case "/api/v1/discover":
             discoverRequestCount += 1
-            feedQuery = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)?
+            let requestQuery = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)?
                 .queryItems?.first(where: { $0.name == "q" })?.value
+            feedQuery = requestQuery
+            if let requestQuery, failingFeedQueries.contains(requestQuery) {
+                throw URLError(.timedOut)
+            }
             if myPostsUnavailable {
                 return response(
                     request,
@@ -395,6 +448,7 @@ private actor DiscoverTestTransport: APITransport {
                 let json = try bodyJSON(request)
                 lastPostUpdatePath = request.url?.path
                 updatedBuddyTitle = json["title"] as? String
+                updatedBuddyCategory = json["category"] as? String
                 updatedBuddyTags = (json["tags"] as? [String]) ?? []
                 updatedBuddyVisibility = json["visibility"] as? String
                 updatedBuddyReplyPreference = json["replyPreference"] as? String
@@ -465,6 +519,31 @@ private actor DiscoverTestTransport: APITransport {
                 request,
                 200,
                 #"{"data":{"activity":{"id":"activity-1","city":"Munich","school":"TUM","title":"Conversation meetup","description":"Practice together","category":null,"startAt":"2026-07-18T16:00:00Z","endAt":"2026-07-18T18:00:00Z","location":"Cafe","capacity":10,"status":"OPEN","phase":"bookable","goingCount":4,"viewerSignupStatus":null,"isOrganizer":false,"organizer":{"id":"peer-2","displayName":"Noah","avatarUrl":null}},"goingAttendees":[{"userId":"peer-1","displayName":"Mina","avatarUrl":null}],"viewerHasExistingChat":false,"calendarEntryId":null}}"#
+            )
+        case "/api/v1/discover/activities/activity-1/messages":
+            if request.httpMethod == "POST" {
+                let json = try bodyJSON(request)
+                lastActivityMessageWritePath = request.url?.path
+                lastActivityMessageBody = json["body"] as? String
+                recordKey(request)
+                return response(
+                    request,
+                    201,
+                    #"{"data":{"commentId":"activity-message-new","messageId":"activity-message-new"}}"#
+                )
+            }
+            return response(
+                request,
+                200,
+                #"{"data":{"messages":[{"id":"activity-message-1","body":"Is the table reserved?","createdAt":"2026-07-17T11:00:00Z","isOwn":true,"canDelete":true,"canReply":false,"author":{"id":"user-1","displayName":"Test User","avatarUrl":null,"school":"TUM","verifiedStudent":true},"reply":{"id":"activity-reply-1","body":"Yes, it is reserved.","createdAt":"2026-07-17T11:10:00Z","isOwn":false,"canDelete":false,"author":{"id":"peer-2","displayName":"Noah","avatarUrl":null,"school":"TUM","verifiedStudent":true}}}]}}"#
+            )
+        case "/api/v1/discover/activities/activity-1/messages/activity-message-1":
+            lastActivityMessageDeletePath = request.url?.path
+            recordKey(request)
+            return response(
+                request,
+                200,
+                #"{"data":{"commentId":"activity-message-1","deleted":true}}"#
             )
         case "/api/v1/discover/activities/activity-1/signup":
             lastSignupPath = request.url?.path

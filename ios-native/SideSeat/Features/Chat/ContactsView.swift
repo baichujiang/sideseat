@@ -25,7 +25,7 @@ struct ContactsView: View {
             Divider()
 
             Group {
-                if store.isLoading && store.contacts.isEmpty && !isSearchingPeople {
+                if (!store.hasLoaded || store.isLoading) && store.contacts.isEmpty && !isSearchingPeople {
                     SSLoadingState("Loading contacts")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if isSearchingPeople {
@@ -169,7 +169,10 @@ struct ContactsView: View {
                 Spacer()
                 Text(hit.activeConnectionId == nil ? String(localized: "Add") : String(localized: "Open"))
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(SideSeatTheme.accent)
+                    .foregroundStyle(SideSeatTheme.textPrimary)
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 5)
+                    .background(SideSeatTheme.accent.opacity(0.10), in: Capsule())
             }
         }
         .buttonStyle(.plain)

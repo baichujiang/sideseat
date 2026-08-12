@@ -124,14 +124,17 @@ target, finish the capabilities in Xcode:
 3. Use a **paid Apple Developer** team for real devices / TestFlight (simulator tokens are limited)
 4. `AppDelegate.swift` already forwards `didRegisterForRemoteNotificationsWithDeviceToken` to Capacitor
 
-The shared backend now sends APNs notifications with token-based `.p8`
-authentication through `lib/push/apns-send.ts`. Set `APNS_KEY_ID`,
-`APNS_TEAM_ID`, `APNS_KEY_P8`, `APNS_BUNDLE_ID`, and `APNS_USE_SANDBOX` for the
-deployment. Each native registration also records `sandbox` or `production`, so
-the shared backend can deliver Debug and TestFlight tokens through the correct
-APNs endpoint. The new SwiftUI client in `ios-native/` generates Push and
-Associated Domains entitlements from `ios-native/project.yml`; do not maintain
-those by hand in the generated Xcode project.
+The shared backend sends APNs notifications with environment-scoped token-based
+`.p8` authentication through `lib/push/apns-send.ts`. Set
+`APNS_SANDBOX_KEY_ID/P8` for signed Debug builds and
+`APNS_PRODUCTION_KEY_ID/P8` for TestFlight/App Store, together with
+`APNS_TEAM_ID`, `APNS_BUNDLE_ID`, and `APNS_USE_SANDBOX`. The legacy
+`APNS_KEY_ID/P8` pair is accepted only for the default environment selected by
+`APNS_USE_SANDBOX`. Each native registration records `sandbox` or
+`production`, so the backend selects both the matching key and endpoint. The
+new SwiftUI client in `ios-native/` generates Push and Associated Domains
+entitlements from `ios-native/project.yml`; do not maintain those by hand in
+the generated Xcode project.
 
 Web/PWA continues to use Web Push + VAPID (`/api/push/subscribe`).
 

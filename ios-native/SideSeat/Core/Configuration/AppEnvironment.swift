@@ -22,11 +22,22 @@ struct AppEnvironment: Sendable {
         }
         guard
             let rawURL = bundle.object(forInfoDictionaryKey: "SideSeatAPIBaseURL") as? String,
-            let apiBaseURL = URL(string: rawURL),
-            apiBaseURL.host != nil
+            let configuredAPIBaseURL = URL(string: rawURL),
+            configuredAPIBaseURL.host != nil
         else {
             throw AppConfigurationError.invalidAPIBaseURL
         }
+
+        var apiBaseURL = configuredAPIBaseURL
+#if DEBUG
+        if let testOverride = debugAPIBaseURLOverride(
+            deployment: deployment,
+            arguments: ProcessInfo.processInfo.arguments,
+            environment: ProcessInfo.processInfo.environment
+        ) {
+            apiBaseURL = testOverride
+        }
+#endif
 
         if deployment == .production {
             guard apiBaseURL.scheme == "https" else {
@@ -45,6 +56,25 @@ struct AppEnvironment: Sendable {
             buildNumber: bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "0"
         )
     }
+
+#if DEBUG
+    static func debugAPIBaseURLOverride(
+        deployment: DeploymentEnvironment,
+        arguments: [String],
+        environment: [String: String]
+    ) -> URL? {
+        guard
+            deployment == .development,
+            arguments.contains("--ui-testing-local-api"),
+            let rawURL = environment["SIDESEAT_API_BASE_URL_OVERRIDE"],
+            let url = URL(string: rawURL),
+            url.isLoopback
+        else {
+            return nil
+        }
+        return url
+    }
+#endif
 
     static let developmentFallback = AppEnvironment(
         deployment: .development,
@@ -76,6 +106,11 @@ enum AppConfigurationError: LocalizedError {
 }
 
 private extension URL {
+    var isLoopback: Bool {
+        guard let host = host?.lowercased() else { return false }
+        return host == "localhost" || host == "127.0.0.1" || host == "::1"
+    }
+
     var isLocalOrPlaceholder: Bool {
         guard let host = host?.lowercased() else { return true }
         return host == "localhost" ||

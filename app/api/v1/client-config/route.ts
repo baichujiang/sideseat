@@ -3,7 +3,7 @@ import { isStoreKitSupportEnabled } from "@/lib/api/v1/storekit-catalog";
 import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
 import { DISCOVER_SERVED_CITIES } from "@/lib/discover/discover-served-cities";
 import { isDashScopeConfigured } from "@/lib/llm/dashscope";
-import { isApnsConfigured } from "@/lib/push/apns-env";
+import { nativeClientApnsFeatures } from "@/lib/push/apns-env";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +21,7 @@ export function GET(request: Request) {
         nativeAuthentication: true,
         naturalLanguageSchedule: isDashScopeConfigured(),
         storeKitSupport: isStoreKitSupportEnabled(),
-        apnsDelivery: isApnsConfigured(),
+        ...nativeClientApnsFeatures(),
       },
       discover: {
         defaultCity: DEFAULT_DISCOVER_SERVED_CITY,

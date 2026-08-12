@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { describe, it, before, after } from "node:test";
+import { after, before, beforeEach, describe, it } from "node:test";
 
 import {
   isApnsConfigured,
+  apnsCredentialsForEnvironment,
   apnsBundleId,
   apnsHostForEnvironment,
   apnsUseSandbox,
+  nativeClientApnsFeatures,
   normalizeApnsEnvironment,
 } from "../../lib/push/apns-env";
 import { buildApnsPayload } from "../../lib/push/apns-payload";
@@ -17,14 +19,27 @@ function readRepoFile(path: string) {
 }
 
 describe("isApnsConfigured", () => {
-  const keys = ["APNS_KEY_ID", "APNS_TEAM_ID", "APNS_KEY_P8", "APNS_BUNDLE_ID", "APNS_USE_SANDBOX"] as const;
+  const keys = [
+    "APNS_KEY_ID",
+    "APNS_KEY_P8",
+    "APNS_SANDBOX_KEY_ID",
+    "APNS_SANDBOX_KEY_P8",
+    "APNS_PRODUCTION_KEY_ID",
+    "APNS_PRODUCTION_KEY_P8",
+    "APNS_TEAM_ID",
+    "APNS_BUNDLE_ID",
+    "APNS_USE_SANDBOX",
+  ] as const;
   const previous = new Map<string, string | undefined>();
 
   before(() => {
     for (const key of keys) {
       previous.set(key, process.env[key]);
-      delete process.env[key];
     }
+  });
+
+  beforeEach(() => {
+    for (const key of keys) delete process.env[key];
   });
 
   after(() => {
@@ -35,13 +50,42 @@ describe("isApnsConfigured", () => {
     }
   });
 
-  it("is false until required secrets are present", () => {
+  it("uses a legacy key only for its declared default environment", () => {
     assert.equal(isApnsConfigured(), false);
     process.env.APNS_KEY_ID = "ABC123";
     process.env.APNS_TEAM_ID = "TEAM123";
     process.env.APNS_KEY_P8 = "not-a-real-key";
+    process.env.APNS_USE_SANDBOX = "1";
     assert.equal(isApnsConfigured(), true);
+    assert.equal(isApnsConfigured("sandbox"), true);
+    assert.equal(isApnsConfigured("production"), false);
     assert.equal(apnsBundleId(), "app.sideseat.mobile");
+  });
+
+  it("selects independent credentials for Sandbox and Production", () => {
+    process.env.APNS_TEAM_ID = "TEAM123";
+    process.env.APNS_SANDBOX_KEY_ID = "SANDBOX123";
+    process.env.APNS_SANDBOX_KEY_P8 = "sandbox-key";
+
+    assert.equal(isApnsConfigured("sandbox"), true);
+    assert.equal(isApnsConfigured("production"), false);
+    assert.equal(apnsCredentialsForEnvironment("sandbox")?.keyId, "SANDBOX123");
+
+    process.env.APNS_PRODUCTION_KEY_ID = "PRODUCTION123";
+    process.env.APNS_PRODUCTION_KEY_P8 = "production-key";
+    assert.equal(isApnsConfigured("production"), true);
+    assert.equal(apnsCredentialsForEnvironment("production")?.keyId, "PRODUCTION123");
+  });
+
+  it("prefers environment-scoped credentials over the legacy key", () => {
+    process.env.APNS_TEAM_ID = "TEAM123";
+    process.env.APNS_KEY_ID = "LEGACY123";
+    process.env.APNS_KEY_P8 = "legacy-key";
+    process.env.APNS_USE_SANDBOX = "1";
+    process.env.APNS_SANDBOX_KEY_ID = "SANDBOX123";
+    process.env.APNS_SANDBOX_KEY_P8 = "sandbox-key";
+
+    assert.equal(apnsCredentialsForEnvironment("sandbox")?.keyId, "SANDBOX123");
   });
 
   it("honors APNS_USE_SANDBOX override", () => {
@@ -100,6 +144,60 @@ describe("APNs payload", () => {
   });
 });
 
+describe("native client APNs capability", () => {
+  const keys = [
+    "APNS_KEY_ID",
+    "APNS_KEY_P8",
+    "APNS_SANDBOX_KEY_ID",
+    "APNS_SANDBOX_KEY_P8",
+    "APNS_PRODUCTION_KEY_ID",
+    "APNS_PRODUCTION_KEY_P8",
+    "APNS_TEAM_ID",
+    "APNS_USE_SANDBOX",
+  ] as const;
+  const previous = new Map<string, string | undefined>();
+
+  before(() => {
+    for (const key of keys) previous.set(key, process.env[key]);
+  });
+
+  beforeEach(() => {
+    for (const key of keys) delete process.env[key];
+  });
+
+  after(() => {
+    for (const key of keys) {
+      const value = previous.get(key);
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  });
+
+  it("does not advertise TestFlight delivery when only Sandbox is configured", async () => {
+    process.env.APNS_TEAM_ID = "TEAM123";
+    process.env.APNS_SANDBOX_KEY_ID = "SANDBOX123";
+    process.env.APNS_SANDBOX_KEY_P8 = "sandbox-key";
+
+    const features = nativeClientApnsFeatures();
+
+    assert.equal(features.apnsDelivery, false);
+    assert.equal(features.apnsSandboxDelivery, true);
+    assert.equal(features.apnsProductionDelivery, false);
+  });
+
+  it("advertises TestFlight delivery only with Production credentials", async () => {
+    process.env.APNS_TEAM_ID = "TEAM123";
+    process.env.APNS_PRODUCTION_KEY_ID = "PRODUCTION123";
+    process.env.APNS_PRODUCTION_KEY_P8 = "production-key";
+
+    const features = nativeClientApnsFeatures();
+
+    assert.equal(features.apnsDelivery, true);
+    assert.equal(features.apnsSandboxDelivery, false);
+    assert.equal(features.apnsProductionDelivery, true);
+  });
+});
+
 describe("isStoreKitAppleApiConfigured", () => {
   const keys = [
     "STOREKIT_APPLE_ISSUER_ID",
@@ -136,6 +234,14 @@ describe("isStoreKitAppleApiConfigured", () => {
 });
 
 describe("native iOS release assets", () => {
+  it("loads optional local signing values in every app configuration", () => {
+    for (const configuration of ["Development", "Staging", "Production"]) {
+      const source = readRepoFile(`ios-native/Configuration/${configuration}.xcconfig`);
+
+      assert.match(source, /#include\? "Local\.xcconfig"/);
+    }
+  });
+
   it("declares push and Universal Link entitlements", () => {
     const entitlements = readRepoFile("ios-native/SideSeat/SideSeat.entitlements");
     const project = readRepoFile("ios-native/project.yml");
@@ -199,6 +305,36 @@ describe("native iOS release assets", () => {
     assert.match(source, /sendDefaultPii = false/);
     assert.match(appDelegate, /didFinishLaunchingWithOptions[\s\S]*CrashReporting\.start\(\)/);
     assert.match(project, /getsentry\/sentry-cocoa/);
+  });
+
+  it("declares that the app uses no non-exempt encryption", () => {
+    const infoPlist = readRepoFile("ios-native/SideSeat/Resources/Info.plist");
+
+    assert.match(
+      infoPlist,
+      /<key>ITSAppUsesNonExemptEncryption<\/key>\s*<false\/>/,
+    );
+  });
+
+  it("uploads Production archive dSYMs through a guarded Sentry build phase", () => {
+    const project = readRepoFile("ios-native/project.yml");
+    const production = readRepoFile("ios-native/Configuration/Production.xcconfig");
+    const uploader = readRepoFile("ios-native/scripts/upload-sentry-dsyms.sh");
+    const validator = readRepoFile("ios-native/scripts/validate-production-build.sh");
+
+    assert.match(project, /Upload Production dSYMs to Sentry/);
+    assert.match(project, /upload-sentry-dsyms\.sh/);
+    assert.match(production, /DEBUG_INFORMATION_FORMAT = dwarf-with-dsym/);
+    assert.match(uploader, /CONFIGURATION:-.*Production/);
+    assert.match(uploader, /ACTION:-.*install/);
+    assert.match(uploader, /app\.sideseat\.mobile\.sentry-dsym/);
+    assert.match(uploader, /security find-generic-password/);
+    assert.match(uploader, /SENTRY_ORG is required/);
+    assert.match(uploader, /SENTRY_PROJECT is required/);
+    assert.match(uploader, /debug-files upload/);
+    assert.match(uploader, /DWARF_DSYM_FOLDER_PATH/);
+    assert.match(validator, /ACTION:-.*install/);
+    assert.match(validator, /security find-generic-password/);
   });
 
   it("requires on-device speech recognition", () => {

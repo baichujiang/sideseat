@@ -7,6 +7,7 @@ import { getFeedbackInboxEmail } from "@/lib/constants/support";
 import { prisma } from "@/lib/db/prisma";
 import { emailDeliveryConfigured } from "@/lib/email/resend";
 import { sendProductFeedback } from "@/lib/email/send-product-feedback";
+import { rankFeedbackPosts } from "@/lib/feedback/ranking";
 
 export class FeedbackServiceError extends Error {
   constructor(
@@ -80,7 +81,7 @@ export async function listFeedbackPosts(options: {
   });
 
   return {
-    posts,
+    posts: rankFeedbackPosts(posts),
     viewer: {
       isAdmin: isConfiguredAdmin({
         email: options.email,

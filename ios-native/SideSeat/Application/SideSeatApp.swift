@@ -14,10 +14,11 @@ struct SideSeatApp: App {
                 .environment(container.deepLinkRouter)
                 .tint(SideSeatTheme.accent)
                 .preferredColorScheme(Self.uiTestingPreferredColorScheme)
+                .modifier(UITestingDynamicTypeModifier(size: Self.uiTestingDynamicTypeSize))
                 .task {
                     SideSeatTheme.configureChrome()
                     appDelegate.session = container.session
-                    appDelegate.deepLinkRouter = container.deepLinkRouter
+                    appDelegate.installDeepLinkRouter(container.deepLinkRouter)
                     await container.session.restoreSession()
                 }
                 .task {
@@ -57,6 +58,25 @@ struct SideSeatApp: App {
         case "dark": return .dark
         case "light": return .light
         default: return nil
+        }
+    }
+
+    private static var uiTestingDynamicTypeSize: DynamicTypeSize? {
+        ProcessInfo.processInfo.arguments.contains("--ui-testing-dynamic-type-accessibility")
+            ? .accessibility5
+            : nil
+    }
+}
+
+private struct UITestingDynamicTypeModifier: ViewModifier {
+    let size: DynamicTypeSize?
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if let size {
+            content.dynamicTypeSize(size)
+        } else {
+            content
         }
     }
 }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-private struct CalendarCategoryEditorDestination: Identifiable {
+private struct CalendarCategoryEditorDestination: Identifiable, Hashable {
     let id = UUID()
     let category: NativeCalendarCategory?
 }
@@ -34,13 +34,12 @@ struct CalendarCategoryListView: View {
                         Button("Try again") { Task { await store.load(using: session) } }
                     }
                     .ssListPageStateRow()
-                } else if store.isLoading, store.categories.isEmpty {
+                } else if (!store.hasLoaded || store.isLoading), store.categories.isEmpty {
                     SSLoadingState("Loading calendars")
                         .frame(maxWidth: .infinity)
                         .ssListPageStateRow()
                 } else {
-                    categorySection("Built-in", categories: store.categories.filter(\.isBuiltIn))
-                    categorySection("Custom", categories: store.categories.filter { !$0.isBuiltIn })
+                    categorySection("My calendars", categories: store.categories)
                 }
 
                 if let issue = store.issue, !store.categories.isEmpty {
@@ -97,7 +96,7 @@ struct CalendarCategoryListView: View {
                     await store.load(using: session)
                 }
             }
-            .sheet(item: $editor) { destination in
+            .navigationDestination(item: $editor) { destination in
                 CalendarCategoryEditorView(
                     category: destination.category,
                     store: store,
@@ -131,10 +130,14 @@ struct CalendarCategoryListView: View {
             }
             .accessibilityIdentifier("calendar-list")
         }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
     }
 
     @ViewBuilder
-    private func categorySection(_ title: LocalizedStringKey, categories: [NativeCalendarCategory]) -> some View {
+    private func categorySection(_ title: LocalizedStringKey, categories: [NativeCalendarCategory])
+        -> some View
+    {
         if !categories.isEmpty {
             Section(title) {
                 ForEach(categories) { category in
@@ -202,7 +205,8 @@ private enum CalendarTransferFileReader {
             throw CocoaError(.fileReadUnsupportedScheme)
         }
         if let fileSize = values.fileSize,
-           fileSize > CalendarTransferStore.maximumImportBytes {
+            fileSize > CalendarTransferStore.maximumImportBytes
+        {
             throw CalendarTransferFileError.tooLarge
         }
         let data = try Data(contentsOf: url, options: .mappedIfSafe)
@@ -239,7 +243,7 @@ private struct CalendarCategoryRow: View {
                 .fill(Color(hex: category.color) ?? .secondary)
                 .frame(width: 14, height: 14)
             VStack(alignment: .leading, spacing: 3) {
-                Text(category.name)
+                Text(category.displayName)
                     .foregroundStyle(.primary)
                 if category.icsSubscriptionUrl != nil {
                     Label("Subscribed", systemImage: "link")
@@ -248,7 +252,7 @@ private struct CalendarCategoryRow: View {
                 }
             }
             Spacer()
-            Image(systemName: category.isBuiltIn ? "lock" : "chevron.right")
+            Image(systemName: "chevron.right")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.tertiary)
         }
@@ -278,100 +282,96 @@ private struct CalendarCategoryEditorView: View {
         self.category = category
         self.store = store
         self.onSaved = onSaved
-        _name = State(initialValue: category?.name ?? "")
+        _name = State(initialValue: category?.displayName ?? "")
         _color = State(initialValue: category?.color ?? CalendarCategoryPalette.colors[7])
         _subscriptionURL = State(initialValue: category?.icsSubscriptionUrl ?? "")
     }
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section {
-                    TextField("Calendar name", text: $name)
-                        .accessibilityIdentifier("calendar-name")
-                }
+        Form {
+            Section {
+                TextField("Calendar name", text: $name)
+                    .accessibilityIdentifier("calendar-name")
+            }
 
-                Section("Color") {
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 14) {
-                        ForEach(palette, id: \.self) { value in
-                            Button {
-                                color = value
-                            } label: {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color(hex: value) ?? .secondary)
-                                        .frame(width: 34, height: 34)
-                                    if color.caseInsensitiveCompare(value) == .orderedSame {
-                                        Image(systemName: "checkmark")
-                                            .font(.caption.bold())
-                                            .foregroundStyle(.white)
-                                    }
+            Section("Color") {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 14) {
+                    ForEach(palette, id: \.self) { value in
+                        Button {
+                            color = value
+                        } label: {
+                            ZStack {
+                                Circle()
+                                    .fill(Color(hex: value) ?? .secondary)
+                                    .frame(width: 34, height: 34)
+                                if color.caseInsensitiveCompare(value) == .orderedSame {
+                                    Image(systemName: "checkmark")
+                                        .font(.caption.bold())
+                                        .foregroundStyle(.white)
                                 }
                             }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel(value)
-                            .accessibilityAddTraits(
-                                color.caseInsensitiveCompare(value) == .orderedSame ? .isSelected : []
-                            )
                         }
-                    }
-                    .padding(.vertical, 6)
-                }
-
-                if category?.isBuiltIn != true {
-                    Section("Subscription") {
-                        TextField("https:// or webcal://", text: $subscriptionURL)
-                            .textInputAutocapitalization(.never)
-                            .keyboardType(.URL)
-                            .autocorrectionDisabled()
-                            .accessibilityIdentifier("calendar-subscription-url")
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(value)
+                        .accessibilityAddTraits(
+                            color.caseInsensitiveCompare(value) == .orderedSame ? .isSelected : []
+                        )
                     }
                 }
+                .padding(.vertical, 6)
+            }
 
-                if let issue = store.issue {
-                    Section {
-                        Label(issue, systemImage: "exclamationmark.triangle")
-                            .foregroundStyle(SideSeatTheme.danger)
-                    }
-                }
-
-                if let category, !category.isBuiltIn {
-                    Section {
-                        Button("Delete calendar", role: .destructive) {
-                            showDeleteConfirmation = true
-                        }
-                        .accessibilityIdentifier("calendar-delete")
-                        .disabled(store.isMutating)
-                    }
+            if category?.isPreset != true {
+                Section("Subscription") {
+                    TextField("https:// or webcal://", text: $subscriptionURL)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.URL)
+                        .autocorrectionDisabled()
+                        .accessibilityIdentifier("calendar-subscription-url")
                 }
             }
-            .navigationTitle(category == nil ? "New calendar" : "Edit calendar")
-            .navigationBarTitleDisplayMode(.inline)
-            .interactiveDismissDisabled(store.isMutating)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                        .disabled(store.isMutating)
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { Task { await save() } }
-                        .accessibilityIdentifier("calendar-save")
-                        .disabled(store.isMutating || trimmedName.isEmpty)
+
+            if let issue = store.issue {
+                Section {
+                    Label(issue, systemImage: "exclamationmark.triangle")
+                        .foregroundStyle(SideSeatTheme.danger)
                 }
             }
-            .confirmationDialog(
-                "Delete this calendar?",
-                isPresented: $showDeleteConfirmation,
-                titleVisibility: .visible
-            ) {
-                Button("Delete calendar", role: .destructive) {
-                    Task { await delete() }
+
+            if category != nil {
+                Section {
+                    Button("Delete calendar", role: .destructive) {
+                        showDeleteConfirmation = true
+                    }
+                    .accessibilityIdentifier("calendar-delete")
+                    .disabled(store.isMutating)
                 }
-                .accessibilityIdentifier("calendar-delete-confirm")
-                Button("Cancel", role: .cancel) {}
             }
-            .onAppear { store.clearIssue() }
         }
+        .navigationTitle(category == nil ? "New calendar" : "Edit calendar")
+        .navigationBarTitleDisplayMode(.inline)
+        .interactiveDismissDisabled(store.isMutating)
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Save") { Task { await save() } }
+                    .accessibilityIdentifier("calendar-save")
+                    .disabled(store.isMutating || trimmedName.isEmpty)
+            }
+        }
+        .confirmationDialog(
+            "Delete this calendar?",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete calendar", role: .destructive) {
+                Task { await delete() }
+            }
+            .accessibilityIdentifier("calendar-delete-confirm")
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Events in this calendar will remain and become uncategorized.")
+        }
+        .onAppear { store.clearIssue() }
     }
 
     private var palette: [String] {
@@ -389,12 +389,19 @@ private struct CalendarCategoryEditorView: View {
         return value.isEmpty ? nil : value
     }
 
+    private var nameForSave: String {
+        guard let category, category.isPreset, trimmedName == category.displayName else {
+            return trimmedName
+        }
+        return category.name
+    }
+
     private func save() async {
         let succeeded: Bool
         if let category {
             succeeded = await store.update(
                 category,
-                name: trimmedName,
+                name: nameForSave,
                 color: color,
                 subscriptionURL: normalizedSubscription,
                 using: session

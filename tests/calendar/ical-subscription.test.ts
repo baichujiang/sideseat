@@ -88,7 +88,7 @@ describe("parseIcsForSubscriptionWindow", () => {
     );
   });
 
-  it("limits dense recurring feeds and ignores all-day events", () => {
+  it("limits dense recurring feeds without allowing later events to exceed the cap", () => {
     const raw = calendar(
       [
         "BEGIN:VEVENT",
@@ -119,5 +119,50 @@ describe("parseIcsForSubscriptionWindow", () => {
 
     assert.equal(result.events.length, 400);
     assert.ok(result.events.every((event) => event.title === "Dense feed"));
+  });
+
+  it("keeps recurring all-day events on Berlin civil days across DST", () => {
+    const raw = calendar(
+      [
+        "BEGIN:VEVENT",
+        "UID:all-day-dst",
+        "DTSTAMP:20261001T000000Z",
+        "DTSTART;VALUE=DATE:20261025",
+        "DTEND;VALUE=DATE:20261027",
+        "RRULE:FREQ=WEEKLY;COUNT=2",
+        "SUMMARY:Reading week",
+        "END:VEVENT",
+      ].join("\r\n"),
+    );
+
+    const result = parseIcsForSubscriptionWindow(
+      raw,
+      new Date("2026-10-20T00:00:00.000Z"),
+      new Date("2026-11-10T00:00:00.000Z"),
+    );
+
+    assert.deepEqual(
+      result.events.map((event) => ({
+        start: event.start.toISOString(),
+        end: event.end.toISOString(),
+        allDay: event.allDay,
+        title: event.title,
+      })),
+      [
+        {
+          start: "2026-10-24T22:00:00.000Z",
+          end: "2026-10-26T23:00:00.000Z",
+          allDay: true,
+          title: "Reading week",
+        },
+        {
+          start: "2026-10-31T23:00:00.000Z",
+          end: "2026-11-02T23:00:00.000Z",
+          allDay: true,
+          title: "Reading week",
+        },
+      ],
+    );
+    assert.equal(result.skipped, 0);
   });
 });

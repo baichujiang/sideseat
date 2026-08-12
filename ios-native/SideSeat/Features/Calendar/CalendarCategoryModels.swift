@@ -12,7 +12,27 @@ struct NativeCalendarCategory: Codable, Hashable, Identifiable, Sendable {
     let presetKey: String?
     let icsSubscriptionUrl: String?
 
-    var isBuiltIn: Bool { presetKey != nil }
+    var isPreset: Bool { presetKey != nil }
+    var displayName: String { CalendarCategoryDisplayName.resolve(name: name, presetKey: presetKey) }
+}
+
+enum CalendarCategoryDisplayName {
+    static func resolve(name: String, presetKey: String?) -> String {
+        switch presetKey?.lowercased() {
+        case "study" where name.caseInsensitiveCompare("Study") == .orderedSame:
+            String(localized: "Study calendar")
+        case "work" where name.caseInsensitiveCompare("Work") == .orderedSame:
+            String(localized: "Work")
+        case "personal" where name.caseInsensitiveCompare("Personal") == .orderedSame:
+            String(localized: "Personal")
+        case "important" where name.caseInsensitiveCompare("Important") == .orderedSame:
+            String(localized: "Important")
+        case "other" where name.caseInsensitiveCompare("Other") == .orderedSame:
+            String(localized: "Other")
+        default:
+            name
+        }
+    }
 }
 
 struct NativeCalendarCategoryCreateRequest: Encodable, Sendable {
@@ -59,10 +79,26 @@ enum CalendarCategoryPalette {
 extension NativeCalendarCategoryList {
     static let uiTestingFixture = NativeCalendarCategoryList(categories: [
         NativeCalendarCategory(
+            id: "ui-calendar-study",
+            name: "Study",
+            color: "#2563EB",
+            sortOrder: 0,
+            presetKey: "study",
+            icsSubscriptionUrl: nil
+        ),
+        NativeCalendarCategory(
+            id: "ui-calendar-work",
+            name: "Work",
+            color: "#0D9488",
+            sortOrder: 1,
+            presetKey: "work",
+            icsSubscriptionUrl: nil
+        ),
+        NativeCalendarCategory(
             id: "ui-calendar-personal",
             name: "Personal",
             color: "#EA580C",
-            sortOrder: 0,
+            sortOrder: 2,
             presetKey: "personal",
             icsSubscriptionUrl: nil
         ),
@@ -70,7 +106,7 @@ extension NativeCalendarCategoryList {
             id: "ui-calendar-custom",
             name: "Project",
             color: "#2563EB",
-            sortOrder: 4,
+            sortOrder: 3,
             presetKey: nil,
             icsSubscriptionUrl: "https://example.com/project.ics"
         ),

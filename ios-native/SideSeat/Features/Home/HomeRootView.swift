@@ -11,6 +11,7 @@ private enum HomeCalendarMode: String, CaseIterable, Identifiable {
 
 struct HomeRootView: View {
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
     @Environment(ClientConfigurationStore.self) private var clientConfiguration
@@ -43,15 +44,19 @@ struct HomeRootView: View {
                 .padding(.top, 4)
                 .padding(.bottom, 8)
 
-            Picker(String(localized: "Calendar view"), selection: $calendarMode) {
-                Text("Week").tag(HomeCalendarMode.week)
-                Text("Day").tag(HomeCalendarMode.day)
-                Text("List").tag(HomeCalendarMode.list)
+            HStack(spacing: 10) {
+                Picker(String(localized: "Calendar view"), selection: $calendarMode) {
+                    Text("Week").tag(HomeCalendarMode.week)
+                    Text("Day").tag(HomeCalendarMode.day)
+                    Text("List").tag(HomeCalendarMode.list)
+                }
+                .pickerStyle(.segmented)
+                .accessibilityIdentifier("calendar-view-mode")
+
+                calendarCategoriesButton
             }
-            .pickerStyle(.segmented)
             .padding(.horizontal, 20)
             .padding(.bottom, 10)
-            .accessibilityIdentifier("calendar-view-mode")
 
             if calendarMode != .week {
                 HomeDateStripView(
@@ -173,74 +178,33 @@ struct HomeRootView: View {
             }
         }
         .toolbar {
-            ToolbarItemGroup(placement: .topBarTrailing) {
-                Menu {
-                    Button {
-                        sheet = .calendars
-                    } label: {
-                        Label("Calendar categories", systemImage: "calendar")
-                    }
-                    .accessibilityIdentifier("manage-calendars")
-
-                    Button {
-                        router.navigate(to: .courses)
-                    } label: {
-                        Label("Courses", systemImage: "books.vertical")
-                    }
-                    .accessibilityIdentifier("open-courses")
-                } label: {
-                    Text("More")
-                        .font(.subheadline.weight(.semibold))
-                }
-                .accessibilityLabel("More")
-                .accessibilityIdentifier("calendar-more-menu")
-
-                if smartScheduleEnabled {
-                    Menu {
-                        Button {
-                            openNewEvent(at: calendarActionDate)
-                        } label: {
-                            Label("New event", systemImage: "calendar.badge.plus")
-                        }
-                        .accessibilityIdentifier("new-event")
-                        Button {
-                            sheet = .smartSchedule
-                        } label: {
-                            Label("Smart add", systemImage: "sparkles")
-                        }
-                        .accessibilityIdentifier("smart-schedule-open")
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                    .accessibilityLabel("Add event")
-                    .accessibilityIdentifier("calendar-add-menu")
-                    .disabled(store.schedule == nil)
-                } else {
-                    Button {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    performCalendarSelection {
                         openNewEvent(at: calendarActionDate)
-                    } label: {
-                        Image(systemName: "plus")
                     }
-                    .accessibilityLabel("New event")
-                    .accessibilityIdentifier("new-event")
-                    .disabled(store.schedule == nil)
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 18, weight: .semibold))
+                        .frame(width: 32, height: 32)
+                        .contentShape(Circle())
                 }
+                .accessibilityLabel("New event")
+                .accessibilityIdentifier("new-event")
+                .disabled(store.schedule == nil)
             }
         }
         .sheet(item: $sheet, onDismiss: showPendingScheduleShareNotice) { destination in
             switch destination {
             case .event(let context):
-                CalendarEventEditorView(context: context) {
+                CalendarEventEditorView(
+                    context: context,
+                    smartScheduleEnabled: smartScheduleEnabled
+                ) {
                     await store.load(using: session, around: selectedDate)
                 }
             case .calendars:
                 CalendarCategoryListView {
-                    await store.load(using: session, around: selectedDate)
-                }
-            case .smartSchedule:
-                CalendarSmartAddView(
-                    categories: store.schedule?.initialCalendarCategories ?? []
-                ) {
                     await store.load(using: session, around: selectedDate)
                 }
             case .shareSchedule(let initialDates):
@@ -286,48 +250,97 @@ struct HomeRootView: View {
         }
     }
 
+    @ViewBuilder
     private var header: some View {
-        HStack(alignment: .center, spacing: 8) {
-            // Month is the primary calendar landmark (Apple Calendar pattern).
-            Text(calendarMode == .week ? weekViewportDate : selectedDate, format: .dateTime.month(.wide).year())
-                .font(SideSeatTheme.Text.title)
-                .foregroundStyle(SideSeatTheme.textPrimary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.62)
-                .layoutPriority(1)
-                .accessibilityIdentifier("calendar-month-title")
-            Spacer(minLength: 4)
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: 8) {
+                calendarMonthTitle
+                calendarHeaderActions
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            HStack(alignment: .center, spacing: 6) {
+                calendarMonthTitle
+                Spacer(minLength: 4)
+                calendarHeaderActions
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var calendarMonthTitle: some View {
+        Text(calendarMode == .week ? weekViewportDate : selectedDate, format: .dateTime.month(.wide).year())
+            .font(SideSeatTheme.Text.title)
+            .foregroundStyle(SideSeatTheme.textPrimary)
+            .lineLimit(1)
+            .layoutPriority(1)
+            .accessibilityIdentifier("calendar-month-title")
+    }
+
+    private var calendarHeaderActions: some View {
+        HStack(alignment: .center, spacing: 6) {
             Button {
-                sheet = .shareSchedule(scheduleShareInitialDates)
+                performCalendarSelection {
+                    router.navigate(to: .courses)
+                }
             } label: {
-                Label("Share", systemImage: "square.and.arrow.up")
+                Label("Courses", systemImage: "books.vertical.fill")
+                    .lineLimit(1)
+            }
+            .buttonStyle(CalendarCoursesButtonStyle())
+            .frame(minHeight: 44)
+            .accessibilityIdentifier("open-courses")
+
+            Button {
+                performCalendarSelection {
+                    sheet = .shareSchedule(scheduleShareInitialDates)
+                }
+            } label: {
+                Image(systemName: "square.and.arrow.up")
+            }
+            .buttonStyle(CalendarShareButtonStyle())
+            .frame(width: 44, height: 44)
+            .accessibilityLabel("Share schedule")
+            .accessibilityHint("Choose dates and sharing options")
+            .accessibilityIdentifier("calendar-share-schedule")
+            Button {
+                jumpToToday()
+            } label: {
+                Text("Today")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.white)
-                    .padding(.horizontal, 11)
-                    .frame(height: 40)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
                     .background(
-                        SideSeatTheme.accent,
+                        CalendarChrome.nowFill,
                         in: RoundedRectangle(cornerRadius: 8, style: .continuous)
                     )
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .frame(minWidth: 76, minHeight: 44)
-            .contentShape(Rectangle())
-            .accessibilityLabel("Share schedule")
-            .accessibilityIdentifier("calendar-share-schedule")
-            Button("Today") {
-                let today = Date()
-                selectedDate = today
-                weekViewportDate = today
-                timelineScrollToken += 1
-            }
-            .font(.body.weight(.semibold))
-            .foregroundStyle(CalendarChrome.nowRed)
             .frame(minHeight: 44)
-            .contentShape(Rectangle())
             .accessibilityIdentifier("home-jump-today")
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var calendarCategoriesButton: some View {
+        Button {
+            performCalendarSelection { sheet = .calendars }
+        } label: {
+            Image(systemName: "calendar")
+                .symbolRenderingMode(.hierarchical)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(SideSeatTheme.textPrimary)
+                .frame(width: 42, height: 32)
+                .background(
+                    SideSeatTheme.fillTertiary,
+                    in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                )
+                .contentShape(Rectangle())
+        }
+        .accessibilityLabel("Calendar categories")
+        .accessibilityIdentifier("manage-calendars")
     }
 
     private var agendaItems: [HomeAgendaItem] {
@@ -360,6 +373,21 @@ struct HomeRootView: View {
         case .list:
             return HomeWeekWindow.days(from: selectedDate, count: 7, calendar: calendar)
         }
+    }
+
+    private func performCalendarSelection(_ action: () -> Void) {
+        UISelectionFeedbackGenerator().selectionChanged()
+        action()
+    }
+
+    private func jumpToToday() {
+        UISelectionFeedbackGenerator().selectionChanged()
+        let today = Date()
+        withAnimation(.easeOut(duration: 0.22)) {
+            selectedDate = today
+            weekViewportDate = today
+        }
+        timelineScrollToken += 1
     }
 
     private func event(withID id: String) -> NativeHomeStudyEntry? {
@@ -866,6 +894,39 @@ struct HomeRootView: View {
     }
 }
 
+private struct CalendarShareButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 17, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: 40, height: 40)
+            .background(
+                SideSeatTheme.accent,
+                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+            )
+            .scaleEffect(configuration.isPressed ? 0.94 : 1)
+            .opacity(configuration.isPressed ? 0.82 : 1)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
+private struct CalendarCoursesButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(SideSeatTheme.textPrimary)
+            .padding(.horizontal, 9)
+            .frame(height: 40)
+            .background(
+                SideSeatTheme.fillTertiary,
+                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+            )
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .opacity(configuration.isPressed ? 0.72 : 1)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
 private extension Date {
     static func sideSeatISO8601(_ value: String) -> Date? {
         let fractional = ISO8601DateFormatter()
@@ -891,14 +952,12 @@ private struct CalendarNotice: Identifiable {
 private enum HomeSheet: Identifiable {
     case event(CalendarEventEditorContext)
     case calendars
-    case smartSchedule
     case shareSchedule([Date])
 
     var id: String {
         switch self {
         case .event(let context): "event-\(context.id.uuidString)"
         case .calendars: "calendars"
-        case .smartSchedule: "smart-schedule"
         case .shareSchedule: "share-schedule"
         }
     }

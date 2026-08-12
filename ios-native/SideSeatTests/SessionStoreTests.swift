@@ -4,6 +4,109 @@ import Testing
 
 @Suite("Authenticated networking", .serialized)
 struct SessionStoreTests {
+    @Test("Signup normalizes the username, signs in, and persists credentials")
+    @MainActor
+    func signupCompletesNativeAuthentication() async throws {
+        let transport = AuthTestTransport()
+        let credentialStore = MemoryCredentialStore()
+        let store = SessionStore(
+            apiClient: APIClient(environment: .test, transport: transport),
+            credentialStore: credentialStore,
+            device: .test
+        )
+
+        let issue = await store.signup(
+            displayName: "Live Student",
+            username: "  Mixed_CASE  ",
+            password: "Password123",
+            school: "TUM",
+            studentStatus: "CURRENT_STUDENT",
+            degreeLevel: "MASTER",
+            semester: 3,
+            graduationYear: nil
+        )
+
+        #expect(issue == nil)
+        #expect(store.phase == .signedIn)
+        #expect(store.currentUser?.id == "signup-user")
+        #expect(store.currentUser?.username == "mixed_case")
+        #expect(store.accessTokenForStreaming == "access-signup")
+        #expect(await credentialStore.refreshToken() == "refresh-signup")
+        #expect(
+            await transport.signupCapture == SignupCapture(
+                displayName: "Live Student",
+                username: "mixed_case",
+                school: "TUM",
+                studentStatus: "CURRENT_STUDENT",
+                degreeLevel: "MASTER",
+                semester: 3,
+                graduationYear: nil
+            )
+        )
+    }
+
+    @Test("Password reset normalizes email, resets credentials, and signs in")
+    @MainActor
+    func passwordResetCompletesNativeAuthentication() async throws {
+        let transport = AuthTestTransport()
+        let credentialStore = MemoryCredentialStore()
+        let store = SessionStore(
+            apiClient: APIClient(environment: .test, transport: transport),
+            credentialStore: credentialStore,
+            device: .test
+        )
+
+        let sendIssue = await store.sendPasswordResetOTP(email: "  Student@TUM.DE  ")
+        #expect(sendIssue == nil)
+        #expect(await transport.passwordResetEmail == "student@tum.de")
+
+        let resetIssue = await store.resetPassword(
+            email: "  Student@TUM.DE  ",
+            code: " 123456 ",
+            password: "NewPassword123",
+            confirmPassword: "NewPassword123"
+        )
+
+        #expect(resetIssue == nil)
+        #expect(
+            await transport.passwordResetCapture == PasswordResetCapture(
+                email: "student@tum.de",
+                code: "123456",
+                password: "NewPassword123",
+                confirmPassword: "NewPassword123"
+            )
+        )
+        #expect(store.phase == .signedIn)
+        #expect(store.currentUser?.id == "reset-user")
+        #expect(store.currentUser?.username == "reset_student")
+        #expect(store.accessTokenForStreaming == "access-reset")
+        #expect(await credentialStore.refreshToken() == "refresh-reset")
+    }
+
+    @Test("Password reset validation never reaches the network")
+    @MainActor
+    func passwordResetValidationStopsInvalidRequests() async {
+        let transport = AuthTestTransport()
+        let store = SessionStore(
+            apiClient: APIClient(environment: .test, transport: transport),
+            credentialStore: MemoryCredentialStore(),
+            device: .test
+        )
+
+        let invalidEmail = await store.sendPasswordResetOTP(email: "not-an-email")
+        #expect(invalidEmail != nil)
+
+        let mismatched = await store.resetPassword(
+            email: "student@tum.de",
+            code: "123456",
+            password: "NewPassword123",
+            confirmPassword: "DifferentPassword123"
+        )
+        #expect(mismatched == String(localized: "Passwords do not match."))
+        #expect(await transport.passwordResetEmail == nil)
+        #expect(await transport.passwordResetCapture == nil)
+    }
+
     @Test("Concurrent unauthorized requests share one refresh")
     @MainActor
     func concurrentUnauthorizedRequestsShareRefresh() async throws {
@@ -89,8 +192,74 @@ private struct TestValue: Decodable, Sendable {
     let value: String
 }
 
+#if DEBUG
+@Suite("App environment test override")
+struct AppEnvironmentOverrideTests {
+    @Test("Development UI tests may use a loopback API")
+    func acceptsExplicitLoopbackOverride() {
+        let override = AppEnvironment.debugAPIBaseURLOverride(
+            deployment: .development,
+            arguments: ["SideSeat", "--ui-testing-local-api"],
+            environment: ["SIDESEAT_API_BASE_URL_OVERRIDE": "http://127.0.0.1:3000"]
+        )
+
+        #expect(override == URL(string: "http://127.0.0.1:3000"))
+    }
+
+    @Test("The override requires the explicit UI-test launch flag")
+    func rejectsMissingLaunchFlag() {
+        let override = AppEnvironment.debugAPIBaseURLOverride(
+            deployment: .development,
+            arguments: ["SideSeat"],
+            environment: ["SIDESEAT_API_BASE_URL_OVERRIDE": "http://127.0.0.1:3000"]
+        )
+
+        #expect(override == nil)
+    }
+
+    @Test("The override cannot redirect tests to a remote API")
+    func rejectsRemoteURL() {
+        let override = AppEnvironment.debugAPIBaseURLOverride(
+            deployment: .development,
+            arguments: ["SideSeat", "--ui-testing-local-api"],
+            environment: ["SIDESEAT_API_BASE_URL_OVERRIDE": "https://api.sideseat.de"]
+        )
+
+        #expect(override == nil)
+    }
+
+    @Test("Production ignores all UI-test API overrides")
+    func rejectsProductionOverride() {
+        let override = AppEnvironment.debugAPIBaseURLOverride(
+            deployment: .production,
+            arguments: ["SideSeat", "--ui-testing-local-api"],
+            environment: ["SIDESEAT_API_BASE_URL_OVERRIDE": "http://127.0.0.1:3000"]
+        )
+
+        #expect(override == nil)
+    }
+}
+#endif
+
 private struct TestBody: Encodable, Sendable {
     let value: String
+}
+
+private struct SignupCapture: Equatable, Sendable {
+    let displayName: String
+    let username: String
+    let school: String
+    let studentStatus: String
+    let degreeLevel: String
+    let semester: Int?
+    let graduationYear: Int?
+}
+
+private struct PasswordResetCapture: Equatable, Sendable {
+    let email: String
+    let code: String
+    let password: String
+    let confirmPassword: String
 }
 
 private actor MemoryCredentialStore: CredentialStore {
@@ -113,12 +282,56 @@ private actor AuthTestTransport: APITransport {
     private(set) var refreshCount = 0
     private(set) var expiredAccessCount = 0
     private(set) var logoutPushToken: String?
+    private(set) var signupCapture: SignupCapture?
+    private(set) var passwordResetEmail: String?
+    private(set) var passwordResetCapture: PasswordResetCapture?
 
     func data(for request: URLRequest) async throws -> (Data, URLResponse) {
         let path = request.url?.path ?? ""
         switch path {
+        case "/api/auth/signup":
+            let body = jsonBody(from: request)
+            signupCapture = SignupCapture(
+                displayName: body?["displayName"] as? String ?? "",
+                username: body?["username"] as? String ?? "",
+                school: body?["school"] as? String ?? "",
+                studentStatus: body?["studentStatus"] as? String ?? "",
+                degreeLevel: body?["degreeLevel"] as? String ?? "",
+                semester: body?["semester"] as? Int,
+                graduationYear: body?["graduationYear"] as? Int
+            )
+            return response(
+                for: request,
+                status: 201,
+                body: #"{"data":{"userId":"signup-user","onboardingComplete":true}}"#
+            )
+        case "/api/auth/forgot-password/send-otp":
+            passwordResetEmail = jsonBody(from: request)?["email"] as? String
+            return response(for: request, status: 200, body: #"{"data":{"sent":true}}"#)
+        case "/api/auth/forgot-password/reset":
+            let body = jsonBody(from: request)
+            passwordResetCapture = PasswordResetCapture(
+                email: body?["email"] as? String ?? "",
+                code: body?["code"] as? String ?? "",
+                password: body?["password"] as? String ?? "",
+                confirmPassword: body?["confirmPassword"] as? String ?? ""
+            )
+            return response(for: request, status: 200, body: #"{"data":{"userId":"reset-user"}}"#)
         case "/api/v1/auth/login":
-            if loginIdentifier(from: request) == "test_002" {
+            let identifier = loginIdentifier(from: request)
+            if identifier == "mixed_case" {
+                return response(
+                    for: request,
+                    status: 200,
+                    body: authBody(
+                        access: "access-signup",
+                        refresh: "refresh-signup",
+                        userID: "signup-user",
+                        username: "mixed_case"
+                    )
+                )
+            }
+            if identifier == "test_002" {
                 return response(
                     for: request,
                     status: 200,
@@ -127,6 +340,18 @@ private actor AuthTestTransport: APITransport {
                         refresh: "refresh-user-2",
                         userID: "user-2",
                         username: "test_002"
+                    )
+                )
+            }
+            if identifier == "student@tum.de" {
+                return response(
+                    for: request,
+                    status: 200,
+                    body: authBody(
+                        access: "access-reset",
+                        refresh: "refresh-reset",
+                        userID: "reset-user",
+                        username: "reset_student"
                     )
                 )
             }

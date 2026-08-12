@@ -69,16 +69,14 @@ struct ChatsRootView: View {
                         }
                     }
                     .listStyle(.plain)
+                    .contentMargins(.bottom, 88, for: .scrollContent)
                     .accessibilityIdentifier("inbox-list")
                 }
-            } else if store.isLoading {
-                SSLoadingState("Loading chats")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
+            } else if let issue = store.issue {
                 ContentUnavailableView {
                     Label("Chats unavailable", systemImage: "wifi.exclamationmark")
                 } description: {
-                    Text(store.issue ?? String(localized: "Your conversations could not be loaded."))
+                    Text(issue)
                 } actions: {
                     SSPrimaryButton(
                         title: String(localized: "Try again"),
@@ -89,6 +87,9 @@ struct ChatsRootView: View {
                     }
                     .frame(maxWidth: 220)
                 }
+            } else {
+                SSLoadingState("Loading chats")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .ssRootNavigationTitle("Chats")
@@ -243,7 +244,7 @@ struct ChatsRootView: View {
                 .font(.caption.weight(.semibold))
             if count > 0 {
                 Text(count > 99 ? "99+" : "\(count)")
-                    .font(.caption2.weight(.bold))
+                    .font(.caption.weight(.bold))
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
                     .background(
@@ -253,12 +254,14 @@ struct ChatsRootView: View {
                                 : (emphasized ? SideSeatTheme.accent : SideSeatTheme.fillSubtle)
                         )
                     )
-                    .foregroundStyle(selected || emphasized ? Color.white : Color.primary)
+                    .foregroundStyle(selected || emphasized ? SideSeatTheme.ink : Color.primary)
+                    .accessibilityHidden(true)
             }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
-        .foregroundStyle(selected ? Color.white : Color.primary)
+        .frame(minHeight: 44)
+        .foregroundStyle(selected ? SideSeatTheme.ink : Color.primary)
         .background(
             Capsule().fill(selected ? SideSeatTheme.accent : SideSeatTheme.Chat.controlFill)
         )
@@ -299,19 +302,21 @@ struct ChatsRootView: View {
                         if let date = Date.sideSeatInboxISO8601(row.lastActivityAt) {
                             Text(InboxActivityFormatting.label(for: date))
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                .accessibilityIdentifier("inbox-date-visual-\(row.id)")
                         }
                     }
                     HStack(alignment: .firstTextBaseline) {
                         Text(row.listPreview(currentUserID: session.currentUser?.id))
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                             .lineLimit(2)
+                            .accessibilityIdentifier("inbox-preview-visual-\(row.id)")
                         Spacer(minLength: 8)
                         if row.unreadCount > 0 {
                             Text(row.unreadCount > 99 ? "99+" : "\(row.unreadCount)")
-                                .font(.caption2.weight(.bold))
-                                .foregroundStyle(.white)
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(SideSeatTheme.ink)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(Capsule().fill(SideSeatTheme.accent))
@@ -320,8 +325,9 @@ struct ChatsRootView: View {
                     }
                     if row.kind != .direct {
                         Text(row.kind == .course ? String(localized: "Course chat") : String(localized: "Group chat"))
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
+                            .font(.caption)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .accessibilityIdentifier("inbox-kind-visual-\(row.id)")
                     }
                 }
             }

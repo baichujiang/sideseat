@@ -37,9 +37,8 @@ enum SideSeatTheme {
     /// Near-black ink for brand-surface contrast text (use sparingly).
     static let ink = Color(red: 0.14, green: 0.10, blue: 0.16)
 
-    /// Links, selected tab, switches, unread dots, product primary fill.
-    /// Do **not** use for avatar fills, display names, or non-unread status badges —
-    /// those inherit pink from root `.tint` if left on default/accent styles.
+    /// Selected controls, key icons, unread dots, borders, and product primary fills.
+    /// Body text, captions, dates, display names, and status labels use text or semantic colors.
     static let accent = Color.accentColor
 
     // MARK: - Semantic (product)
@@ -52,17 +51,66 @@ enum SideSeatTheme {
     static let surface = Color(uiColor: .secondarySystemGroupedBackground)
     static let textPrimary = Color.primary
     static let textSecondary = Color.secondary
+    /// Secondary text used at compact sizes where the system secondary alpha can miss WCAG AA.
+    static let textSecondaryStrong = Color(
+        uiColor: UIColor { traits in
+            if traits.userInterfaceStyle == .dark {
+                return UIColor(red: 0.76, green: 0.76, blue: 0.79, alpha: 1)
+            }
+            return UIColor(red: 0.32, green: 0.32, blue: 0.35, alpha: 1)
+        }
+    )
+    /// Form placeholders remain visually secondary while meeting contrast on field fills.
+    static let placeholderText = textSecondaryStrong
     /// Delete, validation errors — never use ``accent`` for these.
     static let danger = Color(uiColor: .systemRed)
     /// Success / confirmation — never use ``accent`` for these.
     static let success = Color(uiColor: .systemGreen)
+    static let statusSuccessText = Color(
+        uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 0.45, green: 0.85, blue: 0.55, alpha: 1)
+                : UIColor(red: 0.05, green: 0.40, blue: 0.18, alpha: 1)
+        }
+    )
+    static let statusWarningText = Color(
+        uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 0.95, green: 0.72, blue: 0.30, alpha: 1)
+                : UIColor(red: 0.55, green: 0.28, blue: 0.0, alpha: 1)
+        }
+    )
+    static let statusDangerText = Color(
+        uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 1.0, green: 0.55, blue: 0.52, alpha: 1)
+                : UIColor(red: 0.65, green: 0.08, blue: 0.06, alpha: 1)
+        }
+    )
     /// Calendar “now” line / today digit — kept separate from ``accent`` selection.
-    static let calendarNow = Color(red: 1, green: 0.23, blue: 0.19)
+    /// Dynamic values retain readable contrast on the calendar's neutral controls.
+    static let calendarNow = Color(
+        uiColor: UIColor { traits in
+            if traits.userInterfaceStyle == .dark {
+                return UIColor(red: 1.0, green: 0.62, blue: 0.58, alpha: 1)
+            }
+            return UIColor(red: 0.64, green: 0.05, blue: 0.04, alpha: 1)
+        }
+    )
+    /// Opaque calendar-now fill used behind white text. It stays dark in both appearances so
+    /// compact badges and buttons retain WCAG AA contrast.
+    static let calendarNowFill = Color(red: 0.64, green: 0.05, blue: 0.04)
     /// Course tiles without a custom hex — distinct from accent (not system `.blue`).
     static let courseFallback = Color(red: 0.20, green: 0.52, blue: 0.86)
     /// Verified student seal — trust blue, distinct from interactive Rose accent.
     /// Keep this off ``accent`` so identity chrome never reads as a product-wide pink wash.
-    static let verifiedSeal = Color(red: 0.18, green: 0.48, blue: 0.88)
+    static let verifiedSeal = Color(
+        uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 0.45, green: 0.70, blue: 1.0, alpha: 1)
+                : UIColor(red: 0.05, green: 0.30, blue: 0.64, alpha: 1)
+        }
+    )
     /// Pin / restore / soft caution — never use for selection or errors.
     static let warning = Color.orange
     /// Non-grouped elevated fill (chat peer bubbles, soft chips).
@@ -94,14 +142,14 @@ enum SideSeatTheme {
     /// Deterministic collage / multi-avatar tile colors (not brand chrome / not Rose accent).
     enum AvatarPalette {
         static let tiles: [Color] = [
-            Color(red: 0.35, green: 0.62, blue: 0.95),
-            Color(red: 0.38, green: 0.76, blue: 0.52),
-            Color(red: 0.95, green: 0.62, blue: 0.30),
-            Color(red: 0.78, green: 0.45, blue: 0.42),
-            Color(red: 0.58, green: 0.48, blue: 0.90),
-            Color(red: 0.30, green: 0.72, blue: 0.78),
-            Color(red: 0.72, green: 0.55, blue: 0.38),
-            Color(red: 0.55, green: 0.62, blue: 0.70),
+            Color(red: 0.15, green: 0.38, blue: 0.65),
+            Color(red: 0.18, green: 0.44, blue: 0.25),
+            Color(red: 0.60, green: 0.31, blue: 0.05),
+            Color(red: 0.62, green: 0.27, blue: 0.25),
+            Color(red: 0.43, green: 0.32, blue: 0.71),
+            Color(red: 0.11, green: 0.44, blue: 0.47),
+            Color(red: 0.49, green: 0.36, blue: 0.21),
+            Color(red: 0.32, green: 0.39, blue: 0.47),
         ]
 
         /// Stable tile color from a display name (shared by `InitialAvatar` / group collage).
@@ -161,8 +209,8 @@ enum SideSeatTheme {
         static let pressedOpacity: Double = 0.90
         static let pressedScale: CGFloat = 0.985
         static let pressDuration: Double = 0.15
-        static let disabledFill = Color.gray.opacity(0.40)
-        static let disabledFillSecondary = Color.gray.opacity(0.30)
+        /// Opaque so disabled CTAs keep deterministic text contrast over every screen surface.
+        static let disabledFill = Color(uiColor: .systemGray5)
     }
 
     // MARK: - Typography
@@ -200,13 +248,7 @@ enum SideSeatTheme {
         }
 
         var disabledStyle: AnyShapeStyle {
-            AnyShapeStyle(
-                LinearGradient(
-                    colors: [Interaction.disabledFill, Interaction.disabledFillSecondary],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
+            AnyShapeStyle(Interaction.disabledFill)
         }
     }
 

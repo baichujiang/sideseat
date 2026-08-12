@@ -74,7 +74,7 @@ struct LoginView: View {
 
             Text(String(localized: "Find your people on campus"))
                 .font(.subheadline.weight(.medium))
-                .foregroundStyle(SideSeatTheme.textSecondary)
+                .foregroundStyle(SideSeatTheme.ink)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
@@ -89,6 +89,7 @@ struct LoginView: View {
 
                 SSTextField(
                     title: String(localized: "Username, email, or phone"),
+                    placeholder: String(localized: "Account"),
                     text: $identifier,
                     contentType: .username,
                     keyboard: .default,
@@ -135,7 +136,7 @@ struct LoginView: View {
     private var secondaryActions: some View {
         HStack(spacing: 6) {
             Text(String(localized: "New here?"))
-                .foregroundStyle(SideSeatTheme.textSecondary)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             SSSecondaryButton(
                 title: String(localized: "Create an account"),
                 fontWeight: .semibold,

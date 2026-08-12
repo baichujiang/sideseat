@@ -68,7 +68,8 @@ struct ScheduleShareProposalTimeTests {
             end: "2026-08-10T14:00:00.000Z"
         )
 
-        let selection = try #require(ScheduleShareProposalTime.initialSelection(in: bounds))
+        let now = try #require(Date.sideSeatChatISO8601("2026-08-10T06:00:00.000Z"))
+        let selection = try #require(ScheduleShareProposalTime.initialSelection(in: bounds, now: now))
 
         #expect(selection.start == Date.sideSeatChatISO8601("2026-08-10T08:30:00.000Z"))
         #expect(selection.end == Date.sideSeatChatISO8601("2026-08-10T10:00:00.000Z"))
@@ -81,7 +82,8 @@ struct ScheduleShareProposalTimeTests {
             start: "2026-08-10T08:00:00.000Z",
             end: "2026-08-10T11:00:00.000Z"
         )
-        let original = try #require(ScheduleShareProposalTime.initialSelection(in: bounds))
+        let now = try #require(Date.sideSeatChatISO8601("2026-08-10T06:00:00.000Z"))
+        let original = try #require(ScheduleShareProposalTime.initialSelection(in: bounds, now: now))
         let requestedStart = try #require(Date.sideSeatChatISO8601("2026-08-10T10:30:00.000Z"))
 
         let updated = ScheduleShareProposalTime.updatingStart(original, to: requestedStart)
@@ -125,10 +127,25 @@ struct ScheduleShareProposalTimeTests {
             end: "2026-08-10T22:00:00.000Z"
         )
 
-        let selection = try #require(ScheduleShareProposalTime.initialSelection(in: bounds))
+        let now = try #require(Date.sideSeatChatISO8601("2026-08-09T12:00:00.000Z"))
+        let selection = try #require(ScheduleShareProposalTime.initialSelection(in: bounds, now: now))
 
         #expect(selection.start == Date.sideSeatChatISO8601("2026-08-10T06:00:00.000Z"))
         #expect(selection.end == Date.sideSeatChatISO8601("2026-08-10T07:30:00.000Z"))
+    }
+
+    @Test("An active free window starts at the next half hour")
+    func activeWindowStartsNearNow() throws {
+        let bounds = NativeScheduleShareSlot(
+            start: "2026-08-10T08:00:00.000Z",
+            end: "2026-08-10T14:00:00.000Z"
+        )
+        let now = try #require(Date.sideSeatChatISO8601("2026-08-10T09:07:00.000Z"))
+
+        let selection = try #require(ScheduleShareProposalTime.initialSelection(in: bounds, now: now))
+
+        #expect(selection.start == Date.sideSeatChatISO8601("2026-08-10T09:30:00.000Z"))
+        #expect(selection.end == Date.sideSeatChatISO8601("2026-08-10T11:00:00.000Z"))
     }
 }
 

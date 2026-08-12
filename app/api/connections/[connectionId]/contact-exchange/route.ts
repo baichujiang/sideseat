@@ -13,8 +13,8 @@ import { safeReturnPath } from "@/lib/nav/back";
  *
  *  - `request` → the viewer asks to exchange handles. Rejected if an
  *    ACCEPTED row already exists, a PENDING row already exists in either
- *    direction, or if the last DECLINED/CANCELED row is still within the
- *    cooldown window.
+ *    direction, or if the last DECLINED row is still within the cooldown
+ *    window. A requester cancellation is immediately actionable again.
  *  - `accept`  → the responder of the PENDING row flips it to ACCEPTED.
  *                Both sides' handles become visible.
  *  - `decline` → the responder of the PENDING row flips it to DECLINED.
@@ -67,8 +67,7 @@ export async function POST(
         CONTACT_EXCHANGE_DECLINE_COOLDOWN_HOURS * 60 * 60 * 1000;
       const blockedByCooldown =
         latest &&
-        (latest.status === ContactExchangeStatus.DECLINED ||
-          latest.status === ContactExchangeStatus.CANCELED) &&
+        latest.status === ContactExchangeStatus.DECLINED &&
         latest.updatedAt.getTime() + cooldownMs > Date.now();
 
       if (!blockedByCooldown) {

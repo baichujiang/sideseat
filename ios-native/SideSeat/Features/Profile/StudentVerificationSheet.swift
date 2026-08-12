@@ -31,12 +31,14 @@ struct SchoolIdentityBadge: View {
                 Image(systemName: "checkmark.seal.fill")
                     .imageScale(.small)
                 Text("Verified")
-                    .lineLimit(1)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("school-identity-badge-text")
             } else {
                 Image(systemName: StudentIdentityDisplay.systemImage(verifiedStudent: verifiedStudent, status: status))
                     .imageScale(.small)
                 Text(StudentIdentityDisplay.label(school: school, verifiedStudent: verifiedStudent, status: status))
-                    .lineLimit(1)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("school-identity-badge-text")
             }
         }
         .font(compact ? .caption2.weight(.semibold) : .caption.weight(.semibold))
@@ -56,9 +58,9 @@ extension StudentIdentityTone {
     var foreground: Color {
         switch self {
         case .verified: SideSeatTheme.verifiedSeal
-        case .pending: SideSeatTheme.warning
-        case .rejected: SideSeatTheme.danger
-        case .neutral: SideSeatTheme.textSecondary
+        case .pending: SideSeatTheme.statusWarningText
+        case .rejected: SideSeatTheme.statusDangerText
+        case .neutral: SideSeatTheme.textSecondaryStrong
         }
     }
 
@@ -112,6 +114,8 @@ private struct SchoolBrandMark: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
                     .padding(.horizontal, compact ? 4 : 5)
+                    .accessibilityHidden(true)
+                    .accessibilityIdentifier("school-brand-mark-visual")
             }
         }
         .frame(width: markWidth, height: compact ? 16 : 20)

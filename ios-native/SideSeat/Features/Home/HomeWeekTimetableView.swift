@@ -45,6 +45,8 @@ struct HomeWeekTimetableView: View {
     private let headerHeight = CalendarChrome.weekHeaderHeight
     private static let denseCalendarStressTestEnabled =
         ProcessInfo.processInfo.arguments.contains("--ui-testing-dense-calendar")
+    private static let exposesScrollAnchorsForUITesting =
+        ProcessInfo.processInfo.arguments.contains("--ui-testing-expose-scroll-anchors")
 
     private var dayCount: Int {
         HomeWeekWindow.clampVisibleDayCount(visibleDayCount)
@@ -371,7 +373,10 @@ struct HomeWeekTimetableView: View {
                     Color.clear
                         .frame(width: timeGutter, height: CGFloat(30) * minuteHeight)
                         .id("week-scroll-\(minute)")
-                        .accessibilityIdentifier("week-scroll-\(minute)")
+                        .accessibilityIdentifier(
+                            Self.exposesScrollAnchorsForUITesting ? "week-scroll-\(minute)" : ""
+                        )
+                        .accessibilityHidden(!Self.exposesScrollAnchorsForUITesting)
                 }
             }
             ForEach(1..<24, id: \.self) { hour in
@@ -381,6 +386,7 @@ struct HomeWeekTimetableView: View {
                     .lineLimit(1)
                     .frame(width: timeGutter - 8, alignment: .trailing)
                     .offset(y: CGFloat(hour * 60) * minuteHeight - 7)
+                    .accessibilityHidden(true)
             }
 
             Text(CalendarChrome.compactHour(24))
@@ -633,6 +639,12 @@ struct HomeWeekTimetableView: View {
             availableWidth: laneWidth,
             calendar: calendar
         )
+        let visualTop = CGFloat(placement.startMinute) * minuteHeight + 0.5
+        let hitTarget = CalendarChrome.eventHitTargetLayout(
+            visualTop: visualTop,
+            visualHeight: height,
+            gridHeight: CGFloat(24 * 60) * minuteHeight
+        )
 
         return CalendarEventBlockLabel(
             title: placement.item.title,
@@ -647,6 +659,8 @@ struct HomeWeekTimetableView: View {
         .opacity(isDragging ? 0.16 : 1)
         .scaleEffect(isDragging ? 0.97 : 1)
         .frame(width: laneWidth, height: height, alignment: .topLeading)
+        .padding(.top, hitTarget.topInset)
+        .padding(.bottom, hitTarget.bottomInset)
         .contentShape(Rectangle())
         .gesture(
             eventCardInteractionGesture(
@@ -656,7 +670,7 @@ struct HomeWeekTimetableView: View {
                 days: days
             )
         )
-        .offset(x: x, y: CGFloat(placement.startMinute) * minuteHeight + 0.5)
+        .offset(x: x, y: hitTarget.top)
         .allowsHitTesting(movingEventID == nil && (dragPreview == nil || isDragging))
         .accessibilityElement(children: .ignore)
         .accessibilityIdentifier(weekEventAccessibilityID(for: placement.item, renderedDay: renderedDay))

@@ -15,3 +15,5 @@ APS_ENVIRONMENT = development
 SIDESEAT_ASSOCIATED_DOMAIN = sideseat.invalid
 // Optional crash DSN (empty = CrashReporting no-op)
 SIDESEAT_CRASH_DSN =
+// Build tool only. The auth token must come from the release environment.
+SENTRY_CLI_PATH = $(SRCROOT)/../node_modules/.bin/sentry-cli

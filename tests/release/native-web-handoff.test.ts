@@ -33,6 +33,18 @@ test("AASA advertises the signed iPhone app and schedule links", async () => {
 
   assert.ok(details.appIDs.includes("V4238R5R53.app.sideseat.mobile"));
   assert.ok(details.components.some((entry: { "/": string }) => entry["/"] === "/share/view/*"));
+  const paths = details.components.map((entry: { "/": string }) => entry["/"]);
+  assert.deepEqual(
+    paths.filter((path: string) => path.startsWith("/profile")),
+    [
+      "/profile",
+      "/profile/info",
+      "/profile/verification",
+      "/profile/account",
+      "/profile/blocked",
+    ],
+  );
+  assert.ok(!paths.includes("/profile*"));
 });
 
 test("legacy web is frozen in production while native and admin routes remain", () => {

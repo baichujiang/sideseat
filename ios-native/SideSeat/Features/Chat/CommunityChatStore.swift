@@ -245,10 +245,8 @@ final class CommunityChatStore {
         using session: SessionStore
     ) async -> Bool {
         let body = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !body.isEmpty, !isSending else { return false }
-        isSending = true
+        guard !body.isEmpty else { return false }
         sendIssue = nil
-        defer { isSending = false }
 
         let reply = kind.supportsReply ? (replyTo ?? replyTarget) : nil
         let replyToId = reply?.id
@@ -271,7 +269,7 @@ final class CommunityChatStore {
             messages.append(optimistic)
             sendStatuses[optimistic.id] = .sent
             pendingRemoteCount = 0
-            clearReply()
+            clearReply(ifMatching: replyToId)
             return true
         }
         #endif
@@ -293,6 +291,7 @@ final class CommunityChatStore {
         messages.append(optimistic)
         sendStatuses[localID] = .sending
         pendingRemoteCount = 0
+        clearReply(ifMatching: replyToId)
         scheduleCachePersist()
 
         do {
@@ -313,10 +312,12 @@ final class CommunityChatStore {
                     idempotencyKey: UUID().uuidString
                 )
             }
+            // The optimistic row already handled the visible scroll. Replacing its
+            // local ID with the server ID must not start a second animation.
+            suppressNextScrollDecision = true
             messages.removeAll { $0.id == localID }
             sendStatuses.removeValue(forKey: localID)
             upsert(response.data)
-            clearReply()
             return true
         } catch {
             sendStatuses[localID] = .failed
@@ -434,6 +435,11 @@ final class CommunityChatStore {
     }
 
     func clearReply() {
+        replyTarget = nil
+    }
+
+    private func clearReply(ifMatching messageID: String?) {
+        guard let messageID, replyTarget?.id == messageID else { return }
         replyTarget = nil
     }
 

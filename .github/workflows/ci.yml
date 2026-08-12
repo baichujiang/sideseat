@@ -45,6 +45,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
       - run: npm run lint
       - run: npx tsc --noEmit --incremental false
       - run: npm run test:release:config
@@ -100,7 +102,7 @@ jobs:
 
   native-ios:
     runs-on: macos-26
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - name: Select an available iPhone simulator
@@ -126,7 +128,7 @@ jobs:
           ios-native/scripts/generate-project.sh
           git diff --exit-code -- ios-native/SideSeat/Generated/OpenAPI
           git diff --exit-code -- ios-native/SideSeat.xcodeproj
-      - name: Build and test native iOS app
+      - name: Build and test native iOS functional suite
         run: |
           mkdir -p ios-native/TestResults
           xcodebuild test \
@@ -136,12 +138,37 @@ jobs:
             -destination "platform=iOS Simulator,id=$SIMULATOR_ID" \
             -derivedDataPath ios-native/DerivedData \
             -resultBundlePath ios-native/TestResults/SideSeat.xcresult \
+            -skip-testing:SideSeatUITests/AuthenticationUITests/testAuthenticatedProcessColdLaunchReachesFirstFrameWithinBudget \
+            -skip-testing:SideSeatUITests/AuthenticationUITests/testAuthenticatedWarmResumePerformance \
+            -skip-testing:SideSeatUITests/AuthenticationUITests/testDenseCalendarHorizontalPagingPerformance \
+            -skip-testing:SideSeatUITests/AuthenticationUITests/testDenseDirectChatComposerPerformance \
+            -skip-testing:SideSeatUITests/AuthenticationUITests/testDenseDirectChatEnterExitPerformance \
+            -skip-testing:SideSeatUITests/AuthenticationUITests/testDenseDirectChatFirstCharacterLatency \
+            -skip-testing:SideSeatUITests/AuthenticationUITests/testDenseDirectChatScrollingPerformance \
+            -skip-testing:SideSeatUITests/AuthenticationUITests/testDenseDiscoverBrowseInteractionStress \
+            -skip-testing:SideSeatUITests/AuthenticationUITests/testDenseDiscoverFeedScrollPerformance \
+            -skip-testing:SideSeatUITests/AuthenticationUITests/testDenseDiscoverSearchRemainsResponsive \
+            -skip-testing:SideSeatUITests/AuthenticationUITests/testDenseScheduleImageGenerationRemainsCancelable \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Run isolated native performance gates
+        env:
+          RESULT_ROOT: ${{ github.workspace }}/ios-native/TestResults/Performance
+          DERIVED_DATA_PATH: ${{ github.workspace }}/ios-native/DerivedData
+        run: ios-native/scripts/run-performance-gates.sh
+      - name: Analyze native iOS app
+        run: |
+          xcodebuild analyze \
+            -project ios-native/SideSeat.xcodeproj \
+            -scheme SideSeat-Development \
+            -configuration Development \
+            -destination "generic/platform=iOS Simulator" \
+            -derivedDataPath ios-native/DerivedData \
             CODE_SIGNING_ALLOWED=NO
       - name: Upload native iOS test evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: native-ios-test-evidence
-          path: ios-native/TestResults/SideSeat.xcresult
+          path: ios-native/TestResults
           if-no-files-found: ignore
           retention-days: 14

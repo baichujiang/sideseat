@@ -4,9 +4,9 @@ import Testing
 
 @Suite("Calendar categories")
 struct CalendarCategoryModelsTests {
-    @Test("Built-in identity follows the server preset key")
-    func builtInIdentity() {
-        let builtIn = NativeCalendarCategory(
+    @Test("Starter identity and localized display follow the server preset key")
+    func presetIdentity() {
+        let preset = NativeCalendarCategory(
             id: "personal",
             name: "Personal",
             color: "#EA580C",
@@ -23,8 +23,10 @@ struct CalendarCategoryModelsTests {
             icsSubscriptionUrl: nil
         )
 
-        #expect(builtIn.isBuiltIn)
-        #expect(!custom.isBuiltIn)
+        #expect(preset.isPreset)
+        #expect(preset.displayName == String(localized: "Personal"))
+        #expect(!custom.isPreset)
+        #expect(custom.displayName == "Project")
     }
 
     @Test("Custom updates encode an explicit null to remove a subscription")

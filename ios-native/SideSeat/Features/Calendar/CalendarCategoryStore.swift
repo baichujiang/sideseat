@@ -6,6 +6,7 @@ import Observation
 final class CalendarCategoryStore {
     private(set) var categories: [NativeCalendarCategory] = []
     private(set) var isLoading = false
+    private(set) var hasLoaded = false
     private(set) var isMutating = false
     private(set) var issue: String?
 
@@ -17,7 +18,10 @@ final class CalendarCategoryStore {
         guard !isLoading else { return }
         isLoading = true
         issue = nil
-        defer { isLoading = false }
+        defer {
+            isLoading = false
+            hasLoaded = true
+        }
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
@@ -93,7 +97,7 @@ final class CalendarCategoryStore {
                         color: color,
                         sortOrder: existing.sortOrder,
                         presetKey: existing.presetKey,
-                        icsSubscriptionUrl: existing.isBuiltIn ? existing.icsSubscriptionUrl : subscriptionURL
+                        icsSubscriptionUrl: existing.isPreset ? existing.icsSubscriptionUrl : subscriptionURL
                     )
                 }
                 return
@@ -103,7 +107,7 @@ final class CalendarCategoryStore {
                 name: name,
                 color: color,
                 icsSubscriptionUrl: subscriptionURL,
-                includesSubscription: !category.isBuiltIn
+                includesSubscription: !category.isPreset
             )
             let _: APIEnvelope<NativeCalendarCategory> = try await session.sendAuthorized(
                 "api/v1/calendar/categories/\(category.id)",
@@ -116,7 +120,6 @@ final class CalendarCategoryStore {
     }
 
     func delete(_ category: NativeCalendarCategory, using session: SessionStore) async -> Bool {
-        guard !category.isBuiltIn else { return false }
         return await mutate(using: session) {
             #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {

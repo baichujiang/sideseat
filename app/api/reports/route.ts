@@ -6,6 +6,7 @@ import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
 import { getClassmatePostDetailForViewer } from "@/lib/queries/classmate-post-detail";
+import { loadNativeDiscoverActivityDetail } from "@/lib/api/v1/discover-service";
 import { reportSchema } from "@/lib/validators/invitation";
 
 /**
@@ -40,6 +41,8 @@ export async function POST(request: Request) {
           classmatePostId: formData?.get("classmatePostId") || undefined,
           classmatePostCommentId:
             formData?.get("classmatePostCommentId") || undefined,
+          discoverActivityCommentId:
+            formData?.get("discoverActivityCommentId") || undefined,
           reason: formData?.get("reason"),
           details: formData?.get("details") || "",
         });
@@ -50,6 +53,7 @@ export async function POST(request: Request) {
       values.groupChatMessageId,
       values.classmatePostId,
       values.classmatePostCommentId,
+      values.discoverActivityCommentId,
     ].filter(Boolean).length;
     if (targetCount > 1) {
       return error("Report can target only one item.", 400);
@@ -64,6 +68,7 @@ export async function POST(request: Request) {
     let verifiedGroupChatMessageId: string | null = null;
     let verifiedClassmatePostId: string | null = null;
     let verifiedClassmatePostCommentId: string | null = null;
+    let verifiedDiscoverActivityCommentId: string | null = null;
     let reportedUserId = values.reportedUserId;
 
     if (values.messageId) {
@@ -123,6 +128,19 @@ export async function POST(request: Request) {
       if (!detail.ok) return error("Question not found.", 404);
       verifiedClassmatePostCommentId = comment.id;
       reportedUserId = comment.userId;
+    } else if (values.discoverActivityCommentId) {
+      const comment = await prisma.discoverActivityComment.findUnique({
+        where: { id: values.discoverActivityCommentId },
+        select: { id: true, userId: true, activityId: true },
+      });
+      if (!comment) return error("Message not found.", 404);
+      const detail = await loadNativeDiscoverActivityDetail({
+        activityId: comment.activityId,
+        userId: user.id,
+      });
+      if (!detail) return error("Message not found.", 404);
+      verifiedDiscoverActivityCommentId = comment.id;
+      reportedUserId = comment.userId;
     }
 
     if (reportedUserId === user.id) {
@@ -140,6 +158,7 @@ export async function POST(request: Request) {
         groupChatMessageId: verifiedGroupChatMessageId,
         classmatePostId: verifiedClassmatePostId,
         classmatePostCommentId: verifiedClassmatePostCommentId,
+        discoverActivityCommentId: verifiedDiscoverActivityCommentId,
         reason: values.reason,
         status: ReportStatus.OPEN,
         details: values.details || null,

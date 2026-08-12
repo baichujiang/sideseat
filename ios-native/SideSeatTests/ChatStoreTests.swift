@@ -1,8 +1,115 @@
+import CoreGraphics
 import Foundation
+import Observation
 import Testing
 @testable import SideSeat
 
+@Suite("Inbox previews")
+struct InboxPreviewTests {
+    @Test("Plan previews retain the plan title")
+    func planPreviewTitle() {
+        let peer = NativeChatAuthor(id: "peer", username: "peer", nickname: "Peer", avatarUrl: nil)
+        let row = NativeInboxConversation(
+            kind: .direct,
+            id: "connection",
+            displayName: "Peer",
+            avatarUrl: nil,
+            participantAvatars: [],
+            unreadCount: 1,
+            pinned: false,
+            lastActivityAt: "2026-08-10T12:00:00Z",
+            peer: peer,
+            isSelfNotes: false,
+            course: nil,
+            group: nil,
+            lastMessage: NativeInboxLastMessage(
+                id: "plan-message",
+                sender: peer,
+                type: "PLAN_REQUEST_CARD",
+                body: "Coffee after class",
+                imageUrl: nil,
+                deletedAt: nil,
+                createdAt: "2026-08-10T12:00:00Z"
+            )
+        )
+
+        #expect(row.previewText.contains("Coffee after class"))
+    }
+}
+
+@Suite("Chat initial viewport")
+struct ChatInitialViewportPolicyTests {
+    @Test("Reveals a bottom-anchored cache immediately and waits when no cache exists")
+    func cacheAwareReveal() {
+        #expect(!ChatInitialViewportPolicy.canReveal(
+            hasPreparedViewport: true,
+            hasCompletedInitialLoad: false,
+            hasCachedSnapshot: false,
+            isVisible: false
+        ))
+        #expect(ChatInitialViewportPolicy.canReveal(
+            hasPreparedViewport: true,
+            hasCompletedInitialLoad: false,
+            hasCachedSnapshot: true,
+            isVisible: false
+        ))
+        #expect(ChatInitialViewportPolicy.canReveal(
+            hasPreparedViewport: true,
+            hasCompletedInitialLoad: true,
+            hasCachedSnapshot: false,
+            isVisible: false
+        ))
+        #expect(!ChatInitialViewportPolicy.canReveal(
+            hasPreparedViewport: true,
+            hasCompletedInitialLoad: true,
+            hasCachedSnapshot: true,
+            isVisible: true
+        ))
+    }
+}
+
 @Suite("Chat composer return key")
+struct ChatMessageGroupingTests {
+    @Test("Consecutive messages from one sender join within two minutes")
+    func continuationWindow() {
+        let first = Date(timeIntervalSince1970: 1_000)
+
+        #expect(ChatMessageGrouping.isContinuation(
+            previousSenderID: "peer",
+            previousDate: first,
+            senderID: "peer",
+            date: first.addingTimeInterval(90)
+        ))
+        #expect(!ChatMessageGrouping.isContinuation(
+            previousSenderID: "peer",
+            previousDate: first,
+            senderID: "me",
+            date: first.addingTimeInterval(30)
+        ))
+        #expect(!ChatMessageGrouping.isContinuation(
+            previousSenderID: "peer",
+            previousDate: first,
+            senderID: "peer",
+            date: first.addingTimeInterval(121)
+        ))
+    }
+
+    @Test("Timeline timestamps appear only after meaningful gaps")
+    func timestampWindow() {
+        let first = Date(timeIntervalSince1970: 10_000)
+
+        #expect(ChatMessageGrouping.shouldShowTimestamp(previousDate: nil, date: first))
+        #expect(!ChatMessageGrouping.shouldShowTimestamp(
+            previousDate: first,
+            date: first.addingTimeInterval(14 * 60)
+        ))
+        #expect(ChatMessageGrouping.shouldShowTimestamp(
+            previousDate: first,
+            date: first.addingTimeInterval(15 * 60)
+        ))
+    }
+}
+
 struct ChatComposerReturnKeyTests {
     @Test("Detects Return inserted at the end or cursor position")
     func detectsSingleInsertedReturn() {
@@ -34,6 +141,61 @@ struct ChatComposerReturnKeyTests {
                 current: "Line one\nLine two"
             ) == nil
         )
+    }
+}
+
+@MainActor
+@Suite("Chat composer draft")
+struct ChatComposerDraftTests {
+    @Test("Tracks native text without treating whitespace as sendable")
+    func tracksNativeTextState() {
+        let draft = ChatComposerDraft()
+
+        draft.updateText("   ")
+        #expect(draft.text == "   ")
+        #expect(!draft.isEmpty)
+        #expect(!draft.canSend)
+
+        draft.updateText("  hello")
+        #expect(draft.text == "  hello")
+        #expect(draft.canSend)
+        #expect(draft.trimmedText == "hello")
+    }
+
+    @Test("Clearing resets the native text and presentation state")
+    func clearsDraftState() {
+        let draft = ChatComposerDraft()
+        draft.updateText("连续发送")
+        let initialResetVersion = draft.resetVersion
+
+        draft.clear()
+
+        #expect(draft.text.isEmpty)
+        #expect(draft.isEmpty)
+        #expect(!draft.canSend)
+        #expect(draft.resetVersion == initialResetVersion + 1)
+    }
+
+    @Test("Continuous typing does not invalidate the SwiftUI presentation state")
+    func continuousTypingAvoidsPresentationInvalidation() async {
+        let draft = ChatComposerDraft()
+        draft.updateText("a")
+
+        await confirmation("No presentation invalidation", expectedCount: 0) { invalidated in
+            withObservationTracking {
+                _ = draft.isEmpty
+                _ = draft.canSend
+            } onChange: {
+                invalidated()
+            }
+
+            draft.updateText("ab")
+            draft.updateText("abc")
+            await Task.yield()
+        }
+
+        #expect(draft.text == "abc")
+        #expect(draft.canSend)
     }
 }
 
@@ -117,33 +279,28 @@ struct ChatScrollPolicyTests {
         #expect(ChatScrollPolicy.decisionIgnoringPagination() == .none)
     }
 
-    @Test("Keyboard resize keeps a bottom thread pinned")
-    func keyboardResizeKeepsBottomPinned() {
+    @Test("Keyboard presentation keeps a bottom thread pinned")
+    func keyboardPresentationKeepsBottomPinned() {
         var state = ChatKeyboardBottomAnchorState()
 
         let focusShouldPin = state.composerFocusChanged(isFocused: true, isNearBottom: true)
-        let resizeShouldPin = state.keyboardWillChange(isNearBottom: true)
         state.nearBottomChanged(false)
-        let stayedPinnedDuringTransition = state.isPinned
-        let wasTransitioning = state.isKeyboardTransitioning
-        let settledShouldPin = state.keyboardDidChange(isNearBottom: false)
+        let keyboardShouldPin = state.keyboardVisibilityChanged(
+            isVisible: true,
+            isNearBottom: false
+        )
 
         #expect(focusShouldPin)
-        #expect(resizeShouldPin)
-        #expect(stayedPinnedDuringTransition)
-        #expect(wasTransitioning)
         #expect(state.isPinned)
-        #expect(!state.isKeyboardTransitioning)
-        #expect(settledShouldPin)
+        #expect(keyboardShouldPin == true)
     }
 
-    @Test("A user scroll after keyboard resize releases the bottom pin")
-    func userScrollAfterKeyboardResizeReleasesPin() {
+    @Test("A user scroll after keyboard presentation releases the bottom pin")
+    func userScrollAfterKeyboardPresentationReleasesPin() {
         var state = ChatKeyboardBottomAnchorState()
 
         _ = state.composerFocusChanged(isFocused: true, isNearBottom: true)
-        _ = state.keyboardWillChange(isNearBottom: true)
-        _ = state.keyboardDidChange(isNearBottom: true)
+        _ = state.keyboardVisibilityChanged(isVisible: true, isNearBottom: true)
         state.userScrollBegan()
 
         let dismissShouldPin = state.composerFocusChanged(isFocused: false, isNearBottom: false)
@@ -159,21 +316,21 @@ struct ChatScrollPolicyTests {
         state.userScrollBegan()
         state.nearBottomChanged(false)
         let focusShouldPin = state.composerFocusChanged(isFocused: true, isNearBottom: false)
-        let resizeShouldPin = state.keyboardWillChange(isNearBottom: false)
-        let settledShouldPin = state.keyboardDidChange(isNearBottom: false)
+        let keyboardShouldPin = state.keyboardVisibilityChanged(
+            isVisible: true,
+            isNearBottom: false
+        )
 
         #expect(!focusShouldPin)
-        #expect(!resizeShouldPin)
-        #expect(!settledShouldPin)
+        #expect(keyboardShouldPin == false)
     }
 
-    @Test("Keyboard layout settling does not break the next composer focus")
-    func keyboardLayoutSettlingKeepsNextFocusPinned() {
+    @Test("Keyboard presentation does not break the next composer focus")
+    func keyboardPresentationKeepsNextFocusPinned() {
         var state = ChatKeyboardBottomAnchorState()
 
         _ = state.composerFocusChanged(isFocused: true, isNearBottom: true)
-        _ = state.keyboardWillChange(isNearBottom: true)
-        _ = state.keyboardDidChange(isNearBottom: false)
+        _ = state.keyboardVisibilityChanged(isVisible: true, isNearBottom: false)
         state.nearBottomChanged(false)
         let dismissShouldPin = state.composerFocusChanged(isFocused: false, isNearBottom: false)
         let secondFocusShouldPin = state.composerFocusChanged(isFocused: true, isNearBottom: false)
@@ -181,6 +338,32 @@ struct ChatScrollPolicyTests {
         #expect(state.isPinned)
         #expect(dismissShouldPin)
         #expect(secondFocusShouldPin)
+    }
+
+    @Test("Keyboard candidate-bar changes do not request another bottom scroll")
+    func keyboardCandidateBarChangeIsIgnored() {
+        var state = ChatKeyboardBottomAnchorState()
+
+        let presentation = state.keyboardVisibilityChanged(isVisible: true, isNearBottom: true)
+        let candidateBarChange = state.keyboardVisibilityChanged(isVisible: true, isNearBottom: false)
+
+        #expect(presentation == true)
+        #expect(candidateBarChange == nil)
+        #expect(state.isKeyboardVisible)
+    }
+
+    @Test("Keyboard frame visibility uses its intersection with the iPhone screen")
+    func keyboardFrameVisibility() {
+        let screen = CGRect(x: 0, y: 0, width: 390, height: 844)
+
+        #expect(ChatKeyboardTransition.isVisible(
+            endFrame: CGRect(x: 0, y: 500, width: 390, height: 344),
+            screenBounds: screen
+        ))
+        #expect(!ChatKeyboardTransition.isVisible(
+            endFrame: CGRect(x: 0, y: 844, width: 390, height: 344),
+            screenBounds: screen
+        ))
     }
 
     @Test("Unread jump shows only when unread exceeds one screen")
@@ -699,6 +882,49 @@ struct ChatThreadSearchRowTests {
     }
 }
 
+@Suite("Contact exchange presentation state")
+struct ContactExchangePresentationStateTests {
+    @Test("Requester cancellation immediately becomes available")
+    func canceledIsAvailable() {
+        let state = NativeConnectionExchangeState(
+            status: "CANCELED",
+            role: "requester",
+            cooldownUntil: nil
+        )
+
+        #expect(state.phase == .available)
+    }
+
+    @Test("Pending direction remains explicit")
+    func pendingDirection() {
+        let outgoing = NativeConnectionExchangeState(
+            status: "PENDING",
+            role: "requester",
+            cooldownUntil: nil
+        )
+        let incoming = NativeConnectionExchangeState(
+            status: "PENDING",
+            role: "responder",
+            cooldownUntil: nil
+        )
+
+        #expect(outgoing.phase == .outgoingPending)
+        #expect(incoming.phase == .incomingPending)
+    }
+
+    @Test("A declined request preserves its cooldown")
+    func declinedHasCooldown() {
+        let cooldownUntil = "2026-08-12T10:00:00.000Z"
+        let state = NativeConnectionExchangeState(
+            status: "DECLINED",
+            role: "requester",
+            cooldownUntil: cooldownUntil
+        )
+
+        #expect(state.phase == .declined(cooldownUntil: cooldownUntil))
+    }
+}
+
 @Suite("Direct chat store")
 struct DirectChatStoreTests {
     @Test("Local cache keeps message state isolated by account")
@@ -723,6 +949,14 @@ struct DirectChatStoreTests {
             body: "Cached hello",
             createdAt: "2026-08-04T12:00:00.000Z"
         )
+        let staleServerMessage = NativeDirectMessage(
+            id: "stale-server-message",
+            connectionId: "connection-1",
+            sender: peer,
+            type: "PLAN_REQUEST_CARD",
+            body: "Deleted plan",
+            createdAt: "2026-08-04T12:00:30.000Z"
+        )
         await cache.save(
             accountID: "user-1",
             connectionID: "connection-1",
@@ -733,7 +967,7 @@ struct DirectChatStoreTests {
                     displayName: "Mina",
                     peer: peer
                 ),
-                messages: [pending],
+                messages: [pending, staleServerMessage],
                 sendStatuses: [pending.id: .failed],
                 hasMoreOlder: true,
                 nextCursor: "older-cursor",
@@ -744,7 +978,7 @@ struct DirectChatStoreTests {
         let restored = try #require(
             await cache.load(accountID: "user-1", connectionID: "connection-1")
         )
-        #expect(restored.messages == [pending])
+        #expect(restored.messages == [pending, staleServerMessage])
         #expect(restored.sendStatuses[pending.id] == .failed)
         #expect(
             await cache.load(accountID: "user-2", connectionID: "connection-1") == nil
@@ -778,6 +1012,7 @@ struct DirectChatStoreTests {
         )
         #expect(merged.messages.contains(pending))
         #expect(merged.messages.contains(remote))
+        #expect(!merged.messages.contains(staleServerMessage))
         #expect(merged.sendStatuses[pending.id] == .failed)
 
         await cache.removeAccount("user-1")
@@ -852,6 +1087,7 @@ struct DirectChatStoreTests {
         )
 
         #expect(store.isLoading == false)
+        #expect(store.hasCachedSnapshot)
         #expect(store.conversation?.displayName == "Mina")
         #expect(store.messages == [cachedMessage])
     }
@@ -899,6 +1135,176 @@ struct DirectChatStoreTests {
         #expect(store.messages.contains(where: { $0.body == "Hello Mina" && !$0.id.hasPrefix("local-") }))
         #expect(await transport.sentBodies.contains("Hello Mina"))
         #expect(await transport.writeKeys.count == 1)
+    }
+
+    @Test("Keeps consecutive text sends responsive on a slow connection")
+    @MainActor
+    func consecutiveSendsStayOptimistic() async throws {
+        let transport = ChatTestTransport(holdTextSends: true)
+        let session = SessionStore(
+            apiClient: APIClient(
+                environment: AppEnvironment(
+                    deployment: .development,
+                    apiBaseURL: URL(string: "https://api.sideseat.test")!,
+                    bundleIdentifier: "app.sideseat.mobile.tests",
+                    appVersion: "1.0.0",
+                    buildNumber: "1"
+                ),
+                transport: transport
+            ),
+            credentialStore: ChatMemoryCredentialStore(),
+            device: NativeDevice(
+                id: "chat-device",
+                name: "Chat iPhone",
+                appVersion: "1.0.0",
+                platformVersion: "26.5"
+            )
+        )
+        await session.login(identifier: "test_001", password: "Password123")
+
+        let store = DirectChatStore(cache: DirectChatCache(inMemoryOnly: true))
+        await store.load(
+            connectionID: "connection-1",
+            using: session,
+            apiBaseURL: URL(string: "https://api.sideseat.test")!,
+            enableRealtime: false
+        )
+
+        let initialIDs = Set(store.messages.map(\.id))
+        let first = Task { await store.sendText("First message", using: session) }
+        let second = Task { await store.sendText("Second message", using: session) }
+
+        for _ in 0..<100 where await transport.pendingTextSendCount < 2 {
+            try await Task.sleep(for: .milliseconds(5))
+        }
+        #expect(await transport.pendingTextSendCount == 2)
+
+        let optimisticBodies = Set(
+            store.messages
+                .filter { $0.id.hasPrefix("local-") }
+                .compactMap(\.body)
+        )
+        #expect(optimisticBodies == ["First message", "Second message"])
+        #expect(store.isSending == false)
+        #expect(
+            store.consumeScrollDecision(previousIDs: initialIDs, isNearBottom: true)
+                == .scrollToBottom(animated: true)
+        )
+        let optimisticIDs = Set(store.messages.map(\.id))
+
+        await transport.releaseTextSends()
+        #expect(await first.value)
+        #expect(await second.value)
+        #expect(Set(await transport.sentBodies) == ["First message", "Second message"])
+        #expect(store.messages.allSatisfy { !$0.id.hasPrefix("local-") })
+        #expect(
+            store.consumeScrollDecision(previousIDs: optimisticIDs, isNearBottom: true)
+                == .none
+        )
+    }
+
+    @Test("A delayed send cannot clear a newer reply target")
+    @MainActor
+    func delayedSendPreservesNewReply() async throws {
+        let transport = ChatTestTransport(holdTextSends: true)
+        let session = SessionStore(
+            apiClient: APIClient(
+                environment: AppEnvironment(
+                    deployment: .development,
+                    apiBaseURL: URL(string: "https://api.sideseat.test")!,
+                    bundleIdentifier: "app.sideseat.mobile.tests",
+                    appVersion: "1.0.0",
+                    buildNumber: "1"
+                ),
+                transport: transport
+            ),
+            credentialStore: ChatMemoryCredentialStore(),
+            device: NativeDevice(
+                id: "chat-device",
+                name: "Chat iPhone",
+                appVersion: "1.0.0",
+                platformVersion: "26.5"
+            )
+        )
+        await session.login(identifier: "test_001", password: "Password123")
+
+        let store = DirectChatStore(cache: DirectChatCache(inMemoryOnly: true))
+        await store.load(
+            connectionID: "connection-1",
+            using: session,
+            apiBaseURL: URL(string: "https://api.sideseat.test")!,
+            enableRealtime: false
+        )
+        let originalReply = try #require(store.messages.first)
+        let newerReply = NativeDirectMessage(
+            id: "msg-newer-reply",
+            connectionId: "connection-1",
+            sender: originalReply.sender,
+            type: "TEXT",
+            body: "A newer question",
+            createdAt: "2026-07-17T12:02:00.000Z"
+        )
+
+        store.beginReply(to: originalReply)
+        let send = Task {
+            await store.sendText("First reply", replyTo: originalReply, using: session)
+        }
+        for _ in 0..<100 where await transport.pendingTextSendCount < 1 {
+            try await Task.sleep(for: .milliseconds(5))
+        }
+        #expect(await transport.pendingTextSendCount == 1)
+
+        store.beginReply(to: newerReply)
+        #expect(store.replyTarget?.id == newerReply.id)
+
+        await transport.releaseTextSends()
+        #expect(await send.value)
+        #expect(store.replyTarget?.id == newerReply.id)
+    }
+
+    @Test("A failed optimistic text remains retryable without duplication")
+    @MainActor
+    func failedTextRetriesInPlace() async throws {
+        let transport = ChatTestTransport(textSendFailures: 1)
+        let session = SessionStore(
+            apiClient: APIClient(
+                environment: AppEnvironment(
+                    deployment: .development,
+                    apiBaseURL: URL(string: "https://api.sideseat.test")!,
+                    bundleIdentifier: "app.sideseat.mobile.tests",
+                    appVersion: "1.0.0",
+                    buildNumber: "1"
+                ),
+                transport: transport
+            ),
+            credentialStore: ChatMemoryCredentialStore(),
+            device: NativeDevice(
+                id: "chat-device",
+                name: "Chat iPhone",
+                appVersion: "1.0.0",
+                platformVersion: "26.5"
+            )
+        )
+        await session.login(identifier: "test_001", password: "Password123")
+
+        let store = DirectChatStore(cache: DirectChatCache(inMemoryOnly: true))
+        await store.load(
+            connectionID: "connection-1",
+            using: session,
+            apiBaseURL: URL(string: "https://api.sideseat.test")!,
+            enableRealtime: false
+        )
+
+        #expect(await store.sendText("Retry me", using: session) == false)
+        let failed = try #require(store.messages.first(where: { $0.body == "Retry me" }))
+        #expect(failed.id.hasPrefix("local-"))
+        #expect(store.sendStatuses[failed.id] == .failed)
+
+        #expect(await store.retryFailedSend(failed.id, using: session))
+        #expect(store.messages.filter { $0.body == "Retry me" }.count == 1)
+        #expect(store.messages.allSatisfy { !$0.id.hasPrefix("local-") })
+        #expect(await transport.sentBodies == ["Retry me"])
+        #expect(await transport.writeKeys.count == 2)
     }
 
     @Test("Sends a reply with replyToId and soft-deletes own messages")
@@ -1337,6 +1743,10 @@ private actor ChatTestTransport: APITransport {
     private let failDirectHistory: Bool
     private let failCommunityHistory: Bool
     private let failInbox: Bool
+    private let holdTextSends: Bool
+    private var remainingTextSendFailures: Int
+    private var textSendWaiters: [CheckedContinuation<Void, Never>] = []
+    private(set) var pendingTextSendCount = 0
     private(set) var readMarked = false
     private(set) var courseReadMarked = false
     private(set) var groupReadMarked = false
@@ -1364,11 +1774,21 @@ private actor ChatTestTransport: APITransport {
     init(
         failDirectHistory: Bool = false,
         failCommunityHistory: Bool = false,
-        failInbox: Bool = false
+        failInbox: Bool = false,
+        holdTextSends: Bool = false,
+        textSendFailures: Int = 0
     ) {
         self.failDirectHistory = failDirectHistory
         self.failCommunityHistory = failCommunityHistory
         self.failInbox = failInbox
+        self.holdTextSends = holdTextSends
+        remainingTextSendFailures = textSendFailures
+    }
+
+    func releaseTextSends() {
+        let waiters = textSendWaiters
+        textSendWaiters.removeAll()
+        waiters.forEach { $0.resume() }
     }
 
     func data(for request: URLRequest) async throws -> (Data, URLResponse) {
@@ -1447,6 +1867,16 @@ private actor ChatTestTransport: APITransport {
                     )
                 }
                 let text = body?["body"] as? String ?? ""
+                if holdTextSends {
+                    pendingTextSendCount += 1
+                    await withCheckedContinuation { continuation in
+                        textSendWaiters.append(continuation)
+                    }
+                }
+                if remainingTextSendFailures > 0 {
+                    remainingTextSendFailures -= 1
+                    throw URLError(.networkConnectionLost)
+                }
                 sentBodies.append(text)
                 return response(
                     request,

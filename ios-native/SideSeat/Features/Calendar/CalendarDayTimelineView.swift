@@ -148,6 +148,7 @@ struct CalendarDayTimelineView: View {
                     .lineLimit(1)
                     .frame(width: timeGutter - 8, alignment: .trailing)
                     .offset(y: CGFloat(hour * 60) * minuteHeight - 7)
+                    .accessibilityHidden(true)
             }
 
             Text(CalendarChrome.compactHour(24))
@@ -237,6 +238,12 @@ struct CalendarDayTimelineView: View {
             height: height,
             availableWidth: laneWidth
         )
+        let visualTop = CGFloat(placement.startMinute) * minuteHeight + 1
+        let hitTarget = CalendarChrome.eventHitTargetLayout(
+            visualTop: visualTop,
+            visualHeight: height,
+            gridHeight: CGFloat(24 * 60) * minuteHeight
+        )
 
         return CalendarEventBlockLabel(
             title: placement.item.title,
@@ -248,6 +255,8 @@ struct CalendarDayTimelineView: View {
             contextSymbol: CalendarChrome.eventContextSymbol(for: placement.item)
         )
         .frame(width: laneWidth, height: height)
+        .padding(.top, hitTarget.topInset)
+        .padding(.bottom, hitTarget.bottomInset)
         .contentShape(Rectangle())
         .calendarTapOrLongPress(
             onTap: {
@@ -259,7 +268,7 @@ struct CalendarDayTimelineView: View {
                 menuEvent = placement.item
             }
         )
-        .offset(x: x, y: CGFloat(placement.startMinute) * minuteHeight + 1)
+        .offset(x: x, y: hitTarget.top)
         .allowsHitTesting(movingEventID == nil)
         .accessibilityElement(children: .ignore)
         .accessibilityIdentifier("calendar-timeline-event-\(placement.item.id)")

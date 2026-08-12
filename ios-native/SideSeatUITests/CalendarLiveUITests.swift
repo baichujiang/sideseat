@@ -11,14 +11,16 @@ final class CalendarLiveUITests: XCTestCase {
     }
 
     func testLoginCreateEventAndSeeItOnHome() {
-        let username = ProcessInfo.processInfo.environment["E2E_USER"] ?? "test_001"
-        let password = ProcessInfo.processInfo.environment["E2E_PASSWORD"] ?? "Password123"
+        let username = sideSeatLiveEnvironmentValue("E2E_USER", fallback: "test_001")
+        let password = sideSeatLiveEnvironmentValue("E2E_PASSWORD", fallback: "Password123")
         let title = "Native live event \(Int(Date().timeIntervalSince1970))"
         let app = XCUIApplication()
         app.launchArguments = [
             "--ui-testing-signed-out",
             "--ui-testing-ephemeral-credentials",
+            "--ui-testing-skip-tutorial",
         ]
+        app.configureForSideSeatLiveAPI()
         app.launch()
 
         let identifier = app.textFields["login-identifier"]
@@ -103,14 +105,16 @@ final class CalendarLiveUITests: XCTestCase {
     }
 
     func testCreateAndDeleteCustomCalendar() {
-        let username = ProcessInfo.processInfo.environment["E2E_USER"] ?? "test_001"
-        let password = ProcessInfo.processInfo.environment["E2E_PASSWORD"] ?? "Password123"
+        let username = sideSeatLiveEnvironmentValue("E2E_USER", fallback: "test_001")
+        let password = sideSeatLiveEnvironmentValue("E2E_PASSWORD", fallback: "Password123")
         let name = "Native live calendar \(Int(Date().timeIntervalSince1970))"
         let app = XCUIApplication()
         app.launchArguments = [
             "--ui-testing-signed-out",
             "--ui-testing-ephemeral-credentials",
+            "--ui-testing-skip-tutorial",
         ]
+        app.configureForSideSeatLiveAPI()
         app.launch()
 
         let identifier = app.textFields["login-identifier"]
@@ -122,9 +126,6 @@ final class CalendarLiveUITests: XCTestCase {
         passwordField.typeText(password)
         app.buttons["login-submit"].tap()
 
-        let more = app.buttons["calendar-more-menu"]
-        XCTAssertTrue(more.waitForExistence(timeout: 10))
-        more.tap()
         let calendars = app.buttons["manage-calendars"]
         XCTAssertTrue(calendars.waitForExistence(timeout: 10))
         calendars.tap()
@@ -159,7 +160,9 @@ final class CalendarLiveUITests: XCTestCase {
             guard slot.isHittable else { continue }
             slot.press(forDuration: 1.2)
 
-            let paste = app.buttons["calendar-slot-context-paste-event"]
+            let paste = app.buttons.matching(
+                identifier: "calendar-slot-context-paste-event"
+            ).firstMatch
             if paste.waitForExistence(timeout: 1) {
                 return paste
             }

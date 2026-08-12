@@ -159,6 +159,36 @@ test.describe.serial("API v1 connection actions", () => {
       role: "requester",
       cooldownUntil: null,
     });
+
+    const cancelExchange = await request.post(
+      `/api/v1/connections/${connectionId}/contact-exchange`,
+      {
+        headers: { ...headers, "Idempotency-Key": `exchange-cancel-${Date.now()}` },
+        data: { action: "cancel" },
+      },
+    );
+    expect(cancelExchange.status()).toBe(200);
+    expect(
+      ((await cancelExchange.json()) as {
+        data: { status: string; role: string; cooldownUntil: string | null };
+      }).data,
+    ).toEqual({
+      status: "CANCELED",
+      role: "requester",
+      cooldownUntil: null,
+    });
+
+    const requestAgain = await request.post(
+      `/api/v1/connections/${connectionId}/contact-exchange`,
+      {
+        headers: { ...headers, "Idempotency-Key": `exchange-again-${Date.now()}` },
+        data: { action: "request" },
+      },
+    );
+    expect(requestAgain.status()).toBe(200);
+    expect(
+      ((await requestAgain.json()) as { data: { status: string; role: string } }).data,
+    ).toMatchObject({ status: "PENDING", role: "requester" });
   });
 
   test("ends a conversation", async ({ request }) => {

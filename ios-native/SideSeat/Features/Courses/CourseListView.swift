@@ -1,10 +1,11 @@
 import SwiftUI
 
 struct CourseListView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
     @State private var store = CourseListStore()
-    @State private var scope: NativeCourseScope = .popular
+    @State private var scope: NativeCourseScope = .enrolled
     @State private var selectedSchool: String?
     @State private var query = ""
     @State private var showsSemesterReview = false
@@ -15,7 +16,6 @@ struct CourseListView: View {
     var body: some View {
         List {
             controls
-            archivedCoursesEntry
 
             if let review = store.payload?.semesterReview, review.required {
                 semesterReviewPrompt(review)
@@ -30,30 +30,37 @@ struct CourseListView: View {
                     Button("Try again") { Task { await load() } }
                 }
                 .ssListPageStateRow()
-            } else if store.isLoading, store.payload == nil {
+            } else if store.payload == nil {
                 SSLoadingState("Loading courses")
                     .frame(maxWidth: .infinity)
                     .ssListPageStateRow()
             } else if courses.isEmpty {
-                SSEmptyState(
-                    title: query.isEmpty ? "No courses" : "No results",
-                    systemImage: "books.vertical",
-                    description: query.isEmpty
-                        ? "Courses will appear here."
-                        : "Try another course code or name."
-                )
-                .ssListPageStateRow()
+                emptyCoursesState
+                    .ssListPageStateRow()
             } else {
                 Section {
                     ForEach(courses) { course in
-                        NavigationLink(value: AppRoute.course(courseID: course.id)) {
-                            CourseSummaryRow(course: course)
+                        Button {
+                            router.navigate(to: .course(courseID: course.id))
+                        } label: {
+                            HStack(spacing: SideSeatTheme.spaceSM) {
+                                CourseSummaryRow(course: course)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                if !dynamicTypeSize.isAccessibilitySize {
+                                    Image(systemName: "chevron.right")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(SideSeatTheme.textSecondary)
+                                        .accessibilityHidden(true)
+                                }
+                            }
                         }
                         .buttonStyle(.plain)
                         .accessibilityIdentifier("course-row-\(course.id)")
                     }
                 }
             }
+
+            archivedCoursesEntry
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Courses")
@@ -61,7 +68,7 @@ struct CourseListView: View {
         .searchable(
             text: $query,
             placement: .navigationBarDrawer(displayMode: .always),
-            prompt: "Course code or name"
+            prompt: "Search courses"
         )
         .refreshable { await load() }
         .sheet(isPresented: $showsSemesterReview) {
@@ -123,6 +130,8 @@ struct CourseListView: View {
 
     private var controls: some View {
         Section {
+            schoolContext
+
             Picker("Course list", selection: $scope) {
                 ForEach(NativeCourseScope.primaryCases) { value in
                     Text(value.title).tag(value)
@@ -130,16 +139,73 @@ struct CourseListView: View {
             }
             .pickerStyle(.segmented)
             .accessibilityIdentifier("course-scope")
+        }
+    }
 
-            if let schools = store.payload?.schools, schools.count > 1 {
-                Picker("School", selection: schoolBinding) {
-                    ForEach(schools) { school in
-                        Text(school.shortLabel).tag(Optional(school.code))
+    @ViewBuilder
+    private var schoolContext: some View {
+        if let payload = store.payload {
+            if payload.schools.count > 1 {
+                Menu {
+                    ForEach(payload.schools) { school in
+                        Button {
+                            selectedSchool = school.code
+                        } label: {
+                            if school.code == activeSchoolCode {
+                                Label(school.name, systemImage: "checkmark")
+                            } else {
+                                Text(school.name)
+                            }
+                        }
                     }
+                } label: {
+                    schoolContextLabel(payload: payload, showsDisclosure: true)
                 }
+                .buttonStyle(.plain)
+                .tint(SideSeatTheme.textPrimary)
+                .accessibilityLabel("School")
+                .accessibilityValue(activeSchool?.name ?? payload.school)
                 .accessibilityIdentifier("course-school")
+            } else {
+                schoolContextLabel(payload: payload, showsDisclosure: false)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("School")
+                    .accessibilityValue(activeSchool?.name ?? payload.school)
+                    .accessibilityIdentifier("course-school")
             }
         }
+    }
+
+    private func schoolContextLabel(
+        payload: NativeCourseList,
+        showsDisclosure: Bool
+    ) -> some View {
+        HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
+            Image(systemName: "building.columns.fill")
+                .font(.body.weight(.semibold))
+                .foregroundStyle(SideSeatTheme.textSecondary)
+                .frame(width: 28, height: 28)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(activeSchool?.name ?? payload.school)
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text("\(activeSchool?.shortLabel ?? payload.school) · \(payload.semesterLabel)")
+                    .font(.caption)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: SideSeatTheme.spaceSM)
+
+            if showsDisclosure && !dynamicTypeSize.isAccessibilitySize {
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .contentShape(Rectangle())
     }
 
     private var archivedCoursesEntry: some View {
@@ -158,7 +224,7 @@ struct CourseListView: View {
                             .foregroundStyle(.primary)
                         Text("Restore or remove inactive courses")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }
                     Spacer(minLength: 0)
                     Image(systemName: "chevron.right")
@@ -172,11 +238,13 @@ struct CourseListView: View {
         }
     }
 
-    private var schoolBinding: Binding<String?> {
-        Binding(
-            get: { selectedSchool ?? store.payload?.school },
-            set: { selectedSchool = $0 }
-        )
+    private var activeSchoolCode: String? {
+        selectedSchool ?? store.payload?.school
+    }
+
+    private var activeSchool: NativeCourseSchool? {
+        guard let activeSchoolCode else { return nil }
+        return store.payload?.schools.first { $0.code == activeSchoolCode }
     }
 
     private func semesterReviewPrompt(_ review: NativeCourseSemesterReviewSummary) -> some View {
@@ -195,13 +263,13 @@ struct CourseListView: View {
                             review.semesterLabel
                         ))
                             .font(.body.weight(.semibold))
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(SideSeatTheme.textPrimary)
                         Text(String(
                             format: String(localized: "Review %d previous courses"),
                             review.courseCount
                         ))
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }
                     Spacer(minLength: 0)
                     Image(systemName: "chevron.right")
@@ -209,11 +277,52 @@ struct CourseListView: View {
                         .foregroundStyle(.tertiary)
                 }
             }
+            .buttonStyle(.plain)
             .accessibilityIdentifier("course-semester-review")
         }
     }
 
     private var courses: [NativeCourseSummary] { store.payload?.courses ?? [] }
+
+    @ViewBuilder
+    private var emptyCoursesState: some View {
+        if !query.isEmpty {
+            ContentUnavailableView.search(text: query)
+        } else {
+            switch scope {
+            case .enrolled:
+                ContentUnavailableView {
+                    Label("No current courses", systemImage: "books.vertical")
+                } description: {
+                    Text("Browse your school catalog or add courses from a timetable screenshot.")
+                } actions: {
+                    Button("Browse courses") { scope = .popular }
+                        .accessibilityIdentifier("course-empty-browse")
+                }
+            case .saved:
+                ContentUnavailableView {
+                    Label("No saved courses", systemImage: "bookmark")
+                } description: {
+                    Text("Courses you save for later appear here.")
+                } actions: {
+                    Button("Browse courses") { scope = .popular }
+                        .accessibilityIdentifier("course-empty-browse")
+                }
+            case .popular:
+                ContentUnavailableView(
+                    "No courses at this school",
+                    systemImage: "building.columns",
+                    description: Text("Add a course manually when it is missing from the catalog.")
+                )
+            case .archived:
+                ContentUnavailableView(
+                    "No archived courses",
+                    systemImage: "archivebox",
+                    description: Text("Courses removed from a previous semester appear here.")
+                )
+            }
+        }
+    }
 
     private var loadKey: CourseListLoadKey {
         CourseListLoadKey(scope: scope, school: selectedSchool, query: query)
@@ -254,7 +363,7 @@ struct ArchivedCourseListView: View {
                     Button("Try again") { Task { await load() } }
                 }
                 .ssListPageStateRow()
-            } else if store.isLoading, store.payload == nil {
+            } else if store.payload == nil {
                 SSLoadingState("Loading courses")
                     .frame(maxWidth: .infinity)
                     .ssListPageStateRow()
@@ -294,7 +403,7 @@ struct ArchivedCourseListView: View {
         .listStyle(.insetGrouped)
         .navigationTitle("Archived courses")
         .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $query, prompt: "Course code or name")
+        .searchable(text: $query, prompt: "Search courses")
         .toolbar {
             if showsDoneButton {
                 ToolbarItem(placement: .confirmationAction) {
@@ -490,20 +599,42 @@ private struct CourseSummaryRow: View {
     var showsArchivedStatus = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                if let code = course.code, !code.isEmpty {
-                    Text(code)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.courseFallback)
-                }
-                Text(course.name)
-                    .font(.body.weight(.medium))
-                    .foregroundStyle(.primary)
-                    .lineLimit(2)
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            Text(course.name)
+                .font(.headline)
+                .foregroundStyle(SideSeatTheme.textPrimary)
+                .multilineTextAlignment(.leading)
+                .accessibilityIdentifier("course-title-visual-\(course.id)")
+
+            Text(metadataLine)
+            .font(.subheadline)
+            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityIdentifier("course-metadata-visual-\(course.id)")
+
+            if let instructor = course.instructorSummary, !instructor.isEmpty {
+                Text(instructor)
+                    .font(.caption)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("course-instructor-visual-\(course.id)")
             }
+
             HStack(spacing: 10) {
-                Label("\(course.memberCount)", systemImage: "person.2")
+                HStack(spacing: 4) {
+                    Image(systemName: "person.2")
+                        .font(.caption)
+                        .accessibilityHidden(true)
+                    Text("\(course.memberCount)")
+                        .font(.caption)
+                        .accessibilityLabel(
+                            String(
+                                format: String(localized: "Course member count: %d"),
+                                course.memberCount
+                            )
+                        )
+                        .accessibilityIdentifier("course-member-count-visual-\(course.id)")
+                }
                 if showsArchivedStatus {
                     Label("Archived", systemImage: "archivebox.fill")
                         .foregroundStyle(.secondary)
@@ -520,8 +651,17 @@ private struct CourseSummaryRow: View {
                 }
             }
             .font(.caption)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
         }
-        .padding(.vertical, 3)
+        .padding(.vertical, 5)
+    }
+
+    private var metadataLine: String {
+        [course.code, course.school, course.semesterLabel]
+            .compactMap { value in
+                guard let value, !value.isEmpty else { return nil }
+                return value
+            }
+            .joined(separator: " · ")
     }
 }

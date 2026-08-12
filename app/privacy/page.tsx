@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { getPublicSupportEmail, getSupportMailto } from "@/lib/constants/support";
 import { getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 
@@ -17,6 +18,8 @@ export default async function PrivacyPage() {
   const locale = await getServerAppLocale();
   const legal = getMessages(locale).legal;
   const zh = locale === "zh-CN";
+  const supportEmail = getPublicSupportEmail();
+  const supportMailto = getSupportMailto();
 
   return (
     <main className="mx-auto min-h-dvh w-full max-w-2xl px-5 py-10 text-foreground">
@@ -216,11 +219,16 @@ export default async function PrivacyPage() {
         <div className="space-y-2">
           <h2 className="text-[16px] font-semibold">{zh ? "联系我们" : "Contact"}</h2>
           <p>
-            {zh ? "隐私相关问题：" : "Privacy questions:"}{" "}
-            <a className="underline underline-offset-2" href="mailto:support@sideseat.app">
-              support@sideseat.app
-            </a>
-            {zh ? "。支持页面：" : ". Support page:"}{" "}
+            {supportEmail && supportMailto ? (
+              <>
+                {zh ? "隐私相关问题：" : "Privacy questions:"}{" "}
+                <a className="underline underline-offset-2" href={supportMailto}>
+                  {supportEmail}
+                </a>
+                {zh ? "。" : ". "}
+              </>
+            ) : null}
+            {zh ? "支持页面：" : "Support page:"}{" "}
             <Link href="/support" className="underline underline-offset-2">
               /support
             </Link>

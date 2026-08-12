@@ -129,14 +129,6 @@ struct SettingsRootView: View {
                     .accessibilityIdentifier("settings-support-web")
                 }
 
-                Button {
-                    if let url = URL(string: "mailto:support@sideseat.app") {
-                        openURL(url)
-                    }
-                } label: {
-                    Label("Email support", systemImage: "envelope")
-                }
-                .accessibilityIdentifier("settings-support")
             }
 
             Section("About") {

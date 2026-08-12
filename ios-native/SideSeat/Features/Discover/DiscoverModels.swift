@@ -437,6 +437,7 @@ struct NativeDiscoverActivity: Decodable, Identifiable, Sendable {
     let organizer: NativeDiscoverActivityOrganizer
 
     var startDate: Date? { try? Date(startAt, strategy: .iso8601) }
+    var endDate: Date? { try? Date(endAt, strategy: .iso8601) }
 
     func withSignupStatus(_ signupStatus: String?, goingCount: Int, status: String, phase: String) -> NativeDiscoverActivity {
         NativeDiscoverActivity(
@@ -532,6 +533,10 @@ struct NativeDiscoverQuestionList: Decodable, Sendable {
     let questions: [NativeDiscoverPostQuestion]
 }
 
+struct NativeDiscoverMessageList: Decodable, Sendable {
+    let messages: [NativeDiscoverPostQuestion]
+}
+
 struct NativeDiscoverPostQuestion: Decodable, Identifiable, Sendable {
     let id: String
     let body: String
@@ -572,6 +577,11 @@ struct NativeDiscoverQuestionWriteRequest: Encodable, Sendable {
 struct NativeDiscoverQuestionMutation: Decodable, Sendable {
     let commentId: String
     let questionId: String
+}
+
+struct NativeDiscoverMessageMutation: Decodable, Sendable {
+    let commentId: String
+    let messageId: String
 }
 
 struct NativeDiscoverQuestionDeletion: Decodable, Sendable {
@@ -633,12 +643,12 @@ extension NativeDiscoverFeed {
                 tags: ["study", "library"],
                 visibility: "SCHOOL_ONLY",
                 replyPreference: "REQUEST_FIRST",
-                startsAt: "2026-07-18T14:00:00Z",
-                endsAt: "2026-07-18T16:00:00Z",
+                startsAt: "2026-08-18T14:00:00Z",
+                endsAt: "2026-08-18T16:00:00Z",
                 location: "Main Library",
                 capacity: 3,
-                createdAt: "2026-07-17T10:00:00Z",
-                expiresAt: "2099-12-31T23:59:59Z",
+                createdAt: "2026-08-11T10:00:00Z",
+                expiresAt: "2026-08-20T21:59:59Z",
                 isOwn: false,
                 savedByViewer: false,
                 interestedCount: 2,
@@ -666,8 +676,8 @@ extension NativeDiscoverFeed {
                 title: "English conversation meetup",
                 description: "A relaxed hour of conversation practice.",
                 category: nil,
-                startAt: "2026-07-18T16:00:00Z",
-                endAt: "2026-07-18T18:00:00Z",
+                startAt: "2026-08-18T16:00:00Z",
+                endAt: "2026-08-18T18:00:00Z",
                 location: "Student Cafe",
                 capacity: 10,
                 status: "OPEN",
@@ -725,6 +735,34 @@ extension NativeDiscoverBuddyPost {
             verifiedStudent: true
         )
     )
+
+    func uiTestingClone(index: Int) -> NativeDiscoverBuddyPost {
+        NativeDiscoverBuddyPost(
+            id: "ui-dense-buddy-\(index)",
+            category: index.isMultiple(of: 3) ? "SHARED_COURSES" : category,
+            city: city,
+            title: "Study plan \(index)",
+            body: "Dense feed plan \(index) for scrolling and search performance. #study",
+            status: status,
+            closureReason: closureReason,
+            closedAt: closedAt,
+            tags: ["study", "plan\(index)"],
+            visibility: index.isMultiple(of: 2) ? "SCHOOL_ONLY" : "CITY_INTERNATIONALS",
+            replyPreference: replyPreference,
+            startsAt: Date(timeIntervalSince1970: 1_800_000_000 + Double(index * 60)).formatted(.iso8601),
+            endsAt: Date(timeIntervalSince1970: 1_800_003_600 + Double(index * 60)).formatted(.iso8601),
+            location: "Campus \(index % 8)",
+            capacity: capacity,
+            createdAt: createdAt,
+            expiresAt: expiresAt,
+            isOwn: false,
+            savedByViewer: index.isMultiple(of: 7),
+            interestedCount: index % 12,
+            imageUrls: [],
+            linkedCourses: linkedCourses,
+            author: author
+        )
+    }
 }
 
 /// Mutable Discover feed for `--ui-testing-authenticated` so fake creates show up in the list.
@@ -732,7 +770,16 @@ extension NativeDiscoverBuddyPost {
 enum UITestingDiscoverFixture {
     private static var feedStorage = NativeDiscoverFeed.uiTestingFixture
 
-    static var feed: NativeDiscoverFeed { feedStorage }
+    static var feed: NativeDiscoverFeed {
+        guard ProcessInfo.processInfo.arguments.contains("--ui-testing-dense-discover"),
+              let seed = feedStorage.buddies.first
+        else { return feedStorage }
+        return NativeDiscoverFeed(
+            city: feedStorage.city,
+            buddies: (0..<80).map(seed.uiTestingClone(index:)) + feedStorage.buddies,
+            activities: feedStorage.activities
+        )
+    }
 
     static func reset() {
         feedStorage = .uiTestingFixture
@@ -744,7 +791,7 @@ enum UITestingDiscoverFixture {
         body: String?,
         visibility: String,
         expiresAt: Date
-    ) {
+    ) -> String {
         let post = NativeDiscoverBuddyPost(
             id: "ui-buddy-local-\(UUID().uuidString)",
             category: category,
@@ -786,6 +833,7 @@ enum UITestingDiscoverFixture {
             buddies: [post] + feedStorage.buddies,
             activities: feedStorage.activities
         )
+        return post.id
     }
 
     static func updateBuddy(

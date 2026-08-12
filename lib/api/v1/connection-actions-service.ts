@@ -90,8 +90,7 @@ export async function loadConnectionActions(options: {
   if (latest) {
     const cooldownMs = CONTACT_EXCHANGE_DECLINE_COOLDOWN_HOURS * 60 * 60 * 1000;
     const cooldownUntil =
-      (latest.status === ContactExchangeStatus.DECLINED ||
-        latest.status === ContactExchangeStatus.CANCELED) &&
+      latest.status === ContactExchangeStatus.DECLINED &&
       latest.updatedAt.getTime() + cooldownMs > Date.now()
         ? new Date(latest.updatedAt.getTime() + cooldownMs).toISOString()
         : null;
@@ -347,8 +346,7 @@ export async function mutateContactExchange(options: {
     const cooldownMs = CONTACT_EXCHANGE_DECLINE_COOLDOWN_HOURS * 60 * 60 * 1000;
     if (
       latest &&
-      (latest.status === ContactExchangeStatus.DECLINED ||
-        latest.status === ContactExchangeStatus.CANCELED) &&
+      latest.status === ContactExchangeStatus.DECLINED &&
       latest.updatedAt.getTime() + cooldownMs > Date.now()
     ) {
       throw new ConnectionActionsError(

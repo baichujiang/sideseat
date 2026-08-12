@@ -114,6 +114,10 @@ if (migrationPolicy.run) {
   console.warn(
     `[build] Skipping prisma migrate deploy for remote database ${migrationPolicy.host}. Local builds require ALLOW_REMOTE_DATABASE_MIGRATIONS=1 before they may migrate a remote database.\n`,
   );
+} else if (migrationPolicy.reason === "remote-deployment-requires-approval") {
+  console.warn(
+    `[build] Skipping prisma migrate deploy for remote database ${migrationPolicy.host}. Preview and CI builds cannot migrate remote databases without explicit ALLOW_REMOTE_DATABASE_MIGRATIONS=1 approval.\n`,
+  );
 } else if (migrationPolicy.reason === "explicit-skip") {
   console.warn("[build] Skipping prisma migrate deploy because SKIP_DATABASE_MIGRATIONS=1.\n");
 } else {

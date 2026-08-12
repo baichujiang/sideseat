@@ -469,9 +469,13 @@ struct ProfileEditSection<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            Label(title, systemImage: systemImage)
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                Image(systemName: systemImage)
+                    .foregroundStyle(tint)
+                Text(title)
+                    .foregroundStyle(SideSeatTheme.textPrimary)
+            }
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(tint)
                 .padding(.horizontal, SideSeatTheme.spaceXS)
 
             content()

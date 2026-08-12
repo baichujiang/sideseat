@@ -16,6 +16,85 @@ struct CalendarSmartAddStoreTests {
         #expect(CalendarVoiceTranscript.merge(prefix: "Monday", transcript: "") == "Monday")
     }
 
+    @Test("Voice startup is non-reentrant and can be cancelled while audio prepares")
+    @MainActor
+    func voiceStartupCanBeCancelled() async {
+        let audio = CalendarVoiceTestAudioController(startDelay: .milliseconds(200))
+        let input = CalendarVoiceInput(
+            permissionProvider: CalendarVoiceAllowedPermissionProvider(),
+            audioController: audio
+        )
+
+        let startTask = Task { @MainActor in
+            await input.start(locale: Locale(identifier: "en-US"))
+        }
+        await waitForVoiceTestCondition { await audio.startCount == 1 }
+
+        #expect(input.isStarting)
+        await input.start(locale: Locale(identifier: "en-US"))
+        #expect(await audio.startCount == 1)
+
+        startTask.cancel()
+        input.stop()
+        await startTask.value
+        await waitForVoiceTestCondition { await audio.stopCount > 0 }
+
+        #expect(!input.isActive)
+        #expect(await audio.stopCount > 0)
+    }
+
+    @Test("Voice recognition publishes text and closes after a final result")
+    @MainActor
+    func voiceRecognitionFinishesCleanly() async {
+        let audio = CalendarVoiceTestAudioController()
+        let input = CalendarVoiceInput(
+            permissionProvider: CalendarVoiceAllowedPermissionProvider(),
+            audioController: audio
+        )
+
+        await input.start(locale: Locale(identifier: "en-US"))
+        #expect(input.isRecording)
+
+        await audio.send(
+            CalendarVoiceRecognitionUpdate(
+                transcript: "Lunch tomorrow at twelve",
+                isFinal: true,
+                errorDescription: nil
+            )
+        )
+        await waitForVoiceTestCondition { !input.isActive }
+
+        #expect(input.transcript == "Lunch tomorrow at twelve")
+        #expect(!input.isActive)
+    }
+
+    @Test("A stale voice cleanup cannot stop a newer recording")
+    @MainActor
+    func staleVoiceCleanupIsIgnored() async {
+        let audio = CalendarVoiceTestAudioController(startDelay: .milliseconds(120))
+        let input = CalendarVoiceInput(
+            permissionProvider: CalendarVoiceAllowedPermissionProvider(),
+            audioController: audio
+        )
+
+        let firstStart = Task { @MainActor in
+            await input.start(locale: Locale(identifier: "en-US"))
+        }
+        await waitForVoiceTestCondition { await audio.startCount == 1 }
+        input.stop()
+
+        let secondStart = Task { @MainActor in
+            await input.start(locale: Locale(identifier: "en-US"))
+        }
+        await waitForVoiceTestCondition { await audio.startCount == 2 }
+        await firstStart.value
+        await secondStart.value
+
+        #expect(input.isRecording)
+        #expect(await audio.activeSessionID != nil)
+        input.stop()
+    }
+
     @Test("Timetable OCR extracts course searches and ranks exact course codes")
     func timetableScreenshotMatching() throws {
         let lines = [
@@ -42,6 +121,28 @@ struct CalendarSmartAddStoreTests {
         let result = CourseScreenshotText.score(course: course, lines: lines)
         #expect(result.score == 1)
         #expect(result.evidence == lines[0])
+    }
+
+    @Test("Timetable OCR punctuation cannot create an empty exact match")
+    func timetableScreenshotRejectsEmptyNormalizedEvidence() {
+        let course = NativeCourseSummary(
+            id: "course-noisy",
+            code: "---",
+            name: "Introduction to Deep Learning",
+            instructorSummary: nil,
+            school: "TUM",
+            semesterLabel: "SS 2026",
+            memberCount: 0,
+            viewer: NativeCourseViewerState(enrolled: false, saved: false),
+            sessions: []
+        )
+
+        let result = CourseScreenshotText.score(
+            course: course,
+            lines: ["---", "•••", "10:00"]
+        )
+
+        #expect(result.score == 0)
     }
 
     @Test("Parses drafts, updates their calendar and saves one idempotent batch")
@@ -91,6 +192,58 @@ struct CalendarSmartAddStoreTests {
     }
 }
 
+private struct CalendarVoiceAllowedPermissionProvider: CalendarVoicePermissionProviding {
+    func requestSpeechPermission() async -> Bool { true }
+    func requestMicrophonePermission() async -> Bool { true }
+}
+
+private actor CalendarVoiceTestAudioController: CalendarVoiceAudioControlling {
+    private let startDelay: Duration
+    private var onUpdate: (@Sendable (CalendarVoiceRecognitionUpdate) -> Void)?
+    private(set) var startCount = 0
+    private(set) var stopCount = 0
+    private(set) var activeSessionID: UUID?
+
+    init(startDelay: Duration = .zero) {
+        self.startDelay = startDelay
+    }
+
+    func start(
+        sessionID: UUID,
+        locale: Locale,
+        onUpdate: @escaping @Sendable (CalendarVoiceRecognitionUpdate) -> Void
+    ) async throws {
+        _ = locale
+        startCount += 1
+        activeSessionID = sessionID
+        self.onUpdate = onUpdate
+        if startDelay > .zero {
+            try await Task.sleep(for: startDelay)
+        }
+    }
+
+    func stop(sessionID: UUID, cancelTask: Bool) async {
+        _ = cancelTask
+        guard activeSessionID == sessionID else { return }
+        activeSessionID = nil
+        stopCount += 1
+    }
+
+    func send(_ update: CalendarVoiceRecognitionUpdate) {
+        onUpdate?(update)
+    }
+}
+
+@MainActor
+private func waitForVoiceTestCondition(
+    _ condition: @escaping @MainActor () async -> Bool
+) async {
+    for _ in 0..<100 {
+        if await condition() { return }
+        try? await Task.sleep(for: .milliseconds(5))
+    }
+}
+
 private actor CalendarSmartAddMemoryCredentialStore: CredentialStore {
     private var token: String?
 
@@ -122,7 +275,7 @@ private actor CalendarSmartAddTestTransport: APITransport {
             return response(
                 for: request,
                 status: 200,
-                body: #"{"data":{"events":[{"title":"Library study","location":"Main Library","note":"","startAt":"2026-07-18T15:00:00.000Z","endAt":"2026-07-18T16:00:00.000Z","repeat":"NONE","repeatUntil":"","categoryId":"category-1","categoryPreset":"other"}],"warnings":["Check time"]}}"#
+                body: #"{"data":{"events":[{"title":"Library study","location":"Main Library","note":"","startAt":"2026-07-18T15:00:00.000Z","endAt":"2026-07-18T16:00:00.000Z","repeat":"NONE","repeatUntil":"","categoryId":"category-1","categoryPreset":"study"}],"warnings":["Check time"]}}"#
             )
         case "/api/v1/calendar/events/batch":
             let body = try #require(request.httpBody)

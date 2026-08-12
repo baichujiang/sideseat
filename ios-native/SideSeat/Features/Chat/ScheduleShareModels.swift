@@ -90,7 +90,8 @@ enum ScheduleShareProposalTime {
 
     static func initialSelection(
         in bounds: NativeScheduleShareSlot,
-        preferredStart: Date? = nil
+        preferredStart: Date? = nil,
+        now: Date = Date()
     ) -> NativeScheduleShareProposalSelection? {
         guard let boundsStart = Date.sideSeatChatISO8601(bounds.start),
               let boundsEnd = Date.sideSeatChatISO8601(bounds.end),
@@ -98,7 +99,7 @@ enum ScheduleShareProposalTime {
         else { return nil }
 
         let candidate = max(
-            preferredStart ?? defaultStart(in: boundsStart..<boundsEnd),
+            preferredStart ?? defaultStart(in: boundsStart..<boundsEnd, now: now),
             boundsStart
         )
         var start = min(snappedUp(candidate), boundsEnd.addingTimeInterval(-minutes(minimumMinutes)))
@@ -184,8 +185,7 @@ enum ScheduleShareProposalTime {
         return Date(timeIntervalSinceReferenceDate: ceil(value / interval) * interval)
     }
 
-    private static func defaultStart(in bounds: Range<Date>) -> Date {
-        let now = Date()
+    private static func defaultStart(in bounds: Range<Date>, now: Date) -> Date {
         if bounds.contains(now) { return now }
 
         let calendar = Calendar.sideSeatBerlin

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MyPostsView: View {
     @Environment(SessionStore.self) private var session
+    @Environment(RouterPath.self) private var router
     @State private var store = MyPostsStore()
     @State private var pendingAction: MyPublishedAction?
     @State private var composer: MyPublishedComposer?
@@ -17,7 +18,7 @@ struct MyPostsView: View {
                     Button("Try again") { Task { await store.load(using: session) } }
                 }
                 .ssListPageStateRow()
-            } else if store.isLoading, store.payload == nil {
+            } else if store.payload == nil {
                 SSLoadingState("Loading your posts")
                     .frame(maxWidth: .infinity)
                     .ssListPageStateRow()
@@ -80,14 +81,15 @@ struct MyPostsView: View {
             NavigationStack {
                 switch composer {
                 case .edit(let post):
-                    DiscoverPlanCreateView(editingPost: post) {
+                    DiscoverPlanCreateView(editingPost: post) { _ in
                         self.composer = nil
                         await store.load(using: session)
                     }
                 case .repost(let post):
-                    DiscoverPlanCreateView(repostingPost: post) {
+                    DiscoverPlanCreateView(repostingPost: post) { postID in
                         self.composer = nil
                         await store.load(using: session)
+                        router.navigate(to: .discoverPost(postID: postID))
                     }
                 }
             }

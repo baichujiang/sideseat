@@ -63,11 +63,14 @@ The Production runtime rejects non-HTTPS, loopback and `.invalid` API URLs.
 - Push token register via `POST /api/v1/push/devices` after sign-in
 - Settings Privacy / Help center links + StoreKit entry gated by `storeKitSupport`
 - Sentry Cocoa crash reporting starts only when `SIDESEAT_CRASH_DSN` is set and
-  disables default PII collection
+  disables default PII collection. Production archives require
+  `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and `SENTRY_PROJECT`, then upload the exact
+  generated dSYM through the pinned local Sentry CLI.
 
 Still external (not local): Apple signing/TestFlight (`DEVELOPMENT_TEAM` in
 `Configuration/Local.xcconfig`), APNs `.p8` secrets, ASC consumable products,
-production API DNS, crash project DSN, production `APPLE_TEAM_ID` for Universal Links.
+production API DNS, Sentry project credentials and production `APPLE_TEAM_ID`
+for Universal Links.
 
 Before an archive is distributed, complete
 [`docs/ios-native/APP_STORE_RELEASE_CHECKLIST.md`](../docs/ios-native/APP_STORE_RELEASE_CHECKLIST.md)
@@ -75,6 +78,17 @@ and keep App Store Connect answers aligned with
 [`docs/ios-native/APP_STORE_PRIVACY_MATRIX.md`](../docs/ios-native/APP_STORE_PRIVACY_MATRIX.md).
 
 ## Build and test
+
+Build and inspect the signed app for the first paired physical iPhone without
+installing or launching it:
+
+```sh
+npm run ios:device-preflight
+```
+
+Set `DEVICE_UDID=<hardware-udid>` to select a specific paired iPhone. The
+preflight verifies the embedded API URL, iPhone-only family, arm64 executable,
+bundle ID, Development APNs entitlement and Associated Domain.
 
 List available Simulator devices:
 

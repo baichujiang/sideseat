@@ -11,6 +11,7 @@ struct AppShellView: View {
     /// never dismisses/re-presents (avoids the 0.28s double-sheet flash).
     @State private var isCreateFlowPresented = false
     @State private var createFlowDestination: CreateDestination?
+    @State private var pendingCreatedPostID: String?
     @State private var productTutorial = ProductTutorialController()
     @State private var foregroundPushNotice: ForegroundPushNotice?
     @State private var foregroundPushDismissTask: Task<Void, Never>?
@@ -40,6 +41,7 @@ struct AppShellView: View {
         shellSurface
         .sheet(isPresented: $isCreateFlowPresented, onDismiss: {
             createFlowDestination = nil
+            openPendingCreatedPost()
         }) {
             createFlowSheet
         }
@@ -60,6 +62,7 @@ struct AppShellView: View {
                 selectedTab = .home
                 isCreateFlowPresented = false
                 createFlowDestination = nil
+                pendingCreatedPostID = nil
                 productTutorial.evaluateAutoShow(for: nil)
             } else if session.phase == .signedIn {
                 productTutorial.evaluateAutoShow(for: session.currentUser)
@@ -103,7 +106,14 @@ struct AppShellView: View {
             #if DEBUG
             guard session.phase == .signedIn else { return }
             let arguments = ProcessInfo.processInfo.arguments
-            if arguments.contains("--ui-testing-public-profile") {
+            if let deepLinkArgument = arguments.first(where: {
+                $0.hasPrefix("--ui-testing-deep-link=")
+            }) {
+                await Task.yield()
+                let path = String(deepLinkArgument.dropFirst("--ui-testing-deep-link=".count))
+                deepLinkRouter.handleAppPath(path)
+                routePendingDeepLink()
+            } else if arguments.contains("--ui-testing-public-profile") {
                 await Task.yield()
                 routers.router(for: .discover).navigate(to: .profile(userID: "ui-peer"))
             } else if arguments.contains("--ui-testing-create-plan") {
@@ -273,7 +283,8 @@ struct AppShellView: View {
                 NavigationStack {
                     switch createFlowDestination {
                     case .plan:
-                        DiscoverPlanCreateView {
+                        DiscoverPlanCreateView { postID in
+                            pendingCreatedPostID = postID
                             dismissCreateFlow()
                         }
                     }
@@ -311,6 +322,13 @@ struct AppShellView: View {
                 }
             }
         )
+    }
+
+    private func openPendingCreatedPost() {
+        guard let postID = pendingCreatedPostID else { return }
+        pendingCreatedPostID = nil
+        selectedTab = .discover
+        routers.router(for: .discover).navigate(to: .discoverPost(postID: postID))
     }
 
     /// Create is an action, not a destination — never leave the current tab.
@@ -417,18 +435,24 @@ private extension View {
                 ScheduleShareRecipientView(token: token)
             case .directChat(let id):
                 DirectChatView(connectionID: id)
+                    .toolbar(.hidden, for: .tabBar)
             case .courseChat(let id):
                 CommunityChatView(kind: .course, conversationID: id)
+                    .toolbar(.hidden, for: .tabBar)
             case .groupChat(let id):
                 CommunityChatView(kind: .group, conversationID: id)
+                    .toolbar(.hidden, for: .tabBar)
             case .groupChatInfo(let id):
                 GroupInfoView(groupChatID: id)
+                    .toolbar(.hidden, for: .tabBar)
             case .course(let id):
                 CourseDetailView(courseID: id)
             case .discoverPost(let id):
                 DiscoverBuddyDetailView(postID: id)
+                    .toolbar(.hidden, for: .tabBar)
             case .activity(let id):
                 DiscoverActivityDetailView(activityID: id)
+                    .toolbar(.hidden, for: .tabBar)
             }
         }
     }

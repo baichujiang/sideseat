@@ -5,10 +5,6 @@ export function buildMigrationPolicy(env = process.env) {
     return { run: false, reason: "explicit-skip" };
   }
 
-  if (env.VERCEL || env.CI) {
-    return { run: true, reason: "deployment" };
-  }
-
   const value = String(env.DATABASE_URL_UNPOOLED || env.DATABASE_URL || "").trim();
   if (!value) {
     return { run: false, reason: "unverified-database-url" };
@@ -21,6 +17,9 @@ export function buildMigrationPolicy(env = process.env) {
     }
     if (env.ALLOW_REMOTE_DATABASE_MIGRATIONS === "1") {
       return { run: true, reason: "explicit-remote-approval", host };
+    }
+    if (env.VERCEL || env.CI) {
+      return { run: false, reason: "remote-deployment-requires-approval", host };
     }
     return { run: false, reason: "remote-local-build", host };
   } catch {

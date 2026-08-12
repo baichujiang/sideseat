@@ -13,7 +13,7 @@ struct CalendarNowTimeBadge: View {
             .minimumScaleFactor(0.75)
             .padding(.horizontal, 5)
             .padding(.vertical, 2)
-            .background(Capsule(style: .continuous).fill(CalendarChrome.nowRed))
+            .background(Capsule(style: .continuous).fill(CalendarChrome.nowFill))
             .fixedSize(horizontal: true, vertical: false)
             .accessibilityHidden(true)
     }

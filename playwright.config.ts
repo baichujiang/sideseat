@@ -12,6 +12,7 @@ import { defineConfig, devices } from "@playwright/test";
  * Env:
  *   PLAYWRIGHT_BASE_URL   default http://127.0.0.1:3000
  *   PLAYWRIGHT_SKIP_WEBSERVER  set to "1" if dev server already running
+ *   PLAYWRIGHT_REUSE_WEBSERVER set to "1" only when the existing server has the test env below
  *   E2E_USER / E2E_PASSWORD   seeded onboarded user (default test_001 / Password123)
  */
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000";
@@ -42,8 +43,10 @@ export default defineConfig({
           env: {
             ...process.env,
             CRON_SECRET: process.env.CRON_SECRET ?? "playwright-cron-secret",
+            STOREKIT_SUPPORT_ENABLED: process.env.STOREKIT_SUPPORT_ENABLED ?? "1",
+            STOREKIT_VERIFICATION_MODE: process.env.STOREKIT_VERIFICATION_MODE ?? "test",
           },
-          reuseExistingServer: true,
+          reuseExistingServer: process.env.PLAYWRIGHT_REUSE_WEBSERVER === "1",
           timeout: 180_000,
         },
 });

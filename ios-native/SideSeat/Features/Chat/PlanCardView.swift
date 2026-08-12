@@ -172,7 +172,7 @@ struct PlanCardView: View {
         case "ACCEPTED": SideSeatTheme.success
         case "DECLINED": SideSeatTheme.danger
         case "COUNTER_PROPOSED": SideSeatTheme.warning
-        default: SideSeatTheme.accent
+        default: SideSeatTheme.warning
         }
     }
 }

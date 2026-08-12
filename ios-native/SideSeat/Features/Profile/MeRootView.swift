@@ -41,7 +41,10 @@ struct MeRootView: View {
                             .transition(.move(edge: .top).combined(with: .opacity))
                         }
 
-                        SSGroupedSection(title: String(localized: "My hub")) {
+                        SSGroupedSection(
+                            title: String(localized: "My hub"),
+                            accessibilityID: "me-section-hub"
+                        ) {
                             SSListRow(
                                 title: String(localized: "My courses"),
                                 subtitle: String(localized: "Classes, classmates, and course chats"),
@@ -81,7 +84,10 @@ struct MeRootView: View {
                             }
                         }
 
-                        SSGroupedSection(title: String(localized: "Profile")) {
+                        SSGroupedSection(
+                            title: String(localized: "Profile"),
+                            accessibilityID: "me-section-profile"
+                        ) {
                             SSListRow(
                                 title: String(localized: "Username"),
                                 subtitle: "@\(profile.username)",
@@ -104,7 +110,10 @@ struct MeRootView: View {
                             }
                         }
 
-                        SSGroupedSection(title: String(localized: "More")) {
+                        SSGroupedSection(
+                            title: String(localized: "More"),
+                            accessibilityID: "me-section-more"
+                        ) {
                             SSListRow(
                                 title: String(localized: "Settings"),
                                 subtitle: String(localized: "Preferences, support, and account"),
@@ -119,7 +128,9 @@ struct MeRootView: View {
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 6)
-                    .padding(.bottom, 28)
+                    // iOS 26's floating tab bar overlays scroll content. Keep the final
+                    // settings row fully scrollable above the glass bar.
+                    .padding(.bottom, 104)
                 }
                 .background(SideSeatTheme.bgGrouped.ignoresSafeArea())
                 .refreshable {
@@ -241,7 +252,7 @@ private struct SchoolChangeResultBanner: View {
                     Button("View archived courses", action: onViewArchive)
                         .font(.footnote.weight(.semibold))
                         .buttonStyle(.plain)
-                        .foregroundStyle(SideSeatTheme.accent)
+                        .foregroundStyle(SideSeatTheme.textPrimary)
                         .padding(.top, 2)
                         .accessibilityIdentifier("me-school-change-view-archive")
                 }
@@ -308,13 +319,15 @@ private struct MeHeroCard: View {
                     PhotosPicker(selection: $selectedAvatarPhoto, matching: .images) {
                         Image(systemName: "camera.fill")
                             .font(.caption2.weight(.bold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(SideSeatTheme.ink)
                             .frame(width: 26, height: 26)
                             .background(Circle().fill(SideSeatTheme.accent))
                             .overlay {
                                 Circle().strokeBorder(SideSeatTheme.bg, lineWidth: 2)
                             }
                     }
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
                     .disabled(isPreparingAvatar)
                     .accessibilityIdentifier("profile-change-photo")
                     .offset(x: 2, y: 2)
@@ -326,11 +339,15 @@ private struct MeHeroCard: View {
                             Text(profile.displayName)
                                 .font(.title3.weight(.bold))
                                 .foregroundStyle(.primary)
-                                .lineLimit(1)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .accessibilityIdentifier("me-display-name-visual")
                             Text("@\(profile.username)")
                                 .font(.caption.monospaced())
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .accessibilityIdentifier("me-username-visual")
                         }
+                        .layoutPriority(1)
 
                         Spacer(minLength: 4)
 
@@ -342,6 +359,7 @@ private struct MeHeroCard: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(String(localized: "Edit profile"))
+                .accessibilityValue("\(profile.displayName), @\(profile.username)")
                 .accessibilityIdentifier("me-hero-edit")
             }
             .padding(16)
@@ -353,7 +371,9 @@ private struct MeHeroCard: View {
                 Divider().opacity(0.5)
                 Text(tagline)
                     .font(.subheadline)
-                    .foregroundStyle(.primary.opacity(0.9))
+                    .foregroundStyle(SideSeatTheme.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("me-tagline-visual")
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
             }
@@ -416,7 +436,6 @@ private struct MeHeroCard: View {
             .accessibilityIdentifier("me-school-verification")
         } else {
             schoolIdentityLabel(showsChevron: false)
-                .accessibilityIdentifier("me-school-identity")
         }
     }
 
@@ -440,7 +459,8 @@ private struct MeHeroCard: View {
                 Text(profile.schoolSummary.displayLine)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(SideSeatTheme.textPrimary)
-                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("me-school-identity")
                 Text(
                     StudentIdentityDisplay.label(
                         school: profile.school,
@@ -450,8 +470,10 @@ private struct MeHeroCard: View {
                 )
                 .font(.caption)
                 .foregroundStyle(identityTone.foreground)
-                .lineLimit(1)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("me-school-status-visual")
             }
+            .layoutPriority(1)
 
             Spacer(minLength: SideSeatTheme.spaceSM)
 

@@ -8,7 +8,7 @@ struct ScheduleShareCardView: View {
 
     @State private var preview: NativeScheduleShareChatPreview?
     @State private var issue: String?
-    @State private var isLoading = false
+    @State private var isLoading = true
     @State private var isRevoking = false
     @State private var isRevoked = false
     @State private var isConfirmingRevoke = false
@@ -26,7 +26,11 @@ struct ScheduleShareCardView: View {
             .disabled(isRevoked)
             .accessibilityIdentifier("schedule-share-card")
 
-            if preview?.ownedByViewer == true, !isRevoked {
+            if isLoading, preview == nil {
+                Color.clear
+                    .frame(height: 20)
+                    .accessibilityHidden(true)
+            } else if preview?.ownedByViewer == true, !isRevoked {
                 Button(role: .destructive) {
                     isConfirmingRevoke = true
                 } label: {
@@ -113,12 +117,14 @@ struct ScheduleShareCardView: View {
                 }
         }
         .padding(12)
-        .frame(width: 276, alignment: .leading)
+        .frame(width: 276)
+        .frame(minHeight: 263, alignment: .topLeading)
         .background(SideSeatTheme.Chat.peerBubble, in: RoundedRectangle(cornerRadius: SideSeatTheme.Chat.bubbleRadius, style: .continuous))
     }
 
     private func loadPreview() async {
         guard let token = ScheduleShareURLParser.token(from: shareURL) else {
+            isLoading = false
             issue = String(localized: "Schedule link unavailable")
             return
         }
@@ -126,9 +132,7 @@ struct ScheduleShareCardView: View {
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             if ProcessInfo.processInfo.arguments.contains("--ui-testing-delayed-chat-card") {
-                isLoading = true
                 try? await Task.sleep(nanoseconds: 500_000_000)
-                isLoading = false
             }
             preview = NativeScheduleShareChatPreview(
                 snapshot: NativeScheduleShareSnapshot(
@@ -148,6 +152,7 @@ struct ScheduleShareCardView: View {
                 linkId: "cuitestlink000000000000001",
                 ownedByViewer: true
             )
+            isLoading = false
             return
         }
         #endif
@@ -339,7 +344,7 @@ struct ScheduleShareTimelineView: View {
             Text(day, format: .dateTime.day())
                 .font(.caption2.monospacedDigit())
         }
-        .foregroundStyle(highlighted ? SideSeatTheme.accent : SideSeatTheme.textSecondary)
+        .foregroundStyle(highlighted ? SideSeatTheme.textPrimary : SideSeatTheme.textSecondary)
         .frame(width: dayWidth, height: 28)
         .background(
             highlighted ? SideSeatTheme.accent.opacity(0.08) : Color.clear,

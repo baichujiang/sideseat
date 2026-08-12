@@ -48,7 +48,11 @@ export function inboxConversationV1(item: InboxMerged, viewerId: string) {
             id: last.id,
             sender: inboxAuthor(last.sender),
             type: last.type,
-            body: last.deletedAt ? null : last.body,
+            body: last.deletedAt
+              ? null
+              : last.type === "PLAN_REQUEST_CARD" || last.type === "PLAN_CONFIRMED_CARD"
+                ? last.planRequest?.title.trim() || last.body
+                : last.body,
             imageUrl: last.deletedAt ? null : last.imageUrl,
             deletedAt: last.deletedAt?.toISOString() ?? null,
             createdAt: last.createdAt.toISOString(),

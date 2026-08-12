@@ -11,7 +11,7 @@ struct DiscoverRootView: View {
     }
 
     var body: some View {
-        List {
+        ScrollView {
             if let issue = store.issue, store.payload == nil {
                 ContentUnavailableView {
                     Label("Could not load Discover", systemImage: "wifi.exclamationmark")
@@ -20,33 +20,29 @@ struct DiscoverRootView: View {
                 } actions: {
                     Button("Try again") { Task { await load() } }
                 }
-                .ssListPageStateRow()
-            } else if store.isLoading, store.payload == nil {
+                .frame(maxWidth: .infinity)
+                .padding(.top, 96)
+            } else if store.payload == nil {
                 SSLoadingState("Loading Discover")
                     .frame(maxWidth: .infinity)
-                    .ssListPageStateRow()
+                    .padding(.top, 120)
             } else {
-                feedContent
-            }
-        }
-        .listStyle(.plain)
-        .ssRootNavigationTitle(
-            "Discover",
-            subtitle: DiscoverCityPreferenceStore.shared.selectedCity
-        )
-        .searchable(text: $query, prompt: "People, plans, or places")
-        .refreshable { await load() }
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    createDestination = .plan
-                } label: {
-                    Image(systemName: "plus")
+                LazyVStack(spacing: SideSeatTheme.spaceMD) {
+                    if !plans.isEmpty {
+                        feedContext
+                    }
+                    feedContent
                 }
-                .accessibilityLabel("Create plan")
-                .accessibilityIdentifier("discover-create-plan")
+                .padding(.horizontal, SideSeatTheme.spaceMD)
+                .padding(.top, SideSeatTheme.spaceSM)
+                .padding(.bottom, SideSeatTheme.spaceXL)
             }
         }
+        .background(SideSeatTheme.bgGrouped)
+        .scrollDismissesKeyboard(.interactively)
+        .ssRootNavigationTitle("Discover")
+        .searchable(text: $query, prompt: "Search")
+        .refreshable { await load() }
         // Create forms are presented by `AppShellView` so the center Create action
         // never has to switch tabs (which caused a full-screen flash).
         .onChange(of: createDestination) { previous, destination in
@@ -81,13 +77,13 @@ struct DiscoverRootView: View {
                     NavigationLink(value: AppRoute.discoverPost(postID: post.id)) {
                         DiscoverBuddyRow(post: post)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(DiscoverFeedButtonStyle())
                     .accessibilityIdentifier("discover-plan-\(post.id)")
                 case .activity(let activity):
                     NavigationLink(value: AppRoute.activity(activityID: activity.id)) {
                         DiscoverActivityRow(activity: activity)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(DiscoverFeedButtonStyle())
                     .accessibilityIdentifier("discover-plan-legacy-\(activity.id)")
                 }
             }
@@ -100,7 +96,8 @@ struct DiscoverRootView: View {
             systemImage: "person.2",
             description: description
         )
-        .ssListPageStateRow()
+        .frame(maxWidth: .infinity)
+        .padding(.top, 72)
     }
 
     private var buddies: [NativeDiscoverBuddyPost] { store.payload?.buddies ?? [] }
@@ -112,6 +109,49 @@ struct DiscoverRootView: View {
 
     private func load() async {
         await store.load(using: session, query: query)
+    }
+
+    private var feedContext: some View {
+        HStack(spacing: SideSeatTheme.spaceSM) {
+            Label(store.payload?.city ?? "Munich", systemImage: "location.fill")
+                .lineLimit(1)
+            Spacer(minLength: SideSeatTheme.spaceMD)
+            HStack(spacing: 4) {
+                Text("\(plans.count)")
+                    .monospacedDigit()
+                Text("Plans")
+            }
+        }
+        .font(.caption.weight(.medium))
+        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+        .padding(.horizontal, SideSeatTheme.spaceXS)
+        .accessibilityIdentifier("discover-feed-context")
+    }
+}
+
+private struct DiscoverFeedButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? SideSeatTheme.Interaction.pressedOpacity : 1)
+            .scaleEffect(configuration.isPressed ? SideSeatTheme.Interaction.pressedScale : 1)
+            .animation(
+                .easeOut(duration: SideSeatTheme.Interaction.pressDuration),
+                value: configuration.isPressed
+            )
+    }
+}
+
+private extension View {
+    func discoverFeedCard() -> some View {
+        padding(14)
+            .background(
+                SideSeatTheme.surface,
+                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
+                    .strokeBorder(SideSeatTheme.separator.opacity(0.22), lineWidth: 0.5)
+            }
     }
 }
 
@@ -137,6 +177,8 @@ private enum DiscoverPlanFeedItem: Identifiable {
 }
 
 private struct DiscoverBuddyRow: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     let post: NativeDiscoverBuddyPost
 
     private var status: DiscoverStatusPresentation {
@@ -154,17 +196,28 @@ private struct DiscoverBuddyRow: View {
         return values.isEmpty ? nil : values.joined(separator: " · ")
     }
 
+    private var authorSubtitle: String? {
+        if let tagline = post.author.tagline?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !tagline.isEmpty {
+            return tagline
+        }
+        return academicLine
+    }
+
+    private var showsRestrictedVisibility: Bool {
+        post.visibility.uppercased() != "CITY_INTERNATIONALS"
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
-                InitialAvatar(name: post.author.displayName, url: post.author.avatarUrl, size: 40)
+                InitialAvatar(name: post.author.displayName, url: post.author.avatarUrl, size: 38)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
                         Text(post.author.displayName)
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(.primary)
-                            .lineLimit(1)
-                            .layoutPriority(1)
+                            .accessibilityIdentifier("discover-author-name-visual-\(post.id)")
                         if post.author.verifiedStudent {
                             SchoolIdentityBadge(
                                 school: post.author.school,
@@ -174,114 +227,246 @@ private struct DiscoverBuddyRow: View {
                             )
                             .accessibilityIdentifier("discover-school-verification-\(post.id)")
                         }
-                    }
-
-                    if let academicLine {
-                        Text(academicLine)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
-
-                    if let tagline = post.author.tagline, !tagline.isEmpty {
-                        Text(tagline)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
-                }
-                Spacer()
-                if post.isOwn {
-                    Text("You")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                Text(post.title)
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(.primary)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                if let body = post.body, !body.isEmpty {
-                    Text(body)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(3)
-                }
-            }
-
-            if !post.tags.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
-                        ForEach(post.tags.prefix(6), id: \.self) { tag in
-                            Text("#\(tag)")
-                                .font(.caption2.weight(.semibold))
-                                .foregroundStyle(SideSeatTheme.textSecondary)
-                                .padding(.horizontal, 7)
-                                .padding(.vertical, 3)
-                                .background(SideSeatTheme.fillTertiary, in: Capsule())
+                        if post.isOwn {
+                            Text("You")
+                                .font(.caption2.weight(.medium))
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         }
                     }
+
+                    if let authorSubtitle {
+                        Text(authorSubtitle)
+                            .font(.caption)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .lineLimit(1)
+                            .accessibilityIdentifier("discover-author-tagline-visual-\(post.id)")
+                    }
                 }
+                Spacer(minLength: SideSeatTheme.spaceSM)
+                DiscoverStatusBadge(status: status)
+                    .accessibilityIdentifier("discover-status-\(post.id)")
+            }
+
+            if !post.imageUrls.isEmpty {
+                if dynamicTypeSize.isAccessibilitySize {
+                    VStack(alignment: .leading, spacing: 10) {
+                        postSummary
+                        DiscoverPostMediaGrid(
+                            imageURLs: post.imageUrls,
+                            accessibilityID: "discover-plan-media-\(post.id)"
+                        )
+                        .frame(height: 156)
+                    }
+                } else {
+                    HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
+                        postSummary
+                        DiscoverPostMediaGrid(
+                            imageURLs: post.imageUrls,
+                            accessibilityID: "discover-plan-media-\(post.id)"
+                        )
+                        .frame(width: 104, height: 92)
+                        .layoutPriority(1)
+                    }
+                }
+            } else {
+                postSummary
             }
 
             if post.startDate != nil || post.location != nil {
-                HStack(spacing: 12) {
-                    if let start = post.startDate {
-                        Label(start.formatted(date: .abbreviated, time: .shortened), systemImage: "calendar")
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 12) {
+                        postScheduleMetadata
                     }
-                    if let location = post.location, !location.isEmpty {
-                        Label(location, systemImage: "mappin.and.ellipse")
-                            .lineLimit(1)
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                        postScheduleMetadata
                     }
                 }
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .padding(10)
+                .background(
+                    SideSeatTheme.fillSubtle,
+                    in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
+                )
             }
 
-            ViewThatFits(in: .horizontal) {
+            if showsRestrictedVisibility || post.interestedCount > 0 {
                 HStack(spacing: SideSeatTheme.spaceSM) {
-                    footerBadges
+                    if showsRestrictedVisibility {
+                        visibilityBadge
+                    }
+                    Spacer(minLength: 0)
+                    interestLabel
                 }
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                    footerBadges
-                }
-            }
-
-            if status.isOpen, let expiry = post.expiryDate {
-                Label {
-                    Text("Plan closes \(expiry.formatted(date: .abbreviated, time: .omitted))")
-                } icon: {
-                    Image(systemName: "clock")
-                }
-                .font(.caption2)
-                .foregroundStyle(.secondary)
             }
         }
-        .padding(.vertical, 10)
+        .discoverFeedCard()
         .contentShape(Rectangle())
     }
 
+    private var postSummary: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(post.title)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(.primary)
+                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("discover-post-title-visual-\(post.id)")
+
+            if let body = post.body, !body.isEmpty {
+                Text(body)
+                    .font(.subheadline)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("discover-post-body-visual-\(post.id)")
+            }
+
+            if !post.tags.isEmpty {
+                HStack(spacing: SideSeatTheme.spaceSM) {
+                    ForEach(post.tags.prefix(2), id: \.self) { tag in
+                        Text("#\(tag)")
+                    }
+                    if post.tags.count > 2 {
+                        Text("+\(post.tags.count - 2)")
+                    }
+                }
+                .font(.caption.weight(.medium))
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .lineLimit(1)
+                .accessibilityIdentifier("discover-tags-visual-\(post.id)")
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     @ViewBuilder
-    private var footerBadges: some View {
-        DiscoverStatusBadge(status: status)
-            .accessibilityIdentifier("discover-status-\(post.id)")
+    private var postScheduleMetadata: some View {
+        if let start = post.startDate {
+            Label(start.formatted(date: .abbreviated, time: .shortened), systemImage: "calendar")
+                .lineLimit(1)
+                .accessibilityIdentifier("discover-post-date-visual-\(post.id)")
+        }
+        if let location = post.location, !location.isEmpty {
+            Label(location, systemImage: "mappin.and.ellipse")
+                .lineLimit(1)
+                .accessibilityIdentifier("discover-post-location-visual-\(post.id)")
+        }
+    }
+
+    private var visibilityBadge: some View {
         DiscoverMetadataBadge(
             BuddyPostDisplay.visibilityLabel(post.visibility),
             systemImage: BuddyPostDisplay.visibilitySystemImage(post.visibility)
         )
-        Spacer(minLength: 0)
+        .accessibilityIdentifier("discover-visibility-\(post.id)")
+    }
+
+    @ViewBuilder
+    private var interestLabel: some View {
         if post.interestedCount > 0 {
-            Label("\(post.interestedCount)", systemImage: "heart")
+            Label(
+                "\(post.interestedCount)",
+                systemImage: post.savedByViewer ? "heart.fill" : "heart"
+            )
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(
+                    post.savedByViewer ? SideSeatTheme.accent : SideSeatTheme.textSecondaryStrong
+                )
+                .accessibilityIdentifier("discover-interest-\(post.id)")
+        }
+    }
+}
+
+private struct DiscoverPostMediaGrid: View {
+    let imageURLs: [String]
+    let accessibilityID: String
+
+    private let gap: CGFloat = 3
+
+    private var visibleURLs: [String] {
+        Array(imageURLs.prefix(3))
+    }
+
+    var body: some View {
+        GeometryReader { proxy in
+            let availableWidth = proxy.size.width.isFinite
+                ? max(0, proxy.size.width - gap)
+                : 0
+
+            switch visibleURLs.count {
+            case 0:
+                placeholder(systemImage: "photo")
+                    .frame(width: proxy.size.width, height: proxy.size.height)
+            case 1:
+                image(visibleURLs[0])
+                    .frame(width: proxy.size.width, height: proxy.size.height)
+            case 2:
+                HStack(spacing: gap) {
+                    ForEach(visibleURLs.indices, id: \.self) { index in
+                        image(visibleURLs[index])
+                    }
+                }
+            default:
+                HStack(spacing: gap) {
+                    image(visibleURLs[0])
+                        .frame(width: availableWidth * 0.64)
+                    VStack(spacing: gap) {
+                        image(visibleURLs[1])
+                        image(visibleURLs[2])
+                    }
+                }
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+            imageURLs.count == 1
+                ? String(localized: "1 photo")
+                : String(localized: "\(imageURLs.count) photos")
+        )
+        .accessibilityIdentifier(accessibilityID)
+    }
+
+    private func image(_ value: String) -> some View {
+        AsyncImage(url: URL(string: value)) { phase in
+            switch phase {
+            case .success(let image):
+                image
+                    .resizable()
+                    .scaledToFill()
+            case .failure:
+                placeholder(systemImage: "photo.badge.exclamationmark")
+            default:
+                ZStack {
+                    SideSeatTheme.fillSubtle
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(SideSeatTheme.textSecondary)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
+    }
+
+    private func placeholder(systemImage: String) -> some View {
+        ZStack {
+            SideSeatTheme.fillSubtle
+            Image(systemName: systemImage)
+                .font(.title3)
+                .foregroundStyle(SideSeatTheme.textSecondary)
         }
     }
 }
 
 private struct DiscoverActivityRow: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     let activity: NativeDiscoverActivity
 
     private var status: DiscoverStatusPresentation {
@@ -289,65 +474,93 @@ private struct DiscoverActivityRow: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
-                InitialAvatar(name: activity.organizer.displayName, url: activity.organizer.avatarUrl, size: 40)
+                InitialAvatar(name: activity.organizer.displayName, url: activity.organizer.avatarUrl, size: 38)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(activity.organizer.displayName)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.primary)
-                        .lineLimit(1)
+                    HStack(spacing: 6) {
+                        Text(activity.organizer.displayName)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
+                            .accessibilityIdentifier("discover-activity-author-name-visual-\(activity.id)")
+                        if activity.isOrganizer {
+                            Text("You")
+                                .font(.caption2.weight(.medium))
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        }
+                    }
                     Text(activity.school)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .lineLimit(1)
+                        .accessibilityIdentifier("discover-activity-school-visual-\(activity.id)")
                 }
                 Spacer(minLength: 0)
-                if activity.isOrganizer {
-                    Text("You")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                }
+                DiscoverStatusBadge(status: status)
+                    .accessibilityIdentifier("discover-status-activity-\(activity.id)")
             }
 
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+            VStack(alignment: .leading, spacing: 5) {
                 Text(activity.title)
                     .font(.body.weight(.semibold))
                     .foregroundStyle(.primary)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
                     .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("discover-activity-title-visual-\(activity.id)")
                 if let description = activity.description, !description.isEmpty {
                     Text(description)
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(3)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 3)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier("discover-activity-description-visual-\(activity.id)")
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
-            HStack(spacing: 12) {
-                if let start = activity.startDate {
-                    Label(start.formatted(date: .abbreviated, time: .shortened), systemImage: "calendar")
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 12) {
+                    activityScheduleMetadata
                 }
-                Label(activity.location, systemImage: "mappin.and.ellipse")
-                    .lineLimit(1)
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    activityScheduleMetadata
+                }
             }
             .font(.caption)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            .padding(10)
+            .background(
+                SideSeatTheme.fillSubtle,
+                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
+            )
 
             HStack(spacing: SideSeatTheme.spaceSM) {
-                DiscoverStatusBadge(status: status)
-                    .accessibilityIdentifier("discover-status-activity-\(activity.id)")
                 Spacer(minLength: 0)
                 if let capacity = activity.capacity {
                     Label("\(activity.goingCount)/\(capacity) going", systemImage: "person.2")
+                        .accessibilityIdentifier("discover-activity-attendance-\(activity.id)")
                 } else {
                     Label("\(activity.goingCount) going", systemImage: "person.2")
+                        .accessibilityIdentifier("discover-activity-attendance-\(activity.id)")
                 }
             }
             .font(.caption)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
         }
-        .padding(.vertical, 10)
+        .discoverFeedCard()
         .contentShape(Rectangle())
+    }
+
+    @ViewBuilder
+    private var activityScheduleMetadata: some View {
+        if let start = activity.startDate {
+            Label(start.formatted(date: .abbreviated, time: .shortened), systemImage: "calendar")
+                .lineLimit(1)
+                .accessibilityIdentifier("discover-activity-date-visual-\(activity.id)")
+        }
+        Label(activity.location, systemImage: "mappin.and.ellipse")
+            .lineLimit(1)
+            .accessibilityIdentifier("discover-activity-location-visual-\(activity.id)")
     }
 }
 
@@ -356,10 +569,10 @@ struct DiscoverStatusBadge: View {
 
     private var foreground: Color {
         switch status.tone {
-        case .success: SideSeatTheme.success
-        case .warning: SideSeatTheme.warning
-        case .danger: SideSeatTheme.danger
-        case .neutral: SideSeatTheme.textSecondary
+        case .success: SideSeatTheme.statusSuccessText
+        case .warning: SideSeatTheme.statusWarningText
+        case .danger: SideSeatTheme.statusDangerText
+        case .neutral: SideSeatTheme.textSecondaryStrong
         }
     }
 
@@ -380,7 +593,7 @@ struct DiscoverStatusBadge: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(fill, in: Capsule())
-            .fixedSize(horizontal: true, vertical: false)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -397,11 +610,11 @@ private struct DiscoverMetadataBadge: View {
         Label(label, systemImage: systemImage)
             .labelStyle(.titleAndIcon)
             .font(.caption2.weight(.medium))
-            .foregroundStyle(SideSeatTheme.textSecondary)
+            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(SideSeatTheme.fillTertiary, in: Capsule())
-            .fixedSize(horizontal: true, vertical: false)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -444,6 +657,10 @@ struct InitialAvatar: View {
         Text(String(name.first ?? "?"))
             .font(size >= 40 ? .title3.weight(.semibold) : .subheadline.weight(.semibold))
             .foregroundStyle(.white)
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+            .accessibilityHidden(true)
+            .accessibilityIdentifier("avatar-initial-visual")
     }
 }
 

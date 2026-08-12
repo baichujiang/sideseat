@@ -11,7 +11,6 @@ import {
   rateLimitSubject,
 } from "@/lib/api/v1/rate-limit";
 import {
-  BuiltInCalendarDeleteError,
   BuiltInCalendarSubscriptionError,
   CalendarCategoryNotFoundError,
   InvalidCalendarSubscriptionError,
@@ -93,13 +92,6 @@ export function calendarCategoryDomainError(request: Request, cause: unknown) {
       code: "NOT_FOUND",
       message: "The calendar was not found.",
       status: 404,
-    });
-  }
-  if (cause instanceof BuiltInCalendarDeleteError) {
-    return v1Error(request, {
-      code: "BUILT_IN_CALENDAR",
-      message: "Built-in calendars cannot be deleted.",
-      status: 409,
     });
   }
   if (cause instanceof BuiltInCalendarSubscriptionError) {

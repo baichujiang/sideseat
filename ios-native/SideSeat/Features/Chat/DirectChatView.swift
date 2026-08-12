@@ -3,35 +3,6 @@ import PhotosUI
 import SwiftUI
 import UIKit
 
-private struct ChatMessageContentHeightPreferenceKey: PreferenceKey {
-    static let defaultValue: CGFloat = 0
-
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = max(value, nextValue())
-    }
-}
-
-private final class ChatMessageContentHeightTracker {
-    private(set) var maximumHeight: CGFloat = 0
-    var pendingScrollTask: Task<Void, Never>?
-
-    func recordGrowth(_ height: CGFloat) -> Bool {
-        guard height > maximumHeight + 0.5 else { return false }
-        maximumHeight = height
-        return true
-    }
-
-    func reset() {
-        maximumHeight = 0
-        cancelPendingScroll()
-    }
-
-    func cancelPendingScroll() {
-        pendingScrollTask?.cancel()
-        pendingScrollTask = nil
-    }
-}
-
 struct DirectChatView: View {
     @Environment(SessionStore.self) private var session
     @Environment(AppContainer.self) private var container
@@ -42,31 +13,29 @@ struct DirectChatView: View {
     let connectionID: String
 
     @State private var store = DirectChatStore()
-    @State private var draft = ""
+    @State private var composerDraft = ChatComposerDraft()
     @State private var replyDraft: NativeDirectMessage?
     @State private var isNearBottom = true
     @State private var keyboardBottomAnchor = ChatKeyboardBottomAnchorState()
-    @State private var messageContentHeightTracker = ChatMessageContentHeightTracker()
-    @State private var initialScrollTargetID: String?
+    @State private var hasPreparedInitialViewport = false
+    @State private var hasCompletedInitialLoad = false
+    @State private var isInitialViewportVisible = false
     @State private var knownMessageIDs: Set<String> = []
     @State private var pendingDelete: NativeDirectMessage?
     @State private var pendingReport: NativeDirectMessage?
+    @State private var actionNotice: ChatTransientNotice?
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var previewImageURL: URL?
     @State private var locationCapture = ChatLocationCapture()
     @State private var showLocationPicker = false
-    @State private var showThreadSearch = false
-    @State private var showRemarkEditor = false
-    @State private var remarkDraft = ""
-    @State private var confirmEnd = false
-    @State private var confirmBlock = false
+    @State private var showChatInfo = false
     @State private var showPlanCreate = false
     @State private var showScheduleShare = false
+    @State private var isAttachmentTrayVisible = false
     @State private var openedScheduleShareToken: ScheduleShareNavToken?
     @State private var counterPlan: NativePlanRequest?
     @State private var scrollToMessageID: String?
-    @State private var showComposerTools = false
-    @FocusState private var composerFocused: Bool
+    @State private var composerFocus = ChatComposerFocusController()
     @Environment(\.dismiss) private var dismiss
 
     private struct ScheduleShareNavToken: Identifiable, Hashable {
@@ -76,26 +45,33 @@ struct DirectChatView: View {
     var body: some View {
         // Composer in a VStack (not safeAreaInset) so scrollTo(bottom) isn't short by one row.
         VStack(spacing: 0) {
-            messageList
+            ZStack {
+                if hasPreparedInitialViewport {
+                    messageList
+                        .opacity(isInitialViewportVisible ? 1 : 0)
+                        .allowsHitTesting(isInitialViewportVisible)
+                        .accessibilityHidden(!isInitialViewportVisible)
+                }
+                if !hasPreparedInitialViewport || !isInitialViewportVisible {
+                    SSLoadingState("Loading conversation")
+                        .accessibilityIdentifier("chat-initial-loading")
+                }
+            }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             composer
         }
             .background(SideSeatTheme.bgGrouped)
-            .navigationTitle(store.conversation?.displayName ?? String(localized: "Chat"))
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .accessibilityIdentifier("direct-chat")
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    directChatTitle
+                }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Button {
-                            showThreadSearch = true
-                        } label: {
-                            Label("Search chat", systemImage: "magnifyingglass")
-                        }
-                        .accessibilityIdentifier("direct-chat-search")
-
-                        Divider()
-                        connectionActionMenu
+                    Button {
+                        composerFocus.blur()
+                        showChatInfo = true
                     } label: {
                         Image(systemName: "ellipsis.circle")
                             .symbolRenderingMode(.hierarchical)
@@ -107,78 +83,27 @@ struct DirectChatView: View {
                     .accessibilityLabel("Chat actions")
                 }
             }
-            .sheet(isPresented: $showThreadSearch) {
-                ChatThreadSearchSheet(
-                    title: String(localized: "Search chat"),
-                    rows: store.messages.map(ChatThreadSearchRow.from),
-                    onSelect: { messageID in
-                        showThreadSearch = false
-                        scrollToMessageID = messageID
-                    }
-                )
-            }
-            .sheet(isPresented: $showRemarkEditor) {
-                NavigationStack {
-                    Form {
-                        TextField("Remark", text: $remarkDraft)
-                            .accessibilityIdentifier("direct-remark-field")
-                    }
-                    .navigationTitle("Contact remark")
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Cancel") { showRemarkEditor = false }
-                        }
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("Save") {
-                                Task {
-                                    let value = remarkDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-                                    _ = await store.updateRemark(value.isEmpty ? nil : value, using: session)
-                                    showRemarkEditor = false
-                                }
-                            }
-                            .accessibilityIdentifier("direct-remark-save")
-                        }
-                    }
-                }
-                .presentationDetents([.medium])
-            }
-            .confirmationDialog("End this conversation?", isPresented: $confirmEnd, titleVisibility: .visible) {
-                Button("End chat", role: .destructive) {
-                    Task {
-                        if await store.endConnection(using: session) {
-                            dismiss()
-                        }
-                    }
-                }
-                Button("Cancel", role: .cancel) {}
-            }
-            .confirmationDialog("Block this person?", isPresented: $confirmBlock, titleVisibility: .visible) {
-                Button("Block", role: .destructive) {
-                    Task {
-                        if await store.blockPeer(using: session) {
-                            dismiss()
-                        }
-                    }
-                }
-                Button("Cancel", role: .cancel) {}
-            }
             .task(id: connectionID) {
                 ActiveChatPresentation.begin("connection:\(connectionID)")
                 keyboardBottomAnchor = ChatKeyboardBottomAnchorState()
-                messageContentHeightTracker.reset()
-                initialScrollTargetID = nil
+                hasPreparedInitialViewport = false
+                hasCompletedInitialLoad = false
+                isInitialViewportVisible = false
+                knownMessageIDs = []
                 await store.load(
                     connectionID: connectionID,
                     using: session,
                     apiBaseURL: container.environment.apiBaseURL
                 )
-                knownMessageIDs = Set(store.messages.map(\.id))
-                isNearBottom = true
-                initialScrollTargetID = ChatScrollAnchor.bottomID
+                hasCompletedInitialLoad = true
+                if !hasPreparedInitialViewport {
+                    prepareInitialViewport(messageIDs: store.messages.map(\.id))
+                }
             }
             .onDisappear {
                 ActiveChatPresentation.end("connection:\(connectionID)")
-                messageContentHeightTracker.cancelPendingScroll()
+                isAttachmentTrayVisible = false
+                composerFocus.blur()
                 store.stop()
             }
             .onChange(of: scenePhase) { _, phase in
@@ -188,12 +113,21 @@ struct DirectChatView: View {
                     store.stop()
                 }
             }
-            .onChange(of: store.messages.map(\.id)) { _, _ in
+            .onChange(of: store.messages.map(\.id)) { _, messageIDs in
+                if !hasPreparedInitialViewport, !messageIDs.isEmpty {
+                    prepareInitialViewport(messageIDs: messageIDs)
+                    return
+                }
+                guard hasPreparedInitialViewport else { return }
+                guard hasCompletedInitialLoad || store.hasCachedSnapshot else {
+                    knownMessageIDs = Set(messageIDs)
+                    return
+                }
                 handleMessageChange()
             }
             .onChange(of: selectedPhoto) { _, item in
                 guard let item else { return }
-                showComposerTools = false
+                isAttachmentTrayVisible = false
                 Task { await sendPhoto(item) }
             }
             .confirmationDialog(
@@ -211,6 +145,9 @@ struct DirectChatView: View {
                         let deleted = await store.deleteMessage(message.id, using: session)
                         if deleted, replyDraft?.id == message.id {
                             replyDraft = nil
+                        }
+                        if deleted {
+                            showActionNotice(String(localized: "Message deleted"), systemImage: "trash")
                         }
                     }
                 }
@@ -232,6 +169,7 @@ struct DirectChatView: View {
                     )
                     if failure == nil {
                         pendingReport = nil
+                        showActionNotice(String(localized: "Report sent"), systemImage: "checkmark.shield")
                     }
                     return failure
                 }
@@ -343,13 +281,46 @@ struct DirectChatView: View {
             .navigationDestination(item: $openedScheduleShareToken) { item in
                 ScheduleShareRecipientView(token: item.id)
             }
+            .navigationDestination(isPresented: $showChatInfo) {
+                DirectChatInfoView(
+                    store: store,
+                    searchRows: store.messages.map(ChatThreadSearchRow.from),
+                    onSelectMessage: { messageID in
+                        showChatInfo = false
+                        Task { @MainActor in
+                            await Task.yield()
+                            scrollToMessageID = messageID
+                        }
+                    },
+                    onViewProfile: { peerID in
+                        showChatInfo = false
+                        Task { @MainActor in
+                            await Task.yield()
+                            router.navigate(to: .profile(userID: peerID))
+                        }
+                    },
+                    onConversationClosed: {
+                        showChatInfo = false
+                        Task { @MainActor in
+                            await Task.yield()
+                            closeChat()
+                        }
+                    }
+                )
+            }
+    }
+
+    private func closeChat() {
+        dismiss()
     }
 
     private var messageList: some View {
         ScrollViewReader { proxy in
             ZStack(alignment: .bottom) {
                 ScrollView {
-                    LazyVStack(spacing: 8) {
+                    ChatMessageStack(
+                        usesLazyLayout: store.messages.count > ChatMessageStack<EmptyView>.eagerMessageLimit
+                    ) {
                         if store.isLoadingOlder {
                             ProgressView()
                                 .padding(.vertical, 8)
@@ -371,28 +342,41 @@ struct DirectChatView: View {
 
                         ForEach(Array(store.messages.enumerated()), id: \.element.id) { index, message in
                             let previous = index > 0 ? store.messages[index - 1] : nil
-                            if let day = ChatDaySeparatorFormatting.dayStart(for: message.createdDate),
-                               ChatDaySeparatorFormatting.dayStart(for: previous?.createdDate) != day
-                            {
-                                Text(ChatDaySeparatorFormatting.label(for: day))
-                                    .font(.caption2.weight(.semibold))
-                                    .foregroundStyle(.secondary)
-                                    .padding(.vertical, 6)
-                                    .frame(maxWidth: .infinity)
-                                    .accessibilityIdentifier("chat-day-\(day.timeIntervalSince1970)")
-                            }
+                            let next = index + 1 < store.messages.count ? store.messages[index + 1] : nil
+                            let connectsAbove = ChatMessageGrouping.isContinuation(
+                                previousSenderID: previous?.sender.id,
+                                previousDate: previous?.createdDate,
+                                senderID: message.sender.id,
+                                date: message.createdDate
+                            )
+                            let connectsBelow = ChatMessageGrouping.isContinuation(
+                                previousSenderID: message.sender.id,
+                                previousDate: message.createdDate,
+                                senderID: next?.sender.id ?? "",
+                                date: next?.createdDate
+                            )
+                            VStack(spacing: 0) {
+                                if ChatMessageGrouping.shouldShowTimestamp(
+                                    previousDate: previous?.createdDate,
+                                    date: message.createdDate
+                                ), let date = message.createdDate {
+                                    ChatTimelineTimestamp(date: date)
+                                }
 
-                            let isMine = message.sender.id == (session.currentUser?.id ?? "ui-test-user")
-                            let peer = store.conversation?.peer
-                            let avatarURL: String? = {
-                                if let url = message.sender.avatarUrl, !url.isEmpty { return url }
-                                if message.sender.id == peer?.id { return peer?.avatarUrl }
-                                return nil
-                            }()
-                            DirectMessageBubble(
+                                let isMine = message.sender.id == (session.currentUser?.id ?? "ui-test-user")
+                                let peer = store.conversation?.peer
+                                let avatarURL: String? = {
+                                    if let url = message.sender.avatarUrl, !url.isEmpty { return url }
+                                    if message.sender.id == peer?.id { return peer?.avatarUrl }
+                                    return nil
+                                }()
+                                DirectMessageBubble(
                                 message: message,
                                 isMine: isMine,
                                 showSenderName: false,
+                                showAvatar: !connectsBelow,
+                                connectsAbove: connectsAbove,
+                                connectsBelow: connectsBelow,
                                 avatarURL: avatarURL,
                                 currentUserID: session.currentUser?.id ?? "ui-test-user",
                                 status: store.sendStatuses[message.id],
@@ -401,18 +385,19 @@ struct DirectChatView: View {
                                     router.navigate(to: .profile(userID: message.sender.id))
                                 },
                                 onReply: {
-                                    replyDraft = message
-                                    store.beginReply(to: message)
-                                    composerFocused = true
+                                    beginReply(to: message)
                                 },
                                 onRetry: {
                                     Task { _ = await store.retryFailedSend(message.id, using: session) }
                                 },
                                 onDelete: {
-                                    pendingDelete = message
+                                    presentDeleteConfirmation(for: message)
                                 },
                                 onReport: {
-                                    pendingReport = message
+                                    presentReportSheet(for: message)
+                                },
+                                onCopy: { text in
+                                    copyMessageText(text)
                                 },
                                 onOpenImage: { url in
                                     previewImageURL = url
@@ -432,73 +417,62 @@ struct DirectChatView: View {
                                 onOpenScheduleShare: { token in
                                     openedScheduleShareToken = ScheduleShareNavToken(id: token)
                                 }
-                            )
+                                )
+                                .padding(.top, connectsAbove ? 2 : 8)
+                            }
                             .id(message.id)
                         }
                         ChatBottomSentinel(isNearBottom: $isNearBottom) {
+                            revealInitialViewport()
                             store.clearPendingRemoteCount()
                         }
                     }
-                    .scrollTargetLayout()
                     .padding(.horizontal, 12)
                     .padding(.vertical, 10)
-                    .background {
-                        GeometryReader { geometry in
-                            Color.clear.preference(
-                                key: ChatMessageContentHeightPreferenceKey.self,
-                                value: geometry.size.height
-                            )
-                        }
-                    }
                 }
                 .contentShape(Rectangle())
                 .simultaneousGesture(
                     TapGesture().onEnded {
-                        guard composerFocused || showComposerTools else { return }
-                        composerFocused = false
-                        if showComposerTools {
-                            withAnimation(.easeOut(duration: 0.18)) {
-                                showComposerTools = false
-                            }
+                        if isAttachmentTrayVisible {
+                            isAttachmentTrayVisible = false
+                            return
                         }
+                        guard composerFocus.isFocused else { return }
+                        composerFocus.blur()
                     }
                 )
                 .scrollDismissesKeyboard(.interactively)
-                .scrollPosition(
-                    id: Binding(
-                        get: { initialScrollTargetID },
-                        set: { _ in }
-                    ),
-                    anchor: .bottom
-                )
-                .chatNearBottomTracker(isNearBottom: $isNearBottom) {
-                    store.clearPendingRemoteCount()
-                }
+                .defaultScrollAnchor(.bottom)
                 .accessibilityIdentifier("chat-message-list")
 
-                if store.pendingRemoteCount > 0 {
-                    Button {
-                        store.clearPendingRemoteCount()
-                        isNearBottom = true
-                        pinMessageListToBottom()
-                        Task {
-                            await ChatScrollAnchor.scrollToBottom(
-                                proxy: proxy,
-                                latestMessageID: { store.messages.last?.id },
-                                animated: true
-                            )
-                        }
-                    } label: {
-                        Text(store.pendingRemoteCount == 1 ? String(localized: "1 new message") : String(localized: "\(store.pendingRemoteCount) new messages"))
-                            .font(.footnote.weight(.semibold))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(.ultraThinMaterial, in: Capsule())
+                VStack(spacing: 8) {
+                    if let actionNotice {
+                        ChatTransientNoticeView(notice: actionNotice)
                     }
-                    .buttonStyle(.plain)
-                    .padding(.bottom, 10)
-                    .accessibilityIdentifier("chat-new-messages")
+
+                    if store.pendingRemoteCount > 0 {
+                        Button {
+                            store.clearPendingRemoteCount()
+                            isNearBottom = true
+                            pinMessageListToBottom()
+                            Task {
+                                await ChatScrollAnchor.scrollToBottom(
+                                    proxy: proxy,
+                                    animated: true
+                                )
+                            }
+                        } label: {
+                            Text(store.pendingRemoteCount == 1 ? String(localized: "1 new message") : String(localized: "\(store.pendingRemoteCount) new messages"))
+                                .font(.footnote.weight(.semibold))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(.ultraThinMaterial, in: Capsule())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("chat-new-messages")
+                    }
                 }
+                .padding(.bottom, 10)
             }
             .overlay(alignment: .topTrailing) {
                 if store.unreadJumpCount > 0, store.unreadJumpMessageID != nil {
@@ -531,44 +505,29 @@ struct DirectChatView: View {
                 Task {
                     await ChatScrollAnchor.scrollToBottom(
                         proxy: proxy,
-                        latestMessageID: { store.messages.last?.id },
                         animated: animated
                     )
                 }
             }
-            .task(id: initialScrollTargetID) {
-                guard initialScrollTargetID == ChatScrollAnchor.bottomID else { return }
-                try? await Task.sleep(nanoseconds: 350_000_000)
-                guard !Task.isCancelled else { return }
-                initialScrollTargetID = nil
-            }
-            .onPreferenceChange(ChatMessageContentHeightPreferenceKey.self) { height in
-                guard height > 0,
-                      messageContentHeightTracker.recordGrowth(height),
-                      keyboardBottomAnchor.isPinned
+            .task(id: hasPreparedInitialViewport && (hasCompletedInitialLoad || store.hasCachedSnapshot)) {
+                guard hasPreparedInitialViewport,
+                      hasCompletedInitialLoad || store.hasCachedSnapshot,
+                      !isInitialViewportVisible
                 else { return }
-
-                messageContentHeightTracker.cancelPendingScroll()
-                messageContentHeightTracker.pendingScrollTask = Task {
-                    try? await Task.sleep(nanoseconds: 120_000_000)
-                    guard !Task.isCancelled, keyboardBottomAnchor.isPinned else { return }
-                    isNearBottom = true
-                    await ChatScrollAnchor.scrollToBottom(
-                        proxy: proxy,
-                        latestMessageID: { store.messages.last?.id },
-                        animated: false
-                    )
-                }
+                await ChatScrollAnchor.scrollToBottom(
+                    proxy: proxy,
+                    animated: false
+                )
+                await Task.yield()
+                revealInitialViewport()
             }
             .chatKeyboardBottomAnchor(
                 state: $keyboardBottomAnchor,
-                isNearBottom: isNearBottom,
-                isComposerFocused: composerFocused
+                isNearBottom: $isNearBottom
             ) { animated in
                 Task {
                     await ChatScrollAnchor.scrollToBottom(
                         proxy: proxy,
-                        latestMessageID: { store.messages.last?.id },
                         animated: animated
                     )
                 }
@@ -589,202 +548,186 @@ struct DirectChatView: View {
 
     private var composer: some View {
         VStack(spacing: 6) {
-            if store.isUnrepliedSendBlocked || store.showUnrepliedHint {
-                UnrepliedReplyBanner(
-                    blocked: store.isUnrepliedSendBlocked,
-                    sent: min(store.unrepliedStreak, 2),
-                    max: 2
-                )
-                .padding(.horizontal, 12)
-                .accessibilityIdentifier("chat-unreplied-hint")
-            }
-
-            if let issue = store.sendIssue ?? store.planIssue ?? store.actionIssue {
-                Text(issue)
-                    .font(.caption)
-                    .foregroundStyle(SideSeatTheme.danger)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                if store.isUnrepliedSendBlocked || store.showUnrepliedHint {
+                    UnrepliedReplyBanner(
+                        blocked: store.isUnrepliedSendBlocked,
+                        sent: min(store.unrepliedStreak, 2),
+                        max: 2
+                    )
                     .padding(.horizontal, 12)
-                    .accessibilityIdentifier("chat-action-issue")
-            }
-
-            if let reply = replyDraft {
-                HStack(alignment: .top, spacing: 10) {
-                    RoundedRectangle(cornerRadius: 1.5)
-                        .fill(SideSeatTheme.accent)
-                        .frame(width: 3, height: 38)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Replying to \(reply.sender.displayName)")
-                            .font(.caption.weight(.semibold))
-                            .accessibilityIdentifier("chat-reply-preview")
-                        Text(reply.previewText)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(2)
-                    }
-                    Spacer(minLength: 8)
-                    Button {
-                        replyDraft = nil
-                        store.clearReply()
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.secondary)
-                    }
-                    .accessibilityIdentifier("chat-reply-cancel")
+                    .accessibilityIdentifier("chat-unreplied-hint")
                 }
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 12)
-                .padding(.top, 8)
-            }
 
-            LazyVGrid(
-                    columns: [
-                        GridItem(.flexible(), spacing: 8),
-                        GridItem(.flexible(), spacing: 8),
-                    ],
-                    spacing: 8
-                ) {
-                    PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                        ComposerToolLabel(
-                            title: String(localized: "Photo"),
-                            systemImage: "photo",
-                            accessibilityID: "chat-composer-photo"
-                        )
-                    }
-                    .disabled(store.isSending || store.isUnrepliedSendBlocked)
-                    .accessibilityIdentifier("chat-composer-photo")
-
-                    Button {
-                        showComposerTools = false
-                        showLocationPicker = true
-                    } label: {
-                        ComposerToolLabel(
-                            title: String(localized: "Location"),
-                            systemImage: "mappin.and.ellipse",
-                            accessibilityID: "chat-composer-location"
-                        )
-                    }
-                    .disabled(store.isSending || store.isUnrepliedSendBlocked)
-                    .accessibilityIdentifier("chat-composer-location")
-
-                    Button {
-                        showComposerTools = false
-                        showPlanCreate = true
-                    } label: {
-                        ComposerToolLabel(
-                            title: String(localized: "Plan"),
-                            systemImage: "calendar.badge.plus",
-                            accessibilityID: "chat-composer-plan"
-                        )
-                    }
-                    .disabled(store.isSending || store.isUnrepliedSendBlocked)
-                    .accessibilityIdentifier("chat-composer-plan")
-
-                    Button {
-                        showComposerTools = false
-                        showScheduleShare = true
-                    } label: {
-                        ComposerToolLabel(
-                            title: String(localized: "Share schedule"),
-                            systemImage: "calendar.badge.clock",
-                            accessibilityID: "chat-composer-schedule-share"
-                        )
-                    }
-                    .disabled(store.isSending || store.isUnrepliedSendBlocked)
-                    .accessibilityIdentifier("chat-composer-schedule-share")
+                if let issue = store.sendIssue ?? store.planIssue ?? store.actionIssue {
+                    Text(issue)
+                        .font(.caption)
+                        .foregroundStyle(SideSeatTheme.danger)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 12)
+                        .accessibilityIdentifier("chat-action-issue")
                 }
-                .padding(.horizontal, 12)
-                .padding(.top, showComposerTools ? 10 : 0)
-                .frame(height: showComposerTools ? 120 : 0)
-                .opacity(showComposerTools ? 1 : 0)
-                .allowsHitTesting(showComposerTools)
-                .accessibilityHidden(!showComposerTools)
-                .accessibilityElement(children: .contain)
-                .accessibilityIdentifier("chat-composer-tools")
-                .transition(.move(edge: .bottom).combined(with: .opacity))
 
-            HStack(alignment: .bottom, spacing: 10) {
-                Button {
-                    let shouldOpen = !showComposerTools
-                    if shouldOpen {
-                        composerFocused = false
+                if let reply = replyDraft {
+                    HStack(alignment: .top, spacing: 10) {
+                        RoundedRectangle(cornerRadius: 1.5)
+                            .fill(SideSeatTheme.accent)
+                            .frame(width: 3, height: 38)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Replying to \(reply.sender.displayName)")
+                                .font(.caption.weight(.semibold))
+                                .accessibilityIdentifier("chat-reply-preview")
+                            Text(reply.previewText)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(2)
+                        }
+                        Spacer(minLength: 8)
+                        Button {
+                            replyDraft = nil
+                            store.clearReply()
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.secondary)
+                        }
+                        .accessibilityIdentifier("chat-reply-cancel")
                     }
-                    withAnimation(.easeOut(duration: 0.18)) {
-                        showComposerTools = shouldOpen
-                    }
-                } label: {
-                    Image(systemName: showComposerTools ? "xmark.circle.fill" : "plus.circle.fill")
-                        .font(.system(size: 30))
-                        .symbolRenderingMode(.hierarchical)
-                        .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 12)
+                    .padding(.top, 8)
                 }
-                .disabled(store.isUnrepliedSendBlocked)
-                .accessibilityIdentifier("chat-composer-attach")
-                .accessibilityLabel(showComposerTools ? String(localized: "Close attachments") : String(localized: "Attachments"))
 
-                TextField(
-                    replyDraft == nil ? String(localized: "Message") : String(localized: "Reply"),
-                    text: $draft,
-                    axis: .vertical
-                )
-                    .lineLimit(1...5)
-                    .textFieldStyle(.plain)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .frame(minHeight: 40)
-                    .background(SideSeatTheme.Chat.controlFill, in: RoundedRectangle(cornerRadius: SideSeatTheme.Chat.composerRadius, style: .continuous))
-                    .focused($composerFocused)
-                    .submitLabel(.send)
+                if isAttachmentTrayVisible {
+                    attachmentTray
+                        .transition(.opacity)
+                }
+
+                HStack(alignment: .bottom, spacing: 10) {
+                    Button {
+                        withAnimation(.easeOut(duration: 0.16)) {
+                            isAttachmentTrayVisible.toggle()
+                        }
+                    } label: {
+                        Image(systemName: isAttachmentTrayVisible ? "xmark" : "plus")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(.primary)
+                            .frame(width: 30, height: 30)
+                            .background(.quaternary, in: Circle())
+                    }
+                    .buttonStyle(.plain)
                     .disabled(store.isUnrepliedSendBlocked)
-                    .onSubmit { Task { await send() } }
-                    .onChange(of: draft) { previous, current in
-                        sendAfterInsertedReturn(previous: previous, current: current)
+                    .accessibilityIdentifier("chat-composer-attach")
+                    .accessibilityLabel(isAttachmentTrayVisible ? "Close attachments" : "Attachments")
+
+                    ChatComposerTextInput(
+                        draft: composerDraft,
+                        placeholder: replyDraft == nil ? String(localized: "Message") : String(localized: "Reply"),
+                        isBlocked: store.isUnrepliedSendBlocked,
+                        focusController: composerFocus
+                    ) { text in
+                        Task { await send(text) }
                     }
-                    .accessibilityIdentifier("chat-composer-field")
-
-                Button {
-                    Task { await send() }
-                } label: {
-                    Image(systemName: "arrow.up.circle.fill")
-                        .font(.system(size: 30))
-                        .symbolRenderingMode(.hierarchical)
                 }
-                .disabled(!canSend || store.isSending || store.isUnrepliedSendBlocked)
-                .accessibilityIdentifier("chat-composer-send")
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("chat-composer")
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .accessibilityElement(children: .contain)
-            .accessibilityIdentifier("chat-composer")
-        }
-        .background(.bar)
-        .onChange(of: composerFocused) { _, focused in
-            guard focused, showComposerTools else { return }
-            withAnimation(.easeOut(duration: 0.18)) {
-                showComposerTools = false
-            }
-        }
+            .background(.bar)
     }
 
-    private var canSend: Bool {
-        !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && !store.isUnrepliedSendBlocked
+    private var attachmentTray: some View {
+        HStack(alignment: .top, spacing: 12) {
+            PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                attachmentActionLabel(title: "Photo", systemImage: "photo")
+            }
+            .disabled(store.isSending || store.isUnrepliedSendBlocked)
+            .accessibilityIdentifier("chat-composer-photo")
+
+            Button {
+                closeAttachmentTrayForDestination()
+                showLocationPicker = true
+            } label: {
+                attachmentActionLabel(title: "Location", systemImage: "mappin.and.ellipse")
+            }
+            .disabled(store.isSending || store.isUnrepliedSendBlocked)
+            .accessibilityIdentifier("chat-composer-location")
+
+            Button {
+                closeAttachmentTrayForDestination()
+                showPlanCreate = true
+            } label: {
+                attachmentActionLabel(title: "Plan", systemImage: "calendar.badge.plus")
+            }
+            .disabled(store.isSending || store.isUnrepliedSendBlocked)
+            .accessibilityIdentifier("chat-composer-plan")
+
+            Button {
+                closeAttachmentTrayForDestination()
+                showScheduleShare = true
+            } label: {
+                attachmentActionLabel(title: "Share schedule", systemImage: "calendar.badge.clock")
+            }
+            .disabled(store.isSending || store.isUnrepliedSendBlocked)
+            .accessibilityIdentifier("chat-composer-schedule-share")
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 12)
+        .padding(.top, 8)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("chat-attachment-tray")
     }
 
-    private func sendAfterInsertedReturn(previous: String, current: String) {
-        guard let message = ChatComposerReturnKey.textBeforeInsertedReturn(
-            previous: previous,
-            current: current
-        ) else { return }
+    nonisolated private func attachmentActionLabel(
+        title: LocalizedStringKey,
+        systemImage: String
+    ) -> some View {
+        VStack(spacing: 5) {
+            Image(systemName: systemImage)
+                .font(.system(size: 19, weight: .medium))
+                .foregroundStyle(.primary)
+                .frame(width: 44, height: 40)
+                .background(.quaternary, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            Text(title)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+        }
+        .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+    }
 
-        draft = message
-        Task { await send() }
+    private func closeAttachmentTrayForDestination() {
+        isAttachmentTrayVisible = false
+        composerFocus.blur()
     }
 
     private func pinMessageListToBottom() {
         var updated = keyboardBottomAnchor
         updated.pinToBottom()
         keyboardBottomAnchor = updated
+    }
+
+    private func prepareInitialViewport(messageIDs: [String]) {
+        knownMessageIDs = Set(messageIDs)
+        isNearBottom = true
+        pinMessageListToBottom()
+        hasPreparedInitialViewport = true
+    }
+
+    private func revealInitialViewport() {
+        guard ChatInitialViewportPolicy.canReveal(
+            hasPreparedViewport: hasPreparedInitialViewport,
+            hasCompletedInitialLoad: hasCompletedInitialLoad,
+            hasCachedSnapshot: store.hasCachedSnapshot,
+            isVisible: isInitialViewportVisible
+        )
+        else { return }
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            isInitialViewportVisible = true
+        }
     }
 
     private func releaseMessageListBottomPin() {
@@ -794,88 +737,114 @@ struct DirectChatView: View {
     }
 
     @ViewBuilder
-    private var connectionActionMenu: some View {
-        let friend = store.connectionActions?.friendLink
-        let exchange = store.connectionActions?.contactExchange
-        let isSelfNotes = store.conversation?.isSelfNotes == true
-            || store.connectionActions?.isSelfNotes == true
-        if !isSelfNotes {
-            if let peerID = store.conversation?.peer.id {
-                Button("View profile") {
-                    router.navigate(to: .profile(userID: peerID))
+    private var directChatTitle: some View {
+        if let conversation = store.conversation {
+            Button {
+                guard !conversation.isSelfNotes else { return }
+                router.navigate(to: .profile(userID: conversation.peer.id))
+            } label: {
+                HStack(spacing: 7) {
+                    InitialAvatar(
+                        name: conversation.displayName,
+                        url: conversation.peer.avatarUrl,
+                        size: 28
+                    )
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(conversation.displayName)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                        if !conversation.isSelfNotes {
+                            Text("@\(conversation.peer.username)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
                 }
-                .accessibilityIdentifier("direct-action-profile")
+                .frame(maxWidth: 190)
+                .contentShape(Rectangle())
             }
-
-            Button("Edit remark") {
-                remarkDraft = store.connectionActions?.remark ?? ""
-                showRemarkEditor = true
-            }
-            .accessibilityIdentifier("direct-action-remark")
-
-            if friend?.status == "NONE" || friend?.status == "DECLINED" || friend == nil {
-                Button("Add close friend") {
-                    Task { _ = await store.performFriendLink(action: "request", using: session) }
-                }
-            } else if friend?.status == "PENDING", friend?.role == "requester" {
-                Button("Cancel friend request") {
-                    Task { _ = await store.performFriendLink(action: "cancel", using: session) }
-                }
-            } else if friend?.status == "PENDING", friend?.role == "responder" {
-                Button("Accept friend request") {
-                    Task { _ = await store.performFriendLink(action: "accept", using: session) }
-                }
-                Button("Decline friend request", role: .destructive) {
-                    Task { _ = await store.performFriendLink(action: "decline", using: session) }
-                }
-            }
-
-            if exchange?.status == "NONE" || exchange?.status == "DECLINED"
-                || exchange?.status == "CANCELED" || exchange == nil {
-                Button("Request contact exchange") {
-                    Task { _ = await store.performContactExchange(action: "request", using: session) }
-                }
-            } else if exchange?.status == "PENDING", exchange?.role == "requester" {
-                Button("Cancel contact request") {
-                    Task { _ = await store.performContactExchange(action: "cancel", using: session) }
-                }
-            } else if exchange?.status == "PENDING", exchange?.role == "responder" {
-                Button("Accept contact exchange") {
-                    Task { _ = await store.performContactExchange(action: "accept", using: session) }
-                }
-                Button("Decline contact exchange", role: .destructive) {
-                    Task { _ = await store.performContactExchange(action: "decline", using: session) }
-                }
-            }
-
-            Divider()
-            Button("End chat", role: .destructive) { confirmEnd = true }
-            Button("Block", role: .destructive) { confirmBlock = true }
+            .buttonStyle(.plain)
+            .disabled(conversation.isSelfNotes)
+            .accessibilityIdentifier("direct-chat-title")
+        } else {
+            Text("Chat")
+                .font(.headline)
+                .accessibilityIdentifier("direct-chat-title")
         }
     }
 
-    private func send() async {
-        let text = draft
-        guard canSend, !store.isSending else { return }
+    private func beginReply(to message: NativeDirectMessage) {
+        UISelectionFeedbackGenerator().selectionChanged()
+        withAnimation(.easeOut(duration: 0.18)) {
+            replyDraft = message
+        }
+        store.beginReply(to: message)
+
+        guard !composerFocus.isFocused else { return }
+        Task { @MainActor in
+            await Task.yield()
+            composerFocus.focus()
+        }
+    }
+
+    private func copyMessageText(_ text: String) {
+        UIPasteboard.general.string = text
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(140))
+            showActionNotice(String(localized: "Copied"), systemImage: "checkmark")
+        }
+    }
+
+    private func presentDeleteConfirmation(for message: NativeDirectMessage) {
+        UISelectionFeedbackGenerator().selectionChanged()
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(140))
+            pendingDelete = message
+        }
+    }
+
+    private func presentReportSheet(for message: NativeDirectMessage) {
+        UISelectionFeedbackGenerator().selectionChanged()
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(140))
+            pendingReport = message
+        }
+    }
+
+    private func showActionNotice(_ text: String, systemImage: String) {
+        let notice = ChatTransientNotice(text: text, systemImage: systemImage)
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        withAnimation(.spring(response: 0.28, dampingFraction: 0.86)) {
+            actionNotice = notice
+        }
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(4_000))
+            guard actionNotice?.id == notice.id else { return }
+            withAnimation(.easeIn(duration: 0.18)) {
+                actionNotice = nil
+            }
+        }
+    }
+
+    private func send(_ text: String) async {
+        let normalizedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty,
+              !store.isUnrepliedSendBlocked
+        else { return }
         let reply = replyDraft
         // Clear immediately so failed rows own the text (avoid draft + bubble duplication).
-        draft = ""
+        composerDraft.clear()
         replyDraft = nil
         isNearBottom = true
-        composerFocused = true
         _ = await store.sendText(text, replyTo: reply, using: session)
-        // Always pin to bottom after send (success or failed optimistic row).
-        NotificationCenter.default.post(
-            name: .sideSeatChatScrollToBottom,
-            object: nil,
-            userInfo: ["animated": true]
-        )
     }
 
     private func sendPhoto(_ item: PhotosPickerItem) async {
         defer { selectedPhoto = nil }
         guard let data = try? await item.loadTransferable(type: Data.self),
-              let draftImage = DiscoverImagePreprocessor.makeDraft(from: data)
+              let draftImage = await DiscoverImagePreprocessor.makeDraftAsync(from: data)
         else {
             store.noteSendIssue(String(localized: "Could not prepare that photo."))
             return
@@ -885,7 +854,7 @@ struct DirectChatView: View {
             store.noteSendIssue(String(localized: "Image is too large. Max 2 MB."))
             return
         }
-        let caption = draft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let caption = composerDraft.trimmedText
         let ok = await store.sendImage(
             data: draftImage.data,
             mimeType: draftImage.mimeType,
@@ -895,9 +864,8 @@ struct DirectChatView: View {
         )
         isNearBottom = true
         if ok {
-            draft = ""
+            composerDraft.clear()
             replyDraft = nil
-            composerFocused = true
         }
         NotificationCenter.default.post(
             name: .sideSeatChatScrollToBottom,
@@ -927,33 +895,332 @@ struct DirectChatView: View {
     }
 }
 
-private struct ComposerToolLabel: View {
-    let title: String
-    let systemImage: String
-    let accessibilityID: String
+struct ChatComposerTextInput: View {
+    let draft: ChatComposerDraft
+    @State private var editorHeight = ChatComposerUIKitTextView.minimumHeight
+
+    let placeholder: String
+    let isBlocked: Bool
+    let focusController: ChatComposerFocusController
+    let onSend: (String) -> Void
+
+    init(
+        draft: ChatComposerDraft,
+        placeholder: String,
+        isBlocked: Bool = false,
+        focusController: ChatComposerFocusController,
+        onSend: @escaping (String) -> Void
+    ) {
+        self.draft = draft
+        self.placeholder = placeholder
+        self.isBlocked = isBlocked
+        self.focusController = focusController
+        self.onSend = onSend
+    }
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: systemImage)
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(SideSeatTheme.accent)
-                .frame(width: 34, height: 34)
-                .background(SideSeatTheme.accent.opacity(0.10), in: Circle())
-            Text(title)
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.primary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-            Spacer(minLength: 0)
+        ZStack(alignment: .topLeading) {
+            Text(placeholder)
+                .font(.body)
+                .foregroundStyle(.tertiary)
+                .padding(.top, 1)
+                .opacity(draft.isEmpty ? 1 : 0)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+
+            ChatComposerUIKitTextView(
+                text: draft.text,
+                resetVersion: draft.resetVersion,
+                isBlocked: isBlocked,
+                accessibilityLabel: placeholder,
+                focusController: focusController,
+                onTextChange: draft.updateText,
+                onHeightChange: { height in
+                    guard abs(editorHeight - height) > 0.5 else { return }
+                    editorHeight = height
+                },
+                onSend: submit
+            )
+            .frame(height: editorHeight)
         }
-        .padding(.horizontal, 10)
-        .frame(maxWidth: .infinity, minHeight: 52, maxHeight: 52)
-        .background(
-            SideSeatTheme.Chat.controlFill,
-            in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 9)
+            .frame(minHeight: 40)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                SideSeatTheme.Chat.controlFill,
+                in: RoundedRectangle(
+                    cornerRadius: SideSeatTheme.Chat.composerRadius,
+                    style: .continuous
+                )
+            )
+            .contentShape(Rectangle())
+            .onTapGesture {
+                guard !isBlocked else { return }
+                focusController.focus()
+            }
+            .layoutPriority(1)
+
+        Button {
+            submit(draft.text)
+        } label: {
+            Image(systemName: "arrow.up.circle.fill")
+                .font(.system(size: 30))
+                .symbolRenderingMode(.hierarchical)
+        }
+        .disabled(!canSend || isBlocked)
+        .accessibilityIdentifier("chat-composer-send")
+    }
+
+    private var canSend: Bool {
+        draft.canSend && !isBlocked
+    }
+
+    private func submit(_ text: String) {
+        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              !isBlocked
+        else { return }
+
+        draft.clear()
+        onSend(text)
+    }
+}
+
+private struct ChatComposerUIKitTextView: UIViewRepresentable {
+    static var minimumHeight: CGFloat {
+        ceil(UIFont.preferredFont(forTextStyle: .body).lineHeight)
+    }
+
+    private static var maximumHeight: CGFloat {
+        ceil(UIFont.preferredFont(forTextStyle: .body).lineHeight * 4)
+    }
+
+    let text: String
+    let resetVersion: Int
+    let isBlocked: Bool
+    let accessibilityLabel: String
+    let focusController: ChatComposerFocusController
+    let onTextChange: (String) -> Void
+    let onHeightChange: (CGFloat) -> Void
+    let onSend: (String) -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
+    }
+
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        textView.delegate = context.coordinator
+        textView.backgroundColor = .clear
+        textView.font = UIFont.preferredFont(forTextStyle: .body)
+        textView.adjustsFontForContentSizeCategory = true
+        textView.textColor = .label
+        textView.tintColor = .tintColor
+        textView.textContainerInset = .zero
+        textView.textContainer.lineFragmentPadding = 0
+        textView.returnKeyType = .send
+        textView.enablesReturnKeyAutomatically = true
+        textView.keyboardDismissMode = .none
+        textView.isScrollEnabled = false
+        textView.showsVerticalScrollIndicator = false
+        textView.accessibilityIdentifier = "chat-composer-field"
+        textView.accessibilityLabel = context.coordinator.resolvedAccessibilityLabel(
+            base: accessibilityLabel
         )
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(title)
+        textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        textView.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        textView.text = text
+        textView.selectedRange = NSRange(location: text.utf16.count, length: 0)
+        context.coordinator.rememberSelection(textView.selectedRange, in: textView)
+        context.coordinator.appliedResetVersion = resetVersion
+        focusController.attach(textView)
+        return textView
+    }
+
+    static func dismantleUIView(_ uiView: UITextView, coordinator: Coordinator) {
+        coordinator.parent.focusController.detach(uiView)
+    }
+
+    func updateUIView(_ textView: UITextView, context: Context) {
+        context.coordinator.parent = self
+
+        if context.coordinator.appliedResetVersion != resetVersion,
+           textView.markedTextRange == nil
+        {
+            context.coordinator.appliedResetVersion = resetVersion
+            let selectedRange = textView.selectedRange
+            if textView.text != text {
+                textView.text = text
+            }
+            textView.selectedRange = NSRange(
+                location: min(selectedRange.location, textView.text.utf16.count),
+                length: 0
+            )
+            context.coordinator.rememberSelection(textView.selectedRange, in: textView)
+            context.coordinator.scheduleHeightUpdate(for: textView, force: true)
+        }
+
+        textView.isEditable = !isBlocked
+        textView.accessibilityLabel = context.coordinator.resolvedAccessibilityLabel(
+            base: accessibilityLabel
+        )
+
+        context.coordinator.scheduleHeightUpdate(for: textView)
+    }
+
+    @MainActor
+    final class Coordinator: NSObject, UITextViewDelegate {
+        var parent: ChatComposerUIKitTextView
+        var appliedResetVersion = 0
+        private var lastMeasuredWidth: CGFloat = 0
+        private var lastReportedHeight = ChatComposerUIKitTextView.minimumHeight
+        private var isHeightUpdateScheduled = false
+        private var lastSelectedRange = NSRange(location: 0, length: 0)
+        #if DEBUG
+        private let recordsInputLatency = ProcessInfo.processInfo.arguments.contains(
+            "--ui-testing-chat-input-diagnostics"
+        )
+        private var inputStartedAt: CFTimeInterval?
+        private var inputSequence = 0
+        private var measuredInputSequence = 0
+        private var latestInputLatencyMilliseconds: Double?
+        #endif
+
+        init(parent: ChatComposerUIKitTextView) {
+            self.parent = parent
+        }
+
+        func textViewDidBeginEditing(_ textView: UITextView) {
+            let restoredSelection = clampedSelection(in: textView)
+            textView.selectedRange = restoredSelection
+            DispatchQueue.main.async { [weak self, weak textView] in
+                guard let self, let textView, textView.isFirstResponder else { return }
+                textView.selectedRange = restoredSelection
+                self.rememberSelection(restoredSelection, in: textView)
+            }
+        }
+
+        func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
+            !parent.isBlocked
+        }
+
+        func textViewDidChange(_ textView: UITextView) {
+            #if DEBUG
+            let startedAt = inputStartedAt
+            let sequence = inputSequence
+            inputStartedAt = nil
+            #endif
+            if parent.text != textView.text {
+                parent.onTextChange(textView.text)
+            }
+            rememberSelection(textView.selectedRange, in: textView)
+            updateHeight(for: textView)
+            #if DEBUG
+            if recordsInputLatency, let startedAt {
+                DispatchQueue.main.async { [weak self, weak textView] in
+                    guard let self, let textView,
+                          sequence == self.inputSequence
+                    else { return }
+                    self.measuredInputSequence = sequence
+                    self.latestInputLatencyMilliseconds =
+                        (CACurrentMediaTime() - startedAt) * 1_000
+                    textView.accessibilityLabel = self.resolvedAccessibilityLabel(
+                        base: self.parent.accessibilityLabel
+                    )
+                }
+            }
+            #endif
+        }
+
+        func textViewDidChangeSelection(_ textView: UITextView) {
+            guard textView.isFirstResponder else { return }
+            rememberSelection(textView.selectedRange, in: textView)
+        }
+
+        func textView(
+            _ textView: UITextView,
+            shouldChangeTextIn range: NSRange,
+            replacementText replacement: String
+        ) -> Bool {
+            #if DEBUG
+            if recordsInputLatency, replacement != "\n" {
+                inputSequence &+= 1
+                inputStartedAt = CACurrentMediaTime()
+            }
+            #endif
+            guard replacement == "\n", textView.markedTextRange == nil else {
+                return !parent.isBlocked
+            }
+
+            let message = textView.text ?? ""
+            guard !message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                  !parent.isBlocked
+            else { return false }
+
+            textView.text = ""
+            parent.onTextChange("")
+            lastSelectedRange = NSRange(location: 0, length: 0)
+            scheduleHeightUpdate(for: textView, force: true)
+            parent.onSend(message)
+            return false
+        }
+
+        func resolvedAccessibilityLabel(base: String) -> String {
+            #if DEBUG
+            if recordsInputLatency, let latestInputLatencyMilliseconds {
+                return "\(base) [input-sequence=\(measuredInputSequence);input-latency-ms=\(String(format: "%.3f", latestInputLatencyMilliseconds))]"
+            }
+            #endif
+            return base
+        }
+
+        func rememberSelection(_ range: NSRange, in textView: UITextView) {
+            let textLength = textView.text.utf16.count
+            lastSelectedRange = NSRange(
+                location: min(range.location, textLength),
+                length: min(range.length, max(textLength - min(range.location, textLength), 0))
+            )
+        }
+
+        private func clampedSelection(in textView: UITextView) -> NSRange {
+            let textLength = textView.text.utf16.count
+            let location = min(lastSelectedRange.location, textLength)
+            return NSRange(
+                location: location,
+                length: min(lastSelectedRange.length, max(textLength - location, 0))
+            )
+        }
+
+        func updateHeight(for textView: UITextView) {
+            guard textView.bounds.width > 0 else { return }
+            lastMeasuredWidth = textView.bounds.width
+            let contentHeight = ceil(textView.contentSize.height)
+            let height = min(
+                max(contentHeight, ChatComposerUIKitTextView.minimumHeight),
+                ChatComposerUIKitTextView.maximumHeight
+            )
+            let shouldScroll = contentHeight > ChatComposerUIKitTextView.maximumHeight + 0.5
+            if textView.isScrollEnabled != shouldScroll {
+                textView.isScrollEnabled = shouldScroll
+            }
+            guard abs(lastReportedHeight - height) > 0.5 else { return }
+            lastReportedHeight = height
+            parent.onHeightChange(height)
+        }
+
+        func scheduleHeightUpdate(for textView: UITextView, force: Bool = false) {
+            guard textView.bounds.width > 0,
+                  (force || abs(lastMeasuredWidth - textView.bounds.width) > 0.5),
+                  !isHeightUpdateScheduled
+            else { return }
+
+            isHeightUpdateScheduled = true
+            DispatchQueue.main.async { [weak self, weak textView] in
+                guard let self, let textView else { return }
+                self.isHeightUpdateScheduled = false
+                self.updateHeight(for: textView)
+            }
+        }
     }
 }
 
@@ -961,6 +1228,9 @@ private struct DirectMessageBubble: View {
     let message: NativeDirectMessage
     let isMine: Bool
     var showSenderName: Bool = true
+    let showAvatar: Bool
+    let connectsAbove: Bool
+    let connectsBelow: Bool
     var avatarURL: String? = nil
     let currentUserID: String
     let status: NativeMessageSendStatus?
@@ -970,6 +1240,7 @@ private struct DirectMessageBubble: View {
     let onRetry: () -> Void
     let onDelete: () -> Void
     let onReport: () -> Void
+    let onCopy: (String) -> Void
     let onOpenImage: (URL) -> Void
     let onAcceptPlan: (String) -> Void
     let onDeclinePlan: (String) -> Void
@@ -984,16 +1255,22 @@ private struct DirectMessageBubble: View {
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
             if !isMine {
-                Button(action: onOpenProfile) {
-                    InitialAvatar(
-                        name: message.sender.displayName,
-                        url: avatarURL ?? message.sender.avatarUrl,
-                        size: 32
-                    )
+                if showAvatar {
+                    Button(action: onOpenProfile) {
+                        InitialAvatar(
+                            name: message.sender.displayName,
+                            url: avatarURL ?? message.sender.avatarUrl,
+                            size: 32
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("chat-avatar-\(message.id)")
+                    .accessibilityLabel(String(localized: "\(message.sender.displayName) profile"))
+                } else {
+                    Color.clear
+                        .frame(width: 32, height: 1)
+                        .accessibilityHidden(true)
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("chat-avatar-\(message.id)")
-                .accessibilityLabel(String(localized: "\(message.sender.displayName) profile"))
             }
 
             if isMine { Spacer(minLength: 48) }
@@ -1008,12 +1285,6 @@ private struct DirectMessageBubble: View {
                 }
 
                 contextualBubble
-
-                if let created = message.createdDate, status != .sending, status != .failed {
-                    Text(created, style: .time)
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                }
 
                 if status == .sending {
                     Text("Sending…")
@@ -1042,11 +1313,13 @@ private struct DirectMessageBubble: View {
     }
 
     private var contextualBubble: some View {
-        bubbleBody
-            .contentShape(Rectangle())
-            .accessibilityElement(children: .contain)
-            .accessibilityIdentifier("chat-bubble-\(message.id)")
-            .contextMenu { messageContextMenu }
+        ChatMessageContextMenuTarget(isEnabled: !message.isDeleted) {
+            bubbleBody
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("chat-bubble-\(message.id)")
+        } menu: {
+            messageContextMenu
+        }
             .accessibilityAction(named: Text(String(localized: "Reply"))) {
                 if !message.isDeleted { onReply() }
             }
@@ -1073,11 +1346,15 @@ private struct DirectMessageBubble: View {
                !body.isEmpty
             {
                 Button {
-                    UIPasteboard.general.string = body
+                    onCopy(body)
                 } label: {
                     Label("Copy", systemImage: "doc.on.doc")
                 }
+                .accessibilityIdentifier("chat-copy-\(message.id)")
             }
+        }
+        if !message.isDeleted {
+            Divider()
         }
         if !isMine && !message.isDeleted {
             Button(role: .destructive) {
@@ -1104,7 +1381,7 @@ private struct DirectMessageBubble: View {
                 .font(.body.italic())
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(bubbleFill, in: RoundedRectangle(cornerRadius: SideSeatTheme.Chat.bubbleRadius, style: .continuous))
+                .background(bubbleFill, in: bubbleShape)
                 .foregroundStyle(isMine ? Color.white.opacity(0.9) : Color.secondary)
                 .accessibilityIdentifier("chat-tombstone-\(message.id)")
         } else if message.type == "IMAGE" {
@@ -1123,7 +1400,7 @@ private struct DirectMessageBubble: View {
                         .font(.body)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
-                        .background(bubbleFill, in: RoundedRectangle(cornerRadius: SideSeatTheme.Chat.bubbleRadius, style: .continuous))
+                        .background(bubbleFill, in: bubbleShape)
                         .foregroundStyle(isMine ? Color.white : Color.primary)
                 }
             }
@@ -1180,7 +1457,7 @@ private struct DirectMessageBubble: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(bubbleFill, in: RoundedRectangle(cornerRadius: SideSeatTheme.Chat.bubbleRadius, style: .continuous))
+            .background(bubbleFill, in: bubbleShape)
             .foregroundStyle(isMine ? Color.white : Color.primary)
         }
     }
@@ -1206,6 +1483,14 @@ private struct DirectMessageBubble: View {
 
     private var bubbleFill: Color {
         isMine ? SideSeatTheme.Chat.ownBubble : SideSeatTheme.Chat.peerBubble
+    }
+
+    private var bubbleShape: ChatBubbleShape {
+        ChatBubbleShape(
+            isMine: isMine,
+            connectsAbove: connectsAbove,
+            connectsBelow: connectsBelow
+        )
     }
 
     private func replyStrip(_ reply: NativeDirectMessageReply) -> some View {
@@ -1521,7 +1806,7 @@ private struct ChatLocationBubble: View {
                     .foregroundStyle(isMine ? Color.white : Color.primary)
                 Text("Open in Maps")
                     .font(.caption)
-                    .foregroundStyle(isMine ? Color.white.opacity(0.85) : SideSeatTheme.accent)
+                    .foregroundStyle(isMine ? Color.white.opacity(0.85) : SideSeatTheme.textSecondary)
             }
             .padding(10)
             .background(
@@ -1653,11 +1938,11 @@ private struct UnrepliedReplyBanner: View {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text(blocked ? "Waiting for a reply" : "Before they reply")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(accent)
+                        .foregroundStyle(blocked ? SideSeatTheme.warning : SideSeatTheme.textPrimary)
                     Spacer(minLength: 4)
                     Text("\(sent) / \(max)")
                         .font(.caption2.weight(.semibold).monospacedDigit())
-                        .foregroundStyle(accent)
+                        .foregroundStyle(blocked ? SideSeatTheme.warning : SideSeatTheme.textSecondary)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
                         .background(accent.opacity(0.12), in: Capsule())

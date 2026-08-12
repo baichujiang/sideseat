@@ -8,7 +8,7 @@ struct BlockedUsersView: View {
 
     var body: some View {
         Group {
-            if store.isLoading && store.blocks.isEmpty {
+            if (!store.hasLoaded || store.isLoading) && store.blocks.isEmpty {
                 SSLoadingState("Loading blocked users")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if store.blocks.isEmpty {
@@ -17,6 +17,7 @@ struct BlockedUsersView: View {
                     systemImage: "hand.raised",
                     description: "If you block someone, they will appear here."
                 )
+                .accessibilityIdentifier("blocked-users-empty")
             } else {
                 List {
                     ForEach(store.blocks) { block in
@@ -37,6 +38,7 @@ struct BlockedUsersView: View {
                                 }
                             }
                             .buttonStyle(.plain)
+                            .accessibilityIdentifier("blocked-users-row-\(block.blockedId)")
 
                             Spacer(minLength: 8)
 
@@ -47,7 +49,6 @@ struct BlockedUsersView: View {
                             .disabled(store.isMutating)
                             .accessibilityIdentifier("blocked-users-unblock-\(block.blockedId)")
                         }
-                        .accessibilityIdentifier("blocked-users-row-\(block.blockedId)")
                     }
                 }
                 .listStyle(.insetGrouped)
@@ -55,7 +56,6 @@ struct BlockedUsersView: View {
         }
         .navigationTitle("Blocked users")
         .navigationBarTitleDisplayMode(.inline)
-        .accessibilityIdentifier("blocked-users-root")
         .task {
             await store.load(using: session)
         }
@@ -76,6 +76,7 @@ struct BlockedUsersView: View {
                     self.pendingUnblock = nil
                 }
             }
+            .accessibilityIdentifier("blocked-users-confirm-unblock")
             Button("Cancel", role: .cancel) {
                 pendingUnblock = nil
             }

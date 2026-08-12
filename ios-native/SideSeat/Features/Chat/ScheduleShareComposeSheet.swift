@@ -32,7 +32,7 @@ enum ScheduleShareRevealSelection {
             guard categoryIDs.contains(category.id) else { return nil }
             return ScheduleShareRevealOption(
                 id: category.id,
-                name: category.name,
+                name: category.displayName,
                 colorHex: category.color,
                 presetKey: category.presetKey
             )
@@ -831,14 +831,13 @@ struct ScheduleShareComposeSheet: View {
                     Text(day, format: .dateTime.weekday(.wide).month(.abbreviated).day())
                         .font(.subheadline.weight(.semibold))
                     Spacer(minLength: SideSeatTheme.spaceSM)
-                    Label(
-                        isIncluded ? "Shared" : "Not shared",
-                        systemImage: isIncluded ? "checkmark.circle.fill" : "eye.slash"
-                    )
+                    HStack(spacing: SideSeatTheme.spaceXS) {
+                        Image(systemName: isIncluded ? "checkmark.circle.fill" : "eye.slash")
+                            .foregroundStyle(isIncluded ? SideSeatTheme.accent : SideSeatTheme.textSecondary)
+                        Text(isIncluded ? "Shared" : "Not shared")
+                            .foregroundStyle(isIncluded ? SideSeatTheme.textPrimary : SideSeatTheme.textSecondary)
+                    }
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(
-                        isIncluded ? SideSeatTheme.accent : SideSeatTheme.textSecondary
-                    )
                 }
 
                 if !isIncluded {
@@ -1329,10 +1328,11 @@ struct ScheduleShareComposeSheet: View {
                 Text(option.name)
                     .font(.caption.weight(.semibold))
                     .lineLimit(1)
+                    .foregroundStyle(isSelected ? SideSeatTheme.textPrimary : SideSeatTheme.textSecondary)
                 Image(systemName: isSelected ? "checkmark" : "eye.slash")
                     .font(.caption2.weight(.bold))
+                    .foregroundStyle(isSelected ? SideSeatTheme.accent : SideSeatTheme.textSecondary)
             }
-            .foregroundStyle(isSelected ? SideSeatTheme.accent : SideSeatTheme.textSecondary)
             .padding(.horizontal, 12)
             .frame(height: 36)
             .background(
@@ -1906,6 +1906,66 @@ struct ScheduleShareComposeSheet: View {
             formatter.string(from: calendar.date(bySettingHour: hour, minute: 0, second: 0, of: day) ?? day)
         }
 
+        var blocks = [
+            NativeScheduleShareBlock(
+                kind: "busy_detail",
+                start: at(9, on: today),
+                end: at(11, on: today),
+                title: "Project seminar",
+                location: "Library",
+                categoryId: "ui-calendar-custom",
+                categoryPresetKey: nil,
+                categoryName: "Project",
+                categoryColor: "#2563EB"
+            ),
+            NativeScheduleShareBlock(
+                kind: "busy_detail",
+                start: at(16, on: nextDay),
+                end: at(18, on: nextDay),
+                title: "Gym",
+                location: nil,
+                categoryId: "ui-calendar-personal",
+                categoryPresetKey: "personal",
+                categoryName: "Personal",
+                categoryColor: "#EA580C"
+            ),
+            NativeScheduleShareBlock(
+                kind: "busy_detail",
+                start: at(19, on: nextDay),
+                end: at(20, on: nextDay),
+                title: "Dinner",
+                location: "Home",
+                categoryId: nil,
+                categoryPresetKey: "none",
+                categoryName: nil,
+                categoryColor: nil
+            ),
+        ]
+
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-dense-schedule-share") {
+            blocks = (0..<7).flatMap { dayOffset -> [NativeScheduleShareBlock] in
+                let day = calendar.date(byAdding: .day, value: dayOffset, to: today) ?? today
+                return (0..<14).map { index in
+                    let startMinute = 15 + index * 95
+                    let start = calendar.date(byAdding: .minute, value: startMinute, to: day) ?? day
+                    let end = calendar.date(byAdding: .minute, value: 45, to: start) ?? start
+                    return NativeScheduleShareBlock(
+                        kind: index.isMultiple(of: 4) ? "busy_anonymous" : "busy_detail",
+                        start: formatter.string(from: start),
+                        end: formatter.string(from: end),
+                        title: "Dense event \(dayOffset)-\(index)",
+                        location: index.isMultiple(of: 3) ? "Campus" : nil,
+                        categoryId: index.isMultiple(of: 2)
+                            ? "ui-calendar-custom"
+                            : "ui-calendar-personal",
+                        categoryPresetKey: index.isMultiple(of: 2) ? nil : "personal",
+                        categoryName: index.isMultiple(of: 2) ? "Project" : "Personal",
+                        categoryColor: index.isMultiple(of: 2) ? "#2563EB" : "#EA580C"
+                    )
+                }
+            }
+        }
+
         return NativeScheduleShareSnapshot(
             ownerDisplayLabel: "You",
             rangeStart: at(0, on: today),
@@ -1914,41 +1974,7 @@ struct ScheduleShareComposeSheet: View {
             expiresAt: nil,
             allowGuestProposals: true,
             freeSlots: [NativeScheduleShareSlot(start: at(12, on: tomorrow), end: at(14, on: tomorrow))],
-            blocks: [
-                NativeScheduleShareBlock(
-                    kind: "busy_detail",
-                    start: at(9, on: today),
-                    end: at(11, on: today),
-                    title: "Project seminar",
-                    location: "Library",
-                    categoryId: "ui-calendar-custom",
-                    categoryPresetKey: nil,
-                    categoryName: "Project",
-                    categoryColor: "#2563EB"
-                ),
-                NativeScheduleShareBlock(
-                    kind: "busy_detail",
-                    start: at(16, on: nextDay),
-                    end: at(18, on: nextDay),
-                    title: "Gym",
-                    location: nil,
-                    categoryId: "ui-calendar-personal",
-                    categoryPresetKey: "personal",
-                    categoryName: "Personal",
-                    categoryColor: "#EA580C"
-                ),
-                NativeScheduleShareBlock(
-                    kind: "busy_detail",
-                    start: at(19, on: nextDay),
-                    end: at(20, on: nextDay),
-                    title: "Dinner",
-                    location: "Home",
-                    categoryId: nil,
-                    categoryPresetKey: "none",
-                    categoryName: nil,
-                    categoryColor: nil
-                ),
-            ]
+            blocks: blocks
         )
     }
     #endif
@@ -2025,7 +2051,7 @@ private struct ScheduleSharePoster: View {
 
                 Text("My schedule")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(SideSeatTheme.rose)
+                    .foregroundStyle(secondary)
                     .padding(.top, 17)
 
                 Text(dateRangeLabel)

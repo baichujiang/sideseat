@@ -85,6 +85,26 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
+    func testCaptureCourses() throws {
+        let appearance = Self.resolvedAppearance()
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-skip-tutorial",
+            "--ui-testing-appearance=\(appearance)",
+        ]
+        app.launch()
+
+        let courses = app.buttons["open-courses"]
+        XCTAssertTrue(courses.waitForExistence(timeout: 8))
+        courses.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["courses-list"].waitForExistence(timeout: 5))
+        RunLoop.current.run(until: Date().addingTimeInterval(0.35))
+        saveScreenshot(app: app, name: "courses-\(appearance)")
+        app.terminate()
+    }
+
+    @MainActor
     private func captureAuth(appearance: String) {
         let app = XCUIApplication()
         app.launchArguments = [

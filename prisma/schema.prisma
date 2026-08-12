@@ -385,6 +385,8 @@ model User {
   onboardingComplete               Boolean                      @default(false)
   /// First-run product tutorial (tab overview); set when user dismisses; optional cross-device sync.
   productTutorialDismissedAt       DateTime?
+  /// Default user calendars are seeded once; subsequent deletes stay deleted.
+  calendarCategoriesInitializedAt  DateTime?
   /// Last academic term for which the user reviewed expired course memberships.
   courseReviewSemesterLabel        String?
   verifiedStudent                  Boolean                      @default(false)
@@ -441,6 +443,7 @@ model User {
   lifePhotos                       UserLifePhoto[]
   discoverActivitiesOrganized      DiscoverActivity[]           @relation("DiscoverActivityOrganizer")
   discoverActivitySignups          DiscoverActivitySignup[]
+  discoverActivityComments         DiscoverActivityComment[]
   userLanguages                    UserLanguage[]
   groupChatsCreated                GroupChat[]                  @relation("GroupChatCreator")
   groupChatParticipants            GroupChatParticipant[]
@@ -796,6 +799,7 @@ model DiscoverActivity {
   updatedAt       DateTime                  @updatedAt
   organizer       User                      @relation("DiscoverActivityOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
   signups         DiscoverActivitySignup[]
+  comments        DiscoverActivityComment[]
   calendarEntries CalendarEntry[]
 
   @@index([city, status, startAt])
@@ -815,6 +819,26 @@ model DiscoverActivitySignup {
 
   @@unique([activityId, userId])
   @@index([activityId, status])
+  @@index([userId, createdAt])
+}
+
+/// Lightweight public messages under a fixed-time Discover plan. Top-level
+/// rows are participant questions; the organizer may add one public reply.
+model DiscoverActivityComment {
+  id         String                   @id @default(cuid())
+  activityId String
+  userId     String
+  parentId   String?                  @unique
+  body       String                   @db.VarChar(500)
+  createdAt  DateTime                 @default(now())
+  updatedAt  DateTime                 @updatedAt
+  activity   DiscoverActivity         @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user       User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent     DiscoverActivityComment? @relation("DiscoverActivityCommentReply", fields: [parentId], references: [id], onDelete: Cascade)
+  reply      DiscoverActivityComment? @relation("DiscoverActivityCommentReply")
+  reports    Report[]                 @relation("DiscoverActivityCommentReports")
+
+  @@index([activityId, createdAt])
   @@index([userId, createdAt])
 }
 
@@ -1341,42 +1365,45 @@ model Block {
 }
 
 model Report {
-  id                     String                @id @default(cuid())
-  reporterId             String
-  reportedUserId         String
-  connectionId           String?
-  invitationId           String?
+  id                        String                   @id @default(cuid())
+  reporterId                String
+  reportedUserId            String
+  connectionId              String?
+  invitationId              String?
   /// Optional pointer to a specific 1:1 message being reported. We keep the
   /// user-level fields too so admins still know who the report is about even
   /// if the source message is later deleted.
-  messageId              String?
+  messageId                 String?
   /// Optional pointer to a specific course-room message being reported.
-  courseRoomMessageId    String?
+  courseRoomMessageId       String?
   /// Optional pointer to a specific group-chat message being reported.
-  groupChatMessageId     String?
+  groupChatMessageId        String?
   /// Optional pointer to a Discover buddy post being reported.
-  classmatePostId        String?
+  classmatePostId           String?
   /// Optional pointer to a public question or host reply under a buddy post.
-  classmatePostCommentId String?
-  reason                 ReportReason
-  status                 ReportStatus          @default(OPEN)
-  details                String?
-  adminNotes             String?
-  reviewedAt             DateTime?
-  resolvedAt             DateTime?
-  handledByEmail         String?
-  createdAt              DateTime              @default(now())
-  reporter               User                  @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
-  reportedUser           User                  @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
-  connection             Connection?           @relation(fields: [connectionId], references: [id], onDelete: SetNull)
-  invitation             Invitation?           @relation(fields: [invitationId], references: [id], onDelete: SetNull)
-  message                Message?              @relation("MessageReports", fields: [messageId], references: [id], onDelete: SetNull)
-  courseRoomMessage      CourseRoomMessage?    @relation("CRMReports", fields: [courseRoomMessageId], references: [id], onDelete: SetNull)
-  groupChatMessage       GroupChatMessage?     @relation("GroupChatMessageReports", fields: [groupChatMessageId], references: [id], onDelete: SetNull)
-  classmatePost          ClassmatePost?        @relation("ClassmatePostReports", fields: [classmatePostId], references: [id], onDelete: SetNull)
-  classmatePostComment   ClassmatePostComment? @relation("ClassmatePostCommentReports", fields: [classmatePostCommentId], references: [id], onDelete: SetNull)
-  actionLog              ReportAction[]
-  moderationBlocks       ModerationBlock[]
+  classmatePostCommentId    String?
+  /// Optional pointer to a public message or organizer reply under an activity.
+  discoverActivityCommentId String?
+  reason                    ReportReason
+  status                    ReportStatus             @default(OPEN)
+  details                   String?
+  adminNotes                String?
+  reviewedAt                DateTime?
+  resolvedAt                DateTime?
+  handledByEmail            String?
+  createdAt                 DateTime                 @default(now())
+  reporter                  User                     @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUser              User                     @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  connection                Connection?              @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+  invitation                Invitation?              @relation(fields: [invitationId], references: [id], onDelete: SetNull)
+  message                   Message?                 @relation("MessageReports", fields: [messageId], references: [id], onDelete: SetNull)
+  courseRoomMessage         CourseRoomMessage?       @relation("CRMReports", fields: [courseRoomMessageId], references: [id], onDelete: SetNull)
+  groupChatMessage          GroupChatMessage?        @relation("GroupChatMessageReports", fields: [groupChatMessageId], references: [id], onDelete: SetNull)
+  classmatePost             ClassmatePost?           @relation("ClassmatePostReports", fields: [classmatePostId], references: [id], onDelete: SetNull)
+  classmatePostComment      ClassmatePostComment?    @relation("ClassmatePostCommentReports", fields: [classmatePostCommentId], references: [id], onDelete: SetNull)
+  discoverActivityComment   DiscoverActivityComment? @relation("DiscoverActivityCommentReports", fields: [discoverActivityCommentId], references: [id], onDelete: SetNull)
+  actionLog                 ReportAction[]
+  moderationBlocks          ModerationBlock[]
 
   @@index([reportedUserId])
   @@index([reason])
@@ -1385,6 +1412,7 @@ model Report {
   @@index([groupChatMessageId])
   @@index([classmatePostId])
   @@index([classmatePostCommentId])
+  @@index([discoverActivityCommentId])
 }
 
 model ReportAction {
@@ -1520,7 +1548,7 @@ model UserCalendarCategory {
   /// Hex RGB e.g. #2563EB
   color              String
   sortOrder          Int             @default(0)
-  /// Built-in template key (course, study, …). Null = user-created; only one row per user per key when set.
+  /// Starter template key. Null = user-created; only one row per user per key when set.
   presetKey          String?
   /// Optional ICS/WebCal feed URL; events are merged on Home (server-fetched, not copied to DB).
   icsSubscriptionUrl String?

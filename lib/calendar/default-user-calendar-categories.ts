@@ -3,10 +3,10 @@ import type { PrismaClient } from "@prisma/client";
 import { normalizeCalendarCategoryHex } from "@/lib/calendar/calendar-category-colors";
 
 /**
- * Built-in calendar lists per user (`presetKey` unique per user).
+ * Starter calendar lists per user (`presetKey` unique per user).
  *
- * These should stay general-purpose. Discover buddy posts no longer use fixed activity buckets,
- * so calendar defaults should not recreate those old buckets as built-in lists.
+ * These are seeded once, then behave like user-owned calendars: users may rename, recolor, or
+ * delete them without the server recreating them on the next load.
  */
 export const DEFAULT_USER_CALENDAR_PRESETS: ReadonlyArray<{
   presetKey: string;
@@ -14,10 +14,9 @@ export const DEFAULT_USER_CALENDAR_PRESETS: ReadonlyArray<{
   color: string;
   sortOrder: number;
 }> = [
-  { presetKey: "personal", name: "Personal", color: "#EA580C", sortOrder: 0 },
-  { presetKey: "work", name: "Work", color: "#1E3A8A", sortOrder: 1 },
-  { presetKey: "important", name: "Important", color: "#DC2626", sortOrder: 2 },
-  { presetKey: "other", name: "Other", color: "#64748B", sortOrder: 3 },
+  { presetKey: "study", name: "Study", color: "#2563EB", sortOrder: 0 },
+  { presetKey: "work", name: "Work", color: "#0D9488", sortOrder: 1 },
+  { presetKey: "personal", name: "Personal", color: "#EA580C", sortOrder: 2 },
 ];
 
 /**
@@ -27,7 +26,7 @@ export const DEFAULT_USER_CALENDAR_PRESETS: ReadonlyArray<{
  */
 const LEGACY_PRESET_COLORS_BY_KEY: Readonly<Record<string, readonly string[]>> = {
   personal: ["#6B7280"],
-  work: ["#1E40AF"],
+  work: ["#1E40AF", "#1E3A8A"],
   course: ["#2563EB"],
   study: ["#7C3AED"],
   meal: ["#D97706"],
@@ -41,7 +40,6 @@ const LEGACY_PRESET_COLORS_BY_KEY: Readonly<Record<string, readonly string[]>> =
  */
 export const OBSOLETE_USER_CALENDAR_PRESET_KEYS = [
   "course",
-  "study",
   "meal",
   "language",
   "sports",
@@ -54,6 +52,8 @@ export const OBSOLETE_USER_CALENDAR_PRESET_KEYS = [
   "universitycalendar",
   "university_calendar",
 ] as const;
+
+const RETIRED_GENERAL_PRESET_KEYS = ["important", "other"] as const;
 
 async function syncPresetSortOrders(prisma: PrismaClient, userId: string): Promise<void> {
   await Promise.all(
@@ -86,17 +86,39 @@ async function upgradeLegacyPresetColors(prisma: PrismaClient, userId: string): 
   }
 }
 
-/** Idempotent: insert any missing preset categories for this user; keep preset sort order canonical; optional legacy color lift. */
+async function removeUnusedRetiredPresets(prisma: PrismaClient, userId: string): Promise<void> {
+  const retired = await prisma.userCalendarCategory.findMany({
+    where: { userId, presetKey: { in: [...RETIRED_GENERAL_PRESET_KEYS] } },
+    select: { id: true, _count: { select: { entries: true } } },
+  });
+  const unusedIds = retired
+    .filter((category) => category._count.entries === 0)
+    .map((category) => category.id);
+  if (unusedIds.length > 0) {
+    await prisma.userCalendarCategory.deleteMany({ where: { id: { in: unusedIds } } });
+  }
+}
+
+/** Idempotent and one-shot: seed starter calendars and migrate retired defaults without data loss. */
 export async function ensureUserCalendarCategories(
   prisma: PrismaClient,
   userId: string,
 ): Promise<void> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { calendarCategoriesInitializedAt: true },
+  });
+  if (!user || user.calendarCategoriesInitializedAt) return;
+
   await prisma.userCalendarCategory.deleteMany({
     where: {
       userId,
       presetKey: { in: [...OBSOLETE_USER_CALENDAR_PRESET_KEYS] },
     },
   });
+
+  // Keep retired categories that still contain events so old schedules and share links remain valid.
+  await removeUnusedRetiredPresets(prisma, userId);
 
   const existing = await prisma.userCalendarCategory.findMany({
     where: { userId, presetKey: { not: null } },
@@ -119,4 +141,8 @@ export async function ensureUserCalendarCategories(
 
   await syncPresetSortOrders(prisma, userId);
   await upgradeLegacyPresetColors(prisma, userId);
+  await prisma.user.update({
+    where: { id: userId },
+    data: { calendarCategoriesInitializedAt: new Date() },
+  });
 }

@@ -25,6 +25,18 @@ struct ForegroundPushNotice: Equatable, Sendable {
         kind == "plan_accepted"
     }
 
+    /// Prefer the explicit server route, but keep notification taps useful when an
+    /// older or partially delivered payload only contains its conversation ID.
+    var navigationURL: String? {
+        if let url, !url.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return url
+        }
+        if let connectionID { return "/connections/\(connectionID)" }
+        if let courseID { return "/courses/\(courseID)/chat" }
+        if let groupChatID { return "/groups/\(groupChatID)" }
+        return nil
+    }
+
     init(
         title: String,
         body: String,
@@ -74,6 +86,25 @@ enum ActiveChatPresentation {
 final class SideSeatAppDelegate: NSObject, UIApplicationDelegate {
     weak var session: SessionStore?
     weak var deepLinkRouter: DeepLinkRouter?
+    @MainActor private var pendingNotificationURL: String?
+
+    @MainActor
+    func installDeepLinkRouter(_ router: DeepLinkRouter) {
+        deepLinkRouter = router
+        guard let pendingNotificationURL else { return }
+        self.pendingNotificationURL = nil
+        router.handleNotificationURL(pendingNotificationURL)
+    }
+
+    @MainActor
+    func routeNotification(_ rawURL: String) {
+        if let deepLinkRouter {
+            deepLinkRouter.handleNotificationURL(rawURL)
+        } else {
+            // A notification tap can arrive before SideSeatApp's first task runs.
+            pendingNotificationURL = rawURL
+        }
+    }
 
     func application(
         _ application: UIApplication,
@@ -143,8 +174,8 @@ extension SideSeatAppDelegate: UNUserNotificationCenterDelegate {
         )
         Self.refreshAppState(for: notice)
         Task { @MainActor [weak self] in
-            if let url {
-                self?.deepLinkRouter?.handleNotificationURL(url)
+            if let navigationURL = notice.navigationURL {
+                self?.routeNotification(navigationURL)
             }
         }
         completionHandler()
@@ -161,7 +192,7 @@ extension SideSeatAppDelegate: UNUserNotificationCenterDelegate {
     }
 
     nonisolated private static func refreshAppState(for notice: ForegroundPushNotice) {
-        let rawURL = notice.url ?? ""
+        let rawURL = notice.navigationURL ?? ""
         let path = URL(string: rawURL)?.path ?? rawURL
         let isChat = path.hasPrefix("/connections/")
             || (path.hasPrefix("/courses/") && path.hasSuffix("/chat"))

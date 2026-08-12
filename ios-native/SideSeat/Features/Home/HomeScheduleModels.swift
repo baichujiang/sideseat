@@ -228,6 +228,8 @@ struct NativeHomeCalendarCategory: Codable, Hashable, Identifiable, Sendable {
     let color: String
     let presetKey: String?
     let icsSubscriptionUrl: String?
+
+    var displayName: String { CalendarCategoryDisplayName.resolve(name: name, presetKey: presetKey) }
 }
 
 struct NativeHomeCompanionOption: Codable, Hashable, Identifiable, Sendable {
@@ -451,6 +453,36 @@ extension NativeHomeSchedule {
                     icsSubscriptionUrl: nil
                 )
             ]
+        )
+    }
+
+    static func uiTestingAllDayFixture(now: Date) -> NativeHomeSchedule {
+        let base = uiTestingFixture(now: now)
+        let calendar = Calendar.sideSeatBerlin
+        let start = calendar.startOfDay(for: now)
+        let end = calendar.date(byAdding: .day, value: 2, to: start) ?? start.addingTimeInterval(48 * 3_600)
+        let allDay = NativeHomeStudyEntry(
+            id: "icsfeed:ui-all-day:0",
+            title: "Reading week",
+            location: nil,
+            withLabel: nil,
+            note: "Imported all-day subscription",
+            repeatRule: "NONE",
+            repeatUntilISO: nil,
+            eventParticipants: [],
+            startISO: start.ISO8601Format(),
+            endISO: end.ISO8601Format(),
+            categoryId: "external",
+            categoryColor: "#16A34A",
+            categoryName: "External",
+            discoverActivityId: nil
+        )
+        return NativeHomeSchedule(
+            window: base.window,
+            classBlocks: base.classBlocks,
+            studyEntries: base.studyEntries + [allDay],
+            companionOptions: base.companionOptions,
+            initialCalendarCategories: base.initialCalendarCategories
         )
     }
 

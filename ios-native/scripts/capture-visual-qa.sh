@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Capture Auth + 5-tab screenshots in light and dark for design-freeze visual QA (§8).
+# Capture the full launch, tab, sharing, and courses screenshot matrix in light and dark.
 # Simulator (default): uses simctl appearance + --ui-testing-appearance=.
 # Physical device: set DEVICE_UDID=<udid> (or pass --device). Appearance forced via launch arg only.
 set -euo pipefail
@@ -17,7 +17,7 @@ Usage: capture-visual-qa.sh [--device [UDID]] [--simulator [UDID]]
 
   --device [UDID]      Run on a paired physical iPhone (required for 真机 §8).
                        If UDID omitted, picks the first available iPhone from
-                       `xcrun xctrace list devices` / `devicectl`.
+                       `xcrun xctrace list devices`.
   --simulator [UDID]   Run on Simulator (default iPhone 17 Pro).
   DEVICE_UDID=...      Same as --device (env).
   SIM_DEVICE_ID=...    Same as --simulator (env).
@@ -50,34 +50,7 @@ if [[ -n "$DEVICE_UDID" ]]; then
 fi
 
 resolve_physical_udid() {
-  if [[ -n "$DEVICE_UDID" ]]; then
-    printf '%s\n' "$DEVICE_UDID"
-    return
-  fi
-  # Prefer xctrace: hardware listed before "== Simulators ==".
-  local line
-  line="$(
-    xcrun xctrace list devices 2>/dev/null | sed -n '1,/^== Simulators ==$/p' \
-      | grep -E 'iPhone|iPad' \
-      | grep -Eo '\([0-9A-Fa-f-]{25,}\)' \
-      | head -1 \
-      | tr -d '()'
-  )"
-  if [[ -n "${line:-}" ]]; then
-    printf '%s\n' "$line"
-    return
-  fi
-  line="$(
-    xcrun devicectl list devices 2>/dev/null \
-      | grep -E 'iPhone|iPad' \
-      | grep -Eo '[0-9A-Fa-f-]{25,}' \
-      | head -1
-  )"
-  if [[ -n "${line:-}" ]]; then
-    printf '%s\n' "$line"
-    return
-  fi
-  return 1
+  DEVICE_UDID="$DEVICE_UDID" "$IOS/scripts/resolve-physical-iphone-udid.sh"
 }
 
 mkdir -p "$OUT"
@@ -93,13 +66,13 @@ run_appearance() {
   xcodebuild \
     -scheme SideSeat-Development \
     -destination "$destination" \
-    -only-testing:SideSeatUITests/VisualQAScreenshotUITests/testCaptureCurrentAppearanceMatrix \
+    -only-testing:SideSeatUITests/VisualQAScreenshotUITests \
     test
 }
 
 if [[ "$MODE" == "device" ]]; then
   UDID="$(resolve_physical_udid)" || {
-    echo "error: no physical iPhone/iPad found. Plug in a device, Trust this computer, enable Developer Mode, then re-run:" >&2
+    echo "error: no physical iPhone found. Plug in an iPhone, Trust this computer, enable Developer Mode, then re-run:" >&2
     echo "  ios-native/scripts/capture-visual-qa.sh --device" >&2
     exit 1
   }

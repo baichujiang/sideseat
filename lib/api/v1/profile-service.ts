@@ -184,6 +184,8 @@ export async function updateNativeCurrentProfile(options: {
 }) {
   const db = options.tx ?? prisma;
   const values = options.values;
+  const changedSchool = values.school !== undefined
+    && schoolIdentityChanged(options.user.school, values.school);
   let schoolChange: Awaited<ReturnType<typeof archivePreviousSchoolSocialState>> | null = null;
 
   const data: Prisma.UserUpdateInput = {};
@@ -206,7 +208,7 @@ export async function updateNativeCurrentProfile(options: {
   if (values.gender !== undefined) data.gender = values.gender;
   if (values.school !== undefined) {
     data.school = values.school;
-    if (schoolIdentityChanged(options.user.school, values.school)) {
+    if (changedSchool) {
       data.courseReviewSemesterLabel = null;
     }
   }
@@ -242,8 +244,8 @@ export async function updateNativeCurrentProfile(options: {
     data,
   });
 
-  if (values.school !== undefined) {
-    if (schoolIdentityChanged(options.user.school, values.school) && options.tx) {
+  if (changedSchool && values.school !== undefined) {
+    if (options.tx) {
       schoolChange = await archivePreviousSchoolSocialState(options.tx, {
         userId: options.user.id,
         previousSchool: options.user.school,

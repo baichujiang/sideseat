@@ -127,6 +127,7 @@ struct ForgotPasswordSheet: View {
                 title: String(localized: "New password"),
                 text: $password,
                 isVisible: $isPasswordVisible,
+                contentType: .newPassword,
                 submitLabel: .next,
                 accessibilityID: "forgot-password"
             )
@@ -137,6 +138,7 @@ struct ForgotPasswordSheet: View {
                 title: String(localized: "Confirm new password"),
                 text: $confirmPassword,
                 isVisible: $isPasswordVisible,
+                contentType: .newPassword,
                 submitLabel: .go,
                 accessibilityID: "forgot-confirm-password"
             )
@@ -164,7 +166,7 @@ struct ForgotPasswordSheet: View {
             }
             .buttonStyle(.plain)
             .foregroundStyle(
-                resendSecondsRemaining > 0 ? SideSeatTheme.textSecondary : SideSeatTheme.accent
+                resendSecondsRemaining > 0 ? SideSeatTheme.textSecondary : SideSeatTheme.textPrimary
             )
             .disabled(resendSecondsRemaining > 0 || isWorking)
             .frame(maxWidth: .infinity)

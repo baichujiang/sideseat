@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cronMonitorUrlFor } from "@/lib/ops/cron-monitor-config";
+
 export type ObservedCronJob =
   | "calendar-reminders"
   | "chat-realtime-retention"
@@ -23,10 +25,12 @@ function cronErrorMessage(cause: unknown) {
 }
 
 async function reportCronResult(payload: CronMonitorPayload) {
-  const monitorUrl = process.env.CRON_MONITOR_URL?.trim();
-  if (!monitorUrl) return;
-
   try {
+    const monitorUrl = cronMonitorUrlFor(payload.job, payload.status);
+    if (!monitorUrl) {
+      console.error(`[cron-monitor] No monitor endpoint configured for ${payload.job}.`);
+      return;
+    }
     const response = await fetch(monitorUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

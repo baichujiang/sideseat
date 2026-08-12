@@ -9,6 +9,13 @@ final class DeepLinkRouter {
     private(set) var navigationEpoch = 0
 
     func handle(_ url: URL) {
+        guard Self.isSupportedScheme(url) else { return }
+        if let tabRoute = Self.tabRoute(forAppPath: Self.appPath(for: url)) {
+            pendingTab = tabRoute.tab
+            pendingRoute = tabRoute.route
+            navigationEpoch += 1
+            return
+        }
         guard let route = Self.route(for: url) else { return }
         pendingRoute = route
         pendingTab = Self.tab(for: route)
@@ -57,14 +64,25 @@ final class DeepLinkRouter {
     }
 
     nonisolated static func route(for url: URL) -> AppRoute? {
-        guard let scheme = url.scheme?.lowercased(),
-              scheme == "https" || scheme == "sideseat" || scheme == "http"
-        else { return nil }
+        guard isSupportedScheme(url), let scheme = url.scheme?.lowercased() else { return nil }
         var components = url.pathComponents.filter { $0 != "/" }
         if scheme == "sideseat", let host = url.host, !host.isEmpty {
             components.insert(host, at: 0)
         }
         return route(forPathComponents: components)
+    }
+
+    nonisolated private static func isSupportedScheme(_ url: URL) -> Bool {
+        guard let scheme = url.scheme?.lowercased() else { return false }
+        return scheme == "https" || scheme == "sideseat" || scheme == "http"
+    }
+
+    nonisolated private static func appPath(for url: URL) -> String {
+        guard url.scheme?.lowercased() == "sideseat",
+              let host = url.host,
+              !host.isEmpty
+        else { return url.path }
+        return "/\(host)\(url.path)"
     }
 
     nonisolated static func route(forPath path: String) -> AppRoute? {

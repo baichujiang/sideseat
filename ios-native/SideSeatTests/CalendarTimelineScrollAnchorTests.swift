@@ -16,6 +16,33 @@ struct CalendarAllDayStyleTests {
         let shortEnd = try #require(calendar.date(bySettingHour: 11, minute: 0, second: 0, of: day))
         #expect(!CalendarAllDayStyle.contains(start: start, end: shortEnd, on: day, calendar: calendar))
     }
+
+    @Test("A Berlin date-only range remains in the all-day band across DST")
+    func dateOnlyRangeAcrossDST() throws {
+        let calendar = Calendar.sideSeatBerlin
+        let firstDay = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 10, day: 25))
+        )
+        let secondDay = try #require(calendar.date(byAdding: .day, value: 1, to: firstDay))
+        let end = try #require(calendar.date(byAdding: .day, value: 2, to: firstDay))
+
+        #expect(
+            CalendarAllDayStyle.contains(
+                start: firstDay,
+                end: end,
+                on: firstDay,
+                calendar: calendar
+            )
+        )
+        #expect(
+            CalendarAllDayStyle.contains(
+                start: firstDay,
+                end: end,
+                on: secondDay,
+                calendar: calendar
+            )
+        )
+    }
 }
 
 @Suite("Calendar chrome formatting")
@@ -37,7 +64,7 @@ struct CalendarChromeFormattingTests {
     func selectionVersusTodayColors() {
         let selectedTodayWeekday = CalendarChrome.weekdayForeground(selected: true, isToday: true)
         let unselectedTodayWeekday = CalendarChrome.weekdayForeground(selected: false, isToday: true)
-        #expect(selectedTodayWeekday == SideSeatTheme.accent)
+        #expect(selectedTodayWeekday == SideSeatTheme.textPrimary)
         #expect(unselectedTodayWeekday == CalendarChrome.nowRed)
 
         let selectedNumber = CalendarChrome.dayNumberForeground(selected: true, isToday: false)
@@ -57,6 +84,35 @@ struct CalendarChromeFormattingTests {
         #expect(CalendarChrome.timelineEndCapHeight > 0)
         #expect(CalendarChrome.timelineEndCapHeight <= 16)
         #expect(CalendarChrome.compactHour(24) == "24")
+    }
+
+    @Test("Short event hit targets reach 44pt and stay inside day boundaries")
+    func eventHitTargetsStayInsideTimeline() {
+        let middle = CalendarChrome.eventHitTargetLayout(
+            visualTop: 100,
+            visualHeight: 30,
+            gridHeight: 1_000
+        )
+        #expect(middle.targetHeight == 44)
+        #expect(middle.top == 93)
+        #expect(middle.topInset == 7)
+        #expect(middle.bottomInset == 7)
+
+        let nearStart = CalendarChrome.eventHitTargetLayout(
+            visualTop: 2,
+            visualHeight: 18,
+            gridHeight: 1_000
+        )
+        #expect(nearStart.top == 0)
+        #expect(nearStart.topInset + 18 + nearStart.bottomInset == 44)
+
+        let nearEnd = CalendarChrome.eventHitTargetLayout(
+            visualTop: 982,
+            visualHeight: 18,
+            gridHeight: 1_000
+        )
+        #expect(nearEnd.top == 956)
+        #expect(nearEnd.topInset + 18 + nearEnd.bottomInset == 44)
     }
 }
 

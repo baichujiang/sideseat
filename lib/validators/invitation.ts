@@ -101,6 +101,8 @@ export const reportSchema = z.object({
   classmatePostId: z.string().cuid().optional(),
   /** Report targets a public question or host answer under a buddy post. */
   classmatePostCommentId: z.string().cuid().optional(),
+  /** Report targets a public message or organizer reply under an activity. */
+  discoverActivityCommentId: z.string().cuid().optional(),
   reason: z.nativeEnum(ReportReason),
   details: z.string().max(500).optional().or(z.literal("")),
 });

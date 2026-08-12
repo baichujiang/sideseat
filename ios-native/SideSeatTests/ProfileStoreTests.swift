@@ -220,6 +220,79 @@ struct ProfileStoreTests {
     }
 }
 
+@Suite("Feedback presentation state")
+struct FeedbackPresentationStateTests {
+    @Test("Switches and clears votes without drifting counters")
+    func switchesAndClearsVotes() {
+        let original = makePost(up: 3, down: 1, myVote: nil)
+
+        let upvoted = original.applyingVote("UP")
+        #expect(upvoted.up == 4)
+        #expect(upvoted.down == 1)
+        #expect(upvoted.score == 3)
+        #expect(upvoted.myVote == "UP")
+
+        let downvoted = upvoted.applyingVote("DOWN")
+        #expect(downvoted.up == 3)
+        #expect(downvoted.down == 2)
+        #expect(downvoted.score == 1)
+        #expect(downvoted.myVote == "DOWN")
+
+        let cleared = downvoted.applyingVote(nil)
+        #expect(cleared.up == 3)
+        #expect(cleared.down == 1)
+        #expect(cleared.score == 2)
+        #expect(cleared.myVote == nil)
+    }
+
+    @Test("Appends a comment once and updates the visible count")
+    func appendsCommentIdempotently() {
+        let comment = NativeFeedbackComment(
+            id: "comment-1",
+            body: "This would help.",
+            isOfficial: false,
+            createdAt: "2026-08-10T12:05:00.000Z",
+            author: makeAuthor()
+        )
+
+        let once = makePost().appending(comment)
+        let twice = once.appending(comment)
+        #expect(once.commentCount == 1)
+        #expect(twice.commentCount == 1)
+        #expect(twice.comments?.map(\.id) == ["comment-1"])
+    }
+
+    private func makePost(
+        up: Int = 0,
+        down: Int = 0,
+        myVote: String? = nil
+    ) -> NativeFeedbackPost {
+        NativeFeedbackPost(
+            id: "feedback-1",
+            topic: "idea",
+            title: "Calendar improvement",
+            message: "Make shared schedules easier to compare.",
+            createdAt: "2026-08-10T12:00:00.000Z",
+            score: up - down,
+            commentCount: 0,
+            up: up,
+            down: down,
+            myVote: myVote,
+            comments: [],
+            author: makeAuthor()
+        )
+    }
+
+    private func makeAuthor() -> NativeFeedbackAuthor {
+        NativeFeedbackAuthor(
+            id: "user-1",
+            username: "test_001",
+            nickname: "Test User",
+            avatarUrl: nil
+        )
+    }
+}
+
 private actor ProfileMemoryCredentialStore: CredentialStore {
     private var token: String?
     func refreshToken() -> String? { token }
