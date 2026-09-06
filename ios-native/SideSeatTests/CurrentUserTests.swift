@@ -56,6 +56,45 @@ struct MVPReadinessTests {
     }
 }
 
+@Suite("MVP readiness cache", .serialized)
+struct MVPReadinessCacheTests {
+    @Test("Persists last-known ready state per user")
+    func persistsReadyState() throws {
+        let suiteName = "mvp-readiness-cache-tests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        #expect(MVPReadinessCache.ready(userID: "user-a", defaults: defaults) == nil)
+
+        MVPReadinessCache.store(
+            NativeMVPReadiness(
+                campusIdentityComplete: true,
+                languagesComplete: true,
+                verificationState: "VERIFIED",
+                ready: true
+            ),
+            userID: "user-a",
+            defaults: defaults
+        )
+        MVPReadinessCache.store(
+            NativeMVPReadiness(
+                campusIdentityComplete: true,
+                languagesComplete: false,
+                verificationState: "VERIFIED",
+                ready: false
+            ),
+            userID: "user-b",
+            defaults: defaults
+        )
+
+        #expect(MVPReadinessCache.ready(userID: "user-a", defaults: defaults) == true)
+        #expect(MVPReadinessCache.ready(userID: "user-b", defaults: defaults) == false)
+
+        MVPReadinessCache.remove(userID: "user-a", defaults: defaults)
+        #expect(MVPReadinessCache.ready(userID: "user-a", defaults: defaults) == nil)
+    }
+}
+
 @Suite("App language", .serialized)
 struct AppLanguageTests {
     @Test("Persists an in-app language selection")

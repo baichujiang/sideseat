@@ -1,6 +1,28 @@
 import Foundation
 import Observation
 
+enum MVPReadinessCache {
+    private static let keyPrefix = "sideseat.mvp-readiness.ready."
+
+    static func ready(userID: String, defaults: UserDefaults = .standard) -> Bool? {
+        let key = keyPrefix + userID
+        guard defaults.object(forKey: key) != nil else { return nil }
+        return defaults.bool(forKey: key)
+    }
+
+    static func store(
+        _ readiness: NativeMVPReadiness,
+        userID: String,
+        defaults: UserDefaults = .standard
+    ) {
+        defaults.set(readiness.ready, forKey: keyPrefix + userID)
+    }
+
+    static func remove(userID: String, defaults: UserDefaults = .standard) {
+        defaults.removeObject(forKey: keyPrefix + userID)
+    }
+}
+
 @MainActor
 @Observable
 final class CurrentProfileStore {
@@ -10,6 +32,14 @@ final class CurrentProfileStore {
     private(set) var isSaving = false
     private(set) var issue: String?
 
+    func reset() {
+        profile = nil
+        lastSchoolChange = nil
+        isLoading = false
+        isSaving = false
+        issue = nil
+    }
+
     func load(using session: SessionStore) async {
         isLoading = true
         issue = nil
@@ -18,14 +48,16 @@ final class CurrentProfileStore {
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             let arguments = ProcessInfo.processInfo.arguments
-            if arguments.contains("--ui-testing-pending-profile") {
-                profile = .uiTestingPendingFixture
+            if arguments.contains("--ui-testing-required-setup") {
+                install(.uiTestingRequiredSetupFixture)
+            } else if arguments.contains("--ui-testing-pending-profile") {
+                install(.uiTestingPendingFixture)
             } else if arguments.contains("--ui-testing-rejected-profile") {
-                profile = .uiTestingRejectedFixture
+                install(.uiTestingRejectedFixture)
             } else if arguments.contains("--ui-testing-unverified-profile") {
-                profile = .uiTestingUnverifiedFixture
+                install(.uiTestingUnverifiedFixture)
             } else {
-                profile = .uiTestingFixture
+                install(.uiTestingFixture)
             }
             return
         }
@@ -35,7 +67,7 @@ final class CurrentProfileStore {
             let response: APIEnvelope<NativeCurrentProfile> = try await session.sendAuthorized(
                 "api/v1/me"
             )
-            profile = response.data
+            install(response.data)
         } catch {
             issue = error.localizedDescription
         }
@@ -54,7 +86,7 @@ final class CurrentProfileStore {
             let changedSchool = request.school.map {
                 StudentIdentityDisplay.schoolCode($0) != StudentIdentityDisplay.schoolCode(current.school)
             } ?? false
-            profile = current.applying(request)
+            install(current.applying(request))
             if changedSchool {
                 lastSchoolChange = NativeProfileSchoolChangeSummary(
                     archivedCourseCount: 2,
@@ -74,8 +106,56 @@ final class CurrentProfileStore {
                 body: request,
                 idempotencyKey: UUID().uuidString
             )
-            profile = response.data.profile
+            install(response.data.profile)
             lastSchoolChange = response.data.schoolChange
+            return true
+        } catch {
+            issue = error.localizedDescription
+            return false
+        }
+    }
+
+    func saveLanguages(
+        _ languages: [NativeCoordinationLanguage],
+        using session: SessionStore
+    ) async -> Bool {
+        guard !isSaving, !languages.isEmpty else { return false }
+        isSaving = true
+        issue = nil
+        defer { isSaving = false }
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            let current = profile ?? .uiTestingRequiredSetupFixture
+            let campusComplete =
+                !StudentIdentityDisplay.schoolCode(current.school).isEmpty &&
+                !(current.studentStatus?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+            let verificationComplete =
+                current.verifiedStudent &&
+                current.studentVerificationStatus.uppercased() == "VERIFIED"
+            let readiness = NativeMVPReadiness(
+                campusIdentityComplete: campusComplete,
+                languagesComplete: true,
+                verificationState: current.studentVerificationStatus,
+                ready: campusComplete && verificationComplete
+            )
+            install(current.withMVPState(languages: languages, readiness: readiness))
+            return true
+        }
+        #endif
+
+        struct Request: Encodable, Sendable {
+            let languages: [NativeCoordinationLanguage]
+        }
+
+        do {
+            let response: APIEnvelope<NativeCurrentProfile> = try await session.sendAuthorized(
+                "api/v1/me/languages",
+                method: .put,
+                body: Request(languages: languages),
+                idempotencyKey: UUID().uuidString
+            )
+            install(response.data)
             return true
         } catch {
             issue = error.localizedDescription
@@ -91,10 +171,10 @@ final class CurrentProfileStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            profile = (profile ?? .uiTestingFixture).applyingUsername(
+            install((profile ?? .uiTestingFixture).applyingUsername(
                 username.lowercased(),
                 updatedAt: Date().ISO8601Format()
-            )
+            ))
             return true
         }
         #endif
@@ -106,7 +186,7 @@ final class CurrentProfileStore {
                 body: NativeProfileUsernameUpdateRequest(username: username),
                 idempotencyKey: UUID().uuidString
             )
-            profile = response.data
+            install(response.data)
             return true
         } catch {
             issue = error.localizedDescription
@@ -130,7 +210,7 @@ final class CurrentProfileStore {
                 verifyUrl: "http://127.0.0.1:3000/api/student-verification/verify?token=ui-testing",
                 message: AppLocalization.string( "Email delivery is disabled in this test build. Use the verification link below to finish now.")
             )
-            profile = (profile ?? .uiTestingFixture).applyingVerification(status: result.status, verifiedStudent: false)
+            install((profile ?? .uiTestingFixture).applyingVerification(status: result.status, verifiedStudent: false))
             return result
         }
         #endif
@@ -142,10 +222,12 @@ final class CurrentProfileStore {
                 body: NativeStudentVerificationRequest(email: normalized),
                 idempotencyKey: UUID().uuidString
             )
-            profile = profile?.applyingVerification(
-                status: response.data.status,
-                verifiedStudent: response.data.status.uppercased() == "VERIFIED"
-            )
+            if let current = profile {
+                install(current.applyingVerification(
+                    status: response.data.status,
+                    verifiedStudent: response.data.status.uppercased() == "VERIFIED"
+                ))
+            }
             return response.data
         } catch {
             issue = error.localizedDescription
@@ -171,7 +253,7 @@ final class CurrentProfileStore {
                 verifyUrl: nil,
                 message: AppLocalization.string( "Your school document was submitted for review.")
             )
-            profile = (profile ?? .uiTestingFixture).applyingVerification(status: result.status, verifiedStudent: false)
+            install((profile ?? .uiTestingFixture).applyingVerification(status: result.status, verifiedStudent: false))
             return result
         }
         #endif
@@ -189,7 +271,9 @@ final class CurrentProfileStore {
                 fields: normalizedEmail.isEmpty ? [:] : ["email": normalizedEmail],
                 idempotencyKey: UUID().uuidString
             )
-            profile = profile?.applyingVerification(status: response.data.status, verifiedStudent: false)
+            if let current = profile {
+                install(current.applyingVerification(status: response.data.status, verifiedStudent: false))
+            }
             return response.data
         } catch {
             issue = error.localizedDescription
@@ -205,7 +289,7 @@ final class CurrentProfileStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            profile = (profile ?? .uiTestingFixture).applyingAvatar(url: "https://cdn.sideseat.test/avatars/ui-avatar.jpg")
+            install((profile ?? .uiTestingFixture).applyingAvatar(url: "https://cdn.sideseat.test/avatars/ui-avatar.jpg"))
             return true
         }
         #endif
@@ -221,7 +305,7 @@ final class CurrentProfileStore {
                 ),
                 idempotencyKey: UUID().uuidString
             )
-            profile = response.data.profile
+            install(response.data.profile)
             return true
         } catch {
             issue = error.localizedDescription
@@ -229,6 +313,12 @@ final class CurrentProfileStore {
         }
     }
 
+    private func install(_ nextProfile: NativeCurrentProfile) {
+        profile = nextProfile
+        if let readiness = nextProfile.readiness {
+            MVPReadinessCache.store(readiness, userID: nextProfile.id)
+        }
+    }
 }
 
 @MainActor
@@ -271,6 +361,61 @@ final class PublicProfileStore {
             profile: current.profile,
             sharedCourses: current.sharedCourses,
             peerCourses: current.peerCourses
+        )
+    }
+}
+
+private extension NativeCurrentProfile {
+    static var uiTestingRequiredSetupFixture: NativeCurrentProfile {
+        uiTestingFixture.withMVPState(
+            languages: [],
+            readiness: NativeMVPReadiness(
+                campusIdentityComplete: true,
+                languagesComplete: false,
+                verificationState: "UNVERIFIED",
+                ready: false
+            ),
+            verifiedStudent: false,
+            verificationStatus: "UNVERIFIED"
+        )
+    }
+
+    func withMVPState(
+        languages: [NativeCoordinationLanguage],
+        readiness: NativeMVPReadiness,
+        verifiedStudent nextVerifiedStudent: Bool? = nil,
+        verificationStatus nextVerificationStatus: String? = nil
+    ) -> NativeCurrentProfile {
+        NativeCurrentProfile(
+            id: id,
+            username: username,
+            nickname: nickname,
+            email: email,
+            phone: phone,
+            avatarUrl: avatarUrl,
+            tagline: tagline,
+            school: school,
+            studentStatus: studentStatus,
+            degreeLevel: degreeLevel,
+            major: major,
+            semester: semester,
+            graduationYear: graduationYear,
+            gender: gender,
+            onboardingComplete: onboardingComplete,
+            isGuest: isGuest,
+            verifiedStudent: nextVerifiedStudent ?? verifiedStudent,
+            studentVerificationStatus: nextVerificationStatus ?? studentVerificationStatus,
+            usernameUpdatedAt: usernameUpdatedAt,
+            usernameChangePolicy: usernameChangePolicy,
+            productTutorialDismissedAt: productTutorialDismissedAt,
+            locale: locale,
+            languages: languages,
+            readiness: readiness,
+            displayName: displayName,
+            schoolSummary: schoolSummary,
+            contacts: contacts,
+            privacy: privacy,
+            counts: counts
         )
     }
 }
