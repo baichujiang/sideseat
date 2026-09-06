@@ -1,15 +1,52 @@
 import SwiftUI
+import UIKit
+
+private struct CalendarDayScrollOffsetPreferenceKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
+private struct CalendarDayViewportTrackingModifier: ViewModifier {
+    let minuteHeight: CGFloat
+    let stepMinutes: Int
+    @Binding var viewportStartMinute: Int?
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *) {
+            content.onScrollGeometryChange(for: Int.self) { geometry in
+                let offset = max(0, geometry.contentOffset.y + geometry.contentInsets.top)
+                return snappedMinute(forOffset: offset)
+            } action: { _, nextMinute in
+                guard nextMinute != viewportStartMinute else { return }
+                viewportStartMinute = nextMinute
+            }
+        } else {
+            content
+        }
+    }
+
+    private func snappedMinute(forOffset offset: CGFloat) -> Int {
+        let rawMinute = max(0, offset / minuteHeight)
+        let step = CGFloat(stepMinutes)
+        let maximumMinute = CGFloat(24 * 60 - stepMinutes)
+        return Int(min(max(floor(rawMinute / step) * step, 0), maximumMinute))
+    }
+}
 
 struct CalendarDayTimelineView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
+
     let date: Date
     let items: [HomeAgendaItem]
     let onOpen: (HomeAgendaItem) -> Void
-    let onEdit: (HomeAgendaItem) -> Void
     let onCopy: (HomeAgendaItem) -> Void
     let onDuplicate: (HomeAgendaItem) -> Void
-    let movingEventID: String?
-    let onStartMove: (HomeAgendaItem) -> Void
-    let onChooseMoveTarget: (Date) -> Void
+    let onDelete: (HomeAgendaItem) -> Void
     let canPaste: Bool
     let onCreateAtSlot: (Date) -> Void
     let onPasteAtSlot: (Date) -> Void
@@ -18,10 +55,15 @@ struct CalendarDayTimelineView: View {
 
     @State private var menuEvent: HomeAgendaItem?
     @State private var menuSlot: Date?
+    @State private var verticalScrollPositionID: String?
+    @State private var verticalViewportStartMinute: Int?
+    @State private var verticalViewportHeight: CGFloat = 1
 
     private let calendar = Calendar.sideSeatBerlin
     private let minuteHeight = CalendarChrome.dayMinuteHeight
     private let timeGutter = CalendarChrome.dayTimeGutter
+    private static let verticalScrollPositionStepMinutes = 5
+    private static let scrollCoordinateSpace = "calendar-day-scroll-coordinate-space"
 
     private var allDayItems: [HomeAgendaItem] {
         items.filter { $0.isAllDayStyle(on: date, calendar: calendar) }
@@ -44,14 +86,21 @@ struct CalendarDayTimelineView: View {
                     CalendarAllDayBand(
                         items: allDayItems,
                         onOpen: onOpen,
+                        selectedActionItem: $menuEvent,
                         onLongPress: { item in
-                            guard movingEventID == nil else { return }
+                            guard item.source == .event else { return }
                             menuEvent = item
-                        }
+                        },
+                        onCopy: onCopy,
+                        onDuplicate: onDuplicate,
+                        onDelete: onDelete
                     )
                 }
                 .padding(.bottom, 4)
-                Divider().opacity(0.35)
+                Rectangle()
+                    .fill(CalendarChrome.hourLine)
+                    .frame(height: CalendarChrome.hourLineThickness)
+                    .allowsHitTesting(false)
             }
 
             GeometryReader { geometry in
@@ -63,13 +112,24 @@ struct CalendarDayTimelineView: View {
                         ZStack(alignment: .topLeading) {
                             // Laid-out anchors so ScrollViewReader can find real Y positions.
                             VStack(spacing: 0) {
-                                ForEach(0..<48, id: \.self) { index in
-                                    let minute = index * 30
+                                ForEach(
+                                    0..<(24 * 60 / Self.verticalScrollPositionStepMinutes),
+                                    id: \.self
+                                ) { index in
+                                    let minute = index * Self.verticalScrollPositionStepMinutes
                                     Color.clear
-                                        .frame(width: 1, height: CGFloat(30) * minuteHeight)
+                                        .frame(
+                                            // Match the week timeline's full gutter-width targets.
+                                            // A one-point target can be scrolled to, but SwiftUI may
+                                            // drop it from the scroll-position binding after layout.
+                                            width: timeGutter,
+                                            height: CGFloat(Self.verticalScrollPositionStepMinutes) * minuteHeight
+                                        )
                                         .id("timeline-slot-\(minute)")
+                                        .allowsHitTesting(false)
                                 }
                             }
+                            .scrollTargetLayout()
                             .accessibilityHidden(true)
 
                             timeline(width: geometry.size.width)
@@ -79,65 +139,111 @@ struct CalendarDayTimelineView: View {
                             height: contentHeight,
                             alignment: .topLeading
                         )
+                        .background {
+                            GeometryReader { contentGeometry in
+                                Color.clear.preference(
+                                    key: CalendarDayScrollOffsetPreferenceKey.self,
+                                    value: contentGeometry.frame(
+                                        in: .named(Self.scrollCoordinateSpace)
+                                    ).minY
+                                )
+                            }
+                        }
                     }
                     .scrollIndicators(.hidden)
+                    .scrollPosition(id: $verticalScrollPositionID, anchor: .top)
                     .accessibilityIdentifier("calendar-day-timeline")
+                    .coordinateSpace(name: Self.scrollCoordinateSpace)
+                    .onPreferenceChange(CalendarDayScrollOffsetPreferenceKey.self) { contentMinY in
+                        updateViewportStartMinute(forContentMinY: contentMinY)
+                    }
+                    .modifier(
+                        CalendarDayViewportTrackingModifier(
+                            minuteHeight: minuteHeight,
+                            stepMinutes: Self.verticalScrollPositionStepMinutes,
+                            viewportStartMinute: $verticalViewportStartMinute
+                        )
+                    )
+                    .background {
+                        GeometryReader { scrollGeometry in
+                            Color.clear
+                                .onAppear {
+                                    verticalViewportHeight = max(1, scrollGeometry.size.height)
+                                }
+                                .onChange(of: scrollGeometry.size.height) { _, nextHeight in
+                                    verticalViewportHeight = max(1, nextHeight)
+                                }
+                        }
+                    }
+                    .overlay {
+                        offscreenEventIndicators(width: geometry.size.width, reader: reader)
+                    }
+                    // Keep the final time slots scrollable above Home's 44-point
+                    // calendar-canvas create action without changing root geometry.
+                    .contentMargins(.bottom, 86, for: .scrollContent)
                     // Changing the visible day must keep the same vertical time position.
                     // Only an explicit re-anchor request (for example, Today) scrolls again.
                     .task(id: scrollAnchorToken) {
                         await Task.yield()
                         try? await Task.sleep(nanoseconds: 50_000_000)
-                        reader.scrollTo(scrollTargetID, anchor: .top)
+                        let target = scrollTargetID
+                        verticalScrollPositionID = target
+                        verticalViewportStartMinute = timelineMinute(from: target)
+                        reader.scrollTo(target, anchor: .top)
                     }
                 }
             }
         }
-        .frame(minHeight: 420, maxHeight: .infinity)
-        .background(SideSeatTheme.bg)
-        .calendarItemActions(
-            item: $menuEvent,
-            onOpen: onOpen,
-            onEdit: onEdit,
-            onCopy: onCopy,
-            onDuplicate: onDuplicate,
-            onStartMove: onStartMove,
-            moveAccessibilityIdentifier: "calendar-event-context-move"
+        .frame(
+            minHeight: dynamicTypeSize.isAccessibilitySize ? 0 : 420,
+            maxHeight: .infinity
         )
-        .confirmationDialog(
-            menuSlot.map(newEventLabel(for:)) ?? "",
+        .background(SideSeatTheme.bg)
+        .ssLongPressActionMenu(
             isPresented: Binding(
                 get: { menuSlot != nil },
                 set: { if !$0 { menuSlot = nil } }
             ),
-            titleVisibility: .visible,
-            presenting: menuSlot
-        ) { slot in
-            Button("New event") { onCreateAtSlot(slot) }
-                .accessibilityIdentifier("calendar-slot-context-new-event")
-            if canPaste {
-                Button("Paste copied event") { onPasteAtSlot(slot) }
-                    .accessibilityIdentifier("calendar-slot-context-paste-event")
-            }
-            Button("Cancel", role: .cancel) {}
+            title: menuSlot.map(newEventLabel(for:)) ?? AppLocalization.string("New event"),
+            actions: slotMenuActions
+        )
+    }
+
+    private var slotMenuActions: [SSLongPressAction] {
+        guard let slot = menuSlot else { return [] }
+        var actions = [
+            SSLongPressAction(
+                id: "calendar-slot-context-new-event",
+                title: AppLocalization.string("New event"),
+                systemImage: "calendar.badge.plus",
+                perform: { onCreateAtSlot(slot) }
+            ),
+        ]
+        if canPaste {
+            actions.append(
+                SSLongPressAction(
+                    id: "calendar-slot-context-paste-event",
+                    title: AppLocalization.string("Paste copied event"),
+                    systemImage: "doc.on.clipboard",
+                    perform: { onPasteAtSlot(slot) }
+                )
+            )
         }
+        return actions
     }
 
     private func timeline(width: CGFloat) -> some View {
         let placements = CalendarDayLayout.placements(items: timedItems, on: date, calendar: calendar)
-        let isToday = calendar.isDateInToday(date)
-
         return ZStack(alignment: .topLeading) {
-            if isToday {
-                CalendarChrome.todayWash
-                    .frame(width: max(0, width - timeGutter))
-                    .offset(x: timeGutter)
-            }
-
             ForEach(0...48, id: \.self) { index in
                 let minute = index * 30
                 Rectangle()
                     .fill(index.isMultiple(of: 2) ? CalendarChrome.hourLine : CalendarChrome.halfHourLine)
-                    .frame(height: index.isMultiple(of: 2) ? 0.66 : 0.33)
+                    .frame(
+                        height: index.isMultiple(of: 2)
+                            ? CalendarChrome.hourLineThickness
+                            : CalendarChrome.halfHourLineThickness
+                    )
                     .offset(x: timeGutter, y: CGFloat(minute) * minuteHeight)
             }
 
@@ -167,15 +273,14 @@ struct CalendarDayTimelineView: View {
                     .offset(x: timeGutter, y: CGFloat(minute) * minuteHeight)
                     .calendarTapOrLongPress(
                         onTap: {
-                            guard movingEventID == nil, let slot = slotDate(minute: minute) else { return }
+                            guard let slot = slotDate(minute: minute) else { return }
                             onCreateAtSlot(slot)
                         },
                         onLongPress: {
-                            guard movingEventID == nil, let slot = slotDate(minute: minute) else { return }
+                            guard let slot = slotDate(minute: minute) else { return }
                             menuSlot = slot
                         }
                     )
-                    .allowsHitTesting(movingEventID == nil)
                     .accessibilityElement()
                     .accessibilityLabel(slotAccessibilityLabel(minute: minute))
                     .accessibilityHint("Creates an event. Long press for more actions.")
@@ -184,12 +289,6 @@ struct CalendarDayTimelineView: View {
 
             ForEach(placements) { placement in
                 eventCard(placement, availableWidth: max(0, width - timeGutter - 8))
-            }
-
-            if movingEventID != nil {
-                ForEach(0..<48, id: \.self) { index in
-                    moveTarget(index: index, width: width)
-                }
             }
 
             if calendar.isDateInToday(date) {
@@ -205,7 +304,7 @@ struct CalendarDayTimelineView: View {
                             .padding(.trailing, 2)
 
                         Rectangle()
-                            .fill(CalendarChrome.nowRed)
+                            .fill(CalendarChrome.nowAccent)
                             .frame(height: CalendarChrome.nowLineThickness)
                             .frame(height: CalendarChrome.nowLineHitSlop, alignment: .center)
                     }
@@ -215,7 +314,7 @@ struct CalendarDayTimelineView: View {
                     .accessibilityIdentifier("day-now-indicator")
                     .accessibilityLabel(
                         String(
-                            format: String(localized: "Current time, %@"),
+                            format: AppLocalization.string( "Current time, %@"),
                             now.formatted(date: .omitted, time: .shortened)
                         )
                     )
@@ -250,7 +349,7 @@ struct CalendarDayTimelineView: View {
             subtitle: subtitle,
             color: color,
             height: height,
-            emphasized: placement.item.id == movingEventID,
+            emphasized: false,
             context: placement.item.context,
             contextSymbol: CalendarChrome.eventContextSymbol(for: placement.item)
         )
@@ -260,16 +359,21 @@ struct CalendarDayTimelineView: View {
         .contentShape(Rectangle())
         .calendarTapOrLongPress(
             onTap: {
-                guard movingEventID == nil else { return }
                 onOpen(placement.item)
             },
             onLongPress: {
-                guard movingEventID == nil else { return }
+                guard placement.item.source == .event else { return }
                 menuEvent = placement.item
             }
         )
+        .calendarItemActions(
+            target: placement.item,
+            selectedItem: $menuEvent,
+            onCopy: onCopy,
+            onDuplicate: onDuplicate,
+            onDelete: onDelete
+        )
         .offset(x: x, y: hitTarget.top)
-        .allowsHitTesting(movingEventID == nil)
         .accessibilityElement(children: .ignore)
         .accessibilityIdentifier("calendar-timeline-event-\(placement.item.id)")
         .accessibilityLabel(placement.item.title)
@@ -277,33 +381,113 @@ struct CalendarDayTimelineView: View {
         .accessibilityAddTraits(.isButton)
     }
 
-    private func moveTarget(index: Int, width: CGFloat) -> some View {
-        let minute = index * 30
-        let targetWidth = max(0, width - timeGutter)
+    @ViewBuilder
+    private func offscreenEventIndicators(
+        width: CGFloat,
+        reader: ScrollViewProxy
+    ) -> some View {
+        if menuEvent == nil,
+           menuSlot == nil,
+           verticalViewportHeight >= 80,
+           let viewportStartMinute = verticalViewportStartMinute
+        {
+            let viewportEndMinute = min(
+                24 * 60,
+                viewportStartMinute + Int(ceil(verticalViewportHeight / minuteHeight))
+            )
+            let topHint = CalendarOffscreenEventHints.nearest(
+                items: timedItems,
+                on: date,
+                viewportStartMinute: viewportStartMinute,
+                viewportEndMinute: viewportEndMinute,
+                edge: .top,
+                calendar: calendar
+            )
+            let bottomHint = CalendarOffscreenEventHints.nearest(
+                items: timedItems,
+                on: date,
+                viewportStartMinute: viewportStartMinute,
+                viewportEndMinute: viewportEndMinute,
+                edge: .bottom,
+                calendar: calendar
+            )
+            let canvasWidth = max(1, width - timeGutter)
+            let indicatorWidth = min(44, canvasWidth)
+            let indicatorX = timeGutter + canvasWidth / 2
 
-        return Button {
-            guard let slot = calendar.date(
-                byAdding: .minute,
-                value: minute,
-                to: calendar.startOfDay(for: date)
-            ) else { return }
-            onChooseMoveTarget(slot)
-        } label: {
-            Rectangle()
-                .fill(SideSeatTheme.accent.opacity(index.isMultiple(of: 2) ? 0.055 : 0.035))
-                .overlay(alignment: .top) {
-                    Rectangle()
-                        .fill(SideSeatTheme.accent.opacity(0.18))
-                        .frame(height: 0.5)
+            ZStack(alignment: .topLeading) {
+                Color.clear
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+
+                if let topHint {
+                    CalendarOffscreenEventBar(
+                        edge: .top,
+                        color: CalendarChrome.eventColor(for: topHint.item),
+                        availableWidth: indicatorWidth,
+                        accessibilityIdentifier: "calendar-day-offscreen-event-top",
+                        action: { scrollToOffscreenEvent(topHint, reader: reader) }
+                    )
+                    .position(x: indicatorX, y: 22)
+                    .transition(.opacity)
                 }
-                .contentShape(Rectangle())
+
+                if let bottomHint {
+                    CalendarOffscreenEventBar(
+                        edge: .bottom,
+                        color: CalendarChrome.eventColor(for: bottomHint.item),
+                        availableWidth: indicatorWidth,
+                        accessibilityIdentifier: "calendar-day-offscreen-event-bottom",
+                        action: { scrollToOffscreenEvent(bottomHint, reader: reader) }
+                    )
+                    .position(x: indicatorX, y: verticalViewportHeight - 22)
+                    .transition(.opacity)
+                }
+            }
+            .animation(
+                accessibilityReduceMotion ? nil : .easeOut(duration: 0.14),
+                value: topHint?.item.id
+            )
+            .animation(
+                accessibilityReduceMotion ? nil : .easeOut(duration: 0.14),
+                value: bottomHint?.item.id
+            )
         }
-        .buttonStyle(.plain)
-        .frame(width: targetWidth, height: CGFloat(30) * minuteHeight)
-        .offset(x: timeGutter, y: CGFloat(minute) * minuteHeight)
-        .accessibilityLabel(moveTargetAccessibilityLabel(minute: minute))
-        .accessibilityHint("Moves the selected event to this time")
-        .accessibilityIdentifier("calendar-move-target-\(minute)")
+    }
+
+    private func scrollToOffscreenEvent(
+        _ hint: CalendarOffscreenEventHint,
+        reader: ScrollViewProxy
+    ) {
+        let minute = CalendarOffscreenEventHints.scrollTargetMinute(for: hint)
+        let target = timelineScrollID(nearest: minute)
+        UISelectionFeedbackGenerator().selectionChanged()
+        withAnimation(accessibilityReduceMotion ? nil : .easeInOut(duration: 0.26)) {
+            verticalScrollPositionID = target
+            verticalViewportStartMinute = minute
+            reader.scrollTo(target, anchor: .top)
+        }
+    }
+
+    private func updateViewportStartMinute(forContentMinY contentMinY: CGFloat) {
+        let rawMinute = max(0, -contentMinY / minuteHeight)
+        let step = CGFloat(Self.verticalScrollPositionStepMinutes)
+        let maximumMinute = CGFloat(24 * 60 - Self.verticalScrollPositionStepMinutes)
+        let snappedMinute = Int(min(max(floor(rawMinute / step) * step, 0), maximumMinute))
+        guard snappedMinute != verticalViewportStartMinute else { return }
+        verticalViewportStartMinute = snappedMinute
+    }
+
+    private func timelineMinute(from identifier: String) -> Int? {
+        guard identifier.hasPrefix("timeline-slot-") else { return nil }
+        return Int(identifier.dropFirst("timeline-slot-".count))
+    }
+
+    private func timelineScrollID(nearest minute: Int) -> String {
+        let step = Self.verticalScrollPositionStepMinutes
+        let maximumMinute = 24 * 60 - step
+        let snapped = min(max((minute / step) * step, 0), maximumMinute)
+        return "timeline-slot-\(snapped)"
     }
 
     private func slotDate(minute: Int) -> Date? {
@@ -315,6 +499,12 @@ struct CalendarDayTimelineView: View {
     }
 
     private var scrollTargetID: String {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-offscreen-event-cues") {
+            return "timeline-slot-720"
+        }
+        #endif
+
         let firstMinute = CalendarTimelineScrollAnchor.firstEventMinute(
             items: timedItems,
             on: date,
@@ -337,19 +527,7 @@ struct CalendarDayTimelineView: View {
 
     private func newEventLabel(for slot: Date) -> String {
         String(
-            format: String(localized: "New event at %@"),
-            slot.formatted(date: .omitted, time: .shortened)
-        )
-    }
-
-    private func moveTargetAccessibilityLabel(minute: Int) -> String {
-        guard let slot = calendar.date(
-            byAdding: .minute,
-            value: minute,
-            to: calendar.startOfDay(for: date)
-        ) else { return String(localized: "Move event") }
-        return String(
-            format: String(localized: "Move event to %@"),
+            format: AppLocalization.string( "New event at %@"),
             slot.formatted(date: .omitted, time: .shortened)
         )
     }
@@ -375,7 +553,7 @@ struct CalendarDayTimelineView: View {
         switch item.context {
         case .publicPlan where !item.participantNames.isEmpty:
             let people = String(
-                format: String(localized: "%lld people"),
+                format: AppLocalization.string( "%lld people"),
                 Int64(item.participantNames.count)
             )
             return "\(time) · \(people)"

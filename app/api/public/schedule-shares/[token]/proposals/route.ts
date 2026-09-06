@@ -75,13 +75,16 @@ export async function POST(
     return error("Proposal times must fall within the shared schedule range.", 400);
   }
 
+  const reveal = parseRevealConfigJson(link.revealConfig);
   const fits = await rangeFitsScheduleShareSnapshot(prisma, {
     ownerUserId: link.ownerUserId,
     rangeStart: link.rangeStart,
     rangeEnd: link.rangeEnd,
     proposalStart: startTime,
     proposalEnd: endTime,
-    includedDates: parseRevealConfigJson(link.revealConfig).includedDates,
+    includedDates: reveal.includedDates,
+    availabilityStartMinutes: reveal.availabilityStartMinutes,
+    availabilityEndMinutes: reveal.availabilityEndMinutes,
   });
 
   if (!fits) {

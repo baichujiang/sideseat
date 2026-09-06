@@ -42,12 +42,12 @@ struct NativeCommunityConversation: Codable, Hashable, Sendable {
     var displayName: String {
         if kind == NativeCommunityChatKind.course.rawValue {
             let trimmed = name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            return trimmed.isEmpty ? String(localized: "Course chat") : trimmed
+            return trimmed.isEmpty ? AppLocalization.string( "Course chat") : trimmed
         }
         let trimmedTitle = title?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if !trimmedTitle.isEmpty { return trimmedTitle }
         let custom = customTitle?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return custom.isEmpty ? String(localized: "Group chat") : custom
+        return custom.isEmpty ? AppLocalization.string( "Group chat") : custom
     }
 
     init(
@@ -102,9 +102,9 @@ struct NativeCommunityMessageReply: Codable, Hashable, Sendable {
     var isDeleted: Bool { deletedAt != nil }
 
     var previewText: String {
-        if isDeleted { return String(localized: "Message deleted") }
+        if isDeleted { return AppLocalization.string( "Message deleted") }
         let trimmed = body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return trimmed.isEmpty ? String(localized: "Message") : trimmed
+        return trimmed.isEmpty ? AppLocalization.string( "Message") : trimmed
     }
 }
 
@@ -145,9 +145,9 @@ struct NativeCommunityMessage: Codable, Identifiable, Hashable, Sendable {
     }
 
     var previewText: String {
-        if isDeleted { return String(localized: "Message deleted") }
+        if isDeleted { return AppLocalization.string( "Message deleted") }
         let trimmed = body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return trimmed.isEmpty ? String(localized: "Message") : trimmed
+        return trimmed.isEmpty ? AppLocalization.string( "Message") : trimmed
     }
 
     func asReplyReference() -> NativeCommunityMessageReply {

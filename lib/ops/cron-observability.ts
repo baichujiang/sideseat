@@ -6,6 +6,8 @@ export type ObservedCronJob =
   | "calendar-reminders"
   | "chat-realtime-retention"
   | "student-verification-retention"
+  | "product-funnel-retention"
+  | "social-group-expiration"
   | "lmu-course-catalog"
   | "tum-course-catalog";
 

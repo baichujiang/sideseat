@@ -2,7 +2,6 @@ import SwiftUI
 
 struct CourseDetailView: View {
     @Environment(SessionStore.self) private var session
-    @Environment(RouterPath.self) private var router
     @State private var store = CourseDetailStore()
     @State private var confirmingLeave = false
 
@@ -27,13 +26,31 @@ struct CourseDetailView: View {
         .navigationTitle("Course")
         .navigationBarTitleDisplayMode(.inline)
         .task { if store.detail == nil { await load() } }
-        .confirmationDialog("Remove this course?", isPresented: $confirmingLeave) {
-            Button("Remove course", role: .destructive) {
-                Task { _ = await store.setEnrolled(false, courseID: courseID, using: session) }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("It will be removed from your current courses and classmate matching.")
+        .ssActionPrompt(
+            isPresented: $confirmingLeave,
+            title: AppLocalization.string("Remove this course?"),
+            message: AppLocalization.string("It will be removed from your current courses, timetable, and course-action matching."),
+            systemImage: "rectangle.portrait.and.arrow.right",
+            tint: SideSeatTheme.danger,
+            onDismiss: { confirmingLeave = false },
+            accessibilityIdentifier: "course-leave-prompt"
+        ) {
+            [
+                SSActionPromptAction(
+                    id: "course-leave-cancel",
+                    title: AppLocalization.string("Cancel"),
+                    systemImage: "xmark",
+                    role: .cancel
+                ) {},
+                SSActionPromptAction(
+                    id: "course-leave-confirm",
+                    title: AppLocalization.string("Remove course"),
+                    systemImage: "rectangle.portrait.and.arrow.right",
+                    role: .destructive
+                ) {
+                    Task { _ = await store.setEnrolled(false, courseID: courseID, using: session) }
+                },
+            ]
         }
         .accessibilityIdentifier("course-detail")
     }
@@ -70,19 +87,6 @@ struct CourseDetailView: View {
                 }
             }
 
-            if detail.course.viewer.enrolled {
-                Section("Classmates") {
-                    if detail.members.isEmpty {
-                        Text("No classmates have joined yet.")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        ForEach(detail.members) { member in
-                            CourseMemberRow(member: member)
-                        }
-                    }
-                }
-            }
-
             if let issue = store.issue {
                 Section {
                     Label(issue, systemImage: "exclamationmark.triangle")
@@ -105,12 +109,9 @@ struct CourseDetailView: View {
                 Text(course.name)
                     .font(.title2.weight(.semibold))
                     .foregroundStyle(.primary)
-                HStack(spacing: 12) {
-                    Text(course.school)
-                    Label("\(course.memberCount) currently taking", systemImage: "person.2")
-                }
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                Text(course.school)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
                 if let instructor = course.instructorSummary, !instructor.isEmpty {
                     Text(instructor)
                         .font(.subheadline)
@@ -129,27 +130,6 @@ struct CourseDetailView: View {
 
     private func actions(_ detail: NativeCourseDetail) -> some View {
         Section {
-            if detail.chat.available {
-                NavigationLink(value: AppRoute.courseChat(courseID: courseID)) {
-                    HStack {
-                        Label("Course chat", systemImage: "bubble.left.and.bubble.right")
-                            .foregroundStyle(.primary)
-                        Spacer()
-                        if detail.chat.unreadCount > 0 {
-                            Text(detail.chat.unreadCount > 99 ? "99+" : "\(detail.chat.unreadCount)")
-                                .font(.caption2.weight(.bold))
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Capsule().fill(SideSeatTheme.accent))
-                                .accessibilityLabel("\(detail.chat.unreadCount) unread")
-                        }
-                    }
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("course-open-chat")
-            }
-
             if detail.course.viewer.enrolled {
                 Button("Remove from my courses", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
                     confirmingLeave = true
@@ -222,44 +202,5 @@ private struct CourseSessionLabel: View {
 
     private func time(_ minute: Int) -> String {
         String(format: "%02d:%02d", minute / 60, minute % 60)
-    }
-}
-
-private struct CourseMemberRow: View {
-    let member: NativeCourseMember
-
-    var body: some View {
-        HStack(spacing: 11) {
-            AsyncImage(url: member.avatarUrl.flatMap(URL.init(string:))) { image in
-                image.resizable().scaledToFill()
-            } placeholder: {
-                Circle()
-                    .fill(SideSeatTheme.AvatarPalette.color(for: member.displayName))
-                    .overlay(
-                        Text(String(member.displayName.prefix(1)))
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                    )
-            }
-            .frame(width: 42, height: 42)
-            .clipShape(Circle())
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(member.displayName)
-                    .font(.body.weight(.medium))
-                    .foregroundStyle(.primary)
-                if let tagline = member.tagline, !tagline.isEmpty {
-                    Text(tagline)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                } else if let major = member.major, !major.isEmpty {
-                    Text(major)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
-        .accessibilityElement(children: .combine)
     }
 }

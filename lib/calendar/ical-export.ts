@@ -1,6 +1,6 @@
 import { addDays, startOfDay } from "date-fns";
 import type { Weekday } from "@prisma/client";
-import { randomUUID } from "crypto";
+import { createHash } from "crypto";
 
 import {
   escapeIcsText,
@@ -22,9 +22,13 @@ const WEEKDAY_TO_JS: Record<Weekday, number> = {
 };
 
 export type ExportClassBlock = {
+  sessionId?: string;
   courseId: string;
   courseName: string;
   courseCode: string | null;
+  /** Per-course bounds; legacy callers can continue using the global bounds. */
+  lecturePeriodStart?: Date;
+  lecturePeriodEnd?: Date;
   weekday: Weekday;
   startMinute: number;
   endMinute: number;
@@ -32,6 +36,7 @@ export type ExportClassBlock = {
 };
 
 export type ExportCalendarEntry = {
+  uid?: string;
   startAt: Date;
   endAt: Date;
   title: string;
@@ -49,8 +54,8 @@ function expandClassOccurrences(
   block: ExportClassBlock,
   semesterStart: Date,
   semesterEnd: Date,
-): Array<{ start: Date; end: Date; summary: string; location: string | null; description: string }> {
-  const out: Array<{ start: Date; end: Date; summary: string; location: string | null; description: string }> = [];
+): Array<{ uid: string; start: Date; end: Date; summary: string; location: string | null; description: string }> {
+  const out: Array<{ uid: string; start: Date; end: Date; summary: string; location: string | null; description: string }> = [];
   const want = WEEKDAY_TO_JS[block.weekday];
   const { h: sh, m: sm } = minutesToClock(block.startMinute);
   const { h: eh, m: em } = minutesToClock(block.endMinute);
@@ -68,6 +73,9 @@ function expandClassOccurrences(
       end.setHours(eh, em, 0, 0);
       if (end > start) {
         out.push({
+          uid: stableIcsUid(
+            `course-session:${block.sessionId ?? `${block.courseId}:${block.weekday}:${block.startMinute}:${block.endMinute}`}:${formatIcsDate(start)}`,
+          ),
           start,
           end,
           summary,
@@ -79,6 +87,11 @@ function expandClassOccurrences(
     d = addDays(d, 1);
   }
   return out;
+}
+
+/** Stable UIDs are essential for subscribed feeds; random UIDs duplicate every refresh. */
+function stableIcsUid(source: string): string {
+  return `${createHash("sha256").update(source, "utf8").digest("hex")}@calendar.sideseat.de`;
 }
 
 function pushVevent(
@@ -120,19 +133,28 @@ export function buildSideSeatIcsExport(opts: {
   classBlocks: ExportClassBlock[];
   entries: ExportCalendarEntry[];
 }): string {
-  const dtstamp = new Date();
+  // A subscribed feed must be byte-stable when its events have not changed;
+  // using the request time here defeats ETag revalidation on every refresh.
+  // SideSeat does not yet persist a per-event updatedAt value, so keep this
+  // publication marker stable and let UID plus event fields carry updates.
+  const dtstamp = new Date("2000-01-01T00:00:00.000Z");
   const body: string[] = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//SideSeat//Calendar Export//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
+    "X-WR-CALNAME:SideSeat",
   ];
 
   for (const block of opts.classBlocks) {
-    for (const occ of expandClassOccurrences(block, opts.semesterStart, opts.semesterEnd)) {
+    for (const occ of expandClassOccurrences(
+      block,
+      block.lecturePeriodStart ?? opts.semesterStart,
+      block.lecturePeriodEnd ?? opts.semesterEnd,
+    )) {
       pushVevent(body, {
-        uid: `${randomUUID()}@sideseat`,
+        uid: occ.uid,
         dtstamp,
         dtstart: formatIcsFloatingLocal(occ.start),
         dtend: formatIcsFloatingLocal(occ.end),
@@ -146,7 +168,10 @@ export function buildSideSeatIcsExport(opts: {
   for (const e of opts.entries) {
     const allDay = isBerlinAllDayRange(e.startAt, e.endAt);
     pushVevent(body, {
-      uid: `${randomUUID()}@sideseat`,
+      uid: stableIcsUid(
+        e.uid ??
+          `event:${e.startAt.toISOString()}:${e.endAt.toISOString()}:${e.title}:${e.location ?? ""}`,
+      ),
       dtstamp,
       dtstart: allDay ? formatIcsDate(e.startAt) : formatIcsUtc(e.startAt),
       dtend: allDay ? formatIcsDate(e.endAt) : formatIcsUtc(e.endAt),

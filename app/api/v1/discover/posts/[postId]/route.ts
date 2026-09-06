@@ -18,8 +18,11 @@ import {
   ClassmatePostCreateError,
   updateClassmatePostForUser,
 } from "@/lib/discover/create-classmate-post";
+import { isDiscoverServedCity } from "@/lib/discover/discover-served-cities";
 import { prismaClassmatePostToDiscoverRow } from "@/lib/discover/prisma-classmate-post-for-discover";
 import { updateClassmatePostSchema } from "@/lib/validators/classmate-posts";
+import { evaluateActionCoordinationCapability } from "@/lib/v2/action-coordination/capability";
+import { getCreatorGatedActionToPlanAssignment } from "@/lib/v2/experiments";
 
 export const dynamic = "force-dynamic";
 
@@ -42,9 +45,15 @@ export async function GET(
   }
 
   try {
+    const capability = evaluateActionCoordinationCapability(request.headers);
+    const assignment = await getCreatorGatedActionToPlanAssignment(
+      auth.user,
+      capability,
+    );
     const detail = await loadNativeDiscoverPostDetail({
       userId: auth.user.id,
       postId,
+      coordinationViewer: { capability, assignment },
     });
     if (!detail) {
       return v1Error(request, {
@@ -84,6 +93,14 @@ export async function PATCH(
   if (!idempotency.ok) return idempotency.response;
   const parsed = await parseV1Json(request, updateClassmatePostSchema);
   if (!parsed.ok) return parsed.response;
+  if (!isDiscoverServedCity(parsed.data.city)) {
+    return v1Error(request, {
+      code: "INVALID_REQUEST",
+      message: "Choose a supported Discover city.",
+      status: 422,
+      field: "city",
+    });
+  }
 
   try {
     const limited = await limitDiscoverWrite(request, auth.user.id);
@@ -117,7 +134,10 @@ export async function PATCH(
       const notFound = cause.code === "NOT_FOUND";
       const authorOnly = cause.code === "AUTHOR_ONLY";
       const invalidState = cause.code === "INVALID_STATE";
+      const cityMismatch = cause.code === "CITY_MISMATCH";
       const courseRestricted = cause.code === "COURSE_NOT_ENROLLED";
+      const courseSelectionInvalid =
+        cause.code === "COURSE_SELECTION_INVALID";
       return v1Error(request, {
         code: notFound
           ? "NOT_FOUND"
@@ -130,12 +150,27 @@ export async function PATCH(
             ? "Only the author can edit this post."
             : invalidState
               ? "Only active posts can be edited."
+              : cityMismatch
+                ? "A post cannot be moved to another Discover city."
               : courseRestricted
                 ? "You can only share courses you joined."
+                : courseSelectionInvalid
+                  ? "Choose exactly one active course for this action."
                 : cause.code === "INVALID_IMAGE"
                   ? "Upload the image again before saving the plan."
                   : "Choose a future expiry date.",
-        status: notFound ? 404 : authorOnly || courseRestricted ? 403 : invalidState ? 409 : 422,
+        status: notFound
+          ? 404
+          : authorOnly || courseRestricted
+            ? 403
+            : invalidState
+              ? 409
+              : 422,
+        field: cityMismatch
+          ? "city"
+          : courseSelectionInvalid
+            ? "courseIds"
+            : undefined,
       });
     }
     console.error("PATCH /api/v1/discover/posts/[postId]", cause);

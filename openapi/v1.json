@@ -463,6 +463,34 @@
         }
       }
     },
+    "/api/v1/me/saved-posts": {
+      "get": {
+        "operationId": "listCurrentUserSavedDiscoverPosts",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The current user's saved, still-visible buddy posts in newest-saved order.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoverSavedPostsEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
     "/api/v1/me/profile": {
       "patch": {
         "operationId": "updateCurrentProfile",
@@ -1424,14 +1452,28 @@
     "/api/v1/calendar/export": {
       "get": {
         "operationId": "exportCalendarIcs",
+        "description": "Export one calendar year of SideSeat events. When year is omitted, the current Europe/Berlin calendar year is used. Course sessions are included only inside the course's own lecture period.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "description": "Calendar year to export; defaults to the current Europe/Berlin year.",
+            "schema": {
+              "type": "integer",
+              "minimum": 2000,
+              "maximum": 2100
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "An iCalendar export of the viewer's semester schedule.",
+            "description": "An iCalendar export for the selected calendar year.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1444,6 +1486,177 @@
             "$ref": "#/components/responses/Error"
           },
           "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/api/v1/calendar/subscriptions": {
+      "get": {
+        "operationId": "listCalendarSubscriptions",
+        "description": "List the viewer's active private read-only calendar feed connections.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The active calendar connections.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarSubscriptionListEnvelope"
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Error" },
+          "403": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      },
+      "post": {
+        "operationId": "createCalendarSubscription",
+        "description": "Create a revocable private read-only calendar feed. The bearer URL is returned only when the connection is created.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarSubscriptionCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "A new private calendar connection and its one-time bearer URL.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarSubscriptionCreateEnvelope"
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Error" },
+          "403": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "422": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/calendar/subscriptions/{linkId}": {
+      "delete": {
+        "operationId": "revokeCalendarSubscription",
+        "description": "Revoke a private calendar feed connection. Existing events can remain in Apple Calendar, but the feed stops updating.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "linkId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The calendar connection was revoked, or had already been revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarSubscriptionRevokeEnvelope"
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Error" },
+          "403": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "422": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/calendar/search": {
+      "get": {
+        "operationId": "searchCalendarEvents",
+        "description": "Search the viewer's SideSeat-managed calendar events by title, location, or notes. Recurring series are collapsed to their nearest relevant occurrence.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Up to 30 matches ordered by field relevance and distance from now.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarSearchEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
             "$ref": "#/components/responses/Error"
           },
           "500": {
@@ -1632,9 +1845,8 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": [
-                "Munich"
-              ],
+              "minLength": 1,
+              "description": "Canonical Discover city from /api/v1/client-config.",
               "default": "Munich"
             }
           },
@@ -1876,7 +2088,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DiscoverBuddyPostRequest"
+                "$ref": "#/components/schemas/DiscoverBuddyPostUpdateRequest"
               }
             }
           }
@@ -2981,6 +3193,188 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarDeleteEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/api/v1/calendar/events/{eventId}/shares": {
+      "post": {
+        "operationId": "createCalendarEventShare",
+        "description": "Create a time-limited, privacy-filtered snapshot of one calendar event or occurrence. This is sharing, not an RSVP invitation.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarEventShareCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "A shared event snapshot was created, or a completed retry was replayed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventShareCreateEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/api/v1/event-shares/{token}": {
+      "get": {
+        "operationId": "getCalendarEventShare",
+        "description": "Resolve a shared event snapshot for the signed-in viewer without exposing the owner's private calendar entry.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The shared event snapshot and viewer-specific import state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventShareRecipientEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/api/v1/event-shares/{token}/add": {
+      "post": {
+        "operationId": "addCalendarEventShare",
+        "description": "Add an independent one-off copy of the shared event to the viewer's calendar. This does not create an attendee relationship or future synchronization.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The viewer had already added this shared event.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventShareImportEnvelope"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "An independent calendar entry was created, or a completed retry was replayed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventShareImportEnvelope"
                 }
               }
             }
@@ -4264,6 +4658,9 @@
             }
           },
           "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
             "$ref": "#/components/responses/Error"
           },
           "404": {
@@ -6467,6 +6864,108 @@
       }
     },
     "/api/v1/schedule-shares/owner/{linkId}": {
+      "get": {
+        "operationId": "getScheduleShareOwner",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "linkId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Editable schedule share settings and the current owner preview.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleShareOwnerEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateScheduleShare",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "linkId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Updated schedule range, privacy reveal configuration, usage limit, and expiry. The existing link token is preserved."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Schedule share updated without changing its link token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleShareOwnerEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
       "delete": {
         "operationId": "revokeScheduleShare",
         "security": [
@@ -6961,6 +7460,657 @@
         }
       }
     },
+    "/api/v1/analytics/events": {
+      "post": {
+        "operationId": "recordProductFunnelEvents",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProductFunnelBatch" } } } },
+        "responses": {
+          "202": { "description": "First-party privacy-safe funnel events accepted.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/V2SuccessEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "422": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/me/experiments": {
+      "get": {
+        "operationId": "getV2Experiments",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Stable experiment assignments and feature gates.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/V2SuccessEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/me/social-preferences": {
+      "get": {
+        "operationId": "getSocialPreferences",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Private current-week social preferences.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/V2SuccessEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      },
+      "patch": {
+        "operationId": "updateSocialPreferences",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SocialPreferencesRequest" } } } },
+        "responses": {
+          "200": { "description": "Updated private social preferences.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/V2SuccessEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "422": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/me/weekly-intents": {
+      "get": {
+        "operationId": "getCurrentWeeklyIntent",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "The owner's active and paused Weekly Intents, plus a legacy singular projection.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WeeklyIntentCollectionEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "403": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      },
+      "post": {
+        "operationId": "createWeeklyIntent",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } }
+        ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WeeklyIntentCreateRequest" } } } },
+        "responses": {
+          "201": { "description": "A private Weekly Intent was created.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WeeklyIntentEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "403": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "409": { "$ref": "#/components/responses/Error" }, "422": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/me/weekly-intents/{intentId}": {
+      "parameters": [
+        { "name": "intentId", "in": "path", "required": true, "schema": { "type": "string", "minLength": 1, "maxLength": 191, "pattern": "^[A-Za-z0-9._:-]+$" } },
+        { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } }
+      ],
+      "patch": {
+        "operationId": "updateWeeklyIntent",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WeeklyIntentPatchRequest" } } } },
+        "responses": {
+          "200": { "description": "The Weekly Intent was edited, paused, or resumed.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WeeklyIntentEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "403": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "409": { "$ref": "#/components/responses/Error" }, "422": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      },
+      "delete": {
+        "operationId": "endWeeklyIntent",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WeeklyIntentEndRequest" } } } },
+        "responses": {
+          "200": { "description": "The Weekly Intent is terminal and no longer supplies opportunities.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WeeklyIntentEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "403": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "409": { "$ref": "#/components/responses/Error" }, "422": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/me/together-matching-session": {
+      "get": {
+        "operationId": "getTogetherMatchingSession",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "The user's explicit Together matching window.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TogetherMatchingSessionEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      },
+      "post": {
+        "operationId": "startTogetherMatchingSession",
+        "x-sideseat-empty-request-body": true,
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } }
+        ],
+        "responses": {
+          "200": { "description": "Matching started or restarted for exactly 48 hours.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TogetherMatchingSessionEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "409": { "$ref": "#/components/responses/Error" }, "422": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      },
+      "delete": {
+        "operationId": "stopTogetherMatchingSession",
+        "x-sideseat-empty-request-body": true,
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } }
+        ],
+        "responses": {
+          "200": { "description": "Matching stopped; saved intentions remain unchanged.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TogetherMatchingSessionEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "422": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/me/mutual-opportunities": {
+      "get": {
+        "operationId": "listMutualOpportunities",
+        "x-sideseat-contract": "mutual-opportunity-v1",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Private, viewer-safe opportunities generated from active Weekly Intents.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MutualOpportunitiesEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "403": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/me/mutual-opportunities/{opportunityId}/decision": {
+      "parameters": [
+        { "name": "opportunityId", "in": "path", "required": true, "schema": { "type": "string", "minLength": 1, "maxLength": 191, "pattern": "^[A-Za-z0-9._:-]+$" } },
+        { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } }
+      ],
+      "post": {
+        "operationId": "decideMutualOpportunity",
+        "x-sideseat-contract": "mutual-opportunity-v1",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MutualOpportunityDecisionRequest" } } } },
+        "responses": {
+          "200": { "description": "The viewer's private decision was recorded; coordination is returned only after mutual YES.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MutualOpportunityEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "403": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "409": { "$ref": "#/components/responses/Error" }, "422": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      },
+      "delete": {
+        "operationId": "withdrawMutualOpportunityDecision",
+        "x-sideseat-contract": "mutual-opportunity-v1",
+        "x-sideseat-empty-request-body": true,
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "A pending YES was privately withdrawn without disclosing the peer's decision.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MutualOpportunityEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "403": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "409": { "$ref": "#/components/responses/Error" }, "422": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/discover/posts/{postId}/interest": {
+      "parameters": [
+        { "name": "postId", "in": "path", "required": true, "schema": { "type": "string" } },
+        { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } }
+      ],
+      "post": {
+        "operationId": "expressActionInterest",
+        "x-sideseat-contract": "legacy-direct-action-interest-v1",
+        "x-sideseat-empty-request-body": true,
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "201": { "description": "Interest recorded and a direct contextual conversation created or reused.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LegacyDirectActionInterestCreateEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "403": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "409": { "$ref": "#/components/responses/Error" }, "422": { "$ref": "#/components/responses/Error" }, "429": { "$ref": "#/components/responses/RateLimited" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      },
+      "delete": {
+        "operationId": "withdrawActionInterest",
+        "x-sideseat-contract": "legacy-direct-action-interest-v1",
+        "x-sideseat-empty-request-body": true,
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Interest withdrawn without deleting the direct conversation.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LegacyDirectActionInterestWithdrawEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "403": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "409": { "$ref": "#/components/responses/Error" }, "422": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/action-coordination/v2/actions/{actionId}/interest": {
+      "parameters": [
+        { "name": "actionId", "in": "path", "required": true, "schema": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]+$" } },
+        { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } },
+        { "name": "X-SideSeat-Platform", "in": "header", "required": true, "schema": { "type": "string", "const": "ios" } },
+        { "name": "X-SideSeat-App-Version", "in": "header", "required": true, "schema": { "type": "string", "pattern": "^\\d+(?:\\.\\d+)*$" } },
+        { "name": "X-SideSeat-Build", "in": "header", "required": true, "schema": { "type": "string", "pattern": "^\\d+(?:\\.\\d+)*$" } },
+        { "name": "X-SideSeat-Capabilities", "in": "header", "required": true, "schema": { "type": "string", "pattern": "(^|.*,\\s*)action-coordination-v2(\\s*,.*|$)" } }
+      ],
+      "post": {
+        "operationId": "createCreatorGatedActionInterest",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "createCreatorGatedActionInterest",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreatorGatedInterestRequest" } } } },
+        "responses": {
+          "200": { "description": "The existing active response and current activation were returned without creating another attempt.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreatorGatedInterestEnvelope" } } } },
+          "201": { "description": "A bodyless response, activation, and WAITING Action Context were created without a conversation or message.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreatorGatedInterestEnvelope" } } } },
+          "400": { "$ref": "#/components/responses/BLightInterestError" },
+          "401": { "$ref": "#/components/responses/BLightInterestError" },
+          "403": { "$ref": "#/components/responses/BLightInterestError" },
+          "404": { "$ref": "#/components/responses/BLightInterestError" },
+          "409": { "$ref": "#/components/responses/BLightInterestError" },
+          "422": { "$ref": "#/components/responses/BLightInterestError" },
+          "426": { "$ref": "#/components/responses/BLightInterestError" },
+          "429": { "$ref": "#/components/responses/BLightInterestError" },
+          "500": { "$ref": "#/components/responses/BLightInterestError" }
+        }
+      }
+    },
+    "/api/v1/action-coordination/v2/interests/{interestId}": {
+      "parameters": [
+        { "name": "interestId", "in": "path", "required": true, "schema": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]+$" } }
+      ],
+      "get": {
+        "operationId": "getCreatorGatedActionInterest",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "getCreatorGatedActionInterest",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Participant-safe current or historical response state from its immutable Action snapshot.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreatorGatedInterestEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/BLightInterestError" },
+          "403": { "$ref": "#/components/responses/BLightInterestError" },
+          "404": { "$ref": "#/components/responses/BLightInterestError" },
+          "422": { "$ref": "#/components/responses/BLightInterestError" },
+          "500": { "$ref": "#/components/responses/BLightInterestError" }
+        }
+      },
+      "delete": {
+        "operationId": "withdrawCreatorGatedActionInterest",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "withdrawCreatorGatedActionInterest",
+        "x-sideseat-empty-request-body": true,
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } }
+        ],
+        "responses": {
+          "200": { "description": "A pre-Connect response was withdrawn, or its existing neutral terminal state was returned idempotently.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreatorGatedInterestEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/BLightInterestError" },
+          "403": { "$ref": "#/components/responses/BLightInterestError" },
+          "404": { "$ref": "#/components/responses/BLightInterestError" },
+          "409": { "$ref": "#/components/responses/BLightInterestError" },
+          "422": { "$ref": "#/components/responses/BLightInterestError" },
+          "500": { "$ref": "#/components/responses/BLightInterestError" }
+        }
+      }
+    },
+    "/api/v1/action-coordination/v2/interests/{interestId}/reactivate": {
+      "parameters": [
+        { "name": "interestId", "in": "path", "required": true, "schema": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]+$" } },
+        { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } },
+        { "name": "X-SideSeat-Platform", "in": "header", "required": true, "schema": { "type": "string", "const": "ios" } },
+        { "name": "X-SideSeat-App-Version", "in": "header", "required": true, "schema": { "type": "string", "pattern": "^\\d+(?:\\.\\d+)*$" } },
+        { "name": "X-SideSeat-Build", "in": "header", "required": true, "schema": { "type": "string", "pattern": "^\\d+(?:\\.\\d+)*$" } },
+        { "name": "X-SideSeat-Capabilities", "in": "header", "required": true, "schema": { "type": "string", "pattern": "(^|.*,\\s*)action-coordination-v2(\\s*,.*|$)" } }
+      ],
+      "post": {
+        "operationId": "reactivateCreatorGatedActionInterest",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "reactivateCreatorGatedActionInterest",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreatorGatedInterestRequest" } } } },
+        "responses": {
+          "200": { "description": "The response was already active and its current activation was returned without duplication.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreatorGatedInterestEnvelope" } } } },
+          "201": { "description": "A previously withdrawn pre-Connect response was explicitly reactivated with a new activation ordinal.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreatorGatedInterestEnvelope" } } } },
+          "400": { "$ref": "#/components/responses/BLightInterestError" },
+          "401": { "$ref": "#/components/responses/BLightInterestError" },
+          "403": { "$ref": "#/components/responses/BLightInterestError" },
+          "404": { "$ref": "#/components/responses/BLightInterestError" },
+          "409": { "$ref": "#/components/responses/BLightInterestError" },
+          "422": { "$ref": "#/components/responses/BLightInterestError" },
+          "426": { "$ref": "#/components/responses/BLightInterestError" },
+          "429": { "$ref": "#/components/responses/BLightInterestError" },
+          "500": { "$ref": "#/components/responses/BLightInterestError" }
+        }
+      }
+    },
+    "/api/v1/action-coordination/v2/me/interests": {
+      "get": {
+        "operationId": "listMyCreatorGatedActionInterests",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "listMyCreatorGatedActionInterests",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "state", "in": "query", "required": false, "schema": { "type": "string", "enum": ["ALL", "WAITING", "TERMINAL"], "default": "ALL" } },
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 1, "maximum": 50, "default": 50 } },
+          { "name": "cursor", "in": "query", "required": false, "description": "Opaque keyset cursor bound to the authenticated participant and selected state filter.", "schema": { "type": "string", "minLength": 1, "maxLength": 1024 } }
+        ],
+        "responses": {
+          "200": { "description": "Participant-scoped creator-gated responses ordered by latest activation descending with a stable opaque continuation cursor.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreatorGatedMyInterestsEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/BLightInterestError" },
+          "403": { "$ref": "#/components/responses/BLightInterestError" },
+          "422": { "$ref": "#/components/responses/BLightInterestError" },
+          "500": { "$ref": "#/components/responses/BLightInterestError" }
+        }
+      }
+    },
+    "/api/v1/action-coordination/v2/responses": {
+      "get": {
+        "operationId": "listCreatorActionResponses",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "listCreatorActionResponses",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "actionId", "in": "query", "required": false, "schema": { "type": "string", "minLength": 1, "maxLength": 128 } },
+          { "name": "presentation", "in": "query", "required": false, "schema": { "type": "string", "enum": ["VISIBLE", "HIDDEN"], "default": "VISIBLE" } },
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 1, "maximum": 50, "default": 30 } },
+          { "name": "cursor", "in": "query", "required": false, "description": "Opaque continuation cursor bound to the creator, snapshot, Action filter, and presentation filter.", "schema": { "type": "string", "minLength": 1, "maxLength": 2048 } }
+        ],
+        "responses": {
+          "200": { "description": "Canonical creator responses grouped by Action with stable snapshot membership and ordering.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionResponsesEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/BLightInterestError" },
+          "403": { "$ref": "#/components/responses/BLightInterestError" },
+          "404": { "$ref": "#/components/responses/BLightInterestError" },
+          "410": { "$ref": "#/components/responses/BLightInterestError" },
+          "422": { "$ref": "#/components/responses/BLightInterestError" },
+          "500": { "$ref": "#/components/responses/BLightInterestError" }
+        }
+      }
+    },
+    "/api/v1/action-coordination/v2/actions/{actionId}/responses/seen": {
+      "post": {
+        "operationId": "markCreatorActionResponsesSeen",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "markCreatorActionResponsesSeen",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "actionId", "in": "path", "required": true, "schema": { "type": "string", "minLength": 1, "maxLength": 128 } },
+          { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } }
+        ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionResponsesSeenRequest" } } } },
+        "responses": {
+          "200": { "description": "The exact rendered current activations were marked seen without creating a conversation or notification.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionResponsesSeenEnvelope" } } } },
+          "400": { "$ref": "#/components/responses/BLightInterestError" },
+          "401": { "$ref": "#/components/responses/BLightInterestError" },
+          "403": { "$ref": "#/components/responses/BLightInterestError" },
+          "404": { "$ref": "#/components/responses/BLightInterestError" },
+          "409": { "$ref": "#/components/responses/BLightInterestError" },
+          "410": { "$ref": "#/components/responses/BLightInterestError" },
+          "422": { "$ref": "#/components/responses/BLightInterestError" },
+          "500": { "$ref": "#/components/responses/BLightInterestError" }
+        }
+      }
+    },
+    "/api/v1/action-coordination/v2/interests/{interestId}/presentation": {
+      "patch": {
+        "operationId": "setCreatorActionInterestPresentation",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "setCreatorActionInterestPresentation",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "interestId", "in": "path", "required": true, "schema": { "type": "string", "minLength": 1, "maxLength": 128 } },
+          { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } }
+        ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionResponsePresentationRequest" } } } },
+        "responses": {
+          "200": { "description": "Creator-private response presentation was returned; same-state requests are no-ops.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionResponsePresentationEnvelope" } } } },
+          "400": { "$ref": "#/components/responses/BLightInterestError" },
+          "401": { "$ref": "#/components/responses/BLightInterestError" },
+          "403": { "$ref": "#/components/responses/BLightInterestError" },
+          "404": { "$ref": "#/components/responses/BLightInterestError" },
+          "409": { "$ref": "#/components/responses/BLightInterestError" },
+          "422": { "$ref": "#/components/responses/BLightInterestError" },
+          "500": { "$ref": "#/components/responses/BLightInterestError" }
+        }
+      }
+    },
+    "/api/v1/action-coordination/v2/interests/{interestId}/reservations": {
+      "post": {
+        "operationId": "reserveCreatorGatedActionCoordination",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "reserveCreatorGatedActionCoordination",
+        "x-sideseat-empty-request-body": true,
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "interestId", "in": "path", "required": true, "schema": { "type": "string", "minLength": 1, "maxLength": 128 } },
+          { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } },
+          { "name": "X-SideSeat-Platform", "in": "header", "required": true, "schema": { "type": "string", "const": "ios" } },
+          { "name": "X-SideSeat-App-Version", "in": "header", "required": true, "schema": { "type": "string", "pattern": "^\\d+(?:\\.\\d+)*$" } },
+          { "name": "X-SideSeat-Build", "in": "header", "required": true, "schema": { "type": "string", "pattern": "^\\d+(?:\\.\\d+)*$" } },
+          { "name": "X-SideSeat-Capabilities", "in": "header", "required": true, "schema": { "type": "string", "pattern": "(^|.*,\\s*)action-coordination-v2(\\s*,.*|$)" } }
+        ],
+        "responses": {
+          "200": { "description": "The creator resumed the same live shell without consuming another coordination slot.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionCoordinationReservationEnvelope" } } } },
+          "201": { "description": "One bounded creator-private INITIATING reservation was created without a conversation, message, or notification.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionCoordinationReservationEnvelope" } } } },
+          "400": { "$ref": "#/components/responses/BLightInterestError" },
+          "401": { "$ref": "#/components/responses/BLightInterestError" },
+          "403": { "$ref": "#/components/responses/BLightInterestError" },
+          "404": { "$ref": "#/components/responses/BLightInterestError" },
+          "409": { "$ref": "#/components/responses/BLightInterestError" },
+          "422": { "$ref": "#/components/responses/BLightInterestError" },
+          "426": { "$ref": "#/components/responses/BLightInterestError" },
+          "500": { "$ref": "#/components/responses/BLightInterestError" }
+        }
+      }
+    },
+    "/api/v1/action-coordination/v2/reservations/{reservationId}": {
+      "delete": {
+        "operationId": "releaseCreatorGatedActionCoordinationReservation",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "releaseCreatorGatedActionCoordinationReservation",
+        "x-sideseat-empty-request-body": true,
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "reservationId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } }
+        ],
+        "responses": {
+          "200": { "description": "The unsent shell was released as a safe drain, or the completed release was replayed.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionCoordinationReservationReleaseEnvelope" } } } },
+          "400": { "$ref": "#/components/responses/BLightInterestError" },
+          "401": { "$ref": "#/components/responses/BLightInterestError" },
+          "403": { "$ref": "#/components/responses/BLightInterestError" },
+          "404": { "$ref": "#/components/responses/BLightInterestError" },
+          "409": { "$ref": "#/components/responses/BLightInterestError" },
+          "422": { "$ref": "#/components/responses/BLightInterestError" },
+          "500": { "$ref": "#/components/responses/BLightInterestError" }
+        }
+      }
+    },
+    "/api/v1/action-coordination/v2/reservations/{reservationId}/heartbeat": {
+      "post": {
+        "operationId": "heartbeatCreatorGatedActionCoordinationReservation",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "heartbeatCreatorGatedActionCoordinationReservation",
+        "x-sideseat-empty-request-body": true,
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "reservationId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } },
+          { "name": "X-SideSeat-Platform", "in": "header", "required": true, "schema": { "type": "string", "const": "ios" } },
+          { "name": "X-SideSeat-App-Version", "in": "header", "required": true, "schema": { "type": "string", "pattern": "^\\d+(?:\\.\\d+)*$" } },
+          { "name": "X-SideSeat-Build", "in": "header", "required": true, "schema": { "type": "string", "pattern": "^\\d+(?:\\.\\d+)*$" } },
+          { "name": "X-SideSeat-Capabilities", "in": "header", "required": true, "schema": { "type": "string", "pattern": "(^|.*,\\s*)action-coordination-v2(\\s*,.*|$)" } }
+        ],
+        "responses": {
+          "200": { "description": "The active foreground shell lease was extended within the server bound without another reservation event.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionCoordinationReservationEnvelope" } } } },
+          "400": { "$ref": "#/components/responses/BLightInterestError" },
+          "401": { "$ref": "#/components/responses/BLightInterestError" },
+          "403": { "$ref": "#/components/responses/BLightInterestError" },
+          "404": { "$ref": "#/components/responses/BLightInterestError" },
+          "409": { "$ref": "#/components/responses/BLightInterestError" },
+          "422": { "$ref": "#/components/responses/BLightInterestError" },
+          "426": { "$ref": "#/components/responses/BLightInterestError" },
+          "500": { "$ref": "#/components/responses/BLightInterestError" }
+        }
+      }
+    },
+    "/api/v1/action-coordination/v2/reservations/{reservationId}/activate": {
+      "post": {
+        "operationId": "activateCreatorGatedActionCoordination",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "activateCreatorGatedActionCoordination",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "reservationId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } },
+          { "name": "X-SideSeat-Platform", "in": "header", "required": true, "schema": { "type": "string", "const": "ios" } },
+          { "name": "X-SideSeat-App-Version", "in": "header", "required": true, "schema": { "type": "string", "pattern": "^\\d+(?:\\.\\d+)*$" } },
+          { "name": "X-SideSeat-Build", "in": "header", "required": true, "schema": { "type": "string", "pattern": "^\\d+(?:\\.\\d+)*$" } },
+          { "name": "X-SideSeat-Capabilities", "in": "header", "required": true, "schema": { "type": "string", "pattern": "(^|.*,\\s*)action-coordination-v2(\\s*,.*|$)" } }
+        ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionCoordinationActivationRequest" } } } },
+        "responses": {
+          "201": { "description": "The immutable source card, MESSAGE or PLAN first content, OPEN Context, and Connect event were committed atomically with the branch-appropriate notification.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionCoordinationActivationEnvelope" } } } },
+          "400": { "$ref": "#/components/responses/BLightInterestError" },
+          "401": { "$ref": "#/components/responses/BLightInterestError" },
+          "403": { "$ref": "#/components/responses/BLightInterestError" },
+          "404": { "$ref": "#/components/responses/BLightInterestError" },
+          "409": { "$ref": "#/components/responses/BLightInterestError" },
+          "422": { "$ref": "#/components/responses/BLightInterestError" },
+          "426": { "$ref": "#/components/responses/BLightInterestError" },
+          "500": { "$ref": "#/components/responses/BLightInterestError" }
+        }
+      }
+    },
+    "/api/v1/action-coordination/v2/contexts/{contextId}/plans": {
+      "post": {
+        "operationId": "createCreatorGatedActionPlan",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "createCreatorGatedActionPlan",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "contextId", "in": "path", "required": true, "schema": { "type": "string", "minLength": 1, "maxLength": 128 } },
+          { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } }
+        ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionPlanInput" } } } },
+        "responses": {
+          "201": { "description": "An INITIAL Plan revision with trusted Action origin was proposed in the OPEN Context.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionPlanMutationEnvelope" } } } },
+          "400": { "$ref": "#/components/responses/BLightPlanError" },
+          "401": { "$ref": "#/components/responses/BLightPlanError" },
+          "403": { "$ref": "#/components/responses/BLightPlanError" },
+          "404": { "$ref": "#/components/responses/BLightPlanError" },
+          "409": { "$ref": "#/components/responses/BLightPlanError" },
+          "422": { "$ref": "#/components/responses/BLightPlanError" },
+          "500": { "$ref": "#/components/responses/BLightPlanError" }
+        }
+      }
+    },
+    "/api/v1/action-coordination/v2/plans/{revisionId}/counter": {
+      "post": {
+        "operationId": "counterCreatorGatedActionPlan",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "counterCreatorGatedActionPlan",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "revisionId", "in": "path", "required": true, "schema": { "type": "string", "minLength": 1, "maxLength": 128 } },
+          { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } }
+        ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionPlanInput" } } } },
+        "responses": {
+          "201": { "description": "A new PENDING INITIAL counter-revision replaced the previous proposal.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionPlanMutationEnvelope" } } } },
+          "400": { "$ref": "#/components/responses/BLightPlanError" },
+          "401": { "$ref": "#/components/responses/BLightPlanError" },
+          "403": { "$ref": "#/components/responses/BLightPlanError" },
+          "404": { "$ref": "#/components/responses/BLightPlanError" },
+          "409": { "$ref": "#/components/responses/BLightPlanError" },
+          "422": { "$ref": "#/components/responses/BLightPlanError" },
+          "500": { "$ref": "#/components/responses/BLightPlanError" }
+        }
+      }
+    },
+    "/api/v1/action-coordination/v2/plans/{revisionId}/accept": {
+      "post": {
+        "operationId": "acceptCreatorGatedActionPlan",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "acceptCreatorGatedActionPlan",
+        "x-sideseat-empty-request-body": true,
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "revisionId", "in": "path", "required": true, "schema": { "type": "string", "minLength": 1, "maxLength": 128 } },
+          { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } }
+        ],
+        "responses": {
+          "200": { "description": "The INITIAL revision was atomically confirmed, the Action fulfilled, and both Calendar projections created.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionPlanMutationEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/BLightPlanError" },
+          "403": { "$ref": "#/components/responses/BLightPlanError" },
+          "404": { "$ref": "#/components/responses/BLightPlanError" },
+          "409": { "$ref": "#/components/responses/BLightPlanError" },
+          "422": { "$ref": "#/components/responses/BLightPlanError" },
+          "500": { "$ref": "#/components/responses/BLightPlanError" }
+        }
+      }
+    },
+    "/api/v1/action-coordination/v2/plans/{revisionId}/decline": {
+      "post": {
+        "operationId": "declineCreatorGatedActionPlan",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "declineCreatorGatedActionPlan",
+        "x-sideseat-empty-request-body": true,
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "revisionId", "in": "path", "required": true, "schema": { "type": "string", "minLength": 1, "maxLength": 128 } },
+          { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } }
+        ],
+        "responses": {
+          "200": { "description": "The receiver declined the current INITIAL revision and closed its negotiation.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionPlanMutationEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/BLightPlanError" },
+          "403": { "$ref": "#/components/responses/BLightPlanError" },
+          "404": { "$ref": "#/components/responses/BLightPlanError" },
+          "409": { "$ref": "#/components/responses/BLightPlanError" },
+          "422": { "$ref": "#/components/responses/BLightPlanError" },
+          "500": { "$ref": "#/components/responses/BLightPlanError" }
+        }
+      }
+    },
+    "/api/v1/action-coordination/v2/plans/{revisionId}": {
+      "delete": {
+        "operationId": "withdrawCreatorGatedActionPlan",
+        "x-sideseat-contract": "b-light-v2",
+        "x-sideseat-stable-operation-id": "withdrawCreatorGatedActionPlan",
+        "x-sideseat-empty-request-body": true,
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "revisionId", "in": "path", "required": true, "schema": { "type": "string", "minLength": 1, "maxLength": 128 } },
+          { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } }
+        ],
+        "responses": {
+          "200": { "description": "The proposer withdrew the current INITIAL revision and closed its negotiation.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionPlanMutationEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/BLightPlanError" },
+          "403": { "$ref": "#/components/responses/BLightPlanError" },
+          "404": { "$ref": "#/components/responses/BLightPlanError" },
+          "409": { "$ref": "#/components/responses/BLightPlanError" },
+          "422": { "$ref": "#/components/responses/BLightPlanError" },
+          "500": { "$ref": "#/components/responses/BLightPlanError" }
+        }
+      }
+    },
+    "/api/v1/discover/recommendations": {
+      "get": {
+        "operationId": "getActionRecommendations",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "city", "in": "query", "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 30 } }
+        ],
+        "responses": {
+          "200": { "description": "Action-only recommendations with explainable reason codes.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/V2SuccessEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "422": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/plans/{planId}/outcome": {
+      "post": {
+        "operationId": "recordPlanOutcome",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "planId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OutcomeRequest" } } } },
+        "responses": {
+          "200": { "description": "Post-plan outcome recorded.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/V2SuccessEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "409": { "$ref": "#/components/responses/Error" }, "422": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/social-group-opportunities": {
+      "get": {
+        "operationId": "getSmallGroupOpportunities",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Allowlisted small-group invitations with limited profile signals.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/V2SuccessEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/social-group-opportunities/{opportunityId}/response": {
+      "post": {
+        "operationId": "respondToSmallGroupOpportunity",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "opportunityId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SmallGroupResponseRequest" } } } },
+        "responses": {
+          "200": { "description": "Candidate response recorded and group formed atomically when ready.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/V2SuccessEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "409": { "$ref": "#/components/responses/Error" }, "422": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/social-group-opportunities/{opportunityId}/outcome": {
+      "post": {
+        "operationId": "recordSmallGroupOutcome",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "opportunityId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OutcomeRequest" } } } },
+        "responses": {
+          "200": { "description": "Small-group outcome recorded.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/V2SuccessEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "409": { "$ref": "#/components/responses/Error" }, "422": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
     "/api/v1/me/product-tutorial/dismiss": {
       "post": {
         "operationId": "dismissProductTutorial",
@@ -7071,6 +8221,32 @@
           }
         }
       },
+      "BLightInterestError": {
+        "description": "A bounded creator-gated Interest error, optionally carrying authoritative Interest state and a typed recovery focus.",
+        "headers": {
+          "Retry-After": {
+            "description": "Seconds until a rate-limited activation may be retried.",
+            "schema": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BLightInterestErrorEnvelope"
+            }
+          }
+        }
+      },
+      "BLightPlanError": {
+        "description": "A bounded creator-gated Plan error, optionally carrying authoritative Commitment state and exact Plan recovery focus.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BLightPlanErrorEnvelope"
+            }
+          }
+        }
+      },
       "RateLimited": {
         "description": "The request exceeded a server-side rate limit.",
         "headers": {
@@ -7109,6 +8285,1097 @@
       }
     },
     "schemas": {
+      "V2SuccessEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "object", "additionalProperties": true },
+          "meta": { "type": "object", "additionalProperties": true }
+        },
+        "required": ["data"]
+      },
+      "LegacyDirectActionInterestAuthor": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "displayName": { "type": "string" }
+        },
+        "required": ["id", "displayName"]
+      },
+      "LegacyDirectActionInterestCourse": {
+        "type": ["object", "null"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "code": { "type": ["string", "null"] },
+          "name": { "type": "string" }
+        },
+        "required": ["id", "code", "name"]
+      },
+      "LegacyDirectActionContext": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "version": { "type": "integer", "const": 1 },
+          "sourceKind": { "type": "string", "enum": ["BUDDY_POST", "COURSE_ACTION"] },
+          "sourceId": { "type": "string" },
+          "title": { "type": "string" },
+          "startsAt": { "type": ["string", "null"], "format": "date-time" },
+          "endsAt": { "type": ["string", "null"], "format": "date-time" },
+          "location": { "type": ["string", "null"] },
+          "planType": { "type": "string", "enum": ["STUDY", "MEAL", "SPORTS", "LANGUAGE", "CUSTOM"] },
+          "participantIds": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "string" } },
+          "author": { "$ref": "#/components/schemas/LegacyDirectActionInterestAuthor" },
+          "course": { "$ref": "#/components/schemas/LegacyDirectActionInterestCourse" }
+        },
+        "required": ["version", "sourceKind", "sourceId", "title", "startsAt", "endsAt", "location", "planType", "participantIds", "author", "course"]
+      },
+      "LegacyDirectActionPlanDraft": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": { "type": "string" },
+          "startTime": { "type": ["string", "null"], "format": "date-time" },
+          "endTime": { "type": ["string", "null"], "format": "date-time" },
+          "location": { "type": ["string", "null"] },
+          "planType": { "type": "string", "enum": ["STUDY", "MEAL", "SPORTS", "LANGUAGE", "CUSTOM"] },
+          "participantIds": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "string" } },
+          "origin": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": { "type": "string", "const": "ACTION_INTEREST" },
+              "id": { "type": "string" }
+            },
+            "required": ["kind", "id"]
+          }
+        },
+        "required": ["title", "startTime", "endTime", "location", "planType", "participantIds", "origin"]
+      },
+      "LegacyDirectActionInterest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "status": { "type": "string", "enum": ["ACTIVE", "WITHDRAWN"] },
+          "connectionId": { "type": "string" },
+          "postId": { "type": "string" },
+          "context": { "$ref": "#/components/schemas/LegacyDirectActionContext" },
+          "planDraft": { "$ref": "#/components/schemas/LegacyDirectActionPlanDraft" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "status", "connectionId", "postId", "context", "planDraft", "createdAt", "updatedAt"]
+      },
+      "LegacyDirectActionInterestCreateEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "interest": { "$ref": "#/components/schemas/LegacyDirectActionInterest" },
+              "messageId": { "type": ["string", "null"] }
+            },
+            "required": ["interest", "messageId"]
+          }
+        },
+        "required": ["data"]
+      },
+      "LegacyDirectActionInterestWithdrawEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "interest": { "$ref": "#/components/schemas/LegacyDirectActionInterest" }
+            },
+            "required": ["interest"]
+          }
+        },
+        "required": ["data"]
+      },
+      "CreatorGatedInterestRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "interestSurface": {
+            "type": "string",
+            "enum": ["FEED_CARD", "ACTION_DETAIL"]
+          }
+        },
+        "required": ["interestSurface"]
+      },
+      "CreatorGatedInterestCourse": {
+        "type": ["object", "null"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "code": { "type": ["string", "null"] },
+          "name": { "type": "string" }
+        },
+        "required": ["id", "code", "name"]
+      },
+      "CreatorGatedLiveInterestContext": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": { "type": "string", "const": "LIVE" },
+          "title": { "type": "string" },
+          "startsAt": { "type": ["string", "null"], "format": "date-time" },
+          "endsAt": { "type": ["string", "null"], "format": "date-time" },
+          "location": { "type": ["string", "null"] },
+          "course": { "$ref": "#/components/schemas/CreatorGatedInterestCourse" }
+        },
+        "required": ["kind", "title", "startsAt", "endsAt", "location", "course"]
+      },
+      "CreatorGatedTombstoneInterestContext": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": { "type": "string", "const": "TOMBSTONE" }
+        },
+        "required": ["kind"]
+      },
+      "CreatorGatedInterestContext": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/CreatorGatedLiveInterestContext" },
+          { "$ref": "#/components/schemas/CreatorGatedTombstoneInterestContext" }
+        ],
+        "discriminator": {
+          "propertyName": "kind",
+          "mapping": {
+            "LIVE": "#/components/schemas/CreatorGatedLiveInterestContext",
+            "TOMBSTONE": "#/components/schemas/CreatorGatedTombstoneInterestContext"
+          }
+        }
+      },
+      "CreatorGatedLivePlanDraft": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": { "type": "string", "const": "LIVE" },
+          "title": { "type": "string" },
+          "startTime": { "type": ["string", "null"], "format": "date-time" },
+          "endTime": { "type": ["string", "null"], "format": "date-time" },
+          "location": { "type": ["string", "null"] },
+          "planType": { "type": "string", "enum": ["STUDY", "MEAL", "SPORTS", "LANGUAGE", "CUSTOM"] }
+        },
+        "required": ["kind", "title", "startTime", "endTime", "location", "planType"]
+      },
+      "CreatorGatedTombstonePlanDraft": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": { "type": "string", "const": "TOMBSTONE" }
+        },
+        "required": ["kind"]
+      },
+      "CreatorGatedPlanDraft": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/CreatorGatedLivePlanDraft" },
+          { "$ref": "#/components/schemas/CreatorGatedTombstonePlanDraft" }
+        ],
+        "discriminator": {
+          "propertyName": "kind",
+          "mapping": {
+            "LIVE": "#/components/schemas/CreatorGatedLivePlanDraft",
+            "TOMBSTONE": "#/components/schemas/CreatorGatedTombstonePlanDraft"
+          }
+        }
+      },
+      "CoordinationShellFocus": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": { "type": "string", "const": "COORDINATION_SHELL" },
+          "interestId": { "type": "string" },
+          "reservationId": { "type": "string", "format": "uuid" }
+        },
+        "required": ["type", "interestId", "reservationId"]
+      },
+      "ActionCoordinationReservation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "contextId": { "type": "string" },
+          "leaseExpiresAt": { "type": "string", "format": "date-time" },
+          "generation": { "type": "integer", "minimum": 1 },
+          "actionContextPreview": { "$ref": "#/components/schemas/CreatorGatedLiveInterestContext" },
+          "planDraft": { "$ref": "#/components/schemas/CreatorGatedLivePlanDraft" },
+          "focus": { "$ref": "#/components/schemas/CoordinationShellFocus" }
+        },
+        "required": ["id", "contextId", "leaseExpiresAt", "generation", "actionContextPreview", "planDraft", "focus"]
+      },
+      "ActionCoordinationReservationEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "reservation": { "$ref": "#/components/schemas/ActionCoordinationReservation" }
+        },
+        "required": ["reservation"]
+      },
+      "ActionCoordinationReservationRelease": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "reservationId": { "type": "string", "format": "uuid" },
+          "contextId": { "type": "string" },
+          "interestId": { "type": "string" },
+          "actionId": { "type": "string" },
+          "generation": { "type": "integer", "minimum": 1 },
+          "releasedAt": { "type": "string", "format": "date-time" },
+          "focus": { "$ref": "#/components/schemas/ActionResponsesFocus" }
+        },
+        "required": ["reservationId", "contextId", "interestId", "actionId", "generation", "releasedAt", "focus"]
+      },
+      "ActionCoordinationReservationReleaseEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "release": { "$ref": "#/components/schemas/ActionCoordinationReservationRelease" }
+        },
+        "required": ["release"]
+      },
+      "ActionCoordinationFirstMessageContent": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": { "type": "string", "const": "MESSAGE" },
+          "body": { "type": "string", "minLength": 1, "maxLength": 500 }
+        },
+        "required": ["type", "body"]
+      },
+      "ActionCoordinationFirstPlanContent": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": { "type": "string", "const": "PLAN" },
+          "planType": { "type": "string", "enum": ["STUDY", "MEAL", "SPORTS", "LANGUAGE", "CUSTOM"] },
+          "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "location": { "type": ["string", "null"], "maxLength": 120 },
+          "message": { "type": ["string", "null"], "maxLength": 500 },
+          "startTime": { "type": "string", "format": "date-time" },
+          "endTime": { "type": "string", "format": "date-time" }
+        },
+        "required": ["type", "planType", "title", "startTime", "endTime"]
+      },
+      "ActionCoordinationFirstContent": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/ActionCoordinationFirstMessageContent" },
+          { "$ref": "#/components/schemas/ActionCoordinationFirstPlanContent" }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "MESSAGE": "#/components/schemas/ActionCoordinationFirstMessageContent",
+            "PLAN": "#/components/schemas/ActionCoordinationFirstPlanContent"
+          }
+        }
+      },
+      "ActionCoordinationActivationRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "firstContent": { "$ref": "#/components/schemas/ActionCoordinationFirstContent" }
+        },
+        "required": ["firstContent"]
+      },
+      "ActionCoordinationMessageActivation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "connectionId": { "type": "string" },
+          "contextId": { "type": "string" },
+          "sourceCardMessageId": { "type": "string" },
+          "firstMessageId": { "type": "string" },
+          "firstContentType": { "type": "string", "const": "MESSAGE" },
+          "focus": { "$ref": "#/components/schemas/CreatorGatedActionContextFocus" }
+        },
+        "required": ["connectionId", "contextId", "sourceCardMessageId", "firstMessageId", "firstContentType", "focus"]
+      },
+      "ActionCoordinationPlanActivation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "connectionId": { "type": "string" },
+          "contextId": { "type": "string" },
+          "sourceCardMessageId": { "type": "string" },
+          "planCardMessageId": { "type": "string" },
+          "commitmentId": { "type": "string" },
+          "revisionId": { "type": "string" },
+          "firstContentType": { "type": "string", "const": "PLAN" },
+          "focus": { "$ref": "#/components/schemas/CreatorGatedPlanFocus" }
+        },
+        "required": ["connectionId", "contextId", "sourceCardMessageId", "planCardMessageId", "commitmentId", "revisionId", "firstContentType", "focus"]
+      },
+      "ActionCoordinationActivation": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/ActionCoordinationMessageActivation" },
+          { "$ref": "#/components/schemas/ActionCoordinationPlanActivation" }
+        ],
+        "discriminator": {
+          "propertyName": "firstContentType",
+          "mapping": {
+            "MESSAGE": "#/components/schemas/ActionCoordinationMessageActivation",
+            "PLAN": "#/components/schemas/ActionCoordinationPlanActivation"
+          }
+        }
+      },
+      "ActionCoordinationActivationEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "activation": { "$ref": "#/components/schemas/ActionCoordinationActivation" }
+        },
+        "required": ["activation"]
+      },
+      "ActionPlanInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "planType": { "type": "string", "enum": ["STUDY", "MEAL", "SPORTS", "LANGUAGE", "CUSTOM"] },
+          "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "location": { "type": ["string", "null"], "maxLength": 120 },
+          "message": { "type": ["string", "null"], "maxLength": 500 },
+          "startTime": { "type": "string", "format": "date-time" },
+          "endTime": { "type": "string", "format": "date-time" }
+        },
+        "required": ["planType", "title", "startTime", "endTime"]
+      },
+      "ActionPlanMutation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "commitmentId": { "type": "string" },
+          "revisionId": { "type": "string" },
+          "connectionId": { "type": "string" },
+          "commitmentStatus": { "type": "string", "enum": ["NEGOTIATING", "CONFIRMED", "CLOSED"] },
+          "revisionStatus": { "type": "string", "enum": ["PENDING", "ACCEPTED", "DECLINED", "CANCELED"] },
+          "focus": { "$ref": "#/components/schemas/CreatorGatedPlanFocus" }
+        },
+        "required": ["commitmentId", "revisionId", "connectionId", "commitmentStatus", "revisionStatus", "focus"]
+      },
+      "ActionPlanMutationEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "plan": { "$ref": "#/components/schemas/ActionPlanMutation" }
+        },
+        "required": ["plan"]
+      },
+      "CreatorGatedUnconnectedInterestFocus": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": { "type": "string", "const": "INTEREST" },
+          "interestId": { "type": "string" }
+        },
+        "required": ["type", "interestId"]
+      },
+      "CreatorGatedActionContextFocus": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": { "type": "string", "const": "ACTION_CONTEXT" },
+          "connectionId": { "type": "string" },
+          "contextId": { "type": "string" }
+        },
+        "required": ["type", "connectionId", "contextId"]
+      },
+      "CreatorGatedPlanFocus": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": { "type": "string", "const": "PLAN" },
+          "connectionId": { "type": "string" },
+          "commitmentId": { "type": "string" },
+          "revisionId": { "type": "string" }
+        },
+        "required": ["type", "connectionId", "commitmentId", "revisionId"]
+      },
+      "CreatorGatedPlanRecoveryFocus": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": { "type": "string", "const": "PLAN" },
+          "connectionId": { "type": "string" },
+          "commitmentId": { "type": "string" },
+          "revisionId": { "type": "string" }
+        },
+        "required": ["type", "connectionId", "commitmentId"]
+      },
+      "ActionPlanConflictState": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "actionId": { "type": "string" },
+          "commitmentId": { "type": "string" },
+          "revisionId": { "type": "string" },
+          "commitmentStatus": { "type": "string", "enum": ["NEGOTIATING", "CONFIRMED", "CLOSED", "CANCELED"] },
+          "revisionStatus": { "type": "string", "enum": ["PENDING", "ACCEPTED", "DECLINED", "CANCELED", "COUNTER_PROPOSED", "EXPIRED", "INVALIDATED"] }
+        },
+        "required": ["commitmentId"]
+      },
+      "CreatorGatedActionPlanRecovery": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "action": { "type": "string", "const": "OPEN_PLAN" },
+          "focus": { "$ref": "#/components/schemas/CreatorGatedPlanRecoveryFocus" }
+        },
+        "required": ["action", "focus"]
+      },
+      "CreatorGatedActionContextRecovery": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "action": { "type": "string", "const": "OPEN_ACTION_CONTEXT" },
+          "focus": { "$ref": "#/components/schemas/CreatorGatedActionContextFocus" }
+        },
+        "required": ["action", "focus"]
+      },
+      "LegacyCoordinationPolicyRecovery": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/CreatorGatedActionPlanRecovery" },
+          { "$ref": "#/components/schemas/CreatorGatedActionContextRecovery" }
+        ],
+        "discriminator": {
+          "propertyName": "action",
+          "mapping": {
+            "OPEN_PLAN": "#/components/schemas/CreatorGatedActionPlanRecovery",
+            "OPEN_ACTION_CONTEXT": "#/components/schemas/CreatorGatedActionContextRecovery"
+          }
+        }
+      },
+      "BLightPlanErrorEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": { "type": "string", "minLength": 1 },
+              "message": { "type": "string" },
+              "field": { "type": "string" },
+              "retryable": { "type": "boolean" },
+              "retryAfterSeconds": { "type": "integer", "minimum": 1 },
+              "requestId": { "type": "string" }
+            },
+            "required": ["code", "message", "retryable"]
+          },
+          "currentState": { "$ref": "#/components/schemas/ActionPlanConflictState" },
+          "recovery": { "$ref": "#/components/schemas/CreatorGatedActionPlanRecovery" }
+        },
+        "required": ["error"]
+      },
+      "CreatorGatedInterestFocus": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/CreatorGatedUnconnectedInterestFocus" },
+          { "$ref": "#/components/schemas/CreatorGatedActionContextFocus" },
+          { "$ref": "#/components/schemas/CreatorGatedPlanFocus" }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "INTEREST": "#/components/schemas/CreatorGatedUnconnectedInterestFocus",
+            "ACTION_CONTEXT": "#/components/schemas/CreatorGatedActionContextFocus",
+            "PLAN": "#/components/schemas/CreatorGatedPlanFocus"
+          }
+        }
+      },
+      "CreatorGatedActionInterest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "actionId": { "type": "string" },
+          "actionState": { "type": "string", "enum": ["ACTIVE", "CLOSED", "EXPIRED", "FULFILLED", "REMOVED"] },
+          "actionExpiresAt": { "type": "string", "format": "date-time" },
+          "interestState": { "type": "string", "enum": ["ACTIVE", "WITHDRAWN"] },
+          "coordinationState": { "type": "string", "enum": ["WAITING", "INITIATING", "OPEN", "ENDED", "UNAVAILABLE"] },
+          "activationId": { "type": "string" },
+          "activationStartedAt": { "type": "string", "format": "date-time" },
+          "terminalReason": { "type": ["string", "null"], "enum": ["ACTION_FULFILLED_BEFORE_CONNECT", "ACTION_EXPIRED_BEFORE_CONNECT", "INTEREST_WITHDRAWN_BEFORE_CONNECT", null] },
+          "terminalAt": { "type": ["string", "null"], "format": "date-time" },
+          "context": { "$ref": "#/components/schemas/CreatorGatedInterestContext" },
+          "planDraft": { "$ref": "#/components/schemas/CreatorGatedPlanDraft" },
+          "focus": { "$ref": "#/components/schemas/CreatorGatedInterestFocus" },
+          "coordinationPolicy": { "type": "string", "const": "CREATOR_GATED_V2" },
+          "policySchemaVersion": { "type": "integer", "const": 1 },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "actionId", "actionState", "actionExpiresAt", "interestState", "coordinationState", "activationId", "activationStartedAt", "terminalReason", "terminalAt", "context", "planDraft", "focus", "coordinationPolicy", "policySchemaVersion", "createdAt", "updatedAt"]
+      },
+      "CreatorGatedInterestEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "interest": { "$ref": "#/components/schemas/CreatorGatedActionInterest" }
+        },
+        "required": ["interest"]
+      },
+      "CreatorGatedMyInterestsEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "interests": {
+            "type": "array",
+            "maxItems": 50,
+            "items": { "$ref": "#/components/schemas/CreatorGatedActionInterest" }
+          },
+          "nextCursor": { "type": ["string", "null"], "description": "Opaque keyset cursor for the next page, or null when this collection is exhausted." }
+        },
+        "required": ["interests", "nextCursor"]
+      },
+      "CreatorGatedInterestRecovery": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "action": { "type": "string", "const": "REACTIVATE_INTEREST" },
+          "focus": { "$ref": "#/components/schemas/CreatorGatedUnconnectedInterestFocus" }
+        },
+        "required": ["action", "focus"]
+      },
+      "BLightInterestErrorEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": { "type": "string", "minLength": 1 },
+              "message": { "type": "string" },
+              "field": { "type": "string" },
+              "retryable": { "type": "boolean" },
+              "retryAfterSeconds": { "type": "integer", "minimum": 1 },
+              "requestId": { "type": "string" }
+            },
+            "required": ["code", "message", "retryable"]
+          },
+          "currentState": { "$ref": "#/components/schemas/CreatorGatedActionInterest" },
+          "recovery": { "$ref": "#/components/schemas/CreatorGatedInterestRecovery" }
+        },
+        "required": ["error"]
+      },
+      "ActionResponseCounts": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "totalActiveInterestCount": { "type": "integer", "minimum": 0 },
+          "visibleInterestCount": { "type": "integer", "minimum": 0 },
+          "unseenVisibleInterestCount": { "type": "integer", "minimum": 0 }
+        },
+        "required": ["totalActiveInterestCount", "visibleInterestCount", "unseenVisibleInterestCount"]
+      },
+      "ActionResponseCourse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "code": { "type": ["string", "null"] },
+          "name": { "type": "string" }
+        },
+        "required": ["id", "code", "name"]
+      },
+      "NullableActionResponseCourse": {
+        "type": ["object", "null"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "code": { "type": ["string", "null"] },
+          "name": { "type": "string" }
+        },
+        "required": ["id", "code", "name"]
+      },
+      "ActionResponsesFocus": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": { "type": "string", "const": "ACTION_RESPONSES" },
+          "actionId": { "type": "string" },
+          "interestId": { "type": "string" }
+        },
+        "required": ["type", "actionId"]
+      },
+      "LimitedActionResponder": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "userId": { "type": "string" },
+          "displayName": { "type": "string" },
+          "avatarUrl": { "type": ["string", "null"], "format": "uri" },
+          "verifiedStudent": { "type": "boolean" }
+        },
+        "required": ["userId", "displayName", "avatarUrl", "verifiedStudent"]
+      },
+      "ActionResponseSignals": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "sharedCourse": { "$ref": "#/components/schemas/NullableActionResponseCourse" },
+          "sharedLanguages": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["CHINESE", "ENGLISH", "GERMAN", "FRENCH", "HINDI", "SPANISH", "OTHER"] }
+          }
+        },
+        "required": ["sharedCourse", "sharedLanguages"]
+      },
+      "ActionResponseItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "interestId": { "type": "string" },
+          "activationId": { "type": "string" },
+          "contextId": { "type": "string" },
+          "responder": { "$ref": "#/components/schemas/LimitedActionResponder" },
+          "signals": { "$ref": "#/components/schemas/ActionResponseSignals" },
+          "receivedAt": { "type": "string", "format": "date-time" },
+          "viewedAt": { "type": ["string", "null"], "format": "date-time" },
+          "hiddenAt": { "type": ["string", "null"], "format": "date-time" },
+          "interestState": { "type": "string", "enum": ["ACTIVE", "WITHDRAWN"] },
+          "coordinationState": { "type": "string", "enum": ["WAITING", "INITIATING", "OPEN", "ENDED", "UNAVAILABLE"] },
+          "presentationState": { "type": "string", "enum": ["VISIBLE", "HIDDEN"] },
+          "canStartCoordination": { "type": "boolean" },
+          "startCoordinationUnavailableReason": {
+            "type": ["string", "null"],
+            "enum": [
+              "COORDINATION_START_UNAVAILABLE",
+              "INTEREST_NOT_ACTIVE",
+              "INTEREST_ALREADY_COORDINATING",
+              "ACTION_EXPIRED",
+              "ACTION_FULFILLED",
+              "COORDINATION_LIMIT_REACHED",
+              "ACTION_PLAN_PENDING",
+              "COORDINATION_POLICY_UNSUPPORTED",
+              null
+            ]
+          }
+        },
+        "required": ["interestId", "activationId", "contextId", "responder", "signals", "receivedAt", "viewedAt", "hiddenAt", "interestState", "coordinationState", "presentationState", "canStartCoordination", "startCoordinationUnavailableReason"]
+      },
+      "ActionResponseAction": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "actionState": { "type": "string", "enum": ["ACTIVE", "CLOSED", "EXPIRED", "FULFILLED", "REMOVED"] },
+          "startsAt": { "type": ["string", "null"], "format": "date-time" },
+          "endsAt": { "type": ["string", "null"], "format": "date-time" },
+          "location": { "type": ["string", "null"] },
+          "course": { "$ref": "#/components/schemas/NullableActionResponseCourse" }
+        },
+        "required": ["id", "title", "actionState", "startsAt", "endsAt", "location", "course"]
+      },
+      "ActionResponseGroup": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "action": { "$ref": "#/components/schemas/ActionResponseAction" },
+          "counts": { "$ref": "#/components/schemas/ActionResponseCounts" },
+          "responses": { "type": "array", "items": { "$ref": "#/components/schemas/ActionResponseItem" } },
+          "focus": { "$ref": "#/components/schemas/ActionResponsesFocus" }
+        },
+        "required": ["action", "counts", "responses", "focus"]
+      },
+      "ActionResponseSnapshotMetadata": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "token": { "type": "string", "minLength": 1, "maxLength": 2048 },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "expiresAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["token", "createdAt", "expiresAt"]
+      },
+      "ActionResponsesEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "snapshot": { "$ref": "#/components/schemas/ActionResponseSnapshotMetadata" },
+          "groups": { "type": "array", "items": { "$ref": "#/components/schemas/ActionResponseGroup" } },
+          "nextCursor": { "type": ["string", "null"] }
+        },
+        "required": ["snapshot", "groups", "nextCursor"]
+      },
+      "ActionResponsesSeenRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "snapshotToken": { "type": "string", "minLength": 1, "maxLength": 2048 },
+          "interestIds": { "type": "array", "minItems": 1, "maxItems": 50, "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 128 } }
+        },
+        "required": ["snapshotToken", "interestIds"]
+      },
+      "ActionResponseViewed": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "interestId": { "type": "string" },
+          "activationId": { "type": "string" },
+          "viewedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["interestId", "activationId", "viewedAt"]
+      },
+      "ActionResponsesSeenEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "actionId": { "type": "string" },
+          "viewed": { "type": "array", "items": { "$ref": "#/components/schemas/ActionResponseViewed" } },
+          "counts": { "$ref": "#/components/schemas/ActionResponseCounts" }
+        },
+        "required": ["actionId", "viewed", "counts"]
+      },
+      "ActionResponsePresentationRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "presentationState": { "type": "string", "enum": ["VISIBLE", "HIDDEN"] }
+        },
+        "required": ["presentationState"]
+      },
+      "ActionResponsePresentation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "interestId": { "type": "string" },
+          "presentationState": { "type": "string", "enum": ["VISIBLE", "HIDDEN"] },
+          "hiddenAt": { "type": ["string", "null"], "format": "date-time" },
+          "version": { "type": "integer", "minimum": 0 },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["interestId", "presentationState", "hiddenAt", "version", "updatedAt"]
+      },
+      "ActionResponsePresentationEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "presentation": { "$ref": "#/components/schemas/ActionResponsePresentation" },
+          "actionId": { "type": "string" },
+          "counts": { "$ref": "#/components/schemas/ActionResponseCounts" }
+        },
+        "required": ["presentation", "actionId", "counts"]
+      },
+      "CreatorResponseEntry": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "counts": { "$ref": "#/components/schemas/ActionResponseCounts" },
+          "focus": { "$ref": "#/components/schemas/ActionResponsesFocus" }
+        },
+        "required": ["counts", "focus"]
+      },
+      "ActionResponseSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "actionCountWithUnseenResponses": { "type": "integer", "minimum": 0 },
+          "unseenVisibleInterestCount": { "type": "integer", "minimum": 0 },
+          "focus": { "$ref": "#/components/schemas/ActionResponsesFocus" }
+        },
+        "required": ["actionCountWithUnseenResponses", "unseenVisibleInterestCount", "focus"]
+      },
+      "ProductFunnelBatch": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "events": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "clientEventId": { "type": "string", "format": "uuid" },
+                "name": { "type": "string", "enum": ["OPPORTUNITY_IMPRESSION", "OPPORTUNITY_OPEN"] },
+                "surface": { "type": "string", "enum": ["DISCOVER_RECOMMENDED", "DISCOVER_EXPLORE", "ACTION_DETAIL", "CHAT", "PLAN_CENTER", "SMALL_GROUP"] },
+                "sourceKind": { "type": "string", "enum": ["BUDDY_POST", "COURSE_ACTION", "DISCOVER_ACTIVITY", "PLAN", "SMALL_GROUP"] },
+                "sourceId": { "type": "string", "maxLength": 128 },
+                "occurredAt": { "type": "string", "format": "date-time" },
+                "metadata": { "type": "object", "additionalProperties": false, "properties": { "reasonCodes": { "type": "array", "maxItems": 8, "items": { "type": "string" } }, "position": { "type": "integer" }, "visibilityDurationMs": { "type": "integer", "minimum": 500, "maximum": 60000 }, "appVersion": { "type": "string" }, "buildNumber": { "type": "string" } } }
+              },
+              "required": ["clientEventId", "name", "surface", "occurredAt"]
+            }
+          }
+        },
+        "required": ["events"]
+      },
+      "SocialPreferencesRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "topics": { "type": "array", "maxItems": 6, "items": { "type": "string", "enum": ["COFFEE", "STUDY", "SPORTS", "EXPLORE", "FOOD", "EVENTS"] } },
+          "meetingPreference": { "type": "string", "enum": ["ONE_TO_ONE", "SMALL_GROUP", "BOTH"] },
+          "weeklyWindows": { "type": "array", "maxItems": 21, "items": { "type": "object", "additionalProperties": false, "properties": { "weekday": { "type": "integer", "minimum": 1, "maximum": 7 }, "startMinutes": { "type": "integer", "minimum": 0, "maximum": 1435 }, "endMinutes": { "type": "integer", "minimum": 5, "maximum": 1440 } }, "required": ["weekday", "startMinutes", "endMinutes"] } },
+          "timeZone": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "activeUntil": { "type": "string", "format": "date-time" }
+        },
+        "required": ["topics", "meetingPreference", "weeklyWindows", "timeZone"]
+      },
+      "WeeklyIntentTimeWindow": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "startAt": { "type": "string", "format": "date-time" },
+          "endAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["startAt", "endAt"]
+      },
+      "WeeklyIntentCourse": {
+        "type": ["object", "null"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "code": { "type": ["string", "null"] },
+          "name": { "type": "string" }
+        },
+        "required": ["id", "code", "name"]
+      },
+      "WeeklyIntent": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "topic": { "type": "string", "enum": ["COFFEE", "STUDY", "SPORTS", "EXPLORE", "FOOD", "EVENTS"] },
+          "togetherMode": { "type": "string", "enum": ["SAME_ACTIVITY", "PARALLEL", "EITHER"] },
+          "studyGoal": { "type": ["string", "null"], "maxLength": 80 },
+          "activityText": { "type": ["string", "null"], "maxLength": 80 },
+          "sportTag": { "type": ["string", "null"], "enum": ["BASKETBALL", "BADMINTON", "TABLE_TENNIS", "FOOTBALL", "VOLLEYBALL", "TENNIS", "GYM", "RUNNING", "HIKING", "CYCLING", "SWIMMING", "SKIING", "CLIMBING", "YOGA", "OTHER", null] },
+          "sportOtherNote": { "type": ["string", "null"], "maxLength": 60 },
+          "courseId": { "type": ["string", "null"] },
+          "course": { "$ref": "#/components/schemas/WeeklyIntentCourse" },
+          "timeWindows": { "type": "array", "minItems": 1, "maxItems": 7, "items": { "$ref": "#/components/schemas/WeeklyIntentTimeWindow" } },
+          "timeZone": { "type": "string" },
+          "note": { "type": ["string", "null"] },
+          "status": { "type": "string", "enum": ["ACTIVE", "PAUSED", "ENDED", "EXPIRED"] },
+          "policyVersion": { "type": "integer", "minimum": 1 },
+          "version": { "type": "integer", "minimum": 1 },
+          "expiresAt": { "type": "string", "format": "date-time" },
+          "pausedAt": { "type": ["string", "null"], "format": "date-time" },
+          "endedAt": { "type": ["string", "null"], "format": "date-time" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "topic", "togetherMode", "studyGoal", "activityText", "sportTag", "sportOtherNote", "courseId", "course", "timeWindows", "timeZone", "note", "status", "policyVersion", "version", "expiresAt", "pausedAt", "endedAt", "createdAt", "updatedAt"]
+      },
+      "WeeklyIntentData": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "intent": { "$ref": "#/components/schemas/WeeklyIntent" }
+        }
+      },
+      "WeeklyIntentEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "data": { "$ref": "#/components/schemas/WeeklyIntentData" } },
+        "required": ["data"]
+      },
+      "WeeklyIntentCollectionData": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "intent": { "$ref": "#/components/schemas/WeeklyIntent" },
+          "intents": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/WeeklyIntent" }
+          }
+        },
+        "required": ["intents"]
+      },
+      "WeeklyIntentCollectionEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "data": { "$ref": "#/components/schemas/WeeklyIntentCollectionData" } },
+        "required": ["data"]
+      },
+      "WeeklyIntentCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "topic": { "type": "string", "enum": ["COFFEE", "STUDY", "SPORTS", "EXPLORE", "FOOD", "EVENTS"] },
+          "togetherMode": { "type": "string", "enum": ["SAME_ACTIVITY", "PARALLEL", "EITHER"] },
+          "studyGoal": { "type": ["string", "null"], "maxLength": 80 },
+          "activityText": { "type": ["string", "null"], "maxLength": 80 },
+          "sportTag": { "type": ["string", "null"], "enum": ["BASKETBALL", "BADMINTON", "TABLE_TENNIS", "FOOTBALL", "VOLLEYBALL", "TENNIS", "GYM", "RUNNING", "HIKING", "CYCLING", "SWIMMING", "SKIING", "CLIMBING", "YOGA", "OTHER", null] },
+          "sportOtherNote": { "type": ["string", "null"], "minLength": 1, "maxLength": 60 },
+          "courseId": { "type": ["string", "null"] },
+          "timeWindows": { "type": "array", "minItems": 1, "maxItems": 7, "items": { "$ref": "#/components/schemas/WeeklyIntentTimeWindow" } },
+          "timeZone": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "note": { "type": ["string", "null"], "maxLength": 160 }
+        },
+        "required": ["topic", "timeWindows", "timeZone"]
+      },
+      "WeeklyIntentPatchRequest": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "action": { "type": "string", "const": "EDIT" },
+              "expectedVersion": { "type": "integer", "minimum": 1 },
+              "topic": { "type": "string", "enum": ["COFFEE", "STUDY", "SPORTS", "EXPLORE", "FOOD", "EVENTS"] },
+              "togetherMode": { "type": "string", "enum": ["SAME_ACTIVITY", "PARALLEL", "EITHER"] },
+              "studyGoal": { "type": ["string", "null"], "maxLength": 80 },
+              "activityText": { "type": ["string", "null"], "maxLength": 80 },
+              "sportTag": { "type": ["string", "null"], "enum": ["BASKETBALL", "BADMINTON", "TABLE_TENNIS", "FOOTBALL", "VOLLEYBALL", "TENNIS", "GYM", "RUNNING", "HIKING", "CYCLING", "SWIMMING", "SKIING", "CLIMBING", "YOGA", "OTHER", null] },
+              "sportOtherNote": { "type": ["string", "null"], "minLength": 1, "maxLength": 60 },
+              "courseId": { "type": ["string", "null"] },
+              "timeWindows": { "type": "array", "minItems": 1, "maxItems": 7, "items": { "$ref": "#/components/schemas/WeeklyIntentTimeWindow" } },
+              "timeZone": { "type": "string", "minLength": 1, "maxLength": 64 },
+              "note": { "type": ["string", "null"], "maxLength": 160 }
+            },
+            "required": ["action", "expectedVersion"],
+            "minProperties": 3
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "action": { "type": "string", "const": "PAUSE" },
+              "expectedVersion": { "type": "integer", "minimum": 1 }
+            },
+            "required": ["action", "expectedVersion"]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "action": { "type": "string", "const": "RESUME" },
+              "expectedVersion": { "type": "integer", "minimum": 1 }
+            },
+            "required": ["action", "expectedVersion"]
+          }
+        ]
+      },
+      "WeeklyIntentEndRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "expectedVersion": { "type": "integer", "minimum": 1 } },
+        "required": ["expectedVersion"]
+      },
+      "TogetherMatchingSession": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "state": { "type": "string", "enum": ["IDLE", "MATCHING", "EXPIRED"] },
+          "startedAt": { "type": ["string", "null"], "format": "date-time" },
+          "matchingUntil": { "type": ["string", "null"], "format": "date-time" },
+          "stoppedAt": { "type": ["string", "null"], "format": "date-time" },
+          "version": { "type": "integer", "minimum": 0 }
+        },
+        "required": ["state", "startedAt", "matchingUntil", "stoppedAt", "version"]
+      },
+      "TogetherMatchingSessionEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "data": { "$ref": "#/components/schemas/TogetherMatchingSession" } },
+        "required": ["data"]
+      },
+      "MutualOpportunityCourse": {
+        "type": ["object", "null"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "code": { "type": ["string", "null"] },
+          "name": { "type": "string" }
+        },
+        "required": ["id", "code", "name"]
+      },
+      "MutualOpportunityPeer": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "displayName": { "type": "string" },
+          "avatarUrl": { "type": ["string", "null"] },
+          "verifiedStudent": { "type": "boolean" },
+          "major": { "type": ["string", "null"] },
+          "semester": { "type": ["integer", "null"], "minimum": 1 },
+          "sharedLanguages": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["displayName", "avatarUrl", "verifiedStudent", "major", "semester", "sharedLanguages"]
+      },
+      "MutualOpportunityCoordination": {
+        "type": ["object", "null"],
+        "additionalProperties": false,
+        "properties": { "connectionId": { "type": "string" } },
+        "required": ["connectionId"]
+      },
+      "MutualOpportunity": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "viewerIntentId": { "type": "string" },
+          "policyVersion": { "type": "string", "const": "MUTUAL_OPPORTUNITY_V1" },
+          "state": { "type": "string", "enum": ["NEEDS_DECISION", "DECIDED", "CLOSED", "READY_TO_COORDINATE", "UNAVAILABLE"] },
+          "topic": { "type": "string", "enum": ["COFFEE", "STUDY", "SPORTS", "EXPLORE", "FOOD", "EVENTS"] },
+          "matchKind": { "type": "string", "enum": ["EXACT_ACTIVITY", "SHARED_CONTEXT"] },
+          "sharedContext": { "type": ["string", "null"], "enum": ["PARALLEL_STUDY", null] },
+          "viewerTogetherMode": { "type": "string", "enum": ["SAME_ACTIVITY", "PARALLEL", "EITHER"] },
+          "peerTogetherMode": { "type": "string", "enum": ["SAME_ACTIVITY", "PARALLEL", "EITHER"] },
+          "viewerStudyGoal": { "type": ["string", "null"], "maxLength": 80 },
+          "peerStudyGoal": { "type": ["string", "null"], "maxLength": 80 },
+          "activityText": { "type": ["string", "null"], "maxLength": 80 },
+          "sportTag": { "type": ["string", "null"], "enum": ["BASKETBALL", "BADMINTON", "TABLE_TENNIS", "FOOTBALL", "VOLLEYBALL", "TENNIS", "GYM", "RUNNING", "HIKING", "CYCLING", "SWIMMING", "SKIING", "CLIMBING", "YOGA", "OTHER", null] },
+          "sportOtherNote": { "type": ["string", "null"], "maxLength": 60 },
+          "course": { "$ref": "#/components/schemas/MutualOpportunityCourse" },
+          "startsAt": { "type": "string", "format": "date-time" },
+          "endsAt": { "type": "string", "format": "date-time" },
+          "expiresAt": { "type": "string", "format": "date-time" },
+          "peer": { "$ref": "#/components/schemas/MutualOpportunityPeer" },
+          "viewerDecision": { "type": ["string", "null"], "enum": ["YES", "NO", "WITHDRAWN", null] },
+          "coordination": { "$ref": "#/components/schemas/MutualOpportunityCoordination" },
+          "version": { "type": "integer", "minimum": 1 }
+        },
+        "required": ["id", "viewerIntentId", "policyVersion", "state", "topic", "matchKind", "sharedContext", "viewerTogetherMode", "peerTogetherMode", "viewerStudyGoal", "peerStudyGoal", "activityText", "sportTag", "sportOtherNote", "course", "startsAt", "endsAt", "expiresAt", "peer", "viewerDecision", "coordination", "version"]
+      },
+      "MutualOpportunitiesData": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "opportunities": { "type": "array", "items": { "$ref": "#/components/schemas/MutualOpportunity" } } },
+        "required": ["opportunities"]
+      },
+      "MutualOpportunitiesEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "data": { "$ref": "#/components/schemas/MutualOpportunitiesData" } },
+        "required": ["data"]
+      },
+      "MutualOpportunityEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "data": { "$ref": "#/components/schemas/MutualOpportunity" } },
+        "required": ["data"]
+      },
+      "MutualOpportunityDecisionRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "decision": { "type": "string", "enum": ["YES", "NO"] } },
+        "required": ["decision"]
+      },
+      "OutcomeRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "value": { "type": "string", "enum": ["OCCURRED", "DID_NOT_OCCUR", "PREFER_NOT_TO_SAY"] } },
+        "required": ["value"]
+      },
+      "SmallGroupResponseRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "status": { "type": "string", "enum": ["INTERESTED", "DECLINED", "WITHDRAWN"] } },
+        "required": ["status"]
+      },
       "SuccessEnvelope": {
         "type": "object",
         "properties": {
@@ -7150,6 +9417,9 @@
               "retryable",
               "requestId"
             ]
+          },
+          "recovery": {
+            "$ref": "#/components/schemas/LegacyCoordinationPolicyRecovery"
           }
         },
         "required": [
@@ -7360,6 +9630,20 @@
               "null"
             ]
           },
+          "actionInterestId": {
+            "type": ["string", "null"]
+          },
+          "actionContextId": {
+            "type": ["string", "null"]
+          },
+          "actionInterest": {
+            "type": ["object", "null"],
+            "additionalProperties": true
+          },
+          "mutualOpportunity": {
+            "type": ["object", "null"],
+            "additionalProperties": true
+          },
           "replyTo": {
             "type": [
               "object",
@@ -7396,6 +9680,10 @@
           "location",
           "availabilityShareId",
           "planRequestId",
+          "actionInterestId",
+          "actionContextId",
+          "actionInterest",
+          "mutualOpportunity",
           "replyTo",
           "deletedAt",
           "createdAt",
@@ -7457,6 +9745,11 @@
               },
               "replyToId": {
                 "type": "string"
+              },
+              "actionContextId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
               }
             },
             "required": [
@@ -7481,6 +9774,11 @@
               },
               "replyToId": {
                 "type": "string"
+              },
+              "actionContextId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
               }
             },
             "required": [
@@ -7514,6 +9812,11 @@
               },
               "replyToId": {
                 "type": "string"
+              },
+              "actionContextId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
               }
             },
             "required": [
@@ -7994,6 +10297,9 @@
               "plansNeedingYourAction": {
                 "type": "integer",
                 "minimum": 0
+              },
+              "actionResponseSummary": {
+                "$ref": "#/components/schemas/ActionResponseSummary"
               }
             },
             "required": [
@@ -8237,7 +10543,9 @@
             "properties": {
               "filename": {
                 "type": "string",
-                "const": "sideseat-schedule.ics"
+                "pattern": "^sideseat-schedule-[0-9]{4}\\.ics$",
+                "example": "sideseat-schedule-2026.ics",
+                "description": "Year-specific filename for the selected annual export."
               },
               "mediaType": {
                 "type": "string",
@@ -8253,6 +10561,277 @@
               "mediaType",
               "ics"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CalendarSubscriptionConnection": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastAccessedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "createdAt",
+          "lastAccessedAt"
+        ]
+      },
+      "CalendarSubscriptionListEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "connections": {
+                "type": "array",
+                "maxItems": 5,
+                "items": {
+                  "$ref": "#/components/schemas/CalendarSubscriptionConnection"
+                }
+              }
+            },
+            "required": [
+              "connections"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CalendarSubscriptionCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "default": "Apple Calendar"
+          }
+        }
+      },
+      "CalendarSubscriptionCreateEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "connection": {
+                "$ref": "#/components/schemas/CalendarSubscriptionConnection"
+              },
+              "subscriptionUrl": {
+                "type": "string",
+                "format": "uri",
+                "description": "Private bearer URL returned only when the connection is created. Do not log or persist it in plaintext."
+              }
+            },
+            "required": [
+              "connection",
+              "subscriptionUrl"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CalendarSubscriptionRevokeEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "revoked": {
+                "type": "boolean",
+                "const": true
+              }
+            },
+            "required": [
+              "id",
+              "revoked"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CalendarEventShareCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "includeLocation": {
+            "type": "boolean",
+            "default": true
+          },
+          "includeNotes": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "CalendarEventShareCreateResult": {
+        "type": "object",
+        "properties": {
+          "linkId": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "shareUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "linkId",
+          "token",
+          "shareUrl",
+          "expiresAt"
+        ]
+      },
+      "CalendarEventShareCreateEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CalendarEventShareCreateResult"
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CalendarEventShareSnapshot": {
+        "type": "object",
+        "properties": {
+          "linkId": {
+            "type": "string"
+          },
+          "ownerDisplayLabel": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "startAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "linkId",
+          "ownerDisplayLabel",
+          "title",
+          "startAt",
+          "endAt",
+          "location",
+          "note",
+          "expiresAt"
+        ]
+      },
+      "CalendarEventShareRecipientResult": {
+        "type": "object",
+        "properties": {
+          "snapshot": {
+            "$ref": "#/components/schemas/CalendarEventShareSnapshot"
+          },
+          "ownedByViewer": {
+            "type": "boolean"
+          },
+          "addedCalendarEntryId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "snapshot",
+          "ownedByViewer",
+          "addedCalendarEntryId"
+        ]
+      },
+      "CalendarEventShareRecipientEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CalendarEventShareRecipientResult"
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CalendarEventShareImportResult": {
+        "type": "object",
+        "properties": {
+          "calendarEntryId": {
+            "type": "string"
+          },
+          "created": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "calendarEntryId",
+          "created"
+        ]
+      },
+      "CalendarEventShareImportEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CalendarEventShareImportResult"
           }
         },
         "required": [
@@ -8295,7 +10874,8 @@
             "$ref": "#/components/schemas/CalendarRepeatRule"
           },
           "repeatUntil": {
-            "type": "string"
+            "type": "string",
+            "description": "Optional ISO 8601 boundary. Omit or send an empty string for a recurring series without an end."
           },
           "categoryId": {
             "type": [
@@ -8310,6 +10890,29 @@
           "endAt"
         ]
       },
+      "CalendarSearchEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "results": {
+                "type": "array",
+                "maxItems": 30,
+                "items": {
+                  "$ref": "#/components/schemas/HomeStudyEntry"
+                }
+              }
+            },
+            "required": [
+              "results"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "CalendarCreateEnvelope": {
         "type": "object",
         "properties": {
@@ -8319,7 +10922,8 @@
               "count": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 120
+                "maximum": 1,
+                "description": "Number of logical events created. A recurring series is one logical event."
               }
             },
             "required": [
@@ -8578,6 +11182,49 @@
           "verifiedStudent"
         ]
       },
+      "DiscoverActionCoordination": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Capability-aware interaction semantics for this immutable Action policy. Mutations still repeat authoritative eligibility checks.",
+        "properties": {
+          "policy": {
+            "type": "string",
+            "enum": [
+              "DIRECT_CONVERSATION_V1",
+              "CREATOR_GATED_V2"
+            ]
+          },
+          "schemaVersion": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "interactionMode": {
+            "type": "string",
+            "enum": [
+              "DIRECT_CONVERSATION",
+              "EXPRESS_INTEREST",
+              "READ_ONLY"
+            ]
+          },
+          "readOnlyReason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "CLIENT_UPDATE_REQUIRED",
+              "PILOT_UNAVAILABLE",
+              null
+            ]
+          }
+        },
+        "required": [
+          "policy",
+          "schemaVersion",
+          "interactionMode",
+          "readOnlyReason"
+        ]
+      },
       "DiscoverBuddyPost": {
         "type": "object",
         "properties": {
@@ -8632,6 +11279,9 @@
               "null"
             ],
             "format": "date-time"
+          },
+          "coordination": {
+            "$ref": "#/components/schemas/DiscoverActionCoordination"
           },
           "tags": {
             "type": "array",
@@ -8701,7 +11351,14 @@
           "savedByViewer": {
             "type": "boolean"
           },
+          "interestedByViewer": {
+            "type": "boolean"
+          },
           "interestedCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "commentCount": {
             "type": "integer",
             "minimum": 0
           },
@@ -8732,6 +11389,7 @@
           "status",
           "closureReason",
           "closedAt",
+          "coordination",
           "tags",
           "visibility",
           "replyPreference",
@@ -8743,7 +11401,9 @@
           "expiresAt",
           "isOwn",
           "savedByViewer",
+          "interestedByViewer",
           "interestedCount",
+          "commentCount",
           "imageUrls",
           "linkedCourses",
           "author"
@@ -8813,6 +11473,31 @@
           "data"
         ]
       },
+      "DiscoverSavedPosts": {
+        "type": "object",
+        "properties": {
+          "posts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscoverBuddyPost"
+            }
+          }
+        },
+        "required": [
+          "posts"
+        ]
+      },
+      "DiscoverSavedPostsEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/DiscoverSavedPosts"
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "DiscoverActivityOrganizer": {
         "type": "object",
         "properties": {
@@ -8827,12 +11512,16 @@
               "string",
               "null"
             ]
+          },
+          "verifiedStudent": {
+            "type": "boolean"
           }
         },
         "required": [
           "id",
           "displayName",
-          "avatarUrl"
+          "avatarUrl",
+          "verifiedStudent"
         ]
       },
       "DiscoverActivity": {
@@ -8913,6 +11602,10 @@
             "type": "integer",
             "minimum": 0
           },
+          "commentCount": {
+            "type": "integer",
+            "minimum": 0
+          },
           "viewerSignupStatus": {
             "type": [
               "string",
@@ -8945,6 +11638,7 @@
           "status",
           "phase",
           "goingCount",
+          "commentCount",
           "viewerSignupStatus",
           "isOrganizer",
           "organizer"
@@ -8955,9 +11649,8 @@
         "properties": {
           "city": {
             "type": "string",
-            "enum": [
-              "Munich"
-            ]
+            "minLength": 1,
+            "description": "Canonical Discover city echoed for this feed."
           },
           "buddies": {
             "type": "array",
@@ -9006,9 +11699,8 @@
           },
           "city": {
             "type": "string",
-            "enum": [
-              "Munich"
-            ],
+            "minLength": 1,
+            "description": "Canonical Discover city from /api/v1/client-config.",
             "default": "Munich"
           },
           "title": {
@@ -9086,6 +11778,102 @@
         },
         "required": [
           "title",
+          "expiresAt"
+        ]
+      },
+      "DiscoverBuddyPostUpdateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Complete editable state for an existing Discover buddy post. Unlike create, update does not accept category changes and requires the current city and audience settings.",
+        "properties": {
+          "city": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60,
+            "description": "The post's current canonical Discover city. It must match the existing post because editing cannot move a post between cities."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "body": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 280
+          },
+          "tags": {
+            "type": "array",
+            "maxItems": 8,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 24
+            }
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "SCHOOL_ONLY",
+              "CITY_INTERNATIONALS",
+              "VERIFIED_ONLY",
+              "COURSEMATES_ONLY"
+            ]
+          },
+          "replyPreference": {
+            "type": "string",
+            "enum": [
+              "DIRECT_MESSAGE",
+              "REQUEST_FIRST",
+              "VERIFIED_ONLY"
+            ]
+          },
+          "courseIds": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "capacity": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 500
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "imageUrls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000000
+            },
+            "maxItems": 3
+          }
+        },
+        "required": [
+          "city",
+          "title",
+          "visibility",
+          "replyPreference",
           "expiresAt"
         ]
       },
@@ -9183,6 +11971,9 @@
           },
           "viewerCanMessage": {
             "type": "boolean"
+          },
+          "creatorResponseEntry": {
+            "$ref": "#/components/schemas/CreatorResponseEntry"
           }
         },
         "required": [
@@ -9476,6 +12267,11 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
+          "city": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Canonical Discover city from /api/v1/client-config. When omitted by an older client, the server uses its current default city."
+          },
           "title": {
             "type": "string",
             "minLength": 1,
@@ -12246,6 +15042,30 @@
           "connectionId": {
             "type": "string"
           },
+          "commitmentId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "originContextId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "coordinationPolicy": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "DIRECT_CONVERSATION_V1",
+              "CREATOR_GATED_V2",
+              null
+            ],
+            "description": "Trusted source Action policy. Null when the Plan has no surviving Action source; clients must not infer policy from stable Plan IDs."
+          },
           "status": {
             "type": "string"
           },
@@ -12299,6 +15119,18 @@
               "null"
             ]
           },
+          "origin": {
+            "type": ["object", "null"],
+            "additionalProperties": true
+          },
+          "viewerOutcome": {
+            "type": ["string", "null"],
+            "enum": ["OCCURRED", "DID_NOT_OCCUR", "PREFER_NOT_TO_SAY", null]
+          },
+          "outcomeResponseCount": {
+            "type": "integer",
+            "minimum": 0
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -12311,6 +15143,9 @@
         "required": [
           "id",
           "connectionId",
+          "commitmentId",
+          "originContextId",
+          "coordinationPolicy",
           "status",
           "planType",
           "title",
@@ -12323,6 +15158,9 @@
           "counterOfId",
           "availabilityShareId",
           "scheduleShareLinkId",
+          "origin",
+          "viewerOutcome",
+          "outcomeResponseCount",
           "createdAt",
           "updatedAt"
         ]
@@ -12379,6 +15217,15 @@
           "endTime": {
             "type": "string",
             "format": "date-time"
+          },
+          "origin": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": { "type": "string", "enum": ["ACTION_INTEREST"] },
+              "id": { "type": "string" }
+            },
+            "required": ["kind", "id"]
           },
           "receiverUserId": {
             "type": "string"
@@ -12543,6 +15390,13 @@
           },
           "ownedByViewer": {
             "type": "boolean"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isUpdated": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -12550,7 +15404,9 @@
           "expired",
           "ownerDisplayLabel",
           "linkId",
-          "ownedByViewer"
+          "ownedByViewer",
+          "updatedAt",
+          "isUpdated"
         ]
       },
       "ScheduleShareChatPreviewEnvelope": {
@@ -12558,6 +15414,134 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/ScheduleShareChatPreview"
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ScheduleShareRevealConfig": {
+        "type": "object",
+        "properties": {
+          "categoryIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "presetKeys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hideAllDetails": {
+            "type": "boolean"
+          },
+          "includedDates": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "availabilityStartMinutes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1439,
+            "description": "Start of the owner's explicitly shareable daily availability in Europe/Berlin minutes after midnight. Omitted on legacy links."
+          },
+          "availabilityEndMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1440,
+            "description": "Exclusive end of the owner's explicitly shareable daily availability in Europe/Berlin minutes after midnight. Omitted on legacy links."
+          }
+        },
+        "required": [
+          "categoryIds",
+          "presetKeys",
+          "hideAllDetails",
+          "includedDates"
+        ]
+      },
+      "ScheduleShareOwnerSettings": {
+        "type": "object",
+        "properties": {
+          "rangeStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rangeEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revealConfig": {
+            "$ref": "#/components/schemas/ScheduleShareRevealConfig"
+          },
+          "allowGuestProposals": {
+            "type": "boolean"
+          },
+          "usageLimit": {
+            "type": "string",
+            "enum": [
+              "SINGLE_USE",
+              "UNLIMITED"
+            ]
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "rangeStart",
+          "rangeEnd",
+          "revealConfig",
+          "allowGuestProposals",
+          "usageLimit",
+          "expiresAt"
+        ]
+      },
+      "ScheduleShareOwnerResult": {
+        "type": "object",
+        "properties": {
+          "snapshot": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "settings": {
+            "$ref": "#/components/schemas/ScheduleShareOwnerSettings"
+          },
+          "linkId": {
+            "type": "string"
+          },
+          "pendingProposalCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isUpdated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "snapshot",
+          "settings",
+          "linkId",
+          "pendingProposalCount",
+          "updatedAt",
+          "isUpdated"
+        ]
+      },
+      "ScheduleShareOwnerEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ScheduleShareOwnerResult"
           }
         },
         "required": [
@@ -12893,13 +15877,26 @@
               },
               "linkId": {
                 "type": "string"
+              },
+              "ownedByViewer": {
+                "type": "boolean"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "isUpdated": {
+                "type": "boolean"
               }
             },
             "required": [
               "snapshot",
               "proposal",
               "allowGuestProposals",
-              "linkId"
+              "linkId",
+              "ownedByViewer",
+              "updatedAt",
+              "isUpdated"
             ]
           }
         },

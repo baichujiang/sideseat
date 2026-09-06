@@ -1,6 +1,8 @@
 import { ClassmatePostInsightKind } from "@prisma/client";
 import { z } from "zod";
 
+import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-served-cities";
+
 /** Single source of truth for `POST /api/classmate-posts` string limits (trimmed). */
 export const CLASSMATE_POST_CITY_MAX_LEN = 60;
 export const CLASSMATE_POST_TITLE_MAX_LEN = 120;
@@ -242,7 +244,12 @@ export const CLASSMATE_POST_MAX_IMAGES = 3;
 
 export const createClassmatePostSchema = z
   .object({
-    city: z.string().trim().min(1).max(CLASSMATE_POST_CITY_MAX_LEN).default("Munich"),
+    city: z
+      .string()
+      .trim()
+      .min(1)
+      .max(CLASSMATE_POST_CITY_MAX_LEN)
+      .default(DEFAULT_DISCOVER_SERVED_CITY),
     category: classmatePostCategorySchema.optional(),
     title: z.string().trim().min(1, "Add a short title.").max(CLASSMATE_POST_TITLE_MAX_LEN),
     body: z.preprocess(

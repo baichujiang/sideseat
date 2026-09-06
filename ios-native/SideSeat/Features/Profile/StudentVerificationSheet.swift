@@ -27,9 +27,7 @@ struct SchoolIdentityBadge: View {
     var body: some View {
         HStack(spacing: compact ? 5 : 6) {
             if isVerified {
-                SchoolBrandMark(school: school, compact: compact)
-                Image(systemName: "checkmark.seal.fill")
-                    .imageScale(.small)
+                VerifiedSchoolMark(school: school, compact: compact, bordered: false)
                 Text("Verified")
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("school-identity-badge-text")
@@ -74,9 +72,11 @@ extension StudentIdentityTone {
     }
 }
 
-private struct SchoolBrandMark: View {
+struct VerifiedSchoolMark: View {
     let school: String?
-    let compact: Bool
+    var compact = true
+    var bordered = true
+    var accessibilityID: String? = nil
 
     private var code: String {
         StudentIdentityDisplay.schoolCode(school)
@@ -91,13 +91,27 @@ private struct SchoolBrandMark: View {
     }
 
     private var logoImage: UIImage? {
-        guard !compact else { return nil }
-        return UIImage(named: StudentIdentityDisplay.logoAssetName(school))
+        UIImage(named: StudentIdentityDisplay.logoAssetName(school))
     }
 
-    private var markWidth: CGFloat {
-        if logoImage != nil { return 60 }
-        return compact ? 25 : 30
+    private var markHeight: CGFloat {
+        bordered ? (compact ? 12 : 16) : (compact ? 16 : 20)
+    }
+
+    private var badgeHeight: CGFloat {
+        compact ? 20 : 26
+    }
+
+    private var badgeCornerRadius: CGFloat {
+        compact ? 3 : 4
+    }
+
+    private var logoWidth: CGFloat {
+        guard let logoImage, logoImage.size.height > 0 else {
+            return compact ? 27 : 34
+        }
+        let aspectRatio = min(max(logoImage.size.width / logoImage.size.height, 1), 3)
+        return min(markHeight * aspectRatio, compact ? 36 : 54)
     }
 
     var body: some View {
@@ -106,21 +120,37 @@ private struct SchoolBrandMark: View {
                 Image(uiImage: logoImage)
                     .resizable()
                     .scaledToFit()
-                    .padding(.horizontal, 3)
+                    .frame(width: logoWidth, height: markHeight)
             } else {
                 Text(code)
                     .font(.system(size: compact ? 8 : 10, weight: .bold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(brandColor)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
-                    .padding(.horizontal, compact ? 4 : 5)
-                    .accessibilityHidden(true)
+                    .frame(width: logoWidth, height: markHeight)
                     .accessibilityIdentifier("school-brand-mark-visual")
             }
         }
-        .frame(width: markWidth, height: compact ? 16 : 20)
-        .background(brandColor, in: RoundedRectangle(cornerRadius: 4, style: .continuous))
-        .accessibilityHidden(true)
+        .padding(.horizontal, bordered ? (compact ? 5 : 7) : 0)
+        .frame(height: bordered ? badgeHeight : markHeight)
+        .background {
+            if bordered {
+                RoundedRectangle(cornerRadius: badgeCornerRadius, style: .continuous)
+                    .fill(brandColor.opacity(0.09))
+            }
+        }
+        .overlay {
+            if bordered {
+                RoundedRectangle(cornerRadius: badgeCornerRadius, style: .continuous)
+                    .strokeBorder(brandColor.opacity(0.48), lineWidth: 1)
+            }
+        }
+        .fixedSize()
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+            StudentIdentityDisplay.label(school: school, verifiedStudent: true, status: "VERIFIED")
+        )
+        .ssAccessibilityIdentifier(accessibilityID)
     }
 }
 
@@ -383,41 +413,41 @@ struct StudentVerificationSheet: View {
 
     private var verificationButtonTitle: String {
         if result?.delivery?.lowercased() == "failed" {
-            return String(localized: "Try again")
+            return AppLocalization.string( "Try again")
         }
-        return String(localized: "Verify school email")
+        return AppLocalization.string( "Verify school email")
     }
 
     private func verificationResultTitle(for result: NativeStudentVerificationResult) -> String {
         switch result.delivery?.lowercased() {
         case "sent":
-            return String(localized: "Check your school inbox")
+            return AppLocalization.string( "Check your school inbox")
         case "failed":
-            return String(localized: "Email delivery failed")
+            return AppLocalization.string( "Email delivery failed")
         case "skipped":
-            return String(localized: "Complete verification")
+            return AppLocalization.string( "Complete verification")
         default:
             return result.status.uppercased() == "MANUAL_REVIEW_REQUIRED"
-                ? String(localized: "Review submitted")
-                : String(localized: "Verification update")
+                ? AppLocalization.string( "Review submitted")
+                : AppLocalization.string( "Verification update")
         }
     }
 
     private func verificationCompletionTitle(for result: NativeStudentVerificationResult) -> String {
         switch result.delivery?.lowercased() {
         case "sent":
-            return String(localized: "Verification email sent")
+            return AppLocalization.string( "Verification email sent")
         case "skipped":
-            return String(localized: "Verification link ready")
+            return AppLocalization.string( "Verification link ready")
         default:
-            return String(localized: "Verification requested")
+            return AppLocalization.string( "Verification requested")
         }
     }
 
     private var manualReviewFooter: String {
         let document = profile.studentStatus == "ALUMNI"
-            ? String(localized: "a diploma or graduation document")
-            : String(localized: "an enrollment document or student card")
+            ? AppLocalization.string( "a diploma or graduation document")
+            : AppLocalization.string( "an enrollment document or student card")
         return String(
             localized: "Upload \(document), PDF or image, up to 4 MB. Hide student numbers, birth dates, addresses, and other details we do not need. The private file is deleted after review or within 30 days."
         )
@@ -451,8 +481,8 @@ struct StudentVerificationSheet: View {
 
     private func verificationLinkTitle(for result: NativeStudentVerificationResult) -> String {
         result.delivery?.lowercased() == "sent"
-            ? String(localized: "Open verification link")
-            : String(localized: "Verify with link")
+            ? AppLocalization.string( "Open verification link")
+            : AppLocalization.string( "Verify with link")
     }
 
     private func submit() async {
@@ -468,7 +498,7 @@ struct StudentVerificationSheet: View {
                 showsManualReview = true
             }
         } else {
-            issue = String(localized: "Unable to start school verification.")
+            issue = AppLocalization.string( "Unable to start school verification.")
         }
     }
 
@@ -482,18 +512,18 @@ struct StudentVerificationSheet: View {
             }
             let data = try Data(contentsOf: url, options: .mappedIfSafe)
             guard !data.isEmpty else {
-                issue = String(localized: "The selected file is empty.")
+                issue = AppLocalization.string( "The selected file is empty.")
                 return
             }
             guard data.count <= 4 * 1024 * 1024 else {
-                issue = String(localized: "The selected file is larger than 4 MB.")
+                issue = AppLocalization.string( "The selected file is larger than 4 MB.")
                 return
             }
             let contentType = UTType(filenameExtension: url.pathExtension)
             let mimeType = contentType?.preferredMIMEType ?? "application/octet-stream"
             let allowedMIMETypes = Set(["application/pdf", "image/jpeg", "image/png", "image/webp", "image/heic"])
             guard allowedMIMETypes.contains(mimeType) else {
-                issue = String(localized: "Choose a PDF, JPG, PNG, WEBP, or HEIC file.")
+                issue = AppLocalization.string( "Choose a PDF, JPG, PNG, WEBP, or HEIC file.")
                 return
             }
             proof = NativeStudentProofDraft(
@@ -502,7 +532,7 @@ struct StudentVerificationSheet: View {
                 data: data
             )
         } catch {
-            issue = String(localized: "The selected document could not be read.")
+            issue = AppLocalization.string( "The selected document could not be read.")
         }
     }
 
@@ -516,7 +546,7 @@ struct StudentVerificationSheet: View {
             result = next
             self.proof = nil
         } else {
-            issue = String(localized: "Unable to submit the school document for review.")
+            issue = AppLocalization.string( "Unable to submit the school document for review.")
         }
     }
 
@@ -533,10 +563,10 @@ struct StudentVerificationSheet: View {
                 status: "VERIFIED",
                 delivery: nil,
                 verifyUrl: nil,
-                message: String(localized: "School email verified. Your posts and profile now show a verified school identity.")
+                message: AppLocalization.string( "School email verified. Your posts and profile now show a verified school identity.")
             )
         } catch {
-            issue = String(localized: "The verification link could not be opened. Try again in a moment.")
+            issue = AppLocalization.string( "The verification link could not be opened. Try again in a moment.")
         }
     }
 }

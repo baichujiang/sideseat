@@ -19,25 +19,38 @@ final class HomeScheduleStore {
     private let foregroundRefreshAge: TimeInterval = 60
     /// Reload before the user reaches the hard edge of the loaded window.
     private let edgePaddingDays = 3
+    private let cache: HomeScheduleCache
     private var restoredCacheForUserID: String?
     private var pendingLoadFocus: Date?
+
+    init(cache: HomeScheduleCache = .shared) {
+        self.cache = cache
+    }
 
     func load(using session: SessionStore, around focus: Date = Date()) async {
         guard !isLoading else {
             pendingLoadFocus = focus
             return
         }
-        isLoading = true
         issue = nil
         subscriptionIssue = nil
-        defer { finishLoad(using: session) }
+
+        let userID = session.currentUser?.id
+        if let userID {
+            await restoreCacheIfNeeded(for: userID)
+        }
 
         #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            let arguments = ProcessInfo.processInfo.arguments
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("--ui-testing-authenticated")
+            || arguments.contains("--ui-testing-slow-cached-launch")
+            || arguments.contains("--ui-testing-offline-cached-launch")
+        {
             let fixture: NativeHomeSchedule
             if arguments.contains("--ui-testing-dense-calendar") {
                 fixture = NativeHomeSchedule.uiTestingDenseFixture(now: focus)
+            } else if arguments.contains("--ui-testing-calendar-dot-overflow") {
+                fixture = NativeHomeSchedule.uiTestingEventDotOverflowFixture(now: focus)
             } else if arguments.contains("--ui-testing-all-day-calendar") {
                 fixture = NativeHomeSchedule.uiTestingAllDayFixture(now: focus)
             } else {
@@ -57,10 +70,21 @@ final class HomeScheduleStore {
         }
         #endif
 
-        let userID = session.currentUser?.id
-        if let userID {
-            await restoreCacheIfNeeded(for: userID)
+        guard session.canMakeAuthenticatedRequests else {
+            if session.isOffline {
+                subscriptionIssue = schedule == nil
+                    ? AppLocalization.string("Connect to load your calendar.")
+                    : AppLocalization.string("Showing saved schedule. Pull to refresh.")
+            }
+            return
         }
+
+        guard !isLoading else {
+            pendingLoadFocus = focus
+            return
+        }
+        isLoading = true
+        defer { finishLoad(using: session) }
 
         let calendar = Calendar.sideSeatBerlin
         let day = calendar.startOfDay(for: focus)
@@ -68,7 +92,7 @@ final class HomeScheduleStore {
             let start = calendar.date(byAdding: .day, value: -leadingDays, to: day),
             let end = calendar.date(byAdding: .day, value: trailingDays, to: day)
         else {
-            issue = String(localized: "The schedule window could not be created.")
+            issue = AppLocalization.string( "The schedule window could not be created.")
             return
         }
 
@@ -97,7 +121,7 @@ final class HomeScheduleStore {
                     )
                     refreshedSchedule = response.data.mergingSubscriptionEntries(subscriptions.data.studyEntries)
                 } catch {
-                    subscriptionIssue = String(localized: "Calendar subscriptions could not be refreshed.")
+                    subscriptionIssue = AppLocalization.string( "Calendar subscriptions could not be refreshed.")
                 }
             }
 
@@ -107,7 +131,7 @@ final class HomeScheduleStore {
             lastSyncedAt = Date()
             await CalendarReminderScheduler.shared.synchronize(with: refreshedSchedule)
             if let userID {
-                await HomeScheduleCache.shared.save(
+                await cache.save(
                     schedule: refreshedSchedule,
                     window: refreshedWindow,
                     userID: userID,
@@ -118,7 +142,7 @@ final class HomeScheduleStore {
             if schedule == nil {
                 issue = error.localizedDescription
             } else {
-                subscriptionIssue = String(localized: "Showing saved schedule. Pull to refresh.")
+                subscriptionIssue = AppLocalization.string( "Showing saved schedule. Pull to refresh.")
             }
         }
     }
@@ -150,7 +174,7 @@ final class HomeScheduleStore {
     private func restoreCacheIfNeeded(for userID: String) async {
         guard restoredCacheForUserID != userID else { return }
         restoredCacheForUserID = userID
-        guard let cached = await HomeScheduleCache.shared.load(for: userID) else { return }
+        guard let cached = await cache.load(for: userID) else { return }
         replaceSchedule(cached.schedule)
         loadedWindow = DateInterval(start: cached.windowStart, end: cached.windowEnd)
         lastSyncedAt = cached.savedAt
@@ -202,6 +226,23 @@ final class HomeScheduleStore {
             window: schedule.window,
             classBlocks: schedule.classBlocks,
             studyEntries: entries,
+            companionOptions: schedule.companionOptions,
+            initialCalendarCategories: schedule.initialCalendarCategories
+        ))
+    }
+
+    /// Removes an in-memory event for hermetic context-menu deletion tests.
+    func applyUITestingDelete(eventID: String) {
+        guard
+            ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated"),
+            let schedule,
+            schedule.studyEntries.contains(where: { $0.id == eventID })
+        else { return }
+
+        replaceSchedule(NativeHomeSchedule(
+            window: schedule.window,
+            classBlocks: schedule.classBlocks,
+            studyEntries: schedule.studyEntries.filter { $0.id != eventID },
             companionOptions: schedule.companionOptions,
             initialCalendarCategories: schedule.initialCalendarCategories
         ))
@@ -267,11 +308,11 @@ actor HomeScheduleCache {
     private let fileManager: FileManager
     private let fileURL: URL
 
-    init(fileManager: FileManager = .default) {
+    init(fileManager: FileManager = .default, fileURL: URL? = nil) {
         self.fileManager = fileManager
         let base = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first
             ?? fileManager.temporaryDirectory
-        fileURL = base
+        self.fileURL = fileURL ?? base
             .appendingPathComponent("SideSeat", isDirectory: true)
             .appendingPathComponent("home-schedule-v1.json", isDirectory: false)
     }

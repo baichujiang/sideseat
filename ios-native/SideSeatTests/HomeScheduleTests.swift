@@ -172,6 +172,47 @@ struct HomeScheduleTests {
         #expect(planItem.discoverActivityID == "activity-1")
     }
 
+    @Test("Preserves event metadata required by the read-only detail")
+    func eventDetailMetadata() throws {
+        let calendar = Calendar.sideSeatBerlin
+        let start = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 9, day: 7, hour: 9))
+        )
+        let end = try #require(calendar.date(byAdding: .minute, value: 90, to: start))
+        let repeatUntil = try #require(calendar.date(byAdding: .month, value: 2, to: start))
+        let schedule = NativeHomeSchedule(
+            window: NativeHomeScheduleWindow(start: "", end: "", timeZone: "Europe/Berlin"),
+            classBlocks: [],
+            studyEntries: [
+                NativeHomeStudyEntry(
+                    id: "weekly-study",
+                    title: "Weekly study",
+                    location: "Library",
+                    withLabel: nil,
+                    note: "Review chapter four",
+                    repeatRule: "WEEKLY",
+                    repeatUntilISO: repeatUntil.ISO8601Format(),
+                    eventParticipants: [],
+                    startISO: start.ISO8601Format(),
+                    endISO: end.ISO8601Format(),
+                    categoryId: "study",
+                    categoryColor: "#7C3AED",
+                    categoryName: "Study",
+                    discoverActivityId: nil
+                )
+            ],
+            companionOptions: [],
+            initialCalendarCategories: []
+        )
+
+        let item = try #require(schedule.items(on: start, calendar: calendar).first)
+
+        #expect(item.note == "Review chapter four")
+        #expect(item.categoryName == "Study")
+        #expect(item.repeatRule == "WEEKLY")
+        #expect(item.repeatUntil == repeatUntil)
+    }
+
     @Test("Builds a sparse 14-day agenda and keeps cross-day continuations")
     func multiDayAgenda() throws {
         let calendar = Calendar.sideSeatBerlin
@@ -318,6 +359,90 @@ struct HomeScheduleTests {
         #expect(reminder.isAllDay)
     }
 
+    @Test("Offline startup restores the saved schedule without a home API request")
+    @MainActor
+    func offlineStartupUsesSavedSchedule() async throws {
+        let focus = Date(timeIntervalSince1970: 1_786_000_000)
+        let fixture = NativeHomeSchedule.uiTestingFixture(now: focus)
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("sideseat-home-startup-\(UUID().uuidString).json")
+        let cache = HomeScheduleCache(fileURL: fileURL)
+        let window = DateInterval(
+            start: focus.addingTimeInterval(-14 * 86_400),
+            end: focus.addingTimeInterval(45 * 86_400)
+        )
+        await cache.save(
+            schedule: fixture,
+            window: window,
+            userID: "cached-home-user",
+            savedAt: focus
+        )
+        let credentials = HomeStartupCredentialStore(
+            token: "cached-refresh",
+            user: .homeStartupTest
+        )
+        let transport = HomeStartupOfflineTransport()
+        let session = SessionStore(
+            apiClient: APIClient(environment: .homeStartupTest, transport: transport),
+            credentialStore: credentials,
+            device: .homeStartupTest
+        )
+        await session.restoreSession()
+        let store = HomeScheduleStore(cache: cache)
+
+        await store.load(using: session, around: focus)
+
+        #expect(store.schedule?.studyEntries.map(\.id) == fixture.studyEntries.map(\.id))
+        #expect(!store.isLoading)
+        #expect(store.subscriptionIssue != nil)
+        #expect(await transport.homeRequestCount == 0)
+        await cache.clear()
+    }
+
+    @Test("Month grid uses six Monday-first weeks")
+    func monthGridUsesMondayFirstSixWeekWindow() throws {
+        let calendar = Calendar.sideSeatBerlin
+        let august = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 22))
+        )
+
+        let days = HomeMonthGrid.visibleDays(containing: august, calendar: calendar)
+        let first = try #require(days.first)
+        let last = try #require(days.last)
+
+        #expect(days.count == 42)
+        #expect(calendar.component(.weekday, from: first) == calendar.firstWeekday)
+        #expect(calendar.dateComponents([.year, .month, .day], from: first) == DateComponents(year: 2026, month: 7, day: 27))
+        #expect(calendar.dateComponents([.year, .month, .day], from: last) == DateComponents(year: 2026, month: 9, day: 6))
+        #expect(HomeMonthGrid.daysInMonth(containing: august, calendar: calendar).count == 31)
+    }
+
+    @Test("Month paging clamps the selected day")
+    func monthPagingClampsSelectedDay() throws {
+        let calendar = Calendar.sideSeatBerlin
+        let january31 = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 1, day: 31))
+        )
+        let february = HomeMonthGrid.shiftedSelection(january31, by: 1, calendar: calendar)
+
+        #expect(
+            calendar.dateComponents([.year, .month, .day], from: february)
+                == DateComponents(year: 2026, month: 2, day: 28)
+        )
+    }
+
+    @Test("Calendar event markers summarize overflow after three events")
+    func calendarEventMarkersSummarizeOverflow() {
+        #expect(CalendarEventMarkerLayout.visibleDotCount(for: 0) == 0)
+        #expect(CalendarEventMarkerLayout.visibleDotCount(for: 1) == 1)
+        #expect(CalendarEventMarkerLayout.visibleDotCount(for: 3) == 3)
+        #expect(CalendarEventMarkerLayout.overflowCount(for: 3) == nil)
+        #expect(CalendarEventMarkerLayout.visibleDotCount(for: 4) == 2)
+        #expect(CalendarEventMarkerLayout.overflowCount(for: 4) == 2)
+        #expect(CalendarEventMarkerLayout.visibleDotCount(for: 5) == 2)
+        #expect(CalendarEventMarkerLayout.overflowCount(for: 5) == 3)
+    }
+
     private func reminderSchedule(entries: [NativeHomeStudyEntry]) -> NativeHomeSchedule {
         NativeHomeSchedule(
             window: NativeHomeScheduleWindow(start: "", end: "", timeZone: "Europe/Berlin"),
@@ -353,4 +478,79 @@ struct HomeScheduleTests {
             discoverActivityId: discoverActivityID
         )
     }
+}
+
+private actor HomeStartupCredentialStore: CredentialStore {
+    private var token: String?
+    private var user: CurrentUser?
+
+    init(token: String?, user: CurrentUser?) {
+        self.token = token
+        self.user = user
+    }
+
+    func refreshToken() -> String? { token }
+    func save(refreshToken: String) { token = refreshToken }
+    func cachedUser() async throws -> CurrentUser? { user }
+    func saveCachedUser(_ user: CurrentUser) async throws { self.user = user }
+    func clear() {
+        token = nil
+        user = nil
+    }
+}
+
+private actor HomeStartupOfflineTransport: APITransport {
+    private(set) var homeRequestCount = 0
+
+    func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+        if request.url?.path.contains("/api/v1/home/") == true {
+            homeRequestCount += 1
+        }
+        throw URLError(.notConnectedToInternet)
+    }
+}
+
+private extension AppEnvironment {
+    static let homeStartupTest = AppEnvironment(
+        deployment: .development,
+        apiBaseURL: URL(string: "https://api.sideseat.test")!,
+        bundleIdentifier: "app.sideseat.mobile.home-startup-tests",
+        appVersion: "1.0.0",
+        buildNumber: "1"
+    )
+}
+
+private extension NativeDevice {
+    static let homeStartupTest = NativeDevice(
+        id: "home-device",
+        name: "Test iPhone",
+        appVersion: "1.0.0",
+        platformVersion: "26.5"
+    )
+}
+
+private extension CurrentUser {
+    static let homeStartupTest = CurrentUser(
+        id: "cached-home-user",
+        username: "cached_home_user",
+        nickname: "Cached Student",
+        email: nil,
+        phone: nil,
+        avatarUrl: nil,
+        tagline: nil,
+        school: "TUM",
+        studentStatus: "CURRENT_STUDENT",
+        degreeLevel: nil,
+        major: nil,
+        semester: nil,
+        graduationYear: nil,
+        gender: "UNSPECIFIED",
+        onboardingComplete: true,
+        isGuest: false,
+        verifiedStudent: true,
+        studentVerificationStatus: "VERIFIED",
+        usernameUpdatedAt: nil,
+        productTutorialDismissedAt: "2026-01-01T00:00:00.000Z",
+        locale: "en"
+    )
 }

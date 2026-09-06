@@ -20,7 +20,16 @@ export type NormalizedRevealConfig = {
   hideAllDetails: boolean;
   /** Berlin yyyy-MM-dd keys; when set, only these days within [rangeStart, rangeEnd] are shared. */
   includedDates: string[];
+  /** Minutes after Berlin midnight that the owner explicitly makes available. */
+  availabilityStartMinutes: number;
+  /** Exclusive daily end, in minutes after Berlin midnight. */
+  availabilityEndMinutes: number;
 };
+
+export const SCHEDULE_SHARE_DEFAULT_AVAILABILITY_START_MINUTES = 9 * 60;
+export const SCHEDULE_SHARE_DEFAULT_AVAILABILITY_END_MINUTES = 21 * 60;
+export const SCHEDULE_SHARE_LEGACY_AVAILABILITY_START_MINUTES = 0;
+export const SCHEDULE_SHARE_LEGACY_AVAILABILITY_END_MINUTES = 24 * 60;
 
 const presetKeySchema = z
   .string()
@@ -35,6 +44,20 @@ export const revealConfigSchema = z.object({
   presetKeys: z.array(presetKeySchema).default([]),
   hideAllDetails: z.boolean().optional().default(false),
   includedDates: z.array(isoDateOnly).max(SCHEDULE_SHARE_MAX_RANGE_DAYS).optional(),
+  availabilityStartMinutes: z.number().int().min(0).max(24 * 60 - 1).optional(),
+  availabilityEndMinutes: z.number().int().min(1).max(24 * 60).optional(),
+}).superRefine((value, ctx) => {
+  if (
+    value.availabilityStartMinutes != null
+    && value.availabilityEndMinutes != null
+    && value.availabilityEndMinutes <= value.availabilityStartMinutes
+  ) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["availabilityEndMinutes"],
+      message: "Daily availability end must be after start.",
+    });
+  }
 });
 
 export function normalizeRevealConfig(raw: z.input<typeof revealConfigSchema>): NormalizedRevealConfig {
@@ -44,7 +67,18 @@ export function normalizeRevealConfig(raw: z.input<typeof revealConfigSchema>): 
   const includedDates = raw.includedDates?.length
     ? [...new Set(raw.includedDates)].sort()
     : [];
-  return { categoryIds, presetKeys, hideAllDetails, includedDates };
+  const availabilityStartMinutes = raw.availabilityStartMinutes
+    ?? SCHEDULE_SHARE_LEGACY_AVAILABILITY_START_MINUTES;
+  const availabilityEndMinutes = raw.availabilityEndMinutes
+    ?? SCHEDULE_SHARE_LEGACY_AVAILABILITY_END_MINUTES;
+  return {
+    categoryIds,
+    presetKeys,
+    hideAllDetails,
+    includedDates,
+    availabilityStartMinutes,
+    availabilityEndMinutes,
+  };
 }
 
 /** Parse untrusted JSON (e.g. from DB). Throws ZodError if invalid. */

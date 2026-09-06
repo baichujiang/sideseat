@@ -36,6 +36,3 @@ export const DISCOVER_CITY_NAME_KEYS = [
 ] as const;
 
 export type DiscoverCityNameKey = (typeof DISCOVER_CITY_NAME_KEYS)[number];
-
-/** Single metro currently used for Discover listing filters and default post scope. */
-export const DEFAULT_DISCOVER_SERVED_CITY = "Munich" satisfies DiscoverCityNameKey;

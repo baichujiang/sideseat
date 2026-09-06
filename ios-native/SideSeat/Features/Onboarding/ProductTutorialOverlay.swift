@@ -89,7 +89,7 @@ struct ProductTutorialOverlay: View {
                         y: 3
                     )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SSPressButtonStyle())
                 .accessibilityLabel(step.title)
                 .accessibilityAddTraits(active ? .isSelected : [])
                 .accessibilityIdentifier("product-tutorial-tab-\(step.id)")
@@ -110,7 +110,7 @@ struct ProductTutorialOverlay: View {
             HStack(alignment: .center, spacing: 10) {
                 Text(
                     String(
-                        format: String(localized: "%lld / %lld"),
+                        format: AppLocalization.string( "%lld / %lld"),
                         Int64(controller.stepIndex + 1),
                         Int64(ProductTutorialController.steps.count)
                     )
@@ -141,7 +141,9 @@ struct ProductTutorialOverlay: View {
                         .foregroundStyle(.secondary)
                         .frame(width: 28, height: 28)
                         .background(Circle().fill(Color.primary.opacity(0.06)))
+                        .ssIconButtonHitTarget()
                 }
+                .buttonStyle(SSPressButtonStyle())
                 .accessibilityLabel("Close tutorial")
                 .accessibilityIdentifier("product-tutorial-close")
                 .disabled(controller.isDismissing)
@@ -157,7 +159,7 @@ struct ProductTutorialOverlay: View {
                         .shadow(color: SideSeatTheme.magenta.opacity(0.28), radius: 8, y: 3)
                     Image(systemName: controller.currentStep.systemImage)
                         .font(.body.weight(.semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(SideSeatTheme.onAccent)
                 }
                 .frame(width: 40, height: 40)
 
@@ -198,7 +200,7 @@ struct ProductTutorialOverlay: View {
             HStack(spacing: 10) {
                 if controller.stepIndex > 0 {
                     SSSecondaryButton(
-                        title: String(localized: "Back"),
+                        title: AppLocalization.string( "Back"),
                         kind: .softFill,
                         fontWeight: .semibold,
                         accessibilityID: "product-tutorial-back"
@@ -214,7 +216,7 @@ struct ProductTutorialOverlay: View {
 
                 if controller.isLastStep {
                     SSPrimaryButton(
-                        title: String(localized: "Done"),
+                        title: AppLocalization.string( "Done"),
                         isLoading: controller.isDismissing,
                         fill: .brand,
                         chrome: .capsule,
@@ -226,7 +228,7 @@ struct ProductTutorialOverlay: View {
                     .disabled(controller.isDismissing)
                 } else {
                     SSPrimaryButton(
-                        title: String(localized: "Next"),
+                        title: AppLocalization.string( "Next"),
                         fill: .brand,
                         chrome: .capsule,
                         height: 44,

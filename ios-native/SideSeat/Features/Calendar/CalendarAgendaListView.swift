@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// A multi-day agenda. It shares event semantics with Week and Day while using
-/// a denser, scan-first layout instead of recreating a time grid.
+/// A secondary multi-day agenda. It shares event semantics with Month, Week, and Day
+/// while using a denser, scan-first layout instead of becoming a fourth time scale.
 struct CalendarAgendaListView: View {
     let schedule: NativeHomeSchedule?
     let startDate: Date
@@ -10,14 +10,12 @@ struct CalendarAgendaListView: View {
     let onRetry: () -> Void
     let onOpenDay: (Date) -> Void
     let onOpen: (HomeAgendaItem, Date) -> Void
-    let onEdit: (HomeAgendaItem) -> Void
     let onCopy: (HomeAgendaItem) -> Void
     let onDuplicate: (HomeAgendaItem) -> Void
-    let onStartMove: (HomeAgendaItem) -> Void
+    let onDelete: (HomeAgendaItem) -> Void
     let onCreate: (Date) -> Void
 
     @State private var actionItem: HomeAgendaItem?
-    @State private var actionRenderedDay: Date?
 
     private let calendar = Calendar.sideSeatBerlin
     private let dayCount = HomeAgendaWindow.defaultDayCount
@@ -49,7 +47,7 @@ struct CalendarAgendaListView: View {
                     title: "No upcoming events",
                     systemImage: "calendar",
                     description: "The next 14 days are open.",
-                    actionTitle: String(localized: "New event"),
+                    actionTitle: AppLocalization.string( "New event"),
                     actionAccessibilityID: "agenda-empty-new-event"
                 ) {
                     onCreate(startDate)
@@ -62,17 +60,6 @@ struct CalendarAgendaListView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(SideSeatTheme.bg)
-        .calendarItemActions(
-            item: $actionItem,
-            onOpen: { selected in
-                onOpen(selected, actionRenderedDay ?? selected.start)
-            },
-            onEdit: onEdit,
-            onCopy: onCopy,
-            onDuplicate: onDuplicate,
-            onStartMove: onStartMove,
-            moveAccessibilityIdentifier: "agenda-event-context-move"
-        )
         .accessibilityIdentifier("calendar-agenda-list")
     }
 
@@ -81,7 +68,7 @@ struct CalendarAgendaListView: View {
             LazyVStack(alignment: .leading, spacing: 14, pinnedViews: [.sectionHeaders]) {
                 HStack(spacing: 8) {
                     Image(systemName: "list.bullet")
-                        .foregroundStyle(SideSeatTheme.accent)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     Text("Next 14 days")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(SideSeatTheme.textPrimary)
@@ -102,14 +89,25 @@ struct CalendarAgendaListView: View {
                                     .calendarTapOrLongPress(
                                         onTap: { onOpen(item, section.day) },
                                         onLongPress: {
-                                            actionRenderedDay = section.day
+                                            guard item.source == .event else { return }
                                             actionItem = item
                                         }
+                                    )
+                                    .calendarItemActions(
+                                        target: item,
+                                        selectedItem: $actionItem,
+                                        onCopy: onCopy,
+                                        onDuplicate: onDuplicate,
+                                        onDelete: onDelete
                                     )
                                     .accessibilityElement(children: .combine)
                                     .accessibilityAddTraits(.isButton)
                                     .accessibilityIdentifier(rowAccessibilityID(for: item, day: section.day))
-                                    .accessibilityHint("Opens event details. Long press for more actions.")
+                                    .accessibilityHint(
+                                        item.source == .event
+                                            ? "Opens event details. Long press for more actions."
+                                            : "Opens event details."
+                                    )
                             }
                         }
                     } header: {
@@ -121,7 +119,7 @@ struct CalendarAgendaListView: View {
                                     .font(.headline)
                                     .foregroundStyle(
                                         calendar.isDateInToday(section.day)
-                                            ? CalendarChrome.nowRed
+                                            ? CalendarChrome.nowAccent
                                             : SideSeatTheme.textPrimary
                                     )
                                 Spacer(minLength: 0)
@@ -134,10 +132,10 @@ struct CalendarAgendaListView: View {
                             .background(SideSeatTheme.bg)
                             .contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(SSPressButtonStyle())
                         .accessibilityLabel(
                             String(
-                                format: String(localized: "Open day %@"),
+                                format: AppLocalization.string( "Open day %@"),
                                 section.day.formatted(date: .complete, time: .omitted)
                             )
                         )
@@ -153,7 +151,7 @@ struct CalendarAgendaListView: View {
 
     private func dayHeading(_ day: Date) -> String {
         if calendar.isDateInToday(day) {
-            return String(localized: "Today")
+            return AppLocalization.string( "Today")
         }
         return day.formatted(.dateTime.weekday(.wide).month(.abbreviated).day())
     }

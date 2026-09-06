@@ -17,10 +17,11 @@ struct SSListRow: View {
                 subtitle: subtitle,
                 systemImage: systemImage,
                 tint: tint,
-                showDivider: showDivider
+                showDivider: showDivider,
+                accessibilityID: accessibilityID
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SSPressButtonStyle())
         .ssAccessibilityIdentifier(accessibilityID)
     }
 }
@@ -33,6 +34,7 @@ extension SSListRow {
         let systemImage: String
         let tint: Color
         var showDivider: Bool = true
+        var accessibilityID: String? = nil
 
         var body: some View {
             VStack(spacing: 0) {
@@ -56,10 +58,12 @@ extension SSListRow {
                         Text(title)
                             .font(.body.weight(.semibold))
                             .foregroundStyle(SideSeatTheme.textPrimary)
+                            .ssAccessibilityIdentifier(accessibilityID.map { "\($0)-title-visual" })
                         Text(subtitle)
-                            .font(SideSeatTheme.Text.footnote)
+                            .font(.footnote.weight(.medium))
                             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                             .fixedSize(horizontal: false, vertical: true)
+                            .ssAccessibilityIdentifier(accessibilityID.map { "\($0)-subtitle-visual" })
                     }
                     .layoutPriority(1)
 

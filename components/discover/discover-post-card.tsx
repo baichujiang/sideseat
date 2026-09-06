@@ -29,7 +29,7 @@ import {
 } from "@/lib/discover/scene-palette";
 import type {
   DiscoverPostCardScene,
-  DiscoverPostRow,
+  DiscoverPostClientRow,
 } from "@/lib/discover/discover-post-row";
 import {
   courseMatchesViewer,
@@ -174,7 +174,7 @@ function isNeverExpiry(value: Date) {
 }
 
 export type DiscoverPostCardProps = {
-  post: DiscoverPostRow;
+  post: DiscoverPostClientRow;
   scene: DiscoverPostCardScene;
   viewerCourseMatchIndex: ViewerCourseMatchIndex;
   /** When set, used for post detail `returnTo` instead of the default Discover path from `scene`. */
@@ -289,7 +289,7 @@ export function DiscoverPostCard({
         >
           示例展示
         </span>
-      ) : (
+      ) : post.allowsLegacyDirectConversation ? (
         <DiscoverMessageButton
           peerId={post.userId}
           returnTo={postPath}
@@ -298,7 +298,7 @@ export function DiscoverPostCard({
           insightPostId={post.id}
           className="min-h-10 min-w-[6.5rem] justify-center"
         />
-      )}
+      ) : null}
     </div>
   );
 

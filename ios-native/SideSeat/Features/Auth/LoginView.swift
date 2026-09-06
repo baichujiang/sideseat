@@ -72,7 +72,7 @@ struct LoginView: View {
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityLabel("SideSeat")
 
-            Text(String(localized: "Find your people on campus"))
+            Text(AppLocalization.string("Find people to do things with—and make a plan."))
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(SideSeatTheme.ink)
                 .multilineTextAlignment(.center)
@@ -84,12 +84,12 @@ struct LoginView: View {
     private var loginCard: some View {
         SSCard {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
-                Text(String(localized: "Log in"))
+                Text(AppLocalization.string( "Log in"))
                     .font(SideSeatTheme.Text.titleSmall)
 
                 SSTextField(
-                    title: String(localized: "Username, email, or phone"),
-                    placeholder: String(localized: "Account"),
+                    title: AppLocalization.string( "Username, email, or phone"),
+                    placeholder: AppLocalization.string( "Account"),
                     text: $identifier,
                     contentType: .username,
                     keyboard: .default,
@@ -100,14 +100,15 @@ struct LoginView: View {
                 .onSubmit { focusedField = .password }
 
                 SSSecureField(
-                    title: String(localized: "Password"),
+                    title: AppLocalization.string( "Password"),
                     text: $password,
                     isVisible: $isPasswordVisible,
                     submitLabel: .go,
-                    accessibilityID: "login-password"
+                    isFocused: focusBinding(for: .password),
+                    accessibilityID: "login-password",
+                    onSubmit: login
                 )
                 .focused($focusedField, equals: .password)
-                .onSubmit(login)
 
                 if let issue = session.issue {
                     SSFieldMessage(text: issue, accessibilityID: "login-error")
@@ -115,7 +116,7 @@ struct LoginView: View {
                 }
 
                 SSPrimaryButton(
-                    title: String(localized: "Log in"),
+                    title: AppLocalization.string( "Log in"),
                     isLoading: session.isWorking,
                     fill: .brand,
                     accessibilityID: "login-submit",
@@ -124,7 +125,7 @@ struct LoginView: View {
                 .disabled(!canSubmit || session.isWorking)
 
                 SSSecondaryButton(
-                    title: String(localized: "Forgot password?"),
+                    title: AppLocalization.string( "Forgot password?"),
                     accessibilityID: "login-forgot-password"
                 ) {
                     showForgotPassword = true
@@ -135,10 +136,10 @@ struct LoginView: View {
 
     private var secondaryActions: some View {
         HStack(spacing: 6) {
-            Text(String(localized: "New here?"))
+            Text(AppLocalization.string( "New here?"))
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             SSSecondaryButton(
-                title: String(localized: "Create an account"),
+                title: AppLocalization.string( "Create an account"),
                 fontWeight: .semibold,
                 expands: false,
                 accessibilityID: "login-create-account"
@@ -153,6 +154,19 @@ struct LoginView: View {
         !identifier.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !password.isEmpty
     }
 
+    private func focusBinding(for field: Field) -> Binding<Bool> {
+        Binding(
+            get: { focusedField == field },
+            set: { isFocused in
+                if isFocused {
+                    focusedField = field
+                } else if focusedField == field {
+                    focusedField = nil
+                }
+            }
+        )
+    }
+
     private func login() {
         guard canSubmit else { return }
         Task {
@@ -162,6 +176,8 @@ struct LoginView: View {
             )
             if session.phase == .signedIn {
                 password = ""
+            } else {
+                focusedField = .password
             }
         }
     }

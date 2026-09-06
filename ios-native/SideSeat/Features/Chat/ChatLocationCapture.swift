@@ -11,9 +11,9 @@ final class ChatLocationCapture: NSObject, CLLocationManagerDelegate {
         var errorDescription: String? {
             switch self {
             case .denied:
-                String(localized: "Location access is required to share where you are.")
+                AppLocalization.string( "Location access is required to share where you are.")
             case .unavailable:
-                String(localized: "Could not get your current location. Try again.")
+                AppLocalization.string( "Could not get your current location. Try again.")
             }
         }
     }

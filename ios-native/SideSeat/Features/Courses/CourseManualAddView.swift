@@ -64,6 +64,7 @@ struct CourseManualAddView: View {
                         }
                     }
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).count < 2 || store.isSaving)
+                    .ssConfirmationActionStyle()
                     .accessibilityIdentifier("course-manual-confirm")
                 }
             }

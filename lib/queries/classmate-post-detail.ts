@@ -1,10 +1,12 @@
 import "server-only";
 
 import type {
+  ActionCoordinationPolicy,
   ClassmatePostReplyPreference,
   ClassmatePostVisibility,
   LanguageProficiency,
   LanguageTag,
+  Prisma,
 } from "@prisma/client";
 import {
   ClassmatePostCategory,
@@ -12,7 +14,7 @@ import {
   ClassmatePostStatus,
 } from "@prisma/client";
 
-import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
+import { isDiscoverServedCity } from "@/lib/discover/discover-served-cities";
 import {
   mapPrismaLanguageToDiscoverRow,
   mapPrismaMealsToDiscoverRow,
@@ -31,6 +33,7 @@ import {
   buildViewerCourseMatchIndex,
   courseMatchesViewer,
 } from "@/lib/discover/viewer-course-match";
+import { allowsLegacyDirectConversationForAction } from "@/lib/v2/action-coordination/policy-snapshot";
 
 export type ClassmatePostDetailAuthor = {
   id: string;
@@ -62,6 +65,13 @@ export type ClassmatePostDetail = {
   status: ClassmatePostStatus;
   closureReason: ClassmatePostClosureReason | null;
   closedAt: Date | null;
+  coordinationPolicy?: ActionCoordinationPolicy | null;
+  policySchemaVersion?: number | null;
+  policyParametersSnapshot?: Prisma.JsonValue | null;
+  experimentKeySnapshot?: string | null;
+  experimentVariantSnapshot?: "CONTROL" | "TREATMENT" | null;
+  clientCapabilitySnapshot?: Prisma.JsonValue | null;
+  policySnapshottedAt?: Date | null;
   tags: string[];
   visibility: ClassmatePostVisibility;
   replyPreference: ClassmatePostReplyPreference;
@@ -190,7 +200,7 @@ export async function getClassmatePostDetailForViewer(
       language: true,
       sport: true,
       images: { select: { url: true, sortOrder: true } },
-      _count: { select: { saves: true } },
+      _count: { select: { interests: { where: { status: "ACTIVE" } } } },
     },
   });
 
@@ -221,6 +231,13 @@ export async function getClassmatePostDetailForViewer(
     status: post.status,
     closureReason: post.closureReason,
     closedAt: post.closedAt,
+    coordinationPolicy: post.coordinationPolicy,
+    policySchemaVersion: post.policySchemaVersion,
+    policyParametersSnapshot: post.policyParametersSnapshot,
+    experimentKeySnapshot: post.experimentKeySnapshot,
+    experimentVariantSnapshot: post.experimentVariantSnapshot,
+    clientCapabilitySnapshot: post.clientCapabilitySnapshot,
+    policySnapshottedAt: post.policySnapshottedAt,
     tags: post.tags,
     visibility: post.visibility,
     replyPreference: post.replyPreference,
@@ -237,7 +254,7 @@ export async function getClassmatePostDetailForViewer(
     languageMeta,
     sportMeta,
     imageUrls,
-    interestedCount: post._count.saves,
+    interestedCount: post._count.interests,
   };
 
   if (post.userId === viewerId) {
@@ -254,7 +271,7 @@ export async function getClassmatePostDetailForViewer(
   if (post.status !== ClassmatePostStatus.ACTIVE || post.expiresAt <= now) {
     return { ok: false };
   }
-  if (post.city !== DEFAULT_DISCOVER_SERVED_CITY) {
+  if (!isDiscoverServedCity(post.city)) {
     return { ok: false };
   }
 
@@ -295,7 +312,6 @@ export async function getClassmatePostDetailForViewer(
     post: basePost,
     author,
     isAuthor: false,
-    // Visibility controls discovery; the shared first-contact message limit handles interruptions.
-    viewerCanMessage: true,
+    viewerCanMessage: allowsLegacyDirectConversationForAction(basePost),
   };
 }

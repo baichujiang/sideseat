@@ -17,12 +17,16 @@ import {
   hashIdempotencyRequest,
   readIdempotencyKey,
 } from "@/lib/api/v1/idempotency";
+import { parseCalendarOccurrenceId } from "@/lib/calendar/calendar-occurrence-id";
 import { prisma } from "@/lib/db/prisma";
 import { calendarEventSchema, type CalendarEventInput } from "@/lib/validators/calendar";
 
 export const dynamic = "force-dynamic";
 
-const eventIdSchema = z.string().cuid();
+const eventIdSchema = z.string().refine(
+  (value) => z.string().cuid().safeParse(value).success || Boolean(parseCalendarOccurrenceId(value)),
+  "Invalid calendar event identifier.",
+);
 const mutationScopeSchema = z.enum(["this", "future", "all"]);
 
 function missingIdempotencyKey(request: Request) {

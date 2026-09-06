@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ChatReportSheet: View {
-    var title = String(localized: "Report message")
+    var title = AppLocalization.string( "Report message")
     let onSubmit: (NativeReportReason, String) async -> String?
     @Environment(\.dismiss) private var dismiss
 
@@ -46,6 +46,7 @@ struct ChatReportSheet: View {
                         Task { await submit() }
                     }
                     .disabled(isSubmitting)
+                    .ssConfirmationActionStyle()
                     .accessibilityIdentifier("chat-report-send")
                 }
             }

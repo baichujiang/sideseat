@@ -69,7 +69,10 @@ final class DeepLinkRouter {
         if scheme == "sideseat", let host = url.host, !host.isEmpty {
             components.insert(host, at: 0)
         }
-        return route(forPathComponents: components)
+        return route(
+            forPathComponents: components,
+            queryItems: URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
+        )
     }
 
     nonisolated private static func isSupportedScheme(_ url: URL) -> Bool {
@@ -86,17 +89,49 @@ final class DeepLinkRouter {
     }
 
     nonisolated static func route(forPath path: String) -> AppRoute? {
-        let components = path.split(separator: "/").map(String.init).filter { !$0.isEmpty }
-        return route(forPathComponents: components)
+        let normalized = path.hasPrefix("/") ? path : "/\(path)"
+        let parsed = URLComponents(string: normalized)
+        let routePath = parsed?.path ?? normalized
+        let components = routePath.split(separator: "/").map(String.init).filter { !$0.isEmpty }
+        return route(
+            forPathComponents: components,
+            queryItems: parsed?.queryItems ?? []
+        )
     }
 
-    nonisolated private static func route(forPathComponents components: [String]) -> AppRoute? {
+    nonisolated private static func route(
+        forPathComponents components: [String],
+        queryItems: [URLQueryItem]
+    ) -> AppRoute? {
         guard components.count >= 2 else { return nil }
         let identifier = components[1]
         guard identifier.count <= 128 else { return nil }
         switch components[0] {
         case "users": return .profile(userID: identifier)
-        case "connections": return .directChat(connectionID: identifier)
+        case "connections":
+            if components.count == 4, components[2] == "contexts" {
+                let contextID = components[3]
+                guard !contextID.isEmpty, contextID.count <= 128 else { return nil }
+                return .directChat(
+                    connectionID: identifier,
+                    focus: .actionContext(id: contextID)
+                )
+            }
+            if components.count == 4, components[2] == "plans" {
+                let commitmentID = components[3]
+                guard !commitmentID.isEmpty, commitmentID.count <= 128 else { return nil }
+                let revisionID = queryItems.first(where: { $0.name == "revision" })?.value
+                guard revisionID?.isEmpty != true, revisionID?.count ?? 0 <= 128 else { return nil }
+                return .directChat(
+                    connectionID: identifier,
+                    focus: .plan(
+                        commitmentID: commitmentID,
+                        revisionID: revisionID
+                    )
+                )
+            }
+            guard components.count == 2 else { return nil }
+            return .directChat(connectionID: identifier)
         case "courses":
             if components.count >= 3, components[2] == "chat" {
                 return .courseChat(courseID: identifier)
@@ -107,16 +142,33 @@ final class DeepLinkRouter {
         case "discover" where components.count >= 3 && components[1] == "posts":
             let postID = components[2]
             guard postID.count <= 128 else { return nil }
+            if components.count >= 7,
+               components[3] == "responses",
+               components[5] == "coordination"
+            {
+                let interestID = components[4]
+                let reservationID = components[6]
+                guard interestID.count <= 128, reservationID.count <= 128 else { return nil }
+                return .coordinationShell(interestID: interestID, reservationID: reservationID)
+            }
             return .discoverPost(postID: postID)
         case "discover" where components.count >= 3 && components[1] == "activities":
             let activityID = components[2]
             guard activityID.count <= 128 else { return nil }
             return .activity(activityID: activityID)
         case "activities": return .activity(activityID: identifier)
+        case "responses":
+            let interestID = components.count >= 3 ? components[2] : nil
+            guard interestID?.count ?? 0 <= 128 else { return nil }
+            return .actionResponses(actionID: identifier, interestID: interestID)
         case "share" where components.count >= 3 && components[1] == "view":
             let token = components[2]
             guard token.count <= 128 else { return nil }
             return .scheduleShare(token: token)
+        case "share" where components.count >= 3 && components[1] == "event":
+            let token = components[2]
+            guard token.count <= 128 else { return nil }
+            return .eventShare(token: token)
         case "profile" where identifier == "blocked":
             return .blockedUsers
         default: return nil
@@ -132,9 +184,9 @@ final class DeepLinkRouter {
         case "/inbox":
             return (.chats, nil)
         case "/courses":
-            return (.home, .courses)
+            return (.me, .courses)
         case "/courses/archived":
-            return (.home, .archivedCourses)
+            return (.me, .archivedCourses)
         case "/profile":
             return (.me, nil)
         case "/profile/info", "/profile/verification":
@@ -149,10 +201,13 @@ final class DeepLinkRouter {
     nonisolated private static func tab(for route: AppRoute) -> AppTab {
         switch route {
         case .courses, .archivedCourses, .course:
-            return .home
-        case .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .plans, .scheduleShare:
+            return .me
+        case .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .plans, .scheduleShare,
+             .actionResponses, .coordinationShell:
             return .chats
-        case .myPosts, .profile, .settings, .blockedUsers, .supportStore, .feedback, .feedbackDetail:
+        case .eventShare:
+            return .home
+        case .myPosts, .savedPosts, .profile, .settings, .blockedUsers, .supportStore, .feedback, .feedbackDetail:
             return .me
         case .discoverPost, .activity:
             return .discover

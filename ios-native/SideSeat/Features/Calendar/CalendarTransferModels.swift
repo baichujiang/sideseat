@@ -17,6 +17,31 @@ struct NativeCalendarIcsExport: Decodable, Sendable {
     let ics: String
 }
 
+struct NativeCalendarSubscriptionConnection: Decodable, Identifiable, Sendable, Equatable {
+    let id: String
+    let label: String
+    let createdAt: String
+    let lastAccessedAt: String?
+}
+
+struct NativeCalendarSubscriptionList: Decodable, Sendable {
+    let connections: [NativeCalendarSubscriptionConnection]
+}
+
+struct NativeCalendarSubscriptionCreateRequest: Encodable, Sendable {
+    let label: String
+}
+
+struct NativeCalendarSubscriptionCreateResult: Decodable, Sendable {
+    let connection: NativeCalendarSubscriptionConnection
+    let subscriptionUrl: String
+}
+
+struct NativeCalendarSubscriptionRevokeResult: Decodable, Sendable {
+    let id: String
+    let revoked: Bool
+}
+
 struct CalendarICSFileDocument: FileDocument {
     static var readableContentTypes: [UTType] { [.sideSeatICalendar] }
     static var writableContentTypes: [UTType] { [.sideSeatICalendar] }

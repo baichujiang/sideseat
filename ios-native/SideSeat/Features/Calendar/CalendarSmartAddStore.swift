@@ -14,7 +14,7 @@ final class CalendarSmartAddStore {
         guard !isParsing, !isSaving else { return }
         let normalized = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalized.isEmpty else {
-            issue = String(localized: "Describe at least one event.")
+            issue = AppLocalization.string( "Describe at least one event.")
             return
         }
 
@@ -38,7 +38,7 @@ final class CalendarSmartAddStore {
             || ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated")
         {
             drafts = [.uiTestingFixture]
-            warnings = [String(localized: "Check the date before saving.")]
+            warnings = [AppLocalization.string( "Check the date before saving.")]
             return
         }
         #endif
@@ -60,6 +60,18 @@ final class CalendarSmartAddStore {
     func setCategory(_ categoryID: String?, for draftID: UUID) {
         guard let index = drafts.firstIndex(where: { $0.id == draftID }) else { return }
         drafts[index].categoryId = categoryID
+    }
+
+    func updateDraft(_ draft: NativeCalendarNaturalDraft) {
+        guard let index = drafts.firstIndex(where: { $0.id == draft.id }) else { return }
+        drafts[index] = draft
+    }
+
+    func removeDraft(withID draftID: UUID) {
+        drafts.removeAll { $0.id == draftID }
+        if drafts.isEmpty {
+            warnings = []
+        }
     }
 
     func save(using session: SessionStore) async -> Bool {
@@ -97,14 +109,14 @@ final class CalendarSmartAddStore {
 
     private static func friendlyIssue(from error: Error) -> String {
         if error is SessionError {
-            return String(localized: "Your session expired. Please sign in again.")
+            return AppLocalization.string( "Your session expired. Please sign in again.")
         }
         if let apiError = error as? APIClientError, apiError.isUnauthorized {
-            return String(localized: "Your session expired. Please sign in again.")
+            return AppLocalization.string( "Your session expired. Please sign in again.")
         }
         let description = error.localizedDescription
         if isAuthenticationIssue(description) {
-            return String(localized: "Your session expired. Please sign in again.")
+            return AppLocalization.string( "Your session expired. Please sign in again.")
         }
         return description
     }

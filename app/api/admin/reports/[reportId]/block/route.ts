@@ -1,6 +1,10 @@
-import { ConnectionStatus, ReportActionType, ReportStatus } from "@prisma/client";
+import { ReportActionType, ReportStatus } from "@prisma/client";
 
 import { requireAdminUser } from "@/lib/auth/guards";
+import {
+  deactivateUserModerationBlock,
+  installUserModerationBlock,
+} from "@/lib/connections/moderation-block-transaction";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok } from "@/lib/http";
 
@@ -12,43 +16,22 @@ export async function POST(
     const admin = await requireAdminUser();
     const { reportId } = await params;
 
-    const report = await prisma.report.findUnique({
-      where: { id: reportId },
-      include: {
-        moderationBlocks: {
-          where: { isActive: true },
-        },
-      },
-    });
+    const report = await prisma.report.findUnique({ where: { id: reportId } });
 
     if (!report) {
       return error("Report not found.", 404);
     }
 
-    if (report.moderationBlocks.length) {
-      return ok({ blocked: true });
-    }
-
     await prisma.$transaction(async (tx) => {
-      await tx.moderationBlock.create({
-        data: {
-          userId: report.reportedUserId,
-          reportId: report.id,
-          reason: report.reason.toLowerCase().replaceAll("_", " "),
-          createdByEmail: admin.adminActor,
-        },
+      const endedAt = new Date();
+      const moderation = await installUserModerationBlock(tx, {
+        userId: report.reportedUserId,
+        reportId: report.id,
+        reason: report.reason.toLowerCase().replaceAll("_", " "),
+        createdByEmail: admin.adminActor,
+        endedAt,
       });
-
-      await tx.connection.updateMany({
-        where: {
-          status: ConnectionStatus.ACTIVE,
-          OR: [{ userAId: report.reportedUserId }, { userBId: report.reportedUserId }],
-        },
-        data: {
-          status: ConnectionStatus.BLOCKED,
-          endedAt: new Date(),
-        },
-      });
+      if (!moderation.created) return;
 
       await tx.report.update({
         where: { id: report.id },
@@ -106,10 +89,11 @@ export async function DELETE(
     }
 
     await prisma.$transaction(async (tx) => {
-      await tx.moderationBlock.update({
-        where: { id: activeBlock.id },
-        data: { isActive: false },
+      const deactivated = await deactivateUserModerationBlock(tx, {
+        userId: report.reportedUserId,
+        moderationBlockId: activeBlock.id,
       });
+      if (!deactivated) return;
 
       await tx.reportAction.create({
         data: {

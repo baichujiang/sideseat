@@ -12,7 +12,7 @@ import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { buddyRequestAvailabilityValue, buddyRequestStatusLabel } from "@/lib/discover/buddy-request-detail-meta";
 import { getBuddyRequestDisplayStatus } from "@/lib/discover/buddy-request-status";
 import { buddyTypeLabel, shouldShowBuddyCategoryLabel } from "@/lib/discover/buddy-type-labels";
-import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
+import type { DiscoverPostClientRow } from "@/lib/discover/discover-post-row";
 import { formatClassmatePostExpiryMonthDay } from "@/lib/i18n/format-classmate-post-expiry";
 import { formatMessage } from "@/lib/i18n/messages";
 import { ClassmatePostStatus } from "@prisma/client";
@@ -34,7 +34,7 @@ export function BuddyRequestCard({
   hideAuthorRow = false,
   listingStatus,
 }: {
-  post: DiscoverPostRow;
+  post: DiscoverPostClientRow;
   returnTo?: string;
   /** When set, replaces the default message action in the author row. */
   customFooter?: ReactNode;
@@ -68,7 +68,10 @@ export function BuddyRequestCard({
     new Date(post.createdAt),
   );
   const showSave = post.savedByViewer !== undefined && !post.isDevExample;
-  const showDefaultMessage = customFooter === undefined && !post.isDevExample;
+  const showDefaultMessage =
+    customFooter === undefined &&
+    !post.isDevExample &&
+    post.allowsLegacyDirectConversation;
   const linkedCourseId = post.linkedCourses?.[0]?.id;
   const contentReserveClass = showSave ? "pr-11 sm:pr-12" : undefined;
   const interestedLine =

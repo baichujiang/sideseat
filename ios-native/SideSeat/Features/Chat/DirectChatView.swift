@@ -11,6 +11,7 @@ struct DirectChatView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     let connectionID: String
+    let initialFocus: DirectChatFocus?
 
     @State private var store = DirectChatStore()
     @State private var composerDraft = ChatComposerDraft()
@@ -34,12 +35,55 @@ struct DirectChatView: View {
     @State private var isAttachmentTrayVisible = false
     @State private var openedScheduleShareToken: ScheduleShareNavToken?
     @State private var counterPlan: NativePlanRequest?
+    @State private var actionPlanDraft: ActionPlanPresentation?
     @State private var scrollToMessageID: String?
+    @State private var initialFocusMessageID: String?
+    @State private var hasResolvedInitialFocus: Bool
+    @State private var hasPositionedInitialTarget: Bool
     @State private var composerFocus = ChatComposerFocusController()
     @Environment(\.dismiss) private var dismiss
 
     private struct ScheduleShareNavToken: Identifiable, Hashable {
         let id: String
+    }
+
+    private struct ActionPlanPresentation: Identifiable, Hashable {
+        let target: PlanSubmissionTarget
+        let draft: NativePlanDraft
+        var id: String { "\(target):\(draft.id)" }
+    }
+
+    private struct InitialChatTaskKey: Hashable {
+        let connectionID: String
+        let focus: DirectChatFocus?
+    }
+
+    init(connectionID: String, initialFocus: DirectChatFocus? = nil) {
+        self.connectionID = connectionID
+        self.initialFocus = initialFocus
+        _hasResolvedInitialFocus = State(initialValue: initialFocus == nil)
+        _hasPositionedInitialTarget = State(initialValue: initialFocus == nil)
+    }
+
+    private func resolveMessageID(for focus: DirectChatFocus) async -> String? {
+        switch focus {
+        case .message(let id):
+            await store.messageID(forMessageID: id, loadingOlderUsing: session)
+        case .plan(let commitmentID, let revisionID):
+            await store.messageID(
+                forPlanCommitmentID: commitmentID,
+                revisionID: revisionID,
+                loadingOlderUsing: session
+            )
+        case .actionInterest(let id):
+            await store.messageID(forActionInterestID: id, loadingOlderUsing: session)
+        case .actionContext(let id):
+            await store.messageID(forActionContextID: id, loadingOlderUsing: session)
+        }
+    }
+
+    private var activeActionContextID: String? {
+        DirectChatStore.actionContextID(for: initialFocus, in: store.messages)
     }
 
     var body: some View {
@@ -60,7 +104,7 @@ struct DirectChatView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             composer
         }
-            .background(SideSeatTheme.bgGrouped)
+            .background(SideSeatTheme.Chat.canvas)
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .accessibilityIdentifier("direct-chat")
@@ -83,18 +127,25 @@ struct DirectChatView: View {
                     .accessibilityLabel("Chat actions")
                 }
             }
-            .task(id: connectionID) {
+            .task(id: InitialChatTaskKey(connectionID: connectionID, focus: initialFocus)) {
                 ActiveChatPresentation.begin("connection:\(connectionID)")
                 keyboardBottomAnchor = ChatKeyboardBottomAnchorState()
                 hasPreparedInitialViewport = false
                 hasCompletedInitialLoad = false
                 isInitialViewportVisible = false
                 knownMessageIDs = []
+                initialFocusMessageID = nil
+                hasResolvedInitialFocus = initialFocus == nil
+                hasPositionedInitialTarget = initialFocus == nil
                 await store.load(
                     connectionID: connectionID,
                     using: session,
                     apiBaseURL: container.environment.apiBaseURL
                 )
+                if let initialFocus {
+                    initialFocusMessageID = await resolveMessageID(for: initialFocus)
+                    hasResolvedInitialFocus = true
+                }
                 hasCompletedInitialLoad = true
                 if !hasPreparedInitialViewport {
                     prepareInitialViewport(messageIDs: store.messages.map(\.id))
@@ -115,6 +166,7 @@ struct DirectChatView: View {
             }
             .onChange(of: store.messages.map(\.id)) { _, messageIDs in
                 if !hasPreparedInitialViewport, !messageIDs.isEmpty {
+                    guard initialFocus == nil || hasResolvedInitialFocus else { return }
                     prepareInitialViewport(messageIDs: messageIDs)
                     return
                 }
@@ -125,42 +177,30 @@ struct DirectChatView: View {
                 }
                 handleMessageChange()
             }
+            .onChange(of: store.planRecoveryRoute) { _, route in
+                guard let route else { return }
+                router.replaceTop(with: route)
+            }
             .onChange(of: selectedPhoto) { _, item in
                 guard let item else { return }
                 isAttachmentTrayVisible = false
                 Task { await sendPhoto(item) }
             }
-            .confirmationDialog(
-                "Delete this message?",
-                isPresented: Binding(
-                    get: { pendingDelete != nil },
-                    set: { if !$0 { pendingDelete = nil } }
-                ),
-                titleVisibility: .visible
-            ) {
-                Button("Delete", role: .destructive) {
-                    guard let message = pendingDelete else { return }
-                    pendingDelete = nil
-                    Task {
-                        let deleted = await store.deleteMessage(message.id, using: session)
-                        if deleted, replyDraft?.id == message.id {
-                            replyDraft = nil
-                        }
-                        if deleted {
-                            showActionNotice(String(localized: "Message deleted"), systemImage: "trash")
-                        }
-                    }
-                }
-                Button("Cancel", role: .cancel) {
-                    pendingDelete = nil
-                }
-            }
+            .ssActionPrompt(
+                isPresented: pendingDeletePromptPresented,
+                title: AppLocalization.string("Delete this message?"),
+                systemImage: "trash.fill",
+                tint: SideSeatTheme.danger,
+                onDismiss: { pendingDelete = nil },
+                accessibilityIdentifier: "chat-delete-prompt",
+                actions: { pendingDeletePromptActions }
+            )
             .sheet(isPresented: Binding(
                 get: { pendingReport != nil },
                 set: { if !$0 { pendingReport = nil } }
             )) {
                 ChatReportSheet { reason, details in
-                    guard let message = pendingReport else { return String(localized: "Message unavailable.") }
+                    guard let message = pendingReport else { return AppLocalization.string( "Message unavailable.") }
                     let failure = await store.reportMessage(
                         message,
                         reason: reason,
@@ -169,7 +209,7 @@ struct DirectChatView: View {
                     )
                     if failure == nil {
                         pendingReport = nil
-                        showActionNotice(String(localized: "Report sent"), systemImage: "checkmark.shield")
+                        showActionNotice(AppLocalization.string( "Report sent"), systemImage: "checkmark.shield")
                     }
                     return failure
                 }
@@ -184,27 +224,23 @@ struct DirectChatView: View {
             }
             .sheet(isPresented: $showPlanCreate) {
                 PlanCreateSheet(
-                    connectionID: connectionID,
+                    target: activeActionContextID.map(PlanSubmissionTarget.actionContext)
+                        ?? .legacyConnection(connectionID: connectionID),
                     recipientName: store.conversation?.displayName
-                ) {
-                    Task {
-                        #if DEBUG
-                        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-                            store.seedLocalPlanCard()
-                        } else {
-                            await store.refreshMessages(using: session)
-                            store.publishLatestOutboundToInbox()
-                        }
-                        #else
-                        await store.refreshMessages(using: session)
-                        store.publishLatestOutboundToInbox()
-                        #endif
-                        NotificationCenter.default.post(
-                            name: .sideSeatChatScrollToBottom,
-                            object: nil,
-                            userInfo: ["animated": true]
-                        )
-                    }
+                ) { result in
+                    finishPlanSubmission(result)
+                }
+            }
+            .sheet(item: $actionPlanDraft) { presentation in
+                PlanCreateSheet(
+                    target: presentation.target,
+                    recipientName: store.conversation?.displayName,
+                    draft: presentation.draft
+                ) { result in
+                    finishPlanSubmission(
+                        result,
+                        uiTestingTitle: presentation.draft.title
+                    )
                 }
             }
             .sheet(isPresented: $showLocationPicker) {
@@ -213,6 +249,7 @@ struct DirectChatView: View {
                         latitude: location.latitude,
                         longitude: location.longitude,
                         name: location.name,
+                        actionContextID: activeActionContextID,
                         using: session
                     )
                     if sent {
@@ -229,28 +266,11 @@ struct DirectChatView: View {
             }
             .sheet(item: $counterPlan) { plan in
                 PlanCreateSheet(
-                    connectionID: connectionID,
+                    target: .counter(for: plan),
                     recipientName: store.conversation?.displayName,
                     counterOf: plan
-                ) {
-                    Task {
-                        #if DEBUG
-                        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-                            store.seedLocalPlanCard(title: plan.title)
-                        } else {
-                            await store.refreshMessages(using: session)
-                            store.publishLatestOutboundToInbox()
-                        }
-                        #else
-                        await store.refreshMessages(using: session)
-                        store.publishLatestOutboundToInbox()
-                        #endif
-                        NotificationCenter.default.post(
-                            name: .sideSeatChatScrollToBottom,
-                            object: nil,
-                            userInfo: ["animated": true]
-                        )
-                    }
+                ) { result in
+                    finishPlanSubmission(result, uiTestingTitle: plan.title)
                 }
             }
             .sheet(isPresented: $showScheduleShare) {
@@ -315,7 +335,8 @@ struct DirectChatView: View {
     }
 
     private var messageList: some View {
-        ScrollViewReader { proxy in
+        let displayedMessages = DirectChatStore.presentationMessages(from: store.messages)
+        return ScrollViewReader { proxy in
             ZStack(alignment: .bottom) {
                 ScrollView {
                     ChatMessageStack(
@@ -340,9 +361,9 @@ struct DirectChatView: View {
                             .accessibilityIdentifier("chat-load-older")
                         }
 
-                        ForEach(Array(store.messages.enumerated()), id: \.element.id) { index, message in
-                            let previous = index > 0 ? store.messages[index - 1] : nil
-                            let next = index + 1 < store.messages.count ? store.messages[index + 1] : nil
+                        ForEach(Array(displayedMessages.enumerated()), id: \.element.id) { index, message in
+                            let previous = index > 0 ? displayedMessages[index - 1] : nil
+                            let next = index + 1 < displayedMessages.count ? displayedMessages[index + 1] : nil
                             let connectsAbove = ChatMessageGrouping.isContinuation(
                                 previousSenderID: previous?.sender.id,
                                 previousDate: previous?.createdDate,
@@ -381,6 +402,8 @@ struct DirectChatView: View {
                                 currentUserID: session.currentUser?.id ?? "ui-test-user",
                                 status: store.sendStatuses[message.id],
                                 isActingOnPlan: store.isActingOnPlan,
+                                canProposeFromAction: canProposePlan(from: message),
+                                mutualOpportunityPlanState: mutualOpportunityPlanState(for: message),
                                 onOpenProfile: {
                                     router.navigate(to: .profile(userID: message.sender.id))
                                 },
@@ -402,14 +425,33 @@ struct DirectChatView: View {
                                 onOpenImage: { url in
                                     previewImageURL = url
                                 },
-                                onAcceptPlan: { planID in
-                                    Task { _ = await store.acceptPlan(planID, using: session) }
+                                onAcceptPlan: { plan in
+                                    Task { _ = await store.acceptPlan(plan, using: session) }
                                 },
-                                onDeclinePlan: { planID in
-                                    Task { _ = await store.declinePlan(planID, using: session) }
+                                onDeclinePlan: { plan in
+                                    Task { _ = await store.declinePlan(plan, using: session) }
+                                },
+                                onWithdrawPlan: { plan in
+                                    Task { _ = await store.withdrawPlan(plan, using: session) }
                                 },
                                 onCounterPlan: { plan in
                                     counterPlan = plan
+                                },
+                                onProposeFromAction: { interest, contextID in
+                                    guard let contextID else { return }
+                                    actionPlanDraft = ActionPlanPresentation(
+                                        target: .actionContext(contextID: contextID),
+                                        draft: NativePlanDraft(
+                                            context: interest.context,
+                                            interestID: interest.id
+                                        )
+                                    )
+                                },
+                                onProposeFromMutualOpportunity: { opportunity in
+                                    actionPlanDraft = ActionPlanPresentation(
+                                        target: .legacyConnection(connectionID: connectionID),
+                                        draft: opportunity.planDraft
+                                    )
                                 },
                                 onOpenCalendar: {
                                     deepLinkRouter.handleAppPath("/home")
@@ -462,13 +504,13 @@ struct DirectChatView: View {
                                 )
                             }
                         } label: {
-                            Text(store.pendingRemoteCount == 1 ? String(localized: "1 new message") : String(localized: "\(store.pendingRemoteCount) new messages"))
+                            Text(store.pendingRemoteCount == 1 ? AppLocalization.string( "1 new message") : AppLocalization.string( "\(store.pendingRemoteCount) new messages"))
                                 .font(.footnote.weight(.semibold))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
                                 .background(.ultraThinMaterial, in: Capsule())
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(SSPressButtonStyle())
                         .accessibilityIdentifier("chat-new-messages")
                     }
                 }
@@ -514,10 +556,31 @@ struct DirectChatView: View {
                       hasCompletedInitialLoad || store.hasCachedSnapshot,
                       !isInitialViewportVisible
                 else { return }
-                await ChatScrollAnchor.scrollToBottom(
-                    proxy: proxy,
-                    animated: false
-                )
+
+                if let initialFocusMessageID {
+                    releaseMessageListBottomPin()
+                    isNearBottom = false
+                    await Task.yield()
+                    // A LazyVStack can finish measuring rich cards after the first
+                    // scroll request. Re-apply the initial focus while the list is
+                    // still hidden so the bottom anchor cannot win that race.
+                    for attempt in 0..<3 {
+                        var transaction = Transaction()
+                        transaction.disablesAnimations = true
+                        withTransaction(transaction) {
+                            proxy.scrollTo(initialFocusMessageID, anchor: .center)
+                        }
+                        guard attempt < 2 else { break }
+                        try? await Task.sleep(for: .milliseconds(60))
+                    }
+                    self.initialFocusMessageID = nil
+                } else {
+                    await ChatScrollAnchor.scrollToBottom(
+                        proxy: proxy,
+                        animated: false
+                    )
+                }
+                hasPositionedInitialTarget = true
                 await Task.yield()
                 revealInitialViewport()
             }
@@ -612,15 +675,16 @@ struct DirectChatView: View {
                             .foregroundStyle(.primary)
                             .frame(width: 30, height: 30)
                             .background(.quaternary, in: Circle())
+                            .ssIconButtonHitTarget()
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(SSPressButtonStyle())
                     .disabled(store.isUnrepliedSendBlocked)
                     .accessibilityIdentifier("chat-composer-attach")
                     .accessibilityLabel(isAttachmentTrayVisible ? "Close attachments" : "Attachments")
 
                     ChatComposerTextInput(
                         draft: composerDraft,
-                        placeholder: replyDraft == nil ? String(localized: "Message") : String(localized: "Reply"),
+                        placeholder: replyDraft == nil ? AppLocalization.string( "Message") : AppLocalization.string( "Reply"),
                         isBlocked: store.isUnrepliedSendBlocked,
                         focusController: composerFocus
                     ) { text in
@@ -665,12 +729,12 @@ struct DirectChatView: View {
                 closeAttachmentTrayForDestination()
                 showScheduleShare = true
             } label: {
-                attachmentActionLabel(title: "Share schedule", systemImage: "calendar.badge.clock")
+                attachmentActionLabel(title: "Share availability", systemImage: "calendar.badge.clock")
             }
             .disabled(store.isSending || store.isUnrepliedSendBlocked)
             .accessibilityIdentifier("chat-composer-schedule-share")
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SSPressButtonStyle())
         .padding(.horizontal, 12)
         .padding(.top, 8)
         .accessibilityElement(children: .contain)
@@ -710,8 +774,13 @@ struct DirectChatView: View {
 
     private func prepareInitialViewport(messageIDs: [String]) {
         knownMessageIDs = Set(messageIDs)
-        isNearBottom = true
-        pinMessageListToBottom()
+        if initialFocus == nil {
+            isNearBottom = true
+            pinMessageListToBottom()
+        } else {
+            isNearBottom = false
+            releaseMessageListBottomPin()
+        }
         hasPreparedInitialViewport = true
     }
 
@@ -720,7 +789,8 @@ struct DirectChatView: View {
             hasPreparedViewport: hasPreparedInitialViewport,
             hasCompletedInitialLoad: hasCompletedInitialLoad,
             hasCachedSnapshot: store.hasCachedSnapshot,
-            isVisible: isInitialViewportVisible
+            isVisible: isInitialViewportVisible,
+            hasPositionedInitialTarget: hasPositionedInitialTarget
         )
         else { return }
         var transaction = Transaction()
@@ -765,7 +835,7 @@ struct DirectChatView: View {
                 .frame(maxWidth: 190)
                 .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SSPressButtonStyle())
             .disabled(conversation.isSelfNotes)
             .accessibilityIdentifier("direct-chat-title")
         } else {
@@ -793,8 +863,49 @@ struct DirectChatView: View {
         UIPasteboard.general.string = text
         Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(140))
-            showActionNotice(String(localized: "Copied"), systemImage: "checkmark")
+            showActionNotice(AppLocalization.string( "Copied"), systemImage: "checkmark")
         }
+    }
+
+    private var pendingDeletePromptPresented: Binding<Bool> {
+        Binding(
+            get: { pendingDelete != nil },
+            set: { if !$0 { pendingDelete = nil } }
+        )
+    }
+
+    private var pendingDeletePromptActions: [SSActionPromptAction] {
+        guard let message = pendingDelete else { return [] }
+
+        return [
+            SSActionPromptAction(
+                id: "chat-delete-cancel",
+                title: AppLocalization.string("Cancel"),
+                systemImage: "xmark",
+                role: .cancel
+            ) {
+                pendingDelete = nil
+            },
+            SSActionPromptAction(
+                id: "chat-delete-confirm",
+                title: AppLocalization.string("Delete"),
+                systemImage: "trash",
+                role: .destructive
+            ) {
+                Task {
+                    let deleted = await store.deleteMessage(message.id, using: session)
+                    if deleted, replyDraft?.id == message.id {
+                        replyDraft = nil
+                    }
+                    if deleted {
+                        showActionNotice(
+                            AppLocalization.string("Message deleted"),
+                            systemImage: "trash"
+                        )
+                    }
+                }
+            },
+        ]
     }
 
     private func presentDeleteConfirmation(for message: NativeDirectMessage) {
@@ -838,7 +949,12 @@ struct DirectChatView: View {
         composerDraft.clear()
         replyDraft = nil
         isNearBottom = true
-        _ = await store.sendText(text, replyTo: reply, using: session)
+        _ = await store.sendText(
+            text,
+            replyTo: reply,
+            actionContextID: activeActionContextID,
+            using: session
+        )
     }
 
     private func sendPhoto(_ item: PhotosPickerItem) async {
@@ -846,12 +962,12 @@ struct DirectChatView: View {
         guard let data = try? await item.loadTransferable(type: Data.self),
               let draftImage = await DiscoverImagePreprocessor.makeDraftAsync(from: data)
         else {
-            store.noteSendIssue(String(localized: "Could not prepare that photo."))
+            store.noteSendIssue(AppLocalization.string( "Could not prepare that photo."))
             return
         }
         // Chat upload limit is 2 MB.
         guard draftImage.data.count <= 2 * 1024 * 1024 else {
-            store.noteSendIssue(String(localized: "Image is too large. Max 2 MB."))
+            store.noteSendIssue(AppLocalization.string( "Image is too large. Max 2 MB."))
             return
         }
         let caption = composerDraft.trimmedText
@@ -860,6 +976,7 @@ struct DirectChatView: View {
             mimeType: draftImage.mimeType,
             fileName: "chat-\(draftImage.id.uuidString).jpg",
             caption: caption.isEmpty ? nil : caption,
+            actionContextID: activeActionContextID,
             using: session
         )
         isNearBottom = true
@@ -874,12 +991,47 @@ struct DirectChatView: View {
         )
     }
 
+    private func finishPlanSubmission(
+        _ result: PlanSubmissionResult,
+        uiTestingTitle: String? = nil
+    ) {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            store.seedLocalPlanCard(title: uiTestingTitle ?? AppLocalization.string("Plan"))
+            NotificationCenter.default.post(
+                name: .sideSeatChatScrollToBottom,
+                object: nil,
+                userInfo: ["animated": true]
+            )
+            return
+        }
+        #endif
+
+        NotificationCenter.default.post(name: .sideSeatPlansNeedsRefresh, object: nil)
+        NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
+        router.replaceTop(
+            with: .directChat(
+                connectionID: result.connectionID,
+                focus: result.focus
+            )
+        )
+    }
+
     private func handleMessageChange() {
+        let newlyConfirmed = store.messages.contains {
+            !knownMessageIDs.contains($0.id) && $0.type == "PLAN_CONFIRMED_CARD"
+        }
         let decision = store.consumeScrollDecision(
             previousIDs: knownMessageIDs,
             isNearBottom: isNearBottom
         )
         knownMessageIDs = Set(store.messages.map(\.id))
+        if newlyConfirmed {
+            Task { await HomeScheduleCache.shared.clear() }
+            NotificationCenter.default.post(name: .sideSeatCalendarNeedsRefresh, object: nil)
+            NotificationCenter.default.post(name: .sideSeatPlansNeedsRefresh, object: nil)
+            NotificationCenter.default.post(name: .sideSeatTogetherNeedsRefresh, object: nil)
+        }
         switch decision {
         case .scrollToBottom(let animated):
             NotificationCenter.default.post(
@@ -891,6 +1043,30 @@ struct DirectChatView: View {
             store.noteRemoteArrivalWhileScrolledUp(count: count)
         case .none:
             break
+        }
+    }
+
+    private func mutualOpportunityPlanState(
+        for message: NativeDirectMessage
+    ) -> MutualOpportunityPlanState? {
+        guard message.type == "MUTUAL_OPPORTUNITY_CARD",
+              let opportunityID = message.mutualOpportunity?.id
+        else { return nil }
+
+        let sourcePlans = store.messages.compactMap(\.planRequest).filter { plan in
+            plan.origin?.kind == "MUTUAL_OPPORTUNITY"
+                && plan.origin?.id == opportunityID
+        }
+        if sourcePlans.contains(where: \.isAccepted) { return .arranged }
+        if sourcePlans.contains(where: \.isPending) { return .waiting }
+        return nil
+    }
+
+    private func canProposePlan(from message: NativeDirectMessage) -> Bool {
+        guard let contextID = message.actionContextId else { return false }
+        return !store.messages.contains { candidate in
+            guard candidate.planRequest?.originContextId == contextID else { return false }
+            return candidate.planRequest?.status == "PENDING" || candidate.planRequest?.status == "ACCEPTED"
         }
     }
 }
@@ -922,7 +1098,7 @@ struct ChatComposerTextInput: View {
         ZStack(alignment: .topLeading) {
             Text(placeholder)
                 .font(.body)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(SideSeatTheme.placeholderText)
                 .padding(.top, 1)
                 .opacity(draft.isEmpty ? 1 : 0)
                 .allowsHitTesting(false)
@@ -1224,6 +1400,11 @@ private struct ChatComposerUIKitTextView: UIViewRepresentable {
     }
 }
 
+private enum MutualOpportunityPlanState: Equatable {
+    case waiting
+    case arranged
+}
+
 private struct DirectMessageBubble: View {
     let message: NativeDirectMessage
     let isMine: Bool
@@ -1235,6 +1416,8 @@ private struct DirectMessageBubble: View {
     let currentUserID: String
     let status: NativeMessageSendStatus?
     let isActingOnPlan: Bool
+    let canProposeFromAction: Bool
+    let mutualOpportunityPlanState: MutualOpportunityPlanState?
     let onOpenProfile: () -> Void
     let onReply: () -> Void
     let onRetry: () -> Void
@@ -1242,9 +1425,12 @@ private struct DirectMessageBubble: View {
     let onReport: () -> Void
     let onCopy: (String) -> Void
     let onOpenImage: (URL) -> Void
-    let onAcceptPlan: (String) -> Void
-    let onDeclinePlan: (String) -> Void
+    let onAcceptPlan: (NativePlanRequest) -> Void
+    let onDeclinePlan: (NativePlanRequest) -> Void
+    let onWithdrawPlan: (NativePlanRequest) -> Void
     let onCounterPlan: (NativePlanRequest) -> Void
+    let onProposeFromAction: (NativeActionInterest, String?) -> Void
+    let onProposeFromMutualOpportunity: (NativeMutualOpportunitySource) -> Void
     let onOpenCalendar: () -> Void
     let onOpenScheduleShare: (String) -> Void
 
@@ -1254,7 +1440,12 @@ private struct DirectMessageBubble: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
-            if !isMine {
+            if message.type == "MUTUAL_OPPORTUNITY_CARD" {
+                Spacer(minLength: 20)
+                contextualBubble
+                Spacer(minLength: 20)
+            } else {
+                if !isMine {
                 if showAvatar {
                     Button(action: onOpenProfile) {
                         InitialAvatar(
@@ -1263,9 +1454,9 @@ private struct DirectMessageBubble: View {
                             size: 32
                         )
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(SSPressButtonStyle())
                     .accessibilityIdentifier("chat-avatar-\(message.id)")
-                    .accessibilityLabel(String(localized: "\(message.sender.displayName) profile"))
+                    .accessibilityLabel(AppLocalization.string( "\(message.sender.displayName) profile"))
                 } else {
                     Color.clear
                         .frame(width: 32, height: 1)
@@ -1281,7 +1472,7 @@ private struct DirectMessageBubble: View {
                             .font(.caption2.weight(.semibold))
                             .foregroundStyle(.secondary)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(SSPressButtonStyle())
                 }
 
                 contextualBubble
@@ -1297,7 +1488,7 @@ private struct DirectMessageBubble: View {
                                 .font(.caption2)
                                 .foregroundStyle(SideSeatTheme.danger)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(SSPressButtonStyle())
                         .accessibilityIdentifier("chat-retry-\(message.id)")
                     } else {
                         Text("Not delivered")
@@ -1307,71 +1498,73 @@ private struct DirectMessageBubble: View {
                 }
 
             }
-            if !isMine { Spacer(minLength: 48) }
+                if !isMine { Spacer(minLength: 48) }
+            }
         }
         .accessibilityElement(children: .contain)
     }
 
     private var contextualBubble: some View {
-        ChatMessageContextMenuTarget(isEnabled: !message.isDeleted) {
+        ChatMessageContextMenuTarget(
+            isEnabled: !message.isDeleted,
+            edge: isMine ? .trailing : .leading
+        ) {
             bubbleBody
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("chat-bubble-\(message.id)")
-        } menu: {
-            messageContextMenu
+        } actions: {
+            messageContextMenuActions
         }
-            .accessibilityAction(named: Text(String(localized: "Reply"))) {
+            .accessibilityAction(named: Text(AppLocalization.string( "Reply"))) {
                 if !message.isDeleted { onReply() }
             }
-            .accessibilityAction(named: Text(String(localized: "Report"))) {
+            .accessibilityAction(named: Text(AppLocalization.string( "Report"))) {
                 if !isMine && !message.isDeleted { onReport() }
             }
             .modifier(ChatDeleteAccessibilityAction(
-                enabled: isMine && !message.isDeleted,
+                enabled: isMine && message.supportsUserDeletion && !message.isDeleted,
                 action: onDelete
             ))
     }
 
-    @ViewBuilder
-    private var messageContextMenu: some View {
-        if !message.isDeleted {
-            Button {
-                onReply()
-            } label: {
-                Label("Reply", systemImage: "arrowshape.turn.up.left")
-            }
-            .accessibilityIdentifier("chat-reply-\(message.id)")
-            if message.type == "TEXT",
-               let body = message.body?.trimmingCharacters(in: .whitespacesAndNewlines),
-               !body.isEmpty
-            {
-                Button {
-                    onCopy(body)
-                } label: {
-                    Label("Copy", systemImage: "doc.on.doc")
-                }
-                .accessibilityIdentifier("chat-copy-\(message.id)")
-            }
+    private var messageContextMenuActions: [SSLongPressAction] {
+        guard !message.isDeleted else { return [] }
+
+        var actions = [
+            SSLongPressAction(
+                id: "chat-reply-\(message.id)",
+                title: AppLocalization.string("Reply"),
+                systemImage: "arrowshape.turn.up.left",
+                perform: onReply
+            ),
+        ]
+
+        if message.type == "TEXT",
+           let body = message.body?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !body.isEmpty
+        {
+            actions.append(
+                SSLongPressAction(
+                    id: "chat-copy-\(message.id)",
+                    title: AppLocalization.string("Copy"),
+                    systemImage: "doc.on.doc",
+                    perform: { onCopy(body) }
+                )
+            )
         }
-        if !message.isDeleted {
-            Divider()
+
+        if !isMine || message.supportsUserDeletion {
+            actions.append(
+                SSLongPressAction(
+                    id: isMine ? "chat-delete-\(message.id)" : "chat-report-\(message.id)",
+                    title: AppLocalization.string(isMine ? "Delete" : "Report"),
+                    systemImage: isMine ? "trash" : "flag",
+                    role: .destructive,
+                    perform: isMine ? onDelete : onReport
+                )
+            )
         }
-        if !isMine && !message.isDeleted {
-            Button(role: .destructive) {
-                onReport()
-            } label: {
-                Label("Report", systemImage: "flag")
-            }
-            .accessibilityIdentifier("chat-report-\(message.id)")
-        }
-        if isMine && !message.isDeleted {
-            Button(role: .destructive) {
-                onDelete()
-            } label: {
-                Label("Delete", systemImage: "trash")
-            }
-            .accessibilityIdentifier("chat-delete-\(message.id)")
-        }
+        return actions
     }
 
     @ViewBuilder
@@ -1382,7 +1575,11 @@ private struct DirectMessageBubble: View {
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .background(bubbleFill, in: bubbleShape)
-                .foregroundStyle(isMine ? Color.white.opacity(0.9) : Color.secondary)
+                .foregroundStyle(
+                    isMine
+                        ? SideSeatTheme.Chat.ownBubbleForeground.opacity(0.9)
+                        : SideSeatTheme.textSecondaryStrong
+                )
                 .accessibilityIdentifier("chat-tombstone-\(message.id)")
         } else if message.type == "IMAGE" {
             VStack(alignment: isMine ? .trailing : .leading, spacing: 6) {
@@ -1401,7 +1598,7 @@ private struct DirectMessageBubble: View {
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
                         .background(bubbleFill, in: bubbleShape)
-                        .foregroundStyle(isMine ? Color.white : Color.primary)
+                        .foregroundStyle(isMine ? SideSeatTheme.Chat.ownBubbleForeground : Color.primary)
                 }
             }
         } else if message.type == "LOCATION" {
@@ -1412,7 +1609,7 @@ private struct DirectMessageBubble: View {
                 if let location = message.location {
                     ChatLocationBubble(location: location, isMine: isMine)
                 } else {
-                    Text(String(localized: "Location"))
+                    Text(AppLocalization.string( "Location"))
                         .font(.footnote.weight(.medium))
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
@@ -1427,11 +1624,27 @@ private struct DirectMessageBubble: View {
                 plan: plan,
                 currentUserID: currentUserID,
                 isActing: isActingOnPlan,
-                onAccept: { onAcceptPlan(plan.id) },
-                onDecline: { onDeclinePlan(plan.id) },
+                onAccept: { onAcceptPlan(plan) },
+                onDecline: { onDeclinePlan(plan) },
+                onWithdraw: { onWithdrawPlan(plan) },
                 onCounter: { onCounterPlan(plan) },
                 onOpenCalendar: onOpenCalendar
             )
+        } else if message.type == "ACTION_INTEREST_CARD",
+                  let interest = message.actionInterest {
+            ActionInterestCard(
+                interest: interest,
+                canProposePlan: canProposeFromAction,
+                onProposePlan: { onProposeFromAction(interest, message.actionContextId) }
+            )
+        } else if message.type == "MUTUAL_OPPORTUNITY_CARD",
+                  let opportunity = message.mutualOpportunity {
+            MutualOpportunitySourceCard(
+                opportunity: opportunity,
+                planState: mutualOpportunityPlanState
+            ) {
+                onProposeFromMutualOpportunity(opportunity)
+            }
         } else if message.type == "SCHEDULE_SHARE_CARD",
                   let shareURL = message.body?.trimmingCharacters(in: .whitespacesAndNewlines),
                   !shareURL.isEmpty {
@@ -1440,6 +1653,8 @@ private struct DirectMessageBubble: View {
             || message.type == "AVAILABILITY_CARD"
             || message.type == "PLAN_REQUEST_CARD"
             || message.type == "PLAN_CONFIRMED_CARD"
+            || message.type == "ACTION_INTEREST_CARD"
+            || message.type == "MUTUAL_OPPORTUNITY_CARD"
             || message.type == "SYSTEM" {
             Text(cardPreviewText(for: message))
                 .font(.footnote.weight(.medium))
@@ -1458,7 +1673,7 @@ private struct DirectMessageBubble: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(bubbleFill, in: bubbleShape)
-            .foregroundStyle(isMine ? Color.white : Color.primary)
+            .foregroundStyle(isMine ? SideSeatTheme.Chat.ownBubbleForeground : Color.primary)
         }
     }
 
@@ -1469,15 +1684,17 @@ private struct DirectMessageBubble: View {
 
     private func cardPreviewText(for message: NativeDirectMessage) -> String {
         switch message.type {
-        case "SCHEDULE_SHARE_CARD": return String(localized: "Shared schedule")
+        case "SCHEDULE_SHARE_CARD": return AppLocalization.string("Shared availability")
         case "AVAILABILITY_CARD":
-            return message.availabilityShareId == nil ? String(localized: "Availability unavailable") : String(localized: "Shared availability")
-        case "PLAN_REQUEST_CARD": return String(localized: "Plan invite")
-        case "PLAN_CONFIRMED_CARD": return String(localized: "Plan confirmed")
+            return message.availabilityShareId == nil ? AppLocalization.string( "Availability unavailable") : AppLocalization.string( "Shared availability")
+        case "PLAN_REQUEST_CARD": return AppLocalization.string( "Plan invite")
+        case "PLAN_CONFIRMED_CARD": return AppLocalization.string( "Plan confirmed")
+        case "ACTION_INTEREST_CARD": return AppLocalization.string("Action interest")
+        case "MUTUAL_OPPORTUNITY_CARD": return AppLocalization.string("Together opportunity")
         case "SYSTEM":
             let body = message.body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            return body.isEmpty ? String(localized: "Update") : body
-        default: return String(localized: "Message")
+            return body.isEmpty ? AppLocalization.string( "Update") : body
+        default: return AppLocalization.string( "Message")
         }
     }
 
@@ -1496,7 +1713,7 @@ private struct DirectMessageBubble: View {
     private func replyStrip(_ reply: NativeDirectMessageReply) -> some View {
         HStack(alignment: .top, spacing: 8) {
             RoundedRectangle(cornerRadius: 1.5)
-                .fill(isMine ? Color.white.opacity(0.85) : SideSeatTheme.accent)
+                .fill(isMine ? SideSeatTheme.Chat.ownBubbleForeground.opacity(0.72) : SideSeatTheme.accent)
                 .frame(width: 3)
             VStack(alignment: .leading, spacing: 2) {
                 Text(reply.sender.displayName)
@@ -1507,6 +1724,12 @@ private struct DirectMessageBubble: View {
                     .opacity(0.85)
             }
         }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(
+            SideSeatTheme.Chat.quoteSurface,
+            in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+        )
         .accessibilityIdentifier("chat-quote-\(message.id)")
     }
 
@@ -1515,6 +1738,162 @@ private struct DirectMessageBubble: View {
             return nil
         }
         return url
+    }
+}
+
+private struct ActionInterestCard: View {
+    let interest: NativeActionInterest
+    let canProposePlan: Bool
+    let onProposePlan: () -> Void
+
+    private var context: NativeActionContext { interest.context }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                Image(systemName: context.sourceKind == "COURSE_ACTION" ? "book.closed.fill" : "person.2.fill")
+                    .foregroundStyle(SideSeatTheme.accentText)
+                Text(AppLocalization.string(context.sourceKind == "COURSE_ACTION" ? "Course action" : "Buddy action"))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                Spacer(minLength: SideSeatTheme.spaceSM)
+                Text(AppLocalization.string("Interested"))
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.success)
+            }
+
+            Text(context.title)
+                .font(.headline)
+                .foregroundStyle(SideSeatTheme.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if let course = context.course {
+                Label([course.code, course.name].compactMap { $0 }.joined(separator: " "), systemImage: "graduationcap")
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            }
+            if let start = context.startDate {
+                Label(start.formatted(date: .abbreviated, time: .shortened), systemImage: "calendar")
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            }
+            if let location = context.location, !location.isEmpty {
+                Label(location, systemImage: "mappin.and.ellipse")
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            }
+
+            Button(action: onProposePlan) {
+                Label("Propose plan", systemImage: "calendar.badge.plus")
+                    .font(.subheadline.weight(.semibold))
+                    .frame(maxWidth: .infinity, minHeight: 44)
+            }
+            .buttonStyle(.borderedProminent)
+            .buttonBorderShape(.capsule)
+            .tint(SideSeatTheme.accent)
+            .foregroundStyle(SideSeatTheme.onAccent)
+            .disabled(!canProposePlan)
+            .accessibilityIdentifier("action-interest-propose-plan-\(interest.id)")
+        }
+        .padding(SideSeatTheme.spaceMD)
+        .frame(maxWidth: 320, alignment: .leading)
+        .background(SideSeatTheme.Chat.cardSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(SideSeatTheme.separator.opacity(0.4), lineWidth: 0.5)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("action-interest-card-\(interest.id)")
+    }
+}
+
+private struct MutualOpportunitySourceCard: View {
+    let opportunity: NativeMutualOpportunitySource
+    let planState: MutualOpportunityPlanState?
+    let onProposePlan: () -> Void
+
+    private var context: NativeActionContext { opportunity.context }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                Image(systemName: "person.2.fill")
+                    .foregroundStyle(SideSeatTheme.accentText)
+                Text("You both want to do this")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                Spacer(minLength: SideSeatTheme.spaceSM)
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(SideSeatTheme.success)
+            }
+
+            Text(context.title)
+                .font(.headline)
+                .foregroundStyle(SideSeatTheme.textPrimary)
+
+            if let course = context.course {
+                Label(
+                    [course.code, course.name].compactMap { $0 }.joined(separator: " "),
+                    systemImage: "graduationcap"
+                )
+                .font(.footnote)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            }
+            if let start = context.startDate {
+                Label(
+                    start.formatted(date: .abbreviated, time: .shortened),
+                    systemImage: "calendar"
+                )
+                .font(.footnote)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            }
+
+            if let planState {
+                Label(
+                    AppLocalization.string(
+                        planState == .arranged
+                            ? "Plan arranged"
+                            : "Plan waiting for response"
+                    ),
+                    systemImage: planState == .arranged
+                        ? "calendar.badge.checkmark"
+                        : "hourglass"
+                )
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(
+                    planState == .arranged
+                        ? SideSeatTheme.success
+                        : SideSeatTheme.textSecondaryStrong
+                )
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                .accessibilityIdentifier(
+                    "mutual-opportunity-plan-\(planState == .arranged ? "arranged" : "waiting")-\(opportunity.id)"
+                )
+            } else {
+                Button(action: onProposePlan) {
+                    Label("Make a plan", systemImage: "calendar.badge.plus")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                }
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.capsule)
+                .tint(SideSeatTheme.accent)
+                .foregroundStyle(SideSeatTheme.onAccent)
+                .accessibilityIdentifier("mutual-opportunity-propose-plan-\(opportunity.id)")
+            }
+        }
+        .padding(SideSeatTheme.spaceMD)
+        .frame(maxWidth: 320, alignment: .leading)
+        .background(
+            SideSeatTheme.Chat.cardSurface,
+            in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(SideSeatTheme.accent.opacity(0.24), lineWidth: 1)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("mutual-opportunity-card-\(opportunity.id)")
     }
 }
 
@@ -1595,7 +1974,7 @@ private struct ChatLocationShareSheet: View {
                     Image(systemName: "mappin.circle.fill")
                         .font(.system(size: 38, weight: .semibold))
                         .symbolRenderingMode(.palette)
-                        .foregroundStyle(SideSeatTheme.accent, Color.white)
+                        .foregroundStyle(SideSeatTheme.HubTint.plans, Color.white)
                         .shadow(color: .black.opacity(0.18), radius: 4, y: 2)
                         .offset(y: -18)
 
@@ -1615,8 +1994,9 @@ private struct ChatLocationShareSheet: View {
                                     .font(.body.weight(.semibold))
                                     .frame(width: 42, height: 42)
                                     .background(.regularMaterial, in: Circle())
+                                    .ssIconButtonHitTarget()
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(SSPressButtonStyle())
                             .accessibilityLabel("Current location")
                             .accessibilityIdentifier("chat-location-current")
                         }
@@ -1627,7 +2007,7 @@ private struct ChatLocationShareSheet: View {
                 .frame(maxHeight: .infinity)
 
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(locationName.isEmpty ? String(localized: "Pinned location") : locationName)
+                    Text(locationName.isEmpty ? AppLocalization.string( "Pinned location") : locationName)
                         .font(.headline)
                         .lineLimit(2)
                     if let coordinate {
@@ -1656,7 +2036,7 @@ private struct ChatLocationShareSheet: View {
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 SSPrimaryButton(
-                    title: String(localized: "Send location"),
+                    title: AppLocalization.string( "Send location"),
                     isLoading: isSending,
                     fill: .product,
                     height: 48,
@@ -1684,7 +2064,7 @@ private struct ChatLocationShareSheet: View {
                 SideSeatTheme.fillTertiary
                 Image(systemName: "map")
                     .font(.system(size: 74, weight: .ultraLight))
-                    .foregroundStyle(SideSeatTheme.accent.opacity(0.22))
+                    .foregroundStyle(SideSeatTheme.HubTint.plans.opacity(0.22))
             }
         } else {
             interactiveMap
@@ -1779,7 +2159,7 @@ private struct ChatLocationShareSheet: View {
         if sent {
             dismiss()
         } else {
-            issue = String(localized: "Could not share this location. Try again.")
+            issue = AppLocalization.string( "Could not share this location. Try again.")
         }
     }
 
@@ -1801,12 +2181,16 @@ private struct ChatLocationBubble: View {
                 .frame(width: 220, height: 120)
                 .clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
 
-                Text(location.name ?? String(localized: "Location"))
+                Text(location.name ?? AppLocalization.string( "Location"))
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(isMine ? Color.white : Color.primary)
+                    .foregroundStyle(isMine ? SideSeatTheme.Chat.ownBubbleForeground : Color.primary)
                 Text("Open in Maps")
                     .font(.caption)
-                    .foregroundStyle(isMine ? Color.white.opacity(0.85) : SideSeatTheme.textSecondary)
+                    .foregroundStyle(
+                        isMine
+                            ? SideSeatTheme.Chat.ownBubbleForeground.opacity(0.78)
+                            : SideSeatTheme.textSecondary
+                    )
             }
             .padding(10)
             .background(
@@ -1814,7 +2198,7 @@ private struct ChatLocationBubble: View {
                     .fill(isMine ? SideSeatTheme.Chat.ownBubble : SideSeatTheme.Chat.peerBubble)
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SSPressButtonStyle())
         .accessibilityIdentifier("chat-location")
     }
 
@@ -1845,14 +2229,14 @@ private struct ChatLocationSnapshotView: View {
                     Color(red: 0.90, green: 0.93, blue: 0.92)
                     Image(systemName: "map")
                         .font(.system(size: 62, weight: .ultraLight))
-                        .foregroundStyle(SideSeatTheme.accent.opacity(0.20))
+                        .foregroundStyle(SideSeatTheme.HubTint.plans.opacity(0.20))
                 }
             }
 
             Image(systemName: "mappin.circle.fill")
                 .font(.system(size: 32, weight: .semibold))
                 .symbolRenderingMode(.palette)
-                .foregroundStyle(SideSeatTheme.accent, Color.white)
+                .foregroundStyle(SideSeatTheme.HubTint.plans, Color.white)
                 .shadow(color: .black.opacity(0.18), radius: 3, y: 2)
                 .offset(y: -14)
         }
@@ -1990,7 +2374,7 @@ private struct ChatDeleteAccessibilityAction: ViewModifier {
 
     func body(content: Content) -> some View {
         if enabled {
-            content.accessibilityAction(named: Text(String(localized: "Delete")), action)
+            content.accessibilityAction(named: Text(AppLocalization.string( "Delete")), action)
         } else {
             content
         }
@@ -2010,6 +2394,8 @@ extension Notification.Name {
     static let sideSeatCalendarNeedsRefresh = Notification.Name("sideSeatCalendarNeedsRefresh")
     /// A plan was accepted or declined and the plan center should reload.
     static let sideSeatPlansNeedsRefresh = Notification.Name("sideSeatPlansNeedsRefresh")
+    /// An accepted Mutual-opportunity Plan ended its two source intents.
+    static let sideSeatTogetherNeedsRefresh = Notification.Name("sideSeatTogetherNeedsRefresh")
     static let sideSeatDiscoverNeedsRefresh = Notification.Name("sideSeatDiscoverNeedsRefresh")
     static let sideseatReplayProductTutorial = Notification.Name("sideseatReplayProductTutorial")
 }

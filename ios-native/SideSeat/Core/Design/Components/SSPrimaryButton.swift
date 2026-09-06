@@ -22,7 +22,7 @@ struct SSPrimaryButton: View {
             HStack(spacing: SideSeatTheme.spaceSM) {
                 if isLoading {
                     ProgressView()
-                        .tint(.white)
+                        .tint(SideSeatTheme.onAccent)
                 } else {
                     Text(title)
                         .font(.body.weight(.semibold))
@@ -47,7 +47,7 @@ private struct SSPrimaryButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .foregroundStyle(isEnabled ? Color.white : SideSeatTheme.textPrimary)
+            .foregroundStyle(foreground)
             .background(background(isPressed: configuration.isPressed))
             .opacity(configuration.isPressed ? SideSeatTheme.Interaction.pressedOpacity : 1)
             .scaleEffect(configuration.isPressed ? SideSeatTheme.Interaction.pressedScale : 1)
@@ -55,6 +55,11 @@ private struct SSPrimaryButtonStyle: ButtonStyle {
                 .easeOut(duration: SideSeatTheme.Interaction.pressDuration),
                 value: configuration.isPressed
             )
+    }
+
+    private var foreground: Color {
+        guard isEnabled else { return SideSeatTheme.textPrimary }
+        return SideSeatTheme.onAccent
     }
 
     @ViewBuilder

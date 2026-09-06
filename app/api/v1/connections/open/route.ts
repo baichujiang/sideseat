@@ -151,6 +151,13 @@ export async function POST(request: Request) {
             status: 403,
             field: "postId",
           });
+        case "ACTION_COORDINATION_REQUIRED":
+          return v1Error(request, {
+            code: "INVALID_REQUEST",
+            message: "Respond from the action page to contact its creator.",
+            status: 409,
+            field: "postId",
+          });
         case "RATE_LIMITED":
           return v1Error(request, {
             code: "RATE_LIMITED",

@@ -14,9 +14,10 @@ export const DEFAULT_USER_CALENDAR_PRESETS: ReadonlyArray<{
   color: string;
   sortOrder: number;
 }> = [
-  { presetKey: "study", name: "Study", color: "#2563EB", sortOrder: 0 },
-  { presetKey: "work", name: "Work", color: "#0D9488", sortOrder: 1 },
-  { presetKey: "personal", name: "Personal", color: "#EA580C", sortOrder: 2 },
+  // Semantic palette: focused purple, professional blue, and warm brand-adjacent rose.
+  { presetKey: "study", name: "Study", color: "#7C3AED", sortOrder: 0 },
+  { presetKey: "work", name: "Work", color: "#2563EB", sortOrder: 1 },
+  { presetKey: "personal", name: "Personal", color: "#DB2777", sortOrder: 2 },
 ];
 
 /**
@@ -25,10 +26,10 @@ export const DEFAULT_USER_CALENDAR_PRESETS: ReadonlyArray<{
  * default changes (e.g. Personal grey era → warm default).
  */
 const LEGACY_PRESET_COLORS_BY_KEY: Readonly<Record<string, readonly string[]>> = {
-  personal: ["#6B7280"],
-  work: ["#1E40AF", "#1E3A8A"],
+  personal: ["#6B7280", "#EA580C"],
+  work: ["#1E40AF", "#1E3A8A", "#0D9488"],
   course: ["#2563EB"],
-  study: ["#7C3AED"],
+  study: ["#2563EB"],
   meal: ["#D97706"],
   sports: ["#16A34A"],
   other: ["#64748B"],

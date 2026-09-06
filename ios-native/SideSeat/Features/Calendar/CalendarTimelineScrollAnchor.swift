@@ -42,3 +42,77 @@ enum CalendarTimelineScrollAnchor {
             .min()
     }
 }
+
+enum CalendarOffscreenEventEdge: Equatable, Sendable {
+    case top
+    case bottom
+}
+
+struct CalendarOffscreenEventHint: Equatable, Sendable {
+    let item: HomeAgendaItem
+    let startMinute: Int
+    let endMinute: Int
+}
+
+/// Finds the nearest timed event that sits fully outside the vertical viewport.
+/// Partially visible cards do not produce a hint because the event is already discoverable.
+enum CalendarOffscreenEventHints {
+    static let scrollLeadInMinutes = 30
+    static let scrollStepMinutes = 5
+
+    static func nearest(
+        items: [HomeAgendaItem],
+        on date: Date,
+        viewportStartMinute: Int,
+        viewportEndMinute: Int,
+        edge: CalendarOffscreenEventEdge,
+        calendar: Calendar = .sideSeatBerlin
+    ) -> CalendarOffscreenEventHint? {
+        let visibleStart = min(max(viewportStartMinute, 0), 24 * 60)
+        let visibleEnd = min(max(viewportEndMinute, visibleStart), 24 * 60)
+        let placements = CalendarDayLayout.placements(
+            items: items.filter { !$0.isAllDayStyle(on: date, calendar: calendar) },
+            on: date,
+            calendar: calendar
+        )
+
+        let placement: CalendarDayPlacement?
+        switch edge {
+        case .top:
+            placement = placements
+                .filter { $0.endMinute <= visibleStart }
+                .max {
+                    if $0.endMinute == $1.endMinute {
+                        return $0.startMinute < $1.startMinute
+                    }
+                    return $0.endMinute < $1.endMinute
+                }
+        case .bottom:
+            placement = placements
+                .filter { $0.startMinute >= visibleEnd }
+                .min {
+                    if $0.startMinute == $1.startMinute {
+                        return $0.endMinute < $1.endMinute
+                    }
+                    return $0.startMinute < $1.startMinute
+                }
+        }
+
+        guard let placement else { return nil }
+        return CalendarOffscreenEventHint(
+            item: placement.item,
+            startMinute: placement.startMinute,
+            endMinute: placement.endMinute
+        )
+    }
+
+    static func scrollTargetMinute(
+        for hint: CalendarOffscreenEventHint,
+        leadInMinutes: Int = scrollLeadInMinutes,
+        stepMinutes: Int = scrollStepMinutes
+    ) -> Int {
+        let step = max(1, stepMinutes)
+        let preferred = max(0, hint.startMinute - max(0, leadInMinutes))
+        return min(24 * 60 - step, (preferred / step) * step)
+    }
+}

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Apple Calendar–style red pill showing the wall-clock time at the now indicator.
+/// Compact brand-Rose pill showing the wall-clock time at the current-time indicator.
 struct CalendarNowTimeBadge: View {
     let date: Date
 
@@ -8,12 +8,12 @@ struct CalendarNowTimeBadge: View {
         Text(CalendarChrome.compactClock(date))
             .font(CalendarChrome.Typography.nowBadge)
             .monospacedDigit()
-            .foregroundStyle(.white)
+            .foregroundStyle(SideSeatTheme.calendarNowForeground)
             .lineLimit(1)
             .minimumScaleFactor(0.75)
             .padding(.horizontal, 5)
             .padding(.vertical, 2)
-            .background(Capsule(style: .continuous).fill(CalendarChrome.nowFill))
+            .background(Capsule(style: .continuous).fill(CalendarChrome.nowBadgeFill))
             .fixedSize(horizontal: true, vertical: false)
             .accessibilityHidden(true)
     }

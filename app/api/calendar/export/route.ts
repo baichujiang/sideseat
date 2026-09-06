@@ -1,16 +1,28 @@
 import { requireOnboardedUser } from "@/lib/auth/guards";
+import {
+  calendarExportFilename,
+  parseCalendarExportYear,
+} from "@/lib/calendar/calendar-export-window";
 import { loadCalendarIcsExport } from "@/lib/calendar/load-calendar-ics-export";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const user = await requireOnboardedUser();
-    const ics = await loadCalendarIcsExport(user);
+    const now = new Date();
+    const year = parseCalendarExportYear(
+      new URL(request.url).searchParams.get("year"),
+      now,
+    );
+    if (year === null) {
+      return new Response("Invalid calendar export year.", { status: 400 });
+    }
+    const ics = await loadCalendarIcsExport(user, { now, year });
 
     return new Response(ics, {
       status: 200,
       headers: {
         "Content-Type": "text/calendar; charset=utf-8",
-        "Content-Disposition": 'attachment; filename="sideseat-schedule.ics"',
+        "Content-Disposition": `attachment; filename="${calendarExportFilename(year)}"`,
         "Cache-Control": "no-store",
       },
     });

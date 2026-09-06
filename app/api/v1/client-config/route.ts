@@ -4,6 +4,7 @@ import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-
 import { DISCOVER_SERVED_CITIES } from "@/lib/discover/discover-served-cities";
 import { isDashScopeConfigured } from "@/lib/llm/dashscope";
 import { nativeClientApnsFeatures } from "@/lib/push/apns-env";
+import { v2ClientFeatures } from "@/lib/v2/feature-flags";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,7 @@ export function GET(request: Request) {
         naturalLanguageSchedule: isDashScopeConfigured(),
         storeKitSupport: isStoreKitSupportEnabled(),
         ...nativeClientApnsFeatures(),
+        ...v2ClientFeatures(),
       },
       discover: {
         defaultCity: DEFAULT_DISCOVER_SERVED_CITY,

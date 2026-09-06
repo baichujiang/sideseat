@@ -26,13 +26,14 @@ test("production share origin rejects insecure configuration", () => {
   );
 });
 
-test("AASA advertises the signed iPhone app and schedule links", async () => {
+test("AASA advertises the signed iPhone app and supported share links", async () => {
   const response = getAppleAppSiteAssociation();
   const body = await response.json();
   const details = body.applinks.details[0];
 
   assert.ok(details.appIDs.includes("V4238R5R53.app.sideseat.mobile"));
   assert.ok(details.components.some((entry: { "/": string }) => entry["/"] === "/share/view/*"));
+  assert.ok(details.components.some((entry: { "/": string }) => entry["/"] === "/share/event/*"));
   const paths = details.components.map((entry: { "/": string }) => entry["/"]);
   assert.deepEqual(
     paths.filter((path: string) => path.startsWith("/profile")),
@@ -55,6 +56,7 @@ test("legacy web is frozen in production while native and admin routes remain", 
   assert.equal(isNativeWebPath("/"), true);
   assert.equal(isNativeWebPath("/ios"), true);
   assert.equal(isNativeWebPath("/share/view/token"), true);
+  assert.equal(isNativeWebPath("/share/event/token"), true);
   assert.equal(isNativeWebPath("/privacy"), true);
   assert.equal(isNativeWebPath("/support"), true);
   assert.equal(isNativeWebPath("/admin/verifications"), true);

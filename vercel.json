@@ -11,6 +11,14 @@
       "schedule": "45 3 * * *"
     },
     {
+      "path": "/api/cron/product-funnel-retention",
+      "schedule": "5 4 * * *"
+    },
+    {
+      "path": "/api/cron/social-group-expiration",
+      "schedule": "20 4 * * *"
+    },
+    {
       "path": "/api/cron/tum-course-catalog",
       "schedule": "30 2 * * 0"
     },

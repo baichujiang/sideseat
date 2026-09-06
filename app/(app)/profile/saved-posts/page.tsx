@@ -13,8 +13,10 @@ import {
   mapPrismaSportToDiscoverRow,
   mapPrismaStudyToDiscoverRow,
   mapPrismaClassmatePostImagesToUrls,
+  type DiscoverPostClientRow,
   type DiscoverPostRow,
 } from "@/lib/discover/discover-post-row";
+import { toPublicDiscoverPostRow } from "@/lib/discover/public-discover-post-row";
 import { prisma } from "@/lib/db/prisma";
 import { getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
@@ -32,9 +34,12 @@ const savedPostInclude = {
 
 type PostWithAuthorCourses = Prisma.ClassmatePostGetPayload<{ include: typeof savedPostInclude }>;
 
-function toDiscoverPostRow(post: PostWithAuthorCourses, currentUserId: string): DiscoverPostRow {
+function toDiscoverPostRow(
+  post: PostWithAuthorCourses,
+  currentUserId: string,
+): DiscoverPostClientRow {
   const imageUrls = mapPrismaClassmatePostImagesToUrls(post.images);
-  return {
+  const row: DiscoverPostRow = {
     id: post.id,
     category: post.category,
     city: post.city,
@@ -43,6 +48,13 @@ function toDiscoverPostRow(post: PostWithAuthorCourses, currentUserId: string): 
     status: post.status,
     closureReason: post.closureReason,
     closedAt: post.closedAt,
+    coordinationPolicy: post.coordinationPolicy,
+    policySchemaVersion: post.policySchemaVersion,
+    policyParametersSnapshot: post.policyParametersSnapshot,
+    experimentKeySnapshot: post.experimentKeySnapshot,
+    experimentVariantSnapshot: post.experimentVariantSnapshot,
+    clientCapabilitySnapshot: post.clientCapabilitySnapshot,
+    policySnapshottedAt: post.policySnapshottedAt,
     tags: post.tags,
     visibility: post.visibility,
     replyPreference: post.replyPreference,
@@ -81,6 +93,7 @@ function toDiscoverPostRow(post: PostWithAuthorCourses, currentUserId: string): 
     interestedCount: post._count.saves,
     ...(imageUrls?.length ? { imageUrls } : {}),
   };
+  return toPublicDiscoverPostRow(row);
 }
 
 export default async function ProfileSavedPostsPage() {

@@ -33,14 +33,14 @@ struct SignupSheet: View {
             SSScreen(surface: .brand) {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
-                        Text(String(localized: "Create your SideSeat"))
+                        Text(AppLocalization.string( "Create your SideSeat"))
                             .font(SideSeatTheme.Text.title)
-                        Text(String(localized: "Create your account and add the school identity shown on your posts."))
+                        Text(AppLocalization.string( "Create your account and add the school identity shown on your posts."))
                             .font(.subheadline)
                             .foregroundStyle(SideSeatTheme.textSecondary)
 
                         SSTextField(
-                            title: String(localized: "Nickname"),
+                            title: AppLocalization.string( "Nickname"),
                             text: $displayName,
                             contentType: .nickname,
                             submitLabel: .next,
@@ -50,7 +50,7 @@ struct SignupSheet: View {
                         .onSubmit { focusedField = .username }
 
                         SSTextField(
-                            title: String(localized: "Username"),
+                            title: AppLocalization.string( "Username"),
                             text: $username,
                             contentType: .username,
                             submitLabel: .next,
@@ -60,40 +60,42 @@ struct SignupSheet: View {
                         .onSubmit { focusedField = .password }
 
                         SSSecureField(
-                            title: String(localized: "Password"),
+                            title: AppLocalization.string( "Password"),
                             text: $password,
                             isVisible: $isPasswordVisible,
                             contentType: .newPassword,
                             submitLabel: .next,
-                            accessibilityID: "signup-password"
+                            isFocused: focusBinding(for: .password),
+                            accessibilityID: "signup-password",
+                            onSubmit: { focusedField = .confirm }
                         )
                         .focused($focusedField, equals: .password)
-                        .onSubmit { focusedField = .confirm }
 
                         SSSecureField(
-                            title: String(localized: "Confirm password"),
+                            title: AppLocalization.string( "Confirm password"),
                             text: $confirmPassword,
                             isVisible: $isConfirmPasswordVisible,
                             contentType: .newPassword,
                             submitLabel: .go,
-                            accessibilityID: "signup-confirm-password"
+                            isFocused: focusBinding(for: .confirm),
+                            accessibilityID: "signup-confirm-password",
+                            onSubmit: submit
                         )
                         .focused($focusedField, equals: .confirm)
-                        .onSubmit(submit)
 
                         VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                            Label(String(localized: "School identity"), systemImage: "graduationcap.fill")
+                            Label(AppLocalization.string( "School identity"), systemImage: "graduationcap.fill")
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(SideSeatTheme.textPrimary)
 
-                            Picker(String(localized: "School"), selection: $school) {
+                            Picker(AppLocalization.string( "School"), selection: $school) {
                                 Text("TUM").tag("TUM")
                                 Text("LMU").tag("LMU")
                             }
                             .pickerStyle(.segmented)
                             .accessibilityIdentifier("signup-school")
 
-                            Picker(String(localized: "Student status"), selection: $studentStatus) {
+                            Picker(AppLocalization.string( "Student status"), selection: $studentStatus) {
                                 Text("Current student").tag("CURRENT_STUDENT")
                                 Text("Exchange student").tag("EXCHANGE_STUDENT")
                                 Text("Alumni").tag("ALUMNI")
@@ -101,7 +103,7 @@ struct SignupSheet: View {
                             .pickerStyle(.menu)
                             .accessibilityIdentifier("signup-student-status")
 
-                            Picker(String(localized: "Degree"), selection: $degreeLevel) {
+                            Picker(AppLocalization.string( "Degree"), selection: $degreeLevel) {
                                 Text("Bachelor").tag("BACHELOR")
                                 Text("Master").tag("MASTER")
                                 Text("Other").tag("OTHER")
@@ -111,21 +113,21 @@ struct SignupSheet: View {
 
                             if studentStatus == "ALUMNI" {
                                 Stepper(
-                                    String(localized: "Graduation year: \(graduationYear)"),
+                                    AppLocalization.string( "Graduation year: \(graduationYear)"),
                                     value: $graduationYear,
                                     in: (Calendar.current.component(.year, from: Date()) - 80)...(Calendar.current.component(.year, from: Date()) + 1)
                                 )
                                 .accessibilityIdentifier("signup-graduation-year")
                             } else {
                                 Stepper(
-                                    String(localized: "Current semester: \(semester)"),
+                                    AppLocalization.string( "Current semester: \(semester)"),
                                     value: $semester,
                                     in: 1...20
                                 )
                                 .accessibilityIdentifier("signup-semester")
                             }
 
-                            Text(String(localized: "Verify this school later with an official school email or manual review."))
+                            Text(AppLocalization.string( "Verify this school later with an official school email or manual review."))
                                 .font(.caption)
                                 .foregroundStyle(SideSeatTheme.textSecondary)
                         }
@@ -142,22 +144,23 @@ struct SignupSheet: View {
                 }
                 .scrollDismissesKeyboard(.interactively)
             }
-            .navigationTitle(String(localized: "Sign up"))
+            .navigationTitle(AppLocalization.string( "Sign up"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(String(localized: "Cancel")) { dismiss() }
+                    Button(AppLocalization.string( "Cancel")) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(action: submit) {
                         if isWorking || session.isWorking {
                             ProgressView()
                         } else {
-                            Text(String(localized: "Create account"))
+                            Text(AppLocalization.string( "Create account"))
                                 .fontWeight(.semibold)
                         }
                     }
                     .disabled(!canSubmit || isWorking || session.isWorking)
+                    .ssConfirmationActionStyle()
                     .accessibilityIdentifier("signup-submit")
                 }
             }
@@ -172,11 +175,24 @@ struct SignupSheet: View {
             && password == confirmPassword
     }
 
+    private func focusBinding(for field: Field) -> Binding<Bool> {
+        Binding(
+            get: { focusedField == field },
+            set: { isFocused in
+                if isFocused {
+                    focusedField = field
+                } else if focusedField == field {
+                    focusedField = nil
+                }
+            }
+        )
+    }
+
     private func submit() {
         issue = nil
         let trimmedDisplayName = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard (2...32).contains(trimmedDisplayName.count) else {
-            issue = String(localized: "Nickname must be 2–32 characters.")
+            issue = AppLocalization.string( "Nickname must be 2–32 characters.")
             return
         }
         if let usernameIssue = AuthFieldValidation.usernameIssue(username) {
@@ -188,7 +204,7 @@ struct SignupSheet: View {
             return
         }
         if password != confirmPassword {
-            issue = String(localized: "Passwords do not match.")
+            issue = AppLocalization.string( "Passwords do not match.")
             return
         }
 

@@ -3,6 +3,15 @@ import { ClassmatePostStatus } from "@prisma/client";
 /** Display-only status for buddy requests (feed + detail). */
 export type BuddyRequestDisplayStatus = "open" | "expired" | "closed";
 
+/** Author close is a one-way ACTIVE → CLOSED transition, never a terminal rewrite. */
+export function classmatePostStatusAfterAuthorClose(
+  status: ClassmatePostStatus,
+): ClassmatePostStatus {
+  return status === ClassmatePostStatus.ACTIVE
+    ? ClassmatePostStatus.CLOSED
+    : status;
+}
+
 /**
  * Closed wins over expired. Unknown Prisma status falls back to `closed` (safe: do not imply joinable).
  */

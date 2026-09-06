@@ -61,6 +61,7 @@ struct CourseScreenshotImportView: View {
                         }
                     }
                     .disabled(store.selectedCourseIDs.isEmpty || store.isImporting)
+                    .ssConfirmationActionStyle()
                     .accessibilityIdentifier("course-screenshot-import-confirm")
                 }
             }
@@ -130,18 +131,22 @@ struct CourseScreenshotImportView: View {
                                     .font(.body.weight(.medium))
                                     .foregroundStyle(.primary)
                             }
-                            Text(match.course.viewer.enrolled ? "Already in my courses" : String(localized: match.confidenceLabel))
+                            Text(
+                                match.course.viewer.enrolled
+                                    ? "Already in my courses"
+                                    : AppLocalization.string(resource: match.confidenceLabel)
+                            )
                                 .font(.caption)
                                 .foregroundStyle(match.course.viewer.enrolled ? SideSeatTheme.success : .secondary)
                             Text(match.evidence)
                                 .font(.caption2)
-                                .foregroundStyle(.tertiary)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                                 .lineLimit(1)
                         }
                     }
                     .padding(.vertical, 2)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SSPressButtonStyle())
                 .disabled(match.course.viewer.enrolled)
                 .accessibilityIdentifier("course-screenshot-match-\(match.id)")
             }
@@ -168,7 +173,7 @@ struct CourseScreenshotImportView: View {
     }
 
     private var addButtonTitle: String {
-        String(format: String(localized: "Add %d"), store.selectedCourseIDs.count)
+        String(format: AppLocalization.string( "Add %d"), store.selectedCourseIDs.count)
     }
 
     private func selectionIcon(for match: CourseScreenshotMatch) -> String {
@@ -178,7 +183,7 @@ struct CourseScreenshotImportView: View {
 
     private func selectionColor(for match: CourseScreenshotMatch) -> Color {
         if match.course.viewer.enrolled { return SideSeatTheme.success }
-        return store.selectedCourseIDs.contains(match.id) ? SideSeatTheme.accent : .secondary
+        return store.selectedCourseIDs.contains(match.id) ? SideSeatTheme.accentText : .secondary
     }
 
     private func load(_ item: PhotosPickerItem) async {
@@ -199,5 +204,5 @@ struct CourseScreenshotImportView: View {
 private enum CourseScreenshotImportViewError: LocalizedError {
     case unreadableImage
 
-    var errorDescription: String? { String(localized: "The selected image could not be read.") }
+    var errorDescription: String? { AppLocalization.string( "The selected image could not be read.") }
 }

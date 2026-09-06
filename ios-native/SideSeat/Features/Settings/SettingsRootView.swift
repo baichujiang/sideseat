@@ -6,6 +6,7 @@ struct SettingsRootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(ClientConfigurationStore.self) private var clientConfiguration
     @Environment(RouterPath.self) private var router
+    @Environment(AppLanguageStore.self) private var appLanguage
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
 
@@ -35,35 +36,31 @@ struct SettingsRootView: View {
                         set: { cityPreference.select($0) }
                     )) {
                         ForEach(cityPreference.servedCities, id: \.self) { city in
-                            Text(city).tag(city)
+                            Text(verbatim: DiscoverCityDisplay.localizedName(for: city))
+                                .tag(city)
                         }
                     }
                     .accessibilityIdentifier("settings-discover-city-picker")
                 } else {
-                    LabeledContent("City", value: cityPreference.selectedCity)
-                        .accessibilityIdentifier("settings-discover-city")
+                    LabeledContent("City") {
+                        Text(verbatim: DiscoverCityDisplay.localizedName(for: cityPreference.selectedCity))
+                    }
+                    .accessibilityIdentifier("settings-discover-city")
                 }
 
-                Button {
-                    guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
-                    openURL(settingsURL)
+                NavigationLink {
+                    AppLanguageSettingsView()
                 } label: {
                     HStack(spacing: 12) {
                         Label("App language", systemImage: "globe")
                             .foregroundStyle(.primary)
                         Spacer()
-                        Text(currentAppLanguageName)
+                        Text(appLanguage.currentSelectionName)
                             .foregroundStyle(.secondary)
-                        Image(systemName: "arrow.up.forward.app")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.tertiary)
                     }
                 }
                 .accessibilityIdentifier("settings-language")
-                .accessibilityValue(currentAppLanguageName)
-                Text("Change SideSeat's language in iPhone Settings.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                .accessibilityValue(appLanguage.currentSelectionName)
 
                 Button {
                     Task {
@@ -197,23 +194,16 @@ struct SettingsRootView: View {
         return url
     }
 
-    private var currentAppLanguageName: String {
-        let identifier = Bundle.main.preferredLocalizations.first ?? "en"
-        if identifier.hasPrefix("de") { return "Deutsch" }
-        if identifier.hasPrefix("zh") { return "中文" }
-        return "English"
-    }
-
     private var notificationStatusLabel: String {
         switch notificationStatus {
         case .authorized, .provisional, .ephemeral:
-            return String(localized: "On")
+            return AppLocalization.string( "On")
         case .denied:
-            return String(localized: "Off")
+            return AppLocalization.string( "Off")
         case .notDetermined:
-            return String(localized: "Set up")
+            return AppLocalization.string( "Set up")
         @unknown default:
-            return String(localized: "Off")
+            return AppLocalization.string( "Off")
         }
     }
 
@@ -221,5 +211,56 @@ struct SettingsRootView: View {
         notificationStatus = await UNUserNotificationCenter.current()
             .notificationSettings()
             .authorizationStatus
+    }
+}
+
+private struct AppLanguageSettingsView: View {
+    @Environment(AppLanguageStore.self) private var appLanguage
+
+    var body: some View {
+        List {
+            Section {
+                languageRow(.system, title: nil, subtitle: "Use the language selected for your iPhone.")
+                languageRow(.simplifiedChinese, title: AppLanguage.simplifiedChinese.nativeName)
+                languageRow(.english, title: AppLanguage.english.nativeName)
+                languageRow(.german, title: AppLanguage.german.nativeName)
+            } footer: {
+                Text("SideSeat changes language immediately. iOS permission prompts continue to use the iPhone language.")
+            }
+        }
+        .navigationTitle(AppLocalization.string("App language"))
+        .navigationBarTitleDisplayMode(.inline)
+        .accessibilityIdentifier("app-language-settings")
+    }
+
+    private func languageRow(
+        _ language: AppLanguage,
+        title: String?,
+        subtitle: LocalizedStringKey? = nil
+    ) -> some View {
+        Button {
+            appLanguage.select(language)
+        } label: {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title ?? AppLocalization.string("Follow iPhone"))
+                        .foregroundStyle(.primary)
+                    if let subtitle {
+                        Text(subtitle)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Spacer(minLength: 12)
+                if appLanguage.selection == language {
+                    Image(systemName: "checkmark")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.utilityAction)
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .accessibilityIdentifier("app-language-\(language.rawValue)")
+        .accessibilityAddTraits(appLanguage.selection == language ? .isSelected : [])
     }
 }

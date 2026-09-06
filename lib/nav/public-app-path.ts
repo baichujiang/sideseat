@@ -42,7 +42,9 @@ export function isPublicAppPath(pathname: string): boolean {
     pathname === "/share/schedule" ||
     pathname.startsWith("/share/schedule/") ||
     pathname === "/share/view" ||
-    pathname.startsWith("/share/view/")
+    pathname.startsWith("/share/view/") ||
+    pathname === "/share/event" ||
+    pathname.startsWith("/share/event/")
   ) {
     return true;
   }

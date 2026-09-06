@@ -28,6 +28,7 @@ export function GET() {
             { "/": "/discover/activities/*", comment: "Discover activities" },
             { "/": "/activities/*", comment: "Activities" },
             { "/": "/share/view/*", comment: "Schedule share links" },
+            { "/": "/share/event/*", comment: "Shared event links" },
             { "/": "/profile", comment: "Profile tab" },
             { "/": "/profile/info", comment: "Profile details handoff" },
             { "/": "/profile/verification", comment: "Verification handoff" },

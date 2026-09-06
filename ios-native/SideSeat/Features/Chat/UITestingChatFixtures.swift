@@ -423,6 +423,36 @@ enum UITestingChatFixtures {
                     createdAt: "2026-07-17T12:03:30.000Z"
                 ),
                 NativeDirectMessage(
+                    id: "ui-msg-action-interest",
+                    connectionId: mina.connectionID,
+                    sender: me,
+                    type: "ACTION_INTEREST_CARD",
+                    body: nil,
+                    createdAt: "2026-07-17T12:03:45.000Z",
+                    actionInterestId: "ui-interest-ui-buddy",
+                    actionInterest: NativeActionInterest(
+                        id: "ui-interest-ui-buddy",
+                        status: "ACTIVE",
+                        connectionId: mina.connectionID,
+                        postId: "ui-buddy",
+                        context: NativeActionContext(
+                            version: 1,
+                            sourceKind: "BUDDY_POST",
+                            sourceId: "ui-buddy",
+                            title: "Library study buddy",
+                            startsAt: "2026-09-01T14:00:00.000Z",
+                            endsAt: "2026-09-01T16:00:00.000Z",
+                            location: "Main Library",
+                            planType: "CUSTOM",
+                            participantIds: [me.id, mina.id],
+                            author: NativeActionContextAuthor(id: mina.id, displayName: mina.nickname),
+                            course: nil
+                        ),
+                        createdAt: "2026-07-17T12:03:45.000Z",
+                        updatedAt: "2026-07-17T12:03:45.000Z"
+                    )
+                ),
+                NativeDirectMessage(
                     id: "ui-msg-plan",
                     connectionId: mina.connectionID,
                     sender: peer,

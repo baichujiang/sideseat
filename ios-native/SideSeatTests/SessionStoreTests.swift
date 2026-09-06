@@ -32,6 +32,7 @@ struct SessionStoreTests {
         #expect(store.currentUser?.username == "mixed_case")
         #expect(store.accessTokenForStreaming == "access-signup")
         #expect(await credentialStore.refreshToken() == "refresh-signup")
+        #expect(try await credentialStore.cachedUser()?.id == "signup-user")
         #expect(
             await transport.signupCapture == SignupCapture(
                 displayName: "Live Student",
@@ -186,10 +187,188 @@ struct SessionStoreTests {
         #expect(store.accessTokenForStreaming == "access-user-2")
         #expect(await credentialStore.refreshToken() == "refresh-user-2")
     }
+
+    @Test("Cached identity is available while a slow refresh is still running")
+    @MainActor
+    func cachedIdentityPrecedesSlowNetworkRefresh() async {
+        let transport = AuthTestTransport(refreshBehavior: .slowSuccess)
+        let credentialStore = MemoryCredentialStore(
+            token: "refresh-old",
+            user: .sessionTest
+        )
+        let store = SessionStore(
+            apiClient: APIClient(environment: .test, transport: transport),
+            credentialStore: credentialStore,
+            device: .test
+        )
+
+        let restore = Task { await store.restoreSession() }
+        await transport.waitUntilRefreshStarted()
+
+        #expect(store.currentUser?.id == "user-1")
+        #expect(store.canPresentAppShell)
+        #expect(store.phase == .restoring)
+
+        await restore.value
+        #expect(store.phase == .signedIn)
+        #expect(store.accessTokenForStreaming == "access-new")
+        #expect(!store.isOffline)
+    }
+
+    @Test("Offline cold launch preserves the cached account and refresh token")
+    @MainActor
+    func offlineColdLaunchKeepsCachedSession() async throws {
+        let transport = AuthTestTransport(refreshBehavior: .offline)
+        let credentialStore = MemoryCredentialStore(
+            token: "refresh-old",
+            user: .sessionTest
+        )
+        let store = SessionStore(
+            apiClient: APIClient(environment: .test, transport: transport),
+            credentialStore: credentialStore,
+            device: .test
+        )
+
+        await store.restoreSession()
+
+        #expect(store.phase == .signedIn)
+        #expect(store.currentUser?.id == "user-1")
+        #expect(store.canPresentAppShell)
+        #expect(store.isOffline)
+        #expect(store.accessTokenForStreaming == nil)
+        #expect(await credentialStore.refreshToken() == "refresh-old")
+        #expect(try await credentialStore.cachedUser()?.id == "user-1")
+    }
+
+    @Test("An explicitly invalid refresh token clears the cached account")
+    @MainActor
+    func unauthorizedRefreshSignsOut() async throws {
+        let transport = AuthTestTransport(refreshBehavior: .unauthorized)
+        let credentialStore = MemoryCredentialStore(
+            token: "expired-refresh",
+            user: .sessionTest
+        )
+        let store = SessionStore(
+            apiClient: APIClient(environment: .test, transport: transport),
+            credentialStore: credentialStore,
+            device: .test
+        )
+
+        await store.restoreSession()
+
+        #expect(store.phase == .signedOut)
+        #expect(store.currentUser == nil)
+        #expect(!store.isOffline)
+        #expect(await credentialStore.refreshToken() == nil)
+        #expect(try await credentialStore.cachedUser() == nil)
+    }
+
+    @Test("API errors retain authoritative top-level recovery focus")
+    func errorRecoverySurvivesClientDecoding() async throws {
+        let client = APIClient(
+            environment: .test,
+            transport: RecoveryErrorTransport()
+        )
+
+        do {
+            let _: APIEnvelope<TestValue> = try await client.send("api/v1/test-recovery")
+            Issue.record("Expected the request to fail with a typed recovery payload.")
+        } catch let error as APIClientError {
+            guard case .server(let status, let payload) = error else {
+                Issue.record("Expected a server error, got \(error).")
+                return
+            }
+            #expect(status == 409)
+            #expect(payload.code == "ACTION_PLAN_PENDING")
+            #expect(payload.recovery?.action == "OPEN_PLAN")
+            #expect(payload.recovery?.focus.type == "PLAN")
+            #expect(payload.recovery?.focus.connectionId == "connection-1")
+            #expect(payload.recovery?.focus.commitmentId == "commitment-1")
+            #expect(payload.recovery?.focus.revisionId == "revision-1")
+        }
+    }
+
+    @Test("OpenAPI date-time request fields are encoded as ISO 8601 strings")
+    func openAPIDatesEncodeAsStrings() async throws {
+        let transport = DateEncodingTransport()
+        let client = APIClient(environment: .test, transport: transport)
+        let start = Date(timeIntervalSince1970: 1_788_256_800)
+        let end = start.addingTimeInterval(3_600)
+
+        let _: APIEnvelope<TestValue> = try await client.send(
+            "api/v1/test-date-encoding",
+            method: .post,
+            body: OpenAPIDateBody(startTime: start, endTime: end)
+        )
+
+        let encodedStart = try #require(await transport.startTime)
+        let encodedEnd = try #require(await transport.endTime)
+        let formatter = ISO8601DateFormatter()
+        #expect(formatter.date(from: encodedStart) == start)
+        #expect(formatter.date(from: encodedEnd) == end)
+    }
 }
 
 private struct TestValue: Decodable, Sendable {
     let value: String
+}
+
+private actor RecoveryErrorTransport: APITransport {
+    func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+        let data = Data(
+            """
+            {
+              "error": {
+                "code": "ACTION_PLAN_PENDING",
+                "message": "Open the existing plan.",
+                "retryable": false
+              },
+              "recovery": {
+                "action": "OPEN_PLAN",
+                "focus": {
+                  "type": "PLAN",
+                  "connectionId": "connection-1",
+                  "commitmentId": "commitment-1",
+                  "revisionId": "revision-1"
+                }
+              }
+            }
+            """.utf8
+        )
+        let response = HTTPURLResponse(
+            url: request.url!,
+            statusCode: 409,
+            httpVersion: nil,
+            headerFields: ["Content-Type": "application/json"]
+        )!
+        return (data, response)
+    }
+}
+
+private struct OpenAPIDateBody: Encodable, Sendable {
+    let startTime: Date
+    let endTime: Date
+}
+
+private actor DateEncodingTransport: APITransport {
+    private(set) var startTime: String?
+    private(set) var endTime: String?
+
+    func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+        if let body = request.httpBody,
+           let json = try JSONSerialization.jsonObject(with: body) as? [String: Any]
+        {
+            startTime = json["startTime"] as? String
+            endTime = json["endTime"] as? String
+        }
+        let response = HTTPURLResponse(
+            url: request.url!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: ["Content-Type": "application/json"]
+        )!
+        return (Data(#"{"data":{"value":"ok"}}"#.utf8), response)
+    }
 }
 
 #if DEBUG
@@ -264,6 +443,12 @@ private struct PasswordResetCapture: Equatable, Sendable {
 
 private actor MemoryCredentialStore: CredentialStore {
     private var token: String?
+    private var user: CurrentUser?
+
+    init(token: String? = nil, user: CurrentUser? = nil) {
+        self.token = token
+        self.user = user
+    }
 
     func refreshToken() -> String? {
         token
@@ -273,18 +458,47 @@ private actor MemoryCredentialStore: CredentialStore {
         token = refreshToken
     }
 
+    func cachedUser() async throws -> CurrentUser? {
+        user
+    }
+
+    func saveCachedUser(_ user: CurrentUser) async throws {
+        self.user = user
+    }
+
     func clear() {
         token = nil
+        user = nil
     }
 }
 
 private actor AuthTestTransport: APITransport {
+    enum RefreshBehavior: Sendable {
+        case slowSuccess
+        case offline
+        case unauthorized
+    }
+
+    private let refreshBehavior: RefreshBehavior
     private(set) var refreshCount = 0
     private(set) var expiredAccessCount = 0
     private(set) var logoutPushToken: String?
     private(set) var signupCapture: SignupCapture?
     private(set) var passwordResetEmail: String?
     private(set) var passwordResetCapture: PasswordResetCapture?
+    private var refreshStarted = false
+    private var refreshStartWaiters: [CheckedContinuation<Void, Never>] = []
+
+    init(refreshBehavior: RefreshBehavior = .slowSuccess) {
+        self.refreshBehavior = refreshBehavior
+    }
+
+    func waitUntilRefreshStarted() async {
+        if refreshStarted { return }
+        await withCheckedContinuation { continuation in
+            refreshStartWaiters.append(continuation)
+        }
+    }
 
     func data(for request: URLRequest) async throws -> (Data, URLResponse) {
         let path = request.url?.path ?? ""
@@ -361,8 +575,20 @@ private actor AuthTestTransport: APITransport {
             return response(for: request, status: 200, body: #"{"data":{"revoked":true}}"#)
         case "/api/v1/auth/refresh":
             refreshCount += 1
-            try await Task.sleep(for: .milliseconds(120))
-            return response(for: request, status: 200, body: authBody(access: "access-new", refresh: "refresh-new"))
+            markRefreshStarted()
+            switch refreshBehavior {
+            case .slowSuccess:
+                try await Task.sleep(for: .milliseconds(120))
+                return response(for: request, status: 200, body: authBody(access: "access-new", refresh: "refresh-new"))
+            case .offline:
+                throw URLError(.notConnectedToInternet)
+            case .unauthorized:
+                return response(
+                    for: request,
+                    status: 401,
+                    body: #"{"error":{"code":"REFRESH_TOKEN_EXPIRED","message":"The session has expired.","field":null,"retryable":false,"requestId":"request-refresh"}}"#
+                )
+            }
         case "/api/v1/protected":
             if request.value(forHTTPHeaderField: "Authorization") == "Bearer access-new" {
                 return response(for: request, status: 200, body: #"{"data":{"value":"ok"}}"#)
@@ -377,6 +603,13 @@ private actor AuthTestTransport: APITransport {
         default:
             return response(for: request, status: 404, body: #"{"error":{"code":"NOT_FOUND","message":"Missing","field":null,"retryable":false,"requestId":"request-2"}}"#)
         }
+    }
+
+    private func markRefreshStarted() {
+        refreshStarted = true
+        let waiters = refreshStartWaiters
+        refreshStartWaiters.removeAll()
+        waiters.forEach { $0.resume() }
     }
 
     private func response(
@@ -430,5 +663,31 @@ private extension NativeDevice {
         name: "Test iPhone",
         appVersion: "1.0.0",
         platformVersion: "26.5"
+    )
+}
+
+private extension CurrentUser {
+    static let sessionTest = CurrentUser(
+        id: "user-1",
+        username: "test_001",
+        nickname: "Test User",
+        email: nil,
+        phone: nil,
+        avatarUrl: nil,
+        tagline: nil,
+        school: "TUM",
+        studentStatus: "CURRENT_STUDENT",
+        degreeLevel: nil,
+        major: nil,
+        semester: nil,
+        graduationYear: nil,
+        gender: "UNSPECIFIED",
+        onboardingComplete: true,
+        isGuest: false,
+        verifiedStudent: true,
+        studentVerificationStatus: "VERIFIED",
+        usernameUpdatedAt: nil,
+        productTutorialDismissedAt: "2026-01-01T00:00:00.000Z",
+        locale: "en"
     )
 }

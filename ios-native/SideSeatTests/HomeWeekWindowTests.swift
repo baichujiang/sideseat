@@ -102,7 +102,82 @@ struct HomeWeekWindowTests {
         )
     }
 
-    @Test("Event drag preview snaps to visible day and quarter-hour slots")
+    @Test("Scroll direction waits for intentional movement")
+    func scrollDirectionActivationThreshold() {
+        #expect(HomeWeekWindow.scrollAxis(translation: CGSize(width: 18, height: 0)) == nil)
+        #expect(HomeWeekWindow.scrollAxis(translation: CGSize(width: 0, height: -18)) == nil)
+        #expect(HomeWeekWindow.scrollAxis(translation: CGSize(width: 24, height: 22)) == nil)
+    }
+
+    @Test("Scroll direction recognizes both signs of each axis")
+    func scrollDirectionRecognizesDominantAxis() {
+        #expect(HomeWeekWindow.scrollAxis(translation: CGSize(width: 24, height: 8)) == .horizontal)
+        #expect(HomeWeekWindow.scrollAxis(translation: CGSize(width: -24, height: -8)) == .horizontal)
+        #expect(HomeWeekWindow.scrollAxis(translation: CGSize(width: 8, height: 24)) == .vertical)
+        #expect(HomeWeekWindow.scrollAxis(translation: CGSize(width: -8, height: -24)) == .vertical)
+    }
+
+    @Test("Scroll direction remains locked until the gesture ends")
+    func scrollDirectionDoesNotFlipAfterLocking() {
+        #expect(
+            HomeWeekWindow.scrollAxis(
+                translation: CGSize(width: 2, height: 40),
+                lockedAxis: .horizontal
+            ) == .horizontal
+        )
+        #expect(
+            HomeWeekWindow.scrollAxis(
+                translation: CGSize(width: 40, height: 2),
+                lockedAxis: .vertical
+            ) == .vertical
+        )
+    }
+
+    @Test("Scroll feedback follows the edge where new content enters")
+    func scrollFeedbackUsesIncomingContentEdge() {
+        #expect(
+            HomeWeekWindow.scrollFeedbackEdge(
+                translation: CGSize(width: -30, height: 2),
+                axis: .horizontal
+            ) == .trailing
+        )
+        #expect(
+            HomeWeekWindow.scrollFeedbackEdge(
+                translation: CGSize(width: 30, height: -2),
+                axis: .horizontal
+            ) == .leading
+        )
+        #expect(
+            HomeWeekWindow.scrollFeedbackEdge(
+                translation: CGSize(width: 2, height: -30),
+                axis: .vertical
+            ) == .bottom
+        )
+        #expect(
+            HomeWeekWindow.scrollFeedbackEdge(
+                translation: CGSize(width: -2, height: 30),
+                axis: .vertical
+            ) == .top
+        )
+    }
+
+    @Test("Scroll feedback waits through a small direction reversal")
+    func scrollFeedbackIgnoresDirectionJitter() {
+        #expect(
+            HomeWeekWindow.scrollFeedbackEdge(
+                translation: CGSize(width: -8, height: 0),
+                axis: .horizontal
+            ) == nil
+        )
+        #expect(
+            HomeWeekWindow.scrollFeedbackEdge(
+                translation: CGSize(width: 0, height: 8),
+                axis: .vertical
+            ) == nil
+        )
+    }
+
+    @Test("Event drag preview snaps to visible day and five-minute slots")
     func eventDragSnap() {
         let target = HomeWeekWindow.eventDragTarget(
             originDayIndex: 1,
@@ -137,7 +212,87 @@ struct HomeWeekWindowTests {
         )
 
         #expect(upper == HomeWeekWindow.EventDragTarget(dayIndex: 0, startMinute: 0))
-        #expect(lower == HomeWeekWindow.EventDragTarget(dayIndex: 2, startMinute: 23 * 60 + 45))
+        #expect(lower == HomeWeekWindow.EventDragTarget(dayIndex: 2, startMinute: 23 * 60 + 55))
+    }
+
+    @Test("Event long-press drag distinguishes body and resize edges")
+    func eventDragOperationUsesVisibleEdges() {
+        #expect(
+            HomeWeekWindow.eventDragOperation(
+                startLocationY: 6,
+                visualTopInset: 4,
+                visualHeight: 60
+            ) == .resizeStart
+        )
+        #expect(
+            HomeWeekWindow.eventDragOperation(
+                startLocationY: 34,
+                visualTopInset: 4,
+                visualHeight: 60
+            ) == .move
+        )
+        #expect(
+            HomeWeekWindow.eventDragOperation(
+                startLocationY: 62,
+                visualTopInset: 4,
+                visualHeight: 60
+            ) == .resizeEnd
+        )
+        #expect(
+            HomeWeekWindow.eventDragOperation(
+                startLocationY: 62,
+                visualTopInset: 4,
+                visualHeight: 60,
+                canResizeEnd: false
+            ) == .move
+        )
+    }
+
+    @Test("Short events retain a central move target between resize edges")
+    func shortEventKeepsMoveTarget() {
+        #expect(
+            HomeWeekWindow.eventDragOperation(
+                startLocationY: 9,
+                visualTopInset: 0,
+                visualHeight: 18
+            ) == .move
+        )
+    }
+
+    @Test("Event edge resize snaps to five minutes and preserves a valid range")
+    func eventResizeSnapAndMinimumDuration() {
+        let laterEnd = HomeWeekWindow.eventResizeTarget(
+            originStartMinute: 9 * 60,
+            originEndMinute: 10 * 60,
+            translationHeight: 17,
+            minuteHeight: 1,
+            operation: .resizeEnd
+        )
+        #expect(laterEnd == HomeWeekWindow.EventResizeTarget(
+            startMinute: 9 * 60,
+            endMinute: 10 * 60 + 15
+        ))
+
+        let laterStart = HomeWeekWindow.eventResizeTarget(
+            originStartMinute: 9 * 60,
+            originEndMinute: 10 * 60,
+            translationHeight: 17,
+            minuteHeight: 1,
+            operation: .resizeStart
+        )
+        #expect(laterStart == HomeWeekWindow.EventResizeTarget(
+            startMinute: 9 * 60 + 15,
+            endMinute: 10 * 60
+        ))
+
+        let minimum = HomeWeekWindow.eventResizeTarget(
+            originStartMinute: 9 * 60,
+            originEndMinute: 10 * 60,
+            translationHeight: -200,
+            minuteHeight: 1,
+            operation: .resizeEnd
+        )
+        #expect(minimum.endMinute - minimum.startMinute == 5)
     }
 
     @Test("Event drag ignores long-press jitter until movement is intentional")
@@ -168,13 +323,53 @@ struct HomeWeekWindowTests {
         #expect(dayWidth > CalendarChrome.dayChipDiameter)
     }
 
-    @Test("Clamps timeline density to compact, standard, or spacious")
-    func clampsTimelineDensity() {
-        #expect(HomeWeekWindow.clampTimelineDensityLevel(-1) == 0)
-        #expect(HomeWeekWindow.clampTimelineDensityLevel(1) == 1)
-        #expect(HomeWeekWindow.clampTimelineDensityLevel(3) == 2)
-        #expect(HomeWeekWindow.timelineScale(for: 0) < 1)
-        #expect(HomeWeekWindow.timelineScale(for: 1) == 1)
-        #expect(HomeWeekWindow.timelineScale(for: 2) > 1)
+    @Test("Clamps continuous timeline scale to the supported range")
+    func clampsTimelineScale() {
+        #expect(
+            HomeWeekWindow.clampTimelineScale(0.2)
+                == HomeWeekWindow.minimumTimelineScale
+        )
+        #expect(HomeWeekWindow.clampTimelineScale(1.13) == 1.13)
+        #expect(
+            HomeWeekWindow.clampTimelineScale(2)
+                == HomeWeekWindow.maximumTimelineScale
+        )
+    }
+
+    @Test("Continuous zoom preserves the time beneath the gesture anchor")
+    func timelineZoomPreservesGestureAnchor() {
+        let anchorMinute: CGFloat = 12 * 60
+        let viewportHeight: CGFloat = 500
+        let anchorFraction: CGFloat = 0.5
+        let compactTop = HomeWeekWindow.timelineTopMinutePreservingAnchor(
+            anchorMinute: anchorMinute,
+            anchorFraction: anchorFraction,
+            viewportHeight: viewportHeight,
+            minuteHeight: CalendarChrome.weekMinuteHeight * 0.9
+        )
+        let spaciousTop = HomeWeekWindow.timelineTopMinutePreservingAnchor(
+            anchorMinute: anchorMinute,
+            anchorFraction: anchorFraction,
+            viewportHeight: viewportHeight,
+            minuteHeight: CalendarChrome.weekMinuteHeight * 1.3
+        )
+
+        let compactAnchor = compactTop
+            + anchorFraction * viewportHeight / (CalendarChrome.weekMinuteHeight * 0.9)
+        let spaciousAnchor = spaciousTop
+            + anchorFraction * viewportHeight / (CalendarChrome.weekMinuteHeight * 1.3)
+        #expect(abs(compactAnchor - anchorMinute) < 0.001)
+        #expect(abs(spaciousAnchor - anchorMinute) < 0.001)
+    }
+
+    @Test("Persists an exact continuous timeline scale")
+    func storesContinuousTimelineScale() {
+        let suiteName = "HomeWeekWindowTests.timelineScale.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        HomeWeekWindow.storeTimelineScale(1.17, defaults: defaults)
+
+        #expect(abs(HomeWeekWindow.storedTimelineScale(defaults: defaults) - 1.17) < 0.001)
     }
 }

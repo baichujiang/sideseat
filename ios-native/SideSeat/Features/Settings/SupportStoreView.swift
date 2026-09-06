@@ -68,13 +68,30 @@ struct SupportStoreView: View {
         .onDisappear {
             store.stopListening()
         }
-        .alert("Thank you", isPresented: Binding(
-            get: { store.thankYouVisible },
-            set: { if !$0 { store.dismissThankYou() } }
-        )) {
-            Button("OK", role: .cancel) { store.dismissThankYou() }
-        } message: {
-            Text("Your support means a lot. There’s nothing to restore — tips are one-time only.")
+        .ssActionPrompt(
+            isPresented: Binding(
+                get: { store.thankYouVisible },
+                set: { if !$0 { store.dismissThankYou() } }
+            ),
+            title: AppLocalization.string("Thank you"),
+            message: AppLocalization.string(
+                "Your support means a lot. There’s nothing to restore — tips are one-time only."
+            ),
+            systemImage: "heart.fill",
+            tint: SideSeatTheme.HubTint.feedback,
+            dismissOnTapOutside: true,
+            onDismiss: { store.dismissThankYou() },
+            accessibilityIdentifier: "support-thank-you-prompt"
+        ) {
+            [
+                SSActionPromptAction(
+                    id: "support-thank-you-ok",
+                    title: AppLocalization.string("OK"),
+                    role: .cancel
+                ) {
+                    store.dismissThankYou()
+                }
+            ]
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("support-store")

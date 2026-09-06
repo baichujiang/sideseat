@@ -20,15 +20,15 @@ enum CalendarCategoryDisplayName {
     static func resolve(name: String, presetKey: String?) -> String {
         switch presetKey?.lowercased() {
         case "study" where name.caseInsensitiveCompare("Study") == .orderedSame:
-            String(localized: "Study calendar")
+            AppLocalization.string( "Study calendar")
         case "work" where name.caseInsensitiveCompare("Work") == .orderedSame:
-            String(localized: "Work")
+            AppLocalization.string( "Work")
         case "personal" where name.caseInsensitiveCompare("Personal") == .orderedSame:
-            String(localized: "Personal")
+            AppLocalization.string( "Personal")
         case "important" where name.caseInsensitiveCompare("Important") == .orderedSame:
-            String(localized: "Important")
+            AppLocalization.string( "Important")
         case "other" where name.caseInsensitiveCompare("Other") == .orderedSame:
-            String(localized: "Other")
+            AppLocalization.string( "Other")
         default:
             name
         }
@@ -81,7 +81,7 @@ extension NativeCalendarCategoryList {
         NativeCalendarCategory(
             id: "ui-calendar-study",
             name: "Study",
-            color: "#2563EB",
+            color: "#7C3AED",
             sortOrder: 0,
             presetKey: "study",
             icsSubscriptionUrl: nil
@@ -89,7 +89,7 @@ extension NativeCalendarCategoryList {
         NativeCalendarCategory(
             id: "ui-calendar-work",
             name: "Work",
-            color: "#0D9488",
+            color: "#2563EB",
             sortOrder: 1,
             presetKey: "work",
             icsSubscriptionUrl: nil
@@ -97,7 +97,7 @@ extension NativeCalendarCategoryList {
         NativeCalendarCategory(
             id: "ui-calendar-personal",
             name: "Personal",
-            color: "#EA580C",
+            color: "#DB2777",
             sortOrder: 2,
             presetKey: "personal",
             icsSubscriptionUrl: nil

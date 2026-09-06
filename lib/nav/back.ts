@@ -15,6 +15,7 @@ const BLOCKED_BACK_PATH_PREFIXES = [
   "/onboarding",
   "/share/view",
   "/share/schedule",
+  "/share/event",
 ] as const;
 
 /** Returns `raw` if it is a safe same-origin path, otherwise `fallback`. */

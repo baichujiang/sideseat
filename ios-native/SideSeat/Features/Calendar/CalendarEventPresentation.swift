@@ -84,7 +84,7 @@ struct CalendarAgendaRowLabel: View {
 
     private var startLabel: String {
         guard !item.isAllDayStyle(on: renderedDay, calendar: calendar) else {
-            return String(localized: "All day")
+            return AppLocalization.string( "All day")
         }
         guard let dayInterval, item.start < dayInterval.start else {
             return CalendarChrome.compactClock(item.start)
@@ -111,46 +111,60 @@ struct CalendarAgendaRowLabel: View {
 }
 
 private struct CalendarItemActionsModifier: ViewModifier {
-    @Binding var item: HomeAgendaItem?
-    let onOpen: (HomeAgendaItem) -> Void
-    let onEdit: (HomeAgendaItem) -> Void
+    let target: HomeAgendaItem
+    @Binding var selectedItem: HomeAgendaItem?
     let onCopy: (HomeAgendaItem) -> Void
     let onDuplicate: (HomeAgendaItem) -> Void
-    let onStartMove: (HomeAgendaItem) -> Void
-    let moveAccessibilityIdentifier: String
+    let onDelete: (HomeAgendaItem) -> Void
 
     func body(content: Content) -> some View {
-        content.confirmationDialog(
-            item?.title ?? "",
-            isPresented: Binding(
-                get: { item != nil },
-                set: { if !$0 { item = nil } }
-            ),
-            titleVisibility: .visible,
-            presenting: item
-        ) { selected in
-            Button("View details") {
-                onOpen(selected)
-            }
-
-            if selected.source == .event {
-                Button("Edit event") {
-                    onEdit(selected)
-                }
-                Button("Copy") {
-                    onCopy(selected)
-                }
-                Button("Duplicate after event") {
-                    onDuplicate(selected)
-                }
-                Button("Move event") {
-                    onStartMove(selected)
-                }
-                .accessibilityIdentifier(moveAccessibilityIdentifier)
-            }
-
-            Button("Cancel", role: .cancel) {}
+        SSAnchoredActionMenuTarget(
+            isPresented: presentationBinding,
+            sourceCornerRadius: 8,
+            minimumMenuWidth: 144,
+            menuAccessibilityLabel: AppLocalization.string("Event actions"),
+            menuAccessibilityIdentifier: "calendar-event-context-menu"
+        ) {
+            content
+        } actions: {
+            menuActions
         }
+    }
+
+    private var presentationBinding: Binding<Bool> {
+        Binding(
+            get: { selectedItem?.id == target.id },
+            set: { presented in
+                if !presented, selectedItem?.id == target.id {
+                    selectedItem = nil
+                }
+            }
+        )
+    }
+
+    private var menuActions: [SSLongPressAction] {
+        guard target.source == .event else { return [] }
+        return [
+            SSLongPressAction(
+                id: "calendar-event-context-copy",
+                title: AppLocalization.string("Copy"),
+                systemImage: "doc.on.doc",
+                perform: { onCopy(target) }
+            ),
+            SSLongPressAction(
+                id: "calendar-event-context-duplicate",
+                title: AppLocalization.string("Create duplicate"),
+                systemImage: "plus.square.on.square",
+                perform: { onDuplicate(target) }
+            ),
+            SSLongPressAction(
+                id: "calendar-event-context-delete",
+                title: AppLocalization.string("Delete event"),
+                systemImage: "trash",
+                role: .destructive,
+                perform: { onDelete(target) }
+            ),
+        ]
     }
 }
 
@@ -188,23 +202,19 @@ extension View {
     }
 
     func calendarItemActions(
-        item: Binding<HomeAgendaItem?>,
-        onOpen: @escaping (HomeAgendaItem) -> Void,
-        onEdit: @escaping (HomeAgendaItem) -> Void,
+        target: HomeAgendaItem,
+        selectedItem: Binding<HomeAgendaItem?>,
         onCopy: @escaping (HomeAgendaItem) -> Void,
         onDuplicate: @escaping (HomeAgendaItem) -> Void,
-        onStartMove: @escaping (HomeAgendaItem) -> Void,
-        moveAccessibilityIdentifier: String
+        onDelete: @escaping (HomeAgendaItem) -> Void
     ) -> some View {
         modifier(
             CalendarItemActionsModifier(
-                item: item,
-                onOpen: onOpen,
-                onEdit: onEdit,
+                target: target,
+                selectedItem: selectedItem,
                 onCopy: onCopy,
                 onDuplicate: onDuplicate,
-                onStartMove: onStartMove,
-                moveAccessibilityIdentifier: moveAccessibilityIdentifier
+                onDelete: onDelete
             )
         )
     }

@@ -4,19 +4,71 @@ import XCTest
 @testable import SideSeat
 
 final class ThemeContrastTests: XCTestCase {
-    func testTodayButtonContrastInLightAndDarkAppearances() {
+    func testCalendarNowBadgeContrastInLightAndDarkAppearances() {
         assertContrast(
-            foreground: .white,
+            foreground: UIColor(SideSeatTheme.calendarNowForeground),
             background: UIColor(SideSeatTheme.calendarNowFill),
             style: .light,
             minimum: 4.5
         )
         assertContrast(
-            foreground: .white,
+            foreground: UIColor(SideSeatTheme.calendarNowForeground),
             background: UIColor(SideSeatTheme.calendarNowFill),
             style: .dark,
             minimum: 4.5
         )
+    }
+
+    func testTodayButtonContrastOnNeutralControlSurface() {
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            assertContrast(
+                foreground: UIColor(CalendarChrome.nowAccent),
+                background: UIColor(CalendarChrome.todayControlFill),
+                style: style,
+                minimum: 4.5
+            )
+        }
+    }
+
+    func testCalendarCreateActionSeparatesFromCanvasInLightAndDarkAppearances() {
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            let traits = UITraitCollection(userInterfaceStyle: style)
+            let canvas: UIColor = style == .dark ? .black : .white
+            let fill = composite(
+                UIColor(CalendarChrome.createActionFill).resolvedColor(with: traits),
+                over: canvas
+            )
+            let foreground = composite(
+                UIColor(CalendarChrome.createActionForeground).resolvedColor(with: traits),
+                over: fill
+            )
+
+            XCTAssertGreaterThanOrEqual(
+                contrastRatio(fill, canvas),
+                1.4,
+                "The floating create action must remain distinct from the calendar canvas."
+            )
+            XCTAssertGreaterThanOrEqual(
+                contrastRatio(foreground, fill),
+                4.5,
+                "The create symbol must remain readable in both appearances."
+            )
+        }
+    }
+
+    func testCalendarNowUsesTheUnifiedBrandRosePalette() {
+        let lightTraits = UITraitCollection(userInterfaceStyle: .light)
+        let light = rgba(UIColor(SideSeatTheme.calendarNow).resolvedColor(with: lightTraits))
+        XCTAssertEqual(light.red, 0.82, accuracy: 0.001)
+        XCTAssertEqual(light.green, 0.102, accuracy: 0.001)
+        XCTAssertEqual(light.blue, 0.38, accuracy: 0.001)
+
+        let darkTraits = UITraitCollection(userInterfaceStyle: .dark)
+        let calendarDark = rgba(UIColor(SideSeatTheme.calendarNow).resolvedColor(with: darkTraits))
+        let accentDark = rgba(UIColor(SideSeatTheme.accent).resolvedColor(with: darkTraits))
+        XCTAssertEqual(calendarDark.red, accentDark.red, accuracy: 0.001)
+        XCTAssertEqual(calendarDark.green, accentDark.green, accuracy: 0.001)
+        XCTAssertEqual(calendarDark.blue, accentDark.blue, accuracy: 0.001)
     }
 
     func testCalendarNowMarkerContrastInLightAndDarkAppearances() {
@@ -79,6 +131,27 @@ final class ThemeContrastTests: XCTestCase {
         )
     }
 
+    func testDisabledPrimaryActionSeparatesFromElevatedSurface() {
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            let traits = UITraitCollection(userInterfaceStyle: style)
+            let canvas = style == .dark ? UIColor.black : UIColor.white
+            let surface = composite(
+                UIColor.systemBackground.resolvedColor(with: traits),
+                over: canvas
+            )
+            let disabledFill = composite(
+                UIColor(SideSeatTheme.Interaction.disabledFill).resolvedColor(with: traits),
+                over: surface
+            )
+
+            XCTAssertGreaterThanOrEqual(
+                contrastRatio(disabledFill, surface),
+                1.4,
+                "Disabled primary actions must remain visually distinct from their surrounding surface."
+            )
+        }
+    }
+
     func testToolbarActionContrastInLightAndDarkAppearances() {
         assertContrast(
             foreground: .label,
@@ -88,6 +161,21 @@ final class ThemeContrastTests: XCTestCase {
         )
         assertContrast(
             foreground: .label,
+            background: .systemBackground,
+            style: .dark,
+            minimum: 4.5
+        )
+    }
+
+    func testUtilityActionContrastInLightAndDarkAppearances() {
+        assertContrast(
+            foreground: UIColor(SideSeatTheme.utilityAction),
+            background: .systemBackground,
+            style: .light,
+            minimum: 4.5
+        )
+        assertContrast(
+            foreground: UIColor(SideSeatTheme.utilityAction),
             background: .systemBackground,
             style: .dark,
             minimum: 4.5
@@ -111,14 +199,109 @@ final class ThemeContrastTests: XCTestCase {
 
     func testCompactTextOnAccentContrast() {
         assertContrast(
-            foreground: UIColor(SideSeatTheme.ink),
+            foreground: UIColor(SideSeatTheme.onAccent),
             background: UIColor(SideSeatTheme.accent),
             style: .light,
             minimum: 4.5
         )
         assertContrast(
-            foreground: UIColor(SideSeatTheme.ink),
+            foreground: UIColor(SideSeatTheme.onAccent),
             background: UIColor(SideSeatTheme.accent),
+            style: .dark,
+            minimum: 4.5
+        )
+    }
+
+    func testOwnChatBubbleContrastInLightAndDarkAppearances() {
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            assertContrast(
+                foreground: UIColor(SideSeatTheme.Chat.ownBubbleForeground),
+                background: UIColor(SideSeatTheme.Chat.ownBubble),
+                style: style,
+                minimum: 4.5
+            )
+            assertContrast(
+                foreground: UIColor(SideSeatTheme.Chat.ownBubbleForeground.opacity(0.78)),
+                background: UIColor(SideSeatTheme.Chat.ownBubble),
+                style: style,
+                minimum: 4.5
+            )
+            assertContrast(
+                foreground: UIColor(SideSeatTheme.Chat.ownBubbleForeground.opacity(0.72)),
+                background: UIColor(SideSeatTheme.Chat.ownBubble),
+                style: style,
+                minimum: 3.0
+            )
+        }
+    }
+
+    func testPeerChatBubbleContrastInLightAndDarkAppearances() {
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            assertContrast(
+                foreground: .label,
+                background: UIColor(SideSeatTheme.Chat.peerBubble),
+                style: style,
+                minimum: 4.5
+            )
+            assertContrast(
+                foreground: UIColor(SideSeatTheme.textSecondaryStrong),
+                background: UIColor(SideSeatTheme.Chat.peerBubble),
+                style: style,
+                minimum: 4.5
+            )
+        }
+    }
+
+    func testStructuredChatCardSecondaryTextContrastInLightAndDarkAppearances() {
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            assertContrast(
+                foreground: UIColor(SideSeatTheme.textSecondaryStrong),
+                background: UIColor(SideSeatTheme.Chat.cardSurface),
+                style: style,
+                minimum: 4.5
+            )
+        }
+    }
+
+    func testChatBubbleSurfacesSeparateFromConversationCanvas() {
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            assertContrast(
+                foreground: UIColor(SideSeatTheme.Chat.ownBubble),
+                background: UIColor(SideSeatTheme.Chat.canvas),
+                style: style,
+                minimum: 1.5
+            )
+            assertContrast(
+                foreground: UIColor(SideSeatTheme.Chat.peerBubble),
+                background: UIColor(SideSeatTheme.Chat.canvas),
+                style: style,
+                minimum: 1.45
+            )
+        }
+    }
+
+    func testOwnChatBubbleStaysLowSaturation() {
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            let traits = UITraitCollection(userInterfaceStyle: style)
+            let bubble = UIColor(SideSeatTheme.Chat.ownBubble).resolvedColor(with: traits)
+            XCTAssertLessThanOrEqual(
+                hslSaturation(bubble),
+                0.60,
+                "Chat bubble should remain a muted reading surface in \(style == .dark ? "dark" : "light") mode."
+            )
+        }
+    }
+
+    func testAccentTextContrastOnProductSurfaces() {
+        assertContrast(
+            foreground: UIColor(SideSeatTheme.accentText),
+            background: .systemBackground,
+            style: .light,
+            minimum: 4.5
+        )
+        assertContrast(
+            foreground: UIColor(SideSeatTheme.accentText),
+            background: .systemBackground,
             style: .dark,
             minimum: 4.5
         )
@@ -286,6 +469,16 @@ final class ThemeContrastTests: XCTestCase {
         return 0.2126 * linearize(components.red)
             + 0.7152 * linearize(components.green)
             + 0.0722 * linearize(components.blue)
+    }
+
+    private func hslSaturation(_ color: UIColor) -> CGFloat {
+        let components = rgba(color)
+        let maximum = max(components.red, max(components.green, components.blue))
+        let minimum = min(components.red, min(components.green, components.blue))
+        let delta = maximum - minimum
+        guard delta > 0 else { return 0 }
+        let lightness = (maximum + minimum) / 2
+        return delta / (1 - abs(2 * lightness - 1))
     }
 
     private func linearize(_ component: CGFloat) -> CGFloat {

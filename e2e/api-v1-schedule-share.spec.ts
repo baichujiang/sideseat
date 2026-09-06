@@ -115,6 +115,101 @@ test("creates a standalone schedule link without posting a chat message", async 
   expect(created.data.token).toBeTruthy();
   standaloneLinkId = created.data.linkId;
 
+  const ownerSettings = await request.get(
+    `/api/v1/schedule-shares/owner/${standaloneLinkId}`,
+    { headers: { Authorization: `Bearer ${ownerToken}`, "x-forwarded-for": IP } },
+  );
+  expect(ownerSettings.status()).toBe(200);
+  const initialOwnerPayload = (await ownerSettings.json()) as {
+    data: {
+      linkId: string;
+      pendingProposalCount: number;
+      isUpdated: boolean;
+      settings: {
+        rangeStart: string;
+        rangeEnd: string;
+        allowGuestProposals: boolean;
+        usageLimit: string;
+      };
+    };
+  };
+  expect(initialOwnerPayload.data.linkId).toBe(standaloneLinkId);
+  expect(initialOwnerPayload.data.pendingProposalCount).toBe(0);
+  expect(initialOwnerPayload.data.isUpdated).toBe(false);
+  expect(initialOwnerPayload.data.settings.usageLimit).toBe("UNLIMITED");
+
+  const peerToken = await accessToken(request, E2E_PEER);
+  const hiddenFromPeer = await request.get(
+    `/api/v1/schedule-shares/owner/${standaloneLinkId}`,
+    { headers: { Authorization: `Bearer ${peerToken}`, "x-forwarded-for": IP } },
+  );
+  expect(hiddenFromPeer.status()).toBe(404);
+
+  const updatedStart = new Date(start.getTime() + 24 * 60 * 60_000);
+  const updatedEnd = new Date(end.getTime() + 24 * 60 * 60_000);
+  const update = await request.patch(
+    `/api/v1/schedule-shares/owner/${standaloneLinkId}`,
+    {
+      headers: { Authorization: `Bearer ${ownerToken}`, "x-forwarded-for": IP },
+      data: {
+        rangeStart: updatedStart.toISOString(),
+        rangeEnd: updatedEnd.toISOString(),
+        revealConfig: {
+          categoryIds: [],
+          presetKeys: [],
+          hideAllDetails: true,
+          includedDates: [updatedStart.toISOString().slice(0, 10)],
+        },
+        allowGuestProposals: false,
+        usageLimit: "UNLIMITED",
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60_000).toISOString(),
+      },
+    },
+  );
+  expect(update.status()).toBe(200);
+  const updatedPayload = (await update.json()) as {
+    data: {
+      linkId: string;
+      isUpdated: boolean;
+      settings: {
+        rangeStart: string;
+        rangeEnd: string;
+        allowGuestProposals: boolean;
+        revealConfig: { includedDates: string[] };
+      };
+    };
+  };
+  expect(updatedPayload.data.linkId).toBe(standaloneLinkId);
+  expect(updatedPayload.data.isUpdated).toBe(true);
+  expect(updatedPayload.data.settings.rangeStart).toBe(updatedStart.toISOString());
+  expect(updatedPayload.data.settings.rangeEnd).toBe(updatedEnd.toISOString());
+  expect(updatedPayload.data.settings.allowGuestProposals).toBe(false);
+  expect(updatedPayload.data.settings.revealConfig.includedDates).toEqual([
+    updatedStart.toISOString().slice(0, 10),
+  ]);
+
+  const originalTokenStillWorks = await request.get(
+    `/api/v1/schedule-shares/recipient/${encodeURIComponent(created.data.token!)}`,
+    { headers: { Authorization: `Bearer ${peerToken}`, "x-forwarded-for": IP } },
+  );
+  expect(originalTokenStillWorks.status()).toBe(200);
+  const recipientPayload = (await originalTokenStillWorks.json()) as {
+    data: { linkId: string; ownedByViewer: boolean; isUpdated: boolean };
+  };
+  expect(recipientPayload.data.linkId).toBe(standaloneLinkId);
+  expect(recipientPayload.data.ownedByViewer).toBe(false);
+  expect(recipientPayload.data.isUpdated).toBe(true);
+
+  const ownerRecipientView = await request.get(
+    `/api/v1/schedule-shares/recipient/${encodeURIComponent(created.data.token!)}`,
+    { headers: { Authorization: `Bearer ${ownerToken}`, "x-forwarded-for": IP } },
+  );
+  expect(ownerRecipientView.status()).toBe(200);
+  expect(
+    ((await ownerRecipientView.json()) as { data: { ownedByViewer: boolean } }).data
+      .ownedByViewer,
+  ).toBe(true);
+
   const messagesAfter = await prisma.message.count({
     where: { connectionId, type: "SCHEDULE_SHARE_CARD" },
   });
@@ -148,6 +243,37 @@ test("send default schedule share and load peer chat preview", async ({ request 
   expect(created.data.message.body).toBe(created.data.shareUrl);
   createdLinkId = created.data.linkId;
   createdMessageId = created.data.message.id;
+
+  const editable = await request.get(
+    `/api/v1/schedule-shares/owner/${created.data.linkId}`,
+    { headers: { Authorization: `Bearer ${ownerToken}`, "x-forwarded-for": IP } },
+  );
+  expect(editable.status()).toBe(200);
+  const editablePayload = (await editable.json()) as {
+    data: {
+      settings: {
+        rangeStart: string;
+        rangeEnd: string;
+        revealConfig: {
+          categoryIds: string[];
+          presetKeys: string[];
+          hideAllDetails: boolean;
+          includedDates: string[];
+        };
+        allowGuestProposals: boolean;
+        usageLimit: string;
+        expiresAt: string;
+      };
+    };
+  };
+  const makeReusable = await request.patch(
+    `/api/v1/schedule-shares/owner/${created.data.linkId}`,
+    {
+      headers: { Authorization: `Bearer ${ownerToken}`, "x-forwarded-for": IP },
+      data: { ...editablePayload.data.settings, usageLimit: "UNLIMITED" },
+    },
+  );
+  expect(makeReusable.status()).toBe(200);
 
   const preview = await request.get(
     `/api/v1/schedule-shares/chat-preview/${encodeURIComponent(created.data.token!)}`,
@@ -233,6 +359,16 @@ test("send default schedule share and load peer chat preview", async ({ request 
   expect(proposalBody.data.submitted).toBe(true);
   expect(proposalBody.data.proposal.title).toBe("Coffee catch-up");
   expect(proposalBody.data.proposal.status).toBe("PENDING");
+
+  const pendingOwnerSettings = await request.get(
+    `/api/v1/schedule-shares/owner/${created.data.linkId}`,
+    { headers: { Authorization: `Bearer ${ownerToken}`, "x-forwarded-for": IP } },
+  );
+  expect(pendingOwnerSettings.status()).toBe(200);
+  expect(
+    ((await pendingOwnerSettings.json()) as { data: { pendingProposalCount: number } }).data
+      .pendingProposalCount,
+  ).toBe(1);
 
   const revoked = await request.delete(
     `/api/v1/schedule-shares/owner/${created.data.linkId}`,

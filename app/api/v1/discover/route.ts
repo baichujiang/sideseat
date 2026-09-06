@@ -5,6 +5,8 @@ import { loadNativeDiscoverFeed } from "@/lib/api/v1/discover-service";
 import { v1Error, v1Success } from "@/lib/api/v1/http";
 import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
 import { isDiscoverServedCity } from "@/lib/discover/discover-served-cities";
+import { evaluateActionCoordinationCapability } from "@/lib/v2/action-coordination/capability";
+import { getCreatorGatedActionToPlanAssignment } from "@/lib/v2/experiments";
 
 export const dynamic = "force-dynamic";
 
@@ -35,10 +37,16 @@ export async function GET(request: Request) {
   }
 
   try {
+    const capability = evaluateActionCoordinationCapability(request.headers);
+    const assignment = await getCreatorGatedActionToPlanAssignment(
+      auth.user,
+      capability,
+    );
     const feed = await loadNativeDiscoverFeed({
       userId: auth.user.id,
       city,
       query: query.data,
+      coordinationViewer: { capability, assignment },
     });
     return v1Success(feed, { request });
   } catch (cause) {

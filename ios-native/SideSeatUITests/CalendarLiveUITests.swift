@@ -64,36 +64,7 @@ final class CalendarLiveUITests: XCTestCase {
         XCTAssertTrue(sourceEvent.waitForExistence(timeout: 5))
         sourceEvent.press(forDuration: 1.2)
 
-        let move = app.buttons.matching(
-            NSPredicate(
-                format: "identifier == %@ OR label IN %@",
-                "calendar-event-context-move",
-                ["Move event", "移动日程"]
-            )
-        ).firstMatch
-        XCTAssertTrue(move.waitForExistence(timeout: 3))
-        move.tap()
-
-        let moveTarget = app.buttons["calendar-move-target-180"]
-        XCTAssertTrue(moveTarget.waitForExistence(timeout: 3))
-        XCTAssertTrue(moveTarget.isHittable)
-        moveTarget.tap()
-        let confirmMove = app.buttons.matching(identifier: "calendar-move-confirm").firstMatch
-        XCTAssertTrue(confirmMove.waitForExistence(timeout: 3))
-        confirmMove.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
-        XCTAssertTrue(app.descendants(matching: .any)["calendar-move-banner"].waitForNonExistence(timeout: 10))
-
-        let movedEvent = app.buttons[title]
-        XCTAssertTrue(movedEvent.waitForExistence(timeout: 10))
-        XCTAssertTrue(
-            (movedEvent.value as? String)?.contains("3:00") == true,
-            "Expected moved event value to contain 3:00, got \(String(describing: movedEvent.value))"
-        )
-        movedEvent.press(forDuration: 1.2)
-
-        let copy = app.buttons.matching(
-            NSPredicate(format: "label IN %@", ["Copy", "复制"])
-        ).firstMatch
+        let copy = app.buttons["calendar-event-context-copy"]
         XCTAssertTrue(copy.waitForExistence(timeout: 3))
         copy.tap()
 

@@ -17,6 +17,87 @@ function calendar(...events: string[]) {
 }
 
 describe("iCalendar import and export", () => {
+  it("keeps VEVENT UIDs stable across subscription refreshes", () => {
+    const options = {
+      semesterStart: new Date("2026-10-01T00:00:00.000Z"),
+      semesterEnd: new Date("2026-10-31T00:00:00.000Z"),
+      classBlocks: [
+        {
+          sessionId: "session-1",
+          courseId: "course-1",
+          courseName: "Distributed Systems",
+          courseCode: "IN1234",
+          weekday: "MON" as const,
+          startMinute: 10 * 60,
+          endMinute: 11 * 60,
+          location: "Room 101",
+        },
+      ],
+      entries: [
+        {
+          uid: "event-1",
+          startAt: new Date("2026-10-06T12:00:00.000Z"),
+          endAt: new Date("2026-10-06T13:00:00.000Z"),
+          title: "Lunch",
+          location: "Mensa",
+          note: null,
+        },
+      ],
+    };
+
+    const first = buildSideSeatIcsExport(options);
+    const second = buildSideSeatIcsExport(options);
+    const uids = (value: string) =>
+      value
+        .split("\r\n")
+        .filter((line) => line.startsWith("UID:"))
+        .sort();
+
+    assert.equal(first, second);
+    assert.deepEqual(uids(first), uids(second));
+    assert.equal(uids(first).length, 5);
+    assert.equal(new Set(uids(first)).size, uids(first).length);
+  });
+
+  it("uses the database event identity instead of mutable display fields for its UID", () => {
+    const base = {
+      semesterStart: new Date("2026-10-01T00:00:00.000Z"),
+      semesterEnd: new Date("2026-10-31T00:00:00.000Z"),
+      classBlocks: [],
+    };
+    const first = buildSideSeatIcsExport({
+      ...base,
+      entries: [
+        {
+          uid: "event-1",
+          startAt: new Date("2026-10-06T12:00:00.000Z"),
+          endAt: new Date("2026-10-06T13:00:00.000Z"),
+          title: "Lunch",
+          location: "Mensa",
+          note: null,
+        },
+      ],
+    });
+    const edited = buildSideSeatIcsExport({
+      ...base,
+      entries: [
+        {
+          uid: "event-1",
+          startAt: new Date("2026-10-06T12:30:00.000Z"),
+          endAt: new Date("2026-10-06T13:30:00.000Z"),
+          title: "Lunch with Mina",
+          location: "New Mensa",
+          note: "Updated",
+        },
+      ],
+    });
+
+    assert.equal(
+      first.match(/^UID:(.+)$/m)?.[1],
+      edited.match(/^UID:(.+)$/m)?.[1],
+    );
+  });
+
   it("imports all-day dates and TZID times without shifting the Berlin calendar day", () => {
     const raw = calendar(
       [

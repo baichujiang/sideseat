@@ -17,6 +17,7 @@ export type V1ErrorCode =
   | "ACCOUNT_UNAVAILABLE"
   | "CONTENT_RESTRICTED"
   | "PEER_REPLY_REQUIRED"
+  | "COORDINATION_POLICY_UNSUPPORTED"
   | "FEATURE_UNAVAILABLE"
   | "BUILT_IN_CALENDAR"
   | "NOT_FOUND"
@@ -25,6 +26,8 @@ export type V1ErrorCode =
   | "IDEMPOTENCY_KEY_REQUIRED"
   | "IDEMPOTENCY_CONFLICT"
   | "REQUEST_IN_PROGRESS"
+  | "STATE_CONFLICT"
+  | "CURSOR_EXPIRED"
   | "REALTIME_CURSOR_EXPIRED"
   | "USERNAME_TAKEN"
   | "USERNAME_CHANGE_COOLDOWN"
@@ -73,6 +76,21 @@ export function v1Error(
     status: number;
     field?: string;
     retryable?: boolean;
+    recovery?: Readonly<{
+      action: "OPEN_PLAN" | "OPEN_ACTION_CONTEXT";
+      focus:
+        | Readonly<{
+            type: "PLAN";
+            connectionId: string;
+            commitmentId: string;
+            revisionId: string;
+          }>
+        | Readonly<{
+            type: "ACTION_CONTEXT";
+            connectionId: string;
+            contextId: string;
+          }>;
+    }>;
     requestId?: string;
     headers?: HeadersInit;
   },
@@ -87,6 +105,7 @@ export function v1Error(
         retryable: options.retryable ?? false,
         requestId,
       },
+      ...(options.recovery ? { recovery: options.recovery } : {}),
     },
     {
       status: options.status,

@@ -4,19 +4,62 @@ import Security
 protocol CredentialStore: Sendable {
     func refreshToken() async throws -> String?
     func save(refreshToken: String) async throws
+    func cachedUser() async throws -> CurrentUser?
+    func saveCachedUser(_ user: CurrentUser) async throws
     func clear() async throws
+}
+
+extension CredentialStore {
+    func cachedUser() async throws -> CurrentUser? { nil }
+    func saveCachedUser(_ user: CurrentUser) async throws {}
 }
 
 actor KeychainCredentialStore: CredentialStore {
     private let service: String
-    private let account = "native-refresh-token"
+    private let refreshTokenAccount = "native-refresh-token"
+    private let currentUserAccount = "native-current-user"
 
     init(service: String) {
         self.service = service
     }
 
     func refreshToken() throws -> String? {
-        var query = baseQuery
+        guard let data = try data(for: refreshTokenAccount) else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    func save(refreshToken: String) throws {
+        guard let data = refreshToken.data(using: .utf8) else {
+            throw CredentialStoreError.encoding
+        }
+        try save(data, for: refreshTokenAccount)
+    }
+
+    func cachedUser() throws -> CurrentUser? {
+        guard let data = try data(for: currentUserAccount) else { return nil }
+        do {
+            return try JSONDecoder().decode(CurrentUser.self, from: data)
+        } catch {
+            try? delete(account: currentUserAccount)
+            return nil
+        }
+    }
+
+    func saveCachedUser(_ user: CurrentUser) throws {
+        do {
+            try save(JSONEncoder().encode(user), for: currentUserAccount)
+        } catch is EncodingError {
+            throw CredentialStoreError.encoding
+        }
+    }
+
+    func clear() throws {
+        try delete(account: refreshTokenAccount)
+        try delete(account: currentUserAccount)
+    }
+
+    private func data(for account: String) throws -> Data? {
+        var query = baseQuery(account: account)
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         var result: CFTypeRef?
@@ -25,13 +68,11 @@ actor KeychainCredentialStore: CredentialStore {
         guard status == errSecSuccess, let data = result as? Data else {
             throw CredentialStoreError.keychain(status)
         }
-        return String(data: data, encoding: .utf8)
+        return data
     }
 
-    func save(refreshToken: String) throws {
-        guard let data = refreshToken.data(using: .utf8) else {
-            throw CredentialStoreError.encoding
-        }
+    private func save(_ data: Data, for account: String) throws {
+        let baseQuery = baseQuery(account: account)
         let attributes = [kSecValueData as String: data]
         let updateStatus = SecItemUpdate(baseQuery as CFDictionary, attributes as CFDictionary)
         if updateStatus == errSecItemNotFound {
@@ -47,14 +88,14 @@ actor KeychainCredentialStore: CredentialStore {
         }
     }
 
-    func clear() throws {
-        let status = SecItemDelete(baseQuery as CFDictionary)
+    private func delete(account: String) throws {
+        let status = SecItemDelete(baseQuery(account: account) as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw CredentialStoreError.keychain(status)
         }
     }
 
-    private var baseQuery: [String: Any] {
+    private func baseQuery(account: String) -> [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -67,6 +108,7 @@ actor KeychainCredentialStore: CredentialStore {
 #if DEBUG
 actor EphemeralCredentialStore: CredentialStore {
     private var token: String?
+    private var user: CurrentUser?
 
     func refreshToken() -> String? {
         token
@@ -76,8 +118,17 @@ actor EphemeralCredentialStore: CredentialStore {
         token = refreshToken
     }
 
+    func cachedUser() async throws -> CurrentUser? {
+        user
+    }
+
+    func saveCachedUser(_ user: CurrentUser) async throws {
+        self.user = user
+    }
+
     func clear() {
         token = nil
+        user = nil
     }
 }
 
@@ -113,6 +164,29 @@ actor ResilientCredentialStore: CredentialStore {
         } catch let CredentialStoreError.keychain(status) where status == errSecMissingEntitlement {
             useEphemeral = true
             await ephemeral.save(refreshToken: refreshToken)
+        }
+    }
+
+    func cachedUser() async throws -> CurrentUser? {
+        if useEphemeral { return try await ephemeral.cachedUser() }
+        do {
+            return try await keychain.cachedUser()
+        } catch let CredentialStoreError.keychain(status) where status == errSecMissingEntitlement {
+            useEphemeral = true
+            return try await ephemeral.cachedUser()
+        }
+    }
+
+    func saveCachedUser(_ user: CurrentUser) async throws {
+        if useEphemeral {
+            try await ephemeral.saveCachedUser(user)
+            return
+        }
+        do {
+            try await keychain.saveCachedUser(user)
+        } catch let CredentialStoreError.keychain(status) where status == errSecMissingEntitlement {
+            useEphemeral = true
+            try await ephemeral.saveCachedUser(user)
         }
     }
 

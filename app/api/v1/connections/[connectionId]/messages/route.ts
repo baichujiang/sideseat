@@ -20,11 +20,15 @@ import {
 import {
   activeDirectConnectionWhere,
   createDirectMessageRecord,
+  DirectMessageActionContextUnavailableError,
   InvalidDirectMessageImageError,
+  lockFocusedDirectMessageActionContext,
   PeerReplyRequiredError,
+  recordFirstFocusedCounterpartResponse,
 } from "@/lib/chat/direct-message-service";
 import { prisma } from "@/lib/db/prisma";
 import { scheduleNewDirectChatMessageNotification } from "@/lib/push/notify-user";
+import { pairSafetyLock } from "@/lib/v2/action-coordination/db-locks";
 import { directMessageSchema, type DirectMessageInput } from "@/lib/validators/invitation";
 
 const MESSAGE_SEND_LIMIT = 60;
@@ -188,9 +192,30 @@ export async function POST(
 
     const requestHash = hashIdempotencyRequest(values);
     const result = await prisma.$transaction(async (tx) => {
+      // Resolve the pair without row locks, acquire the pair lock, then
+      // revalidate. Focused messages lock Context before the writer locks the
+      // Connection; generic messages deliberately skip Context attribution.
+      const pairSnapshot = await tx.connection.findUnique({
+        where: { id: connectionId },
+        select: { userAId: true, userBId: true },
+      });
+      if (
+        !pairSnapshot ||
+        (pairSnapshot.userAId !== auth.user.id &&
+          pairSnapshot.userBId !== auth.user.id)
+      ) {
+        return { kind: "not_found" } as const;
+      }
+      if (pairSnapshot.userAId !== pairSnapshot.userBId) {
+        await pairSafetyLock(
+          tx,
+          pairSnapshot.userAId,
+          pairSnapshot.userBId,
+        );
+      }
       const connection = await tx.connection.findFirst({
         where: activeDirectConnectionWhere(connectionId, auth.user.id),
-        select: { id: true },
+        select: { id: true, userAId: true, userBId: true },
       });
       if (!connection) return { kind: "not_found" } as const;
 
@@ -203,11 +228,28 @@ export async function POST(
       });
       if (claim.kind !== "owner") return claim;
 
+      const focusedContext = values.actionContextId
+        ? await lockFocusedDirectMessageActionContext(tx, {
+            actionContextId: values.actionContextId,
+            connectionId,
+            actorId: auth.user.id,
+            participantIds: [connection.userAId, connection.userBId],
+          })
+        : null;
+
       const created = await createDirectMessageRecord(tx, {
         connectionId,
         senderId: auth.user.id,
         input: values,
       });
+      if (focusedContext) {
+        await recordFirstFocusedCounterpartResponse(tx, {
+          context: focusedContext,
+          actorId: auth.user.id,
+          connectionId,
+          occurredAt: created.message.createdAt,
+        });
+      }
       const hydrated = await tx.message.findUniqueOrThrow({
         where: { id: created.message.id },
         include: directMessageV1Include,
@@ -264,6 +306,15 @@ export async function POST(
         message: "The image URL is invalid.",
         status: 422,
         field: "imageUrl",
+      });
+    }
+    if (cause instanceof DirectMessageActionContextUnavailableError) {
+      return v1Error(request, {
+        code: "FEATURE_UNAVAILABLE",
+        message: cause.message,
+        status: 409,
+        retryable: false,
+        field: "actionContextId",
       });
     }
     if (cause instanceof PeerReplyRequiredError) {

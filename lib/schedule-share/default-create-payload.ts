@@ -5,6 +5,10 @@ import {
   sortedShareIncludedDates,
 } from "@/lib/schedule-share/share-selected-days";
 import type { ScheduleShareUsageLimitInput } from "@/lib/schedule-share/usage-limit";
+import {
+  SCHEDULE_SHARE_DEFAULT_AVAILABILITY_END_MINUTES,
+  SCHEDULE_SHARE_DEFAULT_AVAILABILITY_START_MINUTES,
+} from "@/lib/schedule-share/reveal-config";
 
 export function buildDefaultScheduleShareCreatePayload(baseNow = new Date()) {
   const selected = shareDateKeysForNextDayCount(3, baseNow);
@@ -14,13 +18,14 @@ export function buildDefaultScheduleShareCreatePayload(baseNow = new Date()) {
     rangeEnd: rangeEnd.toISOString(),
     revealConfig: {
       categoryIds: [] as string[],
-      // Empty lists with hideAllDetails=false retain the legacy "show all" meaning.
       presetKeys: [] as string[],
-      hideAllDetails: false,
+      hideAllDetails: true,
       includedDates: sortedShareIncludedDates(selected),
+      availabilityStartMinutes: SCHEDULE_SHARE_DEFAULT_AVAILABILITY_START_MINUTES,
+      availabilityEndMinutes: SCHEDULE_SHARE_DEFAULT_AVAILABILITY_END_MINUTES,
     },
     allowGuestProposals: true,
-    usageLimit: "SINGLE_USE" as ScheduleShareUsageLimitInput,
+    usageLimit: "UNLIMITED" as ScheduleShareUsageLimitInput,
     expiresAt: defaultShareExpiresAt(baseNow).toISOString(),
   };
 }

@@ -6,8 +6,13 @@ final class ScheduleShareRecipientStore {
     private(set) var snapshot: NativeScheduleShareSnapshot?
     private(set) var proposal: NativeScheduleShareViewerProposal?
     private(set) var allowGuestProposals = false
+    private(set) var linkID: String?
+    private(set) var ownedByViewer = false
+    private(set) var updatedAt: String?
+    private(set) var isUpdated = false
     private(set) var isLoading = false
     private(set) var isSubmitting = false
+    private(set) var isRevoking = false
     private(set) var issue: String?
 
     func load(token: String, using session: SessionStore) async {
@@ -47,6 +52,10 @@ final class ScheduleShareRecipientStore {
             )
             allowGuestProposals = true
             proposal = nil
+            linkID = "cuitestlink000000000000001"
+            ownedByViewer = ProcessInfo.processInfo.arguments.contains("--ui-testing-schedule-share-owner")
+            updatedAt = "2026-07-18T12:00:00.000Z"
+            isUpdated = ProcessInfo.processInfo.arguments.contains("--ui-testing-schedule-share-updated")
             return
         }
         #endif
@@ -59,6 +68,10 @@ final class ScheduleShareRecipientStore {
             snapshot = response.data.snapshot
             proposal = response.data.proposal
             allowGuestProposals = response.data.allowGuestProposals
+            linkID = response.data.linkId
+            ownedByViewer = response.data.ownedByViewer ?? false
+            updatedAt = response.data.updatedAt
+            isUpdated = response.data.isUpdated ?? false
         } catch {
             issue = error.localizedDescription
         }
@@ -117,35 +130,75 @@ final class ScheduleShareRecipientStore {
             return false
         }
     }
+
+    func revoke(using session: SessionStore) async -> Bool {
+        guard let linkID, !isRevoking else { return false }
+        isRevoking = true
+        issue = nil
+        defer { isRevoking = false }
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            return true
+        }
+        #endif
+
+        do {
+            let encoded = linkID.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? linkID
+            let _: APIEnvelope<NativeScheduleShareRevokeResult> = try await session.sendAuthorized(
+                "api/v1/schedule-shares/owner/\(encoded)",
+                method: .delete
+            )
+            return true
+        } catch {
+            issue = error.localizedDescription
+            return false
+        }
+    }
 }
 
 struct ScheduleShareRecipientView: View {
     @Environment(SessionStore.self) private var session
+    @Environment(\.dismiss) private var dismiss
     let token: String
 
     @State private var store = ScheduleShareRecipientStore()
     @State private var timeSelection: NativeScheduleShareProposalSelection?
     @State private var visibleDayCount = 3
     @State private var showsFullDay = false
-    @State private var title = String(localized: "Meet up")
+    @State private var showsFullSchedule = false
+    @State private var title = AppLocalization.string( "Meet up")
     @State private var note = ""
     @State private var location = ""
+    @State private var showEditShare = false
+    @State private var showRevokeConfirmation = false
 
     var body: some View {
         Group {
             if let issue = store.issue, store.snapshot == nil {
-                ContentUnavailableView("Schedule unavailable", systemImage: "calendar.badge.exclamationmark", description: Text(issue))
+                ContentUnavailableView("Availability unavailable", systemImage: "calendar.badge.exclamationmark", description: Text(issue))
             } else if let snapshot = store.snapshot {
                 ScrollView {
                     VStack(alignment: .leading, spacing: SideSeatTheme.spaceXL) {
                         scheduleHeader(snapshot)
-                        scheduleTimeline(snapshot)
-
-                        if !snapshot.freeSlots.isEmpty {
-                            availableTimes(snapshot.freeSlots)
+                        if store.ownedByViewer {
+                            scheduleTimeline(snapshot)
+                        } else {
+                            if snapshot.freeSlots.isEmpty {
+                                scheduleTimeline(snapshot)
+                            } else {
+                                recommendedTimes(
+                                    snapshot.freeSlots,
+                                    allowsSelection: store.allowGuestProposals
+                                )
+                            }
+                            if showsFullSchedule {
+                                scheduleTimeline(snapshot)
+                                    .transition(.opacity.combined(with: .move(edge: .top)))
+                            }
                         }
 
-                    if let proposal = store.proposal {
+                    if !store.ownedByViewer, let proposal = store.proposal {
                             VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
                                 Text("Your proposal")
                                     .font(.headline)
@@ -173,8 +226,10 @@ struct ScheduleShareRecipientView: View {
                             }
                     }
 
-                    if store.allowGuestProposals {
-                            proposalComposer
+                    if !store.ownedByViewer,
+                       store.allowGuestProposals,
+                       timeSelection != nil {
+                        proposalComposer
                     }
 
                     if let issue = store.issue {
@@ -188,13 +243,39 @@ struct ScheduleShareRecipientView: View {
                 }
                 .background(SideSeatTheme.bgGrouped)
             } else {
-                SSLoadingState("Loading schedule")
+                SSLoadingState("Loading availability")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .background(SideSeatTheme.bgGrouped)
-        .navigationTitle("Shared schedule")
+        .navigationTitle(store.ownedByViewer ? "Your shared availability" : "Shared availability")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if store.ownedByViewer, store.linkID != nil {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button {
+                        showEditShare = true
+                    } label: {
+                        Image(systemName: "slider.horizontal.3")
+                    }
+                    .accessibilityLabel("Edit sharing settings")
+                    .accessibilityIdentifier("schedule-share-owner-edit")
+
+                    Menu {
+                        Button(role: .destructive) {
+                            showRevokeConfirmation = true
+                        } label: {
+                            Label("Stop sharing", systemImage: "link.badge.minus")
+                        }
+                        .accessibilityIdentifier("schedule-share-owner-stop")
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                    .accessibilityLabel("More")
+                    .accessibilityIdentifier("schedule-share-owner-more")
+                }
+            }
+        }
         .task {
             await store.load(token: token, using: session)
             if let snapshot = store.snapshot, rangeDayCount(snapshot) > 3 {
@@ -202,17 +283,54 @@ struct ScheduleShareRecipientView: View {
             }
             restoreExistingProposalSelection()
         }
+        .sheet(isPresented: $showEditShare) {
+            if let linkID = store.linkID {
+                ScheduleShareComposeSheet(editingLinkID: linkID)
+            }
+        }
+        .ssActionPrompt(
+            isPresented: $showRevokeConfirmation,
+            title: AppLocalization.string("Stop sharing this availability?"),
+            message: AppLocalization.string("Anyone with this link will no longer be able to view your availability or suggest a time."),
+            systemImage: "link.badge.minus",
+            tint: SideSeatTheme.danger,
+            onDismiss: { showRevokeConfirmation = false },
+            accessibilityIdentifier: "schedule-share-owner-stop-prompt"
+        ) {
+            [
+                SSActionPromptAction(
+                    id: "schedule-share-owner-cancel-stop",
+                    title: AppLocalization.string("Cancel"),
+                    systemImage: "xmark",
+                    role: .cancel
+                ) {},
+                SSActionPromptAction(
+                    id: "schedule-share-owner-confirm-stop",
+                    title: AppLocalization.string("Stop sharing"),
+                    systemImage: "link.badge.minus",
+                    role: .destructive
+                ) {
+                    Task { await revokeShare() }
+                },
+            ]
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .sideSeatScheduleShareDidUpdate)) { notification in
+            guard notification.userInfo?[ScheduleShareNotificationKey.linkID] as? String == store.linkID else {
+                return
+            }
+            Task { await store.load(token: token, using: session) }
+        }
         .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("schedule-share-recipient")
+        .accessibilityIdentifier(store.ownedByViewer ? "schedule-share-owner" : "schedule-share-recipient")
     }
 
     private func scheduleHeader(_ snapshot: NativeScheduleShareSnapshot) -> some View {
         HStack(spacing: SideSeatTheme.spaceMD) {
             Image(systemName: "calendar.badge.clock")
                 .font(.title2.weight(.semibold))
-                .foregroundStyle(SideSeatTheme.accent)
+                .foregroundStyle(SideSeatTheme.HubTint.plans)
                 .frame(width: 44, height: 44)
-                .background(SideSeatTheme.accent.opacity(0.10), in: Circle())
+                .background(SideSeatTheme.HubTint.plans.opacity(0.12), in: Circle())
             VStack(alignment: .leading, spacing: 3) {
                 Text(snapshot.ownerDisplayLabel)
                     .font(.title3.weight(.semibold))
@@ -221,6 +339,11 @@ struct ScheduleShareRecipientView: View {
                     Text("\(start.formatted(date: .abbreviated, time: .omitted)) – \(end.formatted(date: .abbreviated, time: .omitted))")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
+                }
+                if store.isUpdated {
+                    Label("Updated", systemImage: "arrow.triangle.2.circlepath")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 }
             }
             Spacer(minLength: 0)
@@ -253,16 +376,16 @@ struct ScheduleShareRecipientView: View {
                 fullDay: showsFullDay,
                 selectedSlotID: timeSelection?.bounds.id,
                 selectedRange: timeSelection.map { DateInterval(start: $0.start, end: $0.end) },
-                onSelectSlot: { slot in
+                onSelectSlot: store.allowGuestProposals ? { slot in
                     selectFreeWindow(slot)
-                }
+                } : nil
             )
 
             HStack(spacing: SideSeatTheme.spaceLG) {
-                legend(color: SideSeatTheme.success, title: String(localized: "Free"))
-                legend(color: SideSeatTheme.textSecondary, title: String(localized: "Busy"))
+                legend(color: SideSeatTheme.success, title: AppLocalization.string( "Free"))
+                legend(color: SideSeatTheme.textSecondary, title: AppLocalization.string( "Busy"))
                 if timeSelection != nil {
-                    legend(color: SideSeatTheme.accent, title: String(localized: "Your time"))
+                    legend(color: SideSeatTheme.accent, title: AppLocalization.string( "Your time"))
                 }
                 Spacer(minLength: 0)
                 Button {
@@ -272,13 +395,13 @@ struct ScheduleShareRecipientView: View {
                 } label: {
                     HStack(spacing: SideSeatTheme.spaceXS) {
                         Image(systemName: showsFullDay ? "sun.max" : "clock")
-                            .foregroundStyle(SideSeatTheme.accent)
-                        Text(showsFullDay ? String(localized: "Day view") : String(localized: "24 hours"))
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        Text(showsFullDay ? AppLocalization.string( "Day view") : AppLocalization.string( "24 hours"))
                             .foregroundStyle(SideSeatTheme.textPrimary)
                     }
                     .font(.caption.weight(.semibold))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SSPressButtonStyle())
                 .accessibilityIdentifier("schedule-share-full-day-toggle")
             }
         }
@@ -308,48 +431,107 @@ struct ScheduleShareRecipientView: View {
         ).count
     }
 
-    private func availableTimes(_ slots: [NativeScheduleShareSlot]) -> some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("Free windows")
+    private func recommendedTimes(
+        _ slots: [NativeScheduleShareSlot],
+        allowsSelection: Bool
+    ) -> some View {
+        let candidates = ScheduleShareCandidateRecommendations.candidates(from: slots)
+        return VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(allowsSelection ? "Recommended times" : "Available times")
                     .font(.headline)
-                Spacer(minLength: SideSeatTheme.spaceMD)
-                Text("All day")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(.secondary)
+                Text(
+                    allowsSelection
+                        ? "Choose a suggested time, or open the full availability to find another."
+                        : "This availability is for viewing only."
+                )
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if !allowsSelection {
+                Label("View only", systemImage: "eye")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .accessibilityIdentifier("schedule-share-view-only")
             }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: SideSeatTheme.spaceSM) {
-                    ForEach(slots) { slot in
-                        Button {
-                            selectFreeWindow(slot)
-                        } label: {
-                            VStack(alignment: .leading, spacing: 3) {
-                                if let start = Date.sideSeatChatISO8601(slot.start),
-                                   let end = Date.sideSeatChatISO8601(slot.end) {
-                                    Text(start.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day()))
-                                        .font(.caption2.weight(.semibold))
-                                    Text(freeWindowTimeLabel(start: start, end: end))
-                                        .font(.caption.monospacedDigit())
-                                }
+                    ForEach(candidates) { candidate in
+                        if allowsSelection {
+                            Button {
+                                selectCandidate(candidate)
+                            } label: {
+                                candidateCard(candidate, selected: isCandidateSelected(candidate))
                             }
-                            .foregroundStyle(timeSelection?.bounds.id == slot.id ? Color.white : SideSeatTheme.textPrimary)
-                            .padding(.horizontal, 12)
-                            .frame(height: 50)
-                            .background(
-                                timeSelection?.bounds.id == slot.id ? SideSeatTheme.accent : SideSeatTheme.surface,
-                                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                    .strokeBorder(SideSeatTheme.fillTertiary, lineWidth: timeSelection?.bounds.id == slot.id ? 0 : 1)
-                            )
+                            .buttonStyle(SSPressButtonStyle())
+                            .accessibilityIdentifier("schedule-share-candidate-\(candidate.id)")
+                        } else {
+                            candidateCard(candidate, selected: false)
+                                .accessibilityIdentifier("schedule-share-candidate-\(candidate.id)")
                         }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("schedule-share-slot-\(slot.id)")
                     }
                 }
             }
+
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showsFullSchedule.toggle()
+                }
+            } label: {
+                HStack(spacing: SideSeatTheme.spaceSM) {
+                    Image(systemName: showsFullSchedule ? "chevron.up" : "calendar")
+                    Text(showsFullSchedule ? "Hide full availability" : "View all available times")
+                    Spacer(minLength: 0)
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(SideSeatTheme.utilityAction)
+                .frame(minHeight: 44)
+            }
+            .buttonStyle(SSPressButtonStyle())
+            .accessibilityIdentifier("schedule-share-full-availability")
+        }
+        .padding(SideSeatTheme.spaceMD)
+        .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+
+    private func candidateCard(
+        _ candidate: NativeScheduleShareCandidate,
+        selected: Bool
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(candidate.start.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day()))
+                .font(.caption2.weight(.semibold))
+            Text(freeWindowTimeLabel(start: candidate.start, end: candidate.end))
+                .font(.caption.monospacedDigit())
+        }
+        .foregroundStyle(selected ? Color.white : SideSeatTheme.textPrimary)
+        .padding(.horizontal, 12)
+        .frame(height: 50)
+        .background(
+            selected ? SideSeatTheme.accent : SideSeatTheme.fillTertiary,
+            in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .strokeBorder(SideSeatTheme.separator, lineWidth: selected ? 0 : 0.5)
+        )
+    }
+
+    private func isCandidateSelected(_ candidate: NativeScheduleShareCandidate) -> Bool {
+        guard let timeSelection else { return false }
+        return abs(timeSelection.start.timeIntervalSince(candidate.start)) < 1
+            && abs(timeSelection.end.timeIntervalSince(candidate.end)) < 1
+    }
+
+    private func selectCandidate(_ candidate: NativeScheduleShareCandidate) {
+        guard let selection = ScheduleShareProposalTime.selection(
+            in: candidate.bounds,
+            start: candidate.start,
+            end: candidate.end
+        ) else { return }
+        withAnimation(.easeOut(duration: 0.18)) {
+            timeSelection = selection
         }
     }
 
@@ -360,10 +542,6 @@ struct ScheduleShareRecipientView: View {
 
             if let selection = timeSelection {
                 proposalTimeEditor(selection)
-            } else {
-                Label("Choose a green free window", systemImage: "hand.tap")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
             }
 
             VStack(spacing: 0) {
@@ -384,7 +562,7 @@ struct ScheduleShareRecipientView: View {
             .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
 
             SSPrimaryButton(
-                title: String(localized: "Send proposal"),
+                title: AppLocalization.string( "Send proposal"),
                 isLoading: store.isSubmitting,
                 fill: .product,
                 height: 46,
@@ -407,14 +585,14 @@ struct ScheduleShareRecipientView: View {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                 HStack(spacing: SideSeatTheme.spaceSM) {
                     Image(systemName: "calendar.badge.checkmark")
-                        .foregroundStyle(SideSeatTheme.accent)
+                        .foregroundStyle(SideSeatTheme.HubTint.plans)
                     Text("\(selection.start.formatted(date: .abbreviated, time: .shortened)) – \(selection.end.formatted(date: .omitted, time: .shortened))")
                         .foregroundStyle(SideSeatTheme.textPrimary)
                 }
                 .font(.subheadline.weight(.semibold))
 
                 Text(
-                    "\(String(localized: "Free window")) \(boundsStart.formatted(date: .omitted, time: .shortened))–\(boundsEnd.formatted(date: .omitted, time: .shortened))"
+                    "\(AppLocalization.string( "Free window")) \(boundsStart.formatted(date: .omitted, time: .shortened))–\(boundsEnd.formatted(date: .omitted, time: .shortened))"
                 )
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -496,7 +674,7 @@ struct ScheduleShareRecipientView: View {
                     in: RoundedRectangle(cornerRadius: 8, style: .continuous)
                 )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SSPressButtonStyle())
         .disabled(!fits)
         .opacity(fits ? 1 : 0.38)
         .accessibilityIdentifier("schedule-share-duration-\(minutes)")
@@ -504,10 +682,10 @@ struct ScheduleShareRecipientView: View {
 
     private func durationLabel(_ minutes: Int) -> String {
         switch minutes {
-        case 30: String(localized: "30 min")
-        case 60: String(localized: "1 hr")
-        case 90: String(localized: "90 min")
-        default: String(localized: "2 hr")
+        case 30: AppLocalization.string( "30 min")
+        case 60: AppLocalization.string( "1 hr")
+        case 90: AppLocalization.string( "90 min")
+        default: AppLocalization.string( "2 hr")
         }
     }
 
@@ -547,9 +725,9 @@ struct ScheduleShareRecipientView: View {
 
     private func proposalStatus(_ status: String) -> String {
         switch status {
-        case "ACCEPTED": String(localized: "Accepted")
-        case "DECLINED": String(localized: "Declined")
-        default: String(localized: "Waiting for a response")
+        case "ACCEPTED": AppLocalization.string( "Accepted")
+        case "DECLINED": AppLocalization.string( "Declined")
+        default: AppLocalization.string( "Waiting for a response")
         }
     }
 
@@ -586,5 +764,16 @@ struct ScheduleShareRecipientView: View {
             end: selection.end,
             using: session
         )
+    }
+
+    @MainActor
+    private func revokeShare() async {
+        guard await store.revoke(using: session), let linkID = store.linkID else { return }
+        NotificationCenter.default.post(
+            name: .sideSeatScheduleShareDidRevoke,
+            object: nil,
+            userInfo: [ScheduleShareNotificationKey.linkID: linkID]
+        )
+        dismiss()
     }
 }

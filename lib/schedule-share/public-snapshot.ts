@@ -50,6 +50,8 @@ export async function buildOwnerPreviewSnapshotForUserId(
       presetKeys: [],
       hideAllDetails: false,
       includedDates: [],
+      availabilityStartMinutes: 0,
+      availabilityEndMinutes: 24 * 60,
     },
     ownerDisplayLabel: "",
     linkExpiresAt: defaultShareExpiresAt(new Date()),

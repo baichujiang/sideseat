@@ -1,10 +1,23 @@
 import "server-only";
 
-import { MessageType, Prisma } from "@prisma/client";
+import {
+  type ActionInterestSurface,
+  type ClassmatePostCategory,
+  MessageType,
+  Prisma,
+  type ProductFunnelSourceKind,
+} from "@prisma/client";
 
 import { RETIRED_SYSTEM_USERNAMES } from "@/lib/auth/retired-system-users";
 import { UNREPLIED_DIRECT_MESSAGE_LIMIT } from "@/lib/chat/unreplied-direct-message-limit";
 import { isAllowedChatImageUrl } from "@/lib/constants/chat-media";
+import { parseActionOriginSnapshot } from "@/lib/v2/action-context-snapshot";
+import { ACTION_COORDINATION_POLICY_SCHEMA_VERSION } from "@/lib/v2/action-coordination/capability";
+import { actionPolicyTupleKind } from "@/lib/v2/action-coordination/policy-snapshot";
+import {
+  businessFunnelEventKeys,
+  recordServerFunnelEvent,
+} from "@/lib/v2/funnel-events";
 import type { DirectMessageInput } from "@/lib/validators/invitation";
 
 type DirectMessageDb = Pick<
@@ -17,6 +30,13 @@ type DirectReplyGateDecision = {
 };
 
 export class InvalidDirectMessageImageError extends Error {}
+
+export class DirectMessageActionContextUnavailableError extends Error {
+  constructor(message = "The focused Action coordination is unavailable.") {
+    super(message);
+    this.name = "DirectMessageActionContextUnavailableError";
+  }
+}
 
 export class PeerReplyRequiredError extends Error {
   constructor(message = "Wait for a reply before sending more messages.") {
@@ -92,14 +112,14 @@ export async function assertDirectUnrepliedSendAllowed(
       where: {
         connectionId: options.connectionId,
         senderId: options.senderId,
-        type: { not: MessageType.SYSTEM },
+        type: { notIn: [MessageType.SYSTEM, MessageType.ACTION_INTEREST_CARD, MessageType.MUTUAL_OPPORTUNITY_CARD] },
       },
     }),
     db.message.findFirst({
       where: {
         connectionId: options.connectionId,
         senderId: peerId,
-        type: { not: MessageType.SYSTEM },
+        type: { notIn: [MessageType.SYSTEM, MessageType.ACTION_INTEREST_CARD, MessageType.MUTUAL_OPPORTUNITY_CARD] },
       },
       select: { id: true },
     }),
@@ -126,6 +146,7 @@ export async function createDirectMessageRecord(
     connectionId: string;
     senderId: string;
     input: DirectMessageInput;
+    createdAt?: Date;
   },
 ) {
   const gate = await assertDirectUnrepliedSendAllowed(db, {
@@ -144,6 +165,8 @@ export async function createDirectMessageRecord(
         body,
         type: MessageType.TEXT,
         replyToId,
+        actionContextId: options.input.actionContextId,
+        createdAt: options.createdAt,
       },
     });
     await completeDirectReplyGateAfterSend(db, options.connectionId, message.createdAt, gate);
@@ -163,6 +186,8 @@ export async function createDirectMessageRecord(
         type: MessageType.IMAGE,
         imageUrl: options.input.imageUrl,
         replyToId,
+        actionContextId: options.input.actionContextId,
+        createdAt: options.createdAt,
       },
     });
     await completeDirectReplyGateAfterSend(db, options.connectionId, message.createdAt, gate);
@@ -181,6 +206,8 @@ export async function createDirectMessageRecord(
       locationLng: options.input.locationLng,
       locationName,
       replyToId,
+      actionContextId: options.input.actionContextId,
+      createdAt: options.createdAt,
     },
   });
   await completeDirectReplyGateAfterSend(db, options.connectionId, message.createdAt, gate);
@@ -198,4 +225,157 @@ export async function completeDirectReplyGateAfterSend(
     where: { id: connectionId },
     data: { replyLimitUnlockedAt: createdAt },
   });
+}
+
+const focusedContextSelect = Prisma.validator<Prisma.ActionCoordinationContextSelect>()({
+  id: true,
+  state: true,
+  connectionId: true,
+  firstCounterpartResponseAt: true,
+  currentActivationId: true,
+  currentActivation: {
+    select: {
+      id: true,
+      interestId: true,
+      interestSurface: true,
+      connectedAt: true,
+      firstContentType: true,
+      terminalReason: true,
+    },
+  },
+  interest: {
+    select: {
+      id: true,
+      userId: true,
+      status: true,
+      originSnapshot: true,
+      classmatePostId: true,
+      classmatePost: {
+        select: {
+          id: true,
+          userId: true,
+          category: true,
+          coordinationPolicy: true,
+          policySchemaVersion: true,
+          policyParametersSnapshot: true,
+          experimentKeySnapshot: true,
+          experimentVariantSnapshot: true,
+          clientCapabilitySnapshot: true,
+          policySnapshottedAt: true,
+        },
+      },
+    },
+  },
+});
+
+export type FocusedDirectMessageActionContext =
+  Prisma.ActionCoordinationContextGetPayload<{
+    select: typeof focusedContextSelect;
+  }>;
+
+/**
+ * Pair safety must already be held. Lock and validate the explicit Context
+ * before the direct-message writer locks the Connection. Omitted Context IDs
+ * never call this path and are deliberately left unattributed.
+ */
+export async function lockFocusedDirectMessageActionContext(
+  tx: Prisma.TransactionClient,
+  options: {
+    actionContextId: string;
+    connectionId: string;
+    actorId: string;
+    participantIds: readonly [string, string];
+  },
+): Promise<FocusedDirectMessageActionContext> {
+  const locked = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+    SELECT "id"
+    FROM "ActionCoordinationContext"
+    WHERE "id" = ${options.actionContextId}
+    FOR UPDATE
+  `);
+  if (!locked[0]) throw new DirectMessageActionContextUnavailableError();
+  const context = await tx.actionCoordinationContext.findUnique({
+    where: { id: options.actionContextId },
+    select: focusedContextSelect,
+  });
+  if (!context) throw new DirectMessageActionContextUnavailableError();
+  const interest = context.interest;
+  const action = interest.classmatePost;
+  const expected = new Set([interest.userId, action.userId]);
+  const actual = new Set(options.participantIds);
+  const activation = context.currentActivation;
+  const origin = parseActionOriginSnapshot(interest.originSnapshot);
+  if (
+    context.state !== "OPEN" ||
+    context.connectionId !== options.connectionId ||
+    interest.status !== "ACTIVE" ||
+    !actual.has(options.actorId) ||
+    expected.size !== 2 ||
+    actual.size !== 2 ||
+    [...expected].some((id) => !actual.has(id)) ||
+    !activation ||
+    context.currentActivationId !== activation.id ||
+    activation.interestId !== interest.id ||
+    activation.connectedAt === null ||
+    activation.firstContentType === null ||
+    activation.terminalReason !== null ||
+    actionPolicyTupleKind(action) !== "SNAPSHOTTED_CREATOR_GATED" ||
+    origin?.kind !== "LIVE"
+  ) {
+    throw new DirectMessageActionContextUnavailableError();
+  }
+  return context;
+}
+
+function sourceKind(category: ClassmatePostCategory): ProductFunnelSourceKind {
+  return category === "SHARED_COURSES" ? "COURSE_ACTION" : "BUDDY_POST";
+}
+
+/** The interested counterpart owns the once-only human-response transition. */
+export async function recordFirstFocusedCounterpartResponse(
+  tx: Prisma.TransactionClient,
+  options: {
+    context: FocusedDirectMessageActionContext;
+    actorId: string;
+    connectionId: string;
+    occurredAt: Date;
+  },
+): Promise<boolean> {
+  const context = options.context;
+  const interest = context.interest;
+  const action = interest.classmatePost;
+  const activation = context.currentActivation;
+  if (options.actorId !== interest.userId || !activation) return false;
+  const updated = await tx.actionCoordinationContext.updateMany({
+    where: {
+      id: context.id,
+      connectionId: options.connectionId,
+      state: "OPEN",
+      firstCounterpartResponseAt: null,
+    },
+    data: {
+      firstCounterpartResponseAt: options.occurredAt,
+      updatedAt: options.occurredAt,
+    },
+  });
+  if (updated.count !== 1) return false;
+  await recordServerFunnelEvent(tx, {
+    businessEventKey: businessFunnelEventKeys.firstHumanResponse(context.id),
+    actorId: options.actorId,
+    name: "FIRST_HUMAN_RESPONSE",
+    surface: "CHAT",
+    sourceKind: sourceKind(action.category),
+    sourceId: action.id,
+    connectionId: options.connectionId,
+    actionInterestId: interest.id,
+    interestActivationId: activation.id,
+    actionContextId: context.id,
+    interestSurface: activation.interestSurface as ActionInterestSurface,
+    coordinationPolicy: "CREATOR_GATED_V2",
+    policySchemaVersion: ACTION_COORDINATION_POLICY_SCHEMA_VERSION,
+    experimentKey: action.experimentKeySnapshot!,
+    experimentVariant: action.experimentVariantSnapshot!,
+    occurredAt: options.occurredAt,
+  });
+  return true;
 }

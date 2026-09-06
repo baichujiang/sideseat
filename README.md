@@ -1,264 +1,115 @@
-# SideSeat MVP
+# SideSeat
 
-SideSeat is a mobile-first web app for international students in Germany to meet classmates through shared courses and communicate in a low-pressure, privacy-respecting way.
+> 让每一段校园时光，都有人同行。
 
-The product principle is:
+SideSeat 是面向大学生的校园同行产品。用户从一个具体、短期的意愿开始，
+在双方独立同意后进入带上下文的沟通，确认 Plan，并把真实承诺写入双方日历。
+长期目标不是制造更多匹配，而是让一次共同经历自然发展成下一次适合的同行，
+让原本陌生的校园逐渐充满熟悉的人。
 
-`shared context first, relationship second`
-
-## Architecture Summary
-
-- Frontend and backend live in one Next.js App Router app for a faster MVP with a cleaner deployment story.
-- PostgreSQL + Prisma provide a relational schema that keeps courses, connections, messages, blocks, reports, and contact exchange flows consistent.
-- Auth uses email/password plus secure, opaque, database-backed sessions stored in an `HttpOnly` cookie.
-- Discovery is intentionally constrained to shared academic context: same course, major, or semester.
-- Direct messaging uses the first-message flow: the sender's first message creates the 1:1 thread atomically (no approval step). Access requires at least one shared course, and a per-hour cap bounds abuse.
-- Private contact info is hidden until contact exchange is explicitly requested and accepted.
-
-## Tech Stack
-
-- Next.js App Router
-- TypeScript
-- Tailwind CSS
-- React Hook Form + Zod
-- Prisma
-- PostgreSQL
-- bcryptjs for password hashing
-
-## Project Structure
+当前核心链路：
 
 ```text
-.
-├── app
-│   ├── (auth)
-│   │   ├── forgot-password/page.tsx
-│   │   ├── login/page.tsx
-│   │   ├── signup/page.tsx
-│   │   └── layout.tsx
-│   ├── (app)
-│   │   ├── connections/[connectionId]/page.tsx
-│   │   ├── courses/[courseId]/page.tsx
-│   │   ├── courses/add/page.tsx
-│   │   ├── courses/page.tsx
-│   │   ├── discover/page.tsx
-│   │   ├── home/page.tsx
-│   │   ├── inbox/page.tsx
-│   │   ├── onboarding/page.tsx
-│   │   ├── profile/page.tsx
-│   │   ├── settings/page.tsx
-│   │   └── layout.tsx
-│   ├── api
-│   │   ├── auth/login/route.ts
-│   │   ├── auth/logout/route.ts
-│   │   ├── auth/signup/route.ts
-│   │   ├── blocks/route.ts
-│   │   ├── connections/[connectionId]/contact-exchange/route.ts
-│   │   ├── connections/[connectionId]/end/route.ts
-│   │   ├── connections/[connectionId]/messages/route.ts
-│   │   ├── courses/[courseId]/route.ts
-│   │   ├── courses/route.ts
-│   │   ├── discover/route.ts
-│   │   ├── connections/start/route.ts
-│   │   ├── profile/route.ts
-│   │   └── reports/route.ts
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx
-├── components
-│   ├── cards
-│   ├── forms
-│   ├── inbox
-│   ├── layout
-│   └── ui
-├── lib
-│   ├── auth
-│   ├── constants
-│   ├── db
-│   ├── queries
-│   ├── validators
-│   ├── http.ts
-│   └── utils.ts
-├── prisma
-│   ├── schema.prisma
-│   └── seed.ts
-├── middleware.ts
-├── package.json
-└── .env.example
+Weekly Intent
+→ 48 小时主动匹配
+→ private Mutual Opportunity
+→ bilateral consent
+→ contextual Messages
+→ Plan confirmed
+→ both Calendars
+→ Outcome
+→ Meet Again（下一阶段）
+→ Familiar Face / Repeat Opportunity（下一阶段）
 ```
 
-## Database Schema
+SideSeat 不提供人物广场、滑动匹配、课程大群、同学名单或公开社交关系图。
+课程提供匹配与课表上下文；Calendar 是承诺的可靠承载层，不是推荐入口。
 
-Main models:
+## Product surfaces
 
-- `User`: profile, privacy preferences, optional private contact handles
-- `Session`: opaque database-backed login sessions
-- `Course`: shared academic context
-- `UserCourse`: user-course membership plus per-course intention tags
-- `Connection`: 1:1 thread metadata; `originCourseId` records the shared course context it was seeded from
-- `Invitation` (legacy): pre-MVP approval gate; no longer written to, kept for historical rows and admin reads
-- `Message`: lightweight plain-text chat
-- `ContactExchangeRequest`: explicit private contact unlock flow
-- `Block`: anti-harassment protection
-- `Report`: moderation intake
+原生 iPhone App 使用四个稳定入口：
 
-See [prisma/schema.prisma](prisma/schema.prisma) for the full schema.
+```text
+Together / 同行   Calendar / 日历   Messages / 消息   Me / 我
+```
 
-## API Design
+- **Together**：管理多个短期意愿、开启或停止 48 小时匹配、决定有限的同行机会。
+- **Calendar**：个人日程、课程、确认后的 Plan、搜索以及 Apple Calendar 互操作。
+- **Messages**：双方同意后的上下文沟通、Plan 提议、接受、改期与取消。
+- **Me**：身份、学生认证、课程、语言、隐私、安全和设置。
 
-### Auth
+旧 Next.js 页面和 Capacitor 工程仅作为回归及紧急兼容路径，不是当前正式用户界面。
 
-- `POST /api/auth/email/send-otp` — send email signup code (`{ "email": "…", "purpose": "signup" }`); rejects already-registered addresses
-- `POST /api/auth/signup-email` — register with **verified email + password** (`code` from email OTP; one account per normalized email)
-- `POST /api/auth/phone/send-otp` — send SMS signup code (`{ "phone": "…", "purpose": "signup" }`)
-- `POST /api/auth/signup-phone` — register with **phone + SMS code + password**
-- `POST /api/auth/signup` — legacy **username + password** signup (still supported for scripts / old clients)
-- `POST /api/auth/login` — **username, email, or phone** + password
+## Architecture
 
-**SMS (production):** set `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_FROM_NUMBER`.  
-If Twilio is not configured, **development** builds log the 6-digit code to the server console; **production** returns an error until Twilio is configured.
+- `ios-native/`：SwiftUI 原生 iPhone 客户端，最低 iOS 17。
+- `app/api/`：Next.js App Router HTTP API 与公开链接入口。
+- `lib/`：服务端领域逻辑、匹配、Plan、Calendar、消息与安全规则。
+- `prisma/`：PostgreSQL Schema 和仅前向迁移。
+- `openapi/v1.json`：原生客户端 API 的契约来源。
+- `ios-native/SideSeat/Generated/OpenAPI/`：由 OpenAPI 生成，不手工编辑。
+- `tests/`、`e2e/`、`ios-native/SideSeatTests/`、`ios-native/SideSeatUITests/`：
+  服务端、API、Swift 和 UI 验证。
+- `docs/`：产品、工程合同、设计、发布与运维文档。
 
-- `POST /api/auth/logout`
-- `POST /api/student-verification/request`
-- `GET /api/student-verification/verify?token=...`
-- `PATCH /api/admin/verifications/:userId`
+生产服务运行在 Vercel 与 PostgreSQL/Neon 上。原生客户端、公开兼容页面和 API
+共享同一账号及数据来源。
 
-### Profile and Settings
+## Documentation authority
 
-- `PUT /api/profile`
+开始产品或工程修改前先阅读：
 
-### Courses and Discovery
+1. [AGENTS.md](./AGENTS.md) — 本仓库开发方式。
+2. [Documentation index](./docs/README.md) — 文档状态和权威顺序。
+3. [Product](./docs/PRODUCT.md) — 定位、对象、导航、冻结规则与非目标。
+4. [User Flow](./docs/USER_FLOW.md) — 当前完整交互逻辑。
+5. [Roadmap](./docs/ROADMAP.md) — 当前实施顺序和进入下一阶段的门槛。
 
-- `GET /api/courses`
-- `POST /api/courses`
-- `DELETE /api/courses/:courseId`
-- `GET /api/discover`
+实现状态以当前代码、Schema、OpenAPI 和可复现测试结果为准。带日期的历史测试或
+发布记录不能替代当前验证。
 
-### Connections and Messages
+## Local development
 
-- `POST /api/connections/start` — create a new 1:1 thread by sending the first message (first-message flow)
-- `POST /api/connections/:connectionId/messages` — reply on an existing thread
-- `POST /api/connections/:connectionId/contact-exchange`
-- `POST /api/connections/:connectionId/end`
+Requirements:
 
-### Safety
+- Node.js 22+
+- npm
+- Xcode 26+
+- 本地或隔离 PostgreSQL 测试数据库
 
-- `POST /api/blocks`
-- `POST /api/reports`
-- `PATCH /api/admin/reports/:reportId`
-
-## Local Setup
-
-1. Install dependencies:
-
-```bash
+```sh
 npm install
-```
-
-2. Copy env values:
-
-```bash
-cp .env.example .env
-```
-
-3. Start PostgreSQL locally and update `DATABASE_URL` in `.env`.
-
-4. Generate Prisma client:
-
-```bash
+npm run db:start
 npm run prisma:generate
-```
-
-5. Create your initial schema:
-
-```bash
-npm run prisma:migrate -- --name init
-```
-
-6. Seed demo data:
-
-```bash
-npm run prisma:seed
-```
-
-7. Run the app:
-
-```bash
 npm run dev
 ```
 
-8. Run the authenticated smoke test against the dev server:
+常用检查：
 
-```bash
-npm run smoke:auth
+```sh
+npm run lint
+npx tsc --noEmit --incremental false
+npm run test:v2
+npm run test:openapi:v1
+npm run check:openapi:v1
 ```
 
-## Demo Accounts
+原生工程：
 
-After seeding:
+```sh
+ios-native/scripts/generate-openapi-client.sh
+ios-native/scripts/generate-project.sh
+```
 
-- `lin@example.com`
-- `amira@example.com`
-- `lucas@example.com`
-- `yuna@example.com`
+详细构建方式见 [Native iOS](./docs/IOS.md)。
 
-Password for all seeded users:
+## Deployment and release
 
-`Password123`
+生产数据库迁移、Vercel Production 部署、远程通知、签名和 TestFlight 上传都是
+明确的发布操作，必须针对本次目标获得授权，并记录实际环境与结果。不要依赖普通
+Preview 或本地构建隐式迁移共享数据库。
 
-## Product Coverage by Phase
+- 发布与生产配置：[Release](./docs/RELEASE.md)
+- 隐私申报：[Privacy](./docs/PRIVACY.md)
 
-### Phase 1
-
-- App scaffold
-- Prisma schema
-- Authentication
-- Protected routes
-- Onboarding/profile
-- Course management
-- Discovery through shared context
-- Mobile-first shell and navigation
-- Student verification status foundation
-
-### Phase 2
-
-- First-message chat flow (no invite gate; per-hour new-thread rate limit)
-- Inbox
-- Accepted connections
-
-### Phase 3
-
-- Lightweight text chat
-- Contact exchange request flow
-- End connection
-- Block user
-- Report user
-
-### Phase 4
-
-- Seed data
-- README
-- Deployment notes
-- Basic moderation dashboard
-
-## Deployment Notes
-
-- Set `DATABASE_URL`, `SESSION_SECRET`, and `NEXT_PUBLIC_APP_URL` in your deployment environment.
-- **Stripe tips (optional):** set `STRIPE_SECRET_KEY` (`sk_test_…` or `sk_live_…`) to enable the Me-page tip flow via Stripe Checkout. Use a public `NEXT_PUBLIC_APP_URL` so success/cancel redirects match your domain. See `DEPLOY.md` §2b for Dashboard steps.
-- Set `ADMIN_EMAILS` to a comma-separated allowlist for moderation access.
-- Set `RESEND_API_KEY` and `EMAIL_FROM` to enable real student verification emails. If they are missing, the app falls back to a local verification link for development.
-- Student email auto-verification is currently restricted to a small Munich launch whitelist of officially confirmed domains. Other domains go to manual review.
-- Lightweight anti-abuse signals are captured on signup, login, and first-message send: install ID, hashed IP, user agent, language, platform, timezone, and screen size. These are used as moderation hints rather than hard identity proof.
-- Run Prisma migration during deploy or release step.
-- Session cookies are configured as secure in production.
-- For a production launch, add:
-  - password reset email flow
-  - admin moderation dashboard
-  - stronger per-IP and per-account rate limiting
-  - optional university email verification
-  - audit logging for safety actions
-
-## Notes
-
-- This MVP intentionally does not include public feeds, random discovery, media messaging, typing indicators, or read receipts.
-- If you later wrap this into iOS or Android shells, the current mobile-first web architecture is already suitable for a WebView-based first release.
-# sideseat
+任何凭据、数据库 URL、APNs 私钥、Sentry Token 或测试账号密码都不得写入仓库。

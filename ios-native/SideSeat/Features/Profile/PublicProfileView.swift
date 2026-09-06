@@ -5,7 +5,6 @@ struct PublicProfileView: View {
     @Environment(RouterPath.self) private var router
     let userID: String
     @State private var store = PublicProfileStore()
-    @State private var openConversation = OpenConversationStore()
 
     var body: some View {
         Group {
@@ -18,8 +17,7 @@ struct PublicProfileView: View {
                             avatarUrl: payload.profile.avatarUrl,
                             tagline: payload.profile.tagline,
                             schoolSummary: payload.profile.schoolSummary,
-                            verifiedStudent: payload.profile.verifiedStudent,
-                            verificationStatus: payload.profile.studentVerificationStatus
+                            verifiedStudent: payload.profile.verifiedStudent
                         )
                         if let metVia = payload.metVia {
                             Label(metVia, systemImage: "link")
@@ -40,40 +38,24 @@ struct PublicProfileView: View {
                         if !payload.sharedCourses.isEmpty {
                             Text(
                                 payload.sharedCourses.count == 1
-                                    ? String(localized: "\(payload.sharedCourses.count) shared course")
-                                    : String(localized: "\(payload.sharedCourses.count) shared courses")
+                                    ? AppLocalization.string( "\(payload.sharedCourses.count) shared course")
+                                    : AppLocalization.string( "\(payload.sharedCourses.count) shared courses")
                             )
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
 
-                    if payload.viewerCanMessage {
+                    if payload.viewerCanMessage,
+                       let connectionID = payload.connectionId
+                    {
                         Section {
                             Button {
-                                Task { await openChat(peerID: payload.profile.id) }
+                                router.navigate(to: .directChat(connectionID: connectionID))
                             } label: {
-                                if openConversation.isOpening {
-                                    ProgressView()
-                                        .ssNeutralProgressTint()
-                                } else {
-                                    Label(
-                                        payload.connectionId == nil
-                                            ? String(localized: "Message")
-                                            : String(localized: "Open chat"),
-                                        systemImage: "message"
-                                    )
-                                }
+                                Label("Open chat", systemImage: "message")
                             }
-                            .disabled(openConversation.isOpening)
                             .accessibilityIdentifier("public-profile-message")
-
-                            if let issue = openConversation.issue {
-                                Text(issue)
-                                    .font(.footnote)
-                                    .foregroundStyle(SideSeatTheme.danger)
-                                    .accessibilityIdentifier("public-profile-message-error")
-                            }
                         }
                     }
                 }
@@ -100,15 +82,6 @@ struct PublicProfileView: View {
         await store.load(userID: userID, using: session)
     }
 
-    private func openChat(peerID: String) async {
-        guard let connectionID = await openConversation.open(peerID: peerID, using: session) else {
-            return
-        }
-        if let current = store.profile, current.connectionId == nil {
-            store.applyOpenedConnection(connectionID)
-        }
-        router.navigate(to: .directChat(connectionID: connectionID))
-    }
 }
 
 
@@ -119,16 +92,21 @@ private struct ProfileHeader: View {
     let tagline: String?
     let schoolSummary: NativeProfileSchoolSummary
     let verifiedStudent: Bool
-    let verificationStatus: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .center, spacing: 14) {
                 ProfileAvatar(url: avatarUrl, name: displayName, size: 56)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(displayName)
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(.primary)
+                    HStack(spacing: 6) {
+                        Text(displayName)
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                        if verifiedStudent {
+                            VerifiedSchoolMark(school: schoolSummary.schoolShort, compact: false)
+                        }
+                    }
                     Text("@\(username)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -137,11 +115,6 @@ private struct ProfileHeader: View {
             Text(schoolSummary.displayLine)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-            SchoolIdentityBadge(
-                school: schoolSummary.schoolShort,
-                verifiedStudent: verifiedStudent,
-                status: verificationStatus
-            )
             if let tagline, !tagline.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 Text(tagline)
                     .font(.body)

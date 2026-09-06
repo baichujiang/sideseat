@@ -101,7 +101,11 @@ struct NativeHomeSchedule: Codable, Sendable {
             start: start,
             end: end,
             location: entry.location,
+            note: entry.note,
             colorHex: entry.categoryColor,
+            categoryName: entry.categoryName,
+            repeatRule: entry.repeatRule,
+            repeatUntil: entry.repeatUntilISO.flatMap(Date.sideSeatISO8601),
             source: entry.id.hasPrefix("icsfeed:") ? .subscription : .event,
             withLabel: entry.withLabel,
             participantNames: entry.eventParticipants.map(\.name),
@@ -125,7 +129,11 @@ struct NativeHomeSchedule: Codable, Sendable {
             start: start,
             end: end,
             location: block.location,
+            note: nil,
             colorHex: block.categoryColor,
+            categoryName: nil,
+            repeatRule: NativeCalendarRepeatRule.weekly.rawValue,
+            repeatUntil: nil,
             source: .course
         )
     }
@@ -258,7 +266,11 @@ struct HomeAgendaItem: Identifiable, Hashable, Sendable {
     let start: Date
     let end: Date
     let location: String?
+    let note: String?
     let colorHex: String?
+    let categoryName: String?
+    let repeatRule: String
+    let repeatUntil: Date?
     let source: Source
     let withLabel: String?
     let participantNames: [String]
@@ -270,7 +282,11 @@ struct HomeAgendaItem: Identifiable, Hashable, Sendable {
         start: Date,
         end: Date,
         location: String?,
+        note: String? = nil,
         colorHex: String?,
+        categoryName: String? = nil,
+        repeatRule: String = NativeCalendarRepeatRule.none.rawValue,
+        repeatUntil: Date? = nil,
         source: Source,
         withLabel: String? = nil,
         participantNames: [String] = [],
@@ -281,7 +297,11 @@ struct HomeAgendaItem: Identifiable, Hashable, Sendable {
         self.start = start
         self.end = end
         self.location = location
+        self.note = note
         self.colorHex = colorHex
+        self.categoryName = categoryName
+        self.repeatRule = repeatRule
+        self.repeatUntil = repeatUntil
         self.source = source
         self.withLabel = withLabel
         self.participantNames = participantNames
@@ -397,7 +417,7 @@ extension NativeHomeSchedule {
                     startISO: now.ISO8601Format(),
                     endISO: end.ISO8601Format(),
                     categoryId: "ui-test-category",
-                    categoryColor: "#2563EB",
+                    categoryColor: "#7C3AED",
                     categoryName: "Study",
                     discoverActivityId: nil
                 ),
@@ -432,7 +452,7 @@ extension NativeHomeSchedule {
                     startISO: tomorrowStart.ISO8601Format(),
                     endISO: tomorrowEnd.ISO8601Format(),
                     categoryId: "ui-test-category",
-                    categoryColor: "#2563EB",
+                    categoryColor: "#7C3AED",
                     categoryName: "Study",
                     discoverActivityId: nil
                 )
@@ -448,11 +468,49 @@ extension NativeHomeSchedule {
                 NativeHomeCalendarCategory(
                     id: "ui-test-category",
                     name: "Study",
-                    color: "#2563EB",
+                    color: "#7C3AED",
                     presetKey: nil,
                     icsSubscriptionUrl: nil
                 )
             ]
+        )
+    }
+
+    static func uiTestingEventDotOverflowFixture(now: Date) -> NativeHomeSchedule {
+        let base = uiTestingFixture(now: now)
+        let calendar = Calendar.sideSeatBerlin
+        let dayStart = calendar.startOfDay(for: now)
+        let colors = ["#2563EB", "#0F766E", "#C2410C", "#9333EA", "#16A34A"]
+        let entries = colors.enumerated().compactMap { index, color -> NativeHomeStudyEntry? in
+            guard
+                let start = calendar.date(byAdding: .hour, value: 8 + index * 2, to: dayStart),
+                let end = calendar.date(byAdding: .minute, value: 45, to: start)
+            else { return nil }
+
+            return NativeHomeStudyEntry(
+                id: "ui-dot-overflow-\(index)",
+                title: "Calendar item \(index + 1)",
+                location: nil,
+                withLabel: nil,
+                note: nil,
+                repeatRule: "NONE",
+                repeatUntilISO: nil,
+                eventParticipants: [],
+                startISO: start.ISO8601Format(),
+                endISO: end.ISO8601Format(),
+                categoryId: nil,
+                categoryColor: color,
+                categoryName: nil,
+                discoverActivityId: nil
+            )
+        }
+
+        return NativeHomeSchedule(
+            window: base.window,
+            classBlocks: base.classBlocks,
+            studyEntries: entries + base.studyEntries.filter { $0.id == "ui-tomorrow-event" },
+            companionOptions: base.companionOptions,
+            initialCalendarCategories: base.initialCalendarCategories
         )
     }
 

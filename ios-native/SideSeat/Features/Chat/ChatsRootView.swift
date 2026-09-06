@@ -8,17 +8,20 @@ enum ChatCreationSymbol {
 struct ChatsRootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Bindable var store: InboxStore
-    @State private var showCreateGroup = false
 
     var body: some View {
         Group {
             if let payload = store.payload {
-                if payload.conversations.isEmpty {
+                if store.visibleConversations.isEmpty,
+                   payload.plansNeedingYourAction == 0,
+                   (payload.actionResponseSummary?.unseenVisibleInterestCount ?? 0) == 0
+                {
                     SSEmptyState(
                         title: "No conversations",
                         systemImage: "bubble.left.and.bubble.right",
-                        description: "Message someone from Discover or a profile to start chatting."
+                        description: "Conversations appear here after you both choose to do something together."
                     )
                 } else {
                     List {
@@ -30,14 +33,26 @@ struct ChatsRootView: View {
                                     .accessibilityIdentifier("inbox-issue-banner")
                             }
                         }
-                        Section {
-                            inboxQuickChips(payload: payload)
+                        if payload.plansNeedingYourAction > 0 {
+                            Section {
+                                pendingPlansRow(count: payload.plansNeedingYourAction)
+                            }
+                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 4, trailing: 16))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
                         }
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 4, trailing: 16))
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
+                        if let summary = payload.actionResponseSummary,
+                           summary.unseenVisibleInterestCount > 0
+                        {
+                            Section {
+                                actionResponsesRow(summary)
+                            }
+                            .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                        }
 
-                        if store.hasNoSearchMatches || store.hasNoFilterMatches {
+                        if store.hasNoSearchMatches {
                             Section {
                                 SSEmptyState(
                                     title: "No matches",
@@ -51,10 +66,12 @@ struct ChatsRootView: View {
                             .listRowBackground(Color.clear)
                         } else {
                             if !store.pinned.isEmpty {
-                                Section("Pinned") {
+                                Section {
                                     ForEach(store.pinned) { row in
                                         inboxRow(row)
                                     }
+                                } header: {
+                                    inboxSectionHeader("Pinned")
                                 }
                             }
                             Section {
@@ -63,7 +80,7 @@ struct ChatsRootView: View {
                                 }
                             } header: {
                                 if !store.pinned.isEmpty {
-                                    Text("Recent")
+                                    inboxSectionHeader("Recent")
                                 }
                             }
                         }
@@ -74,12 +91,12 @@ struct ChatsRootView: View {
                 }
             } else if let issue = store.issue {
                 ContentUnavailableView {
-                    Label("Chats unavailable", systemImage: "wifi.exclamationmark")
+                    Label("Messages unavailable", systemImage: "wifi.exclamationmark")
                 } description: {
                     Text(issue)
                 } actions: {
                     SSPrimaryButton(
-                        title: String(localized: "Try again"),
+                        title: AppLocalization.string( "Try again"),
                         fill: .product,
                         height: 44
                     ) {
@@ -88,59 +105,17 @@ struct ChatsRootView: View {
                     .frame(maxWidth: 220)
                 }
             } else {
-                SSLoadingState("Loading chats")
+                SSLoadingState("Loading messages")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .ssRootNavigationTitle("Chats")
+        .ssRootNavigationTitle("Messages")
         .searchable(
             text: $store.searchQuery,
             placement: .navigationBarDrawer(displayMode: .always),
-            prompt: "Search chats"
+            prompt: "Search messages"
         )
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Button {
-                        router.navigate(to: .contacts)
-                    } label: {
-                        Label {
-                            Text("Add friend")
-                        } icon: {
-                            Image(systemName: ChatCreationSymbol.addFriend)
-                                .symbolRenderingMode(.hierarchical)
-                        }
-                    }
-                    .accessibilityIdentifier("inbox-toolbar-contacts")
-
-                    Button {
-                        showCreateGroup = true
-                    } label: {
-                        Label {
-                            Text("New group")
-                        } icon: {
-                            Image(systemName: ChatCreationSymbol.newGroup)
-                                .symbolRenderingMode(.hierarchical)
-                        }
-                    }
-                    .accessibilityIdentifier("inbox-toolbar-new-group")
-                } label: {
-                    Image(systemName: ChatCreationSymbol.newGroup)
-                        .symbolRenderingMode(.hierarchical)
-                        .font(.system(size: 17, weight: .semibold))
-                        .frame(width: 32, height: 32)
-                        .contentShape(Rectangle())
-                }
-                .accessibilityLabel("Create chat")
-                .accessibilityIdentifier("inbox-toolbar-more")
-            }
-        }
-        .sheet(isPresented: $showCreateGroup) {
-            GroupCreateSheet { groupChatID in
-                showCreateGroup = false
-                router.navigate(to: .groupChat(groupChatID: groupChatID))
-            }
-        }
+        .ssRootSearchSurface()
         .refreshable { await loadInboxAndPrefetch() }
         // Initial load. Returning from a pushed chat does not re-fire `onAppear` (root stayed visible).
         .onAppear {
@@ -152,6 +127,13 @@ struct ChatsRootView: View {
                 Task { await loadInboxAndPrefetch() }
             }
         }
+    }
+
+    private func inboxSectionHeader(_ title: LocalizedStringKey) -> some View {
+        Text(title)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            .textCase(nil)
     }
 
     private func loadInboxAndPrefetch() async {
@@ -175,96 +157,154 @@ struct ChatsRootView: View {
         }
     }
 
-    @ViewBuilder
-    private func inboxQuickChips(payload: NativeInboxPayload) -> some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(InboxConversationFilter.allCases, id: \.self) { filter in
-                    let count = conversationCount(for: filter, payload: payload)
-                    Button {
-                        withAnimation(.easeOut(duration: 0.16)) {
-                            store.conversationFilter = filter
-                        }
-                    } label: {
-                        chipLabel(
-                            title: filter.title,
-                            count: count,
-                            selected: store.conversationFilter == filter
-                        )
+    private func pendingPlansRow(count: Int) -> some View {
+        Button {
+            router.navigate(to: .plans)
+        } label: {
+            Group {
+                if dynamicTypeSize.isAccessibilitySize {
+                    HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
+                        pendingPlansIcon(size: 36)
+
+                        Text("Plans waiting for your response")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                        Spacer(minLength: SideSeatTheme.spaceXS)
+                        pendingPlansCountBadge(count)
                     }
-                    .buttonStyle(.plain)
-                    .disabled(filter != .all && count == 0)
-                    .opacity(filter != .all && count == 0 ? 0.45 : 1)
-                    .accessibilityIdentifier(filter.accessibilityIdentifier)
-                    .accessibilityLabel(String(localized: "\(filter.title), \(count)"))
-                    .accessibilityAddTraits(store.conversationFilter == filter ? .isSelected : [])
-                }
+                } else {
+                    HStack(spacing: SideSeatTheme.spaceMD) {
+                        pendingPlansIcon(size: 42)
 
-                Button {
-                    router.navigate(to: .plans)
-                } label: {
-                    chipLabel(
-                        title: String(localized: "Plans"),
-                        count: payload.plansNeedingYourAction,
-                        emphasized: payload.plansNeedingYourAction > 0,
-                        systemImage: "calendar"
-                    )
+                        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                            Text("Plans waiting for your response")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(SideSeatTheme.textPrimary)
+                                .fixedSize(horizontal: false, vertical: true)
+
+                            Text("Review invitations and schedule updates")
+                                .font(.footnote)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                        pendingPlansCountBadge(count)
+                    }
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("inbox-chip-plans")
-                .accessibilityLabel(String(localized: "Plans, \(payload.plansNeedingYourAction)"))
             }
-            .padding(.vertical, 2)
+            .padding(.horizontal, SideSeatTheme.spaceLG)
+            .padding(.vertical, SideSeatTheme.spaceLG)
+            .frame(minHeight: 80)
+            .background(
+                SideSeatTheme.surface,
+                in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
+                    .strokeBorder(SideSeatTheme.separator.opacity(0.65), lineWidth: 0.5)
+            }
+            .contentShape(Rectangle())
         }
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("inbox-quick-chips")
+        .buttonStyle(SSPressButtonStyle())
+        .accessibilityIdentifier("inbox-pending-plans")
+        .accessibilityLabel("Plans waiting for your response")
+        .accessibilityValue("\(count)")
+        .accessibilityHint("Open plans")
     }
 
-    private func conversationCount(
-        for filter: InboxConversationFilter,
-        payload: NativeInboxPayload
-    ) -> Int {
-        guard let kind = filter.kind else { return payload.conversations.count }
-        return payload.conversations.filter { $0.kind == kind }.count
-    }
-
-    private func chipLabel(
-        title: String,
-        count: Int,
-        emphasized: Bool = false,
-        selected: Bool = false,
-        systemImage: String? = nil
-    ) -> some View {
-        HStack(spacing: 6) {
-            if let systemImage {
-                Image(systemName: systemImage)
-                    .font(.caption.weight(.semibold))
+    private func actionResponsesRow(_ summary: Components.Schemas.ActionResponseSummary) -> some View {
+        Button {
+            router.navigate(to: .actionResponses(
+                actionID: summary.focus.actionId,
+                interestID: summary.focus.interestId
+            ))
+        } label: {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: SideSeatTheme.spaceMD) {
+                    actionResponsesIcon
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                        Text("Responses to your actions")
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textPrimary)
+                        Text("See who would like to join you")
+                            .font(.footnote)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    responseCountBadge(summary.unseenVisibleInterestCount)
+                }
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    HStack {
+                        actionResponsesIcon
+                        responseCountBadge(summary.unseenVisibleInterestCount)
+                    }
+                    Text("Responses to your actions")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.textPrimary)
+                    Text("See who would like to join you")
+                        .font(.footnote)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                }
             }
-            Text(title)
-                .font(.caption.weight(.semibold))
-            if count > 0 {
-                Text(count > 99 ? "99+" : "\(count)")
-                    .font(.caption.weight(.bold))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(
-                        Capsule().fill(
-                            selected
-                                ? Color.white.opacity(0.22)
-                                : (emphasized ? SideSeatTheme.accent : SideSeatTheme.fillSubtle)
-                        )
-                    )
-                    .foregroundStyle(selected || emphasized ? SideSeatTheme.ink : Color.primary)
-                    .accessibilityHidden(true)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(SideSeatTheme.spaceLG)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
+            .overlay {
+                RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius)
+                    .strokeBorder(SideSeatTheme.separator.opacity(0.65), lineWidth: 0.5)
             }
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 7)
-        .frame(minHeight: 44)
-        .foregroundStyle(selected ? SideSeatTheme.ink : Color.primary)
-        .background(
-            Capsule().fill(selected ? SideSeatTheme.accent : SideSeatTheme.Chat.controlFill)
-        )
+        .buttonStyle(SSPressButtonStyle())
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Responses to your actions")
+        .accessibilityValue("\(summary.unseenVisibleInterestCount)")
+        .accessibilityHint("Open responses")
+        .accessibilityIdentifier("inbox-action-responses")
+    }
+
+    private var actionResponsesIcon: some View {
+        Image(systemName: "person.2.wave.2")
+            .symbolRenderingMode(.hierarchical)
+            .font(.system(size: 18, weight: .semibold))
+            .foregroundStyle(SideSeatTheme.accentText)
+            .frame(width: 42, height: 42)
+            .background(SideSeatTheme.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    private func responseCountBadge(_ count: Int) -> some View {
+        Text("\(count)")
+            .font(.footnote.weight(.bold))
+            .foregroundStyle(SideSeatTheme.accentText)
+            .padding(.horizontal, 10)
+            .frame(minHeight: 28)
+            .background(SideSeatTheme.accent.opacity(0.12), in: Capsule())
+    }
+
+    private func pendingPlansIcon(size: CGFloat) -> some View {
+        Image(systemName: "calendar.badge.clock")
+            .symbolRenderingMode(.hierarchical)
+            .font(.system(size: size == 36 ? 17 : 19, weight: .semibold))
+            .foregroundStyle(SideSeatTheme.HubTint.plans)
+            .frame(width: size, height: size)
+            .background(
+                SideSeatTheme.HubTint.plans.opacity(0.12),
+                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
+            )
+            .accessibilityHidden(true)
+    }
+
+    private func pendingPlansCountBadge(_ count: Int) -> some View {
+        Text(count > 99 ? "99+" : "\(count)")
+            .font(.subheadline.weight(.bold))
+            .foregroundStyle(SideSeatTheme.ink)
+            .padding(.horizontal, SideSeatTheme.spaceSM)
+            .frame(minWidth: 30, minHeight: 30)
+            .background(SideSeatTheme.HubTint.plans, in: Capsule())
+            .accessibilityHidden(true)
     }
 
     @ViewBuilder
@@ -316,15 +356,15 @@ struct ChatsRootView: View {
                         if row.unreadCount > 0 {
                             Text(row.unreadCount > 99 ? "99+" : "\(row.unreadCount)")
                                 .font(.caption.weight(.bold))
-                                .foregroundStyle(SideSeatTheme.ink)
+                                .foregroundStyle(SideSeatTheme.onAccent)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(Capsule().fill(SideSeatTheme.accent))
-                                .accessibilityLabel(String(localized: "\(row.unreadCount) unread"))
+                                .accessibilityLabel(AppLocalization.string( "\(row.unreadCount) unread"))
                         }
                     }
                     if row.kind != .direct {
-                        Text(row.kind == .course ? String(localized: "Course chat") : String(localized: "Group chat"))
+                        Text(row.kind == .course ? AppLocalization.string( "Course chat") : AppLocalization.string( "Group chat"))
                             .font(.caption)
                             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                             .accessibilityIdentifier("inbox-kind-visual-\(row.id)")
@@ -334,36 +374,47 @@ struct ChatsRootView: View {
             .padding(.vertical, 4)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SSPressButtonStyle())
         .disabled(row.route == nil)
         .opacity(row.route == nil ? 0.55 : 1)
         .accessibilityIdentifier("inbox-row-\(row.id)")
-        .contextMenu {
-            Button {
-                Task { await store.togglePin(row, using: session) }
-            } label: {
-                Label(
-                    row.pinned ? String(localized: "Unpin") : String(localized: "Pin"),
-                    systemImage: row.pinned ? "pin.slash.fill" : "pin.fill"
+        .ssLongPressActionMenu(
+            isEnabled: row.route != nil,
+            title: row.displayName
+        ) {
+            var actions = [
+                SSLongPressAction(
+                    id: "inbox-row-\(row.id)-pin-menu",
+                    title: row.pinned
+                        ? AppLocalization.string("Unpin")
+                        : AppLocalization.string("Pin"),
+                    systemImage: row.pinned ? "pin.slash.fill" : "pin.fill",
+                    perform: {
+                        Task { await store.togglePin(row, using: session) }
+                    }
+                ),
+            ]
+            if row.supportsHide {
+                actions.append(
+                    SSLongPressAction(
+                        id: "inbox-row-\(row.id)-hide-menu",
+                        title: AppLocalization.string("Hide"),
+                        systemImage: "eye.slash",
+                        role: .destructive,
+                        perform: {
+                            Task { await store.hide(row, using: session) }
+                        }
+                    )
                 )
             }
-            .accessibilityIdentifier("inbox-row-\(row.id)-pin-menu")
-
-            if row.supportsHide {
-                Button(role: .destructive) {
-                    Task { await store.hide(row, using: session) }
-                } label: {
-                    Label("Hide", systemImage: "eye.slash")
-                }
-                .accessibilityIdentifier("inbox-row-\(row.id)-hide-menu")
-            }
+            return actions
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             Button {
                 Task { await store.togglePin(row, using: session) }
             } label: {
                 Label(
-                    row.pinned ? String(localized: "Unpin") : String(localized: "Pin"),
+                    row.pinned ? AppLocalization.string( "Unpin") : AppLocalization.string( "Pin"),
                     systemImage: row.pinned ? "pin.slash.fill" : "pin.fill"
                 )
             }

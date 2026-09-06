@@ -6,8 +6,8 @@ enum SideSeatAppShareContent {
 
     static var text: String {
         [
-            String(localized: "Meet international students nearby on SideSeat."),
-            String(localized: "Find buddies, join plans, and meet students from your school."),
+            AppLocalization.string( "Meet international students nearby on SideSeat."),
+            AppLocalization.string( "Find buddies, join plans, and meet students from your school."),
             "#SideSeat #留学生社交 #留学生活",
             url.absoluteString,
         ].joined(separator: "\n")

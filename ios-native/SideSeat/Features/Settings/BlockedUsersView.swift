@@ -5,9 +5,10 @@ struct BlockedUsersView: View {
     @Environment(RouterPath.self) private var router
     @State private var store = BlockedUsersStore()
     @State private var pendingUnblock: NativeBlockedUser?
+    @State private var showsUnblockPrompt = false
 
     var body: some View {
-        Group {
+        ZStack {
             if (!store.hasLoaded || store.isLoading) && store.blocks.isEmpty {
                 SSLoadingState("Loading blocked users")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -37,13 +38,20 @@ struct BlockedUsersView: View {
                                     }
                                 }
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(SSPressButtonStyle())
                             .accessibilityIdentifier("blocked-users-row-\(block.blockedId)")
 
                             Spacer(minLength: 8)
 
                             Button("Unblock") {
                                 pendingUnblock = block
+                                // Let the selected value reach the prompt content before asking
+                                // the window-level presenter to snapshot it.
+                                Task { @MainActor in
+                                    await Task.yield()
+                                    guard pendingUnblock?.id == block.id else { return }
+                                    showsUnblockPrompt = true
+                                }
                             }
                             .buttonStyle(.bordered)
                             .disabled(store.isMutating)
@@ -62,26 +70,44 @@ struct BlockedUsersView: View {
         .refreshable {
             await store.load(using: session)
         }
-        .alert(
-            "Unblock \(pendingUnblock?.displayName ?? "user")?",
-            isPresented: Binding(
-                get: { pendingUnblock != nil },
-                set: { if !$0 { pendingUnblock = nil } }
-            )
-        ) {
-            Button("Unblock", role: .destructive) {
-                guard let pendingUnblock else { return }
-                Task {
-                    _ = await store.unblock(pendingUnblock, using: session)
-                    self.pendingUnblock = nil
-                }
-            }
-            .accessibilityIdentifier("blocked-users-confirm-unblock")
-            Button("Cancel", role: .cancel) {
+        .ssActionPrompt(
+            isPresented: $showsUnblockPrompt,
+            title: String(
+                format: AppLocalization.string("Unblock %@?"),
+                pendingUnblock?.displayName ?? AppLocalization.string("user")
+            ),
+            message: AppLocalization.string("They will be able to contact you again."),
+            systemImage: "hand.raised.slash.fill",
+            tint: SideSeatTheme.danger,
+            onDismiss: {
+                showsUnblockPrompt = false
                 pendingUnblock = nil
-            }
-        } message: {
-            Text("They will be able to contact you again.")
+            },
+            accessibilityIdentifier: "blocked-users-unblock-prompt"
+        ) {
+            guard let block = pendingUnblock else { return [] }
+            return [
+                SSActionPromptAction(
+                    id: "blocked-users-unblock-cancel",
+                    title: AppLocalization.string("Cancel"),
+                    role: .cancel
+                ) {
+                    showsUnblockPrompt = false
+                    pendingUnblock = nil
+                },
+                SSActionPromptAction(
+                    id: "blocked-users-confirm-unblock",
+                    title: AppLocalization.string("Unblock"),
+                    systemImage: "hand.raised.slash",
+                    role: .destructive
+                ) {
+                    Task {
+                        _ = await store.unblock(block, using: session)
+                        showsUnblockPrompt = false
+                        pendingUnblock = nil
+                    }
+                },
+            ]
         }
         .overlay(alignment: .bottom) {
             if let issue = store.issue {
@@ -98,8 +124,8 @@ struct BlockedUsersView: View {
         let fractional = ISO8601DateFormatter()
         fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         let date = fractional.date(from: iso) ?? ISO8601DateFormatter().date(from: iso)
-        guard let date else { return String(localized: "Blocked") }
+        guard let date else { return AppLocalization.string( "Blocked") }
         let relative = date.formatted(.relative(presentation: .named))
-        return String(format: String(localized: "Blocked %@"), relative)
+        return String(format: AppLocalization.string( "Blocked %@"), relative)
     }
 }

@@ -75,7 +75,13 @@ final class AppContainer {
     #if DEBUG
     private func applyUITestingLaunchState() {
         let arguments = ProcessInfo.processInfo.arguments
-        if arguments.contains("--ui-testing-authenticated") {
+        if arguments.contains("--ui-testing-slow-cached-launch") {
+            session.installUITestingSlowCachedLaunchState()
+            clientConfiguration.installUITestingAvailability()
+        } else if arguments.contains("--ui-testing-offline-cached-launch") {
+            session.installUITestingOfflineCachedLaunchState()
+            clientConfiguration.installUITestingAvailability()
+        } else if arguments.contains("--ui-testing-authenticated") {
             session.installUITestingSession()
             clientConfiguration.installUITestingAvailability(
                 features: [

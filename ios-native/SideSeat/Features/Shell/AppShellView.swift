@@ -1,12 +1,59 @@
 import SwiftUI
 
+struct AppShellTabDefinition: Identifiable, Equatable {
+    let tab: AppTab
+    let title: String
+    let systemImage: String
+    let selectedSystemImage: String
+
+    var id: AppTab { tab }
+}
+
+private struct AppShellAuthenticatedLoadID: Equatable {
+    let userID: String?
+    let canMakeAuthenticatedRequests: Bool
+}
+
+enum AppShellNavigation {
+    /// Product information architecture is stable. Experiment assignment may
+    /// change what appears inside Together, but never renames or reorders the
+    /// app's primary destinations.
+    static let tabs: [AppShellTabDefinition] = [
+        .init(
+            tab: .discover,
+            title: "Together",
+            systemImage: "person.2",
+            selectedSystemImage: "person.2.fill"
+        ),
+        .init(
+            tab: .home,
+            title: "Calendar",
+            systemImage: "calendar",
+            selectedSystemImage: "calendar"
+        ),
+        .init(
+            tab: .chats,
+            title: "Messages",
+            systemImage: "bubble.left.and.bubble.right",
+            selectedSystemImage: "bubble.left.and.bubble.right.fill"
+        ),
+        .init(
+            tab: .me,
+            title: "Me",
+            systemImage: "person",
+            selectedSystemImage: "person.fill"
+        ),
+    ]
+}
+
 struct AppShellView: View {
     @Environment(SessionStore.self) private var session
     @Environment(DeepLinkRouter.self) private var deepLinkRouter
     @Environment(\.scenePhase) private var scenePhase
-    @State private var selectedTab: AppTab = .home
+    @State private var selectedTab: AppTab = .discover
     @State private var routers = TabRouter()
     @State private var inboxStore = InboxStore()
+    @State private var v2Store = ActionToPlanV2Store.shared
     /// Single create flow sheet — chooser and form share one presentation so option → form
     /// never dismisses/re-presents (avoids the 0.28s double-sheet flash).
     @State private var isCreateFlowPresented = false
@@ -15,8 +62,6 @@ struct AppShellView: View {
     @State private var productTutorial = ProductTutorialController()
     @State private var foregroundPushNotice: ForegroundPushNotice?
     @State private var foregroundPushDismissTask: Task<Void, Never>?
-
-    private static let tabOrder: [AppTab] = [.home, .discover, .create, .chats, .me]
 
     init() {
         #if DEBUG
@@ -58,8 +103,9 @@ struct AppShellView: View {
             if session.phase == .signedOut {
                 dismissForegroundPush()
                 inboxStore.reset()
+                v2Store.resetAssignment()
                 routers.resetAll()
-                selectedTab = .home
+                selectedTab = .discover
                 isCreateFlowPresented = false
                 createFlowDestination = nil
                 pendingCreatedPostID = nil
@@ -67,6 +113,12 @@ struct AppShellView: View {
             } else if session.phase == .signedIn {
                 productTutorial.evaluateAutoShow(for: session.currentUser)
                 routePendingDeepLink()
+                if session.canMakeAuthenticatedRequests {
+                    Task {
+                        await inboxStore.load(using: session)
+                        await v2Store.loadAssignment(using: session)
+                    }
+                }
             }
         }
         .onChange(of: session.currentUser?.id) {
@@ -74,7 +126,7 @@ struct AppShellView: View {
             productTutorial.evaluateAutoShow(for: session.currentUser)
         }
         .onChange(of: scenePhase) { _, phase in
-            guard phase == .active, session.phase == .signedIn else { return }
+            guard phase == .active, session.canMakeAuthenticatedRequests else { return }
             Task { await inboxStore.load(using: session) }
         }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatInboxConversationRead)) { note in
@@ -86,7 +138,7 @@ struct AppShellView: View {
             inboxStore.applyOutboundPreview(from: note)
         }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatInboxNeedsRefresh)) { _ in
-            guard session.phase == .signedIn else { return }
+            guard session.canMakeAuthenticatedRequests else { return }
             Task { await inboxStore.load(using: session) }
         }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatForegroundPushReceived)) { note in
@@ -118,7 +170,7 @@ struct AppShellView: View {
                 routers.router(for: .discover).navigate(to: .profile(userID: "ui-peer"))
             } else if arguments.contains("--ui-testing-create-plan") {
                 await Task.yield()
-                createFlowDestination = .plan
+                createFlowDestination = .buddyPost
                 isCreateFlowPresented = true
             } else if arguments.contains("--ui-testing-unread-jump") {
                 await Task.yield()
@@ -130,49 +182,31 @@ struct AppShellView: View {
                 productTutorial.evaluateAutoShow(for: session.currentUser)
             }
         }
-        .task(id: session.currentUser?.id) {
-            guard session.phase == .signedIn else { return }
+        .task(
+            id: AppShellAuthenticatedLoadID(
+                userID: session.currentUser?.id,
+                canMakeAuthenticatedRequests: session.canMakeAuthenticatedRequests
+            )
+        ) {
+            guard session.canMakeAuthenticatedRequests else { return }
             await inboxStore.load(using: session)
+            await v2Store.loadAssignment(using: session)
         }
     }
 
     private var shellSurface: some View {
-        TabView(selection: tabSelection) {
-            tab(.home, title: "Calendar", systemImage: "calendar") {
-                HomeRootView()
-            }
-            tab(.discover, title: "Discover", systemImage: "safari") {
-                DiscoverRootView(createDestination: createDestinationBinding)
-            }
-
-            // Placeholder only — UIKit intercept never lets this page become visible.
-            Color.clear
-                .ignoresSafeArea()
-                .tabItem { Label("Create", systemImage: "plus.circle.fill") }
-                .tag(AppTab.create)
-                .accessibilityIdentifier("create-action")
-
-            tab(
-                .chats,
-                title: "Chats",
-                systemImage: "bubble.left.and.bubble.right",
-                badge: inboxStore.unreadBadgeLabel
-            ) {
-                ChatsRootView(store: inboxStore)
-            }
-            tab(.me, title: "Me", systemImage: "person") {
-                MeRootView()
-            }
-        }
-        .background {
-            CreateTabBarInterceptor(
-                tabOrder: Self.tabOrder,
-                createTab: .create,
-                onCreateTap: openCreatePlan,
-                onSelectTab: { tab in
-                    selectedTab = tab
+        TabView(selection: $selectedTab) {
+            ForEach(AppShellNavigation.tabs) { item in
+                tab(
+                    item.tab,
+                    title: LocalizedStringKey(item.title),
+                    systemImage: item.systemImage,
+                    selectedSystemImage: item.selectedSystemImage,
+                    badge: item.tab == .chats ? inboxStore.unreadBadgeLabel : nil
+                ) {
+                    rootView(for: item.tab)
                 }
-            )
+            }
         }
         .overlay {
             if productTutorial.isPresented {
@@ -207,22 +241,55 @@ struct AppShellView: View {
         .animation(.spring(response: 0.32, dampingFraction: 0.9), value: foregroundPushNotice)
     }
 
+    @ViewBuilder
+    private func rootView(for tab: AppTab) -> some View {
+        switch tab {
+        case .discover:
+            TogetherRootView()
+        case .home:
+            HomeRootView()
+        case .chats:
+            ChatsRootView(store: inboxStore)
+        case .me:
+            MeRootView()
+        }
+    }
+
     private func foregroundPushBanner(_ notice: ForegroundPushNotice) -> some View {
         Button {
-            if let url = notice.url {
+            if let url = notice.navigationURL {
                 deepLinkRouter.handleNotificationURL(url)
             }
             dismissForegroundPush()
         } label: {
             HStack(spacing: 11) {
-                Image(systemName: notice.isPlanUpdate ? "calendar.badge.clock" : "bubble.left.fill")
+                Image(
+                    systemName: notice.isMutualOpportunity
+                        ? "person.2.fill"
+                        : notice.isPlanUpdate ? "calendar.badge.clock" : "bubble.left.fill"
+                )
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(SideSeatTheme.accent)
+                    .foregroundStyle(
+                        notice.isMutualOpportunity
+                            ? SideSeatTheme.accent
+                            : notice.isPlanUpdate
+                                ? SideSeatTheme.HubTint.plans
+                                : SideSeatTheme.HubTint.contacts
+                    )
                     .frame(width: 32, height: 32)
-                    .background(SideSeatTheme.accent.opacity(0.12), in: Circle())
+                    .background(
+                        (
+                            notice.isMutualOpportunity
+                                ? SideSeatTheme.accent
+                                : notice.isPlanUpdate
+                                    ? SideSeatTheme.HubTint.plans
+                                    : SideSeatTheme.HubTint.contacts
+                        ).opacity(0.12),
+                        in: Circle()
+                    )
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(notice.title.isEmpty ? String(localized: "SideSeat") : notice.title)
+                    Text(notice.title.isEmpty ? AppLocalization.string( "SideSeat") : notice.title)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.primary)
                         .lineLimit(1)
@@ -235,7 +302,7 @@ struct AppShellView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                if notice.url != nil {
+                if notice.navigationURL != nil {
                     Image(systemName: "chevron.right")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.tertiary)
@@ -251,7 +318,7 @@ struct AppShellView: View {
             .shadow(color: .black.opacity(0.12), radius: 14, y: 5)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SSPressButtonStyle())
         .accessibilityIdentifier("foreground-push-notice")
         .accessibilityLabel("\(notice.title), \(notice.body)")
     }
@@ -282,9 +349,22 @@ struct AppShellView: View {
             if let createFlowDestination {
                 NavigationStack {
                     switch createFlowDestination {
-                    case .plan:
+                    case .courseAction:
+                        DiscoverPlanCreateView(mode: .courseAction) { postID in
+                            pendingCreatedPostID = postID
+                            dismissCreateFlow()
+                        }
+                    case .buddyPost:
                         DiscoverPlanCreateView { postID in
                             pendingCreatedPostID = postID
+                            dismissCreateFlow()
+                        }
+                    case .activity:
+                        DiscoverActivityCreateView {
+                            NotificationCenter.default.post(
+                                name: .sideSeatDiscoverFeedNeedsRefresh,
+                                object: nil
+                            )
                             dismissCreateFlow()
                         }
                     }
@@ -300,8 +380,8 @@ struct AppShellView: View {
                 )
             }
         }
-        .presentationDetents(createFlowDestination == nil ? [.height(360)] : [.large])
-        .presentationDragIndicator(createFlowDestination == nil ? .hidden : .visible)
+        .presentationDetents(createFlowDestination == nil ? [SSSheetPresentation.chooser, .large] : [.large])
+        .presentationDragIndicator(.visible)
         .presentationCornerRadius(SideSeatTheme.cardRadius)
         .presentationBackground(
             createFlowDestination == nil ? SideSeatTheme.bg : SideSeatTheme.bgGrouped
@@ -309,45 +389,11 @@ struct AppShellView: View {
         .animation(.easeInOut(duration: 0.22), value: createFlowDestination)
     }
 
-    /// Discover toolbar create menu writes the form destination directly.
-    private var createDestinationBinding: Binding<CreateDestination?> {
-        Binding(
-            get: { createFlowDestination },
-            set: { newValue in
-                if let newValue {
-                    createFlowDestination = newValue
-                    isCreateFlowPresented = true
-                } else {
-                    dismissCreateFlow()
-                }
-            }
-        )
-    }
-
     private func openPendingCreatedPost() {
         guard let postID = pendingCreatedPostID else { return }
         pendingCreatedPostID = nil
         selectedTab = .discover
         routers.router(for: .discover).navigate(to: .discoverPost(postID: postID))
-    }
-
-    /// Create is an action, not a destination — never leave the current tab.
-    private var tabSelection: Binding<AppTab> {
-        Binding(
-            get: { selectedTab },
-            set: { next in
-                if next == .create {
-                    openCreatePlan()
-                } else {
-                    selectedTab = next
-                }
-            }
-        )
-    }
-
-    private func openCreatePlan() {
-        createFlowDestination = .plan
-        isCreateFlowPresented = true
     }
 
     private func dismissCreateFlow() {
@@ -359,6 +405,7 @@ struct AppShellView: View {
         _ tab: AppTab,
         title: LocalizedStringKey,
         systemImage: String,
+        selectedSystemImage: String,
         badge: String? = nil,
         @ViewBuilder content: () -> Content
     ) -> some View {
@@ -367,7 +414,12 @@ struct AppShellView: View {
                 .withAppDestinations()
         }
         .environment(routers.router(for: tab))
-        .tabItem { Label(title, systemImage: systemImage) }
+        .tabItem {
+            Label(
+                title,
+                systemImage: selectedTab == tab ? selectedSystemImage : systemImage
+            )
+        }
         .badge(badge.map { Text(verbatim: $0) })
         .tag(tab)
     }
@@ -394,10 +446,13 @@ struct AppShellView: View {
     private func tabForRoute(_ route: AppRoute) -> AppTab {
         switch route {
         case .courses, .archivedCourses, .course:
-            return .home
-        case .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .plans, .scheduleShare:
+            return .me
+        case .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .plans, .scheduleShare,
+             .actionResponses, .coordinationShell:
             return .chats
-        case .myPosts, .profile, .settings, .blockedUsers, .supportStore, .feedback, .feedbackDetail:
+        case .eventShare:
+            return .home
+        case .myPosts, .savedPosts, .profile, .settings, .blockedUsers, .supportStore, .feedback, .feedbackDetail:
             return .me
         case .discoverPost, .activity:
             return .discover
@@ -415,6 +470,8 @@ private extension View {
                 ArchivedCourseListView()
             case .myPosts:
                 MyPostsView()
+            case .savedPosts:
+                SavedPostsView()
             case .profile(let id):
                 PublicProfileView(userID: id)
             case .contacts:
@@ -433,8 +490,10 @@ private extension View {
                 FeedbackDetailView(feedbackID: id)
             case .scheduleShare(let token):
                 ScheduleShareRecipientView(token: token)
-            case .directChat(let id):
-                DirectChatView(connectionID: id)
+            case .eventShare(let token):
+                CalendarEventShareRecipientView(token: token)
+            case .directChat(let id, let focus):
+                DirectChatView(connectionID: id, initialFocus: focus)
                     .toolbar(.hidden, for: .tabBar)
             case .courseChat(let id):
                 CommunityChatView(kind: .course, conversationID: id)
@@ -452,6 +511,12 @@ private extension View {
                     .toolbar(.hidden, for: .tabBar)
             case .activity(let id):
                 DiscoverActivityDetailView(activityID: id)
+                    .toolbar(.hidden, for: .tabBar)
+            case .actionResponses(let actionID, let interestID):
+                ActionResponsesView(actionID: actionID, focusedInterestID: interestID)
+                    .toolbar(.hidden, for: .tabBar)
+            case .coordinationShell(let interestID, let reservationID):
+                CoordinationShellView(interestID: interestID, expectedReservationID: reservationID)
                     .toolbar(.hidden, for: .tabBar)
             }
         }

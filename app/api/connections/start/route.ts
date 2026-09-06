@@ -11,11 +11,29 @@ import {
   PeerReplyRequiredError,
 } from "@/lib/chat/direct-message-service";
 import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
+import {
+  withCanonicalConnectionScope,
+  withSelfNotesConnectionScope,
+} from "@/lib/connections/canonical-connection";
 import { findSharedActiveCourse } from "@/lib/courses/shared-active-courses";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
 import { startConversationSchema } from "@/lib/validators/invitation";
-import { findOrCreateSelfNotesConnection } from "@/lib/queries/self-notes-connection";
+
+class StartConversationError extends Error {
+  constructor(
+    readonly code:
+      | "PEER_UNAVAILABLE"
+      | "CROSS_SCHOOL"
+      | "CONTENT_RESTRICTED"
+      | "CONVERSATION_ENDED"
+      | "COURSE_CONTEXT_INVALID"
+      | "RATE_LIMITED",
+  ) {
+    super(code);
+    this.name = "StartConversationError";
+  }
+}
 
 /**
  * First-message flow: creates a 1:1 conversation (or reuses an existing ACTIVE
@@ -49,152 +67,151 @@ export async function POST(request: Request) {
       return error("Message cannot be empty.");
     }
 
-    if (values.peerId === user.id) {
-      const { connectionId, created } = await findOrCreateSelfNotesConnection(user.id);
-      const message = await prisma.message.create({
-        data: {
-          connectionId,
-          senderId: user.id,
-          body,
-        },
-      });
-      await prisma.connection.update({
-        where: { id: connectionId },
-        data: { updatedAt: message.createdAt },
-      });
-      return ok({ connectionId, created }, { status: created ? 201 : 200 });
-    }
+    const result = await prisma.$transaction(async (tx) => {
+      if (values.peerId === user.id) {
+        return withSelfNotesConnectionScope(tx, user.id, async (scope) => {
+          if (scope.existing && scope.existing.status !== ConnectionStatus.ACTIVE) {
+            throw new StartConversationError("CONVERSATION_ENDED");
+          }
+          let created = false;
+          let connection = scope.existing;
+          if (!connection) {
+            const result = await scope.createActive();
+            connection = result;
+            created = result.created;
+          }
+          const message = await tx.message.create({
+            data: { connectionId: connection.id, senderId: user.id, body },
+          });
+          await tx.connection.update({
+            where: { id: connection.id },
+            data: { updatedAt: message.createdAt },
+          });
+          return { connectionId: connection.id, created };
+        });
+      }
 
-    const [peer, mutualBlock, peerModerated, sharedCourse, existingConnection] =
-      await Promise.all([
-        prisma.user.findUnique({
-          where: { id: values.peerId },
-          select: { id: true, onboardingComplete: true, school: true },
-        }),
-        prisma.block.findFirst({
-          where: {
-            OR: [
-              { blockerId: user.id, blockedId: values.peerId },
-              { blockerId: values.peerId, blockedId: user.id },
-            ],
-          },
-          select: { id: true },
-        }),
-        prisma.moderationBlock.findFirst({
-          where: {
-            userId: { in: [user.id, values.peerId] },
-            isActive: true,
-          },
-          select: { id: true },
-        }),
-        findSharedActiveCourse(prisma, user.id, values.peerId, values.courseId),
-        prisma.connection.findFirst({
-          where: {
-            OR: [
-              { userAId: user.id, userBId: values.peerId },
-              { userAId: values.peerId, userBId: user.id },
-            ],
-          },
-          select: { id: true, status: true },
-        }),
-      ]);
+      return withCanonicalConnectionScope(
+        tx,
+        user.id,
+        values.peerId,
+        async (scope) => {
+          // Authentication-dependent user state, safety policy, course access,
+          // rate limits, Connection creation and the first Message all share
+          // the same pair-locked transaction.
+          const [actor, peer, mutualBlock, peerModerated, sharedCourse] =
+            await Promise.all([
+              tx.user.findUnique({
+                where: { id: user.id },
+                select: { id: true, onboardingComplete: true, school: true },
+              }),
+              tx.user.findUnique({
+                where: { id: values.peerId },
+                select: { id: true, onboardingComplete: true, school: true },
+              }),
+              tx.block.findFirst({
+                where: {
+                  OR: [
+                    { blockerId: user.id, blockedId: values.peerId },
+                    { blockerId: values.peerId, blockedId: user.id },
+                  ],
+                },
+                select: { id: true },
+              }),
+              tx.moderationBlock.findFirst({
+                where: {
+                  userId: { in: [user.id, values.peerId] },
+                  isActive: true,
+                },
+                select: { id: true },
+              }),
+              findSharedActiveCourse(
+                tx,
+                user.id,
+                values.peerId,
+                values.courseId,
+              ),
+            ]);
 
-    if (!peer || !peer.onboardingComplete) {
-      return error("That person is not available.", 404);
-    }
+          if (!actor?.onboardingComplete || !peer?.onboardingComplete) {
+            throw new StartConversationError("PEER_UNAVAILABLE");
+          }
+          const viewerSchool = normalizeSchoolCode(actor.school) ?? DEFAULT_SCHOOL;
+          const peerSchool = normalizeSchoolCode(peer.school) ?? DEFAULT_SCHOOL;
+          if (viewerSchool !== peerSchool) {
+            throw new StartConversationError("CROSS_SCHOOL");
+          }
+          if (mutualBlock || peerModerated) {
+            throw new StartConversationError("CONTENT_RESTRICTED");
+          }
+          if (values.courseId && !sharedCourse) {
+            throw new StartConversationError("COURSE_CONTEXT_INVALID");
+          }
+          if (scope.existing && scope.existing.status !== ConnectionStatus.ACTIVE) {
+            throw new StartConversationError("CONVERSATION_ENDED");
+          }
 
-    const viewerSchool = normalizeSchoolCode(user.school) ?? DEFAULT_SCHOOL;
-    const peerSchool = normalizeSchoolCode(peer.school) ?? DEFAULT_SCHOOL;
-    if (viewerSchool !== peerSchool) {
-      return error("Cross-school messages are not available yet.", 403);
-    }
+          let created = false;
+          let connection = scope.existing;
+          if (!connection) {
+            const since = subMinutes(
+              new Date(),
+              NEW_THREAD_RATE_LIMIT_WINDOW_MINUTES,
+            );
+            const recentCount = await tx.connection.count({
+              where: {
+                createdAt: { gte: since },
+                OR: [{ userAId: user.id }, { userBId: user.id }],
+              },
+            });
+            if (recentCount >= NEW_THREAD_RATE_LIMIT_COUNT) {
+              throw new StartConversationError("RATE_LIMITED");
+            }
+            const createdConnection = await scope.createActive({
+              originCourseId: sharedCourse?.id ?? null,
+            });
+            connection = createdConnection;
+            created = createdConnection.created;
+          }
 
-    if (mutualBlock || peerModerated) {
-      return error("This user is unavailable for contact.", 403);
-    }
-
-    // Reusing an existing ACTIVE connection: just insert the message and bail.
-    // This keeps the "Message" button idempotent from every surface.
-    if (existingConnection && existingConnection.status === ConnectionStatus.ACTIVE) {
-      try {
-        await prisma.$transaction(async (tx) => {
           const { message } = await createDirectMessageRecord(tx, {
-            connectionId: existingConnection.id,
+            connectionId: connection.id,
             senderId: user.id,
             input: { type: "TEXT", body },
           });
           await tx.connection.update({
-            where: { id: existingConnection.id },
+            where: { id: connection.id },
             data: { updatedAt: message.createdAt },
           });
-        });
-      } catch (cause) {
-        if (cause instanceof PeerReplyRequiredError) {
-          return error(cause.message, 403, "PEER_REPLY_REQUIRED");
-        }
-        throw cause;
-      }
-      return ok(
-        { connectionId: existingConnection.id, created: false },
-        { status: 200 },
-      );
-    }
-
-    // A non-ACTIVE (ENDED/BLOCKED) prior connection should not silently
-    // resurrect. Admin-unblocks can flip BLOCKED back to ACTIVE if ever needed.
-    if (existingConnection) {
-      return error("This conversation is no longer available.", 409);
-    }
-
-    if (values.courseId && !sharedCourse) {
-      return error("That course context is no longer valid.", 403);
-    }
-
-    // Rate limit: count connections *created* by this user in the window,
-    // regardless of role (userA or userB) — but since rows only get written
-    // once per thread, filtering on connection.createdAt is the right metric.
-    const since = subMinutes(new Date(), NEW_THREAD_RATE_LIMIT_WINDOW_MINUTES);
-    const recentCount = await prisma.connection.count({
-      where: {
-        createdAt: { gte: since },
-        OR: [{ userAId: user.id }, { userBId: user.id }],
-        // Only threads where this user posted the first message, which in
-        // practice is the first Message.senderId. Using the simpler proxy of
-        // "Connection rows touched by me" slightly over-counts if the peer
-        // started a thread against me, but that's fine — if anything it makes
-        // the limit stricter for one side, not looser.
-      },
-    });
-    if (recentCount >= NEW_THREAD_RATE_LIMIT_COUNT) {
-      return error(
-        "You've started too many new chats recently. Try again in a bit.",
-        429,
-      );
-    }
-
-    const originCourseId = sharedCourse?.id ?? null;
-
-    const { connectionId } = await prisma.$transaction(async (tx) => {
-      const connection = await tx.connection.create({
-        data: {
-          userAId: user.id,
-          userBId: values.peerId,
-          status: ConnectionStatus.ACTIVE,
-          originCourseId,
+          return { connectionId: connection.id, created };
         },
-      });
-      await tx.message.create({
-        data: {
-          connectionId: connection.id,
-          senderId: user.id,
-          body,
-        },
-      });
-      return { connectionId: connection.id };
+      );
     });
 
-    return ok({ connectionId, created: true }, { status: 201 });
+    return ok(result, { status: result.created ? 201 : 200 });
   } catch (cause) {
+    if (cause instanceof PeerReplyRequiredError) {
+      return error(cause.message, 403, "PEER_REPLY_REQUIRED");
+    }
+    if (cause instanceof StartConversationError) {
+      switch (cause.code) {
+        case "PEER_UNAVAILABLE":
+          return error("That person is not available.", 404);
+        case "CROSS_SCHOOL":
+          return error("Cross-school messages are not available yet.", 403);
+        case "CONTENT_RESTRICTED":
+          return error("This user is unavailable for contact.", 403);
+        case "CONVERSATION_ENDED":
+          return error("This conversation is no longer available.", 409);
+        case "COURSE_CONTEXT_INVALID":
+          return error("That course context is no longer valid.", 403);
+        case "RATE_LIMITED":
+          return error(
+            "You've started too many new chats recently. Try again in a bit.",
+            429,
+          );
+      }
+    }
     console.error(cause);
     return error("Unable to start conversation.");
   }

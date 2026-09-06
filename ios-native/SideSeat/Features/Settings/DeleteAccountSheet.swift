@@ -30,8 +30,9 @@ struct DeleteAccountSheet: View {
 
                 Section {
                     Toggle("I understand this permanently deletes my account and data.", isOn: $understood)
+                        .tint(SideSeatTheme.danger)
                         .accessibilityIdentifier("delete-account-understood")
-                    TextField(String(localized: "Type \(username) to confirm"), text: $confirmText)
+                    TextField(AppLocalization.string( "Type \(username) to confirm"), text: $confirmText)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .accessibilityIdentifier("delete-account-confirm")

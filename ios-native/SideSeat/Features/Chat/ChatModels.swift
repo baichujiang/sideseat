@@ -1,4 +1,5 @@
 import Foundation
+import Popovers
 import SwiftUI
 import UIKit
 
@@ -31,34 +32,288 @@ struct ChatTransientNoticeView: View {
     }
 }
 
-struct ChatMessageContextMenuTarget<Content: View, Menu: View>: View {
+enum ChatMessageContextMenuEdge {
+    case leading
+    case trailing
+}
+
+private struct ChatMessageSourceFramePreferenceKey: PreferenceKey {
+    static let defaultValue = CGRect.zero
+
+    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
+        let next = nextValue()
+        if !next.isEmpty {
+            value = next
+        }
+    }
+}
+
+struct ChatMessageContextMenuTarget<Content: View>: View {
     let isEnabled: Bool
+    let edge: ChatMessageContextMenuEdge
     private let content: Content
-    private let menu: Menu
+    private let actions: [SSLongPressAction]
+
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    @State private var isPresented = false
+    @State private var sourceFrame = CGRect.zero
 
     init(
         isEnabled: Bool,
+        edge: ChatMessageContextMenuEdge = .leading,
         @ViewBuilder content: () -> Content,
-        @ViewBuilder menu: () -> Menu
+        actions: () -> [SSLongPressAction]
     ) {
         self.isEnabled = isEnabled
+        self.edge = edge
         self.content = content()
-        self.menu = menu()
+        self.actions = actions()
     }
 
-    @ViewBuilder
     var body: some View {
-        if isEnabled {
-            content
-                .contentShape(.interaction, Rectangle())
-                .contentShape(
-                    .contextMenuPreview,
-                    RoundedRectangle(cornerRadius: SideSeatTheme.Chat.bubbleRadius, style: .continuous)
-                )
-                .contextMenu { menu }
-        } else {
-            content
+        content
+            .contentShape(.interaction, Rectangle())
+            .scaleEffect(isPresented ? 1.018 : 1)
+            .shadow(
+                color: .black.opacity(isPresented ? (colorScheme == .dark ? 0.3 : 0.16) : 0),
+                radius: isPresented ? 10 : 0,
+                y: isPresented ? 4 : 0
+            )
+            .animation(.snappy(duration: 0.2), value: isPresented)
+            .background {
+                GeometryReader { proxy in
+                    Color.clear.preference(
+                        key: ChatMessageSourceFramePreferenceKey.self,
+                        value: proxy.frame(in: .global)
+                    )
+                }
+            }
+            .onPreferenceChange(ChatMessageSourceFramePreferenceKey.self) { sourceFrame = $0 }
+            .highPriorityGesture(
+                LongPressGesture(minimumDuration: 0.46, maximumDistance: 14)
+                    .onEnded { completed in
+                        guard completed, isEnabled, !actions.isEmpty else { return }
+                        UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                        isPresented = true
+                    }
+            )
+            .popover(
+                present: $isPresented,
+                attributes: { attributes in
+                    attributes.position = popoverPosition
+                    attributes.sourceFrame = { sourceFrame }
+                    attributes.sourceFrameInset = UIEdgeInsets(
+                        top: -8,
+                        left: 0,
+                        bottom: -8,
+                        right: 0
+                    )
+                    attributes.screenEdgePadding = UIEdgeInsets(
+                        top: 12,
+                        left: 12,
+                        bottom: 12,
+                        right: 12
+                    )
+                    attributes.presentation.animation = .spring(
+                        response: 0.28,
+                        dampingFraction: 0.82
+                    )
+                    attributes.presentation.transition = .scale(
+                        scale: 0.94,
+                        anchor: transitionAnchor
+                    ).combined(with: .opacity)
+                    attributes.dismissal.animation = .easeOut(duration: 0.16)
+                    attributes.dismissal.transition = .opacity
+                    attributes.dismissal.mode = .tapOutside
+                    attributes.rubberBandingMode = .none
+                    attributes.blocksBackgroundTouches = true
+                    attributes.onTapOutside = { isPresented = false }
+                    attributes.accessibility.shiftFocus = true
+                },
+                view: {
+                    ChatMessageActionPopover(
+                        isPresented: $isPresented,
+                        actions: actions,
+                        width: menuWidth
+                    )
+                },
+                background: {
+                    ChatMessageContextBackdrop(
+                        opacity: colorScheme == .dark ? 0.24 : 0.12
+                    )
+                }
+            )
+    }
+
+    private var menuEstimatedHeight: CGFloat {
+        let rowHeight: CGFloat = dynamicTypeSize.isAccessibilitySize ? 64 : 48
+        return CGFloat(actions.count) * rowHeight + 4
+    }
+
+    private var menuWidth: CGFloat {
+        let bodyFont = UIFont.preferredFont(forTextStyle: .body)
+        let longestTitleWidth = actions
+            .map { ($0.title as NSString).size(withAttributes: [.font: bodyFont]).width }
+            .max() ?? 0
+        let horizontalChrome: CGFloat = 26 + 22 + 12 + 4
+        let idealWidth = ceil(longestTitleWidth + horizontalChrome)
+        let minimumWidth: CGFloat = dynamicTypeSize.isAccessibilitySize ? 184 : 132
+        let maximumWidth: CGFloat = dynamicTypeSize.isAccessibilitySize ? 260 : 204
+        return min(max(idealWidth, minimumWidth), maximumWidth)
+    }
+
+    private var windowHeight: CGFloat {
+        let connectedScenes = UIApplication.shared.connectedScenes
+        return connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .first(where: \.isKeyWindow)?
+            .bounds.height ?? UIScreen.main.bounds.height
+    }
+
+    private var presentsAbove: Bool {
+        guard !sourceFrame.isEmpty else { return true }
+        let availableAbove = max(0, sourceFrame.minY - 24)
+        let availableBelow = max(0, windowHeight - sourceFrame.maxY - 24)
+
+        if availableAbove >= menuEstimatedHeight {
+            return true
         }
+        if availableBelow >= menuEstimatedHeight {
+            return false
+        }
+        return availableAbove >= availableBelow
+    }
+
+    private var popoverPosition: Popover.Attributes.Position {
+        switch (presentsAbove, edge) {
+        case (true, .leading):
+            return .absolute(originAnchor: .topLeft, popoverAnchor: .bottomLeft)
+        case (true, .trailing):
+            return .absolute(originAnchor: .topRight, popoverAnchor: .bottomRight)
+        case (false, .leading):
+            return .absolute(originAnchor: .bottomLeft, popoverAnchor: .topLeft)
+        case (false, .trailing):
+            return .absolute(originAnchor: .bottomRight, popoverAnchor: .topRight)
+        }
+    }
+
+    private var transitionAnchor: UnitPoint {
+        switch (presentsAbove, edge) {
+        case (true, .leading): .bottomLeading
+        case (true, .trailing): .bottomTrailing
+        case (false, .leading): .topLeading
+        case (false, .trailing): .topTrailing
+        }
+    }
+}
+
+private struct ChatMessageContextBackdrop: View {
+    let opacity: Double
+
+    var body: some View {
+        PopoverReader { context in
+            Canvas { graphics, size in
+                var mask = Path(CGRect(origin: .zero, size: size))
+                let source = context.attributes.sourceFrame()
+                    .insetBy(dx: -4, dy: -4)
+                mask.addRoundedRect(
+                    in: source,
+                    cornerSize: CGSize(width: 18, height: 18)
+                )
+                graphics.fill(
+                    mask,
+                    with: .color(.black.opacity(opacity)),
+                    style: FillStyle(eoFill: true)
+                )
+            }
+            .frame(
+                width: context.windowBounds.width,
+                height: context.windowBounds.height
+            )
+            .ignoresSafeArea()
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+private struct ChatMessageActionPopover: View {
+    @Binding var isPresented: Bool
+    let actions: [SSLongPressAction]
+    let width: CGFloat
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(Array(actions.enumerated()), id: \.element.id) { index, action in
+                if index > 0 {
+                    Divider()
+                        .padding(.leading, 48)
+                }
+
+                actionButton(action)
+            }
+        }
+        .frame(width: width)
+        .background(.regularMaterial)
+        .overlay {
+            RoundedRectangle(cornerRadius: 15, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.1), lineWidth: 0.5)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+        .shadow(color: .black.opacity(0.18), radius: 18, y: 8)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(AppLocalization.string("Message actions"))
+        .accessibilityIdentifier("chat-context-action-menu")
+    }
+
+    private func actionButton(_ action: SSLongPressAction) -> some View {
+        Button(role: action.role == .destructive ? .destructive : nil) {
+            isPresented = false
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(170))
+                action.perform()
+            }
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: action.systemImage)
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(actionTint(action))
+                    .frame(width: 22)
+                    .accessibilityHidden(true)
+
+                Text(action.title)
+                    .font(.body)
+                    .foregroundStyle(
+                        action.role == .destructive
+                            ? SideSeatTheme.statusDangerText
+                            : SideSeatTheme.textPrimary
+                    )
+                    .multilineTextAlignment(.leading)
+
+                Spacer(minLength: 4)
+            }
+            .padding(.horizontal, 13)
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(ChatMessageActionButtonStyle())
+        .accessibilityIdentifier(action.id)
+    }
+
+    private func actionTint(_ action: SSLongPressAction) -> Color {
+        action.role == .destructive ? SideSeatTheme.danger : SideSeatTheme.accentText
+    }
+}
+
+private struct ChatMessageActionButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(Color.primary.opacity(configuration.isPressed ? 0.08 : 0))
+            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 
@@ -150,15 +405,18 @@ struct NativeInboxPayload: Codable, Sendable {
     let conversations: [NativeInboxConversation]
     let unreadTotal: Int
     let plansNeedingYourAction: Int
+    let actionResponseSummary: Components.Schemas.ActionResponseSummary?
 
     init(
         conversations: [NativeInboxConversation],
         unreadTotal: Int,
-        plansNeedingYourAction: Int
+        plansNeedingYourAction: Int,
+        actionResponseSummary: Components.Schemas.ActionResponseSummary? = nil
     ) {
         self.conversations = conversations
         self.unreadTotal = unreadTotal
         self.plansNeedingYourAction = plansNeedingYourAction
+        self.actionResponseSummary = actionResponseSummary
     }
 }
 
@@ -201,13 +459,13 @@ struct NativeInboxConversation: Codable, Identifiable, Hashable, Sendable {
         let content = contentPreview
         if kind == .direct {
             if let currentUserID, lastMessage.sender.id == currentUserID, lastMessage.deletedAt == nil {
-                return "\(String(localized: "You")): \(content)"
+                return "\(AppLocalization.string( "You")): \(content)"
             }
             return content
         }
         let name: String
         if let currentUserID, lastMessage.sender.id == currentUserID {
-            name = String(localized: "You")
+            name = AppLocalization.string( "You")
         } else {
             name = lastMessage.sender.displayName
         }
@@ -215,23 +473,23 @@ struct NativeInboxConversation: Codable, Identifiable, Hashable, Sendable {
     }
 
     private var contentPreview: String {
-        guard let lastMessage else { return String(localized: "No messages yet") }
-        if lastMessage.deletedAt != nil { return String(localized: "Message deleted") }
+        guard let lastMessage else { return AppLocalization.string( "No messages yet") }
+        if lastMessage.deletedAt != nil { return AppLocalization.string( "Message deleted") }
         switch lastMessage.type {
-        case "IMAGE": return String(localized: "Photo")
-        case "LOCATION": return String(localized: "Location")
-        case "SCHEDULE_SHARE_CARD": return String(localized: "Shared schedule")
-        case "AVAILABILITY_CARD": return String(localized: "Shared availability")
+        case "IMAGE": return AppLocalization.string( "Photo")
+        case "LOCATION": return AppLocalization.string( "Location")
+        case "SCHEDULE_SHARE_CARD": return AppLocalization.string("Shared availability")
+        case "AVAILABILITY_CARD": return AppLocalization.string( "Shared availability")
         case "PLAN_REQUEST_CARD":
-            return titledPreview(prefix: String(localized: "Plan invite"), body: lastMessage.body)
+            return titledPreview(prefix: AppLocalization.string( "Plan invite"), body: lastMessage.body)
         case "PLAN_CONFIRMED_CARD":
-            return titledPreview(prefix: String(localized: "Plan confirmed"), body: lastMessage.body)
+            return titledPreview(prefix: AppLocalization.string( "Plan confirmed"), body: lastMessage.body)
         case "SYSTEM":
             let body = lastMessage.body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            return body.isEmpty ? String(localized: "Update") : body
+            return body.isEmpty ? AppLocalization.string( "Update") : body
         default:
             let body = lastMessage.body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            if body.isEmpty { return String(localized: "New message") }
+            if body.isEmpty { return AppLocalization.string( "New message") }
             return body
         }
     }
@@ -438,6 +696,9 @@ struct NativePlanAuthor: Codable, Hashable, Sendable {
 struct NativePlanRequest: Codable, Identifiable, Hashable, Sendable {
     let id: String
     let connectionId: String
+    let commitmentId: String?
+    let originContextId: String?
+    let coordinationPolicy: String?
     let status: String
     let planType: String
     let title: String
@@ -450,14 +711,229 @@ struct NativePlanRequest: Codable, Identifiable, Hashable, Sendable {
     let counterOfId: String?
     let availabilityShareId: String?
     let scheduleShareLinkId: String?
+    let origin: NativePlanOrigin?
+    let viewerOutcome: String?
+    let outcomeResponseCount: Int?
     let createdAt: String
     let updatedAt: String
+
+    init(
+        id: String,
+        connectionId: String,
+        commitmentId: String? = nil,
+        originContextId: String? = nil,
+        coordinationPolicy: String? = nil,
+        status: String,
+        planType: String,
+        title: String,
+        location: String?,
+        message: String?,
+        startTime: String,
+        endTime: String,
+        proposer: NativePlanAuthor,
+        receiver: NativePlanAuthor,
+        counterOfId: String?,
+        availabilityShareId: String?,
+        scheduleShareLinkId: String?,
+        origin: NativePlanOrigin? = nil,
+        viewerOutcome: String? = nil,
+        outcomeResponseCount: Int? = nil,
+        createdAt: String,
+        updatedAt: String
+    ) {
+        self.id = id
+        self.connectionId = connectionId
+        self.commitmentId = commitmentId
+        self.originContextId = originContextId
+        self.coordinationPolicy = coordinationPolicy
+        self.status = status
+        self.planType = planType
+        self.title = title
+        self.location = location
+        self.message = message
+        self.startTime = startTime
+        self.endTime = endTime
+        self.proposer = proposer
+        self.receiver = receiver
+        self.counterOfId = counterOfId
+        self.availabilityShareId = availabilityShareId
+        self.scheduleShareLinkId = scheduleShareLinkId
+        self.origin = origin
+        self.viewerOutcome = viewerOutcome
+        self.outcomeResponseCount = outcomeResponseCount
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
 
     var isPending: Bool { status == "PENDING" }
     var isAccepted: Bool { status == "ACCEPTED" }
 
+    var usesActionCoordinationV2: Bool {
+        coordinationPolicy == "CREATOR_GATED_V2"
+            && commitmentId != nil
+            && originContextId != nil
+    }
+
     var startDate: Date? { Date.sideSeatChatISO8601(startTime) }
     var endDate: Date? { Date.sideSeatChatISO8601(endTime) }
+}
+
+enum PlanSubmissionTarget: Hashable, Sendable {
+    case legacyConnection(connectionID: String)
+    case actionContext(contextID: String)
+    case coordination(reservationID: String)
+    case legacyCounter(planID: String)
+    case actionCounter(revisionID: String, commitmentID: String, contextID: String)
+
+    static func counter(for plan: NativePlanRequest) -> PlanSubmissionTarget {
+        if plan.usesActionCoordinationV2,
+           let commitmentID = plan.commitmentId,
+           let contextID = plan.originContextId
+        {
+            return .actionCounter(
+                revisionID: plan.id,
+                commitmentID: commitmentID,
+                contextID: contextID
+            )
+        }
+        return .legacyCounter(planID: plan.id)
+    }
+}
+
+struct PlanSubmissionResult: Hashable, Sendable {
+    let connectionID: String
+    let contextID: String?
+    let focus: DirectChatFocus
+
+    init(
+        connectionID: String,
+        commitmentID: String?,
+        revisionID: String?,
+        contextID: String?
+    ) {
+        self.connectionID = connectionID
+        self.contextID = contextID
+        if let commitmentID {
+            focus = .plan(commitmentID: commitmentID, revisionID: revisionID)
+        } else if let revisionID {
+            focus = .plan(id: revisionID)
+        } else {
+            preconditionFailure("A Plan submission result requires a commitment or revision identifier.")
+        }
+    }
+}
+
+struct NativePlanOrigin: Codable, Hashable, Sendable {
+    let kind: String
+    let id: String
+    let snapshot: NativeActionContext
+}
+
+struct NativeActionContextCourse: Codable, Hashable, Sendable {
+    let id: String
+    let code: String?
+    let name: String
+}
+
+struct NativeActionContextAuthor: Codable, Hashable, Sendable {
+    let id: String
+    let displayName: String
+}
+
+struct NativeActionContext: Codable, Hashable, Sendable {
+    let version: Int
+    let sourceKind: String
+    let sourceId: String
+    let title: String
+    let startsAt: String?
+    let endsAt: String?
+    let location: String?
+    let planType: String
+    let participantIds: [String]
+    let author: NativeActionContextAuthor
+    let course: NativeActionContextCourse?
+
+    var startDate: Date? { startsAt.flatMap(Date.sideSeatChatISO8601) }
+    var endDate: Date? { endsAt.flatMap(Date.sideSeatChatISO8601) }
+}
+
+struct NativeActionInterest: Codable, Identifiable, Hashable, Sendable {
+    let id: String
+    let status: String
+    let connectionId: String
+    let postId: String
+    let context: NativeActionContext
+    let createdAt: String
+    let updatedAt: String
+}
+
+struct NativeMutualOpportunitySource: Codable, Identifiable, Hashable, Sendable {
+    let id: String
+    let policyVersion: String
+    let topic: String
+    let context: NativeActionContext
+
+    var planDraft: NativePlanDraft {
+        NativePlanDraft(
+            title: context.title,
+            startTime: context.startsAt,
+            endTime: context.endsAt,
+            location: context.location,
+            planType: context.planType,
+            participantIds: context.participantIds,
+            origin: NativePlanOriginReference(kind: "MUTUAL_OPPORTUNITY", id: id)
+        )
+    }
+}
+
+struct NativePlanDraft: Codable, Hashable, Identifiable, Sendable {
+    let title: String
+    let startTime: String?
+    let endTime: String?
+    let location: String?
+    let planType: String
+    let participantIds: [String]
+    let origin: NativePlanOriginReference
+
+    var id: String { "\(origin.kind):\(origin.id)" }
+
+    init(context: NativeActionContext, interestID: String) {
+        title = context.title
+        startTime = context.startsAt
+        endTime = context.endsAt
+        location = context.location
+        planType = context.planType
+        participantIds = context.participantIds
+        origin = NativePlanOriginReference(kind: "ACTION_INTEREST", id: interestID)
+    }
+
+    init(
+        title: String,
+        startTime: String?,
+        endTime: String?,
+        location: String?,
+        planType: String,
+        participantIds: [String] = [],
+        origin: NativePlanOriginReference
+    ) {
+        self.title = title
+        self.startTime = startTime
+        self.endTime = endTime
+        self.location = location
+        self.planType = planType
+        self.participantIds = participantIds
+        self.origin = origin
+    }
+}
+
+struct NativePlanOriginReference: Codable, Hashable, Sendable {
+    let kind: String
+    let id: String
+}
+
+struct NativeActionInterestMutationPayload: Decodable, Sendable {
+    let interest: NativeActionInterest
+    let messageId: String?
 }
 
 struct NativePlansListPayload: Decodable, Sendable {
@@ -480,6 +956,7 @@ struct NativePlanCreateRequest: Encodable, Sendable {
     let startTime: String
     let endTime: String
     let planType: String
+    let origin: NativePlanOriginReference?
 }
 
 struct NativeDirectMessage: Codable, Identifiable, Hashable, Sendable {
@@ -493,6 +970,10 @@ struct NativeDirectMessage: Codable, Identifiable, Hashable, Sendable {
     let availabilityShareId: String?
     let planRequestId: String?
     let planRequest: NativePlanRequest?
+    let actionInterestId: String?
+    let actionContextId: String?
+    let actionInterest: NativeActionInterest?
+    let mutualOpportunity: NativeMutualOpportunitySource?
     let replyTo: NativeDirectMessageReply?
     let deletedAt: String?
     let createdAt: String
@@ -509,6 +990,10 @@ struct NativeDirectMessage: Codable, Identifiable, Hashable, Sendable {
         availabilityShareId: String? = nil,
         planRequestId: String? = nil,
         planRequest: NativePlanRequest? = nil,
+        actionInterestId: String? = nil,
+        actionContextId: String? = nil,
+        actionInterest: NativeActionInterest? = nil,
+        mutualOpportunity: NativeMutualOpportunitySource? = nil,
         replyTo: NativeDirectMessageReply? = nil,
         deletedAt: String? = nil
     ) {
@@ -522,12 +1007,23 @@ struct NativeDirectMessage: Codable, Identifiable, Hashable, Sendable {
         self.availabilityShareId = availabilityShareId
         self.planRequestId = planRequestId
         self.planRequest = planRequest
+        self.actionInterestId = actionInterestId
+        self.actionContextId = actionContextId
+        self.actionInterest = actionInterest
+        self.mutualOpportunity = mutualOpportunity
         self.replyTo = replyTo
         self.deletedAt = deletedAt
         self.createdAt = createdAt
     }
 
     var isDeleted: Bool { deletedAt != nil }
+
+    /// Structured cards are projections of server-owned workflow state. They
+    /// must be handled through their own accept/decline/withdraw controls,
+    /// never hidden by the generic message delete action.
+    var supportsUserDeletion: Bool {
+        type == "TEXT" || type == "IMAGE" || type == "LOCATION"
+    }
 
     var createdDate: Date? {
         Date.sideSeatChatISO8601(createdAt)
@@ -568,13 +1064,13 @@ struct NativeDirectMessageReply: Codable, Hashable, Sendable {
     var isDeleted: Bool { deletedAt != nil }
 
     var previewText: String {
-        if isDeleted { return String(localized: "Message deleted") }
+        if isDeleted { return AppLocalization.string( "Message deleted") }
         switch type {
-        case "IMAGE": return String(localized: "Photo")
-        case "LOCATION": return String(localized: "Location")
+        case "IMAGE": return AppLocalization.string( "Photo")
+        case "LOCATION": return AppLocalization.string( "Location")
         default:
             let trimmed = body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            if trimmed.isEmpty { return String(localized: "Message") }
+            if trimmed.isEmpty { return AppLocalization.string( "Message") }
             return trimmed
         }
     }
@@ -584,14 +1080,16 @@ struct NativeDirectTextMessageRequest: Encodable, Sendable {
     let type = "TEXT"
     let body: String
     let replyToId: String?
+    let actionContextId: String?
 
-    init(body: String, replyToId: String? = nil) {
+    init(body: String, replyToId: String? = nil, actionContextId: String? = nil) {
         self.body = body
         self.replyToId = replyToId
+        self.actionContextId = actionContextId
     }
 
     private enum CodingKeys: String, CodingKey {
-        case type, body, replyToId
+        case type, body, replyToId, actionContextId
     }
 
     func encode(to encoder: Encoder) throws {
@@ -599,6 +1097,7 @@ struct NativeDirectTextMessageRequest: Encodable, Sendable {
         try container.encode(type, forKey: .type)
         try container.encode(body, forKey: .body)
         try container.encodeIfPresent(replyToId, forKey: .replyToId)
+        try container.encodeIfPresent(actionContextId, forKey: .actionContextId)
     }
 }
 
@@ -607,15 +1106,22 @@ struct NativeDirectImageMessageRequest: Encodable, Sendable {
     let imageUrl: String
     let body: String?
     let replyToId: String?
+    let actionContextId: String?
 
-    init(imageUrl: String, body: String? = nil, replyToId: String? = nil) {
+    init(
+        imageUrl: String,
+        body: String? = nil,
+        replyToId: String? = nil,
+        actionContextId: String? = nil
+    ) {
         self.imageUrl = imageUrl
         self.body = body
         self.replyToId = replyToId
+        self.actionContextId = actionContextId
     }
 
     private enum CodingKeys: String, CodingKey {
-        case type, imageUrl, body, replyToId
+        case type, imageUrl, body, replyToId, actionContextId
     }
 
     func encode(to encoder: Encoder) throws {
@@ -624,6 +1130,7 @@ struct NativeDirectImageMessageRequest: Encodable, Sendable {
         try container.encode(imageUrl, forKey: .imageUrl)
         try container.encodeIfPresent(body, forKey: .body)
         try container.encodeIfPresent(replyToId, forKey: .replyToId)
+        try container.encodeIfPresent(actionContextId, forKey: .actionContextId)
     }
 }
 
@@ -633,21 +1140,24 @@ struct NativeDirectLocationMessageRequest: Encodable, Sendable {
     let locationLng: Double
     let locationName: String?
     let replyToId: String?
+    let actionContextId: String?
 
     init(
         locationLat: Double,
         locationLng: Double,
         locationName: String? = nil,
-        replyToId: String? = nil
+        replyToId: String? = nil,
+        actionContextId: String? = nil
     ) {
         self.locationLat = locationLat
         self.locationLng = locationLng
         self.locationName = locationName
         self.replyToId = replyToId
+        self.actionContextId = actionContextId
     }
 
     private enum CodingKeys: String, CodingKey {
-        case type, locationLat, locationLng, locationName, replyToId
+        case type, locationLat, locationLng, locationName, replyToId, actionContextId
     }
 
     func encode(to encoder: Encoder) throws {
@@ -657,6 +1167,7 @@ struct NativeDirectLocationMessageRequest: Encodable, Sendable {
         try container.encode(locationLng, forKey: .locationLng)
         try container.encodeIfPresent(locationName, forKey: .locationName)
         try container.encodeIfPresent(replyToId, forKey: .replyToId)
+        try container.encodeIfPresent(actionContextId, forKey: .actionContextId)
     }
 }
 
@@ -676,12 +1187,12 @@ enum NativeReportReason: String, CaseIterable, Identifiable, Sendable {
 
     var title: String {
         switch self {
-        case .harassment: String(localized: "Harassment")
-        case .repeatedUnwantedContact: String(localized: "Repeated unwanted contact")
-        case .offensiveLanguage: String(localized: "Offensive language")
-        case .spam: String(localized: "Spam")
-        case .fakeIdentity: String(localized: "Fake identity")
-        case .other: String(localized: "Other")
+        case .harassment: AppLocalization.string( "Harassment")
+        case .repeatedUnwantedContact: AppLocalization.string( "Repeated unwanted contact")
+        case .offensiveLanguage: AppLocalization.string( "Offensive language")
+        case .spam: AppLocalization.string( "Spam")
+        case .fakeIdentity: AppLocalization.string( "Fake identity")
+        case .other: AppLocalization.string( "Other")
         }
     }
 }
@@ -726,13 +1237,13 @@ struct NativeReportResult: Decodable, Sendable {
 
 extension NativeDirectMessage {
     var previewText: String {
-        if isDeleted { return String(localized: "Message deleted") }
+        if isDeleted { return AppLocalization.string( "Message deleted") }
         switch type {
-        case "IMAGE": return String(localized: "Photo")
-        case "LOCATION": return location?.name ?? String(localized: "Location")
+        case "IMAGE": return AppLocalization.string( "Photo")
+        case "LOCATION": return location?.name ?? AppLocalization.string( "Location")
         default:
             let trimmed = body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            if trimmed.isEmpty { return String(localized: "Message") }
+            if trimmed.isEmpty { return AppLocalization.string( "Message") }
             return trimmed
         }
     }
@@ -964,7 +1475,7 @@ enum InboxActivityFormatting {
         if let yesterday = calendar.date(byAdding: .day, value: -1, to: now),
            calendar.isDate(date, inSameDayAs: yesterday)
         {
-            return String(localized: "Yesterday")
+            return AppLocalization.string( "Yesterday")
         }
         if let weekAgo = calendar.date(byAdding: .day, value: -6, to: calendar.startOfDay(for: now)),
            date >= weekAgo
@@ -977,8 +1488,8 @@ enum InboxActivityFormatting {
 
 enum ChatDaySeparatorFormatting {
     static func label(for day: Date, calendar: Calendar = .current) -> String {
-        if calendar.isDateInToday(day) { return String(localized: "Today") }
-        if calendar.isDateInYesterday(day) { return String(localized: "Yesterday") }
+        if calendar.isDateInToday(day) { return AppLocalization.string( "Today") }
+        if calendar.isDateInYesterday(day) { return AppLocalization.string( "Yesterday") }
         return day.formatted(date: .abbreviated, time: .omitted)
     }
 
@@ -1024,10 +1535,10 @@ enum ChatMessageGrouping {
     ) -> String {
         let time = date.formatted(date: .omitted, time: .shortened)
         if calendar.isDateInToday(date) {
-            return String(localized: "Today, \(time)")
+            return AppLocalization.string( "Today, \(time)")
         }
         if calendar.isDateInYesterday(date) {
-            return String(localized: "Yesterday, \(time)")
+            return AppLocalization.string( "Yesterday, \(time)")
         }
         return date.formatted(date: .abbreviated, time: .shortened)
     }
@@ -1166,9 +1677,13 @@ enum ChatInitialViewportPolicy {
         hasPreparedViewport: Bool,
         hasCompletedInitialLoad: Bool,
         hasCachedSnapshot: Bool,
-        isVisible: Bool
+        isVisible: Bool,
+        hasPositionedInitialTarget: Bool = true
     ) -> Bool {
-        hasPreparedViewport && (hasCompletedInitialLoad || hasCachedSnapshot) && !isVisible
+        hasPreparedViewport
+            && (hasCompletedInitialLoad || hasCachedSnapshot)
+            && !isVisible
+            && hasPositionedInitialTarget
     }
 }
 
@@ -1220,9 +1735,9 @@ struct ChatUnreadJumpButton: View {
                 .padding(.vertical, 8)
                 .background(.ultraThinMaterial, in: Capsule())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SSPressButtonStyle())
         .accessibilityIdentifier("chat-unread-jump")
-        .accessibilityLabel(String(localized: "\(count) earlier new messages"))
+        .accessibilityLabel(AppLocalization.string( "\(count) earlier new messages"))
     }
 }
 

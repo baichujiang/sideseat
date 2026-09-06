@@ -2,6 +2,10 @@ import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
 import {
+  LegacyPlanTransitionConflictError,
+  lockLegacyPlanConnectionSafety,
+} from "@/lib/plans/legacy-plan-commitment-compat";
+import {
   getAvailabilityDaysForUser,
   isAvailabilityShareActive,
   normalizeAvailabilityIncludedDates,
@@ -22,6 +26,9 @@ export async function POST(
       where: {
         id: shareId,
         connection: {
+          status: "ACTIVE",
+          userA: { moderationBlocks: { none: { isActive: true } } },
+          userB: { moderationBlocks: { none: { isActive: true } } },
           OR: [{ userAId: user.id }, { userBId: user.id }],
         },
       },
@@ -32,7 +39,7 @@ export async function POST(
       },
     });
 
-    if (!share || share.connection.status !== "ACTIVE") {
+    if (!share) {
       return error("Availability not found.", 404);
     }
     if (!isAvailabilityShareActive(share)) {
@@ -54,6 +61,11 @@ export async function POST(
     }
 
     const result = await prisma.$transaction(async (tx) => {
+      await lockLegacyPlanConnectionSafety(tx, {
+        connectionId: share.connectionId,
+        actorId: user.id,
+        expectedPeerId: share.ownerUserId,
+      });
       const planRequest = await tx.planRequest.create({
         data: {
           connectionId: share.connectionId,
@@ -84,6 +96,9 @@ export async function POST(
 
     return ok(result, { status: 201 });
   } catch (cause) {
+    if (cause instanceof LegacyPlanTransitionConflictError) {
+      return error("Availability not found.", 404);
+    }
     console.error(cause);
     return error("Unable to send plan request.");
   }

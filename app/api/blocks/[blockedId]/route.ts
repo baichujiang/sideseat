@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { requireOnboardedUser } from "@/lib/auth/guards";
+import { unblockUserForActor } from "@/lib/api/v1/blocks-service";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok } from "@/lib/http";
 
@@ -12,14 +13,12 @@ export async function DELETE(
     const user = await requireOnboardedUser();
     const { blockedId } = await params;
 
-    await prisma.block.delete({
-      where: {
-        blockerId_blockedId: {
-          blockerId: user.id,
-          blockedId,
-        },
-      },
+    const result = await unblockUserForActor({
+      db: prisma,
+      blockerId: user.id,
+      blockedId,
     });
+    if (!result) return error("Unable to unblock user.", 404);
 
     return ok({ unblocked: true });
   } catch (cause) {

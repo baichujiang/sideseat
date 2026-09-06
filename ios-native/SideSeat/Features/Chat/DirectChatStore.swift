@@ -23,6 +23,8 @@ final class DirectChatStore {
     private(set) var isMutatingConnectionAction = false
     private(set) var isActingOnPlan = false
     private(set) var planIssue: String?
+    private(set) var planRecoveryRoute: AppRoute?
+    private var planMutationKeys: [String: String] = [:]
     private(set) var hasCachedSnapshot = false
 
     private var nextCursor: String?
@@ -48,7 +50,11 @@ final class DirectChatStore {
     var unrepliedStreak: Int {
         guard !isUnrepliedGateExempt else { return 0 }
         guard let peerID = conversation?.peer.id, !currentUserID.isEmpty else { return 0 }
-        let countable = messages.filter { sendStatuses[$0.id] != .failed }
+        let countable = messages.filter {
+            sendStatuses[$0.id] != .failed
+                && $0.type != "ACTION_INTEREST_CARD"
+                && $0.type != "MUTUAL_OPPORTUNITY_CARD"
+        }
         return Self.countUnrepliedStreak(
             messagesNewestFirst: countable.reversed(),
             viewerID: currentUserID,
@@ -65,7 +71,11 @@ final class DirectChatStore {
         guard !isUnrepliedGateExempt else { return false }
         guard let peerID = conversation?.peer.id, !currentUserID.isEmpty else { return false }
         if isUnrepliedSendBlocked { return false }
-        let countable = messages.filter { sendStatuses[$0.id] != .failed }
+        let countable = messages.filter {
+            sendStatuses[$0.id] != .failed
+                && $0.type != "ACTION_INTEREST_CARD"
+                && $0.type != "MUTUAL_OPPORTUNITY_CARD"
+        }
         guard let newest = countable.last else { return true }
         return newest.sender.id != peerID
     }
@@ -74,7 +84,11 @@ final class DirectChatStore {
         if conversation?.isSelfNotes == true { return true }
         if conversation?.replyLimitUnlocked == true { return true }
         if let peerID = conversation?.peer.id, !currentUserID.isEmpty {
-            let countable = messages.filter { sendStatuses[$0.id] != .failed }
+            let countable = messages.filter {
+                sendStatuses[$0.id] != .failed
+                    && $0.type != "ACTION_INTEREST_CARD"
+                    && $0.type != "MUTUAL_OPPORTUNITY_CARD"
+            }
             if Self.hasMutualExchange(
                 messages: countable,
                 viewerID: currentUserID,
@@ -100,7 +114,10 @@ final class DirectChatStore {
             return 0
         }
         var unreplied = 0
-        for message in messagesNewestFirst {
+        for message in messagesNewestFirst
+        where message.type != "ACTION_INTEREST_CARD"
+            && message.type != "MUTUAL_OPPORTUNITY_CARD"
+        {
             if message.sender.id == viewerID, message.type != "SYSTEM" {
                 unreplied += 1
             }
@@ -116,7 +133,11 @@ final class DirectChatStore {
         guard !viewerID.isEmpty, !peerID.isEmpty, viewerID != peerID else { return false }
         var viewerHasSent = false
         var peerHasSent = false
-        for message in messages where message.type != "SYSTEM" {
+        for message in messages
+        where message.type != "SYSTEM"
+            && message.type != "ACTION_INTEREST_CARD"
+            && message.type != "MUTUAL_OPPORTUNITY_CARD"
+        {
             if message.sender.id == viewerID { viewerHasSent = true }
             if message.sender.id == peerID { peerHasSent = true }
             if viewerHasSent, peerHasSent { return true }
@@ -220,7 +241,48 @@ final class DirectChatStore {
             await persistCache()
         } catch {
             issue = error.localizedDescription
+            if Self.shouldDiscardCachedConversation(after: error) {
+                await discardCachedConversation()
+            }
             isLoading = false
+        }
+    }
+
+    private nonisolated static func shouldDiscardCachedConversation(
+        after error: Error
+    ) -> Bool {
+        guard let apiError = error as? APIClientError else { return false }
+        if apiError.statusCode == 403 || apiError.statusCode == 404 {
+            return true
+        }
+        guard case .server(_, let payload) = apiError else { return false }
+        return payload.code == "SAFETY_UNAVAILABLE"
+            || payload.code == "CONTENT_RESTRICTED"
+    }
+
+    private func discardCachedConversation() async {
+        let pendingCacheWrite = cacheWriteTask
+        pendingCacheWrite?.cancel()
+        cacheWriteTask = nil
+        await pendingCacheWrite?.value
+        stop()
+        conversation = nil
+        messages = []
+        sendStatuses = [:]
+        replyTarget = nil
+        connectionActions = nil
+        nextCursor = nil
+        realtimeCursor = nil
+        hasMoreOlder = false
+        hasCachedSnapshot = false
+        pendingRemoteCount = 0
+        planRecoveryRoute = nil
+        clearUnreadJump()
+        if !currentUserID.isEmpty, !connectionID.isEmpty {
+            await cache.remove(
+                accountID: currentUserID,
+                connectionID: connectionID
+            )
         }
     }
 
@@ -276,7 +338,205 @@ final class DirectChatStore {
             scheduleCachePersist()
         } catch {
             issue = error.localizedDescription
+            if Self.shouldDiscardCachedConversation(after: error) {
+                await discardCachedConversation()
+            }
         }
+    }
+
+    /// Finds the newest chat card for a plan, paging backward when the card is
+    /// older than the initial message window.
+    func messageID(forPlanID planID: String, loadingOlderUsing session: SessionStore) async -> String? {
+        await messageID(
+            forPlanCommitmentID: planID,
+            revisionID: planID,
+            loadingOlderUsing: session
+        )
+    }
+
+    /// Finds the newest card for an exact Plan focus. A revision id wins when
+    /// present; a commitment-only focus falls back to the legacy id until the
+    /// additive commitment metadata is available on every Plan DTO.
+    func messageID(
+        forPlanCommitmentID commitmentID: String,
+        revisionID: String?,
+        loadingOlderUsing session: SessionStore
+    ) async -> String? {
+        if let messageID = Self.messageID(
+            forPlanCommitmentID: commitmentID,
+            revisionID: revisionID,
+            in: messages
+        ) {
+            return messageID
+        }
+
+        defer { suppressNextScrollDecision = false }
+        while hasMoreOlder {
+            let previousCount = messages.count
+            let previousCursor = nextCursor
+            await loadOlder(using: session)
+
+            if let messageID = Self.messageID(
+                forPlanCommitmentID: commitmentID,
+                revisionID: revisionID,
+                in: messages
+            ) {
+                return messageID
+            }
+
+            guard messages.count > previousCount || nextCursor != previousCursor else {
+                break
+            }
+        }
+        return nil
+    }
+
+    nonisolated static func messageID(
+        forPlanID planID: String,
+        in messages: [NativeDirectMessage]
+    ) -> String? {
+        messageID(
+            forPlanCommitmentID: planID,
+            revisionID: planID,
+            in: messages
+        )
+    }
+
+    /// Chat history can contain a request card followed by a confirmed card for
+    /// the same immutable revision. Present only the newest rich card while
+    /// retaining every non-Plan message in timeline order.
+    nonisolated static func presentationMessages(
+        from messages: [NativeDirectMessage]
+    ) -> [NativeDirectMessage] {
+        var seenRevisionIDs = Set<String>()
+        var retained: [NativeDirectMessage] = []
+        retained.reserveCapacity(messages.count)
+        for message in messages.reversed() {
+            let isPlanCard = message.type == "PLAN_REQUEST_CARD" || message.type == "PLAN_CONFIRMED_CARD"
+            guard isPlanCard, let revisionID = message.planRequestId ?? message.planRequest?.id else {
+                retained.append(message)
+                continue
+            }
+            if seenRevisionIDs.insert(revisionID).inserted {
+                retained.append(message)
+            }
+        }
+        return retained.reversed()
+    }
+
+    nonisolated static func messageID(
+        forPlanCommitmentID commitmentID: String,
+        revisionID: String?,
+        in messages: [NativeDirectMessage]
+    ) -> String? {
+        return messages.last { message in
+            let matches = if let revisionID {
+                message.planRequestId == revisionID || message.planRequest?.id == revisionID
+            } else {
+                message.planRequest?.commitmentId == commitmentID
+            }
+            guard matches else {
+                return false
+            }
+            return message.type == "PLAN_REQUEST_CARD" || message.type == "PLAN_CONFIRMED_CARD"
+        }?.id
+    }
+
+    nonisolated static func messageID(
+        forActionContextID contextID: String,
+        in messages: [NativeDirectMessage]
+    ) -> String? {
+        messages.last {
+            $0.type == "ACTION_INTEREST_CARD" && $0.actionContextId == contextID
+        }?.id
+    }
+
+    nonisolated static func actionContextID(
+        for focus: DirectChatFocus?,
+        in messages: [NativeDirectMessage]
+    ) -> String? {
+        guard let focus else { return nil }
+        switch focus {
+        case .actionContext(let id):
+            return id
+        case .message(let id):
+            return messages.last(where: { $0.id == id })?.actionContextId
+        case .plan(let commitmentID, let revisionID):
+            return messages.last(where: {
+                if let revisionID {
+                    return $0.planRequestId == revisionID || $0.planRequest?.id == revisionID
+                }
+                return $0.planRequest?.commitmentId == commitmentID
+            })?.actionContextId
+        case .actionInterest(let id):
+            return messages.last(where: {
+                ($0.actionInterestId == id || $0.actionInterest?.id == id)
+                    && $0.type == "ACTION_INTEREST_CARD"
+            })?.actionContextId
+        }
+    }
+
+    func messageID(
+        forActionContextID contextID: String,
+        loadingOlderUsing session: SessionStore
+    ) async -> String? {
+        if let id = Self.messageID(forActionContextID: contextID, in: messages) { return id }
+        defer { suppressNextScrollDecision = false }
+        while hasMoreOlder {
+            let previousCount = messages.count
+            let previousCursor = nextCursor
+            await loadOlder(using: session)
+            if let id = Self.messageID(forActionContextID: contextID, in: messages) { return id }
+            guard messages.count > previousCount || nextCursor != previousCursor else { break }
+        }
+        return nil
+    }
+
+    func messageID(
+        forActionInterestID interestID: String,
+        loadingOlderUsing session: SessionStore
+    ) async -> String? {
+        if let messageID = Self.messageID(forActionInterestID: interestID, in: messages) {
+            return messageID
+        }
+
+        defer { suppressNextScrollDecision = false }
+        while hasMoreOlder {
+            let previousCount = messages.count
+            let previousCursor = nextCursor
+            await loadOlder(using: session)
+            if let messageID = Self.messageID(forActionInterestID: interestID, in: messages) {
+                return messageID
+            }
+            guard messages.count > previousCount || nextCursor != previousCursor else { break }
+        }
+        return nil
+    }
+
+    func messageID(
+        forMessageID messageID: String,
+        loadingOlderUsing session: SessionStore
+    ) async -> String? {
+        if messages.contains(where: { $0.id == messageID }) { return messageID }
+        defer { suppressNextScrollDecision = false }
+        while hasMoreOlder {
+            let previousCount = messages.count
+            let previousCursor = nextCursor
+            await loadOlder(using: session)
+            if messages.contains(where: { $0.id == messageID }) { return messageID }
+            guard messages.count > previousCount || nextCursor != previousCursor else { break }
+        }
+        return nil
+    }
+
+    nonisolated static func messageID(
+        forActionInterestID interestID: String,
+        in messages: [NativeDirectMessage]
+    ) -> String? {
+        messages.last {
+            ($0.actionInterestId == interestID || $0.actionInterest?.id == interestID)
+                && $0.type == "ACTION_INTEREST_CARD"
+        }?.id
     }
 
     /// Retries a failed optimistic text send in place.
@@ -308,7 +568,11 @@ final class DirectChatStore {
             let response: APIEnvelope<NativeDirectMessage> = try await session.sendAuthorized(
                 "api/v1/connections/\(connectionID)/messages",
                 method: .post,
-                body: NativeDirectTextMessageRequest(body: body, replyToId: message.replyTo?.id),
+                body: NativeDirectTextMessageRequest(
+                    body: body,
+                    replyToId: message.replyTo?.id,
+                    actionContextId: message.actionContextId
+                ),
                 idempotencyKey: UUID().uuidString
             )
             messages.removeAll { $0.id == messageID }
@@ -324,11 +588,16 @@ final class DirectChatStore {
     }
 
     @discardableResult
-    func sendText(_ raw: String, replyTo: NativeDirectMessage? = nil, using session: SessionStore) async -> Bool {
+    func sendText(
+        _ raw: String,
+        replyTo: NativeDirectMessage? = nil,
+        actionContextID: String? = nil,
+        using session: SessionStore
+    ) async -> Bool {
         let body = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !body.isEmpty else { return false }
         if isUnrepliedSendBlocked {
-            sendIssue = String(localized: "Wait for a reply before sending more messages.")
+            sendIssue = AppLocalization.string( "Wait for a reply before sending more messages.")
             return false
         }
         sendIssue = nil
@@ -374,6 +643,7 @@ final class DirectChatStore {
             type: "TEXT",
             body: body,
             createdAt: ISO8601DateFormatter().string(from: Date()),
+            actionContextId: actionContextID,
             replyTo: reply?.asReplyReference()
         )
         messages.append(optimistic)
@@ -387,7 +657,11 @@ final class DirectChatStore {
             let response: APIEnvelope<NativeDirectMessage> = try await session.sendAuthorized(
                 "api/v1/connections/\(connectionID)/messages",
                 method: .post,
-                body: NativeDirectTextMessageRequest(body: body, replyToId: replyToId),
+                body: NativeDirectTextMessageRequest(
+                    body: body,
+                    replyToId: replyToId,
+                    actionContextId: actionContextID
+                ),
                 idempotencyKey: UUID().uuidString
             )
             // The optimistic row already handled the visible scroll. Replacing its
@@ -411,11 +685,12 @@ final class DirectChatStore {
         mimeType: String,
         fileName: String,
         caption: String? = nil,
+        actionContextID: String? = nil,
         using session: SessionStore
     ) async -> Bool {
         guard !isSending else { return false }
         if isUnrepliedSendBlocked {
-            sendIssue = String(localized: "Wait for a reply before sending more messages.")
+            sendIssue = AppLocalization.string( "Wait for a reply before sending more messages.")
             return false
         }
         isSending = true
@@ -438,6 +713,7 @@ final class DirectChatStore {
             body: caption,
             createdAt: ISO8601DateFormatter().string(from: Date()),
             imageUrl: nil,
+            actionContextId: actionContextID,
             replyTo: reply?.asReplyReference()
         )
         messages.append(optimistic)
@@ -457,6 +733,7 @@ final class DirectChatStore {
                 body: caption,
                 createdAt: optimistic.createdAt,
                 imageUrl: "https://example.com/ui-uploaded.jpg",
+                actionContextId: actionContextID,
                 replyTo: reply?.asReplyReference()
             )
             messages.removeAll { $0.id == localID }
@@ -482,7 +759,8 @@ final class DirectChatStore {
                 body: NativeDirectImageMessageRequest(
                     imageUrl: upload.data.url,
                     body: caption,
-                    replyToId: replyToId
+                    replyToId: replyToId,
+                    actionContextId: actionContextID
                 ),
                 idempotencyKey: UUID().uuidString
             )
@@ -503,11 +781,12 @@ final class DirectChatStore {
         latitude: Double,
         longitude: Double,
         name: String? = nil,
+        actionContextID: String? = nil,
         using session: SessionStore
     ) async -> Bool {
         guard !isSending else { return false }
         if isUnrepliedSendBlocked {
-            sendIssue = String(localized: "Wait for a reply before sending more messages.")
+            sendIssue = AppLocalization.string( "Wait for a reply before sending more messages.")
             return false
         }
         isSending = true
@@ -530,6 +809,7 @@ final class DirectChatStore {
             body: nil,
             createdAt: ISO8601DateFormatter().string(from: Date()),
             location: NativeChatLocation(latitude: latitude, longitude: longitude, name: name),
+            actionContextId: actionContextID,
             replyTo: reply?.asReplyReference()
         )
         messages.append(optimistic)
@@ -549,6 +829,7 @@ final class DirectChatStore {
                 body: nil,
                 createdAt: optimistic.createdAt,
                 location: NativeChatLocation(latitude: latitude, longitude: longitude, name: name),
+                actionContextId: actionContextID,
                 replyTo: reply?.asReplyReference()
             )
             messages.removeAll { $0.id == localID }
@@ -565,7 +846,8 @@ final class DirectChatStore {
                     locationLat: latitude,
                     locationLng: longitude,
                     locationName: name,
-                    replyToId: replyToId
+                    replyToId: replyToId,
+                    actionContextId: actionContextID
                 ),
                 idempotencyKey: UUID().uuidString
             )
@@ -586,7 +868,7 @@ final class DirectChatStore {
            case .server(_, let payload) = apiError,
            payload.code == "PEER_REPLY_REQUIRED"
         {
-            sendIssue = String(localized: "Wait for a reply before sending more messages.")
+            sendIssue = AppLocalization.string( "Wait for a reply before sending more messages.")
             return
         }
         sendIssue = error.localizedDescription
@@ -596,6 +878,7 @@ final class DirectChatStore {
     func deleteMessage(_ messageID: String, using session: SessionStore) async -> Bool {
         guard let existing = messages.first(where: { $0.id == messageID }),
               existing.sender.id == currentUserID,
+              existing.supportsUserDeletion,
               !existing.isDeleted
         else { return false }
 
@@ -630,7 +913,7 @@ final class DirectChatStore {
         using session: SessionStore
     ) async -> String? {
         guard message.sender.id != currentUserID, !message.isDeleted else {
-            return String(localized: "You can't report your own content.")
+            return AppLocalization.string( "You can't report your own content.")
         }
 
         #if DEBUG
@@ -819,6 +1102,7 @@ final class DirectChatStore {
         guard let peerID = conversation?.peer.id ?? connectionActions?.peerId else { return false }
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            await completeLocalBlockEffects()
             return true
         }
         #endif
@@ -833,11 +1117,20 @@ final class DirectChatStore {
                 ),
                 idempotencyKey: UUID().uuidString
             )
+            await completeLocalBlockEffects()
             return true
         } catch {
             actionIssue = error.localizedDescription
             return false
         }
+    }
+
+    private func completeLocalBlockEffects() async {
+        await HomeScheduleCache.shared.clear()
+        await discardCachedConversation()
+        NotificationCenter.default.post(name: .sideSeatCalendarNeedsRefresh, object: nil)
+        NotificationCenter.default.post(name: .sideSeatPlansNeedsRefresh, object: nil)
+        NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
     }
 
     func refreshMessages(using session: SessionStore) async {
@@ -944,43 +1237,108 @@ final class DirectChatStore {
     }
 
     @discardableResult
-    func acceptPlan(_ planID: String, using session: SessionStore) async -> Bool {
-        await mutatePlan(path: "api/v1/plans/\(planID)/accept", planID: planID, using: session)
+    func acceptPlan(_ plan: NativePlanRequest, using session: SessionStore) async -> Bool {
+        await mutatePlan(plan, action: "accept", method: .post, using: session)
     }
 
+    /// Compatibility for callers that only hold a legacy PlanRequest id.
     @discardableResult
-    func declinePlan(_ planID: String, using session: SessionStore) async -> Bool {
-        await mutatePlan(path: "api/v1/plans/\(planID)/decline", planID: planID, using: session)
-    }
-
-    private func mutatePlan(path: String, planID: String, using session: SessionStore) async -> Bool {
+    func acceptPlan(_ planID: String, using session: SessionStore) async -> Bool {
+        if let plan = messages.last(where: { $0.planRequest?.id == planID })?.planRequest {
+            return await acceptPlan(plan, using: session)
+        }
         guard !isActingOnPlan else { return false }
         isActingOnPlan = true
         planIssue = nil
         defer { isActingOnPlan = false }
+        let mutationKey = "\(planID):accept"
+        let key = planMutationKeys[mutationKey] ?? UUID().uuidString
+        planMutationKeys[mutationKey] = key
+        do {
+            let _: APIEnvelope<NativePlanEnvelopePayload> = try await session.sendAuthorized(
+                "api/v1/plans/\(planID)/accept",
+                method: .post,
+                idempotencyKey: key
+            )
+            planMutationKeys[mutationKey] = nil
+            await reloadHistory(using: session)
+            await publishPlanMutationEffects(didAccept: true)
+            return true
+        } catch let error as APIClientError {
+            if !error.shouldPreserveIdempotencyKey {
+                planMutationKeys[mutationKey] = nil
+            }
+            planIssue = error.localizedDescription
+            return false
+        } catch {
+            planIssue = error.localizedDescription
+            return false
+        }
+    }
+
+    @discardableResult
+    func declinePlan(_ plan: NativePlanRequest, using session: SessionStore) async -> Bool {
+        await mutatePlan(plan, action: "decline", method: .post, using: session)
+    }
+
+    @discardableResult
+    func withdrawPlan(_ plan: NativePlanRequest, using session: SessionStore) async -> Bool {
+        await mutatePlan(plan, action: "withdraw", method: .delete, using: session)
+    }
+
+    private func mutatePlan(
+        _ plan: NativePlanRequest,
+        action: String,
+        method: HTTPMethod,
+        using session: SessionStore
+    ) async -> Bool {
+        guard !isActingOnPlan else { return false }
+        isActingOnPlan = true
+        planIssue = nil
+        planRecoveryRoute = nil
+        defer { isActingOnPlan = false }
+
+        let usesV2 = plan.usesActionCoordinationV2
+        let path: String
+        if usesV2, action == "withdraw" {
+            path = "api/v1/action-coordination/v2/plans/\(plan.id)"
+        } else if usesV2 {
+            path = "api/v1/action-coordination/v2/plans/\(plan.id)/\(action)"
+        } else {
+            path = "api/v1/plans/\(plan.id)/\(action)"
+        }
+        let mutationKey = "\(plan.id):\(action)"
+        let idempotencyKey = planMutationKeys[mutationKey] ?? UUID().uuidString
+        planMutationKeys[mutationKey] = idempotencyKey
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             messages = messages.map { message in
-                guard message.planRequestId == planID, var plan = message.planRequest else { return message }
-                let status = path.contains("accept") ? "ACCEPTED" : "DECLINED"
-                plan = NativePlanRequest(
-                    id: plan.id,
-                    connectionId: plan.connectionId,
+                guard message.planRequestId == plan.id, var updatedPlan = message.planRequest else { return message }
+                let status = action == "accept" ? "ACCEPTED" : (action == "withdraw" ? "CANCELED" : "DECLINED")
+                updatedPlan = NativePlanRequest(
+                    id: updatedPlan.id,
+                    connectionId: updatedPlan.connectionId,
+                    commitmentId: updatedPlan.commitmentId,
+                    originContextId: updatedPlan.originContextId,
+                    coordinationPolicy: updatedPlan.coordinationPolicy,
                     status: status,
-                    planType: plan.planType,
-                    title: plan.title,
-                    location: plan.location,
-                    message: plan.message,
-                    startTime: plan.startTime,
-                    endTime: plan.endTime,
-                    proposer: plan.proposer,
-                    receiver: plan.receiver,
-                    counterOfId: plan.counterOfId,
-                    availabilityShareId: plan.availabilityShareId,
-                    scheduleShareLinkId: plan.scheduleShareLinkId,
-                    createdAt: plan.createdAt,
-                    updatedAt: plan.updatedAt
+                    planType: updatedPlan.planType,
+                    title: updatedPlan.title,
+                    location: updatedPlan.location,
+                    message: updatedPlan.message,
+                    startTime: updatedPlan.startTime,
+                    endTime: updatedPlan.endTime,
+                    proposer: updatedPlan.proposer,
+                    receiver: updatedPlan.receiver,
+                    counterOfId: updatedPlan.counterOfId,
+                    availabilityShareId: updatedPlan.availabilityShareId,
+                    scheduleShareLinkId: updatedPlan.scheduleShareLinkId,
+                    origin: updatedPlan.origin,
+                    viewerOutcome: updatedPlan.viewerOutcome,
+                    outcomeResponseCount: updatedPlan.outcomeResponseCount,
+                    createdAt: updatedPlan.createdAt,
+                    updatedAt: updatedPlan.updatedAt
                 )
                 return NativeDirectMessage(
                     id: message.id,
@@ -993,25 +1351,48 @@ final class DirectChatStore {
                     location: message.location,
                     availabilityShareId: message.availabilityShareId,
                     planRequestId: message.planRequestId,
-                    planRequest: plan,
+                    planRequest: updatedPlan,
                     replyTo: message.replyTo,
                     deletedAt: message.deletedAt
                 )
             }
-            await publishPlanMutationEffects(didAccept: path.hasSuffix("/accept"))
+            await publishPlanMutationEffects(didAccept: action == "accept")
+            planMutationKeys[mutationKey] = nil
             return true
         }
         #endif
 
         do {
-            let _: APIEnvelope<NativePlanEnvelopePayload> = try await session.sendAuthorized(
-                path,
-                method: .post,
-                idempotencyKey: UUID().uuidString
-            )
+            if usesV2 {
+                let _: Components.Schemas.ActionPlanMutationEnvelope = try await session.sendAuthorized(
+                    path, method: method, idempotencyKey: idempotencyKey
+                )
+            } else {
+                let _: APIEnvelope<NativePlanEnvelopePayload> = try await session.sendAuthorized(
+                    path, method: method, idempotencyKey: idempotencyKey
+                )
+            }
             await reloadHistory(using: session)
-            await publishPlanMutationEffects(didAccept: path.hasSuffix("/accept"))
+            await publishPlanMutationEffects(didAccept: action == "accept")
+            planMutationKeys[mutationKey] = nil
             return true
+        } catch let error as APIClientError {
+            if case .server(_, let payload) = error,
+               payload.recovery?.action == "OPEN_PLAN",
+               let focus = payload.recovery?.focus,
+               let connectionID = focus.connectionId,
+               let commitmentID = focus.commitmentId
+            {
+                planRecoveryRoute = .directChat(
+                    connectionID: connectionID,
+                    focus: .plan(commitmentID: commitmentID, revisionID: focus.revisionId)
+                )
+            }
+            if !error.shouldPreserveIdempotencyKey {
+                planMutationKeys[mutationKey] = nil
+            }
+            planIssue = error.localizedDescription
+            return false
         } catch {
             planIssue = error.localizedDescription
             return false
@@ -1022,6 +1403,7 @@ final class DirectChatStore {
         if didAccept {
             await HomeScheduleCache.shared.clear()
             NotificationCenter.default.post(name: .sideSeatCalendarNeedsRefresh, object: nil)
+            NotificationCenter.default.post(name: .sideSeatTogetherNeedsRefresh, object: nil)
         }
         NotificationCenter.default.post(name: .sideSeatPlansNeedsRefresh, object: nil)
         NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
@@ -1270,6 +1652,10 @@ final class DirectChatStore {
                     // Refresh failed / signed out — stop spinning on 401.
                     break
                 } catch let error as APIClientError {
+                    if Self.shouldDiscardCachedConversation(after: error) {
+                        await self?.discardCachedConversation()
+                        break
+                    }
                     if case .server(_, let payload) = error, payload.code == "STREAM_REAUTH" {
                         backoff = 250_000_000
                     }
@@ -1386,7 +1772,10 @@ final class DirectChatStore {
             }
         case "STREAM_RESET":
             await reloadHistory(using: session)
-        case "STREAM_REVOKED", "STREAM_ERROR":
+        case "STREAM_REVOKED":
+            await discardCachedConversation()
+            return
+        case "STREAM_ERROR":
             break
         default:
             if event.reloadHistory == true {
@@ -1437,6 +1826,9 @@ final class DirectChatStore {
             await markRead(using: session)
         } catch {
             issue = error.localizedDescription
+            if Self.shouldDiscardCachedConversation(after: error) {
+                await discardCachedConversation()
+            }
         }
     }
 

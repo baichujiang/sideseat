@@ -149,13 +149,13 @@ enum NativeCourseWeekday: String, Codable, Sendable, CaseIterable {
 
     var shortName: String {
         switch self {
-        case .mon: String(localized: "Mon")
-        case .tue: String(localized: "Tue")
-        case .wed: String(localized: "Wed")
-        case .thu: String(localized: "Thu")
-        case .fri: String(localized: "Fri")
-        case .sat: String(localized: "Sat")
-        case .sun: String(localized: "Sun")
+        case .mon: AppLocalization.string( "Mon")
+        case .tue: AppLocalization.string( "Tue")
+        case .wed: AppLocalization.string( "Wed")
+        case .thu: AppLocalization.string( "Thu")
+        case .fri: AppLocalization.string( "Fri")
+        case .sat: AppLocalization.string( "Sat")
+        case .sun: AppLocalization.string( "Sun")
         }
     }
 }

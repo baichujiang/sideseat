@@ -2,7 +2,6 @@
 
 import { apiFetch } from "@/lib/auth/api-fetch";
 
-import { ClassmatePostInsightKind } from "@prisma/client";
 import { Loader2, MessageCircle, NotebookPen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -23,7 +22,7 @@ type Props = {
   hasExistingChat?: boolean;
   /** `notes` — notebook icon (e.g. self-notes from post detail). */
   icon?: "message" | "notes";
-  /** When set, records a deduplicated MESSAGE_INTENT for the classmate post (author excluded server-side). */
+  /** Action origin used for server-side coordination-policy enforcement and MESSAGE_INTENT attribution. */
   insightPostId?: string;
   /** Icon without visible label; uses `label` (or default) as `aria-label`. */
   iconOnly?: boolean;
@@ -79,7 +78,11 @@ export function DiscoverMessageButton({
       const res = await apiFetch("/api/connections/open", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ peerId, ...(courseId ? { courseId } : {}) }),
+        body: JSON.stringify({
+          peerId,
+          ...(courseId ? { courseId } : {}),
+          ...(insightPostId ? { postId: insightPostId } : {}),
+        }),
       });
       const payload = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -91,13 +94,6 @@ export function DiscoverMessageButton({
       if (!connectionId) {
         setOpening(false);
         return;
-      }
-      if (insightPostId) {
-        void apiFetch(`/api/classmate-posts/${insightPostId}/insights`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ kind: ClassmatePostInsightKind.MESSAGE_INTENT }),
-        });
       }
       const back = encodeURIComponent(returnTo);
       // Avoid router.refresh() here: refreshing the current route while navigating

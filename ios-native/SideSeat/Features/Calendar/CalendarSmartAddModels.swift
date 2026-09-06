@@ -7,15 +7,15 @@ struct NativeCalendarNaturalParseRequest: Encodable, Sendable {
 
 struct NativeCalendarNaturalDraft: Decodable, Identifiable, Sendable {
     let id = UUID()
-    let title: String
-    let location: String
-    let note: String
-    let startAt: String
-    let endAt: String
-    let repeatRule: String
-    let repeatUntil: String
+    var title: String
+    var location: String
+    var note: String
+    var startAt: String
+    var endAt: String
+    var repeatRule: String
+    var repeatUntil: String
     var categoryId: String?
-    let categoryPreset: String?
+    var categoryPreset: String?
 
     enum CodingKeys: String, CodingKey {
         case title, location, note, startAt, endAt, repeatUntil, categoryId, categoryPreset

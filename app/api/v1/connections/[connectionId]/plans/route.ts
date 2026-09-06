@@ -42,6 +42,7 @@ export async function POST(
           endTime: parsed.data.endTime,
           planType: parsed.data.planType,
           receiverUserId: parsed.data.receiverUserId,
+          origin: parsed.data.origin,
         });
         return {
           status: 201,

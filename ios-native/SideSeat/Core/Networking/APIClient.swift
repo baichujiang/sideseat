@@ -1,6 +1,8 @@
 import Foundation
 
 actor APIClient {
+    static let actionCoordinationCapability = "action-coordination-v2"
+
     private let environment: AppEnvironment
     private let transport: any APITransport
     private let encoder: JSONEncoder
@@ -12,8 +14,8 @@ actor APIClient {
     ) {
         self.environment = environment
         self.transport = transport
-        self.encoder = JSONEncoder()
-        self.decoder = JSONDecoder()
+        self.encoder = Self.makeEncoder()
+        self.decoder = Self.makeDecoder()
     }
 
     func send<Response: Decodable & Sendable>(
@@ -43,6 +45,10 @@ actor APIClient {
         request.setValue("ios", forHTTPHeaderField: "X-SideSeat-Platform")
         request.setValue(environment.appVersion, forHTTPHeaderField: "X-SideSeat-App-Version")
         request.setValue(environment.buildNumber, forHTTPHeaderField: "X-SideSeat-Build")
+        request.setValue(
+            Self.actionCoordinationCapability,
+            forHTTPHeaderField: "X-SideSeat-Capabilities"
+        )
         request.setValue(UUID().uuidString, forHTTPHeaderField: "X-Request-Id")
         if let accessToken {
             request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
@@ -60,6 +66,8 @@ actor APIClient {
         do {
             (data, response) = try await transport.data(for: request)
         } catch is CancellationError {
+            throw CancellationError()
+        } catch let error as URLError where error.code == .cancelled {
             throw CancellationError()
         } catch {
             throw APIClientError.transport(String(describing: error))
@@ -103,6 +111,10 @@ actor APIClient {
         request.setValue("ios", forHTTPHeaderField: "X-SideSeat-Platform")
         request.setValue(environment.appVersion, forHTTPHeaderField: "X-SideSeat-App-Version")
         request.setValue(environment.buildNumber, forHTTPHeaderField: "X-SideSeat-Build")
+        request.setValue(
+            Self.actionCoordinationCapability,
+            forHTTPHeaderField: "X-SideSeat-Capabilities"
+        )
         request.setValue(UUID().uuidString, forHTTPHeaderField: "X-Request-Id")
         if let accessToken {
             request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
@@ -117,6 +129,8 @@ actor APIClient {
         do {
             (data, response) = try await transport.data(for: request)
         } catch is CancellationError {
+            throw CancellationError()
+        } catch let error as URLError where error.code == .cancelled {
             throw CancellationError()
         } catch {
             throw APIClientError.transport(String(describing: error))
@@ -143,7 +157,10 @@ actor APIClient {
     ) throws {
         guard !(200..<300).contains(status) else { return }
         if let envelope = try? decoder.decode(APIErrorEnvelope.self, from: data) {
-            throw APIClientError.server(status: status, payload: envelope.error)
+            throw APIClientError.server(
+                status: status,
+                payload: envelope.error.withRecovery(envelope.recovery)
+            )
         }
         if let legacy = try? decoder.decode(LegacyAPIErrorBody.self, from: data) {
             throw APIClientError.server(
@@ -161,6 +178,40 @@ actor APIClient {
             status: status,
             requestId: httpResponse.value(forHTTPHeaderField: "X-Request-Id")
         )
+    }
+
+    private static func makeDecoder() -> JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let rawValue = try container.decode(String.self)
+            if let date = try? Date(
+                rawValue,
+                strategy: Date.ISO8601FormatStyle(includingFractionalSeconds: true)
+            ) {
+                return date
+            }
+            if let date = try? Date(
+                rawValue,
+                strategy: Date.ISO8601FormatStyle(includingFractionalSeconds: false)
+            ) {
+                return date
+            }
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Expected an ISO 8601 date-time string."
+            )
+        }
+        return decoder
+    }
+
+    private static func makeEncoder() -> JSONEncoder {
+        let encoder = JSONEncoder()
+        // OpenAPI date-time fields are JSON strings. JSONEncoder's default
+        // Date strategy emits seconds since 2001, which the server correctly
+        // rejects for generated Action/Plan request bodies.
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
     }
 
     private static func multipartBody(

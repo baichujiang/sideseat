@@ -65,12 +65,12 @@ struct CalendarChromeFormattingTests {
         let selectedTodayWeekday = CalendarChrome.weekdayForeground(selected: true, isToday: true)
         let unselectedTodayWeekday = CalendarChrome.weekdayForeground(selected: false, isToday: true)
         #expect(selectedTodayWeekday == SideSeatTheme.textPrimary)
-        #expect(unselectedTodayWeekday == CalendarChrome.nowRed)
+        #expect(unselectedTodayWeekday == CalendarChrome.nowAccent)
 
         let selectedNumber = CalendarChrome.dayNumberForeground(selected: true, isToday: false)
         let todayNumber = CalendarChrome.dayNumberForeground(selected: false, isToday: true)
         #expect(selectedNumber == Color.white)
-        #expect(todayNumber == CalendarChrome.nowRed)
+        #expect(todayNumber == CalendarChrome.nowAccent)
     }
 
     @Test("Week header dimensions keep compact day chips readable")
@@ -159,5 +159,145 @@ struct CalendarTimelineScrollAnchorTests {
             calendar: calendar
         )
         #expect(empty == 7 * 60)
+    }
+
+    @Test("Offscreen cues select the nearest fully hidden event on each edge")
+    func offscreenCuesSelectNearestEvents() throws {
+        let calendar = Calendar.sideSeatBerlin
+        let day = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 24))
+        )
+        let early = item("early", from: 7 * 60, to: 8 * 60, day: day, calendar: calendar)
+        let nearestEarly = item(
+            "nearest-early",
+            from: 8 * 60,
+            to: 9 * 60,
+            day: day,
+            calendar: calendar
+        )
+        let overlapsTop = item(
+            "overlaps-top",
+            from: 8 * 60 + 30,
+            to: 9 * 60 + 30,
+            day: day,
+            calendar: calendar
+        )
+        let nearestLate = item(
+            "nearest-late",
+            from: 17 * 60,
+            to: 18 * 60,
+            day: day,
+            calendar: calendar
+        )
+        let late = item("late", from: 20 * 60, to: 21 * 60, day: day, calendar: calendar)
+        let items = [early, nearestEarly, overlapsTop, nearestLate, late]
+
+        let top = CalendarOffscreenEventHints.nearest(
+            items: items,
+            on: day,
+            viewportStartMinute: 9 * 60,
+            viewportEndMinute: 17 * 60,
+            edge: .top,
+            calendar: calendar
+        )
+        let bottom = CalendarOffscreenEventHints.nearest(
+            items: items,
+            on: day,
+            viewportStartMinute: 9 * 60,
+            viewportEndMinute: 17 * 60,
+            edge: .bottom,
+            calendar: calendar
+        )
+
+        #expect(top?.item.id == "nearest-early")
+        #expect(bottom?.item.id == "nearest-late")
+    }
+
+    @Test("Partially visible events do not create offscreen cues")
+    func partiallyVisibleEventsDoNotCreateCues() throws {
+        let calendar = Calendar.sideSeatBerlin
+        let day = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 24))
+        )
+        let crossesTop = item(
+            "crosses-top",
+            from: 8 * 60 + 30,
+            to: 9 * 60 + 30,
+            day: day,
+            calendar: calendar
+        )
+        let crossesBottom = item(
+            "crosses-bottom",
+            from: 16 * 60 + 30,
+            to: 17 * 60 + 30,
+            day: day,
+            calendar: calendar
+        )
+
+        #expect(
+            CalendarOffscreenEventHints.nearest(
+                items: [crossesTop, crossesBottom],
+                on: day,
+                viewportStartMinute: 9 * 60,
+                viewportEndMinute: 17 * 60,
+                edge: .top,
+                calendar: calendar
+            ) == nil
+        )
+        #expect(
+            CalendarOffscreenEventHints.nearest(
+                items: [crossesTop, crossesBottom],
+                on: day,
+                viewportStartMinute: 9 * 60,
+                viewportEndMinute: 17 * 60,
+                edge: .bottom,
+                calendar: calendar
+            ) == nil
+        )
+    }
+
+    @Test("Tapping a cue keeps a half-hour lead-in on the five-minute grid")
+    func offscreenCueScrollTarget() throws {
+        let calendar = Calendar.sideSeatBerlin
+        let day = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 24))
+        )
+        let event = item(
+            "target",
+            from: 17 * 60 + 17,
+            to: 18 * 60,
+            day: day,
+            calendar: calendar
+        )
+        let hint = try #require(
+            CalendarOffscreenEventHints.nearest(
+                items: [event],
+                on: day,
+                viewportStartMinute: 9 * 60,
+                viewportEndMinute: 17 * 60,
+                edge: .bottom,
+                calendar: calendar
+            )
+        )
+
+        #expect(CalendarOffscreenEventHints.scrollTargetMinute(for: hint) == 16 * 60 + 45)
+    }
+
+    private func item(
+        _ id: String,
+        from startMinute: Int,
+        to endMinute: Int,
+        day: Date,
+        calendar: Calendar
+    ) -> HomeAgendaItem {
+        HomeAgendaItem(
+            id: id,
+            title: id,
+            start: calendar.date(byAdding: .minute, value: startMinute, to: day)!,
+            end: calendar.date(byAdding: .minute, value: endMinute, to: day)!,
+            location: nil,
+            colorHex: "#2563EB",
+            source: .event
+        )
     }
 }

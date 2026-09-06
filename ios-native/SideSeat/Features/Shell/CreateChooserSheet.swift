@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Bottom sheet for the center Create tab — product-surface options with press feedback.
+/// Stable Discover publish picker. Its options and order never depend on the active feed filter.
 struct CreateChooserSheet: View {
     let onChoose: (CreateDestination) -> Void
     let onCancel: () -> Void
@@ -8,49 +8,69 @@ struct CreateChooserSheet: View {
     @State private var appeared = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            Capsule()
-                .fill(SideSeatTheme.fillTertiary)
-                .frame(width: 36, height: 5)
-                .padding(.top, SideSeatTheme.spaceSM)
-                .padding(.bottom, SideSeatTheme.spaceMD)
-                .accessibilityHidden(true)
+        ScrollView {
+            VStack(spacing: 0) {
+                Capsule()
+                    .fill(SideSeatTheme.fillTertiary)
+                    .frame(width: 36, height: 5)
+                    .padding(.top, SideSeatTheme.spaceSM)
+                    .padding(.bottom, SideSeatTheme.spaceMD)
+                    .accessibilityHidden(true)
 
-            Text("Create")
-                .font(SideSeatTheme.Text.titleSmall)
-                .foregroundStyle(SideSeatTheme.textPrimary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                Text("Publish")
+                    .font(SideSeatTheme.Text.titleSmall)
+                    .foregroundStyle(SideSeatTheme.textPrimary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, SideSeatTheme.screenHorizontal)
 
-            Text("Share a plan and find the right people.")
-                .font(SideSeatTheme.Text.footnote)
-                .foregroundStyle(SideSeatTheme.textSecondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, SideSeatTheme.screenHorizontal)
-                .padding(.top, 4)
-                .padding(.bottom, SideSeatTheme.spaceLG)
+                Text("Choose what you want to publish.")
+                    .font(SideSeatTheme.Text.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                    .padding(.top, 4)
+                    .padding(.bottom, SideSeatTheme.spaceLG)
 
-            VStack(spacing: SideSeatTheme.spaceSM) {
-                CreateChooserOption(
-                    title: "Create plan",
-                    subtitle: "Add a time and place now, or decide them after you connect.",
-                    systemImage: "calendar.badge.plus",
-                    tint: SideSeatTheme.HubTint.contacts,
-                    accessibilityID: "create-plan"
-                ) {
-                    onChoose(.plan)
+                VStack(spacing: SideSeatTheme.spaceSM) {
+                    CreateChooserOption(
+                        title: "Course action",
+                        subtitle: "Find coursemates to attend class, eat, study, or revise together.",
+                        systemImage: "book.closed.fill",
+                        tint: SideSeatTheme.HubTint.courses,
+                        accessibilityID: "create-course-action"
+                    ) {
+                        onChoose(.courseAction)
+                    }
+                    CreateChooserOption(
+                        title: "Buddy post",
+                        subtitle: "Find people for interests, sports, trips, or everyday plans.",
+                        systemImage: "person.2.fill",
+                        tint: SideSeatTheme.HubTint.contacts,
+                        accessibilityID: "create-buddy-post"
+                    ) {
+                        onChoose(.buddyPost)
+                    }
+                    CreateChooserOption(
+                        title: "Activity",
+                        subtitle: "Create an organized activity with a time, place, and capacity.",
+                        systemImage: "calendar.badge.plus",
+                        tint: SideSeatTheme.HubTint.plans,
+                        accessibilityID: "create-activity"
+                    ) {
+                        onChoose(.activity)
+                    }
                 }
-            }
-            .padding(.horizontal, SideSeatTheme.screenHorizontal)
-            .opacity(appeared ? 1 : 0)
-            .offset(y: appeared ? 0 : 10)
+                .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 10)
 
-            Button("Cancel", action: onCancel)
-                .font(.body.weight(.medium))
-                .foregroundStyle(SideSeatTheme.textSecondary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, SideSeatTheme.spaceLG)
-                .accessibilityIdentifier("create-chooser-cancel")
+                Button("Cancel", action: onCancel)
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(SideSeatTheme.textSecondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, SideSeatTheme.spaceLG)
+                    .accessibilityIdentifier("create-chooser-cancel")
+            }
         }
         .padding(.bottom, SideSeatTheme.spaceSM)
         .background(SideSeatTheme.bg)
@@ -59,7 +79,6 @@ struct CreateChooserSheet: View {
                 appeared = true
             }
         }
-        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("create-chooser-sheet")
     }
 }

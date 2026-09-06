@@ -224,15 +224,75 @@ export function scheduleNewDirectChatMessageNotification(
   });
 }
 
+type DeliverableDirectNotificationConnection = Readonly<{
+  userAId: string;
+  userBId: string;
+}>;
+
+async function deliverableDirectNotificationConnection(
+  params: Pick<DirectChatNotificationParams, "connectionId" | "senderId" | "planId">,
+): Promise<DeliverableDirectNotificationConnection | null> {
+  const connection = await prisma.connection.findFirst({
+    where: {
+      id: params.connectionId,
+      status: "ACTIVE",
+      userA: { moderationBlocks: { none: { isActive: true } } },
+      userB: { moderationBlocks: { none: { isActive: true } } },
+    },
+    select: { userAId: true, userBId: true },
+  });
+  if (
+    !connection ||
+    connection.userAId === connection.userBId ||
+    (params.senderId !== connection.userAId &&
+      params.senderId !== connection.userBId)
+  ) {
+    return null;
+  }
+
+  const peerId =
+    connection.userAId === params.senderId
+      ? connection.userBId
+      : connection.userAId;
+  const [pairBlock, visiblePlan] = await Promise.all([
+    prisma.block.findFirst({
+      where: {
+        OR: [
+          { blockerId: params.senderId, blockedId: peerId },
+          { blockerId: peerId, blockedId: params.senderId },
+        ],
+      },
+      select: { id: true },
+    }),
+    params.planId
+      ? prisma.planRequest.findFirst({
+          where: {
+            id: params.planId,
+            connectionId: params.connectionId,
+            OR: [
+              { commitmentId: null },
+              { commitment: { is: { safetyRestrictedAt: null } } },
+            ],
+          },
+          select: { id: true },
+        })
+      : Promise.resolve({ id: "direct-message" }),
+  ]);
+  return pairBlock || !visiblePlan ? null : connection;
+}
+
+/** Participant message/Plan pushes never bypass a current pair safety barrier. */
+export async function isDirectChatNotificationDeliverable(
+  params: Pick<DirectChatNotificationParams, "connectionId" | "senderId" | "planId">,
+): Promise<boolean> {
+  return Boolean(await deliverableDirectNotificationConnection(params));
+}
+
 export async function notifyNewDirectChatMessage(
   params: DirectChatNotificationParams,
 ): Promise<void> {
-  const connection = await prisma.connection.findUnique({
-    where: { id: params.connectionId },
-    select: { userAId: true, userBId: true },
-  });
+  const connection = await deliverableDirectNotificationConnection(params);
   if (!connection) return;
-  if (connection.userAId === connection.userBId) return;
 
   const peerId =
     connection.userAId === params.senderId
@@ -259,6 +319,11 @@ export async function notifyNewDirectChatMessage(
     planTitle,
   });
   const badge = await getInboxUnreadTotal(peerId).catch(() => undefined);
+
+  // The callback may have been queued before a Block transaction committed.
+  // Recheck immediately before delivery so stale message/Plan work is dropped.
+  // The neutral PLAN_SAFETY_ENDED outbox uses a separate delivery path.
+  if (!(await isDirectChatNotificationDeliverable(params))) return;
 
   await notifyUserPush(peerId, {
     ...content,

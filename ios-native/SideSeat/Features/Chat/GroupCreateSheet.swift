@@ -40,11 +40,11 @@ struct GroupCreateSheet: View {
                                     Spacer()
                                     if selectedIDs.contains(row.id) {
                                         Image(systemName: "checkmark.circle.fill")
-                                            .foregroundStyle(SideSeatTheme.accent)
+                                            .foregroundStyle(SideSeatTheme.accentText)
                                     }
                                 }
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(SSPressButtonStyle())
                             .accessibilityIdentifier("group-create-peer-\(row.id)")
                         }
                     }
@@ -64,10 +64,11 @@ struct GroupCreateSheet: View {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(String(localized: "Create group")) {
+                    Button(AppLocalization.string( "Create group")) {
                         Task { await create() }
                     }
                     .disabled(selectedIDs.count < 2 || isCreating)
+                    .ssConfirmationActionStyle()
                     .accessibilityIdentifier("group-create-submit")
                 }
             }

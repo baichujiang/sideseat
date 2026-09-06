@@ -1,4 +1,4 @@
 "NSLocationWhenInUseUsageDescription" = "仅当你选择在私聊中分享位置时，SideSeat 才会使用你的位置信息。";
 "NSMicrophoneUsageDescription" = "SideSeat 使用麦克风将你说出的日程信息转成日历文字。";
-"NSPhotoLibraryAddUsageDescription" = "仅当你选择保存到相册时，SideSeat 才会将日程图片添加到系统相册。";
+"NSPhotoLibraryAddUsageDescription" = "仅当你选择保存到相册时，SideSeat 才会将分享图片添加到系统相册。";
 "NSSpeechRecognitionUsageDescription" = "SideSeat 使用语音识别转写日程信息，以便智能创建日历事件。";

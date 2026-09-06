@@ -128,7 +128,7 @@ final class CurrentProfileStore {
                 status: "EMAIL_PENDING",
                 delivery: "skipped",
                 verifyUrl: "http://127.0.0.1:3000/api/student-verification/verify?token=ui-testing",
-                message: String(localized: "Email delivery is disabled in this test build. Use the verification link below to finish now.")
+                message: AppLocalization.string( "Email delivery is disabled in this test build. Use the verification link below to finish now.")
             )
             profile = (profile ?? .uiTestingFixture).applyingVerification(status: result.status, verifiedStudent: false)
             return result
@@ -169,7 +169,7 @@ final class CurrentProfileStore {
                 status: "MANUAL_REVIEW_REQUIRED",
                 delivery: nil,
                 verifyUrl: nil,
-                message: String(localized: "Your school document was submitted for review.")
+                message: AppLocalization.string( "Your school document was submitted for review.")
             )
             profile = (profile ?? .uiTestingFixture).applyingVerification(status: result.status, verifiedStudent: false)
             return result

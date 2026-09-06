@@ -12,11 +12,11 @@ struct NativeProfileSchoolSummary: Decodable, Hashable, Sendable {
         let majorText = major.trimmingCharacters(in: .whitespacesAndNewlines)
         let studyText = majorText.isEmpty ? degreeLabel : majorText
         if studentStatus == "ALUMNI" {
-            let year = graduationYear.map(String.init) ?? String(localized: "Alumni")
+            let year = graduationYear.map(String.init) ?? AppLocalization.string( "Alumni")
             return "\(schoolShort) · \(studyText) · \(year)"
         }
         if studentStatus == "EXCHANGE_STUDENT" {
-            return "\(schoolShort) · \(studyText) · \(String(localized: "Exchange"))"
+            return "\(schoolShort) · \(studyText) · \(AppLocalization.string( "Exchange"))"
         }
         if majorText.isEmpty {
             return "\(schoolShort) · \(degreeLabel) · Semester \(semester)"
@@ -35,7 +35,7 @@ enum StudentIdentityTone: Equatable {
 enum StudentIdentityDisplay {
     static func schoolText(_ school: String?) -> String {
         let trimmed = school?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return trimmed.isEmpty ? String(localized: "School") : trimmed.uppercased()
+        return trimmed.isEmpty ? AppLocalization.string( "School") : trimmed.uppercased()
     }
 
     static func schoolCode(_ school: String?) -> String {
@@ -66,15 +66,15 @@ enum StudentIdentityDisplay {
         let school = schoolText(school)
         switch status.uppercased() {
         case "VERIFIED":
-            return String(localized: "\(school) verified")
+            return AppLocalization.string( "\(school) verified")
         case "EMAIL_PENDING":
-            return String(localized: "School email pending")
+            return AppLocalization.string( "School email pending")
         case "MANUAL_REVIEW_REQUIRED":
-            return String(localized: "Manual review")
+            return AppLocalization.string( "Manual review")
         case "REJECTED":
-            return String(localized: "Verification rejected")
+            return AppLocalization.string( "Verification rejected")
         default:
-            return verifiedStudent ? String(localized: "\(school) verified") : String(localized: "Not school verified")
+            return verifiedStudent ? AppLocalization.string( "\(school) verified") : AppLocalization.string( "Not school verified")
         }
     }
 

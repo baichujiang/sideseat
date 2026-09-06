@@ -1,3 +1,5 @@
+import "server-only";
+
 import type { Prisma } from "@prisma/client";
 
 import {
@@ -18,7 +20,18 @@ export const classmatePostForDiscoverInclude = {
   language: true,
   sport: true,
   images: { select: { url: true, sortOrder: true } },
-  _count: { select: { saves: true } },
+  _count: {
+    select: {
+      saves: true,
+      interests: { where: { status: "ACTIVE" } },
+      comments: {
+        where: {
+          parentId: null,
+          user: { moderationBlocks: { none: { isActive: true } } },
+        },
+      },
+    },
+  },
 } satisfies Prisma.ClassmatePostInclude;
 
 export type ClassmatePostForDiscoverPayload = Prisma.ClassmatePostGetPayload<{
@@ -28,7 +41,7 @@ export type ClassmatePostForDiscoverPayload = Prisma.ClassmatePostGetPayload<{
 export function prismaClassmatePostToDiscoverRow(
   post: ClassmatePostForDiscoverPayload,
   viewerUserId: string | null,
-  opts?: { savedByViewer?: boolean },
+  opts?: { savedByViewer?: boolean; interestedByViewer?: boolean },
 ): DiscoverPostRow {
   const row: DiscoverPostRow = {
     id: post.id,
@@ -39,6 +52,13 @@ export function prismaClassmatePostToDiscoverRow(
     status: post.status,
     closureReason: post.closureReason,
     closedAt: post.closedAt,
+    coordinationPolicy: post.coordinationPolicy,
+    policySchemaVersion: post.policySchemaVersion,
+    policyParametersSnapshot: post.policyParametersSnapshot,
+    experimentKeySnapshot: post.experimentKeySnapshot,
+    experimentVariantSnapshot: post.experimentVariantSnapshot,
+    clientCapabilitySnapshot: post.clientCapabilitySnapshot,
+    policySnapshottedAt: post.policySnapshottedAt,
     tags: post.tags,
     visibility: post.visibility,
     replyPreference: post.replyPreference,
@@ -74,7 +94,8 @@ export function prismaClassmatePostToDiscoverRow(
     mealsMeta: mapPrismaMealsToDiscoverRow(post.meals),
     languageMeta: mapPrismaLanguageToDiscoverRow(post.language),
     sportMeta: mapPrismaSportToDiscoverRow(post.sport),
-    interestedCount: post._count.saves,
+    interestedCount: post._count.interests,
+    commentCount: post._count.comments,
   };
   const imageUrls = mapPrismaClassmatePostImagesToUrls(post.images);
   if (imageUrls?.length) {
@@ -82,6 +103,9 @@ export function prismaClassmatePostToDiscoverRow(
   }
   if (opts?.savedByViewer !== undefined) {
     row.savedByViewer = opts.savedByViewer;
+  }
+  if (opts?.interestedByViewer !== undefined) {
+    row.interestedByViewer = opts.interestedByViewer;
   }
   return row;
 }

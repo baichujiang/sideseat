@@ -20,13 +20,27 @@ final class SessionStore {
     private(set) var currentUser: CurrentUser?
     private(set) var accessToken: String?
     private(set) var isWorking = false
+    private(set) var isRestoringConnection = false
+    private(set) var isOffline = false
+    private(set) var restorationIssue: String?
     var issue: String?
 
     /// Access token for long-lived SSE; callers must handle 401 by restarting after refresh.
     var accessTokenForStreaming: String? { accessToken }
+    var canPresentAppShell: Bool { currentUser != nil && phase != .signedOut }
+    var canMakeAuthenticatedRequests: Bool { phase == .signedIn && accessToken != nil }
+    var shouldAutomaticallyRetryConnection: Bool {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-offline-cached-launch") {
+            return false
+        }
+        #endif
+        return isOffline
+    }
 
-    func applyCurrentUser(_ user: CurrentUser) {
+    func applyCurrentUser(_ user: CurrentUser) async {
         currentUser = user
+        try? await credentialStore.saveCachedUser(user)
     }
 
     /// Refresh the access token for SSE reconnect after a 401.
@@ -48,19 +62,55 @@ final class SessionStore {
 
     func restoreSession() async {
         guard phase == .restoring else { return }
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-slow-cached-launch") {
+            isRestoringConnection = true
+            defer { isRestoringConnection = false }
+            try? await Task.sleep(for: .seconds(8))
+            accessToken = "ui-test-restored-access-token"
+            isOffline = false
+            restorationIssue = nil
+            phase = .signedIn
+            return
+        }
+        #endif
+        await restoreOrReconnect(loadCachedIdentity: true)
+    }
+
+    func retryConnection() async {
+        guard !isRestoringConnection else { return }
+        await restoreOrReconnect(loadCachedIdentity: currentUser == nil)
+    }
+
+    private func restoreOrReconnect(loadCachedIdentity: Bool) async {
+        guard !isRestoringConnection else { return }
+        isRestoringConnection = true
+        defer { isRestoringConnection = false }
+        restorationIssue = nil
         let epoch = sessionEpoch
         do {
+            if loadCachedIdentity, currentUser == nil {
+                currentUser = try await credentialStore.cachedUser()
+            }
             guard let token = try await credentialStore.refreshToken() else {
-                phase = .signedOut
+                await invalidateLocalSession(expectedEpoch: epoch)
                 return
             }
             try await refresh(using: token, expectedEpoch: epoch)
         } catch {
             guard sessionEpoch == epoch else { return }
-            try? await credentialStore.clear()
-            currentUser = nil
-            accessToken = nil
-            phase = .signedOut
+            if Self.invalidatesCredentials(error) {
+                await invalidateLocalSession(expectedEpoch: epoch)
+            } else {
+                accessToken = nil
+                isOffline = true
+                restorationIssue = AppLocalization.string(
+                    "Couldn't connect. Your saved data is still available."
+                )
+                if currentUser != nil {
+                    phase = .signedIn
+                }
+            }
         }
     }
 
@@ -69,6 +119,13 @@ final class SessionStore {
         isWorking = true
         issue = nil
         defer { isWorking = false }
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-login-failure") {
+            await Task.yield()
+            issue = AppLocalization.string("Incorrect username or password.")
+            return
+        }
+        #endif
         do {
             try await performLogin(identifier: identifier, password: password)
         } catch {
@@ -88,7 +145,7 @@ final class SessionStore {
         semester: Int?,
         graduationYear: Int?
     ) async -> String? {
-        guard !isWorking else { return String(localized: "Please wait…") }
+        guard !isWorking else { return AppLocalization.string( "Please wait…") }
         if let usernameIssue = AuthFieldValidation.usernameIssue(username) {
             return usernameIssue
         }
@@ -149,7 +206,7 @@ final class SessionStore {
         password: String,
         confirmPassword: String
     ) async -> String? {
-        guard !isWorking else { return String(localized: "Please wait…") }
+        guard !isWorking else { return AppLocalization.string( "Please wait…") }
         if let emailIssue = AuthFieldValidation.emailIssue(email) {
             return emailIssue
         }
@@ -160,7 +217,7 @@ final class SessionStore {
             return passwordIssue
         }
         if password != confirmPassword {
-            return String(localized: "Passwords do not match.")
+            return AppLocalization.string( "Passwords do not match.")
         }
         isWorking = true
         issue = nil
@@ -215,6 +272,8 @@ final class SessionStore {
         try? await credentialStore.clear()
         currentUser = nil
         accessToken = nil
+        isOffline = false
+        restorationIssue = nil
         issue = nil
         phase = .signedOut
 
@@ -237,6 +296,8 @@ final class SessionStore {
             try? await credentialStore.clear()
             currentUser = nil
             accessToken = nil
+            isOffline = false
+            restorationIssue = nil
             phase = .signedOut
             return nil
         }
@@ -262,6 +323,8 @@ final class SessionStore {
             try? await credentialStore.clear()
             currentUser = nil
             accessToken = nil
+            isOffline = false
+            restorationIssue = nil
             phase = .signedOut
             return nil
         } catch {
@@ -276,9 +339,10 @@ final class SessionStore {
         queryItems: [URLQueryItem] = [],
         idempotencyKey: String? = nil
     ) async throws -> Response {
-        guard phase == .signedIn, let accessToken else {
+        guard phase == .signedIn else {
             throw SessionError.authenticationRequired
         }
+        let accessToken = try await authenticatedAccessToken()
 
         do {
             return try await apiClient.send(
@@ -311,9 +375,10 @@ final class SessionStore {
         fields: [String: String] = [:],
         idempotencyKey: String
     ) async throws -> Response {
-        guard phase == .signedIn, let accessToken else {
+        guard phase == .signedIn else {
             throw SessionError.authenticationRequired
         }
+        let accessToken = try await authenticatedAccessToken()
 
         do {
             return try await apiClient.uploadMultipart(
@@ -384,21 +449,54 @@ final class SessionStore {
             guard sessionEpoch == operation.epoch else {
                 throw CancellationError()
             }
-            try? await credentialStore.clear()
-            currentUser = nil
             accessToken = nil
-            phase = .signedOut
+            if Self.invalidatesCredentials(error) {
+                await invalidateLocalSession(expectedEpoch: operation.epoch)
+            } else {
+                isOffline = true
+                restorationIssue = AppLocalization.string(
+                    "Couldn't connect. Your saved data is still available."
+                )
+                if currentUser != nil {
+                    phase = .signedIn
+                }
+            }
             throw error
         }
+    }
+
+    private func authenticatedAccessToken() async throws -> String {
+        if let accessToken { return accessToken }
+        guard currentUser != nil else { throw SessionError.authenticationRequired }
+        return try await refreshAccessToken()
     }
 
     private func adopt(_ payload: AuthPayload, expectedEpoch: UInt64) async throws {
         guard sessionEpoch == expectedEpoch else { throw CancellationError() }
         try await credentialStore.save(refreshToken: payload.tokens.refreshToken)
+        try await credentialStore.saveCachedUser(payload.user)
         guard sessionEpoch == expectedEpoch else { throw CancellationError() }
         accessToken = payload.tokens.accessToken
         currentUser = payload.user
+        isOffline = false
+        restorationIssue = nil
         phase = .signedIn
+    }
+
+    private func invalidateLocalSession(expectedEpoch: UInt64) async {
+        guard sessionEpoch == expectedEpoch else { return }
+        try? await credentialStore.clear()
+        guard sessionEpoch == expectedEpoch else { return }
+        currentUser = nil
+        accessToken = nil
+        isOffline = false
+        restorationIssue = nil
+        phase = .signedOut
+    }
+
+    private nonisolated static func invalidatesCredentials(_ error: Error) -> Bool {
+        if error is SessionError { return true }
+        return (error as? APIClientError)?.isUnauthorized == true
     }
 
     #if DEBUG
@@ -406,7 +504,38 @@ final class SessionStore {
         sessionEpoch &+= 1
         refreshOperation?.task.cancel()
         refreshOperation = nil
-        currentUser = CurrentUser(
+        currentUser = Self.uiTestingUser
+        accessToken = "ui-test-access-token"
+        isOffline = false
+        restorationIssue = nil
+        phase = .signedIn
+    }
+
+    func installUITestingSlowCachedLaunchState() {
+        sessionEpoch &+= 1
+        refreshOperation?.task.cancel()
+        refreshOperation = nil
+        currentUser = Self.uiTestingUser
+        accessToken = nil
+        isOffline = false
+        restorationIssue = nil
+        phase = .restoring
+    }
+
+    func installUITestingOfflineCachedLaunchState() {
+        sessionEpoch &+= 1
+        refreshOperation?.task.cancel()
+        refreshOperation = nil
+        currentUser = Self.uiTestingUser
+        accessToken = nil
+        isOffline = true
+        restorationIssue = AppLocalization.string(
+            "Couldn't connect. Your saved data is still available."
+        )
+        phase = .signedIn
+    }
+
+    private static let uiTestingUser = CurrentUser(
             id: "ui-test-user",
             username: "test_001",
             nickname: "Test User",
@@ -429,9 +558,6 @@ final class SessionStore {
             productTutorialDismissedAt: "2026-01-01T00:00:00.000Z",
             locale: "en"
         )
-        accessToken = "ui-test-access-token"
-        phase = .signedIn
-    }
 
     func installUITestingSignedOutState() {
         sessionEpoch &+= 1
@@ -439,6 +565,8 @@ final class SessionStore {
         refreshOperation = nil
         currentUser = nil
         accessToken = nil
+        isOffline = false
+        restorationIssue = nil
         phase = .signedOut
     }
     #endif

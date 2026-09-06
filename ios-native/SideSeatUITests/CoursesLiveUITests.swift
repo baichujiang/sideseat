@@ -37,8 +37,19 @@ final class CoursesLiveUITests: XCTestCase {
         passwordField.typeText(password)
         app.buttons["login-submit"].tap()
 
-        let courses = app.buttons["open-courses"]
-        XCTAssertTrue(courses.waitForExistence(timeout: 10))
+        let me = app.tabBars.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Me", "我", "Ich"])
+        ).firstMatch
+        XCTAssertTrue(me.waitForExistence(timeout: 10))
+        me.tap()
+        let profile = app.descendants(matching: .any)["me-profile"]
+        XCTAssertTrue(profile.waitForExistence(timeout: 8))
+        let courses = app.buttons["me-courses"]
+        for _ in 0..<8 where !courses.exists || !courses.isHittable {
+            profile.swipeUp()
+        }
+        XCTAssertTrue(courses.exists)
+        XCTAssertTrue(courses.isHittable)
         courses.tap()
 
         let search = app.searchFields.firstMatch
@@ -51,7 +62,7 @@ final class CoursesLiveUITests: XCTestCase {
         row.tap()
 
         XCTAssertTrue(app.buttons["course-leave"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.buttons["course-open-chat"].exists)
+        XCTAssertFalse(app.buttons["course-open-chat"].exists)
 
         let timetable = app.buttons.matching(
             NSPredicate(format: "identifier BEGINSWITH 'course-use-schedule-'")

@@ -29,6 +29,14 @@ if (process.env.ALLOW_REMOTE_DATABASE_MIGRATIONS?.trim() === "1") {
   );
 }
 
+for (const key of ["V2_TESTFLIGHT_ALLOW_ALL", "V2_SMALL_GROUP_ALLOW_ALL"]) {
+  if (process.env[key]?.trim() === "1") {
+    failures.push(
+      `${key} must not be enabled in Production; use an explicit reviewed allowlist.`,
+    );
+  }
+}
+
 for (const key of required) {
   const value = process.env[key]?.trim();
   if (!value || /replace-with|your-production|\.invalid/i.test(value)) {

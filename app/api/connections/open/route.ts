@@ -37,6 +37,10 @@ export async function POST(request: Request) {
           return error("This conversation is no longer available.", 409);
         case "COURSE_CONTEXT_INVALID":
           return error("That course context is no longer valid.", 403);
+        case "POST_CONTEXT_INVALID":
+          return error("That action is no longer available for contact.", 403);
+        case "ACTION_COORDINATION_REQUIRED":
+          return error("Respond from the action page to contact its creator.", 409);
         case "RATE_LIMITED":
           return error(
             "You've started too many new chats recently. Try again in a bit.",

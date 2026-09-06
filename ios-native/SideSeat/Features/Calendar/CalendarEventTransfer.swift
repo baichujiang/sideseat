@@ -43,7 +43,7 @@ struct CalendarEventTransfer: Equatable, Sendable {
         title = event.title
         location = event.location ?? ""
         note = event.note ?? ""
-        duration = max(15 * 60, end.timeIntervalSince(start))
+        duration = max(5 * 60, end.timeIntervalSince(start))
         participantIDs = event.eventParticipants.compactMap(\.userId).sorted()
         categoryID = event.categoryId
         repeatRule = event.repeatRule
@@ -62,6 +62,19 @@ struct CalendarEventTransfer: Equatable, Sendable {
     func moveRequest(startingAt start: Date) -> NativeCalendarEventRequest {
         request(
             startingAt: start,
+            endingAt: start.addingTimeInterval(duration),
+            repeatRule: repeatRule,
+            repeatUntil: isRecurring ? (repeatUntilISO ?? "") : ""
+        )
+    }
+
+    func timingRequest(
+        startingAt start: Date,
+        endingAt end: Date
+    ) -> NativeCalendarEventRequest {
+        request(
+            startingAt: start,
+            endingAt: max(end, start.addingTimeInterval(5 * 60)),
             repeatRule: repeatRule,
             repeatUntil: isRecurring ? (repeatUntilISO ?? "") : ""
         )
@@ -69,6 +82,7 @@ struct CalendarEventTransfer: Equatable, Sendable {
 
     private func request(
         startingAt start: Date,
+        endingAt end: Date? = nil,
         repeatRule: String,
         repeatUntil: String
     ) -> NativeCalendarEventRequest {
@@ -77,7 +91,7 @@ struct CalendarEventTransfer: Equatable, Sendable {
             location: location,
             note: note,
             startAt: start.ISO8601Format(),
-            endAt: start.addingTimeInterval(duration).ISO8601Format(),
+            endAt: (end ?? start.addingTimeInterval(duration)).ISO8601Format(),
             withUserIds: participantIDs,
             repeatRule: repeatRule,
             repeatUntil: repeatUntil,

@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-struct ClientConfiguration: Decodable, Sendable {
+struct ClientConfiguration: Codable, Sendable {
     let apiVersion: String
     let serverTime: String
     let ios: IOSConfiguration
@@ -13,12 +13,12 @@ struct ClientConfiguration: Decodable, Sendable {
     }
 }
 
-struct ClientLinks: Decodable, Sendable {
+struct ClientLinks: Codable, Sendable {
     let privacyUrl: String?
     let supportUrl: String?
 }
 
-struct IOSConfiguration: Decodable, Sendable {
+struct IOSConfiguration: Codable, Sendable {
     let minimumSupportedVersion: String
     let latestVersion: String
     let maintenanceMode: Bool
@@ -36,30 +36,65 @@ enum ClientAvailability: Equatable, Sendable {
 final class ClientConfigurationStore {
     private let apiClient: APIClient
     private let currentVersion: String
+    private let defaults: UserDefaults
+    private let cacheKey = "sideseat.client-configuration-v1"
+    private let hardGateCacheLifetime: TimeInterval = 24 * 60 * 60
 
-    private(set) var availability: ClientAvailability = .checking
+    private(set) var availability: ClientAvailability = .available(updateAvailable: false)
     private(set) var configuration: ClientConfiguration?
     private(set) var issue: String?
+    private(set) var isRefreshing = false
+    private(set) var lastCheckedAt: Date?
 
-    init(apiClient: APIClient, currentVersion: String) {
+    init(
+        apiClient: APIClient,
+        currentVersion: String,
+        defaults: UserDefaults = .standard
+    ) {
         self.apiClient = apiClient
         self.currentVersion = currentVersion
+        self.defaults = defaults
+
+        guard
+            let data = defaults.data(forKey: cacheKey),
+            let cached = try? JSONDecoder().decode(CachedClientConfiguration.self, from: data)
+        else { return }
+
+        configuration = cached.configuration
+        lastCheckedAt = cached.savedAt
+        if Date().timeIntervalSince(cached.savedAt) <= hardGateCacheLifetime {
+            availability = Self.availability(
+                for: cached.configuration.ios,
+                currentVersion: currentVersion
+            )
+        }
     }
 
     func refresh() async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
         issue = nil
         do {
             let response: APIEnvelope<ClientConfiguration> = try await apiClient.send(
                 "api/v1/client-config"
             )
             configuration = response.data
+            let checkedAt = Date()
+            lastCheckedAt = checkedAt
             availability = Self.availability(
                 for: response.data.ios,
                 currentVersion: currentVersion
             )
+            let cached = CachedClientConfiguration(
+                savedAt: checkedAt,
+                configuration: response.data
+            )
+            if let data = try? JSONEncoder().encode(cached) {
+                defaults.set(data, forKey: cacheKey)
+            }
         } catch {
             issue = error.localizedDescription
-            availability = .available(updateAvailable: false)
         }
     }
 
@@ -97,6 +132,11 @@ final class ClientConfigurationStore {
         availability = .available(updateAvailable: false)
     }
     #endif
+}
+
+private struct CachedClientConfiguration: Codable {
+    let savedAt: Date
+    let configuration: ClientConfiguration
 }
 
 struct AppVersion: Comparable, Sendable {

@@ -35,11 +35,21 @@ protocol ScheduleSharePhotoLibraryClient {
     func save(_ imageData: Data) async throws
 }
 
+struct ScheduleSharePhotoPage: Sendable {
+    let data: Data
+    let filename: String
+}
+
 struct SystemScheduleSharePhotoLibraryClient: ScheduleSharePhotoLibraryClient {
     private let saveTimeout: TimeInterval
+    private let originalFilename: String
 
-    init(saveTimeout: TimeInterval = 15) {
+    init(
+        saveTimeout: TimeInterval = 15,
+        originalFilename: String = "SideSeat Schedule.png"
+    ) {
         self.saveTimeout = saveTimeout
+        self.originalFilename = originalFilename
     }
 
     func authorizationStatus() -> PHAuthorizationStatus {
@@ -51,13 +61,22 @@ struct SystemScheduleSharePhotoLibraryClient: ScheduleSharePhotoLibraryClient {
     }
 
     func save(_ imageData: Data) async throws {
+        try await save([
+            ScheduleSharePhotoPage(data: imageData, filename: originalFilename),
+        ])
+    }
+
+    func save(_ pages: [ScheduleSharePhotoPage]) async throws {
+        guard !pages.isEmpty else { throw ScheduleSharePhotoLibraryError.saveFailed }
         let operation = ScheduleSharePhotoWriteOperation()
         try await operation.run(timeout: saveTimeout) { completion in
             PHPhotoLibrary.shared().performChanges {
-                let request = PHAssetCreationRequest.forAsset()
-                let options = PHAssetResourceCreationOptions()
-                options.originalFilename = "SideSeat Schedule.png"
-                request.addResource(with: .photo, data: imageData, options: options)
+                for page in pages {
+                    let request = PHAssetCreationRequest.forAsset()
+                    let options = PHAssetResourceCreationOptions()
+                    options.originalFilename = page.filename
+                    request.addResource(with: .photo, data: page.data, options: options)
+                }
             } completionHandler: { didSave, error in
                 completion(didSave, error)
             }

@@ -36,9 +36,9 @@ struct NativeFeedbackPost: Decodable, Identifiable, Hashable, Sendable {
 
     var topicLabel: String {
         switch topic.lowercased() {
-        case "bug": String(localized: "Bug")
-        case "idea": String(localized: "Idea")
-        default: String(localized: "Other")
+        case "bug": AppLocalization.string( "Bug")
+        case "idea": AppLocalization.string( "Idea")
+        default: AppLocalization.string( "Other")
         }
     }
 
@@ -332,7 +332,7 @@ struct FeedbackRootView: View {
                     title: "No feedback yet",
                     systemImage: "bubble.left.and.bubble.right",
                     description: "Share a bug or idea to help improve SideSeat.",
-                    actionTitle: String(localized: "Share feedback"),
+                    actionTitle: AppLocalization.string( "Share feedback"),
                     actionAccessibilityID: "feedback-empty-compose"
                 ) {
                     showCompose = true
@@ -367,7 +367,7 @@ struct FeedbackRootView: View {
                         }
                         .padding(.vertical, 4)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(SSPressButtonStyle())
                     .accessibilityIdentifier("feedback-row-\(post.id)")
                 }
                 .listStyle(.plain)
@@ -397,16 +397,27 @@ struct FeedbackRootView: View {
         .onAppear {
             Task { await store.load(using: session) }
         }
-        .alert(
-            "Feedback could not be refreshed",
+        .ssActionPrompt(
             isPresented: Binding(
                 get: { store.issue != nil && !store.posts.isEmpty },
                 set: { if !$0 { store.clearIssue() } }
-            )
+            ),
+            title: AppLocalization.string("Feedback could not be refreshed"),
+            message: store.issue,
+            systemImage: "arrow.clockwise.circle.fill",
+            tint: SideSeatTheme.danger,
+            dismissOnTapOutside: true,
+            onDismiss: { store.clearIssue() },
+            accessibilityIdentifier: "feedback-refresh-prompt"
         ) {
-            Button("OK") { store.clearIssue() }
-        } message: {
-            Text(store.issue ?? "")
+            [
+                SSActionPromptAction(
+                    id: "feedback-refresh-ok",
+                    title: AppLocalization.string("OK")
+                ) {
+                    store.clearIssue()
+                }
+            ]
         }
         .accessibilityIdentifier("feedback-root")
     }
@@ -442,7 +453,7 @@ struct FeedbackDetailView: View {
                                 Label("\(post.up ?? 0)", systemImage: post.myVote == "UP" ? "hand.thumbsup.fill" : "hand.thumbsup")
                             }
                             .buttonStyle(.bordered)
-                            .tint(post.myVote == "UP" ? SideSeatTheme.accent : SideSeatTheme.textSecondary)
+                            .tint(post.myVote == "UP" ? SideSeatTheme.accentText : SideSeatTheme.textSecondary)
                             .disabled(store.isMutating)
                             .accessibilityLabel(post.myVote == "UP" ? "Remove upvote" : "Upvote")
                             .accessibilityValue(post.myVote == "UP" ? "Selected" : "Not selected")
@@ -454,7 +465,7 @@ struct FeedbackDetailView: View {
                                 Label("\(post.down ?? 0)", systemImage: post.myVote == "DOWN" ? "hand.thumbsdown.fill" : "hand.thumbsdown")
                             }
                             .buttonStyle(.bordered)
-                            .tint(post.myVote == "DOWN" ? SideSeatTheme.accent : SideSeatTheme.textSecondary)
+                            .tint(post.myVote == "DOWN" ? SideSeatTheme.accentText : SideSeatTheme.textSecondary)
                             .disabled(store.isMutating)
                             .accessibilityLabel(post.myVote == "DOWN" ? "Remove downvote" : "Downvote")
                             .accessibilityValue(post.myVote == "DOWN" ? "Selected" : "Not selected")
@@ -509,6 +520,7 @@ struct FeedbackDetailView: View {
                                 }
                             }
                         }
+                        .ssConfirmationActionStyle()
                         .disabled(
                             commentDraft.trimmingCharacters(in: .whitespacesAndNewlines).count < 2 ||
                             store.isMutating
@@ -525,16 +537,27 @@ struct FeedbackDetailView: View {
         .navigationTitle("Feedback")
         .navigationBarTitleDisplayMode(.inline)
         .task { await store.loadDetail(id: feedbackID, using: session) }
-        .alert(
-            "Action failed",
+        .ssActionPrompt(
             isPresented: Binding(
                 get: { store.issue != nil && store.detail != nil },
                 set: { if !$0 { store.clearIssue() } }
-            )
+            ),
+            title: AppLocalization.string("Action failed"),
+            message: store.issue,
+            systemImage: "exclamationmark.triangle.fill",
+            tint: SideSeatTheme.danger,
+            dismissOnTapOutside: true,
+            onDismiss: { store.clearIssue() },
+            accessibilityIdentifier: "feedback-action-failed-prompt"
         ) {
-            Button("OK") { store.clearIssue() }
-        } message: {
-            Text(store.issue ?? "")
+            [
+                SSActionPromptAction(
+                    id: "feedback-action-failed-ok",
+                    title: AppLocalization.string("OK")
+                ) {
+                    store.clearIssue()
+                }
+            ]
         }
         .accessibilityIdentifier("feedback-detail")
     }
@@ -589,6 +612,7 @@ private struct FeedbackComposeSheet: View {
                         Task { await submit() }
                     }
                     .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).count < 10 || isSubmitting)
+                    .ssConfirmationActionStyle()
                     .accessibilityIdentifier("feedback-submit")
                 }
             }

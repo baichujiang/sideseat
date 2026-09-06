@@ -2,8 +2,8 @@ import SwiftUI
 
 /// Shared visual tokens so Week / Day surfaces stay Apple Calendar–grade and consistent.
 ///
-/// Selection uses ``SideSeatTheme/accent``; “now” / today markers use ``nowRed`` /
-/// ``SideSeatTheme/calendarNow``. Never paint brand gradients into the grid.
+/// Selection uses a bright Rose fill; today / current-time markers use the adaptive
+/// ``SideSeatTheme/calendarNow`` Rose. The grid itself stays neutral.
 enum CalendarChrome {
     struct EventHitTargetLayout: Equatable {
         let top: CGFloat
@@ -24,8 +24,16 @@ enum CalendarChrome {
     static let timelineEndCapHeight: CGFloat = 10
     /// Keep modest — system context-menu chrome already rounds the lifted preview.
     static let eventCornerRadius: CGFloat = 3
-    static let nowLineThickness: CGFloat = 2
+    static let nowLineThickness: CGFloat = 2.5
+    static let nowGuideLineThickness: CGFloat = 1
     static let nowLineHitSlop: CGFloat = 16
+    /// Keep the date header visually separate from the scrollable timetable.
+    static let headerDividerThickness: CGFloat = 1
+    /// Grid lines are intentionally a little heavier than a system hairline so
+    /// they remain legible on high-density displays without competing with events.
+    static let hourLineThickness: CGFloat = 1
+    static let halfHourLineThickness: CGFloat = 0.5
+    static let columnDividerThickness: CGFloat = 0.75
 
     // MARK: - Day chip (date strip + week headers)
 
@@ -35,16 +43,40 @@ enum CalendarChrome {
 
     // MARK: - Washes & lines
 
-    static let todayWash = SideSeatTheme.calendarNow.opacity(0.055)
+    /// Today controls stay on a neutral semantic surface; the Rose foreground carries meaning.
+    static let todayControlFill = SideSeatTheme.fillTertiary
+    /// The floating create action uses one restrained Rose family in both appearances instead
+    /// of combining a neutral gray surface with an unrelated Rose symbol. The dark fill remains
+    /// low-luminance so it reads as an elevated control without becoming a glowing color block.
+    static let createActionFill = Color(
+        uiColor: UIColor { traits in
+            return UIColor(SideSeatTheme.accent)
+                .resolvedColor(with: traits)
+                .withAlphaComponent(traits.userInterfaceStyle == .dark ? 0.26 : 0.28)
+        }
+    )
+    static let createActionBorder = Color(
+        uiColor: UIColor { traits in
+            return UIColor(SideSeatTheme.accentText)
+                .resolvedColor(with: traits)
+                .withAlphaComponent(traits.userInterfaceStyle == .dark ? 0.30 : 0.24)
+        }
+    )
+    static let createActionForeground = SideSeatTheme.accentText
     /// Focused day column in week grid — accent, not now-red.
     static let selectedWash = SideSeatTheme.accent.opacity(0.045)
-    static let hourLine = Color.primary.opacity(0.12)
-    static let halfHourLine = Color.primary.opacity(0.06)
-    static let columnDivider = Color.primary.opacity(0.08)
-    /// Alias of `SideSeatTheme.calendarNow` — kept separate from accent selection.
-    static let nowRed = SideSeatTheme.calendarNow
-    /// Solid surface for white text in Today / current-time controls.
-    static let nowFill = SideSeatTheme.calendarNowFill
+    /// Calendar structure uses the adaptive system separator so the grid remains
+    /// legible on both white and black canvases without competing with event cards.
+    static let hourLine = SideSeatTheme.separator.opacity(0.82)
+    static let halfHourLine = SideSeatTheme.separator.opacity(0.58)
+    static let columnDivider = SideSeatTheme.separator.opacity(0.65)
+    static let headerDivider = SideSeatTheme.separator.opacity(0.96)
+    /// Readable brand Rose for today labels and the current-time line.
+    static let nowAccent = SideSeatTheme.calendarNow
+    /// A quieter continuation of the current-time line across non-today columns.
+    static let nowGuideLine = SideSeatTheme.calendarNow.opacity(0.32)
+    /// Solid adaptive Rose surface for the current-time badge.
+    static let nowBadgeFill = SideSeatTheme.calendarNowFill
 
     // MARK: - Typography
 
@@ -64,13 +96,13 @@ enum CalendarChrome {
 
     static func weekdayForeground(selected: Bool, isToday: Bool) -> Color {
         if selected { return SideSeatTheme.textPrimary }
-        if isToday { return nowRed }
+        if isToday { return nowAccent }
         return SideSeatTheme.textSecondaryStrong
     }
 
     static func dayNumberForeground(selected: Bool, isToday: Bool) -> Color {
         if selected { return .white }
-        if isToday { return nowRed }
+        if isToday { return nowAccent }
         return SideSeatTheme.textPrimary
     }
 
@@ -163,6 +195,54 @@ enum CalendarChrome {
     }
 }
 
+/// A quiet, category-colored edge cue for a timed event outside the viewport.
+/// The visible bar stays small while its button keeps a full 44-point hit target.
+struct CalendarOffscreenEventBar: View {
+    let edge: CalendarOffscreenEventEdge
+    let color: Color
+    let availableWidth: CGFloat
+    let accessibilityIdentifier: String
+    let action: () -> Void
+
+    private var barWidth: CGFloat {
+        min(36, max(20, availableWidth - 12))
+    }
+
+    private var barAlignment: Alignment {
+        edge == .top ? .top : .bottom
+    }
+
+    private var accessibilityLabel: LocalizedStringKey {
+        switch edge {
+        case .top: "An earlier event is outside the visible timeline"
+        case .bottom: "A later event is outside the visible timeline"
+        }
+    }
+
+    var body: some View {
+        Button(action: action) {
+            Capsule(style: .continuous)
+                .fill(color)
+                .frame(width: barWidth, height: 3)
+                .overlay {
+                    Capsule(style: .continuous)
+                        .stroke(SideSeatTheme.textPrimary.opacity(0.2), lineWidth: 0.5)
+                }
+                .shadow(color: SideSeatTheme.bg.opacity(0.9), radius: 1.5)
+                .frame(
+                    width: max(1, availableWidth),
+                    height: 44,
+                    alignment: barAlignment
+                )
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(SSPressButtonStyle())
+        .accessibilityLabel(Text(accessibilityLabel))
+        .accessibilityHint("Scrolls to the event")
+        .accessibilityIdentifier(accessibilityIdentifier)
+    }
+}
+
 // MARK: - Day number chip
 
 /// Shared weekday + day-number chrome for the Home date strip and week column headers.
@@ -203,7 +283,7 @@ struct CalendarDayChipLabel: View {
                     if selected {
                         Circle().fill(SideSeatTheme.accent)
                     } else if isToday {
-                        Circle().fill(CalendarChrome.nowRed.opacity(0.12))
+                        Circle().fill(CalendarChrome.nowAccent.opacity(0.12))
                     }
                 }
                 .accessibilityIdentifier("calendar-day-number-visual")

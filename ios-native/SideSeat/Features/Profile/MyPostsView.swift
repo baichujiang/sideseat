@@ -1,5 +1,166 @@
 import SwiftUI
 
+struct SavedPostsView: View {
+    @Environment(SessionStore.self) private var session
+    @Environment(RouterPath.self) private var router
+    @State private var store = SavedPostsStore()
+
+    var body: some View {
+        List {
+            if let issue = store.issue, store.posts == nil {
+                ContentUnavailableView {
+                    Label("Could not load saved posts", systemImage: "wifi.exclamationmark")
+                } description: {
+                    Text(issue)
+                } actions: {
+                    Button("Try again") { Task { await store.load(using: session) } }
+                }
+                .ssListPageStateRow()
+            } else if store.posts == nil {
+                SSLoadingState("Loading saved posts")
+                    .frame(maxWidth: .infinity)
+                    .ssListPageStateRow()
+            } else if store.posts?.isEmpty == true {
+                ContentUnavailableView {
+                    Label("No saved posts", systemImage: "heart")
+                } description: {
+                    Text("Posts you save in Discover will appear here.")
+                }
+                .ssListPageStateRow()
+                .accessibilityIdentifier("saved-posts-empty")
+            } else {
+                Section {
+                    ForEach(store.posts ?? []) { post in
+                        savedPostRow(post)
+                    }
+                } footer: {
+                    Text("Swipe left or tap the heart to remove a saved post.")
+                }
+            }
+
+            if let issue = store.issue, store.posts != nil {
+                Text(issue)
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.danger)
+            }
+        }
+        .listStyle(.insetGrouped)
+        .navigationTitle("Saved posts")
+        .navigationBarTitleDisplayMode(.large)
+        .refreshable { await store.load(using: session) }
+        .task { await store.load(using: session) }
+        .onChange(of: router.path) { previousPath, path in
+            guard previousPath.count > path.count, path.last == .savedPosts else { return }
+            Task { await store.load(using: session) }
+        }
+        .accessibilityIdentifier("saved-posts-list")
+    }
+
+    @ViewBuilder
+    private func savedPostRow(_ post: NativeDiscoverBuddyPost) -> some View {
+        HStack(spacing: SideSeatTheme.spaceSM) {
+            NavigationLink(value: AppRoute.discoverPost(postID: post.id)) {
+                SavedPostRow(post: post)
+            }
+            .accessibilityIdentifier("saved-post-\(post.id)")
+
+            Button {
+                Task { _ = await store.remove(postID: post.id, using: session) }
+            } label: {
+                if store.mutatingID == post.id {
+                    ProgressView()
+                        .controlSize(.small)
+                        .frame(width: 44, height: 44)
+                } else {
+                    Image(systemName: "heart.fill")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.HubTint.savedPosts)
+                        .frame(width: 44, height: 44)
+                }
+            }
+            .buttonStyle(SSPressButtonStyle())
+            .disabled(store.mutatingID != nil)
+            .accessibilityLabel("Remove from saved posts")
+            .accessibilityIdentifier("saved-post-remove-\(post.id)")
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive) {
+                Task { _ = await store.remove(postID: post.id, using: session) }
+            } label: {
+                Label("Remove", systemImage: "heart.slash")
+            }
+        }
+    }
+}
+
+private struct SavedPostRow: View {
+    let post: NativeDiscoverBuddyPost
+
+    var body: some View {
+        HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
+            thumbnail
+
+            VStack(alignment: .leading, spacing: 5) {
+                Text(post.title)
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.textPrimary)
+                    .lineLimit(2)
+
+                HStack(spacing: 5) {
+                    Text(post.author.displayName)
+                    if post.author.verifiedStudent {
+                        VerifiedSchoolMark(school: post.author.school)
+                    }
+                }
+                .font(.caption.weight(.medium))
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+
+                if !detailLabel.isEmpty {
+                    Text(detailLabel)
+                        .font(.footnote)
+                        .foregroundStyle(SideSeatTheme.textSecondary)
+                        .lineLimit(2)
+                }
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 4)
+    }
+
+    @ViewBuilder
+    private var thumbnail: some View {
+        if let source = post.imageUrls.first {
+            DiscoverMediaImage(source: source)
+                .frame(width: 60, height: 60)
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        } else {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(SideSeatTheme.HubTint.savedPosts.opacity(0.12))
+                Image(systemName: "person.2.fill")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.HubTint.savedPosts)
+            }
+            .frame(width: 60, height: 60)
+        }
+    }
+
+    private var detailLabel: String {
+        [
+            post.startDate?.formatted(date: .abbreviated, time: .shortened),
+            post.location,
+            post.commentCount > 0 ? AppLocalization.string( "\(post.commentCount) comments") : nil,
+        ]
+        .compactMap { value in
+            guard let value else { return nil }
+            let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.isEmpty ? nil : trimmed
+        }
+        .joined(separator: " · ")
+    }
+}
+
 struct MyPostsView: View {
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
@@ -26,7 +187,7 @@ struct MyPostsView: View {
                 ContentUnavailableView {
                     Label("No posts yet", systemImage: "rectangle.stack")
                 } description: {
-                    Text("Plans you publish in Discover will appear here.")
+                    Text("Buddy posts and activities you publish in Discover will appear here.")
                 }
                 .ssListPageStateRow()
             } else {
@@ -57,31 +218,50 @@ struct MyPostsView: View {
         .navigationTitle("My posts")
         .navigationBarTitleDisplayMode(.large)
         .refreshable { await store.load(using: session) }
-        .confirmationDialog(
-            pendingAction?.confirmationTitle ?? "",
+        .ssActionPrompt(
             isPresented: Binding(
                 get: { pendingAction != nil },
                 set: { if !$0 { pendingAction = nil } }
             ),
-            titleVisibility: .visible
+            title: pendingAction?.confirmationTitle ?? "",
+            message: pendingAction?.message,
+            systemImage: pendingAction?.systemImage ?? "questionmark",
+            tint: SideSeatTheme.danger,
+            dismissOnTapOutside: true,
+            onDismiss: { pendingAction = nil },
+            accessibilityIdentifier: pendingAction.map { "my-post-\($0.id)-prompt" }
+                ?? "my-post-action-prompt"
         ) {
-            if let pendingAction {
-                Button(pendingAction.buttonTitle, role: .destructive) {
-                    Task { await perform(pendingAction) }
-                }
-            }
-            Button("Cancel", role: .cancel) { pendingAction = nil }
-        } message: {
-            if let pendingAction {
-                Text(pendingAction.message)
-            }
+            guard let action = pendingAction else { return [] }
+            return [
+                SSActionPromptAction(
+                    id: "my-post-\(action.id)-cancel",
+                    title: AppLocalization.string("Cancel"),
+                    role: .cancel,
+                    perform: {}
+                ),
+                SSActionPromptAction(
+                    id: "my-post-\(action.id)-confirm",
+                    title: action.buttonTitle,
+                    systemImage: action.systemImage,
+                    role: .destructive,
+                    perform: {
+                        Task { await perform(action) }
+                    }
+                ),
+            ]
         }
         .task { await store.load(using: session) }
         .sheet(item: $composer) { composer in
             NavigationStack {
                 switch composer {
                 case .edit(let post):
-                    DiscoverPlanCreateView(editingPost: post) { _ in
+                    DiscoverPlanCreateView(
+                        editingPost: post,
+                        onClose: {
+                            await store.closePost(postID: post.id, using: session)
+                        }
+                    ) { _ in
                         self.composer = nil
                         await store.load(using: session)
                     }
@@ -104,21 +284,35 @@ struct MyPostsView: View {
     @ViewBuilder
     private func itemRow(_ item: MyPublishedItem) -> some View {
         HStack(spacing: SideSeatTheme.spaceSM) {
-            NavigationLink(value: item.route) {
+            HStack(spacing: SideSeatTheme.spaceSM) {
                 MyPublishedRow(item: item, isWorking: store.mutatingID == item.id)
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.textSecondary)
+                    .accessibilityHidden(true)
             }
+            .contentShape(Rectangle())
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction { router.navigate(to: item.route) }
             .accessibilityIdentifier("my-post-\(item.id)")
+            .ssTapOrLongPressActionMenu(
+                isEnabled: !contextActions(for: item).isEmpty,
+                title: item.title,
+                actions: { contextActions(for: item) },
+                onTap: { router.navigate(to: item.route) }
+            )
             if let post = item.editablePost {
                 Button {
                     composer = .edit(post)
                 } label: {
                     Image(systemName: "pencil")
                         .font(.subheadline.weight(.semibold))
-                        .frame(width: 32, height: 32)
+                        .frame(width: 44, height: 44)
                 }
-                .buttonStyle(.borderless)
-                .foregroundStyle(SideSeatTheme.accent)
-                .accessibilityLabel("Edit plan")
+                .buttonStyle(SSPressButtonStyle())
+                .foregroundStyle(SideSeatTheme.textPrimary)
+                .accessibilityLabel("Edit buddy post")
                 .accessibilityIdentifier("my-post-edit-\(post.id)")
             } else if let post = item.repostablePost {
                 Button {
@@ -126,11 +320,11 @@ struct MyPostsView: View {
                 } label: {
                     Image(systemName: "arrow.clockwise")
                         .font(.subheadline.weight(.semibold))
-                        .frame(width: 32, height: 32)
+                        .frame(width: 44, height: 44)
                 }
-                .buttonStyle(.borderless)
-                .foregroundStyle(SideSeatTheme.accent)
-                .accessibilityLabel("Repost plan")
+                .buttonStyle(SSPressButtonStyle())
+                .foregroundStyle(SideSeatTheme.textPrimary)
+                .accessibilityLabel("Repost buddy post")
                 .accessibilityIdentifier("my-post-repost-\(post.id)")
             }
         }
@@ -151,47 +345,63 @@ struct MyPostsView: View {
                 } label: {
                     Label("Edit", systemImage: "pencil")
                 }
-                .tint(SideSeatTheme.accent)
+                .tint(SideSeatTheme.HubTint.posts)
             } else if let post = item.repostablePost {
                 Button {
                     composer = .repost(post)
                 } label: {
                     Label("Repost", systemImage: "arrow.clockwise")
                 }
-                .tint(SideSeatTheme.accent)
-            }
-        }
-        .contextMenu {
-            if let post = item.editablePost {
-                Button {
-                    composer = .edit(post)
-                } label: {
-                    Label("Edit", systemImage: "pencil")
-                }
-            }
-            if let post = item.repostablePost {
-                Button {
-                    composer = .repost(post)
-                } label: {
-                    Label("Repost", systemImage: "arrow.clockwise")
-                }
-            }
-            if item.canClose {
-                Button {
-                    pendingAction = item.closeAction
-                } label: {
-                    Label("Close", systemImage: "lock")
-                }
-            }
-            if let cancelAction = item.cancelAction {
-                Button(role: .destructive) {
-                    pendingAction = cancelAction
-                } label: {
-                    Label("Cancel activity", systemImage: "xmark.circle")
-                }
+                .tint(SideSeatTheme.HubTint.posts)
             }
         }
         .disabled(store.mutatingID != nil)
+    }
+
+    private func contextActions(for item: MyPublishedItem) -> [SSLongPressAction] {
+        var actions: [SSLongPressAction] = []
+        if let post = item.editablePost {
+            actions.append(
+                SSLongPressAction(
+                    id: "my-post-context-edit-\(post.id)",
+                    title: AppLocalization.string("Edit"),
+                    systemImage: "pencil",
+                    perform: { composer = .edit(post) }
+                )
+            )
+        }
+        if let post = item.repostablePost {
+            actions.append(
+                SSLongPressAction(
+                    id: "my-post-context-repost-\(post.id)",
+                    title: AppLocalization.string("Repost"),
+                    systemImage: "arrow.clockwise",
+                    perform: { composer = .repost(post) }
+                )
+            )
+        }
+        if item.canClose {
+            actions.append(
+                SSLongPressAction(
+                    id: "my-post-context-close-\(item.id)",
+                    title: AppLocalization.string("Close"),
+                    systemImage: "lock",
+                    perform: { pendingAction = item.closeAction }
+                )
+            )
+        }
+        if let cancelAction = item.cancelAction {
+            actions.append(
+                SSLongPressAction(
+                    id: "my-post-context-cancel-\(item.id)",
+                    title: AppLocalization.string("Cancel activity"),
+                    systemImage: "xmark.circle",
+                    role: .destructive,
+                    perform: { pendingAction = cancelAction }
+                )
+            )
+        }
+        return actions
     }
 
     private var allItems: [MyPublishedItem] {
@@ -243,8 +453,8 @@ private enum MyPublishedItem: Identifiable {
 
     var kindLabel: String {
         switch self {
-        case .post: String(localized: "Plan")
-        case .activity: String(localized: "Activity")
+        case .post: AppLocalization.string( "Buddy post")
+        case .activity: AppLocalization.string( "Activity")
         }
     }
 
@@ -294,13 +504,13 @@ private enum MyPublishedItem: Identifiable {
             return cleanParts([
                 date?.formatted(date: .abbreviated, time: post.startDate == nil ? .omitted : .shortened),
                 post.location,
-                post.interestedCount > 0 ? String(localized: "\(post.interestedCount) interested") : nil,
+                post.interestedCount > 0 ? AppLocalization.string( "\(post.interestedCount) interested") : nil,
             ])
         case .activity(let activity):
             return cleanParts([
                 activity.startDate?.formatted(date: .abbreviated, time: .shortened),
                 activity.location,
-                String(localized: "\(activity.goingCount) going"),
+                AppLocalization.string( "\(activity.goingCount) going"),
             ])
         }
     }
@@ -349,7 +559,7 @@ private enum MyPublishedItem: Identifiable {
                 localized: "Closed because your school changed. Review visibility and courses before reposting."
             )
         case "AUTHOR_CLOSED":
-            return String(localized: "Closed by you.")
+            return AppLocalization.string( "Closed by you.")
         default:
             return nil
         }
@@ -401,28 +611,35 @@ private enum MyPublishedAction: Identifiable {
 
     var confirmationTitle: String {
         switch self {
-        case .closePost: String(localized: "Close this plan?")
-        case .closeActivity: String(localized: "Close sign-ups?")
-        case .cancelActivity: String(localized: "Cancel this activity?")
+        case .closePost: AppLocalization.string( "Close this buddy post?")
+        case .closeActivity: AppLocalization.string( "Close sign-ups?")
+        case .cancelActivity: AppLocalization.string( "Cancel this activity?")
         }
     }
 
     var buttonTitle: String {
         switch self {
-        case .closePost: String(localized: "Close plan")
-        case .closeActivity: String(localized: "Close sign-ups")
-        case .cancelActivity: String(localized: "Cancel activity")
+        case .closePost: AppLocalization.string( "Close buddy post")
+        case .closeActivity: AppLocalization.string( "Close sign-ups")
+        case .cancelActivity: AppLocalization.string( "Cancel activity")
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .closePost, .closeActivity: "lock"
+        case .cancelActivity: "xmark.circle"
         }
     }
 
     var message: String {
         switch self {
         case .closePost:
-            String(localized: "\(title) will move to Past and stop accepting responses.")
+            AppLocalization.string( "\(title) will move to Past and stop accepting responses.")
         case .closeActivity:
-            String(localized: "\(title) will remain visible, but new sign-ups will stop.")
+            AppLocalization.string( "\(title) will remain visible, but new sign-ups will stop.")
         case .cancelActivity:
-            String(localized: "\(title) will be marked as canceled for everyone.")
+            AppLocalization.string( "\(title) will be marked as canceled for everyone.")
         }
     }
 }

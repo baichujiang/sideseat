@@ -25,6 +25,8 @@ export async function createScheduleShareLinkForUser(
     presetKeys: rc.presetKeys ?? [],
     hideAllDetails: rc.hideAllDetails ?? false,
     includedDates: rc.includedDates,
+    availabilityStartMinutes: rc.availabilityStartMinutes,
+    availabilityEndMinutes: rc.availabilityEndMinutes,
   });
 
   const owned = await validateRevealCategoryOwnership(db, args.ownerUserId, normalizedReveal.categoryIds);
@@ -61,7 +63,7 @@ export async function createScheduleShareLinkForUser(
       rangeEnd,
       revealConfig: normalizedReveal as Prisma.InputJsonValue,
       allowGuestProposals: args.input.allowGuestProposals ?? true,
-      usageLimit: args.input.usageLimit ?? "SINGLE_USE",
+      usageLimit: args.input.usageLimit ?? "UNLIMITED",
       expiresAt,
     },
     select: { id: true },

@@ -24,6 +24,9 @@ import type { DiscoverActivityRow } from "@/lib/discover/discover-activity-row";
 import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
 import { loadActiveDiscoverActivitiesForCity } from "@/lib/discover/load-active-discover-activities-for-city";
 import { loadActiveDiscoverPostsForCity } from "@/lib/discover/load-active-discover-posts";
+import { DISCOVER_SERVED_CITIES } from "@/lib/discover/discover-served-cities";
+import { classmatePostStatusAfterAuthorClose } from "@/lib/discover/buddy-request-status";
+import { toNativeDiscoverActivity } from "@/lib/api/v1/native-discover-serializer";
 import {
   discoverActivityForFeedInclude,
   prismaDiscoverActivityToRow,
@@ -32,6 +35,19 @@ import {
   classmatePostForDiscoverInclude,
   prismaClassmatePostToDiscoverRow,
 } from "@/lib/discover/prisma-classmate-post-for-discover";
+import { actionInterestResponse } from "@/lib/v2/action-interest";
+import type { ActionCoordinationCapability } from "@/lib/v2/action-coordination/capability";
+import {
+  actionCoordinationReadModel,
+  type ActionCoordinationViewerAssignment,
+} from "@/lib/v2/action-coordination/read-model";
+import { loadCreatorResponseEntry } from "@/lib/v2/action-coordination/response-service";
+import { allowsLegacyDirectConversationForAction } from "@/lib/v2/action-coordination/policy-snapshot";
+
+export type NativeDiscoverCoordinationViewer = Readonly<{
+  capability: ActionCoordinationCapability;
+  assignment: ActionCoordinationViewerAssignment;
+}>;
 
 function postMatchesQuery(post: DiscoverPostRow, query: string) {
   if (!query) return true;
@@ -65,16 +81,36 @@ function activityMatchesQuery(activity: DiscoverActivityRow, query: string) {
     .includes(query);
 }
 
-export function toNativeDiscoverPost(row: DiscoverPostRow) {
+function legacyDiscoverPostStatus(
+  status: ClassmatePostStatus,
+): "ACTIVE" | "CLOSED" | "EXPIRED" {
+  if (
+    status === ClassmatePostStatus.FULFILLED ||
+    status === ClassmatePostStatus.REMOVED
+  ) {
+    return "CLOSED";
+  }
+  return status;
+}
+
+export function toNativeDiscoverPost(
+  row: DiscoverPostRow,
+  coordinationViewer?: NativeDiscoverCoordinationViewer,
+) {
   return {
     id: row.id,
     category: row.category,
     city: row.city,
     title: row.title,
     body: row.body,
-    status: row.status,
+    status: legacyDiscoverPostStatus(row.status),
     closureReason: row.closureReason,
     closedAt: row.closedAt?.toISOString() ?? null,
+    coordination: actionCoordinationReadModel({
+      action: row,
+      capability: coordinationViewer?.capability,
+      assignment: coordinationViewer?.assignment,
+    }),
     tags: row.tags,
     visibility: row.visibility,
     replyPreference: row.replyPreference,
@@ -86,7 +122,9 @@ export function toNativeDiscoverPost(row: DiscoverPostRow) {
     expiresAt: row.expiresAt.toISOString(),
     isOwn: row.isOwn,
     savedByViewer: row.savedByViewer ?? false,
+    interestedByViewer: row.interestedByViewer ?? false,
     interestedCount: row.interestedCount ?? 0,
+    commentCount: row.commentCount ?? 0,
     imageUrls: row.imageUrls ?? [],
     linkedCourses: row.linkedCourses ?? [],
     author: {
@@ -104,36 +142,12 @@ export function toNativeDiscoverPost(row: DiscoverPostRow) {
   };
 }
 
-export function toNativeDiscoverActivity(row: DiscoverActivityRow) {
-  return {
-    id: row.id,
-    city: row.city,
-    school: row.school,
-    title: row.title,
-    description: row.description,
-    category: row.category,
-    startAt: row.startAtISO,
-    endAt: row.endAtISO,
-    location: row.location,
-    capacity: row.capacity,
-    status: row.status,
-    phase: row.phase,
-    goingCount: row.goingCount,
-    viewerSignupStatus: row.viewerSignupStatus,
-    isOrganizer: row.isOrganizer,
-    organizer: {
-      id: row.organizerId,
-      displayName: row.organizerNickname,
-      avatarUrl: row.organizerAvatarUrl,
-    },
-  };
-}
-
 export async function loadNativeDiscoverPostDetail(options: {
   userId: string;
   postId: string;
+  coordinationViewer?: NativeDiscoverCoordinationViewer;
 }) {
-  const [detail, saved] = await Promise.all([
+  const [detail, saved, interest] = await Promise.all([
     getClassmatePostDetailForViewer(options.postId, options.userId),
     prisma.classmatePostSave.findUnique({
       where: {
@@ -144,9 +158,40 @@ export async function loadNativeDiscoverPostDetail(options: {
       },
       select: { id: true },
     }),
+    prisma.actionInterest.findUnique({
+      where: {
+        userId_classmatePostId: {
+          userId: options.userId,
+          classmatePostId: options.postId,
+        },
+      },
+      select: {
+        id: true,
+        status: true,
+        connectionId: true,
+        classmatePostId: true,
+        originSnapshot: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    }),
   ]);
   if (!detail.ok) return null;
   const { post, author, isAuthor, viewerCanMessage } = detail;
+  if (post.status === ClassmatePostStatus.REMOVED) return null;
+  const coordination = actionCoordinationReadModel({
+    action: post,
+    capability: options.coordinationViewer?.capability,
+    assignment: options.coordinationViewer?.assignment,
+  });
+  const allowsLegacyDirectConversation =
+    allowsLegacyDirectConversationForAction(post);
+  const creatorResponseEntry = isAuthor
+    ? await loadCreatorResponseEntry({
+        actorId: options.userId,
+        actionId: post.id,
+      })
+    : undefined;
   return {
     post: {
       id: post.id,
@@ -154,9 +199,10 @@ export async function loadNativeDiscoverPostDetail(options: {
       city: post.city,
       title: post.title,
       body: post.body,
-      status: post.status,
+      status: legacyDiscoverPostStatus(post.status),
       closureReason: post.closureReason,
       closedAt: post.closedAt?.toISOString() ?? null,
+      coordination,
       tags: post.tags,
       visibility: post.visibility,
       replyPreference: post.replyPreference,
@@ -168,6 +214,7 @@ export async function loadNativeDiscoverPostDetail(options: {
       expiresAt: post.expiresAt.toISOString(),
       isOwn: isAuthor,
       savedByViewer: Boolean(saved),
+      interestedByViewer: interest?.status === "ACTIVE",
       interestedCount: post.interestedCount,
       imageUrls: post.imageUrls,
       linkedCourses: post.linkedCourses,
@@ -184,7 +231,18 @@ export async function loadNativeDiscoverPostDetail(options: {
         verifiedStudent: author.verifiedStudent,
       },
     },
-    viewerCanMessage,
+    // This legacy field must never advertise a direct-chat bypass for a
+    // creator-gated Action. New clients render `coordination` instead.
+    viewerCanMessage:
+      viewerCanMessage &&
+      coordination.interactionMode === "DIRECT_CONVERSATION",
+    activeInterest:
+      allowsLegacyDirectConversation &&
+      interest?.status === "ACTIVE" &&
+      interest.connectionId !== null
+        ? actionInterestResponse(interest)
+        : null,
+    ...(creatorResponseEntry ? { creatorResponseEntry } : {}),
   };
 }
 
@@ -217,8 +275,8 @@ export async function setNativeDiscoverPostSaved(options: {
     });
   }
 
-  const interestedCount = await options.tx.classmatePostSave.count({
-    where: { classmatePostId: options.postId },
+  const interestedCount = await options.tx.actionInterest.count({
+    where: { classmatePostId: options.postId, status: "ACTIVE" },
   });
   return {
     postId: options.postId,
@@ -468,13 +526,14 @@ export async function setNativeDiscoverPostStatus(options: {
     throw new NativeDiscoverPostStatusError("AUTHOR_ONLY");
   }
 
+  const nextStatus = classmatePostStatusAfterAuthorClose(post.status);
   const updated =
-    post.status === ClassmatePostStatus.CLOSED
+    nextStatus === post.status
       ? post
       : await options.tx.classmatePost.update({
           where: { id: options.postId },
           data: {
-            status: ClassmatePostStatus.CLOSED,
+            status: nextStatus,
             closureReason: ClassmatePostClosureReason.AUTHOR_CLOSED,
             closedAt: new Date(),
           },
@@ -521,10 +580,40 @@ export async function loadNativeOwnedDiscoverItems(userId: string) {
   };
 }
 
+export async function loadNativeSavedDiscoverPosts(userId: string) {
+  const [visiblePostsByCity, savedRows] = await Promise.all([
+    Promise.all(
+      DISCOVER_SERVED_CITIES.map((city) =>
+        loadActiveDiscoverPostsForCity(city, userId),
+      ),
+    ),
+    prisma.classmatePostSave.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+      select: { classmatePostId: true },
+    }),
+  ]);
+  const visibleSavedPosts = new Map(
+    visiblePostsByCity
+      .flat()
+      .filter((post) => post.savedByViewer)
+      .map((post) => [post.id, post]),
+  );
+
+  return {
+    posts: savedRows.flatMap(({ classmatePostId }) => {
+      const post = visibleSavedPosts.get(classmatePostId);
+      return post ? [toNativeDiscoverPost(post)] : [];
+    }),
+  };
+}
+
 export async function loadNativeDiscoverFeed(options: {
   userId: string;
   city: string;
   query?: string | null;
+  coordinationViewer?: NativeDiscoverCoordinationViewer;
 }) {
   const query = options.query?.trim().toLocaleLowerCase() ?? "";
   const [posts, activities] = await Promise.all([
@@ -536,7 +625,9 @@ export async function loadNativeDiscoverFeed(options: {
     city: options.city,
     buddies: posts
       .filter((post) => postMatchesQuery(post, query))
-      .map(toNativeDiscoverPost),
+      .map((post) =>
+        toNativeDiscoverPost(post, options.coordinationViewer),
+      ),
     activities: activities
       .filter((activity) => activityMatchesQuery(activity, query))
       .map(toNativeDiscoverActivity),

@@ -3,6 +3,7 @@ import { inboxConversationV1 } from "@/lib/api/v1/inbox-dto";
 import { v1Error, v1Success } from "@/lib/api/v1/http";
 import { prepareInboxListMerged } from "@/lib/inbox/inbox-list-version";
 import { getInboxMergeBundle } from "@/lib/queries/inbox-merge";
+import { loadActionResponseSummary } from "@/lib/v2/action-coordination/response-service";
 
 export const dynamic = "force-dynamic";
 
@@ -11,9 +12,11 @@ export async function GET(request: Request) {
   if (!auth.ok) return auth.response;
 
   try {
-    const { merged, unreadTotal, plansNeedingYourAction } = await getInboxMergeBundle(
-      auth.user.id,
-    );
+    const [{ merged, unreadTotal, plansNeedingYourAction }, actionResponseSummary] =
+      await Promise.all([
+        getInboxMergeBundle(auth.user.id),
+        loadActionResponseSummary({ actorId: auth.user.id }),
+      ]);
     const conversations = prepareInboxListMerged(merged).map((item) =>
       inboxConversationV1(item, auth.user.id),
     );
@@ -23,6 +26,7 @@ export async function GET(request: Request) {
         conversations,
         unreadTotal,
         plansNeedingYourAction,
+        ...(actionResponseSummary ? { actionResponseSummary } : {}),
       },
       { request },
     );

@@ -8,8 +8,15 @@ import {
   NEW_THREAD_RATE_LIMIT_WINDOW_MINUTES,
 } from "@/lib/constants/app";
 import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
+import {
+  type ConnectionDatabase,
+  withCanonicalConnectionScope,
+  withConnectionTransaction,
+  withSelfNotesConnectionScope,
+} from "@/lib/connections/canonical-connection";
 import { findSharedActiveCourse } from "@/lib/courses/shared-active-courses";
 import { prisma } from "@/lib/db/prisma";
+import { allowsLegacyDirectConversationForAction } from "@/lib/v2/action-coordination/policy-snapshot";
 
 export type OpenConversationInput = {
   peerId: string;
@@ -31,6 +38,7 @@ export class OpenConversationError extends Error {
       | "CONVERSATION_ENDED"
       | "COURSE_CONTEXT_INVALID"
       | "POST_CONTEXT_INVALID"
+      | "ACTION_COORDINATION_REQUIRED"
       | "RATE_LIMITED",
   ) {
     super(code);
@@ -52,10 +60,22 @@ async function resolvePostMessageContext(
       status: "ACTIVE",
       expiresAt: { gt: new Date() },
     },
-    select: { id: true },
+    select: {
+      id: true,
+      coordinationPolicy: true,
+      policySchemaVersion: true,
+      policyParametersSnapshot: true,
+      experimentKeySnapshot: true,
+      experimentVariantSnapshot: true,
+      clientCapabilitySnapshot: true,
+      policySnapshottedAt: true,
+    },
   });
   if (!post) {
     throw new OpenConversationError("POST_CONTEXT_INVALID");
+  }
+  if (!allowsLegacyDirectConversationForAction(post)) {
+    throw new OpenConversationError("ACTION_COORDINATION_REQUIRED");
   }
   return post;
 }
@@ -91,121 +111,106 @@ export async function openConversationForUser(
   values: OpenConversationInput,
   db: DbClient = prisma,
 ): Promise<OpenConversationResult> {
-  if (values.peerId === user.id) {
-    if (values.postId) {
-      throw new OpenConversationError("POST_CONTEXT_INVALID");
+  return withConnectionTransaction(db as ConnectionDatabase, async (tx) => {
+    if (values.peerId === user.id) {
+      if (values.postId) {
+        throw new OpenConversationError("POST_CONTEXT_INVALID");
+      }
+      return withSelfNotesConnectionScope(tx, user.id, async (scope) => {
+        if (scope.existing?.status === ConnectionStatus.ACTIVE) {
+          return { connectionId: scope.existing.id, created: false };
+        }
+        if (scope.existing) {
+          throw new OpenConversationError("CONVERSATION_ENDED");
+        }
+        const row = await scope.createActive();
+        return { connectionId: row.id, created: row.created };
+      });
     }
-    const existing = await db.connection.findFirst({
-      where: {
-        userAId: user.id,
-        userBId: user.id,
-        status: ConnectionStatus.ACTIVE,
+
+    return withCanonicalConnectionScope(
+      tx,
+      user.id,
+      values.peerId,
+      async (scope) => {
+        // All mutable authorization and policy inputs are deliberately read
+        // after the unordered-pair lock and inside this same transaction.
+        const [actor, peer, mutualBlock, peerModerated, sharedCourse, postContext] =
+          await Promise.all([
+            tx.user.findUnique({
+              where: { id: user.id },
+              select: { id: true, onboardingComplete: true, school: true },
+            }),
+            tx.user.findUnique({
+              where: { id: values.peerId },
+              select: { id: true, onboardingComplete: true, school: true },
+            }),
+            tx.block.findFirst({
+              where: {
+                OR: [
+                  { blockerId: user.id, blockedId: values.peerId },
+                  { blockerId: values.peerId, blockedId: user.id },
+                ],
+              },
+              select: { id: true },
+            }),
+            tx.moderationBlock.findFirst({
+              where: {
+                userId: { in: [user.id, values.peerId] },
+                isActive: true,
+              },
+              select: { id: true },
+            }),
+            findSharedActiveCourse(
+              tx,
+              user.id,
+              values.peerId,
+              values.courseId,
+            ),
+            resolvePostMessageContext(tx, values.postId, values.peerId),
+          ]);
+
+        if (!actor?.onboardingComplete || !peer?.onboardingComplete) {
+          throw new OpenConversationError("PEER_UNAVAILABLE");
+        }
+
+        const viewerSchool = normalizeSchoolCode(actor.school) ?? DEFAULT_SCHOOL;
+        const peerSchool = normalizeSchoolCode(peer.school) ?? DEFAULT_SCHOOL;
+        if (viewerSchool !== peerSchool) {
+          throw new OpenConversationError("CROSS_SCHOOL");
+        }
+        if (mutualBlock || peerModerated) {
+          throw new OpenConversationError("CONTENT_RESTRICTED");
+        }
+        if (values.courseId && !sharedCourse) {
+          throw new OpenConversationError("COURSE_CONTEXT_INVALID");
+        }
+
+        if (scope.existing?.status === ConnectionStatus.ACTIVE) {
+          await recordPostMessageIntent(tx, postContext?.id, user.id);
+          return { connectionId: scope.existing.id, created: false };
+        }
+        if (scope.existing) {
+          throw new OpenConversationError("CONVERSATION_ENDED");
+        }
+
+        const since = subMinutes(new Date(), NEW_THREAD_RATE_LIMIT_WINDOW_MINUTES);
+        const recentCount = await tx.connection.count({
+          where: {
+            createdAt: { gte: since },
+            OR: [{ userAId: user.id }, { userBId: user.id }],
+          },
+        });
+        if (recentCount >= NEW_THREAD_RATE_LIMIT_COUNT) {
+          throw new OpenConversationError("RATE_LIMITED");
+        }
+
+        const connection = await scope.createActive({
+          originCourseId: sharedCourse?.id ?? null,
+        });
+        await recordPostMessageIntent(tx, postContext?.id, user.id);
+        return { connectionId: connection.id, created: connection.created };
       },
-      select: { id: true },
-    });
-    if (existing) {
-      return { connectionId: existing.id, created: false };
-    }
-    const row = await db.connection.create({
-      data: {
-        userAId: user.id,
-        userBId: user.id,
-        status: ConnectionStatus.ACTIVE,
-      },
-      select: { id: true },
-    });
-    return { connectionId: row.id, created: true };
-  }
-
-  const [peer, mutualBlock, peerModerated, sharedCourse, existingConnection] =
-    await Promise.all([
-      db.user.findUnique({
-        where: { id: values.peerId },
-        select: { id: true, onboardingComplete: true, school: true },
-      }),
-      db.block.findFirst({
-        where: {
-          OR: [
-            { blockerId: user.id, blockedId: values.peerId },
-            { blockerId: values.peerId, blockedId: user.id },
-          ],
-        },
-        select: { id: true },
-      }),
-      db.moderationBlock.findFirst({
-        where: {
-          userId: { in: [user.id, values.peerId] },
-          isActive: true,
-        },
-        select: { id: true },
-      }),
-      findSharedActiveCourse(db, user.id, values.peerId, values.courseId),
-      db.connection.findFirst({
-        where: {
-          OR: [
-            { userAId: user.id, userBId: values.peerId },
-            { userAId: values.peerId, userBId: user.id },
-          ],
-        },
-        select: { id: true, status: true },
-      }),
-    ]);
-
-  if (!peer || !peer.onboardingComplete) {
-    throw new OpenConversationError("PEER_UNAVAILABLE");
-  }
-
-  const viewerSchool = normalizeSchoolCode(user.school) ?? DEFAULT_SCHOOL;
-  const peerSchool = normalizeSchoolCode(peer.school) ?? DEFAULT_SCHOOL;
-  if (viewerSchool !== peerSchool) {
-    throw new OpenConversationError("CROSS_SCHOOL");
-  }
-
-  if (mutualBlock || peerModerated) {
-    throw new OpenConversationError("CONTENT_RESTRICTED");
-  }
-
-  const postContext = await resolvePostMessageContext(
-    db,
-    values.postId,
-    values.peerId,
-  );
-
-  if (existingConnection && existingConnection.status === ConnectionStatus.ACTIVE) {
-    await recordPostMessageIntent(db, postContext?.id, user.id);
-    return { connectionId: existingConnection.id, created: false };
-  }
-
-  if (existingConnection) {
-    throw new OpenConversationError("CONVERSATION_ENDED");
-  }
-
-  if (values.courseId && !sharedCourse) {
-    throw new OpenConversationError("COURSE_CONTEXT_INVALID");
-  }
-
-  const since = subMinutes(new Date(), NEW_THREAD_RATE_LIMIT_WINDOW_MINUTES);
-  const recentCount = await db.connection.count({
-    where: {
-      createdAt: { gte: since },
-      OR: [{ userAId: user.id }, { userBId: user.id }],
-    },
+    );
   });
-  if (recentCount >= NEW_THREAD_RATE_LIMIT_COUNT) {
-    throw new OpenConversationError("RATE_LIMITED");
-  }
-
-  const connection = await db.connection.create({
-    data: {
-      userAId: user.id,
-      userBId: values.peerId,
-      status: ConnectionStatus.ACTIVE,
-      originCourseId: sharedCourse?.id ?? null,
-    },
-    select: { id: true },
-  });
-
-  await recordPostMessageIntent(db, postContext?.id, user.id);
-
-  return { connectionId: connection.id, created: true };
 }

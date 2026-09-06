@@ -29,6 +29,14 @@ function validProductionEnv(overrides: Partial<NodeJS.ProcessEnv> = {}): NodeJS.
         successUrl: "https://monitor.sideseat.example/verification-retention",
         failureUrl: "https://monitor.sideseat.example/verification-retention/fail",
       },
+      "product-funnel-retention": {
+        successUrl: "https://monitor.sideseat.example/product-funnel-retention",
+        failureUrl: "https://monitor.sideseat.example/product-funnel-retention/fail",
+      },
+      "social-group-expiration": {
+        successUrl: "https://monitor.sideseat.example/social-group-expiration",
+        failureUrl: "https://monitor.sideseat.example/social-group-expiration/fail",
+      },
       "tum-course-catalog": {
         successUrl: "https://monitor.sideseat.example/tum-catalog",
         failureUrl: "https://monitor.sideseat.example/tum-catalog/fail",
@@ -50,6 +58,8 @@ function validProductionEnv(overrides: Partial<NodeJS.ProcessEnv> = {}): NodeJS.
     APPLE_TEAM_ID: "TEAM123456",
     STOREKIT_SUPPORT_ENABLED: "0",
     ALLOW_REMOTE_DATABASE_MIGRATIONS: "",
+    V2_TESTFLIGHT_ALLOW_ALL: "",
+    V2_SMALL_GROUP_ALLOW_ALL: "",
     ...overrides,
   } as NodeJS.ProcessEnv;
 }
@@ -89,6 +99,20 @@ describe("production readiness guard", () => {
 
     assert.equal(result.status, 1);
     assert.match(result.stderr, /must not remain enabled in Production/);
+  });
+
+  it("rejects a production-wide V2 TestFlight bypass", () => {
+    const result = runReadiness({ V2_TESTFLIGHT_ALLOW_ALL: "1" });
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /V2_TESTFLIGHT_ALLOW_ALL must not be enabled/);
+  });
+
+  it("rejects a production-wide small-group bypass", () => {
+    const result = runReadiness({ V2_SMALL_GROUP_ALLOW_ALL: "1" });
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /V2_SMALL_GROUP_ALLOW_ALL must not be enabled/);
   });
 
   it("rejects a private cron monitor endpoint", () => {

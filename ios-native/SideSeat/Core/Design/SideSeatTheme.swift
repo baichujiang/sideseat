@@ -14,11 +14,13 @@ import SwiftUI
 /// ## Brand surface vs product surface
 /// - **Brand surface** (gradients / `SideSeatBrandMark` allowed): Login, Signup, Forgot password;
 ///   optional cold-start empty state and Tutorial primary CTA.
+/// - **Product chrome** may use the compact app mark in root navigation only. It must not become
+///   decoration inside cards, lists, forms, or secondary screens.
 /// - **Product surface** (no full-bleed brand gradients): Home, Discover, Chats, Me / Settings
 ///   (Me hero may keep a light wash stroke only).
 ///
 /// Interactive accent is always Rose via `AccentColor` / ``accent`` — never reuse accent for
-/// calendar “now”, errors, or success. See `Core/Design/README.md`.
+/// calendar “now”, errors, or success. See `docs/DESIGN_SYSTEM.md`.
 enum SideSeatTheme {
     // MARK: - Brand palette
 
@@ -36,10 +38,29 @@ enum SideSeatTheme {
     static let cream = Color(red: 1.0, green: 0.937, blue: 0.922) // #FFEFEB
     /// Near-black ink for brand-surface contrast text (use sparingly).
     static let ink = Color(red: 0.14, green: 0.10, blue: 0.16)
+    /// Foreground on the bright product accent. Pure black leaves room for icon antialiasing.
+    static let onAccent = Color.black
 
     /// Selected controls, key icons, unread dots, borders, and product primary fills.
     /// Body text, captions, dates, display names, and status labels use text or semantic colors.
-    static let accent = Color.accentColor
+    /// Resolve the product accent independently from SwiftUI's environment tint. The
+    /// reserved `AccentColor` asset name follows `.tint`, so it cannot safely serve both
+    /// neutral utility controls and explicit brand surfaces.
+    static let accent = Color(
+        uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 1.0, green: 0.416, blue: 0.647, alpha: 1)
+                : UIColor(red: 0.984, green: 0.255, blue: 0.522, alpha: 1)
+        }
+    )
+    /// High-contrast brand ink for compact selected icons on light surfaces.
+    static let accentText = Color(
+        uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 1.0, green: 0.416, blue: 0.647, alpha: 1)
+                : UIColor(red: 0.65, green: 0.03, blue: 0.27, alpha: 1)
+        }
+    )
 
     // MARK: - Semantic (product)
 
@@ -51,13 +72,16 @@ enum SideSeatTheme {
     static let surface = Color(uiColor: .secondarySystemGroupedBackground)
     static let textPrimary = Color.primary
     static let textSecondary = Color.secondary
+    /// Default tint for navigation, menus, close/cancel controls, and other utility actions.
+    /// Product accent is opt-in so ordinary controls never inherit brand Rose accidentally.
+    static let utilityAction = Color.primary
     /// Secondary text used at compact sizes where the system secondary alpha can miss WCAG AA.
     static let textSecondaryStrong = Color(
         uiColor: UIColor { traits in
             if traits.userInterfaceStyle == .dark {
-                return UIColor(red: 0.76, green: 0.76, blue: 0.79, alpha: 1)
+                return UIColor(red: 0.80, green: 0.80, blue: 0.83, alpha: 1)
             }
-            return UIColor(red: 0.32, green: 0.32, blue: 0.35, alpha: 1)
+            return UIColor(red: 0.24, green: 0.24, blue: 0.27, alpha: 1)
         }
     )
     /// Form placeholders remain visually secondary while meeting contrast on field fills.
@@ -87,19 +111,23 @@ enum SideSeatTheme {
                 : UIColor(red: 0.65, green: 0.08, blue: 0.06, alpha: 1)
         }
     )
-    /// Calendar “now” line / today digit — kept separate from ``accent`` selection.
-    /// Dynamic values retain readable contrast on the calendar's neutral controls.
+    /// Calendar today / current-time marker. Light mode uses a readable mid Rose instead of the
+    /// former burgundy; dark mode uses the same bright Rose as the product accent.
     static let calendarNow = Color(
         uiColor: UIColor { traits in
-            if traits.userInterfaceStyle == .dark {
-                return UIColor(red: 1.0, green: 0.62, blue: 0.58, alpha: 1)
-            }
-            return UIColor(red: 0.64, green: 0.05, blue: 0.04, alpha: 1)
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 1.0, green: 0.416, blue: 0.647, alpha: 1) // #FF6AA5
+                : UIColor(red: 0.82, green: 0.102, blue: 0.38, alpha: 1) // #D11A61
         }
     )
-    /// Opaque calendar-now fill used behind white text. It stays dark in both appearances so
-    /// compact badges and buttons retain WCAG AA contrast.
-    static let calendarNowFill = Color(red: 0.64, green: 0.05, blue: 0.04)
+    /// Foreground paired with the adaptive current-time badge fill.
+    static let calendarNowForeground = Color(
+        uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .black : .white
+        }
+    )
+    /// The current-time badge uses the same Rose as the line and today labels.
+    static let calendarNowFill = calendarNow
     /// Course tiles without a custom hex — distinct from accent (not system `.blue`).
     static let courseFallback = Color(red: 0.20, green: 0.52, blue: 0.86)
     /// Verified student seal — trust blue, distinct from interactive Rose accent.
@@ -129,6 +157,7 @@ enum SideSeatTheme {
         static let courses = Color(red: 0.18, green: 0.62, blue: 0.42)
         static let plans = Color(red: 0.20, green: 0.52, blue: 0.86)
         static let posts = Color(red: 0.08, green: 0.58, blue: 0.62)
+        static let savedPosts = Color(red: 0.76, green: 0.43, blue: 0.10)
         static let contacts = Color(red: 0.55, green: 0.35, blue: 0.82)
         static let settings = Color(red: 0.42, green: 0.45, blue: 0.50)
         static let feedback = Color(red: 0.18, green: 0.55, blue: 0.86)
@@ -170,10 +199,48 @@ enum SideSeatTheme {
     enum Chat {
         static let bubbleRadius: CGFloat = 16
         static let composerRadius: CGFloat = 20
-        static var ownBubble: Color { SideSeatTheme.accent }
-        static var peerBubble: Color { Color(uiColor: .systemGray5) }
+        /// A quiet canvas behind conversation content. Keeping this token beside the message
+        /// surfaces prevents the page and bubbles from drifting into the same tonal band.
+        static var canvas: Color { SideSeatTheme.bgGrouped }
+        /// A muted berry-clay brand surface for long-form reading. It is intentionally darker
+        /// than the canvas without returning to the high-saturation interaction Rose.
+        static var ownBubble: Color {
+            adaptiveBubbleColor(light: 0xDCA9BB, dark: 0x663246)
+        }
+        /// Foreground paired with ``ownBubble``. It is intentionally separate from
+        /// ``SideSeatTheme.onAccent`` because dark message surfaces are no longer bright Rose.
+        static var ownBubbleForeground: Color {
+            adaptiveBubbleColor(light: 0x2E171F, dark: 0xFFF3F7)
+        }
+        /// Incoming messages use a stronger neutral step than systemGray5 so they remain
+        /// distinct from the grouped conversation canvas in both appearances.
+        static var peerBubble: Color {
+            adaptiveBubbleColor(light: 0xC7C6CB, dark: 0x3C3A3E)
+        }
+        /// Structured chat cards remain a separate elevated surface even if message colors
+        /// evolve. They must not inherit the incoming-message palette by accident.
+        static var cardSurface: Color { Color(uiColor: .systemGray5) }
+        /// A subtle inset surface for quoted content inside or immediately above a message.
+        static var quoteSurface: Color { Color.primary.opacity(0.06) }
         static var controlFill: Color { SideSeatTheme.fillSubtle }
         static var selectedChipFill: Color { SideSeatTheme.accent.opacity(0.12) }
+
+        private static func adaptiveBubbleColor(light: UInt32, dark: UInt32) -> Color {
+            return Color(
+                uiColor: UIColor { traits in
+                    Self.uiColor(rgb: traits.userInterfaceStyle == .dark ? dark : light)
+                }
+            )
+        }
+
+        private static func uiColor(rgb: UInt32) -> UIColor {
+            UIColor(
+                red: CGFloat((rgb >> 16) & 0xFF) / 255,
+                green: CGFloat((rgb >> 8) & 0xFF) / 255,
+                blue: CGFloat(rgb & 0xFF) / 255,
+                alpha: 1
+            )
+        }
     }
 
     // MARK: - Shape
@@ -209,8 +276,12 @@ enum SideSeatTheme {
         static let pressedOpacity: Double = 0.90
         static let pressedScale: CGFloat = 0.985
         static let pressDuration: Double = 0.15
-        /// Opaque so disabled CTAs keep deterministic text contrast over every screen surface.
-        static let disabledFill = Color(uiColor: .systemGray5)
+        /// Compact neutral controls sit one step above white/elevated surfaces without
+        /// competing with the Rose reserved for primary actions.
+        static let neutralControlFill = Color(uiColor: .systemGray5)
+        /// Disabled primary actions need a stronger surface boundary than utility controls.
+        /// Opaque systemGray4 stays visibly disabled while avoiding a white-on-white wash.
+        static let disabledFill = Color(uiColor: .systemGray4)
     }
 
     // MARK: - Typography
@@ -227,6 +298,17 @@ enum SideSeatTheme {
         /// Calendar clocks / day numbers.
         static let monoDigit = Font.body.monospacedDigit()
         static let monoDigitCaption = Font.caption.monospacedDigit()
+    }
+
+    // MARK: - Brand chrome
+
+    /// A restrained, repeatable brand signature for root navigation and the system tab bar.
+    /// These values intentionally stay compact so content remains the dominant product surface.
+    enum BrandChrome {
+        static let rootMarkSize: CGFloat = 22
+        static let rootMarkRadius: CGFloat = 5
+        static let rootTitleSpacing: CGFloat = 7
+        static let tabTitleSize: CGFloat = 10
     }
 
     // MARK: - Button fill strategy
@@ -313,10 +395,14 @@ enum SideSeatTheme {
     @MainActor
     static func configureChrome() {
         let accent = UIColor(red: 0.984, green: 0.255, blue: 0.522, alpha: 1)
-        UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = accent
+        UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = .label
 
         let tab = UITabBarAppearance()
         tab.configureWithDefaultBackground()
+        configureTabItems(tab.stackedLayoutAppearance, accent: accent)
+        configureTabItems(tab.inlineLayoutAppearance, accent: accent)
+        configureTabItems(tab.compactInlineLayoutAppearance, accent: accent)
+        tab.shadowColor = UIColor.separator.withAlphaComponent(0.22)
         UITabBar.appearance().standardAppearance = tab
         UITabBar.appearance().scrollEdgeAppearance = tab
         UITabBar.appearance().tintColor = accent
@@ -326,7 +412,25 @@ enum SideSeatTheme {
         nav.shadowColor = .clear
         UINavigationBar.appearance().standardAppearance = nav
         UINavigationBar.appearance().scrollEdgeAppearance = nav
-        UINavigationBar.appearance().tintColor = accent
+        UINavigationBar.appearance().tintColor = .label
+        UIBarButtonItem.appearance(whenContainedInInstancesOf: [UINavigationBar.self]).tintColor = .label
+    }
+
+    @MainActor
+    private static func configureTabItems(
+        _ appearance: UITabBarItemAppearance,
+        accent: UIColor
+    ) {
+        appearance.normal.iconColor = .secondaryLabel
+        appearance.normal.titleTextAttributes = [
+            .foregroundColor: UIColor.secondaryLabel,
+            .font: UIFont.systemFont(ofSize: BrandChrome.tabTitleSize, weight: .medium),
+        ]
+        appearance.selected.iconColor = accent
+        appearance.selected.titleTextAttributes = [
+            .foregroundColor: accent,
+            .font: UIFont.systemFont(ofSize: BrandChrome.tabTitleSize, weight: .semibold),
+        ]
     }
 }
 

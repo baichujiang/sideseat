@@ -1078,6 +1078,10 @@ export type AppMessages = {
     meetingProposalsTitle: string;
     allowProposals: string;
     allowProposalsHelper: string;
+    availabilityHoursLabel: string;
+    availabilityHoursHint: string;
+    availabilityStartLabel: string;
+    availabilityEndLabel: string;
     linkExpiryLabel: string;
     linkUsageLabel: string;
     linkUsageSingleUse: string;
@@ -1132,6 +1136,11 @@ export type AppMessages = {
     busyAnonymous: string;
     noBusyInRange: string;
     freeSlotsTitle: string;
+    candidateTimesTitle: string;
+    candidateTimesHint: string;
+    viewOnlyAvailability: string;
+    viewAllAvailability: string;
+    hideFullAvailability: string;
     publicRangeHint: string;
     shareExcludedDayBadge: string;
     /** `{name}` `{range}` — e.g. “Lin shared their schedule for next week with you”. */

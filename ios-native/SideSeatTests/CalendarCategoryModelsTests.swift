@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import Testing
 @testable import SideSeat
 
@@ -9,7 +10,7 @@ struct CalendarCategoryModelsTests {
         let preset = NativeCalendarCategory(
             id: "personal",
             name: "Personal",
-            color: "#EA580C",
+            color: "#DB2777",
             sortOrder: 0,
             presetKey: "personal",
             icsSubscriptionUrl: nil
@@ -39,7 +40,7 @@ struct CalendarCategoryModelsTests {
         )
         let builtIn = NativeCalendarCategoryPatchRequest(
             name: "Personal",
-            color: "#EA580C",
+            color: "#DB2777",
             icsSubscriptionUrl: nil,
             includesSubscription: false
         )
@@ -52,5 +53,13 @@ struct CalendarCategoryModelsTests {
 
         #expect(customObject["icsSubscriptionUrl"] is NSNull)
         #expect(builtInObject["icsSubscriptionUrl"] == nil)
+    }
+
+    @Test("System color picker values persist as opaque sRGB hex")
+    @MainActor
+    func customColorEncoding() {
+        let selected = Color(.sRGB, red: 0.12, green: 0.34, blue: 0.56, opacity: 0.2)
+
+        #expect(CalendarCategoryColorCodec.hex(from: selected) == "#1F578F")
     }
 }

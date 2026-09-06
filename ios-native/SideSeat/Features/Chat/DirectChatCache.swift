@@ -284,6 +284,19 @@ actor DirectChatCache {
         try? context.save()
     }
 
+    func remove(accountID: String, connectionID: String) {
+        let key = Self.key(accountID: accountID, connectionID: connectionID)
+        let context = ModelContext(container)
+        let descriptor = FetchDescriptor<CachedDirectChatRecord>(
+            predicate: #Predicate { $0.key == key }
+        )
+        guard let rows = try? context.fetch(descriptor) else { return }
+        for row in rows {
+            context.delete(row)
+        }
+        try? context.save()
+    }
+
     private static func key(accountID: String, connectionID: String) -> String {
         "\(accountID)::\(connectionID)"
     }

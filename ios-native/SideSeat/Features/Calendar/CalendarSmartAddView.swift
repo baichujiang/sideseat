@@ -3,6 +3,7 @@ import SwiftUI
 struct CalendarSmartAddView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(SessionStore.self) private var session
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     let categories: [NativeHomeCalendarCategory]
     let onSaved: @MainActor () async -> Void
@@ -13,7 +14,12 @@ struct CalendarSmartAddView: View {
     @State private var voicePrefix = ""
     @State private var voiceStartTask: Task<Void, Never>?
     @State private var showWarningDetails = false
+    @State private var editingDraft: NativeCalendarNaturalDraft?
+    @State private var selectedPresentationDetent = SSSheetPresentation.adaptiveInput
     @FocusState private var isInputFocused: Bool
+
+    private static let exposesPresentationStateForUITesting =
+        ProcessInfo.processInfo.arguments.contains("--ui-testing-expose-smart-detent")
 
     var body: some View {
         NavigationStack {
@@ -38,6 +44,13 @@ struct CalendarSmartAddView: View {
                 }
                 .scrollDismissesKeyboard(.interactively)
                 .accessibilityIdentifier("smart-schedule-view")
+                .accessibilityValue(
+                    Self.exposesPresentationStateForUITesting
+                        ? (dynamicTypeSize.isAccessibilitySize || selectedPresentationDetent == .large
+                            ? "large"
+                            : "compact")
+                        : ""
+                )
             }
             .toolbar(.hidden, for: .navigationBar)
             .interactiveDismissDisabled(store.isSaving)
@@ -55,8 +68,24 @@ struct CalendarSmartAddView: View {
                         .clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
                 }
             }
+            .sheet(item: $editingDraft) { draft in
+                CalendarSmartDraftEditorView(
+                    draft: draft,
+                    categories: categories,
+                    onApply: { store.updateDraft($0) },
+                    onRemove: { store.removeDraft(withID: draft.id) }
+                )
+            }
             .onChange(of: voiceInput.transcript) { _, transcript in
                 text = CalendarVoiceTranscript.merge(prefix: voicePrefix, transcript: transcript)
+            }
+            .onChange(of: isInputFocused) { _, isFocused in
+                guard isFocused else { return }
+                selectedPresentationDetent = .large
+            }
+            .onChange(of: store.drafts.isEmpty) { _, isEmpty in
+                guard !isEmpty else { return }
+                selectedPresentationDetent = .large
             }
             .onDisappear {
                 voiceStartTask?.cancel()
@@ -64,19 +93,23 @@ struct CalendarSmartAddView: View {
                 voiceInput.stop()
             }
         }
-        .presentationDetents([.large])
+        .presentationDetents(
+            [SSSheetPresentation.adaptiveInput, .large],
+            selection: $selectedPresentationDetent
+        )
         .presentationDragIndicator(.visible)
+        .presentationContentInteraction(.scrolls)
     }
 
     private var smartFillHeader: some View {
         ZStack {
             HStack(spacing: 7) {
                 Image(systemName: "sparkles")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(SideSeatTheme.accent)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.accentText)
 
                 Text("Smart fill")
-                    .font(.title3.weight(.semibold))
+                    .font(.headline)
                     .foregroundStyle(SideSeatTheme.textPrimary)
             }
 
@@ -85,12 +118,23 @@ struct CalendarSmartAddView: View {
                     dismiss()
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.subheadline.weight(.semibold))
+                        .font(.caption.weight(.bold))
                         .foregroundStyle(SideSeatTheme.textPrimary)
-                        .frame(width: 40, height: 40)
-                        .background(SideSeatTheme.fillTertiary, in: Circle())
+                        .frame(width: 44, height: 44)
+                        .background {
+                            Circle()
+                                .fill(SideSeatTheme.Interaction.neutralControlFill)
+                                .frame(width: 34, height: 34)
+                                .overlay {
+                                    Circle()
+                                        .strokeBorder(
+                                            SideSeatTheme.separator.opacity(0.55),
+                                            lineWidth: 0.5
+                                        )
+                                }
+                        }
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SSPressButtonStyle())
                 .disabled(store.isSaving)
                 .accessibilityLabel("Cancel")
                 .accessibilityIdentifier("smart-schedule-cancel")
@@ -98,81 +142,83 @@ struct CalendarSmartAddView: View {
                 Spacer()
             }
         }
-        .frame(height: 68)
-        .padding(.horizontal, SideSeatTheme.spaceLG)
+        .frame(height: 56)
+        .padding(.horizontal, SideSeatTheme.spaceMD)
         .background(.bar)
         .overlay(alignment: .bottom) { Divider() }
     }
 
     private var inputPanel: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            Label {
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
                 Text("Describe your schedule")
                     .font(.headline)
                     .foregroundStyle(SideSeatTheme.textPrimary)
-            } icon: {
-                Image(systemName: "sparkles")
-                    .foregroundStyle(SideSeatTheme.accent)
-            }
 
-            ZStack(alignment: .topLeading) {
-                if text.isEmpty {
-                    Text("For example: Tomorrow at 3 PM, study at the library for two hours.")
+                ZStack(alignment: .topLeading) {
+                    if text.isEmpty {
+                        Text("For example: Tomorrow at 3 PM, study at the library for two hours.")
+                            .font(.callout)
+                            .foregroundStyle(SideSeatTheme.textSecondary)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 8)
+                            .allowsHitTesting(false)
+                    }
+
+                    TextEditor(text: $text)
                         .font(.body)
-                        .foregroundStyle(SideSeatTheme.textSecondary)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 8)
-                        .allowsHitTesting(false)
+                        .scrollContentBackground(.hidden)
+                        .frame(
+                            minHeight: dynamicTypeSize.isAccessibilitySize ? 176 : 124,
+                            maxHeight: dynamicTypeSize.isAccessibilitySize ? 240 : 168
+                        )
+                        .focused($isInputFocused)
+                        .accessibilityIdentifier("smart-schedule-input")
                 }
-
-                TextEditor(text: $text)
-                    .scrollContentBackground(.hidden)
-                    .frame(minHeight: 150, maxHeight: 220)
-                    .focused($isInputFocused)
-                    .accessibilityIdentifier("smart-schedule-input")
             }
+            .padding(SideSeatTheme.spaceLG)
 
             Divider()
+                .padding(.leading, SideSeatTheme.spaceLG)
 
-            HStack(spacing: SideSeatTheme.spaceMD) {
-                Button {
-                    toggleVoiceInput()
-                } label: {
+            Button {
+                toggleVoiceInput()
+            } label: {
+                HStack(spacing: SideSeatTheme.spaceMD) {
+                    Text(voiceButtonTitle)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(voiceButtonTitleColor)
+
+                    Spacer(minLength: SideSeatTheme.spaceSM)
+
                     Group {
                         if voiceInput.isStarting {
                             ProgressView()
-                                .tint(.white)
+                                .tint(voiceButtonIconColor)
                         } else {
                             Image(systemName: voiceInput.isRecording ? "stop.fill" : "mic.fill")
                                 .font(.body.weight(.semibold))
                         }
                     }
-                    .frame(width: 40, height: 40)
-                    .foregroundStyle(voiceInput.isActive ? .white : SideSeatTheme.accent)
+                    .frame(width: 36, height: 36)
+                    .foregroundStyle(voiceButtonIconColor)
                     .background(voiceButtonBackground, in: Circle())
+                    .accessibilityHidden(true)
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel(voiceInput.isActive ? "Stop dictation" : "Dictate event")
-                .accessibilityIdentifier("smart-schedule-voice")
-
-                if voiceInput.isStarting {
-                    Label("Preparing microphone", systemImage: "waveform")
-                        .font(.subheadline)
-                        .foregroundStyle(SideSeatTheme.textSecondary)
-                } else if voiceInput.isRecording {
-                    Label("Listening", systemImage: "waveform")
-                        .font(.subheadline)
-                        .foregroundStyle(SideSeatTheme.textSecondary)
-                } else {
-                    Text("Voice input")
-                        .font(.subheadline)
-                        .foregroundStyle(SideSeatTheme.textSecondary)
-                }
-
-                Spacer(minLength: 0)
+                .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
+                .padding(.horizontal, SideSeatTheme.spaceLG)
+                .contentShape(Rectangle())
+                .background(voiceRowBackground)
             }
+            .buttonStyle(SSPressButtonStyle())
+            .accessibilityLabel(voiceInput.isActive ? "Stop dictation" : "Dictate event")
+            .accessibilityValue(voiceButtonTitle)
+            .accessibilityIdentifier("smart-schedule-voice")
 
             if let voiceIssue = voiceInput.issue {
+                Divider()
+                    .padding(.leading, SideSeatTheme.spaceLG)
+
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                     Label(voiceIssue, systemImage: "exclamationmark.triangle")
                         .font(.footnote)
@@ -184,13 +230,19 @@ struct CalendarSmartAddView: View {
                         }
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(SideSeatTheme.spaceLG)
             }
         }
-        .padding(SideSeatTheme.spaceLG)
         .background(
             SideSeatTheme.surface,
             in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
         )
+        .clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
+                .stroke(SideSeatTheme.separator.opacity(0.45), lineWidth: 0.5)
+        }
     }
 
     @ViewBuilder
@@ -229,12 +281,10 @@ struct CalendarSmartAddView: View {
                     ForEach(Array(group.drafts.enumerated()), id: \.element.id) { index, draft in
                         CalendarSmartDraftRow(
                             draft: draft,
-                            categories: categories,
-                            categoryID: Binding(
-                                get: { draft.categoryId },
-                                set: { store.setCategory($0, for: draft.id) }
-                            )
-                        )
+                            categories: categories
+                        ) {
+                            editingDraft = draft
+                        }
 
                         if index < group.drafts.count - 1 {
                             Divider()
@@ -291,7 +341,7 @@ struct CalendarSmartAddView: View {
     private var bottomActionBar: some View {
         if store.drafts.isEmpty {
             SSPrimaryButton(
-                title: String(localized: "Preview events"),
+                title: AppLocalization.string( "Preview events"),
                 isLoading: store.isParsing,
                 fill: .product,
                 height: 48,
@@ -311,7 +361,14 @@ struct CalendarSmartAddView: View {
                         .font(.body.weight(.semibold))
                         .foregroundStyle(SideSeatTheme.textPrimary)
                         .frame(width: 48, height: 48)
-                        .background(SideSeatTheme.fillTertiary, in: Circle())
+                        .background(SideSeatTheme.Interaction.neutralControlFill, in: Circle())
+                        .overlay {
+                            Circle()
+                                .strokeBorder(
+                                    SideSeatTheme.separator.opacity(0.55),
+                                    lineWidth: 0.5
+                                )
+                        }
                 }
                 .disabled(store.isSaving)
                 .accessibilityLabel("Start over")
@@ -365,7 +422,7 @@ struct CalendarSmartAddView: View {
 
     private func eventCountLabel(_ count: Int) -> String {
         String.localizedStringWithFormat(
-            String(localized: "%lld events"),
+            AppLocalization.string( "%lld events"),
             count
         )
     }
@@ -378,6 +435,36 @@ struct CalendarSmartAddView: View {
             return SideSeatTheme.accent
         }
         return SideSeatTheme.accent.opacity(0.12)
+    }
+
+    private var voiceButtonIconColor: Color {
+        if voiceInput.isRecording {
+            return .white
+        }
+        if voiceInput.isStarting {
+            return SideSeatTheme.onAccent
+        }
+        return SideSeatTheme.accentText
+    }
+
+    private var voiceButtonTitle: LocalizedStringKey {
+        if voiceInput.isStarting {
+            return "Preparing microphone"
+        }
+        if voiceInput.isRecording {
+            return "Listening"
+        }
+        return "Voice input"
+    }
+
+    private var voiceButtonTitleColor: Color {
+        voiceInput.isRecording ? SideSeatTheme.danger : SideSeatTheme.textPrimary
+    }
+
+    private var voiceRowBackground: Color {
+        voiceInput.isRecording
+            ? SideSeatTheme.danger.opacity(0.07)
+            : .clear
     }
 
     private var previewDayGroups: [CalendarSmartDraftDay] {
@@ -403,14 +490,14 @@ struct CalendarSmartAddView: View {
 
     private var reviewDetailCountLabel: String {
         String.localizedStringWithFormat(
-            String(localized: "%lld details to review"),
+            AppLocalization.string( "%lld details to review"),
             store.warnings.count
         )
     }
 
     private var addEventsLabel: String {
         String.localizedStringWithFormat(
-            String(localized: "Add %lld events"),
+            AppLocalization.string( "Add %lld events"),
             store.drafts.count
         )
     }
@@ -418,6 +505,8 @@ struct CalendarSmartAddView: View {
     private func startOver() {
         showWarningDetails = false
         store = CalendarSmartAddStore()
+        isInputFocused = false
+        selectedPresentationDetent = SSSheetPresentation.adaptiveInput
     }
 
     private func toggleVoiceInput() {
@@ -486,7 +575,7 @@ private struct CalendarSmartResultSummary: View {
 
     private var eventCountLabel: String {
         String.localizedStringWithFormat(
-            String(localized: "%lld events ready"),
+            AppLocalization.string( "%lld events ready"),
             eventCount
         )
     }
@@ -495,76 +584,72 @@ private struct CalendarSmartResultSummary: View {
 private struct CalendarSmartDraftRow: View {
     let draft: NativeCalendarNaturalDraft
     let categories: [NativeHomeCalendarCategory]
-    @Binding var categoryID: String?
+    let onEdit: () -> Void
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            if let start = CalendarSmartDateParser.parse(draft.startAt),
-               let end = CalendarSmartDateParser.parse(draft.endAt)
-            {
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(start.formatted(date: .omitted, time: .shortened))
+        Button(action: onEdit) {
+            HStack(alignment: .top, spacing: 10) {
+                if let start = CalendarSmartDateParser.parse(draft.startAt),
+                   let end = CalendarSmartDateParser.parse(draft.endAt)
+                {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(start.formatted(date: .omitted, time: .shortened))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textPrimary)
+                        Text(end.formatted(date: .omitted, time: .shortened))
+                            .font(.caption)
+                            .foregroundStyle(SideSeatTheme.textSecondary)
+                    }
+                    .monospacedDigit()
+                    .frame(width: 52, alignment: .trailing)
+                }
+
+                RoundedRectangle(cornerRadius: 1.5, style: .continuous)
+                    .fill(selectedCategoryColor)
+                    .frame(width: 3, height: 58)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(draft.title)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(SideSeatTheme.textPrimary)
-                    Text(end.formatted(date: .omitted, time: .shortened))
-                        .font(.caption)
-                        .foregroundStyle(SideSeatTheme.textSecondary)
-                }
-                .monospacedDigit()
-                .frame(width: 52, alignment: .trailing)
-            }
+                        .lineLimit(2)
 
-            RoundedRectangle(cornerRadius: 1.5, style: .continuous)
-                .fill(selectedCategoryColor)
-                .frame(width: 3, height: 58)
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text(draft.title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(SideSeatTheme.textPrimary)
-                    .lineLimit(2)
-
-                if !draft.location.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    Label(draft.location, systemImage: "mappin.and.ellipse")
-                        .font(.caption)
-                        .foregroundStyle(SideSeatTheme.textSecondary)
-                        .lineLimit(1)
-                }
-
-                Menu {
-                    Picker("Calendar", selection: $categoryID) {
-                        Text("None").tag(String?.none)
-                        ForEach(categories) { category in
-                            Text(category.displayName).tag(Optional(category.id))
-                        }
+                    if !draft.location.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Label(draft.location, systemImage: "mappin.and.ellipse")
+                            .font(.caption)
+                            .foregroundStyle(SideSeatTheme.textSecondary)
+                            .lineLimit(1)
                     }
-                } label: {
+
                     HStack(spacing: 5) {
                         Circle()
                             .fill(selectedCategoryColor)
                             .frame(width: 7, height: 7)
                         Text(selectedCategoryName)
                             .lineLimit(1)
-                        Image(systemName: "chevron.down")
-                            .font(.caption2.weight(.semibold))
                     }
                     .font(.caption.weight(.medium))
                     .foregroundStyle(SideSeatTheme.textSecondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 5)
-                    .background(SideSeatTheme.fillTertiary, in: Capsule())
                 }
-                .accessibilityLabel("Calendar")
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                Image(systemName: "pencil")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.textSecondary)
+                    .frame(width: 32, height: 44)
+                    .accessibilityHidden(true)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
         }
-        .padding(.vertical, 4)
-        .accessibilityElement(children: .contain)
+        .buttonStyle(.plain)
+        .accessibilityLabel(draft.title)
+        .accessibilityHint("Edit event details")
         .accessibilityIdentifier("smart-schedule-draft-\(draft.id.uuidString)")
     }
 
     private var selectedCategory: NativeHomeCalendarCategory? {
-        categories.first { $0.id == categoryID }
+        categories.first { $0.id == draft.categoryId }
     }
 
     private var selectedCategoryColor: Color {
@@ -572,7 +657,158 @@ private struct CalendarSmartDraftRow: View {
     }
 
     private var selectedCategoryName: String {
-        selectedCategory?.displayName ?? String(localized: "None")
+        selectedCategory?.displayName ?? AppLocalization.string( "None")
+    }
+}
+
+private struct CalendarSmartDraftEditorView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    let draft: NativeCalendarNaturalDraft
+    let categories: [NativeHomeCalendarCategory]
+    let onApply: (NativeCalendarNaturalDraft) -> Void
+    let onRemove: () -> Void
+
+    @State private var title: String
+    @State private var location: String
+    @State private var note: String
+    @State private var startAt: Date
+    @State private var endAt: Date
+    @State private var repeatRule: NativeCalendarRepeatRule
+    @State private var repeatUntil: Date
+    @State private var repeatHasEnd: Bool
+    @State private var categoryID: String?
+    @State private var issue: String?
+    @FocusState private var focusedField: CalendarEventFormField?
+
+    init(
+        draft: NativeCalendarNaturalDraft,
+        categories: [NativeHomeCalendarCategory],
+        onApply: @escaping (NativeCalendarNaturalDraft) -> Void,
+        onRemove: @escaping () -> Void
+    ) {
+        self.draft = draft
+        self.categories = categories
+        self.onApply = onApply
+        self.onRemove = onRemove
+
+        let now = CalendarEventTiming.snappedUpToSelectionStep(Date())
+        let start = CalendarSmartDateParser.parse(draft.startAt) ?? now
+        let end = CalendarSmartDateParser.parse(draft.endAt)
+            ?? start.addingTimeInterval(CalendarEventTiming.defaultDuration)
+        let rule = NativeCalendarRepeatRule(rawValue: draft.repeatRule) ?? .none
+        let repeatEnd = CalendarSmartDateParser.parse(draft.repeatUntil)
+            ?? Calendar.sideSeatBerlin.date(byAdding: .month, value: 1, to: start)
+            ?? start
+
+        _title = State(initialValue: draft.title)
+        _location = State(initialValue: draft.location)
+        _note = State(initialValue: draft.note)
+        _startAt = State(initialValue: start)
+        _endAt = State(initialValue: end)
+        _repeatRule = State(initialValue: rule)
+        _repeatUntil = State(initialValue: repeatEnd)
+        _repeatHasEnd = State(initialValue: !draft.repeatUntil.isEmpty)
+        _categoryID = State(initialValue: draft.categoryId)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                CalendarEventFormFields(
+                    title: $title,
+                    location: $location,
+                    note: $note,
+                    startAt: $startAt,
+                    endAt: $endAt,
+                    categoryID: $categoryID,
+                    repeatRule: $repeatRule,
+                    repeatUntil: $repeatUntil,
+                    repeatHasEnd: $repeatHasEnd,
+                    categories: categories,
+                    preservesLegacyOffGridTimes: false,
+                    focusedField: $focusedField
+                )
+
+                if let issue {
+                    Section {
+                        Label(issue, systemImage: "exclamationmark.triangle")
+                            .foregroundStyle(SideSeatTheme.danger)
+                    }
+                }
+
+                Section {
+                    Button("Remove event", role: .destructive) {
+                        onRemove()
+                        dismiss()
+                    }
+                    .accessibilityIdentifier("smart-draft-remove")
+                }
+            }
+            .background(
+                CalendarEventKeyboardDismissBridge {
+                    focusedField = nil
+                }
+            )
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 4).onChanged { _ in
+                    guard focusedField != nil else { return }
+                    focusedField = nil
+                }
+            )
+            .scrollDismissesKeyboard(.immediately)
+            .navigationTitle("Edit event details")
+            .navigationBarTitleDisplayMode(.inline)
+            .accessibilityIdentifier("smart-schedule-draft-editor")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Apply") { applyChanges() }
+                        .ssConfirmationActionStyle()
+                        .accessibilityIdentifier("smart-draft-apply")
+                }
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") { focusedField = nil }
+                }
+            }
+        }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
+    }
+
+    private func applyChanges() {
+        focusedField = nil
+        issue = nil
+
+        let normalizedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let validationIssue = CalendarEventFormValidation.issue(
+            title: normalizedTitle,
+            startAt: startAt,
+            endAt: endAt,
+            repeatRule: repeatRule,
+            repeatUntil: repeatUntil,
+            repeatHasEnd: repeatHasEnd
+        ) {
+            issue = validationIssue
+            return
+        }
+
+        var updated = draft
+        updated.title = normalizedTitle
+        updated.location = location.trimmingCharacters(in: .whitespacesAndNewlines)
+        updated.note = note.trimmingCharacters(in: .whitespacesAndNewlines)
+        updated.startAt = startAt.ISO8601Format()
+        updated.endAt = endAt.ISO8601Format()
+        updated.repeatRule = repeatRule.rawValue
+        updated.repeatUntil = repeatRule == .none || !repeatHasEnd
+            ? ""
+            : repeatUntil.ISO8601Format()
+        updated.categoryId = categoryID
+        onApply(updated)
+        dismiss()
     }
 }
 

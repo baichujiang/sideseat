@@ -8,6 +8,7 @@ import type {
   HomeStudyEntry,
 } from "@/lib/home/home-schedule-dto";
 import { isCalendarCourseMirrorRow } from "@/lib/calendar/calendar-course-mirror";
+import { loadCalendarEntryOccurrences } from "@/lib/calendar/load-calendar-entry-occurrences";
 import { ensureUserCalendarCategories } from "@/lib/calendar/default-user-calendar-categories";
 import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
 
@@ -29,21 +30,7 @@ export async function loadHomeSchedulePayload(args: {
         where: { userId, ...activeCourseMembershipWhere() },
         include: { course: true, sessions: true },
       }),
-      prisma.calendarEntry.findMany({
-        where: {
-          userId,
-          AND: [{ startAt: { lte: windowEnd } }, { endAt: { gte: windowStart } }],
-        },
-        include: {
-          companions: {
-            orderBy: { createdAt: "asc" },
-          },
-          category: {
-            select: { id: true, name: true, color: true },
-          },
-        },
-        orderBy: { startAt: "asc" },
-      }),
+      loadCalendarEntryOccurrences(prisma, { userId, windowStart, windowEnd }),
       prisma.userCalendarCategory.findMany({
         where: { userId },
         orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
@@ -57,7 +44,11 @@ export async function loadHomeSchedulePayload(args: {
         },
       }),
       prisma.calendarEntry.findMany({
-        where: { userId, courseScheduleMirrorKey: { not: null } },
+        where: {
+          userId,
+          projectionStatus: "ACTIVE",
+          courseScheduleMirrorKey: { not: null },
+        },
         select: { courseScheduleMirrorKey: true },
       }),
       prisma.connection.findMany({

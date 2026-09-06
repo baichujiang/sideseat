@@ -19,14 +19,16 @@ export const messageSchema = chatTextMessageSchema;
 const directMessageDiscriminated = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("TEXT"),
-    body: z.string().min(1).max(500),
+    body: z.string().trim().min(1).max(500),
     replyToId: z.string().cuid().optional(),
+    actionContextId: z.string().min(1).max(128).optional(),
   }),
   z.object({
     type: z.literal("IMAGE"),
     imageUrl: z.string().min(1).max(4_000_000),
     body: z.string().max(500).optional(),
     replyToId: z.string().cuid().optional(),
+    actionContextId: z.string().min(1).max(128).optional(),
   }),
   z.object({
     type: z.literal("LOCATION"),
@@ -35,6 +37,7 @@ const directMessageDiscriminated = z.discriminatedUnion("type", [
     locationName: z.string().max(200).optional().or(z.literal("")),
     body: z.string().max(500).optional(),
     replyToId: z.string().cuid().optional(),
+    actionContextId: z.string().min(1).max(128).optional(),
   }),
 ]);
 

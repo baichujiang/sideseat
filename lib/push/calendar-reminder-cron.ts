@@ -1,7 +1,9 @@
 import "server-only";
 
 import { format } from "date-fns";
+import { Prisma } from "@prisma/client";
 
+import { loadCalendarEntryOccurrences } from "@/lib/calendar/load-calendar-entry-occurrences";
 import { prisma } from "@/lib/db/prisma";
 import { notifyUserWebPush } from "@/lib/push/notify-user";
 
@@ -24,26 +26,83 @@ function reminderWindow(now: Date) {
 export async function runCalendarReminderCron(now = new Date()): Promise<{ claimed: number }> {
   const { startAtMin, startAtMax } = reminderWindow(now);
 
-  const candidates = await prisma.calendarEntry.findMany({
-    where: {
-      reminder15mSentAt: null,
-      startAt: { gte: startAtMin, lte: startAtMax },
-      endAt: { gt: now },
-    },
-    select: { id: true, userId: true, title: true, location: true, startAt: true },
+  await prisma.calendarRecurrenceReminderReceipt.deleteMany({
+    where: { sentAt: { lt: new Date(now.getTime() - 24 * 60 * 60 * 1000) } },
   });
+
+  const candidateOwners = await prisma.calendarEntry.findMany({
+    where: {
+      projectionStatus: "ACTIVE",
+      OR: [
+        {
+          isRecurrenceMaster: false,
+          recurrenceMasterId: null,
+          reminder15mSentAt: null,
+          startAt: { gte: startAtMin, lte: startAtMax },
+          endAt: { gt: now },
+        },
+        {
+          isRecurrenceMaster: true,
+          startAt: { lte: startAtMax },
+          OR: [{ repeatUntil: null }, { repeatUntil: { gte: startAtMin } }],
+        },
+        {
+          isRecurrenceMaster: false,
+          recurrenceMasterId: null,
+          recurrenceGroupId: { not: null },
+          repeatRule: { not: "NONE" },
+          startAt: { lte: startAtMax },
+          repeatUntil: { gte: startAtMin },
+        },
+      ],
+    },
+    distinct: ["userId"],
+    select: { userId: true },
+  });
+
+  const candidates = (
+    await Promise.all(
+      candidateOwners.map((owner) =>
+        loadCalendarEntryOccurrences(prisma, {
+          userId: owner.userId,
+          windowStart: startAtMin,
+          windowEnd: new Date(startAtMax.getTime() + 1),
+        }),
+      ),
+    )
+  ).flat();
 
   let claimed = 0;
   for (const entry of candidates) {
-    const updated = await prisma.calendarEntry.updateMany({
-      where: {
-        id: entry.id,
-        reminder15mSentAt: null,
-        startAt: { gte: startAtMin, lte: startAtMax },
-      },
-      data: { reminder15mSentAt: now },
-    });
-    if (updated.count === 0) continue;
+    if (entry.startAt < startAtMin || entry.startAt > startAtMax || entry.endAt <= now) continue;
+    if (entry.seriesMasterId && entry.originalStartAt) {
+      try {
+        await prisma.calendarRecurrenceReminderReceipt.create({
+          data: {
+            userId: entry.userId,
+            recurrenceMasterId: entry.seriesMasterId,
+            originalStartAt: entry.originalStartAt,
+            sentAt: now,
+          },
+        });
+      } catch (cause) {
+        if (cause instanceof Prisma.PrismaClientKnownRequestError && cause.code === "P2002") {
+          continue;
+        }
+        throw cause;
+      }
+    } else {
+      const updated = await prisma.calendarEntry.updateMany({
+        where: {
+          id: entry.id,
+          projectionStatus: "ACTIVE",
+          reminder15mSentAt: null,
+          startAt: { gte: startAtMin, lte: startAtMax },
+        },
+        data: { reminder15mSentAt: now },
+      });
+      if (updated.count === 0) continue;
+    }
     claimed += 1;
 
     const when = format(entry.startAt, "MMM d, HH:mm");

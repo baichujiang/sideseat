@@ -48,14 +48,14 @@ struct SSShareActionBar: View {
                     HStack(spacing: SideSeatTheme.spaceSM) {
                         if isPreparing {
                             ProgressView()
-                                .tint(.white)
+                                .tint(SideSeatTheme.onAccent)
                         } else {
                             Image(systemName: "square.and.arrow.up")
                             Text("Share poster")
                         }
                     }
                     .font(.body.weight(.semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(SideSeatTheme.onAccent)
                     .frame(maxWidth: .infinity)
                     .frame(height: 48)
                     .background(
@@ -63,7 +63,7 @@ struct SSShareActionBar: View {
                         in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
                     )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SSPressButtonStyle())
                 .disabled(isPreparing)
                 .accessibilityIdentifier("\(accessibilityPrefix)-system")
             }
@@ -98,7 +98,7 @@ struct SSShareMark: View {
         HStack(spacing: 7) {
             Image(systemName: "person.2.fill")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(SideSeatTheme.onAccent)
                 .frame(width: 26, height: 26)
                 .background(SideSeatTheme.rose, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             Text("SideSeat")

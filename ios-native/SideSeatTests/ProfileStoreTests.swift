@@ -9,7 +9,9 @@ struct ProfileStoreTests {
         #expect(StudentIdentityDisplay.schoolCode("TUM") == "TUM")
         #expect(StudentIdentityDisplay.schoolCode("Technical University of Munich") == "TUM")
         #expect(StudentIdentityDisplay.schoolCode("Ludwig-Maximilians-Universität München") == "LMU")
+        #expect(StudentIdentityDisplay.logoAssetName("TUM") == "SchoolLogoTUM")
         #expect(StudentIdentityDisplay.logoAssetName("LMU") == "SchoolLogoLMU")
+        #expect(StudentIdentityDisplay.logoAssetName("University of Augsburg") == "SchoolLogoUOA")
     }
 
     @Test("Maps every school verification state to one consistent presentation")

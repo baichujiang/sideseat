@@ -1,6 +1,6 @@
-import { ConnectionStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
 
+import { installPairPeerBlock } from "@/lib/api/v1/pair-block-transaction";
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
@@ -20,34 +20,15 @@ export async function POST(request: Request) {
         });
 
     await prisma.$transaction(async (tx) => {
-      await tx.block.upsert({
-        where: {
-          blockerId_blockedId: {
-            blockerId: user.id,
-            blockedId: values.blockedId,
-          },
-        },
-        create: {
-          blockerId: user.id,
-          blockedId: values.blockedId,
-          connectionId: values.connectionId,
-          reason: values.reason || null,
-        },
-        update: {
-          reason: values.reason || null,
-          connectionId: values.connectionId,
-        },
+      const installed = await installPairPeerBlock(tx, {
+        userId: user.id,
+        blockedId: values.blockedId,
+        connectionId: values.connectionId,
+        reason: values.reason,
+        endedAt: new Date(),
       });
-
-      if (values.connectionId) {
-        await tx.connection.update({
-          where: { id: values.connectionId },
-          data: {
-            status: ConnectionStatus.BLOCKED,
-            endedById: user.id,
-            endedAt: new Date(),
-          },
-        });
+      if (installed.kind !== "blocked") {
+        throw new Error("The blocked user must match this conversation.");
       }
     });
 

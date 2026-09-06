@@ -160,12 +160,25 @@ struct CalendarSmartAddStoreTests {
         #expect(draft.title == "Library study")
         #expect(store.warnings == ["Check time"])
 
-        store.setCategory("category-2", for: draft.id)
+        var editedDraft = draft
+        editedDraft.title = "Updated library study"
+        editedDraft.location = "Quiet room"
+        editedDraft.note = "Bring notes"
+        editedDraft.repeatRule = "WEEKLY"
+        editedDraft.repeatUntil = "2026-09-18T16:00:00.000Z"
+        editedDraft.categoryId = "category-2"
+        store.updateDraft(editedDraft)
         #expect(store.drafts.first?.categoryId == "category-2")
+        #expect(store.drafts.first?.title == "Updated library study")
+        #expect(store.drafts.first?.repeatRule == "WEEKLY")
         #expect(await store.save(using: session))
-        #expect(await transport.savedTitles == ["Library study"])
+        #expect(await transport.savedTitles == ["Updated library study"])
         #expect(await transport.savedCategoryIDs == ["category-2"])
         #expect(await transport.idempotencyKey?.isEmpty == false)
+
+        store.removeDraft(withID: draft.id)
+        #expect(store.drafts.isEmpty)
+        #expect(store.warnings.isEmpty)
     }
 
     @MainActor

@@ -50,6 +50,7 @@ export async function findSharedActiveCourse(
   viewerId: string,
   peerId: string,
   contextCourseId?: string,
+  now: Date = new Date(),
 ): Promise<SharedActiveCourse | null> {
   if (!contextCourseId) {
     return (await loadSharedActiveCourses(db, viewerId, peerId))[0] ?? null;
@@ -64,7 +65,7 @@ export async function findSharedActiveCourse(
   const memberships = await db.userCourse.findMany({
     where: {
       userId: { in: [viewerId, peerId] },
-      ...activeCourseMembershipWhere(),
+      ...activeCourseMembershipWhere(now),
       course: sameCourseIdentityWhere(context),
     },
     select: { userId: true },

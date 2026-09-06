@@ -1,4 +1,5 @@
 import {
+  type ActionCoordinationPolicy,
   ClassmatePostCategory,
   type ClassmatePostClosureReason,
   type ClassmatePostReplyPreference,
@@ -61,6 +62,14 @@ export type DiscoverPostRow = {
   status: ClassmatePostStatus;
   closureReason: ClassmatePostClosureReason | null;
   closedAt: Date | null;
+  /** Immutable coordination semantics; null only on not-yet-backfilled legacy rows. */
+  coordinationPolicy?: ActionCoordinationPolicy | null;
+  policySchemaVersion?: number | null;
+  policyParametersSnapshot?: Prisma.JsonValue | null;
+  experimentKeySnapshot?: string | null;
+  experimentVariantSnapshot?: "CONTROL" | "TREATMENT" | null;
+  clientCapabilitySnapshot?: Prisma.JsonValue | null;
+  policySnapshottedAt?: Date | null;
   tags: string[];
   visibility: ClassmatePostVisibility;
   replyPreference: ClassmatePostReplyPreference;
@@ -98,13 +107,39 @@ export type DiscoverPostRow = {
   imageUrls?: string[];
   /** When set, Discover post cards show the save/bookmark control for the signed-in viewer. */
   savedByViewer?: boolean;
-  /** Current visible interest signal: number of users who saved/hearted this post. */
+  /** Whether the viewer has an active, explicit Action Interest. */
+  interestedByViewer?: boolean;
+  /** Current active Action Interest count; private bookmarks are excluded. */
   interestedCount?: number;
+  /** Current visible top-level public comments on the post. */
+  commentCount?: number;
   /**
    * Client-only / UI-injected rows (e.g. `NEXT_PUBLIC_DISCOVER_DEV_EXAMPLE_POSTS=1`).
    * Disables post detail navigation, save, and peer messaging on the card.
    */
   isDevExample?: boolean;
+};
+
+/**
+ * Public shape allowed to cross a Web Server Component → Client Component
+ * boundary. Immutable policy, experiment, and client-build
+ * snapshots are intentionally absent: Web UI only needs the bounded result of
+ * the server-side policy decision.
+ */
+export type DiscoverPostRawPolicyField =
+  | "coordinationPolicy"
+  | "policySchemaVersion"
+  | "policyParametersSnapshot"
+  | "experimentKeySnapshot"
+  | "experimentVariantSnapshot"
+  | "clientCapabilitySnapshot"
+  | "policySnapshottedAt";
+
+export type DiscoverPostClientRow = Omit<
+  DiscoverPostRow,
+  DiscoverPostRawPolicyField
+> & {
+  allowsLegacyDirectConversation: boolean;
 };
 
 /** Discover tabs / create-post scene — matches `DiscoverList` scene state. */

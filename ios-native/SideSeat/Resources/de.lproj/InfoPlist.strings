@@ -1,4 +1,4 @@
 "NSLocationWhenInUseUsageDescription" = "SideSeat verwendet deinen Standort nur, wenn du ihn in einem Direktchat teilst.";
 "NSMicrophoneUsageDescription" = "SideSeat verwendet das Mikrofon, um gesprochene Termindetails in Kalendertext umzuwandeln.";
-"NSPhotoLibraryAddUsageDescription" = "SideSeat speichert ein Kalenderbild nur dann in deiner Fotomediathek, wenn du In Fotos sichern auswählst.";
+"NSPhotoLibraryAddUsageDescription" = "SideSeat speichert ein geteiltes Bild nur dann in deiner Fotomediathek, wenn du In Fotos sichern auswählst.";
 "NSSpeechRecognitionUsageDescription" = "SideSeat verwendet die Spracherkennung, um Termindetails für die intelligente Kalendererstellung zu transkribieren.";

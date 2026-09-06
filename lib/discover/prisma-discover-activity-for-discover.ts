@@ -9,6 +9,7 @@ export const discoverActivityForFeedInclude = {
       id: true,
       nickname: true,
       avatarUrl: true,
+      verifiedStudent: true,
       moderationBlocks: { where: { isActive: true }, select: { id: true }, take: 1 },
     },
   },
@@ -18,6 +19,12 @@ export const discoverActivityForFeedInclude = {
   _count: {
     select: {
       signups: { where: { status: "GOING" as const } },
+      comments: {
+        where: {
+          parentId: null,
+          user: { moderationBlocks: { none: { isActive: true } } },
+        },
+      },
     },
   },
 } satisfies Prisma.DiscoverActivityInclude;
@@ -40,6 +47,7 @@ export function prismaDiscoverActivityToRow(
     organizerId: activity.organizerId,
     organizerNickname: activity.organizer.nickname?.trim() || "Student",
     organizerAvatarUrl: activity.organizer.avatarUrl,
+    organizerVerifiedStudent: activity.organizer.verifiedStudent,
     city: activity.city,
     school: activity.school,
     title: activity.title,
@@ -52,6 +60,7 @@ export function prismaDiscoverActivityToRow(
     status: activity.status,
     phase: deriveActivityPhase(activity, now),
     goingCount: activity._count.signups,
+    commentCount: activity._count.comments,
     viewerSignupStatus: viewerSignup ? "GOING" : null,
     isOrganizer: viewerUserId === activity.organizerId,
   };

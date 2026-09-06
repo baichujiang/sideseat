@@ -4,6 +4,7 @@ import { fromZonedTime } from "date-fns-tz";
 
 import { normalizeCalendarCategoryHex } from "@/lib/calendar/calendar-category-colors";
 import { isCalendarCourseMirrorRow } from "@/lib/calendar/calendar-course-mirror";
+import { loadCalendarEntryOccurrences } from "@/lib/calendar/load-calendar-entry-occurrences";
 import { SCHEDULE_DISPLAY_TZ } from "@/lib/calendar/schedule-berlin";
 import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
 import { SCHEDULE_SHARE_MIN_PROPOSAL_MINUTES } from "@/lib/schedule-share/constants";
@@ -127,6 +128,18 @@ function berlinStartOfDateKey(dateKey: string): Date {
   return fromZonedTime(`${dateKey}T00:00:00`, SCHEDULE_DISPLAY_TZ);
 }
 
+function berlinTimeOnDateKey(dateKey: string, minuteOfDay: number): Date {
+  if (minuteOfDay >= 24 * 60) {
+    return berlinStartOfDateKey(nextDateKey(dateKey));
+  }
+  const hours = Math.floor(minuteOfDay / 60);
+  const minutes = minuteOfDay % 60;
+  return fromZonedTime(
+    `${dateKey}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`,
+    SCHEDULE_DISPLAY_TZ,
+  );
+}
+
 function nextDateKey(dateKey: string): string {
   const [year, month, day] = dateKey.split("-").map(Number);
   return new Date(Date.UTC(year!, month! - 1, day! + 1)).toISOString().slice(0, 10);
@@ -136,18 +149,22 @@ function scheduleShareAvailabilityWindows(args: {
   rangeStart: Date;
   rangeEnd: Date;
   includedDates?: readonly string[];
+  availabilityStartMinutes?: number;
+  availabilityEndMinutes?: number;
 }): Array<{ start: Date; end: Date }> {
   const keys = args.includedDates?.length
     ? [...new Set(args.includedDates)].sort()
     : [...shareDateKeysInInclusiveRange(args.rangeStart, args.rangeEnd)].sort();
 
   return keys.flatMap((dateKey) => {
+    const availabilityStartMinutes = args.availabilityStartMinutes ?? 0;
+    const availabilityEndMinutes = args.availabilityEndMinutes ?? 24 * 60;
     const start = maxDate([
-      berlinStartOfDateKey(dateKey),
+      berlinTimeOnDateKey(dateKey, availabilityStartMinutes),
       args.rangeStart,
     ]);
     const end = minDate([
-      berlinStartOfDateKey(nextDateKey(dateKey)),
+      berlinTimeOnDateKey(dateKey, availabilityEndMinutes),
       args.rangeEnd,
     ]);
     return end.getTime() > start.getTime() ? [{ start, end }] : [];
@@ -159,6 +176,8 @@ export function computeScheduleShareFreeRanges(args: {
   rangeEnd: Date;
   busy: Array<{ start: Date; end: Date }>;
   includedDates?: readonly string[];
+  availabilityStartMinutes?: number;
+  availabilityEndMinutes?: number;
 }): Array<{ start: Date; end: Date }> {
   const busyMerged = mergeIntervals(args.busy);
   const minimumSpanMs = SCHEDULE_SHARE_MIN_PROPOSAL_MINUTES * 60_000;
@@ -201,7 +220,11 @@ export async function collectInternalScheduleBlocks(
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     }),
     db.calendarEntry.findMany({
-      where: { userId: ownerUserId, courseScheduleMirrorKey: { not: null } },
+      where: {
+        userId: ownerUserId,
+        projectionStatus: "ACTIVE",
+        courseScheduleMirrorKey: { not: null },
+      },
       select: { courseScheduleMirrorKey: true },
     }),
     db.userCourse.findMany({
@@ -211,15 +234,10 @@ export async function collectInternalScheduleBlocks(
         sessions: { orderBy: [{ weekday: "asc" }, { startMinute: "asc" }] },
       },
     }),
-    db.calendarEntry.findMany({
-      where: {
-        userId: ownerUserId,
-        AND: [{ startAt: { lt: rangeEnd } }, { endAt: { gt: rangeStart } }],
-      },
-      include: {
-        category: { select: { id: true, presetKey: true } },
-      },
-      orderBy: { startAt: "asc" },
+    loadCalendarEntryOccurrences(db, {
+      userId: ownerUserId,
+      windowStart: rangeStart,
+      windowEnd: rangeEnd,
     }),
   ]);
 
@@ -374,6 +392,8 @@ export function internalBlocksToPublicSnapshot(args: {
     rangeStart,
     rangeEnd,
     includedDates,
+    availabilityStartMinutes: reveal.availabilityStartMinutes,
+    availabilityEndMinutes: reveal.availabilityEndMinutes,
   });
   const scopedInternal = includedKeys
     ? internal.filter((block) =>
@@ -389,6 +409,8 @@ export function internalBlocksToPublicSnapshot(args: {
     rangeEnd,
     busy: scopedInternal.map((b) => ({ start: b.start, end: b.end })),
     includedDates,
+    availabilityStartMinutes: reveal.availabilityStartMinutes,
+    availabilityEndMinutes: reveal.availabilityEndMinutes,
   });
   const freeSlots = freeRanges.map((f) => ({ start: f.start.toISOString(), end: f.end.toISOString() }));
 
@@ -432,6 +454,8 @@ export async function rangeFitsScheduleShareSnapshot(
     proposalStart: Date;
     proposalEnd: Date;
     includedDates?: readonly string[];
+    availabilityStartMinutes?: number;
+    availabilityEndMinutes?: number;
   },
 ): Promise<boolean> {
   const internal = await collectInternalScheduleBlocks(db, args.ownerUserId, args.rangeStart, args.rangeEnd);
@@ -440,6 +464,8 @@ export async function rangeFitsScheduleShareSnapshot(
     rangeEnd: args.rangeEnd,
     busy: internal.map((b) => ({ start: b.start, end: b.end })),
     includedDates: args.includedDates,
+    availabilityStartMinutes: args.availabilityStartMinutes,
+    availabilityEndMinutes: args.availabilityEndMinutes,
   });
   const ps = args.proposalStart.getTime();
   const pe = args.proposalEnd.getTime();

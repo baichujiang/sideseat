@@ -2,6 +2,11 @@ import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok } from "@/lib/http";
 import {
+  acceptLegacyPlanRevision,
+  LegacyPlanPolicyUnsupportedError,
+  LegacyPlanTransitionConflictError,
+} from "@/lib/plans/legacy-plan-commitment-compat";
+import {
   getAvailabilityDaysForUser,
   isAvailabilityShareActive,
   materializePlanCalendarEntries,
@@ -27,7 +32,17 @@ export async function POST(
         connection: {
           OR: [{ userAId: user.id }, { userBId: user.id }],
           status: "ACTIVE",
+          userA: { moderationBlocks: { none: { isActive: true } } },
+          userB: { moderationBlocks: { none: { isActive: true } } },
         },
+        AND: [
+          {
+            OR: [
+              { commitmentId: null },
+              { commitment: { is: { safetyRestrictedAt: null } } },
+            ],
+          },
+        ],
       },
       include: {
         availabilityShare: true,
@@ -53,13 +68,16 @@ export async function POST(
 
     if (planRequest.scheduleShareLinkId && planRequest.scheduleShareLink) {
       const link = planRequest.scheduleShareLink;
+      const reveal = parseRevealConfigJson(link.revealConfig);
       const fits = await rangeFitsScheduleShareSnapshot(prisma, {
         ownerUserId: link.ownerUserId,
         rangeStart: link.rangeStart,
         rangeEnd: link.rangeEnd,
         proposalStart: planRequest.startTime,
         proposalEnd: planRequest.endTime,
-        includedDates: parseRevealConfigJson(link.revealConfig).includedDates,
+        includedDates: reveal.includedDates,
+        availabilityStartMinutes: reveal.availabilityStartMinutes,
+        availabilityEndMinutes: reveal.availabilityEndMinutes,
       });
       if (!fits) {
         return error(PUBLIC_SCHEDULE_TIME_UNAVAILABLE, 409);
@@ -92,13 +110,11 @@ export async function POST(
     }
 
     const result = await prisma.$transaction(async (tx) => {
-      const accepted = await tx.planRequest.update({
-        where: { id: planRequest.id },
-        data: { status: "ACCEPTED" },
-      });
+      const transition = await acceptLegacyPlanRevision(tx, planRequest.id);
 
       await materializePlanCalendarEntries(tx, {
         planRequestId: planRequest.id,
+        planCommitmentId: transition.planCommitmentId,
         proposerUserId: planRequest.proposerUserId,
         proposerName: planRequest.proposer.nickname ?? planRequest.proposer.username,
         receiverUserId: planRequest.receiverUserId,
@@ -127,11 +143,17 @@ export async function POST(
         },
       });
 
-      return { accepted, confirmation };
+      return { accepted: transition.revision, confirmation };
     });
 
     return ok(result);
   } catch (cause) {
+    if (cause instanceof LegacyPlanPolicyUnsupportedError) {
+      return error(cause.message, 409, cause.code);
+    }
+    if (cause instanceof LegacyPlanTransitionConflictError) {
+      return error(cause.message, 409);
+    }
     console.error(cause);
     return error("Unable to accept plan request.");
   }

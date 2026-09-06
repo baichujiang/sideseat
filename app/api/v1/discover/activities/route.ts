@@ -18,7 +18,10 @@ import {
   DiscoverActivityCreateError,
   createDiscoverActivityForUser,
 } from "@/lib/discover/create-discover-activity";
-import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
+import {
+  DEFAULT_DISCOVER_SERVED_CITY,
+  isDiscoverServedCity,
+} from "@/lib/discover/discover-served-cities";
 import { createDiscoverActivitySchema } from "@/lib/validators/discover-activity";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +41,16 @@ export async function POST(request: Request) {
   const parsed = await parseV1Json(request, createDiscoverActivitySchema);
   if (!parsed.ok) return parsed.response;
   const values = createDiscoverActivitySchema.parse(parsed.data);
+  const city = values.city ?? DEFAULT_DISCOVER_SERVED_CITY;
+  if (!isDiscoverServedCity(city)) {
+    return v1Error(request, {
+      code: "INVALID_REQUEST",
+      message: "Choose a supported Discover city.",
+      status: 422,
+      field: "city",
+    });
+  }
+  const normalizedValues = { ...values, city };
 
   try {
     const rateLimit = await consumeV1RateLimit({
@@ -66,8 +79,8 @@ export async function POST(request: Request) {
       if (claim.kind !== "owner") return claim;
       const activity = await createDiscoverActivityForUser(
         auth.user,
-        values,
-        DEFAULT_DISCOVER_SERVED_CITY,
+        normalizedValues,
+        city,
         tx,
       );
       const body = { activityId: activity.id, status: activity.status, phase: activity.phase };

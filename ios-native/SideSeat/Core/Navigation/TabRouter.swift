@@ -10,6 +10,10 @@ final class RouterPath {
         path.append(route)
     }
 
+    func replaceTop(with route: AppRoute) {
+        if path.isEmpty { path = [route] } else { path[path.count - 1] = route }
+    }
+
     func reset() {
         path.removeAll()
     }

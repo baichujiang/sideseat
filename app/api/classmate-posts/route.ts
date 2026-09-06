@@ -5,6 +5,7 @@ import {
   ClassmatePostCreateError,
   createClassmatePostForUser,
 } from "@/lib/discover/create-classmate-post";
+import { withoutRawActionPolicySnapshots } from "@/lib/discover/public-discover-post-row";
 import { error, ok, parseBody } from "@/lib/http";
 import { createClassmatePostSchema } from "@/lib/validators/classmate-posts";
 
@@ -21,13 +22,19 @@ export async function POST(request: Request) {
       createClassmatePostForUser(user, parsed.data, tx),
     );
 
-    return ok({ post }, { status: 201 });
+    return ok(
+      { post: withoutRawActionPolicySnapshots(post) },
+      { status: 201 },
+    );
   } catch (cause) {
     if (cause instanceof ClassmatePostCreateError) {
       if (cause.code === "INVALID_EXPIRY") return error("Choose a valid expiry date.", 400);
       if (cause.code === "EXPIRY_IN_PAST") return error("Expiry must be in the future.", 400);
       if (cause.code === "COURSE_NOT_ENROLLED") {
         return error("You can only share courses you're enrolled in.", 400);
+      }
+      if (cause.code === "COURSE_SELECTION_INVALID") {
+        return error("Choose exactly one active course for this action.", 400);
       }
       if (cause.code === "CREATE_LIMIT") {
         return error(

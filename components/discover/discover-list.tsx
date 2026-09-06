@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LinkButton } from "@/components/ui/link-button";
 import type { DiscoverActivityRow } from "@/lib/discover/discover-activity-row";
-import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
+import type { DiscoverPostClientRow } from "@/lib/discover/discover-post-row";
 import { filterDiscoverFeedPosts } from "@/lib/discover/discover-feed-kind";
 import { buddyTypeLabel, shouldShowBuddyCategoryLabel } from "@/lib/discover/buddy-type-labels";
 import {
@@ -42,7 +42,7 @@ type BuddyPostVisibility =
   | "VERIFIED_ONLY"
   | "COURSEMATES_ONLY";
 
-export type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
+export type { DiscoverPostClientRow } from "@/lib/discover/discover-post-row";
 
 export type EnrolledCourseOption = { id: string; code: string | null; name: string };
 
@@ -54,7 +54,7 @@ export function DiscoverList({
   servedCity,
   viewerSession,
 }: {
-  posts: DiscoverPostRow[];
+  posts: DiscoverPostClientRow[];
   activities?: DiscoverActivityRow[];
   /** Saved courses count — used to suggest “Add a course” when the feed is empty. */
   savedCourseCount?: number;
@@ -263,7 +263,7 @@ function UnifiedPlanFeed({
   posts,
   activities,
 }: {
-  posts: DiscoverPostRow[];
+  posts: DiscoverPostClientRow[];
   activities: DiscoverActivityRow[];
 }) {
   const items = [

@@ -22,16 +22,16 @@ export function discoverFeedKindToParam(kind: DiscoverFeedKind): string {
  * richer For You ranking, server pagination.
  */
 
-function sortByCreatedDesc(posts: DiscoverPostRow[]) {
+function sortByCreatedDesc<T extends DiscoverPostRow>(posts: T[]): T[] {
   return [...posts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
-function sortByExpiresDesc(posts: DiscoverPostRow[]) {
+function sortByExpiresDesc<T extends DiscoverPostRow>(posts: T[]): T[] {
   return [...posts].sort((a, b) => new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime());
 }
 
 /** “Today” = created calendar-today (server already returns active-only). */
-export function filterDiscoverFeedPosts(posts: DiscoverPostRow[], feed: DiscoverFeedKind): DiscoverPostRow[] {
+export function filterDiscoverFeedPosts<T extends DiscoverPostRow>(posts: T[], feed: DiscoverFeedKind): T[] {
   const now = new Date();
   switch (feed) {
     case "latest":

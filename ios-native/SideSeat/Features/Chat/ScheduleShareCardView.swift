@@ -9,9 +9,7 @@ struct ScheduleShareCardView: View {
     @State private var preview: NativeScheduleShareChatPreview?
     @State private var issue: String?
     @State private var isLoading = true
-    @State private var isRevoking = false
     @State private var isRevoked = false
-    @State private var isConfirmingRevoke = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -22,29 +20,10 @@ struct ScheduleShareCardView: View {
             } label: {
                 cardContent
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SSPressButtonStyle())
             .disabled(isRevoked)
             .accessibilityIdentifier("schedule-share-card")
 
-            if isLoading, preview == nil {
-                Color.clear
-                    .frame(height: 20)
-                    .accessibilityHidden(true)
-            } else if preview?.ownedByViewer == true, !isRevoked {
-                Button(role: .destructive) {
-                    isConfirmingRevoke = true
-                } label: {
-                    if isRevoking {
-                        ProgressView()
-                            .controlSize(.small)
-                    } else {
-                        Label("Stop sharing", systemImage: "link.badge.minus")
-                            .font(.caption.weight(.semibold))
-                    }
-                }
-                .disabled(isRevoking)
-                .accessibilityIdentifier("schedule-share-revoke")
-            }
             if let issue, preview != nil {
                 Text(issue)
                     .font(.caption)
@@ -52,31 +31,42 @@ struct ScheduleShareCardView: View {
             }
         }
         .task(id: shareURL) { await loadPreview() }
-        .confirmationDialog(
-            "Stop sharing this schedule?",
-            isPresented: $isConfirmingRevoke,
-            titleVisibility: .visible
-        ) {
-            Button("Stop sharing", role: .destructive) {
-                Task { await revoke() }
+        .onReceive(NotificationCenter.default.publisher(for: .sideSeatScheduleShareDidUpdate)) { notification in
+            guard notification.userInfo?[ScheduleShareNotificationKey.linkID] as? String == preview?.linkId else {
+                return
             }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("The recipient will no longer be able to view the link or propose a time.")
+            Task { await loadPreview() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .sideSeatScheduleShareDidRevoke)) { notification in
+            guard notification.userInfo?[ScheduleShareNotificationKey.linkID] as? String == preview?.linkId else {
+                return
+            }
+            isRevoked = true
         }
     }
 
     private var cardContent: some View {
         VStack(alignment: .leading, spacing: 8) {
-                Text(
+                HStack(spacing: 8) {
+                    Text(
                     isRevoked
-                        ? String(localized: "Sharing stopped")
+                        ? AppLocalization.string( "Sharing stopped")
                         : preview?.expired == true
-                        ? String(localized: "Schedule expired")
-                        : String(localized: "Shared schedule")
-                )
+                        ? AppLocalization.string( "Schedule expired")
+                        : AppLocalization.string("Shared availability")
+                    )
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    Spacer(minLength: 0)
+                    if preview?.isUpdated == true, !isRevoked {
+                        Text("Updated")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .padding(.horizontal, 7)
+                            .frame(height: 21)
+                            .background(SideSeatTheme.fillTertiary, in: Capsule())
+                    }
+                }
                 if let preview {
                     HStack(alignment: .firstTextBaseline) {
                         Text(preview.ownerDisplayLabel)
@@ -87,7 +77,7 @@ struct ScheduleShareCardView: View {
                            let end = Date.sideSeatChatISO8601(preview.snapshot.rangeEnd) {
                             Text("\(start.formatted(.dateTime.month(.abbreviated).day()))–\(end.formatted(.dateTime.month(.abbreviated).day()))")
                                 .font(.caption2.weight(.medium))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         }
                     }
                     ScheduleShareTimelineView(
@@ -97,35 +87,42 @@ struct ScheduleShareCardView: View {
                     )
                     HStack(spacing: 5) {
                         Image(systemName: "clock.badge.checkmark")
-                        Text(String(localized: "\(preview.snapshot.freeSlots.count) free slots"))
+                        Text(AppLocalization.string( "\(preview.snapshot.freeSlots.count) free slots"))
                         Spacer(minLength: 4)
                         Image(systemName: "chevron.right")
                     }
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 } else if isLoading {
                     ProgressView()
                         .controlSize(.small)
                 } else if let issue {
                     Text(issue)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 } else {
-                    Text("Tap to open schedule")
+                    Text("Tap to view availability")
                         .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 }
         }
         .padding(12)
         .frame(width: 276)
         .frame(minHeight: 263, alignment: .topLeading)
-        .background(SideSeatTheme.Chat.peerBubble, in: RoundedRectangle(cornerRadius: SideSeatTheme.Chat.bubbleRadius, style: .continuous))
+        .background(
+            SideSeatTheme.Chat.cardSurface,
+            in: RoundedRectangle(cornerRadius: SideSeatTheme.Chat.bubbleRadius, style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: SideSeatTheme.Chat.bubbleRadius, style: .continuous)
+                .strokeBorder(SideSeatTheme.separator.opacity(0.55), lineWidth: 0.5)
+        )
     }
 
     private func loadPreview() async {
         guard let token = ScheduleShareURLParser.token(from: shareURL) else {
             isLoading = false
-            issue = String(localized: "Schedule link unavailable")
+            issue = AppLocalization.string( "Schedule link unavailable")
             return
         }
 
@@ -150,7 +147,13 @@ struct ScheduleShareCardView: View {
                 expired: false,
                 ownerDisplayLabel: "Mina",
                 linkId: "cuitestlink000000000000001",
-                ownedByViewer: true
+                ownedByViewer: ProcessInfo.processInfo.arguments.contains(
+                    "--ui-testing-schedule-share-owner"
+                ),
+                updatedAt: "2026-07-18T12:00:00.000Z",
+                isUpdated: ProcessInfo.processInfo.arguments.contains(
+                    "--ui-testing-schedule-share-updated"
+                )
             )
             isLoading = false
             return
@@ -165,32 +168,7 @@ struct ScheduleShareCardView: View {
             let response: APIEnvelope<NativeScheduleShareChatPreview> = try await session.sendAuthorized(path)
             preview = response.data
         } catch {
-            issue = String(localized: "Preview unavailable")
-        }
-    }
-
-    private func revoke() async {
-        guard let linkId = preview?.linkId, !isRevoking else { return }
-        isRevoking = true
-        issue = nil
-        defer { isRevoking = false }
-
-        #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            isRevoked = true
-            return
-        }
-        #endif
-
-        do {
-            let encoded = linkId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? linkId
-            let _: APIEnvelope<NativeScheduleShareRevokeResult> = try await session.sendAuthorized(
-                "api/v1/schedule-shares/owner/\(encoded)",
-                method: .delete
-            )
-            isRevoked = true
-        } catch {
-            issue = error.localizedDescription
+            issue = AppLocalization.string( "Preview unavailable")
         }
     }
 }
@@ -293,7 +271,7 @@ struct ScheduleShareTimelineView: View {
                             } label: {
                                 freeSlotBlock(selected: selectedSlotID == slot.id)
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(SSPressButtonStyle())
                             .frame(width: max(dayWidth - 4, 8), height: geometry.height)
                             .offset(y: geometry.y)
                             .accessibilityIdentifier("schedule-share-timeline-slot-\(slot.id)")
@@ -330,7 +308,7 @@ struct ScheduleShareTimelineView: View {
             Rectangle().fill(SideSeatTheme.fillTertiary).frame(width: 0.5)
         }
         .accessibilityLabel(day.formatted(date: .complete, time: .omitted))
-        .accessibilityValue(isIncluded ? String(localized: "Shared") : String(localized: "Not shared"))
+        .accessibilityValue(isIncluded ? AppLocalization.string( "Shared") : AppLocalization.string( "Not shared"))
         .accessibilityIdentifier(
             "schedule-share-timeline-day-\(ScheduleShareDateSelection.dateKey(for: day, calendar: calendar))"
         )
@@ -401,7 +379,7 @@ struct ScheduleShareTimelineView: View {
             RoundedRectangle(cornerRadius: compact ? 2 : 4, style: .continuous)
                 .fill(blockColor(block).opacity(revealsDetails ? 0.86 : 0.52))
             if (!compact || days.count <= 3), height >= 13 {
-                Text(revealsDetails ? (block.title ?? String(localized: "Busy")) : String(localized: "Busy"))
+                Text(revealsDetails ? (block.title ?? AppLocalization.string( "Busy")) : AppLocalization.string( "Busy"))
                     .font(.system(size: compact ? 7 : 9, weight: .semibold))
                     .foregroundStyle(Color.white)
                     .lineLimit(compact ? 1 : 2)
@@ -409,7 +387,7 @@ struct ScheduleShareTimelineView: View {
                     .padding(.vertical, 2)
             }
         }
-        .accessibilityLabel(revealsDetails ? (block.title ?? String(localized: "Busy")) : String(localized: "Busy"))
+        .accessibilityLabel(revealsDetails ? (block.title ?? AppLocalization.string( "Busy")) : AppLocalization.string( "Busy"))
     }
 
     private var days: [Date] {

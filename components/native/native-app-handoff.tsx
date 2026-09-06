@@ -1,12 +1,14 @@
 import { ArrowUpRight, Download, Smartphone } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 type NativeAppHandoffProps = {
   openURL: string;
   title: string;
   description: string;
   statusMessage?: string | null;
+  children?: ReactNode;
 };
 
 export function NativeAppHandoff({
@@ -14,6 +16,7 @@ export function NativeAppHandoff({
   title,
   description,
   statusMessage,
+  children,
 }: NativeAppHandoffProps) {
   const installURL = process.env.NEXT_PUBLIC_IOS_INSTALL_URL?.trim();
 
@@ -47,6 +50,8 @@ export function NativeAppHandoff({
               {statusMessage}
             </p>
           ) : null}
+
+          {children ? <div className="mt-6">{children}</div> : null}
 
           <div className="mt-8 flex flex-col gap-3">
             <a

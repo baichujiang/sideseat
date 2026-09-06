@@ -207,7 +207,7 @@ final class CalendarVoiceInput {
 
         guard await permissionProvider.requestSpeechPermission() else {
             failPermission(
-                String(localized: "Allow speech recognition in Settings to dictate an event."),
+                AppLocalization.string( "Allow speech recognition in Settings to dictate an event."),
                 attempt: attempt
             )
             return
@@ -216,7 +216,7 @@ final class CalendarVoiceInput {
 
         guard await permissionProvider.requestMicrophonePermission() else {
             failPermission(
-                String(localized: "Allow microphone access in Settings to dictate an event."),
+                AppLocalization.string( "Allow microphone access in Settings to dictate an event."),
                 attempt: attempt
             )
             return
@@ -325,11 +325,11 @@ enum CalendarVoiceInputError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noAudioInput:
-            String(localized: "No microphone input is available on this device.")
+            AppLocalization.string( "No microphone input is available on this device.")
         case .speechUnavailable:
-            String(localized: "Speech recognition is unavailable right now. Try again shortly.")
+            AppLocalization.string( "Speech recognition is unavailable right now. Try again shortly.")
         case .onDeviceRecognitionUnavailable:
-            String(localized: "On-device speech recognition is unavailable for this language.")
+            AppLocalization.string( "On-device speech recognition is unavailable for this language.")
         }
     }
 }

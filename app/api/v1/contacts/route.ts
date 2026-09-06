@@ -77,6 +77,7 @@ export async function POST(request: Request) {
       const added = await addContact({
         userId: auth.user.id,
         peerId: parsed.data.peerId,
+        db: tx,
       });
       const body = {
         connectionId: added.connectionId,

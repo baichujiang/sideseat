@@ -8,7 +8,7 @@ struct GroupInfoView: View {
 
     @State private var titleDraft = ""
     @State private var participants: [NativeChatAuthor] = []
-    @State private var displayTitle = String(localized: "Group chat")
+    @State private var displayTitle = AppLocalization.string( "Group chat")
     @State private var isLoading = false
     @State private var isSaving = false
     @State private var issue: String?
@@ -24,6 +24,7 @@ struct GroupInfoView: View {
                 Button("Save title") {
                     Task { await saveTitle() }
                 }
+                .ssConfirmationActionStyle()
                 .disabled(isSaving)
                 .accessibilityIdentifier("group-info-save-title")
             }
@@ -42,7 +43,7 @@ struct GroupInfoView: View {
                                 .foregroundStyle(.primary)
                         }
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(SSPressButtonStyle())
                     .accessibilityIdentifier("group-member-\(peer.id)")
                 }
                 Button {
@@ -80,11 +81,11 @@ struct GroupInfoView: View {
                                 Spacer()
                                 if addSelected.contains(row.id) {
                                     Image(systemName: "checkmark.circle.fill")
-                                        .foregroundStyle(SideSeatTheme.accent)
+                                        .foregroundStyle(SideSeatTheme.accentText)
                                 }
                             }
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(SSPressButtonStyle())
                     }
                 }
                 .navigationTitle("Add members")
@@ -97,6 +98,7 @@ struct GroupInfoView: View {
                             Task { await addMembers() }
                         }
                         .disabled(addSelected.isEmpty || isSaving)
+                        .ssConfirmationActionStyle()
                         .accessibilityIdentifier("group-info-add-confirm")
                     }
                 }
@@ -142,7 +144,7 @@ struct GroupInfoView: View {
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             displayTitle = titleDraft.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
-                ?? String(localized: "Group chat")
+                ?? AppLocalization.string( "Group chat")
             return
         }
         #endif
@@ -155,7 +157,7 @@ struct GroupInfoView: View {
                 idempotencyKey: UUID().uuidString
             )
             displayTitle = response.data.title?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
-                ?? String(localized: "Group chat")
+                ?? AppLocalization.string( "Group chat")
         } catch {
             issue = error.localizedDescription
         }

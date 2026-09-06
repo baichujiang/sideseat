@@ -50,9 +50,14 @@ jobs:
       - run: npm run lint
       - run: npx tsc --noEmit --incremental false
       - run: npm run test:release:config
+      - name: Apply database migrations before PostgreSQL-backed contract tests
+        run: npx prisma migrate deploy
+      - name: Run V2 contract tests
+        run: npm run test:v2
       - run: npm run check:openapi:v1
+      - name: Run OpenAPI contract regression tests
+        run: npm run test:openapi:v1
       - run: node scripts/verify-chat-realtime-migrations.mjs
-      - run: npx prisma migrate deploy
       - run: npm run seed:test-accounts
       - run: npx playwright install --with-deps chromium
       - name: API and Web integration tests

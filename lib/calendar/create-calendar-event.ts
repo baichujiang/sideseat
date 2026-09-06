@@ -2,14 +2,14 @@ import "server-only";
 
 import type { Prisma, User } from "@prisma/client";
 
-import { expandCalendarRecurrence } from "@/lib/calendar/calendar-recurrence";
 import { prisma } from "@/lib/db/prisma";
 import type { CalendarEventInput } from "@/lib/validators/calendar";
 
 type Tx = Prisma.TransactionClient;
 
 /**
- * Creates one logical calendar event (expands repeats). Returns number of rows inserted.
+ * Creates one logical calendar event. Repeats are stored as one series master
+ * and expanded only for the requested read window.
  */
 export async function createCalendarEventForUser(
   user: Pick<User, "id">,
@@ -58,32 +58,27 @@ export async function createCalendarEventForUser(
     }
   }
 
-  const recurrenceGroupId = values.repeat !== "NONE" ? crypto.randomUUID() : null;
+  const recurring = values.repeat !== "NONE";
+  await tx.calendarEntry.create({
+    data: {
+      userId: user.id,
+      title: values.title.trim(),
+      location: values.location?.trim() || null,
+      note: values.note?.trim() || null,
+      categoryId,
+      repeatRule: values.repeat,
+      repeatUntil: recurring ? repeatUntil : null,
+      recurrenceGroupId: recurring ? crypto.randomUUID() : null,
+      isRecurrenceMaster: recurring,
+      startAt: new Date(values.startAt),
+      endAt: new Date(values.endAt),
+      companions: companions.length
+        ? {
+            create: companions,
+          }
+        : undefined,
+    },
+  });
 
-  let created = 0;
-  const occurrences = expandCalendarRecurrence(values);
-  for (const occurrence of occurrences) {
-    await tx.calendarEntry.create({
-      data: {
-        userId: user.id,
-        title: values.title.trim(),
-        location: values.location?.trim() || null,
-        note: values.note?.trim() || null,
-        categoryId,
-        repeatRule: values.repeat,
-        repeatUntil,
-        recurrenceGroupId,
-        startAt: occurrence.startAt,
-        endAt: occurrence.endAt,
-        companions: companions.length
-          ? {
-              create: companions,
-            }
-          : undefined,
-      },
-    });
-    created += 1;
-  }
-
-  return created;
+  return 1;
 }

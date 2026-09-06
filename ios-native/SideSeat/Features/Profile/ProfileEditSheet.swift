@@ -53,14 +53,14 @@ struct ProfileEditSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceXL) {
                     ProfileEditSection(
-                        title: String(localized: "Basics"),
+                        title: AppLocalization.string( "Basics"),
                         systemImage: "person.text.rectangle.fill",
                         tint: SideSeatTheme.rose
                     ) {
                         VStack(spacing: SideSeatTheme.spaceLG) {
                             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                                 ProfileEditMenuPicker(
-                                    title: String(localized: "School"),
+                                    title: AppLocalization.string( "School"),
                                     selection: $school,
                                     options: [("TUM", "TUM"), ("LMU", "LMU")],
                                     accessibilityID: "profile-edit-school"
@@ -78,27 +78,27 @@ struct ProfileEditSheet: View {
                                 }
                             }
                             ProfileEditMenuPicker(
-                                title: String(localized: "Student status"),
+                                title: AppLocalization.string( "Student status"),
                                 selection: $studentStatus,
                                 options: [
-                                    ("CURRENT_STUDENT", String(localized: "Current student")),
-                                    ("EXCHANGE_STUDENT", String(localized: "Exchange student")),
-                                    ("ALUMNI", String(localized: "Alumni"))
+                                    ("CURRENT_STUDENT", AppLocalization.string( "Current student")),
+                                    ("EXCHANGE_STUDENT", AppLocalization.string( "Exchange student")),
+                                    ("ALUMNI", AppLocalization.string( "Alumni"))
                                 ],
                                 accessibilityID: "profile-edit-student-status"
                             )
                             ProfileEditMenuPicker(
-                                title: String(localized: "Degree"),
+                                title: AppLocalization.string( "Degree"),
                                 selection: $degreeLevel,
                                 options: [
-                                    ("BACHELOR", String(localized: "Bachelor")),
-                                    ("MASTER", String(localized: "Master")),
-                                    ("OTHER", String(localized: "Other"))
+                                    ("BACHELOR", AppLocalization.string( "Bachelor")),
+                                    ("MASTER", AppLocalization.string( "Master")),
+                                    ("OTHER", AppLocalization.string( "Other"))
                                 ],
                                 accessibilityID: "profile-edit-degree-level"
                             )
                             ProfileEditTextField(
-                                title: String(localized: "Nickname"),
+                                title: AppLocalization.string( "Nickname"),
                                 text: $nickname,
                                 capitalization: .words,
                                 autocorrectionDisabled: false,
@@ -110,13 +110,13 @@ struct ProfileEditSheet: View {
                     }
 
                     ProfileEditSection(
-                        title: String(localized: "Study"),
+                        title: AppLocalization.string( "Study"),
                         systemImage: "graduationcap.fill",
                         tint: SideSeatTheme.HubTint.courses
                     ) {
                         VStack(spacing: SideSeatTheme.spaceLG) {
                             ProfileEditTextField(
-                                title: String(localized: "Major"),
+                                title: AppLocalization.string( "Major"),
                                 text: $major,
                                 capitalization: .words,
                                 autocorrectionDisabled: false,
@@ -131,28 +131,28 @@ struct ProfileEditSheet: View {
                     }
 
                     ProfileEditSection(
-                        title: String(localized: "Contact handles"),
+                        title: AppLocalization.string( "Contact handles"),
                         systemImage: "bubble.left.and.bubble.right.fill",
                         tint: SideSeatTheme.HubTint.contacts
                     ) {
                         VStack(spacing: SideSeatTheme.spaceLG) {
                             ProfileEditTextField(
-                                title: String(localized: "WeChat"),
+                                title: AppLocalization.string( "WeChat"),
                                 text: $wechatHandle,
                                 accessibilityID: "profile-edit-wechat"
                             )
                             ProfileEditTextField(
-                                title: String(localized: "WhatsApp"),
+                                title: AppLocalization.string( "WhatsApp"),
                                 text: $whatsappHandle,
                                 accessibilityID: "profile-edit-whatsapp"
                             )
                             ProfileEditTextField(
-                                title: String(localized: "Telegram"),
+                                title: AppLocalization.string( "Telegram"),
                                 text: $telegramHandle,
                                 accessibilityID: "profile-edit-telegram"
                             )
                             ProfileEditTextField(
-                                title: String(localized: "Instagram"),
+                                title: AppLocalization.string( "Instagram"),
                                 text: $instagramHandle,
                                 accessibilityID: "profile-edit-instagram"
                             )
@@ -174,7 +174,7 @@ struct ProfileEditSheet: View {
             .toolbar(.hidden, for: .navigationBar)
             .safeAreaInset(edge: .top, spacing: 0) {
                 ProfileSheetHeader(
-                    title: String(localized: "Edit profile"),
+                    title: AppLocalization.string( "Edit profile"),
                     closeAccessibilityID: "profile-edit-close",
                     isCloseDisabled: isSubmitting
                 ) {
@@ -185,7 +185,7 @@ struct ProfileEditSheet: View {
                 VStack(spacing: 0) {
                     Divider()
                     SSPrimaryButton(
-                        title: String(localized: "Save"),
+                        title: AppLocalization.string( "Save"),
                         isLoading: isSubmitting,
                         fill: .product,
                         accessibilityID: "profile-edit-save"
@@ -208,30 +208,57 @@ struct ProfileEditSheet: View {
                 requestDismissal()
             }
         }
-        .alert(
-            String(localized: "Discard profile changes?"),
-            isPresented: $showsDiscardConfirmation
+        .ssActionPrompt(
+            isPresented: $showsDiscardConfirmation,
+            title: AppLocalization.string("Discard profile changes?"),
+            message: AppLocalization.string("Your unsaved profile changes will be lost."),
+            systemImage: "arrow.uturn.backward.circle.fill",
+            tint: SideSeatTheme.danger,
+            onDismiss: { showsDiscardConfirmation = false },
+            accessibilityIdentifier: "profile-edit-discard-prompt"
         ) {
-            Button(String(localized: "Keep editing"), role: .cancel) {}
-                .accessibilityIdentifier("profile-edit-keep-editing")
-            Button(String(localized: "Discard"), role: .destructive) {
-                dismiss()
-            }
-            .accessibilityIdentifier("profile-edit-discard")
-        } message: {
-            Text("Your unsaved profile changes will be lost.")
+            [
+                SSActionPromptAction(
+                    id: "profile-edit-keep-editing",
+                    title: AppLocalization.string("Keep editing"),
+                    systemImage: "pencil",
+                    role: .cancel
+                ) {},
+                SSActionPromptAction(
+                    id: "profile-edit-discard",
+                    title: AppLocalization.string("Discard"),
+                    systemImage: "trash",
+                    role: .destructive
+                ) {
+                    dismiss()
+                },
+            ]
         }
-        .alert(
-            String(localized: "Change school?"),
-            isPresented: $showsSchoolChangeConfirmation
+        .ssActionPrompt(
+            isPresented: $showsSchoolChangeConfirmation,
+            title: AppLocalization.string("Change school?"),
+            message: AppLocalization.string("Your active courses and school-specific posts will be archived. Existing friends and chats stay available. Verify the new school to show its badge."),
+            systemImage: "building.columns.fill",
+            tint: SideSeatTheme.warning,
+            onDismiss: { showsSchoolChangeConfirmation = false },
+            accessibilityIdentifier: "profile-edit-school-change-prompt"
         ) {
-            Button(String(localized: "Cancel"), role: .cancel) {}
-            Button(String(localized: "Change school"), role: .destructive) {
-                Task { await save() }
-            }
-            .accessibilityIdentifier("profile-edit-confirm-school-change")
-        } message: {
-            Text("Your active courses and school-specific posts will be archived. Existing friends and chats stay available. Verify the new school to show its badge.")
+            [
+                SSActionPromptAction(
+                    id: "profile-edit-cancel-school-change",
+                    title: AppLocalization.string("Cancel"),
+                    systemImage: "xmark",
+                    role: .cancel
+                ) {},
+                SSActionPromptAction(
+                    id: "profile-edit-confirm-school-change",
+                    title: AppLocalization.string("Change school"),
+                    systemImage: "building.columns",
+                    role: .destructive
+                ) {
+                    Task { await save() }
+                },
+            ]
         }
     }
 
@@ -295,7 +322,7 @@ struct ProfileEditSheet: View {
         if await onSave(request) {
             dismiss()
         } else {
-            issue = String(localized: "The profile could not be saved.")
+            issue = AppLocalization.string( "The profile could not be saved.")
         }
     }
 
@@ -504,13 +531,13 @@ struct ProfileSheetHeader: View {
             Button(action: onClose) {
                 Image(systemName: "xmark")
                     .font(.body.weight(.semibold))
-                    .foregroundStyle(SideSeatTheme.accent)
-                    .frame(width: 42, height: 42)
+                    .foregroundStyle(SideSeatTheme.textPrimary)
+                    .frame(width: 44, height: 44)
                     .background(Circle().fill(SideSeatTheme.surface))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SSPressButtonStyle())
             .disabled(isCloseDisabled)
-            .accessibilityLabel(String(localized: "Cancel"))
+            .accessibilityLabel(AppLocalization.string( "Cancel"))
             .accessibilityIdentifier(closeAccessibilityID)
 
             Spacer()
@@ -644,14 +671,15 @@ private struct ProfileEditSemesterControl: View {
                 .font(.body.weight(.semibold))
                 .frame(width: 38, height: 38)
                 .background(Circle().fill(SideSeatTheme.surface))
+                .ssIconButtonHitTarget()
         }
-        .buttonStyle(.plain)
-        .foregroundStyle(enabled ? SideSeatTheme.accent : SideSeatTheme.textSecondary.opacity(0.4))
+        .buttonStyle(SSPressButtonStyle())
+        .foregroundStyle(enabled ? SideSeatTheme.textPrimary : SideSeatTheme.textSecondary.opacity(0.4))
         .disabled(!enabled)
         .accessibilityLabel(
             systemImage == "plus"
-                ? String(localized: "Increase semester")
-                : String(localized: "Decrease semester")
+                ? AppLocalization.string( "Increase semester")
+                : AppLocalization.string( "Decrease semester")
         )
     }
 }
@@ -704,7 +732,7 @@ struct ProfileEditToggleRow: View {
             }
             .padding(.trailing, SideSeatTheme.spaceSM)
         }
-        .tint(SideSeatTheme.accent)
+        .tint(SideSeatTheme.accentText)
         .padding(.vertical, SideSeatTheme.spaceXS)
         .accessibilityIdentifier(accessibilityID)
     }

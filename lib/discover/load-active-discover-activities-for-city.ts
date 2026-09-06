@@ -20,7 +20,7 @@ export async function loadActiveDiscoverActivitiesForCity(
       where: {
         city: servedCity,
         status: { in: [DiscoverActivityStatus.OPEN, DiscoverActivityStatus.FULL] },
-        startAt: { gt: now },
+        endAt: { gt: now },
         organizer: {
           moderationBlocks: { none: { isActive: true } },
           ...(viewerUserId

@@ -4,6 +4,78 @@ import Testing
 
 @Suite("Navigation")
 struct NavigationTests {
+    @Test("App shell exposes the new product navigation in its exact order")
+    func appShellTabOrder() {
+        #expect(AppShellNavigation.tabs.map(\.tab) == [.discover, .home, .chats, .me])
+    }
+
+    @Test("App shell uses the new customer-facing tab titles")
+    func appShellTabTitles() {
+        let titles = AppShellNavigation.tabs.map(\.title)
+
+        #expect(titles == ["Together", "Calendar", "Messages", "Me"])
+        #expect(!titles.contains("Discover"))
+        #expect(!titles.contains("Chats"))
+    }
+
+    @Test("Focused plan chat routes remain distinct from ordinary chat routes")
+    func focusedPlanRouteIdentity() {
+        let ordinary = AppRoute.directChat(connectionID: "connection-123")
+        let focused = AppRoute.directChat(
+            connectionID: "connection-123",
+            focus: .plan(id: "plan-123")
+        )
+
+        #expect(ordinary != focused)
+        #expect(focused != .directChat(connectionID: "connection-123", focus: .actionInterest(id: "plan-123")))
+        #expect(ordinary == .directChat(connectionID: "connection-123"))
+        #expect(
+            DirectChatFocus.plan(id: "legacy-revision")
+                == .plan(commitmentID: "legacy-revision", revisionID: "legacy-revision")
+        )
+    }
+
+    @Test("Plan deep links preserve commitment and optional revision focus")
+    func routesExactPlanFocus() throws {
+        let full = try #require(URL(string:
+            "https://sideseat.example/connections/connection-123/plans/commitment-123?revision=revision-456"
+        ))
+        let custom = try #require(URL(string:
+            "sideseat://connections/connection-123/plans/commitment-123?revision=revision-456"
+        ))
+        let expected = AppRoute.directChat(
+            connectionID: "connection-123",
+            focus: .plan(commitmentID: "commitment-123", revisionID: "revision-456")
+        )
+
+        #expect(DeepLinkRouter.route(for: full) == expected)
+        #expect(DeepLinkRouter.route(for: custom) == expected)
+        #expect(
+            DeepLinkRouter.route(forPath:
+                "/connections/connection-123/plans/commitment-123?revision=revision-456"
+            ) == expected
+        )
+        #expect(
+            DeepLinkRouter.route(forPath: "/connections/connection-123/plans/commitment-123")
+                == .directChat(
+                    connectionID: "connection-123",
+                    focus: .plan(commitmentID: "commitment-123", revisionID: nil)
+                )
+        )
+        #expect(DeepLinkRouter.route(forPath: "/connections/connection-123/unknown/value") == nil)
+    }
+
+    @Test("Action Context deep links are not swallowed by the ordinary chat route")
+    func routesExactActionContextFocus() {
+        #expect(
+            DeepLinkRouter.route(forPath: "/connections/connection-123/contexts/context-456")
+                == .directChat(
+                    connectionID: "connection-123",
+                    focus: .actionContext(id: "context-456")
+                )
+        )
+    }
+
     @Test("Routes supported universal links")
     func routesUniversalLinks() throws {
         let url = try #require(URL(string: "https://sideseat.example/connections/connection-123"))
@@ -20,6 +92,20 @@ struct NavigationTests {
         #expect(DeepLinkRouter.route(for: customShareURL) == .scheduleShare(token: "share-token-123"))
         let pathCustomShareURL = try #require(URL(string: "sideseat:///share/view/share-token-123"))
         #expect(DeepLinkRouter.route(for: pathCustomShareURL) == .scheduleShare(token: "share-token-123"))
+        let eventShareURL = try #require(
+            URL(string: "https://sideseat.example/share/event/event-share-token-123")
+        )
+        #expect(
+            DeepLinkRouter.route(for: eventShareURL)
+                == .eventShare(token: "event-share-token-123")
+        )
+        let customEventShareURL = try #require(
+            URL(string: "sideseat://share/event/event-share-token-123")
+        )
+        #expect(
+            DeepLinkRouter.route(for: customEventShareURL)
+                == .eventShare(token: "event-share-token-123")
+        )
         let activityURL = try #require(
             URL(string: "https://sideseat.example/discover/activities/activity-123")
         )
@@ -34,6 +120,20 @@ struct NavigationTests {
         #expect(DeepLinkRouter.route(for: profileURL) == .profile(userID: "user-123"))
         #expect(DeepLinkRouter.route(for: postURL) == .discoverPost(postID: "post-123"))
         #expect(DeepLinkRouter.route(for: legacyActivityURL) == .activity(activityID: "activity-123"))
+        let responsesURL = try #require(
+            URL(string: "https://sideseat.example/responses/action-123/interest-456")
+        )
+        #expect(
+            DeepLinkRouter.route(for: responsesURL)
+                == .actionResponses(actionID: "action-123", interestID: "interest-456")
+        )
+        let shellURL = try #require(URL(string:
+            "https://sideseat.example/discover/posts/action-123/responses/interest-456/coordination/123e4567-e89b-42d3-a456-426614174001"
+        ))
+        #expect(DeepLinkRouter.route(for: shellURL) == .coordinationShell(
+            interestID: "interest-456",
+            reservationID: "123e4567-e89b-42d3-a456-426614174001"
+        ))
     }
 
     @Test("Universal links route profile handoffs to the Me tab")
@@ -67,6 +167,27 @@ struct NavigationTests {
         router.handle(blocked)
         #expect(router.consumePendingTab() == .me)
         #expect(router.consumePendingRoute() == .blockedUsers)
+    }
+
+    @Test("Course links hand off to course management in the Me tab")
+    @MainActor
+    func routesCourseHandoffs() throws {
+        let router = DeepLinkRouter()
+        let courses = try #require(URL(string: "https://sideseat.example/courses"))
+        let archived = try #require(URL(string: "https://sideseat.example/courses/archived"))
+        let detail = try #require(URL(string: "https://sideseat.example/courses/course-123"))
+
+        router.handle(courses)
+        #expect(router.consumePendingTab() == .me)
+        #expect(router.consumePendingRoute() == .courses)
+
+        router.handle(archived)
+        #expect(router.consumePendingTab() == .me)
+        #expect(router.consumePendingRoute() == .archivedCourses)
+
+        router.handle(detail)
+        #expect(router.consumePendingTab() == .me)
+        #expect(router.consumePendingRoute() == .course(courseID: "course-123"))
     }
 
     @Test("Routes relative push notification paths")
@@ -139,10 +260,60 @@ struct NavigationTests {
             url: "  ",
             userInfo: ["groupChatId": "group-123"]
         )
+        let mutual = ForegroundPushNotice(
+            title: "A new match",
+            body: "Someone also wants to play badminton",
+            url: nil,
+            userInfo: [
+                "data": [
+                    "kind": "mutual_opportunity",
+                    "opportunityId": "opportunity-123",
+                ],
+            ]
+        )
 
         #expect(direct.navigationURL == "/connections/connection-123")
         #expect(course.navigationURL == "/courses/course-123/chat")
         #expect(group.navigationURL == "/groups/group-123")
+        #expect(mutual.isMutualOpportunity)
+        #expect(mutual.navigationURL == "/discover")
+    }
+
+    @Test("Mutual opportunity notifications route to Together")
+    @MainActor
+    func routesMutualOpportunityPushToTogether() {
+        let router = DeepLinkRouter()
+
+        router.handleNotificationURL("/discover")
+
+        #expect(router.consumePendingTab() == .discover)
+        #expect(router.consumePendingRoute() == nil)
+        #expect(router.navigationEpoch == 1)
+    }
+
+    @Test("Mutual opportunity delivery refreshes Together exactly once")
+    @MainActor
+    func refreshesTogetherForMutualOpportunityPush() async {
+        let notice = ForegroundPushNotice(
+            title: "A new match",
+            body: "Someone also wants to play badminton",
+            url: "/discover",
+            userInfo: ["kind": "mutual_opportunity"]
+        )
+        let probe = NavigationNotificationProbe()
+        let observer = NotificationCenter.default.addObserver(
+            forName: .sideSeatTogetherNeedsRefresh,
+            object: nil,
+            queue: nil
+        ) { notification in
+            probe.record(notification.name)
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+
+        SideSeatAppDelegate.refreshAppState(for: notice)
+        await Task.yield()
+
+        #expect(probe.count(for: .sideSeatTogetherNeedsRefresh) == 1)
     }
 
     @Test("Replays a notification tap received before the app router is installed")
@@ -188,5 +359,22 @@ struct NavigationTests {
                 #expect(!visibleCopy.contains(phrase))
             }
         }
+    }
+}
+
+private final class NavigationNotificationProbe: @unchecked Sendable {
+    private let lock = NSLock()
+    private var counts: [Notification.Name: Int] = [:]
+
+    func record(_ name: Notification.Name) {
+        lock.lock()
+        counts[name, default: 0] += 1
+        lock.unlock()
+    }
+
+    func count(for name: Notification.Name) -> Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return counts[name, default: 0]
     }
 }

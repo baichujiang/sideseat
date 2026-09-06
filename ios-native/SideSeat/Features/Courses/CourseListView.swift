@@ -54,7 +54,7 @@ struct CourseListView: View {
                                 }
                             }
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(SSPressButtonStyle())
                         .accessibilityIdentifier("course-row-\(course.id)")
                     }
                 }
@@ -161,7 +161,7 @@ struct CourseListView: View {
                 } label: {
                     schoolContextLabel(payload: payload, showsDisclosure: true)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SSPressButtonStyle())
                 .tint(SideSeatTheme.textPrimary)
                 .accessibilityLabel("School")
                 .accessibilityValue(activeSchool?.name ?? payload.school)
@@ -233,7 +233,7 @@ struct CourseListView: View {
                 }
                 .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SSPressButtonStyle())
             .accessibilityIdentifier("course-archived-entry")
         }
     }
@@ -255,17 +255,17 @@ struct CourseListView: View {
                 HStack(spacing: SideSeatTheme.spaceMD) {
                     Image(systemName: "calendar.badge.clock")
                         .font(.title3)
-                        .foregroundStyle(SideSeatTheme.accent)
+                        .foregroundStyle(SideSeatTheme.HubTint.courses)
                         .frame(width: 34)
                     VStack(alignment: .leading, spacing: 3) {
                         Text(String(
-                            format: String(localized: "Confirm %@ courses"),
+                            format: AppLocalization.string( "Confirm %@ courses"),
                             review.semesterLabel
                         ))
                             .font(.body.weight(.semibold))
                             .foregroundStyle(SideSeatTheme.textPrimary)
                         Text(String(
-                            format: String(localized: "Review %d previous courses"),
+                            format: AppLocalization.string( "Review %d previous courses"),
                             review.courseCount
                         ))
                             .font(.caption)
@@ -277,7 +277,7 @@ struct CourseListView: View {
                         .foregroundStyle(.tertiary)
                 }
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SSPressButtonStyle())
             .accessibilityIdentifier("course-semester-review")
         }
     }
@@ -419,20 +419,16 @@ struct ArchivedCourseListView: View {
             }
             await load()
         }
-        .alert(
-            "Remove archived course?",
-            isPresented: removalConfirmationPresented
-        ) {
-            Button("Cancel", role: .cancel) { pendingRemoval = nil }
-            Button("Remove from archive", role: .destructive) {
-                guard let courseID = pendingRemoval?.id else { return }
-                pendingRemoval = nil
-                Task { _ = await store.removeArchivedCourse(courseID, using: session) }
-            }
-            .accessibilityIdentifier("course-archived-confirm-remove")
-        } message: {
-            Text("This removes the course from your archive. Existing message history is not deleted.")
-        }
+        .ssActionPrompt(
+            isPresented: removalConfirmationPresented,
+            title: AppLocalization.string("Remove archived course?"),
+            message: AppLocalization.string("This removes the course from your archive. Existing message history is not deleted."),
+            systemImage: "trash.fill",
+            tint: SideSeatTheme.danger,
+            onDismiss: { pendingRemoval = nil },
+            accessibilityIdentifier: "course-archived-remove-prompt",
+            actions: { archivedCourseRemovalActions }
+        )
         .accessibilityIdentifier("course-archived-list")
     }
 
@@ -445,6 +441,29 @@ struct ArchivedCourseListView: View {
         )
     }
 
+    private var archivedCourseRemovalActions: [SSActionPromptAction] {
+        guard let courseID = pendingRemoval?.id else { return [] }
+
+        return [
+            SSActionPromptAction(
+                id: "course-archived-cancel-remove",
+                title: AppLocalization.string("Cancel"),
+                systemImage: "xmark",
+                role: .cancel
+            ) {
+                pendingRemoval = nil
+            },
+            SSActionPromptAction(
+                id: "course-archived-confirm-remove",
+                title: AppLocalization.string("Remove from archive"),
+                systemImage: "trash",
+                role: .destructive
+            ) {
+                Task { _ = await store.removeArchivedCourse(courseID, using: session) }
+            },
+        ]
+    }
+
     private func archivedCourseRow(_ course: NativeCourseSummary) -> some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
             CourseSummaryRow(course: course, showsArchivedStatus: true)
@@ -455,7 +474,7 @@ struct ArchivedCourseListView: View {
                     Label("Restore", systemImage: "arrow.counterclockwise")
                         .font(.subheadline.weight(.semibold))
                 }
-                .buttonStyle(.borderless)
+                .buttonStyle(SSPressButtonStyle())
                 .disabled(store.mutatingCourseID != nil)
                 .accessibilityIdentifier("course-archived-restore-\(course.id)")
             } else if course.viewer.restoreBlockReason == "ACTIVE_EQUIVALENT" {
@@ -464,7 +483,7 @@ struct ArchivedCourseListView: View {
                     .foregroundStyle(SideSeatTheme.success)
             } else {
                 Label(
-                    String(format: String(localized: "Switch to %@ to restore"), course.school),
+                    String(format: AppLocalization.string( "Switch to %@ to restore"), course.school),
                     systemImage: "building.columns"
                 )
                 .font(.caption)
@@ -509,7 +528,7 @@ private struct CourseSemesterReviewSheet: View {
                                         .font(.title3)
                                         .foregroundStyle(
                                             store.selectedCourseIDs.contains(course.id)
-                                                ? SideSeatTheme.accent
+                                                ? SideSeatTheme.accentText
                                                 : Color.secondary
                                         )
                                         VStack(alignment: .leading, spacing: 4) {
@@ -524,12 +543,12 @@ private struct CourseSemesterReviewSheet: View {
                                             }
                                             Text("\(course.school) · \(course.previousSemesterLabel)")
                                                 .font(.caption)
-                                                .foregroundStyle(.tertiary)
+                                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                                         }
                                     }
                                     .padding(.vertical, 3)
                                 }
-                                .buttonStyle(.plain)
+                                .buttonStyle(SSPressButtonStyle())
                                 .accessibilityIdentifier("course-review-row-\(course.id)")
                             }
                         } header: {
@@ -556,7 +575,7 @@ private struct CourseSemesterReviewSheet: View {
                     )
                 }
             }
-            .navigationTitle(store.review?.semesterLabel ?? String(localized: "Course review"))
+            .navigationTitle(store.review?.semesterLabel ?? AppLocalization.string( "Course review"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -573,6 +592,7 @@ private struct CourseSemesterReviewSheet: View {
                         }
                     }
                     .disabled(store.review == nil || store.isSaving)
+                    .ssConfirmationActionStyle()
                     .accessibilityIdentifier("course-review-confirm")
                 }
             }
@@ -583,8 +603,8 @@ private struct CourseSemesterReviewSheet: View {
     private var confirmTitle: String {
         let count = store.selectedCourseIDs.count
         return count == 0
-            ? String(localized: "Archive all")
-            : String(format: String(localized: "Keep %d"), count)
+            ? AppLocalization.string( "Archive all")
+            : String(format: AppLocalization.string( "Keep %d"), count)
     }
 }
 
@@ -620,38 +640,26 @@ private struct CourseSummaryRow: View {
                     .accessibilityIdentifier("course-instructor-visual-\(course.id)")
             }
 
-            HStack(spacing: 10) {
-                HStack(spacing: 4) {
-                    Image(systemName: "person.2")
-                        .font(.caption)
-                        .accessibilityHidden(true)
-                    Text("\(course.memberCount)")
-                        .font(.caption)
-                        .accessibilityLabel(
-                            String(
-                                format: String(localized: "Course member count: %d"),
-                                course.memberCount
-                            )
-                        )
-                        .accessibilityIdentifier("course-member-count-visual-\(course.id)")
+            if showsArchivedStatus || course.viewer.enrolled || course.viewer.saved || course.communitySubmitted == true {
+                HStack(spacing: 10) {
+                    if showsArchivedStatus {
+                        Label("Archived", systemImage: "archivebox.fill")
+                            .foregroundStyle(.secondary)
+                    } else if course.viewer.enrolled {
+                        Label("Joined", systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(SideSeatTheme.success)
+                    } else if course.viewer.saved {
+                        Label("Saved", systemImage: "bookmark.fill")
+                            .foregroundStyle(SideSeatTheme.HubTint.plans)
+                    }
+                    if course.communitySubmitted == true {
+                        Label("Community", systemImage: "person.2.badge.plus")
+                            .foregroundStyle(SideSeatTheme.HubTint.courses)
+                    }
                 }
-                if showsArchivedStatus {
-                    Label("Archived", systemImage: "archivebox.fill")
-                        .foregroundStyle(.secondary)
-                } else if course.viewer.enrolled {
-                    Label("Joined", systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(SideSeatTheme.success)
-                } else if course.viewer.saved {
-                    Label("Saved", systemImage: "bookmark.fill")
-                        .foregroundStyle(SideSeatTheme.HubTint.plans)
-                }
-                if course.communitySubmitted == true {
-                    Label("Community", systemImage: "person.2.badge.plus")
-                        .foregroundStyle(SideSeatTheme.HubTint.courses)
-                }
+                .font(.caption)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             }
-            .font(.caption)
-            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
         }
         .padding(.vertical, 5)
     }

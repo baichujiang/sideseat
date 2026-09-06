@@ -55,11 +55,11 @@ struct ForgotPasswordSheet: View {
                 }
                 .scrollDismissesKeyboard(.interactively)
             }
-            .navigationTitle(String(localized: "Reset password"))
+            .navigationTitle(AppLocalization.string( "Reset password"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(String(localized: "Cancel")) { dismiss() }
+                    Button(AppLocalization.string( "Cancel")) { dismiss() }
                 }
             }
             .onAppear { focusedField = .email }
@@ -70,25 +70,25 @@ struct ForgotPasswordSheet: View {
     private var stepTitle: String {
         switch step {
         case .email:
-            String(localized: "Forgot your password?")
+            AppLocalization.string( "Forgot your password?")
         case .reset:
-            String(localized: "Enter the code")
+            AppLocalization.string( "Enter the code")
         }
     }
 
     private var stepSubtitle: String {
         switch step {
         case .email:
-            String(localized: "We'll email a 6-digit code if an account exists for that address.")
+            AppLocalization.string( "We'll email a 6-digit code if an account exists for that address.")
         case .reset:
-            String(localized: "Check your inbox, then choose a new password.")
+            AppLocalization.string( "Check your inbox, then choose a new password.")
         }
     }
 
     private var emailStep: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
             SSTextField(
-                title: String(localized: "Email"),
+                title: AppLocalization.string( "Email"),
                 text: $email,
                 contentType: .emailAddress,
                 keyboard: .emailAddress,
@@ -101,7 +101,7 @@ struct ForgotPasswordSheet: View {
             feedbackBlock
 
             SSPrimaryButton(
-                title: String(localized: "Send code"),
+                title: AppLocalization.string( "Send code"),
                 isLoading: isWorking,
                 fill: .brand,
                 accessibilityID: "forgot-send-code",
@@ -114,7 +114,7 @@ struct ForgotPasswordSheet: View {
     private var resetStep: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
             SSTextField(
-                title: String(localized: "Verification code"),
+                title: AppLocalization.string( "Verification code"),
                 text: $code,
                 contentType: .oneTimeCode,
                 keyboard: .numberPad,
@@ -124,31 +124,33 @@ struct ForgotPasswordSheet: View {
             .focused($focusedField, equals: .code)
 
             SSSecureField(
-                title: String(localized: "New password"),
+                title: AppLocalization.string( "New password"),
                 text: $password,
                 isVisible: $isPasswordVisible,
                 contentType: .newPassword,
                 submitLabel: .next,
-                accessibilityID: "forgot-password"
+                isFocused: focusBinding(for: .password),
+                accessibilityID: "forgot-password",
+                onSubmit: { focusedField = .confirm }
             )
             .focused($focusedField, equals: .password)
-            .onSubmit { focusedField = .confirm }
 
             SSSecureField(
-                title: String(localized: "Confirm new password"),
+                title: AppLocalization.string( "Confirm new password"),
                 text: $confirmPassword,
                 isVisible: $isPasswordVisible,
                 contentType: .newPassword,
                 submitLabel: .go,
-                accessibilityID: "forgot-confirm-password"
+                isFocused: focusBinding(for: .confirm),
+                accessibilityID: "forgot-confirm-password",
+                onSubmit: resetPassword
             )
             .focused($focusedField, equals: .confirm)
-            .onSubmit(resetPassword)
 
             feedbackBlock
 
             SSPrimaryButton(
-                title: String(localized: "Reset & log in"),
+                title: AppLocalization.string( "Reset & log in"),
                 isLoading: isWorking || session.isWorking,
                 fill: .brand,
                 accessibilityID: "forgot-reset-submit",
@@ -158,13 +160,13 @@ struct ForgotPasswordSheet: View {
 
             Button(action: resendCode) {
                 if resendSecondsRemaining > 0 {
-                    Text(String(localized: "Resend code in \(resendSecondsRemaining)s"))
+                    Text(AppLocalization.string( "Resend code in \(resendSecondsRemaining)s"))
                 } else {
-                    Text(String(localized: "Resend code"))
+                    Text(AppLocalization.string( "Resend code"))
                         .fontWeight(.medium)
                 }
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SSPressButtonStyle())
             .foregroundStyle(
                 resendSecondsRemaining > 0 ? SideSeatTheme.textSecondary : SideSeatTheme.textPrimary
             )
@@ -193,6 +195,19 @@ struct ForgotPasswordSheet: View {
             && password == confirmPassword
     }
 
+    private func focusBinding(for field: Field) -> Binding<Bool> {
+        Binding(
+            get: { focusedField == field },
+            set: { isFocused in
+                if isFocused {
+                    focusedField = field
+                } else if focusedField == field {
+                    focusedField = nil
+                }
+            }
+        )
+    }
+
     private func sendCode() {
         issue = nil
         statusMessage = nil
@@ -207,7 +222,7 @@ struct ForgotPasswordSheet: View {
                 isWorking = false
                 return
             }
-            statusMessage = String(localized: "If an account exists, a code is on its way.")
+            statusMessage = AppLocalization.string( "If an account exists, a code is on its way.")
             step = .reset
             startResendCooldown()
             focusedField = .code
@@ -226,7 +241,7 @@ struct ForgotPasswordSheet: View {
                 isWorking = false
                 return
             }
-            statusMessage = String(localized: "Code resent.")
+            statusMessage = AppLocalization.string( "Code resent.")
             startResendCooldown()
             isWorking = false
         }
@@ -244,7 +259,7 @@ struct ForgotPasswordSheet: View {
             return
         }
         if password != confirmPassword {
-            issue = String(localized: "Passwords do not match.")
+            issue = AppLocalization.string( "Passwords do not match.")
             return
         }
 

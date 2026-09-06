@@ -372,7 +372,7 @@ final class CommunityChatStore {
               message.sender.id != currentUserID,
               !message.isDeleted
         else {
-            return String(localized: "You can't report this message.")
+            return AppLocalization.string( "You can't report this message.")
         }
 
         #if DEBUG

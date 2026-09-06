@@ -51,7 +51,7 @@ struct ChatThreadSearchSheet: View {
                             }
                             .padding(.vertical, 2)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(SSPressButtonStyle())
                         .accessibilityIdentifier("thread-search-row-\(row.id)")
                     }
                 }
@@ -87,16 +87,16 @@ struct ChatThreadSearchRow: Identifiable, Hashable, Sendable {
     static func from(_ message: NativeDirectMessage) -> ChatThreadSearchRow {
         let preview: String
         if message.isDeleted {
-            preview = String(localized: "Message deleted")
+            preview = AppLocalization.string( "Message deleted")
         } else {
             switch message.type {
-            case "IMAGE": preview = message.body?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty ?? String(localized: "Photo")
-            case "LOCATION": preview = message.location?.name?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty ?? String(localized: "Location")
-            case "SCHEDULE_SHARE_CARD": preview = String(localized: "Shared schedule")
-            case "AVAILABILITY_CARD": preview = String(localized: "Shared availability")
-            case "PLAN_REQUEST_CARD": preview = String(localized: "Plan invite")
-            case "PLAN_CONFIRMED_CARD": preview = String(localized: "Plan confirmed")
-            default: preview = message.body?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty ?? String(localized: "Message")
+            case "IMAGE": preview = message.body?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty ?? AppLocalization.string( "Photo")
+            case "LOCATION": preview = message.location?.name?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty ?? AppLocalization.string( "Location")
+            case "SCHEDULE_SHARE_CARD": preview = AppLocalization.string("Shared availability")
+            case "AVAILABILITY_CARD": preview = AppLocalization.string( "Shared availability")
+            case "PLAN_REQUEST_CARD": preview = AppLocalization.string( "Plan invite")
+            case "PLAN_CONFIRMED_CARD": preview = AppLocalization.string( "Plan confirmed")
+            default: preview = message.body?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty ?? AppLocalization.string( "Message")
             }
         }
         var parts = [message.sender.displayName, message.sender.username, preview]
@@ -112,8 +112,8 @@ struct ChatThreadSearchRow: Identifiable, Hashable, Sendable {
 
     static func from(_ message: NativeCommunityMessage) -> ChatThreadSearchRow {
         let preview = message.isDeleted
-            ? String(localized: "Message deleted")
-            : (message.body?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty ?? String(localized: "Message"))
+            ? AppLocalization.string( "Message deleted")
+            : (message.body?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty ?? AppLocalization.string( "Message"))
         var parts = [message.sender.displayName, message.sender.username, preview]
         if let body = message.body { parts.append(body) }
         return ChatThreadSearchRow(

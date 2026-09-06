@@ -24,6 +24,9 @@ packages:
   OpenAPIRuntime:
     url: https://github.com/apple/swift-openapi-runtime
     exactVersion: 1.12.0
+  Popovers:
+    url: https://github.com/aheze/Popovers
+    exactVersion: 1.3.2
   Sentry:
     url: https://github.com/getsentry/sentry-cocoa
     exactVersion: 9.13.0
@@ -77,6 +80,7 @@ targets:
           - applinks:$(SIDESEAT_ASSOCIATED_DOMAIN)
     dependencies:
       - package: OpenAPIRuntime
+      - package: Popovers
       - package: Sentry
     preBuildScripts:
       - name: Validate Production Configuration

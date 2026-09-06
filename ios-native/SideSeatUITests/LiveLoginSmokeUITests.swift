@@ -166,7 +166,12 @@ final class SocialLiveUITests: XCTestCase {
         let editedTitle = "\(originalTitle) edited"
         let app = launchAndLogin(username: "test_001")
 
-        tabButton(in: app, labels: ["Create", "发布"]).tap()
+        tabButton(in: app, labels: ["Discover", "发现"]).tap()
+        let publish = app.buttons["discover-publish"]
+        XCTAssertTrue(publish.waitForExistence(timeout: 8))
+        publish.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["create-chooser-sheet"].waitForExistence(timeout: 5))
+        app.buttons["create-buddy-post"].tap()
         let title = app.textViews["buddy-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 8))
         title.tap()
@@ -186,8 +191,7 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["discover-post-detail"].waitForExistence(timeout: 12))
         XCTAssertTrue(app.staticTexts[originalTitle].waitForExistence(timeout: 5))
 
-        app.buttons["discover-plan-actions"].tap()
-        let edit = app.buttons["discover-plan-edit"].firstMatch
+        let edit = app.buttons["discover-post-edit-primary"].firstMatch
         XCTAssertTrue(edit.waitForExistence(timeout: 3))
         edit.tap()
         XCTAssertTrue(app.descendants(matching: .any)["buddy-edit-view"].waitForExistence(timeout: 5))
@@ -205,17 +209,22 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["buddy-edit-view"].waitForNonExistence(timeout: 12))
         XCTAssertTrue(app.staticTexts[editedTitle].waitForExistence(timeout: 8))
 
-        app.buttons["discover-plan-actions"].tap()
-        let close = app.buttons.matching(
-            NSPredicate(format: "label IN %@", ["Close plan", "关闭计划", "Plan schließen"])
-        ).firstMatch
+        let reopenEditor = app.buttons["discover-post-edit-primary"].firstMatch
+        XCTAssertTrue(reopenEditor.waitForExistence(timeout: 3))
+        reopenEditor.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["buddy-edit-view"].waitForExistence(timeout: 5))
+
+        let close = app.buttons["buddy-close-post"]
+        for _ in 0..<6 where !close.isHittable {
+            app.swipeUp()
+        }
         XCTAssertTrue(close.waitForExistence(timeout: 3))
         close.tap()
-        let confirmClose = app.buttons.matching(
-            NSPredicate(format: "label IN %@", ["Close plan", "关闭计划", "Plan schließen"])
-        ).firstMatch
+        let confirmClose = app.buttons["buddy-close-confirm"]
         XCTAssertTrue(confirmClose.waitForExistence(timeout: 3))
         confirmClose.tap()
+
+        XCTAssertTrue(app.descendants(matching: .any)["buddy-edit-view"].waitForNonExistence(timeout: 12))
 
         let closed = app.staticTexts.matching(
             NSPredicate(format: "label IN %@", ["Closed", "已关闭", "Geschlossen"])
@@ -330,46 +339,13 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["@test_001"].exists)
     }
 
-    func testGroupCreationMessageAndMemberVisibility() {
-        let timestamp = Int(Date().timeIntervalSince1970)
-        let groupTitle = "[live-ui] Study group \(timestamp)"
-        let message = "[live-ui] Group hello \(timestamp)"
+    func testMessagesDoesNotExposeArbitraryGroupCreation() {
         let creator = launchAndLogin(username: "test_001")
 
         tabButton(in: creator, labels: ["Chats", "聊天", "消息"]).tap()
         XCTAssertTrue(creator.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 10))
-        creator.buttons["inbox-toolbar-more"].tap()
-        let newGroup = creator.descendants(matching: .any)["inbox-toolbar-new-group"].firstMatch
-        XCTAssertTrue(newGroup.waitForExistence(timeout: 5))
-        newGroup.tap()
-        XCTAssertTrue(creator.descendants(matching: .any)["group-create-sheet"].waitForExistence(timeout: 8))
-
-        let peerTwo = creator.staticTexts["Test 002"].firstMatch
-        let peerThree = creator.staticTexts["Test 003"].firstMatch
-        XCTAssertTrue(peerTwo.waitForExistence(timeout: 8))
-        XCTAssertTrue(peerThree.waitForExistence(timeout: 8))
-        peerTwo.tap()
-        peerThree.tap()
-        let title = creator.textFields["group-create-title"]
-        title.tap()
-        title.typeText(groupTitle)
-        let submit = creator.buttons["group-create-submit"]
-        XCTAssertTrue(waitUntilEnabled(submit, timeout: 5))
-        submit.tap()
-
-        XCTAssertTrue(creator.descendants(matching: .any)["group-chat"].waitForExistence(timeout: 12))
-        XCTAssertTrue(creator.staticTexts[groupTitle].waitForExistence(timeout: 8))
-        sendMessage(message, in: creator)
-        creator.terminate()
-
-        let member = launchAndLogin(username: "test_002")
-        tabButton(in: member, labels: ["Chats", "聊天", "消息"]).tap()
-        XCTAssertTrue(member.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 10))
-        let group = member.staticTexts[groupTitle].firstMatch
-        XCTAssertTrue(group.waitForExistence(timeout: 12))
-        group.tap()
-        XCTAssertTrue(member.descendants(matching: .any)["group-chat"].waitForExistence(timeout: 10))
-        XCTAssertTrue(member.staticTexts[message].waitForExistence(timeout: 10))
+        XCTAssertFalse(creator.buttons["inbox-toolbar-more"].exists)
+        XCTAssertFalse(creator.descendants(matching: .any)["inbox-toolbar-new-group"].exists)
     }
 
     func testFeedbackPostVoteCommentAndCrossAccountVisibility() {

@@ -19,6 +19,8 @@ struct NativeScheduleShareChatPreview: Decodable, Sendable {
     let ownerDisplayLabel: String
     let linkId: String?
     let ownedByViewer: Bool?
+    let updatedAt: String?
+    let isUpdated: Bool?
 }
 
 struct NativeScheduleShareRevokeResult: Decodable, Sendable {
@@ -40,11 +42,29 @@ struct NativeScheduleShareBlock: Decodable, Hashable, Identifiable, Sendable {
     var id: String { "\(start)-\(end)-\(title ?? kind)" }
 }
 
-struct NativeScheduleShareRevealConfigRequest: Encodable, Hashable, Sendable {
+struct NativeScheduleShareRevealConfigRequest: Codable, Hashable, Sendable {
     let categoryIds: [String]
     let presetKeys: [String]
     let hideAllDetails: Bool
     let includedDates: [String]
+    let availabilityStartMinutes: Int?
+    let availabilityEndMinutes: Int?
+
+    init(
+        categoryIds: [String],
+        presetKeys: [String],
+        hideAllDetails: Bool,
+        includedDates: [String],
+        availabilityStartMinutes: Int? = nil,
+        availabilityEndMinutes: Int? = nil
+    ) {
+        self.categoryIds = categoryIds
+        self.presetKeys = presetKeys
+        self.hideAllDetails = hideAllDetails
+        self.includedDates = includedDates
+        self.availabilityStartMinutes = availabilityStartMinutes
+        self.availabilityEndMinutes = availabilityEndMinutes
+    }
 }
 
 struct NativeScheduleShareCreateRequest: Encodable, Hashable, Sendable {
@@ -54,6 +74,24 @@ struct NativeScheduleShareCreateRequest: Encodable, Hashable, Sendable {
     let allowGuestProposals: Bool
     let usageLimit: String
     let expiresAt: String
+}
+
+struct NativeScheduleShareOwnerSettings: Decodable, Hashable, Sendable {
+    let rangeStart: String
+    let rangeEnd: String
+    let revealConfig: NativeScheduleShareRevealConfigRequest
+    let allowGuestProposals: Bool
+    let usageLimit: String
+    let expiresAt: String
+}
+
+struct NativeScheduleShareOwnerPayload: Decodable, Sendable {
+    let snapshot: NativeScheduleShareSnapshot
+    let settings: NativeScheduleShareOwnerSettings
+    let linkId: String
+    let pendingProposalCount: Int
+    let updatedAt: String
+    let isUpdated: Bool
 }
 
 struct NativeScheduleShareSnapshot: Decodable, Sendable {
@@ -80,9 +118,109 @@ struct NativeScheduleShareProposalSelection: Hashable, Sendable {
     let end: Date
 }
 
+struct NativeScheduleShareCandidate: Hashable, Identifiable, Sendable {
+    let bounds: NativeScheduleShareSlot
+    let start: Date
+    let end: Date
+
+    var id: String { "\(bounds.id)-\(start.timeIntervalSince1970)" }
+}
+
+enum ScheduleShareCandidateRecommendations {
+    static let durationMinutes = 60
+    static let maximumCount = 5
+    static let maximumPerDay = 2
+    static let daytimeStartHour = 9
+    static let daytimeEndHour = 21
+    static let stepMinutes = 30
+
+    static func candidates(
+        from slots: [NativeScheduleShareSlot],
+        calendar: Calendar = .sideSeatBerlin
+    ) -> [NativeScheduleShareCandidate] {
+        let duration = TimeInterval(durationMinutes * 60)
+        let step = TimeInterval(stepMinutes * 60)
+        var generated: [NativeScheduleShareCandidate] = []
+
+        for bounds in slots {
+            guard let boundsStart = Date.sideSeatChatISO8601(bounds.start),
+                  let boundsEnd = Date.sideSeatChatISO8601(bounds.end),
+                  boundsEnd.timeIntervalSince(boundsStart) >= duration
+            else { continue }
+
+            var day = calendar.startOfDay(for: boundsStart)
+            let lastDay = calendar.startOfDay(for: boundsEnd.addingTimeInterval(-0.001))
+            while day <= lastDay {
+                guard let daytimeStart = calendar.date(
+                    bySettingHour: daytimeStartHour,
+                    minute: 0,
+                    second: 0,
+                    of: day
+                ), let daytimeEnd = calendar.date(
+                    bySettingHour: daytimeEndHour,
+                    minute: 0,
+                    second: 0,
+                    of: day
+                ) else { break }
+
+                let windowStart = max(boundsStart, daytimeStart)
+                let windowEnd = min(boundsEnd, daytimeEnd)
+                var start = snappedUp(windowStart, step: step)
+                while start.addingTimeInterval(duration) <= windowEnd {
+                    generated.append(
+                        NativeScheduleShareCandidate(
+                            bounds: bounds,
+                            start: start,
+                            end: start.addingTimeInterval(duration)
+                        )
+                    )
+                    start = start.addingTimeInterval(step)
+                }
+                guard let nextDay = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+                day = nextDay
+            }
+        }
+
+        let preferredMinutes = [12 * 60, 15 * 60, 10 * 60, 18 * 60]
+        let sorted = generated.sorted { lhs, rhs in
+            let lhsDay = calendar.startOfDay(for: lhs.start)
+            let rhsDay = calendar.startOfDay(for: rhs.start)
+            if lhsDay != rhsDay { return lhsDay < rhsDay }
+            let lhsMinute = calendar.component(.hour, from: lhs.start) * 60
+                + calendar.component(.minute, from: lhs.start)
+            let rhsMinute = calendar.component(.hour, from: rhs.start) * 60
+                + calendar.component(.minute, from: rhs.start)
+            let lhsScore = preferredMinutes.enumerated().map { index, minute in
+                abs(lhsMinute - minute) * 10 + index
+            }.min() ?? lhsMinute
+            let rhsScore = preferredMinutes.enumerated().map { index, minute in
+                abs(rhsMinute - minute) * 10 + index
+            }.min() ?? rhsMinute
+            if lhsScore != rhsScore { return lhsScore < rhsScore }
+            return lhs.start < rhs.start
+        }
+
+        var perDay: [Date: Int] = [:]
+        var result: [NativeScheduleShareCandidate] = []
+        for candidate in sorted {
+            let day = calendar.startOfDay(for: candidate.start)
+            guard perDay[day, default: 0] < maximumPerDay else { continue }
+            result.append(candidate)
+            perDay[day, default: 0] += 1
+            if result.count == maximumCount { break }
+        }
+        return result
+    }
+
+    private static func snappedUp(_ date: Date, step: TimeInterval) -> Date {
+        let value = date.timeIntervalSinceReferenceDate
+        return Date(timeIntervalSinceReferenceDate: ceil(value / step) * step)
+    }
+}
+
 enum ScheduleShareProposalTime {
-    static let defaultDisplayStartHour = 8
-    static let defaultDisplayEndHour = 22
+    static let defaultDisplayStartHour = 9
+    static let defaultDisplayEndHour = 21
     static let minimumMinutes = 15
     static let maximumMinutes = 240
     static let defaultMinutes = 90
@@ -222,6 +360,9 @@ struct NativeScheduleShareRecipientPayload: Decodable, Sendable {
     let proposal: NativeScheduleShareViewerProposal?
     let allowGuestProposals: Bool
     let linkId: String
+    let ownedByViewer: Bool?
+    let updatedAt: String?
+    let isUpdated: Bool?
 }
 
 struct NativeScheduleShareMyProposalPayload: Decodable, Sendable {
@@ -240,6 +381,66 @@ struct NativeScheduleShareProposalRequest: Encodable, Sendable {
     let location: String?
     let startTime: String
     let endTime: String
+}
+
+enum ScheduleShareEditImpact {
+    static func expandsVisibilityOrAccess(
+        originalDates: Set<String>,
+        newDates: Set<String>,
+        originalRevealOptionIDs: Set<String>,
+        newRevealOptionIDs: Set<String>,
+        originalAllowsProposals: Bool,
+        newAllowsProposals: Bool,
+        originalUsageLimit: String,
+        newUsageLimit: String,
+        originalExpiresAt: Date?,
+        newExpiresAt: Date?,
+        originalAvailabilityStartMinutes: Int = 0,
+        newAvailabilityStartMinutes: Int = 0,
+        originalAvailabilityEndMinutes: Int = 24 * 60,
+        newAvailabilityEndMinutes: Int = 24 * 60
+    ) -> Bool {
+        if !newDates.isSubset(of: originalDates) { return true }
+        if !newRevealOptionIDs.isSubset(of: originalRevealOptionIDs) { return true }
+        if !originalAllowsProposals, newAllowsProposals { return true }
+        if originalUsageLimit == "SINGLE_USE", newUsageLimit == "UNLIMITED" { return true }
+        if newAvailabilityStartMinutes < originalAvailabilityStartMinutes { return true }
+        if newAvailabilityEndMinutes > originalAvailabilityEndMinutes { return true }
+        if let originalExpiresAt, let newExpiresAt,
+           newExpiresAt.timeIntervalSince(originalExpiresAt) > 60 {
+            return true
+        }
+        return false
+    }
+
+    static func canAffectPendingProposals(
+        pendingProposalCount: Int,
+        originalDates: Set<String>,
+        newDates: Set<String>,
+        originalAllowsProposals: Bool,
+        newAllowsProposals: Bool,
+        originalAvailabilityStartMinutes: Int = 0,
+        newAvailabilityStartMinutes: Int = 0,
+        originalAvailabilityEndMinutes: Int = 24 * 60,
+        newAvailabilityEndMinutes: Int = 24 * 60
+    ) -> Bool {
+        pendingProposalCount > 0
+            && (
+                originalDates != newDates
+                    || (originalAllowsProposals && !newAllowsProposals)
+                    || originalAvailabilityStartMinutes != newAvailabilityStartMinutes
+                    || originalAvailabilityEndMinutes != newAvailabilityEndMinutes
+            )
+    }
+}
+
+extension Notification.Name {
+    static let sideSeatScheduleShareDidUpdate = Notification.Name("sideSeatScheduleShareDidUpdate")
+    static let sideSeatScheduleShareDidRevoke = Notification.Name("sideSeatScheduleShareDidRevoke")
+}
+
+enum ScheduleShareNotificationKey {
+    static let linkID = "linkId"
 }
 
 enum ScheduleShareURLParser {

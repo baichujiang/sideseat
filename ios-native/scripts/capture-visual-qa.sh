@@ -6,7 +6,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 IOS="$ROOT/ios-native"
-OUT="$ROOT/docs/ios-native/visual-qa"
+OUT="$ROOT/docs/visual-qa"
 SIM_DEVICE_ID="${SIM_DEVICE_ID:-386193D3-AB27-41F4-8B13-4DB3ACEE3907}"
 DEVICE_UDID="${DEVICE_UDID:-}"
 MODE="simulator"

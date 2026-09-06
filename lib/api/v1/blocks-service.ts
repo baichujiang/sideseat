@@ -1,6 +1,11 @@
 import "server-only";
 
-import type { Prisma } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
+
+import {
+  pairSafetyLock,
+  userConnectionSafetyLocks,
+} from "@/lib/v2/action-coordination/db-locks";
 
 export type BlockedUserV1 = {
   id: string;
@@ -41,29 +46,29 @@ export async function listBlockedUsersForUser(
 }
 
 export async function unblockUserForActor(options: {
-  db: Prisma.TransactionClient | typeof import("@/lib/db/prisma").prisma;
+  db: Prisma.TransactionClient | PrismaClient;
   blockerId: string;
   blockedId: string;
 }): Promise<{ unblocked: true; blockedId: string } | null> {
-  const existing = await options.db.block.findUnique({
-    where: {
-      blockerId_blockedId: {
+  if (options.blockerId === options.blockedId) return null;
+  const run = async (tx: Prisma.TransactionClient) => {
+    await userConnectionSafetyLocks(tx, [options.blockerId, options.blockedId]);
+    await pairSafetyLock(tx, options.blockerId, options.blockedId);
+    const deleted = await tx.block.deleteMany({
+      where: {
         blockerId: options.blockerId,
         blockedId: options.blockedId,
       },
-    },
-    select: { id: true },
-  });
-  if (!existing) return null;
+    });
+    if (deleted.count === 0) return null;
 
-  await options.db.block.delete({
-    where: {
-      blockerId_blockedId: {
-        blockerId: options.blockerId,
-        blockedId: options.blockedId,
-      },
-    },
-  });
+    // Deliberately do not touch Context, Connection, Plan, or Calendar state.
+    // Removing the barrier only permits a future explicit coordination action.
+    return { unblocked: true as const, blockedId: options.blockedId };
+  };
 
-  return { unblocked: true, blockedId: options.blockedId };
+  if ("$transaction" in options.db) {
+    return options.db.$transaction((tx) => run(tx));
+  }
+  return run(options.db);
 }

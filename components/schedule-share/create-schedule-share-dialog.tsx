@@ -20,12 +20,15 @@ import { formatMessage } from "@/lib/i18n/messages";
 import type { PublicScheduleShareSnapshot } from "@/lib/schedule-share/build-schedule-share-snapshot";
 import { formatShareSelectedDaysSummary } from "@/lib/schedule-share/format-share-create-summary";
 import {
-  allRevealedCategoryIds,
   revealConfigFromRevealedCategoryIds,
   shareRevealCategoryColor,
   uncategorizedRevealCategory,
   type ShareRevealCategoryInput,
 } from "@/lib/schedule-share/reveal-category-selection";
+import {
+  SCHEDULE_SHARE_DEFAULT_AVAILABILITY_END_MINUTES,
+  SCHEDULE_SHARE_DEFAULT_AVAILABILITY_START_MINUTES,
+} from "@/lib/schedule-share/reveal-config";
 import { defaultShareExpiresAt } from "@/lib/schedule-share/share-range-presets";
 import {
   berlinDateFromDateKey,
@@ -74,9 +77,16 @@ export function CreateScheduleShareDialog({
   const [selectedShareDateKeys, setSelectedShareDateKeys] = useState<Set<string>>(() =>
     shareDateKeysForQuickPreset("next_3_days"),
   );
-  const [usageLimit, setUsageLimit] = useState<ScheduleShareUsageLimitInput>("SINGLE_USE");
+  const [usageLimit, setUsageLimit] = useState<ScheduleShareUsageLimitInput>("UNLIMITED");
   const [expiresInDays, setExpiresInDays] = useState<7 | 14 | 30>(7);
   const [revealedCategoryIds, setRevealedCategoryIds] = useState<string[]>([]);
+  const [allowGuestProposals, setAllowGuestProposals] = useState(true);
+  const [availabilityStartMinutes, setAvailabilityStartMinutes] = useState(
+    SCHEDULE_SHARE_DEFAULT_AVAILABILITY_START_MINUTES,
+  );
+  const [availabilityEndMinutes, setAvailabilityEndMinutes] = useState(
+    SCHEDULE_SHARE_DEFAULT_AVAILABILITY_END_MINUTES,
+  );
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
@@ -100,9 +110,12 @@ export function CreateScheduleShareDialog({
     setBaseNow(now);
     setFocusDate(berlinStartOfCalendarDay(now));
     setSelectedShareDateKeys(shareDateKeysForQuickPreset("next_3_days", now));
-    setUsageLimit("SINGLE_USE");
+    setUsageLimit("UNLIMITED");
     setExpiresInDays(7);
     setRevealedCategoryIds([]);
+    setAllowGuestProposals(true);
+    setAvailabilityStartMinutes(SCHEDULE_SHARE_DEFAULT_AVAILABILITY_START_MINUTES);
+    setAvailabilityEndMinutes(SCHEDULE_SHARE_DEFAULT_AVAILABILITY_END_MINUTES);
     setShareUrl(null);
     setCopied(false);
     setErr(null);
@@ -174,12 +187,6 @@ export function CreateScheduleShareDialog({
     };
   }, [open, calendarCategoriesProp, s]);
 
-  useEffect(() => {
-    if (revealCategories.length > 0) {
-      setRevealedCategoryIds(allRevealedCategoryIds(revealCategories));
-    }
-  }, [revealCategories]);
-
   const handleSelectShareDay = useCallback(
     (date: Date) => {
       const { next, atCapacity } = toggleShareDaySelection(selectedShareDateKeys, date);
@@ -243,8 +250,15 @@ export function CreateScheduleShareDialog({
       const body = {
         rangeStart: rangeStart.toISOString(),
         rangeEnd: rangeEnd.toISOString(),
-        revealConfig: { categoryIds, presetKeys, hideAllDetails, includedDates },
-        allowGuestProposals: true,
+        revealConfig: {
+          categoryIds,
+          presetKeys,
+          hideAllDetails,
+          includedDates,
+          availabilityStartMinutes,
+          availabilityEndMinutes,
+        },
+        allowGuestProposals,
         usageLimit,
         expiresAt,
       };
@@ -409,6 +423,12 @@ export function CreateScheduleShareDialog({
                   onUsageLimitChange={setUsageLimit}
                   expiresInDays={expiresInDays}
                   onExpiresInDaysChange={setExpiresInDays}
+                  availabilityStartMinutes={availabilityStartMinutes}
+                  onAvailabilityStartMinutesChange={setAvailabilityStartMinutes}
+                  availabilityEndMinutes={availabilityEndMinutes}
+                  onAvailabilityEndMinutesChange={setAvailabilityEndMinutes}
+                  allowGuestProposals={allowGuestProposals}
+                  onAllowGuestProposalsChange={setAllowGuestProposals}
                 />
               </div>
             </div>

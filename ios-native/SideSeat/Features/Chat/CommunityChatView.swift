@@ -43,7 +43,7 @@ struct CommunityChatView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             composer
         }
-            .background(SideSeatTheme.bgGrouped)
+            .background(SideSeatTheme.Chat.canvas)
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .accessibilityIdentifier(kind.accessibilityRootID)
@@ -93,7 +93,7 @@ struct CommunityChatView: View {
             }
             .sheet(isPresented: $showThreadSearch) {
                 ChatThreadSearchSheet(
-                    title: String(localized: "Search chat"),
+                    title: AppLocalization.string( "Search chat"),
                     rows: store.messages.map(ChatThreadSearchRow.from),
                     onSelect: { messageID in
                         showThreadSearch = false
@@ -136,37 +136,21 @@ struct CommunityChatView: View {
                 guard hasPreparedInitialViewport else { return }
                 handleMessageChange()
             }
-            .confirmationDialog(
-                "Delete this message?",
-                isPresented: Binding(
-                    get: { pendingDelete != nil },
-                    set: { if !$0 { pendingDelete = nil } }
-                ),
-                titleVisibility: .visible
-            ) {
-                Button("Delete", role: .destructive) {
-                    guard let message = pendingDelete else { return }
-                    pendingDelete = nil
-                    Task {
-                        let deleted = await store.deleteMessage(message.id, using: session)
-                        if deleted, replyDraft?.id == message.id {
-                            replyDraft = nil
-                        }
-                        if deleted {
-                            showActionNotice(String(localized: "Message deleted"), systemImage: "trash")
-                        }
-                    }
-                }
-                Button("Cancel", role: .cancel) {
-                    pendingDelete = nil
-                }
-            }
+            .ssActionPrompt(
+                isPresented: pendingDeletePromptPresented,
+                title: AppLocalization.string("Delete this message?"),
+                systemImage: "trash.fill",
+                tint: SideSeatTheme.danger,
+                onDismiss: { pendingDelete = nil },
+                accessibilityIdentifier: "chat-delete-prompt",
+                actions: { pendingDeletePromptActions }
+            )
             .sheet(isPresented: Binding(
                 get: { pendingReport != nil },
                 set: { if !$0 { pendingReport = nil } }
             )) {
                 ChatReportSheet { reason, details in
-                    guard let message = pendingReport else { return String(localized: "Message unavailable.") }
+                    guard let message = pendingReport else { return AppLocalization.string( "Message unavailable.") }
                     let failure = await store.reportMessage(
                         message,
                         reason: reason,
@@ -175,7 +159,7 @@ struct CommunityChatView: View {
                     )
                     if failure == nil {
                         pendingReport = nil
-                        showActionNotice(String(localized: "Report sent"), systemImage: "checkmark.shield")
+                        showActionNotice(AppLocalization.string( "Report sent"), systemImage: "checkmark.shield")
                     }
                     return failure
                 }
@@ -194,7 +178,7 @@ struct CommunityChatView: View {
             } label: {
                 communityChatTitleContent
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SSPressButtonStyle())
             .accessibilityIdentifier("group-chat-title")
         } else {
             communityChatTitleContent
@@ -216,7 +200,7 @@ struct CommunityChatView: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text(
                     store.conversation?.displayName
-                        ?? (kind == .course ? String(localized: "Course chat") : String(localized: "Group chat"))
+                        ?? (kind == .course ? AppLocalization.string( "Course chat") : AppLocalization.string( "Group chat"))
                 )
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.primary)
@@ -246,7 +230,7 @@ struct CommunityChatView: View {
             return values.isEmpty ? nil : values.joined(separator: " · ")
         }
         guard let memberCount = conversation.memberCount else { return nil }
-        return String(localized: "\(memberCount) members")
+        return AppLocalization.string( "\(memberCount) members")
     }
 
     private var restoreBanner: some View {
@@ -391,13 +375,13 @@ struct CommunityChatView: View {
                                 )
                             }
                         } label: {
-                            Text(store.pendingRemoteCount == 1 ? String(localized: "1 new message") : String(localized: "\(store.pendingRemoteCount) new messages"))
+                            Text(store.pendingRemoteCount == 1 ? AppLocalization.string( "1 new message") : AppLocalization.string( "\(store.pendingRemoteCount) new messages"))
                                 .font(.footnote.weight(.semibold))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
                                 .background(.ultraThinMaterial, in: Capsule())
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(SSPressButtonStyle())
                         .accessibilityIdentifier("chat-new-messages")
                     }
                 }
@@ -510,7 +494,7 @@ struct CommunityChatView: View {
             HStack(alignment: .bottom, spacing: 10) {
                 ChatComposerTextInput(
                     draft: composerDraft,
-                    placeholder: replyDraft == nil ? String(localized: "Message") : String(localized: "Reply"),
+                    placeholder: replyDraft == nil ? AppLocalization.string( "Message") : AppLocalization.string( "Reply"),
                     focusController: composerFocus
                 ) { text in
                     Task { await send(text) }
@@ -542,8 +526,49 @@ struct CommunityChatView: View {
         UIPasteboard.general.string = text
         Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(140))
-            showActionNotice(String(localized: "Copied"), systemImage: "checkmark")
+            showActionNotice(AppLocalization.string( "Copied"), systemImage: "checkmark")
         }
+    }
+
+    private var pendingDeletePromptPresented: Binding<Bool> {
+        Binding(
+            get: { pendingDelete != nil },
+            set: { if !$0 { pendingDelete = nil } }
+        )
+    }
+
+    private var pendingDeletePromptActions: [SSActionPromptAction] {
+        guard let message = pendingDelete else { return [] }
+
+        return [
+            SSActionPromptAction(
+                id: "chat-delete-cancel",
+                title: AppLocalization.string("Cancel"),
+                systemImage: "xmark",
+                role: .cancel
+            ) {
+                pendingDelete = nil
+            },
+            SSActionPromptAction(
+                id: "chat-delete-confirm",
+                title: AppLocalization.string("Delete"),
+                systemImage: "trash",
+                role: .destructive
+            ) {
+                Task {
+                    let deleted = await store.deleteMessage(message.id, using: session)
+                    if deleted, replyDraft?.id == message.id {
+                        replyDraft = nil
+                    }
+                    if deleted {
+                        showActionNotice(
+                            AppLocalization.string("Message deleted"),
+                            systemImage: "trash"
+                        )
+                    }
+                }
+            },
+        ]
     }
 
     private func presentDeleteConfirmation(for message: NativeCommunityMessage) {
@@ -647,14 +672,6 @@ private struct CommunityMessageBubble: View {
         return value.isEmpty ? nil : value
     }
 
-    private var hasPrimaryContextAction: Bool {
-        (supportsReply && !message.isDeleted) || copyableText != nil
-    }
-
-    private var hasDestructiveContextAction: Bool {
-        !message.isDeleted && ((supportsReport && !isMine) || (supportsDelete && isMine))
-    }
-
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
             if !isMine {
@@ -666,9 +683,9 @@ private struct CommunityMessageBubble: View {
                             size: 32
                         )
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(SSPressButtonStyle())
                     .accessibilityIdentifier("chat-avatar-\(message.id)")
-                    .accessibilityLabel(String(localized: "\(message.sender.displayName) profile"))
+                    .accessibilityLabel(AppLocalization.string( "\(message.sender.displayName) profile"))
                 } else {
                     Color.clear
                         .frame(width: 32, height: 1)
@@ -684,15 +701,22 @@ private struct CommunityMessageBubble: View {
                             .font(.caption2.weight(.semibold))
                             .foregroundStyle(.secondary)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(SSPressButtonStyle())
                 }
 
-                ChatMessageContextMenuTarget(isEnabled: !message.isDeleted) {
+                ChatMessageContextMenuTarget(
+                    isEnabled: !message.isDeleted,
+                    edge: isMine ? .trailing : .leading
+                ) {
                     VStack(alignment: .leading, spacing: 6) {
                         if let reply = message.replyTo {
                             HStack(alignment: .top, spacing: 8) {
                                 RoundedRectangle(cornerRadius: 1.5)
-                                    .fill(isMine ? Color.white.opacity(0.85) : SideSeatTheme.accent)
+                                    .fill(
+                                        isMine
+                                            ? SideSeatTheme.Chat.ownBubbleForeground.opacity(0.72)
+                                            : SideSeatTheme.accent
+                                    )
                                     .frame(width: 3)
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(reply.sender.displayName)
@@ -703,6 +727,12 @@ private struct CommunityMessageBubble: View {
                                         .opacity(0.85)
                                 }
                             }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                            .background(
+                                SideSeatTheme.Chat.quoteSurface,
+                                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            )
                             .accessibilityIdentifier("chat-quote-\(message.id)")
                         }
 
@@ -725,11 +755,11 @@ private struct CommunityMessageBubble: View {
                             connectsBelow: connectsBelow
                         )
                     )
-                    .foregroundStyle(isMine ? Color.white : Color.primary)
+                    .foregroundStyle(isMine ? SideSeatTheme.Chat.ownBubbleForeground : Color.primary)
                     .accessibilityElement(children: .contain)
                     .accessibilityIdentifier("chat-bubble-\(message.id)")
-                } menu: {
-                    messageContextMenu
+                } actions: {
+                    messageContextMenuActions
                 }
 
                 if status == .sending {
@@ -742,7 +772,7 @@ private struct CommunityMessageBubble: View {
                             .font(.caption2)
                             .foregroundStyle(SideSeatTheme.danger)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(SSPressButtonStyle())
                     .accessibilityIdentifier("chat-retry-\(message.id)")
                 }
 
@@ -752,42 +782,51 @@ private struct CommunityMessageBubble: View {
         .accessibilityElement(children: .contain)
     }
 
-    @ViewBuilder
-    private var messageContextMenu: some View {
+    private var messageContextMenuActions: [SSLongPressAction] {
+        var actions: [SSLongPressAction] = []
+
         if supportsReply && !message.isDeleted {
-            Button {
-                onReply()
-            } label: {
-                Label("Reply", systemImage: "arrowshape.turn.up.left")
-            }
-            .accessibilityIdentifier("chat-reply-\(message.id)")
+            actions.append(
+                SSLongPressAction(
+                    id: "chat-reply-\(message.id)",
+                    title: AppLocalization.string("Reply"),
+                    systemImage: "arrowshape.turn.up.left",
+                    perform: onReply
+                )
+            )
         }
         if let copyableText {
-            Button {
-                onCopy(copyableText)
-            } label: {
-                Label("Copy", systemImage: "doc.on.doc")
-            }
-            .accessibilityIdentifier("chat-copy-\(message.id)")
-        }
-        if hasPrimaryContextAction && hasDestructiveContextAction {
-            Divider()
+            actions.append(
+                SSLongPressAction(
+                    id: "chat-copy-\(message.id)",
+                    title: AppLocalization.string("Copy"),
+                    systemImage: "doc.on.doc",
+                    perform: { onCopy(copyableText) }
+                )
+            )
         }
         if supportsReport && !isMine && !message.isDeleted {
-            Button(role: .destructive) {
-                onReport()
-            } label: {
-                Label("Report", systemImage: "flag")
-            }
-            .accessibilityIdentifier("chat-report-\(message.id)")
+            actions.append(
+                SSLongPressAction(
+                    id: "chat-report-\(message.id)",
+                    title: AppLocalization.string("Report"),
+                    systemImage: "flag",
+                    role: .destructive,
+                    perform: onReport
+                )
+            )
         }
         if supportsDelete && isMine && !message.isDeleted {
-            Button(role: .destructive) {
-                onDelete()
-            } label: {
-                Label("Delete", systemImage: "trash")
-            }
-            .accessibilityIdentifier("chat-delete-\(message.id)")
+            actions.append(
+                SSLongPressAction(
+                    id: "chat-delete-\(message.id)",
+                    title: AppLocalization.string("Delete"),
+                    systemImage: "trash",
+                    role: .destructive,
+                    perform: onDelete
+                )
+            )
         }
+        return actions
     }
 }

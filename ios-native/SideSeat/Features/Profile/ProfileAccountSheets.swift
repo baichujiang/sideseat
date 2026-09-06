@@ -81,6 +81,7 @@ struct ProfileUsernameSheet: View {
                         }
                     }
                     .disabled(!canSave || isSubmitting || !profile.canChangeUsernameNow)
+                    .ssConfirmationActionStyle()
                     .accessibilityIdentifier("profile-username-save")
                 }
             }
@@ -139,21 +140,21 @@ struct ProfilePrivacySheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceXL) {
                     ProfileEditSection(
-                        title: String(localized: "Profile visibility"),
+                        title: AppLocalization.string( "Profile visibility"),
                         systemImage: "eye.fill",
                         tint: SideSeatTheme.HubTint.privacyDiscover
                     ) {
                         VStack(spacing: 0) {
                             ProfileEditToggleRow(
-                                title: String(localized: "Show me in Discover"),
-                                subtitle: String(localized: "People can find your profile in Discover."),
+                                title: AppLocalization.string( "Include me in Together suggestions"),
+                                subtitle: AppLocalization.string( "SideSeat may use limited profile context for relevant opportunities."),
                                 isOn: $isDiscoverable,
                                 accessibilityID: "profile-privacy-discover"
                             )
                             Divider().padding(.leading, 4)
                             ProfileEditToggleRow(
-                                title: String(localized: "Show me to course members"),
-                                subtitle: String(localized: "Students in your courses can find your profile."),
+                                title: AppLocalization.string( "Use shared courses for matching"),
+                                subtitle: AppLocalization.string( "A shared course can make an opportunity more relevant."),
                                 isOn: $isVisibleToCourseMembers,
                                 accessibilityID: "profile-privacy-course-members"
                             )
@@ -161,13 +162,13 @@ struct ProfilePrivacySheet: View {
                     }
 
                     ProfileEditSection(
-                        title: String(localized: "Contact sharing"),
+                        title: AppLocalization.string( "Contact sharing"),
                         systemImage: "person.crop.circle.badge.checkmark",
                         tint: SideSeatTheme.HubTint.privacyChat
                     ) {
                         ProfileEditToggleRow(
-                            title: String(localized: "Allow contact exchange"),
-                            subtitle: String(localized: "Handles stay private until you exchange them with a connection."),
+                            title: AppLocalization.string( "Allow contact exchange"),
+                            subtitle: AppLocalization.string( "Handles stay private until you exchange them with a connection."),
                             isOn: $allowsContactExchange,
                             accessibilityID: "profile-privacy-contact-exchange"
                         )
@@ -185,7 +186,7 @@ struct ProfilePrivacySheet: View {
             .accessibilityIdentifier("profile-privacy")
             .toolbar(.hidden, for: .navigationBar)
             .safeAreaInset(edge: .top, spacing: 0) {
-                ProfileSheetHeader(title: String(localized: "Privacy & visibility")) {
+                ProfileSheetHeader(title: AppLocalization.string( "Privacy & visibility")) {
                     dismiss()
                 }
             }
@@ -193,7 +194,7 @@ struct ProfilePrivacySheet: View {
                 VStack(spacing: 0) {
                     Divider()
                     SSPrimaryButton(
-                        title: String(localized: "Save changes"),
+                        title: AppLocalization.string( "Save changes"),
                         isLoading: isSubmitting,
                         fill: .product,
                         accessibilityID: "profile-privacy-save"
@@ -229,7 +230,7 @@ struct ProfilePrivacySheet: View {
         if await onSave(request) {
             dismiss()
         } else {
-            issue = String(localized: "Privacy settings could not be saved.")
+            issue = AppLocalization.string( "Privacy settings could not be saved.")
         }
     }
 }
@@ -244,7 +245,7 @@ private struct ProfileToggleSummary: View {
         HStack {
             Label(title, systemImage: systemImage)
             Spacer()
-            Text(value ? String(localized: "On") : String(localized: "Off"))
+            Text(value ? AppLocalization.string( "On") : AppLocalization.string( "Off"))
                 .foregroundStyle(value ? SideSeatTheme.success : SideSeatTheme.textSecondary)
         }
     }

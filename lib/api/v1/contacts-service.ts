@@ -8,6 +8,11 @@ import {
 } from "@prisma/client";
 
 import { nicknameToKey } from "@/lib/auth/nickname-key";
+import {
+  type ConnectionDatabase,
+  withCanonicalConnectionScope,
+  withConnectionTransaction,
+} from "@/lib/connections/canonical-connection";
 import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
 import { prisma } from "@/lib/db/prisma";
 
@@ -201,63 +206,68 @@ export async function searchContacts(options: {
 export async function addContact(options: {
   userId: string;
   peerId: string;
+  db?: ConnectionDatabase;
 }): Promise<{ connectionId: string; created: boolean }> {
   if (options.peerId === options.userId) {
     throw new ContactsServiceError("INVALID_REQUEST");
   }
 
-  const [peer, mutualBlock, moderated, existingConnection] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: options.peerId },
-      select: { id: true, isGuest: true, onboardingComplete: true },
-    }),
-    prisma.block.findFirst({
-      where: {
-        OR: [
-          { blockerId: options.userId, blockedId: options.peerId },
-          { blockerId: options.peerId, blockedId: options.userId },
-        ],
-      },
-      select: { id: true },
-    }),
-    prisma.moderationBlock.findFirst({
-      where: {
-        userId: { in: [options.userId, options.peerId] },
-        isActive: true,
-      },
-      select: { id: true },
-    }),
-    prisma.connection.findFirst({
-      where: {
-        OR: [
-          { userAId: options.userId, userBId: options.peerId },
-          { userAId: options.peerId, userBId: options.userId },
-        ],
-      },
-      select: { id: true, status: true },
-    }),
-  ]);
+  return withConnectionTransaction(options.db ?? prisma, (tx) =>
+    withCanonicalConnectionScope(
+      tx,
+      options.userId,
+      options.peerId,
+      async (scope) => {
+        const [actor, peer, mutualBlock, moderated] = await Promise.all([
+          tx.user.findUnique({
+            where: { id: options.userId },
+            select: { id: true, isGuest: true, onboardingComplete: true },
+          }),
+          tx.user.findUnique({
+            where: { id: options.peerId },
+            select: { id: true, isGuest: true, onboardingComplete: true },
+          }),
+          tx.block.findFirst({
+            where: {
+              OR: [
+                { blockerId: options.userId, blockedId: options.peerId },
+                { blockerId: options.peerId, blockedId: options.userId },
+              ],
+            },
+            select: { id: true },
+          }),
+          tx.moderationBlock.findFirst({
+            where: {
+              userId: { in: [options.userId, options.peerId] },
+              isActive: true,
+            },
+            select: { id: true },
+          }),
+        ]);
 
-  if (!peer || peer.isGuest || !peer.onboardingComplete) {
-    throw new ContactsServiceError("NOT_FOUND");
-  }
-  if (mutualBlock || moderated) {
-    throw new ContactsServiceError("CONTENT_RESTRICTED");
-  }
-  if (existingConnection?.status === ConnectionStatus.ACTIVE) {
-    return { connectionId: existingConnection.id, created: false };
-  }
-  if (existingConnection) {
-    throw new ContactsServiceError("CONFLICT");
-  }
+        if (
+          !actor ||
+          actor.isGuest ||
+          !actor.onboardingComplete ||
+          !peer ||
+          peer.isGuest ||
+          !peer.onboardingComplete
+        ) {
+          throw new ContactsServiceError("NOT_FOUND");
+        }
+        if (mutualBlock || moderated) {
+          throw new ContactsServiceError("CONTENT_RESTRICTED");
+        }
+        if (scope.existing?.status === ConnectionStatus.ACTIVE) {
+          return { connectionId: scope.existing.id, created: false };
+        }
+        if (scope.existing) {
+          throw new ContactsServiceError("CONFLICT");
+        }
 
-  const connection = await prisma.connection.create({
-    data: {
-      userAId: options.userId,
-      userBId: options.peerId,
-      status: ConnectionStatus.ACTIVE,
-    },
-    select: { id: true },
-  });
-  return { connectionId: connection.id, created: true };
+        const connection = await scope.createActive();
+        return { connectionId: connection.id, created: connection.created };
+      },
+    ),
+  );
 }

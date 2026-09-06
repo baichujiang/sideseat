@@ -163,7 +163,7 @@ final class CourseScreenshotImportStore {
             recognizedLines = lines
             let terms = CourseScreenshotText.searchTerms(from: lines)
             guard !terms.isEmpty else {
-                issue = String(localized: "No course text was found in this image.")
+                issue = AppLocalization.string( "No course text was found in this image.")
                 return
             }
 
@@ -225,7 +225,7 @@ final class CourseScreenshotImportStore {
 
         if !failed.isEmpty {
             issue = String(
-                format: String(localized: "%d courses could not be added. Try again."),
+                format: AppLocalization.string( "%d courses could not be added. Try again."),
                 failed.count
             )
             return false

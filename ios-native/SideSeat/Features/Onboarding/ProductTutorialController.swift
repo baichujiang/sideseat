@@ -27,34 +27,34 @@ final class ProductTutorialController {
 
     static let steps: [ProductTutorialStep] = [
         ProductTutorialStep(
-            id: "home",
-            title: String(localized: "Calendar"),
-            body: String(localized: "Keep personal events and confirmed plans in one schedule."),
-            hint: String(localized: "Know what your week looks like before you commit to another plan."),
-            tab: .home,
-            systemImage: "calendar"
-        ),
-        ProductTutorialStep(
-            id: "discover",
-            title: String(localized: "Discover"),
-            body: String(localized: "Find verified international students through real plans in your school or city."),
-            hint: String(localized: "School verification and visibility controls help you choose who can respond."),
+            id: "together",
+            title: AppLocalization.string("Say what you want to do"),
+            body: AppLocalization.string("Set one private intention and receive a small number of concrete opportunities."),
+            hint: AppLocalization.string("Your intention is not a public post or a people directory."),
             tab: .discover,
-            systemImage: "safari.fill"
+            systemImage: "person.2.fill"
         ),
         ProductTutorialStep(
             id: "chats",
-            title: String(localized: "Chats"),
-            body: String(localized: "Ask questions, confirm a plan, and keep the conversation in one place."),
-            hint: String(localized: "Turn a conversation into a shared plan without losing the details."),
+            title: AppLocalization.string("Turn interest into a plan"),
+            body: AppLocalization.string("Keep the action context, coordinate a time, and send a structured plan."),
+            hint: AppLocalization.string("The goal is a clear yes, another time, or no—not endless messaging."),
             tab: .chats,
             systemImage: "bubble.left.and.bubble.right.fill"
         ),
         ProductTutorialStep(
+            id: "home",
+            title: AppLocalization.string("Keep confirmed plans together"),
+            body: AppLocalization.string("See accepted plans, courses, and personal events in one reliable schedule."),
+            hint: AppLocalization.string("Calendar carries what is confirmed; Together is where plans begin."),
+            tab: .home,
+            systemImage: "calendar"
+        ),
+        ProductTutorialStep(
             id: "me",
-            title: String(localized: "Me"),
-            body: String(localized: "Manage your school identity, profile, courses, plans, and account settings."),
-            hint: String(localized: "A verified school identity helps people know who they are meeting."),
+            title: AppLocalization.string("Set your context"),
+            body: AppLocalization.string("Your school, courses, and verification improve relevance and trust."),
+            hint: AppLocalization.string("Courses power matching and schedule data, not a separate social network."),
             tab: .me,
             systemImage: "person.fill"
         ),
@@ -179,7 +179,7 @@ final class ProductTutorialController {
                         productTutorialDismissedAt: dismissedAt,
                         locale: user.locale
                     )
-                    session.applyCurrentUser(user)
+                    await session.applyCurrentUser(user)
                 }
             } catch {
                 // Local dismiss still stands when offline.
@@ -189,7 +189,7 @@ final class ProductTutorialController {
         isPresented = false
         hasEntered = false
         stepIndex = 0
-        selectTab(.home)
+        selectTab(.discover)
     }
 
     func replay(for userID: String, selectTab: (AppTab) -> Void) {
@@ -200,7 +200,7 @@ final class ProductTutorialController {
         hasEntered = false
         isPresented = true
         writeLocalStep(userID: userID, step: 0)
-        selectTab(.home)
+        selectTab(.discover)
     }
 
     private func present(restoringStepFor userID: String) {

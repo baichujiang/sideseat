@@ -28,6 +28,8 @@ function getPrisma(): PrismaClient {
     discoverActivity?: unknown;
     userLifePhoto?: unknown;
     courseCatalogSyncRun?: unknown;
+    calendarRecurrenceCancellation?: unknown;
+    calendarRecurrenceReminderReceipt?: unknown;
   } | undefined;
   const staleDevSingleton =
     process.env.NODE_ENV !== "production" &&
@@ -37,7 +39,9 @@ function getPrisma(): PrismaClient {
       typeof delegates?.scheduleShareLink === "undefined" ||
       typeof delegates?.discoverActivity === "undefined" ||
       typeof delegates?.userLifePhoto === "undefined" ||
-      typeof delegates?.courseCatalogSyncRun === "undefined");
+      typeof delegates?.courseCatalogSyncRun === "undefined" ||
+      typeof delegates?.calendarRecurrenceCancellation === "undefined" ||
+      typeof delegates?.calendarRecurrenceReminderReceipt === "undefined");
 
   if (existing && !staleDevSingleton) {
     return existing;

@@ -9,6 +9,8 @@ import {
 import { CONTACT_EXCHANGE_DECLINE_COOLDOWN_HOURS } from "@/lib/constants/app";
 import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
 import { prisma } from "@/lib/db/prisma";
+import { installConnectionPeerBlock } from "@/lib/api/v1/connection-block-transaction";
+import { terminalizeConnectionAndDirectV1Contexts } from "@/lib/v2/direct-v1-context-sync";
 
 export type LinkRole = "none" | "requester" | "responder";
 export type FriendLinkActionState = {
@@ -120,21 +122,19 @@ export async function endConnection(options: {
   connectionId: string;
 }): Promise<{ endedAt: string }> {
   const endedAt = new Date();
-  const result = await prisma.connection.updateMany({
-    where: {
-      id: options.connectionId,
-      OR: [{ userAId: options.userId }, { userBId: options.userId }],
-    },
-    data: {
-      status: ConnectionStatus.ENDED,
-      endedById: options.userId,
+  const result = await prisma.$transaction((tx) =>
+    terminalizeConnectionAndDirectV1Contexts(tx, {
+      connectionId: options.connectionId,
+      targetStatus: "ENDED",
+      connectionEndedById: options.userId,
       endedAt,
-    },
-  });
-  if (result.count === 0) {
+      requiredParticipantId: options.userId,
+    }),
+  );
+  if (result.kind === "not_found" || result.kind === "not_authorized") {
     throw new ConnectionActionsError("NOT_FOUND", "Conversation not found.");
   }
-  return { endedAt: endedAt.toISOString() };
+  return { endedAt: (result.endedAt ?? endedAt).toISOString() };
 }
 
 export async function blockConnectionPeer(options: {
@@ -143,50 +143,28 @@ export async function blockConnectionPeer(options: {
   blockedId?: string;
   reason?: string | null;
 }): Promise<{ blocked: true }> {
-  const connection = await requireActiveConnection(
-    options.userId,
-    options.connectionId,
+  const endedAt = new Date();
+  const result = await prisma.$transaction((tx) =>
+    installConnectionPeerBlock(tx, {
+      ...options,
+      endedAt,
+    }),
   );
-  const peerId =
-    connection.userAId === options.userId ? connection.userBId : connection.userAId;
-  const blockedId = options.blockedId ?? peerId;
-  if (blockedId !== peerId) {
+  if (result.kind === "not_found") {
+    throw new ConnectionActionsError("NOT_FOUND", "Conversation not found.");
+  }
+  if (result.kind === "invalid_counterparty") {
     throw new ConnectionActionsError(
       "INVALID_REQUEST",
       "The blocked user must match this conversation.",
     );
   }
-  if (blockedId === options.userId) {
-    throw new ConnectionActionsError("INVALID_REQUEST", "You cannot block yourself.");
+  if (result.kind === "self_block") {
+    throw new ConnectionActionsError(
+      "INVALID_REQUEST",
+      "You cannot block yourself.",
+    );
   }
-
-  const endedAt = new Date();
-  await prisma.$transaction([
-    prisma.block.upsert({
-      where: {
-        blockerId_blockedId: {
-          blockerId: options.userId,
-          blockedId,
-        },
-      },
-      create: {
-        blockerId: options.userId,
-        blockedId,
-        reason: options.reason?.trim() || null,
-      },
-      update: {
-        reason: options.reason?.trim() || null,
-      },
-    }),
-    prisma.connection.update({
-      where: { id: connection.id },
-      data: {
-        status: ConnectionStatus.BLOCKED,
-        endedById: options.userId,
-        endedAt,
-      },
-    }),
-  ]);
   return { blocked: true };
 }
 

@@ -72,12 +72,16 @@ test.describe.serial("API v1 Discover", () => {
     request,
   }) => {
     expect((await request.get("/api/v1/discover")).status()).toBe(401);
+    expect((await request.get("/api/v1/me/saved-posts")).status()).toBe(401);
     const token = await accessToken(request);
     expect(
       (
-        await request.get("/api/v1/discover?city=Berlin", {
-          headers: auth(token),
-        })
+        await request.get(
+          `/api/v1/discover?city=${encodeURIComponent("Unsupported Test City")}`,
+          {
+            headers: auth(token),
+          },
+        )
       ).status(),
     ).toBe(422);
     expect(
@@ -740,6 +744,19 @@ test.describe.serial("API v1 Discover", () => {
       imageUrls: [],
     };
 
+    const unsupportedCity = await request.patch(
+      `/api/v1/discover/posts/${postId}`,
+      {
+        headers: auth(ownerToken, `discover-edit-city-${nonce}`),
+        data: { ...updateData, city: "Unsupported Test City" },
+      },
+    );
+    expect(unsupportedCity.status()).toBe(422);
+    expect((await unsupportedCity.json()).error).toMatchObject({
+      code: "INVALID_REQUEST",
+      field: "city",
+    });
+
     const denied = await request.patch(`/api/v1/discover/posts/${postId}`, {
       headers: auth(peerToken, `discover-edit-denied-${nonce}`),
       data: updateData,
@@ -824,6 +841,7 @@ test.describe.serial("API v1 Discover", () => {
     const token = await accessToken(request);
     const nonce = `Native activity ${Date.now()}-${process.pid}`;
     const data = {
+      city: "Munich",
       title: nonce,
       description: "A small public meetup for the native client test.",
       startAt: new Date(Date.now() + 2 * 60 * 60_000).toISOString(),
@@ -849,6 +867,21 @@ test.describe.serial("API v1 Discover", () => {
     expect(
       await prisma.discoverActivity.count({ where: { id: body.activityId } }),
     ).toBe(1);
+    expect(
+      await prisma.discoverActivity.findUnique({
+        where: { id: body.activityId },
+        select: { city: true },
+      }),
+    ).toEqual({ city: "Munich" });
+
+    const unsupportedCity = await request.post("/api/v1/discover/activities", {
+      headers: auth(token, `${key}-unsupported-city`),
+      data: { ...data, city: "Unsupported City" },
+    });
+    expect(unsupportedCity.status()).toBe(422);
+    expect((await unsupportedCity.json()).error).toEqual(
+      expect.objectContaining({ code: "INVALID_REQUEST", field: "city" }),
+    );
 
     const feed = await request.get(
       `/api/v1/discover?q=${encodeURIComponent(nonce)}`,
@@ -929,6 +962,17 @@ test.describe.serial("API v1 Discover", () => {
     expect(savedReplay.status()).toBe(201);
     expect(savedReplay.headers()["idempotency-replayed"]).toBe("true");
 
+    const savedPosts = await request.get("/api/v1/me/saved-posts", {
+      headers: auth(peerToken),
+    });
+    expect(savedPosts.status()).toBe(200);
+    expect((await savedPosts.json()).data.posts).toContainEqual(
+      expect.objectContaining({
+        id: postId,
+        savedByViewer: true,
+      }),
+    );
+
     const unsaved = await request.delete(
       `/api/v1/discover/posts/${postId}/saved`,
       {
@@ -942,6 +986,13 @@ test.describe.serial("API v1 Discover", () => {
         savedByViewer: false,
         interestedCount: 0,
       }),
+    );
+    const afterUnsave = await request.get("/api/v1/me/saved-posts", {
+      headers: auth(peerToken),
+    });
+    expect(afterUnsave.status()).toBe(200);
+    expect((await afterUnsave.json()).data.posts).not.toContainEqual(
+      expect.objectContaining({ id: postId }),
     );
 
     const activity = await request.post("/api/v1/discover/activities", {

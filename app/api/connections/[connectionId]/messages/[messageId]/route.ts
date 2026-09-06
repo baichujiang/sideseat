@@ -1,14 +1,13 @@
-import { ConnectionStatus } from "@prisma/client";
+import { ConnectionStatus, MessageType } from "@prisma/client";
 
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok } from "@/lib/http";
 
 /**
- * Soft-delete a 1:1 message. Only the original sender can delete, and only
- * while the connection is active. We keep the row (with `deletedAt` set) so
- * replies that quoted it still have an anchor to render the "message deleted"
- * placeholder.
+ * Soft-delete user-authored 1:1 content. Workflow cards are server-owned
+ * projections and must remain visible until their own lifecycle action runs.
+ * We keep deleted content rows so quoted replies retain a tombstone anchor.
  */
 export async function DELETE(
   _request: Request,
@@ -28,6 +27,9 @@ export async function DELETE(
         connectionId,
         senderId: user.id,
         deletedAt: null,
+        type: {
+          in: [MessageType.TEXT, MessageType.IMAGE, MessageType.LOCATION],
+        },
         connection: {
           status: ConnectionStatus.ACTIVE,
           OR: [{ userAId: user.id }, { userBId: user.id }],

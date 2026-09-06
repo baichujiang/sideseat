@@ -25,6 +25,10 @@ struct ForegroundPushNotice: Equatable, Sendable {
         kind == "plan_accepted"
     }
 
+    var isMutualOpportunity: Bool {
+        kind == "mutual_opportunity"
+    }
+
     /// Prefer the explicit server route, but keep notification taps useful when an
     /// older or partially delivered payload only contains its conversation ID.
     var navigationURL: String? {
@@ -34,6 +38,7 @@ struct ForegroundPushNotice: Equatable, Sendable {
         if let connectionID { return "/connections/\(connectionID)" }
         if let courseID { return "/courses/\(courseID)/chat" }
         if let groupChatID { return "/groups/\(groupChatID)" }
+        if isMutualOpportunity { return "/discover" }
         return nil
     }
 
@@ -191,7 +196,7 @@ extension SideSeatAppDelegate: UNUserNotificationCenterDelegate {
         return nil
     }
 
-    nonisolated private static func refreshAppState(for notice: ForegroundPushNotice) {
+    nonisolated static func refreshAppState(for notice: ForegroundPushNotice) {
         let rawURL = notice.navigationURL ?? ""
         let path = URL(string: rawURL)?.path ?? rawURL
         let isChat = path.hasPrefix("/connections/")
@@ -211,6 +216,9 @@ extension SideSeatAppDelegate: UNUserNotificationCenterDelegate {
             }
             if isDiscover {
                 NotificationCenter.default.post(name: .sideSeatDiscoverNeedsRefresh, object: nil)
+            }
+            if notice.isMutualOpportunity {
+                NotificationCenter.default.post(name: .sideSeatTogetherNeedsRefresh, object: nil)
             }
         }
     }

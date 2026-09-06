@@ -10,14 +10,11 @@ import { DEFAULT_USER_CALENDAR_PRESETS } from "../../lib/calendar/default-user-c
 describe("calendar starter categories", () => {
   it("uses the student-focused Study, Work, and Personal defaults", () => {
     assert.deepEqual(CALENDAR_CATEGORY_PRESET_KEYS, ["study", "work", "personal"]);
-    assert.deepEqual(
-      DEFAULT_USER_CALENDAR_PRESETS.map(({ presetKey, name }) => ({ presetKey, name })),
-      [
-        { presetKey: "study", name: "Study" },
-        { presetKey: "work", name: "Work" },
-        { presetKey: "personal", name: "Personal" },
-      ],
-    );
+    assert.deepEqual(DEFAULT_USER_CALENDAR_PRESETS, [
+      { presetKey: "study", name: "Study", color: "#7C3AED", sortOrder: 0 },
+      { presetKey: "work", name: "Work", color: "#2563EB", sortOrder: 1 },
+      { presetKey: "personal", name: "Personal", color: "#DB2777", sortOrder: 2 },
+    ]);
   });
 
   it("does not treat retired priority and fallback buckets as valid smart-add categories", () => {

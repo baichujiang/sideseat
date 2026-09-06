@@ -90,7 +90,7 @@ final class StoreKitManager {
         #endif
 
         guard let product = storeProducts.first(where: { $0.id == productID }) else {
-            issue = String(localized: "This support option isn’t available right now.")
+            issue = AppLocalization.string( "This support option isn’t available right now.")
             return
         }
 
@@ -102,9 +102,9 @@ final class StoreKitManager {
             case .userCancelled:
                 break
             case .pending:
-                issue = String(localized: "Purchase is pending approval. We’ll finish it when StoreKit confirms.")
+                issue = AppLocalization.string( "Purchase is pending approval. We’ll finish it when StoreKit confirms.")
             @unknown default:
-                issue = String(localized: "Purchase couldn’t be completed.")
+                issue = AppLocalization.string( "Purchase couldn’t be completed.")
             }
         } catch {
             issue = error.localizedDescription

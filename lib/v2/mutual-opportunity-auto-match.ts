@@ -1,0 +1,67 @@
+import "server-only";
+
+import { notifyUserPush } from "@/lib/push/notify-user";
+import {
+  generateMutualOpportunitiesForUser,
+  type CreatedMutualOpportunityMatch,
+} from "@/lib/v2/mutual-opportunities";
+
+async function notifyNewOpportunity(
+  match: CreatedMutualOpportunityMatch,
+  userId: string,
+): Promise<void> {
+  await notifyUserPush(userId, {
+    title: "A new Together opportunity",
+    body: "Open SideSeat to see if it feels right.",
+    url: "/discover",
+    threadId: `mutual-opportunity:${match.opportunityId}`,
+    category: "MUTUAL_OPPORTUNITY",
+    data: {
+      kind: "mutual_opportunity",
+      opportunityId: match.opportunityId,
+    },
+  });
+}
+
+/**
+ * Matching entry point for an explicit active 48-hour Together session.
+ * The matcher itself verifies that both participants still have active
+ * sessions, so callers cannot accidentally turn an intent write into an
+ * implicit queue join.
+ *
+ * `createMany(skipDuplicates)` inside the matcher is the notification gate:
+ * only the request that actually inserts a new opportunity gets it back here.
+ * Refreshes and concurrent repeated calls therefore do not resend a push for
+ * an existing opportunity.
+ */
+export async function matchAndNotifyForUser(userId: string): Promise<void> {
+  const created = await generateMutualOpportunitiesForUser(userId);
+  if (created.length === 0) return;
+
+  const deliveries = new Map<
+    string,
+    { match: CreatedMutualOpportunityMatch; userId: string }
+  >();
+  for (const match of created) {
+    for (const participantId of [match.userAId, match.userBId]) {
+      deliveries.set(`${match.opportunityId}:${participantId}`, {
+        match,
+        userId: participantId,
+      });
+    }
+  }
+
+  await Promise.all(
+    [...deliveries.values()].map(async ({ match, userId: recipientId }) => {
+      await notifyNewOpportunity(match, recipientId).catch((cause) => {
+        // The opportunity is already usable in Together. A transient push
+        // failure must never roll back or hide the matched action.
+        console.error("Mutual opportunity push failed", {
+          opportunityId: match.opportunityId,
+          recipientId,
+          cause,
+        });
+      });
+    }),
+  );
+}

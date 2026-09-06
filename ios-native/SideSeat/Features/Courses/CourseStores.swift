@@ -260,7 +260,7 @@ final class CourseManualAddStore {
         let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let code = code.trimmingCharacters(in: .whitespacesAndNewlines)
         guard name.count >= 2 else {
-            issue = String(localized: "Enter the course name.")
+            issue = AppLocalization.string( "Enter the course name.")
             return nil
         }
 

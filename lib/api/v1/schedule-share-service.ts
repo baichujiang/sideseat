@@ -16,6 +16,10 @@ import { assertScheduleShareChatPreviewAccess } from "@/lib/schedule-share/chat-
 import { loadInitialViewerProposalForShareLink } from "@/lib/schedule-share/load-initial-viewer-proposal";
 import { loadScheduleShareRecipientPage } from "@/lib/schedule-share/load-recipient-page";
 import {
+  buildOwnerPreviewSnapshotForLink,
+  persistScheduleShareLinkUpdate,
+} from "@/lib/schedule-share/persist-schedule-share-link";
+import {
   PUBLIC_SCHEDULE_LINK_UNAVAILABLE,
   PUBLIC_SCHEDULE_RATE_LIMIT,
   PUBLIC_SCHEDULE_TIME_UNAVAILABLE,
@@ -155,7 +159,97 @@ export async function getScheduleShareChatPreview(options: {
     ownerDisplayLabel: snapshot.ownerDisplayLabel,
     linkId: access.link.id,
     ownedByViewer: access.link.ownerUserId === options.userId,
+    updatedAt: access.link.updatedAt.toISOString(),
+    isUpdated: isScheduleShareUpdated(access.link),
   };
+}
+
+async function requireEditableScheduleShareOwnerLink(options: {
+  userId: string;
+  linkId: string;
+}) {
+  const link = await prisma.scheduleShareLink.findFirst({
+    where: { id: options.linkId, ownerUserId: options.userId },
+    include: { owner: true },
+  });
+  if (!link) {
+    throw new ScheduleShareServiceError("NOT_FOUND", "Schedule link unavailable.");
+  }
+
+  const unavailable =
+    link.revokedAt !== null ||
+    link.expiresAt.getTime() <= Date.now() ||
+    (link.usageLimit === "SINGLE_USE" && link.consumedAt !== null);
+  if (unavailable) {
+    throw new ScheduleShareServiceError(
+      "CONFLICT",
+      "This schedule share can no longer be edited.",
+    );
+  }
+  return link;
+}
+
+function isScheduleShareUpdated(link: { createdAt: Date; updatedAt: Date }) {
+  return link.updatedAt.getTime() > link.createdAt.getTime();
+}
+
+async function scheduleSharePendingProposalCount(linkId: string) {
+  return prisma.planRequest.count({
+    where: { scheduleShareLinkId: linkId, status: "PENDING" },
+  });
+}
+
+async function scheduleShareOwnerPayload(
+  link: Awaited<ReturnType<typeof requireEditableScheduleShareOwnerLink>>,
+) {
+  const [snapshot, pendingProposalCount] = await Promise.all([
+    buildOwnerPreviewSnapshotForLink(prisma, link),
+    scheduleSharePendingProposalCount(link.id),
+  ]);
+  return {
+    snapshot,
+    settings: {
+      rangeStart: link.rangeStart.toISOString(),
+      rangeEnd: link.rangeEnd.toISOString(),
+      revealConfig: parseRevealConfigJson(link.revealConfig),
+      allowGuestProposals: link.allowGuestProposals,
+      usageLimit: link.usageLimit,
+      expiresAt: link.expiresAt.toISOString(),
+    },
+    linkId: link.id,
+    pendingProposalCount,
+    updatedAt: link.updatedAt.toISOString(),
+    isUpdated: isScheduleShareUpdated(link),
+  };
+}
+
+export async function getScheduleShareOwner(options: {
+  userId: string;
+  linkId: string;
+}) {
+  const link = await requireEditableScheduleShareOwnerLink(options);
+  return scheduleShareOwnerPayload(link);
+}
+
+export async function updateScheduleShare(options: {
+  userId: string;
+  linkId: string;
+  input: unknown;
+}) {
+  const link = await requireEditableScheduleShareOwnerLink(options);
+  const updated = await persistScheduleShareLinkUpdate(
+    prisma,
+    link,
+    options.userId,
+    options.input,
+  );
+  if (!updated.ok) {
+    throw new ScheduleShareServiceError(
+      "INVALID_REQUEST",
+      updated.error,
+    );
+  }
+  return scheduleShareOwnerPayload(updated.link);
 }
 
 export async function revokeScheduleShare(options: { userId: string; linkId: string }) {
@@ -202,6 +296,9 @@ export async function getScheduleShareRecipientView(options: {
     proposal,
     allowGuestProposals: page.resolved.link.allowGuestProposals,
     linkId: page.resolved.link.id,
+    ownedByViewer: page.resolved.link.ownerUserId === options.userId,
+    updatedAt: page.resolved.link.updatedAt.toISOString(),
+    isUpdated: isScheduleShareUpdated(page.resolved.link),
   };
 }
 
@@ -280,13 +377,16 @@ export async function submitScheduleShareRecipientProposal(options: {
     );
   }
 
+  const reveal = parseRevealConfigJson(link.revealConfig);
   const fits = await rangeFitsScheduleShareSnapshot(prisma, {
     ownerUserId: link.ownerUserId,
     rangeStart: link.rangeStart,
     rangeEnd: link.rangeEnd,
     proposalStart: startTime,
     proposalEnd: endTime,
-    includedDates: parseRevealConfigJson(link.revealConfig).includedDates,
+    includedDates: reveal.includedDates,
+    availabilityStartMinutes: reveal.availabilityStartMinutes,
+    availabilityEndMinutes: reveal.availabilityEndMinutes,
   });
   if (!fits) {
     throw new ScheduleShareServiceError(

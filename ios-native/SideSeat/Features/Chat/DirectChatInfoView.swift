@@ -21,7 +21,7 @@ struct DirectChatInfoView: View {
     }
 
     private var peerName: String {
-        store.conversation?.displayName ?? String(localized: "Contact")
+        store.conversation?.displayName ?? AppLocalization.string( "Contact")
     }
 
     var body: some View {
@@ -69,7 +69,7 @@ struct DirectChatInfoView: View {
         .accessibilityIdentifier("direct-chat-info")
         .sheet(isPresented: $showThreadSearch) {
             ChatThreadSearchSheet(
-                title: String(localized: "Search chat"),
+                title: AppLocalization.string( "Search chat"),
                 rows: searchRows,
                 onSelect: { messageID in
                     showThreadSearch = false
@@ -77,25 +77,63 @@ struct DirectChatInfoView: View {
                 }
             )
         }
-        .confirmationDialog("End this conversation?", isPresented: $confirmEnd, titleVisibility: .visible) {
-            Button("End chat", role: .destructive) {
-                Task {
-                    if await store.endConnection(using: session) {
-                        onConversationClosed()
+        .ssActionPrompt(
+            isPresented: $confirmEnd,
+            title: AppLocalization.string("End this conversation?"),
+            systemImage: "bubble.left.and.bubble.right.fill",
+            tint: SideSeatTheme.danger,
+            onDismiss: { confirmEnd = false },
+            accessibilityIdentifier: "direct-info-end-prompt"
+        ) {
+            [
+                SSActionPromptAction(
+                    id: "direct-info-cancel-end",
+                    title: AppLocalization.string("Cancel"),
+                    systemImage: "xmark",
+                    role: .cancel
+                ) {},
+                SSActionPromptAction(
+                    id: "direct-info-confirm-end",
+                    title: AppLocalization.string("End chat"),
+                    systemImage: "rectangle.portrait.and.arrow.right",
+                    role: .destructive
+                ) {
+                    Task {
+                        if await store.endConnection(using: session) {
+                            onConversationClosed()
+                        }
                     }
-                }
-            }
-            Button("Cancel", role: .cancel) {}
+                },
+            ]
         }
-        .confirmationDialog("Block this person?", isPresented: $confirmBlock, titleVisibility: .visible) {
-            Button("Block", role: .destructive) {
-                Task {
-                    if await store.blockPeer(using: session) {
-                        onConversationClosed()
+        .ssActionPrompt(
+            isPresented: $confirmBlock,
+            title: AppLocalization.string("Block this person?"),
+            systemImage: "hand.raised.fill",
+            tint: SideSeatTheme.danger,
+            onDismiss: { confirmBlock = false },
+            accessibilityIdentifier: "direct-info-block-prompt"
+        ) {
+            [
+                SSActionPromptAction(
+                    id: "direct-info-cancel-block",
+                    title: AppLocalization.string("Cancel"),
+                    systemImage: "xmark",
+                    role: .cancel
+                ) {},
+                SSActionPromptAction(
+                    id: "direct-info-confirm-block",
+                    title: AppLocalization.string("Block"),
+                    systemImage: "hand.raised",
+                    role: .destructive
+                ) {
+                    Task {
+                        if await store.blockPeer(using: session) {
+                            onConversationClosed()
+                        }
                     }
-                }
-            }
-            Button("Cancel", role: .cancel) {}
+                },
+            ]
         }
         .overlay(alignment: .bottom) {
             if let actionNotice {
@@ -145,7 +183,7 @@ struct DirectChatInfoView: View {
                 .padding(.vertical, 6)
                 .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SSPressButtonStyle())
             .accessibilityIdentifier("direct-info-profile")
         }
     }
@@ -411,7 +449,10 @@ struct DirectChatInfoView: View {
         let succeeded = await store.performContactExchange(action: action, using: session)
         activeAction = nil
         if succeeded {
-            showNotice(String(localized: successMessage), systemImage: action == "cancel" ? "xmark.circle" : "checkmark.circle")
+            showNotice(
+                AppLocalization.string(resource: successMessage),
+                systemImage: action == "cancel" ? "xmark.circle" : "checkmark.circle"
+            )
         }
     }
 
@@ -421,7 +462,7 @@ struct DirectChatInfoView: View {
         let succeeded = await store.performFriendLink(action: action, using: session)
         activeAction = nil
         if succeeded {
-            showNotice(String(localized: successMessage), systemImage: "checkmark.circle")
+            showNotice(AppLocalization.string(resource: successMessage), systemImage: "checkmark.circle")
         }
     }
 
@@ -494,6 +535,7 @@ private struct DirectChatRemarkEditor: View {
                     }
                 }
                 .disabled(store.isMutatingConnectionAction)
+                .ssConfirmationActionStyle()
                 .accessibilityIdentifier("direct-remark-save")
             }
         }

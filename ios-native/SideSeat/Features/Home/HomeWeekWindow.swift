@@ -2,15 +2,46 @@ import Foundation
 
 /// Pure layout rules for the phone week timetable (configurable 3 / 5 / 7 visible day columns).
 enum HomeWeekWindow {
+    enum ScrollAxis: String, Equatable, Sendable {
+        case horizontal
+        case vertical
+    }
+
+    /// The viewport edge from which new calendar content is entering while the
+    /// user's finger moves along a locked scroll axis.
+    enum ScrollFeedbackEdge: String, Equatable, Sendable {
+        case leading
+        case trailing
+        case top
+        case bottom
+    }
+
+    enum EventDragOperation: Equatable, Sendable {
+        case move
+        case resizeStart
+        case resizeEnd
+    }
+
     struct EventDragTarget: Equatable, Sendable {
         let dayIndex: Int
         let startMinute: Int
     }
 
+    struct EventResizeTarget: Equatable, Sendable {
+        let startMinute: Int
+        let endMinute: Int
+    }
+
     static let allowedVisibleDayCounts = [3, 5, 7]
     static let defaultVisibleDayCount = 5
-    static let defaultTimelineDensityLevel = 1
+    static let minimumTimelineScale: CGFloat = 0.8
+    static let defaultTimelineScale: CGFloat = 1
+    static let maximumTimelineScale: CGFloat = 1.35
+    static let timelineScaleAccessibilityStep: CGFloat = 0.1
     private static let preferencesKey = "sideseat.home.weekVisibleDayCount"
+    private static let timelineScalePreferencesKey = "sideseat.home.weekTimelineScale.v2"
+    private static let timelineZoomHintPreferencesKey = "sideseat.home.weekTimelineZoomHintSeen"
+    /// Kept only to migrate the former compact / standard / spacious preference.
     private static let timelineDensityPreferencesKey = "sideseat.home.weekTimelineDensity"
 
     static func clampVisibleDayCount(_ count: Int) -> Int {
@@ -27,28 +58,54 @@ enum HomeWeekWindow {
         UserDefaults.standard.set(clampVisibleDayCount(count), forKey: preferencesKey)
     }
 
-    static func clampTimelineDensityLevel(_ level: Int) -> Int {
-        min(max(level, 0), 2)
+    static func clampTimelineScale(_ scale: CGFloat) -> CGFloat {
+        min(max(scale, minimumTimelineScale), maximumTimelineScale)
     }
 
-    static func storedTimelineDensityLevel() -> Int {
-        let raw = UserDefaults.standard.object(forKey: timelineDensityPreferencesKey) as? Int
-        return clampTimelineDensityLevel(raw ?? defaultTimelineDensityLevel)
+    static func timelineTopMinutePreservingAnchor(
+        anchorMinute: CGFloat,
+        anchorFraction: CGFloat,
+        viewportHeight: CGFloat,
+        minuteHeight: CGFloat
+    ) -> CGFloat {
+        let fraction = min(max(anchorFraction, 0), 1)
+        return anchorMinute - fraction * max(0, viewportHeight) / max(0.001, minuteHeight)
     }
 
-    static func storeTimelineDensityLevel(_ level: Int) {
-        UserDefaults.standard.set(
-            clampTimelineDensityLevel(level),
-            forKey: timelineDensityPreferencesKey
+    static func storedTimelineScale(defaults: UserDefaults = .standard) -> CGFloat {
+        if let stored = defaults.object(forKey: timelineScalePreferencesKey) as? NSNumber {
+            return clampTimelineScale(CGFloat(stored.doubleValue))
+        }
+        if let stored = defaults.string(forKey: timelineScalePreferencesKey),
+           let value = Double(stored)
+        {
+            return clampTimelineScale(CGFloat(value))
+        }
+
+        let legacyLevel = defaults.object(forKey: timelineDensityPreferencesKey) as? NSNumber
+        switch legacyLevel?.intValue {
+        case 0: return 0.82
+        case 2: return 1.25
+        default: return defaultTimelineScale
+        }
+    }
+
+    static func storeTimelineScale(
+        _ scale: CGFloat,
+        defaults: UserDefaults = .standard
+    ) {
+        defaults.set(
+            Double(clampTimelineScale(scale)),
+            forKey: timelineScalePreferencesKey
         )
     }
 
-    static func timelineScale(for level: Int) -> CGFloat {
-        switch clampTimelineDensityLevel(level) {
-        case 0: 0.82
-        case 2: 1.25
-        default: 1
-        }
+    static func shouldShowTimelineZoomHint(defaults: UserDefaults = .standard) -> Bool {
+        !defaults.bool(forKey: timelineZoomHintPreferencesKey)
+    }
+
+    static func markTimelineZoomHintSeen(defaults: UserDefaults = .standard) {
+        defaults.set(true, forKey: timelineZoomHintPreferencesKey)
     }
 
     /// Fits every selected day inside the phone viewport. A visual minimum here
@@ -110,6 +167,53 @@ enum HomeWeekWindow {
         return 0
     }
 
+    /// Resolves the dominant axis once and keeps it locked for the rest of the drag.
+    /// Ambiguous diagonal movement stays unresolved so the timetable never flashes
+    /// between horizontal paging and vertical time scrolling.
+    static func scrollAxis(
+        translation: CGSize,
+        lockedAxis: ScrollAxis? = nil,
+        activationDistance: CGFloat = 18,
+        dominanceRatio: CGFloat = 1.25
+    ) -> ScrollAxis? {
+        if let lockedAxis { return lockedAxis }
+
+        let horizontalDistance = abs(translation.width)
+        let verticalDistance = abs(translation.height)
+        guard max(horizontalDistance, verticalDistance) > max(0, activationDistance) else {
+            return nil
+        }
+
+        let ratio = max(1, dominanceRatio)
+        if horizontalDistance > verticalDistance * ratio {
+            return .horizontal
+        }
+        if verticalDistance > horizontalDistance * ratio {
+            return .vertical
+        }
+        return nil
+    }
+
+    /// Maps a locked axis plus the signed drag translation to the edge where
+    /// newly revealed content enters the viewport. Keeping this signed intent
+    /// separate from axis locking allows an intentional reversal without ever
+    /// changing horizontal scrolling into vertical scrolling mid-gesture.
+    static func scrollFeedbackEdge(
+        translation: CGSize,
+        axis: ScrollAxis,
+        directionChangeDistance: CGFloat = 8
+    ) -> ScrollFeedbackEdge? {
+        let threshold = max(0, directionChangeDistance)
+        switch axis {
+        case .horizontal:
+            guard abs(translation.width) > threshold else { return nil }
+            return translation.width < 0 ? .trailing : .leading
+        case .vertical:
+            guard abs(translation.height) > threshold else { return nil }
+            return translation.height < 0 ? .bottom : .top
+        }
+    }
+
     /// Converts a free-form card drag into the exact slot shown to the user.
     /// Keeping this calculation shared by the preview and drop avoids a visual
     /// jump when the finger is released.
@@ -120,7 +224,7 @@ enum HomeWeekWindow {
         dayWidth: CGFloat,
         minuteHeight: CGFloat,
         dayCount: Int,
-        snapMinutes: Int = 15
+        snapMinutes: Int = 5
     ) -> EventDragTarget {
         let safeDayCount = max(1, dayCount)
         let safeSnap = max(1, snapMinutes)
@@ -138,6 +242,68 @@ enum HomeWeekWindow {
                 24 * 60 - safeSnap
             )
         )
+    }
+
+    /// Resolves whether a long-press drag began on a resize edge or on the card body.
+    /// The edge zone scales down for short events so a central move target always remains.
+    static func eventDragOperation(
+        startLocationY: CGFloat,
+        visualTopInset: CGFloat,
+        visualHeight: CGFloat,
+        canResizeEnd: Bool = true,
+        maximumEdgeZone: CGFloat = 14
+    ) -> EventDragOperation {
+        let safeHeight = max(1, visualHeight)
+        let edgeZone = min(max(5, safeHeight * 0.25), max(5, maximumEdgeZone))
+        let visualY = startLocationY - visualTopInset
+
+        if visualY <= edgeZone {
+            return .resizeStart
+        }
+        if canResizeEnd, visualY >= safeHeight - edgeZone {
+            return .resizeEnd
+        }
+        return .move
+    }
+
+    /// Converts a vertical edge drag into a valid, snapped time range for one day.
+    /// Start and end never cross, and every edited edge lands on the same five-minute
+    /// grid used by the event editor.
+    static func eventResizeTarget(
+        originStartMinute: Int,
+        originEndMinute: Int,
+        translationHeight: CGFloat,
+        minuteHeight: CGFloat,
+        operation: EventDragOperation,
+        snapMinutes: Int = 5,
+        minimumDurationMinutes: Int = 5
+    ) -> EventResizeTarget {
+        let safeSnap = max(1, snapMinutes)
+        let safeMinimumDuration = max(safeSnap, minimumDurationMinutes)
+        let start = min(max(originStartMinute, 0), 24 * 60 - safeMinimumDuration)
+        let end = min(max(originEndMinute, start + safeMinimumDuration), 24 * 60)
+        let rawDelta = translationHeight / max(minuteHeight, 0.01)
+        let targetMinute = { (origin: Int) in
+            Int(((CGFloat(origin) + rawDelta) / CGFloat(safeSnap)).rounded()) * safeSnap
+        }
+
+        switch operation {
+        case .resizeStart:
+            return EventResizeTarget(
+                startMinute: min(max(targetMinute(start), 0), end - safeMinimumDuration),
+                endMinute: end
+            )
+        case .resizeEnd:
+            return EventResizeTarget(
+                startMinute: start,
+                endMinute: min(
+                    max(targetMinute(end), start + safeMinimumDuration),
+                    24 * 60
+                )
+            )
+        case .move:
+            return EventResizeTarget(startMinute: start, endMinute: end)
+        }
     }
 
     static func isEventDragActivated(

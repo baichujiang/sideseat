@@ -18,6 +18,11 @@ import {
 } from "@/lib/discover/create-classmate-post";
 import { isDiscoverServedCity } from "@/lib/discover/discover-served-cities";
 import { createClassmatePostSchema } from "@/lib/validators/classmate-posts";
+import {
+  actionPolicySnapshotForCreation,
+  evaluateActionCoordinationCapability,
+} from "@/lib/v2/action-coordination/capability";
+import { getCreatorGatedActionToPlanAssignment } from "@/lib/v2/experiments";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +41,7 @@ export async function POST(request: Request) {
   const parsed = await parseV1Json(request, createClassmatePostSchema);
   if (!parsed.ok) return parsed.response;
   const values = createClassmatePostSchema.parse(parsed.data);
+  const capability = evaluateActionCoordinationCapability(request.headers);
   if (!isDiscoverServedCity(values.city)) {
     return v1Error(request, {
       code: "INVALID_REQUEST",
@@ -70,7 +76,21 @@ export async function POST(request: Request) {
         requestHash: hashIdempotencyRequest(values),
       });
       if (claim.kind !== "owner") return claim;
-      const post = await createClassmatePostForUser(auth.user, values, tx);
+      const assignment = await getCreatorGatedActionToPlanAssignment(
+        auth.user,
+        capability,
+        tx,
+      );
+      const policySnapshot = actionPolicySnapshotForCreation({
+        capability,
+        assignment,
+      });
+      const post = await createClassmatePostForUser(
+        auth.user,
+        values,
+        tx,
+        policySnapshot,
+      );
       const body = {
         postId: post.id,
         status: post.status,
@@ -105,12 +125,18 @@ export async function POST(request: Request) {
     return v1Success(result.body, { request, status: 201 });
   } catch (cause) {
     if (cause instanceof ClassmatePostCreateError) {
-      const field = cause.code.includes("EXPIRY") ? "expiresAt" : undefined;
+      const field = cause.code.includes("EXPIRY")
+        ? "expiresAt"
+        : cause.code === "COURSE_SELECTION_INVALID"
+          ? "courseIds"
+          : undefined;
       const message =
         cause.code === "CREATE_LIMIT"
           ? "You already have the maximum number of live plans."
           : cause.code === "INVALID_IMAGE"
             ? "Upload the image again before creating the plan."
+          : cause.code === "COURSE_SELECTION_INVALID"
+            ? "Choose exactly one active course for this action."
           : cause.code === "COURSE_NOT_ENROLLED"
             ? "You can only share courses you joined."
             : "Choose a future expiry date.";

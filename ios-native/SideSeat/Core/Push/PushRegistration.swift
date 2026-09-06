@@ -295,8 +295,8 @@ final class CalendarReminderScheduler {
             let content = UNMutableNotificationContent()
             content.title = candidate.title
             let reminderText = candidate.isAllDay
-                ? String(localized: "All day today")
-                : String(localized: "Starts in 15 minutes")
+                ? AppLocalization.string( "All day today")
+                : AppLocalization.string( "Starts in 15 minutes")
             content.body = candidate.location.map { "\(reminderText) · \($0)" } ?? reminderText
             content.sound = .default
             content.threadIdentifier = "calendar"

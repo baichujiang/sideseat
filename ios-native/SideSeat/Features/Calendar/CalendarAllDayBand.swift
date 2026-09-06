@@ -4,7 +4,11 @@ import SwiftUI
 struct CalendarAllDayBand: View {
     let items: [HomeAgendaItem]
     let onOpen: (HomeAgendaItem) -> Void
-    var onLongPress: ((HomeAgendaItem) -> Void)? = nil
+    let selectedActionItem: Binding<HomeAgendaItem?>
+    let onLongPress: (HomeAgendaItem) -> Void
+    let onCopy: (HomeAgendaItem) -> Void
+    let onDuplicate: (HomeAgendaItem) -> Void
+    let onDelete: (HomeAgendaItem) -> Void
 
     var body: some View {
         if items.isEmpty {
@@ -36,13 +40,24 @@ struct CalendarAllDayBand: View {
                         .contentShape(Capsule(style: .continuous))
                         .calendarTapOrLongPress(
                             onTap: { onOpen(item) },
-                            onLongPress: { onLongPress?(item) }
+                            onLongPress: { onLongPress(item) }
+                        )
+                        .calendarItemActions(
+                            target: item,
+                            selectedItem: selectedActionItem,
+                            onCopy: onCopy,
+                            onDuplicate: onDuplicate,
+                            onDelete: onDelete
                         )
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel(item.title)
                         .accessibilityAddTraits(.isButton)
                         .accessibilityIdentifier("calendar-all-day-\(item.id)")
-                        .accessibilityHint("Opens event details. Long press for more actions.")
+                        .accessibilityHint(
+                            item.source == .event
+                                ? "Opens event details. Long press for more actions."
+                                : "Opens event details."
+                        )
                     }
                 }
                 .padding(.horizontal, 4)

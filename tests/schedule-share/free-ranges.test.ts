@@ -92,6 +92,8 @@ describe("schedule share free ranges", () => {
         presetKeys: [],
         hideAllDetails: true,
         includedDates: ["2026-08-11"],
+        availabilityStartMinutes: 0,
+        availabilityEndMinutes: 24 * 60,
       },
       ownerDisplayLabel: "Mina",
       linkExpiresAt: null,
@@ -105,5 +107,45 @@ describe("schedule share free ranges", () => {
         end: "2026-08-11T22:00:00.000Z",
       },
     ]);
+  });
+
+  it("only treats the owner's explicit 09:00–21:00 window as shareable", () => {
+    const slots = computeScheduleShareFreeRanges({
+      rangeStart: new Date("2026-08-09T22:00:00.000Z"),
+      rangeEnd: new Date("2026-08-10T22:00:00.000Z"),
+      includedDates: ["2026-08-10"],
+      availabilityStartMinutes: 9 * 60,
+      availabilityEndMinutes: 21 * 60,
+      busy: [
+        {
+          start: new Date("2026-08-10T10:00:00.000Z"),
+          end: new Date("2026-08-10T11:00:00.000Z"),
+        },
+      ],
+    });
+
+    assert.deepEqual(
+      slots.map((slot) => [slot.start.toISOString(), slot.end.toISOString()]),
+      [
+        ["2026-08-10T07:00:00.000Z", "2026-08-10T10:00:00.000Z"],
+        ["2026-08-10T11:00:00.000Z", "2026-08-10T19:00:00.000Z"],
+      ],
+    );
+  });
+
+  it("constructs daily hours in Berlin across daylight-saving changes", () => {
+    const spring = computeScheduleShareFreeRanges({
+      rangeStart: new Date("2026-03-28T23:00:00.000Z"),
+      rangeEnd: new Date("2026-03-29T22:00:00.000Z"),
+      includedDates: ["2026-03-29"],
+      availabilityStartMinutes: 9 * 60,
+      availabilityEndMinutes: 21 * 60,
+      busy: [],
+    });
+
+    assert.deepEqual(
+      spring.map((slot) => [slot.start.toISOString(), slot.end.toISOString()]),
+      [["2026-03-29T07:00:00.000Z", "2026-03-29T19:00:00.000Z"]],
+    );
   });
 });

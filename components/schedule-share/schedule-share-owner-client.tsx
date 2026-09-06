@@ -87,7 +87,14 @@ export function ScheduleShareOwnerClient({
     try {
       return parseRevealConfigJson(linkSettings.revealConfig);
     } catch {
-      return { categoryIds: [], presetKeys: [], includedDates: [] };
+      return {
+        categoryIds: [],
+        presetKeys: [],
+        includedDates: [],
+        hideAllDetails: false,
+        availabilityStartMinutes: 0,
+        availabilityEndMinutes: 24 * 60,
+      };
     }
   }, [linkSettings.revealConfig]);
 
@@ -113,6 +120,15 @@ export function ScheduleShareOwnerClient({
     initialRevealedCategoryIds(revealCategories, initialReveal),
   );
   const [usageLimit, setUsageLimit] = useState<ScheduleShareUsageLimitInput>(linkSettings.usageLimit);
+  const [availabilityStartMinutes, setAvailabilityStartMinutes] = useState(
+    initialReveal.availabilityStartMinutes,
+  );
+  const [availabilityEndMinutes, setAvailabilityEndMinutes] = useState(
+    initialReveal.availabilityEndMinutes,
+  );
+  const [allowGuestProposals, setAllowGuestProposals] = useState(
+    linkSettings.allowGuestProposals,
+  );
   const [expiresInDays, setExpiresInDays] = useState<7 | 14 | 30>(() =>
     expiresInDaysFromDate(new Date(linkSettings.expiresAt)),
   );
@@ -183,8 +199,15 @@ export function ScheduleShareOwnerClient({
         body: JSON.stringify({
           rangeStart: rangeStart.toISOString(),
           rangeEnd: rangeEnd.toISOString(),
-          revealConfig: { categoryIds, presetKeys, hideAllDetails, includedDates },
-          allowGuestProposals: true,
+          revealConfig: {
+            categoryIds,
+            presetKeys,
+            hideAllDetails,
+            includedDates,
+            availabilityStartMinutes,
+            availabilityEndMinutes,
+          },
+          allowGuestProposals,
           usageLimit,
           expiresAt: expiresAtFromDays(expiresInDays).toISOString(),
         }),
@@ -207,6 +230,9 @@ export function ScheduleShareOwnerClient({
     selectedShareDateKeys,
     revealCategories,
     revealedCategoryIds,
+    availabilityStartMinutes,
+    availabilityEndMinutes,
+    allowGuestProposals,
     usageLimit,
     expiresInDays,
     token,
@@ -225,6 +251,9 @@ export function ScheduleShareOwnerClient({
   }, [
     selectedShareDateKeys,
     revealedCategoryIds,
+    availabilityStartMinutes,
+    availabilityEndMinutes,
+    allowGuestProposals,
     usageLimit,
     expiresInDays,
     persist,
@@ -315,6 +344,12 @@ export function ScheduleShareOwnerClient({
           onUsageLimitChange={setUsageLimit}
           expiresInDays={expiresInDays}
           onExpiresInDaysChange={setExpiresInDays}
+          availabilityStartMinutes={availabilityStartMinutes}
+          onAvailabilityStartMinutesChange={setAvailabilityStartMinutes}
+          availabilityEndMinutes={availabilityEndMinutes}
+          onAvailabilityEndMinutesChange={setAvailabilityEndMinutes}
+          allowGuestProposals={allowGuestProposals}
+          onAllowGuestProposalsChange={setAllowGuestProposals}
         />
         </div>
       </div>

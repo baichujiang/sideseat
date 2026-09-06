@@ -50,6 +50,10 @@ export function inboxConversationV1(item: InboxMerged, viewerId: string) {
             type: last.type,
             body: last.deletedAt
               ? null
+              : last.type === "ACTION_INTEREST_CARD"
+                ? "Interested in this plan"
+              : last.type === "MUTUAL_OPPORTUNITY_CARD"
+                ? "You can plan this together"
               : last.type === "PLAN_REQUEST_CARD" || last.type === "PLAN_CONFIRMED_CARD"
                 ? last.planRequest?.title.trim() || last.body
                 : last.body,

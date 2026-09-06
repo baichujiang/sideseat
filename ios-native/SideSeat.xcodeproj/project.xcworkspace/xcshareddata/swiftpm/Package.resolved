@@ -1,6 +1,15 @@
 {
-  "originHash" : "dba1ccaca4dc63818fa2c5ccf92628e9262b005b08c4c182876338e8fe07899b",
+  "originHash" : "187371d788e6de593e11cffdf8e5d1756b873fbb3a1f76b64d75c3a7e98d8bca",
   "pins" : [
+    {
+      "identity" : "popovers",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/aheze/Popovers",
+      "state" : {
+        "revision" : "de44c4dd7271ec6413fe350f7efadb14e5e18dce",
+        "version" : "1.3.2"
+      }
+    },
     {
       "identity" : "sentry-cocoa",
       "kind" : "remoteSourceControl",

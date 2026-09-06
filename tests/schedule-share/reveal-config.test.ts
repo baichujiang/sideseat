@@ -85,5 +85,22 @@ describe("schedule-share detail privacy", () => {
 
     assert.deepEqual(initialRevealedCategoryIds(categories, legacy), ["personal-id"]);
     assert.deepEqual(future.presetKeys, ["campus_feed"]);
+    assert.equal(legacy.availabilityStartMinutes, 0);
+    assert.equal(legacy.availabilityEndMinutes, 24 * 60);
+  });
+
+  it("keeps explicit daily scheduling availability separate from calendar privacy", () => {
+    const reveal = normalizeRevealConfig({
+      categoryIds: [],
+      presetKeys: [],
+      hideAllDetails: true,
+      includedDates: ["2026-08-04"],
+      availabilityStartMinutes: 9 * 60,
+      availabilityEndMinutes: 21 * 60,
+    });
+
+    assert.equal(reveal.hideAllDetails, true);
+    assert.equal(reveal.availabilityStartMinutes, 540);
+    assert.equal(reveal.availabilityEndMinutes, 1260);
   });
 });

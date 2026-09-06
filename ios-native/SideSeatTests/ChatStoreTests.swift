@@ -65,6 +65,249 @@ struct ChatInitialViewportPolicyTests {
             hasCachedSnapshot: true,
             isVisible: true
         ))
+        #expect(!ChatInitialViewportPolicy.canReveal(
+            hasPreparedViewport: true,
+            hasCompletedInitialLoad: true,
+            hasCachedSnapshot: false,
+            isVisible: false,
+            hasPositionedInitialTarget: false
+        ))
+    }
+}
+
+@Suite("Direct chat plan focus")
+struct DirectChatPlanFocusTests {
+    @Test("Uses the newest message card matching the requested plan")
+    func newestMatchingCard() {
+        let sender = NativeChatAuthor(
+            id: "peer",
+            username: "peer",
+            nickname: "Peer",
+            avatarUrl: nil
+        )
+        let messages = [
+            NativeDirectMessage(
+                id: "plan-request",
+                connectionId: "connection",
+                sender: sender,
+                type: "PLAN_REQUEST_CARD",
+                body: nil,
+                createdAt: "2026-08-20T10:00:00.000Z",
+                planRequestId: "plan-1"
+            ),
+            NativeDirectMessage(
+                id: "unrelated",
+                connectionId: "connection",
+                sender: sender,
+                type: "TEXT",
+                body: "Later message",
+                createdAt: "2026-08-20T10:01:00.000Z"
+            ),
+            NativeDirectMessage(
+                id: "plan-confirmed",
+                connectionId: "connection",
+                sender: sender,
+                type: "PLAN_CONFIRMED_CARD",
+                body: nil,
+                createdAt: "2026-08-20T10:02:00.000Z",
+                planRequestId: "plan-1"
+            ),
+            NativeDirectMessage(
+                id: "action-context",
+                connectionId: "connection",
+                sender: sender,
+                type: "ACTION_INTEREST_CARD",
+                body: nil,
+                createdAt: "2026-08-20T10:03:00.000Z",
+                actionInterestId: "interest-1"
+            ),
+        ]
+
+        #expect(
+            DirectChatStore.messageID(forPlanID: "plan-1", in: messages)
+                == "plan-confirmed"
+        )
+        #expect(DirectChatStore.messageID(forPlanID: "missing", in: messages) == nil)
+        #expect(
+            DirectChatStore.messageID(forActionInterestID: "interest-1", in: messages)
+                == "action-context"
+        )
+    }
+}
+
+@Suite("Action context message attribution")
+struct ActionContextMessageAttributionTests {
+    @Test("All direct message request types encode the exact Action Context")
+    func requestEncoding() throws {
+        func encodedContextID<Request: Encodable>(_ request: Request) throws -> String? {
+            let data = try JSONEncoder().encode(request)
+            let object = try #require(
+                JSONSerialization.jsonObject(with: data) as? [String: Any]
+            )
+            return object["actionContextId"] as? String
+        }
+
+        #expect(try encodedContextID(
+            NativeDirectTextMessageRequest(
+                body: "Hello",
+                actionContextId: "context-1"
+            )
+        ) == "context-1")
+        #expect(try encodedContextID(
+            NativeDirectImageMessageRequest(
+                imageUrl: "https://example.com/photo.jpg",
+                actionContextId: "context-1"
+            )
+        ) == "context-1")
+        #expect(try encodedContextID(
+            NativeDirectLocationMessageRequest(
+                locationLat: 48.137,
+                locationLng: 11.575,
+                actionContextId: "context-1"
+            )
+        ) == "context-1")
+    }
+
+    @Test("Plan and message focus retain their source Action Context")
+    func focusResolution() {
+        let sender = NativeChatAuthor(
+            id: "peer",
+            username: "peer",
+            nickname: "Peer",
+            avatarUrl: nil
+        )
+        let messages = [
+            NativeDirectMessage(
+                id: "source",
+                connectionId: "connection",
+                sender: sender,
+                type: "ACTION_INTEREST_CARD",
+                body: nil,
+                createdAt: "2026-08-20T10:00:00.000Z",
+                actionInterestId: "interest-1",
+                actionContextId: "context-1"
+            ),
+            NativeDirectMessage(
+                id: "plan",
+                connectionId: "connection",
+                sender: sender,
+                type: "PLAN_REQUEST_CARD",
+                body: nil,
+                createdAt: "2026-08-20T10:01:00.000Z",
+                planRequestId: "revision-1",
+                actionContextId: "context-1"
+            ),
+            NativeDirectMessage(
+                id: "reply",
+                connectionId: "connection",
+                sender: sender,
+                type: "TEXT",
+                body: "Works for me",
+                createdAt: "2026-08-20T10:02:00.000Z",
+                actionContextId: "context-1"
+            ),
+            NativeDirectMessage(
+                id: "plan-latest",
+                connectionId: "connection",
+                sender: sender,
+                type: "PLAN_CONFIRMED_CARD",
+                body: nil,
+                createdAt: "2026-08-20T10:03:00.000Z",
+                planRequestId: "revision-1",
+                actionContextId: "context-1"
+            ),
+            NativeDirectMessage(
+                id: "commitment-latest",
+                connectionId: "connection",
+                sender: sender,
+                type: "PLAN_REQUEST_CARD",
+                body: nil,
+                createdAt: "2026-08-20T10:04:00.000Z",
+                planRequestId: "revision-2",
+                planRequest: NativePlanRequest(
+                    id: "revision-2",
+                    connectionId: "connection",
+                    commitmentId: "commitment-1",
+                    originContextId: "context-1",
+                    status: "PENDING",
+                    planType: "STUDY",
+                    title: "Review",
+                    location: nil,
+                    message: nil,
+                    startTime: "2026-08-21T10:00:00.000Z",
+                    endTime: "2026-08-21T11:00:00.000Z",
+                    proposer: NativePlanAuthor(id: "peer", username: "peer", nickname: nil, avatarUrl: nil),
+                    receiver: NativePlanAuthor(id: "viewer", username: "viewer", nickname: nil, avatarUrl: nil),
+                    counterOfId: nil,
+                    availabilityShareId: nil,
+                    scheduleShareLinkId: nil,
+                    createdAt: "2026-08-20T10:04:00.000Z",
+                    updatedAt: "2026-08-20T10:04:00.000Z"
+                ),
+                actionContextId: "context-1"
+            ),
+        ]
+
+        #expect(DirectChatStore.actionContextID(
+            for: .actionContext(id: "context-1"),
+            in: messages
+        ) == "context-1")
+        #expect(DirectChatStore.actionContextID(
+            for: .actionInterest(id: "interest-1"),
+            in: messages
+        ) == "context-1")
+        #expect(DirectChatStore.actionContextID(
+            for: .plan(commitmentID: "commitment-1", revisionID: "revision-1"),
+            in: messages
+        ) == "context-1")
+        #expect(DirectChatStore.actionContextID(
+            for: .message(id: "reply"),
+            in: messages
+        ) == "context-1")
+        #expect(DirectChatStore.messageID(
+            forPlanCommitmentID: "commitment-1",
+            revisionID: "revision-1",
+            in: messages
+        ) == "plan-latest")
+        #expect(DirectChatStore.messageID(forPlanID: "revision-1", in: messages) == "plan-latest")
+        #expect(DirectChatStore.messageID(
+            forPlanCommitmentID: "commitment-1",
+            revisionID: nil,
+            in: messages
+        ) == "commitment-latest")
+        #expect(
+            DirectChatStore.presentationMessages(from: messages)
+                .filter { $0.planRequestId == "revision-1" }
+                .map(\.id) == ["plan-latest"]
+        )
+    }
+}
+
+@Suite("Action-to-Plan inheritance")
+struct ActionToPlanInheritanceTests {
+    @Test("Plan draft inherits all available action fields and trusted origin reference")
+    func inheritsActionContext() {
+        let context = NativeActionContext(
+            version: 1,
+            sourceKind: "COURSE_ACTION",
+            sourceId: "post-1",
+            title: "Review algorithms",
+            startsAt: "2026-09-01T16:00:00.000Z",
+            endsAt: "2026-09-01T17:30:00.000Z",
+            location: "Main library",
+            planType: "STUDY",
+            participantIds: ["viewer", "author"],
+            author: NativeActionContextAuthor(id: "author", displayName: "Mina"),
+            course: NativeActionContextCourse(id: "course-1", code: "IN0001", name: "Algorithms")
+        )
+        let draft = NativePlanDraft(context: context, interestID: "interest-1")
+
+        #expect(draft.title == context.title)
+        #expect(draft.startTime == context.startsAt)
+        #expect(draft.endTime == context.endsAt)
+        #expect(draft.location == context.location)
+        #expect(draft.planType == "STUDY")
+        #expect(draft.origin == NativePlanOriginReference(kind: "ACTION_INTEREST", id: "interest-1"))
     }
 }
 
@@ -500,7 +743,9 @@ struct ScheduleShareCompositionTests {
                 categoryIds: [],
                 presetKeys: [],
                 hideAllDetails: true,
-                includedDates: ["2026-08-04", "2026-08-05", "2026-08-06"]
+                includedDates: ["2026-08-04", "2026-08-05", "2026-08-06"],
+                availabilityStartMinutes: 9 * 60,
+                availabilityEndMinutes: 21 * 60
             ),
             allowGuestProposals: true,
             usageLimit: "SINGLE_USE",
@@ -513,6 +758,8 @@ struct ScheduleShareCompositionTests {
         let reveal = try #require(object["revealConfig"] as? [String: Any])
         #expect(reveal["hideAllDetails"] as? Bool == true)
         #expect((reveal["includedDates"] as? [String])?.count == 3)
+        #expect(reveal["availabilityStartMinutes"] as? Int == 540)
+        #expect(reveal["availabilityEndMinutes"] as? Int == 1260)
     }
 
     @Test("Detail labels use live categories and real schedule sources")
@@ -647,6 +894,31 @@ struct UnrepliedDirectMessageLimitTests {
         )
     }
 
+    @Test("A peer source card neither counts as a message nor unlocks the gate")
+    func sourceCardDoesNotUnlock() {
+        let sourceCard = NativeDirectMessage(
+            id: "source",
+            connectionId: "c1",
+            sender: peer,
+            type: "ACTION_INTEREST_CARD",
+            body: nil,
+            createdAt: "2026-07-17T12:01:00.000Z",
+            actionContextId: "context-1"
+        )
+        let messages = [message(id: "mine", sender: me), sourceCard]
+        #expect(!DirectChatStore.hasMutualExchange(
+            messages: messages,
+            viewerID: me.id,
+            peerID: peer.id
+        ))
+        #expect(DirectChatStore.countUnrepliedStreak(
+            messagesNewestFirst: Array(messages.reversed()),
+            viewerID: me.id,
+            peerID: peer.id
+        ) == 1)
+        #expect(DirectChatStore.messageID(forActionContextID: "context-1", in: messages) == "source")
+    }
+
     private func message(id: String, sender: NativeChatAuthor) -> NativeDirectMessage {
         NativeDirectMessage(
             id: id,
@@ -729,7 +1001,7 @@ struct InboxStoreTests {
         #expect(store.pinned.count == 1)
         #expect(store.pinned.first?.displayName == "Mina")
         #expect(store.pinned.first?.route == .directChat(connectionID: "connection-1"))
-        #expect(store.recent.count == 2)
+        #expect(store.recent.count == 1)
     }
 
     @Test("Filters conversations with client search")
@@ -741,34 +1013,25 @@ struct InboxStoreTests {
         await store.load(using: session)
 
         store.searchQuery = "algorithms"
-        #expect(store.filteredConversations.map(\.id) == ["course-1"])
-        #expect(store.hasNoSearchMatches == false)
+        #expect(store.filteredConversations.isEmpty)
+        #expect(store.hasNoSearchMatches)
 
         store.searchQuery = "zzzz-no-match"
         #expect(store.filteredConversations.isEmpty)
         #expect(store.hasNoSearchMatches)
     }
 
-    @Test("Filters conversations by kind and combines with search")
+    @Test("Shows direct and user-created group conversations in the primary inbox")
     @MainActor
-    func filtersConversationKinds() async throws {
+    func unifiedConversationKinds() async throws {
         let session = try await chatSession(transport: ChatTestTransport())
         let store = InboxStore(cache: InboxCache(inMemoryOnly: true))
         await store.load(using: session)
 
-        store.conversationFilter = .direct
-        #expect(store.filteredConversations.map(\.id) == ["connection-1"])
-
-        store.conversationFilter = .course
-        #expect(store.filteredConversations.map(\.id) == ["course-1"])
-
-        store.searchQuery = "mina"
-        #expect(store.filteredConversations.isEmpty)
-        #expect(store.hasNoSearchMatches)
-
-        store.searchQuery = ""
-        store.conversationFilter = .all
-        #expect(store.filteredConversations.count == 3)
+        #expect(
+            Set(store.filteredConversations.map(\.id))
+                == Set(["connection-1", "group-1"])
+        )
     }
 
     @Test("Toggles pin and hides course rows")
@@ -875,7 +1138,10 @@ struct ChatThreadSearchRowTests {
             createdAt: "2026-07-17T12:00:00.000Z"
         )
         let row = ChatThreadSearchRow.from(schedule)
-        #expect(["Shared schedule", "共享日程"].contains(row.preview))
+        #expect(
+            ["Shared availability", "共享空闲时间", "Geteilte Verfügbarkeit"]
+                .contains(row.preview)
+        )
         #expect(row.matches(query: row.preview))
         #expect(row.matches(query: "token"))
         #expect(!row.matches(query: "zzzz"))
@@ -1092,6 +1358,80 @@ struct DirectChatStoreTests {
         #expect(store.messages == [cachedMessage])
     }
 
+    @Test("Authoritative restricted history purges sensitive cached conversation")
+    @MainActor
+    func restrictedHistoryPurgesCachedConversation() async {
+        let cache = DirectChatCache(inMemoryOnly: true)
+        let peer = NativeChatAuthor(
+            id: "peer-1",
+            username: "test_002",
+            nickname: "Mina",
+            avatarUrl: nil
+        )
+        await cache.save(
+            accountID: "user-1",
+            connectionID: "connection-1",
+            snapshot: DirectChatCacheSnapshot(
+                conversation: NativeDirectConversation(
+                    id: "connection-1",
+                    isSelfNotes: false,
+                    displayName: "Mina",
+                    peer: peer
+                ),
+                messages: [
+                    NativeDirectMessage(
+                        id: "cached-action-context",
+                        connectionId: "connection-1",
+                        sender: peer,
+                        type: "ACTION_INTEREST_CARD",
+                        body: "Private study location",
+                        createdAt: "2026-08-04T12:00:00.000Z"
+                    ),
+                ],
+                hasMoreOlder: false,
+                nextCursor: nil,
+                realtimeCursor: "realtime-cursor"
+            )
+        )
+
+        let transport = ChatTestTransport(directHistoryStatus: 404)
+        let session = SessionStore(
+            apiClient: APIClient(
+                environment: AppEnvironment(
+                    deployment: .development,
+                    apiBaseURL: URL(string: "https://api.sideseat.test")!,
+                    bundleIdentifier: "app.sideseat.mobile.tests",
+                    appVersion: "1.0.0",
+                    buildNumber: "1"
+                ),
+                transport: transport
+            ),
+            credentialStore: ChatMemoryCredentialStore(),
+            device: NativeDevice(
+                id: "chat-device",
+                name: "Chat iPhone",
+                appVersion: "1.0.0",
+                platformVersion: "26.5"
+            )
+        )
+        await session.login(identifier: "test_001", password: "Password123")
+
+        let store = DirectChatStore(cache: cache)
+        await store.load(
+            connectionID: "connection-1",
+            using: session,
+            apiBaseURL: URL(string: "https://api.sideseat.test")!,
+            enableRealtime: false
+        )
+
+        #expect(store.conversation == nil)
+        #expect(store.messages.isEmpty)
+        #expect(store.hasCachedSnapshot == false)
+        #expect(
+            await cache.load(accountID: "user-1", connectionID: "connection-1") == nil
+        )
+    }
+
     @Test("Loads history and sends optimistic text")
     @MainActor
     func loadsAndSends() async throws {
@@ -1135,6 +1475,51 @@ struct DirectChatStoreTests {
         #expect(store.messages.contains(where: { $0.body == "Hello Mina" && !$0.id.hasPrefix("local-") }))
         #expect(await transport.sentBodies.contains("Hello Mina"))
         #expect(await transport.writeKeys.count == 1)
+    }
+
+    @Test("Loads earlier pages until the requested plan card is available")
+    @MainActor
+    func loadsEarlierPagesForPlanFocus() async throws {
+        let transport = ChatTestTransport(paginatePlanHistory: true)
+        let session = SessionStore(
+            apiClient: APIClient(
+                environment: AppEnvironment(
+                    deployment: .development,
+                    apiBaseURL: URL(string: "https://api.sideseat.test")!,
+                    bundleIdentifier: "app.sideseat.mobile.tests",
+                    appVersion: "1.0.0",
+                    buildNumber: "1"
+                ),
+                transport: transport
+            ),
+            credentialStore: ChatMemoryCredentialStore(),
+            device: NativeDevice(
+                id: "chat-device",
+                name: "Chat iPhone",
+                appVersion: "1.0.0",
+                platformVersion: "26.5"
+            )
+        )
+        await session.login(identifier: "test_001", password: "Password123")
+
+        let store = DirectChatStore(cache: DirectChatCache(inMemoryOnly: true))
+        await store.load(
+            connectionID: "connection-1",
+            using: session,
+            apiBaseURL: URL(string: "https://api.sideseat.test")!,
+            enableRealtime: false
+        )
+
+        #expect(store.messages.map(\.id) == ["latest-message"])
+        let messageID = await store.messageID(
+            forPlanID: "older-plan",
+            loadingOlderUsing: session
+        )
+
+        #expect(messageID == "older-plan-message")
+        #expect(store.messages.first?.id == "older-plan-message")
+        #expect(!store.hasMoreOlder)
+        #expect(await transport.directHistoryRequestCount == 2)
     }
 
     @Test("Keeps consecutive text sends responsive on a slow connection")
@@ -1472,6 +1857,285 @@ struct DirectChatStoreTests {
         #expect(probe.received(.sideSeatPlansNeedsRefresh))
         #expect(probe.received(.sideSeatInboxNeedsRefresh))
     }
+
+    @Test("Blocking immediately clears chat and refreshes plan-backed surfaces")
+    @MainActor
+    func blockingClearsChatAndRefreshesPlanSurfaces() async {
+        let cache = DirectChatCache(inMemoryOnly: true)
+        let transport = ChatTestTransport()
+        let session = SessionStore(
+            apiClient: APIClient(
+                environment: AppEnvironment(
+                    deployment: .development,
+                    apiBaseURL: URL(string: "https://api.sideseat.test")!,
+                    bundleIdentifier: "app.sideseat.mobile.tests",
+                    appVersion: "1.0.0",
+                    buildNumber: "1"
+                ),
+                transport: transport
+            ),
+            credentialStore: ChatMemoryCredentialStore(),
+            device: NativeDevice(
+                id: "chat-device",
+                name: "Chat iPhone",
+                appVersion: "1.0.0",
+                platformVersion: "26.5"
+            )
+        )
+        await session.login(identifier: "test_001", password: "Password123")
+
+        let store = DirectChatStore(cache: cache)
+        await store.load(
+            connectionID: "connection-1",
+            using: session,
+            apiBaseURL: URL(string: "https://api.sideseat.test")!,
+            enableRealtime: false
+        )
+        #expect(store.conversation != nil)
+        #expect(
+            await cache.load(accountID: "user-1", connectionID: "connection-1") != nil
+        )
+
+        let probe = ChatNotificationProbe()
+        let names: [Notification.Name] = [
+            .sideSeatCalendarNeedsRefresh,
+            .sideSeatPlansNeedsRefresh,
+            .sideSeatInboxNeedsRefresh,
+        ]
+        let observers = names.map { name in
+            NotificationCenter.default.addObserver(forName: name, object: nil, queue: nil) { notification in
+                probe.record(notification.name)
+            }
+        }
+        defer { observers.forEach(NotificationCenter.default.removeObserver) }
+
+        #expect(await store.blockPeer(using: session))
+        #expect(store.conversation == nil)
+        #expect(store.messages.isEmpty)
+        #expect(
+            await cache.load(accountID: "user-1", connectionID: "connection-1") == nil
+        )
+        #expect(probe.received(.sideSeatCalendarNeedsRefresh))
+        #expect(probe.received(.sideSeatPlansNeedsRefresh))
+        #expect(probe.received(.sideSeatInboxNeedsRefresh))
+    }
+
+    @Test("Plan mutations select v2 only from the authoritative coordination policy")
+    @MainActor
+    func planMutationNetworkRouting() async throws {
+        let transport = ChatTestTransport()
+        let session = SessionStore(
+            apiClient: APIClient(
+                environment: AppEnvironment(
+                    deployment: .development,
+                    apiBaseURL: URL(string: "https://api.sideseat.test")!,
+                    bundleIdentifier: "app.sideseat.mobile.tests",
+                    appVersion: "1.0.0",
+                    buildNumber: "1"
+                ),
+                transport: transport
+            ),
+            credentialStore: ChatMemoryCredentialStore(),
+            device: NativeDevice(
+                id: "chat-device",
+                name: "Chat iPhone",
+                appVersion: "1.0.0",
+                platformVersion: "26.5"
+            )
+        )
+        await session.login(identifier: "test_001", password: "Password123")
+        let store = DirectChatStore(cache: DirectChatCache(inMemoryOnly: true))
+        await store.load(
+            connectionID: "connection-1",
+            using: session,
+            apiBaseURL: URL(string: "https://api.sideseat.test")!,
+            enableRealtime: false
+        )
+
+        let v2 = planFixture(
+            id: "revision-v2",
+            commitmentID: "commitment-v2",
+            contextID: "context-v2",
+            coordinationPolicy: "CREATOR_GATED_V2"
+        )
+        _ = await store.acceptPlan(v2, using: session)
+        _ = await store.declinePlan(v2, using: session)
+        _ = await store.withdrawPlan(v2, using: session)
+
+        // DB-05 may backfill these stable identifiers on a DIRECT_V1 Plan.
+        // They must never be treated as proof that the v2 routes own it.
+        let legacy = planFixture(
+            id: "revision-legacy",
+            commitmentID: "legacy-commitment",
+            contextID: "legacy-context",
+            coordinationPolicy: "DIRECT_CONVERSATION_V1"
+        )
+        _ = await store.acceptPlan(legacy, using: session)
+        _ = await store.declinePlan(legacy, using: session)
+
+        #expect(await transport.planMutationRequests == [
+            "POST /api/v1/action-coordination/v2/plans/revision-v2/accept",
+            "POST /api/v1/action-coordination/v2/plans/revision-v2/decline",
+            "DELETE /api/v1/action-coordination/v2/plans/revision-v2",
+            "POST /api/v1/plans/revision-legacy/accept",
+            "POST /api/v1/plans/revision-legacy/decline",
+        ])
+    }
+
+    @Test("Counter target requires both identifiers and the creator-gated policy")
+    func counterTargetRouting() {
+        let v2 = planFixture(
+            id: "revision-v2",
+            commitmentID: "commitment-v2",
+            contextID: "context-v2",
+            coordinationPolicy: "CREATOR_GATED_V2"
+        )
+        #expect(PlanSubmissionTarget.counter(for: v2) == .actionCounter(
+            revisionID: "revision-v2",
+            commitmentID: "commitment-v2",
+            contextID: "context-v2"
+        ))
+        #expect(
+            PlanSubmissionTarget.counter(for: planFixture(
+                id: "revision-legacy",
+                commitmentID: "legacy-commitment",
+                contextID: "legacy-context",
+                coordinationPolicy: "DIRECT_CONVERSATION_V1"
+            )) == .legacyCounter(planID: "revision-legacy")
+        )
+    }
+
+    @Test("Plan recovery can focus a commitment without a revision")
+    func commitmentOnlySubmissionFocus() {
+        let result = PlanSubmissionResult(
+            connectionID: "connection-winning",
+            commitmentID: "commitment-winning",
+            revisionID: nil,
+            contextID: nil
+        )
+        #expect(
+            result.focus == .plan(
+                commitmentID: "commitment-winning",
+                revisionID: nil
+            )
+        )
+    }
+
+    @Test("Structured workflow cards cannot use generic message deletion")
+    func structuredCardsAreNotUserDeletable() {
+        let sender = NativeChatAuthor(
+            id: "user-1",
+            username: "viewer",
+            nickname: "Viewer",
+            avatarUrl: nil
+        )
+        let structuredTypes = [
+            "AVAILABILITY_CARD",
+            "SCHEDULE_SHARE_CARD",
+            "ACTION_INTEREST_CARD",
+            "PLAN_REQUEST_CARD",
+            "PLAN_CONFIRMED_CARD",
+            "SYSTEM",
+        ]
+
+        for type in structuredTypes {
+            let message = NativeDirectMessage(
+                id: "message-\(type)",
+                connectionId: "connection-1",
+                sender: sender,
+                type: type,
+                body: nil,
+                createdAt: "2026-08-31T12:00:00.000Z"
+            )
+            #expect(message.supportsUserDeletion == false)
+        }
+
+        for type in ["TEXT", "IMAGE", "LOCATION"] {
+            let message = NativeDirectMessage(
+                id: "message-\(type)",
+                connectionId: "connection-1",
+                sender: sender,
+                type: type,
+                body: nil,
+                createdAt: "2026-08-31T12:00:00.000Z"
+            )
+            #expect(message.supportsUserDeletion)
+        }
+    }
+
+    @Test("Retryable Plan conflicts preserve the original idempotency key")
+    @MainActor
+    func retryablePlanConflictKeepsIdempotencyKey() async {
+        let transport = ChatTestTransport(planMutationRetryableConflicts: 1)
+        let session = SessionStore(
+            apiClient: APIClient(
+                environment: AppEnvironment(
+                    deployment: .development,
+                    apiBaseURL: URL(string: "https://api.sideseat.test")!,
+                    bundleIdentifier: "app.sideseat.mobile.tests",
+                    appVersion: "1.0.0",
+                    buildNumber: "1"
+                ),
+                transport: transport
+            ),
+            credentialStore: ChatMemoryCredentialStore(),
+            device: NativeDevice(
+                id: "chat-device",
+                name: "Chat iPhone",
+                appVersion: "1.0.0",
+                platformVersion: "26.5"
+            )
+        )
+        await session.login(identifier: "test_001", password: "Password123")
+        let store = DirectChatStore(cache: DirectChatCache(inMemoryOnly: true))
+        await store.load(
+            connectionID: "connection-1",
+            using: session,
+            apiBaseURL: URL(string: "https://api.sideseat.test")!,
+            enableRealtime: false
+        )
+        let plan = planFixture(
+            id: "revision-v2",
+            commitmentID: "commitment-v2",
+            contextID: "context-v2",
+            coordinationPolicy: "CREATOR_GATED_V2"
+        )
+
+        #expect(await store.acceptPlan(plan, using: session) == false)
+        #expect(await store.acceptPlan(plan, using: session) == true)
+        let keys = await transport.planMutationIdempotencyKeys
+        #expect(keys.count == 2)
+        #expect(keys.first == keys.last)
+    }
+
+    private func planFixture(
+        id: String,
+        commitmentID: String?,
+        contextID: String?,
+        coordinationPolicy: String?
+    ) -> NativePlanRequest {
+        NativePlanRequest(
+            id: id,
+            connectionId: "connection-1",
+            commitmentId: commitmentID,
+            originContextId: contextID,
+            coordinationPolicy: coordinationPolicy,
+            status: "PENDING",
+            planType: "STUDY",
+            title: "Review",
+            location: nil,
+            message: nil,
+            startTime: "2026-09-01T10:00:00.000Z",
+            endTime: "2026-09-01T11:00:00.000Z",
+            proposer: NativePlanAuthor(id: "peer-1", username: "peer", nickname: nil, avatarUrl: nil),
+            receiver: NativePlanAuthor(id: "user-1", username: "viewer", nickname: nil, avatarUrl: nil),
+            counterOfId: nil,
+            availabilityShareId: nil,
+            scheduleShareLinkId: nil,
+            createdAt: "2026-08-31T10:00:00.000Z",
+            updatedAt: "2026-08-31T10:00:00.000Z"
+        )
+    }
 }
 
 @Suite("Community chat store")
@@ -1741,9 +2405,11 @@ private final class ChatNotificationProbe: @unchecked Sendable {
 
 private actor ChatTestTransport: APITransport {
     private let failDirectHistory: Bool
+    private let directHistoryStatus: Int?
     private let failCommunityHistory: Bool
     private let failInbox: Bool
     private let holdTextSends: Bool
+    private let paginatePlanHistory: Bool
     private var remainingTextSendFailures: Int
     private var textSendWaiters: [CheckedContinuation<Void, Never>] = []
     private(set) var pendingTextSendCount = 0
@@ -1766,23 +2432,33 @@ private actor ChatTestTransport: APITransport {
     private(set) var pinnedPaths: [String] = []
     private(set) var hiddenPaths: [String] = []
     private(set) var acceptedPlanIDs: [String] = []
+    private(set) var planMutationRequests: [String] = []
+    private(set) var planMutationIdempotencyKeys: [String] = []
+    private(set) var directHistoryRequestCount = 0
     private var messageCounter = 2
     private var courseMessageCounter = 1
     private var groupMessageCounter = 1
     private var directPinned = true
+    private var remainingPlanMutationRetryableConflicts: Int
 
     init(
         failDirectHistory: Bool = false,
+        directHistoryStatus: Int? = nil,
         failCommunityHistory: Bool = false,
         failInbox: Bool = false,
         holdTextSends: Bool = false,
-        textSendFailures: Int = 0
+        textSendFailures: Int = 0,
+        paginatePlanHistory: Bool = false,
+        planMutationRetryableConflicts: Int = 0
     ) {
         self.failDirectHistory = failDirectHistory
+        self.directHistoryStatus = directHistoryStatus
         self.failCommunityHistory = failCommunityHistory
         self.failInbox = failInbox
         self.holdTextSends = holdTextSends
         remainingTextSendFailures = textSendFailures
+        self.paginatePlanHistory = paginatePlanHistory
+        remainingPlanMutationRetryableConflicts = planMutationRetryableConflicts
     }
 
     func releaseTextSends() {
@@ -1793,6 +2469,28 @@ private actor ChatTestTransport: APITransport {
 
     func data(for request: URLRequest) async throws -> (Data, URLResponse) {
         let path = request.url?.path ?? ""
+        let isLegacyMutation = path == "/api/v1/plans/revision-legacy/accept"
+            || path == "/api/v1/plans/revision-legacy/decline"
+        if path.hasPrefix("/api/v1/action-coordination/v2/plans/") || isLegacyMutation
+        {
+            planMutationRequests.append("\(request.httpMethod ?? "") \(path)")
+            if let key = request.value(forHTTPHeaderField: "Idempotency-Key") {
+                planMutationIdempotencyKeys.append(key)
+            }
+            if remainingPlanMutationRetryableConflicts > 0 {
+                remainingPlanMutationRetryableConflicts -= 1
+                return response(
+                    request,
+                    409,
+                    #"{"error":{"code":"REQUEST_IN_PROGRESS","message":"The command is still running.","retryable":true}}"#
+                )
+            }
+            if path.hasPrefix("/api/v1/action-coordination/v2/plans/") {
+                let status = path.hasSuffix("/accept") ? "ACCEPTED" : (request.httpMethod == "DELETE" ? "CANCELED" : "DECLINED")
+                return response(request, 200, #"{"plan":{"commitmentId":"commitment-v2","revisionId":"revision-v2","connectionId":"connection-1","commitmentStatus":"NEGOTIATING","revisionStatus":"\#(status)","focus":{"type":"PLAN","connectionId":"connection-1","commitmentId":"commitment-v2","revisionId":"revision-v2"}}}"#)
+            }
+            return response(request, 200, #"{"data":{"plan":{"id":"revision-legacy","connectionId":"connection-1","status":"ACCEPTED","planType":"STUDY","title":"Review","location":null,"message":null,"startTime":"2026-09-01T10:00:00.000Z","endTime":"2026-09-01T11:00:00.000Z","proposer":{"id":"peer-1","username":"peer","nickname":null,"avatarUrl":null},"receiver":{"id":"user-1","username":"viewer","nickname":null,"avatarUrl":null},"counterOfId":null,"availabilityShareId":null,"scheduleShareLinkId":null,"createdAt":"2026-08-31T10:00:00.000Z","updatedAt":"2026-08-31T10:00:00.000Z"}}}"#)
+        }
         switch path {
         case "/api/v1/auth/login":
             return response(
@@ -1809,6 +2507,8 @@ private actor ChatTestTransport: APITransport {
                 200,
                 #"{"data":{"conversations":[{"kind":"DIRECT","id":"connection-1","displayName":"Mina","avatarUrl":null,"participantAvatars":[],"unreadCount":1,"pinned":\#(directPinned),"lastActivityAt":"2026-07-17T12:00:00.000Z","peer":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"isSelfNotes":false,"course":null,"group":null,"lastMessage":{"id":"msg-1","sender":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"type":"TEXT","body":"See you?","imageUrl":null,"deletedAt":null,"createdAt":"2026-07-17T12:00:00.000Z"}},{"kind":"COURSE","id":"course-1","displayName":"Algorithms","avatarUrl":null,"participantAvatars":[],"unreadCount":0,"pinned":false,"lastActivityAt":"2026-07-17T13:00:00.000Z","peer":null,"isSelfNotes":false,"course":{"id":"course-1","name":"Algorithms","code":"IN0007","school":"TUM","semesterLabel":"SS26"},"group":null,"lastMessage":{"id":"course-msg-1","sender":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"type":"TEXT","body":"Tutorial?","imageUrl":null,"deletedAt":null,"createdAt":"2026-07-17T13:00:00.000Z"}},{"kind":"GROUP","id":"group-1","displayName":"Study crew","avatarUrl":null,"participantAvatars":[],"unreadCount":0,"pinned":false,"lastActivityAt":"2026-07-17T14:00:00.000Z","peer":null,"isSelfNotes":false,"course":null,"group":{"id":"group-1","participantCount":2,"participants":[{"id":"user-1","username":"test_001","nickname":"Test User","avatarUrl":null},{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null}]},"lastMessage":{"id":"group-msg-1","sender":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"type":"TEXT","body":"Library at 4?","imageUrl":null,"deletedAt":null,"createdAt":"2026-07-17T14:00:00.000Z"}}],"unreadTotal":1,"plansNeedingYourAction":0}}"#
             )
+        case "/api/v1/connections/connection-1/block":
+            return response(request, 200, #"{"data":{"blocked":true}}"#)
         case "/api/v1/connections/connection-1/pin":
             pinnedPaths.append(path)
             directPinned.toggle()
@@ -1886,6 +2586,32 @@ private actor ChatTestTransport: APITransport {
             }
             if failDirectHistory {
                 throw URLError(.notConnectedToInternet)
+            }
+            if let directHistoryStatus {
+                return response(
+                    request,
+                    directHistoryStatus,
+                    #"{"error":{"code":"NOT_FOUND","message":"Conversation unavailable.","retryable":false}}"#
+                )
+            }
+            directHistoryRequestCount += 1
+            if paginatePlanHistory {
+                let cursor = URLComponents(
+                    url: request.url!,
+                    resolvingAgainstBaseURL: false
+                )?.queryItems?.first(where: { $0.name == "cursor" })?.value
+                if cursor == nil {
+                    return response(
+                        request,
+                        200,
+                        #"{"data":{"connection":{"id":"connection-1","isSelfNotes":false,"displayName":"Mina","peer":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null}},"messages":[{"id":"latest-message","connectionId":"connection-1","sender":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"type":"TEXT","body":"Latest","imageUrl":null,"location":null,"availabilityShareId":null,"planRequestId":null,"planRequest":null,"replyTo":null,"deletedAt":null,"createdAt":"2026-07-17T12:10:00.000Z"}]},"meta":{"hasMore":true,"nextCursor":"older-cursor-1","realtimeCursor":"cursor-1"}}"#
+                    )
+                }
+                return response(
+                    request,
+                    200,
+                    #"{"data":{"connection":{"id":"connection-1","isSelfNotes":false,"displayName":"Mina","peer":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null}},"messages":[{"id":"older-plan-message","connectionId":"connection-1","sender":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"type":"PLAN_REQUEST_CARD","body":null,"imageUrl":null,"location":null,"availabilityShareId":null,"planRequestId":"older-plan","planRequest":{"id":"older-plan","connectionId":"connection-1","status":"PENDING","planType":"STUDY","title":"Library study","location":"Library","message":null,"startTime":"2026-07-18T14:00:00.000Z","endTime":"2026-07-18T15:00:00.000Z","proposer":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"receiver":{"id":"user-1","username":"test_001","nickname":"Test User","avatarUrl":null},"counterOfId":null,"availabilityShareId":null,"scheduleShareLinkId":null,"createdAt":"2026-07-17T12:00:00.000Z","updatedAt":"2026-07-17T12:00:00.000Z"},"replyTo":null,"deletedAt":null,"createdAt":"2026-07-17T12:00:00.000Z"}]},"meta":{"hasMore":false,"nextCursor":null,"realtimeCursor":"cursor-1"}}"#
+                )
             }
             return response(
                 request,
