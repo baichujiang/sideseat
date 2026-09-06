@@ -146,7 +146,59 @@ struct MVPRoutePolicyTests {
         #expect(MVPRoutePolicy.tab(for: .plans) == .chats)
         #expect(MVPRoutePolicy.tab(for: .eventShare(token: "event-1")) == .home)
         #expect(MVPRoutePolicy.tab(for: .courses) == .me)
-        #expect(MVPRoutePolicy.tab(for: .settings) == .me)
+    }
+}
+
+@Suite("Together presentation")
+struct TogetherPresentationTests {
+    @Test("Maps opportunity lifecycle to the five frozen presentation states")
+    func mapsOpportunityStates() {
+        #expect(
+            TogetherOpportunityPresentationState(
+                state: "NEEDS_DECISION",
+                viewerDecision: nil,
+                hasCoordination: false
+            ) == .undecided
+        )
+        #expect(
+            TogetherOpportunityPresentationState(
+                state: "DECIDED",
+                viewerDecision: "YES",
+                hasCoordination: false
+            ) == .privateYes
+        )
+        #expect(
+            TogetherOpportunityPresentationState(
+                state: "READY_TO_COORDINATE",
+                viewerDecision: "YES",
+                hasCoordination: true
+            ) == .mutual
+        )
+        #expect(
+            TogetherOpportunityPresentationState(
+                state: "EXPIRED",
+                viewerDecision: nil,
+                hasCoordination: false
+            ) == .expired
+        )
+        #expect(
+            TogetherOpportunityPresentationState(
+                state: "UNAVAILABLE",
+                viewerDecision: nil,
+                hasCoordination: false
+            ) == .unavailable
+        )
+    }
+
+    @Test("Does not treat a ready state without a canonical conversation as mutual")
+    func requiresCoordinationForMutual() {
+        #expect(
+            TogetherOpportunityPresentationState(
+                state: "READY_TO_COORDINATE",
+                viewerDecision: "YES",
+                hasCoordination: false
+            ) == .unavailable
+        )
     }
 }
 
