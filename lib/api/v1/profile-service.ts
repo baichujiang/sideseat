@@ -3,6 +3,7 @@ import "server-only";
 import { ConnectionStatus, Prisma, type User } from "@prisma/client";
 import { z } from "zod";
 
+import { deriveNativeMVPReadiness } from "@/lib/api/v1/mvp-readiness";
 import { currentUserV1 } from "@/lib/api/v1/user-dto";
 import { validateNicknameForUser } from "@/lib/auth/nickname-fields";
 import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "@/lib/constants/schools";
@@ -34,6 +35,16 @@ export const nativeProfileUpdateSchema = profileObjectSchema
   });
 
 export type NativeProfileUpdateInput = z.infer<typeof nativeProfileUpdateSchema>;
+
+type NativeProfileLanguageRow = {
+  tag: string;
+  proficiency: string;
+};
+
+type NativeCurrentProfileRecord = User & {
+  lifePhotos: Array<{ id: string; url: string; sortOrder: number }>;
+  userLanguages?: NativeProfileLanguageRow[];
+};
 
 export class NativeProfileUpdateError extends Error {
   constructor(
@@ -122,16 +133,31 @@ function profileUserDto(user: {
 }
 
 export function currentProfileDto(
-  profile: User & {
-    lifePhotos: Array<{ id: string; url: string; sortOrder: number }>;
-  },
+  profile: NativeCurrentProfileRecord,
   options: { blockedCount: number; locale: "en" | "zh-CN" },
 ) {
+  const languages = profile.userLanguages?.map((row) => ({
+    tag: row.tag,
+    proficiency: row.proficiency,
+  }));
+  const readiness = profile.userLanguages
+    ? deriveNativeMVPReadiness({
+        school: profile.school,
+        studentStatus: profile.studentStatus,
+        verifiedStudent: profile.verifiedStudent,
+        studentVerificationStatus: profile.studentVerificationStatus,
+        languageCount: profile.userLanguages.length,
+      })
+    : undefined;
+
   return {
     ...currentUserV1(profile, options.locale),
     displayName: profile.nickname?.trim() || profile.username,
     schoolSummary: schoolSummary(profile),
     lifePhotos: profile.lifePhotos,
+    ...(languages !== undefined && readiness !== undefined
+      ? { languages, readiness }
+      : {}),
     contacts: {
       wechatHandle: profile.wechatHandle,
       whatsappHandle: profile.whatsappHandle,
@@ -163,6 +189,10 @@ export async function loadNativeCurrentProfile(options: {
         lifePhotos: {
           orderBy: { sortOrder: "asc" },
           select: { id: true, url: true, sortOrder: true },
+        },
+        userLanguages: {
+          orderBy: { tag: "asc" },
+          select: { tag: true, proficiency: true },
         },
       },
     }),
@@ -262,6 +292,10 @@ export async function updateNativeCurrentProfile(options: {
         lifePhotos: {
           orderBy: { sortOrder: "asc" },
           select: { id: true, url: true, sortOrder: true },
+        },
+        userLanguages: {
+          orderBy: { tag: "asc" },
+          select: { tag: true, proficiency: true },
         },
       },
     }),

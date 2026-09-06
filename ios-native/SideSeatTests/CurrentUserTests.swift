@@ -17,6 +17,45 @@ struct CurrentUserTests {
     }
 }
 
+@Suite("MVP readiness contract")
+struct MVPReadinessTests {
+    @Test("Decodes server-authoritative readiness")
+    func decodesReadiness() throws {
+        let data = Data(
+            """
+            {
+              "campusIdentityComplete": true,
+              "languagesComplete": true,
+              "verificationState": "VERIFIED",
+              "ready": true
+            }
+            """.utf8
+        )
+
+        let readiness = try JSONDecoder().decode(NativeMVPReadiness.self, from: data)
+        #expect(readiness.campusIdentityComplete)
+        #expect(readiness.languagesComplete)
+        #expect(readiness.verificationState == "VERIFIED")
+        #expect(readiness.ready)
+    }
+
+    @Test("Decodes coordination language independently of app locale")
+    func decodesCoordinationLanguage() throws {
+        let data = Data(
+            """
+            {
+              "tag": "GERMAN",
+              "proficiency": "CONVERSATIONAL"
+            }
+            """.utf8
+        )
+
+        let language = try JSONDecoder().decode(NativeCoordinationLanguage.self, from: data)
+        #expect(language.tag == "GERMAN")
+        #expect(language.proficiency == "CONVERSATIONAL")
+    }
+}
+
 @Suite("App language", .serialized)
 struct AppLanguageTests {
     @Test("Persists an in-app language selection")

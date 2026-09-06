@@ -96,6 +96,13 @@ test.describe.serial("API v1 Profile", () => {
           schoolShort: expect.any(String),
           degreeLabel: expect.any(String),
         }),
+        languages: expect.any(Array),
+        readiness: expect.objectContaining({
+          campusIdentityComplete: expect.any(Boolean),
+          languagesComplete: expect.any(Boolean),
+          verificationState: expect.any(String),
+          ready: expect.any(Boolean),
+        }),
         lifePhotos: expect.any(Array),
         contacts: expect.objectContaining({
           wechatHandle: null,
@@ -122,9 +129,89 @@ test.describe.serial("API v1 Profile", () => {
       "wechatHandle",
       "whatsappHandle",
     ]);
+    expect(payload.data.readiness.languagesComplete).toBe(payload.data.languages.length > 0);
+    expect(payload.data.readiness.verificationState).toBe(
+      payload.data.studentVerificationStatus,
+    );
     expect(payload.data).not.toHaveProperty("hashedPassword");
-    expect(payload.data).not.toHaveProperty("languages");
     expect(payload.data).not.toHaveProperty("sessions");
+  });
+
+  test("updates coordination languages idempotently and refreshes readiness", async ({
+    request,
+  }) => {
+    const token = await accessToken(request);
+    const actor = await prisma.user.findUniqueOrThrow({
+      where: { username: E2E_USER },
+      select: {
+        id: true,
+        userLanguages: {
+          select: { tag: true, proficiency: true },
+        },
+      },
+    });
+    const replacement = [
+      { tag: "ENGLISH", proficiency: "FLUENT" },
+      { tag: "GERMAN", proficiency: "CONVERSATIONAL" },
+    ];
+
+    try {
+      const missingKey = await request.put("/api/v1/me/languages", {
+        headers: auth(token),
+        data: { languages: replacement },
+      });
+      expect(missingKey.status()).toBe(422);
+
+      const invalid = await request.put("/api/v1/me/languages", {
+        headers: auth(token, `languages-invalid-${Date.now()}`),
+        data: { languages: [] },
+      });
+      expect(invalid.status()).toBe(422);
+
+      const key = `languages-${Date.now()}-${process.pid}`;
+      const response = await request.put("/api/v1/me/languages", {
+        headers: { ...auth(token, key), "Accept-Language": "zh-CN" },
+        data: { languages: replacement },
+      });
+      expect(response.status()).toBe(200);
+      const payload = await response.json();
+      expect(payload.data.locale).toBe("zh-CN");
+      expect(payload.data.languages).toEqual(replacement);
+      expect(payload.data.readiness.languagesComplete).toBe(true);
+      expect(payload.data.readiness.verificationState).toBe(
+        payload.data.studentVerificationStatus,
+      );
+
+      const replay = await request.put("/api/v1/me/languages", {
+        headers: { ...auth(token, key), "Accept-Language": "zh-CN" },
+        data: { languages: replacement },
+      });
+      expect(replay.status()).toBe(200);
+      expect(replay.headers()["idempotency-replayed"]).toBe("true");
+
+      const conflict = await request.put("/api/v1/me/languages", {
+        headers: auth(token, key),
+        data: {
+          languages: [{ tag: "CHINESE", proficiency: "NATIVE" }],
+        },
+      });
+      expect(conflict.status()).toBe(409);
+
+      const current = await request.get("/api/v1/me", { headers: auth(token) });
+      expect(current.status()).toBe(200);
+      expect((await current.json()).data.languages).toEqual(replacement);
+    } finally {
+      await prisma.userLanguage.deleteMany({ where: { userId: actor.id } });
+      if (actor.userLanguages.length > 0) {
+        await prisma.userLanguage.createMany({
+          data: actor.userLanguages.map((language) => ({
+            userId: actor.id,
+            tag: language.tag,
+            proficiency: language.proficiency,
+          })),
+        });
+      }
+    }
   });
 
   test("returns a permission-filtered public profile and hides blocked peers", async ({

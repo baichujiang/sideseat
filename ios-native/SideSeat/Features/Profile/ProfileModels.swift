@@ -1,5 +1,17 @@
 import Foundation
 
+struct NativeCoordinationLanguage: Codable, Hashable, Sendable {
+    let tag: String
+    let proficiency: String
+}
+
+struct NativeMVPReadiness: Codable, Hashable, Sendable {
+    let campusIdentityComplete: Bool
+    let languagesComplete: Bool
+    let verificationState: String
+    let ready: Bool
+}
+
 struct NativeProfileSchoolSummary: Decodable, Hashable, Sendable {
     let schoolShort: String
     let degreeLabel: String
@@ -134,6 +146,8 @@ struct NativeCurrentProfile: Decodable, Identifiable, Sendable {
     let usernameChangePolicy: NativeUsernameChangePolicy?
     let productTutorialDismissedAt: String?
     let locale: String
+    var languages: [NativeCoordinationLanguage]? = nil
+    var readiness: NativeMVPReadiness? = nil
     let displayName: String
     let schoolSummary: NativeProfileSchoolSummary
     let contacts: NativeProfileContacts
@@ -326,6 +340,15 @@ extension NativeCurrentProfile {
         ),
         productTutorialDismissedAt: "2026-01-01T00:00:00.000Z",
         locale: "en",
+        languages: [
+            NativeCoordinationLanguage(tag: "ENGLISH", proficiency: "FLUENT")
+        ],
+        readiness: NativeMVPReadiness(
+            campusIdentityComplete: true,
+            languagesComplete: true,
+            verificationState: "VERIFIED",
+            ready: true
+        ),
         displayName: "Test User",
         schoolSummary: NativeProfileSchoolSummary(
             schoolShort: "TUM",
@@ -452,6 +475,8 @@ extension NativeCurrentProfile {
             usernameChangePolicy: usernameChangePolicy,
             productTutorialDismissedAt: productTutorialDismissedAt,
             locale: locale,
+            languages: languages,
+            readiness: readiness,
             displayName: {
                 let trimmed = (request.nickname ?? nickname)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
                 return trimmed.isEmpty ? username : trimmed
@@ -522,6 +547,8 @@ extension NativeCurrentProfile {
             ),
             productTutorialDismissedAt: productTutorialDismissedAt,
             locale: locale,
+            languages: languages,
+            readiness: readiness,
             displayName: {
                 let trimmed = nickname?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
                 return trimmed.isEmpty ? nextUsername : trimmed
@@ -557,6 +584,8 @@ extension NativeCurrentProfile {
             usernameChangePolicy: usernameChangePolicy,
             productTutorialDismissedAt: productTutorialDismissedAt,
             locale: locale,
+            languages: languages,
+            readiness: readiness,
             displayName: displayName,
             schoolSummary: schoolSummary,
             contacts: contacts,
@@ -589,6 +618,8 @@ extension NativeCurrentProfile {
             usernameChangePolicy: usernameChangePolicy,
             productTutorialDismissedAt: productTutorialDismissedAt,
             locale: locale,
+            languages: languages,
+            readiness: readiness,
             displayName: displayName,
             schoolSummary: schoolSummary,
             contacts: contacts,
