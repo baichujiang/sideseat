@@ -54,11 +54,6 @@ struct AppShellView: View {
     @State private var routers = TabRouter()
     @State private var inboxStore = InboxStore()
     @State private var v2Store = ActionToPlanV2Store.shared
-    /// Single create flow sheet — chooser and form share one presentation so option → form
-    /// never dismisses/re-presents (avoids the 0.28s double-sheet flash).
-    @State private var isCreateFlowPresented = false
-    @State private var createFlowDestination: CreateDestination?
-    @State private var pendingCreatedPostID: String?
     @State private var productTutorial = ProductTutorialController()
     @State private var foregroundPushNotice: ForegroundPushNotice?
     @State private var foregroundPushDismissTask: Task<Void, Never>?
@@ -67,9 +62,7 @@ struct AppShellView: View {
         #if DEBUG
         let arguments = ProcessInfo.processInfo.arguments
         let initialTab: AppTab =
-            if arguments.contains("--ui-testing-public-profile") {
-                .discover
-            } else if arguments.contains("--ui-testing-chats")
+            if arguments.contains("--ui-testing-chats")
                 || arguments.contains("--ui-testing-unread-jump")
             {
                 .chats
@@ -84,12 +77,6 @@ struct AppShellView: View {
 
     var body: some View {
         shellSurface
-        .sheet(isPresented: $isCreateFlowPresented, onDismiss: {
-            createFlowDestination = nil
-            openPendingCreatedPost()
-        }) {
-            createFlowSheet
-        }
         .task {
             routePendingDeepLink()
         }
@@ -106,9 +93,6 @@ struct AppShellView: View {
                 v2Store.resetAssignment()
                 routers.resetAll()
                 selectedTab = .discover
-                isCreateFlowPresented = false
-                createFlowDestination = nil
-                pendingCreatedPostID = nil
                 productTutorial.evaluateAutoShow(for: nil)
             } else if session.phase == .signedIn {
                 productTutorial.evaluateAutoShow(for: session.currentUser)
@@ -165,13 +149,6 @@ struct AppShellView: View {
                 let path = String(deepLinkArgument.dropFirst("--ui-testing-deep-link=".count))
                 deepLinkRouter.handleAppPath(path)
                 routePendingDeepLink()
-            } else if arguments.contains("--ui-testing-public-profile") {
-                await Task.yield()
-                routers.router(for: .discover).navigate(to: .profile(userID: "ui-peer"))
-            } else if arguments.contains("--ui-testing-create-plan") {
-                await Task.yield()
-                createFlowDestination = .buddyPost
-                isCreateFlowPresented = true
             } else if arguments.contains("--ui-testing-unread-jump") {
                 await Task.yield()
                 ChatUnreadLaunch.stage(conversationID: "ui-connection", unreadCount: 12)
@@ -343,64 +320,6 @@ struct AppShellView: View {
         foregroundPushNotice = nil
     }
 
-    @ViewBuilder
-    private var createFlowSheet: some View {
-        Group {
-            if let createFlowDestination {
-                NavigationStack {
-                    switch createFlowDestination {
-                    case .courseAction:
-                        DiscoverPlanCreateView(mode: .courseAction) { postID in
-                            pendingCreatedPostID = postID
-                            dismissCreateFlow()
-                        }
-                    case .buddyPost:
-                        DiscoverPlanCreateView { postID in
-                            pendingCreatedPostID = postID
-                            dismissCreateFlow()
-                        }
-                    case .activity:
-                        DiscoverActivityCreateView {
-                            NotificationCenter.default.post(
-                                name: .sideSeatDiscoverFeedNeedsRefresh,
-                                object: nil
-                            )
-                            dismissCreateFlow()
-                        }
-                    }
-                }
-            } else {
-                CreateChooserSheet(
-                    onChoose: { destination in
-                        withAnimation(.easeInOut(duration: 0.22)) {
-                            createFlowDestination = destination
-                        }
-                    },
-                    onCancel: dismissCreateFlow
-                )
-            }
-        }
-        .presentationDetents(createFlowDestination == nil ? [SSSheetPresentation.chooser, .large] : [.large])
-        .presentationDragIndicator(.visible)
-        .presentationCornerRadius(SideSeatTheme.cardRadius)
-        .presentationBackground(
-            createFlowDestination == nil ? SideSeatTheme.bg : SideSeatTheme.bgGrouped
-        )
-        .animation(.easeInOut(duration: 0.22), value: createFlowDestination)
-    }
-
-    private func openPendingCreatedPost() {
-        guard let postID = pendingCreatedPostID else { return }
-        pendingCreatedPostID = nil
-        selectedTab = .discover
-        routers.router(for: .discover).navigate(to: .discoverPost(postID: postID))
-    }
-
-    private func dismissCreateFlow() {
-        isCreateFlowPresented = false
-        createFlowDestination = nil
-    }
-
     private func tab<Content: View>(
         _ tab: AppTab,
         title: LocalizedStringKey,
@@ -433,7 +352,7 @@ struct AppShellView: View {
         if let explicitTab {
             tab = explicitTab
         } else if let route {
-            tab = tabForRoute(route)
+            tab = MVPRoutePolicy.tab(for: route)
         } else {
             return
         }
@@ -442,83 +361,55 @@ struct AppShellView: View {
             routers.router(for: tab).navigate(to: route)
         }
     }
-
-    private func tabForRoute(_ route: AppRoute) -> AppTab {
-        switch route {
-        case .courses, .archivedCourses, .course:
-            return .me
-        case .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .plans, .scheduleShare,
-             .actionResponses, .coordinationShell:
-            return .chats
-        case .eventShare:
-            return .home
-        case .myPosts, .savedPosts, .profile, .settings, .blockedUsers, .supportStore, .feedback, .feedbackDetail:
-            return .me
-        case .discoverPost, .activity:
-            return .discover
-        }
-    }
 }
 
 private extension View {
     func withAppDestinations() -> some View {
         navigationDestination(for: AppRoute.self) { route in
-            switch route {
-            case .courses:
-                CourseListView()
-            case .archivedCourses:
-                ArchivedCourseListView()
-            case .myPosts:
-                MyPostsView()
-            case .savedPosts:
-                SavedPostsView()
-            case .profile(let id):
-                PublicProfileView(userID: id)
-            case .contacts:
-                ContactsView()
-            case .plans:
-                PlansRootView()
-            case .settings:
-                SettingsRootView()
-            case .blockedUsers:
-                BlockedUsersView()
-            case .supportStore:
-                SupportStoreView()
-            case .feedback:
-                FeedbackRootView()
-            case .feedbackDetail(let id):
-                FeedbackDetailView(feedbackID: id)
-            case .scheduleShare(let token):
-                ScheduleShareRecipientView(token: token)
-            case .eventShare(let token):
-                CalendarEventShareRecipientView(token: token)
-            case .directChat(let id, let focus):
-                DirectChatView(connectionID: id, initialFocus: focus)
-                    .toolbar(.hidden, for: .tabBar)
-            case .courseChat(let id):
-                CommunityChatView(kind: .course, conversationID: id)
-                    .toolbar(.hidden, for: .tabBar)
-            case .groupChat(let id):
-                CommunityChatView(kind: .group, conversationID: id)
-                    .toolbar(.hidden, for: .tabBar)
-            case .groupChatInfo(let id):
-                GroupInfoView(groupChatID: id)
-                    .toolbar(.hidden, for: .tabBar)
-            case .course(let id):
-                CourseDetailView(courseID: id)
-            case .discoverPost(let id):
-                DiscoverBuddyDetailView(postID: id)
-                    .toolbar(.hidden, for: .tabBar)
-            case .activity(let id):
-                DiscoverActivityDetailView(activityID: id)
-                    .toolbar(.hidden, for: .tabBar)
-            case .actionResponses(let actionID, let interestID):
-                ActionResponsesView(actionID: actionID, focusedInterestID: interestID)
-                    .toolbar(.hidden, for: .tabBar)
-            case .coordinationShell(let interestID, let reservationID):
-                CoordinationShellView(interestID: interestID, expectedReservationID: reservationID)
-                    .toolbar(.hidden, for: .tabBar)
+            switch MVPRoutePolicy.disposition(for: route) {
+            case .legacyUnavailable:
+                MVPUnavailableView()
+            case .allowed:
+                switch route {
+                case .courses:
+                    CourseListView()
+                case .archivedCourses:
+                    ArchivedCourseListView()
+                case .plans:
+                    PlansRootView()
+                case .settings:
+                    SettingsRootView()
+                case .blockedUsers:
+                    BlockedUsersView()
+                case .feedback:
+                    FeedbackRootView()
+                case .feedbackDetail(let id):
+                    FeedbackDetailView(feedbackID: id)
+                case .scheduleShare(let token):
+                    ScheduleShareRecipientView(token: token)
+                case .eventShare(let token):
+                    CalendarEventShareRecipientView(token: token)
+                case .directChat(let id, let focus):
+                    DirectChatView(connectionID: id, initialFocus: focus)
+                        .toolbar(.hidden, for: .tabBar)
+                case .course(let id):
+                    CourseDetailView(courseID: id)
+                default:
+                    MVPUnavailableView()
+                }
             }
         }
+    }
+}
+
+private struct MVPUnavailableView: View {
+    var body: some View {
+        ContentUnavailableView {
+            Label("SideSeat", systemImage: "link")
+        } description: {
+            Text("Details are no longer available.")
+        }
+        .padding()
+        .accessibilityIdentifier("mvp-route-unavailable")
     }
 }

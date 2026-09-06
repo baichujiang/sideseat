@@ -49,6 +49,60 @@ enum AppRoute: Hashable, Sendable {
     case coordinationShell(interestID: String, reservationID: String?)
 }
 
+enum MVPRouteDisposition: Equatable, Sendable {
+    case allowed
+    case legacyUnavailable
+}
+
+enum MVPRoutePolicy {
+    static func disposition(for route: AppRoute) -> MVPRouteDisposition {
+        switch route {
+        case .courses,
+             .archivedCourses,
+             .plans,
+             .settings,
+             .blockedUsers,
+             .feedback,
+             .feedbackDetail,
+             .scheduleShare,
+             .eventShare,
+             .directChat,
+             .course:
+            return .allowed
+
+        case .myPosts,
+             .savedPosts,
+             .profile,
+             .contacts,
+             .supportStore,
+             .courseChat,
+             .groupChat,
+             .groupChatInfo,
+             .discoverPost,
+             .activity,
+             .actionResponses,
+             .coordinationShell:
+            return .legacyUnavailable
+        }
+    }
+
+    static func tab(for route: AppRoute) -> AppTab {
+        switch route {
+        case .courses, .archivedCourses, .course:
+            return .me
+        case .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .plans, .scheduleShare,
+             .actionResponses, .coordinationShell:
+            return .chats
+        case .eventShare:
+            return .home
+        case .myPosts, .savedPosts, .profile, .settings, .blockedUsers, .supportStore, .feedback, .feedbackDetail:
+            return .me
+        case .discoverPost, .activity:
+            return .discover
+        }
+    }
+}
+
 enum CreateDestination: String, Identifiable, CaseIterable {
     case courseAction
     case buddyPost

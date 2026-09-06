@@ -95,6 +95,61 @@ struct MVPReadinessCacheTests {
     }
 }
 
+@Suite("MVP route policy")
+struct MVPRoutePolicyTests {
+    @Test("Keeps canonical MVP owners reachable")
+    func allowsCanonicalRoutes() {
+        let allowed: [AppRoute] = [
+            .courses,
+            .archivedCourses,
+            .plans,
+            .settings,
+            .blockedUsers,
+            .feedback,
+            .feedbackDetail(feedbackID: "feedback-1"),
+            .scheduleShare(token: "share-1"),
+            .eventShare(token: "event-1"),
+            .directChat(connectionID: "connection-1"),
+            .course(courseID: "course-1"),
+        ]
+
+        for route in allowed {
+            #expect(MVPRoutePolicy.disposition(for: route) == .allowed)
+        }
+    }
+
+    @Test("Keeps legacy social routes parseable but unavailable")
+    func hidesLegacyRoutes() {
+        let legacy: [AppRoute] = [
+            .myPosts,
+            .savedPosts,
+            .profile(userID: "user-1"),
+            .contacts,
+            .supportStore,
+            .courseChat(courseID: "course-1"),
+            .groupChat(groupChatID: "group-1"),
+            .groupChatInfo(groupChatID: "group-1"),
+            .discoverPost(postID: "post-1"),
+            .activity(activityID: "activity-1"),
+            .actionResponses(actionID: "action-1", interestID: nil),
+            .coordinationShell(interestID: "interest-1", reservationID: nil),
+        ]
+
+        for route in legacy {
+            #expect(MVPRoutePolicy.disposition(for: route) == .legacyUnavailable)
+        }
+    }
+
+    @Test("Maps canonical owners to the stable four-tab IA")
+    func mapsOwnerTabs() {
+        #expect(MVPRoutePolicy.tab(for: .directChat(connectionID: "connection-1")) == .chats)
+        #expect(MVPRoutePolicy.tab(for: .plans) == .chats)
+        #expect(MVPRoutePolicy.tab(for: .eventShare(token: "event-1")) == .home)
+        #expect(MVPRoutePolicy.tab(for: .courses) == .me)
+        #expect(MVPRoutePolicy.tab(for: .settings) == .me)
+    }
+}
+
 @Suite("App language", .serialized)
 struct AppLanguageTests {
     @Test("Persists an in-app language selection")

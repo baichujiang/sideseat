@@ -199,18 +199,6 @@ final class DeepLinkRouter {
     }
 
     nonisolated private static func tab(for route: AppRoute) -> AppTab {
-        switch route {
-        case .courses, .archivedCourses, .course:
-            return .me
-        case .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .plans, .scheduleShare,
-             .actionResponses, .coordinationShell:
-            return .chats
-        case .eventShare:
-            return .home
-        case .myPosts, .savedPosts, .profile, .settings, .blockedUsers, .supportStore, .feedback, .feedbackDetail:
-            return .me
-        case .discoverPost, .activity:
-            return .discover
-        }
+        MVPRoutePolicy.tab(for: route)
     }
 }
