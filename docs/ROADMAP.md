@@ -69,6 +69,9 @@ participant response coverage and 40% bilateral Plan coverage in two snapshots
 at least seven days apart. Continue the Layer 2 pilot; do not begin Layer 3.
 The first production non-QA baseline on 2026-09-07 contains 0 eligible Plans;
 all 3 candidate Plans were excluded as QA/internal.
+Build 32 improves pilot completion by surfacing pending Plan decisions and
+Outcome answers in the Messages and app-icon attention badges, then refreshing
+that state immediately after an Outcome is saved.
 See the [pilot Gate contract](./LAYER2_PILOT.md) and
 [non-QA tester guide](./LAYER2_PILOT_TESTER_GUIDE.md) for the active pilot, and
 [acceptance record](./releases/2026-09-07-layer2-production-acceptance.md).

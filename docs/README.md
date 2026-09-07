@@ -51,6 +51,7 @@ Historical build evidence never certifies a newer build.
 | [TestFlight 1.0.0 (29)](./releases/2026-09-02-testflight-29.md) | Immutable facts and missing evidence for one uploaded build |
 | [TestFlight 1.0.0 (30)](./releases/2026-09-07-testflight-30.md) | Distributed Layer 2 build and physical acceptance evidence |
 | [TestFlight 1.0.0 (31)](./releases/2026-09-07-testflight-31.md) | Localization-complete internal pilot build and focused smoke plan |
+| [TestFlight 1.0.0 (32)](./releases/2026-09-07-testflight-32.md) | Layer 2 Plan and Outcome attention-badge pilot build |
 | `archive/visual-qa-pre-together/` | Historical screenshots from the old navigation; not current sign-off |
 
 Compatibility material cannot reintroduce public Discover, publishing, city
