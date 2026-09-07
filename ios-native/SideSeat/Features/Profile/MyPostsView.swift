@@ -555,8 +555,8 @@ private enum MyPublishedItem: Identifiable {
         else { return nil }
         switch post.closureReason?.uppercased() {
         case "SCHOOL_CHANGED":
-            return String(
-                localized: "Closed because your school changed. Review visibility and courses before reposting."
+            return AppLocalization.string(
+                "Closed because your school changed. Review visibility and courses before reposting."
             )
         case "AUTHOR_CLOSED":
             return AppLocalization.string( "Closed by you.")

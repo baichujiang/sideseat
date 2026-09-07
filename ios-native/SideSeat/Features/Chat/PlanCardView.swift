@@ -77,8 +77,8 @@ struct PlanCardView: View {
             if canRespond {
                 Text(
                     isRescheduleProposal
-                        ? "Accepting replaces the confirmed time and updates both calendars."
-                        : "Accepting confirms this Plan and adds it to both calendars."
+                        ? AppLocalization.string("Accepting replaces the confirmed time and updates both calendars.")
+                        : AppLocalization.string("Accepting confirms this Plan and adds it to both calendars.")
                 )
                 .font(.caption)
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -91,7 +91,11 @@ struct PlanCardView: View {
                       plan.proposer.id == currentUserID,
                       plan.usesActionCoordinationV2 {
                 Button(role: .destructive, action: onWithdraw) {
-                    Text(isRescheduleProposal ? "Withdraw new time" : "Withdraw proposal")
+                    Text(
+                        isRescheduleProposal
+                            ? AppLocalization.string("Withdraw new time")
+                            : AppLocalization.string("Withdraw proposal")
+                    )
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
@@ -291,14 +295,15 @@ struct PlanCardView: View {
     @ViewBuilder
     private func planDateDetails(start: Date, end: Date) -> some View {
         let calendar = Calendar.autoupdatingCurrent
+        let locale = AppLocalization.selectedLanguage.locale
         if calendar.isDate(start, inSameDayAs: end) {
             Label(
-                "\(start.formatted(date: .abbreviated, time: .shortened)) · \(end.formatted(date: .omitted, time: .shortened))",
+                "\(start.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(locale))) · \(end.formatted(.dateTime.hour().minute().locale(locale)))",
                 systemImage: "calendar"
             )
         } else {
             Label(
-                "\(start.formatted(date: .abbreviated, time: .shortened)) – \(end.formatted(date: .abbreviated, time: .shortened))",
+                "\(start.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(locale))) – \(end.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(locale)))",
                 systemImage: "calendar"
             )
         }

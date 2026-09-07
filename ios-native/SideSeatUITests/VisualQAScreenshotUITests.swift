@@ -87,12 +87,25 @@ final class VisualQAScreenshotUITests: XCTestCase {
         XCTAssertTrue(pendingPlans.waitForExistence(timeout: 8))
         pendingPlans.tap()
 
+        XCTAssertTrue(app.navigationBars["计划"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["需要你回应"].exists)
+        XCTAssertTrue(app.staticTexts["即将开始"].exists)
+        XCTAssertTrue(app.staticTexts["历史与已结束"].exists)
+        XCTAssertTrue(app.staticTexts["已确认"].firstMatch.exists)
+        XCTAssertTrue(app.staticTexts["在对话中管理"].firstMatch.exists)
+        XCTAssertFalse(app.staticTexts["Past & Ended"].exists)
+        XCTAssertFalse(app.staticTexts["Confirmed"].exists)
+        XCTAssertFalse(app.staticTexts["Manage in conversation"].exists)
+
         let planRow = app.buttons["plans-row-ui-plan-1"]
         XCTAssertTrue(planRow.waitForExistence(timeout: 5))
         planRow.tap()
 
         let actions = app.descendants(matching: .any)["plan-card-actions-ui-plan-1"]
         XCTAssertTrue(actions.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["已提议"].exists)
+        XCTAssertTrue(app.staticTexts["接受后会确认此计划，并添加到双方日历。"].exists)
+        XCTAssertFalse(app.staticTexts["Proposed"].exists)
         XCTAssertLessThanOrEqual(actions.frame.height, 48)
         RunLoop.current.run(until: Date().addingTimeInterval(0.35))
         saveScreenshot(app: app, name: "chat-plan-invite-\(appearance)")

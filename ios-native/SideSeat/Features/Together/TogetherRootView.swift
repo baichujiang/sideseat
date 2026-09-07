@@ -464,7 +464,7 @@ private struct TogetherHomeView: View {
     private var opportunitySection: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
             SSProductSectionHeader(
-                title: "Opportunities",
+                title: AppLocalization.string("Opportunities"),
                 accessibilityID: "together-opportunities-section-title"
             )
 
@@ -615,7 +615,7 @@ private struct TogetherHomeView: View {
 
                         if let start = plan.startDate, let end = plan.endDate {
                             Label(
-                                "\(start.formatted(date: .abbreviated, time: .shortened)) – \(end.formatted(date: .omitted, time: .shortened))",
+                                "\(start.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(AppLocalization.selectedLanguage.locale))) – \(end.formatted(.dateTime.hour().minute().locale(AppLocalization.selectedLanguage.locale)))",
                                 systemImage: "calendar"
                             )
                             .font(.footnote)

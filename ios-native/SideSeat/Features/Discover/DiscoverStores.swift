@@ -614,8 +614,8 @@ final class DiscoverCreateStore {
 
         return await save(
             using: session,
-            methodUnavailableMessage: String(
-                localized: "Editing is not available on this server version yet. Please try again shortly."
+            methodUnavailableMessage: AppLocalization.string(
+                "Editing is not available on this server version yet. Please try again shortly."
             )
         ) {
             let uploadedImageURLs = try await uploadBuddyImages(images, using: session)

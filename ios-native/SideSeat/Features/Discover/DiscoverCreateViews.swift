@@ -1163,13 +1163,15 @@ struct DiscoverPlanCreateView: View {
             didSucceed = true
             await onCreated(savedPostID)
         } else {
-            submitIssue = store.issue ?? String(
-                localized: isEditing
-                    ? "The buddy post could not be updated. Please try again."
-                    : (isReposting
-                        ? "The buddy post could not be reposted. Please try again."
-                        : "The buddy post could not be published. Please try again.")
-            )
+            if let issue = store.issue {
+                submitIssue = issue
+            } else if isEditing {
+                submitIssue = AppLocalization.string("The buddy post could not be updated. Please try again.")
+            } else if isReposting {
+                submitIssue = AppLocalization.string("The buddy post could not be reposted. Please try again.")
+            } else {
+                submitIssue = AppLocalization.string("The buddy post could not be published. Please try again.")
+            }
         }
     }
 

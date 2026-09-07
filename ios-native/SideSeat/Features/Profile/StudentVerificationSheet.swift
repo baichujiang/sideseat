@@ -449,8 +449,8 @@ struct StudentVerificationSheet: View {
         let document = profile.studentStatus == "ALUMNI"
             ? AppLocalization.string( "a diploma or graduation document")
             : AppLocalization.string( "an enrollment document or student card")
-        return String(
-            localized: "Upload \(document), PDF or image, up to 4 MB. Hide student numbers, birth dates, addresses, and other details we do not need. The private file is deleted after review or within 30 days."
+        return AppLocalization.string(
+            "Upload \(document), PDF or image, up to 4 MB. Hide student numbers, birth dates, addresses, and other details we do not need. The private file is deleted after review or within 30 days."
         )
     }
 

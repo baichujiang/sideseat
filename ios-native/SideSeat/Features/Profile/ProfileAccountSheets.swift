@@ -34,8 +34,8 @@ struct ProfileUsernameSheet: View {
                 if let nextAllowedAt = profile.usernameNextAllowedAt, !profile.canChangeUsernameNow {
                     Section {
                         Label(
-                            String(
-                                localized: "Available \(nextAllowedAt.formatted(date: .abbreviated, time: .shortened))."
+                            AppLocalization.string(
+                                "Available \(nextAllowedAt.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(AppLocalization.selectedLanguage.locale)))."
                             ),
                             systemImage: "clock"
                         )
@@ -45,8 +45,8 @@ struct ProfileUsernameSheet: View {
                 } else {
                     Section {
                         Label(
-                            String(
-                                localized: "\(profile.usernameChangesRemaining) username changes remaining in this 7-day period."
+                            AppLocalization.string(
+                                "\(profile.usernameChangesRemaining) username changes remaining in this 7-day period."
                             ),
                             systemImage: "arrow.counterclockwise"
                         )

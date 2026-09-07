@@ -551,6 +551,72 @@ struct AppLanguageTests {
         #expect(german == "Einstellungen")
         #expect(chinese == "设置")
     }
+
+    @Test("Keeps every bundled language on the same localization key set")
+    func keepsLocalizationKeySetsAligned() throws {
+        let englishKeys = try localizationKeys(for: .english)
+
+        for language in [AppLanguage.simplifiedChinese, .german] {
+            let localizedKeys = try localizationKeys(for: language)
+            #expect(
+                localizedKeys == englishKeys,
+                "\(language.rawValue) localization keys differ from English"
+            )
+        }
+    }
+
+    @Test("Keeps the active Plan flow translated in every non-English bundle")
+    func translatesActivePlanFlow() {
+        let keys = [
+            "Proposed and confirmed Plans will appear here.",
+            "Opportunities",
+            "Proposed",
+            "Past & Ended",
+            "Confirmed",
+            "Superseded",
+            "Manage in conversation",
+            "Open Plan in conversation",
+            "Your confirmed Plan stays in place until this new time is accepted.",
+            "The confirmed Plan stays unchanged until this new time is accepted.",
+            "Accepting replaces the confirmed time and updates both calendars.",
+            "Accepting confirms this Plan and adds it to both calendars.",
+            "Withdraw new time",
+            "Withdraw proposal",
+            "Confirmed in both calendars",
+            "New time",
+            "Propose new time",
+            "Reschedule proposed",
+            "This proposal was declined.",
+            "A newer proposal is now in the conversation.",
+            "This proposal was withdrawn or canceled.",
+            "This proposal expired before it was confirmed.",
+            "This Plan is no longer available.",
+            "This Plan is no longer active.",
+            "Manage Plan",
+            "Shared Plan details are managed in Messages.",
+        ]
+
+        for language in [AppLanguage.simplifiedChinese, .german] {
+            let bundle = AppLocalization.localizationBundle(for: language)
+            for key in keys {
+                let translation = bundle.localizedString(forKey: key, value: nil, table: nil)
+                #expect(translation != key, "Missing \(language.rawValue) translation for \(key)")
+            }
+        }
+    }
+
+    private func localizationKeys(for language: AppLanguage) throws -> Set<String> {
+        let bundle = AppLocalization.localizationBundle(for: language)
+        let url = try #require(bundle.url(forResource: "Localizable", withExtension: "strings"))
+        let data = try Data(contentsOf: url)
+        let propertyList = try PropertyListSerialization.propertyList(
+            from: data,
+            options: [],
+            format: nil
+        )
+        let table = try #require(propertyList as? [String: String])
+        return Set(table.keys)
+    }
 }
 
 private extension CurrentUser {

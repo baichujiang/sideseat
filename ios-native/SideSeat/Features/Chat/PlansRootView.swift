@@ -15,10 +15,10 @@ enum MVPPlanSection: String, CaseIterable, Equatable, Sendable {
 
     var title: String {
         switch self {
-        case .needsResponse: "Needs your response"
-        case .upcoming: "Upcoming"
-        case .proposed: "Proposed"
-        case .pastEnded: "Past & Ended"
+        case .needsResponse: AppLocalization.string("Needs your response")
+        case .upcoming: AppLocalization.string("Upcoming")
+        case .proposed: AppLocalization.string("Proposed")
+        case .pastEnded: AppLocalization.string("Past & Ended")
         }
     }
 
@@ -311,14 +311,15 @@ struct PlansRootView: View {
     @ViewBuilder
     private func planDateDetails(start: Date, end: Date) -> some View {
         let calendar = Calendar.autoupdatingCurrent
+        let locale = AppLocalization.selectedLanguage.locale
         if calendar.isDate(start, inSameDayAs: end) {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
                 Label(
-                    start.formatted(date: .abbreviated, time: .omitted),
+                    start.formatted(.dateTime.year().month(.abbreviated).day().locale(locale)),
                     systemImage: "calendar"
                 )
                 Label(
-                    "\(start.formatted(date: .omitted, time: .shortened)) – \(end.formatted(date: .omitted, time: .shortened))",
+                    "\(start.formatted(.dateTime.hour().minute().locale(locale))) – \(end.formatted(.dateTime.hour().minute().locale(locale)))",
                     systemImage: "clock"
                 )
             }
@@ -326,7 +327,7 @@ struct PlansRootView: View {
             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
         } else {
             Label(
-                "\(start.formatted(date: .abbreviated, time: .shortened)) – \(end.formatted(date: .abbreviated, time: .shortened))",
+                "\(start.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(locale))) – \(end.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(locale)))",
                 systemImage: "calendar"
             )
             .font(.footnote)
