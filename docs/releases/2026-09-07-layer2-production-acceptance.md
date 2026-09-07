@@ -90,6 +90,7 @@ bilateral response coverage, and the roadmap defines no numeric sufficiency
 threshold.
 
 Continue the Layer 2 pilot and collect non-QA bilateral Outcome responses using
-the same rolling 14-day denominator. Define the minimum sample and coverage
-threshold before evaluating the Gate again. Layer 3 must not start until that
-decision is recorded as passed.
+the same rolling 14-day denominator. The minimum sample, coverage thresholds
+and consecutive-snapshot rule are now defined in the
+[Layer 2 pilot Gate contract](../LAYER2_PILOT.md). Layer 3 must not start until
+that decision is recorded as passed.

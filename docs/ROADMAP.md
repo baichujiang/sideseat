@@ -63,10 +63,14 @@ Gate: sufficient bilateral response coverage to measure occurred plans without
 treating silence as failure.
 
 Current gate status (2026-09-07): **open**. The production contract and the
-two-account physical-device acceptance path pass, but the rolling 14-day sample
-contains only 3 eligible ended accepted Plans. Outcome response coverage and
-bilateral Plan coverage are both 33.3%. Continue the Layer 2 pilot; do not begin
-Layer 3. See the [acceptance record](./releases/2026-09-07-layer2-production-acceptance.md).
+two-account physical-device acceptance path pass. The numeric Gate now requires
+at least 20 eligible non-QA Plans, 10 distinct pairs, 8 bilateral answers, 60%
+participant response coverage and 40% bilateral Plan coverage in two snapshots
+at least seven days apart. Continue the Layer 2 pilot; do not begin Layer 3.
+The first production non-QA baseline on 2026-09-07 contains 0 eligible Plans;
+all 3 candidate Plans were excluded as QA/internal.
+See the [pilot Gate contract](./LAYER2_PILOT.md) and
+[acceptance record](./releases/2026-09-07-layer2-production-acceptance.md).
 
 ## Layer 3 — Meet Again and Repeat Opportunity
 
