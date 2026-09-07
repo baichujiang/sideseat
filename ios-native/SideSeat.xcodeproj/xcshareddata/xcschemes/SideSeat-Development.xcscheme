@@ -95,11 +95,6 @@
       </CommandLineArguments>
       <EnvironmentVariables>
          <EnvironmentVariable
-            key = "SIDESEAT_LIVE_API_BASE_URL"
-            value = "$(SIDESEAT_LIVE_API_BASE_URL)"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-         <EnvironmentVariable
             key = "E2E_COURSE_ID"
             value = "$(E2E_COURSE_ID)"
             isEnabled = "YES">
@@ -132,6 +127,11 @@
          <EnvironmentVariable
             key = "E2E_USER"
             value = "$(E2E_USER)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "SIDESEAT_LIVE_API_BASE_URL"
+            value = "$(SIDESEAT_LIVE_API_BASE_URL)"
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable

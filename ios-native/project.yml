@@ -44,6 +44,7 @@ targets:
         CFBundleDisplayName: SideSeat
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        ITSAppUsesNonExemptEncryption: false
         CFBundleURLTypes:
           - CFBundleURLName: app.sideseat.mobile
             CFBundleURLSchemes:

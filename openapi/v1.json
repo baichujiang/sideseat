@@ -575,6 +575,78 @@
         }
       }
     },
+    "/api/v1/me/languages": {
+      "put": {
+        "operationId": "updateCurrentProfileLanguages",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._:-]+$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileLanguagesUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated the current user's coordination languages.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CurrentProfile"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
     "/api/v1/me/username": {
       "patch": {
         "operationId": "updateCurrentProfileUsername",
@@ -13948,6 +14020,78 @@
           }
         }
       },
+      "ProfileLanguage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tag": {
+            "type": "string",
+            "enum": [
+              "CHINESE",
+              "ENGLISH",
+              "GERMAN",
+              "FRENCH",
+              "HINDI",
+              "SPANISH",
+              "OTHER"
+            ]
+          },
+          "proficiency": {
+            "type": "string",
+            "enum": [
+              "NATIVE",
+              "FLUENT",
+              "CONVERSATIONAL",
+              "BASIC",
+              "LEARNING"
+            ]
+          }
+        },
+        "required": [
+          "tag",
+          "proficiency"
+        ]
+      },
+      "ProfileLanguagesUpdateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "languages": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/ProfileLanguage"
+            }
+          }
+        },
+        "required": [
+          "languages"
+        ]
+      },
+      "ProfileReadiness": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "campusIdentityComplete": {
+            "type": "boolean"
+          },
+          "languagesComplete": {
+            "type": "boolean"
+          },
+          "verificationState": {
+            "type": "string"
+          },
+          "ready": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "campusIdentityComplete",
+          "languagesComplete",
+          "verificationState",
+          "ready"
+        ]
+      },
       "ProfileUsernameUpdateRequest": {
         "type": "object",
         "additionalProperties": false,
@@ -14025,6 +14169,15 @@
                 "items": {
                   "$ref": "#/components/schemas/ProfileLifePhoto"
                 }
+              },
+              "languages": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProfileLanguage"
+                }
+              },
+              "readiness": {
+                "$ref": "#/components/schemas/ProfileReadiness"
               },
               "contacts": {
                 "type": "object",
@@ -14116,6 +14269,8 @@
               "displayName",
               "schoolSummary",
               "lifePhotos",
+              "languages",
+              "readiness",
               "contacts",
               "privacy",
               "usernameChangePolicy",

@@ -191,6 +191,22 @@ test("the repository v1 contract passes structural and route checks", () => {
   assert.ok(result.implementedCount > 0);
 });
 
+test("coordination-language mutation is part of the generated client contract", () => {
+  const spec = JSON.parse(readFileSync(join(root, "openapi/v1.json"), "utf8"));
+  const operation = spec.paths["/api/v1/me/languages"].put;
+
+  assert.equal(operation.operationId, "updateCurrentProfileLanguages");
+  assert.equal(
+    operation.requestBody.content["application/json"].schema.$ref,
+    "#/components/schemas/ProfileLanguagesUpdateRequest",
+  );
+  assert.equal(
+    operation.responses["200"].content["application/json"].schema.allOf[1]
+      .properties.data.$ref,
+    "#/components/schemas/CurrentProfile",
+  );
+});
+
 test("legacy direct Interest documents its actual 201 and explicit wire schema", () => {
   const spec = JSON.parse(readFileSync(join(root, "openapi/v1.json"), "utf8"));
   const item = spec.paths["/api/v1/discover/posts/{postId}/interest"];

@@ -368,11 +368,13 @@ describe("native iOS release assets", () => {
 
   it("declares that the app uses no non-exempt encryption", () => {
     const infoPlist = readRepoFile("ios-native/SideSeat/Resources/Info.plist");
+    const project = readRepoFile("ios-native/project.yml");
 
     assert.match(
       infoPlist,
       /<key>ITSAppUsesNonExemptEncryption<\/key>\s*<false\/>/,
     );
+    assert.match(project, /ITSAppUsesNonExemptEncryption: false/);
   });
 
   it("uploads Production archive dSYMs through a guarded Sentry build phase", () => {

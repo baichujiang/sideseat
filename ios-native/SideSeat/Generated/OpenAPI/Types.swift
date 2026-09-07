@@ -52,6 +52,9 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `PATCH /api/v1/me/profile`.
     /// - Remark: Generated from `#/paths//api/v1/me/profile/patch(updateCurrentProfile)`.
     func updateCurrentProfile(_ input: Operations.UpdateCurrentProfile.Input) async throws -> Operations.UpdateCurrentProfile.Output
+    /// - Remark: HTTP `PUT /api/v1/me/languages`.
+    /// - Remark: Generated from `#/paths//api/v1/me/languages/put(updateCurrentProfileLanguages)`.
+    func updateCurrentProfileLanguages(_ input: Operations.UpdateCurrentProfileLanguages.Input) async throws -> Operations.UpdateCurrentProfileLanguages.Output
     /// - Remark: HTTP `PATCH /api/v1/me/username`.
     /// - Remark: Generated from `#/paths//api/v1/me/username/patch(updateCurrentProfileUsername)`.
     func updateCurrentProfileUsername(_ input: Operations.UpdateCurrentProfileUsername.Input) async throws -> Operations.UpdateCurrentProfileUsername.Output
@@ -646,6 +649,17 @@ extension APIProtocol {
         body: Operations.UpdateCurrentProfile.Input.Body
     ) async throws -> Operations.UpdateCurrentProfile.Output {
         try await updateCurrentProfile(Operations.UpdateCurrentProfile.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// - Remark: HTTP `PUT /api/v1/me/languages`.
+    /// - Remark: Generated from `#/paths//api/v1/me/languages/put(updateCurrentProfileLanguages)`.
+    internal func updateCurrentProfileLanguages(
+        headers: Operations.UpdateCurrentProfileLanguages.Input.Headers,
+        body: Operations.UpdateCurrentProfileLanguages.Input.Body
+    ) async throws -> Operations.UpdateCurrentProfileLanguages.Output {
+        try await updateCurrentProfileLanguages(Operations.UpdateCurrentProfileLanguages.Input(
             headers: headers,
             body: body
         ))
@@ -15357,6 +15371,147 @@ internal enum Components {
                 ])
             }
         }
+        /// - Remark: Generated from `#/components/schemas/ProfileLanguage`.
+        internal struct ProfileLanguage: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ProfileLanguage/tag`.
+            internal enum TagPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case chinese = "CHINESE"
+                case english = "ENGLISH"
+                case german = "GERMAN"
+                case french = "FRENCH"
+                case hindi = "HINDI"
+                case spanish = "SPANISH"
+                case other = "OTHER"
+            }
+            /// - Remark: Generated from `#/components/schemas/ProfileLanguage/tag`.
+            internal var tag: Components.Schemas.ProfileLanguage.TagPayload
+            /// - Remark: Generated from `#/components/schemas/ProfileLanguage/proficiency`.
+            internal enum ProficiencyPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case native = "NATIVE"
+                case fluent = "FLUENT"
+                case conversational = "CONVERSATIONAL"
+                case basic = "BASIC"
+                case learning = "LEARNING"
+            }
+            /// - Remark: Generated from `#/components/schemas/ProfileLanguage/proficiency`.
+            internal var proficiency: Components.Schemas.ProfileLanguage.ProficiencyPayload
+            /// Creates a new `ProfileLanguage`.
+            ///
+            /// - Parameters:
+            ///   - tag:
+            ///   - proficiency:
+            internal init(
+                tag: Components.Schemas.ProfileLanguage.TagPayload,
+                proficiency: Components.Schemas.ProfileLanguage.ProficiencyPayload
+            ) {
+                self.tag = tag
+                self.proficiency = proficiency
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case tag
+                case proficiency
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.tag = try container.decode(
+                    Components.Schemas.ProfileLanguage.TagPayload.self,
+                    forKey: .tag
+                )
+                self.proficiency = try container.decode(
+                    Components.Schemas.ProfileLanguage.ProficiencyPayload.self,
+                    forKey: .proficiency
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "tag",
+                    "proficiency"
+                ])
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ProfileLanguagesUpdateRequest`.
+        internal struct ProfileLanguagesUpdateRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ProfileLanguagesUpdateRequest/languages`.
+            internal var languages: [Components.Schemas.ProfileLanguage]
+            /// Creates a new `ProfileLanguagesUpdateRequest`.
+            ///
+            /// - Parameters:
+            ///   - languages:
+            internal init(languages: [Components.Schemas.ProfileLanguage]) {
+                self.languages = languages
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case languages
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.languages = try container.decode(
+                    [Components.Schemas.ProfileLanguage].self,
+                    forKey: .languages
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "languages"
+                ])
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ProfileReadiness`.
+        internal struct ProfileReadiness: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ProfileReadiness/campusIdentityComplete`.
+            internal var campusIdentityComplete: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/ProfileReadiness/languagesComplete`.
+            internal var languagesComplete: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/ProfileReadiness/verificationState`.
+            internal var verificationState: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ProfileReadiness/ready`.
+            internal var ready: Swift.Bool
+            /// Creates a new `ProfileReadiness`.
+            ///
+            /// - Parameters:
+            ///   - campusIdentityComplete:
+            ///   - languagesComplete:
+            ///   - verificationState:
+            ///   - ready:
+            internal init(
+                campusIdentityComplete: Swift.Bool,
+                languagesComplete: Swift.Bool,
+                verificationState: Swift.String,
+                ready: Swift.Bool
+            ) {
+                self.campusIdentityComplete = campusIdentityComplete
+                self.languagesComplete = languagesComplete
+                self.verificationState = verificationState
+                self.ready = ready
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case campusIdentityComplete
+                case languagesComplete
+                case verificationState
+                case ready
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.campusIdentityComplete = try container.decode(
+                    Swift.Bool.self,
+                    forKey: .campusIdentityComplete
+                )
+                self.languagesComplete = try container.decode(
+                    Swift.Bool.self,
+                    forKey: .languagesComplete
+                )
+                self.verificationState = try container.decode(
+                    Swift.String.self,
+                    forKey: .verificationState
+                )
+                self.ready = try container.decode(
+                    Swift.Bool.self,
+                    forKey: .ready
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "campusIdentityComplete",
+                    "languagesComplete",
+                    "verificationState",
+                    "ready"
+                ])
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/ProfileUsernameUpdateRequest`.
         internal struct ProfileUsernameUpdateRequest: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/ProfileUsernameUpdateRequest/username`.
@@ -15448,6 +15603,10 @@ internal enum Components {
                 internal var schoolSummary: Components.Schemas.ProfileSchoolSummary
                 /// - Remark: Generated from `#/components/schemas/CurrentProfile/value2/lifePhotos`.
                 internal var lifePhotos: [Components.Schemas.ProfileLifePhoto]
+                /// - Remark: Generated from `#/components/schemas/CurrentProfile/value2/languages`.
+                internal var languages: [Components.Schemas.ProfileLanguage]
+                /// - Remark: Generated from `#/components/schemas/CurrentProfile/value2/readiness`.
+                internal var readiness: Components.Schemas.ProfileReadiness
                 /// - Remark: Generated from `#/components/schemas/CurrentProfile/value2/contacts`.
                 internal struct ContactsPayload: Codable, Hashable, Sendable {
                     /// - Remark: Generated from `#/components/schemas/CurrentProfile/value2/contacts/wechatHandle`.
@@ -15565,6 +15724,8 @@ internal enum Components {
                 ///   - displayName:
                 ///   - schoolSummary:
                 ///   - lifePhotos:
+                ///   - languages:
+                ///   - readiness:
                 ///   - contacts:
                 ///   - privacy:
                 ///   - usernameChangePolicy:
@@ -15573,6 +15734,8 @@ internal enum Components {
                     displayName: Swift.String,
                     schoolSummary: Components.Schemas.ProfileSchoolSummary,
                     lifePhotos: [Components.Schemas.ProfileLifePhoto],
+                    languages: [Components.Schemas.ProfileLanguage],
+                    readiness: Components.Schemas.ProfileReadiness,
                     contacts: Components.Schemas.CurrentProfile.Value2Payload.ContactsPayload,
                     privacy: Components.Schemas.CurrentProfile.Value2Payload.PrivacyPayload,
                     usernameChangePolicy: Components.Schemas.UsernameChangePolicy,
@@ -15581,6 +15744,8 @@ internal enum Components {
                     self.displayName = displayName
                     self.schoolSummary = schoolSummary
                     self.lifePhotos = lifePhotos
+                    self.languages = languages
+                    self.readiness = readiness
                     self.contacts = contacts
                     self.privacy = privacy
                     self.usernameChangePolicy = usernameChangePolicy
@@ -15590,6 +15755,8 @@ internal enum Components {
                     case displayName
                     case schoolSummary
                     case lifePhotos
+                    case languages
+                    case readiness
                     case contacts
                     case privacy
                     case usernameChangePolicy
@@ -21255,6 +21422,266 @@ internal enum Operations {
             /// Stable API error.
             ///
             /// - Remark: Generated from `#/paths//api/v1/me/profile/patch(updateCurrentProfile)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `PUT /api/v1/me/languages`.
+    /// - Remark: Generated from `#/paths//api/v1/me/languages/put(updateCurrentProfileLanguages)`.
+    internal enum UpdateCurrentProfileLanguages {
+        internal static let id: Swift.String = "updateCurrentProfileLanguages"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/me/languages/PUT/header`.
+            internal struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/languages/PUT/header/Idempotency-Key`.
+                internal var idempotencyKey: Swift.String
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateCurrentProfileLanguages.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                internal init(
+                    idempotencyKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateCurrentProfileLanguages.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.UpdateCurrentProfileLanguages.Input.Headers
+            /// - Remark: Generated from `#/paths/api/v1/me/languages/PUT/requestBody`.
+            internal enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/languages/PUT/requestBody/content/application\/json`.
+                case json(Components.Schemas.ProfileLanguagesUpdateRequest)
+            }
+            internal var body: Operations.UpdateCurrentProfileLanguages.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            internal init(
+                headers: Operations.UpdateCurrentProfileLanguages.Input.Headers,
+                body: Operations.UpdateCurrentProfileLanguages.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/languages/PUT/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/me/languages/PUT/responses/200/content/json`.
+                    internal struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/api/v1/me/languages/PUT/responses/200/content/json/value1`.
+                        internal var value1: Components.Schemas.SuccessEnvelope
+                        /// - Remark: Generated from `#/paths/api/v1/me/languages/PUT/responses/200/content/json/value2`.
+                        internal struct Value2Payload: Codable, Hashable, Sendable {
+                            /// - Remark: Generated from `#/paths/api/v1/me/languages/PUT/responses/200/content/json/value2/data`.
+                            internal var data: Components.Schemas.CurrentProfile
+                            /// Creates a new `Value2Payload`.
+                            ///
+                            /// - Parameters:
+                            ///   - data:
+                            internal init(data: Components.Schemas.CurrentProfile) {
+                                self.data = data
+                            }
+                            internal enum CodingKeys: String, CodingKey {
+                                case data
+                            }
+                        }
+                        /// - Remark: Generated from `#/paths/api/v1/me/languages/PUT/responses/200/content/json/value2`.
+                        internal var value2: Operations.UpdateCurrentProfileLanguages.Output.Ok.Body.JsonPayload.Value2Payload
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - value1:
+                        ///   - value2:
+                        internal init(
+                            value1: Components.Schemas.SuccessEnvelope,
+                            value2: Operations.UpdateCurrentProfileLanguages.Output.Ok.Body.JsonPayload.Value2Payload
+                        ) {
+                            self.value1 = value1
+                            self.value2 = value2
+                        }
+                        internal init(from decoder: any Swift.Decoder) throws {
+                            self.value1 = try .init(from: decoder)
+                            self.value2 = try .init(from: decoder)
+                        }
+                        internal func encode(to encoder: any Swift.Encoder) throws {
+                            try self.value1.encode(to: encoder)
+                            try self.value2.encode(to: encoder)
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/api/v1/me/languages/PUT/responses/200/content/application\/json`.
+                    case json(Operations.UpdateCurrentProfileLanguages.Output.Ok.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Operations.UpdateCurrentProfileLanguages.Output.Ok.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.UpdateCurrentProfileLanguages.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.UpdateCurrentProfileLanguages.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Updated the current user's coordination languages.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/languages/put(updateCurrentProfileLanguages)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.UpdateCurrentProfileLanguages.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.UpdateCurrentProfileLanguages.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/languages/put(updateCurrentProfileLanguages)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/languages/put(updateCurrentProfileLanguages)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            internal var conflict: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/languages/put(updateCurrentProfileLanguages)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/languages/put(updateCurrentProfileLanguages)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses._Error)

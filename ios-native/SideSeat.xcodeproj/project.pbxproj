@@ -168,7 +168,6 @@
 		E71F11FADCB88D69FDEA344F /* ChatSSEClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4EC5C6BE658AA2886D46F1 /* ChatSSEClient.swift */; };
 		E831E2D532EA9375B78E2B20 /* HomeDateStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BD41CABAEE2DE875752743A /* HomeDateStripView.swift */; };
 		E9F07750FC80E3A55898B669 /* AppRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8D4E37B43C570A523DFC5B /* AppRootView.swift */; };
-		EAEE40CCD5D7AD1A1B3BFC14 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 8C3555ACA17895D47BBB1144 /* README.md */; };
 		EB4EC2A62C9A608071AC6902 /* CredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECA6BDFC8E1906BE22DF662D /* CredentialStore.swift */; };
 		EC2E3CFCD62A238B1737976D /* GroupInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A675FE957FB469D2AEDEFB /* GroupInfoView.swift */; };
 		ED70BE27D8AE69117D929B92 /* APIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2FAF0DAF0FAFC178BC3E535 /* APIModels.swift */; };
@@ -297,7 +296,6 @@
 		843627AD8F218DA5D2232BC6 /* CourseStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseStores.swift; sourceTree = "<group>"; };
 		84D9B7E4E90D0246C91B6C35 /* InboxStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxStore.swift; sourceTree = "<group>"; };
 		8654D880631FDE3377FA8560 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
-		8C3555ACA17895D47BBB1144 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		8CAA3783FEFE6BD91D6FF4E8 /* HomeScheduleModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScheduleModels.swift; sourceTree = "<group>"; };
 		8E4EC5C6BE658AA2886D46F1 /* ChatSSEClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSSEClient.swift; sourceTree = "<group>"; };
 		8E56A57977F5529D517DA271 /* DeepLinkRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
@@ -602,7 +600,6 @@
 			isa = PBXGroup;
 			children = (
 				674F76BCD32D0507A1B7CBC6 /* Components */,
-				8C3555ACA17895D47BBB1144 /* README.md */,
 				B9E3EBDD9BC84D23382AA843 /* SideSeatTheme.swift */,
 			);
 			path = Design;
@@ -940,7 +937,6 @@
 				0A2F26B54A0C6AE985BC285C /* InfoPlist.strings in Resources */,
 				76C7AB994F965F1115771AED /* Localizable.strings in Resources */,
 				D3F1A79AEA6DD5DCE3BB330F /* PrivacyInfo.xcprivacy in Resources */,
-				EAEE40CCD5D7AD1A1B3BFC14 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
