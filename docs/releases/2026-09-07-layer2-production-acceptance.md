@@ -60,6 +60,17 @@ Physical-device UI tests:
 - `SocialLiveUITests/testLayer2SecondParticipantCompletesBilateralOutcomeFromMessages`
   passed in 24.631 seconds.
 
+The same contract was subsequently accepted on the distributed TestFlight
+version `1.0.0` (30), not only on a Development-signed build:
+
+- the same-process account-switch privacy check passed on the iPhone;
+- `test_002` submitted the second `OCCURRED` from Messages;
+- its saved state was visible in Messages and Together;
+- production contained exactly two private `OCCURRED` responses and one Shared
+  Encounter, derived at `2026-09-07T17:30:58.743Z`;
+- the TestFlight evidence bundles are recorded in the
+  [build 30 release record](2026-09-07-testflight-30.md).
+
 The test harness now forwards the live API base URL and stable Layer 2 fixture
 identifiers through the Development scheme. Calendar navigation follows the
 visible off-screen event cue and scrolls the lazy detail list before opening the
@@ -82,6 +93,12 @@ Window: rolling 14 days ending `2026-09-07T10:12:56.623Z`.
 
 An unanswered opportunity remains silence, not a negative Outcome.
 
+An acceptance-time aggregate report at `2026-09-07T17:31:41.592Z` found three
+candidate Plans, all three excluded as QA/internal, and therefore zero eligible
+non-QA Plans, zero distinct non-QA pairs, zero answers and zero bilateral Plans.
+This check is non-qualifying and does not replace the next scheduled weekly
+snapshot.
+
 ## Gate decision and next step
 
 The technical Layer 2 contract is accepted. The product Gate is not accepted:
@@ -93,4 +110,5 @@ Continue the Layer 2 pilot and collect non-QA bilateral Outcome responses using
 the same rolling 14-day denominator. The minimum sample, coverage thresholds
 and consecutive-snapshot rule are now defined in the
 [Layer 2 pilot Gate contract](../LAYER2_PILOT.md). Layer 3 must not start until
-that decision is recorded as passed.
+that decision is recorded as passed. The next formal snapshot remains scheduled
+no earlier than `2026-09-14T10:37:35Z`.
