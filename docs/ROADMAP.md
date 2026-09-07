@@ -77,12 +77,23 @@ two-step Intent editor and pinned Plan submission, and makes saved private
 Outcome answers compact and editable. These changes are included in
 [TestFlight build 33](./releases/2026-09-08-testflight-33.md), uploaded on
 2026-09-08 (Europe/Berlin), processed by Apple and assigned to the existing
-`SideSeat Internal` group. The build-specific physical smoke is pending.
+`SideSeat Internal` group. Its focused core-flow physical smoke passed on
+2026-09-08 on an iPhone 16 Pro Max (iOS 26.0.1), switching between two existing
+QA accounts: Intent save, Plan send/accept, both Calendar entries and historical
+private Outcome saved/edit controls. This run wrote no Outcome answers and did
+not re-test a new Shared Encounter transition. Largest-text Intent interaction
+passed; Light/Dark screenshots were inspected, but the complete appearance
+navigation test is still pending because system banners repeatedly interrupted it.
 The focused simulator check passed (6 state tests and 7 UI tests); see the
 [design verification](./DESIGN_SYSTEM.md#together--plan-verification--2026-09-08).
-Next release step: install build 33 from TestFlight and run its focused
-two-account physical smoke before expanding the non-QA pilot. This UI work does
-not unlock Layer 3.
+Next release step: arrange a short notification-free device session to complete
+the remaining appearance check, then push the release/acceptance records when authorized,
+arrange actual TestFlight access for the intended non-QA testers (external beta
+review has not been performed), and continue real Plan use plus truthful
+bilateral Outcome answers. Check saved state/badge refresh on a genuinely ended
+Plan. The next formal Gate snapshot is no earlier than `2026-09-14T10:37:35Z`;
+QA acceptance does not count toward that Gate or unlock Layer 3. The non-blocking
+English `Chat actions` VoiceOver label is tracked in the build-33 release record.
 See the [pilot Gate contract](./LAYER2_PILOT.md) and
 [non-QA tester guide](./LAYER2_PILOT_TESTER_GUIDE.md) for the active pilot, and
 [acceptance record](./releases/2026-09-07-layer2-production-acceptance.md).
