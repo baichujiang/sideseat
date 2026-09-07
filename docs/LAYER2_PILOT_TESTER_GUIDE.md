@@ -1,6 +1,6 @@
 # Layer 2 non-QA pilot tester guide
 
-**Status:** Active on TestFlight build `1.0.0` (30)
+**Status:** Active on TestFlight build `1.0.0` (31)
 
 **Gate:** Layer 3 remains blocked until the
 [Layer 2 pilot Gate](./LAYER2_PILOT.md) records two qualifying snapshots at
@@ -20,7 +20,7 @@ each available Outcome prompt.
 
 ## Tester flow
 
-Each pair should use Build 30 through the real product flow:
+Each pair should use Build 31 through the real product flow:
 
 1. Both participants install the TestFlight build and use separate normal
    accounts.
@@ -54,7 +54,7 @@ in-app Feedback surface without including the other participant's answer.
 
 Use this message only for people who already agreed to participate:
 
-> You are invited to the SideSeat Layer 2 pilot on TestFlight build 30. Please
+> You are invited to the SideSeat Layer 2 pilot on TestFlight build 31. Please
 > use your own account and SideSeat's normal Together → Messages → Plan flow for
 > real plans. After a plan ends, both people should independently answer the
 > private Outcome question truthfully: occurred, did not occur or skip. Do not
