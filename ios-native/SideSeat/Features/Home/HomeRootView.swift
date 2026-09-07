@@ -14,6 +14,7 @@ struct HomeRootView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
+    @Environment(DeepLinkRouter.self) private var deepLinkRouter
     @Environment(ClientConfigurationStore.self) private var clientConfiguration
     @State private var store = HomeScheduleStore()
     @State private var selectedDate = Date()
@@ -203,17 +204,17 @@ struct HomeRootView: View {
             HomeAgendaDetailView(
                 item: item,
                 footer: readOnlyFooter(for: item),
-                canEdit: item.source == .event && detailEvent(for: item) != nil,
-                canShare: item.source == .event,
+                canEdit: item.isUserEditableEvent && detailEvent(for: item) != nil,
+                canShare: item.isUserEditableEvent,
                 onDone: { readOnlyItem = nil },
                 onEdit: {
                     pendingEditorEvent = detailEvent(for: item)
                     readOnlyItem = nil
                 },
                 onOpenPlan: {
-                    guard let activityID = item.discoverActivityID else { return }
+                    guard let route = item.canonicalPlanRoute else { return }
                     readOnlyItem = nil
-                    router.navigate(to: .activity(activityID: activityID))
+                    deepLinkRouter.handleAppRoute(route)
                 }
             )
             .presentationDetents([.medium, .large])
@@ -698,7 +699,7 @@ struct HomeRootView: View {
         switch destination.kind {
         case .move:
             return String(
-                format: AppLocalization.string( "Move to %@?"),
+                format: AppLocalization.string("Move to %@?"),
                 destination.start.formatted(date: .abbreviated, time: .shortened)
             )
         case .resize:
@@ -759,6 +760,8 @@ struct HomeRootView: View {
             end > start
         else { return }
 
+        let planIdentity = event.planProjectionIdentity
+
         selectedDate = start
         weekViewportDate = start
         searchDetailEvent = event
@@ -773,20 +776,27 @@ struct HomeRootView: View {
             categoryName: event.categoryName,
             repeatRule: event.repeatRule,
             repeatUntil: event.repeatUntilISO.flatMap(Date.sideSeatISO8601),
-            source: .event,
+            source: planIdentity == nil ? .event : .plan,
             withLabel: event.withLabel,
             participantNames: event.eventParticipants.map(\.name),
-            discoverActivityID: event.discoverActivityId
+            discoverActivityID: event.discoverActivityId,
+            planCommitmentID: planIdentity?.commitmentID,
+            planConnectionID: planIdentity?.connectionID,
+            planRevisionID: planIdentity?.revisionID
         )
         Task { await store.ensureCovers(start, using: session) }
     }
 
     private func readOnlyFooter(for item: HomeAgendaItem) -> LocalizedStringKey? {
-        if item.context == .publicPlan { return "A plan from the SideSeat community." }
+        if item.context == .plan {
+            return "Shared Plan details are managed in Messages."
+        }
+        if item.context == .publicPlan { return "A community event is read-only here." }
         if item.context == .shared { return "This event includes other people." }
         return switch item.source {
         case .course: "Course blocks are read-only on Home."
         case .subscription: "Subscribed events are read-only."
+        case .plan: "Shared Plan details are managed in Messages."
         case .event: nil
         }
     }
@@ -800,19 +810,18 @@ struct HomeRootView: View {
     }
 
     private func copyAgendaItem(_ item: HomeAgendaItem) {
-        guard item.source == .event, let event = event(withID: item.id) else { return }
+        guard item.isUserEditableEvent, let event = event(withID: item.id) else { return }
         copyEvent(event)
     }
 
     private func duplicateAgendaItem(_ item: HomeAgendaItem) {
-        guard item.source == .event, let event = event(withID: item.id) else { return }
+        guard item.isUserEditableEvent, let event = event(withID: item.id) else { return }
         duplicateEvent(event)
     }
 
     private func requestDeleteAgendaItem(_ item: HomeAgendaItem) {
-        guard item.source == .event, let event = event(withID: item.id) else { return }
+        guard item.isUserEditableEvent, let event = event(withID: item.id) else { return }
         Task { @MainActor in
-            // Let the action menu dismiss before presenting the destructive scope dialog.
             await Task.yield()
             pendingDeleteEvent = event
         }
@@ -820,7 +829,7 @@ struct HomeRootView: View {
 
     private func dragMoveAgendaItem(_ item: HomeAgendaItem, to start: Date) {
         guard
-            item.source == .event,
+            item.isUserEditableEvent,
             let event = event(withID: item.id),
             let transfer = CalendarEventTransfer(event: event)
         else { return }
@@ -840,7 +849,7 @@ struct HomeRootView: View {
         to start: Date,
         end: Date
     ) {
-        guard item.source == .event, end > start, let event = event(withID: item.id) else {
+        guard item.isUserEditableEvent, end > start, let event = event(withID: item.id) else {
             return
         }
         withAnimation(.snappy(duration: 0.2)) {
@@ -933,7 +942,7 @@ struct HomeRootView: View {
 
                 HStack(spacing: SideSeatTheme.spaceSM) {
                     SSSecondaryButton(
-                        title: AppLocalization.string( "Cancel"),
+                        title: AppLocalization.string("Cancel"),
                         kind: .softFill,
                         fontWeight: .semibold,
                         accessibilityID: isResize
@@ -945,7 +954,7 @@ struct HomeRootView: View {
 
                     SSPrimaryButton(
                         title: isRecurring
-                            ? AppLocalization.string( "Only this event")
+                            ? AppLocalization.string("Only this event")
                             : AppLocalization.string(isResize ? "Adjust event time" : "Move event"),
                         fill: .product,
                         height: 44,
@@ -960,7 +969,7 @@ struct HomeRootView: View {
                 if isRecurring {
                     HStack(spacing: SideSeatTheme.spaceSM) {
                         moveSeriesScopeButton(
-                            title: AppLocalization.string( "This and future events"),
+                            title: AppLocalization.string("This and future events"),
                             accessibilityID: isResize
                                 ? "calendar-resize-future"
                                 : "calendar-move-future"
@@ -968,7 +977,7 @@ struct HomeRootView: View {
                             performMove(destination, scope: "future")
                         }
                         moveSeriesScopeButton(
-                            title: AppLocalization.string( "All events"),
+                            title: AppLocalization.string("All events"),
                             accessibilityID: isResize
                                 ? "calendar-resize-all"
                                 : "calendar-move-all"
@@ -1002,7 +1011,7 @@ struct HomeRootView: View {
                                 destination.event.title
                             )
                             : String(
-                                format: AppLocalization.string( "Moving %@"),
+                                format: AppLocalization.string("Moving %@"),
                                 destination.event.title
                             )
                     )
@@ -1012,7 +1021,7 @@ struct HomeRootView: View {
                         isResize
                             ? adjustmentRangeLabel(for: destination)
                             : String(
-                                format: AppLocalization.string( "Move event to %@"),
+                                format: AppLocalization.string("Move event to %@"),
                                 destination.start.formatted(date: .abbreviated, time: .shortened)
                             )
                     )
@@ -1102,7 +1111,7 @@ struct HomeRootView: View {
         calendarClipboard = transfer
         UIPasteboard.general.string = transfer.plainText(timeZone: calendar.timeZone)
         showCalendarNotice(
-            AppLocalization.string( "Copied"),
+            AppLocalization.string("Copied"),
             systemImage: "doc.on.doc.fill",
             isSuccess: false
         )
@@ -1270,7 +1279,7 @@ struct HomeRootView: View {
         switch destination.kind {
         case .move:
             message = String(
-                format: AppLocalization.string( "Moved to %@"),
+                format: AppLocalization.string("Moved to %@"),
                 destination.start.formatted(date: .abbreviated, time: .shortened)
             )
         case .resize:
@@ -1440,12 +1449,14 @@ private struct HomeAgendaDetailView: View {
                     }
                 }
 
-                if item.discoverActivityID != nil {
+                if item.isPlanProjection {
                     Section {
                         Button(action: onOpenPlan) {
-                            Label("Open plan", systemImage: "arrow.up.right.square")
+                            Label("Manage Plan", systemImage: "bubble.left.and.bubble.right")
                         }
-                        .accessibilityIdentifier("calendar-open-plan")
+                        .accessibilityIdentifier("calendar-manage-plan")
+                    } footer: {
+                        Text("Shared Plan details are managed in Messages.")
                     }
                 }
 

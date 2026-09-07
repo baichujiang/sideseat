@@ -95,6 +95,12 @@ struct NativeHomeSchedule: Codable, Sendable {
             let end = Date.sideSeatISO8601(entry.endISO),
             end > start
         else { return nil }
+
+        let planIdentity = entry.planProjectionIdentity
+        let source: HomeAgendaItem.Source = entry.id.hasPrefix("icsfeed:")
+            ? .subscription
+            : planIdentity == nil ? .event : .plan
+
         return HomeAgendaItem(
             id: entry.id,
             title: entry.title,
@@ -106,10 +112,13 @@ struct NativeHomeSchedule: Codable, Sendable {
             categoryName: entry.categoryName,
             repeatRule: entry.repeatRule,
             repeatUntil: entry.repeatUntilISO.flatMap(Date.sideSeatISO8601),
-            source: entry.id.hasPrefix("icsfeed:") ? .subscription : .event,
+            source: source,
             withLabel: entry.withLabel,
             participantNames: entry.eventParticipants.map(\.name),
-            discoverActivityID: entry.discoverActivityId
+            discoverActivityID: entry.discoverActivityId,
+            planCommitmentID: planIdentity?.commitmentID,
+            planConnectionID: planIdentity?.connectionID,
+            planRevisionID: planIdentity?.revisionID
         )
     }
 
@@ -209,6 +218,12 @@ struct NativeHomeClassBlock: Codable, Sendable {
 }
 
 struct NativeHomeStudyEntry: Codable, Hashable, Sendable {
+    struct PlanProjectionIdentity: Equatable, Sendable {
+        let commitmentID: String?
+        let connectionID: String
+        let revisionID: String?
+    }
+
     let id: String
     let title: String
     let location: String?
@@ -223,6 +238,65 @@ struct NativeHomeStudyEntry: Codable, Hashable, Sendable {
     let categoryColor: String?
     let categoryName: String?
     let discoverActivityId: String?
+    let planCommitmentId: String?
+    let planConnectionId: String?
+    let planRevisionId: String?
+
+    init(
+        id: String,
+        title: String,
+        location: String?,
+        withLabel: String?,
+        note: String?,
+        repeatRule: String,
+        repeatUntilISO: String?,
+        eventParticipants: [NativeHomeEventParticipant],
+        startISO: String,
+        endISO: String,
+        categoryId: String?,
+        categoryColor: String?,
+        categoryName: String?,
+        discoverActivityId: String?,
+        planCommitmentId: String? = nil,
+        planConnectionId: String? = nil,
+        planRevisionId: String? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.location = location
+        self.withLabel = withLabel
+        self.note = note
+        self.repeatRule = repeatRule
+        self.repeatUntilISO = repeatUntilISO
+        self.eventParticipants = eventParticipants
+        self.startISO = startISO
+        self.endISO = endISO
+        self.categoryId = categoryId
+        self.categoryColor = categoryColor
+        self.categoryName = categoryName
+        self.discoverActivityId = discoverActivityId
+        self.planCommitmentId = planCommitmentId
+        self.planConnectionId = planConnectionId
+        self.planRevisionId = planRevisionId
+    }
+
+    var planProjectionIdentity: PlanProjectionIdentity? {
+        let commitmentID = normalizedIdentifier(planCommitmentId)
+        let connectionID = normalizedIdentifier(planConnectionId)
+        let revisionID = normalizedIdentifier(planRevisionId)
+        guard let connectionID, commitmentID != nil || revisionID != nil else { return nil }
+        return PlanProjectionIdentity(
+            commitmentID: commitmentID,
+            connectionID: connectionID,
+            revisionID: revisionID
+        )
+    }
+
+    private func normalizedIdentifier(_ value: String?) -> String? {
+        guard let value else { return nil }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
 }
 
 struct NativeHomeEventParticipant: Codable, Hashable, Sendable {
@@ -249,12 +323,14 @@ struct NativeHomeCompanionOption: Codable, Hashable, Identifiable, Sendable {
 struct HomeAgendaItem: Identifiable, Hashable, Sendable {
     enum Source: Hashable, Sendable {
         case event
+        case plan
         case subscription
         case course
     }
 
     enum Context: Hashable, Sendable {
         case personal
+        case plan
         case shared
         case publicPlan
         case subscription
@@ -275,6 +351,9 @@ struct HomeAgendaItem: Identifiable, Hashable, Sendable {
     let withLabel: String?
     let participantNames: [String]
     let discoverActivityID: String?
+    let planCommitmentID: String?
+    let planConnectionID: String?
+    let planRevisionID: String?
 
     init(
         id: String,
@@ -290,7 +369,10 @@ struct HomeAgendaItem: Identifiable, Hashable, Sendable {
         source: Source,
         withLabel: String? = nil,
         participantNames: [String] = [],
-        discoverActivityID: String? = nil
+        discoverActivityID: String? = nil,
+        planCommitmentID: String? = nil,
+        planConnectionID: String? = nil,
+        planRevisionID: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -306,6 +388,9 @@ struct HomeAgendaItem: Identifiable, Hashable, Sendable {
         self.withLabel = withLabel
         self.participantNames = participantNames
         self.discoverActivityID = discoverActivityID
+        self.planCommitmentID = planCommitmentID
+        self.planConnectionID = planConnectionID
+        self.planRevisionID = planRevisionID
     }
 
     var context: Context {
@@ -314,17 +399,38 @@ struct HomeAgendaItem: Identifiable, Hashable, Sendable {
             return .course
         case .subscription:
             return .subscription
+        case .plan:
+            return .plan
         case .event:
             if discoverActivityID != nil { return .publicPlan }
-            if !participantNames.isEmpty || !(withLabel?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) {
-                return .shared
-            }
             return .personal
         }
     }
 
+    var isPlanProjection: Bool {
+        source == .plan
+            && planConnectionID != nil
+            && (planCommitmentID != nil || planRevisionID != nil)
+    }
+
+    var isUserEditableEvent: Bool {
+        source == .event && context == .personal
+    }
+
+    var canonicalPlanRoute: AppRoute? {
+        guard isPlanProjection,
+              let planConnectionID,
+              let focusID = planCommitmentID ?? planRevisionID
+        else { return nil }
+        return .plan(
+            connectionID: planConnectionID,
+            commitmentID: focusID,
+            revisionID: planRevisionID
+        )
+    }
+
     var isSocial: Bool {
-        context == .shared || context == .publicPlan
+        context == .plan || context == .shared || context == .publicPlan
     }
 
     /// Matches Web `isLongOrAllDayTimedMinutes` — long blocks belong in the all-day band.
@@ -422,7 +528,7 @@ extension NativeHomeSchedule {
                     discoverActivityId: nil
                 ),
                 NativeHomeStudyEntry(
-                    id: "ui-social-plan",
+                    id: "ui-plan-projection",
                     title: "Coffee meetup",
                     location: "Campus cafe",
                     withLabel: "Test Peer",
@@ -438,7 +544,10 @@ extension NativeHomeSchedule {
                     categoryId: nil,
                     categoryColor: "#0F766E",
                     categoryName: nil,
-                    discoverActivityId: "ui-plan-1"
+                    discoverActivityId: nil,
+                    planCommitmentId: "ui-plan-commitment",
+                    planConnectionId: "ui-connection",
+                    planRevisionId: "ui-plan-revision"
                 ),
                 NativeHomeStudyEntry(
                     id: "ui-tomorrow-event",

@@ -53,6 +53,13 @@ final class DeepLinkRouter {
         }
     }
 
+    /// Cross-tab handoff for an already-parsed canonical app route.
+    func handleAppRoute(_ route: AppRoute) {
+        pendingRoute = route
+        pendingTab = Self.tab(for: route)
+        navigationEpoch += 1
+    }
+
     func consumePendingRoute() -> AppRoute? {
         defer { pendingRoute = nil }
         return pendingRoute

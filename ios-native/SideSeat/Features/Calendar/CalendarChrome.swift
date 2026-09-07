@@ -114,6 +114,7 @@ enum CalendarChrome {
     static func eventContextSymbol(for item: HomeAgendaItem) -> String? {
         switch item.context {
         case .personal: nil
+        case .plan: "calendar.badge.checkmark"
         case .shared: "person.fill"
         case .publicPlan: "person.2.fill"
         case .subscription: "link"
@@ -124,8 +125,9 @@ enum CalendarChrome {
     static func eventContextLabel(for item: HomeAgendaItem) -> LocalizedStringKey {
         switch item.context {
         case .personal: "Personal"
+        case .plan: "Plan"
         case .shared: "Shared"
-        case .publicPlan: "Plan"
+        case .publicPlan: "Community event"
         case .subscription: "Subscribed"
         case .course: "Course"
         }
@@ -348,12 +350,12 @@ struct CalendarEventBlockLabel: View {
     }
 
     private var backgroundOpacity: Double {
-        context == .publicPlan ? 0.2 : 0.14
+        context == .plan || context == .publicPlan ? 0.2 : 0.14
     }
 
     private var borderOpacity: Double {
         switch context {
-        case .publicPlan: 0.58
+        case .plan, .publicPlan: 0.58
         case .shared: 0.4
         default: 0.24
         }
@@ -363,7 +365,7 @@ struct CalendarEventBlockLabel: View {
         HStack(spacing: 0) {
             Rectangle()
                 .fill(color)
-                .frame(width: context == .publicPlan ? 4 : 3)
+                .frame(width: context == .plan || context == .publicPlan ? 4 : 3)
 
             VStack(alignment: .leading, spacing: 1) {
                 Text(title)

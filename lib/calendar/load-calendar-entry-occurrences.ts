@@ -8,7 +8,8 @@ type CalendarDb = Prisma.TransactionClient | PrismaClient;
 const calendarEntryInclude = {
   companions: { orderBy: { createdAt: "asc" as const } },
   category: { select: { id: true, name: true, color: true, presetKey: true } },
-  planCommitment: { select: { safetyRestrictedAt: true } },
+  planRequest: { select: { connectionId: true } },
+  planCommitment: { select: { connectionId: true, safetyRestrictedAt: true } },
 } satisfies Prisma.CalendarEntryInclude;
 
 type StoredCalendarEntry = Prisma.CalendarEntryGetPayload<{

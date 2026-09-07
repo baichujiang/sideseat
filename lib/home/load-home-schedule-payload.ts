@@ -1,11 +1,12 @@
 import type { PrismaClient } from "@prisma/client";
 
-import type {
-  HomeCalendarCategory,
-  HomeClassBlock,
-  HomeCompanionOption,
-  HomeSchedulePayload,
-  HomeStudyEntry,
+import {
+  homeSchedulePlanProjectionFields,
+  type HomeCalendarCategory,
+  type HomeClassBlock,
+  type HomeCompanionOption,
+  type HomeSchedulePayload,
+  type HomeStudyEntry,
 } from "@/lib/home/home-schedule-dto";
 import { isCalendarCourseMirrorRow } from "@/lib/calendar/calendar-course-mirror";
 import { loadCalendarEntryOccurrences } from "@/lib/calendar/load-calendar-entry-occurrences";
@@ -115,6 +116,7 @@ export async function loadHomeSchedulePayload(args: {
       categoryColor: mirrorCourse ? null : (e.category?.color ?? null),
       categoryName: mirrorCourse ? null : (e.category?.name ?? null),
       discoverActivityId: e.discoverActivityId,
+      ...homeSchedulePlanProjectionFields(e),
     };
   });
 

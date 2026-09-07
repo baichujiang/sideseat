@@ -328,6 +328,161 @@ struct MVPPlanPresentationTests {
     }
 }
 
+@Suite("MVP Calendar presentation")
+struct MVPCalendarPresentationTests {
+    @Test("Requires explicit Plan identifiers instead of participant metadata")
+    func requiresExplicitPlanIdentity() {
+        let start = Date()
+        let end = start.addingTimeInterval(3600)
+        let plan = HomeAgendaItem(
+            id: "plan-projection",
+            title: "Coffee",
+            start: start,
+            end: end,
+            location: "Campus cafe",
+            colorHex: nil,
+            source: .plan,
+            participantNames: ["Peer"],
+            planCommitmentID: "commitment-1",
+            planConnectionID: "connection-1",
+            planRevisionID: "revision-1"
+        )
+        let ordinary = HomeAgendaItem(
+            id: "personal-event",
+            title: "Study",
+            start: start,
+            end: end,
+            location: nil,
+            colorHex: nil,
+            source: .event,
+            participantNames: ["Peer"]
+        )
+
+        #expect(plan.context == .plan)
+        #expect(plan.isPlanProjection)
+        #expect(!plan.isUserEditableEvent)
+        #expect(
+            plan.canonicalPlanRoute
+                == AppRoute.plan(
+                    connectionID: "connection-1",
+                    commitmentID: "commitment-1",
+                    revisionID: "revision-1"
+                )
+        )
+        #expect(ordinary.context == .personal)
+        #expect(ordinary.isUserEditableEvent)
+        #expect(ordinary.canonicalPlanRoute == nil)
+    }
+
+    @Test("Legacy revision-only projections remain read-only and routable")
+    func routesLegacyRevisionOnlyProjection() {
+        let start = Date()
+        let legacy = HomeAgendaItem(
+            id: "legacy-plan-projection",
+            title: "Legacy plan",
+            start: start,
+            end: start.addingTimeInterval(3600),
+            location: nil,
+            colorHex: nil,
+            source: .plan,
+            planCommitmentID: nil,
+            planConnectionID: "connection-legacy",
+            planRevisionID: "revision-legacy"
+        )
+
+        #expect(legacy.isPlanProjection)
+        #expect(!legacy.isUserEditableEvent)
+        #expect(
+            legacy.canonicalPlanRoute
+                == AppRoute.plan(
+                    connectionID: "connection-legacy",
+                    commitmentID: "revision-legacy",
+                    revisionID: "revision-legacy"
+                )
+        )
+    }
+
+    @Test("Decodes additive Plan projection identifiers")
+    func decodesPlanProjectionIdentifiers() throws {
+        let data = Data(
+            """
+            {
+              "id": "entry-1",
+              "title": "Coffee",
+              "location": null,
+              "withLabel": "With Peer",
+              "note": null,
+              "repeatRule": "NONE",
+              "repeatUntilISO": null,
+              "eventParticipants": [{"userId":"peer-1","name":"Peer"}],
+              "startISO": "2026-09-07T10:00:00Z",
+              "endISO": "2026-09-07T11:00:00Z",
+              "categoryId": null,
+              "categoryColor": null,
+              "categoryName": null,
+              "discoverActivityId": null,
+              "planCommitmentId": "commitment-1",
+              "planConnectionId": "connection-1",
+              "planRevisionId": "revision-1"
+            }
+            """.utf8
+        )
+
+        let entry = try JSONDecoder().decode(NativeHomeStudyEntry.self, from: data)
+        #expect(entry.planCommitmentId == "commitment-1")
+        #expect(entry.planConnectionId == "connection-1")
+        #expect(entry.planRevisionId == "revision-1")
+    }
+
+    @Test("Legacy revision identity decodes without inventing a commitment")
+    func decodesLegacyPlanProjectionIdentifiers() throws {
+        let data = Data(
+            """
+            {
+              "id": "entry-legacy",
+              "title": "Legacy plan",
+              "location": null,
+              "withLabel": null,
+              "note": null,
+              "repeatRule": "NONE",
+              "repeatUntilISO": null,
+              "eventParticipants": [],
+              "startISO": "2026-09-07T10:00:00Z",
+              "endISO": "2026-09-07T11:00:00Z",
+              "categoryId": null,
+              "categoryColor": null,
+              "categoryName": null,
+              "discoverActivityId": null,
+              "planCommitmentId": null,
+              "planConnectionId": "connection-legacy",
+              "planRevisionId": "revision-legacy"
+            }
+            """.utf8
+        )
+
+        let entry = try JSONDecoder().decode(NativeHomeStudyEntry.self, from: data)
+        #expect(entry.planProjectionIdentity?.commitmentID == nil)
+        #expect(entry.planProjectionIdentity?.connectionID == "connection-legacy")
+        #expect(entry.planProjectionIdentity?.revisionID == "revision-legacy")
+    }
+
+    @Test("Manage Plan hands off from Calendar to Messages")
+    @MainActor
+    func routesPlanManagementToMessages() {
+        let router = DeepLinkRouter()
+        let route = AppRoute.plan(
+            connectionID: "connection-1",
+            commitmentID: "commitment-1",
+            revisionID: "revision-1"
+        )
+
+        router.handleAppRoute(route)
+
+        #expect(router.consumePendingTab() == .chats)
+        #expect(router.consumePendingRoute() == route)
+    }
+}
+
 @Suite("App language", .serialized)
 struct AppLanguageTests {
     @Test("Persists an in-app language selection")

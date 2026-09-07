@@ -39,6 +39,9 @@ export type HomeStudyEntry = {
   categoryColor: string | null;
   categoryName: string | null;
   discoverActivityId?: string | null;
+  planCommitmentId?: string | null;
+  planConnectionId?: string | null;
+  planRevisionId?: string | null;
 };
 
 export type HomeCalendarCategory = {
@@ -61,3 +64,23 @@ export type HomeSchedulePayload = {
   companionOptions: HomeCompanionOption[];
   initialCalendarCategories: HomeCalendarCategory[];
 };
+
+export function homeSchedulePlanProjectionFields(entry: {
+  planCommitmentId: string | null;
+  planRequestId: string | null;
+  planCommitment: { connectionId: string } | null;
+  planRequest: { connectionId: string } | null;
+}) {
+  const commitmentID = entry.planCommitmentId;
+  const revisionID = entry.planRequestId;
+  const connectionID =
+    entry.planCommitment?.connectionId ?? entry.planRequest?.connectionId ?? null;
+  const hasExplicitPlanIdentity =
+    Boolean(connectionID) && Boolean(commitmentID || revisionID);
+
+  return {
+    planCommitmentId: commitmentID,
+    planConnectionId: hasExplicitPlanIdentity ? connectionID : null,
+    planRevisionId: hasExplicitPlanIdentity ? revisionID : null,
+  };
+}
