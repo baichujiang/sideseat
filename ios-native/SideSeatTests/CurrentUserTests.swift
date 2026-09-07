@@ -206,10 +206,7 @@ struct TogetherPresentationTests {
 struct MVPConversationInfoTests {
     @Test("Keeps participant, context, search, and safety as the bounded info surface")
     func keepsBoundedInfoSurface() {
-        #expect(
-            MVPConversationInfoPolicy.surfaces
-                == [.participant, .context, .search, .safety]
-        )
+        #expect(MVPConversationInfoPolicy.surfaces == [.participant, .context, .search, .safety])
     }
 
     @Test("Does not re-expose legacy social identity and relationship management")
@@ -224,6 +221,110 @@ struct MVPConversationInfoTests {
         #expect(InboxStore.isMVPVisibleConversationKind(.direct))
         #expect(!InboxStore.isMVPVisibleConversationKind(.course))
         #expect(!InboxStore.isMVPVisibleConversationKind(.group))
+    }
+}
+
+@Suite("MVP Plan presentation")
+struct MVPPlanPresentationTests {
+    @Test("Keeps the four frozen Plan Center sections in order")
+    func keepsSectionOrder() {
+        #expect(MVPPlanSection.ordered == [.needsResponse, .upcoming, .proposed, .pastEnded])
+        #expect(MVPPlanSection.ordered.map(\.title) == [
+            "Needs your response",
+            "Upcoming",
+            "Proposed",
+            "Past & Ended",
+        ])
+    }
+
+    @Test("Classifies proposed and confirmed Plans by viewer role and time")
+    func classifiesPlanStates() {
+        let now = Date()
+        #expect(
+            MVPPlanSection.classify(
+                plan(status: "PENDING", proposerID: "peer", receiverID: "viewer", end: now.addingTimeInterval(3600)),
+                currentUserID: "viewer",
+                now: now
+            ) == .needsResponse
+        )
+        #expect(
+            MVPPlanSection.classify(
+                plan(status: "PENDING", proposerID: "viewer", receiverID: "peer", end: now.addingTimeInterval(3600)),
+                currentUserID: "viewer",
+                now: now
+            ) == .proposed
+        )
+        #expect(
+            MVPPlanSection.classify(
+                plan(status: "ACCEPTED", proposerID: "viewer", receiverID: "peer", end: now.addingTimeInterval(3600)),
+                currentUserID: "viewer",
+                now: now
+            ) == .upcoming
+        )
+        #expect(
+            MVPPlanSection.classify(
+                plan(status: "ACCEPTED", proposerID: "viewer", receiverID: "peer", end: now.addingTimeInterval(-1)),
+                currentUserID: "viewer",
+                now: now
+            ) == .pastEnded
+        )
+        #expect(
+            MVPPlanSection.classify(
+                plan(status: "CANCELED", proposerID: "viewer", receiverID: "peer", end: now.addingTimeInterval(3600)),
+                currentUserID: "viewer",
+                now: now
+            ) == .pastEnded
+        )
+    }
+
+    @Test("Canonical Plan route preserves commitment and revision identity")
+    func buildsCanonicalRoute() {
+        let routedPlan = plan(
+            status: "PENDING",
+            proposerID: "viewer",
+            receiverID: "peer",
+            end: Date().addingTimeInterval(3600),
+            commitmentID: "commitment-1",
+            planID: "revision-1"
+        )
+        #expect(
+            MVPPlanRoute.route(for: routedPlan)
+                == AppRoute.plan(
+                    connectionID: "connection-1",
+                    commitmentID: "commitment-1",
+                    revisionID: "revision-1"
+                )
+        )
+    }
+
+    private func plan(
+        status: String,
+        proposerID: String,
+        receiverID: String,
+        end: Date,
+        commitmentID: String? = nil,
+        planID: String = "plan-1"
+    ) -> NativePlanRequest {
+        let formatter = ISO8601DateFormatter()
+        return NativePlanRequest(
+            id: planID,
+            connectionId: "connection-1",
+            commitmentId: commitmentID,
+            status: status,
+            planType: "CUSTOM",
+            title: "Coffee",
+            location: nil,
+            message: nil,
+            startTime: formatter.string(from: end.addingTimeInterval(-1800)),
+            endTime: formatter.string(from: end),
+            proposer: NativePlanAuthor(id: proposerID, username: proposerID, nickname: nil, avatarUrl: nil),
+            receiver: NativePlanAuthor(id: receiverID, username: receiverID, nickname: nil, avatarUrl: nil),
+            counterOfId: nil,
+            availabilityShareId: nil,
+            scheduleShareLinkId: nil,
+            createdAt: formatter.string(from: Date()),
+            updatedAt: formatter.string(from: Date())
+        )
     }
 }
 

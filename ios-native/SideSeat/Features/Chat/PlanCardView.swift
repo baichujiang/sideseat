@@ -24,11 +24,6 @@ struct PlanCardView: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(statusForeground)
                 Spacer(minLength: 6)
-                if plan.counterOfId != nil {
-                    Text("Another time suggested")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                }
             }
             .accessibilityIdentifier("plan-card-\(plan.id)")
 
@@ -49,6 +44,26 @@ struct PlanCardView: View {
             .font(.footnote)
             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
 
+            if isRescheduleProposal {
+                Label(
+                    "The confirmed Plan stays unchanged until this new time is accepted.",
+                    systemImage: "calendar.badge.clock"
+                )
+                .font(.footnote)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(SideSeatTheme.spaceMD)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    SideSeatTheme.fillTertiary,
+                    in: RoundedRectangle(
+                        cornerRadius: SideSeatTheme.controlRadius,
+                        style: .continuous
+                    )
+                )
+                .accessibilityIdentifier("plan-card-reschedule-keeps-confirmed-\(plan.id)")
+            }
+
             if let note = plan.message?.trimmingCharacters(in: .whitespacesAndNewlines), !note.isEmpty {
                 Text(note)
                     .font(.footnote)
@@ -59,19 +74,23 @@ struct PlanCardView: View {
             Divider()
 
             if canRespond {
-                Text("Accepting adds this plan to both calendars.")
-                    .font(.caption)
-                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    .fixedSize(horizontal: false, vertical: true)
+                Text(
+                    isRescheduleProposal
+                        ? "Accepting replaces the confirmed time and updates both calendars."
+                        : "Accepting confirms this Plan and adds it to both calendars."
+                )
+                .font(.caption)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .fixedSize(horizontal: false, vertical: true)
 
                 planResponseActions
-                .accessibilityElement(children: .contain)
-                .accessibilityIdentifier("plan-card-actions-\(plan.id)")
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("plan-card-actions-\(plan.id)")
             } else if plan.status == "PENDING",
                       plan.proposer.id == currentUserID,
                       plan.usesActionCoordinationV2 {
                 Button(role: .destructive, action: onWithdraw) {
-                    Text("Withdraw plan")
+                    Text(isRescheduleProposal ? "Withdraw new time" : "Withdraw proposal")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
@@ -80,15 +99,15 @@ struct PlanCardView: View {
             } else if plan.status == "PENDING" {
                 Label(
                     plan.proposer.id == currentUserID
-                        ? AppLocalization.string( "Waiting for a response")
-                        : AppLocalization.string( "Response pending"),
+                        ? AppLocalization.string("Waiting for a response")
+                        : AppLocalization.string("Response pending"),
                     systemImage: "hourglass"
                 )
                 .font(.caption.weight(.medium))
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             } else if plan.status == "ACCEPTED" {
                 HStack(spacing: 8) {
-                    Label("Added to both calendars", systemImage: "calendar.badge.checkmark")
+                    Label("Confirmed in both calendars", systemImage: "calendar.badge.checkmark")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(SideSeatTheme.statusSuccessText)
                     Spacer(minLength: 4)
@@ -136,7 +155,7 @@ struct PlanCardView: View {
                     )
                     expandedActionDivider
                     expandedResponseButton(
-                        title: AppLocalization.string("Suggest another time"),
+                        title: AppLocalization.string("Propose new time"),
                         foreground: SideSeatTheme.textPrimary,
                         identifier: "plan-card-counter-\(plan.id)",
                         action: onCounter
@@ -164,7 +183,7 @@ struct PlanCardView: View {
                     compactActionDivider
 
                     compactResponseButton(
-                        title: AppLocalization.string("Suggest another time"),
+                        title: AppLocalization.string("New time"),
                         foreground: SideSeatTheme.textPrimary,
                         lineLimit: 2,
                         identifier: "plan-card-counter-\(plan.id)",
@@ -189,9 +208,7 @@ struct PlanCardView: View {
             SideSeatTheme.fillTertiary,
             in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
         )
-        .clipShape(
-            RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
-        )
+        .clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
                 .strokeBorder(SideSeatTheme.separator.opacity(0.55), lineWidth: 0.5)
@@ -268,43 +285,48 @@ struct PlanCardView: View {
     private func planDateDetails(start: Date, end: Date) -> some View {
         let calendar = Calendar.autoupdatingCurrent
         if calendar.isDate(start, inSameDayAs: end) {
-            Label {
-                Text(
-                    "\(start.formatted(date: .abbreviated, time: .shortened)) · \(end.formatted(date: .omitted, time: .shortened))"
-                )
-            } icon: {
-                Image(systemName: "calendar")
-            }
+            Label(
+                "\(start.formatted(date: .abbreviated, time: .shortened)) · \(end.formatted(date: .omitted, time: .shortened))",
+                systemImage: "calendar"
+            )
         } else {
-            Label {
-                Text(
-                    "\(start.formatted(date: .abbreviated, time: .shortened)) – \(end.formatted(date: .abbreviated, time: .shortened))"
-                )
-            } icon: {
-                Image(systemName: "calendar")
-            }
+            Label(
+                "\(start.formatted(date: .abbreviated, time: .shortened)) – \(end.formatted(date: .abbreviated, time: .shortened))",
+                systemImage: "calendar"
+            )
         }
     }
 
     private var canRespond: Bool {
-        return plan.isPending && plan.receiver.id == currentUserID
+        plan.isPending && plan.receiver.id == currentUserID
+    }
+
+    private var isRescheduleProposal: Bool {
+        plan.status == "PENDING" && plan.counterOfId != nil && plan.commitmentId != nil
     }
 
     private var statusLabel: String {
+        if isRescheduleProposal { return AppLocalization.string("Reschedule proposed") }
         switch plan.status {
-        case "PENDING": return AppLocalization.string( "Plan invite")
-        case "ACCEPTED": return AppLocalization.string( "Plan confirmed")
-        case "DECLINED": return AppLocalization.string( "Plan declined")
-        case "COUNTER_PROPOSED": return AppLocalization.string( "Another time suggested")
-        default: return AppLocalization.string( "Plan")
+        case "PENDING": return AppLocalization.string("Proposed")
+        case "ACCEPTED": return AppLocalization.string("Confirmed")
+        case "DECLINED": return AppLocalization.string("Declined")
+        case "COUNTER_PROPOSED": return AppLocalization.string("Superseded")
+        case "CANCELED": return AppLocalization.string("Canceled")
+        case "EXPIRED": return AppLocalization.string("Expired")
+        case "INVALIDATED": return AppLocalization.string("Ended")
+        default: return AppLocalization.string("Plan")
         }
     }
 
     private var statusDetail: String {
         switch plan.status {
-        case "DECLINED": return AppLocalization.string( "This plan was declined.")
-        case "COUNTER_PROPOSED": return AppLocalization.string( "A new time was proposed in the chat.")
-        default: return AppLocalization.string( "This plan is no longer active.")
+        case "DECLINED": return AppLocalization.string("This proposal was declined.")
+        case "COUNTER_PROPOSED": return AppLocalization.string("A newer proposal is now in the conversation.")
+        case "CANCELED": return AppLocalization.string("This proposal was withdrawn or canceled.")
+        case "EXPIRED": return AppLocalization.string("This proposal expired before it was confirmed.")
+        case "INVALIDATED": return AppLocalization.string("This Plan is no longer available.")
+        default: return AppLocalization.string("This Plan is no longer active.")
         }
     }
 
@@ -313,6 +335,8 @@ struct PlanCardView: View {
         case "ACCEPTED": "checkmark.circle.fill"
         case "DECLINED": "xmark.circle.fill"
         case "COUNTER_PROPOSED": "arrow.triangle.2.circlepath"
+        case "CANCELED": "calendar.badge.minus"
+        case "EXPIRED": "clock.badge.exclamationmark"
         default: "calendar.badge.clock"
         }
     }
@@ -320,8 +344,8 @@ struct PlanCardView: View {
     private var statusTint: Color {
         switch plan.status {
         case "ACCEPTED": SideSeatTheme.success
-        case "DECLINED": SideSeatTheme.danger
-        case "COUNTER_PROPOSED": SideSeatTheme.warning
+        case "DECLINED", "CANCELED": SideSeatTheme.danger
+        case "COUNTER_PROPOSED", "EXPIRED": SideSeatTheme.warning
         default: SideSeatTheme.warning
         }
     }
@@ -329,8 +353,8 @@ struct PlanCardView: View {
     private var statusForeground: Color {
         switch plan.status {
         case "ACCEPTED": SideSeatTheme.statusSuccessText
-        case "DECLINED": SideSeatTheme.statusDangerText
-        case "COUNTER_PROPOSED", "PENDING": SideSeatTheme.statusWarningText
+        case "DECLINED", "CANCELED": SideSeatTheme.statusDangerText
+        case "COUNTER_PROPOSED", "EXPIRED", "PENDING": SideSeatTheme.statusWarningText
         default: SideSeatTheme.textSecondaryStrong
         }
     }

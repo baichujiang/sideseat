@@ -16,8 +16,7 @@ enum DirectChatFocus: Hashable, Sendable {
     case actionContext(id: String)
 
     /// Compatibility for legacy Plan callers whose only stable identifier is
-    /// the PlanRequest revision id. New B-light callers must preserve the
-    /// commitment id separately.
+    /// the PlanRequest revision id. New callers should preserve commitment id.
     static func plan(id: String) -> DirectChatFocus {
         .plan(commitmentID: id, revisionID: id)
     }
@@ -47,6 +46,19 @@ enum AppRoute: Hashable, Sendable {
     case activity(activityID: String)
     case actionResponses(actionID: String?, interestID: String?)
     case coordinationShell(interestID: String, reservationID: String?)
+
+    /// Canonical Plan route. Kept as a factory over the existing direct-chat
+    /// destination so MVP navigation converges without duplicating mutation owners.
+    static func plan(
+        connectionID: String,
+        commitmentID: String,
+        revisionID: String? = nil
+    ) -> AppRoute {
+        .directChat(
+            connectionID: connectionID,
+            focus: .plan(commitmentID: commitmentID, revisionID: revisionID)
+        )
+    }
 }
 
 enum MVPRouteDisposition: Equatable, Sendable {

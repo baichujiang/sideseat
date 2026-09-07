@@ -1,12 +1,78 @@
 import SwiftUI
 
+enum MVPPlanSection: String, CaseIterable, Equatable, Sendable {
+    case needsResponse
+    case upcoming
+    case proposed
+    case pastEnded
+
+    static let ordered: [MVPPlanSection] = [
+        .needsResponse,
+        .upcoming,
+        .proposed,
+        .pastEnded,
+    ]
+
+    var title: String {
+        switch self {
+        case .needsResponse: "Needs your response"
+        case .upcoming: "Upcoming"
+        case .proposed: "Proposed"
+        case .pastEnded: "Past & Ended"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .needsResponse: "envelope.badge"
+        case .upcoming: "calendar.badge.checkmark"
+        case .proposed: "hourglass"
+        case .pastEnded: "clock.arrow.circlepath"
+        }
+    }
+
+    var accessibilityIdentifier: String {
+        switch self {
+        case .needsResponse: "plans-section-needs-response"
+        case .upcoming: "plans-section-upcoming"
+        case .proposed: "plans-section-proposed"
+        case .pastEnded: "plans-section-past-ended"
+        }
+    }
+
+    static func classify(
+        _ plan: NativePlanRequest,
+        currentUserID: String,
+        now: Date
+    ) -> MVPPlanSection {
+        if plan.status == "PENDING", plan.receiver.id == currentUserID {
+            return .needsResponse
+        }
+        if plan.status == "ACCEPTED", (plan.endDate ?? .distantFuture) > now {
+            return .upcoming
+        }
+        if plan.status == "PENDING" {
+            return .proposed
+        }
+        return .pastEnded
+    }
+}
+
+enum MVPPlanRoute {
+    static func route(for plan: NativePlanRequest) -> AppRoute {
+        AppRoute.plan(
+            connectionID: plan.connectionId,
+            commitmentID: plan.commitmentId ?? plan.id,
+            revisionID: plan.id
+        )
+    }
+}
+
 struct PlansRootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var store = PlansStore()
-    @State private var v2Store = ActionToPlanV2Store.shared
-    @State private var smallGroupStore = SmallGroupPilotStore()
 
     var body: some View {
         Group {
@@ -25,15 +91,11 @@ struct PlansRootView: View {
                 SSEmptyState(
                     title: "No plans yet",
                     systemImage: "calendar",
-                    description: "Accepted plans and invitations will appear here."
+                    description: "Proposed and confirmed Plans will appear here."
                 )
             } else {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceXL) {
-                        if !dynamicTypeSize.isAccessibilitySize {
-                            plansOverview
-                        }
-
                         if let issue = store.issue {
                             Label(issue, systemImage: "wifi.exclamationmark")
                                 .font(.footnote)
@@ -50,43 +112,15 @@ struct PlansRootView: View {
                                 .accessibilityIdentifier("plans-issue-banner")
                         }
 
-                        if !smallGroupStore.opportunities.isEmpty {
-                            smallGroupSection
-                        }
-
-                        if !needsResponse.isEmpty {
-                            planSection(
-                                title: "Needs your response",
-                                systemImage: "envelope.badge",
-                                plans: needsResponse,
-                                identifier: "plans-section-needs-response"
-                            )
-                        }
-
-                        if !waitingForResponse.isEmpty {
-                            planSection(
-                                title: "Waiting for response",
-                                systemImage: "hourglass",
-                                plans: waitingForResponse,
-                                identifier: "plans-section-waiting"
-                            )
-                        }
-
-                        if !upcoming.isEmpty {
-                            planSection(
-                                title: "Upcoming",
-                                systemImage: "calendar.badge.checkmark",
-                                plans: upcoming,
-                                identifier: "plans-section-upcoming"
-                            )
-                        }
-
-                        if !needsOutcome.isEmpty {
-                            outcomeSection
+                        ForEach(MVPPlanSection.ordered, id: \.self) { section in
+                            let plans = plans(in: section)
+                            if !plans.isEmpty {
+                                planSection(section, plans: plans)
+                            }
                         }
                     }
                     .padding(.horizontal, SideSeatTheme.screenHorizontal)
-                    .padding(.top, SideSeatTheme.spaceSM)
+                    .padding(.top, SideSeatTheme.spaceLG)
                     .padding(.bottom, 112)
                 }
                 .background(SideSeatTheme.bgGrouped)
@@ -95,14 +129,7 @@ struct PlansRootView: View {
         .navigationTitle("Plans")
         .navigationBarTitleDisplayMode(.inline)
         .refreshable { await store.load(using: session) }
-        .task {
-            async let planLoad: Void = store.load(using: session)
-            await v2Store.loadAssignment(using: session)
-            if v2Store.assignment?.features["v2SmallGroupPilot"] == true {
-                await smallGroupStore.load(using: session)
-            }
-            await planLoad
-        }
+        .task { await store.load(using: session) }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatPlansNeedsRefresh)) { _ in
             Task { await store.load(using: session) }
         }
@@ -113,244 +140,105 @@ struct PlansRootView: View {
         session.currentUser?.id ?? ""
     }
 
-    private var needsResponse: [NativePlanRequest] {
-        store.plans.filter { $0.isPending && $0.receiver.id == currentUserID }
-    }
-
-    private var waitingForResponse: [NativePlanRequest] {
-        store.plans.filter { $0.isPending && $0.proposer.id == currentUserID }
-    }
-
-    private var upcoming: [NativePlanRequest] {
-        store.plans.filter { $0.isAccepted && ($0.endDate ?? .distantFuture) > Date() }
-    }
-
-    private var needsOutcome: [NativePlanRequest] {
-        store.plans.filter {
-            $0.isAccepted && ($0.endDate ?? .distantFuture) <= Date() && $0.viewerOutcome == nil
+    private func plans(in section: MVPPlanSection) -> [NativePlanRequest] {
+        let now = Date()
+        let filtered = store.plans.filter {
+            MVPPlanSection.classify($0, currentUserID: currentUserID, now: now) == section
         }
-    }
-
-    private var smallGroupSection: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            Label("Small group pilot", systemImage: "person.3.fill")
-                .font(.headline)
-                .foregroundStyle(SideSeatTheme.textPrimary)
-            ForEach(smallGroupStore.opportunities) { opportunity in
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                    Text(opportunity.title).font(.headline)
-                    if let description = opportunity.description, !description.isEmpty {
-                        Text(description).font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    }
-                    Label(opportunity.limitedSignals.sharedLanguages.joined(separator: " · "), systemImage: "character.bubble")
-                        .font(.footnote)
-                    if let groupChatID = opportunity.groupChatId {
-                        Button("Open group chat") { router.navigate(to: .groupChat(groupChatID: groupChatID)) }
-                            .buttonStyle(.borderedProminent)
-                    } else {
-                        HStack {
-                            Button("I'm interested") {
-                                Task {
-                                    if let groupChatID = await smallGroupStore.respond("INTERESTED", to: opportunity, using: session) {
-                                        router.navigate(to: .groupChat(groupChatID: groupChatID))
-                                    }
-                                }
-                            }
-                            .buttonStyle(.borderedProminent)
-                            Button("Not this time") {
-                                Task { _ = await smallGroupStore.respond("DECLINED", to: opportunity, using: session) }
-                            }
-                            .buttonStyle(.bordered)
-                        }
-                    }
-                }
-                .padding(SideSeatTheme.spaceLG)
-                .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
-                .accessibilityIdentifier("small-group-opportunity-\(opportunity.id)")
+        switch section {
+        case .pastEnded:
+            return filtered.sorted {
+                ($0.endDate ?? .distantPast) > ($1.endDate ?? .distantPast)
             }
-        }
-    }
-
-    private var outcomeSection: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            Label("Did it happen?", systemImage: "checkmark.bubble")
-                .font(.headline)
-                .foregroundStyle(SideSeatTheme.textPrimary)
-            ForEach(needsOutcome) { plan in
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                    Text(plan.title).font(.headline)
-                    Text("A quick private response helps evaluate whether SideSeat creates real plans.")
-                        .font(.footnote)
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    ViewThatFits(in: .horizontal) {
-                        HStack { outcomeButtons(plan) }
-                        VStack { outcomeButtons(plan) }
-                    }
-                }
-                .padding(SideSeatTheme.spaceLG)
-                .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
-                .accessibilityIdentifier("plan-outcome-\(plan.id)")
+        case .needsResponse, .upcoming, .proposed:
+            return filtered.sorted {
+                ($0.startDate ?? .distantFuture) < ($1.startDate ?? .distantFuture)
             }
-        }
-    }
-
-    @ViewBuilder
-    private func outcomeButtons(_ plan: NativePlanRequest) -> some View {
-        Button("Happened") { Task { await store.recordOutcome("OCCURRED", for: plan.id, using: session) } }
-            .buttonStyle(.borderedProminent)
-        Button("Didn't happen") { Task { await store.recordOutcome("DID_NOT_OCCUR", for: plan.id, using: session) } }
-            .buttonStyle(.bordered)
-        Button("Skip") { Task { await store.recordOutcome("PREFER_NOT_TO_SAY", for: plan.id, using: session) } }
-            .buttonStyle(.plain)
-
-    }
-
-    @ViewBuilder
-    private var plansOverview: some View {
-        if dynamicTypeSize.isAccessibilitySize {
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
-                    overviewIcon
-                    Text("Review invitations and schedule updates")
-                        .font(.headline)
-                        .foregroundStyle(SideSeatTheme.textPrimary)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .accessibilityIdentifier("plans-overview")
-                }
-                responseCountSummary
-            }
-            .plansOverviewCard()
-        } else {
-            HStack(spacing: SideSeatTheme.spaceMD) {
-                overviewIcon
-                Text("Review invitations and schedule updates")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(SideSeatTheme.textPrimary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityIdentifier("plans-overview")
-                Spacer(minLength: SideSeatTheme.spaceSM)
-                responseCountSummary
-            }
-            .plansOverviewCard()
-        }
-    }
-
-    private var overviewIcon: some View {
-        Image(systemName: "calendar.badge.clock")
-            .symbolRenderingMode(.hierarchical)
-            .font(.system(size: 19, weight: .semibold))
-            .foregroundStyle(SideSeatTheme.HubTint.plans)
-            .frame(width: 44, height: 44)
-            .background(
-                SideSeatTheme.HubTint.plans.opacity(0.12),
-                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
-            )
-            .accessibilityHidden(true)
-    }
-
-    private var responseCountSummary: some View {
-        HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
-            Text("\(needsResponse.count)")
-                .font(.title2.weight(.bold))
-                .foregroundStyle(SideSeatTheme.statusWarningText)
-                .accessibilityIdentifier("plans-needs-response-count")
-            Text("Needs your response")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
     private func planSection(
-        title: LocalizedStringKey,
-        systemImage: String,
-        plans: [NativePlanRequest],
-        identifier: String
+        _ section: MVPPlanSection,
+        plans: [NativePlanRequest]
     ) -> some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            HStack(spacing: SideSeatTheme.spaceSM) {
-                Image(systemName: systemImage)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(sectionTint(for: plans))
-                    .accessibilityHidden(true)
-                Text(title)
-                    .font(.headline)
-                    .foregroundStyle(SideSeatTheme.textPrimary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityIdentifier(identifier)
-                    .accessibilityValue("\(plans.count)")
-                Spacer(minLength: SideSeatTheme.spaceSM)
-                Text("\(plans.count)")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(sectionTint(for: plans))
-                    .padding(.horizontal, SideSeatTheme.spaceSM)
-                    .frame(minWidth: 28, minHeight: 28)
-                    .background(sectionFill(for: plans), in: Capsule())
-                    .accessibilityHidden(true)
-            }
+            SSProductSectionHeader(title: section.title)
+                .accessibilityIdentifier(section.accessibilityIdentifier)
+                .accessibilityValue("\(plans.count)")
 
             ForEach(plans) { plan in
-                planRow(plan)
+                planRow(plan, section: section)
             }
         }
     }
 
-    private func planRow(_ plan: NativePlanRequest) -> some View {
+    private func planRow(
+        _ plan: NativePlanRequest,
+        section: MVPPlanSection
+    ) -> some View {
         Button {
-            router.navigate(
-                to: .directChat(
-                    connectionID: plan.connectionId,
-                    focus: .plan(id: plan.id)
-                )
-            )
+            router.navigate(to: MVPPlanRoute.route(for: plan))
         } label: {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                    HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
-                        Text(plan.title)
-                            .font(.headline)
-                            .foregroundStyle(SideSeatTheme.textPrimary)
-                            .fixedSize(horizontal: false, vertical: true)
+                HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
+                    Label(statusLabel(for: plan, section: section), systemImage: statusIcon(for: plan, section: section))
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(statusForeground(for: plan, section: section))
 
-                        Spacer(minLength: SideSeatTheme.spaceSM)
+                    Spacer(minLength: SideSeatTheme.spaceSM)
 
-                        if !dynamicTypeSize.isAccessibilitySize {
-                            Image(systemName: "chevron.right")
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                                .accessibilityHidden(true)
-                        }
-                    }
-
-                    if let start = plan.startDate, let end = plan.endDate {
-                        planDateDetails(start: start, end: end)
-                    }
-
-                    if let location = plan.location?.trimmingCharacters(in: .whitespacesAndNewlines),
-                       !location.isEmpty {
-                        Label(location, systemImage: "mappin.and.ellipse")
-                            .font(.footnote)
+                    if !dynamicTypeSize.isAccessibilitySize {
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.bold))
                             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityHidden(true)
                     }
+                }
+
+                Text(plan.title)
+                    .font(.headline)
+                    .foregroundStyle(SideSeatTheme.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if let start = plan.startDate, let end = plan.endDate {
+                    planDateDetails(start: start, end: end)
+                }
+
+                if let location = plan.location?.trimmingCharacters(in: .whitespacesAndNewlines),
+                   !location.isEmpty {
+                    Label(location, systemImage: "mappin.and.ellipse")
+                        .font(.footnote)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                if plan.counterOfId != nil, plan.commitmentId != nil, plan.status == "PENDING" {
+                    Label(
+                        "Your confirmed Plan stays in place until this new time is accepted.",
+                        systemImage: "calendar.badge.clock"
+                    )
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(SideSeatTheme.spaceMD)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(
+                        SideSeatTheme.fillTertiary,
+                        in: RoundedRectangle(
+                            cornerRadius: SideSeatTheme.controlRadius,
+                            style: .continuous
+                        )
+                    )
+                    .accessibilityIdentifier("plans-reschedule-keeps-confirmed-\(plan.id)")
                 }
 
                 if let note = plan.message?.trimmingCharacters(in: .whitespacesAndNewlines),
                    !note.isEmpty {
-                    Label(note, systemImage: "text.quote")
+                    Text(note)
                         .font(.footnote)
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 3)
                         .fixedSize(horizontal: false, vertical: true)
-                        .padding(SideSeatTheme.spaceMD)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(
-                            SideSeatTheme.fillTertiary,
-                            in: RoundedRectangle(
-                                cornerRadius: SideSeatTheme.controlRadius,
-                                style: .continuous
-                            )
-                        )
                 }
 
                 Divider()
@@ -366,8 +254,7 @@ struct PlansRootView: View {
                         Text(participant.displayName)
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(SideSeatTheme.textPrimary)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Text("Open chat")
+                        Text("Manage in conversation")
                             .font(.caption)
                             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }
@@ -376,10 +263,7 @@ struct PlansRootView: View {
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(SideSeatTheme.HubTint.plans)
                         .frame(width: 36, height: 36)
-                        .background(
-                            SideSeatTheme.HubTint.plans.opacity(0.12),
-                            in: Circle()
-                        )
+                        .background(SideSeatTheme.HubTint.plans.opacity(0.12), in: Circle())
                         .accessibilityHidden(true)
                 }
             }
@@ -397,8 +281,8 @@ struct PlansRootView: View {
         }
         .buttonStyle(SSPressButtonStyle())
         .accessibilityIdentifier("plans-row-\(plan.id)")
-        .accessibilityValue(Text(statusTitle(for: plan)))
-        .accessibilityHint("Open chat")
+        .accessibilityValue(statusLabel(for: plan, section: section))
+        .accessibilityHint("Open Plan in conversation")
     }
 
     @ViewBuilder
@@ -418,63 +302,69 @@ struct PlansRootView: View {
             .font(.footnote)
             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
         } else {
-            Label {
-                Text(
-                    "\(start.formatted(date: .abbreviated, time: .shortened)) – \(end.formatted(date: .abbreviated, time: .shortened))"
-                )
-            } icon: {
-                Image(systemName: "calendar")
-            }
+            Label(
+                "\(start.formatted(date: .abbreviated, time: .shortened)) – \(end.formatted(date: .abbreviated, time: .shortened))",
+                systemImage: "calendar"
+            )
             .font(.footnote)
             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             .fixedSize(horizontal: false, vertical: true)
         }
     }
 
-    private func statusTitle(for plan: NativePlanRequest) -> LocalizedStringKey {
-        if plan.isAccepted { return "Upcoming" }
-        if plan.receiver.id == currentUserID { return "Needs your response" }
-        return "Waiting for response"
+    private func statusLabel(
+        for plan: NativePlanRequest,
+        section: MVPPlanSection
+    ) -> String {
+        if plan.status == "PENDING", plan.counterOfId != nil, plan.commitmentId != nil {
+            return AppLocalization.string("Reschedule proposed")
+        }
+        switch plan.status {
+        case "PENDING":
+            return section == .needsResponse
+                ? AppLocalization.string("Needs your response")
+                : AppLocalization.string("Proposed")
+        case "ACCEPTED": return AppLocalization.string("Confirmed")
+        case "DECLINED": return AppLocalization.string("Declined")
+        case "COUNTER_PROPOSED": return AppLocalization.string("Superseded")
+        case "CANCELED": return AppLocalization.string("Canceled")
+        case "EXPIRED": return AppLocalization.string("Expired")
+        case "INVALIDATED": return AppLocalization.string("Ended")
+        default: return AppLocalization.string("Ended")
+        }
     }
 
-    private func statusForeground(for plan: NativePlanRequest) -> Color {
-        if plan.isAccepted { return SideSeatTheme.statusSuccessText }
-        if plan.receiver.id == currentUserID { return SideSeatTheme.statusWarningText }
+    private func statusIcon(
+        for plan: NativePlanRequest,
+        section: MVPPlanSection
+    ) -> String {
+        if plan.status == "ACCEPTED" { return "checkmark.circle.fill" }
+        if plan.status == "PENDING" {
+            return section == .needsResponse ? "envelope.badge" : "hourglass"
+        }
+        switch plan.status {
+        case "DECLINED": return "xmark.circle"
+        case "CANCELED": return "calendar.badge.minus"
+        case "EXPIRED": return "clock.badge.exclamationmark"
+        default: return "clock.arrow.circlepath"
+        }
+    }
+
+    private func statusForeground(
+        for plan: NativePlanRequest,
+        section: MVPPlanSection
+    ) -> Color {
+        if plan.status == "ACCEPTED" { return SideSeatTheme.statusSuccessText }
+        if plan.status == "PENDING", section == .needsResponse {
+            return SideSeatTheme.statusWarningText
+        }
+        if plan.status == "DECLINED" || plan.status == "CANCELED" {
+            return SideSeatTheme.statusDangerText
+        }
         return SideSeatTheme.textSecondaryStrong
-    }
-
-    private func statusFill(for plan: NativePlanRequest) -> Color {
-        if plan.isAccepted { return SideSeatTheme.success.opacity(0.12) }
-        if plan.receiver.id == currentUserID { return SideSeatTheme.warning.opacity(0.14) }
-        return SideSeatTheme.fillTertiary
-    }
-
-    private func sectionTint(for plans: [NativePlanRequest]) -> Color {
-        guard let plan = plans.first else { return SideSeatTheme.textSecondaryStrong }
-        return statusForeground(for: plan)
-    }
-
-    private func sectionFill(for plans: [NativePlanRequest]) -> Color {
-        guard let plan = plans.first else { return SideSeatTheme.fillTertiary }
-        return statusFill(for: plan)
     }
 
     private func otherParticipant(for plan: NativePlanRequest) -> NativePlanAuthor {
         plan.proposer.id == currentUserID ? plan.receiver : plan.proposer
-    }
-}
-
-private extension View {
-    func plansOverviewCard() -> some View {
-        padding(SideSeatTheme.spaceLG)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                SideSeatTheme.surface,
-                in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
-            )
-            .overlay {
-                RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
-                    .strokeBorder(SideSeatTheme.separator.opacity(0.65), lineWidth: 0.5)
-            }
     }
 }

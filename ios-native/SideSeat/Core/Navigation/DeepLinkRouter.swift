@@ -122,12 +122,10 @@ final class DeepLinkRouter {
                 guard !commitmentID.isEmpty, commitmentID.count <= 128 else { return nil }
                 let revisionID = queryItems.first(where: { $0.name == "revision" })?.value
                 guard revisionID?.isEmpty != true, revisionID?.count ?? 0 <= 128 else { return nil }
-                return .directChat(
+                return .plan(
                     connectionID: identifier,
-                    focus: .plan(
-                        commitmentID: commitmentID,
-                        revisionID: revisionID
-                    )
+                    commitmentID: commitmentID,
+                    revisionID: revisionID
                 )
             }
             guard components.count == 2 else { return nil }
