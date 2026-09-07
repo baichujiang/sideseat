@@ -387,6 +387,7 @@ struct StudentVerificationSheet: View {
                 }
             }
         }
+        .accessibilityIdentifier("student-verification-sheet")
     }
 
     private var normalizedEmail: String {

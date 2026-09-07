@@ -470,33 +470,37 @@ final class AccessibilityAuditUITests: XCTestCase {
         let editProfile = app.buttons["me-hero-edit"]
         XCTAssertTrue(editProfile.exists)
         XCTAssertTrue(editProfile.isHittable)
-        XCTAssertGreaterThanOrEqual(editProfile.frame.height, 100)
+        XCTAssertGreaterThanOrEqual(editProfile.frame.height, 44)
         XCTAssertTrue((editProfile.value as? String)?.contains("@test_001") == true)
 
-        let schoolSummary = app.staticTexts["me-school-identity"]
+        let schoolSummary = app.staticTexts["me-campus-summary"]
         XCTAssertTrue(schoolSummary.exists)
-        XCTAssertGreaterThanOrEqual(schoolSummary.frame.height, 44)
-        let schoolStatus = app.staticTexts["me-school-status-visual"]
-        XCTAssertTrue(schoolStatus.exists)
-        XCTAssertGreaterThanOrEqual(schoolStatus.frame.height, 32)
+        XCTAssertTrue(screenFrame.intersects(schoolSummary.frame))
+        XCTAssertGreaterThanOrEqual(schoolSummary.frame.height, 32)
 
-        let tagline = app.descendants(matching: .any)["me-tagline-visual"]
-        XCTAssertTrue(tagline.exists)
-        XCTAssertGreaterThanOrEqual(tagline.frame.height, 40)
-
-        let settings = app.buttons["me-settings"]
-        for _ in 0..<10 where !settings.exists || !settings.isHittable {
-            profile.swipeUp()
+        let managementRows = [
+            "me-verification",
+            "me-courses",
+            "me-languages",
+            "profile-privacy-settings",
+            "me-blocked",
+            "me-settings",
+        ]
+        for identifier in managementRows {
+            let row = app.buttons[identifier]
+            for _ in 0..<10 where !row.exists || !row.isHittable {
+                profile.swipeUp()
+            }
+            XCTAssertTrue(row.exists, "Expected \(identifier) to exist.")
+            XCTAssertTrue(row.isHittable, "Expected \(identifier) to be hittable.")
+            XCTAssertTrue(screenFrame.intersects(row.frame), "Expected \(identifier) inside the viewport.")
+            XCTAssertGreaterThanOrEqual(row.frame.height, 56)
         }
-        XCTAssertTrue(settings.exists)
-        XCTAssertTrue(settings.isHittable)
-        XCTAssertTrue(screenFrame.intersects(settings.frame))
-        XCTAssertGreaterThanOrEqual(settings.frame.height, 88)
 
-        let moreHeader = app.staticTexts["me-section-more"]
-        XCTAssertTrue(moreHeader.exists)
-        XCTAssertTrue(screenFrame.intersects(moreHeader.frame))
-        XCTAssertGreaterThanOrEqual(moreHeader.frame.height, 28)
+        let settingsHeader = app.staticTexts["me-section-settings"]
+        XCTAssertTrue(settingsHeader.exists)
+        XCTAssertTrue(screenFrame.intersects(settingsHeader.frame))
+        XCTAssertGreaterThanOrEqual(settingsHeader.frame.height, 28)
 
         let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         attachment.name = "Me at accessibility5"

@@ -6,16 +6,14 @@ struct MeRootView: View {
     @Environment(RouterPath.self) private var router
     @State private var store = CurrentProfileStore()
     @State private var editingProfile: NativeCurrentProfile?
-    @State private var editingUsername: NativeCurrentProfile?
     @State private var editingPrivacy: NativeCurrentProfile?
+    @State private var editingLanguages: NativeCurrentProfile?
     @State private var verifyingProfile: NativeCurrentProfile?
     @State private var selectedAvatarPhoto: PhotosPickerItem?
     @State private var isPreparingAvatar = false
     @State private var avatarIssue: String?
     @State private var hasCompletedInitialProfileLoad = false
     @State private var schoolChangeResult: NativeProfileSchoolChangeSummary?
-    @State private var v2Store = ActionToPlanV2Store.shared
-    @State private var showsSocialPreferences = false
 
     var body: some View {
         Group {
@@ -27,8 +25,7 @@ struct MeRootView: View {
                             isPreparingAvatar: isPreparingAvatar || selectedAvatarPhoto != nil,
                             avatarIssue: avatarIssue,
                             selectedAvatarPhoto: $selectedAvatarPhoto,
-                            onEditProfile: { editingProfile = profile },
-                            onVerifySchool: { verifyingProfile = profile }
+                            onEditProfile: { editingProfile = profile }
                         )
 
                         if let schoolChangeResult {
@@ -43,77 +40,74 @@ struct MeRootView: View {
                             .transition(.move(edge: .top).combined(with: .opacity))
                         }
 
-                        SSGroupedSection(
-                            title: AppLocalization.string( "My hub"),
-                            accessibilityID: "me-section-hub"
+                        SSManagementSection(
+                            title: AppLocalization.string("Campus"),
+                            accessibilityID: "me-section-campus"
                         ) {
-                            SSListRow(
-                                title: AppLocalization.string( "My courses"),
-                                subtitle: AppLocalization.string( "Course codes, names, and matching"),
-                                systemImage: "book.fill",
-                                tint: SideSeatTheme.HubTint.courses,
+                            SSManagementRow(
+                                title: AppLocalization.string("Verification"),
+                                value: StudentIdentityDisplay.label(
+                                    school: profile.school,
+                                    verifiedStudent: profile.verifiedStudent,
+                                    status: profile.studentVerificationStatus
+                                ),
+                                systemImage: StudentIdentityDisplay.systemImage(
+                                    verifiedStudent: profile.verifiedStudent,
+                                    status: profile.studentVerificationStatus
+                                ),
+                                accessibilityID: "me-verification"
+                            ) {
+                                verifyingProfile = profile
+                            }
+
+                            SSManagementRow(
+                                title: AppLocalization.string("Courses"),
+                                systemImage: "book.closed",
                                 accessibilityID: "me-courses"
                             ) {
                                 router.navigate(to: .courses)
                             }
-                            if v2Store.assignment?.features["v2SocialPreferences"] == true {
-                                SSListRow(
-                                    title: AppLocalization.string("This week's social preferences"),
-                                    subtitle: AppLocalization.string("Interests, group size, and times you want to meet"),
-                                    systemImage: "sparkles",
-                                    tint: SideSeatTheme.accentText,
-                                    accessibilityID: "me-social-preferences"
-                                ) {
-                                    showsSocialPreferences = true
-                                }
-                            }
-                            SSListRow(
-                                title: AppLocalization.string( "Contacts"),
-                                subtitle: AppLocalization.string( "People you've connected with"),
-                                systemImage: "person.2.fill",
-                                tint: SideSeatTheme.HubTint.contacts,
+
+                            SSManagementRow(
+                                title: AppLocalization.string("Languages"),
+                                value: languageSummary(profile.languages),
+                                systemImage: "character.bubble",
                                 showDivider: false,
-                                accessibilityID: "me-contacts"
+                                accessibilityID: "me-languages"
                             ) {
-                                router.navigate(to: .contacts)
+                                editingLanguages = profile
                             }
                         }
 
-                        SSGroupedSection(
-                            title: AppLocalization.string( "Profile"),
-                            accessibilityID: "me-section-profile"
+                        SSManagementSection(
+                            title: AppLocalization.string("Privacy & Safety"),
+                            accessibilityID: "me-section-privacy-safety"
                         ) {
-                            SSListRow(
-                                title: AppLocalization.string( "Username"),
-                                subtitle: "@\(profile.username)",
-                                systemImage: "at",
-                                tint: SideSeatTheme.HubTint.username,
-                                accessibilityID: "profile-change-username"
-                            ) {
-                                editingUsername = profile
-                            }
-
-                            SSListRow(
-                                title: AppLocalization.string( "Privacy & visibility"),
-                                subtitle: AppLocalization.string( "Together matching, courses, and contact sharing"),
-                                systemImage: "hand.raised.fill",
-                                tint: SideSeatTheme.HubTint.privacyChat,
-                                showDivider: false,
+                            SSManagementRow(
+                                title: AppLocalization.string("Privacy"),
+                                systemImage: "hand.raised",
                                 accessibilityID: "profile-privacy-settings"
                             ) {
                                 editingPrivacy = profile
                             }
+
+                            SSManagementRow(
+                                title: AppLocalization.string("Blocked"),
+                                systemImage: "person.crop.circle.badge.xmark",
+                                showDivider: false,
+                                accessibilityID: "me-blocked"
+                            ) {
+                                router.navigate(to: .blockedUsers)
+                            }
                         }
 
-                        SSGroupedSection(
-                            title: AppLocalization.string( "More"),
-                            accessibilityID: "me-section-more"
+                        SSManagementSection(
+                            title: AppLocalization.string("Settings"),
+                            accessibilityID: "me-section-settings"
                         ) {
-                            SSListRow(
-                                title: AppLocalization.string( "Settings"),
-                                subtitle: AppLocalization.string( "Preferences, support, and account"),
-                                systemImage: "gearshape.fill",
-                                tint: SideSeatTheme.HubTint.settings,
+                            SSManagementRow(
+                                title: AppLocalization.string("Settings"),
+                                systemImage: "gearshape",
                                 showDivider: false,
                                 accessibilityID: "me-settings"
                             ) {
@@ -155,17 +149,17 @@ struct MeRootView: View {
                 return saved
             }
         }
-        .sheet(item: $editingUsername) { profile in
-            ProfileUsernameSheet(profile: profile) { username in
-                if await store.updateUsername(username, using: session) {
-                    return nil
-                }
-                return store.issue ?? AppLocalization.string( "The username could not be saved.")
-            }
-        }
         .sheet(item: $editingPrivacy) { profile in
             ProfilePrivacySheet(profile: profile) { request in
                 await store.save(request, using: session)
+            }
+        }
+        .sheet(item: $editingLanguages) { profile in
+            CoordinationLanguageSelectionSheet(
+                profile: profile,
+                accessibilityID: "me-coordination-languages"
+            ) { languages in
+                await store.saveLanguages(languages, using: session)
             }
         }
         .sheet(item: $verifyingProfile) { profile in
@@ -185,16 +179,11 @@ struct MeRootView: View {
                 await store.load(using: session)
             }
         }
-        .sheet(isPresented: $showsSocialPreferences) {
-            SocialPreferencesView()
-        }
         .onChange(of: selectedAvatarPhoto) { _, item in
             Task { await uploadAvatar(from: item) }
         }
         .task {
-            async let profileLoad: Void = loadProfile()
-            async let assignmentLoad: Void = v2Store.loadAssignment(using: session)
-            _ = await (profileLoad, assignmentLoad)
+            await loadProfile()
         }
     }
 
@@ -225,6 +214,15 @@ struct MeRootView: View {
         } catch {
             avatarIssue = AppLocalization.string( "That photo could not be read.")
         }
+    }
+
+    private func languageSummary(_ languages: [NativeCoordinationLanguage]?) -> String {
+        guard let languages, !languages.isEmpty else {
+            return AppLocalization.string("None")
+        }
+        let names = languages.prefix(2).map { CoordinationLanguageOption.name(for: $0.tag) }
+        let suffix = languages.count > 2 ? " +\(languages.count - 2)" : ""
+        return names.joined(separator: ", ") + suffix
     }
 
 }
@@ -303,13 +301,12 @@ private struct MeHeroCard: View {
     let avatarIssue: String?
     @Binding var selectedAvatarPhoto: PhotosPickerItem?
     let onEditProfile: () -> Void
-    let onVerifySchool: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .center, spacing: 14) {
                 ZStack(alignment: .bottomTrailing) {
-                    ProfileAvatar(url: profile.avatarUrl, name: profile.displayName, size: 76)
+                    ProfileAvatar(url: profile.avatarUrl, name: profile.displayName, size: 64)
                         .overlay {
                             Circle()
                                 .strokeBorder(Color.white.opacity(0.9), lineWidth: 3)
@@ -351,6 +348,12 @@ private struct MeHeroCard: View {
                                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                                 .fixedSize(horizontal: false, vertical: true)
                                 .accessibilityIdentifier("me-username-visual")
+                            Text(profile.schoolSummary.displayLine)
+                                .font(.caption)
+                                .foregroundStyle(SideSeatTheme.textSecondary)
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .accessibilityIdentifier("me-campus-summary")
                         }
                         .layoutPriority(1)
 
@@ -368,20 +371,6 @@ private struct MeHeroCard: View {
                 .accessibilityIdentifier("me-hero-edit")
             }
             .padding(16)
-
-            Divider().opacity(0.5)
-            schoolIdentityRow
-
-            if let tagline = profile.tagline?.trimmingCharacters(in: .whitespacesAndNewlines), !tagline.isEmpty {
-                Divider().opacity(0.5)
-                Text(tagline)
-                    .font(.subheadline)
-                    .foregroundStyle(SideSeatTheme.textPrimary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityIdentifier("me-tagline-visual")
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-            }
 
             if isPreparingAvatar {
                 Divider().opacity(0.5)
@@ -430,82 +419,6 @@ private struct MeHeroCard: View {
         }
     }
 
-    @ViewBuilder
-    private var schoolIdentityRow: some View {
-        if canManageVerification {
-            Button(action: onVerifySchool) {
-                schoolIdentityLabel(showsChevron: true)
-            }
-            .buttonStyle(SSPressButtonStyle())
-            .accessibilityLabel(AppLocalization.string( "School verification"))
-            .accessibilityIdentifier("me-school-verification")
-        } else {
-            schoolIdentityLabel(showsChevron: false)
-        }
-    }
-
-    private func schoolIdentityLabel(showsChevron: Bool) -> some View {
-        HStack(spacing: SideSeatTheme.spaceMD) {
-            ZStack {
-                Circle()
-                    .fill(identityTone.fill)
-                Image(
-                    systemName: StudentIdentityDisplay.systemImage(
-                        verifiedStudent: profile.verifiedStudent,
-                        status: profile.studentVerificationStatus
-                    )
-                )
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(identityTone.foreground)
-            }
-            .frame(width: 36, height: 36)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(profile.schoolSummary.displayLine)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(SideSeatTheme.textPrimary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityIdentifier("me-school-identity")
-                Text(
-                    StudentIdentityDisplay.label(
-                        school: profile.school,
-                        verifiedStudent: profile.verifiedStudent,
-                        status: profile.studentVerificationStatus
-                    )
-                )
-                .font(.caption)
-                .foregroundStyle(identityTone.foreground)
-                .fixedSize(horizontal: false, vertical: true)
-                .accessibilityIdentifier("me-school-status-visual")
-            }
-            .layoutPriority(1)
-
-            Spacer(minLength: SideSeatTheme.spaceSM)
-
-            if showsChevron {
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.tertiary)
-            }
-        }
-        .padding(.horizontal, SideSeatTheme.spaceLG)
-        .padding(.vertical, SideSeatTheme.spaceMD)
-        .contentShape(Rectangle())
-    }
-
-    private var identityTone: StudentIdentityTone {
-        StudentIdentityDisplay.tone(
-            verifiedStudent: profile.verifiedStudent,
-            status: profile.studentVerificationStatus
-        )
-    }
-
-    private var canManageVerification: Bool {
-        StudentIdentityDisplay.canManageVerification(
-            verifiedStudent: profile.verifiedStudent,
-            status: profile.studentVerificationStatus
-        )
-    }
 }
 
 private struct NativeSocialWindow: Codable, Hashable, Sendable {

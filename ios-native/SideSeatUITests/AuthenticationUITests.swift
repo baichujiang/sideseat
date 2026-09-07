@@ -854,16 +854,30 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Test User"].exists)
         XCTAssertTrue(app.staticTexts["@test_001"].exists)
         XCTAssertTrue(app.staticTexts["TUM · Informatics · Semester 3"].exists)
-        XCTAssertTrue(app.descendants(matching: .any)["me-school-identity"].exists)
-        XCTAssertFalse(app.buttons["me-school-verification"].exists)
-        XCTAssertFalse(app.staticTexts["English · Fluent"].exists)
-        XCTAssertFalse(app.staticTexts["German · Conversational"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["me-campus-summary"].exists)
         XCTAssertFalse(app.descendants(matching: .any)["profile-discover-city"].exists)
-        app.swipeUp()
-        XCTAssertTrue(app.descendants(matching: .any)["me-contacts"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.buttons["profile-change-username"].waitForExistence(timeout: 3))
+
+        let verification = app.buttons["me-verification"]
+        XCTAssertTrue(verification.waitForExistence(timeout: 3))
+        verification.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["student-verification-sheet"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["student-verification-submit"].exists)
+        app.navigationBars.buttons.firstMatch.tap()
+
+        let languages = app.buttons["me-languages"]
+        XCTAssertTrue(languages.waitForExistence(timeout: 3))
+        languages.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["me-coordination-languages"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["coordination-language-english"].isSelected)
+        app.navigationBars.buttons.firstMatch.tap()
+
         app.swipeUp()
         XCTAssertTrue(app.buttons["profile-privacy-settings"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["me-blocked"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["me-settings"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.descendants(matching: .any)["me-contacts"].exists)
+        XCTAssertFalse(app.buttons["me-social-preferences"].exists)
+        XCTAssertFalse(app.buttons["profile-change-username"].exists)
     }
 
     func testMeProfileDoesNotDependOnCityConfiguration() {
@@ -894,10 +908,14 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(meTab.waitForExistence(timeout: 5))
         meTab.tap()
 
-        XCTAssertTrue(app.staticTexts["Mein Bereich"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["Meine Pläne"].exists)
-        XCTAssertTrue(app.staticTexts["Kurse, Kommilitonen und Kurschats"].exists)
-        XCTAssertTrue(app.staticTexts["Einladungen und bevorstehende Treffen"].exists)
+        XCTAssertTrue(app.staticTexts["Campus"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Verifizierung"].exists)
+        XCTAssertTrue(app.staticTexts["Kurse"].exists)
+        XCTAssertTrue(app.staticTexts["Sprachen"].exists)
+        app.swipeUp()
+        XCTAssertTrue(app.staticTexts["Privatsphäre & Sicherheit"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Privatsphäre"].exists)
+        XCTAssertTrue(app.staticTexts["Blockiert"].exists)
 
         let settings = app.descendants(matching: .any)["me-settings"]
         if !settings.waitForExistence(timeout: 2) || !settings.isHittable {
@@ -905,6 +923,8 @@ final class AuthenticationUITests: XCTestCase {
         }
         XCTAssertTrue(settings.waitForExistence(timeout: 3))
         settings.tap()
+
+        XCTAssertFalse(app.buttons["settings-support-store"].exists)
 
         XCTAssertTrue(app.staticTexts["Stadt"].waitForExistence(timeout: 3))
         let language = app.descendants(matching: .any)["settings-language"]

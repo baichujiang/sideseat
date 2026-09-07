@@ -15,10 +15,6 @@ struct SettingsRootView: View {
     @State private var showAppShare = false
     @State private var notificationStatus: UNAuthorizationStatus = .notDetermined
 
-    private var storeKitEnabled: Bool {
-        clientConfiguration.configuration?.isFeatureEnabled("storeKitSupport") == true
-    }
-
     private var privacyURL: URL? {
         url(from: clientConfiguration.configuration?.links?.privacyUrl) ?? URL(string: "https://sideseat.de/privacy")
     }
@@ -101,15 +97,6 @@ struct SettingsRootView: View {
             }
 
             Section("Support") {
-                if storeKitEnabled {
-                    Button {
-                        router.navigate(to: .supportStore)
-                    } label: {
-                        Label("Support SideSeat", systemImage: "heart")
-                    }
-                    .accessibilityIdentifier("settings-support-store")
-                }
-
                 Button {
                     router.navigate(to: .feedback)
                 } label: {

@@ -324,10 +324,11 @@ private struct RequiredSetupRow: View {
     }
 }
 
-private struct CoordinationLanguageSelectionSheet: View {
+struct CoordinationLanguageSelectionSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     let profile: NativeCurrentProfile
+    let accessibilityID: String
     let onSave: ([NativeCoordinationLanguage]) async -> Bool
 
     @State private var selectedTags: Set<String>
@@ -336,9 +337,11 @@ private struct CoordinationLanguageSelectionSheet: View {
 
     init(
         profile: NativeCurrentProfile,
+        accessibilityID: String = "required-setup-languages",
         onSave: @escaping ([NativeCoordinationLanguage]) async -> Bool
     ) {
         self.profile = profile
+        self.accessibilityID = accessibilityID
         self.onSave = onSave
         _selectedTags = State(initialValue: Set(profile.languages?.map(\.tag) ?? []))
     }
@@ -368,6 +371,8 @@ private struct CoordinationLanguageSelectionSheet: View {
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
+                        .accessibilityAddTraits(selectedTags.contains(option.tag) ? .isSelected : [])
+                        .accessibilityIdentifier("coordination-language-\(option.tag.lowercased())")
                     }
                 }
 
@@ -392,11 +397,12 @@ private struct CoordinationLanguageSelectionSheet: View {
                             Task { await save() }
                         }
                         .disabled(selectedTags.isEmpty)
+                        .accessibilityIdentifier("coordination-languages-save")
                     }
                 }
             }
         }
-        .accessibilityIdentifier("required-setup-languages")
+        .accessibilityIdentifier(accessibilityID)
     }
 
     @MainActor
@@ -425,7 +431,7 @@ private struct CoordinationLanguageSelectionSheet: View {
     }
 }
 
-private struct CoordinationLanguageOption: Identifiable {
+struct CoordinationLanguageOption: Identifiable {
     let tag: String
     let name: String
 
