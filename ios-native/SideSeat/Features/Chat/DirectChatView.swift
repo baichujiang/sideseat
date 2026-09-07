@@ -30,6 +30,8 @@ struct DirectChatView: View {
     @State private var locationCapture = ChatLocationCapture()
     @State private var showLocationPicker = false
     @State private var showChatInfo = false
+    @State private var showParticipantContext = false
+    @State private var showContextDetails = false
     @State private var showPlanCreate = false
     @State private var showScheduleShare = false
     @State private var isAttachmentTrayVisible = false
@@ -86,9 +88,23 @@ struct DirectChatView: View {
         DirectChatStore.actionContextID(for: initialFocus, in: store.messages)
     }
 
+    private var conversationContext: ConversationContextSelection? {
+        ConversationContextSelection.resolve(
+            focus: initialFocus,
+            messages: store.messages
+        )
+    }
+
     var body: some View {
         // Composer in a VStack (not safeAreaInset) so scrollTo(bottom) isn't short by one row.
         VStack(spacing: 0) {
+            if let conversationContext {
+                ConversationContextBar(selection: conversationContext) {
+                    composerFocus.blur()
+                    showContextDetails = true
+                }
+            }
+
             ZStack {
                 if hasPreparedInitialViewport {
                     messageList
@@ -200,7 +216,7 @@ struct DirectChatView: View {
                 set: { if !$0 { pendingReport = nil } }
             )) {
                 ChatReportSheet { reason, details in
-                    guard let message = pendingReport else { return AppLocalization.string( "Message unavailable.") }
+                    guard let message = pendingReport else { return AppLocalization.string("Message unavailable.") }
                     let failure = await store.reportMessage(
                         message,
                         reason: reason,
@@ -209,7 +225,7 @@ struct DirectChatView: View {
                     )
                     if failure == nil {
                         pendingReport = nil
-                        showActionNotice(AppLocalization.string( "Report sent"), systemImage: "checkmark.shield")
+                        showActionNotice(AppLocalization.string("Report sent"), systemImage: "checkmark.shield")
                     }
                     return failure
                 }
@@ -220,6 +236,28 @@ struct DirectChatView: View {
             )) {
                 ChatImagePreviewView(url: previewImageURL) {
                     previewImageURL = nil
+                }
+            }
+            .sheet(isPresented: $showParticipantContext) {
+                if let conversation = store.conversation {
+                    ParticipantContextSheet(
+                        conversation: conversation,
+                        selection: conversationContext
+                    )
+                }
+            }
+            .sheet(isPresented: $showContextDetails) {
+                if let conversationContext {
+                    ConversationContextSheet(
+                        selection: conversationContext,
+                        canMakePlan: store.conversation?.isSelfNotes != true
+                            && !store.isUnrepliedSendBlocked
+                    ) {
+                        Task { @MainActor in
+                            await Task.yield()
+                            presentPrimaryPlan()
+                        }
+                    }
                 }
             }
             .sheet(isPresented: $showPlanCreate) {
@@ -312,13 +350,7 @@ struct DirectChatView: View {
                             scrollToMessageID = messageID
                         }
                     },
-                    onViewProfile: { peerID in
-                        showChatInfo = false
-                        Task { @MainActor in
-                            await Task.yield()
-                            router.navigate(to: .profile(userID: peerID))
-                        }
-                    },
+                    onViewProfile: { _ in },
                     onConversationClosed: {
                         showChatInfo = false
                         Task { @MainActor in
@@ -392,73 +424,75 @@ struct DirectChatView: View {
                                     return nil
                                 }()
                                 DirectMessageBubble(
-                                message: message,
-                                isMine: isMine,
-                                showSenderName: false,
-                                showAvatar: !connectsBelow,
-                                connectsAbove: connectsAbove,
-                                connectsBelow: connectsBelow,
-                                avatarURL: avatarURL,
-                                currentUserID: session.currentUser?.id ?? "ui-test-user",
-                                status: store.sendStatuses[message.id],
-                                isActingOnPlan: store.isActingOnPlan,
-                                canProposeFromAction: canProposePlan(from: message),
-                                mutualOpportunityPlanState: mutualOpportunityPlanState(for: message),
-                                onOpenProfile: {
-                                    router.navigate(to: .profile(userID: message.sender.id))
-                                },
-                                onReply: {
-                                    beginReply(to: message)
-                                },
-                                onRetry: {
-                                    Task { _ = await store.retryFailedSend(message.id, using: session) }
-                                },
-                                onDelete: {
-                                    presentDeleteConfirmation(for: message)
-                                },
-                                onReport: {
-                                    presentReportSheet(for: message)
-                                },
-                                onCopy: { text in
-                                    copyMessageText(text)
-                                },
-                                onOpenImage: { url in
-                                    previewImageURL = url
-                                },
-                                onAcceptPlan: { plan in
-                                    Task { _ = await store.acceptPlan(plan, using: session) }
-                                },
-                                onDeclinePlan: { plan in
-                                    Task { _ = await store.declinePlan(plan, using: session) }
-                                },
-                                onWithdrawPlan: { plan in
-                                    Task { _ = await store.withdrawPlan(plan, using: session) }
-                                },
-                                onCounterPlan: { plan in
-                                    counterPlan = plan
-                                },
-                                onProposeFromAction: { interest, contextID in
-                                    guard let contextID else { return }
-                                    actionPlanDraft = ActionPlanPresentation(
-                                        target: .actionContext(contextID: contextID),
-                                        draft: NativePlanDraft(
-                                            context: interest.context,
-                                            interestID: interest.id
+                                    message: message,
+                                    isMine: isMine,
+                                    showSenderName: false,
+                                    showAvatar: !connectsBelow,
+                                    connectsAbove: connectsAbove,
+                                    connectsBelow: connectsBelow,
+                                    avatarURL: avatarURL,
+                                    currentUserID: session.currentUser?.id ?? "ui-test-user",
+                                    status: store.sendStatuses[message.id],
+                                    isActingOnPlan: store.isActingOnPlan,
+                                    canProposeFromAction: canProposePlan(from: message),
+                                    mutualOpportunityPlanState: mutualOpportunityPlanState(for: message),
+                                    onOpenProfile: {
+                                        guard store.conversation?.isSelfNotes != true else { return }
+                                        composerFocus.blur()
+                                        showParticipantContext = true
+                                    },
+                                    onReply: {
+                                        beginReply(to: message)
+                                    },
+                                    onRetry: {
+                                        Task { _ = await store.retryFailedSend(message.id, using: session) }
+                                    },
+                                    onDelete: {
+                                        presentDeleteConfirmation(for: message)
+                                    },
+                                    onReport: {
+                                        presentReportSheet(for: message)
+                                    },
+                                    onCopy: { text in
+                                        copyMessageText(text)
+                                    },
+                                    onOpenImage: { url in
+                                        previewImageURL = url
+                                    },
+                                    onAcceptPlan: { plan in
+                                        Task { _ = await store.acceptPlan(plan, using: session) }
+                                    },
+                                    onDeclinePlan: { plan in
+                                        Task { _ = await store.declinePlan(plan, using: session) }
+                                    },
+                                    onWithdrawPlan: { plan in
+                                        Task { _ = await store.withdrawPlan(plan, using: session) }
+                                    },
+                                    onCounterPlan: { plan in
+                                        counterPlan = plan
+                                    },
+                                    onProposeFromAction: { interest, contextID in
+                                        guard let contextID else { return }
+                                        actionPlanDraft = ActionPlanPresentation(
+                                            target: .actionContext(contextID: contextID),
+                                            draft: NativePlanDraft(
+                                                context: interest.context,
+                                                interestID: interest.id
+                                            )
                                         )
-                                    )
-                                },
-                                onProposeFromMutualOpportunity: { opportunity in
-                                    actionPlanDraft = ActionPlanPresentation(
-                                        target: .legacyConnection(connectionID: connectionID),
-                                        draft: opportunity.planDraft
-                                    )
-                                },
-                                onOpenCalendar: {
-                                    deepLinkRouter.handleAppPath("/home")
-                                },
-                                onOpenScheduleShare: { token in
-                                    openedScheduleShareToken = ScheduleShareNavToken(id: token)
-                                }
+                                    },
+                                    onProposeFromMutualOpportunity: { opportunity in
+                                        actionPlanDraft = ActionPlanPresentation(
+                                            target: .legacyConnection(connectionID: connectionID),
+                                            draft: opportunity.planDraft
+                                        )
+                                    },
+                                    onOpenCalendar: {
+                                        deepLinkRouter.handleAppPath("/home")
+                                    },
+                                    onOpenScheduleShare: { token in
+                                        openedScheduleShareToken = ScheduleShareNavToken(id: token)
+                                    }
                                 )
                                 .padding(.top, connectsAbove ? 2 : 8)
                             }
@@ -475,10 +509,6 @@ struct DirectChatView: View {
                 .contentShape(Rectangle())
                 .simultaneousGesture(
                     TapGesture().onEnded {
-                        if isAttachmentTrayVisible {
-                            isAttachmentTrayVisible = false
-                            return
-                        }
                         guard composerFocus.isFocused else { return }
                         composerFocus.blur()
                     }
@@ -504,7 +534,7 @@ struct DirectChatView: View {
                                 )
                             }
                         } label: {
-                            Text(store.pendingRemoteCount == 1 ? AppLocalization.string( "1 new message") : AppLocalization.string( "\(store.pendingRemoteCount) new messages"))
+                            Text(store.pendingRemoteCount == 1 ? AppLocalization.string("1 new message") : AppLocalization.string("\(store.pendingRemoteCount) new messages"))
                                 .font(.footnote.weight(.semibold))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
@@ -561,9 +591,6 @@ struct DirectChatView: View {
                     releaseMessageListBottomPin()
                     isNearBottom = false
                     await Task.yield()
-                    // A LazyVStack can finish measuring rich cards after the first
-                    // scroll request. Re-apply the initial focus while the list is
-                    // still hidden so the bottom anchor cannot win that race.
                     for attempt in 0..<3 {
                         var transaction = Transaction()
                         transaction.disablesAnimations = true
@@ -611,94 +638,93 @@ struct DirectChatView: View {
 
     private var composer: some View {
         VStack(spacing: 6) {
-                if store.isUnrepliedSendBlocked || store.showUnrepliedHint {
-                    UnrepliedReplyBanner(
-                        blocked: store.isUnrepliedSendBlocked,
-                        sent: min(store.unrepliedStreak, 2),
-                        max: 2
-                    )
-                    .padding(.horizontal, 12)
-                    .accessibilityIdentifier("chat-unreplied-hint")
-                }
-
-                if let issue = store.sendIssue ?? store.planIssue ?? store.actionIssue {
-                    Text(issue)
-                        .font(.caption)
-                        .foregroundStyle(SideSeatTheme.danger)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 12)
-                        .accessibilityIdentifier("chat-action-issue")
-                }
-
-                if let reply = replyDraft {
-                    HStack(alignment: .top, spacing: 10) {
-                        RoundedRectangle(cornerRadius: 1.5)
-                            .fill(SideSeatTheme.accent)
-                            .frame(width: 3, height: 38)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Replying to \(reply.sender.displayName)")
-                                .font(.caption.weight(.semibold))
-                                .accessibilityIdentifier("chat-reply-preview")
-                            Text(reply.previewText)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(2)
-                        }
-                        Spacer(minLength: 8)
-                        Button {
-                            replyDraft = nil
-                            store.clearReply()
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundStyle(.secondary)
-                        }
-                        .accessibilityIdentifier("chat-reply-cancel")
-                    }
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 12)
-                    .padding(.top, 8)
-                }
-
-                if isAttachmentTrayVisible {
-                    attachmentTray
-                        .transition(.opacity)
-                }
-
-                HStack(alignment: .bottom, spacing: 10) {
-                    Button {
-                        withAnimation(.easeOut(duration: 0.16)) {
-                            isAttachmentTrayVisible.toggle()
-                        }
-                    } label: {
-                        Image(systemName: isAttachmentTrayVisible ? "xmark" : "plus")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundStyle(.primary)
-                            .frame(width: 30, height: 30)
-                            .background(.quaternary, in: Circle())
-                            .ssIconButtonHitTarget()
-                    }
-                    .buttonStyle(SSPressButtonStyle())
-                    .disabled(store.isUnrepliedSendBlocked)
-                    .accessibilityIdentifier("chat-composer-attach")
-                    .accessibilityLabel(isAttachmentTrayVisible ? "Close attachments" : "Attachments")
-
-                    ChatComposerTextInput(
-                        draft: composerDraft,
-                        placeholder: replyDraft == nil ? AppLocalization.string( "Message") : AppLocalization.string( "Reply"),
-                        isBlocked: store.isUnrepliedSendBlocked,
-                        focusController: composerFocus
-                    ) { text in
-                        Task { await send(text) }
-                    }
-                }
+            if store.isUnrepliedSendBlocked || store.showUnrepliedHint {
+                UnrepliedReplyBanner(
+                    blocked: store.isUnrepliedSendBlocked,
+                    sent: min(store.unrepliedStreak, 2),
+                    max: 2
+                )
                 .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .accessibilityElement(children: .contain)
-                .accessibilityIdentifier("chat-composer")
+                .accessibilityIdentifier("chat-unreplied-hint")
             }
-            .background(.bar)
+
+            if let issue = store.sendIssue ?? store.planIssue ?? store.actionIssue {
+                Text(issue)
+                    .font(.caption)
+                    .foregroundStyle(SideSeatTheme.danger)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 12)
+                    .accessibilityIdentifier("chat-action-issue")
+            }
+
+            if let reply = replyDraft {
+                HStack(alignment: .top, spacing: 10) {
+                    RoundedRectangle(cornerRadius: 1.5)
+                        .fill(SideSeatTheme.accent)
+                        .frame(width: 3, height: 38)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Replying to \(reply.sender.displayName)")
+                            .font(.caption.weight(.semibold))
+                            .accessibilityIdentifier("chat-reply-preview")
+                        Text(reply.previewText)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                    }
+                    Spacer(minLength: 8)
+                    Button {
+                        replyDraft = nil
+                        store.clearReply()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .accessibilityIdentifier("chat-reply-cancel")
+                }
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 12)
+                .padding(.top, 8)
+            }
+
+            HStack(alignment: .bottom, spacing: 10) {
+                Button {
+                    composerFocus.blur()
+                    presentPrimaryPlan()
+                } label: {
+                    Image(systemName: "calendar.badge.plus")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(SideSeatTheme.accentText)
+                        .frame(width: 34, height: 34)
+                        .background(SideSeatTheme.accent.opacity(0.10), in: Circle())
+                        .ssIconButtonHitTarget()
+                }
+                .buttonStyle(SSPressButtonStyle())
+                .disabled(
+                    store.conversation?.isSelfNotes == true
+                        || store.isUnrepliedSendBlocked
+                        || store.isActingOnPlan
+                )
+                .accessibilityIdentifier("chat-composer-plan")
+                .accessibilityLabel("Plan")
+
+                ChatComposerTextInput(
+                    draft: composerDraft,
+                    placeholder: replyDraft == nil ? AppLocalization.string("Message") : AppLocalization.string("Reply"),
+                    isBlocked: store.isUnrepliedSendBlocked,
+                    focusController: composerFocus
+                ) { text in
+                    Task { await send(text) }
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("chat-composer")
+        }
+        .background(.bar)
     }
 
+    /// Retained for rendering/data compatibility. MVP composer no longer exposes this tray.
     private var attachmentTray: some View {
         HStack(alignment: .top, spacing: 12) {
             PhotosPicker(selection: $selectedPhoto, matching: .images) {
@@ -723,7 +749,7 @@ struct DirectChatView: View {
                 attachmentActionLabel(title: "Plan", systemImage: "calendar.badge.plus")
             }
             .disabled(store.isSending || store.isUnrepliedSendBlocked)
-            .accessibilityIdentifier("chat-composer-plan")
+            .accessibilityIdentifier("chat-composer-plan-legacy")
 
             Button {
                 closeAttachmentTrayForDestination()
@@ -811,7 +837,8 @@ struct DirectChatView: View {
         if let conversation = store.conversation {
             Button {
                 guard !conversation.isSelfNotes else { return }
-                router.navigate(to: .profile(userID: conversation.peer.id))
+                composerFocus.blur()
+                showParticipantContext = true
             } label: {
                 HStack(spacing: 7) {
                     InitialAvatar(
@@ -845,6 +872,47 @@ struct DirectChatView: View {
         }
     }
 
+    private func presentPrimaryPlan() {
+        guard store.conversation?.isSelfNotes != true else { return }
+
+        if let conversationContext {
+            switch conversationContext.source {
+            case .actionInterest(let interestID, let contextID):
+                if let contextID {
+                    actionPlanDraft = ActionPlanPresentation(
+                        target: .actionContext(contextID: contextID),
+                        draft: NativePlanDraft(
+                            context: conversationContext.context,
+                            interestID: interestID
+                        )
+                    )
+                    return
+                }
+            case .mutualOpportunity(let opportunityID):
+                actionPlanDraft = ActionPlanPresentation(
+                    target: .legacyConnection(connectionID: connectionID),
+                    draft: NativePlanDraft(
+                        title: conversationContext.context.title,
+                        startTime: conversationContext.context.startsAt,
+                        endTime: conversationContext.context.endsAt,
+                        location: conversationContext.context.location,
+                        planType: conversationContext.context.planType,
+                        participantIds: conversationContext.context.participantIds,
+                        origin: NativePlanOriginReference(
+                            kind: "MUTUAL_OPPORTUNITY",
+                            id: opportunityID
+                        )
+                    )
+                )
+                return
+            case .plan:
+                break
+            }
+        }
+
+        showPlanCreate = true
+    }
+
     private func beginReply(to message: NativeDirectMessage) {
         UISelectionFeedbackGenerator().selectionChanged()
         withAnimation(.easeOut(duration: 0.18)) {
@@ -863,7 +931,7 @@ struct DirectChatView: View {
         UIPasteboard.general.string = text
         Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(140))
-            showActionNotice(AppLocalization.string( "Copied"), systemImage: "checkmark")
+            showActionNotice(AppLocalization.string("Copied"), systemImage: "checkmark")
         }
     }
 
@@ -945,7 +1013,6 @@ struct DirectChatView: View {
               !store.isUnrepliedSendBlocked
         else { return }
         let reply = replyDraft
-        // Clear immediately so failed rows own the text (avoid draft + bubble duplication).
         composerDraft.clear()
         replyDraft = nil
         isNearBottom = true
@@ -962,12 +1029,11 @@ struct DirectChatView: View {
         guard let data = try? await item.loadTransferable(type: Data.self),
               let draftImage = await DiscoverImagePreprocessor.makeDraftAsync(from: data)
         else {
-            store.noteSendIssue(AppLocalization.string( "Could not prepare that photo."))
+            store.noteSendIssue(AppLocalization.string("Could not prepare that photo."))
             return
         }
-        // Chat upload limit is 2 MB.
         guard draftImage.data.count <= 2 * 1024 * 1024 else {
-            store.noteSendIssue(AppLocalization.string( "Image is too large. Max 2 MB."))
+            store.noteSendIssue(AppLocalization.string("Image is too large. Max 2 MB."))
             return
         }
         let caption = composerDraft.trimmedText
@@ -1446,58 +1512,57 @@ private struct DirectMessageBubble: View {
                 Spacer(minLength: 20)
             } else {
                 if !isMine {
-                if showAvatar {
-                    Button(action: onOpenProfile) {
-                        InitialAvatar(
-                            name: message.sender.displayName,
-                            url: avatarURL ?? message.sender.avatarUrl,
-                            size: 32
-                        )
+                    if showAvatar {
+                        Button(action: onOpenProfile) {
+                            InitialAvatar(
+                                name: message.sender.displayName,
+                                url: avatarURL ?? message.sender.avatarUrl,
+                                size: 32
+                            )
+                        }
+                        .buttonStyle(SSPressButtonStyle())
+                        .accessibilityIdentifier("chat-avatar-\(message.id)")
+                        .accessibilityLabel(message.sender.displayName)
+                    } else {
+                        Color.clear
+                            .frame(width: 32, height: 1)
+                            .accessibilityHidden(true)
                     }
-                    .buttonStyle(SSPressButtonStyle())
-                    .accessibilityIdentifier("chat-avatar-\(message.id)")
-                    .accessibilityLabel(AppLocalization.string( "\(message.sender.displayName) profile"))
-                } else {
-                    Color.clear
-                        .frame(width: 32, height: 1)
-                        .accessibilityHidden(true)
                 }
-            }
 
-            if isMine { Spacer(minLength: 48) }
-            VStack(alignment: isMine ? .trailing : .leading, spacing: 4) {
-                if showSenderName, !isMine {
-                    Button(action: onOpenProfile) {
-                        Text(message.sender.displayName)
-                            .font(.caption2.weight(.semibold))
+                if isMine { Spacer(minLength: 48) }
+                VStack(alignment: isMine ? .trailing : .leading, spacing: 4) {
+                    if showSenderName, !isMine {
+                        Button(action: onOpenProfile) {
+                            Text(message.sender.displayName)
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(SSPressButtonStyle())
+                    }
+
+                    contextualBubble
+
+                    if status == .sending {
+                        Text("Sending…")
+                            .font(.caption2)
                             .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(SSPressButtonStyle())
-                }
-
-                contextualBubble
-
-                if status == .sending {
-                    Text("Sending…")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                } else if status == .failed {
-                    if canRetrySend {
-                        Button(action: onRetry) {
-                            Text("Not delivered · Tap to retry")
+                    } else if status == .failed {
+                        if canRetrySend {
+                            Button(action: onRetry) {
+                                Text("Not delivered · Tap to retry")
+                                    .font(.caption2)
+                                    .foregroundStyle(SideSeatTheme.danger)
+                            }
+                            .buttonStyle(SSPressButtonStyle())
+                            .accessibilityIdentifier("chat-retry-\(message.id)")
+                        } else {
+                            Text("Not delivered")
                                 .font(.caption2)
                                 .foregroundStyle(SideSeatTheme.danger)
                         }
-                        .buttonStyle(SSPressButtonStyle())
-                        .accessibilityIdentifier("chat-retry-\(message.id)")
-                    } else {
-                        Text("Not delivered")
-                            .font(.caption2)
-                            .foregroundStyle(SideSeatTheme.danger)
                     }
                 }
-
-            }
                 if !isMine { Spacer(minLength: 48) }
             }
         }
@@ -1515,16 +1580,16 @@ private struct DirectMessageBubble: View {
         } actions: {
             messageContextMenuActions
         }
-            .accessibilityAction(named: Text(AppLocalization.string( "Reply"))) {
-                if !message.isDeleted { onReply() }
-            }
-            .accessibilityAction(named: Text(AppLocalization.string( "Report"))) {
-                if !isMine && !message.isDeleted { onReport() }
-            }
-            .modifier(ChatDeleteAccessibilityAction(
-                enabled: isMine && message.supportsUserDeletion && !message.isDeleted,
-                action: onDelete
-            ))
+        .accessibilityAction(named: Text(AppLocalization.string("Reply"))) {
+            if !message.isDeleted { onReply() }
+        }
+        .accessibilityAction(named: Text(AppLocalization.string("Report"))) {
+            if !isMine && !message.isDeleted { onReport() }
+        }
+        .modifier(ChatDeleteAccessibilityAction(
+            enabled: isMine && message.supportsUserDeletion && !message.isDeleted,
+            action: onDelete
+        ))
     }
 
     private var messageContextMenuActions: [SSLongPressAction] {
@@ -1609,7 +1674,7 @@ private struct DirectMessageBubble: View {
                 if let location = message.location {
                     ChatLocationBubble(location: location, isMine: isMine)
                 } else {
-                    Text(AppLocalization.string( "Location"))
+                    Text(AppLocalization.string("Location"))
                         .font(.footnote.weight(.medium))
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
@@ -1686,15 +1751,15 @@ private struct DirectMessageBubble: View {
         switch message.type {
         case "SCHEDULE_SHARE_CARD": return AppLocalization.string("Shared availability")
         case "AVAILABILITY_CARD":
-            return message.availabilityShareId == nil ? AppLocalization.string( "Availability unavailable") : AppLocalization.string( "Shared availability")
-        case "PLAN_REQUEST_CARD": return AppLocalization.string( "Plan invite")
-        case "PLAN_CONFIRMED_CARD": return AppLocalization.string( "Plan confirmed")
+            return message.availabilityShareId == nil ? AppLocalization.string("Availability unavailable") : AppLocalization.string("Shared availability")
+        case "PLAN_REQUEST_CARD": return AppLocalization.string("Plan invite")
+        case "PLAN_CONFIRMED_CARD": return AppLocalization.string("Plan confirmed")
         case "ACTION_INTEREST_CARD": return AppLocalization.string("Action interest")
         case "MUTUAL_OPPORTUNITY_CARD": return AppLocalization.string("Together opportunity")
         case "SYSTEM":
             let body = message.body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            return body.isEmpty ? AppLocalization.string( "Update") : body
-        default: return AppLocalization.string( "Message")
+            return body.isEmpty ? AppLocalization.string("Update") : body
+        default: return AppLocalization.string("Message")
         }
     }
 
@@ -2007,7 +2072,7 @@ private struct ChatLocationShareSheet: View {
                 .frame(maxHeight: .infinity)
 
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(locationName.isEmpty ? AppLocalization.string( "Pinned location") : locationName)
+                    Text(locationName.isEmpty ? AppLocalization.string("Pinned location") : locationName)
                         .font(.headline)
                         .lineLimit(2)
                     if let coordinate {
@@ -2036,7 +2101,7 @@ private struct ChatLocationShareSheet: View {
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 SSPrimaryButton(
-                    title: AppLocalization.string( "Send location"),
+                    title: AppLocalization.string("Send location"),
                     isLoading: isSending,
                     fill: .product,
                     height: 48,
@@ -2159,7 +2224,7 @@ private struct ChatLocationShareSheet: View {
         if sent {
             dismiss()
         } else {
-            issue = AppLocalization.string( "Could not share this location. Try again.")
+            issue = AppLocalization.string("Could not share this location. Try again.")
         }
     }
 
@@ -2178,10 +2243,10 @@ private struct ChatLocationBubble: View {
         } label: {
             VStack(alignment: .leading, spacing: 6) {
                 ChatLocationSnapshotView(location: location)
-                .frame(width: 220, height: 120)
-                .clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
+                    .frame(width: 220, height: 120)
+                    .clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
 
-                Text(location.name ?? AppLocalization.string( "Location"))
+                Text(location.name ?? AppLocalization.string("Location"))
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(isMine ? SideSeatTheme.Chat.ownBubbleForeground : Color.primary)
                 Text("Open in Maps")
@@ -2374,7 +2439,7 @@ private struct ChatDeleteAccessibilityAction: ViewModifier {
 
     func body(content: Content) -> some View {
         if enabled {
-            content.accessibilityAction(named: Text(AppLocalization.string( "Delete")), action)
+            content.accessibilityAction(named: Text(AppLocalization.string("Delete")), action)
         } else {
             content
         }
@@ -2384,17 +2449,11 @@ private struct ChatDeleteAccessibilityAction: ViewModifier {
 extension Notification.Name {
     static let sideSeatChatScrollToBottom = Notification.Name("sideSeatChatScrollToBottom")
     static let sideSeatInboxConversationRead = Notification.Name("sideSeatInboxConversationRead")
-    /// Outbound (or inbound) message should refresh the matching inbox row preview.
     static let sideSeatInboxConversationUpdated = Notification.Name("sideSeatInboxConversationUpdated")
-    /// A chat push arrived while the app is active or was opened by the user.
     static let sideSeatInboxNeedsRefresh = Notification.Name("sideSeatInboxNeedsRefresh")
-    /// A remote notification arrived while SideSeat is in the foreground.
     static let sideSeatForegroundPushReceived = Notification.Name("sideSeatForegroundPushReceived")
-    /// A confirmed plan changed the signed-in user's calendar.
     static let sideSeatCalendarNeedsRefresh = Notification.Name("sideSeatCalendarNeedsRefresh")
-    /// A plan was accepted or declined and the plan center should reload.
     static let sideSeatPlansNeedsRefresh = Notification.Name("sideSeatPlansNeedsRefresh")
-    /// An accepted Mutual-opportunity Plan ended its two source intents.
     static let sideSeatTogetherNeedsRefresh = Notification.Name("sideSeatTogetherNeedsRefresh")
     static let sideSeatDiscoverNeedsRefresh = Notification.Name("sideSeatDiscoverNeedsRefresh")
     static let sideseatReplayProductTutorial = Notification.Name("sideseatReplayProductTutorial")

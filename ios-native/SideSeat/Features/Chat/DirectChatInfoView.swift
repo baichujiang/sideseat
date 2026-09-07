@@ -1,65 +1,399 @@
 import SwiftUI
 import UIKit
 
+enum MVPConversationPrimaryControl: String, CaseIterable, Sendable {
+    case context
+    case text
+    case plan
+    case safety
+}
+
+enum MVPConversationInfoSurface: String, CaseIterable, Sendable {
+    case participant
+    case context
+    case search
+    case safety
+}
+
+enum MVPConversationInfoPolicy {
+    static let primaryControls: [MVPConversationPrimaryControl] = [
+        .context,
+        .text,
+        .plan,
+        .safety,
+    ]
+
+    static let surfaces: [MVPConversationInfoSurface] = [
+        .participant,
+        .context,
+        .search,
+        .safety,
+    ]
+
+    static let exposesPublicProfile = false
+    static let exposesRelationshipManagement = false
+    static let exposesContactExchange = false
+    static let exposesLegacyAttachmentTray = false
+}
+
+struct ConversationContextSelection: Equatable, Sendable {
+    enum Source: Equatable, Sendable {
+        case actionInterest(interestID: String, contextID: String?)
+        case mutualOpportunity(opportunityID: String)
+        case plan
+    }
+
+    let context: NativeActionContext
+    let source: Source
+
+    static func resolve(
+        focus: DirectChatFocus?,
+        messages: [NativeDirectMessage]
+    ) -> ConversationContextSelection? {
+        if let focus, let focused = focusedSelection(focus, messages: messages) {
+            return focused
+        }
+        for message in messages.reversed() {
+            if let selection = selection(from: message) {
+                return selection
+            }
+        }
+        return nil
+    }
+
+    private static func focusedSelection(
+        _ focus: DirectChatFocus,
+        messages: [NativeDirectMessage]
+    ) -> ConversationContextSelection? {
+        let message: NativeDirectMessage?
+        switch focus {
+        case .message(let id):
+            message = messages.last { $0.id == id }
+        case .actionInterest(let id):
+            message = messages.last { $0.actionInterest?.id == id }
+        case .actionContext(let id):
+            message = messages.last {
+                $0.actionContextId == id || $0.planRequest?.originContextId == id
+            }
+        case .plan(let commitmentID, let revisionID):
+            message = messages.last { candidate in
+                guard let plan = candidate.planRequest else { return false }
+                if let revisionID, plan.id == revisionID { return true }
+                return plan.commitmentId == commitmentID
+            }
+        }
+        return message.flatMap { selection(from: $0) }
+    }
+
+    private static func selection(from message: NativeDirectMessage) -> ConversationContextSelection? {
+        if let interest = message.actionInterest {
+            return ConversationContextSelection(
+                context: interest.context,
+                source: .actionInterest(
+                    interestID: interest.id,
+                    contextID: message.actionContextId
+                )
+            )
+        }
+        if let opportunity = message.mutualOpportunity {
+            return ConversationContextSelection(
+                context: opportunity.context,
+                source: .mutualOpportunity(opportunityID: opportunity.id)
+            )
+        }
+        if let origin = message.planRequest?.origin {
+            return ConversationContextSelection(context: origin.snapshot, source: .plan)
+        }
+        return nil
+    }
+
+    var sourceTitle: String {
+        switch source {
+        case .mutualOpportunity:
+            AppLocalization.string("Together opportunity")
+        case .actionInterest:
+            AppLocalization.string(context.sourceKind == "COURSE_ACTION" ? "Course action" : "Buddy action")
+        case .plan:
+            AppLocalization.string("Plan")
+        }
+    }
+
+    var secondarySummary: String? {
+        if let start = context.startDate {
+            return start.formatted(date: .abbreviated, time: .shortened)
+        }
+        if let course = context.course {
+            let title = [course.code, course.name]
+                .compactMap { $0 }
+                .filter { !$0.isEmpty }
+                .joined(separator: " ")
+            if !title.isEmpty { return title }
+        }
+        if let location = context.location?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !location.isEmpty {
+            return location
+        }
+        return nil
+    }
+}
+
+struct ConversationContextBar: View {
+    let selection: ConversationContextSelection
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: SideSeatTheme.spaceMD) {
+                Image(systemName: "sparkles")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.accentText)
+                    .frame(width: 32, height: 32)
+                    .background(SideSeatTheme.accent.opacity(0.10), in: Circle())
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(selection.sourceTitle)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    Text(selection.context.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.textPrimary)
+                        .lineLimit(1)
+                    if let summary = selection.secondarySummary {
+                        Text(summary)
+                            .font(.caption)
+                            .foregroundStyle(SideSeatTheme.textSecondary)
+                            .lineLimit(1)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.horizontal, SideSeatTheme.spaceLG)
+            .padding(.vertical, SideSeatTheme.spaceSM)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .background(.bar)
+        .overlay(alignment: .bottom) { Divider() }
+        .accessibilityIdentifier("conversation-context-bar")
+    }
+}
+
+struct ConversationContextSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    let selection: ConversationContextSelection
+    var canMakePlan = false
+    var onMakePlan: () -> Void = {}
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                        Text(selection.sourceTitle)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        Text(selection.context.title)
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.vertical, SideSeatTheme.spaceXS)
+                }
+
+                if let course = selection.context.course {
+                    Section {
+                        contextRow(
+                            title: AppLocalization.string("Course"),
+                            value: [course.code, course.name]
+                                .compactMap { $0 }
+                                .filter { !$0.isEmpty }
+                                .joined(separator: " "),
+                            systemImage: "graduationcap"
+                        )
+                    }
+                }
+
+                Section {
+                    if let start = selection.context.startDate {
+                        contextRow(
+                            title: AppLocalization.string("Starts"),
+                            value: start.formatted(date: .abbreviated, time: .shortened),
+                            systemImage: "calendar"
+                        )
+                    }
+                    if let end = selection.context.endDate {
+                        contextRow(
+                            title: AppLocalization.string("Ends"),
+                            value: end.formatted(date: .abbreviated, time: .shortened),
+                            systemImage: "clock"
+                        )
+                    }
+                    if let location = selection.context.location?.trimmingCharacters(in: .whitespacesAndNewlines),
+                       !location.isEmpty {
+                        contextRow(
+                            title: AppLocalization.string("Location"),
+                            value: location,
+                            systemImage: "mappin.and.ellipse"
+                        )
+                    }
+                }
+            }
+            .listStyle(.insetGrouped)
+            .navigationTitle(selection.sourceTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if canMakePlan {
+                    SSPrimaryButton(
+                        title: AppLocalization.string("Make a plan"),
+                        fill: .product,
+                        accessibilityID: "conversation-context-make-plan"
+                    ) {
+                        dismiss()
+                        onMakePlan()
+                    }
+                    .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                    .padding(.vertical, SideSeatTheme.spaceSM)
+                    .background(.bar)
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+        .accessibilityIdentifier("conversation-context-sheet")
+    }
+
+    private func contextRow(title: String, value: String, systemImage: String) -> some View {
+        HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
+            Image(systemName: systemImage)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .frame(width: 22)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                Text(value)
+                    .foregroundStyle(SideSeatTheme.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+}
+
+struct ParticipantContextSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    let conversation: NativeDirectConversation
+    let selection: ConversationContextSelection?
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    HStack(spacing: SideSeatTheme.spaceLG) {
+                        InitialAvatar(
+                            name: conversation.displayName,
+                            url: conversation.peer.avatarUrl,
+                            size: 58
+                        )
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(conversation.displayName)
+                                .font(.headline)
+                                .foregroundStyle(SideSeatTheme.textPrimary)
+                            Text("@\(conversation.peer.username)")
+                                .font(.subheadline)
+                                .foregroundStyle(SideSeatTheme.textSecondary)
+                        }
+                    }
+                    .padding(.vertical, SideSeatTheme.spaceXS)
+                }
+
+                if let selection {
+                    Section {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text(selection.sourceTitle)
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            Text(selection.context.title)
+                                .font(.body.weight(.medium))
+                                .foregroundStyle(SideSeatTheme.textPrimary)
+                                .fixedSize(horizontal: false, vertical: true)
+                            if let summary = selection.secondarySummary {
+                                Text(summary)
+                                    .font(.footnote)
+                                    .foregroundStyle(SideSeatTheme.textSecondary)
+                            }
+                        }
+                    }
+                }
+            }
+            .listStyle(.insetGrouped)
+            .navigationTitle(conversation.displayName)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .presentationDetents([.medium])
+        .presentationDragIndicator(.visible)
+        .accessibilityIdentifier("participant-context-sheet")
+    }
+}
+
 struct DirectChatInfoView: View {
     @Environment(SessionStore.self) private var session
 
     let store: DirectChatStore
     let searchRows: [ChatThreadSearchRow]
     let onSelectMessage: (String) -> Void
+    /// Kept in the call contract so older callers remain source-compatible. MVP Chat Info
+    /// deliberately does not expose a generic public-profile destination.
     let onViewProfile: (String) -> Void
     let onConversationClosed: () -> Void
 
     @State private var showThreadSearch = false
+    @State private var showParticipantContext = false
+    @State private var showContextDetails = false
     @State private var confirmEnd = false
     @State private var confirmBlock = false
-    @State private var activeAction: String?
-    @State private var actionNotice: ChatTransientNotice?
 
     private var isSelfNotes: Bool {
         store.conversation?.isSelfNotes == true || store.connectionActions?.isSelfNotes == true
     }
 
-    private var peerName: String {
-        store.conversation?.displayName ?? AppLocalization.string( "Contact")
+    private var contextSelection: ConversationContextSelection? {
+        ConversationContextSelection.resolve(focus: nil, messages: store.messages)
     }
 
     var body: some View {
         List {
-            if !isSelfNotes {
-                profileSection
+            if !isSelfNotes, let conversation = store.conversation {
+                participantSection(conversation)
+            }
+
+            if let contextSelection {
+                Section {
+                    ConversationContextBar(selection: contextSelection) {
+                        showContextDetails = true
+                    }
+                    .listRowInsets(EdgeInsets())
+                }
             }
 
             chatSection
 
             if !isSelfNotes {
-                if store.connectionActions == nil, store.actionIssue == nil {
-                    Section {
-                        HStack(spacing: 12) {
-                            ProgressView()
-                            Text("Loading chat settings")
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                } else {
-                    relationshipSection
-                    contactExchangeSection
-                }
-
-                if let issue = store.actionIssue {
-                    Section {
-                        Label(issue, systemImage: "exclamationmark.triangle.fill")
-                            .font(.footnote)
-                            .foregroundStyle(SideSeatTheme.danger)
-
-                        Button("Try again") {
-                            Task { await store.loadConnectionActions(using: session) }
-                        }
-                        .disabled(store.isMutatingConnectionAction)
-                    }
-                    .accessibilityIdentifier("direct-info-action-error")
-                }
-
                 safetySection
             }
         }
@@ -69,13 +403,26 @@ struct DirectChatInfoView: View {
         .accessibilityIdentifier("direct-chat-info")
         .sheet(isPresented: $showThreadSearch) {
             ChatThreadSearchSheet(
-                title: AppLocalization.string( "Search chat"),
+                title: AppLocalization.string("Search chat"),
                 rows: searchRows,
                 onSelect: { messageID in
                     showThreadSearch = false
                     onSelectMessage(messageID)
                 }
             )
+        }
+        .sheet(isPresented: $showParticipantContext) {
+            if let conversation = store.conversation {
+                ParticipantContextSheet(
+                    conversation: conversation,
+                    selection: contextSelection
+                )
+            }
+        }
+        .sheet(isPresented: $showContextDetails) {
+            if let contextSelection {
+                ConversationContextSheet(selection: contextSelection)
+            }
         }
         .ssActionPrompt(
             isPresented: $confirmEnd,
@@ -135,56 +482,39 @@ struct DirectChatInfoView: View {
                 },
             ]
         }
-        .overlay(alignment: .bottom) {
-            if let actionNotice {
-                ChatTransientNoticeView(notice: actionNotice)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 18)
-            }
-        }
         .onDisappear {
             store.clearActionIssue()
         }
     }
 
-    private var profileSection: some View {
+    private func participantSection(_ conversation: NativeDirectConversation) -> some View {
         Section {
             Button {
-                if let peerID = store.conversation?.peer.id ?? store.connectionActions?.peerId {
-                    onViewProfile(peerID)
-                }
+                showParticipantContext = true
             } label: {
-                HStack(spacing: 14) {
+                HStack(spacing: SideSeatTheme.spaceMD) {
                     InitialAvatar(
-                        name: peerName,
-                        url: store.conversation?.peer.avatarUrl,
-                        size: 54
+                        name: conversation.displayName,
+                        url: conversation.peer.avatarUrl,
+                        size: 46
                     )
-
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(peerName)
-                            .font(.headline)
-                            .foregroundStyle(.primary)
-                            .lineLimit(1)
-
-                        if let username = store.conversation?.peer.username {
-                            Text("@\(username)")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                        }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(conversation.displayName)
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textPrimary)
+                        Text("@\(conversation.peer.username)")
+                            .font(.footnote)
+                            .foregroundStyle(SideSeatTheme.textSecondary)
                     }
-
-                    Spacer(minLength: 8)
+                    Spacer(minLength: SideSeatTheme.spaceSM)
                     Image(systemName: "chevron.right")
                         .font(.footnote.weight(.semibold))
                         .foregroundStyle(.tertiary)
                 }
-                .padding(.vertical, 6)
                 .contentShape(Rectangle())
             }
-            .buttonStyle(SSPressButtonStyle())
-            .accessibilityIdentifier("direct-info-profile")
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("direct-info-participant-context")
         }
     }
 
@@ -220,150 +550,6 @@ struct DirectChatInfoView: View {
         }
     }
 
-    private var relationshipSection: some View {
-        Section("Relationship") {
-            let friend = store.connectionActions?.friendLink
-
-            if friend?.status == "ACCEPTED" {
-                statusRow(
-                    title: "Close friend",
-                    detail: nil,
-                    systemImage: "person.2.fill",
-                    color: .green
-                )
-            } else if friend?.status == "PENDING", friend?.role == "requester" {
-                statusRow(
-                    title: "Friend request sent",
-                    detail: "Waiting for a response",
-                    systemImage: "clock",
-                    color: .orange
-                )
-                actionButton(
-                    title: "Cancel friend request",
-                    systemImage: "xmark.circle",
-                    action: "friend-cancel"
-                ) {
-                    await performFriendAction("cancel", successMessage: "Friend request canceled")
-                }
-            } else if friend?.status == "PENDING", friend?.role == "responder" {
-                statusRow(
-                    title: "Friend request received",
-                    detail: nil,
-                    systemImage: "person.crop.circle.badge.plus",
-                    color: SideSeatTheme.accent
-                )
-                actionButton(
-                    title: "Accept friend request",
-                    systemImage: "checkmark.circle",
-                    action: "friend-accept"
-                ) {
-                    await performFriendAction("accept", successMessage: "Friend request accepted")
-                }
-                actionButton(
-                    title: "Decline friend request",
-                    systemImage: "xmark.circle",
-                    role: .destructive,
-                    action: "friend-decline"
-                ) {
-                    await performFriendAction("decline", successMessage: "Friend request declined")
-                }
-            } else {
-                actionButton(
-                    title: "Add close friend",
-                    systemImage: "person.badge.plus",
-                    action: "friend-request"
-                ) {
-                    await performFriendAction("request", successMessage: "Friend request sent")
-                }
-            }
-        }
-    }
-
-    private var contactExchangeSection: some View {
-        Section {
-            switch store.connectionActions?.contactExchange?.phase ?? .available {
-            case .available:
-                actionButton(
-                    title: "Request contact exchange",
-                    systemImage: "person.2.badge.plus",
-                    action: "contact-request",
-                    accessibilityIdentifier: "direct-contact-request"
-                ) {
-                    await performContactAction("request", successMessage: "Contact request sent")
-                }
-
-            case .outgoingPending:
-                statusRow(
-                    title: "Request sent",
-                    detail: "Waiting for a response",
-                    systemImage: "clock",
-                    color: .orange
-                )
-                .accessibilityIdentifier("direct-contact-status-pending")
-
-                actionButton(
-                    title: "Cancel contact request",
-                    systemImage: "xmark.circle",
-                    action: "contact-cancel",
-                    accessibilityIdentifier: "direct-contact-cancel"
-                ) {
-                    await performContactAction("cancel", successMessage: "Contact request canceled")
-                }
-
-            case .incomingPending:
-                VStack(alignment: .leading, spacing: 5) {
-                    Label("Contact exchange request", systemImage: "person.crop.circle.badge.questionmark")
-                        .font(.body.weight(.medium))
-                    Text("\(peerName) wants to exchange contact details with you.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.vertical, 3)
-
-                actionButton(
-                    title: "Accept contact exchange",
-                    systemImage: "checkmark.circle",
-                    action: "contact-accept",
-                    accessibilityIdentifier: "direct-contact-accept"
-                ) {
-                    await performContactAction("accept", successMessage: "Contact request accepted")
-                }
-
-                actionButton(
-                    title: "Decline contact exchange",
-                    systemImage: "xmark.circle",
-                    role: .destructive,
-                    action: "contact-decline",
-                    accessibilityIdentifier: "direct-contact-decline"
-                ) {
-                    await performContactAction("decline", successMessage: "Contact request declined")
-                }
-
-            case .accepted:
-                statusRow(
-                    title: "Contact exchange enabled",
-                    detail: "Both people approved this request",
-                    systemImage: "checkmark.circle.fill",
-                    color: .green
-                )
-                .accessibilityIdentifier("direct-contact-status-accepted")
-
-            case let .declined(cooldownUntil):
-                statusRow(
-                    title: "Request declined",
-                    detail: cooldownDescription(cooldownUntil),
-                    systemImage: "clock.badge.exclamationmark",
-                    color: .orange
-                )
-                .accessibilityIdentifier("direct-contact-status-declined")
-            }
-        } header: {
-            Text("Contact information")
-        } footer: {
-            Text("Contact details are shared only after both people agree.")
-        }
-    }
-
     private var safetySection: some View {
         Section {
             Button("End chat", role: .destructive) {
@@ -391,108 +577,6 @@ struct DirectChatInfoView: View {
                 .foregroundStyle(.tertiary)
         }
         .contentShape(Rectangle())
-    }
-
-    private func statusRow(
-        title: LocalizedStringKey,
-        detail: LocalizedStringKey?,
-        systemImage: String,
-        color: Color
-    ) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: systemImage)
-                .frame(width: 22)
-                .foregroundStyle(color)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .foregroundStyle(.primary)
-                if let detail {
-                    Text(detail)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
-        .padding(.vertical, 2)
-    }
-
-    private func actionButton(
-        title: LocalizedStringKey,
-        systemImage: String,
-        role: ButtonRole? = nil,
-        action: String,
-        accessibilityIdentifier: String? = nil,
-        operation: @escaping @MainActor () async -> Void
-    ) -> some View {
-        Button(role: role) {
-            Task { await operation() }
-        } label: {
-            HStack(spacing: 12) {
-                Image(systemName: systemImage)
-                    .frame(width: 22)
-                Text(title)
-                Spacer()
-                if activeAction == action {
-                    ProgressView()
-                        .controlSize(.small)
-                }
-            }
-            .contentShape(Rectangle())
-        }
-        .disabled(activeAction != nil || store.isMutatingConnectionAction)
-        .accessibilityIdentifier(accessibilityIdentifier ?? action)
-    }
-
-    private func performContactAction(_ action: String, successMessage: LocalizedStringResource) async {
-        guard activeAction == nil else { return }
-        activeAction = "contact-\(action)"
-        let succeeded = await store.performContactExchange(action: action, using: session)
-        activeAction = nil
-        if succeeded {
-            showNotice(
-                AppLocalization.string(resource: successMessage),
-                systemImage: action == "cancel" ? "xmark.circle" : "checkmark.circle"
-            )
-        }
-    }
-
-    private func performFriendAction(_ action: String, successMessage: LocalizedStringResource) async {
-        guard activeAction == nil else { return }
-        activeAction = "friend-\(action)"
-        let succeeded = await store.performFriendLink(action: action, using: session)
-        activeAction = nil
-        if succeeded {
-            showNotice(AppLocalization.string(resource: successMessage), systemImage: "checkmark.circle")
-        }
-    }
-
-    private func showNotice(_ text: String, systemImage: String) {
-        let notice = ChatTransientNotice(text: text, systemImage: systemImage)
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-        withAnimation(.spring(response: 0.28, dampingFraction: 0.86)) {
-            actionNotice = notice
-        }
-        Task { @MainActor in
-            try? await Task.sleep(for: .seconds(3))
-            guard actionNotice?.id == notice.id else { return }
-            withAnimation(.easeIn(duration: 0.18)) {
-                actionNotice = nil
-            }
-        }
-    }
-
-    private func cooldownDescription(_ rawValue: String?) -> LocalizedStringKey {
-        guard let rawValue, let date = contactExchangeDate(from: rawValue) else {
-            return "You can request again after the cooldown."
-        }
-        let value = date.formatted(date: .abbreviated, time: .shortened)
-        return "You can request again after \(value)."
-    }
-
-    private func contactExchangeDate(from value: String) -> Date? {
-        let fractional = ISO8601DateFormatter()
-        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return fractional.date(from: value) ?? ISO8601DateFormatter().date(from: value)
     }
 }
 

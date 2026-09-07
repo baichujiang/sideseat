@@ -23,13 +23,15 @@ final class InboxStore {
     private var accountID = ""
     private var cacheWriteTask: Task<Void, Never>?
     private let cache: InboxCache
-    /// Last-message markers cleared locally while the server read cursor catches up.
     private var locallyReadMessageIDs: [String: String] = [:]
-    /// Last outbound preview overlays so fixture/API reloads keep Photo/Location/Plan snippets.
     private static var outboundPreviews: [String: (lastMessage: NativeInboxLastMessage, lastActivityAt: String)] = [:]
 
     init(cache: InboxCache = .shared) {
         self.cache = cache
+    }
+
+    nonisolated static func isMVPVisibleConversationKind(_ kind: NativeInboxConversation.Kind) -> Bool {
+        kind == .direct
     }
 
     var filteredConversations: [NativeInboxConversation] {
@@ -38,8 +40,12 @@ final class InboxStore {
         }
     }
 
+    /// MVP Messages is the canonical home for mutual, contextual direct conversations.
+    /// Legacy course/group rows remain in payload/cache for compatibility but are not surfaced.
     var visibleConversations: [NativeInboxConversation] {
-        (payload?.conversations ?? []).filter { $0.kind != .course }
+        (payload?.conversations ?? []).filter {
+            Self.isMVPVisibleConversationKind($0.kind)
+        }
     }
 
     var pinned: [NativeInboxConversation] {
@@ -63,7 +69,7 @@ final class InboxStore {
 
     private nonisolated static func visibleUnreadCount(in payload: NativeInboxPayload?) -> Int {
         payload?.conversations
-            .filter { $0.kind != .course }
+            .filter { isMVPVisibleConversationKind($0.kind) }
             .reduce(0) { $0 + $1.unreadCount } ?? 0
     }
 
@@ -139,7 +145,6 @@ final class InboxStore {
         }
     }
 
-    /// Clears the unread badge immediately (opening a thread / mark-read success).
     func clearUnread(conversationID: String) {
         if let row = payload?.conversations.first(where: { $0.id == conversationID }) {
             locallyReadMessageIDs[conversationID] = row.lastMessage?.id ?? ""
@@ -151,7 +156,6 @@ final class InboxStore {
         }
     }
 
-    /// Updates the inbox row preview after sending Photo / Location / Plan / Schedule / text.
     func applyOutboundPreview(
         conversationID: String,
         lastMessage: NativeInboxLastMessage,

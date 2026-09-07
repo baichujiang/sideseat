@@ -202,6 +202,31 @@ struct TogetherPresentationTests {
     }
 }
 
+@Suite("MVP conversation info")
+struct MVPConversationInfoTests {
+    @Test("Keeps participant, context, search, and safety as the bounded info surface")
+    func keepsBoundedInfoSurface() {
+        #expect(
+            MVPConversationInfoPolicy.surfaces
+                == [.participant, .context, .search, .safety]
+        )
+    }
+
+    @Test("Does not re-expose legacy social identity and relationship management")
+    func hidesLegacySocialManagement() {
+        #expect(!MVPConversationInfoPolicy.exposesPublicProfile)
+        #expect(!MVPConversationInfoPolicy.exposesRelationshipManagement)
+        #expect(!MVPConversationInfoPolicy.exposesContactExchange)
+    }
+
+    @Test("Messages surfaces direct conversations only")
+    func keepsDirectConversationOwnership() {
+        #expect(InboxStore.isMVPVisibleConversationKind(.direct))
+        #expect(!InboxStore.isMVPVisibleConversationKind(.course))
+        #expect(!InboxStore.isMVPVisibleConversationKind(.group))
+    }
+}
+
 @Suite("App language", .serialized)
 struct AppLanguageTests {
     @Test("Persists an in-app language selection")

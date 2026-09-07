@@ -15,8 +15,7 @@ struct ChatsRootView: View {
         Group {
             if let payload = store.payload {
                 if store.visibleConversations.isEmpty,
-                   payload.plansNeedingYourAction == 0,
-                   (payload.actionResponseSummary?.unseenVisibleInterestCount ?? 0) == 0
+                   payload.plansNeedingYourAction == 0
                 {
                     SSEmptyState(
                         title: "No conversations",
@@ -38,16 +37,6 @@ struct ChatsRootView: View {
                                 pendingPlansRow(count: payload.plansNeedingYourAction)
                             }
                             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 4, trailing: 16))
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(Color.clear)
-                        }
-                        if let summary = payload.actionResponseSummary,
-                           summary.unseenVisibleInterestCount > 0
-                        {
-                            Section {
-                                actionResponsesRow(summary)
-                            }
-                            .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                             .listRowSeparator(.hidden)
                             .listRowBackground(Color.clear)
                         }
@@ -96,7 +85,7 @@ struct ChatsRootView: View {
                     Text(issue)
                 } actions: {
                     SSPrimaryButton(
-                        title: AppLocalization.string( "Try again"),
+                        title: AppLocalization.string("Try again"),
                         fill: .product,
                         height: 44
                     ) {
@@ -117,11 +106,9 @@ struct ChatsRootView: View {
         )
         .ssRootSearchSurface()
         .refreshable { await loadInboxAndPrefetch() }
-        // Initial load. Returning from a pushed chat does not re-fire `onAppear` (root stayed visible).
         .onAppear {
             Task { await loadInboxAndPrefetch() }
         }
-        // Popping back to inbox — refresh unread from server.
         .onChange(of: router.path.count) { previous, current in
             if previous > 0, current == 0 {
                 Task { await loadInboxAndPrefetch() }
@@ -145,15 +132,10 @@ struct ChatsRootView: View {
         }
         #endif
         Task {
-            async let directPrefetch: Void = DirectChatPreloader.primeAndPrefetch(
+            await DirectChatPreloader.primeAndPrefetch(
                 payload: payload,
                 using: session
             )
-            async let communityPrefetch: Void = CommunityChatPreloader.primeAndPrefetch(
-                payload: payload,
-                using: session
-            )
-            _ = await (directPrefetch, communityPrefetch)
         }
     }
 
@@ -167,9 +149,9 @@ struct ChatsRootView: View {
                         pendingPlansIcon(size: 36)
 
                         Text("Plans waiting for your response")
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.textPrimary)
-                        .fixedSize(horizontal: false, vertical: true)
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
 
                         Spacer(minLength: SideSeatTheme.spaceXS)
                         pendingPlansCountBadge(count)
@@ -215,75 +197,6 @@ struct ChatsRootView: View {
         .accessibilityHint("Open plans")
     }
 
-    private func actionResponsesRow(_ summary: Components.Schemas.ActionResponseSummary) -> some View {
-        Button {
-            router.navigate(to: .actionResponses(
-                actionID: summary.focus.actionId,
-                interestID: summary.focus.interestId
-            ))
-        } label: {
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: SideSeatTheme.spaceMD) {
-                    actionResponsesIcon
-                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                        Text("Responses to your actions")
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(SideSeatTheme.textPrimary)
-                        Text("See who would like to join you")
-                            .font(.footnote)
-                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    responseCountBadge(summary.unseenVisibleInterestCount)
-                }
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                    HStack {
-                        actionResponsesIcon
-                        responseCountBadge(summary.unseenVisibleInterestCount)
-                    }
-                    Text("Responses to your actions")
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.textPrimary)
-                    Text("See who would like to join you")
-                        .font(.footnote)
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                }
-            }
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(SideSeatTheme.spaceLG)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
-            .overlay {
-                RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius)
-                    .strokeBorder(SideSeatTheme.separator.opacity(0.65), lineWidth: 0.5)
-            }
-        }
-        .buttonStyle(SSPressButtonStyle())
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Responses to your actions")
-        .accessibilityValue("\(summary.unseenVisibleInterestCount)")
-        .accessibilityHint("Open responses")
-        .accessibilityIdentifier("inbox-action-responses")
-    }
-
-    private var actionResponsesIcon: some View {
-        Image(systemName: "person.2.wave.2")
-            .symbolRenderingMode(.hierarchical)
-            .font(.system(size: 18, weight: .semibold))
-            .foregroundStyle(SideSeatTheme.accentText)
-            .frame(width: 42, height: 42)
-            .background(SideSeatTheme.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
-    }
-
-    private func responseCountBadge(_ count: Int) -> some View {
-        Text("\(count)")
-            .font(.footnote.weight(.bold))
-            .foregroundStyle(SideSeatTheme.accentText)
-            .padding(.horizontal, 10)
-            .frame(minHeight: 28)
-            .background(SideSeatTheme.accent.opacity(0.12), in: Capsule())
-    }
-
     private func pendingPlansIcon(size: CGFloat) -> some View {
         Image(systemName: "calendar.badge.clock")
             .symbolRenderingMode(.hierarchical)
@@ -311,7 +224,6 @@ struct ChatsRootView: View {
     private func inboxRow(_ row: NativeInboxConversation) -> some View {
         Button {
             if let route = row.route {
-                // Stage unread for WeChat-style ↑ jump, then clear badge optimistically.
                 if row.unreadCount > 0 {
                     ChatUnreadLaunch.stage(conversationID: row.id, unreadCount: row.unreadCount)
                     store.clearUnread(conversationID: row.id)
@@ -360,14 +272,8 @@ struct ChatsRootView: View {
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(Capsule().fill(SideSeatTheme.accent))
-                                .accessibilityLabel(AppLocalization.string( "\(row.unreadCount) unread"))
+                                .accessibilityLabel(AppLocalization.string("\(row.unreadCount) unread"))
                         }
-                    }
-                    if row.kind != .direct {
-                        Text(row.kind == .course ? AppLocalization.string( "Course chat") : AppLocalization.string( "Group chat"))
-                            .font(.caption)
-                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                            .accessibilityIdentifier("inbox-kind-visual-\(row.id)")
                     }
                 }
             }
@@ -414,7 +320,7 @@ struct ChatsRootView: View {
                 Task { await store.togglePin(row, using: session) }
             } label: {
                 Label(
-                    row.pinned ? AppLocalization.string( "Unpin") : AppLocalization.string( "Pin"),
+                    row.pinned ? AppLocalization.string("Unpin") : AppLocalization.string("Pin"),
                     systemImage: row.pinned ? "pin.slash.fill" : "pin.fill"
                 )
             }
