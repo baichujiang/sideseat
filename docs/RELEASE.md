@@ -147,4 +147,4 @@ Store submission additionally requires:
 - Rollback must not reverse destructive migrations. Use forward repair, feature
   kill switches and compatible older clients where appropriate.
 
-Current recorded build: [TestFlight 1.0.0 (29)](./releases/2026-09-02-testflight-29.md).
+Current recorded build: [TestFlight 1.0.0 (30)](./releases/2026-09-07-testflight-30.md).
