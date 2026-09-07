@@ -2,7 +2,7 @@
 
 **Status:** Current native design contract
 
-**Last updated:** 2026-09-02
+**Last updated:** 2026-09-08
 
 **Governing flow:** [User Flow](./USER_FLOW.md)
 
@@ -57,6 +57,8 @@ Reusable controls live in `Core/Design/Components/`:
 - `SSPrimaryButton`, `SSSecondaryButton`;
 - `SSTextField`, `SSSecureField`, `SSFieldMessage`;
 - `SSCard`, `SSSectionHeader`, `SSGroupedSection`;
+- `SSFlowCard`, `SSFlowCardHeader`, `SSFlowNotice`, `SSFlowChoice` and
+  `SSFlowActionDock` for the Together → Plan journey;
 - `SSListRow`, `SSEmptyState`;
 - `SSScreen`, `SSBrandAtmosphere`;
 - `SSActionPrompt` for product-owned confirmation;
@@ -67,6 +69,29 @@ dangerous operations and recurrence-scope decisions use the centered SideSeat
 prompt. Long-press menus share an action model but choose presentation by object:
 message and event actions remain anchored near their source; region actions may
 use a panel. Tapping outside dismisses any custom menu.
+
+### Together and Plan card template
+
+Use one anatomy across owner Intent, Opportunity, mutual chat source, Plan list
+and chat Plan cards: context/status → concrete title → time/place/person → action.
+The shared surface uses a 22pt radius, 16pt content inset, neutral adaptive fill
+and a quiet hairline. Status always includes text; it never relies on color alone.
+Use inset notices for privacy and the effect of accepting or rescheduling.
+
+An actionable Opportunity or Plan has one full-width Rose primary action.
+Withdraw, decline and alternate-time actions remain secondary, with targets at
+least 44pt high. At accessibility sizes, alternatives stack without shrinking
+their labels. Outcome choices have equal weight and show only the viewer's answer.
+
+### Editing sheets
+
+Intent and Plan editors use `ssFlowSheet`: native large sheet presentation,
+22pt corner radius, drag indicator, adaptive grouped canvas and system motion.
+The pinned `SSFlowActionDock` keeps the commit action and its consequence visible
+above the safe area/keyboard. Disable dismissal and duplicate submission only
+while saving. Back navigation retains editor input; save errors remain inside
+the editor. Native sheet motion respects Reduce Motion; the Intent step change
+also disables its animation when Reduce Motion is enabled.
 
 ## 5. Interaction rules
 
@@ -100,3 +125,19 @@ The existing pre-Together screenshot set is historical only and lives under
 
 Every UI change must pass the relevant visual states, largest supported Dynamic
 Type, VoiceOver labels/hints and touch target checks.
+
+### Together / Plan verification — 2026-09-08
+
+The Development build passed 6 state tests and 7 focused UI tests on iPhone 17
+Pro Simulator, iOS 26.5. Coverage includes two-step Intent navigation with retained
+input, Plans → conversation, prefilled alternate-time submission, acceptance →
+Calendar, private Outcome save/change, and Together/Plan response controls at
+accessibility5. Chinese Light/Dark screenshots cover the Together cards, both
+Intent steps, Plans, the response card, Plan editor and Outcome choices. German
+large-type controls and the new English/Chinese/German resources were checked.
+
+The two `VisualQAScreenshotUITests` flow tests regenerate local `flow-*.png`
+artifacts in `docs/visual-qa/`; screenshots use local UI fixtures, not pilot data.
+This is simulator evidence for the native changes, not physical acceptance or
+TestFlight build 32 certification. The next release still needs its own signed
+archive, TestFlight distribution and focused physical smoke.

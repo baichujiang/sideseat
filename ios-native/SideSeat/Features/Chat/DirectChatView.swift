@@ -1884,6 +1884,7 @@ private struct ActionInterestCard: View {
 }
 
 private struct MutualOpportunitySourceCard: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let opportunity: NativeMutualOpportunitySource
     let planState: MutualOpportunityPlanState?
     let onProposePlan: () -> Void
@@ -1891,21 +1892,13 @@ private struct MutualOpportunitySourceCard: View {
     private var context: NativeActionContext { opportunity.context }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            HStack(spacing: SideSeatTheme.spaceSM) {
-                Image(systemName: "person.2.fill")
-                    .foregroundStyle(SideSeatTheme.accentText)
-                Text("You both want to do this")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                Spacer(minLength: SideSeatTheme.spaceSM)
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(SideSeatTheme.success)
-            }
-
-            Text(context.title)
-                .font(.headline)
-                .foregroundStyle(SideSeatTheme.textPrimary)
+        SSFlowCard {
+            SSFlowCardHeader(
+                title: context.title,
+                subtitle: AppLocalization.string("You both want to do this"),
+                systemImage: "person.2.fill",
+                tint: SideSeatTheme.statusSuccessText
+            )
 
             if let course = context.course {
                 Label(
@@ -1917,7 +1910,9 @@ private struct MutualOpportunitySourceCard: View {
             }
             if let start = context.startDate {
                 Label(
-                    start.formatted(date: .abbreviated, time: .shortened),
+                    start.formatted(
+                        .dateTime.month(.abbreviated).day().hour().minute().locale(
+                            AppLocalization.selectedLanguage.locale)),
                     systemImage: "calendar"
                 )
                 .font(.footnote)
@@ -1946,28 +1941,16 @@ private struct MutualOpportunitySourceCard: View {
                     "mutual-opportunity-plan-\(planState == .arranged ? "arranged" : "waiting")-\(opportunity.id)"
                 )
             } else {
-                Button(action: onProposePlan) {
-                    Label("Make a plan", systemImage: "calendar.badge.plus")
-                        .font(.subheadline.weight(.semibold))
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                }
-                .buttonStyle(.borderedProminent)
-                .buttonBorderShape(.capsule)
-                .tint(SideSeatTheme.accent)
-                .foregroundStyle(SideSeatTheme.onAccent)
-                .accessibilityIdentifier("mutual-opportunity-propose-plan-\(opportunity.id)")
+                SSPrimaryButton(
+                    title: AppLocalization.string("Make a plan"),
+                    fill: .product,
+                    height: 46,
+                    accessibilityID: "mutual-opportunity-propose-plan-\(opportunity.id)",
+                    action: onProposePlan
+                )
             }
         }
-        .padding(SideSeatTheme.spaceMD)
-        .frame(maxWidth: 320, alignment: .leading)
-        .background(
-            SideSeatTheme.Chat.cardSurface,
-            in: RoundedRectangle(cornerRadius: 14, style: .continuous)
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(SideSeatTheme.accent.opacity(0.24), lineWidth: 1)
-        }
+        .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : 340, alignment: .leading)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("mutual-opportunity-card-\(opportunity.id)")
     }

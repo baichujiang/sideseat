@@ -2,7 +2,7 @@
 
 **Status:** Frozen v1.0 for the current one-to-one flow
 
-**Last updated:** 2026-09-02
+**Last updated:** 2026-09-08
 
 **Governing product:** [Product](./PRODUCT.md)
 
@@ -34,6 +34,8 @@ activity and one or more explicit time windows.
 
 Current editor behavior:
 
+- two steps: choose the concrete activity, then available times; Back preserves
+  all entered fields, and the bottom action advances or saves;
 - choose Coffee, Study, Sports, Explore, Food or Events;
 - Coffee, Explore, Food and Events require a short concrete action rather than
   matching on the broad category alone;
@@ -45,6 +47,12 @@ Current editor behavior:
 - after choosing a start, the default end becomes 30 minutes later;
 - duration is at least 30 minutes;
 - save returns to Together without silently starting matching.
+
+Delivered Opportunities lead the Together page. Matching controls appear when
+there is an Intent or an existing matching session; the initial empty state
+leads with creating an Intent. The top-right Plans entry provides a direct route
+to coordination and history. Recent Plans on Together contain unanswered private
+Outcome prompts; saved answers remain editable in Plans history or conversation.
 
 The user can edit, pause, resume or end each Intent independently.
 
@@ -141,6 +149,11 @@ The draft inherits trusted title/activity, participants, proposed time, course a
 available place context. Existing information is never requested again. The user
 must still explicitly confirm before sending.
 
+Plan creation uses the shared editing sheet with a pinned send action. A new-time
+proposal leads with timing and retains the previous title/place. The response
+card gives Accept the primary action, followed by alternate time and decline.
+It explains the effect on both calendars before acceptance.
+
 Plan is the shared source of truth. A chat message cannot confirm a Plan, and a
 Calendar entry cannot independently change shared title, time, place or
 participants. Confirmed changes use mutual reschedule; either participant may
@@ -168,8 +181,12 @@ Apple Calendar interoperability. It does not show people recommendations.
 
 ## 10. Post-event and repeat flow
 
-This is the approved next user-flow layer, not a claim that the current build has
-completed it:
+Layer 2 is implemented: ended confirmed Plans offer private happened / did not
+happen / skip responses from Together, Plans history and the conversation reached
+from Calendar. Saving shows the viewer's answer; Change answer reopens the choices.
+Shared Encounter is derived only after both independently answer OCCURRED.
+
+The following repeat extension remains blocked by the Layer 2 pilot Gate:
 
 ```text
 confirmed Plan ends

@@ -468,8 +468,8 @@ enum UITestingChatFixtures {
                         title: "图书馆自习",
                         location: "中心图书馆",
                         message: "带上笔记",
-                        startTime: "2026-07-18T14:00:00.000Z",
-                        endTime: "2026-07-18T15:00:00.000Z",
+                        startTime: Date().addingTimeInterval(24 * 60 * 60).formatted(.iso8601),
+                        endTime: Date().addingTimeInterval(25 * 60 * 60).formatted(.iso8601),
                         proposer: NativePlanAuthor(
                             id: mina.id,
                             username: mina.username,

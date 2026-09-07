@@ -4341,12 +4341,6 @@ final class AuthenticationUITests: XCTestCase {
         pendingPlans.tap()
 
         XCTAssertTrue(app.descendants(matching: .any)["plans-root"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.descendants(matching: .any)["plans-overview"].waitForExistence(timeout: 3))
-
-        let responseCount = app.descendants(matching: .any)["plans-needs-response-count"]
-        XCTAssertTrue(responseCount.waitForExistence(timeout: 3))
-        XCTAssertEqual(responseCount.label, "1")
-
         XCTAssertTrue(
             app.descendants(matching: .any)["plans-section-needs-response"]
                 .waitForExistence(timeout: 3)
@@ -4389,11 +4383,7 @@ final class AuthenticationUITests: XCTestCase {
 
         let responseActions = app.descendants(matching: .any)["plan-card-actions-ui-plan-1"]
         XCTAssertTrue(responseActions.waitForExistence(timeout: 3))
-        XCTAssertLessThanOrEqual(
-            responseActions.frame.height,
-            48,
-            "The normal-size plan actions should stay in one compact row."
-        )
+        XCTAssertGreaterThan(responseActions.frame.height, 48)
 
         let responseButtons = [
             app.buttons["plan-card-accept-ui-plan-1"],
@@ -4405,20 +4395,15 @@ final class AuthenticationUITests: XCTestCase {
             XCTAssertTrue(button.isHittable)
             XCTAssertGreaterThanOrEqual(button.frame.height, 44)
         }
-        let actionMidpoints = responseButtons.map { $0.frame.midY }
-        XCTAssertLessThanOrEqual(
-            (actionMidpoints.max() ?? 0) - (actionMidpoints.min() ?? 0),
-            1,
-            "The three actions should share one visual baseline."
-        )
         XCTAssertGreaterThan(
-            responseButtons[1].frame.width,
             responseButtons[0].frame.width,
-            "The longer counter-proposal label should receive the widest segment."
+            responseButtons[1].frame.width,
+            "Accept should be the full-width primary action above the alternatives."
         )
+        XCTAssertLessThan(responseButtons[0].frame.midY, responseButtons[1].frame.midY)
 
         let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
-        attachment.name = "Compact plan response actions"
+        attachment.name = "Plan response action hierarchy"
         attachment.lifetime = .keepAlways
         add(attachment)
     }

@@ -1726,3 +1726,17 @@
 "Title (optional)" = "Title (optional)";
 "Unblock %@?" = "Unblock %@?";
 "中文" = "中文";
+
+/* Together and Plan flow cards */
+"Review the details, then send for the other person to accept." = "Review the details, then send for the other person to accept.";
+"Details from your conversation are already filled in." = "Details from your conversation are already filled in.";
+"Choose a future start time." = "Choose a future start time.";
+"Choose available times" = "Choose available times";
+"Save intention" = "Save intention";
+"One activity at a time. You can add more later." = "One activity at a time. You can add more later.";
+"Saved privately. Start matching separately when you're ready." = "Saved privately. Start matching separately when you're ready.";
+"1 · What would you like to do?" = "1 · What would you like to do?";
+"2 · When are you free?" = "2 · When are you free?";
+"Private response" = "Private response";
+"Your answer stays private. Choose what actually happened." = "Your answer stays private. Choose what actually happened.";
+"Change answer" = "Change answer";

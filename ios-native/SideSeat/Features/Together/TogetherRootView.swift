@@ -167,17 +167,21 @@ private struct TogetherHomeView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceXL) {
-                if !outcomePlans.isEmpty {
-                    outcomeSection
+                if v2Store.isMutualOpportunityEnabled,
+                   !opportunityStore.opportunities.isEmpty || opportunityStore.issue != nil {
+                    opportunitySection
+                }
+                if v2Store.isMutualOpportunityEnabled,
+                   !store.intents.isEmpty || matchingSessionStore.session.state != .idle {
+                    matchingSessionSection
                 }
                 if v2Store.isWeeklyIntentEnabled {
                     intentSection
                 } else {
                     unavailableSection
                 }
-                if v2Store.isMutualOpportunityEnabled {
-                    matchingSessionSection
-                    opportunitySection
+                if !outcomePlans.isEmpty {
+                    outcomeSection
                 }
             }
             .padding(.horizontal, SideSeatTheme.screenHorizontal)
@@ -186,6 +190,16 @@ private struct TogetherHomeView: View {
         }
         .background(SideSeatTheme.bgGrouped)
         .ssRootNavigationTitle("Together")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    router.navigate(to: .plans)
+                } label: {
+                    Label("Plans", systemImage: "calendar")
+                }
+                .accessibilityIdentifier("together-open-plans")
+            }
+        }
         .refreshable {
             await loadContent()
         }
@@ -196,7 +210,7 @@ private struct TogetherHomeView: View {
             Task { await loadContent() }
         }
         .sheet(item: $presentedEditor) { presentation in
-            WeeklyIntentEditorView(intent: presentation.intent) {
+            WeeklyIntentEditorView(intent: presentation.intent, saveIssue: store.issue) {
                 topic,
                 activityText,
                 sportTag,
@@ -225,9 +239,7 @@ private struct TogetherHomeView: View {
                 }
                 return saved
             }
-            .presentationDetents([.large])
-            .presentationDragIndicator(.visible)
-            .presentationBackground(SideSeatTheme.bgGrouped)
+
         }
         .accessibilityIdentifier("together-home")
     }
@@ -248,15 +260,21 @@ private struct TogetherHomeView: View {
                 ProgressView()
                     .frame(maxWidth: .infinity, minHeight: 72)
             } else if store.intents.isEmpty {
-                SSEmptyState(
-                    title: "What would you like to do?",
-                    systemImage: "sparkles",
-                    description: "Set one private intention for this week. It is not a public post.",
-                    actionTitle: AppLocalization.string("Set this week's intention"),
-                    actionAccessibilityID: "together-set-intent",
-                    action: { presentedEditor = .create() }
-                )
-                .padding(.vertical, SideSeatTheme.spaceSM)
+                SSFlowCard {
+                    SSFlowCardHeader(
+                        title: AppLocalization.string("What would you like to do?"),
+                        subtitle: AppLocalization.string("Only you can see this."),
+                        systemImage: "sparkles"
+                    )
+                    Text("Set one private intention for this week. It is not a public post.")
+                        .font(.subheadline)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    SSPrimaryButton(
+                        title: AppLocalization.string("Set this week's intention"),
+                        fill: .product,
+                        accessibilityID: "together-set-intent"
+                    ) { presentedEditor = .create() }
+                }
             } else {
                 ForEach(store.intents) { intent in
                     WeeklyIntentCard(
@@ -313,8 +331,10 @@ private struct TogetherHomeView: View {
                 }
                 .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
             } else {
-                TimelineView(.periodic(from: .now, by: 60)) { context in
-                    matchingSessionContent(at: context.date)
+                SSFlowCard {
+                    TimelineView(.periodic(from: .now, by: 60)) { context in
+                        matchingSessionContent(at: context.date)
+                    }
                 }
             }
 
@@ -345,6 +365,10 @@ private struct TogetherHomeView: View {
                             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }
                 }
+
+                Text("When SideSeat finds someone compatible, they will appear here.")
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
 
                 if let remainingFraction = matchingSessionStore.session.remainingFraction(at: now) {
                     ProgressView(value: remainingFraction)
@@ -594,7 +618,7 @@ private struct TogetherHomeView: View {
 
     private var outcomePlans: [NativePlanRequest] {
         outcomeStore.plans
-            .filter { $0.isOutcomeEligible() }
+            .filter { $0.isOutcomeEligible() && $0.viewerOutcome == nil }
             .sorted { ($0.endDate ?? .distantPast) > ($1.endDate ?? .distantPast) }
     }
 
@@ -606,12 +630,13 @@ private struct TogetherHomeView: View {
             )
 
             ForEach(outcomePlans) { plan in
-                SSCard {
+                SSFlowCard {
                     VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                        Text(plan.title)
-                            .font(.headline)
-                            .foregroundStyle(SideSeatTheme.textPrimary)
-                            .fixedSize(horizontal: false, vertical: true)
+                        SSFlowCardHeader(
+                            title: plan.title,
+                            subtitle: AppLocalization.string("Private response"),
+                            systemImage: "lock"
+                        )
 
                         if let start = plan.startDate, let end = plan.endDate {
                             Label(
@@ -664,18 +689,16 @@ private struct MutualOpportunityCard: View {
     }
 
     var body: some View {
-        SSCard {
+        SSFlowCard {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                Label {
-                    Text(opportunity.activityTitle)
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.textPrimary)
-                        .fixedSize(horizontal: false, vertical: true)
-                } icon: {
-                    Image(systemName: opportunity.topic.systemImage)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.accentText)
-                }
+                SSFlowCardHeader(
+                    title: opportunity.topic == .study
+                        ? (opportunity.effectiveMatchKind == .sharedContext
+                            ? opportunity.matchContextTitle : opportunity.viewerStudyGoalTitle)
+                        : opportunity.activityTitle,
+                    subtitle: opportunity.topic.title,
+                    systemImage: opportunity.topic.systemImage
+                )
 
                 Label(opportunityWindow, systemImage: "clock")
                     .font(.subheadline)
@@ -807,16 +830,21 @@ private struct MutualOpportunityCard: View {
                 Text("SideSeat found someone for this activity")
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                HStack(spacing: SideSeatTheme.spaceSM) {
-                    Button("Not this time", action: onNo)
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                    Button("Do it together", action: onYes)
-                        .buttonStyle(.borderedProminent)
-                        .tint(SideSeatTheme.accent)
-                        .foregroundStyle(SideSeatTheme.onAccent)
-                        .frame(maxWidth: .infinity)
+                SSPrimaryButton(
+                    title: AppLocalization.string("Do it together"),
+                    isLoading: isWorking,
+                    fill: .product,
+                    height: 46,
+                    action: onYes
+                )
+                .disabled(isWorking)
+                Button(action: onNo) {
+                    Text("Not this time")
+                        .font(.subheadline.weight(.medium))
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(SSPressButtonStyle())
                 .disabled(isWorking)
             }
 
@@ -856,11 +884,10 @@ private struct MutualOpportunityCard: View {
         else {
             return AppLocalization.string("Overlapping availability")
         }
-        let startText = start.formatted(date: .abbreviated, time: .shortened)
-        let endText = end.formatted(
-            date: Calendar.current.isDate(start, inSameDayAs: end) ? .omitted : .abbreviated,
-            time: .shortened
-        )
+        let startText = start.formatted(.dateTime.month(.abbreviated).day().hour().minute().locale(AppLocalization.selectedLanguage.locale))
+        let format: Date.FormatStyle = Calendar.current.isDate(start, inSameDayAs: end)
+            ? .dateTime.hour().minute() : .dateTime.month(.abbreviated).day().hour().minute()
+        let endText = end.formatted(format.locale(AppLocalization.selectedLanguage.locale))
         return "\(startText) – \(endText)"
     }
 
@@ -895,36 +922,14 @@ private struct WeeklyIntentCard: View {
     private var isEnded: Bool { intent.status == "ENDED" }
 
     var body: some View {
-        SSCard {
+        SSFlowCard {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                 HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
-                    Image(systemName: intent.topic.systemImage)
-                        .font(.headline.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.accentText)
-                        .frame(width: 38, height: 38)
-                        .background(SideSeatTheme.accent.opacity(0.08), in: Circle())
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(intent.activityTitle)
-                            .font(.headline)
-                        if intent.topic == .sports, intent.sportTag != nil {
-                            Text("Sports")
-                                .font(.caption)
-                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        }
-                        if intent.topic == .study {
-                            Text(intent.effectiveTogetherMode.studyTitle)
-                                .font(.caption)
-                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        if let course = intent.course {
-                            Text(courseTitle(course))
-                                .font(.caption)
-                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                                .lineLimit(1)
-                        }
-                    }
-                    Spacer(minLength: SideSeatTheme.spaceSM)
+                    SSFlowCardHeader(
+                        title: intent.activityTitle,
+                        subtitle: intent.topic == .study ? intent.effectiveTogetherMode.studyTitle : intent.topic.title,
+                        systemImage: intent.topic.systemImage
+                    )
                     if !isEnded {
                         Menu {
                             Button("Edit", systemImage: "pencil", action: onEdit)
@@ -1012,11 +1017,12 @@ private struct WeeklyIntentCard: View {
     }
 
     private func windowSummary(_ window: NativeWeeklyIntentTimeWindow) -> String {
-        let start = window.startAt.formatted(date: .abbreviated, time: .shortened)
+        let locale = AppLocalization.selectedLanguage.locale
+        let start = window.startAt.formatted(.dateTime.month(.abbreviated).day().hour().minute().locale(locale))
         if Calendar.current.isDate(window.startAt, inSameDayAs: window.endAt) {
-            return "\(start) – \(window.endAt.formatted(date: .omitted, time: .shortened))"
+            return "\(start) – \(window.endAt.formatted(.dateTime.hour().minute().locale(locale)))"
         }
-        return "\(start) – \(window.endAt.formatted(date: .abbreviated, time: .shortened))"
+        return "\(start) – \(window.endAt.formatted(.dateTime.month(.abbreviated).day().hour().minute().locale(locale)))"
     }
 }
 
@@ -1058,12 +1064,20 @@ private struct WeeklyIntentDateTimePicker: UIViewRepresentable {
         picker.timeZone = .current
         picker.calendar = .current
         picker.locale = AppLocalization.selectedLanguage.locale
+        picker.setContentCompressionResistancePriority(.required, for: .horizontal)
         picker.addTarget(
             context.coordinator,
             action: #selector(Coordinator.selectionChanged(_:)),
             for: .valueChanged
         )
         return picker
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UIDatePicker, context: Context) -> CGSize? {
+        uiView.sizeThatFits(CGSize(
+            width: proposal.width ?? UIView.layoutFittingExpandedSize.width,
+            height: 44
+        ))
     }
 
     func updateUIView(_ picker: UIDatePicker, context: Context) {
@@ -1118,24 +1132,15 @@ private struct WeeklyIntentEditorView: View {
     @State private var timeWindows: [WeeklyIntentWindowDraft]
     @State private var note: String
     @State private var isSaving = false
+    @State private var editorStep = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @FocusState private var isSportInputFocused: Bool
 
     let intent: NativeWeeklyIntent?
-    let onSave: (
-        NativeWeeklyIntentTopic,
-        String,
-        NativeSportTag?,
-        String,
-        NativeTogetherMode,
-        String,
-        String?,
-        [NativeWeeklyIntentTimeWindow],
-        String
-    ) async -> Bool
-
-    init(
-        intent: NativeWeeklyIntent?,
-        onSave: @escaping (
+    let saveIssue: String?
+    let onSave:
+        (
             NativeWeeklyIntentTopic,
             String,
             NativeSportTag?,
@@ -1146,8 +1151,25 @@ private struct WeeklyIntentEditorView: View {
             [NativeWeeklyIntentTimeWindow],
             String
         ) async -> Bool
+
+    init(
+        intent: NativeWeeklyIntent?,
+        saveIssue: String?,
+        onSave:
+            @escaping (
+                NativeWeeklyIntentTopic,
+                String,
+                NativeSportTag?,
+                String,
+                NativeTogetherMode,
+                String,
+                String?,
+                [NativeWeeklyIntentTimeWindow],
+                String
+            ) async -> Bool
     ) {
         self.intent = intent
+        self.saveIssue = saveIssue
         self.onSave = onSave
         let proposed = Self.defaultWindows(intent: intent)
         _topic = State(initialValue: intent?.topic ?? .coffee)
@@ -1171,251 +1193,67 @@ private struct WeeklyIntentEditorView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("What") {
-                    Picker("Activity", selection: $topic) {
-                        ForEach(NativeWeeklyIntentTopic.allCases) { topic in
-                            Label(topic.title, systemImage: topic.systemImage).tag(topic)
-                        }
+            VStack(spacing: 0) {
+                editorProgress
+                Form {
+                    if editorStep == 0 {
+                        activityFields
+                    } else {
+                        timeFields
                     }
                 }
-
-                if topic == .sports {
-                    Section("Sport") {
-                        TextField("Which sport?", text: $sportText)
-                            .textInputAutocapitalization(.words)
-                            .submitLabel(.done)
-                            .focused($isSportInputFocused)
-                            .onSubmit { isSportInputFocused = false }
-
-                        if !sportSuggestions.isEmpty {
-                            ScrollView(.horizontal) {
-                                HStack(spacing: SideSeatTheme.spaceSM) {
-                                    ForEach(sportSuggestions) { sport in
-                                        Button(sport.title) {
-                                            sportText = sport.title
-                                            isSportInputFocused = false
-                                        }
-                                        .buttonStyle(.bordered)
-                                        .controlSize(.small)
-                                    }
-                                }
-                            }
-                            .scrollIndicators(.hidden)
-                        }
-                        if !hasValidSportSelection {
-                            Text("Enter the sport you want to do.")
-                                .font(.footnote)
-                                .foregroundStyle(SideSeatTheme.danger)
-                        }
-                    }
-                }
-
-                if usesGeneralActivityText {
-                    Section("What exactly?") {
-                        TextField(
-                            generalActivityPlaceholder,
-                            text: $activityText,
-                            axis: .vertical
-                        )
-                        .lineLimit(1...3)
-                        .textInputAutocapitalization(.sentences)
-
-                        if !hasValidActivityText {
-                            Text("Describe the specific thing you want to do.")
-                                .font(.footnote)
-                                .foregroundStyle(SideSeatTheme.danger)
-                        }
-                    }
-                }
-
-                if topic == .study {
-                    Section("What are you working on?") {
-                        TextField(
-                            "For example: write a thesis or review for an exam",
-                            text: $studyGoal,
-                            axis: .vertical
-                        )
-                        .lineLimit(1...3)
-                        .textInputAutocapitalization(.sentences)
-
-                        if !hasValidStudyGoal {
-                            Text("Add a short study goal so SideSeat can find a useful match.")
-                                .font(.footnote)
-                                .foregroundStyle(SideSeatTheme.danger)
-                        }
-                    }
-
-                    Section("How would you like to study?") {
-                        ForEach(NativeTogetherMode.allCases) { mode in
-                            Button {
-                                togetherMode = mode
-                            } label: {
-                                HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
-                                    Text(mode.studyTitle)
-                                        .foregroundStyle(SideSeatTheme.textPrimary)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                    Image(
-                                        systemName: togetherMode == mode
-                                            ? "checkmark.circle.fill"
-                                            : "circle"
-                                    )
-                                    .foregroundStyle(
-                                        togetherMode == mode
-                                            ? SideSeatTheme.accent
-                                            : SideSeatTheme.textSecondary
-                                    )
-                                }
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityAddTraits(togetherMode == mode ? .isSelected : [])
-                        }
-                    }
-                }
-
-                if topic == .study {
-                    Section("Course") {
-                        if courseStore.isLoading, courseStore.payload == nil {
-                            HStack(spacing: SideSeatTheme.spaceSM) {
-                                ProgressView()
-                                Text("Loading courses")
-                                    .foregroundStyle(SideSeatTheme.textSecondary)
-                            }
-                        } else {
-                            Picker("Course", selection: $selectedCourseID) {
-                                Text("None").tag(String?.none)
-                                ForEach(courseOptions) { course in
-                                    Text(course.title).tag(Optional(course.id))
-                                }
-                            }
-                            if courseOptions.isEmpty {
-                                Text("No current courses")
-                                    .font(.footnote)
-                                    .foregroundStyle(SideSeatTheme.textSecondary)
-                            }
-                        }
-                        if let issue = courseStore.issue, courseStore.payload == nil {
-                            Text(issue)
-                                .font(.footnote)
-                                .foregroundStyle(SideSeatTheme.danger)
-                        }
-                    }
-                }
-
-                Section("When") {
-                    ForEach($timeWindows) { $window in
-                        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                            HStack {
-                                Text("Start")
-                                Spacer()
-                                WeeklyIntentDateTimePicker(
-                                    selection: Binding(
-                                        get: { window.startAt },
-                                        set: { newValue in
-                                            let start = min(
-                                                max(
-                                                    NativeWeeklyIntentTimeRules
-                                                        .roundedUpToQuarterHour(newValue),
-                                                    pickerLowerBound
-                                                ),
-                                                pickerUpperBound
-                                            )
-                                            window.startAt = start
-                                            window.endAt = NativeWeeklyIntentTimeRules
-                                                .minimumEnd(after: start)
-                                        }
-                                    ),
-                                    range: pickerLowerBound...pickerUpperBound,
-                                    accessibilityLabel: AppLocalization.string("Start")
-                                )
-                                .fixedSize()
-                            }
-                            HStack {
-                                Text("End")
-                                Spacer()
-                                WeeklyIntentDateTimePicker(
-                                    selection: Binding(
-                                        get: { window.endAt },
-                                        set: { newValue in
-                                            let minimumEnd = NativeWeeklyIntentTimeRules
-                                                .minimumEnd(after: window.startAt)
-                                            let end = NativeWeeklyIntentTimeRules
-                                                .roundedUpToQuarterHour(newValue)
-                                            window.endAt = min(max(end, minimumEnd), expiry)
-                                        }
-                                    ),
-                                    range: NativeWeeklyIntentTimeRules
-                                        .minimumEnd(after: window.startAt)...expiry,
-                                    accessibilityLabel: AppLocalization.string("End")
-                                )
-                                .fixedSize()
-                            }
-                            if timeWindows.count > 1 {
-                                Button("Remove time", systemImage: "minus.circle", role: .destructive) {
-                                    timeWindows.removeAll { $0.id == window.id }
-                                }
-                            }
-                        }
-                    }
-                    Button("Add another time", systemImage: "plus.circle") {
-                        addTimeWindow()
-                    }
-                    .disabled(nextTimeWindow == nil || timeWindows.count >= 7)
-
-                    if !hasValidTimeWindows {
-                        Text("Choose future, non-overlapping times of 30 minutes to 12 hours within this week.")
-                            .font(.footnote)
-                            .foregroundStyle(SideSeatTheme.danger)
-                    }
-                }
-                Section("Optional") {
-                    TextField("A short clarification", text: $note, axis: .vertical)
-                        .lineLimit(2...4)
-                    Text("This is private and is not published as a post.")
-                        .font(.footnote)
-                        .foregroundStyle(SideSeatTheme.textSecondary)
-                }
+                .scrollContentBackground(.hidden)
+                .scrollDismissesKeyboard(.interactively)
+                .disabled(isSaving)
             }
-            .scrollDismissesKeyboard(.interactively)
-            .navigationTitle(intent == nil ? "Set this week" : "Edit intention")
+            .background(SideSeatTheme.bgGrouped)
+            .navigationTitle(AppLocalization.string(intent == nil ? "Set this week" : "Edit intention"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        Task {
-                            isSaving = true
-                            let sportSelection = NativeSportInput.normalized(sportText)
-                            _ = await onSave(
-                                topic,
-                                activityText,
-                                sportSelection.tag,
-                                sportSelection.otherNote ?? "",
-                                togetherMode,
-                                studyGoal,
-                                selectedCourseID,
-                                normalizedTimeWindows,
-                                note
-                            )
-                            isSaving = false
-                        }
+                    if editorStep == 0 {
+                        Button("Cancel") { dismiss() }
+                            .disabled(isSaving)
+                    } else {
+                        Button("Back") { changeStep(0) }
+                            .disabled(isSaving)
+                            .accessibilityIdentifier("intent-editor-back")
                     }
-                    .disabled(
-                        !hasValidTimeWindows ||
-                            !hasValidActivityText ||
-                            !hasValidSportSelection ||
-                            !hasValidStudyGoal ||
-                            note.count > 160 ||
-                            activityText.count > 80 ||
-                            sportText.count > 60 ||
-                            isSaving
-                    )
                 }
             }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                VStack(spacing: 0) {
+                    if let saveIssue {
+                        Text(saveIssue)
+                            .font(.footnote)
+                            .foregroundStyle(SideSeatTheme.danger)
+                            .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                            .padding(.top, SideSeatTheme.spaceSM)
+                            .accessibilityIdentifier("intent-editor-issue")
+                    }
+                    SSFlowActionDock(
+                        title: AppLocalization.string(editorStep == 0 ? "Choose available times" : "Save intention"),
+                        detail: AppLocalization.string(
+                            editorStep == 0
+                                ? "One activity at a time. You can add more later."
+                                : "Saved privately. Start matching separately when you're ready."),
+                        isLoading: isSaving,
+                        isEnabled: editorStep == 0
+                            ? hasValidActivity : hasValidActivity && hasValidTimeWindows && note.count <= 160,
+                        accessibilityID: editorStep == 0 ? "intent-editor-next" : "intent-editor-save"
+                    ) {
+                        if editorStep == 0 {
+                            changeStep(1)
+                        } else {
+                            Task { await save() }
+                        }
+                    }
+                }
+                .background(SideSeatTheme.surface)
+            }
         }
+        .ssFlowSheet(isSaving: isSaving)
+        .accessibilityIdentifier("intent-editor")
         .task(id: topic) {
             guard topic == .study, courseStore.payload == nil else { return }
             await courseStore.load(
@@ -1425,6 +1263,305 @@ private struct WeeklyIntentEditorView: View {
                 query: ""
             )
         }
+    }
+
+    private var editorProgress: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                ForEach(0..<2) { step in
+                    Capsule()
+                        .fill(step <= editorStep ? SideSeatTheme.accent : SideSeatTheme.fillTertiary)
+                        .frame(height: 3)
+                }
+            }
+            .accessibilityHidden(true)
+            Text(AppLocalization.string(editorStep == 0 ? "1 · What would you like to do?" : "2 · When are you free?"))
+                .font(.headline)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityAddTraits(.isHeader)
+        }
+        .padding(.horizontal, SideSeatTheme.screenHorizontal)
+        .padding(.top, SideSeatTheme.spaceMD)
+        .padding(.bottom, SideSeatTheme.spaceSM)
+    }
+
+    private var activityFields: some View {
+        Group {
+            Section("Activity") {
+                LazyVGrid(
+                    columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 260 : 130))],
+                    spacing: SideSeatTheme.spaceSM
+                ) {
+                    ForEach(NativeWeeklyIntentTopic.allCases) { option in
+                        SSFlowChoice(
+                            title: option.title,
+                            systemImage: option.systemImage,
+                            isSelected: topic == option
+                        ) {
+                            topic = option
+                        }
+                        .accessibilityIdentifier("intent-topic-\(option.rawValue.lowercased())")
+                    }
+                }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
+            }
+            if topic == .sports {
+                Section("Sport") {
+                    TextField("Which sport?", text: $sportText)
+                        .textInputAutocapitalization(.words)
+                        .submitLabel(.done)
+                        .focused($isSportInputFocused)
+                        .onSubmit { isSportInputFocused = false }
+
+                    if !sportSuggestions.isEmpty {
+                        ScrollView(.horizontal) {
+                            HStack(spacing: SideSeatTheme.spaceSM) {
+                                ForEach(sportSuggestions) { sport in
+                                    Button(sport.title) {
+                                        sportText = sport.title
+                                        isSportInputFocused = false
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .controlSize(.small)
+                                }
+                            }
+                        }
+                        .scrollIndicators(.hidden)
+                    }
+                    if !hasValidSportSelection {
+                        Text("Enter the sport you want to do.")
+                            .font(.footnote)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    }
+                }
+            }
+
+            if usesGeneralActivityText {
+                Section("What exactly?") {
+                    TextField(
+                        generalActivityPlaceholder,
+                        text: $activityText,
+                        axis: .vertical
+                    )
+                    .lineLimit(1...3)
+                    .textInputAutocapitalization(.sentences)
+                    .accessibilityIdentifier("intent-editor-activity")
+
+                    if !hasValidActivityText {
+                        Text("Describe the specific thing you want to do.")
+                            .font(.footnote)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    }
+                }
+            }
+
+            if topic == .study {
+                Section("What are you working on?") {
+                    TextField(
+                        "For example: write a thesis or review for an exam",
+                        text: $studyGoal,
+                        axis: .vertical
+                    )
+                    .lineLimit(1...3)
+                    .textInputAutocapitalization(.sentences)
+
+                    if !hasValidStudyGoal {
+                        Text("Add a short study goal so SideSeat can find a useful match.")
+                            .font(.footnote)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    }
+                }
+
+                Section("How would you like to study?") {
+                    ForEach(NativeTogetherMode.allCases) { mode in
+                        Button {
+                            togetherMode = mode
+                        } label: {
+                            HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
+                                Text(mode.studyTitle)
+                                    .foregroundStyle(SideSeatTheme.textPrimary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                Image(
+                                    systemName: togetherMode == mode
+                                        ? "checkmark.circle.fill"
+                                        : "circle"
+                                )
+                                .foregroundStyle(
+                                    togetherMode == mode
+                                        ? SideSeatTheme.accent
+                                        : SideSeatTheme.textSecondary
+                                )
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(togetherMode == mode ? .isSelected : [])
+                    }
+                }
+            }
+
+            if topic == .study {
+                Section("Course") {
+                    if courseStore.isLoading, courseStore.payload == nil {
+                        HStack(spacing: SideSeatTheme.spaceSM) {
+                            ProgressView()
+                            Text("Loading courses")
+                                .foregroundStyle(SideSeatTheme.textSecondary)
+                        }
+                    } else {
+                        Picker("Course", selection: $selectedCourseID) {
+                            Text("None").tag(String?.none)
+                            ForEach(courseOptions) { course in
+                                Text(course.title).tag(Optional(course.id))
+                            }
+                        }
+                        if courseOptions.isEmpty {
+                            Text("No current courses")
+                                .font(.footnote)
+                                .foregroundStyle(SideSeatTheme.textSecondary)
+                        }
+                    }
+                    if let issue = courseStore.issue, courseStore.payload == nil {
+                        Text(issue)
+                            .font(.footnote)
+                            .foregroundStyle(SideSeatTheme.danger)
+                    }
+                }
+            }
+
+        }
+    }
+
+    private var timeFields: some View {
+        Group {
+            Section {
+                SSFlowCardHeader(
+                    title: activitySummary,
+                    subtitle: topic.title,
+                    systemImage: topic.systemImage
+                )
+            }
+            Section("When") {
+                ForEach($timeWindows) { $window in
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                        timeRowLayout {
+                            Text("Start")
+                                .fixedSize()
+                                .layoutPriority(2)
+                            if !dynamicTypeSize.isAccessibilitySize { Spacer() }
+                            WeeklyIntentDateTimePicker(
+                                selection: Binding(
+                                    get: { window.startAt },
+                                    set: { newValue in
+                                        let start = min(
+                                            max(
+                                                NativeWeeklyIntentTimeRules
+                                                    .roundedUpToQuarterHour(newValue),
+                                                pickerLowerBound
+                                            ),
+                                            pickerUpperBound
+                                        )
+                                        window.startAt = start
+                                        window.endAt =
+                                            NativeWeeklyIntentTimeRules
+                                            .minimumEnd(after: start)
+                                    }
+                                ),
+                                range: pickerLowerBound...pickerUpperBound,
+                                accessibilityLabel: AppLocalization.string("Start")
+                            )
+                            .frame(minHeight: 44)
+                            .layoutPriority(1)
+                        }
+                        timeRowLayout {
+                            Text("End")
+                                .fixedSize()
+                                .layoutPriority(2)
+                            if !dynamicTypeSize.isAccessibilitySize { Spacer() }
+                            WeeklyIntentDateTimePicker(
+                                selection: Binding(
+                                    get: { window.endAt },
+                                    set: { newValue in
+                                        let minimumEnd =
+                                            NativeWeeklyIntentTimeRules
+                                            .minimumEnd(after: window.startAt)
+                                        let end =
+                                            NativeWeeklyIntentTimeRules
+                                            .roundedUpToQuarterHour(newValue)
+                                        window.endAt = min(max(end, minimumEnd), expiry)
+                                    }
+                                ),
+                                range:
+                                    NativeWeeklyIntentTimeRules
+                                    .minimumEnd(after: window.startAt)...expiry,
+                                accessibilityLabel: AppLocalization.string("End")
+                            )
+                            .frame(minHeight: 44)
+                            .layoutPriority(1)
+                        }
+                        if timeWindows.count > 1 {
+                            Button("Remove time", systemImage: "minus.circle", role: .destructive) {
+                                timeWindows.removeAll { $0.id == window.id }
+                            }
+                        }
+                    }
+                }
+                Button("Add another time", systemImage: "plus.circle") {
+                    addTimeWindow()
+                }
+                .disabled(nextTimeWindow == nil || timeWindows.count >= 7)
+
+                if !hasValidTimeWindows {
+                    Text("Choose future, non-overlapping times of 30 minutes to 12 hours within this week.")
+                        .font(.footnote)
+                        .foregroundStyle(SideSeatTheme.danger)
+                }
+            }
+            Section("Optional") {
+                TextField("A short clarification", text: $note, axis: .vertical)
+                    .lineLimit(2...4)
+                Text("This is private and is not published as a post.")
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondary)
+            }
+        }
+    }
+
+    private var timeRowLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
+            : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
+    }
+
+    private var activitySummary: String {
+        switch topic {
+        case .study: studyGoal.trimmingCharacters(in: .whitespacesAndNewlines)
+        case .sports: sportText.trimmingCharacters(in: .whitespacesAndNewlines)
+        default: activityText.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+    }
+
+    private var hasValidActivity: Bool {
+        hasValidActivityText && hasValidSportSelection && hasValidStudyGoal
+    }
+
+    private func changeStep(_ step: Int) {
+        isSportInputFocused = false
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
+            editorStep = step
+        }
+    }
+
+    private func save() async {
+        isSaving = true
+        defer { isSaving = false }
+        let sportSelection = NativeSportInput.normalized(sportText)
+        _ = await onSave(
+            topic, activityText, sportSelection.tag, sportSelection.otherNote ?? "",
+            togetherMode, studyGoal, selectedCourseID, normalizedTimeWindows, note
+        )
     }
 
     private var expiry: Date {

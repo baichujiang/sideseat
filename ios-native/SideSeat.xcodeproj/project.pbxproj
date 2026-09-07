@@ -36,6 +36,7 @@
 		1C65C5B189C7EE4BCCF43C51 /* SignupSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB4A0C2F244A86B7B5B78EC /* SignupSheet.swift */; };
 		1CCFCF52AE29AD9BB71E659F /* ContactsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4877D42DC56DD9AFA40E0F52 /* ContactsModels.swift */; };
 		1ECC26E920DE0A1F88DC73EB /* CalendarSmartAddModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCB06D77347B4207E25CF13 /* CalendarSmartAddModels.swift */; };
+		2188BA3876536036C48F3B87 /* SSFlowCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7BBE47B8C85A36913574BC0 /* SSFlowCard.swift */; };
 		252F38EB1C429112CA5E42FB /* FeedbackRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05297190706209F0E28ED8E9 /* FeedbackRootView.swift */; };
 		2783CAE0C2CD0A38FE5BF083 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3118E7610273B103B5A2FBE0 /* APIClient.swift */; };
 		2D6F5EBFC5DB75CA33F0F3FA /* DiscoverDetailViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3DB966A27DF9A982A0FC8B1 /* DiscoverDetailViews.swift */; };
@@ -348,6 +349,7 @@
 		CEC905827C24F6CC783D7D4C /* DiscoverStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverStores.swift; sourceTree = "<group>"; };
 		CF0D8FA9E2DF899C1CA0A97D /* CalendarChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarChrome.swift; sourceTree = "<group>"; };
 		CF57114581BA83F81840755B /* NavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationTests.swift; sourceTree = "<group>"; };
+		D7BBE47B8C85A36913574BC0 /* SSFlowCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSFlowCard.swift; sourceTree = "<group>"; };
 		D85D3F2CE3E6DD2E1AA74289 /* CommunityChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityChatView.swift; sourceTree = "<group>"; };
 		DB1DDE44E260D324CBA2E141 /* ContactsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsView.swift; sourceTree = "<group>"; };
 		DB7DFAE92C513B06169BF265 /* WeeklyIntentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyIntentStore.swift; sourceTree = "<group>"; };
@@ -573,6 +575,7 @@
 			children = (
 				77D718DD32E95C9B343AA7F4 /* SSCard.swift */,
 				0ECC089BBB5641CAF4370E41 /* SSEmptyState.swift */,
+				D7BBE47B8C85A36913574BC0 /* SSFlowCard.swift */,
 				14B49A6F281466CD2C625A3D /* SSListRow.swift */,
 				78FCAB137C746EE1FA54D76B /* SSLoadingState.swift */,
 				CA1AB8EFDDB08C466B6D4199 /* SSPrimaryButton.swift */,
@@ -1101,6 +1104,7 @@
 				1801F835EA046BB80FC779BC /* PushRegistration.swift in Sources */,
 				5CE226134F2A1AAE599D0C4F /* SSCard.swift in Sources */,
 				8F185009BFC56BD54F47D9D3 /* SSEmptyState.swift in Sources */,
+				2188BA3876536036C48F3B87 /* SSFlowCard.swift in Sources */,
 				E52483890E09BF20DFD284DB /* SSListRow.swift in Sources */,
 				C42A8EEB30F94B60696CB2B5 /* SSLoadingState.swift in Sources */,
 				7109014BCA8B249F11F47315 /* SSPrimaryButton.swift in Sources */,

@@ -14,24 +14,14 @@ struct PlanCardView: View {
     let onOpenCalendar: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            HStack(spacing: 8) {
-                Image(systemName: statusIcon)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(statusForeground)
-                    .frame(width: 26, height: 26)
-                    .background(statusTint.opacity(0.12), in: Circle())
-                Text(statusLabel)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(statusForeground)
-                Spacer(minLength: 6)
-            }
+        SSFlowCard {
+            SSFlowCardHeader(
+                title: plan.title,
+                subtitle: statusLabel,
+                systemImage: statusIcon,
+                tint: statusForeground
+            )
             .accessibilityIdentifier("plan-card-\(plan.id)")
-
-            Text(plan.title)
-                .font(.body.weight(.semibold))
-                .foregroundStyle(SideSeatTheme.textPrimary)
-                .fixedSize(horizontal: false, vertical: true)
 
             VStack(alignment: .leading, spacing: 7) {
                 if let start = plan.startDate, let end = plan.endDate {
@@ -88,15 +78,16 @@ struct PlanCardView: View {
                     .accessibilityElement(children: .contain)
                     .accessibilityIdentifier("plan-card-actions-\(plan.id)")
             } else if plan.status == "PENDING",
-                      plan.proposer.id == currentUserID,
-                      plan.usesActionCoordinationV2 {
+                plan.proposer.id == currentUserID,
+                plan.usesActionCoordinationV2
+            {
                 Button(role: .destructive, action: onWithdraw) {
                     Text(
                         isRescheduleProposal
                             ? AppLocalization.string("Withdraw new time")
                             : AppLocalization.string("Withdraw proposal")
                     )
-                        .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
                 .disabled(isActing)
@@ -137,159 +128,46 @@ struct PlanCardView: View {
                     .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             }
         }
-        .padding(SideSeatTheme.spaceLG)
         .frame(
-            maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : 320,
+            maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : 340,
             alignment: .leading
         )
-        .background(
-            SideSeatTheme.Chat.cardSurface,
-            in: RoundedRectangle(cornerRadius: SideSeatTheme.Chat.bubbleRadius, style: .continuous)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: SideSeatTheme.Chat.bubbleRadius, style: .continuous)
-                .strokeBorder(statusTint.opacity(0.16), lineWidth: 1)
-        )
     }
 
-    @ViewBuilder
     private var planResponseActions: some View {
-        Group {
-            if dynamicTypeSize.isAccessibilitySize {
-                VStack(spacing: 0) {
-                    expandedResponseButton(
-                        title: AppLocalization.string("Accept"),
-                        foreground: SideSeatTheme.textPrimary,
-                        background: SideSeatTheme.HubTint.plans.opacity(0.16),
-                        identifier: "plan-card-accept-\(plan.id)",
-                        action: onAccept
-                    )
-                    expandedActionDivider
-                    expandedResponseButton(
-                        title: AppLocalization.string("Propose new time"),
-                        foreground: SideSeatTheme.textPrimary,
-                        identifier: "plan-card-counter-\(plan.id)",
-                        action: onCounter
-                    )
-                    expandedActionDivider
-                    expandedResponseButton(
-                        title: AppLocalization.string("Decline"),
-                        foreground: SideSeatTheme.statusDangerText,
-                        role: .destructive,
-                        identifier: "plan-card-decline-\(plan.id)",
-                        action: onDecline
-                    )
+        VStack(spacing: SideSeatTheme.spaceSM) {
+            SSPrimaryButton(
+                title: AppLocalization.string("Accept"),
+                isLoading: isActing,
+                fill: .product,
+                height: 46,
+                accessibilityID: "plan-card-accept-\(plan.id)",
+                action: onAccept
+            )
+            let layout =
+                dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceXS))
+                : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
+            layout {
+                Button(action: onCounter) {
+                    Text("Propose new time")
+                        .font(.subheadline.weight(.medium))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
                 }
-            } else {
-                HStack(spacing: 0) {
-                    compactResponseButton(
-                        title: AppLocalization.string("Accept"),
-                        foreground: SideSeatTheme.textPrimary,
-                        background: SideSeatTheme.HubTint.plans.opacity(0.16),
-                        identifier: "plan-card-accept-\(plan.id)",
-                        action: onAccept
-                    )
-                    .frame(width: 68)
-
-                    compactActionDivider
-
-                    compactResponseButton(
-                        title: AppLocalization.string("New time"),
-                        foreground: SideSeatTheme.textPrimary,
-                        lineLimit: 2,
-                        identifier: "plan-card-counter-\(plan.id)",
-                        action: onCounter
-                    )
-
-                    compactActionDivider
-
-                    compactResponseButton(
-                        title: AppLocalization.string("Decline"),
-                        foreground: SideSeatTheme.statusDangerText,
-                        role: .destructive,
-                        identifier: "plan-card-decline-\(plan.id)",
-                        action: onDecline
-                    )
-                    .frame(width: 68)
+                .accessibilityIdentifier("plan-card-counter-\(plan.id)")
+                Button(role: .destructive, action: onDecline) {
+                    Text("Decline")
+                        .font(.subheadline.weight(.medium))
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
                 }
-                .frame(height: 44)
+                .accessibilityIdentifier("plan-card-decline-\(plan.id)")
             }
+            .buttonStyle(SSPressButtonStyle())
         }
-        .background(
-            SideSeatTheme.fillTertiary,
-            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
-                .strokeBorder(SideSeatTheme.separator.opacity(0.55), lineWidth: 0.5)
-        }
-    }
-
-    private func compactResponseButton(
-        title: String,
-        foreground: Color,
-        background: Color = .clear,
-        role: ButtonRole? = nil,
-        lineLimit: Int = 1,
-        identifier: String,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(role: role, action: action) {
-            Text(title)
-                .font(.caption.weight(.semibold))
-                .lineLimit(lineLimit)
-                .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.78)
-                .foregroundStyle(foreground)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .contentShape(Rectangle())
-                .background(background)
-        }
-        .buttonStyle(SSPressButtonStyle())
         .disabled(isActing)
-        .accessibilityIdentifier(identifier)
-    }
-
-    private func expandedResponseButton(
-        title: String,
-        foreground: Color,
-        background: Color = .clear,
-        role: ButtonRole? = nil,
-        identifier: String,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(role: role, action: action) {
-            Text(title)
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(foreground)
-                .multilineTextAlignment(.leading)
-                .lineLimit(2)
-                .minimumScaleFactor(0.8)
-                .allowsTightening(true)
-                .padding(.horizontal, SideSeatTheme.spaceMD)
-                .padding(.vertical, SideSeatTheme.spaceXS)
-                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                .contentShape(Rectangle())
-                .background(background)
-        }
-        .buttonStyle(SSPressButtonStyle())
-        .disabled(isActing)
-        .accessibilityIdentifier(identifier)
-    }
-
-    private var compactActionDivider: some View {
-        Rectangle()
-            .fill(SideSeatTheme.separator.opacity(0.7))
-            .frame(width: 0.5, height: 22)
-            .accessibilityHidden(true)
-    }
-
-    private var expandedActionDivider: some View {
-        Rectangle()
-            .fill(SideSeatTheme.separator.opacity(0.7))
-            .frame(height: 0.5)
-            .accessibilityHidden(true)
     }
 
     @ViewBuilder
@@ -353,15 +231,6 @@ struct PlanCardView: View {
         }
     }
 
-    private var statusTint: Color {
-        switch plan.status {
-        case "ACCEPTED": SideSeatTheme.success
-        case "DECLINED", "CANCELED": SideSeatTheme.danger
-        case "COUNTER_PROPOSED", "EXPIRED": SideSeatTheme.warning
-        default: SideSeatTheme.warning
-        }
-    }
-
     private var statusForeground: Color {
         switch plan.status {
         case "ACCEPTED": SideSeatTheme.statusSuccessText
@@ -373,6 +242,7 @@ struct PlanCardView: View {
 }
 
 struct PlanOutcomePromptView: View {
+    @State private var isEditing = false
     let plan: NativePlanRequest
     let isSubmitting: Bool
     let onAnswer: (String) -> Void
@@ -391,30 +261,44 @@ struct PlanOutcomePromptView: View {
                 }
             }
 
-            Text("A quick private response helps evaluate whether SideSeat creates real plans.")
+            Text("Your answer stays private. Choose what actually happened.")
                 .font(.footnote)
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 .fixedSize(horizontal: false, vertical: true)
 
-            VStack(spacing: SideSeatTheme.spaceSM) {
-                outcomeButton(
-                    title: AppLocalization.string("Happened"),
-                    systemImage: "checkmark.circle.fill",
-                    value: "OCCURRED",
-                    tint: SideSeatTheme.statusSuccessText
-                )
-                outcomeButton(
-                    title: AppLocalization.string("Didn't happen"),
-                    systemImage: "xmark.circle",
-                    value: "DID_NOT_OCCUR",
-                    tint: SideSeatTheme.textSecondaryStrong
-                )
-                outcomeButton(
-                    title: AppLocalization.string("Skip"),
-                    systemImage: "forward.fill",
-                    value: "PREFER_NOT_TO_SAY",
-                    tint: SideSeatTheme.textSecondaryStrong
-                )
+            if plan.viewerOutcome == nil || isEditing {
+                VStack(spacing: SideSeatTheme.spaceSM) {
+                    outcomeButton(
+                        title: AppLocalization.string("Happened"),
+                        systemImage: "checkmark.circle.fill",
+                        value: "OCCURRED"
+                    )
+                    outcomeButton(
+                        title: AppLocalization.string("Didn't happen"),
+                        systemImage: "xmark.circle",
+                        value: "DID_NOT_OCCUR"
+                    )
+                    outcomeButton(
+                        title: AppLocalization.string("Skip"),
+                        systemImage: "forward.fill",
+                        value: "PREFER_NOT_TO_SAY"
+                    )
+                }
+            } else {
+                HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
+                    Text(savedAnswerTitle)
+                        .font(.subheadline.weight(.semibold))
+                    Spacer(minLength: 0)
+                    Button {
+                        isEditing = true
+                    } label: {
+                        Text("Change answer")
+                            .font(.subheadline)
+                            .frame(minHeight: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .accessibilityIdentifier("plan-outcome-edit-\(plan.id)")
+                }
             }
 
             if plan.viewerOutcome != nil {
@@ -427,54 +311,31 @@ struct PlanOutcomePromptView: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("plan-outcome-\(plan.id)")
+        .onChange(of: plan.viewerOutcome) { _, _ in isEditing = false }
+    }
+
+    private var savedAnswerTitle: String {
+        switch plan.viewerOutcome {
+        case "OCCURRED": AppLocalization.string("Happened")
+        case "DID_NOT_OCCUR": AppLocalization.string("Didn't happen")
+        default: AppLocalization.string("Skip")
+        }
     }
 
     private func outcomeButton(
         title: String,
         systemImage: String,
-        value: String,
-        tint: Color
+        value: String
     ) -> some View {
         let isSelected = plan.viewerOutcome == value
-        return Button {
+        return SSFlowChoice(
+            title: title,
+            systemImage: systemImage,
+            isSelected: isSelected
+        ) {
             onAnswer(value)
-        } label: {
-            HStack(spacing: SideSeatTheme.spaceSM) {
-                Image(systemName: isSelected ? "checkmark.circle.fill" : systemImage)
-                    .frame(width: 20)
-                Text(title)
-                    .font(.subheadline.weight(.semibold))
-                Spacer(minLength: SideSeatTheme.spaceSM)
-                if isSelected {
-                    Text("Selected")
-                        .font(.caption)
-                }
-            }
-            .foregroundStyle(isSelected ? tint : SideSeatTheme.textPrimary)
-            .padding(.horizontal, SideSeatTheme.spaceMD)
-            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-            .background(
-                isSelected ? tint.opacity(0.12) : SideSeatTheme.fillTertiary,
-                in: RoundedRectangle(
-                    cornerRadius: SideSeatTheme.controlRadius,
-                    style: .continuous
-                )
-            )
-            .overlay {
-                RoundedRectangle(
-                    cornerRadius: SideSeatTheme.controlRadius,
-                    style: .continuous
-                )
-                .strokeBorder(
-                    isSelected ? tint.opacity(0.5) : SideSeatTheme.separator.opacity(0.55),
-                    lineWidth: isSelected ? 1 : 0.5
-                )
-            }
-            .contentShape(Rectangle())
         }
-        .buttonStyle(SSPressButtonStyle())
         .disabled(isSubmitting || isSelected)
         .accessibilityIdentifier("plan-outcome-\(value.lowercased())-\(plan.id)")
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

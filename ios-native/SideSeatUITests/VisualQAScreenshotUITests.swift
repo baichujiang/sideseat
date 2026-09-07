@@ -13,6 +13,106 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
+    func testTogetherFlowEditorLightAndDark() {
+        for appearance in ["light", "dark"] {
+            let app = XCUIApplication()
+            app.launchArguments = [
+                "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-discover", "--ui-testing-weekly-intent",
+                "--ui-testing-mutual-opportunity", "--ui-testing-together-matching",
+                "--ui-testing-language=zh-Hans", "--ui-testing-appearance=\(appearance)",
+            ]
+            app.launch()
+            XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 8))
+            saveScreenshot(app: app, name: "flow-together-\(appearance)")
+            let addIntent = app.buttons["together-add-intent"]
+            revealFlowElement(addIntent, in: app)
+            addIntent.tap()
+            let activity = app.descendants(matching: .any)["intent-editor-activity"].firstMatch
+            XCTAssertTrue(activity.waitForExistence(timeout: 5))
+            activity.tap()
+            activity.typeText("课后喝咖啡")
+            let next = app.buttons["intent-editor-next"]
+            XCTAssertTrue(next.isEnabled)
+            saveScreenshot(app: app, name: "flow-intent-activity-\(appearance)")
+            next.tap()
+            let save = app.buttons["intent-editor-save"]
+            XCTAssertTrue(save.waitForExistence(timeout: 3))
+            XCTAssertTrue(save.isEnabled)
+            XCTAssertTrue(save.isHittable)
+            saveScreenshot(app: app, name: "flow-intent-times-\(appearance)")
+            app.buttons["intent-editor-back"].tap()
+            XCTAssertEqual(activity.value as? String, "课后喝咖啡")
+            app.terminate()
+        }
+    }
+
+    @MainActor
+    func testPlanFlowComposerAndOutcomeLightAndDark() {
+        for appearance in ["light", "dark"] {
+            let app = XCUIApplication()
+            app.launchArguments = [
+                "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-chats", "--ui-testing-cached-chat-refresh",
+                "--ui-testing-language=zh-Hans", "--ui-testing-appearance=\(appearance)",
+            ]
+            app.launch()
+            XCTAssertTrue(app.buttons["inbox-pending-plans"].waitForExistence(timeout: 8))
+            app.buttons["inbox-pending-plans"].tap()
+            let plan = app.buttons["plans-row-ui-plan-1"]
+            XCTAssertTrue(plan.waitForExistence(timeout: 5))
+            saveScreenshot(app: app, name: "flow-plans-\(appearance)")
+            plan.tap()
+            let counter = app.buttons["plan-card-counter-ui-plan-1"]
+            XCTAssertTrue(counter.waitForExistence(timeout: 5))
+            revealFlowElement(counter, in: app)
+            saveScreenshot(app: app, name: "flow-plan-response-\(appearance)")
+            counter.tap()
+            let submit = app.buttons["plan-create-submit"]
+            let sheetAppeared = submit.waitForExistence(timeout: 5)
+            saveScreenshot(app: app, name: "flow-plan-editor-\(appearance)")
+            if !sheetAppeared {
+                let tree = XCTAttachment(string: app.debugDescription)
+                tree.lifetime = .keepAlways
+                add(tree)
+            }
+            XCTAssertTrue(sheetAppeared)
+            XCTAssertTrue(submit.isEnabled)
+            XCTAssertTrue(submit.isHittable)
+            XCTAssertEqual(app.textFields["plan-create-title"].value as? String, "图书馆自习")
+            submit.tap()
+            XCTAssertTrue(submit.waitForNonExistence(timeout: 5))
+            app.terminate()
+
+            app.launch()
+            XCTAssertTrue(app.buttons["inbox-pending-plans"].waitForExistence(timeout: 8))
+            app.buttons["inbox-pending-plans"].tap()
+            let happened = app.buttons["plan-outcome-occurred-ui-plan-completed"]
+            revealFlowElement(happened, in: app)
+            saveScreenshot(app: app, name: "flow-outcome-\(appearance)")
+            happened.tap()
+            let edit = app.buttons["plan-outcome-edit-ui-plan-completed"]
+            XCTAssertTrue(edit.waitForExistence(timeout: 4))
+            XCTAssertTrue(app.descendants(matching: .any)["plan-outcome-saved-ui-plan-completed"].exists)
+            edit.tap()
+            let didNotHappen = app.buttons["plan-outcome-did_not_occur-ui-plan-completed"]
+            revealFlowElement(didNotHappen, in: app)
+            didNotHappen.tap()
+            XCTAssertTrue(edit.waitForExistence(timeout: 4))
+            app.terminate()
+        }
+    }
+
+    @MainActor
+    private func revealFlowElement(_ element: XCUIElement, in app: XCUIApplication) {
+        for _ in 0..<8 where !element.exists || !element.isHittable {
+            app.swipeUp()
+        }
+        XCTAssertTrue(element.exists)
+        XCTAssertTrue(element.isHittable)
+    }
+
+    @MainActor
     func testCaptureCurrentAppearanceMatrix() throws {
         let appearance = Self.resolvedAppearance()
         XCTAssertTrue(["light", "dark"].contains(appearance), "appearance must be light|dark")
@@ -91,7 +191,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["需要你回应"].exists)
         XCTAssertTrue(app.staticTexts["即将开始"].exists)
         XCTAssertTrue(app.staticTexts["历史与已结束"].exists)
-        XCTAssertTrue(app.staticTexts["已确认"].firstMatch.exists)
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "已确认")).firstMatch.exists)
         XCTAssertTrue(app.staticTexts["在对话中管理"].firstMatch.exists)
         XCTAssertFalse(app.staticTexts["Past & Ended"].exists)
         XCTAssertFalse(app.staticTexts["Confirmed"].exists)
@@ -103,10 +203,10 @@ final class VisualQAScreenshotUITests: XCTestCase {
 
         let actions = app.descendants(matching: .any)["plan-card-actions-ui-plan-1"]
         XCTAssertTrue(actions.waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["已提议"].exists)
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "已提议")).firstMatch.exists)
         XCTAssertTrue(app.staticTexts["接受后会确认此计划，并添加到双方日历。"].exists)
         XCTAssertFalse(app.staticTexts["Proposed"].exists)
-        XCTAssertLessThanOrEqual(actions.frame.height, 48)
+        XCTAssertGreaterThan(actions.frame.height, 48)
         RunLoop.current.run(until: Date().addingTimeInterval(0.35))
         saveScreenshot(app: app, name: "chat-plan-invite-\(appearance)")
         app.terminate()

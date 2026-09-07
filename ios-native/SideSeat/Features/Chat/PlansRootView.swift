@@ -71,7 +71,6 @@ enum MVPPlanRoute {
 struct PlansRootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var store = PlansStore()
 
     var body: some View {
@@ -121,7 +120,7 @@ struct PlansRootView: View {
                     }
                     .padding(.horizontal, SideSeatTheme.screenHorizontal)
                     .padding(.top, SideSeatTheme.spaceLG)
-                    .padding(.bottom, 112)
+                    .padding(.bottom, SideSeatTheme.spaceXL)
                 }
                 .background(SideSeatTheme.bgGrouped)
             }
@@ -176,108 +175,63 @@ struct PlansRootView: View {
         _ plan: NativePlanRequest,
         section: MVPPlanSection
     ) -> some View {
-        VStack(spacing: SideSeatTheme.spaceSM) {
+        SSFlowCard {
             Button {
                 router.navigate(to: MVPPlanRoute.route(for: plan))
             } label: {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
-                    Label(statusLabel(for: plan, section: section), systemImage: statusIcon(for: plan, section: section))
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(statusForeground(for: plan, section: section))
-
-                    Spacer(minLength: SideSeatTheme.spaceSM)
-
-                    if !dynamicTypeSize.isAccessibilitySize {
+                    HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                        SSFlowCardHeader(
+                            title: plan.title,
+                            subtitle: statusLabel(for: plan, section: section),
+                            systemImage: statusIcon(for: plan, section: section),
+                            tint: statusForeground(for: plan, section: section)
+                        )
                         Image(systemName: "chevron.right")
-                            .font(.caption.weight(.bold))
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textSecondary)
+                            .padding(.top, SideSeatTheme.spaceMD)
+                            .accessibilityHidden(true)
+                    }
+
+                    if let start = plan.startDate, let end = plan.endDate {
+                        planDateDetails(start: start, end: end)
+                    }
+                    if let location = plan.location?.trimmingCharacters(in: .whitespacesAndNewlines),
+                        !location.isEmpty
+                    {
+                        Label(location, systemImage: "mappin.and.ellipse")
+                            .font(.footnote)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    if plan.counterOfId != nil, plan.commitmentId != nil, plan.status == "PENDING" {
+                        SSFlowNotice(
+                            text: AppLocalization.string(
+                                "Your confirmed Plan stays in place until this new time is accepted."),
+                            systemImage: "calendar.badge.clock"
+                        )
+                        .accessibilityIdentifier("plans-reschedule-keeps-confirmed-\(plan.id)")
+                    }
+
+                    HStack(spacing: SideSeatTheme.spaceSM) {
+                        let participant = otherParticipant(for: plan)
+                        InitialAvatar(name: participant.displayName, url: participant.avatarUrl, size: 32)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(participant.displayName)
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(SideSeatTheme.textPrimary)
+                            Text("Manage in conversation")
+                                .font(.caption)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        }
+                        Spacer(minLength: 0)
+                        Image(systemName: "bubble.left.and.bubble.right")
                             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                             .accessibilityHidden(true)
                     }
                 }
-
-                Text(plan.title)
-                    .font(.headline)
-                    .foregroundStyle(SideSeatTheme.textPrimary)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                if let start = plan.startDate, let end = plan.endDate {
-                    planDateDetails(start: start, end: end)
-                }
-
-                if let location = plan.location?.trimmingCharacters(in: .whitespacesAndNewlines),
-                   !location.isEmpty {
-                    Label(location, systemImage: "mappin.and.ellipse")
-                        .font(.footnote)
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                if plan.counterOfId != nil, plan.commitmentId != nil, plan.status == "PENDING" {
-                    Label(
-                        "Your confirmed Plan stays in place until this new time is accepted.",
-                        systemImage: "calendar.badge.clock"
-                    )
-                    .font(.footnote)
-                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(SideSeatTheme.spaceMD)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        SideSeatTheme.fillTertiary,
-                        in: RoundedRectangle(
-                            cornerRadius: SideSeatTheme.controlRadius,
-                            style: .continuous
-                        )
-                    )
-                    .accessibilityIdentifier("plans-reschedule-keeps-confirmed-\(plan.id)")
-                }
-
-                if let note = plan.message?.trimmingCharacters(in: .whitespacesAndNewlines),
-                   !note.isEmpty {
-                    Text(note)
-                        .font(.footnote)
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 3)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                Divider()
-
-                HStack(spacing: SideSeatTheme.spaceMD) {
-                    let participant = otherParticipant(for: plan)
-                    InitialAvatar(
-                        name: participant.displayName,
-                        url: participant.avatarUrl,
-                        size: 36
-                    )
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(participant.displayName)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(SideSeatTheme.textPrimary)
-                        Text("Manage in conversation")
-                            .font(.caption)
-                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    }
-                    Spacer(minLength: 0)
-                    Image(systemName: "bubble.left.and.bubble.right")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.HubTint.plans)
-                        .frame(width: 36, height: 36)
-                        .background(SideSeatTheme.HubTint.plans.opacity(0.12), in: Circle())
-                        .accessibilityHidden(true)
-                }
-                }
-                .padding(SideSeatTheme.spaceLG)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(
-                    SideSeatTheme.surface,
-                    in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
-                )
-                .overlay {
-                    RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
-                        .strokeBorder(SideSeatTheme.separator.opacity(0.65), lineWidth: 0.5)
-                }
                 .contentShape(Rectangle())
             }
             .buttonStyle(SSPressButtonStyle())
@@ -286,6 +240,7 @@ struct PlansRootView: View {
             .accessibilityHint("Open Plan in conversation")
 
             if plan.isOutcomeEligible() {
+                Divider()
                 PlanOutcomePromptView(
                     plan: plan,
                     isSubmitting: store.mutatingOutcomeID == plan.id
@@ -293,16 +248,6 @@ struct PlansRootView: View {
                     Task {
                         await store.recordOutcome(value, for: plan.id, using: session)
                     }
-                }
-                .padding(SideSeatTheme.spaceLG)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(
-                    SideSeatTheme.surface,
-                    in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
-                )
-                .overlay {
-                    RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
-                        .strokeBorder(SideSeatTheme.separator.opacity(0.65), lineWidth: 0.5)
                 }
             }
         }
@@ -340,6 +285,9 @@ struct PlansRootView: View {
         for plan: NativePlanRequest,
         section: MVPPlanSection
     ) -> String {
+        if section == .pastEnded, plan.status == "ACCEPTED" {
+            return AppLocalization.string(plan.viewerOutcome == nil ? "Private response" : "Ended")
+        }
         if plan.status == "PENDING", plan.counterOfId != nil, plan.commitmentId != nil {
             return AppLocalization.string("Reschedule proposed")
         }
@@ -362,6 +310,9 @@ struct PlansRootView: View {
         for plan: NativePlanRequest,
         section: MVPPlanSection
     ) -> String {
+        if section == .pastEnded, plan.status == "ACCEPTED" {
+            return plan.viewerOutcome == nil ? "lock" : "clock.arrow.circlepath"
+        }
         if plan.status == "ACCEPTED" { return "checkmark.circle.fill" }
         if plan.status == "PENDING" {
             return section == .needsResponse ? "envelope.badge" : "hourglass"
@@ -378,6 +329,7 @@ struct PlansRootView: View {
         for plan: NativePlanRequest,
         section: MVPPlanSection
     ) -> Color {
+        if section == .pastEnded { return SideSeatTheme.textSecondaryStrong }
         if plan.status == "ACCEPTED" { return SideSeatTheme.statusSuccessText }
         if plan.status == "PENDING", section == .needsResponse {
             return SideSeatTheme.statusWarningText

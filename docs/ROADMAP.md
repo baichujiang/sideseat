@@ -2,7 +2,7 @@
 
 **Status:** Active dependency roadmap
 
-**Last updated:** 2026-09-07
+**Last updated:** 2026-09-08
 
 **Governing product:** [Product](./PRODUCT.md)
 
@@ -72,6 +72,14 @@ all 3 candidate Plans were excluded as QA/internal.
 Build 32 improves pilot completion by surfacing pending Plan decisions and
 Outcome answers in the Messages and app-icon attention badges, then refreshing
 that state immediately after an Outcome is saved.
+The 2026-09-08 native UX iteration unifies Together and Plan cards, adds a
+two-step Intent editor and pinned Plan submission, and makes saved private
+Outcome answers compact and editable. It is not included in TestFlight build 32.
+The focused simulator check passed (6 state tests and 7 UI tests); see the
+[design verification](./DESIGN_SYSTEM.md#together--plan-verification--2026-09-08).
+Next release step: push the UI commit, package the verified native changes in
+the next TestFlight build, and run its physical smoke before expanding the
+non-QA pilot. This UI work does not unlock Layer 3.
 See the [pilot Gate contract](./LAYER2_PILOT.md) and
 [non-QA tester guide](./LAYER2_PILOT_TESTER_GUIDE.md) for the active pilot, and
 [acceptance record](./releases/2026-09-07-layer2-production-acceptance.md).

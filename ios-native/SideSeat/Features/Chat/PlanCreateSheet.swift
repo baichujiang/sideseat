@@ -3,6 +3,7 @@ import SwiftUI
 struct PlanCreateSheet: View {
     @Environment(SessionStore.self) private var session
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     let target: PlanSubmissionTarget
     var recipientName: String? = nil
@@ -34,8 +35,13 @@ struct PlanCreateSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceXL) {
                     recipientSummary
-                    planDetails
-                    timing
+                    if counterOf != nil {
+                        timing
+                        planDetails
+                    } else {
+                        planDetails
+                        timing
+                    }
                     calendarOutcome
 
                     if let issue {
@@ -54,33 +60,27 @@ struct PlanCreateSheet: View {
             .background(SideSeatTheme.bgGrouped)
             .navigationTitle(
                 counterOf == nil
-                    ? AppLocalization.string( "Propose a plan")
-                    : AppLocalization.string( "Suggest another time")
+                    ? AppLocalization.string("Propose a plan")
+                    : AppLocalization.string("Suggest another time")
             )
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .disabled(isCreating)
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        focusedField = nil
-                        Task { await create() }
-                    } label: {
-                        if isCreating {
-                            ProgressView()
-                        } else {
-                            Text(
-                                counterOf == nil
-                                    ? AppLocalization.string( "Send plan")
-                                    : AppLocalization.string( "Send new time")
-                            )
-                            .fontWeight(.semibold)
-                        }
-                    }
-                    .disabled(!canSend || isCreating)
-                    .ssConfirmationActionStyle()
-                    .accessibilityIdentifier("plan-create-submit")
+            }
+            .accessibilityIdentifier("plan-create-sheet")
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                SSFlowActionDock(
+                    title: AppLocalization.string(counterOf == nil ? "Send plan" : "Send new time"),
+                    detail: AppLocalization.string("Review the details, then send for the other person to accept."),
+                    isLoading: isCreating,
+                    isEnabled: canSend,
+                    accessibilityID: "plan-create-submit"
+                ) {
+                    focusedField = nil
+                    Task { await create() }
                 }
             }
             .onAppear { seedIfNeeded() }
@@ -89,35 +89,36 @@ struct PlanCreateSheet: View {
                 let previousDuration = max(end.timeIntervalSince(oldValue), 30 * 60)
                 end = newValue.addingTimeInterval(previousDuration)
             }
-            .accessibilityIdentifier("plan-create-sheet")
         }
-        .presentationDetents([.large])
-        .presentationDragIndicator(.visible)
+        .ssFlowSheet(isSaving: isCreating)
     }
 
     private var recipientSummary: some View {
-        HStack(spacing: SideSeatTheme.spaceMD) {
-            Image(systemName: counterOf == nil ? "person.crop.circle.badge.plus" : "arrow.triangle.2.circlepath")
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(SideSeatTheme.HubTint.plans)
-                .frame(width: 42, height: 42)
-                .background(SideSeatTheme.HubTint.plans.opacity(0.12), in: Circle())
-            VStack(alignment: .leading, spacing: 2) {
-                Text(counterOf == nil ? AppLocalization.string( "Plan with") : AppLocalization.string( "New time for"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(recipientName ?? AppLocalization.string( "This chat"))
-                    .font(.body.weight(.semibold))
-                    .lineLimit(1)
+        SSFlowCard {
+            SSFlowCardHeader(
+                title: recipientName ?? AppLocalization.string("This chat"),
+                subtitle: AppLocalization.string(counterOf == nil ? "Plan with" : "New time for"),
+                systemImage: counterOf == nil ? "person.2" : "calendar.badge.clock"
+            )
+            if let counterOf, let previousStart = counterOf.startDate {
+                Label(
+                    previousStart.formatted(
+                        .dateTime.month(.abbreviated).day().hour().minute()
+                            .locale(AppLocalization.selectedLanguage.locale)),
+                    systemImage: "clock.arrow.circlepath"
+                )
+                .font(.subheadline)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            } else if draft != nil {
+                Text("Details from your conversation are already filled in.")
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             }
-            Spacer(minLength: 0)
         }
-        .padding(SideSeatTheme.spaceMD)
-        .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
     private var planDetails: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+        SSFlowCard {
             Text("Details")
                 .font(.headline)
 
@@ -165,23 +166,25 @@ struct PlanCreateSheet: View {
                 .padding(SideSeatTheme.spaceMD)
                 .frame(minHeight: 58, alignment: .top)
             }
-            .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
     }
 
     private var timing: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+        SSFlowCard {
             Text("When")
                 .font(.headline)
 
             VStack(spacing: 0) {
-                dateRow(label: AppLocalization.string( "Starts"), icon: "clock", selection: $start)
+                dateRow(label: AppLocalization.string("Starts"), icon: "clock", selection: $start)
                 Divider().padding(.leading, 50)
-                dateRow(label: AppLocalization.string( "Ends"), icon: "clock.badge.checkmark", selection: $end)
+                dateRow(label: AppLocalization.string("Ends"), icon: "clock.badge.checkmark", selection: $end)
             }
-            .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
 
-            if end.timeIntervalSince(start) < 30 * 60 {
+            if start <= Date() {
+                Text("Choose a future start time.")
+                    .font(.caption)
+                    .foregroundStyle(SideSeatTheme.danger)
+            } else if end.timeIntervalSince(start) < 30 * 60 {
                 Text("A plan must be at least 30 minutes.")
                     .font(.caption)
                     .foregroundStyle(SideSeatTheme.danger)
@@ -194,40 +197,34 @@ struct PlanCreateSheet: View {
         icon: String,
         selection: Binding<Date>
     ) -> some View {
-        HStack(spacing: SideSeatTheme.spaceMD) {
-            Image(systemName: icon)
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .frame(width: 22)
-            Text(label)
-                .font(.body)
-            Spacer(minLength: SideSeatTheme.spaceSM)
+        let layout =
+            dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
+            : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
+        return layout {
+            Label(label, systemImage: icon)
+                .font(.subheadline)
+                .frame(maxWidth: .infinity, alignment: .leading)
             DatePicker(label, selection: selection, displayedComponents: [.date, .hourAndMinute])
                 .labelsHidden()
                 .datePickerStyle(.compact)
-                .accessibilityIdentifier(label == AppLocalization.string( "Starts") ? "plan-create-start" : "plan-create-end")
+                .environment(\.locale, AppLocalization.selectedLanguage.locale)
+                .accessibilityIdentifier(
+                    label == AppLocalization.string("Starts") ? "plan-create-start" : "plan-create-end")
         }
-        .padding(.horizontal, SideSeatTheme.spaceMD)
+        .padding(.vertical, SideSeatTheme.spaceSM)
         .frame(minHeight: 54)
     }
 
     private var calendarOutcome: some View {
-        HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
-            Image(systemName: "calendar.badge.checkmark")
-                .font(.body.weight(.semibold))
-                .foregroundStyle(SideSeatTheme.success)
-                .frame(width: 34, height: 34)
-                .background(SideSeatTheme.success.opacity(0.10), in: Circle())
-            VStack(alignment: .leading, spacing: 3) {
-                Text("Added after acceptance")
-                    .font(.subheadline.weight(.semibold))
-                Text("Once accepted, this plan appears in both calendars.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .padding(SideSeatTheme.spaceMD)
-        .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        SSFlowNotice(
+            text: AppLocalization.string(
+                counterOf?.commitmentId != nil
+                    ? "The confirmed Plan stays unchanged until this new time is accepted."
+                    : "Once accepted, this plan appears in both calendars."
+            ),
+            systemImage: "calendar.badge.checkmark"
+        )
     }
 
     private func seedIfNeeded() {
@@ -261,6 +258,7 @@ struct PlanCreateSheet: View {
 
     private var canSend: Bool {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && start > Date()
             && end.timeIntervalSince(start) >= 30 * 60
     }
 

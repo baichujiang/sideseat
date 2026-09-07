@@ -234,7 +234,7 @@ struct MVPPlanPresentationTests {
             "Upcoming",
             "Proposed",
             "Past & Ended",
-        ])
+        ].map { AppLocalization.string($0) })
     }
 
     @Test("Classifies proposed and confirmed Plans by viewer role and time")

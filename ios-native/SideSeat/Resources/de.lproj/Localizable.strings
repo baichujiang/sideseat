@@ -1725,3 +1725,17 @@
 "Try another search or create a plan." = "Probiere eine andere Suche aus oder erstelle einen Plan.";
 "Verified only" = "Nur Verifizierte";
 "Verified replies" = "Verifizierte Antworten";
+
+/* Together and Plan flow cards */
+"Review the details, then send for the other person to accept." = "Prüfe die Angaben und sende sie zur Bestätigung.";
+"Details from your conversation are already filled in." = "Die Angaben aus eurem Gespräch sind bereits ausgefüllt.";
+"Choose a future start time." = "Wähle eine Startzeit in der Zukunft.";
+"Choose available times" = "Freie Zeiten auswählen";
+"Save intention" = "Vorhaben speichern";
+"One activity at a time. You can add more later." = "Ein Vorhaben pro Eintrag. Weitere kannst du später hinzufügen.";
+"Saved privately. Start matching separately when you're ready." = "Privat gespeichert. Starte das Matching, wenn du bereit bist.";
+"1 · What would you like to do?" = "1 · Was möchtest du machen?";
+"2 · When are you free?" = "2 · Wann hast du Zeit?";
+"Private response" = "Private Antwort";
+"Your answer stays private. Choose what actually happened." = "Deine Antwort bleibt privat. Wähle aus, was tatsächlich passiert ist.";
+"Change answer" = "Antwort ändern";

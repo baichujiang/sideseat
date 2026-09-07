@@ -172,12 +172,18 @@ final class AccessibilityAuditUITests: XCTestCase {
         let home = app.descendants(matching: .any)["together-home"]
         XCTAssertTrue(home.waitForExistence(timeout: 6))
         let addIntent = app.buttons["together-add-intent"]
+        for _ in 0..<10 where !addIntent.exists || !addIntent.isHittable {
+            home.swipeUp()
+        }
         XCTAssertTrue(addIntent.waitForExistence(timeout: 5))
         XCTAssertTrue(addIntent.isHittable)
         XCTAssertGreaterThanOrEqual(addIntent.frame.width, 44)
         XCTAssertGreaterThanOrEqual(addIntent.frame.height, 44)
 
-        let decisions = [app.buttons["Not this time"], app.buttons["Do it together"]]
+        for _ in 0..<10 where !app.buttons["Do it together"].isHittable {
+            home.swipeDown()
+        }
+        let decisions = [app.buttons["Do it together"], app.buttons["Not this time"]]
         for decision in decisions {
             for _ in 0..<10 where !decision.exists || !decision.isHittable {
                 home.swipeUp()
@@ -352,6 +358,7 @@ final class AccessibilityAuditUITests: XCTestCase {
         pendingPlans.tap()
 
         let planRow = app.buttons["plans-row-ui-plan-1"]
+        for _ in 0..<5 where !planRow.exists || !planRow.isHittable { app.swipeUp() }
         XCTAssertTrue(planRow.waitForExistence(timeout: 5))
         planRow.tap()
 
@@ -362,7 +369,7 @@ final class AccessibilityAuditUITests: XCTestCase {
 
         let buttons: [(element: XCUIElement, label: String)] = [
             (app.buttons["plan-card-accept-ui-plan-1"], "Annehmen"),
-            (app.buttons["plan-card-counter-ui-plan-1"], "Andere Zeit vorschlagen"),
+            (app.buttons["plan-card-counter-ui-plan-1"], "Neue Zeit vorschlagen"),
             (app.buttons["plan-card-decline-ui-plan-1"], "Ablehnen"),
         ]
         let screenFrame = app.windows.firstMatch.frame

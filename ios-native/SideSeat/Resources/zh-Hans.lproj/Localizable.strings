@@ -1726,3 +1726,17 @@
 "Title (optional)" = "标题（选填）";
 "Unblock %@?" = "解除对 %@ 的屏蔽？";
 "中文" = "中文";
+
+/* Together and Plan flow cards */
+"Review the details, then send for the other person to accept." = "确认信息后发送，由对方接受计划。";
+"Details from your conversation are already filled in." = "已为你填好对话中的计划信息。";
+"Choose a future start time." = "请选择尚未开始的时间。";
+"Choose available times" = "选择空闲时间";
+"Save intention" = "保存想做的事";
+"One activity at a time. You can add more later." = "每次添加一件想做的事，之后可以继续添加。";
+"Saved privately. Start matching separately when you're ready." = "仅自己可见，准备好后再开始匹配。";
+"1 · What would you like to do?" = "1 · 你想做什么？";
+"2 · When are you free?" = "2 · 你什么时候有空？";
+"Private response" = "私密回答";
+"Your answer stays private. Choose what actually happened." = "你的回答仅自己可见，请按实际情况选择。";
+"Change answer" = "修改回答";
