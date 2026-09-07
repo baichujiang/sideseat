@@ -66,6 +66,9 @@ below with its exact UTC window and report output. If a run does not qualify,
 continue the Layer 2 pilot and collect another weekly snapshot; do not enter
 Layer 3.
 
+Recruitment, consent, tester instructions and the truthful-answer protocol are
+defined in the [non-QA pilot tester guide](./LAYER2_PILOT_TESTER_GUIDE.md).
+
 ## Recorded snapshots
 
 | Recorded at (UTC) | Window start (UTC) | Candidate Plans | Excluded QA/internal | Eligible non-QA Plans | Distinct pairs | Answers | Bilateral Plans | Response coverage | Bilateral coverage | Qualifies |

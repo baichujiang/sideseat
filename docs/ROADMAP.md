@@ -70,6 +70,7 @@ at least seven days apart. Continue the Layer 2 pilot; do not begin Layer 3.
 The first production non-QA baseline on 2026-09-07 contains 0 eligible Plans;
 all 3 candidate Plans were excluded as QA/internal.
 See the [pilot Gate contract](./LAYER2_PILOT.md) and
+[non-QA tester guide](./LAYER2_PILOT_TESTER_GUIDE.md) for the active pilot, and
 [acceptance record](./releases/2026-09-07-layer2-production-acceptance.md).
 
 ## Layer 3 — Meet Again and Repeat Opportunity

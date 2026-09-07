@@ -2,7 +2,7 @@
 
 **Status:** Current index and authority map
 
-**Last updated:** 2026-09-02
+**Last updated:** 2026-09-07
 
 ## Read this first
 
@@ -40,6 +40,8 @@ Historical build evidence never certifies a newer build.
 | [Design System](./DESIGN_SYSTEM.md) | Tokens, reusable UI, interaction and visual acceptance |
 | [Release](./RELEASE.md) | Database/Vercel/TestFlight/App Store procedure and gates |
 | [Privacy](./PRIVACY.md) | App Store data disclosure and provider mapping |
+| [Layer 2 pilot Gate](./LAYER2_PILOT.md) | Non-QA sample, coverage thresholds and weekly decisions |
+| [Layer 2 pilot tester guide](./LAYER2_PILOT_TESTER_GUIDE.md) | Consent, recruitment and truthful Outcome instructions |
 
 ## Compatibility and evidence
 
@@ -47,6 +49,7 @@ Historical build evidence never certifies a newer build.
 | --- | --- |
 | [Legacy Action Compatibility](./LEGACY_ACTION_COMPATIBILITY.md) | Existing B-light/public Action, legacy Activity and web fallback only |
 | [TestFlight 1.0.0 (29)](./releases/2026-09-02-testflight-29.md) | Immutable facts and missing evidence for one uploaded build |
+| [TestFlight 1.0.0 (30)](./releases/2026-09-07-testflight-30.md) | Distributed Layer 2 build and physical acceptance evidence |
 | `archive/visual-qa-pre-together/` | Historical screenshots from the old navigation; not current sign-off |
 
 Compatibility material cannot reintroduce public Discover, publishing, city
