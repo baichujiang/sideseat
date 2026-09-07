@@ -111,6 +111,8 @@ export type InboxMergeBundle = {
   unreadTotal: number;
   /** Plan requests where you are the receiver and must accept / decline / counter. */
   plansNeedingYourAction: number;
+  /** Ended accepted Plans where this viewer has not privately answered Outcome. */
+  planOutcomesNeedingYourResponse: number;
 };
 
 /** Same total as {@link InboxMergeBundle.unreadTotal}, without loading merged rows (for nav badges). */
@@ -147,7 +149,15 @@ export async function getInboxUnreadTotal(userId: string): Promise<number> {
 }
 
 export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBundle> {
-  const [connections, userCourses, groupParticipants, plansNeedingYourAction] = await Promise.all([
+  const now = new Date();
+  const recentOutcomeCutoff = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1_000);
+  const [
+    connections,
+    userCourses,
+    groupParticipants,
+    plansNeedingYourAction,
+    planOutcomesNeedingYourResponse,
+  ] = await Promise.all([
     prisma.connection.findMany({
       where: activeUserConnectionWhere(userId),
       include: {
@@ -210,6 +220,29 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
         },
         receiverUserId: userId,
         status: PlanRequestStatus.PENDING,
+      },
+    }),
+    prisma.planRequest.count({
+      where: {
+        connection: {
+          ...activeUserConnectionWhere(userId),
+          userA: { moderationBlocks: { none: { isActive: true } } },
+          userB: { moderationBlocks: { none: { isActive: true } } },
+        },
+        AND: [
+          {
+            OR: [
+              { commitmentId: null },
+              { commitment: { is: { safetyRestrictedAt: null } } },
+            ],
+          },
+          {
+            status: PlanRequestStatus.ACCEPTED,
+            endTime: { lte: now, gte: recentOutcomeCutoff },
+            OR: [{ proposerUserId: userId }, { receiverUserId: userId }],
+            outcomeResponses: { none: { userId } },
+          },
+        ],
       },
     }),
   ]);
@@ -292,5 +325,6 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
     merged,
     unreadTotal,
     plansNeedingYourAction,
+    planOutcomesNeedingYourResponse,
   };
 }

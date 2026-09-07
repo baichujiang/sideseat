@@ -51,7 +51,7 @@ function messageAuthor(user: DirectMessageV1Row["sender"]) {
   };
 }
 
-export function directMessageV1(message: DirectMessageV1Row) {
+export function directMessageV1(message: DirectMessageV1Row, viewerId?: string) {
   const deleted = message.deletedAt !== null;
   const actionOrigin = message.actionInterest
     ? parseActionOriginSnapshot(message.actionInterest.originSnapshot)
@@ -73,7 +73,9 @@ export function directMessageV1(message: DirectMessageV1Row) {
         : null,
     availabilityShareId: message.availabilityShareId,
     planRequestId: message.planRequestId,
-    planRequest: message.planRequest ? planRequestV1(message.planRequest) : null,
+    planRequest: message.planRequest
+      ? planRequestV1(message.planRequest, viewerId)
+      : null,
     actionInterestId: message.actionInterestId,
     actionContextId: message.actionContextId,
     actionInterest: message.actionInterest && actionOrigin?.kind === "LIVE"

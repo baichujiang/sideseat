@@ -575,6 +575,56 @@ test(
         }),
         1,
       );
+      assert.equal(
+        await db.sharedEncounter.count({ where: { planCommitmentId: commitmentId } }),
+        0,
+      );
+
+      await db.$transaction((tx) =>
+        upsertLegacyPlanOutcome(tx, {
+          planId,
+          userId: ids.userA,
+          value: "OCCURRED",
+        }),
+      );
+      await db.$transaction((tx) =>
+        upsertLegacyPlanOutcome(tx, {
+          planId,
+          userId: ids.userB,
+          value: "DID_NOT_OCCUR",
+        }),
+      );
+      assert.equal(
+        await db.sharedEncounter.count({ where: { planCommitmentId: commitmentId } }),
+        0,
+      );
+
+      await db.$transaction((tx) =>
+        upsertLegacyPlanOutcome(tx, {
+          planId,
+          userId: ids.userB,
+          value: "OCCURRED",
+        }),
+      );
+      assert.deepEqual(
+        await db.sharedEncounter.findUnique({
+          where: { planCommitmentId: commitmentId },
+          select: { planId: true, planCommitmentId: true },
+        }),
+        { planId, planCommitmentId: commitmentId },
+      );
+
+      await db.$transaction((tx) =>
+        upsertLegacyPlanOutcome(tx, {
+          planId,
+          userId: ids.userA,
+          value: "PREFER_NOT_TO_SAY",
+        }),
+      );
+      assert.equal(
+        await db.sharedEncounter.count({ where: { planCommitmentId: commitmentId } }),
+        0,
+      );
 
       const replacementId = `${ids.prefix}-accepted-replacement`;
       await db.$transaction(async (tx) => {
@@ -772,6 +822,24 @@ test(
       );
 
       assert.equal(outcome.planCommitmentId, null);
+      assert.equal(
+        await db.sharedEncounter.count({ where: { planId: acceptedId } }),
+        0,
+      );
+      await db.$transaction((tx) =>
+        upsertLegacyPlanOutcome(tx, {
+          planId: acceptedId,
+          userId: ids.userB,
+          value: "OCCURRED",
+        }),
+      );
+      assert.deepEqual(
+        await db.sharedEncounter.findUnique({
+          where: { planId: acceptedId },
+          select: { planId: true, planCommitmentId: true },
+        }),
+        { planId: acceptedId, planCommitmentId: null },
+      );
       assert.equal(
         await db.planCommitment.count({
           where: { connectionId: ids.connection },

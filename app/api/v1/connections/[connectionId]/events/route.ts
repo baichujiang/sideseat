@@ -49,7 +49,7 @@ export async function GET(
       retentionFloor: () => chatRealtimeRetentionFloor("DIRECT", connectionId),
       isAuthorized: () => isDirectChatRealtimeAuthorized(connectionId, auth.user.id),
       loadDeliveries: (after, take) =>
-        loadDirectChatRealtimeDeliveries(connectionId, after, take),
+        loadDirectChatRealtimeDeliveries(connectionId, auth.user.id, after, take),
     });
   } catch (cause) {
     console.error("GET /api/v1/connections/[connectionId]/events", cause);

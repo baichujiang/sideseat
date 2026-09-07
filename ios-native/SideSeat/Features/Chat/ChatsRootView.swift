@@ -15,7 +15,7 @@ struct ChatsRootView: View {
         Group {
             if let payload = store.payload {
                 if store.visibleConversations.isEmpty,
-                   payload.plansNeedingYourAction == 0
+                   planResponseCount(payload) == 0
                 {
                     SSEmptyState(
                         title: "No conversations",
@@ -32,9 +32,9 @@ struct ChatsRootView: View {
                                     .accessibilityIdentifier("inbox-issue-banner")
                             }
                         }
-                        if payload.plansNeedingYourAction > 0 {
+                        if planResponseCount(payload) > 0 {
                             Section {
-                                pendingPlansRow(count: payload.plansNeedingYourAction)
+                                pendingPlansRow(count: planResponseCount(payload))
                             }
                             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 4, trailing: 16))
                             .listRowSeparator(.hidden)
@@ -166,7 +166,7 @@ struct ChatsRootView: View {
                                 .foregroundStyle(SideSeatTheme.textPrimary)
                                 .fixedSize(horizontal: false, vertical: true)
 
-                            Text("Review invitations and schedule updates")
+                            Text("Review invitations, schedule updates, and private follow-ups")
                                 .font(.footnote)
                                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -195,6 +195,10 @@ struct ChatsRootView: View {
         .accessibilityLabel("Plans waiting for your response")
         .accessibilityValue("\(count)")
         .accessibilityHint("Open plans")
+    }
+
+    private func planResponseCount(_ payload: NativeInboxPayload) -> Int {
+        payload.plansNeedingYourAction + payload.planOutcomesNeedingYourResponse
     }
 
     private func pendingPlansIcon(size: CGFloat) -> some View {

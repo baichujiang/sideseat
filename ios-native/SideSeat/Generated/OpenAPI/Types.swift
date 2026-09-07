@@ -10204,6 +10204,8 @@ internal enum Components {
                 internal var unreadTotal: Swift.Int
                 /// - Remark: Generated from `#/components/schemas/InboxEnvelope/data/plansNeedingYourAction`.
                 internal var plansNeedingYourAction: Swift.Int
+                /// - Remark: Generated from `#/components/schemas/InboxEnvelope/data/planOutcomesNeedingYourResponse`.
+                internal var planOutcomesNeedingYourResponse: Swift.Int
                 /// - Remark: Generated from `#/components/schemas/InboxEnvelope/data/actionResponseSummary`.
                 internal var actionResponseSummary: Components.Schemas.ActionResponseSummary?
                 /// Creates a new `DataPayload`.
@@ -10212,22 +10214,26 @@ internal enum Components {
                 ///   - conversations:
                 ///   - unreadTotal:
                 ///   - plansNeedingYourAction:
+                ///   - planOutcomesNeedingYourResponse:
                 ///   - actionResponseSummary:
                 internal init(
                     conversations: [Components.Schemas.InboxConversation],
                     unreadTotal: Swift.Int,
                     plansNeedingYourAction: Swift.Int,
+                    planOutcomesNeedingYourResponse: Swift.Int,
                     actionResponseSummary: Components.Schemas.ActionResponseSummary? = nil
                 ) {
                     self.conversations = conversations
                     self.unreadTotal = unreadTotal
                     self.plansNeedingYourAction = plansNeedingYourAction
+                    self.planOutcomesNeedingYourResponse = planOutcomesNeedingYourResponse
                     self.actionResponseSummary = actionResponseSummary
                 }
                 internal enum CodingKeys: String, CodingKey {
                     case conversations
                     case unreadTotal
                     case plansNeedingYourAction
+                    case planOutcomesNeedingYourResponse
                     case actionResponseSummary
                 }
             }
@@ -16898,8 +16904,6 @@ internal enum Components {
             }
             /// - Remark: Generated from `#/components/schemas/PlanRequest/viewerOutcome`.
             internal var viewerOutcome: Components.Schemas.PlanRequest.ViewerOutcomePayload?
-            /// - Remark: Generated from `#/components/schemas/PlanRequest/outcomeResponseCount`.
-            internal var outcomeResponseCount: Swift.Int
             /// - Remark: Generated from `#/components/schemas/PlanRequest/createdAt`.
             internal var createdAt: Foundation.Date
             /// - Remark: Generated from `#/components/schemas/PlanRequest/updatedAt`.
@@ -16926,7 +16930,6 @@ internal enum Components {
             ///   - scheduleShareLinkId:
             ///   - origin:
             ///   - viewerOutcome:
-            ///   - outcomeResponseCount:
             ///   - createdAt:
             ///   - updatedAt:
             internal init(
@@ -16949,7 +16952,6 @@ internal enum Components {
                 scheduleShareLinkId: Swift.String? = nil,
                 origin: Components.Schemas.PlanRequest.OriginPayload? = nil,
                 viewerOutcome: Components.Schemas.PlanRequest.ViewerOutcomePayload? = nil,
-                outcomeResponseCount: Swift.Int,
                 createdAt: Foundation.Date,
                 updatedAt: Foundation.Date
             ) {
@@ -16972,7 +16974,6 @@ internal enum Components {
                 self.scheduleShareLinkId = scheduleShareLinkId
                 self.origin = origin
                 self.viewerOutcome = viewerOutcome
-                self.outcomeResponseCount = outcomeResponseCount
                 self.createdAt = createdAt
                 self.updatedAt = updatedAt
             }
@@ -16996,7 +16997,6 @@ internal enum Components {
                 case scheduleShareLinkId
                 case origin
                 case viewerOutcome
-                case outcomeResponseCount
                 case createdAt
                 case updatedAt
             }

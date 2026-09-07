@@ -281,4 +281,28 @@ test("PlanRequest DTO exposes trusted source policy and never infers it from DB-
     actionInterest: null,
   } as never);
   assert.equal(missingTrustedSource.coordinationPolicy, null);
+
+  const privateOutcome = planRequestV1(
+    {
+      ...base,
+      originAction: null,
+      actionInterest: null,
+      outcomeResponses: [
+        { userId: "user-a", value: "OCCURRED" },
+        { userId: "user-b", value: "DID_NOT_OCCUR" },
+      ],
+    } as never,
+    "user-a",
+  );
+  assert.equal(privateOutcome.viewerOutcome, "OCCURRED");
+  assert.equal("outcomeResponseCount" in privateOutcome, false);
+  const spec = JSON.parse(await readFile(openApiUrl, "utf8")) as {
+    components: {
+      schemas: { PlanRequest: { properties: Record<string, unknown> } };
+    };
+  };
+  assert.equal(
+    spec.components.schemas.PlanRequest.properties.outcomeResponseCount,
+    undefined,
+  );
 });

@@ -1974,6 +1974,7 @@ model PlanCommitment {
   fulfilledAction           ClassmatePost?                    @relation("ClassmatePostFulfilledByPlan")
   calendarEntries           CalendarEntry[]
   outcomeResponses          PlanOutcomeResponse[]
+  sharedEncounter           SharedEncounter?
   funnelEvents              ProductFunnelEvent[]
 
   @@index([participantAId, status, updatedAt])
@@ -2034,6 +2035,7 @@ model PlanRequest {
   messages                     Message[]
   calendarEntries              CalendarEntry[]
   outcomeResponses             PlanOutcomeResponse[]
+  sharedEncounter              SharedEncounter?
   productFunnelEvents          ProductFunnelEvent[]        @relation("ProductFunnelLegacyPlanRequest")
   productFunnelRevisionEvents  ProductFunnelEvent[]        @relation("ProductFunnelPlanRevision")
 
@@ -2068,6 +2070,19 @@ model PlanOutcomeResponse {
   @@index([userId, createdAt])
   @@index([planId, value])
   @@index([planCommitmentId, userId])
+}
+
+/// A server-derived shared fact. It exists only while both participants'
+/// private Outcome responses are OCCURRED; neither private response is exposed.
+model SharedEncounter {
+  id               String          @id @default(cuid())
+  planId           String          @unique
+  planCommitmentId String?         @unique
+  derivedAt        DateTime        @default(now())
+  plan             PlanRequest     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planCommitment   PlanCommitment? @relation(fields: [planCommitmentId], references: [id], onDelete: Cascade)
+
+  @@index([derivedAt])
 }
 
 /// Public course chat — one timeline per course; only enrolled members (UserCourse) may read/post.

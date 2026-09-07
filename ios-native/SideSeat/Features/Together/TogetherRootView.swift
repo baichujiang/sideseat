@@ -160,12 +160,16 @@ private struct TogetherHomeView: View {
     @State private var store = WeeklyIntentStore()
     @State private var matchingSessionStore = TogetherMatchingSessionStore()
     @State private var opportunityStore = MutualOpportunityStore()
+    @State private var outcomeStore = PlansStore()
     @State private var v2Store = ActionToPlanV2Store.shared
     @State private var presentedEditor: WeeklyIntentEditorPresentation?
 
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceXL) {
+                if !outcomePlans.isEmpty {
+                    outcomeSection
+                }
                 if v2Store.isWeeklyIntentEnabled {
                     intentSection
                 } else {
@@ -560,17 +564,22 @@ private struct TogetherHomeView: View {
     }
 
     private func loadContent() async {
+        async let outcomeLoad: Void = outcomeStore.load(using: session)
         if v2Store.isWeeklyIntentEnabled {
             if v2Store.isMutualOpportunityEnabled {
                 async let intentLoad: Void = store.load(using: session)
                 async let matchingSessionLoad: Void = matchingSessionStore.load(using: session)
                 async let opportunityLoad: Void = opportunityStore.load(using: session)
-                _ = await (intentLoad, matchingSessionLoad, opportunityLoad)
+                _ = await (outcomeLoad, intentLoad, matchingSessionLoad, opportunityLoad)
             } else {
-                await store.load(using: session)
+                async let intentLoad: Void = store.load(using: session)
+                _ = await (outcomeLoad, intentLoad)
             }
         } else if v2Store.isMutualOpportunityEnabled {
-            await opportunityStore.load(using: session)
+            async let opportunityLoad: Void = opportunityStore.load(using: session)
+            _ = await (outcomeLoad, opportunityLoad)
+        } else {
+            _ = await outcomeLoad
         }
     }
 
@@ -581,6 +590,64 @@ private struct TogetherHomeView: View {
 
     private var activeIntents: [NativeWeeklyIntent] {
         store.intents.filter { $0.status == "ACTIVE" }
+    }
+
+    private var outcomePlans: [NativePlanRequest] {
+        outcomeStore.plans
+            .filter { $0.isOutcomeEligible() }
+            .sorted { ($0.endDate ?? .distantPast) > ($1.endDate ?? .distantPast) }
+    }
+
+    private var outcomeSection: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+            SSProductSectionHeader(
+                title: AppLocalization.string("Recent Plans"),
+                accessibilityID: "together-outcome-section-title"
+            )
+
+            ForEach(outcomePlans) { plan in
+                SSCard {
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                        Text(plan.title)
+                            .font(.headline)
+                            .foregroundStyle(SideSeatTheme.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        if let start = plan.startDate, let end = plan.endDate {
+                            Label(
+                                "\(start.formatted(date: .abbreviated, time: .shortened)) – \(end.formatted(date: .omitted, time: .shortened))",
+                                systemImage: "calendar"
+                            )
+                            .font(.footnote)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        }
+
+                        PlanOutcomePromptView(
+                            plan: plan,
+                            isSubmitting: outcomeStore.mutatingOutcomeID == plan.id
+                        ) { value in
+                            Task {
+                                await outcomeStore.recordOutcome(
+                                    value,
+                                    for: plan.id,
+                                    using: session
+                                )
+                            }
+                        }
+
+                        Button {
+                            router.navigate(to: MVPPlanRoute.route(for: plan))
+                        } label: {
+                            Label("Open conversation", systemImage: "bubble.left.and.bubble.right")
+                                .frame(maxWidth: .infinity, minHeight: 44)
+                        }
+                        .buttonStyle(.bordered)
+                        .accessibilityIdentifier("together-outcome-conversation-\(plan.id)")
+                    }
+                }
+                .accessibilityIdentifier("together-outcome-\(plan.id)")
+            }
+        }
     }
 }
 

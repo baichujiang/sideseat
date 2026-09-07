@@ -314,6 +314,7 @@ final class InboxStore {
             conversations: conversations,
             unreadTotal: conversations.reduce(0) { $0 + $1.unreadCount },
             plansNeedingYourAction: current.plansNeedingYourAction,
+            planOutcomesNeedingYourResponse: current.planOutcomesNeedingYourResponse,
             actionResponseSummary: current.actionResponseSummary
         )
         scheduleCachePersist()
@@ -362,6 +363,7 @@ final class InboxStore {
             conversations: conversations,
             unreadTotal: conversations.reduce(0) { $0 + $1.unreadCount },
             plansNeedingYourAction: payload.plansNeedingYourAction,
+            planOutcomesNeedingYourResponse: payload.planOutcomesNeedingYourResponse,
             actionResponseSummary: payload.actionResponseSummary
         )
     }

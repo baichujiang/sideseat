@@ -13,6 +13,56 @@ import {
 
 type DbClient = Prisma.TransactionClient;
 
+async function syncSharedEncounter(
+  tx: DbClient,
+  options: {
+    planId: string;
+    planCommitmentId: string | null;
+    participantAId: string;
+    participantBId: string;
+  },
+) {
+  const scope = options.planCommitmentId
+    ? { planCommitmentId: options.planCommitmentId }
+    : { planId: options.planId };
+  const occurred = await tx.planOutcomeResponse.findMany({
+    where: {
+      ...scope,
+      value: "OCCURRED",
+      userId: { in: [options.participantAId, options.participantBId] },
+    },
+    select: { userId: true },
+  });
+  const occurredUserIds = new Set(occurred.map((row) => row.userId));
+  const bothOccurred =
+    options.participantAId !== options.participantBId &&
+    occurredUserIds.has(options.participantAId) &&
+    occurredUserIds.has(options.participantBId);
+
+  if (!bothOccurred) {
+    await tx.sharedEncounter.deleteMany({ where: scope });
+    return;
+  }
+
+  if (options.planCommitmentId) {
+    await tx.sharedEncounter.upsert({
+      where: { planCommitmentId: options.planCommitmentId },
+      create: {
+        planId: options.planId,
+        planCommitmentId: options.planCommitmentId,
+      },
+      update: { planId: options.planId },
+    });
+    return;
+  }
+
+  await tx.sharedEncounter.upsert({
+    where: { planId: options.planId },
+    create: { planId: options.planId },
+    update: {},
+  });
+}
+
 export class LegacyPlanTransitionConflictError extends Error {
   constructor(message = "This plan request is no longer actionable.") {
     super(message);
@@ -568,7 +618,7 @@ export async function upsertLegacyPlanOutcome(
   });
 
   if (!snapshot.commitmentId) {
-    return tx.planOutcomeResponse.upsert({
+    const response = await tx.planOutcomeResponse.upsert({
       where: {
         planId_userId: { planId: options.planId, userId: options.userId },
       },
@@ -579,6 +629,13 @@ export async function upsertLegacyPlanOutcome(
       },
       update: { value: options.value },
     });
+    await syncSharedEncounter(tx, {
+      planId: options.planId,
+      planCommitmentId: null,
+      participantAId: snapshot.proposerUserId,
+      participantBId: snapshot.receiverUserId,
+    });
+    return response;
   }
 
   const lockedCommitment = await tx.$queryRaw<Array<{ id: string }>>`
@@ -636,7 +693,7 @@ export async function upsertLegacyPlanOutcome(
     );
   }
 
-  return tx.planOutcomeResponse.upsert({
+  const response = await tx.planOutcomeResponse.upsert({
     where: {
       planCommitmentId_userId: {
         planCommitmentId: commitment.id,
@@ -655,4 +712,11 @@ export async function upsertLegacyPlanOutcome(
       value: options.value,
     },
   });
+  await syncSharedEncounter(tx, {
+    planId: plan.id,
+    planCommitmentId: commitment.id,
+    participantAId: commitment.participantAId,
+    participantBId: commitment.participantBId,
+  });
+  return response;
 }

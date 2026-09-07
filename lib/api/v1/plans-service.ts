@@ -87,7 +87,6 @@ export async function listPlansForUser(userId: string) {
             {
               status: "ACCEPTED",
               endTime: { lte: now, gte: recentOutcomeCutoff },
-              outcomeResponses: { none: { userId } },
             },
           ],
         },

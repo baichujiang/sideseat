@@ -123,6 +123,7 @@ export async function isDirectChatRealtimeAuthorized(connectionId: string, userI
 
 export async function loadDirectChatRealtimeDeliveries(
   connectionId: string,
+  viewerId: string,
   after: bigint,
   take: number,
 ): Promise<ChatRealtimeDelivery<ReturnType<typeof directMessageV1>>[]> {
@@ -136,7 +137,9 @@ export async function loadDirectChatRealtimeDeliveries(
         include: directMessageV1Include,
       })
     : [];
-  const byId = new Map(messages.map((message) => [message.id, directMessageV1(message)]));
+  const byId = new Map(
+    messages.map((message) => [message.id, directMessageV1(message, viewerId)]),
+  );
   return events.map((event) => deliveryForEvent(event, byId.get(event.messageId)));
 }
 

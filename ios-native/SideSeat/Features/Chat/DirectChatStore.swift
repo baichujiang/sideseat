@@ -1286,6 +1286,60 @@ final class DirectChatStore {
         await mutatePlan(plan, action: "withdraw", method: .delete, using: session)
     }
 
+    @discardableResult
+    func recordOutcome(
+        _ value: String,
+        for plan: NativePlanRequest,
+        using session: SessionStore
+    ) async -> Bool {
+        guard !isActingOnPlan, plan.isOutcomeEligible() else { return false }
+        isActingOnPlan = true
+        planIssue = nil
+        defer { isActingOnPlan = false }
+
+        let mutationKey = "\(plan.id):outcome:\(value)"
+        let idempotencyKey = planMutationKeys[mutationKey] ?? UUID().uuidString
+        planMutationKeys[mutationKey] = idempotencyKey
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            messages = messages.map { message in
+                guard message.planRequest?.id == plan.id else { return message }
+                return message.replacingPlanRequest(
+                    plan.replacingViewerOutcome(with: value)
+                )
+            }
+            planMutationKeys[mutationKey] = nil
+            return true
+        }
+        #endif
+
+        do {
+            let body = NativePlanOutcomeRequest(value: value)
+            let _: APIEnvelope<NativePlanOutcomeEnvelope> = try await session.sendAuthorized(
+                "api/v1/plans/\(plan.id)/outcome",
+                method: .post,
+                body: body,
+                idempotencyKey: idempotencyKey
+            )
+            planMutationKeys[mutationKey] = nil
+            await reloadHistory(using: session)
+            NotificationCenter.default.post(name: .sideSeatPlansNeedsRefresh, object: nil)
+            NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
+            NotificationCenter.default.post(name: .sideSeatTogetherNeedsRefresh, object: nil)
+            return true
+        } catch let error as APIClientError {
+            if !error.shouldPreserveIdempotencyKey {
+                planMutationKeys[mutationKey] = nil
+            }
+            planIssue = error.localizedDescription
+            return false
+        } catch {
+            planIssue = error.localizedDescription
+            return false
+        }
+    }
+
     private func mutatePlan(
         _ plan: NativePlanRequest,
         action: String,
@@ -1336,7 +1390,6 @@ final class DirectChatStore {
                     scheduleShareLinkId: updatedPlan.scheduleShareLinkId,
                     origin: updatedPlan.origin,
                     viewerOutcome: updatedPlan.viewerOutcome,
-                    outcomeResponseCount: updatedPlan.outcomeResponseCount,
                     createdAt: updatedPlan.createdAt,
                     updatedAt: updatedPlan.updatedAt
                 )

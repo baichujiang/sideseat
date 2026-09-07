@@ -23,6 +23,7 @@ final class PlansStore {
             let formatter = ISO8601DateFormatter()
             let pendingStart = Date().addingTimeInterval(24 * 60 * 60)
             let acceptedStart = Date().addingTimeInterval(48 * 60 * 60)
+            let completedStart = Date().addingTimeInterval(-2 * 60 * 60)
             plans = [
                 NativePlanRequest(
                     id: "ui-plan-1",
@@ -59,6 +60,25 @@ final class PlansStore {
                     scheduleShareLinkId: nil,
                     createdAt: formatter.string(from: Date()),
                     updatedAt: formatter.string(from: Date())
+                ),
+                NativePlanRequest(
+                    id: "ui-plan-completed",
+                    connectionId: "ui-connection",
+                    commitmentId: "ui-plan-completed-commitment",
+                    status: "ACCEPTED",
+                    planType: "COFFEE",
+                    title: "Coffee after class",
+                    location: "Campus café",
+                    message: nil,
+                    startTime: formatter.string(from: completedStart),
+                    endTime: formatter.string(from: completedStart.addingTimeInterval(60 * 60)),
+                    proposer: NativePlanAuthor(id: "ui-test-user", username: "test_001", nickname: "Test User", avatarUrl: nil),
+                    receiver: NativePlanAuthor(id: "ui-peer", username: "test_002", nickname: "Mina", avatarUrl: nil),
+                    counterOfId: nil,
+                    availabilityShareId: nil,
+                    scheduleShareLinkId: nil,
+                    createdAt: formatter.string(from: completedStart),
+                    updatedAt: formatter.string(from: Date())
                 )
             ]
             return
@@ -84,7 +104,9 @@ final class PlansStore {
         defer { mutatingOutcomeID = nil }
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            plans.removeAll { $0.id == planID }
+            plans = plans.map {
+                $0.id == planID ? $0.replacingViewerOutcome(with: value) : $0
+            }
             return
         }
         #endif
@@ -100,14 +122,6 @@ final class PlansStore {
         } catch { issue = error.localizedDescription }
     }
 }
-
-private struct NativePlanOutcomeRequest: Encodable, Sendable { let value: String }
-private struct NativePlanOutcome: Decodable, Sendable {
-    let planId: String
-    let value: String
-    let updatedAt: String
-}
-private struct NativePlanOutcomeEnvelope: Decodable, Sendable { let outcome: NativePlanOutcome }
 
 struct NativeSmallGroupSignals: Decodable, Hashable, Sendable {
     let verifiedStudent: Bool

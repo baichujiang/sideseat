@@ -12,7 +12,12 @@ export async function GET(request: Request) {
   if (!auth.ok) return auth.response;
 
   try {
-    const [{ merged, unreadTotal, plansNeedingYourAction }, actionResponseSummary] =
+    const [{
+      merged,
+      unreadTotal,
+      plansNeedingYourAction,
+      planOutcomesNeedingYourResponse,
+    }, actionResponseSummary] =
       await Promise.all([
         getInboxMergeBundle(auth.user.id),
         loadActionResponseSummary({ actorId: auth.user.id }),
@@ -26,6 +31,7 @@ export async function GET(request: Request) {
         conversations,
         unreadTotal,
         plansNeedingYourAction,
+        planOutcomesNeedingYourResponse,
         ...(actionResponseSummary ? { actionResponseSummary } : {}),
       },
       { request },

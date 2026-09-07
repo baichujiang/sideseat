@@ -176,10 +176,11 @@ struct PlansRootView: View {
         _ plan: NativePlanRequest,
         section: MVPPlanSection
     ) -> some View {
-        Button {
-            router.navigate(to: MVPPlanRoute.route(for: plan))
-        } label: {
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+        VStack(spacing: SideSeatTheme.spaceSM) {
+            Button {
+                router.navigate(to: MVPPlanRoute.route(for: plan))
+            } label: {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
                 HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
                     Label(statusLabel(for: plan, section: section), systemImage: statusIcon(for: plan, section: section))
                         .font(.caption.weight(.semibold))
@@ -266,23 +267,45 @@ struct PlansRootView: View {
                         .background(SideSeatTheme.HubTint.plans.opacity(0.12), in: Circle())
                         .accessibilityHidden(true)
                 }
+                }
+                .padding(SideSeatTheme.spaceLG)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    SideSeatTheme.surface,
+                    in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
+                )
+                .overlay {
+                    RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
+                        .strokeBorder(SideSeatTheme.separator.opacity(0.65), lineWidth: 0.5)
+                }
+                .contentShape(Rectangle())
             }
-            .padding(SideSeatTheme.spaceLG)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                SideSeatTheme.surface,
-                in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
-            )
-            .overlay {
-                RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
-                    .strokeBorder(SideSeatTheme.separator.opacity(0.65), lineWidth: 0.5)
+            .buttonStyle(SSPressButtonStyle())
+            .accessibilityIdentifier("plans-row-\(plan.id)")
+            .accessibilityValue(statusLabel(for: plan, section: section))
+            .accessibilityHint("Open Plan in conversation")
+
+            if plan.isOutcomeEligible() {
+                PlanOutcomePromptView(
+                    plan: plan,
+                    isSubmitting: store.mutatingOutcomeID == plan.id
+                ) { value in
+                    Task {
+                        await store.recordOutcome(value, for: plan.id, using: session)
+                    }
+                }
+                .padding(SideSeatTheme.spaceLG)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    SideSeatTheme.surface,
+                    in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
+                )
+                .overlay {
+                    RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
+                        .strokeBorder(SideSeatTheme.separator.opacity(0.65), lineWidth: 0.5)
+                }
             }
-            .contentShape(Rectangle())
         }
-        .buttonStyle(SSPressButtonStyle())
-        .accessibilityIdentifier("plans-row-\(plan.id)")
-        .accessibilityValue(statusLabel(for: plan, section: section))
-        .accessibilityHint("Open Plan in conversation")
     }
 
     @ViewBuilder

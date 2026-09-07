@@ -297,6 +297,31 @@ struct MVPPlanPresentationTests {
         )
     }
 
+    @Test("Completed accepted Plans expose only the viewer's private Outcome")
+    func keepsOutcomePrivateAndEligible() {
+        let now = Date()
+        let completed = plan(
+            status: "ACCEPTED",
+            proposerID: "viewer",
+            receiverID: "peer",
+            end: now.addingTimeInterval(-1)
+        )
+        let upcoming = plan(
+            status: "ACCEPTED",
+            proposerID: "viewer",
+            receiverID: "peer",
+            end: now.addingTimeInterval(3600)
+        )
+
+        #expect(completed.isOutcomeEligible(at: now))
+        #expect(!upcoming.isOutcomeEligible(at: now))
+
+        let answered = completed.replacingViewerOutcome(with: "OCCURRED")
+        #expect(answered.viewerOutcome == "OCCURRED")
+        #expect(answered.id == completed.id)
+        #expect(answered.commitmentId == completed.commitmentId)
+    }
+
     private func plan(
         status: String,
         proposerID: String,

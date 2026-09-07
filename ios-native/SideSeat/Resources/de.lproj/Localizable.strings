@@ -1410,6 +1410,11 @@
 "A quick private response helps evaluate whether SideSeat creates real plans." = "Eine kurze private Antwort hilft zu bewerten, ob SideSeat zu echten Treffen führt.";
 "Happened" = "Hat stattgefunden";
 "Didn't happen" = "Hat nicht stattgefunden";
+"Recent Plans" = "Letzte Pläne";
+"Open conversation" = "Unterhaltung öffnen";
+"Saving" = "Wird gespeichert";
+"Your answer is saved privately. Only you can see it." = "Deine Antwort wird privat gespeichert. Nur du kannst sie sehen.";
+"Review invitations, schedule updates, and private follow-ups" = "Einladungen, Terminänderungen und private Rückfragen prüfen";
 "Calendar connections" = "Kalenderverbindungen";
 "Connect Apple Calendar or transfer an iCalendar file" = "Apple-Kalender verbinden oder eine iCalendar-Datei übertragen";
 "View SideSeat events in Apple Calendar. Apple refreshes updates periodically." = "SideSeat-Termine im Apple-Kalender anzeigen. Apple aktualisiert sie regelmäßig.";

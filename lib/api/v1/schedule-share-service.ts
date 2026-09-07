@@ -122,7 +122,7 @@ export async function createAndSendScheduleShare(options: {
     shareUrl,
     token,
     linkId,
-    message: directMessageV1(message),
+    message: directMessageV1(message, options.userId),
   };
 }
 

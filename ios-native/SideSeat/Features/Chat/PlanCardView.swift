@@ -10,6 +10,7 @@ struct PlanCardView: View {
     let onDecline: () -> Void
     let onWithdraw: () -> Void
     let onCounter: () -> Void
+    let onRecordOutcome: (String) -> Void
     let onOpenCalendar: () -> Void
 
     var body: some View {
@@ -105,6 +106,12 @@ struct PlanCardView: View {
                 )
                 .font(.caption.weight(.medium))
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            } else if plan.isOutcomeEligible() {
+                PlanOutcomePromptView(
+                    plan: plan,
+                    isSubmitting: isActing,
+                    onAnswer: onRecordOutcome
+                )
             } else if plan.status == "ACCEPTED" {
                 HStack(spacing: 8) {
                     Label("Confirmed in both calendars", systemImage: "calendar.badge.checkmark")
@@ -357,5 +364,112 @@ struct PlanCardView: View {
         case "COUNTER_PROPOSED", "EXPIRED", "PENDING": SideSeatTheme.statusWarningText
         default: SideSeatTheme.textSecondaryStrong
         }
+    }
+}
+
+struct PlanOutcomePromptView: View {
+    let plan: NativePlanRequest
+    let isSubmitting: Bool
+    let onAnswer: (String) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+            HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
+                Label("Did it happen?", systemImage: "lock.fill")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.textPrimary)
+                Spacer(minLength: SideSeatTheme.spaceSM)
+                if isSubmitting {
+                    ProgressView()
+                        .controlSize(.small)
+                        .accessibilityLabel("Saving")
+                }
+            }
+
+            Text("A quick private response helps evaluate whether SideSeat creates real plans.")
+                .font(.footnote)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .fixedSize(horizontal: false, vertical: true)
+
+            VStack(spacing: SideSeatTheme.spaceSM) {
+                outcomeButton(
+                    title: AppLocalization.string("Happened"),
+                    systemImage: "checkmark.circle.fill",
+                    value: "OCCURRED",
+                    tint: SideSeatTheme.statusSuccessText
+                )
+                outcomeButton(
+                    title: AppLocalization.string("Didn't happen"),
+                    systemImage: "xmark.circle",
+                    value: "DID_NOT_OCCUR",
+                    tint: SideSeatTheme.textSecondaryStrong
+                )
+                outcomeButton(
+                    title: AppLocalization.string("Skip"),
+                    systemImage: "forward.fill",
+                    value: "PREFER_NOT_TO_SAY",
+                    tint: SideSeatTheme.textSecondaryStrong
+                )
+            }
+
+            if plan.viewerOutcome != nil {
+                Label("Your answer is saved privately. Only you can see it.", systemImage: "checkmark.shield.fill")
+                    .font(.caption)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("plan-outcome-saved-\(plan.id)")
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("plan-outcome-\(plan.id)")
+    }
+
+    private func outcomeButton(
+        title: String,
+        systemImage: String,
+        value: String,
+        tint: Color
+    ) -> some View {
+        let isSelected = plan.viewerOutcome == value
+        return Button {
+            onAnswer(value)
+        } label: {
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : systemImage)
+                    .frame(width: 20)
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                Spacer(minLength: SideSeatTheme.spaceSM)
+                if isSelected {
+                    Text("Selected")
+                        .font(.caption)
+                }
+            }
+            .foregroundStyle(isSelected ? tint : SideSeatTheme.textPrimary)
+            .padding(.horizontal, SideSeatTheme.spaceMD)
+            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            .background(
+                isSelected ? tint.opacity(0.12) : SideSeatTheme.fillTertiary,
+                in: RoundedRectangle(
+                    cornerRadius: SideSeatTheme.controlRadius,
+                    style: .continuous
+                )
+            )
+            .overlay {
+                RoundedRectangle(
+                    cornerRadius: SideSeatTheme.controlRadius,
+                    style: .continuous
+                )
+                .strokeBorder(
+                    isSelected ? tint.opacity(0.5) : SideSeatTheme.separator.opacity(0.55),
+                    lineWidth: isSelected ? 1 : 0.5
+                )
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(SSPressButtonStyle())
+        .disabled(isSubmitting || isSelected)
+        .accessibilityIdentifier("plan-outcome-\(value.lowercased())-\(plan.id)")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

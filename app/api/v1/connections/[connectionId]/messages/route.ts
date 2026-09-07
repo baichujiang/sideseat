@@ -119,7 +119,9 @@ export async function GET(
           displayName: viewerRemark?.trim() || peer.nickname?.trim() || peer.username,
           peer,
         },
-        messages: pageRows.reverse().map(directMessageV1),
+        messages: pageRows.reverse().map((message) =>
+          directMessageV1(message, auth.user.id),
+        ),
       },
       {
         request,
@@ -254,7 +256,7 @@ export async function POST(
         where: { id: created.message.id },
         include: directMessageV1Include,
       });
-      const body = directMessageV1(hydrated);
+      const body = directMessageV1(hydrated, auth.user.id);
       await completeIdempotency(tx, claim, {
         status: 201,
         body: body as Prisma.InputJsonValue,

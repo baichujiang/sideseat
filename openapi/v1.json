@@ -10298,6 +10298,10 @@
                 "type": "integer",
                 "minimum": 0
               },
+              "planOutcomesNeedingYourResponse": {
+                "type": "integer",
+                "minimum": 0
+              },
               "actionResponseSummary": {
                 "$ref": "#/components/schemas/ActionResponseSummary"
               }
@@ -10305,7 +10309,8 @@
             "required": [
               "conversations",
               "unreadTotal",
-              "plansNeedingYourAction"
+              "plansNeedingYourAction",
+              "planOutcomesNeedingYourResponse"
             ]
           }
         },
@@ -15127,10 +15132,6 @@
             "type": ["string", "null"],
             "enum": ["OCCURRED", "DID_NOT_OCCUR", "PREFER_NOT_TO_SAY", null]
           },
-          "outcomeResponseCount": {
-            "type": "integer",
-            "minimum": 0
-          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -15160,7 +15161,6 @@
           "scheduleShareLinkId",
           "origin",
           "viewerOutcome",
-          "outcomeResponseCount",
           "createdAt",
           "updatedAt"
         ]

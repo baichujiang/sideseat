@@ -1411,6 +1411,11 @@
 "A quick private response helps evaluate whether SideSeat creates real plans." = "A quick private response helps evaluate whether SideSeat creates real plans.";
 "Happened" = "Happened";
 "Didn't happen" = "Didn't happen";
+"Recent Plans" = "Recent Plans";
+"Open conversation" = "Open conversation";
+"Saving" = "Saving";
+"Your answer is saved privately. Only you can see it." = "Your answer is saved privately. Only you can see it.";
+"Review invitations, schedule updates, and private follow-ups" = "Review invitations, schedule updates, and private follow-ups";
 "Calendar connections" = "Calendar connections";
 "Connect Apple Calendar or transfer an iCalendar file" = "Connect Apple Calendar or transfer an iCalendar file";
 "View SideSeat events in Apple Calendar. Apple refreshes updates periodically." = "View SideSeat events in Apple Calendar. Apple refreshes updates periodically.";

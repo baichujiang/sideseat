@@ -405,18 +405,44 @@ struct NativeInboxPayload: Codable, Sendable {
     let conversations: [NativeInboxConversation]
     let unreadTotal: Int
     let plansNeedingYourAction: Int
+    let planOutcomesNeedingYourResponse: Int
     let actionResponseSummary: Components.Schemas.ActionResponseSummary?
+
+    private enum CodingKeys: String, CodingKey {
+        case conversations
+        case unreadTotal
+        case plansNeedingYourAction
+        case planOutcomesNeedingYourResponse
+        case actionResponseSummary
+    }
 
     init(
         conversations: [NativeInboxConversation],
         unreadTotal: Int,
         plansNeedingYourAction: Int,
+        planOutcomesNeedingYourResponse: Int = 0,
         actionResponseSummary: Components.Schemas.ActionResponseSummary? = nil
     ) {
         self.conversations = conversations
         self.unreadTotal = unreadTotal
         self.plansNeedingYourAction = plansNeedingYourAction
+        self.planOutcomesNeedingYourResponse = planOutcomesNeedingYourResponse
         self.actionResponseSummary = actionResponseSummary
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        conversations = try container.decode([NativeInboxConversation].self, forKey: .conversations)
+        unreadTotal = try container.decode(Int.self, forKey: .unreadTotal)
+        plansNeedingYourAction = try container.decode(Int.self, forKey: .plansNeedingYourAction)
+        planOutcomesNeedingYourResponse = try container.decodeIfPresent(
+            Int.self,
+            forKey: .planOutcomesNeedingYourResponse
+        ) ?? 0
+        actionResponseSummary = try container.decodeIfPresent(
+            Components.Schemas.ActionResponseSummary.self,
+            forKey: .actionResponseSummary
+        )
     }
 }
 
@@ -713,7 +739,6 @@ struct NativePlanRequest: Codable, Identifiable, Hashable, Sendable {
     let scheduleShareLinkId: String?
     let origin: NativePlanOrigin?
     let viewerOutcome: String?
-    let outcomeResponseCount: Int?
     let createdAt: String
     let updatedAt: String
 
@@ -737,7 +762,6 @@ struct NativePlanRequest: Codable, Identifiable, Hashable, Sendable {
         scheduleShareLinkId: String?,
         origin: NativePlanOrigin? = nil,
         viewerOutcome: String? = nil,
-        outcomeResponseCount: Int? = nil,
         createdAt: String,
         updatedAt: String
     ) {
@@ -760,7 +784,6 @@ struct NativePlanRequest: Codable, Identifiable, Hashable, Sendable {
         self.scheduleShareLinkId = scheduleShareLinkId
         self.origin = origin
         self.viewerOutcome = viewerOutcome
-        self.outcomeResponseCount = outcomeResponseCount
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -776,6 +799,50 @@ struct NativePlanRequest: Codable, Identifiable, Hashable, Sendable {
 
     var startDate: Date? { Date.sideSeatChatISO8601(startTime) }
     var endDate: Date? { Date.sideSeatChatISO8601(endTime) }
+
+    func isOutcomeEligible(at date: Date = Date()) -> Bool {
+        status == "ACCEPTED" && (endDate ?? .distantFuture) <= date
+    }
+
+    func replacingViewerOutcome(with value: String) -> NativePlanRequest {
+        NativePlanRequest(
+            id: id,
+            connectionId: connectionId,
+            commitmentId: commitmentId,
+            originContextId: originContextId,
+            coordinationPolicy: coordinationPolicy,
+            status: status,
+            planType: planType,
+            title: title,
+            location: location,
+            message: message,
+            startTime: startTime,
+            endTime: endTime,
+            proposer: proposer,
+            receiver: receiver,
+            counterOfId: counterOfId,
+            availabilityShareId: availabilityShareId,
+            scheduleShareLinkId: scheduleShareLinkId,
+            origin: origin,
+            viewerOutcome: value,
+            createdAt: createdAt,
+            updatedAt: updatedAt
+        )
+    }
+}
+
+struct NativePlanOutcome: Decodable, Sendable {
+    let planId: String
+    let value: String
+    let updatedAt: String
+}
+
+struct NativePlanOutcomeEnvelope: Decodable, Sendable {
+    let outcome: NativePlanOutcome
+}
+
+struct NativePlanOutcomeRequest: Encodable, Sendable {
+    let value: String
 }
 
 enum PlanSubmissionTarget: Hashable, Sendable {
@@ -1038,6 +1105,28 @@ struct NativeDirectMessage: Codable, Identifiable, Hashable, Sendable {
             imageUrl: imageUrl,
             deletedAt: deletedAt,
             createdAt: createdAt
+        )
+    }
+
+    func replacingPlanRequest(_ plan: NativePlanRequest) -> NativeDirectMessage {
+        NativeDirectMessage(
+            id: id,
+            connectionId: connectionId,
+            sender: sender,
+            type: type,
+            body: body,
+            createdAt: createdAt,
+            imageUrl: imageUrl,
+            location: location,
+            availabilityShareId: availabilityShareId,
+            planRequestId: planRequestId,
+            planRequest: plan,
+            actionInterestId: actionInterestId,
+            actionContextId: actionContextId,
+            actionInterest: actionInterest,
+            mutualOpportunity: mutualOpportunity,
+            replyTo: replyTo,
+            deletedAt: deletedAt
         )
     }
 }

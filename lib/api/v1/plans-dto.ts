@@ -65,7 +65,6 @@ export function planRequestV1(plan: PlanRequestV1Row, viewerId?: string) {
           }
         : null,
     viewerOutcome,
-    outcomeResponseCount: plan.outcomeResponses.length,
     createdAt: plan.createdAt.toISOString(),
     updatedAt: plan.updatedAt.toISOString(),
   };

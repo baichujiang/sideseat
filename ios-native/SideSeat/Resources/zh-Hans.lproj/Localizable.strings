@@ -1411,6 +1411,11 @@
 "A quick private response helps evaluate whether SideSeat creates real plans." = "简短的私密反馈可以帮助我们判断 SideSeat 是否促成了真实计划。";
 "Happened" = "发生了";
 "Didn't happen" = "没有发生";
+"Recent Plans" = "最近的计划";
+"Open conversation" = "打开对话";
+"Saving" = "正在保存";
+"Your answer is saved privately. Only you can see it." = "你的回答已私密保存，只有你能看到。";
+"Review invitations, schedule updates, and private follow-ups" = "查看邀请、日程更新和私密跟进";
 "Calendar connections" = "日历连接";
 "Connect Apple Calendar or transfer an iCalendar file" = "连接 Apple 日历或传输 iCalendar 文件";
 "View SideSeat events in Apple Calendar. Apple refreshes updates periodically." = "在 Apple 日历中查看 SideSeat 日程，由 Apple 定期刷新。";
