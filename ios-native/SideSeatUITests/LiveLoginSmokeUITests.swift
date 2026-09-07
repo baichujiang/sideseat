@@ -283,6 +283,127 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertTrue(proposer.staticTexts[planTitle].waitForExistence(timeout: 10))
     }
 
+    func testLayer2FirstParticipantReachesOutcomeFromEveryHistorySurface() throws {
+        let planID = try requiredLayer2Environment("E2E_LAYER2_PLAN_ID")
+        let planTitle = try requiredLayer2Environment("E2E_LAYER2_PLAN_TITLE")
+        let calendarEntryID = try requiredLayer2Environment("E2E_LAYER2_CALENDAR_ENTRY_ID")
+        let username = sideSeatLiveEnvironmentValue("E2E_USER", fallback: "test_001")
+        let app = launchAndLogin(
+            username: username,
+            additionalLaunchArguments: ["--ui-testing-language=en"]
+        )
+
+        let together = tabButton(in: app, labels: ["Together", "同行", "Zusammen"])
+        XCTAssertTrue(together.waitForExistence(timeout: 8))
+        together.tap()
+        XCTAssertTrue(
+            app.descendants(matching: .any)["together-outcome-\(planID)"]
+                .waitForExistence(timeout: 15)
+        )
+        XCTAssertTrue(app.staticTexts[planTitle].waitForExistence(timeout: 5))
+        XCTAssertTrue(
+            app.buttons["plan-outcome-occurred-\(planID)"]
+                .waitForExistence(timeout: 5)
+        )
+
+        let messages = tabButton(
+            in: app,
+            labels: ["Messages", "Chats", "消息", "聊天", "Nachrichten"]
+        )
+        XCTAssertTrue(messages.waitForExistence(timeout: 8))
+        messages.tap()
+        let responseBanner = app.buttons["inbox-pending-plans"]
+        XCTAssertTrue(responseBanner.waitForExistence(timeout: 12))
+        responseBanner.tap()
+        XCTAssertTrue(
+            app.descendants(matching: .any)["plans-root"]
+                .waitForExistence(timeout: 10)
+        )
+        XCTAssertTrue(
+            app.buttons["plan-outcome-occurred-\(planID)"]
+                .waitForExistence(timeout: 8)
+        )
+
+        let calendar = tabButton(in: app, labels: ["Calendar", "日历", "Kalender"])
+        XCTAssertTrue(calendar.waitForExistence(timeout: 8))
+        calendar.tap()
+        let timetable = app.descendants(matching: .any)["home-week-timetable"]
+        XCTAssertTrue(timetable.waitForExistence(timeout: 12))
+        let planEvent = app.descendants(matching: .any)["home-week-event-\(calendarEntryID)"]
+        XCTAssertTrue(planEvent.waitForExistence(timeout: 10))
+        let earlierEventCue = app.buttons.matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "calendar-week-offscreen-event-top-")
+        ).firstMatch
+        if earlierEventCue.waitForExistence(timeout: 2) {
+            earlierEventCue.tap()
+            RunLoop.current.run(until: Date().addingTimeInterval(0.6))
+        }
+        let planEventTitle = app.staticTexts.matching(identifier: "calendar-event-title-visual")
+            .matching(NSPredicate(format: "label == %@", planTitle))
+            .firstMatch
+        XCTAssertTrue(planEventTitle.waitForExistence(timeout: 5))
+        XCTAssertTrue(planEventTitle.isHittable)
+        planEventTitle.tap()
+        let calendarDetail = app.descendants(matching: .any)["calendar-readonly-detail"]
+        XCTAssertTrue(calendarDetail.waitForExistence(timeout: 8))
+        let managePlan = app.buttons["calendar-manage-plan"]
+        for _ in 0..<6 where !managePlan.exists {
+            calendarDetail.swipeUp()
+        }
+        XCTAssertTrue(managePlan.waitForExistence(timeout: 5))
+        managePlan.tap()
+        XCTAssertTrue(
+            app.descendants(matching: .any)["direct-chat"]
+                .waitForExistence(timeout: 12)
+        )
+        XCTAssertTrue(app.staticTexts[planTitle].waitForExistence(timeout: 8))
+        let occurred = app.buttons["plan-outcome-occurred-\(planID)"]
+        XCTAssertTrue(occurred.waitForExistence(timeout: 8))
+        occurred.tap()
+        XCTAssertTrue(
+            app.descendants(matching: .any)["plan-outcome-saved-\(planID)"]
+                .waitForExistence(timeout: 12)
+        )
+    }
+
+    func testLayer2SecondParticipantCompletesBilateralOutcomeFromMessages() throws {
+        let planID = try requiredLayer2Environment("E2E_LAYER2_PLAN_ID")
+        let username = sideSeatLiveEnvironmentValue("E2E_USER", fallback: "test_002")
+        let app = launchAndLogin(
+            username: username,
+            additionalLaunchArguments: ["--ui-testing-language=en"]
+        )
+
+        let messages = tabButton(
+            in: app,
+            labels: ["Messages", "Chats", "消息", "聊天", "Nachrichten"]
+        )
+        XCTAssertTrue(messages.waitForExistence(timeout: 8))
+        messages.tap()
+        let responseBanner = app.buttons["inbox-pending-plans"]
+        XCTAssertTrue(responseBanner.waitForExistence(timeout: 12))
+        responseBanner.tap()
+        XCTAssertTrue(
+            app.descendants(matching: .any)["plans-root"]
+                .waitForExistence(timeout: 10)
+        )
+        let occurred = app.buttons["plan-outcome-occurred-\(planID)"]
+        XCTAssertTrue(occurred.waitForExistence(timeout: 8))
+        occurred.tap()
+        XCTAssertTrue(
+            app.descendants(matching: .any)["plan-outcome-saved-\(planID)"]
+                .waitForExistence(timeout: 12)
+        )
+
+        let together = tabButton(in: app, labels: ["Together", "同行", "Zusammen"])
+        XCTAssertTrue(together.waitForExistence(timeout: 8))
+        together.tap()
+        XCTAssertTrue(
+            app.descendants(matching: .any)["plan-outcome-saved-\(planID)"]
+                .waitForExistence(timeout: 12)
+        )
+    }
+
     func testTogetherIntentToMutualPlanAddsBothCalendars() {
         let timestamp = Int(Date().timeIntervalSince1970)
         let activity = "[live-ui] Coffee and a short walk \(timestamp)"
@@ -522,6 +643,12 @@ final class SocialLiveUITests: XCTestCase {
         app.buttons["login-submit"].tap()
         XCTAssertTrue(tabButton(in: app, labels: ["Calendar", "日历"]).waitForExistence(timeout: 15))
         return app
+    }
+
+    private func requiredLayer2Environment(_ key: String) throws -> String {
+        let value = ProcessInfo.processInfo.environment[key]?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return try XCTUnwrap(value.isEmpty ? nil : value, "\(key) is required for Layer2 live QA.")
     }
 
     private func assertSignedInProfile(username: String, in app: XCUIApplication) {

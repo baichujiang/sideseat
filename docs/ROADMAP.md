@@ -2,11 +2,12 @@
 
 **Status:** Active dependency roadmap
 
-**Last updated:** 2026-09-02
+**Last updated:** 2026-09-07
 
 **Governing product:** [Product](./PRODUCT.md)
 
-**Current release evidence:** [TestFlight 1.0.0 (29)](./releases/2026-09-02-testflight-29.md)
+**Current release evidence:**
+[Layer 2 production acceptance](./releases/2026-09-07-layer2-production-acceptance.md)
 
 ## Goal
 
@@ -60,6 +61,12 @@ Calendar history without duplicating state.
 
 Gate: sufficient bilateral response coverage to measure occurred plans without
 treating silence as failure.
+
+Current gate status (2026-09-07): **open**. The production contract and the
+two-account physical-device acceptance path pass, but the rolling 14-day sample
+contains only 3 eligible ended accepted Plans. Outcome response coverage and
+bilateral Plan coverage are both 33.3%. Continue the Layer 2 pilot; do not begin
+Layer 3. See the [acceptance record](./releases/2026-09-07-layer2-production-acceptance.md).
 
 ## Layer 3 — Meet Again and Repeat Opportunity
 

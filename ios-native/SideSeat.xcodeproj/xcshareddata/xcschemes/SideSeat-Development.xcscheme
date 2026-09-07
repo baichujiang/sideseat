@@ -95,6 +95,11 @@
       </CommandLineArguments>
       <EnvironmentVariables>
          <EnvironmentVariable
+            key = "SIDESEAT_LIVE_API_BASE_URL"
+            value = "$(SIDESEAT_LIVE_API_BASE_URL)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
             key = "E2E_COURSE_ID"
             value = "$(E2E_COURSE_ID)"
             isEnabled = "YES">
@@ -102,6 +107,21 @@
          <EnvironmentVariable
             key = "E2E_COURSE_NAME"
             value = "$(E2E_COURSE_NAME)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "E2E_LAYER2_CALENDAR_ENTRY_ID"
+            value = "$(E2E_LAYER2_CALENDAR_ENTRY_ID)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "E2E_LAYER2_PLAN_ID"
+            value = "$(E2E_LAYER2_PLAN_ID)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "E2E_LAYER2_PLAN_TITLE"
+            value = "$(E2E_LAYER2_PLAN_TITLE)"
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
