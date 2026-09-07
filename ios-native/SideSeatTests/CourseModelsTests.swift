@@ -369,7 +369,7 @@ struct WeeklyIntentModelsTests {
         )
     }
 
-    @Test("Default and updated starts produce a thirty-minute minimum end")
+    @Test("Default windows leave matching lead time and last thirty minutes")
     func providesThirtyMinuteEndTimes() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
@@ -391,7 +391,7 @@ struct WeeklyIntentModelsTests {
                     month: 9,
                     day: 1,
                     hour: 10,
-                    minute: 15
+                    minute: 45
                 )
             )
         )
@@ -400,6 +400,10 @@ struct WeeklyIntentModelsTests {
 
         #expect(window.startAt == expectedStart)
         #expect(window.endAt == expectedEnd)
+        #expect(
+            window.startAt.timeIntervalSince(unalignedStart) >=
+                NativeWeeklyIntentTimeRules.minimumMatchingLeadTime
+        )
         #expect(
             NativeWeeklyIntentTimeRules.minimumEnd(after: expectedStart) == expectedEnd
         )

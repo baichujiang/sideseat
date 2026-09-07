@@ -283,6 +283,105 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertTrue(proposer.staticTexts[planTitle].waitForExistence(timeout: 10))
     }
 
+    func testTogetherIntentToMutualPlanAddsBothCalendars() {
+        let timestamp = Int(Date().timeIntervalSince1970)
+        let activity = "[live-ui] Coffee and a short walk \(timestamp)"
+        let togetherArguments = [
+            "--ui-testing-discover",
+            "--ui-testing-language=en",
+        ]
+
+        let firstParticipant = launchAndLogin(
+            username: "test_001",
+            additionalLaunchArguments: togetherArguments
+        )
+        createCoffeeIntentAndStartMatching(activity, in: firstParticipant)
+        firstParticipant.terminate()
+
+        let secondParticipant = launchAndLogin(
+            username: "test_002",
+            additionalLaunchArguments: togetherArguments
+        )
+        createCoffeeIntentAndStartMatching(activity, in: secondParticipant)
+        let secondDecision = togetherYesButton(in: secondParticipant)
+        XCTAssertFalse(secondParticipant.buttons["Start planning"].exists)
+        secondDecision.tap()
+        XCTAssertTrue(
+            secondParticipant.staticTexts["Your choice is saved privately"]
+                .waitForExistence(timeout: 12)
+        )
+        XCTAssertFalse(secondParticipant.staticTexts["You both want to do this"].exists)
+        secondParticipant.terminate()
+
+        let firstReturn = launchAndLogin(
+            username: "test_001",
+            additionalLaunchArguments: togetherArguments
+        )
+        let recoveredCountdown = firstReturn.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS[c] %@", "remaining")
+        ).firstMatch
+        XCTAssertTrue(recoveredCountdown.waitForExistence(timeout: 12))
+        let firstDecision = togetherYesButton(in: firstReturn)
+        XCTAssertFalse(firstReturn.staticTexts["Your choice is saved privately"].exists)
+        firstDecision.tap()
+        let startPlanning = firstReturn.buttons["Start planning"]
+        XCTAssertTrue(startPlanning.waitForExistence(timeout: 12))
+        startPlanning.tap()
+
+        XCTAssertTrue(firstReturn.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 12))
+        XCTAssertTrue(
+            firstReturn.staticTexts["You both want to do this"]
+                .waitForExistence(timeout: 12)
+        )
+        XCTAssertTrue(firstReturn.staticTexts[activity].waitForExistence(timeout: 8))
+        let makePlan = firstReturn.buttons["Make a plan"]
+        XCTAssertTrue(makePlan.waitForExistence(timeout: 8))
+        makePlan.tap()
+
+        XCTAssertTrue(firstReturn.descendants(matching: .any)["plan-create-sheet"].waitForExistence(timeout: 8))
+        let titleField = firstReturn.textFields["plan-create-title"]
+        XCTAssertTrue(titleField.waitForExistence(timeout: 5))
+        let planTitle = titleField.value as? String ?? ""
+        XCTAssertTrue(planTitle.hasPrefix("[live-ui] Coffee and a short walk"))
+        let submit = firstReturn.buttons["plan-create-submit"]
+        XCTAssertTrue(waitUntilEnabled(submit, timeout: 5))
+        submit.tap()
+        XCTAssertTrue(
+            firstReturn.descendants(matching: .any)["plan-create-sheet"]
+                .waitForNonExistence(timeout: 12)
+        )
+        XCTAssertTrue(firstReturn.staticTexts[planTitle].waitForExistence(timeout: 12))
+        firstReturn.terminate()
+
+        let receiver = launchAndLogin(
+            username: "test_002",
+            additionalLaunchArguments: ["--ui-testing-language=en"]
+        )
+        openDirectChat(in: receiver, peerName: "Test 001")
+        XCTAssertTrue(receiver.staticTexts[planTitle].waitForExistence(timeout: 12))
+        let acceptButtons = receiver.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Accept", "接受", "Annehmen"])
+        )
+        let accept = acceptButtons.element(boundBy: max(acceptButtons.count - 1, 0))
+        XCTAssertTrue(accept.waitForExistence(timeout: 8))
+        accept.tap()
+        let viewCalendar = receiver.buttons.matching(
+            NSPredicate(format: "label IN %@", ["View calendar", "查看日历", "Kalender anzeigen"])
+        ).firstMatch
+        XCTAssertTrue(viewCalendar.waitForExistence(timeout: 12))
+        viewCalendar.tap()
+        XCTAssertTrue(receiver.descendants(matching: .any)["home-week-timetable"].waitForExistence(timeout: 8))
+        XCTAssertTrue(receiver.staticTexts[planTitle].waitForExistence(timeout: 10))
+        receiver.terminate()
+
+        let proposer = launchAndLogin(
+            username: "test_001",
+            additionalLaunchArguments: ["--ui-testing-language=en"]
+        )
+        XCTAssertTrue(proposer.descendants(matching: .any)["home-week-timetable"].waitForExistence(timeout: 10))
+        XCTAssertTrue(proposer.staticTexts[planTitle].waitForExistence(timeout: 10))
+    }
+
     func testProfileEditPersistsAcrossRelaunchAndCanBeRestored() {
         let temporaryNickname = "Live User \(Int(Date().timeIntervalSince1970) % 100_000)"
         var app = launchAndLogin(username: "test_001")
@@ -398,13 +497,15 @@ final class SocialLiveUITests: XCTestCase {
 
     private func launchAndLogin(
         username: String,
-        ephemeralCredentials: Bool = true
+        ephemeralCredentials: Bool = true,
+        additionalLaunchArguments: [String] = []
     ) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
             "--ui-testing-signed-out",
             "--ui-testing-skip-tutorial",
         ]
+        app.launchArguments.append(contentsOf: additionalLaunchArguments)
         if ephemeralCredentials {
             app.launchArguments.append("--ui-testing-ephemeral-credentials")
         }
@@ -445,7 +546,7 @@ final class SocialLiveUITests: XCTestCase {
     }
 
     private func openDirectChat(in app: XCUIApplication, peerName: String) {
-        let chats = tabButton(in: app, labels: ["Chats", "聊天", "消息"])
+        let chats = tabButton(in: app, labels: ["Messages", "Chats", "消息", "聊天", "Nachrichten"])
         chats.tap()
         XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 10))
         let peer = app.staticTexts[peerName].firstMatch
@@ -465,8 +566,12 @@ final class SocialLiveUITests: XCTestCase {
     }
 
     private func createPlan(_ title: String, in app: XCUIApplication) {
-        app.buttons["chat-composer-attach"].tap()
         let plan = app.buttons["chat-composer-plan"]
+        if !plan.exists {
+            let attach = app.buttons["chat-composer-attach"]
+            XCTAssertTrue(attach.waitForExistence(timeout: 5))
+            attach.tap()
+        }
         XCTAssertTrue(plan.waitForExistence(timeout: 5))
         plan.tap()
         XCTAssertTrue(app.descendants(matching: .any)["plan-create-sheet"].waitForExistence(timeout: 5))
@@ -479,6 +584,54 @@ final class SocialLiveUITests: XCTestCase {
         submit.tap()
         XCTAssertTrue(app.descendants(matching: .any)["plan-create-sheet"].waitForNonExistence(timeout: 12))
         XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 12))
+    }
+
+    private func createCoffeeIntentAndStartMatching(_ activity: String, in app: XCUIApplication) {
+        let together = tabButton(in: app, labels: ["Together", "同行", "Zusammen"])
+        XCTAssertTrue(together.waitForExistence(timeout: 8))
+        together.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 15))
+
+        let setIntent = app.buttons["together-set-intent"]
+        XCTAssertTrue(setIntent.waitForExistence(timeout: 8))
+        setIntent.tap()
+        XCTAssertTrue(app.navigationBars["Set this week"].waitForExistence(timeout: 8))
+
+        let activityField = app.textFields["For example: coffee and a short walk"]
+        XCTAssertTrue(activityField.waitForExistence(timeout: 5))
+        activityField.tap()
+        activityField.typeText(activity)
+        let save = app.navigationBars.buttons["Save"]
+        XCTAssertTrue(waitUntilEnabled(save, timeout: 5))
+        save.tap()
+
+        let savedIntent = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "weekly-intent-")
+        ).firstMatch
+        XCTAssertTrue(savedIntent.waitForExistence(timeout: 12))
+        let startMatching = app.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Start matching", "开始匹配", "Matching starten"])
+        ).firstMatch
+        for _ in 0..<6 where !startMatching.isHittable {
+            app.swipeUp()
+        }
+        XCTAssertTrue(startMatching.waitForExistence(timeout: 5))
+        startMatching.tap()
+        let stopMatching = app.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Stop matching", "停止匹配", "Matching stoppen"])
+        ).firstMatch
+        XCTAssertTrue(stopMatching.waitForExistence(timeout: 12))
+    }
+
+    private func togetherYesButton(in app: XCUIApplication) -> XCUIElement {
+        let decision = app.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Do it together", "一起做", "Zusammen machen"])
+        ).firstMatch
+        for _ in 0..<8 where !decision.isHittable {
+            app.swipeUp()
+        }
+        XCTAssertTrue(decision.waitForExistence(timeout: 15))
+        return decision
     }
 
     private func openProfileEditor(in app: XCUIApplication, selectMeTab: Bool = true) {

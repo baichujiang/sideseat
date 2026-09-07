@@ -26,7 +26,7 @@ struct SSPrimaryButton: View {
                 } else {
                     Text(title)
                         .font(.body.weight(.semibold))
-                        .lineLimit(1)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             // Content-sized CTAs (empty states) must keep inset; full-width forms stay centered.

@@ -181,6 +181,7 @@ struct NativeWeeklyIntentTimeWindow: Codable, Hashable, Sendable {
 enum NativeWeeklyIntentTimeRules {
     static let minuteInterval = 15
     static let minimumDuration: TimeInterval = 30 * 60
+    static let minimumMatchingLeadTime: TimeInterval = 30 * 60
 
     static func roundedUpToQuarterHour(
         _ date: Date,
@@ -208,7 +209,9 @@ enum NativeWeeklyIntentTimeRules {
     }
 
     static func defaultWindow(startingAt date: Date) -> NativeWeeklyIntentTimeWindow {
-        let start = roundedUpToQuarterHour(date)
+        let start = roundedUpToQuarterHour(
+            date.addingTimeInterval(minimumMatchingLeadTime)
+        )
         return NativeWeeklyIntentTimeWindow(startAt: start, endAt: minimumEnd(after: start))
     }
 }

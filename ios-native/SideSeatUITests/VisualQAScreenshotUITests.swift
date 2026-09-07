@@ -1,6 +1,6 @@
 import XCTest
 
-/// Captures Auth + 4-tab screenshots for design-freeze visual QA (README §8).
+/// Captures Auth, Together states, and the current 4-tab shell for visual QA.
 /// Appearance: host writes `.appearance` (and optionally `simctl ui`); tests also pass
 /// `--ui-testing-appearance=` so physical devices force light/dark without simctl.
 final class VisualQAScreenshotUITests: XCTestCase {
@@ -22,31 +22,49 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
-    func testCaptureDiscoverPlanShare() throws {
+    func testCaptureTogetherOpportunity() throws {
         let appearance = Self.resolvedAppearance()
         let app = XCUIApplication()
         app.launchArguments = [
             "--ui-testing-authenticated",
             "--ui-testing-skip-tutorial",
+            "--ui-testing-discover",
+            "--ui-testing-weekly-intent",
+            "--ui-testing-mutual-opportunity",
+            "--ui-testing-together-matching",
             "--ui-testing-appearance=\(appearance)",
         ]
         app.launch()
 
-        let discover = tabButton(in: app, labels: ["Discover", "发现"])
-        XCTAssertTrue(discover.waitForExistence(timeout: 8))
-        discover.tap()
-        XCTAssertTrue(app.staticTexts["Library study buddy"].waitForExistence(timeout: 5))
-        app.staticTexts["Library study buddy"].tap()
-        XCTAssertTrue(app.descendants(matching: .any)["discover-post-detail"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.descendants(matching: .any)["mutual-opportunity-cmutualui0000000000000001"].waitForExistence(timeout: 5))
         RunLoop.current.run(until: Date().addingTimeInterval(0.35))
-        saveScreenshot(app: app, name: "discover-plan-\(appearance)")
+        saveScreenshot(app: app, name: "together-opportunity-\(appearance)")
+        app.terminate()
+    }
 
-        let share = app.buttons["discover-plan-share"]
-        XCTAssertTrue(share.waitForExistence(timeout: 3))
-        share.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["discover-plan-share-preview"].waitForExistence(timeout: 5))
+    @MainActor
+    func testCaptureTogetherActiveMatching() throws {
+        let appearance = Self.resolvedAppearance()
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated",
+            "--ui-testing-skip-tutorial",
+            "--ui-testing-discover",
+            "--ui-testing-weekly-intent",
+            "--ui-testing-mutual-opportunity-empty",
+            "--ui-testing-together-matching-active",
+            "--ui-testing-appearance=\(appearance)",
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 8))
+        let stopMatching = app.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Stop matching", "停止匹配", "Matching stoppen"])
+        ).firstMatch
+        XCTAssertTrue(stopMatching.waitForExistence(timeout: 5))
         RunLoop.current.run(until: Date().addingTimeInterval(0.35))
-        saveScreenshot(app: app, name: "discover-plan-share-\(appearance)")
+        saveScreenshot(app: app, name: "together-matching-active-\(appearance)")
         app.terminate()
     }
 
@@ -233,52 +251,38 @@ final class VisualQAScreenshotUITests: XCTestCase {
     @MainActor
     private func captureAuthenticatedTabs(appearance: String) {
         let app = XCUIApplication()
-        // Stay on Calendar first — do not pass --ui-testing-chats (that forces Chats as initial tab).
         app.launchArguments = [
             "--ui-testing-authenticated",
             "--ui-testing-skip-tutorial",
+            "--ui-testing-chats",
+            "--ui-testing-weekly-intent",
+            "--ui-testing-mutual-opportunity-empty",
+            "--ui-testing-together-matching",
             "--ui-testing-appearance=\(appearance)",
         ]
         app.launch()
 
+        let together = tabButton(in: app, labels: ["Together", "同行", "Zusammen"])
+        XCTAssertTrue(together.waitForExistence(timeout: 8))
+        together.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 6))
+        XCTAssertTrue(app.descendants(matching: .any)["together-opportunities-empty"].waitForExistence(timeout: 5))
+        RunLoop.current.run(until: Date().addingTimeInterval(0.35))
+        saveScreenshot(app: app, name: "together-idle-\(appearance)")
+
+        tabButton(in: app, labels: ["Calendar", "日历", "Kalender"]).tap()
         XCTAssertTrue(tabButton(in: app, labels: ["Calendar", "日历"]).waitForExistence(timeout: 8))
         XCTAssertTrue(app.descendants(matching: .any)["home-week-timetable"].waitForExistence(timeout: 6)
             || app.descendants(matching: .any)["home-date-strip"].waitForExistence(timeout: 6))
         RunLoop.current.run(until: Date().addingTimeInterval(0.45))
-        saveScreenshot(app: app, name: "home-\(appearance)")
+        saveScreenshot(app: app, name: "calendar-\(appearance)")
 
-        tabButton(in: app, labels: ["Discover", "发现"]).tap()
-        XCTAssertTrue(
-            app.descendants(matching: .any)["discover-list"].waitForExistence(timeout: 5)
-                || app.staticTexts["Library study buddy"].waitForExistence(timeout: 5)
-        )
+        tabButton(in: app, labels: ["Messages", "消息", "Nachrichten"]).tap()
+        XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 5))
         RunLoop.current.run(until: Date().addingTimeInterval(0.35))
-        saveScreenshot(app: app, name: "discover-\(appearance)")
+        saveScreenshot(app: app, name: "messages-\(appearance)")
 
-        let publish = app.buttons["discover-publish"]
-        XCTAssertTrue(publish.waitForExistence(timeout: 5))
-        publish.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["create-chooser-sheet"].waitForExistence(timeout: 5))
-        RunLoop.current.run(until: Date().addingTimeInterval(0.3))
-        saveScreenshot(app: app, name: "create-\(appearance)")
-        app.buttons["create-chooser-cancel"].tap()
-        RunLoop.current.run(until: Date().addingTimeInterval(0.25))
-
-        tabButton(in: app, labels: ["Chats", "消息", "聊天"]).tap()
-        // Inbox may be empty without --ui-testing-chats; either list or empty state is fine.
-        XCTAssertTrue(
-            app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 5)
-                || app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "conversation")).firstMatch
-                    .waitForExistence(timeout: 3)
-                || app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "对话")).firstMatch
-                    .waitForExistence(timeout: 3)
-                || app.navigationBars.matching(NSPredicate(format: "identifier CONTAINS %@ OR label IN %@", "Chat", ["Chats", "聊天", "消息"])).firstMatch
-                    .waitForExistence(timeout: 3)
-        )
-        RunLoop.current.run(until: Date().addingTimeInterval(0.35))
-        saveScreenshot(app: app, name: "chats-\(appearance)")
-
-        tabButton(in: app, labels: ["Me", "我"]).tap()
+        tabButton(in: app, labels: ["Me", "我", "Ich"]).tap()
         XCTAssertTrue(app.descendants(matching: .any)["me-profile"].waitForExistence(timeout: 5))
         RunLoop.current.run(until: Date().addingTimeInterval(0.35))
         saveScreenshot(app: app, name: "me-\(appearance)")

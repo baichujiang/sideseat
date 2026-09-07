@@ -122,7 +122,7 @@ struct SSManagementRow: View {
                         if let subtitle, !subtitle.isEmpty {
                             Text(subtitle)
                                 .font(.footnote)
-                                .foregroundStyle(SideSeatTheme.textSecondary)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
@@ -133,9 +133,9 @@ struct SSManagementRow: View {
                     if let value, !value.isEmpty {
                         Text(value)
                             .font(.subheadline)
-                            .foregroundStyle(SideSeatTheme.textSecondary)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                             .multilineTextAlignment(.trailing)
-                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
 
                     if showsChevron {

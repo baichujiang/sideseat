@@ -970,7 +970,7 @@ struct InboxStoreTests {
         #expect(store.payload?.unreadTotal == 0)
     }
 
-    @Test("Loads merged inbox conversations")
+    @Test("Loads merged payload while surfacing only MVP direct conversations")
     @MainActor
     func loadsInbox() async throws {
         let transport = ChatTestTransport()
@@ -1001,7 +1001,7 @@ struct InboxStoreTests {
         #expect(store.pinned.count == 1)
         #expect(store.pinned.first?.displayName == "Mina")
         #expect(store.pinned.first?.route == .directChat(connectionID: "connection-1"))
-        #expect(store.recent.count == 1)
+        #expect(store.recent.isEmpty)
     }
 
     @Test("Filters conversations with client search")
@@ -1021,7 +1021,7 @@ struct InboxStoreTests {
         #expect(store.hasNoSearchMatches)
     }
 
-    @Test("Shows direct and user-created group conversations in the primary inbox")
+    @Test("Shows only direct conversations in the primary MVP inbox")
     @MainActor
     func unifiedConversationKinds() async throws {
         let session = try await chatSession(transport: ChatTestTransport())
@@ -1030,7 +1030,7 @@ struct InboxStoreTests {
 
         #expect(
             Set(store.filteredConversations.map(\.id))
-                == Set(["connection-1", "group-1"])
+                == Set(["connection-1"])
         )
     }
 

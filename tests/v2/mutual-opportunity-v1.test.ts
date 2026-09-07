@@ -107,7 +107,8 @@ test("Together presents finite private decisions and reveals chat only after mut
   assert.match(root, /Button\("Not this time", action: onNo\)/);
   assert.match(root, /Button\("Do it together", action: onYes\)/);
   assert.match(root, /Button\("Withdraw", action: onWithdraw\)/);
-  assert.match(root, /if opportunity\.isReadyToCoordinate/);
+  assert.match(root, /case "READY_TO_COORDINATE" where hasCoordination:/);
+  assert.match(root, /case \.mutual:[\s\S]*"Start planning"/);
   assert.match(store, /opportunities\.removeAll \{ \$0\.id == opportunity\.id \}/);
   assert.match(root, /Your choice is saved privately/);
   assert.doesNotMatch(root, /Waiting for the other person to respond/);

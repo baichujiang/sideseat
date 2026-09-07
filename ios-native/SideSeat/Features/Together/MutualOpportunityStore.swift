@@ -17,6 +17,10 @@ final class MutualOpportunityStore {
         defer { isLoading = false }
 
         #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-mutual-opportunity-empty") {
+            opportunities = []
+            return
+        }
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-mutual-opportunity") {
             opportunities = [.uiTestingFixture]
             return

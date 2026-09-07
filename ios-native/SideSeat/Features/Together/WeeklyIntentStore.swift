@@ -222,6 +222,17 @@ final class TogetherMatchingSessionStore {
         }
 
         #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-together-matching-active") {
+            let now = Date()
+            session = NativeTogetherMatchingSession(
+                state: .matching,
+                startedAt: now.ISO8601Format(),
+                matchingUntil: now.addingTimeInterval(48 * 60 * 60).ISO8601Format(),
+                stoppedAt: nil,
+                version: 1
+            )
+            return
+        }
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-together-matching") {
             session = .idle
             return

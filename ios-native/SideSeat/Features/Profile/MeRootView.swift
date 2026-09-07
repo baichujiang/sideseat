@@ -350,8 +350,7 @@ private struct MeHeroCard: View {
                                 .accessibilityIdentifier("me-username-visual")
                             Text(profile.schoolSummary.displayLine)
                                 .font(.caption)
-                                .foregroundStyle(SideSeatTheme.textSecondary)
-                                .lineLimit(2)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                                 .fixedSize(horizontal: false, vertical: true)
                                 .accessibilityIdentifier("me-campus-summary")
                         }

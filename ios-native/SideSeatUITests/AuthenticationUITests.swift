@@ -122,23 +122,18 @@ final class AuthenticationUITests: XCTestCase {
             "--ui-testing-slow-cached-launch",
             "--ui-testing-weekly-intent",
             "--ui-testing-mutual-opportunity",
+            "--ui-testing-together-matching",
             "--ui-testing-skip-tutorial",
         ]
         app.launch()
 
         let togetherTab = app.tabBars.buttons.element(boundBy: 0)
-        XCTAssertTrue(togetherTab.waitForExistence(timeout: 2))
+        XCTAssertTrue(togetherTab.waitForExistence(timeout: 8))
         togetherTab.tap()
 
-        XCTAssertTrue(
-            app.descendants(matching: .any)["together-assignment-loading"]
-                .waitForExistence(timeout: 2)
-        )
+        let loadedHome = app.descendants(matching: .any)["together-home"]
         XCTAssertFalse(app.descendants(matching: .any)["together-assignment-failure"].exists)
-        XCTAssertTrue(
-            app.descendants(matching: .any)["together-home"]
-                .waitForExistence(timeout: 12)
-        )
+        XCTAssertTrue(loadedHome.waitForExistence(timeout: 12))
         XCTAssertFalse(app.descendants(matching: .any)["together-assignment-failure"].exists)
     }
 

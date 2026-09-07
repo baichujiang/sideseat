@@ -16,6 +16,7 @@ import {
   FriendLinkStatus,
   LanguageProficiency,
   LanguageTag,
+  StudentStatus,
   StudentVerificationStatus,
   Weekday,
 } from "@prisma/client";
@@ -202,10 +203,13 @@ async function upsertTestUser(spec: AccountSpec) {
     avatarUrl: spec.avatarUrl,
     bio: spec.bio,
     school: "TUM",
+    studentStatus: StudentStatus.CURRENT_STUDENT,
     degreeLevel: DegreeLevel.BACHELOR,
     major: "Informatics",
     semester: 2,
     onboardingComplete: true,
+    hideFromDiscovery: false,
+    hideFromRecommendations: false,
     verifiedStudent: spec.verifiedStudent,
     studentVerificationStatus: spec.studentVerificationStatus,
     emailVerifiedAt: spec.emailVerifiedAt ?? null,
@@ -375,22 +379,80 @@ async function resetLiveUITestArtifacts() {
   // API rate-limit counters live in PostgreSQL, so restarting Next.js is not
   // enough to isolate repeated local regression runs.
   const rateLimits = await prisma.apiRateLimitCounter.deleteMany();
+  const testUsers = await prisma.user.findMany({
+    where: { username: { in: ACCOUNTS.map((account) => account.username) } },
+    select: { id: true },
+  });
+  const testUserIds = testUsers.map((user) => user.id);
   const plans = await prisma.planRequest.findMany({
     where: { title: { startsWith: "[live-ui]" } },
     select: { id: true },
   });
   const planIds = plans.map((plan) => plan.id);
+  const planCommitments = planIds.length > 0
+    ? await prisma.planCommitment.findMany({
+        where: { revisions: { some: { id: { in: planIds } } } },
+        select: { id: true },
+      })
+    : [];
+  const planCommitmentIds = planCommitments.map((commitment) => commitment.id);
   if (planIds.length > 0) {
     await prisma.calendarEntry.deleteMany({
-      where: { planRequestId: { in: planIds } },
+      where: {
+        OR: [
+          { planRequestId: { in: planIds } },
+          { planCommitmentId: { in: planCommitmentIds } },
+        ],
+      },
     });
     await prisma.message.deleteMany({
       where: { planRequestId: { in: planIds } },
+    });
+    await prisma.planCommitment.updateMany({
+      where: { id: { in: planCommitmentIds } },
+      data: {
+        status: "CLOSED",
+        currentPendingRevisionId: null,
+      },
+    });
+    await prisma.planCommitment.updateMany({
+      where: { id: { in: planCommitmentIds } },
+      data: { currentAcceptedRevisionId: null },
+    });
+    await prisma.planCommitment.deleteMany({
+      where: { id: { in: planCommitmentIds } },
     });
     await prisma.planRequest.deleteMany({
       where: { id: { in: planIds } },
     });
   }
+
+  const mutualOpportunities = await prisma.mutualOpportunity.findMany({
+    where: {
+      OR: [
+        { userAId: { in: testUserIds } },
+        { userBId: { in: testUserIds } },
+      ],
+    },
+    select: { id: true },
+  });
+  const mutualOpportunityIds = mutualOpportunities.map((opportunity) => opportunity.id);
+  const mutualOpportunityMessages = mutualOpportunityIds.length > 0
+    ? await prisma.message.deleteMany({
+        where: { mutualOpportunityId: { in: mutualOpportunityIds } },
+      })
+    : { count: 0 };
+  const removedMutualOpportunities = mutualOpportunityIds.length > 0
+    ? await prisma.mutualOpportunity.deleteMany({
+        where: { id: { in: mutualOpportunityIds } },
+      })
+    : { count: 0 };
+  const matchingSessions = await prisma.togetherMatchingSession.deleteMany({
+    where: { userId: { in: testUserIds } },
+  });
+  const weeklyIntents = await prisma.weeklyIntent.deleteMany({
+    where: { userId: { in: testUserIds } },
+  });
 
   const [messages, posts] = await Promise.all([
     prisma.message.deleteMany({
@@ -419,6 +481,11 @@ async function resetLiveUITestArtifacts() {
   });
   const removed =
     planIds.length +
+    planCommitmentIds.length +
+    mutualOpportunityMessages.count +
+    removedMutualOpportunities.count +
+    matchingSessions.count +
+    weeklyIntents.count +
     messages.count +
     posts.count +
     groups.count +

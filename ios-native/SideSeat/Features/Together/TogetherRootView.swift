@@ -376,7 +376,7 @@ private struct TogetherHomeView: View {
                 )
                 Text("Start another 48-hour round.")
                     .font(.subheadline)
-                    .foregroundStyle(SideSeatTheme.textSecondary)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
 
                 SSPrimaryButton(
                     title: AppLocalization.string("Match again"),
@@ -397,7 +397,7 @@ private struct TogetherHomeView: View {
                 if activeIntents.isEmpty {
                     Label("Add something you want to do first.", systemImage: "info.circle")
                         .font(.footnote)
-                        .foregroundStyle(SideSeatTheme.textSecondary)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 }
             }
         } else {
@@ -410,7 +410,7 @@ private struct TogetherHomeView: View {
                 )
                 Text("Match all your active intentions for 48 hours.")
                     .font(.subheadline)
-                    .foregroundStyle(SideSeatTheme.textSecondary)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
 
                 SSPrimaryButton(
                     title: AppLocalization.string("Start matching"),
@@ -431,7 +431,7 @@ private struct TogetherHomeView: View {
                 if activeIntents.isEmpty {
                     Label("Add something you want to do first.", systemImage: "info.circle")
                         .font(.footnote)
-                        .foregroundStyle(SideSeatTheme.textSecondary)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .accessibilityIdentifier("together-start-matching-disabled-reason")
                 }
             }
@@ -632,8 +632,8 @@ private struct MutualOpportunityCard: View {
                         if !peerContext.isEmpty {
                             Text(peerContext)
                                 .font(.caption)
-                                .foregroundStyle(SideSeatTheme.textSecondary)
-                                .lineLimit(2)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                     }
                 }
@@ -666,7 +666,7 @@ private struct MutualOpportunityCard: View {
 
             Text(opportunity.matchExplanation)
                 .font(.footnote)
-                .foregroundStyle(SideSeatTheme.textSecondary)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 .fixedSize(horizontal: false, vertical: true)
 
             if let course = opportunity.course {

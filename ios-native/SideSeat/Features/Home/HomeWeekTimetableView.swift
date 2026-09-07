@@ -453,6 +453,8 @@ struct HomeWeekTimetableView: View {
                 style: .weekHeader,
                 calendar: calendar
             )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
         }
         .buttonStyle(SSPressButtonStyle())
         .accessibilityLabel(

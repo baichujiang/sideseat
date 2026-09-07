@@ -100,7 +100,8 @@ final class ActionToPlanV2Store {
                     "v2PlanInheritance": enabled,
                     "v2SocialPreferences": enabled,
                     "v2WeeklyIntent": ProcessInfo.processInfo.arguments.contains("--ui-testing-weekly-intent"),
-                    "v2MutualOpportunity": ProcessInfo.processInfo.arguments.contains("--ui-testing-mutual-opportunity"),
+                    "v2MutualOpportunity": ProcessInfo.processInfo.arguments.contains("--ui-testing-mutual-opportunity")
+                        || ProcessInfo.processInfo.arguments.contains("--ui-testing-mutual-opportunity-empty"),
                     "v2Recommendations": enabled,
                     "v2SmallGroupPilot": enabled,
                 ]

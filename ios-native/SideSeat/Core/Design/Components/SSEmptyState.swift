@@ -16,6 +16,7 @@ struct SSEmptyState: View {
         } description: {
             if let description {
                 Text(description)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             }
         } actions: {
             if let actionTitle, let action {

@@ -133,7 +133,7 @@ struct HomeScheduleTests {
         #expect(items.first?.source == .subscription)
     }
 
-    @Test("Preserves social context for shared events and public plans")
+    @Test("Preserves participant metadata without upgrading ordinary events to Plans")
     func socialContext() throws {
         let calendar = Calendar.sideSeatBerlin
         let start = try #require(
@@ -166,7 +166,7 @@ struct HomeScheduleTests {
         let sharedItem = try #require(items.first { $0.id == "shared" })
         let planItem = try #require(items.first { $0.id == "plan" })
 
-        #expect(sharedItem.context == .shared)
+        #expect(sharedItem.context == .personal)
         #expect(sharedItem.participantNames == ["Mina"])
         #expect(planItem.context == .publicPlan)
         #expect(planItem.discoverActivityID == "activity-1")
