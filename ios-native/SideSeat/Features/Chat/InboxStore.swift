@@ -12,7 +12,7 @@ struct NativeInboxPreferenceResult: Decodable, Sendable {
 final class InboxStore {
     private(set) var payload: NativeInboxPayload? {
         didSet {
-            PushBadgeController.update(Self.visibleUnreadCount(in: payload))
+            PushBadgeController.update(Self.attentionCount(in: payload))
         }
     }
     private(set) var isLoading = false
@@ -63,8 +63,8 @@ final class InboxStore {
             && filteredConversations.isEmpty
     }
 
-    var unreadBadgeLabel: String? {
-        Self.unreadBadgeLabel(for: Self.visibleUnreadCount(in: payload))
+    var attentionBadgeLabel: String? {
+        Self.badgeLabel(for: Self.attentionCount(in: payload))
     }
 
     private nonisolated static func visibleUnreadCount(in payload: NativeInboxPayload?) -> Int {
@@ -73,7 +73,13 @@ final class InboxStore {
             .reduce(0) { $0 + $1.unreadCount } ?? 0
     }
 
-    nonisolated static func unreadBadgeLabel(for total: Int) -> String? {
+    nonisolated static func attentionCount(in payload: NativeInboxPayload?) -> Int {
+        visibleUnreadCount(in: payload)
+            + (payload?.plansNeedingYourAction ?? 0)
+            + (payload?.planOutcomesNeedingYourResponse ?? 0)
+    }
+
+    nonisolated static func badgeLabel(for total: Int) -> String? {
         guard total > 0 else { return nil }
         return total > 99 ? "99+" : String(total)
     }

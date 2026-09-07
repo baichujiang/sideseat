@@ -107,6 +107,7 @@ final class PlansStore {
             plans = plans.map {
                 $0.id == planID ? $0.replacingViewerOutcome(with: value) : $0
             }
+            NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
             return
         }
         #endif
@@ -119,6 +120,7 @@ final class PlansStore {
                 idempotencyKey: UUID().uuidString
             )
             await load(using: session)
+            NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
         } catch { issue = error.localizedDescription }
     }
 }

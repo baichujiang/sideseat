@@ -179,7 +179,7 @@ struct AppShellView: View {
                     title: LocalizedStringKey(item.title),
                     systemImage: item.systemImage,
                     selectedSystemImage: item.selectedSystemImage,
-                    badge: item.tab == .chats ? inboxStore.unreadBadgeLabel : nil
+                    badge: item.tab == .chats ? inboxStore.attentionBadgeLabel : nil
                 ) {
                     rootView(for: item.tab)
                 }
