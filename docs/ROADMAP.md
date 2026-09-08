@@ -15,8 +15,9 @@ owner-authorized time-compressed QA fixture); prior
 **Matching hotfix verified locally:** The reported `Swift.CancellationError`
 handling defect is fixed. Native regressions (9 cases), backend matching (8 tests)
 and the real local two-account intent → matching → Plan → both Calendars UI test
-pass. The fix is not yet committed, pushed or uploaded; TestFlight Build 34 still
-needs replacement before testers receive it. See the
+pass. The fix is committed and pushed as `a734117`; replacement internal
+TestFlight Build 35 is being prepared with the owner's authorization. See the
+[Build 35 release record](./releases/2026-09-08-testflight-35.md) and
 [matching regression record](./releases/2026-09-08-matching-cancellation-regression.md).
 
 ## Goal
@@ -162,8 +163,8 @@ external/public release was submitted. Build 33 does not contain this work. See
 Gate: repeat improves real encounters without materially increasing Block/report
 rates or starving newcomers of first opportunities.
 
-Next: commit/push the verified matching cancellation fix and its scoped tests/docs,
-then prepare and upload a replacement internal TestFlight build when authorized.
+Next: finish the authorized Build 35 archive/upload and confirm availability in
+the existing internal TestFlight group, then update both test phones and verify matching.
 Keep the unrelated plist edit and old archives out of the release. The signed repeat Outcome closure is
 complete and its scoped acceptance documentation was pushed through `cfb7f2a`.
 Separately decide when to start the real-user small-group pilot and obtain

@@ -1,8 +1,10 @@
 # Build 34 matching cancellation regression — 2026-09-08
 
-**Current status: fixed locally; targeted native regression and real local
-two-account UI acceptance passed. Not committed, pushed or uploaded.** The
-installed TestFlight Build 34 has not changed.
+**Current status: fixed and pushed as `a734117`; targeted native regression and
+real local two-account UI acceptance passed.** Replacement internal TestFlight
+Build 35 is being prepared under the owner's explicit upload authorization.
+Installed Build 34 has not changed. Track distribution in the
+[Build 35 release record](./2026-09-08-testflight-35.md).
 
 ## Fix and two-account acceptance — 2026-09-08
 
@@ -178,9 +180,9 @@ testing. Other simulators and both physical phones were left alone.
 
 ## Next step
 
-Commit and push the scoped fix/test/documentation changes, then prepare and upload
-a replacement internal TestFlight build with the owner's authorization. Keep the
-unrelated plist change and old archives out of that commit and release. The
-matching regression and local two-account flow now pass; the current TestFlight
-Build 34 still needs replacement before these fixes reach the owner/testers.
+Finish the authorized Build 35 archive/upload, confirm existing internal-group
+availability, then update both test phones and verify matching on that binary.
+Keep the unrelated plist change and old archives out of the release. The
+matching regression and local two-account flow pass; Build 34 must be updated
+before these fixes reach the owner/testers.
 No real-user pilot or public-release gate is passed by this QA run.
