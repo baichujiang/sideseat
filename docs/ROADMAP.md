@@ -93,10 +93,14 @@ not used. These fixture answers are not production or non-QA pilot evidence.
 The earlier feature-revision simulator check passed (6 state tests and 7 UI
 tests); see the
 [design verification](./DESIGN_SYSTEM.md#together--plan-verification--2026-09-08).
-Next release step: push the release/acceptance records when authorized, then
-arrange actual TestFlight access for the intended non-QA testers (external beta
-review has not been performed), and continue real Plan use plus truthful
-bilateral Outcome answers. Check saved state/badge refresh on a genuinely ended
+Release/acceptance commits through `cd3ebda` are now pushed. The next-step
+App Store Connect check found the existing external `SideSeat 用户测试` group
+has zero testers and zero builds; its invitation link alone does not grant
+Build 33 access. Beta feedback/contact fields are empty and reviewer sign-in
+is not configured. Next: obtain the owner's review contact and dedicated
+reviewer login, complete authorized external Beta App Review, confirm Build 33
+installation for a consenting external tester, then continue real Plan use
+plus truthful bilateral Outcome answers. Check saved state/badge refresh on a genuinely ended
 Plan. The next formal Gate snapshot is no earlier than `2026-09-14T10:37:35Z`;
 QA acceptance does not count toward that Gate or unlock Layer 3. The non-blocking
 English `Chat actions` VoiceOver label is tracked in the build-33 release record.

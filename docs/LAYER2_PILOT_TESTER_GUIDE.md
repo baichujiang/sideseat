@@ -1,10 +1,36 @@
 # Layer 2 non-QA pilot tester guide
 
-**Status:** Active on TestFlight build `1.0.0` (32)
+**Status:** Prepared for TestFlight build `1.0.0` (33); external access pending
 
 **Gate:** Layer 3 remains blocked until the
 [Layer 2 pilot Gate](./LAYER2_PILOT.md) records two qualifying snapshots at
 least seven days apart.
+
+## TestFlight access prerequisite
+
+App Store Connect was checked on 2026-09-08. Build 33 is processed and assigned
+to `SideSeat Internal` (one tester). The existing external group
+`SideSeat 用户测试` has zero testers and zero builds. It already has a public
+invitation link with a displayed 100-tester limit, but that link is not evidence
+that Build 33 is available to external testers.
+
+Before sending invitations:
+
+1. Complete Beta App Information and Beta App Review Information. Feedback
+   email, privacy-policy URL and reviewer contact fields were empty at this
+   check; sign-in information was not configured. The owner must choose the
+   review contact and authorize a dedicated reviewer login. Enter credentials
+   directly in App Store Connect, never in Git or this guide.
+2. Add Build 33 to the existing external group and submit it for TestFlight
+   Beta App Review with authorization. Verify approval and build availability
+   before distributing the existing link to consenting participants.
+3. Confirm the first external participant can accept the invitation and install
+   `1.0.0 (33)` before treating recruitment as live. Do not give ordinary
+   testers App Store Connect team access just to bypass external beta review.
+
+This check did not change group access, submit a review or send invitations.
+See Apple's [test information requirements](https://developer.apple.com/help/app-store-connect/test-a-beta-version/provide-test-information)
+and [external tester workflow](https://developer.apple.com/help/app-store-connect/test-a-beta-version/invite-external-testers).
 
 ## Who may participate
 
@@ -20,7 +46,7 @@ each available Outcome prompt.
 
 ## Tester flow
 
-Each pair should use Build 32 through the real product flow:
+After access is confirmed, each pair should use Build 33 through the real product flow:
 
 1. Both participants install the TestFlight build and use separate normal
    accounts.
@@ -52,9 +78,10 @@ in-app Feedback surface without including the other participant's answer.
 
 ## Invitation text
 
-Use this message only for people who already agreed to participate:
+Use this message only after external access is confirmed and only for people
+who already agreed to participate:
 
-> You are invited to the SideSeat Layer 2 pilot on TestFlight build 32. Please
+> You are invited to the SideSeat Layer 2 pilot on TestFlight build 33. Please
 > use your own account and SideSeat's normal Together → Messages → Plan flow for
 > real plans. After a plan ends, both people should independently answer the
 > private Outcome question truthfully: occurred, did not occur or skip. Do not
