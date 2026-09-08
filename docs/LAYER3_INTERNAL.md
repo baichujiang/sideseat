@@ -3,7 +3,8 @@
 **Status:** Implemented; local backend/HTTP and simulator acceptance passed on
 2026-09-08. The owner-authorized migration/backend release is deployed, Layer 3
 is enabled and TestFlight Build 34 is available internally. Signed two-account
-device acceptance is still pending; this is not public-release approval.
+private/repeat-to-Calendar acceptance passed on Baichu's explicitly available
+iPhone on 2026-09-08; this is not public-release approval.
 
 **Owner decision:** 2026-09-08. Build the complete repeat flow and perform
 internal acceptance without waiting for real-user pilot samples. Do not claim
@@ -43,9 +44,11 @@ The owner subsequently authorized the migration/backend and internal Build 34
 release; these steps completed on 2026-09-08, including internal activation.
 See [Build 34 release evidence](./releases/2026-09-08-testflight-34.md) for backup,
 deployment, signature, Apple processing and production HTTP smoke evidence.
-Production smoke requested no Outcome or permission mutations. Build 33 already
-submitted to Apple does not contain Layer 3; no Build 34 external/public release
-was authorized or submitted.
+The initial production HTTP smoke requested no Outcome or permission mutations.
+The subsequent owner-authorized signed-device session used only existing QA
+accounts for synthetic Outcome/permission answers and the new repeat Plan.
+Build 33 already submitted to Apple does not contain Layer 3; no Build 34
+external/public release was authorized or submitted.
 
 Disabling the flag stops creation/acceptance of repeat opportunities, including
 fallback to first-encounter matching for a pair with an ended accepted Plan.
@@ -99,6 +102,30 @@ Two existing source-contract assertions were aligned with the already-shipped
 shared button components. The historical fixture transaction was corrected to
 respect the existing deferred Plan commitment constraint.
 
+### Signed TestFlight acceptance
+
+On 2026-09-08 the owner explicitly made Baichu's iPhone available. Updated the
+installed app from Build 33 to `1.0.0 (34)` through TestFlight and independently
+verified its version. On an iPhone 16 Pro Max / iOS 26.0.1, both QA accounts
+completed private Outcome and Meet Again answers, withdrawal/NO/YES editing,
+relaunch persistence, fresh Intents and explicit matching sessions, new bilateral
+Opportunity decisions, a new source-prefilled Plan, receiver acceptance and both
+Calendar views. The core continuation passed at `2026-09-08T03:13:40Z`.
+
+Scoped read-only production snapshots verified unilateral privacy, Shared
+Encounter creation only after both source answers were OCCURRED, the new immutable
+repeat source, and distinct new Calendar entries. One XCTest title-entry assertion
+failed because the harness left a prefilled suffix; acceptance continued from the
+actual saved QA Plan without duplicate writes. See the
+[Build 34 record](./releases/2026-09-08-testflight-34.md) for successful result
+bundles, the retained failed-run log and limitations. This follows the complete
+device → API → persisted data → second-account UI path, not simulator fixtures.
+
+The new future Plan's Outcome remains unanswered, so this session does not claim
+a second production Shared Encounter. QA is excluded from organic pilot metrics;
+the product-data Gate, APNs/device matrix and public monitoring/recovery
+requirements remain independent. No external/public submission was made.
+
 ### Reproduce the backend checks
 
 Run `npm run db:start`, then apply migrations only to the isolated database:
@@ -134,11 +161,11 @@ Layer 3 development or authorize any release. No new snapshot was collected.
 
 ## Next step
 
-The pending implementation/release commits are pushed; the additive migration,
-backend, internal Build 34 and Layer 3 activation are complete. Next, arrange an
-explicitly available iPhone and run signed two-account TestFlight acceptance
-before external/public distribution. Do not use the owner's occupied phone or
-equate Apple's installation telemetry with completed acceptance. Verify private
-permission, fresh bilateral consent, a new accepted Plan and both Calendars.
-Do not relabel Build 33 as containing Layer 3. Continue the non-QA pilot in
-parallel; its product-data Gate is still open.
+The implementation/release commits are pushed; the additive migration, backend,
+internal Build 34, Layer 3 activation and signed private/repeat-to-Calendar
+acceptance are complete. Preserve the scoped acceptance record and push when
+authorized. The next distribution step is owner-approved Build 34 external
+TestFlight assignment/Beta review, not automatic public publication. Complete
+remaining public-release monitoring/recovery and device requirements separately.
+Do not relabel Build 33 as containing Layer 3. Continue truthful non-QA usage in
+parallel; its product-data Gate is still open and QA is not qualifying evidence.

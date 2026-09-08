@@ -8,7 +8,7 @@
 
 **Current release evidence:**
 [TestFlight Build 34 internal release](./releases/2026-09-08-testflight-34.md)
-(signed two-account Layer 3 acceptance pending); prior
+(signed two-account private/repeat-to-Calendar acceptance passed); prior
 [Layer 2 production acceptance](./releases/2026-09-07-layer2-production-acceptance.md).
 
 ## Goal
@@ -123,8 +123,13 @@ passed on 2026-09-08 (67 backend/contract checks and 4 native tests). The owner
 subsequently authorized the migration, backend deployment and internal release:
 these are complete, `V2_MEET_AGAIN_ENABLED=1`, and Build 34 is processed and
 assigned to the existing one-tester internal group. Production two-account HTTP
-read smoke passed with the flag off and on; no Outcome/permission mutations
-were requested. Signed TestFlight acceptance remains pending. No Build 34
+read smoke passed with the flag off and on without Outcome/permission mutations.
+The subsequent owner-authorized signed Build 34 session on Baichu's iPhone
+passed private answers/withdrawal, fresh matching and consent, a new accepted
+Plan and both Calendar views, using only excluded QA accounts. One harness
+title assertion required continuation from the actual saved Plan; it did not
+require a product fix or duplicate Plan. The new future Plan remains unanswered
+and is not a second production Shared Encounter. No Build 34
 external/public release was submitted. Build 33 does not contain this work. See
 [Layer 3 internal acceptance](./LAYER3_INTERNAL.md) and the
 [Build 34 release record](./releases/2026-09-08-testflight-34.md).
@@ -140,10 +145,9 @@ external/public release was submitted. Build 33 does not contain this work. See
 Gate: repeat improves real encounters without materially increasing Block/report
 rates or starving newcomers of first opportunities.
 
-Next: arrange an explicitly available iPhone for signed Build 34 two-account
-acceptance of private Meet Again consent, a fresh opportunity, a new accepted
-Plan and both Calendars; do not operate the owner's occupied phone. Complete
-that acceptance before external/public distribution. The weekly Layer 2
+Next: preserve/push the scoped signed-device acceptance record when authorized,
+then obtain approval for Build 34 external TestFlight assignment/Beta review.
+Do not automatically publish to the App Store. The weekly Layer 2
 automation keeps its original schedule but no longer re-blocks Layer 3
 development; the organic product-data Gate is still open. Full public-release
 readiness, including outstanding monitoring/restore evidence, is not certified
