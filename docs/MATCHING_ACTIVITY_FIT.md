@@ -5,9 +5,11 @@ fit instead of only delivering extremely compatible opportunities.
 
 **Status:** Implemented locally; native, three-language visual and real-API
 two-account acceptance passed.
-Owner authorized commit/push and a new internal TestFlight build on 2026-09-08.
-Release preparation is in progress; not deployed or included in TestFlight Build 35.
-Related matching must remain disabled until both test phones confirm their update.
+Feature commit `2ec160d` and Build 36 preparation `661866a` are pushed.
+The new internal client is uploaded, processed and available in `SideSeat Internal`;
+see the [Build 36 release record](./releases/2026-09-08-testflight-36.md).
+No production backend or flag has changed.
+Related matching must remain disabled until both test phones confirm Build 36.
 
 ## Eligibility before score
 
@@ -72,10 +74,13 @@ paths remain available. The global kill switch also disables the feature.
 Build 35 does not understand the new explanation; do not enable related matching
 while the internal test phones still use it.
 
-Next release, with explicit authorization: deploy the additive backend with the
-flag off, upload the new internal native build, update/confirm both test phones,
-then enable the flag on a reviewed deployment and perform signed two-account
-acceptance. No production flag, data or deployment is changed by this local task.
+The owner authorized the native upload first; Build 36 accepts the existing
+backend's no-score responses. Before activating the new rules, deploy the
+reviewed additive backend with the flag off and confirm both test phones have
+Build 36, then enable the flag on a reviewed deployment and perform signed
+two-account acceptance. No production flag, data or deployment has been changed
+by the implementation/native-upload tasks. Uploading the client alone does not
+make server-generated scores or broader matches available.
 Do not expose this policy to old external clients without a compatible client rollout.
 
 ## Verification
@@ -136,6 +141,6 @@ Machine-local evidence (not uploaded release artifacts):
 - `docs/visual-qa/activity-fit-{zh-Hans,en,de}.png` and the corresponding
   `activity-fit-details-{zh-Hans,en,de}.png` (local ignored captures).
 
-**Next:** Commit/push this scoped change when authorized, then follow the internal
-rollout order above. Collect real intent-to-opportunity and Plan conversion
+**Next:** Confirm both test phones have Build 36, complete the reviewed backend
+rollout above, then perform signed two-account acceptance. Collect real intent-to-opportunity and Plan conversion
 evidence after rollout; this small QA run does not establish a real-world lift.

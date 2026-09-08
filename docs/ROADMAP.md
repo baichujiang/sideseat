@@ -7,6 +7,9 @@
 **Governing product:** [Product](./PRODUCT.md)
 
 **Current release evidence:**
+[TestFlight Build 36 activity-fit client](./releases/2026-09-08-testflight-36.md)
+(uploaded, processed and available in `SideSeat Internal`; broader matching
+remains inactive until both phones confirm the update and backend rollout completes). Prior
 [TestFlight Build 35 matching hotfix](./releases/2026-09-08-testflight-35.md)
 (uploaded, processed and available in the existing internal group; physical-phone
 update and matching acceptance pending). Prior
@@ -38,11 +41,12 @@ UI is ready.
 activities beyond exact wording and show an explainable activity-fit score.
 Implementation and local verification passed: 32 compatibility/PostgreSQL checks,
 native decoding/regressions, three-language cards and a real local two-account
-60/100 opportunity → Plan → both Calendars UI flow. Production and TestFlight
-Build 35 remain unchanged. See [Activity-fit policy](./MATCHING_ACTIVITY_FIT.md).
-Next for this change: commit/push and perform an authorized coordinated
-backend/internal-client release; enable related matching only after
-the existing testers update to a client that explains it correctly.
+60/100 opportunity → Plan → both Calendars UI flow. Feature `2ec160d` and
+Build 36 preparation `661866a` are pushed; the internal client is uploaded.
+Production backend/flags remain unchanged. See [Activity-fit policy](./MATCHING_ACTIVITY_FIT.md).
+Next for this change: confirm both phones have Build 36, complete the reviewed
+backend rollout, then enable related matching and perform signed two-account
+acceptance. Client upload alone does not enable scores or broader matching.
 
 Current implementation foundation:
 
@@ -177,7 +181,7 @@ external/public release was submitted. Build 33 does not contain this work. See
 Gate: repeat improves real encounters without materially increasing Block/report
 rates or starving newcomers of first opportunities.
 
-Next: update both test phones through TestFlight to `1.0.0 (35)` and verify
+Next: update both test phones through TestFlight to `1.0.0 (36)` and verify
 matching → private YES → accepted Plan → both Calendars on the signed binary.
 Keep the unrelated plist edit and old archives out of the release. The signed repeat Outcome closure is
 complete and its scoped acceptance documentation was pushed through `cfb7f2a`.

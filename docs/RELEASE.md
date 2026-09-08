@@ -154,7 +154,8 @@ Store submission additionally requires:
 - Rollback must not reverse destructive migrations. Use forward repair, feature
   kill switches and compatible older clients where appropriate.
 
-Current recorded build: [TestFlight 1.0.0 (34)](./releases/2026-09-08-testflight-34.md)
-(internal only; signed two-account repeat Outcome/Shared Encounter closure passed
-with an owner-authorized synthetic QA time window, including correction/restoration;
-public-release readiness still requires the separate checks above).
+Current recorded build: [TestFlight 1.0.0 (36)](./releases/2026-09-08-testflight-36.md)
+(internal client available; activity-fit backend rollout and broader matching
+activation wait for both phones to confirm the update. Build 34's signed repeat
+Outcome acceptance remains historical evidence, not acceptance of Build 36.
+Public-release readiness still requires the separate checks above).
