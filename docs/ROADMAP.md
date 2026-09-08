@@ -50,8 +50,10 @@ Both phone updates are owner-confirmed; the production backend is deployed and
 API smoke. See [Activity-fit policy](./MATCHING_ACTIVITY_FIT.md) and the rollout
 record above. Installed Build 36 acceptance passed with a real related 60/100
 opportunity, bilateral YES, accepted Plan and both Calendars. Next for this
-change: collect actual matching-to-Plan conversion evidence with internal
-testers; keep the recorded display follow-ups scoped to the next change.
+change: commit/push and release the [native title/disclosure fix](./releases/2026-09-08-native-title-disclosure-fix.md)
+when the owner requests release, then collect actual matching-to-Plan conversion
+evidence with internal testers. The native fix is local and not in the already
+distributed Build 36; production matching remains enabled and unchanged.
 
 Current implementation foundation:
 

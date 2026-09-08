@@ -1757,3 +1757,27 @@
 "Activity %d/50 · Time %d/30 · Language %d/10 · School %d/10" = "活动 %d/50 · 时间 %d/30 · 语言 %d/10 · 学校 %d/10";
 "%d minutes of shared availability" = "共同有空 %d 分钟";
 "This describes the activity, not the person or the chance of success. A lower score can still be worth trying." = "分数只描述本次活动的契合程度，不是对人的评价，也不代表成功概率。分数较低的机会也值得看看。";
+
+/* Server-generated Together opportunity titles; authored text stays unchanged. */
+"Coffee together" = "一起喝咖啡";
+"Study together" = "一起学习";
+"Study side by side" = "一起自习";
+"Do sports together" = "一起运动";
+"Explore together" = "一起探索";
+"Eat together" = "一起吃饭";
+"Go to an event together" = "一起参加活动";
+"Play basketball together" = "一起打篮球";
+"Play badminton together" = "一起打羽毛球";
+"Play table tennis together" = "一起打乒乓球";
+"Play football together" = "一起踢足球";
+"Play volleyball together" = "一起打排球";
+"Play tennis together" = "一起打网球";
+"Work out together" = "一起健身";
+"Go running together" = "一起跑步";
+"Go hiking together" = "一起徒步";
+"Go cycling together" = "一起骑行";
+"Go swimming together" = "一起游泳";
+"Go skiing together" = "一起滑雪";
+"Go climbing together" = "一起攀岩";
+"Do yoga together" = "一起练瑜伽";
+"%@ together" = "一起%@";

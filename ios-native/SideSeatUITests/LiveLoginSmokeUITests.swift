@@ -412,11 +412,16 @@ final class SocialLiveUITests: XCTestCase {
         runTogetherIntentToPlan(relatedActivities: true)
     }
 
-    private func runTogetherIntentToPlan(relatedActivities: Bool) {
+    func testRelatedActivitiesLocalizeChinesePlanAndReachBothCalendars() {
+        runTogetherIntentToPlan(relatedActivities: true, planLanguage: "zh-Hans")
+    }
+
+    private func runTogetherIntentToPlan(relatedActivities: Bool, planLanguage: String = "en") {
+        let chinesePlan = planLanguage == "zh-Hans"
         let timestamp = Int(Date().timeIntervalSince1970)
         let activity = "[live-ui] Coffee and a short walk \(timestamp)"
         let peerActivity = relatedActivities ? "[live-ui] Coffee and conversation \(timestamp)" : activity
-        let contextTitle = relatedActivities ? "Coffee together" : activity
+        let contextTitle = relatedActivities ? (chinesePlan ? "一起喝咖啡" : "Coffee together") : activity
         let togetherArguments = [
             "--ui-testing-discover",
             "--ui-testing-language=en",
@@ -458,26 +463,26 @@ final class SocialLiveUITests: XCTestCase {
 
         let firstReturn = launchAndLogin(
             username: "test_001",
-            additionalLaunchArguments: togetherArguments
+            additionalLaunchArguments: ["--ui-testing-discover", "--ui-testing-language=\(planLanguage)"]
         )
         let recoveredCountdown = firstReturn.staticTexts.matching(
-            NSPredicate(format: "label CONTAINS[c] %@", "remaining")
+            NSPredicate(format: "label CONTAINS[c] %@", chinesePlan ? "剩余" : "remaining")
         ).firstMatch
         XCTAssertTrue(recoveredCountdown.waitForExistence(timeout: 12))
         let firstDecision = togetherYesButton(in: firstReturn)
-        XCTAssertFalse(firstReturn.staticTexts["Your choice is saved privately"].exists)
+        XCTAssertFalse(firstReturn.staticTexts[chinesePlan ? "你的选择已私密保存" : "Your choice is saved privately"].exists)
         firstDecision.tap()
-        let startPlanning = firstReturn.buttons["Start planning"]
+        let startPlanning = firstReturn.buttons[chinesePlan ? "开始计划" : "Start planning"]
         XCTAssertTrue(startPlanning.waitForExistence(timeout: 12))
         startPlanning.tap()
 
         XCTAssertTrue(firstReturn.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 12))
         XCTAssertTrue(
-            firstReturn.staticTexts["You both want to do this"]
+            firstReturn.staticTexts[chinesePlan ? "你们都想一起做这件事" : "You both want to do this"]
                 .waitForExistence(timeout: 12)
         )
         XCTAssertTrue(firstReturn.staticTexts[contextTitle].waitForExistence(timeout: 8))
-        let makePlan = firstReturn.buttons["Make a plan"]
+        let makePlan = firstReturn.buttons[chinesePlan ? "制定计划" : "Make a plan"]
         XCTAssertTrue(makePlan.waitForExistence(timeout: 8))
         makePlan.tap()
 
@@ -486,6 +491,10 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertTrue(titleField.waitForExistence(timeout: 5))
         let planTitle = titleField.value as? String ?? ""
         XCTAssertEqual(planTitle, contextTitle)
+        let draftCapture = XCTAttachment(screenshot: firstReturn.screenshot())
+        draftCapture.name = "Related Plan localized prefill - \(planLanguage)"
+        draftCapture.lifetime = .keepAlways
+        add(draftCapture)
         let submit = firstReturn.buttons["plan-create-submit"]
         XCTAssertTrue(waitUntilEnabled(submit, timeout: 5))
         submit.tap()
@@ -780,7 +789,7 @@ final class SocialLiveUITests: XCTestCase {
 
     private func togetherYesButton(in app: XCUIApplication) -> XCUIElement {
         let decision = app.buttons.matching(
-            NSPredicate(format: "label IN %@", ["Do it together", "一起做", "Zusammen machen"])
+            NSPredicate(format: "label IN %@", ["Do it together", "愿意同行", "Zusammen machen"])
         ).firstMatch
         for _ in 0..<8 where !decision.isHittable {
             app.swipeUp()

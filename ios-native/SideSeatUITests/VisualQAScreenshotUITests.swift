@@ -14,10 +14,11 @@ final class VisualQAScreenshotUITests: XCTestCase {
 
     @MainActor
     func testRelatedActivityFitInThreeLanguages() {
-        for (language, title, details) in [
-            ("zh-Hans", "活动匹配度", "匹配度怎么算"),
-            ("en", "Activity fit", "How this is calculated"),
-            ("de", "Aktivitätspassung", "So wird der Wert berechnet"),
+        for (language, title, largeType) in [
+            ("zh-Hans", "活动匹配度", false),
+            ("en", "Activity fit", false),
+            ("de", "Aktivitätspassung", false),
+            ("zh-Hans", "活动匹配度", true),
         ] {
             let app = XCUIApplication()
             app.launchArguments = [
@@ -27,17 +28,42 @@ final class VisualQAScreenshotUITests: XCTestCase {
                 "--ui-testing-together-matching", "--ui-testing-language=\(language)",
                 "--ui-testing-appearance=\(language == "de" ? "dark" : "light")",
             ]
+            if largeType { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
             app.launch()
             let fit = app.descendants(matching: .any)["mutual-opportunity-fit-cmutualui0000000000000001"]
-            XCTAssertTrue(fit.waitForExistence(timeout: 8))
+            revealFlowElement(fit, in: app)
             XCTAssertTrue(fit.label.contains(title))
             XCTAssertTrue(fit.label.contains("60/100"))
-            saveScreenshot(app: app, name: "activity-fit-\(language)")
-            let explanation = app.buttons[details]
+            let suffix = "\(language)\(largeType ? "-large-type" : "")"
+            saveScreenshot(app: app, name: "activity-fit-\(suffix)")
+            let explanation = app.buttons["mutual-opportunity-fit-details-cmutualui0000000000000001"]
             revealFlowElement(explanation, in: app)
             explanation.tap()
+            let disclaimer = app.staticTexts["mutual-opportunity-fit-disclaimer-cmutualui0000000000000001"]
+            XCTAssertTrue(disclaimer.waitForExistence(timeout: 5))
+            revealFlowElement(disclaimer, in: app)
+            let followingText = app.staticTexts["mutual-opportunity-match-explanation-cmutualui0000000000000001"]
+            XCTAssertTrue(followingText.exists)
+            XCTAssertLessThanOrEqual(disclaimer.frame.maxY, followingText.frame.minY,
+                                     "Expanded text must reserve height before the next section")
+            let verified = app.staticTexts["mutual-opportunity-verified-cmutualui0000000000000001"]
+            XCTAssertLessThanOrEqual(disclaimer.frame.maxY, verified.frame.minY,
+                                     "The following status row must not cover the disclaimer")
             XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "25/50")).firstMatch.exists)
-            saveScreenshot(app: app, name: "activity-fit-details-\(language)")
+            saveScreenshot(app: app, name: "activity-fit-details-\(suffix)")
+            // Return to the disclosure header, including at accessibility text sizes.
+            for _ in 0..<12 {
+                // XCTest calls controls behind the navigation/status bar
+                // hittable. Bring the whole header into the content viewport.
+                if explanation.frame.minY < app.navigationBars.firstMatch.frame.maxY + 4 {
+                    app.swipeDown()
+                } else if !explanation.isHittable {
+                    app.swipeUp()
+                } else { break }
+            }
+            XCTAssertTrue(explanation.isHittable)
+            explanation.tap()
+            XCTAssertTrue(disclaimer.waitForNonExistence(timeout: 5))
             app.terminate()
         }
     }

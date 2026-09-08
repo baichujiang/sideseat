@@ -1757,3 +1757,27 @@
 "Activity %d/50 · Time %d/30 · Language %d/10 · School %d/10" = "Activity %d/50 · Time %d/30 · Language %d/10 · School %d/10";
 "%d minutes of shared availability" = "%d minutes of shared availability";
 "This describes the activity, not the person or the chance of success. A lower score can still be worth trying." = "This describes the activity, not the person or the chance of success. A lower score can still be worth trying.";
+
+/* Server-generated Together opportunity titles; authored text stays unchanged. */
+"Coffee together" = "Coffee together";
+"Study together" = "Study together";
+"Study side by side" = "Study side by side";
+"Do sports together" = "Do sports together";
+"Explore together" = "Explore together";
+"Eat together" = "Eat together";
+"Go to an event together" = "Go to an event together";
+"Play basketball together" = "Play basketball together";
+"Play badminton together" = "Play badminton together";
+"Play table tennis together" = "Play table tennis together";
+"Play football together" = "Play football together";
+"Play volleyball together" = "Play volleyball together";
+"Play tennis together" = "Play tennis together";
+"Work out together" = "Work out together";
+"Go running together" = "Go running together";
+"Go hiking together" = "Go hiking together";
+"Go cycling together" = "Go cycling together";
+"Go swimming together" = "Go swimming together";
+"Go skiing together" = "Go skiing together";
+"Go climbing together" = "Go climbing together";
+"Do yoga together" = "Do yoga together";
+"%@ together" = "%@ together";

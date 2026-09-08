@@ -680,6 +680,9 @@ private struct TogetherHomeView: View {
 }
 
 private struct MutualOpportunityCard: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var isShowingFitDetails = false
+
     let opportunity: NativeMutualOpportunity
     let isWorking: Bool
     let onYes: () -> Void
@@ -752,18 +755,45 @@ private struct MutualOpportunityCard: View {
                 .accessibilityElement(children: .combine)
                 .accessibilityIdentifier("mutual-opportunity-fit-\(opportunity.id)")
 
-                DisclosureGroup(AppLocalization.string("How this is calculated")) {
+                Button {
+                    withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
+                        isShowingFitDetails.toggle()
+                    }
+                } label: {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(AppLocalization.string("How this is calculated"))
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: SideSeatTheme.spaceSM)
+                        Image(systemName: "chevron.down")
+                            .rotationEffect(.degrees(isShowingFitDetails ? 180 : 0))
+                            .accessibilityHidden(true)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .font(.footnote)
+                .accessibilityValue(AppLocalization.string(isShowingFitDetails ? "Expanded" : "Collapsed"))
+                .accessibilityIdentifier("mutual-opportunity-fit-details-\(opportunity.id)")
+
+                // Let the containing card measure the full text height. The
+                // DisclosureGroup clipped its expanded multiline body.
+                if isShowingFitDetails {
                     VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                         Text(fit.breakdown)
+                            .fixedSize(horizontal: false, vertical: true)
                         Text(String(format: AppLocalization.string("%d minutes of shared availability"), fit.overlapMinutes))
+                            .fixedSize(horizontal: false, vertical: true)
                         Text(AppLocalization.string("This describes the activity, not the person or the chance of success. A lower score can still be worth trying."))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityIdentifier("mutual-opportunity-fit-disclaimer-\(opportunity.id)")
                     }
                     .font(.footnote)
                     .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .fixedSize(horizontal: false, vertical: true)
+                    .transition(.opacity)
                 }
-                .font(.footnote)
-                .accessibilityIdentifier("mutual-opportunity-fit-details-\(opportunity.id)")
             }
 
             HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
@@ -788,6 +818,7 @@ private struct MutualOpportunityCard: View {
                 .font(.footnote)
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("mutual-opportunity-match-explanation-\(opportunity.id)")
 
             if let course = opportunity.course {
                 Label(

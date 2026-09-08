@@ -904,7 +904,7 @@ struct DirectChatView: View {
                 actionPlanDraft = ActionPlanPresentation(
                     target: .legacyConnection(connectionID: connectionID),
                     draft: NativePlanDraft(
-                        title: conversationContext.context.title,
+                        title: conversationContext.context.localizedTitle,
                         startTime: conversationContext.context.startsAt,
                         endTime: conversationContext.context.endsAt,
                         location: conversationContext.context.location,
@@ -1899,7 +1899,7 @@ private struct MutualOpportunitySourceCard: View {
     var body: some View {
         SSFlowCard {
             SSFlowCardHeader(
-                title: context.title,
+                title: context.localizedTitle,
                 subtitle: AppLocalization.string("You both want to do this"),
                 systemImage: "person.2.fill",
                 tint: SideSeatTheme.statusSuccessText

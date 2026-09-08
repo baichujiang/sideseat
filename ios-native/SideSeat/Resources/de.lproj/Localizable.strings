@@ -1756,3 +1756,27 @@
 "Activity %d/50 · Time %d/30 · Language %d/10 · School %d/10" = "Aktivität %d/50 · Zeit %d/30 · Sprache %d/10 · Hochschule %d/10";
 "%d minutes of shared availability" = "%d Minuten gemeinsame freie Zeit";
 "This describes the activity, not the person or the chance of success. A lower score can still be worth trying." = "Der Wert beschreibt die Aktivität, nicht die Person oder die Erfolgschance. Auch ein niedrigerer Wert kann einen Versuch wert sein.";
+
+/* Server-generated Together opportunity titles; authored text stays unchanged. */
+"Coffee together" = "Gemeinsam Kaffee trinken";
+"Study together" = "Gemeinsam lernen";
+"Study side by side" = "Nebeneinander lernen";
+"Do sports together" = "Gemeinsam Sport machen";
+"Explore together" = "Gemeinsam entdecken";
+"Eat together" = "Gemeinsam essen";
+"Go to an event together" = "Gemeinsam eine Veranstaltung besuchen";
+"Play basketball together" = "Gemeinsam Basketball spielen";
+"Play badminton together" = "Gemeinsam Badminton spielen";
+"Play table tennis together" = "Gemeinsam Tischtennis spielen";
+"Play football together" = "Gemeinsam Fußball spielen";
+"Play volleyball together" = "Gemeinsam Volleyball spielen";
+"Play tennis together" = "Gemeinsam Tennis spielen";
+"Work out together" = "Gemeinsam trainieren";
+"Go running together" = "Gemeinsam laufen";
+"Go hiking together" = "Gemeinsam wandern";
+"Go cycling together" = "Gemeinsam Rad fahren";
+"Go swimming together" = "Gemeinsam schwimmen";
+"Go skiing together" = "Gemeinsam Ski fahren";
+"Go climbing together" = "Gemeinsam klettern";
+"Do yoga together" = "Gemeinsam Yoga machen";
+"%@ together" = "%@ zusammen";

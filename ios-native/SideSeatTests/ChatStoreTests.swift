@@ -330,6 +330,66 @@ struct ActionContextMessageAttributionTests {
 
 @Suite("Action-to-Plan inheritance")
 struct ActionToPlanInheritanceTests {
+    @Test("Generated opportunity titles localize without changing authored or saved titles")
+    func localizesGeneratedOpportunityTitle() throws {
+        let data = Data("""
+        {
+          "id":"opportunity", "policyVersion":"MUTUAL_OPPORTUNITY_V1", "topic":"EXPLORE",
+          "context": {
+            "version":1, "sourceKind":"MUTUAL_OPPORTUNITY", "sourceId":"opportunity",
+            "title":"Explore together", "startsAt":"2026-09-09T10:00:00Z",
+            "endsAt":"2026-09-09T10:30:00Z", "location":null, "planType":"CUSTOM",
+            "participantIds":["a","b"], "author":{"id":"a","displayName":"QA"}, "course":null,
+            "activityText":null, "sportTag":null, "sportOtherNote":null
+          }
+        }
+        """.utf8)
+        let source = try JSONDecoder().decode(NativeMutualOpportunitySource.self, from: data)
+        #expect(source.context.localizedTitle == AppLocalization.string("Explore together"))
+        #expect(source.planDraft.title == source.context.localizedTitle)
+        #expect(source.planDraft.origin == NativePlanOriginReference(kind: "MUTUAL_OPPORTUNITY", id: "opportunity"))
+        #expect(source.planDraft.startTime == source.context.startsAt)
+        #expect(source.planDraft.endTime == source.context.endsAt)
+        #expect(source.planDraft.participantIds == ["a", "b"])
+        #expect(source.context.title == "Explore together")
+
+        // Exact authored text may coincide with a translation key.
+        let authoredData = Data(String(decoding: data, as: UTF8.self)
+            .replacingOccurrences(of: "\"activityText\":null", with: "\"activityText\":\"Explore together\"").utf8)
+        let authored = try JSONDecoder().decode(NativeMutualOpportunitySource.self, from: authoredData)
+        #expect(authored.context.activityText == "Explore together")
+        #expect(authored.context.localizedTitle == "Explore together")
+        #expect(authored.planDraft.title == "Explore together")
+
+        let buddyData = Data(String(decoding: data, as: UTF8.self)
+            .replacingOccurrences(of: "\"sourceKind\":\"MUTUAL_OPPORTUNITY\"", with: "\"sourceKind\":\"BUDDY_POST\"").utf8)
+        let buddy = try JSONDecoder().decode(NativeMutualOpportunitySource.self, from: buddyData)
+        #expect(buddy.context.localizedTitle == "Explore together")
+    }
+
+    @Test("Every generated title has Chinese and German copy, including neutral related titles")
+    func generatedOpportunityTitleTranslations() {
+        let titles = [
+            "Coffee together", "Study together", "Study side by side", "Do sports together",
+            "Explore together", "Eat together", "Go to an event together", "Play basketball together",
+            "Play badminton together", "Play table tennis together", "Play football together",
+            "Play volleyball together", "Play tennis together", "Work out together", "Go running together",
+            "Go hiking together", "Go cycling together", "Go swimming together", "Go skiing together",
+            "Go climbing together", "Do yoga together", "%@ together",
+        ]
+        for language in [AppLanguage.simplifiedChinese, .german, .english] {
+            let bundle = AppLocalization.localizationBundle(for: language)
+            for title in titles {
+                let value = bundle.localizedString(forKey: title, value: nil, table: nil)
+                #expect(!value.isEmpty)
+                if language == .english { #expect(value == title) }
+                else { #expect(value != title) }
+            }
+        }
+        #expect(AppLocalization.localizationBundle(for: .simplifiedChinese)
+            .localizedString(forKey: "Explore together", value: nil, table: nil) == "一起探索")
+    }
+
     @Test("Plan draft inherits all available action fields and trusted origin reference")
     func inheritsActionContext() {
         let context = NativeActionContext(

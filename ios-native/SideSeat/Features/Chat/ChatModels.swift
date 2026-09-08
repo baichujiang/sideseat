@@ -951,9 +951,37 @@ struct NativeActionContext: Codable, Hashable, Sendable {
     let participantIds: [String]
     let author: NativeActionContextAuthor
     let course: NativeActionContextCourse?
+    var activityText: String? = nil
+    var sportTag: String? = nil
+    var sportOtherNote: String? = nil
 
     var startDate: Date? { startsAt.flatMap(Date.sideSeatChatISO8601) }
     var endDate: Date? { endsAt.flatMap(Date.sideSeatChatISO8601) }
+
+    /// Localize only server-generated opportunity titles, never authored text
+    /// or the title of a Plan that participants have already agreed on.
+    var localizedTitle: String {
+        guard sourceKind == "MUTUAL_OPPORTUNITY",
+              activityText?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty != false
+        else { return title }
+        if sportTag == "OTHER" {
+            guard let note = sportOtherNote?.trimmingCharacters(in: .whitespacesAndNewlines),
+                  !note.isEmpty
+            else { return title }
+            return String(format: AppLocalization.string("%@ together"), note)
+        }
+        switch title {
+        case "Coffee together", "Study together", "Study side by side",
+             "Do sports together", "Explore together", "Eat together", "Go to an event together",
+             "Play basketball together", "Play badminton together", "Play table tennis together",
+             "Play football together", "Play volleyball together", "Play tennis together",
+             "Work out together", "Go running together", "Go hiking together", "Go cycling together",
+             "Go swimming together", "Go skiing together", "Go climbing together", "Do yoga together":
+            return AppLocalization.string(String.LocalizationValue(title))
+        default:
+            return title
+        }
+    }
 }
 
 struct NativeActionInterest: Codable, Identifiable, Hashable, Sendable {
@@ -974,7 +1002,7 @@ struct NativeMutualOpportunitySource: Codable, Identifiable, Hashable, Sendable 
 
     var planDraft: NativePlanDraft {
         NativePlanDraft(
-            title: context.title,
+            title: context.localizedTitle,
             startTime: context.startsAt,
             endTime: context.endsAt,
             location: context.location,
