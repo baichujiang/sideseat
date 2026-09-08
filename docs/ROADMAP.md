@@ -82,18 +82,18 @@ Outcome answers compact and editable. These changes are included in
 QA accounts: Intent save, Plan send/accept, both Calendar entries and historical
 private Outcome saved/edit controls. This run wrote no Outcome answers and did
 not re-test a new Shared Encounter transition. Largest-text Intent interaction
-passed; Light/Dark screenshots were inspected, but the complete appearance
-navigation test is still pending because system banners repeatedly interrupted it.
-At the owner's request, subsequent UI work moved to a SideSeat-only simulator.
-The exact release source built successfully there; light Plan card/sheet
-inspection completed, but app relaunch/install stalled before either selected
-test case completed. Resolve that simulator execution issue and finish the UI
-regression without using the owner's phone. This is not a new passing UI suite.
-The focused simulator check passed (6 state tests and 7 UI tests); see the
+passed. System banners interrupted the physical appearance navigation test,
+so the remaining UI regression moved to a SideSeat-only simulator at the
+owner's request. After resolving that simulator's initial system migration
+stall, the exact release source `6a1c2f7` passed both selected Light/Dark tests
+at `2026-09-08T00:27:34Z`: 2 tests, 0 failures, 14 screenshots visually
+inspected. Coverage includes Together draft/back navigation, Plan rescheduling
+and private Outcome save/edit in local DEBUG fixtures. The owner's phone was
+not used. These fixture answers are not production or non-QA pilot evidence.
+The earlier feature-revision simulator check passed (6 state tests and 7 UI
+tests); see the
 [design verification](./DESIGN_SYSTEM.md#together--plan-verification--2026-09-08).
-Next release step: resolve the simulator launch stall and finish the appearance
-check in the SideSeat simulator, without occupying the owner's phone, then push
-the records when authorized,
+Next release step: push the release/acceptance records when authorized, then
 arrange actual TestFlight access for the intended non-QA testers (external beta
 review has not been performed), and continue real Plan use plus truthful
 bilateral Outcome answers. Check saved state/badge refresh on a genuinely ended
