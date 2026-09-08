@@ -68,7 +68,9 @@ Current gate status (2026-09-07): **open**. The production contract and the
 two-account physical-device acceptance path pass. The numeric Gate now requires
 at least 20 eligible non-QA Plans, 10 distinct pairs, 8 bilateral answers, 60%
 participant response coverage and 40% bilateral Plan coverage in two snapshots
-at least seven days apart. Continue the Layer 2 pilot as product validation.
+at least seven days apart. The owner clarified on 2026-09-08 that only internal
+QA is running and the real-user small-group pilot has not launched; preserve
+these measurement rules for a later separately authorized pilot.
 Owner decision on 2026-09-08: this real-user Gate no longer blocks Layer 3
 development and internal acceptance. It is not marked passed; public release
 still requires the release quality gate and separate authorization.

@@ -2,6 +2,13 @@
 
 **Status:** Open — product validation pending; Layer 3 internal development authorized
 
+**Owner clarification, 2026-09-08:** Only the owner is currently testing through
+internal QA accounts; the real-user small-group pilot has **not launched**.
+The measurement contract and existing weekly snapshot configuration are retained
+for a later owner-authorized pilot, not evidence of current external testers.
+Finish internal functional acceptance first. Do not recruit testers, launch the
+pilot or treat missing organic samples as a blocker for internal QA.
+
 **Decision:** Determine whether Outcome has enough real bilateral observation to
 support the Layer 3 repeat-opportunity experiment. This is an early-pilot
 readiness Gate, not a product-market-fit claim.
@@ -87,8 +94,10 @@ valid non-qualifying snapshot, not evidence of a negative Outcome rate.
 
 ## Next step
 
-Continue the Layer 2 pilot with real non-QA participants and run the next weekly
-snapshot no earlier than 2026-09-14 10:37:35 UTC. Keep collecting until two
+Complete owner-only internal QA. Launch a real non-QA pilot only when the owner
+authorizes it; it is not currently running. The existing earliest formal weekly
+snapshot remains 2026-09-14 10:37:35 UTC, and its automation has not been changed.
+Once real-user collection starts, keep collecting until two
 qualifying snapshots at least seven days apart exist. Only then update this
 document and `docs/ROADMAP.md` to mark the product-data Gate passed. Do not infer
 release approval or change the independent Layer 3 implementation status.

@@ -173,5 +173,7 @@ record and push when authorized after recording real results. The subsequent
 distribution step is owner-approved Build 34 external
 TestFlight assignment/Beta review, not automatic public publication. Complete
 remaining public-release monitoring/recovery and device requirements separately.
-Do not relabel Build 33 as containing Layer 3. Continue truthful non-QA usage in
-parallel; its product-data Gate is still open and QA is not qualifying evidence.
+Do not relabel Build 33 as containing Layer 3. The owner clarified that the
+real-user pilot has not launched: current work is owner-only internal QA.
+The organic product-data Gate stays open for a later authorized pilot, and QA
+is not qualifying evidence. Do not launch external testing as part of this run.
