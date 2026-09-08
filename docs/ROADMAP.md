@@ -145,8 +145,11 @@ external/public release was submitted. Build 33 does not contain this work. See
 Gate: repeat improves real encounters without materially increasing Block/report
 rates or starving newcomers of first opportunities.
 
-Next: preserve/push the scoped signed-device acceptance record when authorized,
-then obtain approval for Build 34 external TestFlight assignment/Beta review.
+Next: finish the owner-requested signed repeat Outcome closure after the new
+Plan's unchanged `2026-09-08T04:15:00Z` end time, following the staged phases in
+the Build 34 release record. Pre-end UI/DTO checks passed; after-end closure is
+not yet verified. Then preserve/push the scoped acceptance record when authorized
+and obtain approval for Build 34 external TestFlight assignment/Beta review.
 Do not automatically publish to the App Store. The weekly Layer 2
 automation keeps its original schedule but no longer re-blocks Layer 3
 development; the organic product-data Gate is still open. Full public-release

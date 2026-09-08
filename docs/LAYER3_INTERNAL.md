@@ -163,8 +163,14 @@ Layer 3 development or authorize any release. No new snapshot was collected.
 
 The implementation/release commits are pushed; the additive migration, backend,
 internal Build 34, Layer 3 activation and signed private/repeat-to-Calendar
-acceptance are complete. Preserve the scoped acceptance record and push when
-authorized. The next distribution step is owner-approved Build 34 external
+acceptance are complete. The owner subsequently requested completing the actual
+repeat Plan's Outcome as well. Next, resume the staged device/checker phases in
+the Build 34 record after its unchanged `2026-09-08T04:15:00Z` end time. Pre-end
+device/DTO checks passed; after-end phases are compiled but not executed. A new
+one-off heartbeat could not be added because this task already has the weekly
+pilot; that automation has not been changed. Preserve the scoped acceptance
+record and push when authorized after recording real results. The subsequent
+distribution step is owner-approved Build 34 external
 TestFlight assignment/Beta review, not automatic public publication. Complete
 remaining public-release monitoring/recovery and device requirements separately.
 Do not relabel Build 33 as containing Layer 3. Continue truthful non-QA usage in
