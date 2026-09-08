@@ -1,7 +1,9 @@
 # Layer 3 — internal implementation and acceptance
 
 **Status:** Implemented; local backend/HTTP and simulator acceptance passed on
-2026-09-08. Production remains disabled; signed TestFlight acceptance is pending.
+2026-09-08. The owner-authorized migration/backend release is deployed, Layer 3
+is enabled and TestFlight Build 34 is available internally. Signed two-account
+device acceptance is still pending; this is not public-release approval.
 
 **Owner decision:** 2026-09-08. Build the complete repeat flow and perform
 internal acceptance without waiting for real-user pilot samples. Do not claim
@@ -34,10 +36,16 @@ the Layer 2 product-data Gate passed or substitute QA data for organic usage.
 
 ## Release boundary
 
-`V2_MEET_AGAIN_ENABLED` defaults off and obeys the global kill switch. Internal
-tests enable it only against localhost PostgreSQL. Production migration,
+`V2_MEET_AGAIN_ENABLED` defaults off and obeys the global kill switch. Automated
+mutation tests enable it only against localhost PostgreSQL. Production migration,
 deployment, TestFlight upload and public release require separate authorization.
-Build 33 already submitted to Apple does not contain Layer 3.
+The owner subsequently authorized the migration/backend and internal Build 34
+release; these steps completed on 2026-09-08, including internal activation.
+See [Build 34 release evidence](./releases/2026-09-08-testflight-34.md) for backup,
+deployment, signature, Apple processing and production HTTP smoke evidence.
+Production smoke requested no Outcome or permission mutations. Build 33 already
+submitted to Apple does not contain Layer 3; no Build 34 external/public release
+was authorized or submitted.
 
 Disabling the flag stops creation/acceptance of repeat opportunities, including
 fallback to first-encounter matching for a pair with an ended accepted Plan.
@@ -126,9 +134,11 @@ Layer 3 development or authorize any release. No new snapshot was collected.
 
 ## Next step
 
-With separate owner authorization: push the pending commits, deploy the reviewed
-additive migration followed by the backend, prepare the next numbered native
-build for internal TestFlight, enable Layer 3 in the intended beta environment,
-and run signed two-account acceptance before external/public distribution.
+The pending implementation/release commits are pushed; the additive migration,
+backend, internal Build 34 and Layer 3 activation are complete. Next, arrange an
+explicitly available iPhone and run signed two-account TestFlight acceptance
+before external/public distribution. Do not use the owner's occupied phone or
+equate Apple's installation telemetry with completed acceptance. Verify private
+permission, fresh bilateral consent, a new accepted Plan and both Calendars.
 Do not relabel Build 33 as containing Layer 3. Continue the non-QA pilot in
 parallel; its product-data Gate is still open.

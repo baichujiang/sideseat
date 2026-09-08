@@ -7,7 +7,9 @@
 **Governing product:** [Product](./PRODUCT.md)
 
 **Current release evidence:**
-[Layer 2 production acceptance](./releases/2026-09-07-layer2-production-acceptance.md)
+[TestFlight Build 34 internal release](./releases/2026-09-08-testflight-34.md)
+(signed two-account Layer 3 acceptance pending); prior
+[Layer 2 production acceptance](./releases/2026-09-07-layer2-production-acceptance.md).
 
 ## Goal
 
@@ -117,10 +119,15 @@ See the [pilot Gate contract](./LAYER2_PILOT.md) and
 ## Layer 3 — Meet Again and Repeat Opportunity
 
 **Development status:** Implemented; local backend/HTTP and simulator acceptance
-passed on 2026-09-08 (67 backend/contract checks and 4 native tests). Production
-is still disabled, and Build 33 does not contain this work. Signed TestFlight
-acceptance remains pending. No production rollout is authorized by this decision. See
-[Layer 3 internal acceptance](./LAYER3_INTERNAL.md).
+passed on 2026-09-08 (67 backend/contract checks and 4 native tests). The owner
+subsequently authorized the migration, backend deployment and internal release:
+these are complete, `V2_MEET_AGAIN_ENABLED=1`, and Build 34 is processed and
+assigned to the existing one-tester internal group. Production two-account HTTP
+read smoke passed with the flag off and on; no Outcome/permission mutations
+were requested. Signed TestFlight acceptance remains pending. No Build 34
+external/public release was submitted. Build 33 does not contain this work. See
+[Layer 3 internal acceptance](./LAYER3_INTERNAL.md) and the
+[Build 34 release record](./releases/2026-09-08-testflight-34.md).
 
 - privately ask “Would you do something together again?” after the user's own
   occurred response;
@@ -133,11 +140,14 @@ acceptance remains pending. No production rollout is authorized by this decision
 Gate: repeat improves real encounters without materially increasing Block/report
 rates or starving newcomers of first opportunities.
 
-Next: with separate owner authorization, push the pending commits, apply the
-additive migration before deploying the backend, then upload the next native
-build for internal TestFlight acceptance. The weekly Layer 2 automation keeps
-its original schedule but no longer re-blocks Layer 3 development; the organic
-product-data Gate is still open.
+Next: arrange an explicitly available iPhone for signed Build 34 two-account
+acceptance of private Meet Again consent, a fresh opportunity, a new accepted
+Plan and both Calendars; do not operate the owner's occupied phone. Complete
+that acceptance before external/public distribution. The weekly Layer 2
+automation keeps its original schedule but no longer re-blocks Layer 3
+development; the organic product-data Gate is still open. Full public-release
+readiness, including outstanding monitoring/restore evidence, is not certified
+by an internal TestFlight upload.
 
 ## Layer 4 — controlled Pod
 
