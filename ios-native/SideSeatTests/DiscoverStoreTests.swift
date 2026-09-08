@@ -1155,6 +1155,135 @@ struct DiscoverStoreTests {
         #expect(store.assignmentIssue == nil)
     }
 
+    @Test("Together start succeeds, loads opportunities, and reads back matching state")
+    @MainActor
+    func togetherMatchingStartAndReadback() async {
+        let transport = TogetherCancellationTestTransport()
+        let session = makeSession(transport: transport)
+        await session.login(identifier: "test_001", password: "Password123")
+        let matching = TogetherMatchingSessionStore()
+        let opportunities = MutualOpportunityStore()
+
+        #expect(await matching.start(using: session))
+        await opportunities.load(using: session)
+        let readback = TogetherMatchingSessionStore()
+        await readback.load(using: session)
+
+        #expect(matching.session.isMatching(at: Date()))
+        #expect(readback.session == matching.session)
+        #expect(opportunities.opportunities.map(\.id) == ["cancel-regression-match"])
+        #expect(matching.issue == nil)
+        #expect(opportunities.issue == nil)
+        #expect(await transport.startCount == 1)
+    }
+
+    @Test("Together cancelled start must not expose a raw system error", arguments: TogetherTestCancellation.allCases)
+    @MainActor
+    func togetherCancelledStartDoesNotExposeSystemError(cancellation: TogetherTestCancellation) async {
+        // Model the response being cancelled after the server accepted the write.
+        // This does not assert that a real user's request was committed.
+        let transport = TogetherCancellationTestTransport(cancelledStart: cancellation)
+        let session = makeSession(transport: transport)
+        await session.login(identifier: "test_001", password: "Password123")
+        let matching = TogetherMatchingSessionStore()
+
+        #expect(await matching.start(using: session))
+        #expect(!matching.isMutating)
+        #expect(await transport.startCount == 1)
+        #expect(matching.session.isMatching(at: Date()))
+        #expect(await transport.statusReadCount == 1)
+
+        let readback = TogetherMatchingSessionStore()
+        await readback.load(using: session)
+        #expect(readback.session.isMatching(at: Date()))
+        #expect(readback.session.version == 1)
+        #expect(readback.issue == nil)
+        #expect(await transport.startCount == 1, "Readback must not repeat the start write")
+        #expect(matching.issue == nil, "Cancellation must not be shown as a matching failure")
+    }
+
+    @Test("Together cancelled opportunity refresh preserves the loaded match", arguments: TogetherTestCancellation.allCases)
+    @MainActor
+    func togetherCancelledOpportunityRefreshPreservesMatch(cancellation: TogetherTestCancellation) async {
+        let transport = TogetherCancellationTestTransport()
+        let session = makeSession(transport: transport)
+        await session.login(identifier: "test_001", password: "Password123")
+        let matching = TogetherMatchingSessionStore()
+        let opportunities = MutualOpportunityStore()
+
+        #expect(await matching.start(using: session))
+        await opportunities.load(using: session)
+        #expect(opportunities.opportunities.map(\.id) == ["cancel-regression-match"])
+
+        await transport.cancelNextOpportunityRefresh(with: cancellation)
+        await opportunities.load(using: session)
+
+        #expect(!opportunities.isLoading)
+        #expect(matching.session.isMatching(at: Date()))
+        #expect(await transport.startCount == 1)
+        #expect(opportunities.opportunities.map(\.id) == ["cancel-regression-match"])
+        #expect(opportunities.issue == nil, "Cancellation must not be shown as a matching failure")
+    }
+
+    @Test("A cancelled start that was not accepted must not report matching success")
+    @MainActor
+    func togetherCancelledStartReadsIdleWithoutReplaying() async {
+        let transport = TogetherCancellationTestTransport(cancelledStart: .task, acceptsStart: false)
+        let session = makeSession(transport: transport)
+        await session.login(identifier: "test_001", password: "Password123")
+        let matching = TogetherMatchingSessionStore()
+
+        #expect(!(await matching.start(using: session)))
+        #expect(!matching.session.isMatching(at: Date()))
+        #expect(matching.issue == nil)
+        #expect(await transport.startCount == 1)
+        #expect(await transport.statusReadCount == 1)
+    }
+
+    @Test("Cancelled Together background reads do not expose system errors", arguments: TogetherTestCancellation.allCases)
+    @MainActor
+    func togetherCancelledBackgroundReadsStayQuiet(cancellation: TogetherTestCancellation) async {
+        let transport = TogetherCancellationTestTransport()
+        let session = makeSession(transport: transport)
+        await session.login(identifier: "test_001", password: "Password123")
+        let matching = TogetherMatchingSessionStore()
+        let intents = WeeklyIntentStore()
+        let plans = PlansStore()
+
+        await transport.cancelNextRead(at: "/api/v1/me/together-matching-session", with: cancellation)
+        await matching.load(using: session)
+        #expect(matching.issue == nil)
+        #expect(!matching.isLoading)
+        await transport.cancelNextRead(at: "/api/v1/me/weekly-intents", with: cancellation)
+        await intents.load(using: session)
+        #expect(intents.issue == nil)
+        #expect(!intents.isLoading)
+        await transport.cancelNextRead(at: "/api/v1/plans", with: cancellation)
+        await plans.load(using: session)
+        #expect(plans.issue == nil)
+        #expect(!plans.isLoading)
+    }
+
+    @Test("An actually cancelled matching task leaves recovery to the next active load")
+    @MainActor
+    func togetherCancelledTaskRecoversOnNextLoad() async {
+        let transport = TogetherCancellationTestTransport(cancelledStart: .task, cancelsCallingTask: true)
+        let session = makeSession(transport: transport)
+        await session.login(identifier: "test_001", password: "Password123")
+        let matching = TogetherMatchingSessionStore()
+
+        let cancelledTask = Task { await matching.start(using: session) }
+        #expect(!(await cancelledTask.value))
+        #expect(cancelledTask.isCancelled)
+        #expect(matching.issue == nil)
+        #expect(await transport.statusReadCount == 0)
+        await matching.load(using: session)
+        #expect(matching.session.isMatching(at: Date()))
+        #expect(matching.issue == nil)
+        #expect(await transport.startCount == 1)
+        #expect(await transport.statusReadCount == 1)
+    }
+
     @MainActor
     private func makeSession(transport: any APITransport) -> SessionStore {
         SessionStore(
@@ -1184,6 +1313,90 @@ struct DiscoverStoreTests {
         #expect(!store.hasLoadedAssignment)
         #expect(!store.isLoadingAssignment)
         #expect(store.assignmentIssue == nil)
+    }
+}
+
+enum TogetherTestCancellation: CaseIterable, Sendable {
+    case task
+    case url
+
+    func raise() throws {
+        switch self {
+        case .task: throw CancellationError()
+        case .url: throw URLError(.cancelled)
+        }
+    }
+}
+
+private actor TogetherCancellationTestTransport: APITransport {
+    private let auth = AssignmentTestTransport(responses: [])
+    private let cancelledStart: TogetherTestCancellation?
+    private let acceptsStart: Bool
+    private let cancelsCallingTask: Bool
+    private var cancelledRefresh: TogetherTestCancellation?
+    private var cancelledRead: (path: String, cancellation: TogetherTestCancellation)?
+    private let startedAt = Date()
+    private(set) var startCount = 0
+    private(set) var statusReadCount = 0
+    private var matchingVersion = 0
+
+    init(
+        cancelledStart: TogetherTestCancellation? = nil,
+        acceptsStart: Bool = true,
+        cancelsCallingTask: Bool = false
+    ) {
+        self.cancelledStart = cancelledStart
+        self.acceptsStart = acceptsStart
+        self.cancelsCallingTask = cancelsCallingTask
+    }
+
+    func cancelNextOpportunityRefresh(with cancellation: TogetherTestCancellation) {
+        cancelledRefresh = cancellation
+    }
+
+    func cancelNextRead(at path: String, with cancellation: TogetherTestCancellation) {
+        cancelledRead = (path, cancellation)
+    }
+
+    func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+        if let cancelledRead, request.url?.path == cancelledRead.path {
+            self.cancelledRead = nil
+            try cancelledRead.cancellation.raise()
+        }
+        switch request.url?.path {
+        case "/api/v1/auth/login":
+            return try await auth.data(for: request)
+        case "/api/v1/me/together-matching-session":
+            if request.httpMethod == "POST" {
+                startCount += 1
+                if acceptsStart { matchingVersion += 1 }
+                if cancelsCallingTask { withUnsafeCurrentTask { $0?.cancel() } }
+                try cancelledStart?.raise()
+            } else {
+                statusReadCount += 1
+            }
+            let state = matchingVersion > 0 ? "MATCHING" : "IDLE"
+            return response(request, """
+            {"data":{"state":"\(state)","startedAt":"\(startedAt.ISO8601Format())",\
+            "matchingUntil":"\(startedAt.addingTimeInterval(48 * 60 * 60).ISO8601Format())",\
+            "stoppedAt":null,"version":\(matchingVersion)}}
+            """)
+        case "/api/v1/me/mutual-opportunities":
+            if let cancellation = cancelledRefresh {
+                cancelledRefresh = nil
+                try cancellation.raise()
+            }
+            return response(request, #"{"data":{"opportunities":[{"id":"cancel-regression-match","policyVersion":"v1","state":"NEEDS_DECISION","topic":"COFFEE","startsAt":"2026-09-09T10:00:00Z","endsAt":"2026-09-09T11:00:00Z","expiresAt":"2026-09-09T11:00:00Z","peer":{"displayName":"Test Peer","verifiedStudent":true,"sharedLanguages":["ENGLISH"]},"version":1}]}}"#)
+        default:
+            throw URLError(.unsupportedURL)
+        }
+    }
+
+    private func response(_ request: URLRequest, _ body: String) -> (Data, URLResponse) {
+        (Data(body.utf8), HTTPURLResponse(
+            url: request.url!, statusCode: 200, httpVersion: "HTTP/1.1",
+            headerFields: ["Content-Type": "application/json"]
+        )!)
     }
 }
 

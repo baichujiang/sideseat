@@ -12,6 +12,13 @@
 owner-authorized time-compressed QA fixture); prior
 [Layer 2 production acceptance](./releases/2026-09-07-layer2-production-acceptance.md).
 
+**Matching hotfix verified locally:** The reported `Swift.CancellationError`
+handling defect is fixed. Native regressions (9 cases), backend matching (8 tests)
+and the real local two-account intent → matching → Plan → both Calendars UI test
+pass. The fix is not yet committed, pushed or uploaded; TestFlight Build 34 still
+needs replacement before testers receive it. See the
+[matching regression record](./releases/2026-09-08-matching-cancellation-regression.md).
+
 ## Goal
 
 Prove that private action-first matching can produce safe, real and eventually
@@ -155,10 +162,12 @@ external/public release was submitted. Build 33 does not contain this work. See
 Gate: repeat improves real encounters without materially increasing Block/report
 rates or starving newcomers of first opportunities.
 
-Next: push the scoped acceptance documentation when authorized; the owner-requested
-signed repeat Outcome closure is now complete. Separately decide when to start
-the real-user small-group pilot and obtain approval for Build 34 external
-TestFlight assignment/Beta review.
+Next: commit/push the verified matching cancellation fix and its scoped tests/docs,
+then prepare and upload a replacement internal TestFlight build when authorized.
+Keep the unrelated plist edit and old archives out of the release. The signed repeat Outcome closure is
+complete and its scoped acceptance documentation was pushed through `cfb7f2a`.
+Separately decide when to start the real-user small-group pilot and obtain
+approval for external TestFlight assignment/Beta review.
 Do not automatically publish to the App Store. The weekly Layer 2
 automation keeps its original schedule but no longer re-blocks Layer 3
 development; the organic product-data Gate is still open. Full public-release

@@ -89,6 +89,8 @@ final class PlansStore {
         do {
             let response: APIEnvelope<NativePlansListPayload> = try await session.sendAuthorized("api/v1/plans")
             plans = response.data.plans
+        } catch is CancellationError {
+            return
         } catch {
             issue = error.localizedDescription
         }

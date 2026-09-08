@@ -32,6 +32,9 @@ final class MutualOpportunityStore {
                 "api/v1/me/mutual-opportunities"
             )
             opportunities = envelope.data.opportunities
+        } catch is CancellationError {
+            // A cancelled refresh says nothing about the already loaded matches.
+            return
         } catch {
             opportunities = []
             issue = error.localizedDescription

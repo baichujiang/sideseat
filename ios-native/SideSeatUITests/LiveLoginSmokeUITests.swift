@@ -724,11 +724,14 @@ final class SocialLiveUITests: XCTestCase {
         setIntent.tap()
         XCTAssertTrue(app.navigationBars["Set this week"].waitForExistence(timeout: 8))
 
-        let activityField = app.textFields["For example: coffee and a short walk"]
+        let activityField = app.textFields["intent-editor-activity"]
         XCTAssertTrue(activityField.waitForExistence(timeout: 5))
         activityField.tap()
         activityField.typeText(activity)
-        let save = app.navigationBars.buttons["Save"]
+        let next = app.buttons["intent-editor-next"]
+        XCTAssertTrue(waitUntilEnabled(next, timeout: 5))
+        next.tap()
+        let save = app.buttons["intent-editor-save"]
         XCTAssertTrue(waitUntilEnabled(save, timeout: 5))
         save.tap()
 
@@ -748,6 +751,9 @@ final class SocialLiveUITests: XCTestCase {
             NSPredicate(format: "label IN %@", ["Stop matching", "停止匹配", "Matching stoppen"])
         ).firstMatch
         XCTAssertTrue(stopMatching.waitForExistence(timeout: 12))
+        XCTAssertFalse(app.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS %@", "Swift.CancellationError")
+        ).firstMatch.exists)
     }
 
     private func togetherYesButton(in app: XCUIApplication) -> XCUIElement {

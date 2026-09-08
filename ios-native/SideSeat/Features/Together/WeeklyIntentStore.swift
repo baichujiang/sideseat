@@ -30,6 +30,8 @@ final class WeeklyIntentStore {
                 "api/v1/me/weekly-intents"
             )
             intents = response.data.intents
+        } catch is CancellationError {
+            return
         } catch {
             issue = error.localizedDescription
         }
@@ -239,15 +241,7 @@ final class TogetherMatchingSessionStore {
         }
         #endif
 
-        do {
-            let response: APIEnvelope<NativeTogetherMatchingSession> =
-                try await userSession.sendAuthorized(
-                    "api/v1/me/together-matching-session"
-                )
-            session = response.data
-        } catch {
-            issue = error.localizedDescription
-        }
+        _ = await refreshSession(using: userSession)
     }
 
     func start(using userSession: SessionStore) async -> Bool {
@@ -282,6 +276,12 @@ final class TogetherMatchingSessionStore {
                 )
             session = response.data
             return true
+        } catch is CancellationError {
+            // The server may have accepted the write before its response was
+            // cancelled. Read the state once; never replay the start mutation.
+            guard !Task.isCancelled else { return false }
+            let refreshed = await refreshSession(using: userSession)
+            return refreshed && session.isMatching(at: Date())
         } catch {
             issue = error.localizedDescription
             return false
@@ -319,6 +319,24 @@ final class TogetherMatchingSessionStore {
                 )
             session = response.data
             return true
+        } catch is CancellationError {
+            guard !Task.isCancelled else { return false }
+            let refreshed = await refreshSession(using: userSession)
+            return refreshed && !session.isMatching(at: Date())
+        } catch {
+            issue = error.localizedDescription
+            return false
+        }
+    }
+
+    private func refreshSession(using userSession: SessionStore) async -> Bool {
+        do {
+            let response: APIEnvelope<NativeTogetherMatchingSession> =
+                try await userSession.sendAuthorized("api/v1/me/together-matching-session")
+            session = response.data
+            return true
+        } catch is CancellationError {
+            return false
         } catch {
             issue = error.localizedDescription
             return false
