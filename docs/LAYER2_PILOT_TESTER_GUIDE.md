@@ -16,11 +16,10 @@ that Build 33 is available to external testers.
 
 Before sending invitations:
 
-1. Complete Beta App Information and Beta App Review Information. Feedback
-   email, privacy-policy URL and reviewer contact fields were empty at this
-   check; sign-in information was not configured. The owner must choose the
-   review contact and authorize a dedicated reviewer login. Enter credentials
-   directly in App Store Connect, never in Git or this guide.
+1. Beta App Information and Beta App Review Information are saved as of
+   2026-09-08, including the owner-provided contact and existing QA reviewer
+   login. Both QA accounts passed authentication and remain excluded from the
+   pilot. Keep credentials in App Store Connect, never in Git or this guide.
 2. Add Build 33 to the existing external group and submit it for TestFlight
    Beta App Review with authorization. Verify approval and build availability
    before distributing the existing link to consenting participants.

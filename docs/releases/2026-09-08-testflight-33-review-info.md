@@ -1,11 +1,13 @@
-# Build 33 — TestFlight information draft
+# Build 33 — TestFlight review information
 
-**Status:** Entered in App Store Connect; not saved or submitted.
+**Status:** Saved in App Store Connect on 2026-09-08; external review not submitted.
 
-The Save button is disabled while required reviewer credentials are missing.
-The owner must supply the review contact and designate a dedicated review
-account. Do not invent those values, use real users' credentials or commit
-passwords. The browser form is retained for handoff.
+The owner supplied the reviewer contact and requested reuse of the existing
+test accounts. Both `test_001` and `test_002` authenticated successfully against
+the production native login API, with completed onboarding and student
+verification. The temporary verification sessions were revoked. No account was
+created and no Plan or Outcome was changed. These `test_` accounts are excluded
+from pilot measurements. Apple displayed Saved after the form was submitted.
 
 ## Public fields
 
@@ -15,8 +17,11 @@ passwords. The browser form is retained for handoff.
 - Privacy policy URL: `https://www.sideseat.de/privacy`.
 - Support reference: `https://www.sideseat.de/support`.
 - The three public pages returned HTTP 200 during this check.
-- Sign-in required: checked. Username and password remain unfilled.
-- Review contact name, phone and email remain unfilled.
+- Sign-in required: checked. Primary reviewer login: `test_001`; secondary QA
+  account for bilateral inspection: `test_002`. The reviewer password was entered
+  in Apple's sign-in field and is not reproduced in this document.
+- Review contact name, phone and email: owner-provided and saved in Apple.
+  Private contact details are not mirrored into this repository.
 
 ## Beta description — Simplified Chinese
 
@@ -35,6 +40,8 @@ SideSeat 帮助大学校园中的同学围绕具体活动和共同有空的时�
 
 ## Beta review notes — English
 
+Review access: the primary sign-in account is test_001. A second repository-owned QA account, test_002, is available for the two-participant flow and uses the same password as the primary account in the sign-in fields. Both accounts have completed onboarding and student verification. They are internal QA accounts, not real students, and are excluded from the non-QA pilot metrics.
+
 SideSeat is a campus activity-coordination app. Sign-in is required.
 
 Build 33 focuses on the Together and Plan flows. The four main tabs are Together, Calendar, Messages and Me.
@@ -51,7 +58,6 @@ Privacy policy: https://www.sideseat.de/privacy
 
 ## Next step
 
-Obtain the owner's review contact and dedicated reviewer credentials, complete
-and save the form, and read back the saved state. Submit external Beta App
+Add Build 33 to the existing external group and submit external Beta App
 Review only with authorization. No build/group assignment, invitation, review
 submission, production account creation or Outcome write occurred in this task.
