@@ -1,6 +1,6 @@
 # Layer 2 non-QA pilot tester guide
 
-**Status:** Prepared for TestFlight build `1.0.0` (33); external access pending
+**Status:** TestFlight build `1.0.0` (33) submitted; waiting for external Beta review
 
 **Gate:** Layer 3 remains blocked until the
 [Layer 2 pilot Gate](./LAYER2_PILOT.md) records two qualifying snapshots at
@@ -8,11 +8,13 @@ least seven days apart.
 
 ## TestFlight access prerequisite
 
-App Store Connect was checked on 2026-09-08. Build 33 is processed and assigned
-to `SideSeat Internal` (one tester). The existing external group
-`SideSeat 用户测试` has zero testers and zero builds. It already has a public
-invitation link with a displayed 100-tester limit, but that link is not evidence
-that Build 33 is available to external testers.
+Build 33 remains assigned to `SideSeat Internal` (one tester). With owner
+authorization, it was also added to the existing external group
+`SideSeat 用户测试` and submitted for Beta App Review. By
+`2026-09-08T00:49:26Z`, App Store Connect showed Waiting for Review, one external
+group build and zero external testers. The existing public invitation link and
+100-tester limit were unchanged. The link is not yet evidence of an available
+Build 33 download.
 
 Before sending invitations:
 
@@ -20,14 +22,17 @@ Before sending invitations:
    2026-09-08, including the owner-provided contact and existing QA reviewer
    login. Both QA accounts passed authentication and remain excluded from the
    pilot. Keep credentials in App Store Connect, never in Git or this guide.
-2. Add Build 33 to the existing external group and submit it for TestFlight
-   Beta App Review with authorization. Verify approval and build availability
-   before distributing the existing link to consenting participants.
+2. Wait for Beta App Review approval. Automatic tester notification was
+   deselected at submission, so manually start testing/notify testers after
+   approval. Verify external build availability before distributing the
+   existing link to consenting participants.
 3. Confirm the first external participant can accept the invitation and install
    `1.0.0 (33)` before treating recruitment as live. Do not give ordinary
    testers App Store Connect team access just to bypass external beta review.
 
-This check did not change group access, submit a review or send invitations.
+The authorized follow-up assigned Build 33 and submitted its review; it did not
+add testers, send invitations or change public-link settings. No production
+Plan or Outcome data was read or written.
 See Apple's [test information requirements](https://developer.apple.com/help/app-store-connect/test-a-beta-version/provide-test-information)
 and [external tester workflow](https://developer.apple.com/help/app-store-connect/test-a-beta-version/invite-external-testers).
 

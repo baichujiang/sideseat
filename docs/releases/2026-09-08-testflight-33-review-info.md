@@ -1,6 +1,7 @@
 # Build 33 — TestFlight review information
 
-**Status:** Saved in App Store Connect on 2026-09-08; external review not submitted.
+**Status:** Saved and submitted for external Beta App Review; Waiting for Review
+as of `2026-09-08T00:49:26Z`.
 
 The owner supplied the reviewer contact and requested reuse of the existing
 test accounts. Both `test_001` and `test_002` authenticated successfully against
@@ -58,6 +59,12 @@ Privacy policy: https://www.sideseat.de/privacy
 
 ## Next step
 
-Add Build 33 to the existing external group and submit external Beta App
-Review only with authorization. No build/group assignment, invitation, review
-submission, production account creation or Outcome write occurred in this task.
+The owner authorized the follow-up: Build 33 was added to `SideSeat 用户测试`
+and submitted to Apple. The group now contains one build and zero testers.
+Automatic tester notification was deselected; no invitation was sent and no
+public-link setting, production account, Plan or Outcome was changed.
+
+After Apple approval, manually start external testing/notify testers and verify
+that a consenting external participant can install Build 33 before wider
+recruitment. Approval and external installation are not yet verified. The
+Layer 2 non-QA Gate remains open; Layer 3 stays blocked.

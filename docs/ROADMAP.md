@@ -93,15 +93,18 @@ not used. These fixture answers are not production or non-QA pilot evidence.
 The earlier feature-revision simulator check passed (6 state tests and 7 UI
 tests); see the
 [design verification](./DESIGN_SYSTEM.md#together--plan-verification--2026-09-08).
-Release/acceptance commits through `cd3ebda` are now pushed. The next-step
-App Store Connect check found the existing external `SideSeat 用户测试` group
-has zero testers and zero builds; its invitation link alone does not grant
-Build 33 access. Beta metadata, owner-provided contact details and the verified
-repository QA reviewer login have now been saved in App Store Connect.
-Next: authorize Build 33 assignment and external Beta App Review, confirm Build 33
-installation for a consenting external tester, then continue real Plan use
-plus truthful bilateral Outcome answers. Check saved state/badge refresh on a genuinely ended
-Plan. The next formal Gate snapshot is no earlier than `2026-09-14T10:37:35Z`;
+Release/acceptance commits through `cd3ebda` are now pushed. Beta metadata,
+owner-provided contact details and the verified repository QA reviewer login
+are saved in App Store Connect. With owner authorization, Build 33 was added
+to the existing external `SideSeat 用户测试` group and submitted for Beta App
+Review. By `2026-09-08T00:49:26Z`, Apple showed Waiting for Review and the group
+contained one build and zero testers. Automatic tester notification was
+deselected; no invitations were sent and external installation is not yet verified.
+Next: obtain Apple approval, manually start external testing/notify testers,
+then confirm Build 33 installation for a consenting external tester before
+wider recruitment. Continue real Plan use plus truthful bilateral Outcome
+answers, checking saved state/badge refresh on a genuinely ended Plan.
+The next formal Gate snapshot is no earlier than `2026-09-14T10:37:35Z`;
 QA acceptance does not count toward that Gate or unlock Layer 3. The non-blocking
 English `Chat actions` VoiceOver label is tracked in the build-33 release record.
 See the [pilot Gate contract](./LAYER2_PILOT.md) and
