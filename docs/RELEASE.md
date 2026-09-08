@@ -155,7 +155,10 @@ Store submission additionally requires:
   kill switches and compatible older clients where appropriate.
 
 Current recorded build: [TestFlight 1.0.0 (36)](./releases/2026-09-08-testflight-36.md)
-(internal client available; activity-fit backend rollout and broader matching
-activation wait for both phones to confirm the update. Build 34's signed repeat
+(internal client available; both phone updates are owner-confirmed and the
+[activity-fit backend](./releases/2026-09-08-activity-fit-production.md) is live
+with broader matching enabled. Build 36 signed two-account matching-to-both-Calendars
+acceptance passed, with the documented QA time alignment and display follow-ups.
+Build 34's signed repeat
 Outcome acceptance remains historical evidence, not acceptance of Build 36.
 Public-release readiness still requires the separate checks above).

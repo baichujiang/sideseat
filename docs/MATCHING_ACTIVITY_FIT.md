@@ -3,13 +3,15 @@
 **Owner decision:** 2026-09-08 — improve matching coverage and show the degree of
 fit instead of only delivering extremely compatible opportunities.
 
-**Status:** Implemented locally; native, three-language visual and real-API
-two-account acceptance passed.
+**Status:** Implemented and enabled in production; local verification and the
+installed Build 36 two-account matching-to-both-Calendars acceptance passed.
 Feature commit `2ec160d` and Build 36 preparation `661866a` are pushed.
 The new internal client is uploaded, processed and available in `SideSeat Internal`;
 see the [Build 36 release record](./releases/2026-09-08-testflight-36.md).
-No production backend or flag has changed.
-Related matching must remain disabled until both test phones confirm Build 36.
+The owner confirmed both phones have Build 36. The reviewed production backend
+is now deployed with related matching enabled; both QA accounts passed the
+production API smoke. See the [production rollout record](./releases/2026-09-08-activity-fit-production.md)
+for signed-device acceptance status and the verified feature-off rollback.
 
 ## Eligibility before score
 
@@ -78,9 +80,10 @@ The owner authorized the native upload first; Build 36 accepts the existing
 backend's no-score responses. Before activating the new rules, deploy the
 reviewed additive backend with the flag off and confirm both test phones have
 Build 36, then enable the flag on a reviewed deployment and perform signed
-two-account acceptance. No production flag, data or deployment has been changed
-by the implementation/native-upload tasks. Uploading the client alone does not
-make server-generated scores or broader matches available.
+two-account acceptance. The implementation/native-upload tasks did not change
+production; the subsequent owner-confirmed rollout enabled it at `11:15 UTC`
+on September 8. Uploading the client alone does not make server-generated scores
+or broader matches available.
 Do not expose this policy to old external clients without a compatible client rollout.
 
 ## Verification
@@ -117,7 +120,8 @@ and the dedicated simulator; no real-user data or phones are used.
   was verified by the actual UI run above, not inferred from that skipped test.
 - TypeScript, ESLint, 13 OpenAPI contract tests, 170-operation route validation,
   Swift generation and all three localization plist checks passed.
-- Production or TestFlight-binary acceptance: not performed.
+- Production/TestFlight follow-up: see the separate rollout record linked above;
+  the checks in this section are the earlier local implementation evidence.
 
 These QA records do not count toward the organic pilot Gate.
 
@@ -141,6 +145,7 @@ Machine-local evidence (not uploaded release artifacts):
 - `docs/visual-qa/activity-fit-{zh-Hans,en,de}.png` and the corresponding
   `activity-fit-details-{zh-Hans,en,de}.png` (local ignored captures).
 
-**Next:** Confirm both test phones have Build 36, complete the reviewed backend
-rollout above, then perform signed two-account acceptance. Collect real intent-to-opportunity and Plan conversion
-evidence after rollout; this small QA run does not establish a real-world lift.
+**Next:** Collect real intent-to-opportunity and Plan conversion evidence with
+the existing internal testers on Build 36. Track the rollout record's narrow
+display follow-ups for the next change. A small QA run does not establish a
+real-world lift or pass the organic pilot Gate.

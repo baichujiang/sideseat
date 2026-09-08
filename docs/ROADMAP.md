@@ -8,8 +8,10 @@
 
 **Current release evidence:**
 [TestFlight Build 36 activity-fit client](./releases/2026-09-08-testflight-36.md)
-(uploaded, processed and available in `SideSeat Internal`; broader matching
-remains inactive until both phones confirm the update and backend rollout completes). Prior
+(uploaded, processed and available in `SideSeat Internal`; both phone updates are
+owner-confirmed and the [activity-fit backend rollout](./releases/2026-09-08-activity-fit-production.md)
+is live with broader matching enabled; signed two-account matching → Plan →
+both Calendars acceptance passed on the installed Build 36). Prior
 [TestFlight Build 35 matching hotfix](./releases/2026-09-08-testflight-35.md)
 (uploaded, processed and available in the existing internal group; physical-phone
 update and matching acceptance pending). Prior
@@ -23,7 +25,7 @@ handling defect is fixed. Native regressions (9 cases), backend matching (8 test
 and the real local two-account intent → matching → Plan → both Calendars UI test
 pass. The fix is committed and pushed as `a734117`; replacement internal
 TestFlight Build 35 is uploaded, processed and assigned to `SideSeat Internal`.
-Both test phones must update to 35 to receive the fix. See the
+Both test phones are now owner-confirmed on Build 36, which includes this fix. See the
 [Build 35 release record](./releases/2026-09-08-testflight-35.md) and
 [matching regression record](./releases/2026-09-08-matching-cancellation-regression.md).
 
@@ -43,10 +45,13 @@ Implementation and local verification passed: 32 compatibility/PostgreSQL checks
 native decoding/regressions, three-language cards and a real local two-account
 60/100 opportunity → Plan → both Calendars UI flow. Feature `2ec160d` and
 Build 36 preparation `661866a` are pushed; the internal client is uploaded.
-Production backend/flags remain unchanged. See [Activity-fit policy](./MATCHING_ACTIVITY_FIT.md).
-Next for this change: confirm both phones have Build 36, complete the reviewed
-backend rollout, then enable related matching and perform signed two-account
-acceptance. Client upload alone does not enable scores or broader matching.
+Both phone updates are owner-confirmed; the production backend is deployed and
+`V2_ACTIVITY_FIT_ENABLED=1` is active. Both QA accounts passed production-domain
+API smoke. See [Activity-fit policy](./MATCHING_ACTIVITY_FIT.md) and the rollout
+record above. Installed Build 36 acceptance passed with a real related 60/100
+opportunity, bilateral YES, accepted Plan and both Calendars. Next for this
+change: collect actual matching-to-Plan conversion evidence with internal
+testers; keep the recorded display follow-ups scoped to the next change.
 
 Current implementation foundation:
 
@@ -181,8 +186,9 @@ external/public release was submitted. Build 33 does not contain this work. See
 Gate: repeat improves real encounters without materially increasing Block/report
 rates or starving newcomers of first opportunities.
 
-Next: update both test phones through TestFlight to `1.0.0 (36)` and verify
-matching → private YES → accepted Plan → both Calendars on the signed binary.
+Next: both test phones are confirmed on `1.0.0 (36)` and signed two-account
+matching → private YES → accepted Plan → both Calendars acceptance passed.
+Use the enabled version with existing internal testers and collect conversion evidence.
 Keep the unrelated plist edit and old archives out of the release. The signed repeat Outcome closure is
 complete and its scoped acceptance documentation was pushed through `cfb7f2a`.
 Separately decide when to start the real-user small-group pilot and obtain
