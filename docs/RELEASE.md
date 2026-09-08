@@ -2,7 +2,7 @@
 
 **Status:** Current release procedure and go/no-go gate
 
-**Last updated:** 2026-09-02
+**Last updated:** 2026-09-08
 
 **Scope:** Shared database migrations, Vercel Production, native signing, TestFlight, App Store and recovery
 
@@ -124,6 +124,13 @@ Then run current Swift/unit/API/UI suites and attach artifacts. Required native
 coverage includes the changed end-to-end path, accessibility, largest Dynamic
 Type, Light/Dark and an actual signed-device smoke test. Build-specific failures
 cannot be waived by historical counts.
+
+Use an isolated simulator for iterative card, sheet, navigation and appearance
+checks. Record its source revision and fixture use separately from TestFlight
+evidence. Reserve physical-device access for checks that require it, such as
+the installed distribution build and production push delivery; do not repeatedly
+occupy the owner's phone for visual automation. If the phone is in use, continue
+simulator-capable checks and arrange any necessary physical follow-up explicitly.
 
 ## 8. TestFlight and App Store gate
 
