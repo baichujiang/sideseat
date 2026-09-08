@@ -7,6 +7,9 @@
 **Governing product:** [Product](./PRODUCT.md)
 
 **Current release evidence:**
+[TestFlight Build 37 title/disclosure fix](./releases/2026-09-08-testflight-37.md)
+(uploaded, processed and available in `SideSeat Internal`; phone updates and
+signed acceptance pending; production matching unchanged). Prior
 [TestFlight Build 36 activity-fit client](./releases/2026-09-08-testflight-36.md)
 (uploaded, processed and available in `SideSeat Internal`; both phone updates are
 owner-confirmed and the [activity-fit backend rollout](./releases/2026-09-08-activity-fit-production.md)
@@ -49,11 +52,13 @@ Both phone updates are owner-confirmed; the production backend is deployed and
 `V2_ACTIVITY_FIT_ENABLED=1` is active. Both QA accounts passed production-domain
 API smoke. See [Activity-fit policy](./MATCHING_ACTIVITY_FIT.md) and the rollout
 record above. Installed Build 36 acceptance passed with a real related 60/100
-opportunity, bilateral YES, accepted Plan and both Calendars. Next for this
-change: commit/push and release the [native title/disclosure fix](./releases/2026-09-08-native-title-disclosure-fix.md)
-when the owner requests release, then collect actual matching-to-Plan conversion
-evidence with internal testers. The native fix is local and not in the already
-distributed Build 36; production matching remains enabled and unchanged.
+opportunity, bilateral YES, accepted Plan and both Calendars. The
+[native title/disclosure fix](./releases/2026-09-08-native-title-disclosure-fix.md)
+is committed/pushed and available in internal Build 37. Next: update both phones
+and confirm the localized new Plan title and complete expanded explanation,
+then collect actual matching-to-Plan conversion evidence with internal testers.
+Production matching remains enabled and unchanged; Build 37 signed acceptance
+is not inferred from Build 36 or local QA.
 
 Current implementation foundation:
 

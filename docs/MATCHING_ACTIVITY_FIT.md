@@ -14,9 +14,10 @@ production API smoke. See the [production rollout record](./releases/2026-09-08-
 for signed-device acceptance status and the verified feature-off rollback.
 
 **Native display follow-up:** System-generated Plan titles and expanded fit
-details have been fixed locally; see the [native follow-up record](./releases/2026-09-08-native-title-disclosure-fix.md).
-This does not change the already distributed Build 36; a new internal client
-release is the next shipping step.
+details are fixed in [internal Build 37](./releases/2026-09-08-testflight-37.md),
+uploaded, processed and available; see the [native follow-up record](./releases/2026-09-08-native-title-disclosure-fix.md).
+Both phones must update before signed acceptance of this display fix. Production
+matching remains enabled and unchanged.
 
 ## Eligibility before score
 
@@ -150,7 +151,7 @@ Machine-local evidence (not uploaded release artifacts):
 - `docs/visual-qa/activity-fit-{zh-Hans,en,de}.png` and the corresponding
   `activity-fit-details-{zh-Hans,en,de}.png` (local ignored captures).
 
-**Next:** Commit/push and release the verified native display fix when the owner
-requests release, then collect real intent-to-opportunity and Plan conversion
+**Next:** Update both phones to Build 37 and confirm the localized new Plan title
+and expanded fit text, then collect real intent-to-opportunity and Plan conversion
 evidence with the existing internal testers. A small QA run does not establish
 a real-world lift or pass the organic pilot Gate.

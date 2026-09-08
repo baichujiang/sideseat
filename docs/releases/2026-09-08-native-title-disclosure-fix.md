@@ -1,7 +1,9 @@
 # Native generated-title localization and fit-details layout
 
-**Status:** Implemented locally; native, visual and real-API UI verification passed. Not committed,
-pushed, uploaded to TestFlight or installed on the owner's phones by this task.
+**Status:** Native, visual and real-API UI verification passed; fix `a5387f7`
+is committed/pushed and included in [TestFlight Build 37](./2026-09-08-testflight-37.md),
+processed and available in `SideSeat Internal`. Phone updates and signed Build 37
+acceptance remain pending. The verification below is local QA, not phone evidence.
 
 ## Fix
 
@@ -69,9 +71,8 @@ and `/tmp/sideseat-title-disclosure-{readback,cleanup,post-cleanup-readback}.log
 
 ## Next step
 
-Commit/push the scoped fix and publish the next internal TestFlight build when
-the owner requests release. Build 36 already installed on phones does not yet
-contain these native changes. After updating, confirm the new localized Plan
+Update both phones from Build 36 to the available internal Build 37, which
+contains these native changes. After updating, confirm the new localized Plan
 title and expanded details with internal testers; continue collecting real
 matching-to-Plan conversion evidence. This QA does not pass the organic Gate
 or authorize external/public release.

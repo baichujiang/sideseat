@@ -158,6 +158,7 @@ layout in the next focused display change. External/public rollout remains a
 separate approval and readiness decision.
 
 **Subsequent native follow-up:** The owner requested both display fixes; they
-are implemented locally in the [title/disclosure follow-up](./2026-09-08-native-title-disclosure-fix.md).
-A new internal TestFlight upload remains a separate next step. This does not
-rewrite the Build 36 screenshots, stored Plan titles or production evidence above.
+are implemented in the [title/disclosure follow-up](./2026-09-08-native-title-disclosure-fix.md)
+and available in [internal Build 37](./2026-09-08-testflight-37.md). Update both
+phones and confirm these displays next. This does not rewrite the Build 36
+screenshots, stored Plan titles or production evidence above.
