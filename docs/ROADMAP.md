@@ -8,7 +8,8 @@
 
 **Current release evidence:**
 [TestFlight Build 34 internal release](./releases/2026-09-08-testflight-34.md)
-(signed two-account private/repeat-to-Calendar acceptance passed); prior
+(signed two-account repeat Outcome/Shared Encounter closure passed using an
+owner-authorized time-compressed QA fixture); prior
 [Layer 2 production acceptance](./releases/2026-09-07-layer2-production-acceptance.md).
 
 ## Goal
@@ -115,7 +116,7 @@ The next formal Gate snapshot is no earlier than `2026-09-14T10:37:35Z`;
 QA acceptance does not count toward that product-data Gate. The non-blocking
 English `Chat actions` VoiceOver label is tracked in the build-33 release record.
 See the [pilot Gate contract](./LAYER2_PILOT.md) and
-[non-QA tester guide](./LAYER2_PILOT_TESTER_GUIDE.md) for the active pilot, and
+[non-QA tester guide](./LAYER2_PILOT_TESTER_GUIDE.md) for a later authorized pilot, and
 [acceptance record](./releases/2026-09-07-layer2-production-acceptance.md).
 
 ## Layer 3 — Meet Again and Repeat Opportunity
@@ -130,8 +131,15 @@ The subsequent owner-authorized signed Build 34 session on Baichu's iPhone
 passed private answers/withdrawal, fresh matching and consent, a new accepted
 Plan and both Calendar views, using only excluded QA accounts. One harness
 title assertion required continuation from the actual saved Plan; it did not
-require a product fix or duplicate Plan. The new future Plan remains unanswered
-and is not a second production Shared Encounter. No Build 34
+require a product fix or duplicate Plan. The owner subsequently authorized a
+time-compressed window for only that QA Plan and its two Calendars. Its signed
+Outcome closure passed by `2026-09-08T04:04:23.539Z`: both accounts' three private
+answers, all three history entrances, bilateral-only Shared Encounter creation,
+correction/removal, restoration and stable two-account relaunch readbacks.
+All answers came through TestFlight; no Outcome or encounter was injected into
+the database. Original source facts were preserved and new Meet Again consent
+remained unanswered. This is synthetic functional QA, not a real second meeting
+or qualifying pilot evidence. No Build 34
 external/public release was submitted. Build 33 does not contain this work. See
 [Layer 3 internal acceptance](./LAYER3_INTERNAL.md) and the
 [Build 34 release record](./releases/2026-09-08-testflight-34.md).
@@ -147,11 +155,10 @@ external/public release was submitted. Build 33 does not contain this work. See
 Gate: repeat improves real encounters without materially increasing Block/report
 rates or starving newcomers of first opportunities.
 
-Next: finish the owner-requested signed repeat Outcome closure after the new
-Plan's unchanged `2026-09-08T04:15:00Z` end time, following the staged phases in
-the Build 34 release record. Pre-end UI/DTO checks passed; after-end closure is
-not yet verified. Then preserve/push the scoped acceptance record when authorized
-and obtain approval for Build 34 external TestFlight assignment/Beta review.
+Next: push the scoped acceptance documentation when authorized; the owner-requested
+signed repeat Outcome closure is now complete. Separately decide when to start
+the real-user small-group pilot and obtain approval for Build 34 external
+TestFlight assignment/Beta review.
 Do not automatically publish to the App Store. The weekly Layer 2
 automation keeps its original schedule but no longer re-blocks Layer 3
 development; the organic product-data Gate is still open. Full public-release

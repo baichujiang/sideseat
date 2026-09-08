@@ -3,8 +3,10 @@
 **Status:** Implemented; local backend/HTTP and simulator acceptance passed on
 2026-09-08. The owner-authorized migration/backend release is deployed, Layer 3
 is enabled and TestFlight Build 34 is available internally. Signed two-account
-private/repeat-to-Calendar acceptance passed on Baichu's explicitly available
-iPhone on 2026-09-08; this is not public-release approval.
+acceptance passed on Baichu's explicitly available iPhone through the repeat
+Plan's Outcome and second Shared Encounter, including correction/restoration,
+on 2026-09-08. The final Plan used an owner-authorized time-compressed QA fixture;
+this is not organic pilot evidence or public-release approval.
 
 **Owner decision:** 2026-09-08. Build the complete repeat flow and perform
 internal acceptance without waiting for real-user pilot samples. Do not claim
@@ -121,10 +123,26 @@ actual saved QA Plan without duplicate writes. See the
 bundles, the retained failed-run log and limitations. This follows the complete
 device → API → persisted data → second-account UI path, not simulator fixtures.
 
-The new future Plan's Outcome remains unanswered, so this session does not claim
-a second production Shared Encounter. QA is excluded from organic pilot metrics;
-the product-data Gate, APNs/device matrix and public monitoring/recovery
-requirements remain independent. No external/public submission was made.
+The owner then explicitly allowed moving only the new QA Plan and its two
+Calendar time windows from `03:45–04:15Z` to `03:10–03:40Z`, with original facts
+saved and all other source/commitment/Intent state preserved. No Outcome was
+written by that transaction; every answer was subsequently submitted through
+the installed TestFlight Build 34 UI.
+
+By `2026-09-08T04:04:23.539Z`, both accounts had exercised no/skip/occurred from
+Together, Calendar history and Messages, with private saved-state relaunches.
+Only both OCCURRED produced the repeat Shared Encounter; a correction removed
+it and restoration produced exactly one. Final two-account reads retained the
+same record, both matching sessions were stopped, and old Meet Again permission
+did not carry forward. The source encounter and all original source facts were
+compared unchanged. Nine closure result bundles passed; two earlier harness
+assumptions and a temporary test-traffic login limit are recorded, not hidden.
+
+This completes the signed TestFlight → production → second-account functional
+closure using synthetic QA; it is not evidence of a real second meeting. QA is
+excluded from organic pilot metrics. The product-data Gate, APNs/device matrix
+and public monitoring/recovery requirements remain independent. No external or
+public submission was made and no automation was changed during closure.
 
 ### Reproduce the backend checks
 
@@ -162,16 +180,12 @@ Layer 3 development or authorize any release. No new snapshot was collected.
 ## Next step
 
 The implementation/release commits are pushed; the additive migration, backend,
-internal Build 34, Layer 3 activation and signed private/repeat-to-Calendar
-acceptance are complete. The owner subsequently requested completing the actual
-repeat Plan's Outcome as well. Next, resume the staged device/checker phases in
-the Build 34 record after its unchanged `2026-09-08T04:15:00Z` end time. Pre-end
-device/DTO checks passed; after-end phases are compiled but not executed. A new
-one-off heartbeat could not be added because this task already has the weekly
-pilot; that automation has not been changed. Preserve the scoped acceptance
-record and push when authorized after recording real results. The subsequent
-distribution step is owner-approved Build 34 external
-TestFlight assignment/Beta review, not automatic public publication. Complete
+internal Build 34, Layer 3 activation and signed acceptance through the repeat
+Outcome and second Shared Encounter are complete, including correction and
+private relaunch readbacks. The owner-authorized time compression is documented
+as synthetic QA, not organic usage. Next, push the scoped acceptance records
+when authorized. The subsequent distribution step is owner-approved Build 34
+external TestFlight assignment/Beta review, not automatic public publication. Complete
 remaining public-release monitoring/recovery and device requirements separately.
 Do not relabel Build 33 as containing Layer 3. The owner clarified that the
 real-user pilot has not launched: current work is owner-only internal QA.

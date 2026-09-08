@@ -155,5 +155,6 @@ Store submission additionally requires:
   kill switches and compatible older clients where appropriate.
 
 Current recorded build: [TestFlight 1.0.0 (34)](./releases/2026-09-08-testflight-34.md)
-(internal only; signed two-account private/repeat-to-Calendar acceptance passed;
+(internal only; signed two-account repeat Outcome/Shared Encounter closure passed
+with an owner-authorized synthetic QA time window, including correction/restoration;
 public-release readiness still requires the separate checks above).
