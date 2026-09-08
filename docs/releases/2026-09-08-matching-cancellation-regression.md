@@ -2,8 +2,9 @@
 
 **Current status: fixed and pushed as `a734117`; targeted native regression and
 real local two-account UI acceptance passed.** Replacement internal TestFlight
-Build 35 is being prepared under the owner's explicit upload authorization.
-Installed Build 34 has not changed. Track distribution in the
+Build 35 is uploaded, processed and available in `SideSeat Internal` under the
+owner's explicit upload authorization. Phones still on Build 34 must update.
+Track distribution in the
 [Build 35 release record](./2026-09-08-testflight-35.md).
 
 ## Fix and two-account acceptance — 2026-09-08
@@ -180,8 +181,8 @@ testing. Other simulators and both physical phones were left alone.
 
 ## Next step
 
-Finish the authorized Build 35 archive/upload, confirm existing internal-group
-availability, then update both test phones and verify matching on that binary.
+Update both test phones through TestFlight to `1.0.0 (35)` and verify matching
+on that signed binary; upload and existing internal-group availability are complete.
 Keep the unrelated plist change and old archives out of the release. The
 matching regression and local two-account flow pass; Build 34 must be updated
 before these fixes reach the owner/testers.

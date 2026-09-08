@@ -7,6 +7,9 @@
 **Governing product:** [Product](./PRODUCT.md)
 
 **Current release evidence:**
+[TestFlight Build 35 matching hotfix](./releases/2026-09-08-testflight-35.md)
+(uploaded, processed and available in the existing internal group; physical-phone
+update and matching acceptance pending). Prior
 [TestFlight Build 34 internal release](./releases/2026-09-08-testflight-34.md)
 (signed two-account repeat Outcome/Shared Encounter closure passed using an
 owner-authorized time-compressed QA fixture); prior
@@ -16,7 +19,8 @@ owner-authorized time-compressed QA fixture); prior
 handling defect is fixed. Native regressions (9 cases), backend matching (8 tests)
 and the real local two-account intent → matching → Plan → both Calendars UI test
 pass. The fix is committed and pushed as `a734117`; replacement internal
-TestFlight Build 35 is being prepared with the owner's authorization. See the
+TestFlight Build 35 is uploaded, processed and assigned to `SideSeat Internal`.
+Both test phones must update to 35 to receive the fix. See the
 [Build 35 release record](./releases/2026-09-08-testflight-35.md) and
 [matching regression record](./releases/2026-09-08-matching-cancellation-regression.md).
 
@@ -163,8 +167,8 @@ external/public release was submitted. Build 33 does not contain this work. See
 Gate: repeat improves real encounters without materially increasing Block/report
 rates or starving newcomers of first opportunities.
 
-Next: finish the authorized Build 35 archive/upload and confirm availability in
-the existing internal TestFlight group, then update both test phones and verify matching.
+Next: update both test phones through TestFlight to `1.0.0 (35)` and verify
+matching → private YES → accepted Plan → both Calendars on the signed binary.
 Keep the unrelated plist edit and old archives out of the release. The signed repeat Outcome closure is
 complete and its scoped acceptance documentation was pushed through `cfb7f2a`.
 Separately decide when to start the real-user small-group pilot and obtain
