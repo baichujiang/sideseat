@@ -405,8 +405,18 @@ final class SocialLiveUITests: XCTestCase {
     }
 
     func testTogetherIntentToMutualPlanAddsBothCalendars() {
+        runTogetherIntentToPlan(relatedActivities: false)
+    }
+
+    func testRelatedActivitiesShowFitAndReachBothCalendars() {
+        runTogetherIntentToPlan(relatedActivities: true)
+    }
+
+    private func runTogetherIntentToPlan(relatedActivities: Bool) {
         let timestamp = Int(Date().timeIntervalSince1970)
         let activity = "[live-ui] Coffee and a short walk \(timestamp)"
+        let peerActivity = relatedActivities ? "[live-ui] Coffee and conversation \(timestamp)" : activity
+        let contextTitle = relatedActivities ? "Coffee together" : activity
         let togetherArguments = [
             "--ui-testing-discover",
             "--ui-testing-language=en",
@@ -423,8 +433,20 @@ final class SocialLiveUITests: XCTestCase {
             username: "test_002",
             additionalLaunchArguments: togetherArguments
         )
-        createCoffeeIntentAndStartMatching(activity, in: secondParticipant)
+        createCoffeeIntentAndStartMatching(peerActivity, in: secondParticipant)
         let secondDecision = togetherYesButton(in: secondParticipant)
+        if relatedActivities {
+            let fit = secondParticipant.descendants(matching: .any).matching(
+                NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-fit-")
+            ).matching(NSPredicate(format: "label CONTAINS %@", "60/100")).firstMatch
+            XCTAssertTrue(fit.exists)
+            XCTAssertTrue(secondParticipant.staticTexts[activity].exists)
+            XCTAssertTrue(secondParticipant.staticTexts[peerActivity].exists)
+            let details = secondParticipant.descendants(matching: .any).matching(
+                NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-fit-details-")
+            ).firstMatch
+            XCTAssertTrue(details.exists)
+        }
         XCTAssertFalse(secondParticipant.buttons["Start planning"].exists)
         secondDecision.tap()
         XCTAssertTrue(
@@ -454,7 +476,7 @@ final class SocialLiveUITests: XCTestCase {
             firstReturn.staticTexts["You both want to do this"]
                 .waitForExistence(timeout: 12)
         )
-        XCTAssertTrue(firstReturn.staticTexts[activity].waitForExistence(timeout: 8))
+        XCTAssertTrue(firstReturn.staticTexts[contextTitle].waitForExistence(timeout: 8))
         let makePlan = firstReturn.buttons["Make a plan"]
         XCTAssertTrue(makePlan.waitForExistence(timeout: 8))
         makePlan.tap()
@@ -463,7 +485,7 @@ final class SocialLiveUITests: XCTestCase {
         let titleField = firstReturn.textFields["plan-create-title"]
         XCTAssertTrue(titleField.waitForExistence(timeout: 5))
         let planTitle = titleField.value as? String ?? ""
-        XCTAssertTrue(planTitle.hasPrefix("[live-ui] Coffee and a short walk"))
+        XCTAssertEqual(planTitle, contextTitle)
         let submit = firstReturn.buttons["plan-create-submit"]
         XCTAssertTrue(waitUntilEnabled(submit, timeout: 5))
         submit.tap()

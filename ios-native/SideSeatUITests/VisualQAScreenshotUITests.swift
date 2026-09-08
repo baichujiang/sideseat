@@ -13,6 +13,36 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
+    func testRelatedActivityFitInThreeLanguages() {
+        for (language, title, details) in [
+            ("zh-Hans", "活动匹配度", "匹配度怎么算"),
+            ("en", "Activity fit", "How this is calculated"),
+            ("de", "Aktivitätspassung", "So wird der Wert berechnet"),
+        ] {
+            let app = XCUIApplication()
+            app.launchArguments = [
+                "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-discover", "--ui-testing-weekly-intent",
+                "--ui-testing-mutual-opportunity", "--ui-testing-related-activity",
+                "--ui-testing-together-matching", "--ui-testing-language=\(language)",
+                "--ui-testing-appearance=\(language == "de" ? "dark" : "light")",
+            ]
+            app.launch()
+            let fit = app.descendants(matching: .any)["mutual-opportunity-fit-cmutualui0000000000000001"]
+            XCTAssertTrue(fit.waitForExistence(timeout: 8))
+            XCTAssertTrue(fit.label.contains(title))
+            XCTAssertTrue(fit.label.contains("60/100"))
+            saveScreenshot(app: app, name: "activity-fit-\(language)")
+            let explanation = app.buttons[details]
+            revealFlowElement(explanation, in: app)
+            explanation.tap()
+            XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "25/50")).firstMatch.exists)
+            saveScreenshot(app: app, name: "activity-fit-details-\(language)")
+            app.terminate()
+        }
+    }
+
+    @MainActor
     func testTogetherFlowEditorLightAndDark() {
         for appearance in ["light", "dark"] {
             let app = XCUIApplication()

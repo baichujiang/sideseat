@@ -19,6 +19,7 @@ import { normalizeSchoolCode } from "@/lib/constants/schools";
 import { prisma } from "@/lib/db/prisma";
 import { repeatEligibility } from "@/lib/plans/repeat-eligibility";
 import { isV2FeatureEnabled } from "@/lib/v2/feature-flags";
+import { activityFit, activityFitProjection } from "@/lib/v2/activity-fit";
 import {
   classifyActivityMatch,
   type ActivityMatchClassification,
@@ -220,6 +221,7 @@ function viewerProjection(row: OpportunityRow, viewerId: string) {
     state,
     topic: row.topic,
     matchKind: row.matchKind,
+    matchFit: activityFitProjection(row.contextSnapshot, viewerIsA),
     sharedContext: row.sharedContext,
     viewerStudyGoal: viewerIsA ? row.intentAStudyGoal : row.intentBStudyGoal,
     peerStudyGoal: viewerIsA ? row.intentBStudyGoal : row.intentAStudyGoal,
@@ -271,6 +273,10 @@ function contextSnapshot(options: {
   userA: LimitedUser;
   userB: LimitedUser;
   course: { id: string; code: string | null; name: string } | null;
+  activityFit: (ReturnType<typeof activityFit> & {
+    intentAActivityText: string | null;
+    intentBActivityText: string | null;
+  }) | null;
 }): Prisma.InputJsonObject {
   return {
     version: 1,
@@ -296,6 +302,7 @@ function contextSnapshot(options: {
     activityText: options.activityText,
     sportTag: options.sportTag,
     sportOtherNote: options.sportOtherNote,
+    activityFit: options.activityFit,
   };
 }
 
@@ -403,7 +410,9 @@ async function createCandidateOpportunity(options: {
 }): Promise<CreatedMutualOpportunityMatch | null> {
   const { ownerIntent, candidateIntent, now } = options;
   if (ownerIntent.topic !== candidateIntent.topic) return null;
-  const activityMatch = classifyActivityMatch(ownerIntent, candidateIntent);
+  const activityMatch = classifyActivityMatch(
+    ownerIntent, candidateIntent, isV2FeatureEnabled("v2ActivityFit"),
+  );
   if (!activityMatch) return null;
   if (
     (ownerIntent.courseId || candidateIntent.courseId) &&
@@ -430,6 +439,18 @@ async function createCandidateOpportunity(options: {
   const intentBId = ownerFirst ? candidateIntent.id : ownerIntent.id;
   const intentAActivity = ownerFirst ? activityMatch.first : activityMatch.second;
   const intentBActivity = ownerFirst ? activityMatch.second : activityMatch.first;
+  const fit = {
+    ...activityFit(activityMatch, (overlap.endAt.getTime() - overlap.startAt.getTime()) / 60_000),
+    intentAActivityText: ownerFirst ? ownerIntent.activityText : candidateIntent.activityText,
+    intentBActivityText: ownerFirst ? candidateIntent.activityText : ownerIntent.activityText,
+  };
+  // A related activity has no agreed concrete title yet; the Plan editor uses
+  // the shared topic, and the new card shows both original descriptions.
+  const sharedActivityText = fit.basis === "RELATED_ACTIVITY" ? null : ownerIntent.activityText;
+  // Pre-concrete legacy intents remain eligible under their old rules, but
+  // without a declared activity there is no basis for public activity points.
+  const fitSnapshot = ownerIntent.activityText || ownerIntent.studyGoal || ownerIntent.sportTag
+    ? fit : null;
 
   return prisma.$transaction(async (tx) =>
     withCanonicalConnectionScope(tx, userA.id, userB.id, async (scope) => {
@@ -589,6 +610,7 @@ async function createCandidateOpportunity(options: {
       if (hasOpenOccupation) return null;
 
       const placeholder = contextSnapshot({
+        activityFit: fitSnapshot,
         id: "pending",
         isRepeat: Boolean(repeat?.source),
         topic: ownerIntent.topic,
@@ -598,7 +620,7 @@ async function createCandidateOpportunity(options: {
         intentBStudyGoal: intentBActivity.displayStudyGoal,
         intentATogetherMode: intentAActivity.togetherMode,
         intentBTogetherMode: intentBActivity.togetherMode,
-        activityText: ownerIntent.activityText,
+        activityText: sharedActivityText,
         sportTag: ownerIntent.sportTag,
         sportOtherNote: ownerIntent.sportOtherNote,
         startsAt: overlap.startAt,
@@ -621,7 +643,7 @@ async function createCandidateOpportunity(options: {
           intentATogetherMode: intentAActivity.togetherMode,
           intentBTogetherMode: intentBActivity.togetherMode,
           courseId: ownerIntent.courseId,
-          activityText: ownerIntent.activityText,
+          activityText: sharedActivityText,
           sportTag: ownerIntent.sportTag,
           sportOtherNote: ownerIntent.sportOtherNote,
           startsAt: overlap.startAt,
@@ -641,6 +663,7 @@ async function createCandidateOpportunity(options: {
         where: { id: created.id },
         data: {
           contextSnapshot: contextSnapshot({
+            activityFit: fitSnapshot,
             id: created.id,
             isRepeat: Boolean(repeat?.source),
             topic: ownerIntent.topic,
@@ -650,7 +673,7 @@ async function createCandidateOpportunity(options: {
             intentBStudyGoal: intentBActivity.displayStudyGoal,
             intentATogetherMode: intentAActivity.togetherMode,
             intentBTogetherMode: intentBActivity.togetherMode,
-            activityText: ownerIntent.activityText,
+            activityText: sharedActivityText,
             sportTag: ownerIntent.sportTag,
             sportOtherNote: ownerIntent.sportOtherNote,
             startsAt: overlap.startAt,
@@ -811,26 +834,31 @@ export async function generateMutualOpportunitiesForUser(
   const ownerSchool = normalizeSchoolCode(owner.school);
   const created: CreatedMutualOpportunityMatch[] = [];
   for (const ownerIntent of ownerIntents) {
-    candidatePass:
-    for (const preferredMatchKind of ["EXACT_ACTIVITY", "SHARED_CONTEXT"] as const) {
-      for (const candidate of candidates) {
-        const activityMatch = classifyActivityMatch(ownerIntent, candidate);
-        if (activityMatch?.matchKind !== preferredMatchKind) continue;
-        const candidateSchool = normalizeSchoolCode(candidate.user.school);
-        const sameSchool =
-          ownerSchool !== null &&
-          candidateSchool !== null &&
-          ownerSchool === candidateSchool;
-        if (!sameSchool) continue;
-        const opportunity = await createCandidateOpportunity({
-          ownerIntent,
-          candidateIntent: candidate,
-          now,
-        });
-        if (opportunity) {
-          created.push(opportunity);
-          break candidatePass;
-        }
+    const rankedCandidates = candidates.flatMap((candidate) => {
+      const match = classifyActivityMatch(ownerIntent, candidate, isV2FeatureEnabled("v2ActivityFit"));
+      const overlap = earliestActionableOverlap(ownerIntent.timeWindows, candidate.timeWindows, now);
+      if (!match || !overlap) return [];
+      const fit = activityFit(match, (overlap.endAt.getTime() - overlap.startAt.getTime()) / 60_000);
+      return [{ candidate, fit }];
+    }).sort((left, right) => right.fit.score - left.fit.score ||
+      right.fit.activityPoints - left.fit.activityPoints);
+    // Scores rank feasible opportunities; there is deliberately no score cutoff.
+    // Stable ties retain the existing oldest-first order.
+    for (const { candidate } of rankedCandidates) {
+      const candidateSchool = normalizeSchoolCode(candidate.user.school);
+      const sameSchool =
+        ownerSchool !== null &&
+        candidateSchool !== null &&
+        ownerSchool === candidateSchool;
+      if (!sameSchool) continue;
+      const opportunity = await createCandidateOpportunity({
+        ownerIntent,
+        candidateIntent: candidate,
+        now,
+      });
+      if (opportunity) {
+        created.push(opportunity);
+        break;
       }
     }
   }

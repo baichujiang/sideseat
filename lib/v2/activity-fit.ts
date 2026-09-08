@@ -1,0 +1,55 @@
+import { z } from "zod";
+
+import type { ActivityMatchClassification } from "./mutual-opportunity-activity-compatibility";
+
+const activityFitSnapshotSchema = z.object({
+  policyVersion: z.literal("ACTIVITY_FIT_V1"),
+  basis: z.enum(["EXACT_ACTIVITY", "PARALLEL_STUDY", "RELATED_ACTIVITY"]),
+  score: z.number().int().min(0).max(100),
+  activityPoints: z.number().int().min(0).max(50),
+  timePoints: z.number().int().min(0).max(30),
+  languagePoints: z.literal(10),
+  schoolPoints: z.literal(10),
+  overlapMinutes: z.number().int().min(30),
+  intentAActivityText: z.string().max(80).nullable(),
+  intentBActivityText: z.string().max(80).nullable(),
+});
+
+/** An explainable activity-fit heuristic, never a person's rating or probability. */
+export function activityFit(
+  match: ActivityMatchClassification,
+  overlapMinutes: number,
+) {
+  const basis =
+    match.matchKind === "EXACT_ACTIVITY"
+      ? "EXACT_ACTIVITY"
+      : match.sharedContext === "PARALLEL_STUDY"
+        ? "PARALLEL_STUDY"
+        : "RELATED_ACTIVITY";
+  const activityPoints =
+    basis === "EXACT_ACTIVITY" ? 50 : basis === "PARALLEL_STUDY" ? 35 : 25;
+  const timePoints = Math.min(30, Math.floor(overlapMinutes / 2));
+  return {
+    policyVersion: "ACTIVITY_FIT_V1" as const,
+    basis,
+    score: activityPoints + timePoints + 20,
+    activityPoints,
+    timePoints,
+    languagePoints: 10 as const,
+    schoolPoints: 10 as const,
+    overlapMinutes: Math.floor(overlapMinutes),
+  };
+}
+
+export function activityFitProjection(snapshot: unknown, viewerIsA: boolean) {
+  if (!snapshot || typeof snapshot !== "object" || !("activityFit" in snapshot))
+    return null;
+  const parsed = activityFitSnapshotSchema.safeParse(snapshot.activityFit);
+  if (!parsed.success) return null;
+  const { intentAActivityText, intentBActivityText, ...fit } = parsed.data;
+  return {
+    ...fit,
+    viewerActivityText: viewerIsA ? intentAActivityText : intentBActivityText,
+    peerActivityText: viewerIsA ? intentBActivityText : intentAActivityText,
+  };
+}

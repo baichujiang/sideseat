@@ -47,8 +47,8 @@ test("automatic matching PostgreSQL test refuses non-local database targets", ()
   );
 });
 
-test(
-  "two explicit matching sessions produce a mutual Plan and two Calendar projections",
+for (const related of [false, true]) test(
+  `${related ? "60/100 related coffee activities" : "exact sports activities"}: two explicit sessions produce a mutual Plan and both Calendars`,
   { skip: localDatabaseUrl ? false : "requires localhost PostgreSQL" },
   async () => {
     assert.ok(localDatabaseUrl);
@@ -70,6 +70,8 @@ test(
     const userAId = `auto-match-${suffix}-a`;
     const userBId = `auto-match-${suffix}-b`;
     await db.$connect();
+    const previousFitFlag = process.env.V2_ACTIVITY_FIT_ENABLED;
+    process.env.V2_ACTIVITY_FIT_ENABLED = related ? "1" : "0";
 
     try {
       await db.user.createMany({
@@ -107,10 +109,11 @@ test(
         ? realNow
         : new Date(currentWeekExpiry.getTime() + 2 * 60 * 60_000);
       const startsAt = new Date(serviceNow.getTime() + 2 * 60 * 60_000);
-      const endsAt = new Date(startsAt.getTime() + 60 * 60_000);
+      const endsAt = new Date(startsAt.getTime() + (related ? 30 : 60) * 60_000);
       const input = {
-        topic: "SPORTS" as const,
-        sportTag: "BADMINTON" as const,
+        topic: related ? "COFFEE" as const : "SPORTS" as const,
+        sportTag: related ? undefined : "BADMINTON" as const,
+        activityText: related ? "喝咖啡" : undefined,
         courseId: null,
         timeWindows: [{
           startAt: startsAt.toISOString(),
@@ -121,9 +124,11 @@ test(
       };
 
       const first = await createWeeklyIntent(userAId, input, serviceNow);
-      const second = await createWeeklyIntent(userBId, input, serviceNow);
-      assert.equal(first.intent.sportTag, "BADMINTON");
-      assert.equal(second.intent.sportTag, "BADMINTON");
+      const second = await createWeeklyIntent(userBId, {
+        ...input, activityText: related ? "咖啡聊聊" : undefined,
+      }, serviceNow);
+      assert.equal(first.intent.sportTag, related ? null : "BADMINTON");
+      assert.equal(second.intent.sportTag, related ? null : "BADMINTON");
 
       assert.equal(
         await db.mutualOpportunity.count({
@@ -142,6 +147,11 @@ test(
         "one active session is not enough",
       );
       await activateMatchingSessions(db, [userBId]);
+      if (related) {
+        process.env.V2_ACTIVITY_FIT_ENABLED = "0";
+        assert.deepEqual(await generateMutualOpportunitiesForUser(userBId), [], "old-client rollout does not broaden early");
+        process.env.V2_ACTIVITY_FIT_ENABLED = "1";
+      }
       assert.equal(
         (await generateMutualOpportunitiesForUser(userBId)).length,
         1,
@@ -151,10 +161,21 @@ test(
       const opportunity = firstList.opportunities.find(
         (item) =>
           item.state === "NEEDS_DECISION" &&
-          item.sportTag === "BADMINTON",
+          item.viewerIntentId === first.intent.id,
       );
       assert.ok(opportunity, "the second active session should create the match");
       assert.equal(opportunity.viewerIntentId, first.intent.id);
+      assert.equal(opportunity.matchFit?.score, related ? 60 : 100);
+      assert.equal(opportunity.matchFit?.basis, related ? "RELATED_ACTIVITY" : "EXACT_ACTIVITY");
+      if (related) {
+        assert.equal(opportunity.activityText, null, "no fabricated agreed concrete action");
+        assert.equal(opportunity.matchFit?.viewerActivityText, "喝咖啡");
+        assert.equal(opportunity.matchFit?.peerActivityText, "咖啡聊聊");
+        const peer = (await listMutualOpportunities(userBId, false)).opportunities[0]!;
+        assert.equal(peer.matchFit?.score, 60);
+        assert.equal(peer.matchFit?.viewerActivityText, "咖啡聊聊");
+        assert.equal(peer.matchFit?.peerActivityText, "喝咖啡");
+      }
 
       await stopMatchingSessions(db, [userAId, userBId]);
       assert.equal(
@@ -172,6 +193,10 @@ test(
       });
       assert.equal(waiting.opportunity.state, "DECIDED");
       assert.equal(waiting.opportunity.viewerDecision, "YES");
+      const privatePeer = (await listMutualOpportunities(userBId, false)).opportunities[0]!;
+      assert.equal(privatePeer.viewerDecision, null);
+      assert.equal(privatePeer.state, "NEEDS_DECISION");
+      assert.equal(privatePeer.coordination, null);
       assert.equal(
         (await listMutualOpportunities(userAId, false)).opportunities.some(
           (item) => item.id === opportunity.id && item.state === "DECIDED",
@@ -202,11 +227,11 @@ test(
         userId: userAId,
         connectionId,
         receiverUserId: userBId,
-        title: "Play badminton together",
-        location: "TUM Sports Center",
+        title: related ? "Coffee together" : "Play badminton together",
+        location: related ? "Campus cafe" : "TUM Sports Center",
         startTime: startsAt.toISOString(),
         endTime: endsAt.toISOString(),
-        planType: "SPORTS",
+        planType: related ? "CUSTOM" : "SPORTS",
         origin: { kind: "MUTUAL_OPPORTUNITY", id: opportunity.id },
       });
       assert.equal(created.plan.status, "PENDING");
@@ -229,6 +254,8 @@ test(
           .map((userId) => ({ userId, projectionStatus: "ACTIVE" })),
       );
     } finally {
+      if (previousFitFlag === undefined) delete process.env.V2_ACTIVITY_FIT_ENABLED;
+      else process.env.V2_ACTIVITY_FIT_ENABLED = previousFitFlag;
       await db.user.deleteMany({
         where: { id: { in: [userAId, userBId] } },
       });
@@ -236,6 +263,24 @@ test(
     }
   },
 );
+
+test("legacy intents without concrete activity never receive invented activity points",
+  { skip: localDatabaseUrl ? false : "requires localhost PostgreSQL" }, async () => {
+    const { createWeeklyIntent } = await import("../../lib/v2/weekly-intents");
+    const { generateMutualOpportunitiesForUser, listMutualOpportunities } = await import("../../lib/v2/mutual-opportunities");
+    await withMatchingPair("legacy-fit", async ({ db, userAId, userBId }) => {
+      const { serviceNow, startsAt, endsAt } = await matchingWindow();
+      const input = { topic: "COFFEE" as const, activityText: "Coffee", courseId: null,
+        timeZone: "Europe/Berlin", timeWindows: [{ startAt: startsAt.toISOString(), endAt: endsAt.toISOString() }] };
+      const a = await createWeeklyIntent(userAId, input, serviceNow);
+      const b = await createWeeklyIntent(userBId, input, serviceNow);
+      // Model actual pre-concrete rows, which current input validators cannot create.
+      await db.weeklyIntent.updateMany({ where: { id: { in: [a.intent.id, b.intent.id] } }, data: { activityText: null } });
+      await activateMatchingSessions(db, [userAId, userBId]);
+      assert.equal((await generateMutualOpportunitiesForUser(userAId)).length, 1);
+      assert.equal((await listMutualOpportunities(userAId, false)).opportunities[0]?.matchFit, null);
+    });
+  });
 
 test(
   "parallel study goals create an explainable shared-context Plan and two Calendar projections",

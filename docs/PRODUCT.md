@@ -1,8 +1,8 @@
 # SideSeat Product
 
-**Status:** Frozen v1.0
+**Status:** Frozen v1.0 with approved activity-fit amendment (2026-09-08)
 
-**Last updated:** 2026-09-02
+**Last updated:** 2026-09-08
 
 **Scope:** Product positioning, canonical objects, information architecture, invariants, and non-goals
 
@@ -117,7 +117,9 @@ authorize a current acquisition surface.
 7. Opportunity generation uses explicit course, activity, language, school and
    user-declared social-time context only.
 8. A Mutual Opportunity is pair-scoped and symmetric. There is no creator,
-   candidate pool, ranking or winner.
+   public candidate pool or winner. The 2026-09-08 owner decision permits
+   explainable activity-fit scores and internal ordering of feasible opportunities,
+   not ratings or popularity ranking of people.
 9. One-sided consent is private and creates no chat, waiting indicator, message or
    disclosure of the other participant's state.
 10. Only current bilateral consent authorizes contextual coordination.
@@ -184,7 +186,7 @@ preferences and settings. Short-lived Intent editing remains primarily in Togeth
 ## 7. Current non-goals
 
 - public people or post browsing;
-- swipe matching, compatibility percentages or popularity ranking;
+- swipe matching, person compatibility/probability claims or popularity ranking;
 - followers, likes, online status or a Familiar Faces people wall;
 - unsolicited one-sided messaging;
 - course community, classmate directory or permanent Pod community;
@@ -195,6 +197,13 @@ preferences and settings. Short-lived Intent editing remains primarily in Togeth
 - additional Messenger features unrelated to real coordination.
 
 ## 8. Product-change rule
+
+Owner decision on 2026-09-08: broaden delivery beyond exact activity descriptions
+and show users the degree of fit. [Activity-fit policy](./MATCHING_ACTIVITY_FIT.md)
+defines the first implementation: related general-category activities are eligible,
+scores explain/order opportunities without a high-score delivery threshold, and
+hard eligibility plus bilateral consent remain intact. This changes the old
+no-score rule for activities only; it does not create a people-browsing surface.
 
 A proposal belongs in the active roadmap only when it strengthens a transition in
 the canonical loop without creating an overlapping state owner. Changing a frozen

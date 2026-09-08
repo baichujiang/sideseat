@@ -81,8 +81,8 @@ export function normalizeActivityText(value: string | null): string | null {
 }
 
 /**
- * General categories are only a navigation layer; matching still requires the
- * same concrete action. Two NULL values remain compatible solely for intents
+ * Checks exact normalized wording before the optional related-category pass.
+ * Two NULL values remain compatible solely for intents
  * created before concrete general activities were introduced.
  */
 export function generalActivityTextsAreCompatible(
@@ -133,6 +133,7 @@ function exact(
 export function classifyActivityMatch(
   first: ActivityMatchInput,
   second: ActivityMatchInput,
+  allowRelatedActivities = false,
 ): ActivityMatchClassification | null {
   if (first.topic !== second.topic) return null;
 
@@ -143,12 +144,17 @@ export function classifyActivityMatch(
   }
 
   if (first.topic !== "STUDY") {
-    return generalActivityTextsAreCompatible(
+    if (generalActivityTextsAreCompatible(
       first.activityText,
       second.activityText,
-    )
-      ? exact(first, second)
-      : null;
+    )) return exact(first, second);
+    // A shared category is an invitation to coordinate, not a claim that the
+    // concrete activities agree. Preserve both descriptions for the decision.
+    if (allowRelatedActivities && displayActivityText(first.activityText) &&
+      displayActivityText(second.activityText)) {
+      return { ...exact(first, second), matchKind: "SHARED_CONTEXT" };
+    }
+    return null;
   }
 
   const firstGoal = normalizeStudyGoal(first.studyGoal);

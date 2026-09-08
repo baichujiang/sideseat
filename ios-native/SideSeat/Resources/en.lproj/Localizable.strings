@@ -1748,3 +1748,12 @@
 "Private response" = "Private response";
 "Your answer stays private. Choose what actually happened." = "Your answer stays private. Choose what actually happened.";
 "Change answer" = "Change answer";
+
+/* Explainable activity fit */
+"Activity fit" = "Activity fit";
+"How this is calculated" = "How this is calculated";
+"Similar interests, details to agree" = "Similar interests, details to agree";
+"You chose the same category, but different activities. See if you can agree on something together." = "You chose the same category, but different activities. See if you can agree on something together.";
+"Activity %d/50 · Time %d/30 · Language %d/10 · School %d/10" = "Activity %d/50 · Time %d/30 · Language %d/10 · School %d/10";
+"%d minutes of shared availability" = "%d minutes of shared availability";
+"This describes the activity, not the person or the chance of success. A lower score can still be worth trying." = "This describes the activity, not the person or the chance of success. A lower score can still be worth trying.";

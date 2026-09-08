@@ -1748,3 +1748,12 @@
 "Private response" = "私密回答";
 "Your answer stays private. Choose what actually happened." = "你的回答仅自己可见，请按实际情况选择。";
 "Change answer" = "修改回答";
+
+/* Explainable activity fit */
+"Activity fit" = "活动匹配度";
+"How this is calculated" = "匹配度怎么算";
+"Similar interests, details to agree" = "方向相近，细节可商量";
+"You chose the same category, but different activities. See if you can agree on something together." = "你们选择了同一类别，但具体想做的事不同。看看能否商量出共同的活动。";
+"Activity %d/50 · Time %d/30 · Language %d/10 · School %d/10" = "活动 %d/50 · 时间 %d/30 · 语言 %d/10 · 学校 %d/10";
+"%d minutes of shared availability" = "共同有空 %d 分钟";
+"This describes the activity, not the person or the chance of success. A lower score can still be worth trying." = "分数只描述本次活动的契合程度，不是对人的评价，也不代表成功概率。分数较低的机会也值得看看。";

@@ -34,6 +34,16 @@ UI is ready.
 
 ## Layer 1 — close the first-encounter loop
 
+**Approved matching improvement (2026-09-08):** Broaden eligible general-category
+activities beyond exact wording and show an explainable activity-fit score.
+Implementation and local verification passed: 32 compatibility/PostgreSQL checks,
+native decoding/regressions, three-language cards and a real local two-account
+60/100 opportunity → Plan → both Calendars UI flow. Production and TestFlight
+Build 35 remain unchanged. See [Activity-fit policy](./MATCHING_ACTIVITY_FIT.md).
+Next for this change: commit/push and perform an authorized coordinated
+backend/internal-client release; enable related matching only after
+the existing testers update to a client that explains it correctly.
+
 Current implementation foundation:
 
 - multiple private Weekly Intents;
@@ -219,7 +229,7 @@ justify adding more matching surfaces.
 ## Frozen outside scope
 
 - public feed, generic publisher and save shelf;
-- person search, swipe deck, follower graph and compatibility score;
+- person search, swipe deck, follower graph and person compatibility scoring;
 - course roster, mega-chat and course community;
 - RSVP, collaborative calendar and complex attendee lifecycle;
 - People Match as an independent product object;

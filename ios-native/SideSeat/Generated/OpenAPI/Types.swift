@@ -8233,6 +8233,152 @@ internal enum Components {
                 ])
             }
         }
+        /// Frozen, symmetric activity-fit heuristic, not a person's rating or success probability. Scores order feasible opportunities; no minimum-score delivery gate. Null on historical opportunities without a snapshot.
+        ///
+        /// - Remark: Generated from `#/components/schemas/ActivityFit`.
+        internal struct ActivityFit: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/policyVersion`.
+            internal enum PolicyVersionPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case activityFitV1 = "ACTIVITY_FIT_V1"
+            }
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/policyVersion`.
+            internal var policyVersion: Components.Schemas.ActivityFit.PolicyVersionPayload
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/basis`.
+            internal enum BasisPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case exactActivity = "EXACT_ACTIVITY"
+                case parallelStudy = "PARALLEL_STUDY"
+                case relatedActivity = "RELATED_ACTIVITY"
+            }
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/basis`.
+            internal var basis: Components.Schemas.ActivityFit.BasisPayload
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/score`.
+            internal var score: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/activityPoints`.
+            internal var activityPoints: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/timePoints`.
+            internal var timePoints: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/languagePoints`.
+            internal enum LanguagePointsPayload: Int, Codable, Hashable, Sendable, CaseIterable {
+                case _10 = 10
+            }
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/languagePoints`.
+            internal var languagePoints: Components.Schemas.ActivityFit.LanguagePointsPayload
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/schoolPoints`.
+            internal enum SchoolPointsPayload: Int, Codable, Hashable, Sendable, CaseIterable {
+                case _10 = 10
+            }
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/schoolPoints`.
+            internal var schoolPoints: Components.Schemas.ActivityFit.SchoolPointsPayload
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/overlapMinutes`.
+            internal var overlapMinutes: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/viewerActivityText`.
+            internal var viewerActivityText: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/peerActivityText`.
+            internal var peerActivityText: Swift.String?
+            /// Creates a new `ActivityFit`.
+            ///
+            /// - Parameters:
+            ///   - policyVersion:
+            ///   - basis:
+            ///   - score:
+            ///   - activityPoints:
+            ///   - timePoints:
+            ///   - languagePoints:
+            ///   - schoolPoints:
+            ///   - overlapMinutes:
+            ///   - viewerActivityText:
+            ///   - peerActivityText:
+            internal init(
+                policyVersion: Components.Schemas.ActivityFit.PolicyVersionPayload,
+                basis: Components.Schemas.ActivityFit.BasisPayload,
+                score: Swift.Int,
+                activityPoints: Swift.Int,
+                timePoints: Swift.Int,
+                languagePoints: Components.Schemas.ActivityFit.LanguagePointsPayload,
+                schoolPoints: Components.Schemas.ActivityFit.SchoolPointsPayload,
+                overlapMinutes: Swift.Int,
+                viewerActivityText: Swift.String? = nil,
+                peerActivityText: Swift.String? = nil
+            ) {
+                self.policyVersion = policyVersion
+                self.basis = basis
+                self.score = score
+                self.activityPoints = activityPoints
+                self.timePoints = timePoints
+                self.languagePoints = languagePoints
+                self.schoolPoints = schoolPoints
+                self.overlapMinutes = overlapMinutes
+                self.viewerActivityText = viewerActivityText
+                self.peerActivityText = peerActivityText
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case policyVersion
+                case basis
+                case score
+                case activityPoints
+                case timePoints
+                case languagePoints
+                case schoolPoints
+                case overlapMinutes
+                case viewerActivityText
+                case peerActivityText
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.policyVersion = try container.decode(
+                    Components.Schemas.ActivityFit.PolicyVersionPayload.self,
+                    forKey: .policyVersion
+                )
+                self.basis = try container.decode(
+                    Components.Schemas.ActivityFit.BasisPayload.self,
+                    forKey: .basis
+                )
+                self.score = try container.decode(
+                    Swift.Int.self,
+                    forKey: .score
+                )
+                self.activityPoints = try container.decode(
+                    Swift.Int.self,
+                    forKey: .activityPoints
+                )
+                self.timePoints = try container.decode(
+                    Swift.Int.self,
+                    forKey: .timePoints
+                )
+                self.languagePoints = try container.decode(
+                    Components.Schemas.ActivityFit.LanguagePointsPayload.self,
+                    forKey: .languagePoints
+                )
+                self.schoolPoints = try container.decode(
+                    Components.Schemas.ActivityFit.SchoolPointsPayload.self,
+                    forKey: .schoolPoints
+                )
+                self.overlapMinutes = try container.decode(
+                    Swift.Int.self,
+                    forKey: .overlapMinutes
+                )
+                self.viewerActivityText = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .viewerActivityText
+                )
+                self.peerActivityText = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .peerActivityText
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "policyVersion",
+                    "basis",
+                    "score",
+                    "activityPoints",
+                    "timePoints",
+                    "languagePoints",
+                    "schoolPoints",
+                    "overlapMinutes",
+                    "viewerActivityText",
+                    "peerActivityText"
+                ])
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/MutualOpportunity`.
         internal struct MutualOpportunity: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/MutualOpportunity/id`.
@@ -8275,6 +8421,8 @@ internal enum Components {
             }
             /// - Remark: Generated from `#/components/schemas/MutualOpportunity/matchKind`.
             internal var matchKind: Components.Schemas.MutualOpportunity.MatchKindPayload
+            /// - Remark: Generated from `#/components/schemas/MutualOpportunity/matchFit`.
+            internal var matchFit: Components.Schemas.ActivityFit?
             /// - Remark: Generated from `#/components/schemas/MutualOpportunity/sharedContext`.
             internal enum SharedContextPayload: String, Codable, Hashable, Sendable, CaseIterable {
                 case parallelStudy = "PARALLEL_STUDY"
@@ -8360,6 +8508,7 @@ internal enum Components {
             ///   - state:
             ///   - topic:
             ///   - matchKind:
+            ///   - matchFit:
             ///   - sharedContext:
             ///   - viewerTogetherMode:
             ///   - peerTogetherMode:
@@ -8384,6 +8533,7 @@ internal enum Components {
                 state: Components.Schemas.MutualOpportunity.StatePayload,
                 topic: Components.Schemas.MutualOpportunity.TopicPayload,
                 matchKind: Components.Schemas.MutualOpportunity.MatchKindPayload,
+                matchFit: Components.Schemas.ActivityFit? = nil,
                 sharedContext: Components.Schemas.MutualOpportunity.SharedContextPayload? = nil,
                 viewerTogetherMode: Components.Schemas.MutualOpportunity.ViewerTogetherModePayload,
                 peerTogetherMode: Components.Schemas.MutualOpportunity.PeerTogetherModePayload,
@@ -8408,6 +8558,7 @@ internal enum Components {
                 self.state = state
                 self.topic = topic
                 self.matchKind = matchKind
+                self.matchFit = matchFit
                 self.sharedContext = sharedContext
                 self.viewerTogetherMode = viewerTogetherMode
                 self.peerTogetherMode = peerTogetherMode
@@ -8433,6 +8584,7 @@ internal enum Components {
                 case state
                 case topic
                 case matchKind
+                case matchFit
                 case sharedContext
                 case viewerTogetherMode
                 case peerTogetherMode
@@ -8479,6 +8631,10 @@ internal enum Components {
                 self.matchKind = try container.decode(
                     Components.Schemas.MutualOpportunity.MatchKindPayload.self,
                     forKey: .matchKind
+                )
+                self.matchFit = try container.decodeIfPresent(
+                    Components.Schemas.ActivityFit.self,
+                    forKey: .matchFit
                 )
                 self.sharedContext = try container.decodeIfPresent(
                     Components.Schemas.MutualOpportunity.SharedContextPayload.self,
@@ -8552,6 +8708,7 @@ internal enum Components {
                     "state",
                     "topic",
                     "matchKind",
+                    "matchFit",
                     "sharedContext",
                     "viewerTogetherMode",
                     "peerTogetherMode",

@@ -1747,3 +1747,12 @@
 "Private response" = "Private Antwort";
 "Your answer stays private. Choose what actually happened." = "Deine Antwort bleibt privat. Wähle aus, was tatsächlich passiert ist.";
 "Change answer" = "Antwort ändern";
+
+/* Explainable activity fit */
+"Activity fit" = "Aktivitätspassung";
+"How this is calculated" = "So wird der Wert berechnet";
+"Similar interests, details to agree" = "Ähnliche Interessen, Details noch offen";
+"You chose the same category, but different activities. See if you can agree on something together." = "Ihr habt dieselbe Kategorie, aber unterschiedliche Aktivitäten gewählt. Schaut, ob ihr euch auf etwas Gemeinsames einigen könnt.";
+"Activity %d/50 · Time %d/30 · Language %d/10 · School %d/10" = "Aktivität %d/50 · Zeit %d/30 · Sprache %d/10 · Hochschule %d/10";
+"%d minutes of shared availability" = "%d Minuten gemeinsame freie Zeit";
+"This describes the activity, not the person or the chance of success. A lower score can still be worth trying." = "Der Wert beschreibt die Aktivität, nicht die Person oder die Erfolgschance. Auch ein niedrigerer Wert kann einen Versuch wert sein.";

@@ -80,8 +80,10 @@ The system privately considers pairs whose users both have active matching
 sessions. It filters school, verification, language, time overlap, course,
 activity compatibility, Block, moderation and cooldown constraints.
 
-- General categories require the same normalized concrete action; a broad
-  category alone is not a current-client match.
+- General categories prefer the same normalized action. Under the approved
+  activity-fit rollout, different concrete actions within Coffee, Food, Explore
+  or Events may be offered as details-to-agree opportunities. Both original
+  descriptions are shown; an exact shared action is not fabricated.
 - Sports requires the same normalized concrete activity.
 - Study prefers the same goal.
 - Different Study goals may form a parallel-study Opportunity only when both
@@ -89,6 +91,8 @@ activity compatibility, Block, moderation and cooldown constraints.
 
 Each unoccupied Intent may have one current Opportunity. There is no global
 “maximum three matches” across unrelated Intents.
+Feasible opportunities are ordered by activity fit, with oldest-first ties.
+A lower score does not prevent delivery; no eligible active peer still means no match.
 
 ## 5. Decide on an Opportunity
 
@@ -96,12 +100,16 @@ An Opportunity card leads with:
 
 - the shared thing;
 - overlapping time context;
+- activity fit out of 100 and an expandable explanation of the activity, time,
+  common-language and same-school points; not a person rating or success probability;
+- for related activities, both participants' descriptions and a details-to-agree cue;
 - minimum identity/trust context such as verified school, shared course or shared
   language;
 - `愿意一起` and `暂时不要`.
 
-It does not show a compatibility score, candidate ranking, full profile or the
-other person's decision.
+It does not show a person's compatibility rating, candidate ranking, full profile
+or the other person's decision. Historical opportunities without a score snapshot
+do not display an invented score. See [Activity fit](./MATCHING_ACTIVITY_FIT.md).
 
 Decision behavior:
 

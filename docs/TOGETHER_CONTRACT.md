@@ -4,7 +4,7 @@
 
 **Policy:** `MUTUAL_OPPORTUNITY_V1`
 
-**Last updated:** 2026-09-02
+**Last updated:** 2026-09-08
 
 **Governing flow:** [User Flow](./USER_FLOW.md)
 
@@ -82,16 +82,23 @@ Calendar content is never queried.
 
 Compatibility rules:
 
-- general non-Study/non-Sports topics require the same normalized concrete
-  action; nullable legacy rows never consume a new concrete Intent;
+- general non-Study/non-Sports topics prefer the same normalized concrete
+  action; with `V2_ACTIVITY_FIT_ENABLED=1`, different concrete descriptions in
+  the same topic may create `SHARED_CONTEXT` with no parallel-study context;
+  nullable legacy rows never consume a new concrete Intent;
 - Sports requires the same normalized concrete activity; broad `SPORTS` alone is
   insufficient;
-- Study exact normalized goal ranks first;
+- activity fit orders feasible candidates; no minimum-score delivery filter;
+- Study exact normalized goal is preferred to parallel study at equal time fit;
 - different Study goals may match as `PARALLEL_STUDY` only when both users allow
   shared-context parallel study;
 - each currently unoccupied Intent may produce one current Opportunity;
 - there is no global maximum-three rule across unrelated Intents;
 - list reads and generation batches remain technically bounded.
+
+The [activity-fit policy](./MATCHING_ACTIVITY_FIT.md) defines weights, frozen
+snapshot fields and rollout. Related opportunities preserve both descriptions,
+use a neutral topic-level Plan title, and require coordination before commitment.
 
 ## 4. Opportunity and decision state
 
@@ -165,8 +172,10 @@ DELETE /api/v1/me/mutual-opportunities/{opportunityId}/decision
 
 ## 7. Privacy, retention and compatibility
 
-- No Intent note, raw decision, exact private location, ranking score or Calendar
+- No Intent note, raw decision, exact private location, person ranking or Calendar
   content enters another user's projection.
+- The approved activity-fit score and both relevant concrete activity texts may
+  enter that opportunity's projection; score is symmetric and independent of consent.
 - Account deletion cascades private Intents, decisions and Opportunities.
 - Historical source snapshots are minimized and privacy-filtered.
 - Unblock never resurrects an expired/unavailable Opportunity.
@@ -182,6 +191,8 @@ DELETE /api/v1/me/mutual-opportunities/{opportunityId}/decision
 - course membership and verification are rechecked server-side;
 - DST expiry is deterministic;
 - exact Sports and fuzzy parallel-Study behavior are covered;
+- lower-fit general activities reach bilateral consent, Plan and both Calendars;
+- fit scores/reasons are symmetric and do not reveal unilateral decisions;
 - both matching-session locks prevent stale-pair insertion;
 - one-sided YES remains invisible;
 - mutual activation creates one canonical Connection/source card;

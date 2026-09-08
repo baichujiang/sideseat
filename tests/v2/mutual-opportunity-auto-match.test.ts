@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { activityFit, activityFitProjection } from "../../lib/v2/activity-fit";
 
 import {
   classifyActivityMatch,
@@ -100,6 +101,40 @@ test("general categories match the same normalized concrete action", () => {
     classifyActivityMatch(base, { ...base, activityText: "Eat pizza" }),
     null,
   );
+});
+
+test("related general activities are eligible without exact wording when the rollout is enabled", () => {
+  for (const topic of ["COFFEE", "FOOD", "EXPLORE", "EVENTS"] as const) {
+    const base = { topic, activityText: "First activity", sportTag: null,
+      sportOtherNote: null, togetherMode: "SAME_ACTIVITY" as const, studyGoal: null };
+    const other = { ...base, activityText: "Another activity" };
+    assert.equal(classifyActivityMatch(base, other), null, "legacy rollout stays exact");
+    const match = classifyActivityMatch(base, other, true);
+    assert.equal(match?.matchKind, "SHARED_CONTEXT");
+    assert.equal(match?.sharedContext, null, "not falsely described as parallel study");
+    assert.equal(classifyActivityMatch(base, { ...other, activityText: null }, true), null);
+    assert.equal(classifyActivityMatch(base, { ...other, topic: "STUDY" }, true), null);
+  }
+});
+
+test("activity fit is symmetric, explainable and admits a 60/100 related opportunity", () => {
+  const base = { topic: "COFFEE" as const, activityText: "喝咖啡", sportTag: null,
+    sportOtherNote: null, togetherMode: "SAME_ACTIVITY" as const, studyGoal: null };
+  const peer = { ...base, activityText: "咖啡聊聊" };
+  const match = classifyActivityMatch(base, peer, true)!;
+  const fit = activityFit(match, 30);
+  assert.equal(fit.score, 60);
+  assert.equal(fit.activityPoints + fit.timePoints + fit.languagePoints + fit.schoolPoints, fit.score);
+  assert.deepEqual(fit, activityFit(classifyActivityMatch(peer, base, true)!, 30));
+  assert.equal(activityFit(classifyActivityMatch(base, base, true)!, 60).score, 100);
+  assert.equal(activityFit(classifyActivityMatch(base, base, true)!, 120).score, 100);
+  const snapshot = { activityFit: { ...fit, intentAActivityText: base.activityText,
+    intentBActivityText: peer.activityText }, privateNote: "not disclosed" };
+  assert.equal(activityFitProjection(snapshot, true)?.viewerActivityText, "喝咖啡");
+  assert.equal(activityFitProjection(snapshot, false)?.viewerActivityText, "咖啡聊聊");
+  assert.equal(activityFitProjection(snapshot, false)?.score, 60);
+  assert.equal(activityFitProjection({}, true), null, "never invent a score for history");
+  assert.ok(!JSON.stringify(activityFitProjection(snapshot, true)).includes("privateNote"));
 });
 
 test("same normalized study goal is an exact activity match", () => {
@@ -257,9 +292,9 @@ test("matcher persists an explainable shared-context snapshot and viewer-relativ
   const matcher = source("lib/v2/mutual-opportunities.ts");
   assert.match(
     matcher,
-    /for \(const preferredMatchKind of \["EXACT_ACTIVITY", "SHARED_CONTEXT"\]/,
+    /right\.fit\.score - left\.fit\.score/,
   );
-  assert.match(matcher, /const activityMatch = classifyActivityMatch\(ownerIntent, candidateIntent\)/);
+  assert.match(matcher, /const activityMatch = classifyActivityMatch\([\s\S]*ownerIntent, candidateIntent/);
   assert.match(matcher, /matchKind: activityMatch\.matchKind/);
   assert.match(matcher, /sharedContext: activityMatch\.sharedContext/);
   assert.match(matcher, /intentAStudyGoal: intentAActivity\.displayStudyGoal/);

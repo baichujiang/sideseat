@@ -9403,6 +9403,24 @@
         "properties": { "connectionId": { "type": "string" } },
         "required": ["connectionId"]
       },
+      "ActivityFit": {
+        "type": ["object", "null"],
+        "additionalProperties": false,
+        "description": "Frozen, symmetric activity-fit heuristic, not a person's rating or success probability. Scores order feasible opportunities; no minimum-score delivery gate. Null on historical opportunities without a snapshot.",
+        "properties": {
+          "policyVersion": { "type": "string", "const": "ACTIVITY_FIT_V1" },
+          "basis": { "type": "string", "enum": ["EXACT_ACTIVITY", "PARALLEL_STUDY", "RELATED_ACTIVITY"] },
+          "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "activityPoints": { "type": "integer", "minimum": 0, "maximum": 50 },
+          "timePoints": { "type": "integer", "minimum": 0, "maximum": 30 },
+          "languagePoints": { "type": "integer", "const": 10 },
+          "schoolPoints": { "type": "integer", "const": 10 },
+          "overlapMinutes": { "type": "integer", "minimum": 30 },
+          "viewerActivityText": { "type": ["string", "null"], "maxLength": 80 },
+          "peerActivityText": { "type": ["string", "null"], "maxLength": 80 }
+        },
+        "required": ["policyVersion", "basis", "score", "activityPoints", "timePoints", "languagePoints", "schoolPoints", "overlapMinutes", "viewerActivityText", "peerActivityText"]
+      },
       "MutualOpportunity": {
         "type": "object",
         "additionalProperties": false,
@@ -9414,6 +9432,7 @@
           "state": { "type": "string", "enum": ["NEEDS_DECISION", "DECIDED", "CLOSED", "READY_TO_COORDINATE", "UNAVAILABLE"] },
           "topic": { "type": "string", "enum": ["COFFEE", "STUDY", "SPORTS", "EXPLORE", "FOOD", "EVENTS"] },
           "matchKind": { "type": "string", "enum": ["EXACT_ACTIVITY", "SHARED_CONTEXT"] },
+          "matchFit": { "$ref": "#/components/schemas/ActivityFit" },
           "sharedContext": { "type": ["string", "null"], "enum": ["PARALLEL_STUDY", null] },
           "viewerTogetherMode": { "type": "string", "enum": ["SAME_ACTIVITY", "PARALLEL", "EITHER"] },
           "peerTogetherMode": { "type": "string", "enum": ["SAME_ACTIVITY", "PARALLEL", "EITHER"] },

@@ -57,7 +57,7 @@ test("matching uses private active intent context and hard eligibility filters",
   assert.doesNotMatch(service, /DEFAULT_SCHOOL/);
 });
 
-test("viewer projection never discloses the peer decision or ranking", () => {
+test("viewer projection exposes only explainable activity fit, never peer decisions or person ranking", () => {
   const service = source("lib/v2/mutual-opportunities.ts");
   const projection = service.slice(
     service.indexOf("function viewerProjection"),
@@ -68,7 +68,8 @@ test("viewer projection never discloses the peer decision or ranking", () => {
   assert.doesNotMatch(projection, /peerDecision/);
   assert.doesNotMatch(projection, /peerIntentId/);
   assert.doesNotMatch(projection, /peerId/);
-  assert.doesNotMatch(projection, /score|rank|compatibility/i);
+  assert.match(projection, /matchFit: activityFitProjection\(row.contextSnapshot, viewerIsA\)/);
+  assert.doesNotMatch(projection, /personScore|rank|compatibility/i);
   assert.doesNotMatch(projection, /decidedAt|createdAt|updatedAt/);
 });
 

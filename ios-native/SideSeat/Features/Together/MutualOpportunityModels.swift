@@ -28,6 +28,26 @@ struct NativeMutualOpportunityCoordination: Codable, Hashable, Sendable {
     let connectionId: String
 }
 
+struct NativeActivityFit: Codable, Hashable, Sendable {
+    let policyVersion: String
+    let basis: String
+    let score: Int
+    let activityPoints: Int
+    let timePoints: Int
+    let languagePoints: Int
+    let schoolPoints: Int
+    let overlapMinutes: Int
+    let viewerActivityText: String?
+    let peerActivityText: String?
+
+    var isRelatedActivity: Bool { basis == "RELATED_ACTIVITY" }
+    var breakdown: String {
+        String(format: AppLocalization.string(
+            "Activity %d/50 · Time %d/30 · Language %d/10 · School %d/10"
+        ), activityPoints, timePoints, languagePoints, schoolPoints)
+    }
+}
+
 struct NativeMutualOpportunity: Codable, Identifiable, Hashable, Sendable {
     let id: String
     let policyVersion: String
@@ -52,6 +72,7 @@ struct NativeMutualOpportunity: Codable, Identifiable, Hashable, Sendable {
     let coordination: NativeMutualOpportunityCoordination?
     let version: Int
     var isRepeat: Bool? = nil
+    var matchFit: NativeActivityFit? = nil
 
     var startDate: Date? { Date.sideSeatChatISO8601(startsAt) }
     var endDate: Date? { Date.sideSeatChatISO8601(endsAt) }
@@ -75,12 +96,16 @@ struct NativeMutualOpportunity: Codable, Identifiable, Hashable, Sendable {
     }
     var matchTitle: String {
         if isRepeat == true { return AppLocalization.string("Another chance to do something together") }
+        if matchFit?.isRelatedActivity == true { return AppLocalization.string("Similar interests, details to agree") }
         return effectiveMatchKind == .sharedContext
             ? AppLocalization.string("Same-place match")
             : AppLocalization.string("Same activity")
     }
     var matchExplanation: String {
-        effectiveMatchKind == .sharedContext
+        if matchFit?.isRelatedActivity == true {
+            return AppLocalization.string("You chose the same category, but different activities. See if you can agree on something together.")
+        }
+        return effectiveMatchKind == .sharedContext
             ? AppLocalization.string(
                 "You can study in the same place while working on different things."
             )

@@ -4,6 +4,37 @@ import Testing
 
 @Suite("Discover stores")
 struct DiscoverStoreTests {
+    @Test("Decodes an explainable activity fit and still supports existing opportunities")
+    @MainActor
+    func activityFitDecodingAndLegacyCompatibility() throws {
+        let base: [String: Any] = [
+            "id": "activity-fit-test", "policyVersion": "MUTUAL_OPPORTUNITY_V1",
+            "state": "NEEDS_DECISION", "topic": "COFFEE", "matchKind": "SHARED_CONTEXT",
+            "startsAt": "2026-09-09T10:00:00Z", "endsAt": "2026-09-09T10:30:00Z",
+            "expiresAt": "2026-09-09T09:45:00Z", "version": 1,
+            "peer": ["displayName": "Mia", "verifiedStudent": true, "sharedLanguages": ["ENGLISH"]],
+        ]
+        let decoder = JSONDecoder()
+        let legacy = try decoder.decode(NativeMutualOpportunity.self, from: JSONSerialization.data(withJSONObject: base))
+        #expect(legacy.matchFit == nil)
+        var scored = base
+        scored["matchFit"] = [
+            "policyVersion": "ACTIVITY_FIT_V1", "basis": "RELATED_ACTIVITY",
+            "score": 60, "activityPoints": 25, "timePoints": 15,
+            "languagePoints": 10, "schoolPoints": 10, "overlapMinutes": 30,
+            "viewerActivityText": "喝咖啡", "peerActivityText": "咖啡聊聊",
+        ] as [String: Any]
+        let opportunity = try decoder.decode(NativeMutualOpportunity.self, from: JSONSerialization.data(withJSONObject: scored))
+        #expect(opportunity.matchFit?.score == 60)
+        #expect(opportunity.matchFit?.isRelatedActivity == true)
+        #expect(opportunity.matchFit?.viewerActivityText == "喝咖啡")
+        #expect(opportunity.matchFit?.peerActivityText == "咖啡聊聊")
+        #expect(opportunity.matchTitle == AppLocalization.string("Similar interests, details to agree"))
+        #expect(opportunity.matchExplanation != AppLocalization.string("You both want to do the same activity."))
+        #expect(opportunity.needsViewerDecision)
+        #expect(!opportunity.isReadyToCoordinate)
+    }
+
     @Test("Derives plan status from both API state and expiry")
     func planStatusPresentation() {
         let now = Date(timeIntervalSince1970: 1_800_000_000)

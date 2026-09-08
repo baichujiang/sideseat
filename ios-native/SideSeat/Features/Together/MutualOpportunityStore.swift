@@ -129,14 +129,15 @@ final class MutualOpportunityStore {
 
 private extension NativeMutualOpportunity {
     static var uiTestingFixture: NativeMutualOpportunity {
+        let related = ProcessInfo.processInfo.arguments.contains("--ui-testing-related-activity")
         let start = Date().addingTimeInterval(26 * 60 * 60)
-        let end = start.addingTimeInterval(60 * 60)
+        let end = start.addingTimeInterval((related ? 30 : 60) * 60)
         return NativeMutualOpportunity(
             id: "cmutualui0000000000000001",
             policyVersion: "MUTUAL_OPPORTUNITY_V1",
             state: "NEEDS_DECISION",
             viewerIntentId: nil,
-            topic: .study,
+            topic: related ? .coffee : .study,
             activityText: nil,
             sportTag: nil,
             sportOtherNote: nil,
@@ -145,8 +146,8 @@ private extension NativeMutualOpportunity {
             viewerStudyGoal: "Review for the algorithms exam",
             peerStudyGoal: "Finish an algorithms problem set",
             matchKind: .sharedContext,
-            sharedContext: .parallelStudy,
-            course: NativeMutualOpportunityCourse(
+            sharedContext: related ? nil : .parallelStudy,
+            course: related ? nil : NativeMutualOpportunityCourse(
                 id: "cui-course",
                 code: "IN0007",
                 name: "Algorithms"
@@ -164,7 +165,13 @@ private extension NativeMutualOpportunity {
             ),
             viewerDecision: nil,
             coordination: nil,
-            version: 1
+            version: 1,
+            matchFit: related ? NativeActivityFit(
+                policyVersion: "ACTIVITY_FIT_V1", basis: "RELATED_ACTIVITY",
+                score: 60, activityPoints: 25, timePoints: 15,
+                languagePoints: 10, schoolPoints: 10, overlapMinutes: 30,
+                viewerActivityText: "喝咖啡", peerActivityText: "咖啡聊聊"
+            ) : nil
         )
     }
 }

@@ -739,6 +739,33 @@ private struct MutualOpportunityCard: View {
 
     private var trustContext: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            if let fit = opportunity.matchFit {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(AppLocalization.string("Activity fit"))
+                        .font(.subheadline.weight(.semibold))
+                    Spacer()
+                    Text("\(fit.score)/100")
+                        .font(.title3.weight(.bold))
+                        .monospacedDigit()
+                }
+                .foregroundStyle(SideSeatTheme.textPrimary)
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("mutual-opportunity-fit-\(opportunity.id)")
+
+                DisclosureGroup(AppLocalization.string("How this is calculated")) {
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                        Text(fit.breakdown)
+                        Text(String(format: AppLocalization.string("%d minutes of shared availability"), fit.overlapMinutes))
+                        Text(AppLocalization.string("This describes the activity, not the person or the chance of success. A lower score can still be worth trying."))
+                    }
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
+                }
+                .font(.footnote)
+                .accessibilityIdentifier("mutual-opportunity-fit-details-\(opportunity.id)")
+            }
+
             HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
                 SSInlineStatus(
                     text: opportunity.matchTitle,
@@ -783,6 +810,16 @@ private struct MutualOpportunityCard: View {
                     ),
                     value: opportunity.peerStudyGoalTitle
                 )
+            } else if let fit = opportunity.matchFit, fit.isRelatedActivity {
+                if let activity = fit.viewerActivityText {
+                    explanationRow(title: AppLocalization.string("Your plan"), value: activity)
+                }
+                if let activity = fit.peerActivityText {
+                    explanationRow(
+                        title: String(format: AppLocalization.string("%@'s plan"), opportunity.peer.displayName),
+                        value: activity
+                    )
+                }
             }
         }
         .padding(SideSeatTheme.spaceMD)
