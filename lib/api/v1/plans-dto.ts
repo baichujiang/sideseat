@@ -16,6 +16,7 @@ export type PlanRequestV1Row = PlanRequest & {
     classmatePost: { coordinationPolicy: ActionCoordinationPolicy | null };
   } | null;
   outcomeResponses: Array<{ userId: string; value: PlanRequestV1Outcome }>;
+  meetAgainPermissions?: Array<{ userId: string; value: "YES" | "NO" | "WITHDRAWN" }>;
 };
 
 type PlanRequestV1Outcome = "OCCURRED" | "DID_NOT_OCCUR" | "PREFER_NOT_TO_SAY";
@@ -65,6 +66,12 @@ export function planRequestV1(plan: PlanRequestV1Row, viewerId?: string) {
           }
         : null,
     viewerOutcome,
+    viewerMeetAgain: viewerId
+      ? plan.meetAgainPermissions?.find((row) => row.userId === viewerId)?.value ?? null
+      : null,
+    meetAgainAvailable: process.env.V2_MEET_AGAIN_ENABLED === "1" &&
+      process.env.V2_GLOBAL_KILL_SWITCH !== "1" &&
+      viewerOutcome === "OCCURRED" && plan.status === "ACCEPTED" && plan.endTime <= new Date(),
     createdAt: plan.createdAt.toISOString(),
     updatedAt: plan.updatedAt.toISOString(),
   };
@@ -86,6 +93,9 @@ export const planRequestV1Include = {
     },
   },
   outcomeResponses: {
+    select: { userId: true, value: true },
+  },
+  meetAgainPermissions: {
     select: { userId: true, value: true },
   },
 } as const;

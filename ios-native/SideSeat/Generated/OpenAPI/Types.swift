@@ -521,6 +521,9 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /api/v1/discover/recommendations`.
     /// - Remark: Generated from `#/paths//api/v1/discover/recommendations/get(getActionRecommendations)`.
     func getActionRecommendations(_ input: Operations.GetActionRecommendations.Input) async throws -> Operations.GetActionRecommendations.Output
+    /// - Remark: HTTP `POST /api/v1/plans/{planId}/meet-again`.
+    /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/meet-again/post(recordPlanMeetAgain)`.
+    func recordPlanMeetAgain(_ input: Operations.RecordPlanMeetAgain.Input) async throws -> Operations.RecordPlanMeetAgain.Output
     /// - Remark: HTTP `POST /api/v1/plans/{planId}/outcome`.
     /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/outcome/post(recordPlanOutcome)`.
     func recordPlanOutcome(_ input: Operations.RecordPlanOutcome.Input) async throws -> Operations.RecordPlanOutcome.Output
@@ -2312,6 +2315,19 @@ extension APIProtocol {
         try await getActionRecommendations(Operations.GetActionRecommendations.Input(
             query: query,
             headers: headers
+        ))
+    }
+    /// - Remark: HTTP `POST /api/v1/plans/{planId}/meet-again`.
+    /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/meet-again/post(recordPlanMeetAgain)`.
+    internal func recordPlanMeetAgain(
+        path: Operations.RecordPlanMeetAgain.Input.Path,
+        headers: Operations.RecordPlanMeetAgain.Input.Headers,
+        body: Operations.RecordPlanMeetAgain.Input.Body
+    ) async throws -> Operations.RecordPlanMeetAgain.Output {
+        try await recordPlanMeetAgain(Operations.RecordPlanMeetAgain.Input(
+            path: path,
+            headers: headers,
+            body: body
         ))
     }
     /// - Remark: HTTP `POST /api/v1/plans/{planId}/outcome`.
@@ -8229,6 +8245,8 @@ internal enum Components {
             }
             /// - Remark: Generated from `#/components/schemas/MutualOpportunity/policyVersion`.
             internal var policyVersion: Components.Schemas.MutualOpportunity.PolicyVersionPayload
+            /// - Remark: Generated from `#/components/schemas/MutualOpportunity/isRepeat`.
+            internal var isRepeat: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/MutualOpportunity/state`.
             internal enum StatePayload: String, Codable, Hashable, Sendable, CaseIterable {
                 case needsDecision = "NEEDS_DECISION"
@@ -8338,6 +8356,7 @@ internal enum Components {
             ///   - id:
             ///   - viewerIntentId:
             ///   - policyVersion:
+            ///   - isRepeat:
             ///   - state:
             ///   - topic:
             ///   - matchKind:
@@ -8361,6 +8380,7 @@ internal enum Components {
                 id: Swift.String,
                 viewerIntentId: Swift.String,
                 policyVersion: Components.Schemas.MutualOpportunity.PolicyVersionPayload,
+                isRepeat: Swift.Bool? = nil,
                 state: Components.Schemas.MutualOpportunity.StatePayload,
                 topic: Components.Schemas.MutualOpportunity.TopicPayload,
                 matchKind: Components.Schemas.MutualOpportunity.MatchKindPayload,
@@ -8384,6 +8404,7 @@ internal enum Components {
                 self.id = id
                 self.viewerIntentId = viewerIntentId
                 self.policyVersion = policyVersion
+                self.isRepeat = isRepeat
                 self.state = state
                 self.topic = topic
                 self.matchKind = matchKind
@@ -8408,6 +8429,7 @@ internal enum Components {
                 case id
                 case viewerIntentId
                 case policyVersion
+                case isRepeat
                 case state
                 case topic
                 case matchKind
@@ -8441,6 +8463,10 @@ internal enum Components {
                 self.policyVersion = try container.decode(
                     Components.Schemas.MutualOpportunity.PolicyVersionPayload.self,
                     forKey: .policyVersion
+                )
+                self.isRepeat = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: .isRepeat
                 )
                 self.state = try container.decode(
                     Components.Schemas.MutualOpportunity.StatePayload.self,
@@ -8522,6 +8548,7 @@ internal enum Components {
                     "id",
                     "viewerIntentId",
                     "policyVersion",
+                    "isRepeat",
                     "state",
                     "topic",
                     "matchKind",
@@ -17071,6 +17098,23 @@ internal enum Components {
             }
             /// - Remark: Generated from `#/components/schemas/PlanRequest/viewerOutcome`.
             internal var viewerOutcome: Components.Schemas.PlanRequest.ViewerOutcomePayload?
+            /// Only the authenticated viewer's permission. Never counterpart state.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PlanRequest/viewerMeetAgain`.
+            internal enum ViewerMeetAgainPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case yes = "YES"
+                case no = "NO"
+                case withdrawn = "WITHDRAWN"
+                case _empty_ = ""
+            }
+            /// Only the authenticated viewer's permission. Never counterpart state.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PlanRequest/viewerMeetAgain`.
+            internal var viewerMeetAgain: Components.Schemas.PlanRequest.ViewerMeetAgainPayload?
+            /// Based only on feature availability and the viewer's own occurred answer.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PlanRequest/meetAgainAvailable`.
+            internal var meetAgainAvailable: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/PlanRequest/createdAt`.
             internal var createdAt: Foundation.Date
             /// - Remark: Generated from `#/components/schemas/PlanRequest/updatedAt`.
@@ -17097,6 +17141,8 @@ internal enum Components {
             ///   - scheduleShareLinkId:
             ///   - origin:
             ///   - viewerOutcome:
+            ///   - viewerMeetAgain: Only the authenticated viewer's permission. Never counterpart state.
+            ///   - meetAgainAvailable: Based only on feature availability and the viewer's own occurred answer.
             ///   - createdAt:
             ///   - updatedAt:
             internal init(
@@ -17119,6 +17165,8 @@ internal enum Components {
                 scheduleShareLinkId: Swift.String? = nil,
                 origin: Components.Schemas.PlanRequest.OriginPayload? = nil,
                 viewerOutcome: Components.Schemas.PlanRequest.ViewerOutcomePayload? = nil,
+                viewerMeetAgain: Components.Schemas.PlanRequest.ViewerMeetAgainPayload? = nil,
+                meetAgainAvailable: Swift.Bool? = nil,
                 createdAt: Foundation.Date,
                 updatedAt: Foundation.Date
             ) {
@@ -17141,6 +17189,8 @@ internal enum Components {
                 self.scheduleShareLinkId = scheduleShareLinkId
                 self.origin = origin
                 self.viewerOutcome = viewerOutcome
+                self.viewerMeetAgain = viewerMeetAgain
+                self.meetAgainAvailable = meetAgainAvailable
                 self.createdAt = createdAt
                 self.updatedAt = updatedAt
             }
@@ -17164,8 +17214,136 @@ internal enum Components {
                 case scheduleShareLinkId
                 case origin
                 case viewerOutcome
+                case viewerMeetAgain
+                case meetAgainAvailable
                 case createdAt
                 case updatedAt
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/MeetAgainRequest`.
+        internal struct MeetAgainRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/MeetAgainRequest/value`.
+            internal enum ValuePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case yes = "YES"
+                case no = "NO"
+                case withdrawn = "WITHDRAWN"
+            }
+            /// - Remark: Generated from `#/components/schemas/MeetAgainRequest/value`.
+            internal var value: Components.Schemas.MeetAgainRequest.ValuePayload
+            /// Creates a new `MeetAgainRequest`.
+            ///
+            /// - Parameters:
+            ///   - value:
+            internal init(value: Components.Schemas.MeetAgainRequest.ValuePayload) {
+                self.value = value
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case value
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.value = try container.decode(
+                    Components.Schemas.MeetAgainRequest.ValuePayload.self,
+                    forKey: .value
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "value"
+                ])
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/MeetAgainEnvelope`.
+        internal struct MeetAgainEnvelope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/MeetAgainEnvelope/data`.
+            internal struct DataPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/MeetAgainEnvelope/data/meetAgain`.
+                internal struct MeetAgainPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/components/schemas/MeetAgainEnvelope/data/meetAgain/planId`.
+                    internal var planId: Swift.String
+                    /// - Remark: Generated from `#/components/schemas/MeetAgainEnvelope/data/meetAgain/value`.
+                    internal enum ValuePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                        case yes = "YES"
+                        case no = "NO"
+                        case withdrawn = "WITHDRAWN"
+                    }
+                    /// - Remark: Generated from `#/components/schemas/MeetAgainEnvelope/data/meetAgain/value`.
+                    internal var value: Components.Schemas.MeetAgainEnvelope.DataPayload.MeetAgainPayload.ValuePayload
+                    /// - Remark: Generated from `#/components/schemas/MeetAgainEnvelope/data/meetAgain/updatedAt`.
+                    internal var updatedAt: Foundation.Date
+                    /// Creates a new `MeetAgainPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - planId:
+                    ///   - value:
+                    ///   - updatedAt:
+                    internal init(
+                        planId: Swift.String,
+                        value: Components.Schemas.MeetAgainEnvelope.DataPayload.MeetAgainPayload.ValuePayload,
+                        updatedAt: Foundation.Date
+                    ) {
+                        self.planId = planId
+                        self.value = value
+                        self.updatedAt = updatedAt
+                    }
+                    internal enum CodingKeys: String, CodingKey {
+                        case planId
+                        case value
+                        case updatedAt
+                    }
+                    internal init(from decoder: any Swift.Decoder) throws {
+                        let container = try decoder.container(keyedBy: CodingKeys.self)
+                        self.planId = try container.decode(
+                            Swift.String.self,
+                            forKey: .planId
+                        )
+                        self.value = try container.decode(
+                            Components.Schemas.MeetAgainEnvelope.DataPayload.MeetAgainPayload.ValuePayload.self,
+                            forKey: .value
+                        )
+                        self.updatedAt = try container.decode(
+                            Foundation.Date.self,
+                            forKey: .updatedAt
+                        )
+                        try decoder.ensureNoAdditionalProperties(knownKeys: [
+                            "planId",
+                            "value",
+                            "updatedAt"
+                        ])
+                    }
+                }
+                /// - Remark: Generated from `#/components/schemas/MeetAgainEnvelope/data/meetAgain`.
+                internal var meetAgain: Components.Schemas.MeetAgainEnvelope.DataPayload.MeetAgainPayload
+                /// Creates a new `DataPayload`.
+                ///
+                /// - Parameters:
+                ///   - meetAgain:
+                internal init(meetAgain: Components.Schemas.MeetAgainEnvelope.DataPayload.MeetAgainPayload) {
+                    self.meetAgain = meetAgain
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case meetAgain
+                }
+                internal init(from decoder: any Swift.Decoder) throws {
+                    let container = try decoder.container(keyedBy: CodingKeys.self)
+                    self.meetAgain = try container.decode(
+                        Components.Schemas.MeetAgainEnvelope.DataPayload.MeetAgainPayload.self,
+                        forKey: .meetAgain
+                    )
+                    try decoder.ensureNoAdditionalProperties(knownKeys: [
+                        "meetAgain"
+                    ])
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/MeetAgainEnvelope/data`.
+            internal var data: Components.Schemas.MeetAgainEnvelope.DataPayload
+            /// Creates a new `MeetAgainEnvelope`.
+            ///
+            /// - Parameters:
+            ///   - data:
+            internal init(data: Components.Schemas.MeetAgainEnvelope.DataPayload) {
+                self.data = data
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case data
             }
         }
         /// - Remark: Generated from `#/components/schemas/PlanWriteRequest`.
@@ -60197,6 +60375,286 @@ internal enum Operations {
             /// Stable API error.
             ///
             /// - Remark: Generated from `#/paths//api/v1/discover/recommendations/get(getActionRecommendations)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `POST /api/v1/plans/{planId}/meet-again`.
+    /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/meet-again/post(recordPlanMeetAgain)`.
+    internal enum RecordPlanMeetAgain {
+        internal static let id: Swift.String = "recordPlanMeetAgain"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/plans/{planId}/meet-again/POST/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/plans/{planId}/meet-again/POST/path/planId`.
+                internal var planId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - planId:
+                internal init(planId: Swift.String) {
+                    self.planId = planId
+                }
+            }
+            internal var path: Operations.RecordPlanMeetAgain.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/plans/{planId}/meet-again/POST/header`.
+            internal struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/plans/{planId}/meet-again/POST/header/Idempotency-Key`.
+                internal var idempotencyKey: Swift.String
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RecordPlanMeetAgain.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                internal init(
+                    idempotencyKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RecordPlanMeetAgain.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.RecordPlanMeetAgain.Input.Headers
+            /// - Remark: Generated from `#/paths/api/v1/plans/{planId}/meet-again/POST/requestBody`.
+            internal enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/plans/{planId}/meet-again/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.MeetAgainRequest)
+            }
+            internal var body: Operations.RecordPlanMeetAgain.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            internal init(
+                path: Operations.RecordPlanMeetAgain.Input.Path,
+                headers: Operations.RecordPlanMeetAgain.Input.Headers,
+                body: Operations.RecordPlanMeetAgain.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/plans/{planId}/meet-again/POST/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/plans/{planId}/meet-again/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.MeetAgainEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.MeetAgainEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.RecordPlanMeetAgain.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.RecordPlanMeetAgain.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Viewer-private, withdrawable permission saved. No counterpart state or notification.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/meet-again/post(recordPlanMeetAgain)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.RecordPlanMeetAgain.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.RecordPlanMeetAgain.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/meet-again/post(recordPlanMeetAgain)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/meet-again/post(recordPlanMeetAgain)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            internal var forbidden: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/meet-again/post(recordPlanMeetAgain)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/meet-again/post(recordPlanMeetAgain)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            internal var conflict: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/meet-again/post(recordPlanMeetAgain)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/meet-again/post(recordPlanMeetAgain)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses._Error)

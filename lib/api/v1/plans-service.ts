@@ -40,6 +40,8 @@ import {
 import { ACTION_TO_PLAN_EXPERIMENT_KEY } from "@/lib/v2/experiments";
 import { finalizeAcceptedMutualOpportunityPlan } from "@/lib/v2/mutual-opportunity-plan-lifecycle";
 import { finalizeStablePlanRevision } from "@/lib/v2/plan-lifecycle-finalizer";
+import { isV2FeatureEnabled } from "@/lib/v2/feature-flags";
+import { invalidatePendingRepeats } from "@/lib/plans/repeat-eligibility";
 
 export class PlansServiceError extends Error {
   constructor(
@@ -919,6 +921,64 @@ export async function recordPlanOutcome(options: {
       value: response.value,
       updatedAt: response.updatedAt.toISOString(),
     };
+  });
+}
+
+export async function recordPlanMeetAgain(options: {
+  userId: string;
+  planId: string;
+  value: "YES" | "NO" | "WITHDRAWN";
+}) {
+  if (options.value === "YES" && !isV2FeatureEnabled("v2MeetAgain")) {
+    throw new PlansServiceError("INVALID_REQUEST", "Meet Again is not available.");
+  }
+  return prisma.$transaction(async (tx) => {
+    const snapshot = await tx.planRequest.findUnique({
+      where: { id: options.planId },
+      select: { connectionId: true },
+    });
+    if (!snapshot) throw new PlansServiceError("NOT_FOUND", "Plan not found.");
+    try {
+      await lockLegacyPlanConnectionSafety(tx, {
+        connectionId: snapshot.connectionId,
+        actorId: options.userId,
+        allowEnded: options.value !== "YES",
+      });
+    } catch (cause) {
+      if (cause instanceof LegacyPlanTransitionConflictError) {
+        throw new PlansServiceError("CONTENT_RESTRICTED", "This plan is unavailable.");
+      }
+      throw cause;
+    }
+    // Outcome writers hold the same pair lock, so eligibility cannot change
+    // between this read and the private permission write.
+    const plan = await tx.planRequest.findFirst({
+      where: {
+        id: options.planId,
+        status: "ACCEPTED",
+        endTime: { lte: new Date() },
+        OR: [{ proposerUserId: options.userId }, { receiverUserId: options.userId }],
+        AND: [legacyParticipantVisibleWhere],
+      },
+      include: {
+        commitment: true,
+        outcomeResponses: { where: { userId: options.userId }, select: { value: true } },
+      },
+    });
+    if (!plan || (plan.commitment && (
+      plan.commitment.status !== "CONFIRMED" ||
+      plan.commitment.currentAcceptedRevisionId !== plan.id
+    )) || (options.value !== "WITHDRAWN" && plan.outcomeResponses[0]?.value !== "OCCURRED")) {
+      throw new PlansServiceError("INVALID_REQUEST", "Meet Again follows your own occurred answer.");
+    }
+    const permission = await tx.meetAgainPermission.upsert({
+      where: { planId_userId: { planId: plan.id, userId: options.userId } },
+      create: { planId: plan.id, userId: options.userId, value: options.value },
+      update: { value: options.value },
+    });
+    if (permission.value !== "YES") await invalidatePendingRepeats(tx, plan.id);
+    // Do not match, notify, or expose counterpart permission as a side effect.
+    return { planId: plan.id, value: permission.value, updatedAt: permission.updatedAt.toISOString() };
   });
 }
 

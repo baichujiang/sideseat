@@ -243,7 +243,10 @@ struct PlansRootView: View {
                 Divider()
                 PlanOutcomePromptView(
                     plan: plan,
-                    isSubmitting: store.mutatingOutcomeID == plan.id
+                    isSubmitting: store.mutatingOutcomeID == plan.id,
+                    onMeetAgain: { value in
+                        Task { await store.recordMeetAgain(value, for: plan.id, using: session) }
+                    }
                 ) { value in
                     Task {
                         await store.recordOutcome(value, for: plan.id, using: session)

@@ -11,6 +11,7 @@ struct PlanCardView: View {
     let onWithdraw: () -> Void
     let onCounter: () -> Void
     let onRecordOutcome: (String) -> Void
+    let onRecordMeetAgain: (String) -> Void
     let onOpenCalendar: () -> Void
 
     var body: some View {
@@ -105,6 +106,7 @@ struct PlanCardView: View {
                 PlanOutcomePromptView(
                     plan: plan,
                     isSubmitting: isActing,
+                    onMeetAgain: onRecordMeetAgain,
                     onAnswer: onRecordOutcome
                 )
             } else if plan.status == "ACCEPTED" {
@@ -245,6 +247,7 @@ struct PlanOutcomePromptView: View {
     @State private var isEditing = false
     let plan: NativePlanRequest
     let isSubmitting: Bool
+    var onMeetAgain: ((String) -> Void)? = nil
     let onAnswer: (String) -> Void
 
     var body: some View {
@@ -308,6 +311,11 @@ struct PlanOutcomePromptView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("plan-outcome-saved-\(plan.id)")
             }
+
+            if plan.showsMeetAgain, let onMeetAgain {
+                Divider()
+                PlanMeetAgainPromptView(plan: plan, isSubmitting: isSubmitting, onAnswer: onMeetAgain)
+            }
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("plan-outcome-\(plan.id)")
@@ -337,5 +345,63 @@ struct PlanOutcomePromptView: View {
         }
         .disabled(isSubmitting || isSelected)
         .accessibilityIdentifier("plan-outcome-\(value.lowercased())-\(plan.id)")
+    }
+}
+
+struct PlanMeetAgainPromptView: View {
+    @State private var isEditing = false
+    let plan: NativePlanRequest
+    let isSubmitting: Bool
+    let onAnswer: (String) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            Label("Would you meet again?", systemImage: "arrow.triangle.2.circlepath")
+                .font(.subheadline.weight(.semibold))
+            Text("Your choice is private. A future opportunity still needs new intentions and consent.")
+                .font(.footnote)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .fixedSize(horizontal: false, vertical: true)
+            if plan.viewerMeetAgain == nil || isEditing {
+                choice("I'd be open to it", icon: "checkmark.circle", value: "YES")
+                    .disabled(plan.meetAgainAvailable != true)
+                choice("Not this time", icon: "minus.circle", value: "NO")
+            } else {
+                HStack {
+                    Text(savedTitle).font(.subheadline.weight(.medium))
+                    Spacer(minLength: SideSeatTheme.spaceSM)
+                    Button("Change answer") { isEditing = true }
+                        .frame(minHeight: 44)
+                        .accessibilityIdentifier("plan-meet-again-edit-\(plan.id)")
+                }
+                if plan.viewerMeetAgain == "YES" {
+                    Button("Withdraw permission") { onAnswer("WITHDRAWN") }
+                        .frame(minHeight: 44)
+                        .accessibilityIdentifier("plan-meet-again-withdraw-\(plan.id)")
+                }
+                Label("Only your choice is shown. You can change it anytime.", systemImage: "lock.fill")
+                    .font(.caption)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .accessibilityIdentifier("plan-meet-again-saved-\(plan.id)")
+            }
+        }
+        .disabled(isSubmitting)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("plan-meet-again-\(plan.id)")
+        .onChange(of: plan.viewerMeetAgain) { _, _ in isEditing = false }
+    }
+
+    private var savedTitle: String {
+        switch plan.viewerMeetAgain {
+        case "YES": AppLocalization.string("Open to meeting again")
+        case "NO": AppLocalization.string("Not this time")
+        default: AppLocalization.string("Permission withdrawn")
+        }
+    }
+
+    private func choice(_ title: String.LocalizationValue, icon: String, value: String) -> some View {
+        SSFlowChoice(title: AppLocalization.string(title), systemImage: icon,
+                     isSelected: plan.viewerMeetAgain == value) { onAnswer(value) }
+            .accessibilityIdentifier("plan-meet-again-\(value.lowercased())-\(plan.id)")
     }
 }

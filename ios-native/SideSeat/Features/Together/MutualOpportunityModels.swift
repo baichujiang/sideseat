@@ -51,6 +51,7 @@ struct NativeMutualOpportunity: Codable, Identifiable, Hashable, Sendable {
     let viewerDecision: String?
     let coordination: NativeMutualOpportunityCoordination?
     let version: Int
+    var isRepeat: Bool? = nil
 
     var startDate: Date? { Date.sideSeatChatISO8601(startsAt) }
     var endDate: Date? { Date.sideSeatChatISO8601(endsAt) }
@@ -73,7 +74,8 @@ struct NativeMutualOpportunity: Codable, Identifiable, Hashable, Sendable {
         peerTogetherMode ?? .sameActivity
     }
     var matchTitle: String {
-        effectiveMatchKind == .sharedContext
+        if isRepeat == true { return AppLocalization.string("Another chance to do something together") }
+        return effectiveMatchKind == .sharedContext
             ? AppLocalization.string("Same-place match")
             : AppLocalization.string("Same activity")
     }

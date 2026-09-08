@@ -366,6 +366,12 @@ enum PlanOutcomeValue {
   PREFER_NOT_TO_SAY
 }
 
+enum MeetAgainValue {
+  YES
+  NO
+  WITHDRAWN
+}
+
 enum SocialIntentTopic {
   COFFEE
   STUDY
@@ -693,6 +699,7 @@ model User {
   mutualOpportunitiesAsB             MutualOpportunity[]                 @relation("MutualOpportunityUserB")
   mutualOpportunityDecisions         MutualOpportunityDecision[]
   planOutcomeResponses               PlanOutcomeResponse[]
+  meetAgainPermissions               MeetAgainPermission[]
   socialGroupCandidates              SocialGroupCandidate[]
   socialGroupOutcomes                SocialGroupOutcomeResponse[]
   socialGroupsApproved               SocialGroupOpportunity[]            @relation("SocialGroupApprover")
@@ -1001,6 +1008,8 @@ model MutualOpportunity {
   contextSnapshot     Json
   connectionId        String?
   activatedAt         DateTime?
+  /// Internal provenance for a new opportunity, never a reused old Plan.
+  repeatOfPlanId      String?
   terminalAt          DateTime?
   version             Int                             @default(1)
   createdAt           DateTime                        @default(now())
@@ -1013,6 +1022,7 @@ model MutualOpportunity {
   connection          Connection?                     @relation(fields: [connectionId], references: [id], onDelete: SetNull)
   decisions           MutualOpportunityDecision[]
   sourceMessage       Message?
+  repeatOfPlan        PlanRequest? @relation("RepeatOpportunitySource", fields: [repeatOfPlanId], references: [id], onDelete: Cascade)
 
   @@unique([intentAId, intentBId])
   @@index([userAId, status, expiresAt])
@@ -1020,6 +1030,7 @@ model MutualOpportunity {
   @@index([status, expiresAt])
   @@index([userAId, userBId, createdAt])
   @@index([connectionId, status])
+  @@index([repeatOfPlanId, status])
 }
 
 /// One participant's private decision. The API never returns the counterpart's
@@ -2036,6 +2047,8 @@ model PlanRequest {
   calendarEntries              CalendarEntry[]
   outcomeResponses             PlanOutcomeResponse[]
   sharedEncounter              SharedEncounter?
+  meetAgainPermissions         MeetAgainPermission[]
+  repeatOpportunities          MutualOpportunity[] @relation("RepeatOpportunitySource")
   productFunnelEvents          ProductFunnelEvent[]        @relation("ProductFunnelLegacyPlanRequest")
   productFunnelRevisionEvents  ProductFunnelEvent[]        @relation("ProductFunnelPlanRevision")
 
@@ -2083,6 +2096,22 @@ model SharedEncounter {
   planCommitment   PlanCommitment? @relation(fields: [planCommitmentId], references: [id], onDelete: Cascade)
 
   @@index([derivedAt])
+}
+
+/// Withdrawable, participant-private permission. Neither a friendship nor a
+/// counterpart-visible state; eligibility also requires bilateral OCCURRED.
+model MeetAgainPermission {
+  id        String         @id @default(cuid())
+  planId    String
+  userId    String
+  value     MeetAgainValue
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  plan      PlanRequest    @relation(fields: [planId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, userId])
+  @@index([userId, updatedAt])
 }
 
 /// Public course chat — one timeline per course; only enrolled members (UserCourse) may read/post.

@@ -618,7 +618,7 @@ private struct TogetherHomeView: View {
 
     private var outcomePlans: [NativePlanRequest] {
         outcomeStore.plans
-            .filter { $0.isOutcomeEligible() && $0.viewerOutcome == nil }
+            .filter { $0.isOutcomeEligible() && ($0.viewerOutcome == nil || ($0.showsMeetAgain && $0.viewerMeetAgain == nil)) }
             .sorted { ($0.endDate ?? .distantPast) > ($1.endDate ?? .distantPast) }
     }
 
@@ -649,7 +649,10 @@ private struct TogetherHomeView: View {
 
                         PlanOutcomePromptView(
                             plan: plan,
-                            isSubmitting: outcomeStore.mutatingOutcomeID == plan.id
+                            isSubmitting: outcomeStore.mutatingOutcomeID == plan.id,
+                            onMeetAgain: { value in
+                                Task { await outcomeStore.recordMeetAgain(value, for: plan.id, using: session) }
+                            }
                         ) { value in
                             Task {
                                 await outcomeStore.recordOutcome(

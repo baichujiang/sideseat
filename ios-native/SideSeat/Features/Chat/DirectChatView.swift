@@ -471,6 +471,9 @@ struct DirectChatView: View {
                                     onCounterPlan: { plan in
                                         counterPlan = plan
                                     },
+                                    onRecordPlanMeetAgain: { value, plan in
+                                        Task { _ = await store.recordMeetAgain(value, for: plan, using: session) }
+                                    },
                                     onRecordPlanOutcome: { value, plan in
                                         Task {
                                             _ = await store.recordOutcome(
@@ -1504,6 +1507,7 @@ private struct DirectMessageBubble: View {
     let onDeclinePlan: (NativePlanRequest) -> Void
     let onWithdrawPlan: (NativePlanRequest) -> Void
     let onCounterPlan: (NativePlanRequest) -> Void
+    let onRecordPlanMeetAgain: (String, NativePlanRequest) -> Void
     let onRecordPlanOutcome: (String, NativePlanRequest) -> Void
     let onProposeFromAction: (NativeActionInterest, String?) -> Void
     let onProposeFromMutualOpportunity: (NativeMutualOpportunitySource) -> Void
@@ -1704,6 +1708,7 @@ private struct DirectMessageBubble: View {
                 onWithdraw: { onWithdrawPlan(plan) },
                 onCounter: { onCounterPlan(plan) },
                 onRecordOutcome: { onRecordPlanOutcome($0, plan) },
+                onRecordMeetAgain: { onRecordPlanMeetAgain($0, plan) },
                 onOpenCalendar: onOpenCalendar
             )
         } else if message.type == "ACTION_INTEREST_CARD",

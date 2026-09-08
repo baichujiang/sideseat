@@ -77,6 +77,7 @@ final class PlansStore {
                     counterOfId: nil,
                     availabilityShareId: nil,
                     scheduleShareLinkId: nil,
+                    meetAgainAvailable: true,
                     createdAt: formatter.string(from: completedStart),
                     updatedAt: formatter.string(from: Date())
                 )
@@ -121,6 +122,28 @@ final class PlansStore {
             )
             await load(using: session)
             NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
+        } catch { issue = error.localizedDescription }
+    }
+
+    func recordMeetAgain(_ value: String, for planID: String, using session: SessionStore) async {
+        guard mutatingOutcomeID == nil else { return }
+        mutatingOutcomeID = planID
+        issue = nil
+        defer { mutatingOutcomeID = nil }
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            plans = plans.map { $0.id == planID ? $0.replacingViewerMeetAgain(with: value) : $0 }
+            return
+        }
+        #endif
+        do {
+            let _: APIEnvelope<NativePlanMeetAgainEnvelope> = try await session.sendAuthorized(
+                "api/v1/plans/\(planID)/meet-again", method: .post,
+                body: NativePlanMeetAgainRequest(value: value), idempotencyKey: UUID().uuidString
+            )
+            await load(using: session)
+            NotificationCenter.default.post(name: .sideSeatPlansNeedsRefresh, object: nil)
+            NotificationCenter.default.post(name: .sideSeatTogetherNeedsRefresh, object: nil)
         } catch { issue = error.localizedDescription }
     }
 }

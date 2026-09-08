@@ -4,6 +4,51 @@ import Observation
 import Testing
 @testable import SideSeat
 
+@Suite("Meet Again private state")
+struct MeetAgainPrivateStateTests {
+    private func plan(available: Bool? = true) -> NativePlanRequest {
+        NativePlanRequest(
+            id: "local-plan", connectionId: "local-connection", status: "ACCEPTED",
+            planType: "CUSTOM", title: "Coffee", location: nil, message: nil,
+            startTime: "2026-01-01T10:00:00Z", endTime: "2026-01-01T11:00:00Z",
+            proposer: NativePlanAuthor(id: "a", username: "a", nickname: nil, avatarUrl: nil),
+            receiver: NativePlanAuthor(id: "b", username: "b", nickname: nil, avatarUrl: nil),
+            counterOfId: nil, availabilityShareId: nil, scheduleShareLinkId: nil,
+            meetAgainAvailable: available,
+            createdAt: "2026-01-01T09:00:00Z", updatedAt: "2026-01-01T09:00:00Z"
+        )
+    }
+
+    @Test("Only the viewer's own occurred answer opens the private prompt")
+    func ownOutcomeAndPermission() {
+        let original = plan()
+        #expect(!original.showsMeetAgain)
+        let occurred = original.replacingViewerOutcome(with: "OCCURRED")
+        #expect(occurred.showsMeetAgain)
+        let permission = occurred.replacingViewerMeetAgain(with: "YES")
+        #expect(permission.viewerOutcome == "OCCURRED")
+        #expect(permission.viewerMeetAgain == "YES")
+        let withdrawn = permission.replacingViewerMeetAgain(with: "WITHDRAWN")
+        #expect(withdrawn.viewerOutcome == "OCCURRED")
+        let corrected = permission.replacingViewerOutcome(with: "DID_NOT_OCCUR")
+        #expect(!corrected.showsMeetAgain)
+        #expect(corrected.viewerMeetAgain == "WITHDRAWN")
+    }
+
+    @Test("Older servers hide the feature; existing permission remains withdrawable during a kill switch")
+    func rollingClientAndKillSwitch() throws {
+        let old = plan(available: nil).replacingViewerOutcome(with: "OCCURRED")
+        #expect(!old.showsMeetAgain)
+        let disabled = plan(available: false).replacingViewerOutcome(with: "OCCURRED")
+        #expect(!disabled.showsMeetAgain)
+        #expect(disabled.replacingViewerMeetAgain(with: "YES").showsMeetAgain)
+        let data = try JSONEncoder().encode(old)
+        let decoded = try JSONDecoder().decode(NativePlanRequest.self, from: data)
+        #expect(decoded.viewerMeetAgain == nil)
+        #expect(decoded.meetAgainAvailable == nil)
+    }
+}
+
 @Suite("Inbox previews")
 struct InboxPreviewTests {
     @Test("Plan previews retain the plan title")

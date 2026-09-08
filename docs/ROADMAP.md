@@ -66,7 +66,10 @@ Current gate status (2026-09-07): **open**. The production contract and the
 two-account physical-device acceptance path pass. The numeric Gate now requires
 at least 20 eligible non-QA Plans, 10 distinct pairs, 8 bilateral answers, 60%
 participant response coverage and 40% bilateral Plan coverage in two snapshots
-at least seven days apart. Continue the Layer 2 pilot; do not begin Layer 3.
+at least seven days apart. Continue the Layer 2 pilot as product validation.
+Owner decision on 2026-09-08: this real-user Gate no longer blocks Layer 3
+development and internal acceptance. It is not marked passed; public release
+still requires the release quality gate and separate authorization.
 The first production non-QA baseline on 2026-09-07 contains 0 eligible Plans;
 all 3 candidate Plans were excluded as QA/internal.
 Build 32 improves pilot completion by surfacing pending Plan decisions and
@@ -105,13 +108,19 @@ then confirm Build 33 installation for a consenting external tester before
 wider recruitment. Continue real Plan use plus truthful bilateral Outcome
 answers, checking saved state/badge refresh on a genuinely ended Plan.
 The next formal Gate snapshot is no earlier than `2026-09-14T10:37:35Z`;
-QA acceptance does not count toward that Gate or unlock Layer 3. The non-blocking
+QA acceptance does not count toward that product-data Gate. The non-blocking
 English `Chat actions` VoiceOver label is tracked in the build-33 release record.
 See the [pilot Gate contract](./LAYER2_PILOT.md) and
 [non-QA tester guide](./LAYER2_PILOT_TESTER_GUIDE.md) for the active pilot, and
 [acceptance record](./releases/2026-09-07-layer2-production-acceptance.md).
 
 ## Layer 3 — Meet Again and Repeat Opportunity
+
+**Development status:** Implemented; local backend/HTTP and simulator acceptance
+passed on 2026-09-08 (67 backend/contract checks and 4 native tests). Production
+is still disabled, and Build 33 does not contain this work. Signed TestFlight
+acceptance remains pending. No production rollout is authorized by this decision. See
+[Layer 3 internal acceptance](./LAYER3_INTERNAL.md).
 
 - privately ask “Would you do something together again?” after the user's own
   occurred response;
@@ -123,6 +132,12 @@ See the [pilot Gate contract](./LAYER2_PILOT.md) and
 
 Gate: repeat improves real encounters without materially increasing Block/report
 rates or starving newcomers of first opportunities.
+
+Next: with separate owner authorization, push the pending commits, apply the
+additive migration before deploying the backend, then upload the next native
+build for internal TestFlight acceptance. The weekly Layer 2 automation keeps
+its original schedule but no longer re-blocks Layer 3 development; the organic
+product-data Gate is still open.
 
 ## Layer 4 — controlled Pod
 

@@ -10,6 +10,7 @@ import {
   pairSafetyLock,
   userConnectionSafetyLocks,
 } from "@/lib/v2/action-coordination/db-locks";
+import { invalidatePendingRepeats } from "@/lib/plans/repeat-eligibility";
 
 type DbClient = Prisma.TransactionClient;
 
@@ -616,6 +617,14 @@ export async function upsertLegacyPlanOutcome(
     ],
     allowEnded: true,
   });
+
+  if (options.value !== "OCCURRED") {
+    await tx.meetAgainPermission.updateMany({
+      where: { planId: options.planId, userId: options.userId, value: "YES" },
+      data: { value: "WITHDRAWN" },
+    });
+    await invalidatePendingRepeats(tx, options.planId);
+  }
 
   if (!snapshot.commitmentId) {
     const response = await tx.planOutcomeResponse.upsert({

@@ -1340,6 +1340,45 @@ final class DirectChatStore {
         }
     }
 
+    @discardableResult
+    func recordMeetAgain(_ value: String, for plan: NativePlanRequest, using session: SessionStore) async -> Bool {
+        guard !isActingOnPlan, plan.showsMeetAgain else { return false }
+        isActingOnPlan = true
+        planIssue = nil
+        defer { isActingOnPlan = false }
+        let mutationKey = "\(plan.id):meet-again:\(value)"
+        let key = planMutationKeys[mutationKey] ?? UUID().uuidString
+        planMutationKeys[mutationKey] = key
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            messages = messages.map { message in
+                guard message.planRequest?.id == plan.id else { return message }
+                return message.replacingPlanRequest(plan.replacingViewerMeetAgain(with: value))
+            }
+            planMutationKeys[mutationKey] = nil
+            return true
+        }
+        #endif
+        do {
+            let _: APIEnvelope<NativePlanMeetAgainEnvelope> = try await session.sendAuthorized(
+                "api/v1/plans/\(plan.id)/meet-again", method: .post,
+                body: NativePlanMeetAgainRequest(value: value), idempotencyKey: key
+            )
+            planMutationKeys[mutationKey] = nil
+            await reloadHistory(using: session)
+            NotificationCenter.default.post(name: .sideSeatPlansNeedsRefresh, object: nil)
+            NotificationCenter.default.post(name: .sideSeatTogetherNeedsRefresh, object: nil)
+            return true
+        } catch let error as APIClientError {
+            if !error.shouldPreserveIdempotencyKey { planMutationKeys[mutationKey] = nil }
+            planIssue = error.localizedDescription
+            return false
+        } catch {
+            planIssue = error.localizedDescription
+            return false
+        }
+    }
+
     private func mutatePlan(
         _ plan: NativePlanRequest,
         action: String,
@@ -1390,6 +1429,8 @@ final class DirectChatStore {
                     scheduleShareLinkId: updatedPlan.scheduleShareLinkId,
                     origin: updatedPlan.origin,
                     viewerOutcome: updatedPlan.viewerOutcome,
+                    viewerMeetAgain: updatedPlan.viewerMeetAgain,
+                    meetAgainAvailable: updatedPlan.meetAgainAvailable,
                     createdAt: updatedPlan.createdAt,
                     updatedAt: updatedPlan.updatedAt
                 )

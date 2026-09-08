@@ -186,7 +186,9 @@ happen / skip responses from Together, Plans history and the conversation reache
 from Calendar. Saving shows the viewer's answer; Change answer reopens the choices.
 Shared Encounter is derived only after both independently answer OCCURRED.
 
-The following repeat extension remains blocked by the Layer 2 pilot Gate:
+The owner authorized implementation and internal acceptance of the following
+repeat extension on 2026-09-08. Real-user pilot evidence remains pending and is
+not a development prerequisite; production rollout requires a separate release.
 
 ```text
 confirmed Plan ends

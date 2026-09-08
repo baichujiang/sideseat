@@ -2,9 +2,9 @@
 
 **Status:** TestFlight build `1.0.0` (33) submitted; waiting for external Beta review
 
-**Gate:** Layer 3 remains blocked until the
-[Layer 2 pilot Gate](./LAYER2_PILOT.md) records two qualifying snapshots at
-least seven days apart.
+**Gate:** The [Layer 2 pilot Gate](./LAYER2_PILOT.md) still requires two qualifying
+snapshots at least seven days apart. The owner's 2026-09-08 decision separately
+allows Layer 3 internal development; it does not enable it for these testers.
 
 ## TestFlight access prerequisite
 
@@ -98,6 +98,6 @@ The production report is aggregate-only and excludes QA/internal accounts. The
 formal weekly snapshot runs Monday at 12:38 Europe/Berlin. The next snapshot may
 run no earlier than `2026-09-14T10:37:35Z`.
 
-Passing one snapshot does not unlock Layer 3. Two consecutive snapshots must
+Passing one snapshot does not pass the product-data Gate. Two consecutive snapshots must
 each meet all documented minimum sample and coverage thresholds, with at least
 seven days between them.

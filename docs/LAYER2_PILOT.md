@@ -1,10 +1,16 @@
 # Layer 2 Outcome pilot Gate
 
-**Status:** Open — Layer 3 is blocked
+**Status:** Open — product validation pending; Layer 3 internal development authorized
 
 **Decision:** Determine whether Outcome has enough real bilateral observation to
 support the Layer 3 repeat-opportunity experiment. This is an early-pilot
 readiness Gate, not a product-market-fit claim.
+
+**Owner decision, 2026-09-08:** Real-user sample collection no longer blocks
+Layer 3 development or internal acceptance. Preserve these thresholds and
+snapshots without claiming they passed. Internal QA remains excluded. Public
+distribution requires the quality checks in `RELEASE.md` and separate release
+authorization; this decision does not enable Layer 3 in production.
 
 ## Measurement contract
 
@@ -50,7 +56,7 @@ rate estimation.
 
 The full Gate passes only after **two qualifying snapshots at least seven days
 apart** are recorded here. This prevents one short acquisition or reminder
-spike from unlocking Layer 3.
+spike from being treated as sustained product evidence.
 
 ## Reproducible collection
 
@@ -63,8 +69,8 @@ npm run report:layer2-pilot
 Only organic answers submitted by non-QA participants count. Do not seed,
 backfill or infer Outcome rows to satisfy this Gate. Record each weekly snapshot
 below with its exact UTC window and report output. If a run does not qualify,
-continue the Layer 2 pilot and collect another weekly snapshot; do not enter
-Layer 3.
+continue the Layer 2 pilot and collect another weekly snapshot. Layer 3 internal
+development may proceed independently under the owner decision above.
 
 Recruitment, consent, tester instructions and the truthful-answer protocol are
 defined in the [non-QA pilot tester guide](./LAYER2_PILOT_TESTER_GUIDE.md).
@@ -84,4 +90,5 @@ valid non-qualifying snapshot, not evidence of a negative Outcome rate.
 Continue the Layer 2 pilot with real non-QA participants and run the next weekly
 snapshot no earlier than 2026-09-14 10:37:35 UTC. Keep collecting until two
 qualifying snapshots at least seven days apart exist. Only then update this
-document and `docs/ROADMAP.md` to mark the Gate passed and begin Layer 3.
+document and `docs/ROADMAP.md` to mark the product-data Gate passed. Do not infer
+release approval or change the independent Layer 3 implementation status.

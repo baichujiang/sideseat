@@ -104,6 +104,43 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
+    func testMeetAgainPrivatePermissionLightAndDark() {
+        for appearance in ["light", "dark"] {
+            let app = XCUIApplication()
+            app.launchArguments = [
+                "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-chats", "--ui-testing-cached-chat-refresh",
+                "--ui-testing-language=zh-Hans", "--ui-testing-appearance=\(appearance)",
+            ]
+            app.launch()
+            XCTAssertTrue(app.buttons["inbox-pending-plans"].waitForExistence(timeout: 8))
+            app.buttons["inbox-pending-plans"].tap()
+            let happened = app.buttons["plan-outcome-occurred-ui-plan-completed"]
+            revealFlowElement(happened, in: app)
+            XCTAssertFalse(app.buttons["plan-meet-again-yes-ui-plan-completed"].exists)
+            happened.tap()
+            let yes = app.buttons["plan-meet-again-yes-ui-plan-completed"]
+            revealFlowElement(yes, in: app)
+            XCTAssertTrue(app.staticTexts["愿意再次同行吗？"].exists)
+            saveScreenshot(app: app, name: "layer3-permission-\(appearance)")
+            yes.tap()
+            let withdraw = app.buttons["plan-meet-again-withdraw-ui-plan-completed"]
+            revealFlowElement(withdraw, in: app)
+            XCTAssertTrue(app.staticTexts["你愿意再次同行"].exists)
+            saveScreenshot(app: app, name: "layer3-permission-saved-\(appearance)")
+            withdraw.tap()
+            XCTAssertTrue(app.staticTexts["已撤回意愿"].waitForExistence(timeout: 4))
+            app.buttons["plan-meet-again-edit-ui-plan-completed"].tap()
+            let no = app.buttons["plan-meet-again-no-ui-plan-completed"]
+            revealFlowElement(no, in: app)
+            no.tap()
+            XCTAssertTrue(app.buttons["plan-meet-again-edit-ui-plan-completed"].waitForExistence(timeout: 4))
+            XCTAssertFalse(app.buttons["plan-meet-again-withdraw-ui-plan-completed"].exists)
+            app.terminate()
+        }
+    }
+
+    @MainActor
     private func revealFlowElement(_ element: XCUIElement, in app: XCUIApplication) {
         for _ in 0..<8 where !element.exists || !element.isHittable {
             app.swipeUp()

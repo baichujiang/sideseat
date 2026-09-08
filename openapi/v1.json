@@ -8137,6 +8137,26 @@
         }
       }
     },
+    "/api/v1/plans/{planId}/meet-again": {
+      "post": {
+        "operationId": "recordPlanMeetAgain",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "planId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128 } }
+        ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MeetAgainRequest" } } } },
+        "responses": {
+          "200": { "description": "Viewer-private, withdrawable permission saved. No counterpart state or notification.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MeetAgainEnvelope" } } } },
+          "401": { "$ref": "#/components/responses/Error" },
+          "403": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "422": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
     "/api/v1/plans/{planId}/outcome": {
       "post": {
         "operationId": "recordPlanOutcome",
@@ -9390,6 +9410,7 @@
           "id": { "type": "string" },
           "viewerIntentId": { "type": "string" },
           "policyVersion": { "type": "string", "const": "MUTUAL_OPPORTUNITY_V1" },
+          "isRepeat": { "type": "boolean" },
           "state": { "type": "string", "enum": ["NEEDS_DECISION", "DECIDED", "CLOSED", "READY_TO_COORDINATE", "UNAVAILABLE"] },
           "topic": { "type": "string", "enum": ["COFFEE", "STUDY", "SPORTS", "EXPLORE", "FOOD", "EVENTS"] },
           "matchKind": { "type": "string", "enum": ["EXACT_ACTIVITY", "SHARED_CONTEXT"] },
@@ -15287,6 +15308,12 @@
             "type": ["string", "null"],
             "enum": ["OCCURRED", "DID_NOT_OCCUR", "PREFER_NOT_TO_SAY", null]
           },
+          "viewerMeetAgain": {
+            "type": ["string", "null"],
+            "enum": ["YES", "NO", "WITHDRAWN", null],
+            "description": "Only the authenticated viewer's permission. Never counterpart state."
+          },
+          "meetAgainAvailable": { "type": "boolean", "description": "Based only on feature availability and the viewer's own occurred answer." },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -15319,6 +15346,32 @@
           "createdAt",
           "updatedAt"
         ]
+      },
+      "MeetAgainRequest": {
+        "type": "object", "additionalProperties": false,
+        "properties": { "value": { "type": "string", "enum": ["YES", "NO", "WITHDRAWN"] } },
+        "required": ["value"]
+      },
+      "MeetAgainEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object", "additionalProperties": false,
+            "properties": {
+              "meetAgain": {
+                "type": "object", "additionalProperties": false,
+                "properties": {
+                  "planId": { "type": "string" },
+                  "value": { "type": "string", "enum": ["YES", "NO", "WITHDRAWN"] },
+                  "updatedAt": { "type": "string", "format": "date-time" }
+                },
+                "required": ["planId", "value", "updatedAt"]
+              }
+            },
+            "required": ["meetAgain"]
+          }
+        },
+        "required": ["data"]
       },
       "PlanWriteRequest": {
         "type": "object",

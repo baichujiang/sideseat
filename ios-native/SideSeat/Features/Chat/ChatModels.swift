@@ -739,6 +739,8 @@ struct NativePlanRequest: Codable, Identifiable, Hashable, Sendable {
     let scheduleShareLinkId: String?
     let origin: NativePlanOrigin?
     let viewerOutcome: String?
+    let viewerMeetAgain: String?
+    let meetAgainAvailable: Bool?
     let createdAt: String
     let updatedAt: String
 
@@ -762,6 +764,8 @@ struct NativePlanRequest: Codable, Identifiable, Hashable, Sendable {
         scheduleShareLinkId: String?,
         origin: NativePlanOrigin? = nil,
         viewerOutcome: String? = nil,
+        viewerMeetAgain: String? = nil,
+        meetAgainAvailable: Bool? = nil,
         createdAt: String,
         updatedAt: String
     ) {
@@ -784,6 +788,8 @@ struct NativePlanRequest: Codable, Identifiable, Hashable, Sendable {
         self.scheduleShareLinkId = scheduleShareLinkId
         self.origin = origin
         self.viewerOutcome = viewerOutcome
+        self.viewerMeetAgain = viewerMeetAgain
+        self.meetAgainAvailable = meetAgainAvailable
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -805,6 +811,22 @@ struct NativePlanRequest: Codable, Identifiable, Hashable, Sendable {
     }
 
     func replacingViewerOutcome(with value: String) -> NativePlanRequest {
+        replacingPrivateResponses(
+            outcome: value,
+            meetAgain: value != "OCCURRED" && viewerMeetAgain == "YES" ? "WITHDRAWN" : viewerMeetAgain
+        )
+    }
+
+    var showsMeetAgain: Bool {
+        isOutcomeEligible() && viewerOutcome == "OCCURRED"
+            && (meetAgainAvailable == true || viewerMeetAgain == "YES")
+    }
+
+    func replacingViewerMeetAgain(with value: String) -> NativePlanRequest {
+        replacingPrivateResponses(outcome: viewerOutcome, meetAgain: value)
+    }
+
+    private func replacingPrivateResponses(outcome: String?, meetAgain: String?) -> NativePlanRequest {
         NativePlanRequest(
             id: id,
             connectionId: connectionId,
@@ -824,7 +846,9 @@ struct NativePlanRequest: Codable, Identifiable, Hashable, Sendable {
             availabilityShareId: availabilityShareId,
             scheduleShareLinkId: scheduleShareLinkId,
             origin: origin,
-            viewerOutcome: value,
+            viewerOutcome: outcome,
+            viewerMeetAgain: meetAgain,
+            meetAgainAvailable: meetAgainAvailable,
             createdAt: createdAt,
             updatedAt: updatedAt
         )
@@ -843,6 +867,14 @@ struct NativePlanOutcomeEnvelope: Decodable, Sendable {
 
 struct NativePlanOutcomeRequest: Encodable, Sendable {
     let value: String
+}
+
+struct NativePlanMeetAgainRequest: Encodable, Sendable {
+    let value: String
+}
+
+struct NativePlanMeetAgainEnvelope: Decodable, Sendable {
+    let meetAgain: NativePlanOutcome
 }
 
 enum PlanSubmissionTarget: Hashable, Sendable {

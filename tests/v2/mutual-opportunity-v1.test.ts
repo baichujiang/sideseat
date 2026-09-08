@@ -104,8 +104,8 @@ test("Together presents finite private decisions and reveals chat only after mut
   const store = source(
     "ios-native/SideSeat/Features/Together/MutualOpportunityStore.swift",
   );
-  assert.match(root, /Button\("Not this time", action: onNo\)/);
-  assert.match(root, /Button\("Do it together", action: onYes\)/);
+  assert.match(root, /Button\(action: onNo\)\s*\{\s*Text\("Not this time"\)/);
+  assert.match(root, /SSPrimaryButton\([\s\S]{0,240}title: AppLocalization\.string\("Do it together"\)[\s\S]{0,200}action: onYes/);
   assert.match(root, /Button\("Withdraw", action: onWithdraw\)/);
   assert.match(root, /case "READY_TO_COORDINATE" where hasCoordination:/);
   assert.match(root, /case \.mutual:[\s\S]*"Start planning"/);

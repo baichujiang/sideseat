@@ -17,6 +17,8 @@ import {
 } from "@/lib/connections/canonical-connection";
 import { normalizeSchoolCode } from "@/lib/constants/schools";
 import { prisma } from "@/lib/db/prisma";
+import { repeatEligibility } from "@/lib/plans/repeat-eligibility";
+import { isV2FeatureEnabled } from "@/lib/v2/feature-flags";
 import {
   classifyActivityMatch,
   type ActivityMatchClassification,
@@ -214,6 +216,7 @@ function viewerProjection(row: OpportunityRow, viewerId: string) {
     id: row.id,
     viewerIntentId: viewerIsA ? row.intentAId : row.intentBId,
     policyVersion: row.policyVersion,
+    isRepeat: Boolean(row.repeatOfPlanId),
     state,
     topic: row.topic,
     matchKind: row.matchKind,
@@ -252,6 +255,7 @@ function viewerProjection(row: OpportunityRow, viewerId: string) {
 
 function contextSnapshot(options: {
   id: string;
+  isRepeat?: boolean;
   topic: SocialIntentTopic;
   matchKind: ActivityMatchClassification["matchKind"];
   sharedContext: ActivityMatchClassification["sharedContext"];
@@ -272,6 +276,7 @@ function contextSnapshot(options: {
     version: 1,
     sourceKind: "MUTUAL_OPPORTUNITY",
     sourceId: options.id,
+    isRepeat: options.isRepeat ?? false,
     title: topicTitle(options),
     startsAt: options.startsAt.toISOString(),
     endsAt: options.endsAt.toISOString(),
@@ -363,6 +368,7 @@ async function lockActiveMatchingSessions(
 async function createCandidateOpportunity(options: {
   ownerIntent: {
     id: string;
+    createdAt: Date;
     userId: string;
     topic: SocialIntentTopic;
     courseId: string | null;
@@ -378,6 +384,7 @@ async function createCandidateOpportunity(options: {
   };
   candidateIntent: {
     id: string;
+    createdAt: Date;
     userId: string;
     topic: SocialIntentTopic;
     courseId: string | null;
@@ -480,6 +487,13 @@ async function createCandidateOpportunity(options: {
         });
       if (!intentsAreCurrent) return null;
 
+      const repeat = await repeatEligibility(tx, userA.id, userB.id, now);
+      // A known pair cannot fall back to first-encounter matching to bypass
+      // missing/withdrawn permission. Both intents must be new after the Plan.
+      if (repeat.hasHistory && (!isV2FeatureEnabled("v2MeetAgain") || !repeat.source ||
+        ownerIntent.createdAt <= repeat.source.endedAt ||
+        candidateIntent.createdAt <= repeat.source.endedAt)) return null;
+
       // A peer may not have refreshed Together since an older opportunity's
       // decision window elapsed. Retire those rows here so an expired PENDING
       // record cannot monopolize an otherwise active intent.
@@ -530,7 +544,8 @@ async function createCandidateOpportunity(options: {
             userBId: userB.id,
             createdAt: { gte: new Date(now.getTime() - PAIR_COOLDOWN_MS) },
           },
-          select: { id: true },
+          orderBy: { createdAt: "desc" },
+          select: { id: true, createdAt: true },
         }),
         tx.mutualOpportunity.findMany({
           where: {
@@ -544,7 +559,9 @@ async function createCandidateOpportunity(options: {
           select: { id: true, status: true },
         }),
       ]);
-      if (blocked || moderated || recent) return null;
+      const completedCooldown = repeat?.source &&
+        recent && recent.createdAt < repeat.source.endedAt;
+      if (blocked || moderated || (recent && !completedCooldown)) return null;
 
       // Cooldown is historical and was checked above. Occupation is narrower:
       // an arranged MUTUAL row remains immutable history, but once its trusted
@@ -573,6 +590,7 @@ async function createCandidateOpportunity(options: {
 
       const placeholder = contextSnapshot({
         id: "pending",
+        isRepeat: Boolean(repeat?.source),
         topic: ownerIntent.topic,
         matchKind: activityMatch.matchKind,
         sharedContext: activityMatch.sharedContext,
@@ -610,6 +628,7 @@ async function createCandidateOpportunity(options: {
           endsAt: overlap.endAt,
           expiresAt,
           contextSnapshot: placeholder,
+          repeatOfPlanId: repeat?.source?.planId ?? null,
         }],
         skipDuplicates: true,
       });
@@ -623,6 +642,7 @@ async function createCandidateOpportunity(options: {
         data: {
           contextSnapshot: contextSnapshot({
             id: created.id,
+            isRepeat: Boolean(repeat?.source),
             topic: ownerIntent.topic,
             matchKind: activityMatch.matchKind,
             sharedContext: activityMatch.sharedContext,
@@ -707,6 +727,7 @@ export async function generateMutualOpportunitiesForUser(
       expiresAt: true,
       version: true,
       user: { select: opportunityInclude.userA.select },
+      createdAt: true,
     },
   });
   if (ownerIntents.length === 0) return [];
@@ -782,6 +803,7 @@ export async function generateMutualOpportunitiesForUser(
       expiresAt: true,
       version: true,
       user: { select: opportunityInclude.userB.select },
+      createdAt: true,
       course: { select: { id: true, code: true, name: true } },
     },
   });
@@ -900,6 +922,14 @@ export async function decideMutualOpportunity(options: {
       const now = new Date();
       if (row.status !== "PENDING" || row.expiresAt <= now || row.startsAt <= now) {
         throw new MutualOpportunityError("NO_LONGER_AVAILABLE");
+      }
+      if (row.repeatOfPlanId && options.decision === "YES") {
+        const repeat = isV2FeatureEnabled("v2MeetAgain")
+          ? await repeatEligibility(tx, row.userAId, row.userBId, now)
+          : null;
+        if (repeat?.source?.planId !== row.repeatOfPlanId) {
+          throw new MutualOpportunityError("NO_LONGER_AVAILABLE");
+        }
       }
       const existing = row.decisions.find((decision) => decision.userId === options.userId);
       if (existing && existing.value !== options.decision) {
