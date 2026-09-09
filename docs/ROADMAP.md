@@ -11,23 +11,26 @@ replaces the new client's separate Start/48-hour session with explicit publicati
 and per-intent pause/resume/end. Implementation and 15 real local PostgreSQL checks
 pass; all 4 native model tests and 3 UI tests pass, including the final German
 largest-text follow-up. Evidence is recorded in the feature document above.
-Owner authorized commit/push, both pending migrations and backend deployment
-with automatic/flexible flags OFF, then internal TestFlight Build 39. Release is
-in progress. Activate only after both phones update and separate owner approval.
+Feature `46b0e7a` and Build 39 preparation `503e827` are pushed; both migrations
+and the production backend are deployed. Automatic/flexible flags remain OFF.
+[Build 39](./releases/2026-09-09-testflight-39.md) is processed and available in
+`SideSeat Internal`, with testing notes saved.
+Next: both phones update → separate activation approval
+and signed two-account acceptance.
 
-**Current local development:** [Flexible intention timing](./FLEXIBLE_INTENT_TIMING.md)
+**Current flexible timing:** [Flexible intention timing](./FLEXIBLE_INTENT_TIMING.md)
 adds tomorrow/weekend/next-week/date-range/undecided timing, a 14-day intention
 lifecycle, separate activity fit and timing, and explicit time confirmation in the
-Plan composer. Migration applied only to a dedicated localhost database; real
+Plan composer. Initially verified on a dedicated localhost database; real
 two-account service flow through both Calendars passes. Native verification is
 complete: 6 model tests and 3 UI tests pass, including Chinese/English and German
 largest text. The final simulator result is `/tmp/sideseat-flexible-timing-ui-7.xcresult`.
 The focused German wrapping/translation follow-up also passes in
 `/tmp/sideseat-flexible-timing-ui-8.xcresult`.
-Owner authorized commit/push on 2026-09-09. Not deployed or included in TestFlight Build 38.
-Next: execute the authorized migration, backend deployment with rollout OFF and
-next internal TestFlight release; activate `V2_FLEXIBLE_TIMING_ENABLED` only after migration,
-backend and compatible testing phones are ready. Outcome/Shared Encounter unchanged.
+Source `71e5241` is pushed and now deployed with rollout OFF; included in the
+available internal Build 39, not Build 38. Next: both phones update to Build 39;
+activate only with separate owner approval.
+Outcome/Shared Encounter unchanged.
 
 **Current internal matching demo:** [test_001 QA demo](./TOGETHER_QA_DEMO.md)
 has six live, course-scoped QA matching cards covering all Together topics.
@@ -36,7 +39,7 @@ Together on the internal app and inspect them before **2026-09-09 15:45 UTC**;
 other Sports options are prepared as separate batches. This is synthetic QA,
 not an organic pilot sample or a new app release.
 
-**Current UI release:** [Build 38](./releases/2026-09-09-testflight-38.md)
+**Previous UI release:** [Build 38](./releases/2026-09-09-testflight-38.md)
 is committed/pushed, processed and available in `SideSeat Internal`, with Chinese
 testing notes saved. It includes the
 [Little Companions avatars](./SYSTEM_AVATARS.md), clearer Opportunity cards,
@@ -48,11 +51,14 @@ checks; final motion verification passed four distinct UI checks and two gesture
 unit tests, including Reduce Motion, vertical scrolling and failed-save recovery.
 Full earlier card/gesture evidence remains in the design document. The simulator
 motion recording stays local at `docs/visual-qa/opportunity-swipe-motion.mp4`.
-These are local QA results, not signed Build 38 acceptance. Next: update both
-phones to **1.0.0 (38)** and verify the physical swipe/haptics and
+These are local QA results, not signed Build 38 acceptance. Internal Build 39
+includes these changes; update both phones to **1.0.0 (39)** and verify the physical swipe/haptics and
 private-interest → chat → confirmed Plan flow. No matching-rule or database change.
 
 **Current release evidence:**
+[TestFlight Build 39 intention-driven matching preparation](./releases/2026-09-09-testflight-39.md)
+(backend and 134 migrations deployed; both new flags OFF; signed IPA validated,
+processed and available in `SideSeat Internal`; phone updates/acceptance pending). Prior
 [TestFlight Build 38 avatar/card/motion release](./releases/2026-09-09-testflight-38.md)
 (uploaded, processed and available in `SideSeat Internal`; 68 release checks and
 independent signed payload verification passed; phone updates and physical acceptance

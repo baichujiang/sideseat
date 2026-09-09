@@ -2,7 +2,7 @@
 
 **Status:** Current release procedure and go/no-go gate
 
-**Last updated:** 2026-09-08
+**Last updated:** 2026-09-09
 
 **Scope:** Shared database migrations, Vercel Production, native signing, TestFlight, App Store and recovery
 
@@ -154,11 +154,11 @@ Store submission additionally requires:
 - Rollback must not reverse destructive migrations. Use forward repair, feature
   kill switches and compatible older clients where appropriate.
 
-Current recorded build: [TestFlight 1.0.0 (37)](./releases/2026-09-08-testflight-37.md)
-(title/disclosure fix available in the existing internal group; both phone
-updates and signed Build 37 acceptance are pending. The
-[activity-fit backend](./releases/2026-09-08-activity-fit-production.md) is live
-with broader matching enabled and unchanged. Build 36 signed two-account
-matching-to-both-Calendars acceptance and Build 34 signed repeat Outcome acceptance
-remain historical evidence, not acceptance of Build 37.
-Public-release readiness still requires the separate checks above).
+Current recorded build: [TestFlight 1.0.0 (39)](./releases/2026-09-09-testflight-39.md)
+(processed and available in `SideSeat Internal`; production backend and both additive
+migrations are deployed. Automatic matching and flexible timing stay OFF; existing
+broader matching stays ON. Next: both phone updates,
+separately authorized activation and signed two-account acceptance. Build 36
+matching-to-both-Calendars and Build 34 repeat Outcome acceptance remain historical
+evidence, not acceptance of Build 39. Public-release readiness still requires the
+separate checks above).

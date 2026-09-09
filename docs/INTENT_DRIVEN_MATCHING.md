@@ -3,9 +3,10 @@
 **Owner decision:** 2026-09-09. Publishing an activity intention is the explicit
 request to find company. Remove the second Start matching action from the new flow.
 
-**Status:** Implemented and verified locally on 2026-09-09. Owner authorized
-commit/push, both migrations and backend deployment with both new flags OFF,
-then internal TestFlight Build 39. Release is in progress, not yet available.
+**Status:** Committed/pushed as `46b0e7a`; both migrations and production backend
+deployed on 2026-09-09. Both new flags remain OFF. Internal TestFlight Build 39
+is processed and available in `SideSeat Internal`, with testing notes saved.
+See the [release record](./releases/2026-09-09-testflight-39.md).
 
 ## Product flow
 
@@ -51,8 +52,9 @@ interested → contextual chat → propose a concrete timed Plan → accept → 
 
 ## Verification
 
-- Applied the new migration only to `sideseat_flexible_timing_20260909` on
-  `127.0.0.1:5433`; all 134 migrations applied. No production writes.
+- During implementation, applied the new migration only to
+  `sideseat_flexible_timing_20260909` on `127.0.0.1:5433`; all 134 migrations
+  applied. Subsequent authorized production deployment is recorded above.
 - 15 real PostgreSQL tests pass, none skipped: publication without any session,
   private first interest, mutual chat, explicit Plan and both Calendars; legacy
   consent, pause/resume, expiry/end, rollout OFF, old-client Stop and prior
@@ -86,8 +88,8 @@ interested → contextual chat → propose a concrete timed Plan → accept → 
 
 ## Next step
 
-Owner-authorized commit/push → deploy both
-pending migrations and backend with automatic/flexible flags OFF → new internal
-TestFlight → both phones updated → separately authorize enabling the flags and
-accept the signed two-account flow. Production activation is not authorized by
-the current release request. QA is not a real-user Outcome Gate sample.
+Both phones update to internal Build 39 → separately authorize enabling the
+automatic/flexible flags →
+accept the signed two-account publish → Opportunity → chat → timed Plan → both
+Calendars flow. Production activation is not authorized by the current release
+request. QA is not a real-user Outcome Gate sample.

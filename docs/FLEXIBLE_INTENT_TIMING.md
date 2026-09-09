@@ -1,9 +1,11 @@
 # Flexible activity intention timing
 
-**Status:** Owner-approved, implemented and verified locally on 2026-09-09. Not deployed.
+**Status:** Implemented, verified and deployed on 2026-09-09 with rollout OFF.
 
-**Source delivery:** Owner authorized commit/push on 2026-09-09. Production
-migration, backend rollout and the next internal TestFlight release remain pending.
+**Source delivery:** `71e5241` pushed. Both migrations and production backend are
+deployed; flexible timing and automatic matching stay OFF. Build 39 is processed
+and available in `SideSeat Internal`, with testing notes saved.
+See the [release record](./releases/2026-09-09-testflight-39.md).
 
 **Publication follow-up:** [Event-driven matching](./INTENT_DRIVEN_MATCHING.md)
 adds explicit publish-to-match and removes the separate session from the enabled
@@ -44,7 +46,8 @@ undecided. Relative choices are saved as absolute dates in the selected time zon
 Feature activation stays off by default until the additive database migration,
 backend and compatible internal clients are ready. Old clients must never decode
 nullable new Opportunity fields as their former required timestamps. No production
-data, matching flags or TestFlight release is changed by this development task.
+data, matching flags or TestFlight release was changed during the implementation
+phase. The subsequent authorized flags-OFF release is recorded above.
 
 - Rollout flag: `V2_FLEXIBLE_TIMING_ENABLED=1`, exposed as `v2FlexibleTiming`.
   Default remains off, including when the global kill switch is active.
@@ -94,7 +97,7 @@ tests/v2/mutual-opportunity-auto-match-postgres.test.ts
 tests/v2/together-matching-session-postgres.test.ts
 tests/v2/mutual-opportunity-plan-closure-postgres.test.ts` (one shell command).
 
-Next after source delivery: authorize migration and
-backend deployment with rollout OFF → new internal TestFlight build → both phones
-updated → enable flexible timing and accept the signed two-account flow. These
-local synthetic QA results do not count toward the real-user Outcome Gate.
+Next: both phones update to internal Build 39 → separately
+authorize enabling flexible timing and automatic matching → accept the signed
+two-account flow. Local synthetic QA results do not count toward the real-user
+Outcome Gate.
