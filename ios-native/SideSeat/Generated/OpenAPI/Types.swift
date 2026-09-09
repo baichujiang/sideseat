@@ -7353,6 +7353,10 @@ internal enum Components {
         }
         /// - Remark: Generated from `#/components/schemas/WeeklyIntent`.
         internal struct WeeklyIntent: Codable, Hashable, Sendable {
+            /// Explicitly published for matching during its ACTIVE lifecycle; false retains legacy session consent.
+            ///
+            /// - Remark: Generated from `#/components/schemas/WeeklyIntent/automaticMatching`.
+            internal var automaticMatching: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/WeeklyIntent/id`.
             internal var id: Swift.String
             /// - Remark: Generated from `#/components/schemas/WeeklyIntent/topic`.
@@ -7516,6 +7520,7 @@ internal enum Components {
             /// Creates a new `WeeklyIntent`.
             ///
             /// - Parameters:
+            ///   - automaticMatching: Explicitly published for matching during its ACTIVE lifecycle; false retains legacy session consent.
             ///   - id:
             ///   - topic:
             ///   - togetherMode:
@@ -7538,6 +7543,7 @@ internal enum Components {
             ///   - createdAt:
             ///   - updatedAt:
             internal init(
+                automaticMatching: Swift.Bool? = nil,
                 id: Swift.String,
                 topic: Components.Schemas.WeeklyIntent.TopicPayload,
                 togetherMode: Components.Schemas.WeeklyIntent.TogetherModePayload,
@@ -7560,6 +7566,7 @@ internal enum Components {
                 createdAt: Foundation.Date,
                 updatedAt: Foundation.Date
             ) {
+                self.automaticMatching = automaticMatching
                 self.id = id
                 self.topic = topic
                 self.togetherMode = togetherMode
@@ -7583,6 +7590,7 @@ internal enum Components {
                 self.updatedAt = updatedAt
             }
             internal enum CodingKeys: String, CodingKey {
+                case automaticMatching
                 case id
                 case topic
                 case togetherMode
@@ -7607,6 +7615,10 @@ internal enum Components {
             }
             internal init(from decoder: any Swift.Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.automaticMatching = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: .automaticMatching
+                )
                 self.id = try container.decode(
                     Swift.String.self,
                     forKey: .id
@@ -7692,6 +7704,7 @@ internal enum Components {
                     forKey: .updatedAt
                 )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "automaticMatching",
                     "id",
                     "topic",
                     "togetherMode",
@@ -7831,6 +7844,10 @@ internal enum Components {
         }
         /// - Remark: Generated from `#/components/schemas/WeeklyIntentCreateRequest`.
         internal struct WeeklyIntentCreateRequest: Codable, Hashable, Sendable {
+            /// Publish and automatically find company until paused, ended or expired. Requires v2AutomaticMatching.
+            ///
+            /// - Remark: Generated from `#/components/schemas/WeeklyIntentCreateRequest/automaticMatching`.
+            internal var automaticMatching: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/WeeklyIntentCreateRequest/topic`.
             internal enum TopicPayload: String, Codable, Hashable, Sendable, CaseIterable {
                 case coffee = "COFFEE"
@@ -7890,6 +7907,7 @@ internal enum Components {
             /// Creates a new `WeeklyIntentCreateRequest`.
             ///
             /// - Parameters:
+            ///   - automaticMatching: Publish and automatically find company until paused, ended or expired. Requires v2AutomaticMatching.
             ///   - topic:
             ///   - togetherMode:
             ///   - studyGoal:
@@ -7902,6 +7920,7 @@ internal enum Components {
             ///   - timeZone:
             ///   - note:
             internal init(
+                automaticMatching: Swift.Bool? = nil,
                 topic: Components.Schemas.WeeklyIntentCreateRequest.TopicPayload,
                 togetherMode: Components.Schemas.WeeklyIntentCreateRequest.TogetherModePayload? = nil,
                 studyGoal: Swift.String? = nil,
@@ -7914,6 +7933,7 @@ internal enum Components {
                 timeZone: Swift.String,
                 note: Swift.String? = nil
             ) {
+                self.automaticMatching = automaticMatching
                 self.topic = topic
                 self.togetherMode = togetherMode
                 self.studyGoal = studyGoal
@@ -7927,6 +7947,7 @@ internal enum Components {
                 self.note = note
             }
             internal enum CodingKeys: String, CodingKey {
+                case automaticMatching
                 case topic
                 case togetherMode
                 case studyGoal
@@ -7941,6 +7962,10 @@ internal enum Components {
             }
             internal init(from decoder: any Swift.Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.automaticMatching = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: .automaticMatching
+                )
                 self.topic = try container.decode(
                     Components.Schemas.WeeklyIntentCreateRequest.TopicPayload.self,
                     forKey: .topic
@@ -7986,6 +8011,7 @@ internal enum Components {
                     forKey: .note
                 )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "automaticMatching",
                     "topic",
                     "togetherMode",
                     "studyGoal",
@@ -8010,6 +8036,8 @@ internal enum Components {
                 }
                 /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case1/action`.
                 internal var action: Components.Schemas.WeeklyIntentPatchRequest.Case1Payload.ActionPayload
+                /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case1/automaticMatching`.
+                internal var automaticMatching: Swift.Bool?
                 /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case1/expectedVersion`.
                 internal var expectedVersion: Swift.Int
                 /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case1/topic`.
@@ -8072,6 +8100,7 @@ internal enum Components {
                 ///
                 /// - Parameters:
                 ///   - action:
+                ///   - automaticMatching:
                 ///   - expectedVersion:
                 ///   - topic:
                 ///   - togetherMode:
@@ -8086,6 +8115,7 @@ internal enum Components {
                 ///   - note:
                 internal init(
                     action: Components.Schemas.WeeklyIntentPatchRequest.Case1Payload.ActionPayload,
+                    automaticMatching: Swift.Bool? = nil,
                     expectedVersion: Swift.Int,
                     topic: Components.Schemas.WeeklyIntentPatchRequest.Case1Payload.TopicPayload? = nil,
                     togetherMode: Components.Schemas.WeeklyIntentPatchRequest.Case1Payload.TogetherModePayload? = nil,
@@ -8100,6 +8130,7 @@ internal enum Components {
                     note: Swift.String? = nil
                 ) {
                     self.action = action
+                    self.automaticMatching = automaticMatching
                     self.expectedVersion = expectedVersion
                     self.topic = topic
                     self.togetherMode = togetherMode
@@ -8115,6 +8146,7 @@ internal enum Components {
                 }
                 internal enum CodingKeys: String, CodingKey {
                     case action
+                    case automaticMatching
                     case expectedVersion
                     case topic
                     case togetherMode
@@ -8133,6 +8165,10 @@ internal enum Components {
                     self.action = try container.decode(
                         Components.Schemas.WeeklyIntentPatchRequest.Case1Payload.ActionPayload.self,
                         forKey: .action
+                    )
+                    self.automaticMatching = try container.decodeIfPresent(
+                        Swift.Bool.self,
+                        forKey: .automaticMatching
                     )
                     self.expectedVersion = try container.decode(
                         Swift.Int.self,
@@ -8184,6 +8220,7 @@ internal enum Components {
                     )
                     try decoder.ensureNoAdditionalProperties(knownKeys: [
                         "action",
+                        "automaticMatching",
                         "expectedVersion",
                         "topic",
                         "togetherMode",
@@ -8250,19 +8287,73 @@ internal enum Components {
                 /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case3/action`.
                 internal enum ActionPayload: String, Codable, Hashable, Sendable, CaseIterable {
                     case resume = "RESUME"
-                    case extend = "EXTEND"
                 }
                 /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case3/action`.
                 internal var action: Components.Schemas.WeeklyIntentPatchRequest.Case3Payload.ActionPayload
+                /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case3/automaticMatching`.
+                internal var automaticMatching: Swift.Bool?
                 /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case3/expectedVersion`.
                 internal var expectedVersion: Swift.Int
                 /// Creates a new `Case3Payload`.
                 ///
                 /// - Parameters:
                 ///   - action:
+                ///   - automaticMatching:
                 ///   - expectedVersion:
                 internal init(
                     action: Components.Schemas.WeeklyIntentPatchRequest.Case3Payload.ActionPayload,
+                    automaticMatching: Swift.Bool? = nil,
+                    expectedVersion: Swift.Int
+                ) {
+                    self.action = action
+                    self.automaticMatching = automaticMatching
+                    self.expectedVersion = expectedVersion
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case action
+                    case automaticMatching
+                    case expectedVersion
+                }
+                internal init(from decoder: any Swift.Decoder) throws {
+                    let container = try decoder.container(keyedBy: CodingKeys.self)
+                    self.action = try container.decode(
+                        Components.Schemas.WeeklyIntentPatchRequest.Case3Payload.ActionPayload.self,
+                        forKey: .action
+                    )
+                    self.automaticMatching = try container.decodeIfPresent(
+                        Swift.Bool.self,
+                        forKey: .automaticMatching
+                    )
+                    self.expectedVersion = try container.decode(
+                        Swift.Int.self,
+                        forKey: .expectedVersion
+                    )
+                    try decoder.ensureNoAdditionalProperties(knownKeys: [
+                        "action",
+                        "automaticMatching",
+                        "expectedVersion"
+                    ])
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case3`.
+            case case3(Components.Schemas.WeeklyIntentPatchRequest.Case3Payload)
+            /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case4`.
+            internal struct Case4Payload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case4/action`.
+                internal enum ActionPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case extend = "EXTEND"
+                }
+                /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case4/action`.
+                internal var action: Components.Schemas.WeeklyIntentPatchRequest.Case4Payload.ActionPayload
+                /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case4/expectedVersion`.
+                internal var expectedVersion: Swift.Int
+                /// Creates a new `Case4Payload`.
+                ///
+                /// - Parameters:
+                ///   - action:
+                ///   - expectedVersion:
+                internal init(
+                    action: Components.Schemas.WeeklyIntentPatchRequest.Case4Payload.ActionPayload,
                     expectedVersion: Swift.Int
                 ) {
                     self.action = action
@@ -8275,7 +8366,7 @@ internal enum Components {
                 internal init(from decoder: any Swift.Decoder) throws {
                     let container = try decoder.container(keyedBy: CodingKeys.self)
                     self.action = try container.decode(
-                        Components.Schemas.WeeklyIntentPatchRequest.Case3Payload.ActionPayload.self,
+                        Components.Schemas.WeeklyIntentPatchRequest.Case4Payload.ActionPayload.self,
                         forKey: .action
                     )
                     self.expectedVersion = try container.decode(
@@ -8288,8 +8379,8 @@ internal enum Components {
                     ])
                 }
             }
-            /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case3`.
-            case case3(Components.Schemas.WeeklyIntentPatchRequest.Case3Payload)
+            /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case4`.
+            case case4(Components.Schemas.WeeklyIntentPatchRequest.Case4Payload)
             internal init(from decoder: any Swift.Decoder) throws {
                 var errors: [any Swift.Error] = []
                 do {
@@ -8310,6 +8401,12 @@ internal enum Components {
                 } catch {
                     errors.append(error)
                 }
+                do {
+                    self = .case4(try .init(from: decoder))
+                    return
+                } catch {
+                    errors.append(error)
+                }
                 throw Swift.DecodingError.failedToDecodeOneOfSchema(
                     type: Self.self,
                     codingPath: decoder.codingPath,
@@ -8323,6 +8420,8 @@ internal enum Components {
                 case let .case2(value):
                     try value.encode(to: encoder)
                 case let .case3(value):
+                    try value.encode(to: encoder)
+                case let .case4(value):
                     try value.encode(to: encoder)
                 }
             }

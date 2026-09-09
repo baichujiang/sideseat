@@ -5,6 +5,10 @@
 **Source delivery:** Owner authorized commit/push on 2026-09-09. Production
 migration, backend rollout and the next internal TestFlight release remain pending.
 
+**Publication follow-up:** [Event-driven matching](./INTENT_DRIVEN_MATCHING.md)
+adds explicit publish-to-match and removes the separate session from the enabled
+new client. Ship this follow-up with flexible timing in the next internal build.
+
 **Decision:** 2026-09-09. Intent is willingness, not an appointment. Users can
 choose tomorrow, this weekend, next week, a date range, exact times, or leave time
 undecided. Relative choices are saved as absolute dates in the selected time zone.

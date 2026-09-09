@@ -330,6 +330,20 @@ struct ActionContextMessageAttributionTests {
 
 @Suite("Flexible intention timing")
 struct FlexibleIntentTimingTests {
+    @Test("Publishing and resuming encode explicit automatic matching; legacy requests omit it")
+    func publicationConsent() throws {
+        var input = NativeWeeklyIntentCreateRequest(topic: .coffee, activityText: "Coffee", sportTag: nil,
+            sportOtherNote: nil, togetherMode: .sameActivity, studyGoal: nil, courseId: nil,
+            timeWindows: [], timeZone: "Europe/Berlin", note: nil, timePreference: NativeIntentTimePreference(kind: "UNDECIDED"))
+        let legacy = try JSONSerialization.jsonObject(with: JSONEncoder().encode(input)) as! [String: Any]
+        #expect(legacy["automaticMatching"] == nil)
+        input.automaticMatching = true
+        let published = try JSONSerialization.jsonObject(with: JSONEncoder().encode(input)) as! [String: Any]
+        #expect(published["automaticMatching"] as? Bool == true)
+        let resume = NativeWeeklyIntentStateRequest(action: "RESUME", expectedVersion: 2, automaticMatching: true)
+        let resumed = try JSONSerialization.jsonObject(with: JSONEncoder().encode(resume)) as! [String: Any]
+        #expect(resumed["automaticMatching"] as? Bool == true)
+    }
     @Test("Undecided intentions encode without fake exact windows")
     func encodesUndecided() throws {
         let input = NativeWeeklyIntentCreateRequest(topic: .coffee, activityText: "Coffee", sportTag: nil,

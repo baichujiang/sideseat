@@ -352,6 +352,7 @@ async function lockActiveMatchingSessions(
   userIds: string[],
 ) {
   const orderedUserIds = [...new Set(userIds)].sort();
+  if (orderedUserIds.length === 0) return true;
   await tx.$queryRaw(Prisma.sql`
     SELECT "userId"
     FROM "TogetherMatchingSession"
@@ -389,6 +390,7 @@ async function createCandidateOpportunity(options: {
     sportOtherNote: string | null;
     timeWindows: Prisma.JsonValue;
     timePreference: Prisma.JsonValue;
+    automaticMatching: boolean;
     timeZone: string;
     expiresAt: Date;
     version: number;
@@ -407,6 +409,7 @@ async function createCandidateOpportunity(options: {
     sportOtherNote: string | null;
     timeWindows: Prisma.JsonValue;
     timePreference: Prisma.JsonValue;
+    automaticMatching: boolean;
     timeZone: string;
     expiresAt: Date;
     version: number;
@@ -460,12 +463,11 @@ async function createCandidateOpportunity(options: {
         tx,
         [ownerIntent.id, candidateIntent.id],
       );
-      // Candidate discovery happens outside this transaction. Re-lock and
-      // re-check both explicit 48-hour sessions before inserting so a stopped
-      // or expired participant cannot be matched from a stale query result.
+      // Published intentions use their locked lifecycle. Only legacy intents
+      // require the separate session consent, rechecked after acquiring locks.
       if (!await lockActiveMatchingSessions(
         tx,
-        [ownerIntent.userId, candidateIntent.userId],
+        [ownerIntent, candidateIntent].filter(intent => !intent.automaticMatching).map(intent => intent.userId),
       )) return null;
       const lockedIntents = await tx.weeklyIntent.findMany({
         where: { id: { in: intentIds } },
@@ -481,6 +483,7 @@ async function createCandidateOpportunity(options: {
           sportOtherNote: true,
           timeWindows: true,
           timePreference: true,
+          automaticMatching: true,
           timeZone: true,
           expiresAt: true,
           status: true,
@@ -491,13 +494,16 @@ async function createCandidateOpportunity(options: {
         [ownerIntent.id, ownerIntent],
         [candidateIntent.id, candidateIntent],
       ]);
+      const recheckNow = new Date();
       const intentsAreCurrent = lockedIntents.length === 2 &&
         lockedIntents.every((intent) => {
           const snapshot = expected.get(intent.id);
           return snapshot !== undefined &&
             intent.userId === snapshot.userId &&
             intent.status === "ACTIVE" &&
-            intent.expiresAt > now &&
+            intent.expiresAt > recheckNow &&
+            intent.automaticMatching === snapshot.automaticMatching &&
+            (!intent.automaticMatching || isV2FeatureEnabled("v2AutomaticMatching")) &&
             intent.version === snapshot.version &&
             intent.topic === snapshot.topic &&
             intent.courseId === snapshot.courseId &&
@@ -699,22 +705,25 @@ async function createCandidateOpportunity(options: {
   );
 }
 
+function matchingEnrollmentWhere(now: Date): Prisma.WeeklyIntentWhereInput {
+  return {
+    OR: [
+      ...(isV2FeatureEnabled("v2AutomaticMatching") ? [{ automaticMatching: true }] : []),
+      { automaticMatching: false, user: { togetherMatchingSession: { is: {
+        stoppedAt: null, matchingUntil: { gt: now },
+      } } } },
+    ],
+  };
+}
+
 export async function generateMutualOpportunitiesForUser(
   userId: string,
 ): Promise<CreatedMutualOpportunityMatch[]> {
   const now = new Date();
   await expireStaleForUser(userId, now);
-  const ownerSession = await prisma.togetherMatchingSession.findFirst({
-    where: {
-      userId,
-      stoppedAt: null,
-      matchingUntil: { gt: now },
-    },
-    select: { userId: true },
-  });
-  if (!ownerSession) return [];
   const ownerIntents = await prisma.weeklyIntent.findMany({
     where: {
+      ...matchingEnrollmentWhere(now),
       userId,
       status: "ACTIVE",
       expiresAt: { gt: now },
@@ -731,12 +740,6 @@ export async function generateMutualOpportunitiesForUser(
         hideFromDiscovery: false,
         hideFromRecommendations: false,
         moderationBlocks: { none: { isActive: true } },
-        togetherMatchingSession: {
-          is: {
-            stoppedAt: null,
-            matchingUntil: { gt: now },
-          },
-        },
       },
     },
     // Every currently unoccupied intent gets one matching pass. Oldest first
@@ -754,6 +757,7 @@ export async function generateMutualOpportunitiesForUser(
       sportOtherNote: true,
       timeWindows: true,
       timePreference: true,
+      automaticMatching: true,
       timeZone: true,
       expiresAt: true,
       version: true,
@@ -771,6 +775,7 @@ export async function generateMutualOpportunitiesForUser(
 
   const candidates = await prisma.weeklyIntent.findMany({
     where: {
+      ...matchingEnrollmentWhere(now),
       userId: { not: userId },
       status: "ACTIVE",
       expiresAt: { gt: now },
@@ -810,12 +815,6 @@ export async function generateMutualOpportunitiesForUser(
         hideFromDiscovery: false,
         hideFromRecommendations: false,
         moderationBlocks: { none: { isActive: true } },
-        togetherMatchingSession: {
-          is: {
-            stoppedAt: null,
-            matchingUntil: { gt: now },
-          },
-        },
       },
     },
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
@@ -832,6 +831,7 @@ export async function generateMutualOpportunitiesForUser(
       sportOtherNote: true,
       timeWindows: true,
       timePreference: true,
+      automaticMatching: true,
       timeZone: true,
       expiresAt: true,
       version: true,

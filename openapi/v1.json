@@ -9260,6 +9260,7 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
+          "automaticMatching": { "type": "boolean", "description": "Explicitly published for matching during its ACTIVE lifecycle; false retains legacy session consent." },
           "id": { "type": "string" },
           "topic": { "type": "string", "enum": ["COFFEE", "STUDY", "SPORTS", "EXPLORE", "FOOD", "EVENTS"] },
           "togetherMode": { "type": "string", "enum": ["SAME_ACTIVITY", "PARALLEL", "EITHER"] },
@@ -9327,6 +9328,7 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
+          "automaticMatching": { "type": "boolean", "const": true, "description": "Publish and automatically find company until paused, ended or expired. Requires v2AutomaticMatching." },
           "topic": { "type": "string", "enum": ["COFFEE", "STUDY", "SPORTS", "EXPLORE", "FOOD", "EVENTS"] },
           "togetherMode": { "type": "string", "enum": ["SAME_ACTIVITY", "PARALLEL", "EITHER"] },
           "studyGoal": { "type": ["string", "null"], "maxLength": 80 },
@@ -9348,6 +9350,7 @@
             "additionalProperties": false,
             "properties": {
               "action": { "type": "string", "const": "EDIT" },
+              "automaticMatching": { "type": "boolean", "const": true },
               "expectedVersion": { "type": "integer", "minimum": 1 },
               "topic": { "type": "string", "enum": ["COFFEE", "STUDY", "SPORTS", "EXPLORE", "FOOD", "EVENTS"] },
               "togetherMode": { "type": "string", "enum": ["SAME_ACTIVITY", "PARALLEL", "EITHER"] },
@@ -9377,7 +9380,17 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "action": { "type": "string", "enum": ["RESUME", "EXTEND"] },
+              "action": { "type": "string", "const": "RESUME" },
+              "automaticMatching": { "type": "boolean", "const": true },
+              "expectedVersion": { "type": "integer", "minimum": 1 }
+            },
+            "required": ["action", "expectedVersion"]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "action": { "type": "string", "const": "EXTEND" },
               "expectedVersion": { "type": "integer", "minimum": 1 }
             },
             "required": ["action", "expectedVersion"]

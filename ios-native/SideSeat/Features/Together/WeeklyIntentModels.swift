@@ -295,6 +295,7 @@ struct NativeWeeklyIntent: Codable, Identifiable, Hashable, Sendable {
     let createdAt: Date
     let updatedAt: Date
     var timePreference: NativeIntentTimePreference? = nil
+    var automaticMatching: Bool? = nil
 
     var isPaused: Bool { status == "PAUSED" }
     var effectiveTogetherMode: NativeTogetherMode { togetherMode ?? .sameActivity }
@@ -370,6 +371,7 @@ struct NativeWeeklyIntentCreateRequest: Encodable, Sendable {
     let timeZone: String
     let note: String?
     var timePreference: NativeIntentTimePreference? = nil
+    var automaticMatching: Bool? = nil
 }
 
 struct NativeWeeklyIntentEditRequest: Encodable, Sendable {
@@ -386,6 +388,7 @@ struct NativeWeeklyIntentEditRequest: Encodable, Sendable {
     let timeZone: String
     let note: String?
     var timePreference: NativeIntentTimePreference? = nil
+    var automaticMatching: Bool? = nil
 
     private enum CodingKeys: String, CodingKey {
         case action
@@ -399,6 +402,7 @@ struct NativeWeeklyIntentEditRequest: Encodable, Sendable {
         case courseId
         case timeWindows
         case timePreference
+        case automaticMatching
         case timeZone
         case note
     }
@@ -438,6 +442,7 @@ struct NativeWeeklyIntentEditRequest: Encodable, Sendable {
         }
         try container.encode(timeWindows, forKey: .timeWindows)
         try container.encodeIfPresent(timePreference, forKey: .timePreference)
+        try container.encodeIfPresent(automaticMatching, forKey: .automaticMatching)
         try container.encode(timeZone, forKey: .timeZone)
         try container.encodeIfPresent(note, forKey: .note)
         if note == nil {
@@ -449,6 +454,7 @@ struct NativeWeeklyIntentEditRequest: Encodable, Sendable {
 struct NativeWeeklyIntentStateRequest: Encodable, Sendable {
     let action: String
     let expectedVersion: Int
+    var automaticMatching: Bool? = nil
 }
 
 struct NativeWeeklyIntentEndRequest: Encodable, Sendable {

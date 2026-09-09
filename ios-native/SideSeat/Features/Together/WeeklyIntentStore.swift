@@ -48,6 +48,7 @@ final class WeeklyIntentStore {
         courseId: String?,
         timeWindows: [NativeWeeklyIntentTimeWindow],
         timePreference: NativeIntentTimePreference? = nil,
+        automaticMatching: Bool = false,
         note: String,
         using session: SessionStore
     ) async -> Bool {
@@ -104,7 +105,8 @@ final class WeeklyIntentStore {
                         timeWindows: timeWindows,
                         timeZone: TimeZone.current.identifier,
                         note: trimmedNote.isEmpty ? nil : trimmedNote,
-                        timePreference: timePreference
+                        timePreference: timePreference,
+                        automaticMatching: automaticMatching ? true : nil
                     ),
                     idempotencyKey: UUID().uuidString
                 )
@@ -123,7 +125,8 @@ final class WeeklyIntentStore {
                         timeWindows: timeWindows,
                         timeZone: TimeZone.current.identifier,
                         note: trimmedNote.isEmpty ? nil : trimmedNote,
-                        timePreference: timePreference
+                        timePreference: timePreference,
+                        automaticMatching: automaticMatching ? true : nil
                     ),
                     idempotencyKey: UUID().uuidString
                 )
@@ -143,6 +146,7 @@ final class WeeklyIntentStore {
         _ paused: Bool,
         intent: NativeWeeklyIntent,
         extend: Bool = false,
+        automaticMatching: Bool = false,
         using session: SessionStore
     ) async -> Bool {
         guard !mutatingIDs.contains(intent.id) else { return false }
@@ -155,7 +159,8 @@ final class WeeklyIntentStore {
                 method: .patch,
                 body: NativeWeeklyIntentStateRequest(
                     action: extend ? "EXTEND" : paused ? "PAUSE" : "RESUME",
-                    expectedVersion: intent.version
+                    expectedVersion: intent.version,
+                    automaticMatching: !paused && !extend && automaticMatching ? true : nil
                 ),
                 idempotencyKey: UUID().uuidString
             )

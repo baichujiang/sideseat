@@ -61,6 +61,7 @@ const ownerSelect = {
   course: { select: { id: true, code: true, name: true } },
   timeWindows: true,
   timePreference: true,
+  automaticMatching: true,
   timeZone: true,
   note: true,
   status: true,
@@ -184,9 +185,8 @@ async function autoMatchAfterMutation(userId: string) {
   } catch (cause) {
     // The intent transaction already committed. Returning success keeps an
     // idempotent create/edit from being replayed into a duplicate; GET/list
-    // provides the matching retry path while an explicit 48-hour session is
-    // active. The matcher is the authoritative session gate; an inactive
-    // user's write never joins matching implicitly.
+    // provides the retry path. Only explicitly published active intentions or
+    // legacy intentions with an active session participate.
     console.error("Weekly Intent auto-match failed after mutation", cause);
   }
 }
@@ -333,7 +333,7 @@ export async function createWeeklyIntent(
   input: WeeklyIntentCreateInput,
   now = new Date(),
 ) {
-  const expiresAt = input.timePreference ? recentIntentExpiry(now) : weeklyIntentExpiry(input.timeZone, now);
+  const expiresAt = input.timePreference || input.automaticMatching ? recentIntentExpiry(now) : weeklyIntentExpiry(input.timeZone, now);
   assertTiming(input.timeWindows, input.timePreference, input.timeZone, now, expiresAt);
   const sport = normalizedSportSelection(
     input.topic,
@@ -370,6 +370,7 @@ export async function createWeeklyIntent(
         courseId: input.courseId ?? null,
         timeWindows: normalizedWindows(input.timeWindows),
         ...(input.timePreference ? { timePreference: input.timePreference } : {}),
+        automaticMatching: input.automaticMatching ?? false,
         timeZone: input.timeZone,
         note: input.note || null,
         policyVersion: CURRENT_POLICY_VERSION,
@@ -415,7 +416,8 @@ export async function patchWeeklyIntent(
       if (current.status !== "PAUSED") {
         throw new WeeklyIntentError("WEEKLY_INTENT_STATE_INVALID");
       }
-      data = { status: "ACTIVE", pausedAt: null, version: { increment: 1 } };
+      data = { status: "ACTIVE", pausedAt: null, version: { increment: 1 },
+        ...(input.automaticMatching ? { automaticMatching: true } : {}) };
     } else if (input.action === "EXTEND") {
       data = { expiresAt: recentIntentExpiry(now), version: { increment: 1 } };
     } else {
@@ -503,6 +505,7 @@ export async function patchWeeklyIntent(
           : {}),
         ...(input.timeZone !== undefined ? { timeZone: input.timeZone } : {}),
         ...(input.timePreference !== undefined ? { timePreference: input.timePreference } : {}),
+        ...(input.automaticMatching ? { automaticMatching: true } : {}),
         ...(input.note !== undefined ? { note: input.note || null } : {}),
         version: { increment: 1 },
       };

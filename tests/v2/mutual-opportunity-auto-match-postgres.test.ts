@@ -264,30 +264,36 @@ for (const related of [false, true]) test(
   },
 );
 
-test("flexible intentions: create, edit, extend, bilateral interest, explicit Plan and both calendars",
+test("published flexible intentions: automatic match without sessions, bilateral interest, explicit Plan and both calendars",
   { skip: localDatabaseUrl ? false : "requires localhost PostgreSQL" }, async () => {
     const { createWeeklyIntent, patchWeeklyIntent } = await import("../../lib/v2/weekly-intents");
     const { generateMutualOpportunitiesForUser, listMutualOpportunities, decideMutualOpportunity } = await import("../../lib/v2/mutual-opportunities");
     const plans = await import("../../lib/api/v1/plans-service");
     const { formatInTimeZone } = await import("date-fns-tz");
-    const flag = process.env.V2_FLEXIBLE_TIMING_ENABLED;
-    process.env.V2_FLEXIBLE_TIMING_ENABLED = "1";
+    const flags = ["V2_FLEXIBLE_TIMING_ENABLED", "V2_AUTOMATIC_MATCHING_ENABLED", "V2_WEEKLY_INTENT_ENABLED", "V2_MUTUAL_OPPORTUNITY_ENABLED"];
+    const previous = flags.map(key => process.env[key]);
+    flags.forEach(key => { process.env[key] = "1"; });
     try {
       await withMatchingPair("flex-timing", async ({ db, userAId, userBId }) => {
         const now = new Date();
         const tomorrow = formatInTimeZone(new Date(now.getTime() + 86400000), "Europe/Berlin", "yyyy-MM-dd");
-        const input = { topic: "COFFEE" as const, activityText: "Coffee", timeZone: "Europe/Berlin", timeWindows: [], timePreference: { kind: "UNDECIDED" as const } };
-        const first = await createWeeklyIntent(userAId, input, now);
-        const second = await createWeeklyIntent(userBId, input, now);
-        assert.equal(new Date(first.intent.expiresAt).getTime() - now.getTime(), 14 * 86400000);
+        const input = { topic: "COFFEE" as const, activityText: "Automatic coffee", timeZone: "Europe/Berlin", timeWindows: [], timePreference: { kind: "UNDECIDED" as const }, automaticMatching: true as const };
+        const publishedAt = new Date(now.getTime() - 3 * 86400000);
+        const first = await createWeeklyIntent(userAId, input, publishedAt);
+        assert.equal(new Date(first.intent.expiresAt).getTime() - publishedAt.getTime(), 14 * 86400000);
+        assert.equal(first.intent.automaticMatching, true);
+        assert.equal((await listMutualOpportunities(userAId, false)).opportunities.length, 0);
         const edited = await patchWeeklyIntent(userAId, first.intent.id, { action: "EDIT", expectedVersion: first.intent.version,
           timePreference: { kind: "FLEXIBLE", startDate: tomorrow, endDate: tomorrow, period: "ANY" }, timeWindows: [] });
         const extended = await patchWeeklyIntent(userAId, first.intent.id, { action: "EXTEND", expectedVersion: edited.intent.version });
         assert.ok(new Date(extended.intent.expiresAt) >= new Date(first.intent.expiresAt));
         assert.deepEqual(extended.intent.timeWindows, []);
+        const second = await createWeeklyIntent(userBId, input, now);
         assert.equal(second.intent.status, "ACTIVE");
-        await activateMatchingSessions(db, [userAId, userBId]);
-        assert.equal((await generateMutualOpportunitiesForUser(userAId)).length, 1);
+        assert.equal(await db.togetherMatchingSession.count({ where: { userId: { in: [userAId, userBId] } } }), 0);
+        assert.equal(await db.mutualOpportunity.count({ where: { OR: [{ userAId }, { userBId: userAId }] } }), 1,
+          "second publication creates an opportunity immediately; no matching start or refresh is needed");
+        assert.deepEqual(await generateMutualOpportunitiesForUser(userAId), [], "refresh does not duplicate the opportunity");
         const opportunity = (await listMutualOpportunities(userAId, false)).opportunities[0]!;
         assert.ok(opportunity);
         assert.equal(opportunity.startsAt, null);
@@ -316,8 +322,54 @@ test("flexible intentions: create, edit, extend, bilateral interest, explicit Pl
         assert.equal(await db.calendarEntry.count({ where: { planCommitmentId: accepted.commitmentId, projectionStatus: "ACTIVE" } }), 2);
       });
     } finally {
-      if (flag === undefined) delete process.env.V2_FLEXIBLE_TIMING_ENABLED;
-      else process.env.V2_FLEXIBLE_TIMING_ENABLED = flag;
+      flags.forEach((key, index) => {
+        if (previous[index] === undefined) delete process.env[key];
+        else process.env[key] = previous[index];
+      });
+    }
+  });
+
+test("intention-driven matching preserves legacy consent, pause/resume and rollout controls",
+  { skip: localDatabaseUrl ? false : "requires localhost PostgreSQL" }, async () => {
+    const { createWeeklyIntent, patchWeeklyIntent, endWeeklyIntent } = await import("../../lib/v2/weekly-intents");
+    const { generateMutualOpportunitiesForUser } = await import("../../lib/v2/mutual-opportunities");
+    const { stopTogetherMatchingSession } = await import("../../lib/v2/together-matching-session");
+    const flags = ["V2_FLEXIBLE_TIMING_ENABLED", "V2_AUTOMATIC_MATCHING_ENABLED", "V2_WEEKLY_INTENT_ENABLED", "V2_MUTUAL_OPPORTUNITY_ENABLED"];
+    const previous = flags.map(key => process.env[key]);
+    flags.forEach(key => { process.env[key] = "1"; });
+    try {
+      for (const scenario of ["legacy", "pause", "rollout", "expired", "ended"] as const) {
+        await withMatchingPair(`intent-${scenario}`, async ({ db, userAId, userBId }) => {
+          const input = { topic: "COFFEE" as const, activityText: `Coffee ${scenario}`, timeZone: "Europe/Berlin", timeWindows: [],
+            timePreference: { kind: "UNDECIDED" as const }, automaticMatching: true as const };
+          let first = await createWeeklyIntent(userAId, { ...input, automaticMatching: scenario === "legacy" ? undefined : true });
+          if (scenario === "pause") first = await patchWeeklyIntent(userAId, first.intent.id, { action: "PAUSE", expectedVersion: first.intent.version });
+          if (scenario === "ended") await endWeeklyIntent(userAId, first.intent.id, first.intent.version);
+          if (scenario === "rollout") process.env.V2_AUTOMATIC_MATCHING_ENABLED = "0";
+          if (scenario === "expired") await db.weeklyIntent.update({ where: { id: first.intent.id }, data: { expiresAt: new Date(Date.now() - 1000) } });
+          await createWeeklyIntent(userBId, input);
+          assert.equal(await db.mutualOpportunity.count({ where: { OR: [{ userAId }, { userBId: userAId }] } }), 0, scenario);
+          if (scenario === "legacy") {
+            assert.equal(first.intent.automaticMatching, false);
+            await patchWeeklyIntent(userAId, first.intent.id, { action: "EDIT", expectedVersion: first.intent.version, automaticMatching: true });
+          } else if (scenario === "pause") {
+            await patchWeeklyIntent(userAId, first.intent.id, { action: "RESUME", expectedVersion: first.intent.version, automaticMatching: true });
+          } else if (scenario === "rollout") {
+            process.env.V2_AUTOMATIC_MATCHING_ENABLED = "1";
+            await generateMutualOpportunitiesForUser(userAId);
+          } else return;
+          assert.equal(await db.mutualOpportunity.count({ where: { OR: [{ userAId }, { userBId: userAId }] } }), 1, scenario);
+          // Stop on an older installed client must still stop this owner's supply.
+          await stopTogetherMatchingSession(userAId);
+          assert.equal((await db.weeklyIntent.findUniqueOrThrow({ where: { id: first.intent.id } })).status, "PAUSED");
+          assert.equal(await db.mutualOpportunity.count({ where: { userAId: { in: [userAId, userBId] }, status: "PENDING" } }), 0);
+        });
+      }
+    } finally {
+      flags.forEach((key, index) => {
+        if (previous[index] === undefined) delete process.env[key];
+        else process.env[key] = previous[index];
+      });
     }
   });
 

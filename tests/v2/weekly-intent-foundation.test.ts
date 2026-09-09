@@ -447,7 +447,7 @@ test("OpenAPI exposes viewer-safe shared-context matching fields", () => {
   }
 });
 
-test("Weekly Intent mutations refresh matching only through the active session gate", () => {
+test("Weekly Intent mutations match through explicit publication or legacy session consent", () => {
   const service = readFileSync(
     new URL("../../lib/v2/weekly-intents.ts", import.meta.url),
     "utf8",
@@ -465,7 +465,9 @@ test("Weekly Intent mutations refresh matching only through the active session g
   );
   assert.match(matcher, /TogetherMatchingSession/);
   assert.match(matcher, /matchingUntil:\s*\{ gt: now \}/);
-  assert.match(matcher, /if \(!ownerSession\) return \[\]/);
+  assert.match(matcher, /matchingEnrollmentWhere\(now\)/);
+  assert.match(service, /automaticMatching: input\.automaticMatching \?\? false/);
+  assert.match(matcher, /intent\.automaticMatching === snapshot\.automaticMatching/);
 });
 
 test("Weekly Intent uses an independent feature gate and idempotent mutations", () => {

@@ -1,6 +1,6 @@
 # SideSeat Product
 
-**Status:** Frozen v1.0 with approved activity-fit (2026-09-08) and flexible-timing (2026-09-09) amendments
+**Status:** Frozen v1.0 with approved activity-fit (2026-09-08), flexible-timing and event-driven publication (2026-09-09) amendments
 
 **Last updated:** 2026-09-09
 
@@ -109,10 +109,12 @@ authorize a current acquisition surface.
 2. A Weekly Intent is private and grants only bounded, action-specific eligibility.
 3. A user may maintain multiple independent Intents; each Intent describes one
    concrete thing.
-4. Creating an Intent does not silently start matching.
-5. Current matching participation is explicit and time-bounded. The current
-   48-hour duration is a versioned implementation policy, not a permanent product
-   invariant.
+4. Explicitly publishing an Intent starts automatic matching, with disclosure
+   before publication. Old saved intentions are not silently enrolled by upgrade.
+5. Matching participation follows each published intention's ACTIVE lifecycle;
+   pause, end or expiry exits supply. The separate 48-hour session remains only
+   for already-shipped clients/legacy intentions. See the
+   [event-driven matching amendment](./INTENT_DRIVEN_MATCHING.md) for rollout status.
 6. Calendar content is never read by matching or recommendation logic.
 7. Opportunity generation uses explicit course, activity, language, school and
    user-declared social-time context only.

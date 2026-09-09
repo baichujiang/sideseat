@@ -8,6 +8,10 @@
 
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
 
+**Approved publication amendment:** With `v2AutomaticMatching`, publishing replaces
+the separate matching start. Legacy saved intentions keep their original consent.
+See [event-driven automatic matching](./INTENT_DRIVEN_MATCHING.md). Not yet deployed.
+
 **Approved timing amendment:** The flexible timing behavior below is implemented
 locally behind `v2FlexibleTiming`; Build 38 still uses exact windows until a new
 internal client and backend rollout. See [delivery and verification](./FLEXIBLE_INTENT_TIMING.md).
@@ -52,11 +56,12 @@ Current editor behavior:
 - exact time input advances in 15-minute increments; after choosing a start,
   the default end becomes 30 minutes later, with a 30-minute minimum duration;
 - flexible and undecided timing never fabricate an exact start/end;
-- save returns to Together without silently starting matching.
+- publishing returns to Together and automatically starts finding company, after
+  explicit disclosure; saving a paused intention keeps it paused.
 
-Delivered Opportunities lead the Together page. Matching controls appear when
-there is an Intent or an existing matching session; the initial empty state
-leads with creating an Intent. The top-right Plans entry provides a direct route
+Delivered Opportunities lead the Together page. Published intentions show
+“Finding company automatically”; no separate Start/48-hour countdown appears.
+The initial empty state leads with publishing an activity. The top-right Plans entry provides a direct route
 to coordination and history. Recent Plans on Together contain unanswered private
 Outcome prompts; saved answers remain editable in Plans history or conversation.
 
@@ -65,28 +70,27 @@ intentions last 14 days; active/paused intentions can be explicitly extended for
 14 days from now. Extension does not move the selected dates or exact windows.
 Legacy intentions keep their original expiry unless the owner extends them.
 
-## 3. Start matching
+## 3. Automatic matching
 
-With at least one active Intent, the user explicitly taps `开始匹配`.
+The new client labels the final action `发布意向` and explains that SideSeat
+automatically finds company during its validity; the user may pause anytime.
 
 ```text
-IDLE → MATCHING for 48 hours → EXPIRED
-            │
-            └── user stops → IDLE
+Publish → ACTIVE (automatically find company) ↔ PAUSED
+                   └── end / expiry → no new matches
 ```
 
-The server owns the expiry time. Together displays a live countdown, not a static
-duration label. The countdown means “your eligible Intents are in the matching
-queue”; it does not promise a result or disclose anyone else's activity.
-
-All eligible active Intents participate. The current release does not ask the user
-to select a matching duration. Stopping or expiry prevents new Opportunities but
-does not erase already delivered Opportunities or active conversations.
+Both users need not be online together. A compatible new publication can match
+an existing active intention, and both users receive a notification. No match is
+guaranteed. Pause/end removes that intention from supply; resume tries immediately.
+Pending cards become unavailable, while mutual chat and confirmed Plans remain.
+Old saved intentions offer review/publication, not silent enrollment. Until rollout,
+Build 38 and legacy intentions keep the original explicit 48-hour session path.
 
 ## 4. Opportunity generation
 
-The system privately considers pairs whose users both have active matching
-sessions. It filters school, verification, language, timing compatibility, course,
+The system privately considers pairs with active published intentions (or explicit
+legacy session consent). It filters school, verification, language, timing compatibility, course,
 activity compatibility, Block, moderation and cooldown constraints.
 
 Exact overlapping windows are preferred. Compatible date ranges/day-parts or

@@ -155,6 +155,7 @@ private struct TogetherAssignmentFailureView: View {
 }
 
 private struct TogetherHomeView: View {
+    @Environment(ClientConfigurationStore.self) private var clientConfiguration
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -165,6 +166,10 @@ private struct TogetherHomeView: View {
     @State private var v2Store = ActionToPlanV2Store.shared
     @State private var presentedEditor: WeeklyIntentEditorPresentation?
 
+    private var automaticMatchingEnabled: Bool {
+        v2Store.isMutualOpportunityEnabled && clientConfiguration.configuration?.isFeatureEnabled("v2AutomaticMatching") == true
+    }
+
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceXL) {
@@ -172,7 +177,7 @@ private struct TogetherHomeView: View {
                    !opportunityStore.opportunities.isEmpty || opportunityStore.issue != nil {
                     opportunitySection
                 }
-                if v2Store.isMutualOpportunityEnabled,
+                if !automaticMatchingEnabled, v2Store.isMutualOpportunityEnabled,
                    !store.intents.isEmpty || matchingSessionStore.session.state != .idle {
                     matchingSessionSection
                 }
@@ -233,6 +238,7 @@ private struct TogetherHomeView: View {
                     courseId: courseId,
                     timeWindows: timeWindows,
                     timePreference: timePreference,
+                    automaticMatching: automaticMatchingEnabled,
                     note: note,
                     using: session
                 )
@@ -269,7 +275,9 @@ private struct TogetherHomeView: View {
                         subtitle: AppLocalization.string("Only you can see this."),
                         systemImage: "sparkles"
                     )
-                    Text("Add something you would like to do. Your intention stays private.")
+                    Text(AppLocalization.string(automaticMatchingEnabled
+                        ? "Publish an activity to find company automatically. There is no public intention feed."
+                        : "Add something you would like to do. Your intention stays private."))
                         .font(.subheadline)
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     SSPrimaryButton(
@@ -292,6 +300,7 @@ private struct TogetherHomeView: View {
                                 let changed = await store.setPaused(
                                     !intent.isPaused,
                                     intent: intent,
+                                    automaticMatching: automaticMatchingEnabled,
                                     using: session
                                 )
                                 if changed {
@@ -597,7 +606,7 @@ private struct TogetherHomeView: View {
         if v2Store.isWeeklyIntentEnabled {
             if v2Store.isMutualOpportunityEnabled {
                 async let intentLoad: Void = store.load(using: session)
-                async let matchingSessionLoad: Void = matchingSessionStore.load(using: session)
+                async let matchingSessionLoad: Void = loadLegacyMatchingSession()
                 async let opportunityLoad: Void = opportunityStore.load(using: session)
                 _ = await (outcomeLoad, intentLoad, matchingSessionLoad, opportunityLoad)
             } else {
@@ -615,6 +624,10 @@ private struct TogetherHomeView: View {
     private func refreshOpportunitiesAfterIntentChange() async {
         guard v2Store.isMutualOpportunityEnabled else { return }
         await opportunityStore.load(using: session)
+    }
+
+    private func loadLegacyMatchingSession() async {
+        if !automaticMatchingEnabled { await matchingSessionStore.load(using: session) }
     }
 
     private var activeIntents: [NativeWeeklyIntent] {
@@ -1062,7 +1075,10 @@ private struct WeeklyIntentCard: View {
                                 Button("Keep for 14 more days", systemImage: "arrow.clockwise", action: onExtend)
                             }
                             Button(
-                                intent.isPaused ? "Resume" : "Pause",
+                                intent.isPaused
+                                    ? (clientConfiguration.configuration?.isFeatureEnabled("v2AutomaticMatching") == true
+                                        ? "Resume finding company" : "Resume")
+                                    : "Pause",
                                 systemImage: intent.isPaused ? "play.fill" : "pause.fill",
                                 action: onPause
                             )
@@ -1142,6 +1158,19 @@ private struct WeeklyIntentCard: View {
                         tone: .neutral,
                         accessibilityID: "weekly-intent-ended-\(intent.id)"
                     )
+                } else if clientConfiguration.configuration?.isFeatureEnabled("v2AutomaticMatching") == true {
+                    if intent.automaticMatching == true {
+                        SSInlineStatus(
+                            text: AppLocalization.string("Finding company automatically"),
+                            systemImage: "sparkle.magnifyingglass",
+                            tone: .neutral,
+                            accessibilityID: "weekly-intent-automatic-\(intent.id)"
+                        )
+                    } else {
+                        Button("Review and publish for automatic matching", action: onEdit)
+                            .font(.subheadline)
+                            .disabled(isWorking)
+                    }
                 }
             }
         }
@@ -1399,9 +1428,7 @@ private struct WeeklyIntentEditorView: View {
                             .accessibilityIdentifier("intent-editor-issue")
                     }
                     SSFlowActionDock(
-                        title: AppLocalization.string(dynamicTypeSize.isAccessibilitySize
-                            ? (editorStep == 0 ? "Next" : "Save")
-                            : (editorStep == 0 ? "Choose timing preference" : "Save intention")),
+                        title: editorActionTitle,
                         detail: dynamicTypeSize.isAccessibilitySize ? "" : editorActionDetail,
                         isLoading: isSaving,
                         isEnabled: editorStep == 0
@@ -1434,7 +1461,28 @@ private struct WeeklyIntentEditorView: View {
     private var editorActionDetail: String {
         AppLocalization.string(editorStep == 0
             ? "One activity at a time. You can add more later."
-            : "Saved privately. Start matching separately when you're ready.")
+            : automaticMatchingEnabled
+                ? (intent?.isPaused == true ? "This intention stays paused until you resume it."
+                    : "Automatically find company until this intention expires. Pause anytime.")
+                : "Saved privately. Start matching separately when you're ready.")
+    }
+
+    private var automaticMatchingEnabled: Bool {
+        clientConfiguration.configuration?.isFeatureEnabled("v2AutomaticMatching") == true &&
+            ActionToPlanV2Store.shared.isMutualOpportunityEnabled
+    }
+
+    private var editorActionTitle: String {
+        if editorStep == 0 {
+            return AppLocalization.string(dynamicTypeSize.isAccessibilitySize ? "Next" : "Choose timing preference")
+        }
+        if automaticMatchingEnabled, intent?.isPaused != true {
+            if intent?.automaticMatching == true {
+                return AppLocalization.string(dynamicTypeSize.isAccessibilitySize ? "Save" : "Save changes")
+            }
+            return AppLocalization.string(dynamicTypeSize.isAccessibilitySize ? "Publish intention (short)" : "Publish intention")
+        }
+        return AppLocalization.string(dynamicTypeSize.isAccessibilitySize ? "Save" : "Save intention")
     }
 
     private var editorProgress: some View {
@@ -1738,10 +1786,10 @@ private struct WeeklyIntentEditorView: View {
             }
             if timingKind == "FLEXIBLE" {
                 Section("A day or date range") {
-                    ViewThatFits(in: .horizontal) {
-                        HStack { quickDateButtons }
-                        VStack(alignment: .leading) { quickDateButtons }
-                    }
+                    let quickLayout = dynamicTypeSize.isAccessibilitySize
+                        ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
+                        : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
+                    quickLayout { quickDateButtons }
                     DatePicker("From", selection: $flexibleStart,
                         in: Calendar.current.startOfDay(for: Date())...lastFlexibleDay, displayedComponents: .date)
                         .accessibilityIdentifier("intent-flexible-start")
@@ -1805,7 +1853,10 @@ private struct WeeklyIntentEditorView: View {
             }
         } label: {
             HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
-                Image(systemName: icon).frame(width: 24).padding(.top, 3)
+                Image(systemName: icon)
+                    .font(.system(size: 20))
+                    .frame(width: 24).padding(.top, 3)
+                    .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(AppLocalization.string(String.LocalizationValue(title))).font(.subheadline.weight(.semibold))
                     Text(AppLocalization.string(String.LocalizationValue(detail))).font(.footnote)
@@ -1814,7 +1865,9 @@ private struct WeeklyIntentEditorView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
                 Image(systemName: timingKind == kind ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 22))
                     .padding(.top, 3)
+                    .accessibilityHidden(true)
             }
             .foregroundStyle(timingKind == kind ? SideSeatTheme.accent : SideSeatTheme.textPrimary)
             .padding(.vertical, SideSeatTheme.spaceSM)
@@ -1833,6 +1886,7 @@ private struct WeeklyIntentEditorView: View {
                 flexibleEnd = range.1
             }
             .buttonStyle(.bordered)
+            .fixedSize(horizontal: false, vertical: true)
             .tint(SideSeatTheme.accent)
             .disabled(range.1 > lastFlexibleDay)
             .accessibilityIdentifier("intent-quick-\(title)")
@@ -1886,7 +1940,7 @@ private struct WeeklyIntentEditorView: View {
     }
 
     private var expiry: Date {
-        intent?.expiresAt ?? (supportsFlexibleTiming ? Date().addingTimeInterval(14 * 24 * 60 * 60) : Self.currentWeekExpiry())
+        intent?.expiresAt ?? (supportsFlexibleTiming || automaticMatchingEnabled ? Date().addingTimeInterval(14 * 24 * 60 * 60) : Self.currentWeekExpiry())
     }
 
     private var pickerUpperBound: Date {

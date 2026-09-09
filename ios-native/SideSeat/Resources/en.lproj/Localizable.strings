@@ -1858,3 +1858,12 @@
 "You can pause, end, or extend this intention later." = "You can pause, end, or extend this intention later.";
 "Tomorrow" = "Tomorrow";
 "This weekend" = "This weekend";
+// Event-driven intention publication
+"Publish an activity to find company automatically. There is no public intention feed." = "Publish an activity to find company automatically. There is no public intention feed.";
+"Finding company automatically" = "Finding company automatically";
+"Review and publish for automatic matching" = "Review and publish for automatic matching";
+"This intention stays paused until you resume it." = "This intention stays paused until you resume it.";
+"Automatically find company until this intention expires. Pause anytime." = "Automatically find company until this intention expires. Pause anytime.";
+"Publish intention" = "Publish intention";
+"Publish intention (short)" = "Publish";
+"Resume finding company" = "Resume finding company";

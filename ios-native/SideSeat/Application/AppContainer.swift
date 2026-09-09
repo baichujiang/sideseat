@@ -89,6 +89,7 @@ final class AppContainer {
                     "storeKitSupport": true,
                     "apnsDelivery": false,
                     "v2FlexibleTiming": arguments.contains("--ui-testing-flexible-timing"),
+                    "v2AutomaticMatching": arguments.contains("--ui-testing-automatic-matching"),
                 ]
             )
         } else if arguments.contains("--ui-testing-signed-out") {

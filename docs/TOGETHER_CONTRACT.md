@@ -4,11 +4,19 @@
 
 **Policy:** `MUTUAL_OPPORTUNITY_V1`
 
-**Last updated:** 2026-09-08
+**Last updated:** 2026-09-09
 
 **Governing flow:** [User Flow](./USER_FLOW.md)
 
 **Scope:** Weekly Intent, matching session, Mutual Opportunity and mutual activation
+
+**2026-09-09 publication amendment (local, rollout-gated):**
+[Event-driven automatic matching](./INTENT_DRIVEN_MATCHING.md) supersedes the
+session-only enrollment rules below for explicitly published intentions when
+`v2AutomaticMatching` is enabled. ACTIVE lifecycle is the supply gate; no separate
+Start or 48-hour session is required. Legacy rows default to their original
+session consent, without automatic conversion. Pause/end and locked insertion
+preserve the existing safety boundaries. Build 38 remains on the legacy flow.
 
 **2026-09-09 timing amendment (local, rollout-gated):**
 [Flexible intention timing](./FLEXIBLE_INTENT_TIMING.md) supersedes the exact-only

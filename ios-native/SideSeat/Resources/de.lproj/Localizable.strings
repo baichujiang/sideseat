@@ -1857,3 +1857,12 @@
 "You can pause, end, or extend this intention later." = "Du kannst das Vorhaben später pausieren, beenden oder verlängern.";
 "Tomorrow" = "Morgen";
 "This weekend" = "Dieses Wochenende";
+// Event-driven intention publication
+"Publish an activity to find company automatically. There is no public intention feed." = "Veröffentliche ein Vorhaben, um automatisch Begleitung zu finden. Es gibt keinen öffentlichen Feed.";
+"Finding company automatically" = "Wir suchen automatisch Begleitung";
+"Review and publish for automatic matching" = "Prüfen und veröffentlichen, um Begleitung zu finden";
+"This intention stays paused until you resume it." = "Dieses Vorhaben bleibt pausiert, bis du es fortsetzt.";
+"Automatically find company until this intention expires. Pause anytime." = "Bis zum Ablauf automatisch Begleitung finden. Jederzeit pausierbar.";
+"Publish intention" = "Vorhaben veröffentlichen";
+"Publish intention (short)" = "Aktivieren";
+"Resume finding company" = "Wieder Begleitung finden";

@@ -1858,3 +1858,12 @@
 "You can pause, end, or extend this intention later." = "之后可以随时暂停、结束或延长意愿。";
 "Tomorrow" = "明天";
 "This weekend" = "本周末";
+// Event-driven intention publication
+"Publish an activity to find company automatically. There is no public intention feed." = "发布想做的活动，自动寻找同行。意向不会公开发布到动态广场。";
+"Finding company automatically" = "正在自动寻找同行";
+"Review and publish for automatic matching" = "查看并发布，自动寻找同行";
+"This intention stays paused until you resume it." = "这条意向仍保持暂停，恢复后才会继续寻找同行。";
+"Automatically find company until this intention expires. Pause anytime." = "有效期内自动寻找同行，可随时暂停。";
+"Publish intention" = "发布意向";
+"Publish intention (short)" = "发布";
+"Resume finding company" = "恢复寻找同行";

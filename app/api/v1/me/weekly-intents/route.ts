@@ -104,6 +104,7 @@ export async function POST(request: Request) {
   }
   const parsed = await parseV1Json(request, weeklyIntentCreateSchema);
   if (!parsed.ok) return parsed.response;
+  if (parsed.data.automaticMatching && (!isV2FeatureEnabled("v2AutomaticMatching") || !isV2FeatureEnabled("v2MutualOpportunity"))) return unavailable(request);
   if (parsed.data.timePreference && !isV2FeatureEnabled("v2FlexibleTiming")) return unavailable(request);
   try {
     return await runIdempotentV1Mutation({

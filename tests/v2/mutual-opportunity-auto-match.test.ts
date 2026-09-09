@@ -261,7 +261,7 @@ test("SPORTS never broadens across concrete activities through parallel mode", (
   );
 });
 
-test("explicit session start is the matching trigger and both participants are gated", () => {
+test("publication and legacy sessions preserve bilateral enrollment and matching notifications", () => {
   const matcher = source("lib/v2/mutual-opportunities.ts");
   const orchestrator = source("lib/v2/mutual-opportunity-auto-match.ts");
   const sessionRoute = source(
@@ -271,8 +271,10 @@ test("explicit session start is the matching trigger and both participants are g
   assert.match(matcher, /opportunityId: created\.id/);
   assert.match(
     matcher,
-    /const ownerSession = await prisma\.togetherMatchingSession\.findFirst/,
+    /function matchingEnrollmentWhere/,
   );
+  assert.match(matcher, /automaticMatching: false, user:/);
+  assert.match(matcher, /isV2FeatureEnabled\("v2AutomaticMatching"\)/);
   assert.match(
     matcher,
     /togetherMatchingSession:[\s\S]*stoppedAt: null[\s\S]*matchingUntil: \{ gt: now \}/,

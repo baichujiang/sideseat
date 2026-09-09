@@ -30,6 +30,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
                 "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
                 "--ui-testing-discover", "--ui-testing-weekly-intent",
                 "--ui-testing-mutual-opportunity", "--ui-testing-flexible-timing",
+                "--ui-testing-automatic-matching",
                 "--ui-testing-together-matching",
                 "--ui-testing-language=\(language)", "--ui-testing-appearance=\(appearance)",
             ]
@@ -37,6 +38,9 @@ final class VisualQAScreenshotUITests: XCTestCase {
             app.launch()
             let add = app.buttons["together-add-intent"]
             XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 8))
+            XCTAssertFalse(app.buttons["together-start-matching"].exists)
+            XCTAssertFalse(app.buttons["together-restart-matching"].exists)
+            XCTAssertFalse(app.descendants(matching: .any)["together-matching-section-title"].exists)
             saveScreenshot(app: app, name: "flexible-opportunity-\(language)-\(appearance)")
             revealFlowElement(add, in: app)
             XCTAssertTrue(add.exists)
@@ -55,18 +59,23 @@ final class VisualQAScreenshotUITests: XCTestCase {
             XCTAssertTrue(undecided.waitForExistence(timeout: 5))
             XCTAssertTrue(undecided.isSelected)
             XCTAssertTrue(app.buttons["intent-editor-save"].isEnabled)
+            XCTAssertEqual(app.buttons["intent-editor-save"].label,
+                language == "zh-Hans" ? "发布意向" : language == "de" ? (large ? "Aktivieren" : "Vorhaben veröffentlichen") : "Publish intention")
             saveScreenshot(app: app, name: "flexible-undecided-\(language)-\(appearance)")
             let flexible = app.buttons["intent-timing-flexible"]
             revealFlowElement(flexible, in: app)
             flexible.tap()
+            XCTAssertTrue(flexible.isSelected)
             let nextWeek = app.buttons["intent-quick-Next week"]
             revealFlowElement(nextWeek, in: app)
             XCTAssertTrue(nextWeek.isEnabled)
+            saveScreenshot(app: app, name: "automatic-quick-buttons-\(language)-\(appearance)")
             nextWeek.tap()
             XCTAssertTrue(app.buttons["intent-editor-save"].isEnabled)
             let summary = app.descendants(matching: .any)["intent-timing-summary"].firstMatch
             revealFlowElement(summary, in: app)
             XCTAssertTrue(summary.exists)
+            XCTAssertTrue(summary.label.contains("–"), "Next week must select a range, not leave the default tomorrow: \(summary.label)")
             saveScreenshot(app: app, name: "flexible-next-week-\(language)-\(appearance)")
             let exact = app.buttons["intent-timing-exact"]
             for _ in 0..<8 { if exact.isHittable { break }; app.swipeDown() }
@@ -537,8 +546,18 @@ final class VisualQAScreenshotUITests: XCTestCase {
 
     @MainActor
     private func revealFlowElement(_ element: XCUIElement, in app: XCUIApplication) {
-        for _ in 0..<8 where !element.exists || !element.isHittable {
-            app.swipeUp()
+        let fields = app.descendants(matching: .any)["intent-editor-fields"].firstMatch
+        let surface = fields.exists ? fields : app
+        for _ in 0..<12 {
+            let visible = surface.frame.intersection(app.frame)
+            if element.exists, element.isHittable,
+               element.frame.midY > visible.minY + 24,
+               element.frame.midY < visible.maxY - 24 { break }
+            if element.exists, element.frame.midY < visible.minY + 24 {
+                surface.swipeDown(velocity: .slow)
+            } else {
+                surface.swipeUp(velocity: .slow)
+            }
         }
         XCTAssertTrue(element.exists)
         XCTAssertTrue(element.isHittable)

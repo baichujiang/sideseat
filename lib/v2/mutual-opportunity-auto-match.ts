@@ -1,6 +1,7 @@
 import "server-only";
 
 import { notifyUserPush } from "@/lib/push/notify-user";
+import { isV2FeatureEnabled } from "@/lib/v2/feature-flags";
 import {
   generateMutualOpportunitiesForUser,
   type CreatedMutualOpportunityMatch,
@@ -24,10 +25,8 @@ async function notifyNewOpportunity(
 }
 
 /**
- * Matching entry point for an explicit active 48-hour Together session.
- * The matcher itself verifies that both participants still have active
- * sessions, so callers cannot accidentally turn an intent write into an
- * implicit queue join.
+ * Publishing/resuming an intention triggers matching immediately. The matcher
+ * verifies active, unexpired per-intent consent (or a legacy matching session).
  *
  * `createMany(skipDuplicates)` inside the matcher is the notification gate:
  * only the request that actually inserts a new opportunity gets it back here.
@@ -35,6 +34,7 @@ async function notifyNewOpportunity(
  * an existing opportunity.
  */
 export async function matchAndNotifyForUser(userId: string): Promise<void> {
+  if (!isV2FeatureEnabled("v2WeeklyIntent") || !isV2FeatureEnabled("v2MutualOpportunity")) return;
   const created = await generateMutualOpportunitiesForUser(userId);
   if (created.length === 0) return;
 

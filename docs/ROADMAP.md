@@ -6,6 +6,15 @@
 
 **Governing product:** [Product](./PRODUCT.md)
 
+**Current publication follow-up:** [Event-driven automatic matching](./INTENT_DRIVEN_MATCHING.md)
+replaces the new client's separate Start/48-hour session with explicit publication
+and per-intent pause/resume/end. Implementation and 15 real local PostgreSQL checks
+pass; all 4 native model tests and 3 UI tests pass, including the final German
+largest-text follow-up. Evidence is recorded in the feature document above.
+Owner authorized commit/push, both pending migrations and backend deployment
+with automatic/flexible flags OFF, then internal TestFlight Build 39. Release is
+in progress. Activate only after both phones update and separate owner approval.
+
 **Current local development:** [Flexible intention timing](./FLEXIBLE_INTENT_TIMING.md)
 adds tomorrow/weekend/next-week/date-range/undecided timing, a 14-day intention
 lifecycle, separate activity fit and timing, and explicit time confirmation in the
@@ -16,7 +25,7 @@ largest text. The final simulator result is `/tmp/sideseat-flexible-timing-ui-7.
 The focused German wrapping/translation follow-up also passes in
 `/tmp/sideseat-flexible-timing-ui-8.xcresult`.
 Owner authorized commit/push on 2026-09-09. Not deployed or included in TestFlight Build 38.
-Next: authorize the migration, backend deployment with rollout OFF and
+Next: execute the authorized migration, backend deployment with rollout OFF and
 next internal TestFlight release; activate `V2_FLEXIBLE_TIMING_ENABLED` only after migration,
 backend and compatible testing phones are ready. Outcome/Shared Encounter unchanged.
 

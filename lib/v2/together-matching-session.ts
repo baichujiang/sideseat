@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
 
@@ -149,6 +149,24 @@ export async function stopTogetherMatchingSession(
   now = new Date(),
 ): Promise<TogetherMatchingSessionResponse> {
   const row = await prisma.$transaction(async (tx) => {
+    // A user returning to a shipped client still expects Stop to stop supply.
+    // Lock intentions before sessions, in the same order as the matcher.
+    const published = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+      SELECT "id" FROM "WeeklyIntent"
+      WHERE "userId" = ${userId} AND "automaticMatching" = true AND "status" = 'ACTIVE'
+      ORDER BY "id" FOR UPDATE
+    `);
+    if (published.length > 0) {
+      const ids = published.map(intent => intent.id);
+      await tx.weeklyIntent.updateMany({
+        where: { id: { in: ids } },
+        data: { status: "PAUSED", pausedAt: now, version: { increment: 1 } },
+      });
+      await tx.mutualOpportunity.updateMany({
+        where: { status: "PENDING", OR: [{ intentAId: { in: ids } }, { intentBId: { in: ids } }] },
+        data: { status: "UNAVAILABLE", terminalAt: now, version: { increment: 1 } },
+      });
+    }
     await tx.togetherMatchingSession.updateMany({
       where: {
         userId,

@@ -127,6 +127,8 @@ export async function PATCH(
   if (!identifier.ok) return identifier.response;
   const parsed = await parseV1Json(request, weeklyIntentPatchSchema);
   if (!parsed.ok) return parsed.response;
+  if ("automaticMatching" in parsed.data && parsed.data.automaticMatching &&
+    (!isV2FeatureEnabled("v2AutomaticMatching") || !isV2FeatureEnabled("v2MutualOpportunity"))) return unavailable(request);
   if ((parsed.data.action === "EXTEND" || (parsed.data.action === "EDIT" && parsed.data.timePreference)) &&
     !isV2FeatureEnabled("v2FlexibleTiming")) return unavailable(request);
   if (

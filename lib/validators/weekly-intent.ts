@@ -243,6 +243,7 @@ const intentFields = {
   courseId: z.string().trim().min(1).max(191).nullable().optional(),
   timeWindows: weeklyIntentWindowsSchema,
   timePreference: intentTimePreferenceSchema.optional(),
+  automaticMatching: z.literal(true).optional(),
   timeZone: timeZoneSchema,
   note: z.string().trim().max(160).nullable().optional(),
 } as const;
@@ -275,6 +276,7 @@ const weeklyIntentEditSchema = z
     courseId: intentFields.courseId,
     timeWindows: intentFields.timeWindows.optional(),
     timePreference: intentFields.timePreference,
+    automaticMatching: intentFields.automaticMatching,
     timeZone: intentFields.timeZone.optional(),
     note: intentFields.note,
   })
@@ -290,6 +292,7 @@ const weeklyIntentEditSchema = z
       value.courseId !== undefined ||
       value.timeWindows !== undefined ||
       value.timePreference !== undefined ||
+      value.automaticMatching !== undefined ||
       value.timeZone !== undefined ||
       value.note !== undefined,
     { message: "Choose at least one field to edit." },
@@ -310,6 +313,7 @@ const weeklyIntentResumeSchema = z
   .object({
     action: z.literal("RESUME"),
     expectedVersion: z.number().int().positive(),
+    automaticMatching: intentFields.automaticMatching,
   })
   .strict();
 

@@ -945,6 +945,7 @@ model WeeklyIntent {
   timeWindows            Json
   /// NULL preserves legacy exact windows. New clients declare timing explicitly.
   timePreference         Json?
+  automaticMatching      Boolean @default(false)
   timeZone               String              @default("Europe/Berlin")
   note                   String?             @db.VarChar(160)
   status                 WeeklyIntentStatus  @default(ACTIVE)

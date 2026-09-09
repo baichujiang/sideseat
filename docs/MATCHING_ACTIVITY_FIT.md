@@ -21,6 +21,11 @@ matching remains enabled and unchanged.
 
 ## Eligibility before score
 
+The session requirement below is the shipped legacy policy. The approved
+[event-driven publication amendment](./INTENT_DRIVEN_MATCHING.md) replaces it
+with active per-intent publication consent for new intentions; it does not remove
+school/language/activity/safety gates or change score ordering. Not yet deployed.
+
 Preserve verified/onboarded same-school users, at least one shared language,
 two explicit active matching sessions, active intents, at least 30 minutes of
 actionable overlapping declared availability, course scope, Block/moderation,
