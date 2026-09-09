@@ -452,7 +452,7 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `DELETE /api/v1/me/together-matching-session`.
     /// - Remark: Generated from `#/paths//api/v1/me/together-matching-session/delete(stopTogetherMatchingSession)`.
     func stopTogetherMatchingSession(_ input: Operations.StopTogetherMatchingSession.Input) async throws -> Operations.StopTogetherMatchingSession.Output
-    /// Send X-SideSeat-Flexible-Timing: 1 to receive undated opportunities and ACTIVITY_FIT_V2 components. Legacy clients receive only dated opportunities, with V2 matchFit omitted as null.
+    /// Send X-SideSeat-Flexible-Timing: 1 for undated opportunities and X-SideSeat-Discovery-Matching: 1 for discovery-first cards with explicit differences. Discovery cards are not delivered to older clients. Legacy clients receive only dated opportunities, with V2 matchFit omitted as null.
     ///
     /// - Remark: HTTP `GET /api/v1/me/mutual-opportunities`.
     /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/get(listMutualOpportunities)`.
@@ -2056,7 +2056,7 @@ extension APIProtocol {
     internal func stopTogetherMatchingSession(headers: Operations.StopTogetherMatchingSession.Input.Headers) async throws -> Operations.StopTogetherMatchingSession.Output {
         try await stopTogetherMatchingSession(Operations.StopTogetherMatchingSession.Input(headers: headers))
     }
-    /// Send X-SideSeat-Flexible-Timing: 1 to receive undated opportunities and ACTIVITY_FIT_V2 components. Legacy clients receive only dated opportunities, with V2 matchFit omitted as null.
+    /// Send X-SideSeat-Flexible-Timing: 1 for undated opportunities and X-SideSeat-Discovery-Matching: 1 for discovery-first cards with explicit differences. Discovery cards are not delivered to older clients. Legacy clients receive only dated opportunities, with V2 matchFit omitted as null.
     ///
     /// - Remark: HTTP `GET /api/v1/me/mutual-opportunities`.
     /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/get(listMutualOpportunities)`.
@@ -8709,6 +8709,86 @@ internal enum Components {
                 ])
             }
         }
+        /// - Remark: Generated from `#/components/schemas/DiscoveryActivity`.
+        internal struct DiscoveryActivity: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoveryActivity/topic`.
+            internal enum TopicPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case coffee = "COFFEE"
+                case study = "STUDY"
+                case sports = "SPORTS"
+                case explore = "EXPLORE"
+                case food = "FOOD"
+                case events = "EVENTS"
+            }
+            /// - Remark: Generated from `#/components/schemas/DiscoveryActivity/topic`.
+            internal var topic: Components.Schemas.DiscoveryActivity.TopicPayload
+            /// - Remark: Generated from `#/components/schemas/DiscoveryActivity/activityText`.
+            internal var activityText: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/DiscoveryActivity/studyGoal`.
+            internal var studyGoal: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/DiscoveryActivity/sportTag`.
+            internal var sportTag: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/DiscoveryActivity/sportOtherNote`.
+            internal var sportOtherNote: Swift.String?
+            /// Creates a new `DiscoveryActivity`.
+            ///
+            /// - Parameters:
+            ///   - topic:
+            ///   - activityText:
+            ///   - studyGoal:
+            ///   - sportTag:
+            ///   - sportOtherNote:
+            internal init(
+                topic: Components.Schemas.DiscoveryActivity.TopicPayload,
+                activityText: Swift.String? = nil,
+                studyGoal: Swift.String? = nil,
+                sportTag: Swift.String? = nil,
+                sportOtherNote: Swift.String? = nil
+            ) {
+                self.topic = topic
+                self.activityText = activityText
+                self.studyGoal = studyGoal
+                self.sportTag = sportTag
+                self.sportOtherNote = sportOtherNote
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case topic
+                case activityText
+                case studyGoal
+                case sportTag
+                case sportOtherNote
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.topic = try container.decode(
+                    Components.Schemas.DiscoveryActivity.TopicPayload.self,
+                    forKey: .topic
+                )
+                self.activityText = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .activityText
+                )
+                self.studyGoal = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .studyGoal
+                )
+                self.sportTag = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .sportTag
+                )
+                self.sportOtherNote = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .sportOtherNote
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "topic",
+                    "activityText",
+                    "studyGoal",
+                    "sportTag",
+                    "sportOtherNote"
+                ])
+            }
+        }
         /// Frozen, symmetric activity-fit heuristic, not a person's rating or success probability. Scores order feasible opportunities; no minimum-score delivery gate. Null on historical opportunities without a snapshot.
         ///
         /// - Remark: Generated from `#/components/schemas/ActivityFit`.
@@ -8717,6 +8797,7 @@ internal enum Components {
             internal enum PolicyVersionPayload: String, Codable, Hashable, Sendable, CaseIterable {
                 case activityFitV1 = "ACTIVITY_FIT_V1"
                 case activityFitV2 = "ACTIVITY_FIT_V2"
+                case discoveryFitV1 = "DISCOVERY_FIT_V1"
             }
             /// - Remark: Generated from `#/components/schemas/ActivityFit/policyVersion`.
             internal var policyVersion: Components.Schemas.ActivityFit.PolicyVersionPayload
@@ -8725,6 +8806,7 @@ internal enum Components {
                 case exactActivity = "EXACT_ACTIVITY"
                 case parallelStudy = "PARALLEL_STUDY"
                 case relatedActivity = "RELATED_ACTIVITY"
+                case differentActivity = "DIFFERENT_ACTIVITY"
             }
             /// - Remark: Generated from `#/components/schemas/ActivityFit/basis`.
             internal var basis: Components.Schemas.ActivityFit.BasisPayload
@@ -8736,12 +8818,14 @@ internal enum Components {
             internal var timePoints: Swift.Int?
             /// - Remark: Generated from `#/components/schemas/ActivityFit/languagePoints`.
             internal enum LanguagePointsPayload: Int, Codable, Hashable, Sendable, CaseIterable {
+                case _0 = 0
                 case _10 = 10
             }
             /// - Remark: Generated from `#/components/schemas/ActivityFit/languagePoints`.
             internal var languagePoints: Components.Schemas.ActivityFit.LanguagePointsPayload
             /// - Remark: Generated from `#/components/schemas/ActivityFit/schoolPoints`.
             internal enum SchoolPointsPayload: Int, Codable, Hashable, Sendable, CaseIterable {
+                case _0 = 0
                 case _10 = 10
             }
             /// - Remark: Generated from `#/components/schemas/ActivityFit/schoolPoints`.
@@ -8752,6 +8836,23 @@ internal enum Components {
             internal var viewerActivityText: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ActivityFit/peerActivityText`.
             internal var peerActivityText: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/DifferencesPayload`.
+            internal enum DifferencesPayloadPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case activity = "ACTIVITY"
+                case time = "TIME"
+                case timeUndecided = "TIME_UNDECIDED"
+                case language = "LANGUAGE"
+                case school = "SCHOOL"
+                case course = "COURSE"
+            }
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/differences`.
+            internal typealias DifferencesPayload = [Components.Schemas.ActivityFit.DifferencesPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/differences`.
+            internal var differences: Components.Schemas.ActivityFit.DifferencesPayload?
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/viewerActivity`.
+            internal var viewerActivity: Components.Schemas.DiscoveryActivity?
+            /// - Remark: Generated from `#/components/schemas/ActivityFit/peerActivity`.
+            internal var peerActivity: Components.Schemas.DiscoveryActivity?
             /// Creates a new `ActivityFit`.
             ///
             /// - Parameters:
@@ -8765,6 +8866,9 @@ internal enum Components {
             ///   - overlapMinutes:
             ///   - viewerActivityText:
             ///   - peerActivityText:
+            ///   - differences:
+            ///   - viewerActivity:
+            ///   - peerActivity:
             internal init(
                 policyVersion: Components.Schemas.ActivityFit.PolicyVersionPayload,
                 basis: Components.Schemas.ActivityFit.BasisPayload,
@@ -8775,7 +8879,10 @@ internal enum Components {
                 schoolPoints: Components.Schemas.ActivityFit.SchoolPointsPayload,
                 overlapMinutes: Swift.Int? = nil,
                 viewerActivityText: Swift.String? = nil,
-                peerActivityText: Swift.String? = nil
+                peerActivityText: Swift.String? = nil,
+                differences: Components.Schemas.ActivityFit.DifferencesPayload? = nil,
+                viewerActivity: Components.Schemas.DiscoveryActivity? = nil,
+                peerActivity: Components.Schemas.DiscoveryActivity? = nil
             ) {
                 self.policyVersion = policyVersion
                 self.basis = basis
@@ -8787,6 +8894,9 @@ internal enum Components {
                 self.overlapMinutes = overlapMinutes
                 self.viewerActivityText = viewerActivityText
                 self.peerActivityText = peerActivityText
+                self.differences = differences
+                self.viewerActivity = viewerActivity
+                self.peerActivity = peerActivity
             }
             internal enum CodingKeys: String, CodingKey {
                 case policyVersion
@@ -8799,6 +8909,9 @@ internal enum Components {
                 case overlapMinutes
                 case viewerActivityText
                 case peerActivityText
+                case differences
+                case viewerActivity
+                case peerActivity
             }
             internal init(from decoder: any Swift.Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -8842,6 +8955,18 @@ internal enum Components {
                     Swift.String.self,
                     forKey: .peerActivityText
                 )
+                self.differences = try container.decodeIfPresent(
+                    Components.Schemas.ActivityFit.DifferencesPayload.self,
+                    forKey: .differences
+                )
+                self.viewerActivity = try container.decodeIfPresent(
+                    Components.Schemas.DiscoveryActivity.self,
+                    forKey: .viewerActivity
+                )
+                self.peerActivity = try container.decodeIfPresent(
+                    Components.Schemas.DiscoveryActivity.self,
+                    forKey: .peerActivity
+                )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
                     "policyVersion",
                     "basis",
@@ -8852,7 +8977,10 @@ internal enum Components {
                     "schoolPoints",
                     "overlapMinutes",
                     "viewerActivityText",
-                    "peerActivityText"
+                    "peerActivityText",
+                    "differences",
+                    "viewerActivity",
+                    "peerActivity"
                 ])
             }
         }
@@ -54219,7 +54347,7 @@ internal enum Operations {
             }
         }
     }
-    /// Send X-SideSeat-Flexible-Timing: 1 to receive undated opportunities and ACTIVITY_FIT_V2 components. Legacy clients receive only dated opportunities, with V2 matchFit omitted as null.
+    /// Send X-SideSeat-Flexible-Timing: 1 for undated opportunities and X-SideSeat-Discovery-Matching: 1 for discovery-first cards with explicit differences. Discovery cards are not delivered to older clients. Legacy clients receive only dated opportunities, with V2 matchFit omitted as null.
     ///
     /// - Remark: HTTP `GET /api/v1/me/mutual-opportunities`.
     /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/get(listMutualOpportunities)`.

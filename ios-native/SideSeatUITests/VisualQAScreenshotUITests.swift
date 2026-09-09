@@ -13,6 +13,53 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
+    func testDiscoveryDifferencesAcrossLanguages() {
+        for (language, title) in [("zh-Hans", "相关度"), ("en", "Relevance"), ("de", "Relevanz")] {
+            let app = XCUIApplication()
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-discover", "--ui-testing-weekly-intent", "--ui-testing-mutual-opportunity",
+                "--ui-testing-discovery-matching", "--ui-testing-automatic-matching", "--ui-testing-together-matching",
+                "--ui-testing-language=\(language)", "--ui-testing-appearance=\(language == "en" ? "dark" : "light")"]
+            if language == "de" { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
+            app.launch()
+            XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 8))
+            saveScreenshot(app: app, name: "discovery-card-\(language)")
+            let differences = app.descendants(matching: .any)["mutual-opportunity-differences-cmutualui0000000000000001"]
+            revealFlowElement(differences, in: app)
+            XCTAssertTrue(differences.exists)
+            let fit = app.descendants(matching: .any)["mutual-opportunity-fit-cmutualui0000000000000001"]
+            revealFlowElement(fit, in: app)
+            XCTAssertTrue(fit.label.contains(title))
+            XCTAssertTrue(fit.label.contains("0/100"))
+            saveScreenshot(app: app, name: "discovery-differences-\(language)")
+            XCTAssertFalse(app.buttons["together-start-matching"].exists)
+            app.terminate()
+        }
+    }
+
+    @MainActor
+    func testDiscoveryEmptyStates() {
+        for published in [false, true] {
+            let app = XCUIApplication()
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-discover", "--ui-testing-weekly-intent", "--ui-testing-mutual-opportunity", "--ui-testing-mutual-opportunity-empty",
+                "--ui-testing-discovery-matching", "--ui-testing-automatic-matching", "--ui-testing-together-matching",
+                "--ui-testing-language=zh-Hans"]
+            if published { app.launchArguments.append("--ui-testing-discovery-published") }
+            app.launch()
+            let action = app.buttons["together-discovery-empty-action"]
+            XCTAssertTrue(action.waitForExistence(timeout: 8))
+            XCTAssertEqual(action.label, published ? "刷新推荐" : "创建意向")
+            XCTAssertFalse(app.buttons["together-start-matching"].exists)
+            saveScreenshot(app: app, name: "discovery-empty-\(published ? "published" : "unpublished")")
+            action.tap()
+            if published { XCTAssertTrue(action.waitForExistence(timeout: 5)) }
+            else { XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForExistence(timeout: 5)) }
+            app.terminate()
+        }
+    }
+
+    @MainActor
     func testFlexibleTimingChoicesAcrossLanguages() {
         verifyFlexibleTimingConfigurations([("zh-Hans", "light", false), ("en", "dark", false)])
     }

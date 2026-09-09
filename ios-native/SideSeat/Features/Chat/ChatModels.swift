@@ -972,7 +972,7 @@ struct NativeActionContext: Codable, Hashable, Sendable {
             return String(format: AppLocalization.string("%@ together"), note)
         }
         switch title {
-        case "Coffee together", "Study together", "Study side by side",
+        case "Do something together", "Coffee together", "Study together", "Study side by side",
              "Do sports together", "Explore together", "Eat together", "Go to an event together",
              "Play basketball together", "Play badminton together", "Play table tennis together",
              "Play football together", "Play volleyball together", "Play tennis together",

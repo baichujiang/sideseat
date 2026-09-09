@@ -20,6 +20,7 @@ import { prisma } from "@/lib/db/prisma";
 import { repeatEligibility } from "@/lib/plans/repeat-eligibility";
 import { isV2FeatureEnabled } from "@/lib/v2/feature-flags";
 import { activityFit, activityFitProjection } from "@/lib/v2/activity-fit";
+import { discoveryFit } from "@/lib/v2/discovery-fit";
 import { compatibleIntentTiming, type OpportunityTimeContext } from "@/lib/v2/intent-timing";
 import {
   classifyActivityMatch,
@@ -278,19 +279,19 @@ function contextSnapshot(options: {
   activityFit: (ReturnType<typeof activityFit> & {
     intentAActivityText: string | null;
     intentBActivityText: string | null;
-  }) | null;
+  }) | ReturnType<typeof discoveryFit>["snapshot"] | null;
 }): Prisma.InputJsonObject {
   return {
     version: 1,
     sourceKind: "MUTUAL_OPPORTUNITY",
     sourceId: options.id,
     isRepeat: options.isRepeat ?? false,
-    title: topicTitle(options),
+    title: options.activityFit?.basis === "DIFFERENT_ACTIVITY" ? "Do something together" : topicTitle(options),
     startsAt: options.startsAt?.toISOString() ?? null,
     endsAt: options.endsAt?.toISOString() ?? null,
     timeContext: options.timeContext,
     location: null,
-    planType: planType(options.topic),
+    planType: options.activityFit?.basis === "DIFFERENT_ACTIVITY" ? "CUSTOM" : planType(options.topic),
     participantIds: [options.userA.id, options.userB.id],
     author: { id: options.userA.id, displayName: displayName(options.userA) },
     course: options.course
@@ -419,19 +420,21 @@ async function createCandidateOpportunity(options: {
   now: Date;
 }): Promise<CreatedMutualOpportunityMatch | null> {
   const { ownerIntent, candidateIntent, now } = options;
-  if (ownerIntent.topic !== candidateIntent.topic) return null;
-  const activityMatch = classifyActivityMatch(
+  const discovery = isV2FeatureEnabled("v2DiscoveryMatching")
+    ? discoveryFit(ownerIntent, candidateIntent, now) : null;
+  if (!discovery && ownerIntent.topic !== candidateIntent.topic) return null;
+  const activityMatch = discovery?.classification ?? classifyActivityMatch(
     ownerIntent, candidateIntent, isV2FeatureEnabled("v2ActivityFit"),
   );
   if (!activityMatch) return null;
   if (
-    (ownerIntent.courseId || candidateIntent.courseId) &&
+    !discovery && (ownerIntent.courseId || candidateIntent.courseId) &&
     ownerIntent.courseId !== candidateIntent.courseId
   ) return null;
-  if (sharedLanguages(ownerIntent.user, candidateIntent.user).length === 0) return null;
-  const overlap = compatibleIntentTiming(ownerIntent, candidateIntent, now);
+  if (!discovery && sharedLanguages(ownerIntent.user, candidateIntent.user).length === 0) return null;
+  const overlap = discovery?.timing ?? compatibleIntentTiming(ownerIntent, candidateIntent, now);
   if (!overlap) return null;
-  if (!overlap.startsAt && !isV2FeatureEnabled("v2FlexibleTiming")) return null;
+  if (!discovery && !overlap.startsAt && !isV2FeatureEnabled("v2FlexibleTiming")) return null;
   const expiresAt = overlap.expiresAt;
   if (expiresAt <= now) return null;
 
@@ -442,17 +445,26 @@ async function createCandidateOpportunity(options: {
   const intentBId = ownerFirst ? candidateIntent.id : ownerIntent.id;
   const intentAActivity = ownerFirst ? activityMatch.first : activityMatch.second;
   const intentBActivity = ownerFirst ? activityMatch.second : activityMatch.first;
-  const fit = {
+  const fit = discovery ? {
+    ...discovery.snapshot,
+    intentAActivityText: ownerFirst ? ownerIntent.activityText : candidateIntent.activityText,
+    intentBActivityText: ownerFirst ? candidateIntent.activityText : ownerIntent.activityText,
+    intentAActivity: ownerFirst ? discovery.snapshot.intentAActivity : discovery.snapshot.intentBActivity,
+    intentBActivity: ownerFirst ? discovery.snapshot.intentBActivity : discovery.snapshot.intentAActivity,
+  } : {
     ...activityFit(activityMatch, overlap.overlapMinutes, Boolean(ownerIntent.timePreference || candidateIntent.timePreference)),
     intentAActivityText: ownerFirst ? ownerIntent.activityText : candidateIntent.activityText,
     intentBActivityText: ownerFirst ? candidateIntent.activityText : ownerIntent.activityText,
   };
   // A related activity has no agreed concrete title yet; the Plan editor uses
   // the shared topic, and the new card shows both original descriptions.
-  const sharedActivityText = fit.basis === "RELATED_ACTIVITY" ? null : ownerIntent.activityText;
+  const sharedActivityText = fit.basis === "RELATED_ACTIVITY" || fit.basis === "DIFFERENT_ACTIVITY" ? null : ownerIntent.activityText;
+  const sharedSportTag = fit.basis === "DIFFERENT_ACTIVITY" ? null : ownerIntent.sportTag;
+  const sharedSportNote = fit.basis === "DIFFERENT_ACTIVITY" ? null : ownerIntent.sportOtherNote;
+  const sharedCourse = ownerIntent.courseId === candidateIntent.courseId ? candidateIntent.course : null;
   // Pre-concrete legacy intents remain eligible under their old rules, but
   // without a declared activity there is no basis for public activity points.
-  const fitSnapshot = ownerIntent.activityText || ownerIntent.studyGoal || ownerIntent.sportTag
+  const fitSnapshot = discovery || ownerIntent.activityText || ownerIntent.studyGoal || ownerIntent.sportTag
     ? fit : null;
 
   return prisma.$transaction(async (tx) =>
@@ -519,11 +531,15 @@ async function createCandidateOpportunity(options: {
       if (!intentsAreCurrent) return null;
 
       const repeat = await repeatEligibility(tx, userA.id, userB.id, now);
-      // A known pair cannot fall back to first-encounter matching to bypass
-      // missing/withdrawn permission. Both intents must be new after the Plan.
-      if (repeat.hasHistory && (!isV2FeatureEnabled("v2MeetAgain") || !repeat.source ||
+      // Discovery may introduce a new activity without answered historical
+      // feedback. It never treats that omission as consent or a repeat encounter.
+      if (discovery && !repeat.discoveryAllowed) return null;
+      if (!discovery && repeat.hasHistory && (!isV2FeatureEnabled("v2MeetAgain") || !repeat.source ||
         ownerIntent.createdAt <= repeat.source.endedAt ||
         candidateIntent.createdAt <= repeat.source.endedAt)) return null;
+      const repeatSource = isV2FeatureEnabled("v2MeetAgain") && repeat.source &&
+        ownerIntent.createdAt > repeat.source.endedAt && candidateIntent.createdAt > repeat.source.endedAt
+        ? repeat.source : null;
 
       // A peer may not have refreshed Together since an older opportunity's
       // decision window elapsed. Retire those rows here so an expired PENDING
@@ -574,6 +590,7 @@ async function createCandidateOpportunity(options: {
             userAId: userA.id,
             userBId: userB.id,
             createdAt: { gte: new Date(now.getTime() - PAIR_COOLDOWN_MS) },
+            ...(discovery ? { decisions: { some: { value: { in: ["NO", "WITHDRAWN"] } } } } : {}),
           },
           orderBy: { createdAt: "desc" },
           select: { id: true, createdAt: true },
@@ -590,8 +607,8 @@ async function createCandidateOpportunity(options: {
           select: { id: true, status: true },
         }),
       ]);
-      const completedCooldown = repeat?.source &&
-        recent && recent.createdAt < repeat.source.endedAt;
+      const completedCooldown = !discovery && repeatSource &&
+        recent && recent.createdAt < repeatSource.endedAt;
       if (blocked || moderated || (recent && !completedCooldown)) return null;
 
       // Cooldown is historical and was checked above. Occupation is narrower:
@@ -622,7 +639,7 @@ async function createCandidateOpportunity(options: {
       const placeholder = contextSnapshot({
         activityFit: fitSnapshot,
         id: "pending",
-        isRepeat: Boolean(repeat?.source),
+        isRepeat: Boolean(repeatSource),
         topic: ownerIntent.topic,
         matchKind: activityMatch.matchKind,
         sharedContext: activityMatch.sharedContext,
@@ -631,14 +648,14 @@ async function createCandidateOpportunity(options: {
         intentATogetherMode: intentAActivity.togetherMode,
         intentBTogetherMode: intentBActivity.togetherMode,
         activityText: sharedActivityText,
-        sportTag: ownerIntent.sportTag,
-        sportOtherNote: ownerIntent.sportOtherNote,
+        sportTag: sharedSportTag,
+        sportOtherNote: sharedSportNote,
         startsAt: overlap.startsAt,
         endsAt: overlap.endsAt,
         timeContext: overlap.context,
         userA,
         userB,
-        course: candidateIntent.course,
+        course: sharedCourse,
       });
       const inserted = await tx.mutualOpportunity.createMany({
         data: [{
@@ -653,15 +670,15 @@ async function createCandidateOpportunity(options: {
           intentBStudyGoal: intentBActivity.displayStudyGoal,
           intentATogetherMode: intentAActivity.togetherMode,
           intentBTogetherMode: intentBActivity.togetherMode,
-          courseId: ownerIntent.courseId,
+          courseId: sharedCourse?.id ?? null,
           activityText: sharedActivityText,
-          sportTag: ownerIntent.sportTag,
-          sportOtherNote: ownerIntent.sportOtherNote,
+          sportTag: sharedSportTag,
+          sportOtherNote: sharedSportNote,
           startsAt: overlap.startsAt,
           endsAt: overlap.endsAt,
           expiresAt,
           contextSnapshot: placeholder,
-          repeatOfPlanId: repeat?.source?.planId ?? null,
+          repeatOfPlanId: repeatSource?.planId ?? null,
         }],
         skipDuplicates: true,
       });
@@ -676,7 +693,7 @@ async function createCandidateOpportunity(options: {
           contextSnapshot: contextSnapshot({
             activityFit: fitSnapshot,
             id: created.id,
-            isRepeat: Boolean(repeat?.source),
+            isRepeat: Boolean(repeatSource),
             topic: ownerIntent.topic,
             matchKind: activityMatch.matchKind,
             sharedContext: activityMatch.sharedContext,
@@ -685,14 +702,14 @@ async function createCandidateOpportunity(options: {
             intentATogetherMode: intentAActivity.togetherMode,
             intentBTogetherMode: intentBActivity.togetherMode,
             activityText: sharedActivityText,
-            sportTag: ownerIntent.sportTag,
-            sportOtherNote: ownerIntent.sportOtherNote,
+            sportTag: sharedSportTag,
+            sportOtherNote: sharedSportNote,
             startsAt: overlap.startsAt,
             endsAt: overlap.endsAt,
             timeContext: overlap.context,
             userA,
             userB,
-            course: candidateIntent.course,
+            course: sharedCourse,
           }),
         },
       });
@@ -721,6 +738,7 @@ export async function generateMutualOpportunitiesForUser(
 ): Promise<CreatedMutualOpportunityMatch[]> {
   const now = new Date();
   await expireStaleForUser(userId, now);
+  const discoveryEnabled = isV2FeatureEnabled("v2DiscoveryMatching");
   const ownerIntents = await prisma.weeklyIntent.findMany({
     where: {
       ...matchingEnrollmentWhere(now),
@@ -768,9 +786,9 @@ export async function generateMutualOpportunitiesForUser(
   if (ownerIntents.length === 0) return [];
   const owner = ownerIntents[0]!.user;
   if (
-    !owner.verifiedStudent ||
+    !discoveryEnabled && (!owner.verifiedStudent ||
     normalizeSchoolCode(owner.school) === null ||
-    owner.userLanguages.length === 0
+    owner.userLanguages.length === 0)
   ) return [];
 
   const candidates = await prisma.weeklyIntent.findMany({
@@ -779,7 +797,7 @@ export async function generateMutualOpportunitiesForUser(
       userId: { not: userId },
       status: "ACTIVE",
       expiresAt: { gt: now },
-      topic: { in: [...new Set(ownerIntents.map((intent) => intent.topic))] },
+      ...(!discoveryEnabled ? { topic: { in: [...new Set(ownerIntents.map((intent) => intent.topic))] } } : {}),
       mutualOpportunitiesAsA: {
         none: {
           OR: [
@@ -818,7 +836,9 @@ export async function generateMutualOpportunitiesForUser(
       },
     },
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-    take: MAX_MATCH_CANDIDATES_PER_REFRESH,
+    // Discovery must not report an empty pool just because its first 240 rows
+    // belong to unavailable pairs. Rank the current participating supply.
+    take: discoveryEnabled ? undefined : MAX_MATCH_CANDIDATES_PER_REFRESH,
     select: {
       id: true,
       userId: true,
@@ -843,24 +863,32 @@ export async function generateMutualOpportunitiesForUser(
 
   const ownerSchool = normalizeSchoolCode(owner.school);
   const created: CreatedMutualOpportunityMatch[] = [];
-  for (const ownerIntent of ownerIntents) {
-    const rankedCandidates = candidates.flatMap((candidate) => {
+  type RankedPair = { ownerIntent: typeof ownerIntents[number]; candidate: typeof candidates[number];
+    fit: { score: number; activityPoints: number }; certainty: number };
+  const rankedPairs = ownerIntents.flatMap(ownerIntent => {
+    return candidates.flatMap<RankedPair>((candidate) => {
+      if (discoveryEnabled) {
+        const discovery = discoveryFit(ownerIntent, candidate, now);
+        return [{ ownerIntent, candidate, fit: discovery.snapshot, certainty: discovery.timing.certainty }];
+      }
       const match = classifyActivityMatch(ownerIntent, candidate, isV2FeatureEnabled("v2ActivityFit"));
       const overlap = compatibleIntentTiming(ownerIntent, candidate, now);
       if (!match || !overlap) return [];
       const fit = activityFit(match, overlap.overlapMinutes, Boolean(ownerIntent.timePreference || candidate.timePreference));
-      return [{ candidate, fit, certainty: overlap.certainty }];
+      return [{ ownerIntent, candidate, fit, certainty: overlap.certainty }];
     }).sort((left, right) => right.certainty - left.certainty || right.fit.score - left.fit.score ||
       right.fit.activityPoints - left.fit.activityPoints);
-    // Scores rank feasible opportunities; there is deliberately no score cutoff.
-    // Stable ties retain the existing oldest-first order.
-    for (const { candidate } of rankedCandidates) {
+  });
+  if (discoveryEnabled) rankedPairs.sort((a, b) => b.fit.score - a.fit.score || b.fit.activityPoints - a.fit.activityPoints);
+  const filledIntents = new Set<string>();
+  for (const { ownerIntent, candidate } of rankedPairs) {
+      if (filledIntents.has(ownerIntent.id)) continue;
       const candidateSchool = normalizeSchoolCode(candidate.user.school);
       const sameSchool =
         ownerSchool !== null &&
         candidateSchool !== null &&
         ownerSchool === candidateSchool;
-      if (!sameSchool) continue;
+      if (!discoveryEnabled && !sameSchool) continue;
       const opportunity = await createCandidateOpportunity({
         ownerIntent,
         candidateIntent: candidate,
@@ -868,9 +896,8 @@ export async function generateMutualOpportunitiesForUser(
       });
       if (opportunity) {
         created.push(opportunity);
-        break;
+        filledIntents.add(ownerIntent.id);
       }
-    }
   }
   return created;
 }
@@ -907,6 +934,7 @@ export async function listMutualOpportunities(userId: string, generate: boolean)
   await expireStaleForUser(userId, now);
   if (generate) await generateMutualOpportunitiesForUser(userId);
   const rows = await rowsForUser(userId);
+  const hasDiscovery = rows.some(row => activityFitProjection(row.contextSnapshot, true)?.policyVersion === "DISCOVERY_FIT_V1");
   return {
     opportunities: rows
       .map((row) => viewerProjection(row, userId))
@@ -914,7 +942,10 @@ export async function listMutualOpportunities(userId: string, generate: boolean)
         row.state === "NEEDS_DECISION" ||
         row.state === "DECIDED" ||
         row.state === "READY_TO_COORDINATE"
-      ),
+      ).sort((a, b) => {
+        if (!hasDiscovery) return 0;
+        return (b.matchFit?.score ?? -1) - (a.matchFit?.score ?? -1);
+      }),
   };
 }
 
@@ -960,6 +991,10 @@ export async function decideMutualOpportunity(options: {
       const now = new Date();
       if (row.status !== "PENDING" || row.expiresAt <= now || (row.startsAt !== null && row.startsAt <= now)) {
         throw new MutualOpportunityError("NO_LONGER_AVAILABLE");
+      }
+      if (options.decision === "YES" && activityFitProjection(row.contextSnapshot, true)?.policyVersion === "DISCOVERY_FIT_V1") {
+        const permission = await repeatEligibility(tx, row.userAId, row.userBId, now);
+        if (!permission.discoveryAllowed) throw new MutualOpportunityError("NO_LONGER_AVAILABLE");
       }
       if (row.repeatOfPlanId && options.decision === "YES") {
         const repeat = isV2FeatureEnabled("v2MeetAgain")

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { ActivityMatchClassification } from "./mutual-opportunity-activity-compatibility";
+import { discoveryFitSnapshotSchema } from "./discovery-fit";
 
 const legacyActivityFitSnapshotSchema = z.object({
   policyVersion: z.literal("ACTIVITY_FIT_V1"),
@@ -15,6 +16,7 @@ const legacyActivityFitSnapshotSchema = z.object({
   intentBActivityText: z.string().max(80).nullable(),
 });
 const activityFitSnapshotSchema = z.union([
+  discoveryFitSnapshotSchema,
   legacyActivityFitSnapshotSchema,
   legacyActivityFitSnapshotSchema.extend({
     policyVersion: z.literal("ACTIVITY_FIT_V2"),
@@ -56,6 +58,16 @@ export function activityFitProjection(snapshot: unknown, viewerIsA: boolean) {
   const parsed = activityFitSnapshotSchema.safeParse(snapshot.activityFit);
   if (!parsed.success) return null;
   const { intentAActivityText, intentBActivityText, ...fit } = parsed.data;
+  if (fit.policyVersion === "DISCOVERY_FIT_V1") {
+    const { intentAActivity, intentBActivity, ...publicFit } = fit;
+    return {
+      ...publicFit,
+      viewerActivityText: viewerIsA ? intentAActivityText : intentBActivityText,
+      peerActivityText: viewerIsA ? intentBActivityText : intentAActivityText,
+      viewerActivity: viewerIsA ? intentAActivity : intentBActivity,
+      peerActivity: viewerIsA ? intentBActivity : intentAActivity,
+    };
+  }
   return {
     ...fit,
     viewerActivityText: viewerIsA ? intentAActivityText : intentBActivityText,

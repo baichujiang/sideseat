@@ -6,17 +6,29 @@
 
 **Governing product:** [Product](./PRODUCT.md)
 
+**Current development (not yet released):** [Discovery-first Together](./DISCOVERY_FIRST_MATCHING.md)
+replaces activity/time/language/school/course exclusions with relevance ranking
+and explicit card differences. Missing historical feedback no longer blocks
+ordinary discovery; privacy, safety and explicit refusals remain protected.
+The local 0/100 two-account flow reaches chat, an accepted Plan and both Calendars.
+Backend regressions and native acceptance pass: 26 combined PostgreSQL/pure
+checks, 46 native tests and both three-language/empty-state UI checks. No production
+setting or user data changed. Next: authorized
+commit/push → backend OFF → new internal build → both phones updated → enable
+discovery and signed acceptance. Build 39 does not contain this follow-up.
+
 **Current publication follow-up:** [Event-driven automatic matching](./INTENT_DRIVEN_MATCHING.md)
 replaces the new client's separate Start/48-hour session with explicit publication
 and per-intent pause/resume/end. Implementation and 15 real local PostgreSQL checks
 pass; all 4 native model tests and 3 UI tests pass, including the final German
 largest-text follow-up. Evidence is recorded in the feature document above.
 Feature `46b0e7a` and Build 39 preparation `503e827` are pushed; both migrations
-and the production backend are deployed. Automatic/flexible flags remain OFF.
+and the production backend are deployed. Automatic/flexible flags are now ON
+after owner-authorized [activation](./releases/2026-09-09-automatic-matching-production.md).
 [Build 39](./releases/2026-09-09-testflight-39.md) is processed and available in
 `SideSeat Internal`, with testing notes saved.
-Next: both phones update → separate activation approval
-and signed two-account acceptance.
+Next: both phones confirm Build 39 and reopen the app → explicitly publish
+intentions → signed two-account acceptance.
 
 **Current flexible timing:** [Flexible intention timing](./FLEXIBLE_INTENT_TIMING.md)
 adds tomorrow/weekend/next-week/date-range/undecided timing, a 14-day intention
@@ -27,9 +39,9 @@ complete: 6 model tests and 3 UI tests pass, including Chinese/English and Germa
 largest text. The final simulator result is `/tmp/sideseat-flexible-timing-ui-7.xcresult`.
 The focused German wrapping/translation follow-up also passes in
 `/tmp/sideseat-flexible-timing-ui-8.xcresult`.
-Source `71e5241` is pushed and now deployed with rollout OFF; included in the
+Source `71e5241` is pushed and now deployed with rollout ON; included in the
 available internal Build 39, not Build 38. Next: both phones update to Build 39;
-activate only with separate owner approval.
+reopen to refresh configuration and verify the signed two-account flow.
 Outcome/Shared Encounter unchanged.
 
 **Current internal matching demo:** [test_001 QA demo](./TOGETHER_QA_DEMO.md)
@@ -57,7 +69,7 @@ private-interest → chat → confirmed Plan flow. No matching-rule or database 
 
 **Current release evidence:**
 [TestFlight Build 39 intention-driven matching preparation](./releases/2026-09-09-testflight-39.md)
-(backend and 134 migrations deployed; both new flags OFF; signed IPA validated,
+(backend and 134 migrations deployed; both new flags now ON; signed IPA validated,
 processed and available in `SideSeat Internal`; phone updates/acceptance pending). Prior
 [TestFlight Build 38 avatar/card/motion release](./releases/2026-09-09-testflight-38.md)
 (uploaded, processed and available in `SideSeat Internal`; 68 release checks and

@@ -28,7 +28,7 @@ export async function repeatEligibility(
       meetAgainPermissions: { select: { userId: true, value: true } },
     },
   });
-  if (!plan) return { hasHistory: false, source: null };
+  if (!plan) return { hasHistory: false, source: null, discoveryAllowed: true };
   const yes = new Set(plan.meetAgainPermissions
     .filter((row) => row.value === "YES").map((row) => row.userId));
   const eligible = plan.sharedEncounter !== null &&
@@ -39,6 +39,11 @@ export async function repeatEligibility(
     yes.has(firstUserId) && yes.has(secondUserId);
   return {
     hasHistory: true,
+    // Missing feedback is not a refusal. Explicit opt-outs and safety remain
+    // private hard stops even for an unrelated new discovery.
+    discoveryAllowed: plan.connection.status === "ACTIVE" &&
+      !plan.commitment?.safetyRestrictedAt &&
+      !plan.meetAgainPermissions.some(row => row.value === "NO" || row.value === "WITHDRAWN"),
     source: eligible ? { planId: plan.id, endedAt: plan.endTime } : null,
   };
 }
@@ -47,8 +52,18 @@ export async function invalidatePendingRepeats(
   tx: Prisma.TransactionClient,
   planId: string,
 ) {
+  const plan = await tx.planRequest.findUnique({ where: { id: planId },
+    select: { proposerUserId: true, receiverUserId: true } });
+  const blocksDiscovery = plan && !(await repeatEligibility(tx, plan.proposerUserId, plan.receiverUserId, new Date())).discoveryAllowed;
   await tx.mutualOpportunity.updateMany({
-    where: { repeatOfPlanId: planId, status: "PENDING" },
+    where: { status: "PENDING", OR: [
+      { repeatOfPlanId: planId },
+      ...(blocksDiscovery ? [{
+        userAId: { in: [plan.proposerUserId, plan.receiverUserId] },
+        userBId: { in: [plan.proposerUserId, plan.receiverUserId] },
+        contextSnapshot: { path: ["activityFit", "policyVersion"], equals: "DISCOVERY_FIT_V1" },
+      }] : []),
+    ] },
     data: { status: "UNAVAILABLE", terminalAt: new Date(), version: { increment: 1 } },
   });
 }

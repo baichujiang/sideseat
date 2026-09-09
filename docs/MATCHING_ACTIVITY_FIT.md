@@ -1,5 +1,11 @@
 # Activity fit and broader opportunities
 
+**2026-09-09 amendment:** [Discovery-first matching](./DISCOVERY_FIRST_MATCHING.md)
+supersedes the soft gates below when its independent rollout is enabled. Even
+0/100, cross-activity, conflicting-time, disjoint-language and cross-school
+intentions can be suggested with explicit differences. This new work is local
+only; the following sections preserve the released V1/V2 historical contracts.
+
 **Owner decision:** 2026-09-08 — improve matching coverage and show the degree of
 fit instead of only delivering extremely compatible opportunities.
 

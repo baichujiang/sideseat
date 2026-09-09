@@ -90,6 +90,7 @@ final class AppContainer {
                     "apnsDelivery": false,
                     "v2FlexibleTiming": arguments.contains("--ui-testing-flexible-timing"),
                     "v2AutomaticMatching": arguments.contains("--ui-testing-automatic-matching"),
+                    "v2DiscoveryMatching": arguments.contains("--ui-testing-discovery-matching"),
                 ]
             )
         } else if arguments.contains("--ui-testing-signed-out") {

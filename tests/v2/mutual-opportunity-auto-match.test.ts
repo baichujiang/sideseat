@@ -297,7 +297,7 @@ test("matcher persists an explainable shared-context snapshot and viewer-relativ
     matcher,
     /right\.fit\.score - left\.fit\.score/,
   );
-  assert.match(matcher, /const activityMatch = classifyActivityMatch\([\s\S]*ownerIntent, candidateIntent/);
+  assert.match(matcher, /const activityMatch = discovery\?\.classification \?\? classifyActivityMatch\([\s\S]*ownerIntent, candidateIntent/);
   assert.match(matcher, /matchKind: activityMatch\.matchKind/);
   assert.match(matcher, /sharedContext: activityMatch\.sharedContext/);
   assert.match(matcher, /intentAStudyGoal: intentAActivity\.displayStudyGoal/);

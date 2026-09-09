@@ -34,11 +34,12 @@ test("editing, pausing, ending, or expiring an intent terminalizes only pending 
   );
 });
 
-test("matching gives every active intent one fair pass and enforces one active opportunity per intent and pair", () => {
+test("matching ranks every active intent and enforces one active opportunity per intent and pair", () => {
   const service = source("lib/v2/mutual-opportunities.ts");
-  assert.match(service, /for \(const ownerIntent of ownerIntents\)/);
-  assert.match(service, /for \(const \{ candidate \} of rankedCandidates\)/);
-  assert.match(service, /const opportunity = await createCandidateOpportunity\([\s\S]*if \(opportunity\) \{[\s\S]*break/);
+  assert.match(service, /ownerIntents\.flatMap/);
+  assert.match(service, /for \(const \{ ownerIntent, candidate \} of rankedPairs\)/);
+  assert.match(service, /filledIntents\.has\(ownerIntent\.id\)/);
+  assert.match(service, /const opportunity = await createCandidateOpportunity\([\s\S]*if \(opportunity\) \{[\s\S]*filledIntents\.add\(ownerIntent\.id\)/);
   assert.match(service, /orderBy: \[\{ createdAt: "asc" \}, \{ id: "asc" \}\]/);
   assert.match(service, /status: \{ in: \["PENDING", "MUTUAL"\] \}/);
   assert.match(service, /intentAId: \{ in: intentIds \}/);

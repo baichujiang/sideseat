@@ -136,7 +136,8 @@ private extension NativeMutualOpportunity {
     static var uiTestingFixture: NativeMutualOpportunity {
         let arguments = ProcessInfo.processInfo.arguments
         let related = arguments.contains("--ui-testing-related-activity")
-        let flexible = arguments.contains("--ui-testing-flexible-timing")
+        let discovery = arguments.contains("--ui-testing-discovery-matching")
+        let flexible = arguments.contains("--ui-testing-flexible-timing") || discovery
         let topicArgument = arguments.first { $0.hasPrefix("--ui-testing-opportunity-topic=") }
             .map { String($0.dropFirst("--ui-testing-opportunity-topic=".count)) }
         let topic = topicArgument.flatMap(NativeWeeklyIntentTopic.init(rawValue:))
@@ -145,7 +146,7 @@ private extension NativeMutualOpportunity {
             .map { String($0.dropFirst("--ui-testing-opportunity-state=".count)) } ?? "NEEDS_DECISION"
         let start = Date().addingTimeInterval(26 * 60 * 60)
         let end = start.addingTimeInterval((related ? 30 : 60) * 60)
-        return NativeMutualOpportunity(
+        var card = NativeMutualOpportunity(
             id: "cmutualui0000000000000001",
             policyVersion: "MUTUAL_OPPORTUNITY_V1",
             state: state,
@@ -174,7 +175,7 @@ private extension NativeMutualOpportunity {
                 verifiedStudent: true,
                 major: "Computer Science",
                 semester: 3,
-                sharedLanguages: ["ENGLISH", "GERMAN"]
+                sharedLanguages: discovery ? [] : ["ENGLISH", "GERMAN"]
             ),
             viewerDecision: ["DECIDED", "READY_TO_COORDINATE"].contains(state) ? "YES" : nil,
             coordination: state == "READY_TO_COORDINATE"
@@ -197,5 +198,16 @@ private extension NativeMutualOpportunity {
             ),
             timeContext: flexible ? NativeIntentTimePreference(kind: "UNDECIDED") : nil
         )
+        if discovery {
+            card.matchFit = NativeActivityFit(
+                policyVersion: "DISCOVERY_FIT_V1", basis: "DIFFERENT_ACTIVITY", score: 0,
+                activityPoints: 0, timePoints: 0, languagePoints: 0, schoolPoints: 0,
+                overlapMinutes: nil, viewerActivityText: AppLocalization.string("Coffee"), peerActivityText: nil,
+                differences: ["ACTIVITY", "TIME", "LANGUAGE", "SCHOOL"],
+                viewerActivity: NativeDiscoveryActivity(topic: .coffee, activityText: AppLocalization.string("Coffee"), studyGoal: nil, sportTag: nil, sportOtherNote: nil),
+                peerActivity: NativeDiscoveryActivity(topic: .sports, activityText: nil, studyGoal: nil, sportTag: .basketball, sportOtherNote: nil)
+            )
+        }
+        return card
     }
 }

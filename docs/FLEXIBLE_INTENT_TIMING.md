@@ -1,9 +1,15 @@
 # Flexible activity intention timing
 
-**Status:** Implemented, verified and deployed on 2026-09-09 with rollout OFF.
+**Approved follow-up, not yet released:** [Discovery-first matching](./DISCOVERY_FIRST_MATCHING.md)
+can suggest conflicting preferences without claiming shared availability. It
+preserves both declarations and requires a new concrete time agreement; the
+legacy compatibility and V2 scoring sections below still describe Build 39.
+
+**Status:** Implemented, verified and deployed on 2026-09-09; rollout is now ON
+after explicit owner [activation](./releases/2026-09-09-automatic-matching-production.md).
 
 **Source delivery:** `71e5241` pushed. Both migrations and production backend are
-deployed; flexible timing and automatic matching stay OFF. Build 39 is processed
+deployed; flexible timing and automatic matching are ON. Build 39 is processed
 and available in `SideSeat Internal`, with testing notes saved.
 See the [release record](./releases/2026-09-09-testflight-39.md).
 
@@ -97,7 +103,6 @@ tests/v2/mutual-opportunity-auto-match-postgres.test.ts
 tests/v2/together-matching-session-postgres.test.ts
 tests/v2/mutual-opportunity-plan-closure-postgres.test.ts` (one shell command).
 
-Next: both phones update to internal Build 39 → separately
-authorize enabling flexible timing and automatic matching → accept the signed
+Next: both phones confirm internal Build 39 and reopen the app → accept the signed
 two-account flow. Local synthetic QA results do not count toward the real-user
 Outcome Gate.

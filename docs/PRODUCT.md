@@ -1,6 +1,6 @@
 # SideSeat Product
 
-**Status:** Frozen v1.0 with approved activity-fit (2026-09-08), flexible-timing and event-driven publication (2026-09-09) amendments
+**Status:** Frozen v1.0 with approved activity-fit (2026-09-08), flexible-timing, event-driven publication and discovery-first (2026-09-09) amendments
 
 **Last updated:** 2026-09-09
 
@@ -117,7 +117,11 @@ authorize a current acquisition surface.
    [event-driven matching amendment](./INTENT_DRIVEN_MATCHING.md) for rollout status.
 6. Calendar content is never read by matching or recommendation logic.
 7. Opportunity generation uses explicit course, activity, language, school and
-   user-declared social-time context only.
+   user-declared social-time context only. The approved [discovery-first policy](./DISCOVERY_FIRST_MATCHING.md)
+   makes differences relevance factors, not eligibility cutoffs; 0/100 remains
+   deliverable among actively participating people. Privacy/safety/refusal remain
+   hard boundaries. Missing historical feedback does not block ordinary discovery
+   or count as permission for a repeat encounter.
 8. A Mutual Opportunity is pair-scoped and symmetric. There is no creator,
    public candidate pool or winner. The 2026-09-08 owner decision permits
    explainable activity-fit scores and internal ordering of feasible opportunities,

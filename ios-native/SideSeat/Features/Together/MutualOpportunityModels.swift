@@ -28,6 +28,21 @@ struct NativeMutualOpportunityCoordination: Codable, Hashable, Sendable {
     let connectionId: String
 }
 
+struct NativeDiscoveryActivity: Codable, Hashable, Sendable {
+    let topic: NativeWeeklyIntentTopic
+    let activityText: String?
+    let studyGoal: String?
+    let sportTag: NativeSportTag?
+    let sportOtherNote: String?
+
+    var title: String {
+        if topic == .sports, let sportTag {
+            return sportTag == .other ? (sportOtherNote ?? sportTag.title) : sportTag.title
+        }
+        return (topic == .study ? studyGoal : activityText) ?? topic.title
+    }
+}
+
 struct NativeActivityFit: Codable, Hashable, Sendable {
     let policyVersion: String
     let basis: String
@@ -39,8 +54,28 @@ struct NativeActivityFit: Codable, Hashable, Sendable {
     let overlapMinutes: Int?
     let viewerActivityText: String?
     let peerActivityText: String?
+    var differences: [String]? = nil
+    var viewerActivity: NativeDiscoveryActivity? = nil
+    var peerActivity: NativeDiscoveryActivity? = nil
 
     var isRelatedActivity: Bool { basis == "RELATED_ACTIVITY" }
+    var isDiscovery: Bool { policyVersion == "DISCOVERY_FIT_V1" }
+    var isDifferentActivity: Bool { basis == "DIFFERENT_ACTIVITY" }
+    var differenceHints: [String] {
+        (differences ?? []).compactMap { code in
+            let key: String
+            switch code {
+            case "ACTIVITY": key = "Different activities — see what you could enjoy together."
+            case "TIME": key = "Times do not overlap yet — a different time would need agreement."
+            case "TIME_UNDECIDED": key = "Timing is still open — discuss it together."
+            case "LANGUAGE": key = "No shared language listed — check how you would communicate."
+            case "SCHOOL": key = "Different or unspecified schools — agree on a convenient place."
+            case "COURSE": key = "Different course preferences — the course is not agreed."
+            default: return nil
+            }
+            return AppLocalization.string(String.LocalizationValue(key))
+        }
+    }
     var breakdown: String {
         guard let timePoints else {
             return AppLocalization.string("Activity fit uses your activities, shared language and school. Timing is discussed separately.")
@@ -100,12 +135,16 @@ struct NativeMutualOpportunity: Codable, Identifiable, Hashable, Sendable {
     }
     var matchTitle: String {
         if isRepeat == true { return AppLocalization.string("Another chance to do something together") }
+        if matchFit?.isDiscovery == true { return AppLocalization.string("A possibility to explore") }
         if matchFit?.isRelatedActivity == true { return AppLocalization.string("Similar interests, details to agree") }
         return effectiveMatchKind == .sharedContext
             ? AppLocalization.string("Same-place match")
             : AppLocalization.string("Same activity")
     }
     var matchExplanation: String {
+        if matchFit?.isDiscovery == true {
+            return AppLocalization.string("Ranked by relevance, not filtered for a perfect fit. Both of you choose whether to chat; the activity and time still need agreement.")
+        }
         if matchFit?.isRelatedActivity == true {
             return AppLocalization.string("You chose the same category, but different activities. See if you can agree on something together.")
         }

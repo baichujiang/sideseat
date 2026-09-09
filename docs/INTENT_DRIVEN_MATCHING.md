@@ -1,10 +1,16 @@
 # Event-driven automatic matching
 
+**Approved follow-up, local only:** [Discovery-first matching](./DISCOVERY_FIRST_MATCHING.md)
+keeps publication/lifecycle consent but replaces soft compatibility cutoffs with
+relevance ranking, visible differences and meaningful automatic-flow empty states.
+It is not deployed and is not included in Build 39.
+
 **Owner decision:** 2026-09-09. Publishing an activity intention is the explicit
 request to find company. Remove the second Start matching action from the new flow.
 
 **Status:** Committed/pushed as `46b0e7a`; both migrations and production backend
-deployed on 2026-09-09. Both new flags remain OFF. Internal TestFlight Build 39
+deployed on 2026-09-09. Both new flags are now ON after explicit owner
+[activation](./releases/2026-09-09-automatic-matching-production.md). Internal TestFlight Build 39
 is processed and available in `SideSeat Internal`, with testing notes saved.
 See the [release record](./releases/2026-09-09-testflight-39.md).
 
@@ -88,8 +94,7 @@ interested → contextual chat → propose a concrete timed Plan → accept → 
 
 ## Next step
 
-Both phones update to internal Build 39 → separately authorize enabling the
-automatic/flexible flags →
-accept the signed two-account publish → Opportunity → chat → timed Plan → both
-Calendars flow. Production activation is not authorized by the current release
-request. QA is not a real-user Outcome Gate sample.
+On both phones, confirm internal Build 39 and return to the foreground to refresh
+configuration. Explicitly publish intentions, then accept the signed two-account
+publish → Opportunity → chat → timed Plan → both Calendars flow. Activation is
+complete; physical acceptance remains pending. QA is not a real-user Outcome Gate sample.

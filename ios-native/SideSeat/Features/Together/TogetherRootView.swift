@@ -173,8 +173,7 @@ private struct TogetherHomeView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceXL) {
-                if v2Store.isMutualOpportunityEnabled,
-                   !opportunityStore.opportunities.isEmpty || opportunityStore.issue != nil {
+                if v2Store.isMutualOpportunityEnabled {
                     opportunitySection
                 }
                 if !automaticMatchingEnabled, v2Store.isMutualOpportunityEnabled,
@@ -513,6 +512,9 @@ private struct TogetherHomeView: View {
             if opportunityStore.isLoading, opportunityStore.opportunities.isEmpty {
                 ProgressView()
                     .frame(maxWidth: .infinity, minHeight: 72)
+            } else if opportunityStore.issue != nil, opportunityStore.opportunities.isEmpty {
+                Button("Try again") { Task { await loadContent() } }
+                    .buttonStyle(.bordered)
             } else if opportunityStore.opportunities.isEmpty {
                 emptyOpportunityState
             } else {
@@ -531,7 +533,33 @@ private struct TogetherHomeView: View {
         }
     }
 
+    @ViewBuilder
     private var emptyOpportunityState: some View {
+        if automaticMatchingEnabled {
+            let published = activeIntents.contains { $0.automaticMatching == true && $0.expiresAt > Date() }
+            let discoveryEnabled = clientConfiguration.configuration?.isFeatureEnabled("v2DiscoveryMatching") == true
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                Label(AppLocalization.string(published ? "No new people to discover right now" : "Publish an intention to discover company"), systemImage: "person.2")
+                    .font(.subheadline.weight(.medium))
+                Text(AppLocalization.string(published
+                    ? (discoveryEnabled ? "Your intention is published. Participating people appear here by relevance, even when preferences differ. There are no new suggestions available right now."
+                       : "Your intention is published. New opportunities will appear here when available.")
+                    : "Choose something you would like to do and publish it. Paused and unpublished intentions do not join discovery."))
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button(AppLocalization.string(published ? "Refresh suggestions" : "Create an intention")) {
+                    if published { Task { await loadContent() } }
+                    else { presentedEditor = .create() }
+                }
+                .buttonStyle(.bordered)
+                .accessibilityIdentifier("together-discovery-empty-action")
+            }
+            .padding(.vertical, SideSeatTheme.spaceMD)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("together-opportunities-empty")
+        } else {
         TimelineView(.periodic(from: .now, by: 60)) { context in
             let isMatching = matchingSessionStore.session.isMatching(at: context.date)
             let hasExpired = matchingSessionStore.session.hasExpired(at: context.date)
@@ -563,6 +591,7 @@ private struct TogetherHomeView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .accessibilityIdentifier("together-opportunities-empty")
+        }
     }
 
     private func opportunityCard(_ opportunity: NativeMutualOpportunity) -> some View {
@@ -729,6 +758,8 @@ private struct MutualOpportunityCard: View {
     }
 
     private var activityTitle: String {
+        if opportunity.matchFit?.isDifferentActivity == true { return AppLocalization.string("Do something together") }
+        if let activity = opportunity.matchFit?.viewerActivity { return activity.title }
         // Related activities are a suggestion to agree on something, not an agreed plan.
         if opportunity.matchFit?.isRelatedActivity == true { return opportunity.topic.title }
         if opportunity.topic == .study {
@@ -752,7 +783,7 @@ private struct MutualOpportunityCard: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            SSActivityArtwork(topic: opportunity.topic)
+            SSActivityArtwork(topic: opportunity.matchFit?.viewerActivity?.topic ?? opportunity.topic)
         }
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("mutual-opportunity-activity-\(opportunity.id)")
@@ -798,7 +829,8 @@ private struct MutualOpportunityCard: View {
                 Text(AppLocalization.string(opportunity.startDate == nil ? "Timing preference" : "Available together"))
                     .font(.caption)
                     .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                Text(opportunityWindow)
+                Text(opportunity.matchFit?.differences?.contains("TIME") == true
+                     ? AppLocalization.string("Time needs a new agreement") : opportunityWindow)
                     .font(.subheadline.weight(.medium))
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -809,7 +841,8 @@ private struct MutualOpportunityCard: View {
         .background(SideSeatTheme.activityInset,
                     in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
         .accessibilityLabel(AppLocalization.string(opportunity.startDate == nil ? "Timing preference" : "Available together"))
-        .accessibilityValue(opportunityWindow)
+        .accessibilityValue(opportunity.matchFit?.differences?.contains("TIME") == true
+                             ? AppLocalization.string("Time needs a new agreement") : opportunityWindow)
         .accessibilityElement(children: .ignore)
     }
 
@@ -820,7 +853,27 @@ private struct MutualOpportunityCard: View {
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 .fixedSize(horizontal: false, vertical: true)
 
-            if opportunity.topic == .study || opportunity.matchFit?.isRelatedActivity == true {
+            if let fit = opportunity.matchFit, fit.isDiscovery {
+                let layout = dynamicTypeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
+                    : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceLG))
+                layout {
+                    if let activity = fit.viewerActivity { explanationRow(title: AppLocalization.string("You"), value: activity.title) }
+                    if let activity = fit.peerActivity { explanationRow(title: opportunity.peer.displayName, value: activity.title) }
+                }
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    ForEach(fit.differenceHints, id: \.self) { hint in
+                        Label(hint, systemImage: "arrow.left.arrow.right")
+                            .font(.footnote)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(hint)
+                    }
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("mutual-opportunity-differences-\(opportunity.id)")
+            } else if opportunity.topic == .study || opportunity.matchFit?.isRelatedActivity == true {
                 let layout = dynamicTypeSize.isAccessibilitySize
                     ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
                     : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceLG))
@@ -839,6 +892,7 @@ private struct MutualOpportunityCard: View {
     }
 
     private var matchSymbol: String {
+        if opportunity.matchFit?.isDiscovery == true { return "sparkle.magnifyingglass" }
         if opportunity.isRepeat == true { return "arrow.clockwise" }
         if opportunity.matchFit?.isRelatedActivity == true { return "arrow.triangle.branch" }
         return opportunity.effectiveMatchKind == .sharedContext ? "building.2" : "equal.circle"
@@ -857,7 +911,7 @@ private struct MutualOpportunityCard: View {
                         ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
                         : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
                     layout {
-                        Text(AppLocalization.string(opportunity.matchFit == nil ? "Why this opportunity" : "Activity fit"))
+                        Text(AppLocalization.string(opportunity.matchFit?.isDiscovery == true ? "Relevance" : opportunity.matchFit == nil ? "Why this opportunity" : "Activity fit"))
                             .font(.subheadline.weight(.medium))
                             .foregroundStyle(SideSeatTheme.textPrimary)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -1463,7 +1517,9 @@ private struct WeeklyIntentEditorView: View {
             ? "One activity at a time. You can add more later."
             : automaticMatchingEnabled
                 ? (intent?.isPaused == true ? "This intention stays paused until you resume it."
-                    : "Automatically find company until this intention expires. Pause anytime.")
+                    : clientConfiguration.configuration?.isFeatureEnabled("v2DiscoveryMatching") == true
+                        ? "Discover participating people by relevance, even when preferences differ. Both choose whether to chat. Pause anytime."
+                        : "Automatically find company until this intention expires. Pause anytime.")
                 : "Saved privately. Start matching separately when you're ready.")
     }
 

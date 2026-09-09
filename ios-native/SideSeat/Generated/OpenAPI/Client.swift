@@ -24680,7 +24680,7 @@ internal struct Client: APIProtocol {
             }
         )
     }
-    /// Send X-SideSeat-Flexible-Timing: 1 to receive undated opportunities and ACTIVITY_FIT_V2 components. Legacy clients receive only dated opportunities, with V2 matchFit omitted as null.
+    /// Send X-SideSeat-Flexible-Timing: 1 for undated opportunities and X-SideSeat-Discovery-Matching: 1 for discovery-first cards with explicit differences. Discovery cards are not delivered to older clients. Legacy clients receive only dated opportunities, with V2 matchFit omitted as null.
     ///
     /// - Remark: HTTP `GET /api/v1/me/mutual-opportunities`.
     /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/get(listMutualOpportunities)`.

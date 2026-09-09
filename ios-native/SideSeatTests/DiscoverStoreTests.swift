@@ -4,6 +4,31 @@ import Testing
 
 @Suite("Discover stores")
 struct DiscoverStoreTests {
+    @Test("Discovery cards disclose differences and decode a zero relevance score")
+    @MainActor
+    func discoveryFitDecoding() throws {
+        let json: [String: Any] = [
+            "id": "discovery-test", "policyVersion": "MUTUAL_OPPORTUNITY_V1",
+            "state": "NEEDS_DECISION", "topic": "COFFEE", "matchKind": "SHARED_CONTEXT",
+            "expiresAt": "2026-09-12T10:00:00Z", "version": 1,
+            "peer": ["displayName": "Mia", "verifiedStudent": true, "sharedLanguages": []],
+            "matchFit": ["policyVersion": "DISCOVERY_FIT_V1", "basis": "DIFFERENT_ACTIVITY", "score": 0,
+                "activityPoints": 0, "timePoints": 0, "languagePoints": 0, "schoolPoints": 0,
+                "differences": ["ACTIVITY", "TIME", "LANGUAGE", "SCHOOL"],
+                "viewerActivity": ["topic": "COFFEE", "activityText": "Coffee"],
+                "peerActivity": ["topic": "SPORTS", "sportTag": "BASKETBALL"]] as [String: Any],
+        ]
+        let value = try JSONDecoder().decode(NativeMutualOpportunity.self, from: JSONSerialization.data(withJSONObject: json))
+        #expect(value.matchFit?.isDiscovery == true)
+        #expect(value.matchFit?.score == 0)
+        #expect(value.matchFit?.differenceHints.count == 4)
+        #expect(value.matchFit?.peerActivity?.title == NativeSportTag.basketball.title)
+        #expect(value.matchTitle == AppLocalization.string("A possibility to explore"))
+        #expect(value.startDate == nil)
+        #expect(value.needsViewerDecision)
+        #expect(!value.isReadyToCoordinate)
+    }
+
     @Test("Decodes an explainable activity fit and still supports existing opportunities")
     @MainActor
     func activityFitDecodingAndLegacyCompatibility() throws {

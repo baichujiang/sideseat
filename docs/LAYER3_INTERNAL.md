@@ -14,6 +14,13 @@ the Layer 2 product-data Gate passed or substitute QA data for organic usage.
 
 ## Contract
 
+**2026-09-09 amendment:** [Discovery-first matching](./DISCOVERY_FIRST_MATCHING.md)
+allows ordinary new discovery despite unanswered historical feedback. It does
+not create repeat provenance or Shared Encounters without the qualifications
+below. Explicit NO/WITHDRAWN and safety still stop the pair. The amendment is
+local-only behind its own disabled rollout flag; existing production repeat
+rules are unchanged by this development task.
+
 - After the viewer's own OCCURRED answer on an ended accepted Plan, offer a
   private Meet Again answer: YES, NO or WITHDRAWN. Only the viewer's value is
   returned. No counterpart answer, permission count, waiting state or permission

@@ -7655,7 +7655,7 @@
     "/api/v1/me/mutual-opportunities": {
       "get": {
         "operationId": "listMutualOpportunities",
-        "description": "Send X-SideSeat-Flexible-Timing: 1 to receive undated opportunities and ACTIVITY_FIT_V2 components. Legacy clients receive only dated opportunities, with V2 matchFit omitted as null.",
+        "description": "Send X-SideSeat-Flexible-Timing: 1 for undated opportunities and X-SideSeat-Discovery-Matching: 1 for discovery-first cards with explicit differences. Discovery cards are not delivered to older clients. Legacy clients receive only dated opportunities, with V2 matchFit omitted as null.",
         "x-sideseat-contract": "mutual-opportunity-v1",
         "security": [{ "bearerAuth": [] }],
         "responses": {
@@ -9450,21 +9450,35 @@
         "properties": { "connectionId": { "type": "string" } },
         "required": ["connectionId"]
       },
+      "DiscoveryActivity": {
+        "type": "object", "additionalProperties": false,
+        "properties": {
+          "topic": { "type": "string", "enum": ["COFFEE", "STUDY", "SPORTS", "EXPLORE", "FOOD", "EVENTS"] },
+          "activityText": { "type": ["string", "null"], "maxLength": 80 },
+          "studyGoal": { "type": ["string", "null"], "maxLength": 80 },
+          "sportTag": { "type": ["string", "null"] },
+          "sportOtherNote": { "type": ["string", "null"], "maxLength": 60 }
+        },
+        "required": ["topic", "activityText", "studyGoal", "sportTag", "sportOtherNote"]
+      },
       "ActivityFit": {
         "type": ["object", "null"],
         "additionalProperties": false,
         "description": "Frozen, symmetric activity-fit heuristic, not a person's rating or success probability. Scores order feasible opportunities; no minimum-score delivery gate. Null on historical opportunities without a snapshot.",
         "properties": {
-          "policyVersion": { "type": "string", "enum": ["ACTIVITY_FIT_V1", "ACTIVITY_FIT_V2"] },
-          "basis": { "type": "string", "enum": ["EXACT_ACTIVITY", "PARALLEL_STUDY", "RELATED_ACTIVITY"] },
+          "policyVersion": { "type": "string", "enum": ["ACTIVITY_FIT_V1", "ACTIVITY_FIT_V2", "DISCOVERY_FIT_V1"] },
+          "basis": { "type": "string", "enum": ["EXACT_ACTIVITY", "PARALLEL_STUDY", "RELATED_ACTIVITY", "DIFFERENT_ACTIVITY"] },
           "score": { "type": "integer", "minimum": 0, "maximum": 100 },
           "activityPoints": { "type": "integer", "minimum": 0, "maximum": 50 },
           "timePoints": { "type": ["integer", "null"], "minimum": 0, "maximum": 30 },
-          "languagePoints": { "type": "integer", "const": 10 },
-          "schoolPoints": { "type": "integer", "const": 10 },
+          "languagePoints": { "type": "integer", "enum": [0, 10] },
+          "schoolPoints": { "type": "integer", "enum": [0, 10] },
           "overlapMinutes": { "type": ["integer", "null"], "minimum": 30 },
           "viewerActivityText": { "type": ["string", "null"], "maxLength": 80 },
-          "peerActivityText": { "type": ["string", "null"], "maxLength": 80 }
+          "peerActivityText": { "type": ["string", "null"], "maxLength": 80 },
+          "differences": { "type": "array", "items": { "type": "string", "enum": ["ACTIVITY", "TIME", "TIME_UNDECIDED", "LANGUAGE", "SCHOOL", "COURSE"] } },
+          "viewerActivity": { "$ref": "#/components/schemas/DiscoveryActivity" },
+          "peerActivity": { "$ref": "#/components/schemas/DiscoveryActivity" }
         },
         "required": ["policyVersion", "basis", "score", "activityPoints", "timePoints", "languagePoints", "schoolPoints", "overlapMinutes", "viewerActivityText", "peerActivityText"]
       },

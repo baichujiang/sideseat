@@ -21,6 +21,14 @@ final class WeeklyIntentStore {
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-weekly-intent") {
             intents = []
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-discovery-published") {
+                intents = [NativeWeeklyIntent(id: "ui-published-intent", topic: .coffee, activityText: AppLocalization.string("Coffee"),
+                    sportTag: nil, sportOtherNote: nil, togetherMode: .sameActivity, studyGoal: nil,
+                    courseId: nil, course: nil, timeWindows: [], timeZone: "Europe/Berlin", note: nil,
+                    status: "ACTIVE", policyVersion: 1, version: 1, expiresAt: Date().addingTimeInterval(86400),
+                    pausedAt: nil, endedAt: nil, createdAt: Date(), updatedAt: Date(),
+                    timePreference: NativeIntentTimePreference(kind: "UNDECIDED"), automaticMatching: true)]
+            }
             return
         }
         #endif

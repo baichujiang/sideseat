@@ -15,6 +15,9 @@ export async function GET(request: Request) {
       isV2FeatureEnabled("v2MutualOpportunity");
     if (generate) await matchAndNotifyForUser(auth.user.id);
     const payload = await listMutualOpportunities(auth.user.id, false);
+    if (request.headers.get("X-SideSeat-Discovery-Matching") !== "1") {
+      payload.opportunities = payload.opportunities.filter(row => row.matchFit?.policyVersion !== "DISCOVERY_FIT_V1");
+    }
     // Shipped clients require concrete timestamps and V1 score components.
     if (request.headers.get("X-SideSeat-Flexible-Timing") !== "1") {
       payload.opportunities = payload.opportunities.filter(row => row.startsAt && row.endsAt)
