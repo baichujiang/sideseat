@@ -328,6 +328,51 @@ struct ActionContextMessageAttributionTests {
     }
 }
 
+@Suite("Flexible intention timing")
+struct FlexibleIntentTimingTests {
+    @Test("Undecided intentions encode without fake exact windows")
+    func encodesUndecided() throws {
+        let input = NativeWeeklyIntentCreateRequest(topic: .coffee, activityText: "Coffee", sportTag: nil,
+            sportOtherNote: nil, togetherMode: .sameActivity, studyGoal: nil, courseId: nil,
+            timeWindows: [], timeZone: "Europe/Berlin", note: nil,
+            timePreference: NativeIntentTimePreference(kind: "UNDECIDED"))
+        let json = try #require(JSONSerialization.jsonObject(with: JSONEncoder().encode(input)) as? [String: Any])
+        #expect((json["timeWindows"] as? [Any])?.isEmpty == true)
+        let timing = try #require(json["timePreference"] as? [String: String])
+        #expect(timing == ["kind": "UNDECIDED"])
+    }
+
+    @Test("Nullable opportunity timing and unknown score components decode")
+    func decodesUndatedOpportunity() throws {
+        var json: [String: Any] = ["id": "opportunity", "policyVersion": "MUTUAL_OPPORTUNITY_V1", "state": "NEEDS_DECISION",
+            "topic": "COFFEE", "expiresAt": "2026-09-10T10:00:00Z", "version": 1,
+            "peer": ["displayName": "Peer", "verifiedStudent": true, "sharedLanguages": ["ENGLISH"]]]
+        json["startsAt"] = NSNull()
+        json["endsAt"] = NSNull()
+        json["timeContext"] = ["kind": "UNDECIDED", "period": "ANY", "timeZone": "Europe/Berlin"]
+        json["matchFit"] = ["policyVersion": "ACTIVITY_FIT_V2", "basis": "EXACT_ACTIVITY", "score": 100,
+            "activityPoints": 50, "timePoints": NSNull(), "languagePoints": 10, "schoolPoints": 10,
+            "overlapMinutes": NSNull(), "viewerActivityText": "Coffee", "peerActivityText": "Coffee"]
+        let value = try JSONDecoder().decode(NativeMutualOpportunity.self, from: JSONSerialization.data(withJSONObject: json))
+        #expect(value.startDate == nil)
+        #expect(value.endDate == nil)
+        #expect(value.matchFit?.timePoints == nil)
+        #expect(value.matchFit?.overlapMinutes == nil)
+        #expect(value.timeContext?.summary == AppLocalization.string("Time to discuss"))
+    }
+
+    @Test("Undated chat context requires an explicit time selection before proposing")
+    func requiresTimeSelection() {
+        let draft = NativePlanDraft(title: "Coffee", startTime: nil, endTime: nil, location: nil,
+            planType: "CUSTOM", origin: NativePlanOriginReference(kind: "MUTUAL_OPPORTUNITY", id: "opportunity"))
+        #expect(draft.needsTimeSelection)
+        #expect(draft.startTime == nil)
+        let timed = NativePlanDraft(title: "Coffee", startTime: "2026-09-10T10:00:00Z", endTime: "2026-09-10T11:00:00Z", location: nil,
+            planType: "CUSTOM", origin: draft.origin)
+        #expect(!timed.needsTimeSelection)
+    }
+}
+
 @Suite("Action-to-Plan inheritance")
 struct ActionToPlanInheritanceTests {
     @Test("Generated opportunity titles localize without changing authored or saved titles")

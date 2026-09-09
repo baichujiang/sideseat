@@ -8,6 +8,10 @@
 
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
 
+**Approved timing amendment:** The flexible timing behavior below is implemented
+locally behind `v2FlexibleTiming`; Build 38 still uses exact windows until a new
+internal client and backend rollout. See [delivery and verification](./FLEXIBLE_INTENT_TIMING.md).
+
 ## 1. App entry
 
 After authentication, onboarding and required student eligibility, the app opens
@@ -25,16 +29,18 @@ Do not restore the old Discover feed as an implicit fallback.
 Together initially explains one action:
 
 ```text
-这周你想和同学一起做什么？
+近期你想和同学一起做什么？
 [添加想做的事]
 ```
 
 The user may create several independent Intents. One Intent contains one concrete
-activity and one or more explicit time windows.
+activity and a timing preference. Default: time to discuss. Users can instead
+choose a day/date range (tomorrow, this weekend, next week, custom), optionally a
+day-part, or one or more exact windows. Intention is not an appointment.
 
 Current editor behavior:
 
-- two steps: choose the concrete activity, then available times; Back preserves
+- two steps: choose the concrete activity, then timing preference; Back preserves
   all entered fields, and the bottom action advances or saves;
 - choose Coffee, Study, Sports, Explore, Food or Events;
 - Coffee, Explore, Food and Events require a short concrete action rather than
@@ -43,9 +49,9 @@ Current editor behavior:
 - Study may include a current course, a concrete goal and whether parallel study
   with different goals is acceptable;
 - course input does not appear for unrelated categories;
-- time input advances in 15-minute increments;
-- after choosing a start, the default end becomes 30 minutes later;
-- duration is at least 30 minutes;
+- exact time input advances in 15-minute increments; after choosing a start,
+  the default end becomes 30 minutes later, with a 30-minute minimum duration;
+- flexible and undecided timing never fabricate an exact start/end;
 - save returns to Together without silently starting matching.
 
 Delivered Opportunities lead the Together page. Matching controls appear when
@@ -54,7 +60,10 @@ leads with creating an Intent. The top-right Plans entry provides a direct route
 to coordination and history. Recent Plans on Together contain unanswered private
 Outcome prompts; saved answers remain editable in Plans history or conversation.
 
-The user can edit, pause, resume or end each Intent independently.
+The user can edit, pause, resume or end each Intent independently. New timing-aware
+intentions last 14 days; active/paused intentions can be explicitly extended for
+14 days from now. Extension does not move the selected dates or exact windows.
+Legacy intentions keep their original expiry unless the owner extends them.
 
 ## 3. Start matching
 
@@ -77,8 +86,12 @@ does not erase already delivered Opportunities or active conversations.
 ## 4. Opportunity generation
 
 The system privately considers pairs whose users both have active matching
-sessions. It filters school, verification, language, time overlap, course,
+sessions. It filters school, verification, language, timing compatibility, course,
 activity compatibility, Block, moderation and cooldown constraints.
+
+Exact overlapping windows are preferred. Compatible date ranges/day-parts or
+undecided timing are eligible, but explicit conflicts are excluded. Unknown does
+not mean both people are free all day. Their cards say “time to discuss”.
 
 - General categories prefer the same normalized action. Under the approved
   activity-fit rollout, different concrete actions within Coffee, Food, Explore
@@ -99,9 +112,10 @@ A lower score does not prevent delivery; no eligible active peer still means no 
 An Opportunity card leads with:
 
 - the shared thing;
-- overlapping time context;
-- activity fit out of 100 and an expandable explanation of the activity, time,
-  common-language and same-school points; not a person rating or success probability;
+- overlapping availability or a date preference / “time to discuss” label;
+- activity fit out of 100 and an expandable explanation. Timing-aware V2 scores
+  activity, common language and school, with timing shown separately. Legacy V1
+  snapshots keep their original time points. Neither is a person rating or success probability;
 - for related activities, both participants' descriptions and a details-to-agree cue;
 - minimum identity/trust context such as verified school, shared course or shared
   language;
@@ -163,8 +177,11 @@ Action Context
 → Calendar projection for each participant
 ```
 
-The draft inherits trusted title/activity, participants, proposed time, course and
-available place context. Existing information is never requested again. The user
+The draft inherits trusted title/activity, participants, available proposed time, course and
+available place context. For an undated Opportunity, the user must explicitly
+review/select proposal times and enable “Propose these times” before Send is
+available. This is the author's proposal, not bilateral agreement.
+Existing information is never requested again. The user
 must still explicitly confirm before sending.
 
 Plan creation uses the shared editing sheet with a pinned send action. A new-time

@@ -19,6 +19,7 @@ import {
   weeklyIntentWindowsFitLifecycle,
 } from "@/lib/v2/weekly-intent-policy";
 import { matchAndNotifyForUser } from "@/lib/v2/mutual-opportunity-auto-match";
+import { readTimePreference, recentIntentExpiry, flexiblePreferenceFitsLifecycle } from "@/lib/v2/intent-timing";
 
 const CURRENT_POLICY_VERSION = 1;
 // This is a hidden abuse guard, not a product-level weekly quota. A normal
@@ -59,6 +60,7 @@ const ownerSelect = {
   courseId: true,
   course: { select: { id: true, code: true, name: true } },
   timeWindows: true,
+  timePreference: true,
   timeZone: true,
   note: true,
   status: true,
@@ -199,6 +201,17 @@ function assertWindowsWithinLifecycle(
   }
 }
 
+function assertTiming(windows: WeeklyIntentCreateInput["timeWindows"], preference: unknown,
+  timeZone: string, now: Date, expiresAt: Date) {
+  const timing = readTimePreference(preference);
+  if (timing.kind === "EXACT") {
+    if (!windows.length) throw new WeeklyIntentError("WEEKLY_INTENT_WINDOW_INVALID");
+    assertWindowsWithinLifecycle(windows, now, expiresAt);
+  } else if (windows.length || !flexiblePreferenceFitsLifecycle(timing, timeZone, now, expiresAt)) {
+    throw new WeeklyIntentError("WEEKLY_INTENT_WINDOW_INVALID");
+  }
+}
+
 async function lockUser(tx: Prisma.TransactionClient, userId: string) {
   await tx.$queryRaw(Prisma.sql`
     SELECT "id" FROM "User" WHERE "id" = ${userId} FOR UPDATE
@@ -320,8 +333,8 @@ export async function createWeeklyIntent(
   input: WeeklyIntentCreateInput,
   now = new Date(),
 ) {
-  const expiresAt = weeklyIntentExpiry(input.timeZone, now);
-  assertWindowsWithinLifecycle(input.timeWindows, now, expiresAt);
+  const expiresAt = input.timePreference ? recentIntentExpiry(now) : weeklyIntentExpiry(input.timeZone, now);
+  assertTiming(input.timeWindows, input.timePreference, input.timeZone, now, expiresAt);
   const sport = normalizedSportSelection(
     input.topic,
     input.sportTag,
@@ -356,6 +369,7 @@ export async function createWeeklyIntent(
         sportOtherNote: sport.sportOtherNote,
         courseId: input.courseId ?? null,
         timeWindows: normalizedWindows(input.timeWindows),
+        ...(input.timePreference ? { timePreference: input.timePreference } : {}),
         timeZone: input.timeZone,
         note: input.note || null,
         policyVersion: CURRENT_POLICY_VERSION,
@@ -402,10 +416,13 @@ export async function patchWeeklyIntent(
         throw new WeeklyIntentError("WEEKLY_INTENT_STATE_INVALID");
       }
       data = { status: "ACTIVE", pausedAt: null, version: { increment: 1 } };
+    } else if (input.action === "EXTEND") {
+      data = { expiresAt: recentIntentExpiry(now), version: { increment: 1 } };
     } else {
       const nextWindows = input.timeWindows ??
         (current.timeWindows as WeeklyIntentCreateInput["timeWindows"]);
-      assertWindowsWithinLifecycle(nextWindows, now, current.expiresAt);
+      const nextPreference = input.timePreference ?? current.timePreference;
+      assertTiming(nextWindows, nextPreference, input.timeZone ?? current.timeZone, now, current.expiresAt);
       const nextCourseId = input.courseId === undefined
         ? current.courseId
         : input.courseId;
@@ -485,6 +502,7 @@ export async function patchWeeklyIntent(
           ? { timeWindows: normalizedWindows(input.timeWindows) }
           : {}),
         ...(input.timeZone !== undefined ? { timeZone: input.timeZone } : {}),
+        ...(input.timePreference !== undefined ? { timePreference: input.timePreference } : {}),
         ...(input.note !== undefined ? { note: input.note || null } : {}),
         version: { increment: 1 },
       };
@@ -500,7 +518,7 @@ export async function patchWeeklyIntent(
     }
     return { intent: ownerResponse(row) };
   });
-  if (input.action === "EDIT" || input.action === "RESUME") {
+  if (input.action === "EDIT" || input.action === "RESUME" || input.action === "EXTEND") {
     await autoMatchAfterMutation(userId);
   }
   return result;

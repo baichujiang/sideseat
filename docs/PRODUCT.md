@@ -1,8 +1,8 @@
 # SideSeat Product
 
-**Status:** Frozen v1.0 with approved activity-fit amendment (2026-09-08)
+**Status:** Frozen v1.0 with approved activity-fit (2026-09-08) and flexible-timing (2026-09-09) amendments
 
-**Last updated:** 2026-09-08
+**Last updated:** 2026-09-09
 
 **Scope:** Product positioning, canonical objects, information architecture, invariants, and non-goals
 
@@ -139,6 +139,10 @@ authorize a current acquisition surface.
 19. A repeat always requires a new current Intent, Opportunity, consent and Plan.
 20. Two-person Together uses one bilateral Plan. Pod starts at three participants
     and cannot ship without a dedicated group commitment and safety contract.
+21. An Intent need not declare an appointment: it can express a local day/range,
+    an optional day-part, exact availability, or undecided timing. Unknown timing
+    is not all-day availability. Only a timed, accepted Plan creates commitment.
+    See [Flexible intention timing](./FLEXIBLE_INTENT_TIMING.md) for the gated rollout.
 
 ## 6. Module boundaries
 

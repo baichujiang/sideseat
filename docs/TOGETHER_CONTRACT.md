@@ -10,6 +10,16 @@
 
 **Scope:** Weekly Intent, matching session, Mutual Opportunity and mutual activation
 
+**2026-09-09 timing amendment (local, rollout-gated):**
+[Flexible intention timing](./FLEXIBLE_INTENT_TIMING.md) supersedes the exact-only
+rules below when `v2FlexibleTiming` is enabled. New explicit preferences are EXACT,
+FLEXIBLE (inclusive local dates plus ANY/MORNING/AFTERNOON/EVENING), or UNDECIDED.
+Non-exact modes store no exact windows; compatible preferences may match with NULL
+Opportunity timestamps. New intentions last 14 days; EXTEND is an explicit,
+version-checked owner mutation. Legacy NULL preferences retain exact semantics and
+original expiry. Calendar is still populated only by accepted timed Plans.
+Build 38 / production have not received this amendment yet.
+
 ## 1. Weekly Intent
 
 A Weekly Intent is private, owner-scoped and short-lived. Current fields support:

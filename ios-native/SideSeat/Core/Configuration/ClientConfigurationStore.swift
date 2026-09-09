@@ -71,6 +71,10 @@ final class ClientConfigurationStore {
     }
 
     func refresh() async {
+        #if DEBUG
+        // Offline UI fixtures must not be replaced by the live rollout flags.
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") { return }
+        #endif
         guard !isRefreshing else { return }
         isRefreshing = true
         defer { isRefreshing = false }

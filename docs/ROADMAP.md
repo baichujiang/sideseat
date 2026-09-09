@@ -6,6 +6,20 @@
 
 **Governing product:** [Product](./PRODUCT.md)
 
+**Current local development:** [Flexible intention timing](./FLEXIBLE_INTENT_TIMING.md)
+adds tomorrow/weekend/next-week/date-range/undecided timing, a 14-day intention
+lifecycle, separate activity fit and timing, and explicit time confirmation in the
+Plan composer. Migration applied only to a dedicated localhost database; real
+two-account service flow through both Calendars passes. Native verification is
+complete: 6 model tests and 3 UI tests pass, including Chinese/English and German
+largest text. The final simulator result is `/tmp/sideseat-flexible-timing-ui-7.xcresult`.
+The focused German wrapping/translation follow-up also passes in
+`/tmp/sideseat-flexible-timing-ui-8.xcresult`.
+Owner authorized commit/push on 2026-09-09. Not deployed or included in TestFlight Build 38.
+Next: authorize the migration, backend deployment with rollout OFF and
+next internal TestFlight release; activate `V2_FLEXIBLE_TIMING_ENABLED` only after migration,
+backend and compatible testing phones are ready. Outcome/Shared Encounter unchanged.
+
 **Current internal matching demo:** [test_001 QA demo](./TOGETHER_QA_DEMO.md)
 has six live, course-scoped QA matching cards covering all Together topics.
 Existing intentions/history and matching rules are preserved. Next: refresh

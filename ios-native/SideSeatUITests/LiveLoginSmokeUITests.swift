@@ -753,7 +753,7 @@ final class SocialLiveUITests: XCTestCase {
         let setIntent = app.buttons["together-set-intent"]
         XCTAssertTrue(setIntent.waitForExistence(timeout: 8))
         setIntent.tap()
-        XCTAssertTrue(app.navigationBars["Set this week"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForExistence(timeout: 8))
 
         let activityField = app.textFields["intent-editor-activity"]
         XCTAssertTrue(activityField.waitForExistence(timeout: 5))

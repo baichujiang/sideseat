@@ -33,16 +33,19 @@ struct NativeActivityFit: Codable, Hashable, Sendable {
     let basis: String
     let score: Int
     let activityPoints: Int
-    let timePoints: Int
+    let timePoints: Int?
     let languagePoints: Int
     let schoolPoints: Int
-    let overlapMinutes: Int
+    let overlapMinutes: Int?
     let viewerActivityText: String?
     let peerActivityText: String?
 
     var isRelatedActivity: Bool { basis == "RELATED_ACTIVITY" }
     var breakdown: String {
-        String(format: AppLocalization.string(
+        guard let timePoints else {
+            return AppLocalization.string("Activity fit uses your activities, shared language and school. Timing is discussed separately.")
+        }
+        return String(format: AppLocalization.string(
             "Activity %d/50 · Time %d/30 · Language %d/10 · School %d/10"
         ), activityPoints, timePoints, languagePoints, schoolPoints)
     }
@@ -64,8 +67,8 @@ struct NativeMutualOpportunity: Codable, Identifiable, Hashable, Sendable {
     let matchKind: NativeMutualOpportunityMatchKind?
     let sharedContext: NativeMutualOpportunitySharedContext?
     let course: NativeMutualOpportunityCourse?
-    let startsAt: String
-    let endsAt: String
+    let startsAt: String?
+    let endsAt: String?
     let expiresAt: String
     let peer: NativeMutualOpportunityPeer
     let viewerDecision: String?
@@ -73,9 +76,10 @@ struct NativeMutualOpportunity: Codable, Identifiable, Hashable, Sendable {
     let version: Int
     var isRepeat: Bool? = nil
     var matchFit: NativeActivityFit? = nil
+    var timeContext: NativeIntentTimePreference? = nil
 
-    var startDate: Date? { Date.sideSeatChatISO8601(startsAt) }
-    var endDate: Date? { Date.sideSeatChatISO8601(endsAt) }
+    var startDate: Date? { startsAt.flatMap(Date.sideSeatChatISO8601) }
+    var endDate: Date? { endsAt.flatMap(Date.sideSeatChatISO8601) }
     var isReadyToCoordinate: Bool {
         state == "READY_TO_COORDINATE" && coordination != nil
     }

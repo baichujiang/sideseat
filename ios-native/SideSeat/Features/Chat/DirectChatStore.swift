@@ -198,6 +198,18 @@ final class DirectChatStore {
             } else {
                 messages = fixture.messages
             }
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-flexible-timing") {
+                messages.append(NativeDirectMessage(
+                    id: "ui-flexible-source", connectionId: connectionID, sender: fixture.connection.peer,
+                    type: "MUTUAL_OPPORTUNITY_CARD", body: nil, createdAt: Date().ISO8601Format(),
+                    mutualOpportunity: NativeMutualOpportunitySource(id: "ui-flexible-opportunity",
+                        policyVersion: "MUTUAL_OPPORTUNITY_V1", topic: "COFFEE",
+                        context: NativeActionContext(version: 1, sourceKind: "MUTUAL_OPPORTUNITY",
+                            sourceId: "ui-flexible-opportunity", title: "Coffee together", startsAt: nil, endsAt: nil,
+                            location: nil, planType: "CUSTOM", participantIds: ["ui-test-user", fixture.connection.peer.id],
+                            author: NativeActionContextAuthor(id: fixture.connection.peer.id, displayName: "Peer"), course: nil,
+                            timeContext: NativeIntentTimePreference(kind: "UNDECIDED")))))
+            }
             hasMoreOlder = false
             nextCursor = nil
             realtimeCursor = "ui-cursor"

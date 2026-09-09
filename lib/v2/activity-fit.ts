@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import type { ActivityMatchClassification } from "./mutual-opportunity-activity-compatibility";
 
-const activityFitSnapshotSchema = z.object({
+const legacyActivityFitSnapshotSchema = z.object({
   policyVersion: z.literal("ACTIVITY_FIT_V1"),
   basis: z.enum(["EXACT_ACTIVITY", "PARALLEL_STUDY", "RELATED_ACTIVITY"]),
   score: z.number().int().min(0).max(100),
@@ -14,11 +14,20 @@ const activityFitSnapshotSchema = z.object({
   intentAActivityText: z.string().max(80).nullable(),
   intentBActivityText: z.string().max(80).nullable(),
 });
+const activityFitSnapshotSchema = z.union([
+  legacyActivityFitSnapshotSchema,
+  legacyActivityFitSnapshotSchema.extend({
+    policyVersion: z.literal("ACTIVITY_FIT_V2"),
+    timePoints: z.null(),
+    overlapMinutes: z.number().int().min(30).nullable(),
+  }),
+]);
 
 /** An explainable activity-fit heuristic, never a person's rating or probability. */
 export function activityFit(
   match: ActivityMatchClassification,
-  overlapMinutes: number,
+  overlapMinutes: number | null,
+  separateTiming = false,
 ) {
   const basis =
     match.matchKind === "EXACT_ACTIVITY"
@@ -28,16 +37,16 @@ export function activityFit(
         : "RELATED_ACTIVITY";
   const activityPoints =
     basis === "EXACT_ACTIVITY" ? 50 : basis === "PARALLEL_STUDY" ? 35 : 25;
-  const timePoints = Math.min(30, Math.floor(overlapMinutes / 2));
+  const timePoints = overlapMinutes === null || separateTiming ? null : Math.min(30, Math.floor(overlapMinutes / 2));
   return {
-    policyVersion: "ACTIVITY_FIT_V1" as const,
+    policyVersion: timePoints === null ? "ACTIVITY_FIT_V2" as const : "ACTIVITY_FIT_V1" as const,
     basis,
-    score: activityPoints + timePoints + 20,
+    score: timePoints === null ? Math.round((activityPoints + 20) / 70 * 100) : activityPoints + timePoints + 20,
     activityPoints,
     timePoints,
     languagePoints: 10 as const,
     schoolPoints: 10 as const,
-    overlapMinutes: Math.floor(overlapMinutes),
+    overlapMinutes: overlapMinutes === null ? null : Math.floor(overlapMinutes),
   };
 }
 

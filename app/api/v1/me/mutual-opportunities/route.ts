@@ -14,7 +14,13 @@ export async function GET(request: Request) {
       isV2FeatureEnabled("v2WeeklyIntent") &&
       isV2FeatureEnabled("v2MutualOpportunity");
     if (generate) await matchAndNotifyForUser(auth.user.id);
-    return v1Success(await listMutualOpportunities(auth.user.id, false), {
+    const payload = await listMutualOpportunities(auth.user.id, false);
+    // Shipped clients require concrete timestamps and V1 score components.
+    if (request.headers.get("X-SideSeat-Flexible-Timing") !== "1") {
+      payload.opportunities = payload.opportunities.filter(row => row.startsAt && row.endsAt)
+        .map(row => ({ ...row, matchFit: row.matchFit?.policyVersion === "ACTIVITY_FIT_V2" ? null : row.matchFit }));
+    }
+    return v1Success(payload, {
       request,
     });
   } catch (cause) {

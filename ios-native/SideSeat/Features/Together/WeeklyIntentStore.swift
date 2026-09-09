@@ -47,6 +47,7 @@ final class WeeklyIntentStore {
         studyGoal: String,
         courseId: String?,
         timeWindows: [NativeWeeklyIntentTimeWindow],
+        timePreference: NativeIntentTimePreference? = nil,
         note: String,
         using session: SessionStore
     ) async -> Bool {
@@ -102,7 +103,8 @@ final class WeeklyIntentStore {
                         courseId: submittedCourseID,
                         timeWindows: timeWindows,
                         timeZone: TimeZone.current.identifier,
-                        note: trimmedNote.isEmpty ? nil : trimmedNote
+                        note: trimmedNote.isEmpty ? nil : trimmedNote,
+                        timePreference: timePreference
                     ),
                     idempotencyKey: UUID().uuidString
                 )
@@ -120,7 +122,8 @@ final class WeeklyIntentStore {
                         courseId: submittedCourseID,
                         timeWindows: timeWindows,
                         timeZone: TimeZone.current.identifier,
-                        note: trimmedNote.isEmpty ? nil : trimmedNote
+                        note: trimmedNote.isEmpty ? nil : trimmedNote,
+                        timePreference: timePreference
                     ),
                     idempotencyKey: UUID().uuidString
                 )
@@ -139,6 +142,7 @@ final class WeeklyIntentStore {
     func setPaused(
         _ paused: Bool,
         intent: NativeWeeklyIntent,
+        extend: Bool = false,
         using session: SessionStore
     ) async -> Bool {
         guard !mutatingIDs.contains(intent.id) else { return false }
@@ -150,7 +154,7 @@ final class WeeklyIntentStore {
                 "api/v1/me/weekly-intents/\(intent.id)",
                 method: .patch,
                 body: NativeWeeklyIntentStateRequest(
-                    action: paused ? "PAUSE" : "RESUME",
+                    action: extend ? "EXTEND" : paused ? "PAUSE" : "RESUME",
                     expectedVersion: intent.version
                 ),
                 idempotencyKey: UUID().uuidString

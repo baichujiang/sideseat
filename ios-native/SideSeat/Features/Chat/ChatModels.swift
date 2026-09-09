@@ -954,6 +954,7 @@ struct NativeActionContext: Codable, Hashable, Sendable {
     var activityText: String? = nil
     var sportTag: String? = nil
     var sportOtherNote: String? = nil
+    var timeContext: NativeIntentTimePreference? = nil
 
     var startDate: Date? { startsAt.flatMap(Date.sideSeatChatISO8601) }
     var endDate: Date? { endsAt.flatMap(Date.sideSeatChatISO8601) }
@@ -1023,6 +1024,7 @@ struct NativePlanDraft: Codable, Hashable, Identifiable, Sendable {
     let origin: NativePlanOriginReference
 
     var id: String { "\(origin.kind):\(origin.id)" }
+    var needsTimeSelection: Bool { origin.kind == "MUTUAL_OPPORTUNITY" && startTime == nil }
 
     init(context: NativeActionContext, interestID: String) {
         title = context.title

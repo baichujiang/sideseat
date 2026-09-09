@@ -20,6 +20,7 @@ import { prisma } from "@/lib/db/prisma";
 import { repeatEligibility } from "@/lib/plans/repeat-eligibility";
 import { isV2FeatureEnabled } from "@/lib/v2/feature-flags";
 import { activityFit, activityFitProjection } from "@/lib/v2/activity-fit";
+import { compatibleIntentTiming, type OpportunityTimeContext } from "@/lib/v2/intent-timing";
 import {
   classifyActivityMatch,
   type ActivityMatchClassification,
@@ -29,7 +30,6 @@ export const MUTUAL_OPPORTUNITY_POLICY = "MUTUAL_OPPORTUNITY_V1";
 const MAX_MATCH_CANDIDATES_PER_REFRESH = 240;
 const PAIR_COOLDOWN_MS = 14 * 24 * 60 * 60 * 1_000;
 const MIN_OVERLAP_MS = 30 * 60 * 1_000;
-const DECISION_LEAD_MS = 15 * 60 * 1_000;
 
 type TimeWindow = Readonly<{ startAt: Date; endAt: Date }>;
 
@@ -235,8 +235,9 @@ function viewerProjection(row: OpportunityRow, viewerId: string) {
     sportTag: row.sportTag,
     sportOtherNote: row.sportOtherNote,
     course: row.course,
-    startsAt: row.startsAt.toISOString(),
-    endsAt: row.endsAt.toISOString(),
+    startsAt: row.startsAt?.toISOString() ?? null,
+    endsAt: row.endsAt?.toISOString() ?? null,
+    timeContext: (row.contextSnapshot as Prisma.JsonObject)?.timeContext ?? null,
     expiresAt: row.expiresAt.toISOString(),
     peer: {
       displayName: displayName(peer),
@@ -268,8 +269,9 @@ function contextSnapshot(options: {
   activityText: string | null;
   sportTag: SportTag | null;
   sportOtherNote: string | null;
-  startsAt: Date;
-  endsAt: Date;
+  startsAt: Date | null;
+  endsAt: Date | null;
+  timeContext: OpportunityTimeContext;
   userA: LimitedUser;
   userB: LimitedUser;
   course: { id: string; code: string | null; name: string } | null;
@@ -284,8 +286,9 @@ function contextSnapshot(options: {
     sourceId: options.id,
     isRepeat: options.isRepeat ?? false,
     title: topicTitle(options),
-    startsAt: options.startsAt.toISOString(),
-    endsAt: options.endsAt.toISOString(),
+    startsAt: options.startsAt?.toISOString() ?? null,
+    endsAt: options.endsAt?.toISOString() ?? null,
+    timeContext: options.timeContext,
     location: null,
     planType: planType(options.topic),
     participantIds: [options.userA.id, options.userB.id],
@@ -385,6 +388,8 @@ async function createCandidateOpportunity(options: {
     sportTag: SportTag | null;
     sportOtherNote: string | null;
     timeWindows: Prisma.JsonValue;
+    timePreference: Prisma.JsonValue;
+    timeZone: string;
     expiresAt: Date;
     version: number;
     user: LimitedUser;
@@ -401,6 +406,8 @@ async function createCandidateOpportunity(options: {
     sportTag: SportTag | null;
     sportOtherNote: string | null;
     timeWindows: Prisma.JsonValue;
+    timePreference: Prisma.JsonValue;
+    timeZone: string;
     expiresAt: Date;
     version: number;
     user: LimitedUser;
@@ -419,17 +426,10 @@ async function createCandidateOpportunity(options: {
     ownerIntent.courseId !== candidateIntent.courseId
   ) return null;
   if (sharedLanguages(ownerIntent.user, candidateIntent.user).length === 0) return null;
-  const overlap = earliestActionableOverlap(
-    ownerIntent.timeWindows,
-    candidateIntent.timeWindows,
-    now,
-  );
+  const overlap = compatibleIntentTiming(ownerIntent, candidateIntent, now);
   if (!overlap) return null;
-  const expiresAt = new Date(Math.min(
-    ownerIntent.expiresAt.getTime(),
-    candidateIntent.expiresAt.getTime(),
-    overlap.startAt.getTime() - DECISION_LEAD_MS,
-  ));
+  if (!overlap.startsAt && !isV2FeatureEnabled("v2FlexibleTiming")) return null;
+  const expiresAt = overlap.expiresAt;
   if (expiresAt <= now) return null;
 
   const ownerFirst = ownerIntent.userId.localeCompare(candidateIntent.userId) < 0;
@@ -440,7 +440,7 @@ async function createCandidateOpportunity(options: {
   const intentAActivity = ownerFirst ? activityMatch.first : activityMatch.second;
   const intentBActivity = ownerFirst ? activityMatch.second : activityMatch.first;
   const fit = {
-    ...activityFit(activityMatch, (overlap.endAt.getTime() - overlap.startAt.getTime()) / 60_000),
+    ...activityFit(activityMatch, overlap.overlapMinutes, Boolean(ownerIntent.timePreference || candidateIntent.timePreference)),
     intentAActivityText: ownerFirst ? ownerIntent.activityText : candidateIntent.activityText,
     intentBActivityText: ownerFirst ? candidateIntent.activityText : ownerIntent.activityText,
   };
@@ -480,6 +480,8 @@ async function createCandidateOpportunity(options: {
           sportTag: true,
           sportOtherNote: true,
           timeWindows: true,
+          timePreference: true,
+          timeZone: true,
           expiresAt: true,
           status: true,
           version: true,
@@ -504,6 +506,8 @@ async function createCandidateOpportunity(options: {
             intent.activityText === snapshot.activityText &&
             intent.sportTag === snapshot.sportTag &&
             intent.sportOtherNote === snapshot.sportOtherNote &&
+            intent.timeZone === snapshot.timeZone &&
+            JSON.stringify(intent.timePreference) === JSON.stringify(snapshot.timePreference) &&
             JSON.stringify(intent.timeWindows) === JSON.stringify(snapshot.timeWindows);
         });
       if (!intentsAreCurrent) return null;
@@ -623,8 +627,9 @@ async function createCandidateOpportunity(options: {
         activityText: sharedActivityText,
         sportTag: ownerIntent.sportTag,
         sportOtherNote: ownerIntent.sportOtherNote,
-        startsAt: overlap.startAt,
-        endsAt: overlap.endAt,
+        startsAt: overlap.startsAt,
+        endsAt: overlap.endsAt,
+        timeContext: overlap.context,
         userA,
         userB,
         course: candidateIntent.course,
@@ -646,8 +651,8 @@ async function createCandidateOpportunity(options: {
           activityText: sharedActivityText,
           sportTag: ownerIntent.sportTag,
           sportOtherNote: ownerIntent.sportOtherNote,
-          startsAt: overlap.startAt,
-          endsAt: overlap.endAt,
+          startsAt: overlap.startsAt,
+          endsAt: overlap.endsAt,
           expiresAt,
           contextSnapshot: placeholder,
           repeatOfPlanId: repeat?.source?.planId ?? null,
@@ -676,8 +681,9 @@ async function createCandidateOpportunity(options: {
             activityText: sharedActivityText,
             sportTag: ownerIntent.sportTag,
             sportOtherNote: ownerIntent.sportOtherNote,
-            startsAt: overlap.startAt,
-            endsAt: overlap.endAt,
+            startsAt: overlap.startsAt,
+            endsAt: overlap.endsAt,
+            timeContext: overlap.context,
             userA,
             userB,
             course: candidateIntent.course,
@@ -747,6 +753,8 @@ export async function generateMutualOpportunitiesForUser(
       sportTag: true,
       sportOtherNote: true,
       timeWindows: true,
+      timePreference: true,
+      timeZone: true,
       expiresAt: true,
       version: true,
       user: { select: opportunityInclude.userA.select },
@@ -774,7 +782,7 @@ export async function generateMutualOpportunitiesForUser(
             {
               status: "PENDING",
               expiresAt: { gt: now },
-              startsAt: { gt: now },
+              OR: [{ startsAt: null }, { startsAt: { gt: now } }],
               intentA: { status: "ACTIVE" },
               intentB: { status: "ACTIVE" },
             },
@@ -788,7 +796,7 @@ export async function generateMutualOpportunitiesForUser(
             {
               status: "PENDING",
               expiresAt: { gt: now },
-              startsAt: { gt: now },
+              OR: [{ startsAt: null }, { startsAt: { gt: now } }],
               intentA: { status: "ACTIVE" },
               intentB: { status: "ACTIVE" },
             },
@@ -823,6 +831,8 @@ export async function generateMutualOpportunitiesForUser(
       sportTag: true,
       sportOtherNote: true,
       timeWindows: true,
+      timePreference: true,
+      timeZone: true,
       expiresAt: true,
       version: true,
       user: { select: opportunityInclude.userB.select },
@@ -836,11 +846,11 @@ export async function generateMutualOpportunitiesForUser(
   for (const ownerIntent of ownerIntents) {
     const rankedCandidates = candidates.flatMap((candidate) => {
       const match = classifyActivityMatch(ownerIntent, candidate, isV2FeatureEnabled("v2ActivityFit"));
-      const overlap = earliestActionableOverlap(ownerIntent.timeWindows, candidate.timeWindows, now);
+      const overlap = compatibleIntentTiming(ownerIntent, candidate, now);
       if (!match || !overlap) return [];
-      const fit = activityFit(match, (overlap.endAt.getTime() - overlap.startAt.getTime()) / 60_000);
-      return [{ candidate, fit }];
-    }).sort((left, right) => right.fit.score - left.fit.score ||
+      const fit = activityFit(match, overlap.overlapMinutes, Boolean(ownerIntent.timePreference || candidate.timePreference));
+      return [{ candidate, fit, certainty: overlap.certainty }];
+    }).sort((left, right) => right.certainty - left.certainty || right.fit.score - left.fit.score ||
       right.fit.activityPoints - left.fit.activityPoints);
     // Scores rank feasible opportunities; there is deliberately no score cutoff.
     // Stable ties retain the existing oldest-first order.
@@ -948,7 +958,7 @@ export async function decideMutualOpportunity(options: {
         throw new MutualOpportunityError("NOT_FOUND");
       }
       const now = new Date();
-      if (row.status !== "PENDING" || row.expiresAt <= now || row.startsAt <= now) {
+      if (row.status !== "PENDING" || row.expiresAt <= now || (row.startsAt !== null && row.startsAt <= now)) {
         throw new MutualOpportunityError("NO_LONGER_AVAILABLE");
       }
       if (row.repeatOfPlanId && options.decision === "YES") {

@@ -43,6 +43,7 @@ actor APIClient {
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("ios", forHTTPHeaderField: "X-SideSeat-Platform")
+        request.setValue("1", forHTTPHeaderField: "X-SideSeat-Flexible-Timing")
         request.setValue(environment.appVersion, forHTTPHeaderField: "X-SideSeat-App-Version")
         request.setValue(environment.buildNumber, forHTTPHeaderField: "X-SideSeat-Build")
         request.setValue(

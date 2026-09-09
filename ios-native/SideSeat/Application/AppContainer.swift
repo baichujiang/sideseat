@@ -88,6 +88,7 @@ final class AppContainer {
                     "naturalLanguageSchedule": arguments.contains("--ui-testing-smart-schedule"),
                     "storeKitSupport": true,
                     "apnsDelivery": false,
+                    "v2FlexibleTiming": arguments.contains("--ui-testing-flexible-timing"),
                 ]
             )
         } else if arguments.contains("--ui-testing-signed-out") {

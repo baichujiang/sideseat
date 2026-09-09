@@ -4,6 +4,7 @@ import {
   TogetherMode,
 } from "@prisma/client";
 import { z } from "zod";
+import { intentTimePreferenceSchema } from "@/lib/v2/intent-timing";
 
 const MIN_WINDOW_MS = 30 * 60 * 1_000;
 const MAX_WINDOW_MS = 12 * 60 * 60 * 1_000;
@@ -43,7 +44,6 @@ export const weeklyIntentTimeWindowSchema = z
 
 const weeklyIntentWindowsSchema = z
   .array(weeklyIntentTimeWindowSchema)
-  .min(1)
   .max(7)
   .superRefine((windows, ctx) => {
     const sorted = windows
@@ -242,6 +242,7 @@ const intentFields = {
   sportOtherNote: sportOtherNoteSchema,
   courseId: z.string().trim().min(1).max(191).nullable().optional(),
   timeWindows: weeklyIntentWindowsSchema,
+  timePreference: intentTimePreferenceSchema.optional(),
   timeZone: timeZoneSchema,
   note: z.string().trim().max(160).nullable().optional(),
 } as const;
@@ -249,6 +250,13 @@ const intentFields = {
 export const weeklyIntentCreateSchema = z
   .object(intentFields)
   .strict()
+  .superRefine((value, ctx) => {
+    const exact = !value.timePreference || value.timePreference.kind === "EXACT";
+    if (exact ? value.timeWindows.length === 0 : value.timeWindows.length !== 0) {
+      ctx.addIssue({ code: "custom", path: ["timeWindows"],
+        message: exact ? "Choose at least one exact time window." : "Flexible timing must not declare exact availability." });
+    }
+  })
   .superRefine(validateActivityTextSelection)
   .superRefine(validateSportSelection)
   .superRefine(validateStudySelection)
@@ -266,6 +274,7 @@ const weeklyIntentEditSchema = z
     sportOtherNote: intentFields.sportOtherNote,
     courseId: intentFields.courseId,
     timeWindows: intentFields.timeWindows.optional(),
+    timePreference: intentFields.timePreference,
     timeZone: intentFields.timeZone.optional(),
     note: intentFields.note,
   })
@@ -280,6 +289,7 @@ const weeklyIntentEditSchema = z
       value.sportOtherNote !== undefined ||
       value.courseId !== undefined ||
       value.timeWindows !== undefined ||
+      value.timePreference !== undefined ||
       value.timeZone !== undefined ||
       value.note !== undefined,
     { message: "Choose at least one field to edit." },
@@ -307,6 +317,7 @@ export const weeklyIntentPatchSchema = z.union([
   weeklyIntentEditSchema,
   weeklyIntentPauseSchema,
   weeklyIntentResumeSchema,
+  z.object({ action: z.literal("EXTEND"), expectedVersion: z.number().int().positive() }).strict(),
 ]);
 
 export const weeklyIntentEndSchema = z

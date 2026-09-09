@@ -220,6 +220,7 @@ private struct TogetherHomeView: View {
                 studyGoal,
                 courseId,
                 timeWindows,
+                timePreference,
                 note in
                 let saved = await store.save(
                     intent: presentation.intent,
@@ -231,6 +232,7 @@ private struct TogetherHomeView: View {
                     studyGoal: studyGoal,
                     courseId: courseId,
                     timeWindows: timeWindows,
+                    timePreference: timePreference,
                     note: note,
                     using: session
                 )
@@ -249,7 +251,7 @@ private struct TogetherHomeView: View {
     private var intentSection: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
             SSProductSectionHeader(
-                title: AppLocalization.string("This week"),
+                title: AppLocalization.string("Recent intentions"),
                 actionTitle: AppLocalization.string("Add"),
                 accessibilityID: "together-intent-section-title",
                 actionAccessibilityID: "together-add-intent",
@@ -267,11 +269,11 @@ private struct TogetherHomeView: View {
                         subtitle: AppLocalization.string("Only you can see this."),
                         systemImage: "sparkles"
                     )
-                    Text("Set one private intention for this week. It is not a public post.")
+                    Text("Add something you would like to do. Your intention stays private.")
                         .font(.subheadline)
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     SSPrimaryButton(
-                        title: AppLocalization.string("Set this week's intention"),
+                        title: AppLocalization.string("Add an intention"),
                         fill: .product,
                         chrome: .capsule,
                         height: 46,
@@ -296,6 +298,9 @@ private struct TogetherHomeView: View {
                                     await refreshOpportunitiesAfterIntentChange()
                                 }
                             }
+                        },
+                        onExtend: {
+                            Task { _ = await store.setPaused(false, intent: intent, extend: true, using: session) }
                         },
                         onEnd: {
                             Task {
@@ -472,7 +477,7 @@ private struct TogetherHomeView: View {
 
     private var unavailableSection: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            SSProductSectionHeader(title: AppLocalization.string("This week"))
+            SSProductSectionHeader(title: AppLocalization.string("Recent intentions"))
             SSEmptyState(
                 title: "Together isn't enabled for this account yet",
                 systemImage: "person.2.slash",
@@ -777,7 +782,7 @@ private struct MutualOpportunityCard: View {
                 .font(.subheadline)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                Text(AppLocalization.string("Available together"))
+                Text(AppLocalization.string(opportunity.startDate == nil ? "Timing preference" : "Available together"))
                     .font(.caption)
                     .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 Text(opportunityWindow)
@@ -790,7 +795,7 @@ private struct MutualOpportunityCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(SideSeatTheme.activityInset,
                     in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
-        .accessibilityLabel(AppLocalization.string("Available together"))
+        .accessibilityLabel(AppLocalization.string(opportunity.startDate == nil ? "Timing preference" : "Available together"))
         .accessibilityValue(opportunityWindow)
         .accessibilityElement(children: .ignore)
     }
@@ -886,8 +891,13 @@ private struct MutualOpportunityCard: View {
                     if let fit = opportunity.matchFit {
                         Text(fit.breakdown)
                             .fixedSize(horizontal: false, vertical: true)
-                        Text(String(format: AppLocalization.string("%d minutes of shared availability"), fit.overlapMinutes))
-                            .fixedSize(horizontal: false, vertical: true)
+                        if let minutes = fit.overlapMinutes {
+                            Text(String(format: AppLocalization.string("%d minutes of shared availability"), minutes))
+                                .fixedSize(horizontal: false, vertical: true)
+                        } else {
+                            Text("Time is not agreed yet. Start a conversation to work it out.")
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
                         Text(AppLocalization.string("This describes the activity, not the person or the chance of success. A lower score can still be worth trying."))
                             .fixedSize(horizontal: false, vertical: true)
                             .accessibilityIdentifier("mutual-opportunity-fit-disclaimer-\(opportunity.id)")
@@ -994,7 +1004,7 @@ private struct MutualOpportunityCard: View {
         guard let start = opportunity.startDate,
               let end = opportunity.endDate
         else {
-            return AppLocalization.string("Overlapping availability")
+            return opportunity.timeContext?.summary ?? AppLocalization.string("Time to discuss")
         }
         let startText = start.formatted(.dateTime.month(.abbreviated).day().hour().minute().locale(AppLocalization.selectedLanguage.locale))
         let format: Date.FormatStyle = Calendar.current.isDate(start, inSameDayAs: end)
@@ -1025,10 +1035,12 @@ private struct MutualOpportunityCard: View {
 }
 
 private struct WeeklyIntentCard: View {
+    @Environment(ClientConfigurationStore.self) private var clientConfiguration
     let intent: NativeWeeklyIntent
     let isWorking: Bool
     let onEdit: () -> Void
     let onPause: () -> Void
+    let onExtend: () -> Void
     let onEnd: () -> Void
 
     private var isEnded: Bool { intent.status == "ENDED" }
@@ -1046,6 +1058,9 @@ private struct WeeklyIntentCard: View {
                     if !isEnded {
                         Menu {
                             Button("Edit", systemImage: "pencil", action: onEdit)
+                            if clientConfiguration.configuration?.isFeatureEnabled("v2FlexibleTiming") == true {
+                                Button("Keep for 14 more days", systemImage: "arrow.clockwise", action: onExtend)
+                            }
                             Button(
                                 intent.isPaused ? "Resume" : "Pause",
                                 systemImage: intent.isPaused ? "play.fill" : "pause.fill",
@@ -1072,6 +1087,12 @@ private struct WeeklyIntentCard: View {
                 }
 
                 VStack(alignment: .leading, spacing: 5) {
+                    if let timing = intent.timePreference, timing.kind != "EXACT" {
+                        Label(timing.summary, systemImage: "calendar.badge.clock")
+                            .font(.subheadline)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                     let windows = intent.relevantTimeWindows()
                     ForEach(Array(windows.prefix(2).enumerated()), id: \.offset) { _, window in
                         Label {
@@ -1101,6 +1122,11 @@ private struct WeeklyIntentCard: View {
                         .foregroundStyle(SideSeatTheme.textSecondary)
                         .lineLimit(2)
                 }
+
+                Text(String(format: AppLocalization.string("Active until %@"),
+                    intent.expiresAt.formatted(.dateTime.month(.abbreviated).day().locale(AppLocalization.selectedLanguage.locale))))
+                    .font(.caption)
+                    .foregroundStyle(SideSeatTheme.textSecondary)
 
                 if intent.isPaused {
                     SSInlineStatus(
@@ -1233,6 +1259,7 @@ private struct WeeklyIntentCourseOption: Identifiable, Hashable {
 }
 
 private struct WeeklyIntentEditorView: View {
+    @Environment(ClientConfigurationStore.self) private var clientConfiguration
     @Environment(\.dismiss) private var dismiss
     @Environment(SessionStore.self) private var session
     @State private var courseStore = CourseListStore()
@@ -1243,6 +1270,10 @@ private struct WeeklyIntentEditorView: View {
     @State private var studyGoal: String
     @State private var selectedCourseID: String?
     @State private var timeWindows: [WeeklyIntentWindowDraft]
+    @State private var timingKind: String
+    @State private var flexibleStart: Date
+    @State private var flexibleEnd: Date
+    @State private var period: String
     @State private var note: String
     @State private var isSaving = false
     @State private var editorStep = 0
@@ -1262,6 +1293,7 @@ private struct WeeklyIntentEditorView: View {
             String,
             String?,
             [NativeWeeklyIntentTimeWindow],
+            NativeIntentTimePreference?,
             String
         ) async -> Bool
 
@@ -1278,6 +1310,7 @@ private struct WeeklyIntentEditorView: View {
                 String,
                 String?,
                 [NativeWeeklyIntentTimeWindow],
+                NativeIntentTimePreference?,
                 String
             ) async -> Bool
     ) {
@@ -1302,6 +1335,11 @@ private struct WeeklyIntentEditorView: View {
             }
         )
         _note = State(initialValue: intent?.note ?? "")
+        _timingKind = State(initialValue: intent?.timePreference?.kind ?? (intent == nil ? "UNDECIDED" : "EXACT"))
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
+        _flexibleStart = State(initialValue: NativeIntentTimePreference.date(intent?.timePreference?.startDate) ?? tomorrow)
+        _flexibleEnd = State(initialValue: NativeIntentTimePreference.date(intent?.timePreference?.endDate) ?? tomorrow)
+        _period = State(initialValue: intent?.timePreference?.period ?? "ANY")
     }
 
     var body: some View {
@@ -1332,10 +1370,11 @@ private struct WeeklyIntentEditorView: View {
                 .scrollContentBackground(.hidden)
                 .scrollDismissesKeyboard(.interactively)
                 .accessibilityIdentifier("intent-editor-fields")
+                .id(editorStep)
                 .disabled(isSaving)
             }
             .background(SideSeatTheme.bgGrouped)
-            .navigationTitle(AppLocalization.string(intent == nil ? "Set this week" : "Edit intention"))
+            .navigationTitle(AppLocalization.string(intent == nil ? "Add an intention" : "Edit intention"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -1362,7 +1401,7 @@ private struct WeeklyIntentEditorView: View {
                     SSFlowActionDock(
                         title: AppLocalization.string(dynamicTypeSize.isAccessibilitySize
                             ? (editorStep == 0 ? "Next" : "Save")
-                            : (editorStep == 0 ? "Choose available times" : "Save intention")),
+                            : (editorStep == 0 ? "Choose timing preference" : "Save intention")),
                         detail: dynamicTypeSize.isAccessibilitySize ? "" : editorActionDetail,
                         isLoading: isSaving,
                         isEnabled: editorStep == 0
@@ -1408,7 +1447,7 @@ private struct WeeklyIntentEditorView: View {
                 }
             }
             .accessibilityHidden(true)
-            Text(AppLocalization.string(editorStep == 0 ? "1 · What would you like to do?" : "2 · When are you free?"))
+            Text(AppLocalization.string(editorStep == 0 ? "1 · What would you like to do?" : "2 · When would you like to go?"))
                 .font(.headline)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
@@ -1575,7 +1614,9 @@ private struct WeeklyIntentEditorView: View {
                     activityTopic: topic
                 )
             }
-            Section("When") {
+            if supportsFlexibleTiming { timingPreferences }
+            if effectiveTimingKind == "EXACT" {
+              Section("When") {
                 ForEach($timeWindows) { $window in
                     VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                         timeRowLayout {
@@ -1646,10 +1687,11 @@ private struct WeeklyIntentEditorView: View {
                 .disabled(nextTimeWindow == nil || timeWindows.count >= 7)
 
                 if !hasValidTimeWindows {
-                    Text("Choose future, non-overlapping times of 30 minutes to 12 hours within this week.")
+                    Text("Choose future, non-overlapping times of 30 minutes to 12 hours before this intention expires.")
                         .font(.footnote)
                         .foregroundStyle(SideSeatTheme.danger)
                 }
+            }
             }
             Section("Optional") {
                 TextField("A short clarification", text: $note, axis: .vertical)
@@ -1659,6 +1701,152 @@ private struct WeeklyIntentEditorView: View {
                     .foregroundStyle(SideSeatTheme.textSecondary)
             }
         }
+    }
+
+    private var supportsFlexibleTiming: Bool {
+        clientConfiguration.configuration?.isFeatureEnabled("v2FlexibleTiming") == true || intent?.timePreference != nil
+    }
+
+    private var effectiveTimingKind: String { supportsFlexibleTiming ? timingKind : "EXACT" }
+
+    private var submittedTiming: NativeIntentTimePreference? {
+        guard supportsFlexibleTiming else { return nil }
+        if timingKind == "FLEXIBLE" {
+            return NativeIntentTimePreference(kind: timingKind,
+                startDate: NativeIntentTimePreference.dateKey(flexibleStart),
+                endDate: NativeIntentTimePreference.dateKey(flexibleEnd), period: period)
+        }
+        return NativeIntentTimePreference(kind: timingKind)
+    }
+
+    private var lastFlexibleDay: Date {
+        let calendar = Calendar.current
+        return max(calendar.startOfDay(for: Date()), calendar.date(byAdding: .day, value: -1,
+            to: calendar.startOfDay(for: expiry.addingTimeInterval(1)))!)
+    }
+
+    private var timingPreferences: some View {
+        Group {
+            Section {
+                timingChoice("UNDECIDED", title: "Time to discuss", detail: "Just an intention for now. Find someone first.", icon: "bubble.left.and.bubble.right")
+                timingChoice("FLEXIBLE", title: "A day or date range", detail: "Tomorrow, next week, or a few possible days.", icon: "calendar")
+                timingChoice("EXACT", title: "Specific times", detail: "I already know when I am available.", icon: "clock")
+            } header: {
+                Text("Timing preference")
+            } footer: {
+                Text("This is a preference, not an appointment. Agree on the exact time in chat.")
+            }
+            if timingKind == "FLEXIBLE" {
+                Section("A day or date range") {
+                    ViewThatFits(in: .horizontal) {
+                        HStack { quickDateButtons }
+                        VStack(alignment: .leading) { quickDateButtons }
+                    }
+                    DatePicker("From", selection: $flexibleStart,
+                        in: Calendar.current.startOfDay(for: Date())...lastFlexibleDay, displayedComponents: .date)
+                        .accessibilityIdentifier("intent-flexible-start")
+                        .onChange(of: flexibleStart) { _, value in
+                            if flexibleEnd < value { flexibleEnd = value }
+                        }
+                    DatePicker("Through", selection: $flexibleEnd,
+                        in: min(flexibleStart, lastFlexibleDay)...lastFlexibleDay, displayedComponents: .date)
+                        .accessibilityIdentifier("intent-flexible-end")
+                    if dynamicTypeSize.isAccessibilitySize {
+                        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                            Text("Part of the day")
+                            Menu {
+                                ForEach(["ANY", "MORNING", "AFTERNOON", "EVENING"], id: \.self) { part in
+                                    Button(NativeIntentTimePreference.periodTitle(part)) { period = part }
+                                }
+                            } label: {
+                                HStack(alignment: .top) {
+                                    Text(NativeIntentTimePreference.periodTitle(period))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                    Image(systemName: "chevron.up.chevron.down").font(.caption)
+                                }
+                                .foregroundStyle(SideSeatTheme.textPrimary)
+                            }
+                            .accessibilityIdentifier("intent-period-picker")
+                        }
+                    } else {
+                        Picker("Part of the day", selection: $period) {
+                            ForEach(["ANY", "MORNING", "AFTERNOON", "EVENING"], id: \.self) { part in
+                                Text(NativeIntentTimePreference.periodTitle(part)).tag(part)
+                            }
+                        }
+                    }
+                    Text(submittedTiming?.summary ?? "")
+                        .font(.footnote)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier("intent-timing-summary")
+                }
+                .environment(\.locale, AppLocalization.selectedLanguage.locale)
+            }
+            Section {
+                Text(String(format: AppLocalization.string("Active until %@"),
+                    expiry.formatted(.dateTime.month(.abbreviated).day().locale(AppLocalization.selectedLanguage.locale))))
+                Text("You can pause, end, or extend this intention later.")
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            }
+        }
+    }
+
+    private func timingChoice(_ kind: String, title: String, detail: String, icon: String) -> some View {
+        Button {
+            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
+                timingKind = kind
+                if kind == "FLEXIBLE" {
+                    flexibleStart = min(max(Calendar.current.startOfDay(for: flexibleStart), Calendar.current.startOfDay(for: Date())), lastFlexibleDay)
+                    flexibleEnd = min(max(Calendar.current.startOfDay(for: flexibleEnd), flexibleStart), lastFlexibleDay)
+                }
+            }
+        } label: {
+            HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
+                Image(systemName: icon).frame(width: 24).padding(.top, 3)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(AppLocalization.string(String.LocalizationValue(title))).font(.subheadline.weight(.semibold))
+                    Text(AppLocalization.string(String.LocalizationValue(detail))).font(.footnote)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+                Image(systemName: timingKind == kind ? "checkmark.circle.fill" : "circle")
+                    .padding(.top, 3)
+            }
+            .foregroundStyle(timingKind == kind ? SideSeatTheme.accent : SideSeatTheme.textPrimary)
+            .padding(.vertical, SideSeatTheme.spaceSM)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("intent-timing-\(kind.lowercased())")
+        .accessibilityAddTraits(timingKind == kind ? .isSelected : [])
+    }
+
+    @ViewBuilder private var quickDateButtons: some View {
+        ForEach(["Tomorrow", "This weekend", "Next week"], id: \.self) { title in
+            let range = quickDateRange(title)
+            Button(AppLocalization.string(String.LocalizationValue(title))) {
+                flexibleStart = range.0
+                flexibleEnd = range.1
+            }
+            .buttonStyle(.bordered)
+            .tint(SideSeatTheme.accent)
+            .disabled(range.1 > lastFlexibleDay)
+            .accessibilityIdentifier("intent-quick-\(title)")
+        }
+    }
+
+    private func quickDateRange(_ title: String) -> (Date, Date) {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let weekday = calendar.component(.weekday, from: today)
+        let offset = title == "Tomorrow" ? 1 : title == "This weekend" ? (weekday == 1 ? 0 : (7 - weekday)) : (9 - weekday) % 7 == 0 ? 7 : (9 - weekday) % 7
+        let start = calendar.date(byAdding: .day, value: offset, to: today)!
+        let count = title == "Next week" ? 6 : title == "This weekend" && weekday != 1 ? 1 : 0
+        return (start, calendar.date(byAdding: .day, value: count, to: start)!)
     }
 
     private var timeRowLayout: AnyLayout {
@@ -1693,12 +1881,12 @@ private struct WeeklyIntentEditorView: View {
         let sportSelection = NativeSportInput.normalized(sportText)
         _ = await onSave(
             topic, activityText, sportSelection.tag, sportSelection.otherNote ?? "",
-            togetherMode, studyGoal, selectedCourseID, normalizedTimeWindows, note
+            togetherMode, studyGoal, selectedCourseID, normalizedTimeWindows, submittedTiming, note
         )
     }
 
     private var expiry: Date {
-        intent?.expiresAt ?? Self.currentWeekExpiry()
+        intent?.expiresAt ?? (supportsFlexibleTiming ? Date().addingTimeInterval(14 * 24 * 60 * 60) : Self.currentWeekExpiry())
     }
 
     private var pickerUpperBound: Date {
@@ -1739,7 +1927,8 @@ private struct WeeklyIntentEditorView: View {
     }
 
     private var normalizedTimeWindows: [NativeWeeklyIntentTimeWindow] {
-        timeWindows
+        guard effectiveTimingKind == "EXACT" else { return [] }
+        return timeWindows
             .map(\.value)
             .sorted {
                 $0.startAt == $1.startAt
@@ -1749,6 +1938,10 @@ private struct WeeklyIntentEditorView: View {
     }
 
     private var hasValidTimeWindows: Bool {
+        if effectiveTimingKind == "UNDECIDED" { return true }
+        if effectiveTimingKind == "FLEXIBLE" {
+            return flexibleStart <= flexibleEnd && Calendar.current.startOfDay(for: flexibleStart) >= Calendar.current.startOfDay(for: Date()) && flexibleEnd <= lastFlexibleDay
+        }
         let now = Date()
         let windows = normalizedTimeWindows
         guard !windows.isEmpty, windows.count <= 7 else { return false }

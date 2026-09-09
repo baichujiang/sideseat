@@ -943,6 +943,8 @@ model WeeklyIntent {
   sportOtherNote         String?             @db.VarChar(60)
   courseId               String?
   timeWindows            Json
+  /// NULL preserves legacy exact windows. New clients declare timing explicitly.
+  timePreference         Json?
   timeZone               String              @default("Europe/Berlin")
   note                   String?             @db.VarChar(160)
   status                 WeeklyIntentStatus  @default(ACTIVE)
@@ -1001,8 +1003,8 @@ model MutualOpportunity {
   sportTag            SportTag?
   sportOtherNote      String?                         @db.VarChar(60)
   courseId            String?
-  startsAt            DateTime
-  endsAt              DateTime
+  startsAt            DateTime?
+  endsAt              DateTime?
   expiresAt           DateTime
   status              MutualOpportunityStatus         @default(PENDING)
   contextSnapshot     Json

@@ -83,6 +83,9 @@ export async function POST(
           decision: parsed.data.decision,
         });
         const body = result.opportunity;
+        if (request.headers.get("X-SideSeat-Flexible-Timing") !== "1" && body.matchFit?.policyVersion === "ACTIVITY_FIT_V2") {
+          body.matchFit = null;
+        }
         if (result.rematchUserIds.length > 0) {
           await Promise.all(
             result.rematchUserIds.map(async (userId) => {
@@ -140,6 +143,9 @@ export async function DELETE(
           userId: auth.user.id,
           opportunityId: id.value,
         });
+        if (request.headers.get("X-SideSeat-Flexible-Timing") !== "1" && result.opportunity.matchFit?.policyVersion === "ACTIVITY_FIT_V2") {
+          result.opportunity.matchFit = null;
+        }
         await Promise.all(
           result.rematchUserIds.map(async (userId) => {
             await matchAndNotifyForUser(userId).catch((cause) => {

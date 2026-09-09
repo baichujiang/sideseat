@@ -233,6 +233,46 @@ struct NativeWeeklyIntentCourse: Codable, Hashable, Sendable {
     let name: String
 }
 
+struct NativeIntentTimePreference: Codable, Hashable, Sendable {
+    var kind: String
+    var startDate: String? = nil
+    var endDate: String? = nil
+    var period: String? = nil
+
+    static func dateKey(_ date: Date, timeZone: TimeZone = .current) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = timeZone
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
+    }
+
+    static func date(_ key: String?) -> Date? {
+        guard let key else { return nil }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.date(from: key)
+    }
+
+    var summary: String {
+        guard kind == "FLEXIBLE", let first = Self.date(startDate), let last = Self.date(endDate) else {
+            return AppLocalization.string("Time to discuss")
+        }
+        let style = Date.FormatStyle.dateTime.month(.abbreviated).day().locale(AppLocalization.selectedLanguage.locale)
+        let dates = first == last ? first.formatted(style) : "\(first.formatted(style)) – \(last.formatted(style))"
+        let part = Self.periodTitle(period ?? "ANY")
+        return "\(dates) · \(part) · \(AppLocalization.string("Time to discuss"))"
+    }
+
+    static func periodTitle(_ value: String) -> String {
+        AppLocalization.string(String.LocalizationValue(["ANY": "Any part of the day", "MORNING": "Morning", "AFTERNOON": "Afternoon", "EVENING": "Evening"][value] ?? "Any part of the day"))
+    }
+}
+
 struct NativeWeeklyIntent: Codable, Identifiable, Hashable, Sendable {
     let id: String
     let topic: NativeWeeklyIntentTopic
@@ -254,6 +294,7 @@ struct NativeWeeklyIntent: Codable, Identifiable, Hashable, Sendable {
     let endedAt: Date?
     let createdAt: Date
     let updatedAt: Date
+    var timePreference: NativeIntentTimePreference? = nil
 
     var isPaused: Bool { status == "PAUSED" }
     var effectiveTogetherMode: NativeTogetherMode { togetherMode ?? .sameActivity }
@@ -328,6 +369,7 @@ struct NativeWeeklyIntentCreateRequest: Encodable, Sendable {
     let timeWindows: [NativeWeeklyIntentTimeWindow]
     let timeZone: String
     let note: String?
+    var timePreference: NativeIntentTimePreference? = nil
 }
 
 struct NativeWeeklyIntentEditRequest: Encodable, Sendable {
@@ -343,6 +385,7 @@ struct NativeWeeklyIntentEditRequest: Encodable, Sendable {
     let timeWindows: [NativeWeeklyIntentTimeWindow]
     let timeZone: String
     let note: String?
+    var timePreference: NativeIntentTimePreference? = nil
 
     private enum CodingKeys: String, CodingKey {
         case action
@@ -355,6 +398,7 @@ struct NativeWeeklyIntentEditRequest: Encodable, Sendable {
         case studyGoal
         case courseId
         case timeWindows
+        case timePreference
         case timeZone
         case note
     }
@@ -393,6 +437,7 @@ struct NativeWeeklyIntentEditRequest: Encodable, Sendable {
             try container.encodeNil(forKey: .courseId)
         }
         try container.encode(timeWindows, forKey: .timeWindows)
+        try container.encodeIfPresent(timePreference, forKey: .timePreference)
         try container.encode(timeZone, forKey: .timeZone)
         try container.encodeIfPresent(note, forKey: .note)
         if note == nil {

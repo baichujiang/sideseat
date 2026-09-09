@@ -39,7 +39,7 @@ function domainError(request: Request, cause: WeeklyIntentError) {
     case "WEEKLY_INTENT_WINDOW_INVALID":
       return v1Error(request, {
         code: "INVALID_REQUEST",
-        message: "Time windows must be in the future and end before this week expires.",
+        message: "Choose future timing within this intention's validity, or leave time undecided.",
         status: 422,
         field: "timeWindows",
       });
@@ -104,6 +104,7 @@ export async function POST(request: Request) {
   }
   const parsed = await parseV1Json(request, weeklyIntentCreateSchema);
   if (!parsed.ok) return parsed.response;
+  if (parsed.data.timePreference && !isV2FeatureEnabled("v2FlexibleTiming")) return unavailable(request);
   try {
     return await runIdempotentV1Mutation({
       request,

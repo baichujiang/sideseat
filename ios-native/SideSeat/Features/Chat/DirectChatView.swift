@@ -1924,6 +1924,13 @@ private struct MutualOpportunitySourceCard: View {
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             }
 
+            if context.startDate == nil {
+                Label(context.timeContext?.summary ?? AppLocalization.string("Time to discuss"), systemImage: "calendar.badge.clock")
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
             if let planState {
                 Label(
                     AppLocalization.string(

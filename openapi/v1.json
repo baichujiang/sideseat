@@ -7655,6 +7655,7 @@
     "/api/v1/me/mutual-opportunities": {
       "get": {
         "operationId": "listMutualOpportunities",
+        "description": "Send X-SideSeat-Flexible-Timing: 1 to receive undated opportunities and ACTIVITY_FIT_V2 components. Legacy clients receive only dated opportunities, with V2 matchFit omitted as null.",
         "x-sideseat-contract": "mutual-opportunity-v1",
         "security": [{ "bearerAuth": [] }],
         "responses": {
@@ -9214,6 +9215,28 @@
         },
         "required": ["topics", "meetingPreference", "weeklyWindows", "timeZone"]
       },
+      "IntentTimePreference": {
+        "description": "EXACT requires 1–7 timeWindows. FLEXIBLE uses inclusive local dates and an optional day-part (ANY means no day-part preference); UNDECIDED is not declared all-day availability. Both non-exact modes require empty timeWindows. New intentions last 14 days.",
+        "oneOf": [
+          { "type": "object", "additionalProperties": false, "properties": { "kind": { "type": "string", "const": "EXACT" } }, "required": ["kind"] },
+          { "type": "object", "additionalProperties": false, "properties": { "kind": { "type": "string", "const": "UNDECIDED" } }, "required": ["kind"] },
+          { "type": "object", "additionalProperties": false, "properties": {
+            "kind": { "type": "string", "const": "FLEXIBLE" },
+            "startDate": { "type": "string", "format": "date" }, "endDate": { "type": "string", "format": "date" },
+            "period": { "type": "string", "enum": ["ANY", "MORNING", "AFTERNOON", "EVENING"] }
+          }, "required": ["kind", "startDate", "endDate", "period"] }
+        ]
+      },
+      "OpportunityTimeContext": {
+        "type": ["object", "null"], "additionalProperties": false,
+        "description": "Immutable date preference, not an appointment or bilateral availability. Null for legacy snapshots.",
+        "properties": {
+          "kind": { "type": "string", "enum": ["EXACT", "FLEXIBLE", "UNDECIDED"] },
+          "startDate": { "type": ["string", "null"], "format": "date" }, "endDate": { "type": ["string", "null"], "format": "date" },
+          "period": { "type": "string", "enum": ["ANY", "MORNING", "AFTERNOON", "EVENING"] },
+          "timeZone": { "type": "string" }
+        }, "required": ["kind", "startDate", "endDate", "period", "timeZone"]
+      },
       "WeeklyIntentTimeWindow": {
         "type": "object",
         "additionalProperties": false,
@@ -9246,7 +9269,16 @@
           "sportOtherNote": { "type": ["string", "null"], "maxLength": 60 },
           "courseId": { "type": ["string", "null"] },
           "course": { "$ref": "#/components/schemas/WeeklyIntentCourse" },
-          "timeWindows": { "type": "array", "minItems": 1, "maxItems": 7, "items": { "$ref": "#/components/schemas/WeeklyIntentTimeWindow" } },
+          "timeWindows": { "type": "array", "maxItems": 7, "items": { "$ref": "#/components/schemas/WeeklyIntentTimeWindow" } },
+          "timePreference": {
+            "type": ["object", "null"], "additionalProperties": false,
+            "description": "Null preserves legacy exact windows and their original expiry.",
+            "properties": {
+              "kind": { "type": "string", "enum": ["EXACT", "FLEXIBLE", "UNDECIDED"] },
+              "startDate": { "type": "string", "format": "date" }, "endDate": { "type": "string", "format": "date" },
+              "period": { "type": "string", "enum": ["ANY", "MORNING", "AFTERNOON", "EVENING"] }
+            }, "required": ["kind"]
+          },
           "timeZone": { "type": "string" },
           "note": { "type": ["string", "null"] },
           "status": { "type": "string", "enum": ["ACTIVE", "PAUSED", "ENDED", "EXPIRED"] },
@@ -9302,7 +9334,8 @@
           "sportTag": { "type": ["string", "null"], "enum": ["BASKETBALL", "BADMINTON", "TABLE_TENNIS", "FOOTBALL", "VOLLEYBALL", "TENNIS", "GYM", "RUNNING", "HIKING", "CYCLING", "SWIMMING", "SKIING", "CLIMBING", "YOGA", "OTHER", null] },
           "sportOtherNote": { "type": ["string", "null"], "minLength": 1, "maxLength": 60 },
           "courseId": { "type": ["string", "null"] },
-          "timeWindows": { "type": "array", "minItems": 1, "maxItems": 7, "items": { "$ref": "#/components/schemas/WeeklyIntentTimeWindow" } },
+          "timeWindows": { "type": "array", "maxItems": 7, "items": { "$ref": "#/components/schemas/WeeklyIntentTimeWindow" } },
+          "timePreference": { "$ref": "#/components/schemas/IntentTimePreference" },
           "timeZone": { "type": "string", "minLength": 1, "maxLength": 64 },
           "note": { "type": ["string", "null"], "maxLength": 160 }
         },
@@ -9323,7 +9356,8 @@
               "sportTag": { "type": ["string", "null"], "enum": ["BASKETBALL", "BADMINTON", "TABLE_TENNIS", "FOOTBALL", "VOLLEYBALL", "TENNIS", "GYM", "RUNNING", "HIKING", "CYCLING", "SWIMMING", "SKIING", "CLIMBING", "YOGA", "OTHER", null] },
               "sportOtherNote": { "type": ["string", "null"], "minLength": 1, "maxLength": 60 },
               "courseId": { "type": ["string", "null"] },
-              "timeWindows": { "type": "array", "minItems": 1, "maxItems": 7, "items": { "$ref": "#/components/schemas/WeeklyIntentTimeWindow" } },
+              "timeWindows": { "type": "array", "maxItems": 7, "items": { "$ref": "#/components/schemas/WeeklyIntentTimeWindow" } },
+              "timePreference": { "$ref": "#/components/schemas/IntentTimePreference" },
               "timeZone": { "type": "string", "minLength": 1, "maxLength": 64 },
               "note": { "type": ["string", "null"], "maxLength": 160 }
             },
@@ -9343,7 +9377,7 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "action": { "type": "string", "const": "RESUME" },
+              "action": { "type": "string", "enum": ["RESUME", "EXTEND"] },
               "expectedVersion": { "type": "integer", "minimum": 1 }
             },
             "required": ["action", "expectedVersion"]
@@ -9408,14 +9442,14 @@
         "additionalProperties": false,
         "description": "Frozen, symmetric activity-fit heuristic, not a person's rating or success probability. Scores order feasible opportunities; no minimum-score delivery gate. Null on historical opportunities without a snapshot.",
         "properties": {
-          "policyVersion": { "type": "string", "const": "ACTIVITY_FIT_V1" },
+          "policyVersion": { "type": "string", "enum": ["ACTIVITY_FIT_V1", "ACTIVITY_FIT_V2"] },
           "basis": { "type": "string", "enum": ["EXACT_ACTIVITY", "PARALLEL_STUDY", "RELATED_ACTIVITY"] },
           "score": { "type": "integer", "minimum": 0, "maximum": 100 },
           "activityPoints": { "type": "integer", "minimum": 0, "maximum": 50 },
-          "timePoints": { "type": "integer", "minimum": 0, "maximum": 30 },
+          "timePoints": { "type": ["integer", "null"], "minimum": 0, "maximum": 30 },
           "languagePoints": { "type": "integer", "const": 10 },
           "schoolPoints": { "type": "integer", "const": 10 },
-          "overlapMinutes": { "type": "integer", "minimum": 30 },
+          "overlapMinutes": { "type": ["integer", "null"], "minimum": 30 },
           "viewerActivityText": { "type": ["string", "null"], "maxLength": 80 },
           "peerActivityText": { "type": ["string", "null"], "maxLength": 80 }
         },
@@ -9442,8 +9476,9 @@
           "sportTag": { "type": ["string", "null"], "enum": ["BASKETBALL", "BADMINTON", "TABLE_TENNIS", "FOOTBALL", "VOLLEYBALL", "TENNIS", "GYM", "RUNNING", "HIKING", "CYCLING", "SWIMMING", "SKIING", "CLIMBING", "YOGA", "OTHER", null] },
           "sportOtherNote": { "type": ["string", "null"], "maxLength": 60 },
           "course": { "$ref": "#/components/schemas/MutualOpportunityCourse" },
-          "startsAt": { "type": "string", "format": "date-time" },
-          "endsAt": { "type": "string", "format": "date-time" },
+          "startsAt": { "type": ["string", "null"], "format": "date-time" },
+          "endsAt": { "type": ["string", "null"], "format": "date-time" },
+          "timeContext": { "$ref": "#/components/schemas/OpportunityTimeContext" },
           "expiresAt": { "type": "string", "format": "date-time" },
           "peer": { "$ref": "#/components/schemas/MutualOpportunityPeer" },
           "viewerDecision": { "type": ["string", "null"], "enum": ["YES", "NO", "WITHDRAWN", null] },

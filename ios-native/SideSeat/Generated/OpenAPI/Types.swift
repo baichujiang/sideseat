@@ -452,6 +452,8 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `DELETE /api/v1/me/together-matching-session`.
     /// - Remark: Generated from `#/paths//api/v1/me/together-matching-session/delete(stopTogetherMatchingSession)`.
     func stopTogetherMatchingSession(_ input: Operations.StopTogetherMatchingSession.Input) async throws -> Operations.StopTogetherMatchingSession.Output
+    /// Send X-SideSeat-Flexible-Timing: 1 to receive undated opportunities and ACTIVITY_FIT_V2 components. Legacy clients receive only dated opportunities, with V2 matchFit omitted as null.
+    ///
     /// - Remark: HTTP `GET /api/v1/me/mutual-opportunities`.
     /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/get(listMutualOpportunities)`.
     func listMutualOpportunities(_ input: Operations.ListMutualOpportunities.Input) async throws -> Operations.ListMutualOpportunities.Output
@@ -2054,6 +2056,8 @@ extension APIProtocol {
     internal func stopTogetherMatchingSession(headers: Operations.StopTogetherMatchingSession.Input.Headers) async throws -> Operations.StopTogetherMatchingSession.Output {
         try await stopTogetherMatchingSession(Operations.StopTogetherMatchingSession.Input(headers: headers))
     }
+    /// Send X-SideSeat-Flexible-Timing: 1 to receive undated opportunities and ACTIVITY_FIT_V2 components. Legacy clients receive only dated opportunities, with V2 matchFit omitted as null.
+    ///
     /// - Remark: HTTP `GET /api/v1/me/mutual-opportunities`.
     /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/get(listMutualOpportunities)`.
     internal func listMutualOpportunities(headers: Operations.ListMutualOpportunities.Input.Headers = .init()) async throws -> Operations.ListMutualOpportunities.Output {
@@ -6998,6 +7002,268 @@ internal enum Components {
                 ])
             }
         }
+        /// EXACT requires 1–7 timeWindows. FLEXIBLE uses inclusive local dates and an optional day-part (ANY means no day-part preference); UNDECIDED is not declared all-day availability. Both non-exact modes require empty timeWindows. New intentions last 14 days.
+        ///
+        /// - Remark: Generated from `#/components/schemas/IntentTimePreference`.
+        internal enum IntentTimePreference: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/IntentTimePreference/case1`.
+            internal struct Case1Payload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/IntentTimePreference/case1/kind`.
+                internal enum KindPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case exact = "EXACT"
+                }
+                /// - Remark: Generated from `#/components/schemas/IntentTimePreference/case1/kind`.
+                internal var kind: Components.Schemas.IntentTimePreference.Case1Payload.KindPayload
+                /// Creates a new `Case1Payload`.
+                ///
+                /// - Parameters:
+                ///   - kind:
+                internal init(kind: Components.Schemas.IntentTimePreference.Case1Payload.KindPayload) {
+                    self.kind = kind
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case kind
+                }
+                internal init(from decoder: any Swift.Decoder) throws {
+                    let container = try decoder.container(keyedBy: CodingKeys.self)
+                    self.kind = try container.decode(
+                        Components.Schemas.IntentTimePreference.Case1Payload.KindPayload.self,
+                        forKey: .kind
+                    )
+                    try decoder.ensureNoAdditionalProperties(knownKeys: [
+                        "kind"
+                    ])
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/IntentTimePreference/case1`.
+            case case1(Components.Schemas.IntentTimePreference.Case1Payload)
+            /// - Remark: Generated from `#/components/schemas/IntentTimePreference/case2`.
+            internal struct Case2Payload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/IntentTimePreference/case2/kind`.
+                internal enum KindPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case undecided = "UNDECIDED"
+                }
+                /// - Remark: Generated from `#/components/schemas/IntentTimePreference/case2/kind`.
+                internal var kind: Components.Schemas.IntentTimePreference.Case2Payload.KindPayload
+                /// Creates a new `Case2Payload`.
+                ///
+                /// - Parameters:
+                ///   - kind:
+                internal init(kind: Components.Schemas.IntentTimePreference.Case2Payload.KindPayload) {
+                    self.kind = kind
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case kind
+                }
+                internal init(from decoder: any Swift.Decoder) throws {
+                    let container = try decoder.container(keyedBy: CodingKeys.self)
+                    self.kind = try container.decode(
+                        Components.Schemas.IntentTimePreference.Case2Payload.KindPayload.self,
+                        forKey: .kind
+                    )
+                    try decoder.ensureNoAdditionalProperties(knownKeys: [
+                        "kind"
+                    ])
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/IntentTimePreference/case2`.
+            case case2(Components.Schemas.IntentTimePreference.Case2Payload)
+            /// - Remark: Generated from `#/components/schemas/IntentTimePreference/case3`.
+            internal struct Case3Payload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/IntentTimePreference/case3/kind`.
+                internal enum KindPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case flexible = "FLEXIBLE"
+                }
+                /// - Remark: Generated from `#/components/schemas/IntentTimePreference/case3/kind`.
+                internal var kind: Components.Schemas.IntentTimePreference.Case3Payload.KindPayload
+                /// - Remark: Generated from `#/components/schemas/IntentTimePreference/case3/startDate`.
+                internal var startDate: Swift.String
+                /// - Remark: Generated from `#/components/schemas/IntentTimePreference/case3/endDate`.
+                internal var endDate: Swift.String
+                /// - Remark: Generated from `#/components/schemas/IntentTimePreference/case3/period`.
+                internal enum PeriodPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case any = "ANY"
+                    case morning = "MORNING"
+                    case afternoon = "AFTERNOON"
+                    case evening = "EVENING"
+                }
+                /// - Remark: Generated from `#/components/schemas/IntentTimePreference/case3/period`.
+                internal var period: Components.Schemas.IntentTimePreference.Case3Payload.PeriodPayload
+                /// Creates a new `Case3Payload`.
+                ///
+                /// - Parameters:
+                ///   - kind:
+                ///   - startDate:
+                ///   - endDate:
+                ///   - period:
+                internal init(
+                    kind: Components.Schemas.IntentTimePreference.Case3Payload.KindPayload,
+                    startDate: Swift.String,
+                    endDate: Swift.String,
+                    period: Components.Schemas.IntentTimePreference.Case3Payload.PeriodPayload
+                ) {
+                    self.kind = kind
+                    self.startDate = startDate
+                    self.endDate = endDate
+                    self.period = period
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case kind
+                    case startDate
+                    case endDate
+                    case period
+                }
+                internal init(from decoder: any Swift.Decoder) throws {
+                    let container = try decoder.container(keyedBy: CodingKeys.self)
+                    self.kind = try container.decode(
+                        Components.Schemas.IntentTimePreference.Case3Payload.KindPayload.self,
+                        forKey: .kind
+                    )
+                    self.startDate = try container.decode(
+                        Swift.String.self,
+                        forKey: .startDate
+                    )
+                    self.endDate = try container.decode(
+                        Swift.String.self,
+                        forKey: .endDate
+                    )
+                    self.period = try container.decode(
+                        Components.Schemas.IntentTimePreference.Case3Payload.PeriodPayload.self,
+                        forKey: .period
+                    )
+                    try decoder.ensureNoAdditionalProperties(knownKeys: [
+                        "kind",
+                        "startDate",
+                        "endDate",
+                        "period"
+                    ])
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/IntentTimePreference/case3`.
+            case case3(Components.Schemas.IntentTimePreference.Case3Payload)
+            internal init(from decoder: any Swift.Decoder) throws {
+                var errors: [any Swift.Error] = []
+                do {
+                    self = .case1(try .init(from: decoder))
+                    return
+                } catch {
+                    errors.append(error)
+                }
+                do {
+                    self = .case2(try .init(from: decoder))
+                    return
+                } catch {
+                    errors.append(error)
+                }
+                do {
+                    self = .case3(try .init(from: decoder))
+                    return
+                } catch {
+                    errors.append(error)
+                }
+                throw Swift.DecodingError.failedToDecodeOneOfSchema(
+                    type: Self.self,
+                    codingPath: decoder.codingPath,
+                    errors: errors
+                )
+            }
+            internal func encode(to encoder: any Swift.Encoder) throws {
+                switch self {
+                case let .case1(value):
+                    try value.encode(to: encoder)
+                case let .case2(value):
+                    try value.encode(to: encoder)
+                case let .case3(value):
+                    try value.encode(to: encoder)
+                }
+            }
+        }
+        /// Immutable date preference, not an appointment or bilateral availability. Null for legacy snapshots.
+        ///
+        /// - Remark: Generated from `#/components/schemas/OpportunityTimeContext`.
+        internal struct OpportunityTimeContext: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/OpportunityTimeContext/kind`.
+            internal enum KindPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case exact = "EXACT"
+                case flexible = "FLEXIBLE"
+                case undecided = "UNDECIDED"
+            }
+            /// - Remark: Generated from `#/components/schemas/OpportunityTimeContext/kind`.
+            internal var kind: Components.Schemas.OpportunityTimeContext.KindPayload
+            /// - Remark: Generated from `#/components/schemas/OpportunityTimeContext/startDate`.
+            internal var startDate: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/OpportunityTimeContext/endDate`.
+            internal var endDate: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/OpportunityTimeContext/period`.
+            internal enum PeriodPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case any = "ANY"
+                case morning = "MORNING"
+                case afternoon = "AFTERNOON"
+                case evening = "EVENING"
+            }
+            /// - Remark: Generated from `#/components/schemas/OpportunityTimeContext/period`.
+            internal var period: Components.Schemas.OpportunityTimeContext.PeriodPayload
+            /// - Remark: Generated from `#/components/schemas/OpportunityTimeContext/timeZone`.
+            internal var timeZone: Swift.String
+            /// Creates a new `OpportunityTimeContext`.
+            ///
+            /// - Parameters:
+            ///   - kind:
+            ///   - startDate:
+            ///   - endDate:
+            ///   - period:
+            ///   - timeZone:
+            internal init(
+                kind: Components.Schemas.OpportunityTimeContext.KindPayload,
+                startDate: Swift.String? = nil,
+                endDate: Swift.String? = nil,
+                period: Components.Schemas.OpportunityTimeContext.PeriodPayload,
+                timeZone: Swift.String
+            ) {
+                self.kind = kind
+                self.startDate = startDate
+                self.endDate = endDate
+                self.period = period
+                self.timeZone = timeZone
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case kind
+                case startDate
+                case endDate
+                case period
+                case timeZone
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.kind = try container.decode(
+                    Components.Schemas.OpportunityTimeContext.KindPayload.self,
+                    forKey: .kind
+                )
+                self.startDate = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .startDate
+                )
+                self.endDate = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .endDate
+                )
+                self.period = try container.decode(
+                    Components.Schemas.OpportunityTimeContext.PeriodPayload.self,
+                    forKey: .period
+                )
+                self.timeZone = try container.decode(
+                    Swift.String.self,
+                    forKey: .timeZone
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "kind",
+                    "startDate",
+                    "endDate",
+                    "period",
+                    "timeZone"
+                ])
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/WeeklyIntentTimeWindow`.
         internal struct WeeklyIntentTimeWindow: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/WeeklyIntentTimeWindow/startAt`.
@@ -7141,6 +7407,85 @@ internal enum Components {
             internal var course: Components.Schemas.WeeklyIntentCourse?
             /// - Remark: Generated from `#/components/schemas/WeeklyIntent/timeWindows`.
             internal var timeWindows: [Components.Schemas.WeeklyIntentTimeWindow]
+            /// Null preserves legacy exact windows and their original expiry.
+            ///
+            /// - Remark: Generated from `#/components/schemas/WeeklyIntent/timePreference`.
+            internal struct TimePreferencePayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/WeeklyIntent/timePreference/kind`.
+                internal enum KindPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case exact = "EXACT"
+                    case flexible = "FLEXIBLE"
+                    case undecided = "UNDECIDED"
+                }
+                /// - Remark: Generated from `#/components/schemas/WeeklyIntent/timePreference/kind`.
+                internal var kind: Components.Schemas.WeeklyIntent.TimePreferencePayload.KindPayload
+                /// - Remark: Generated from `#/components/schemas/WeeklyIntent/timePreference/startDate`.
+                internal var startDate: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/WeeklyIntent/timePreference/endDate`.
+                internal var endDate: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/WeeklyIntent/timePreference/period`.
+                internal enum PeriodPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case any = "ANY"
+                    case morning = "MORNING"
+                    case afternoon = "AFTERNOON"
+                    case evening = "EVENING"
+                }
+                /// - Remark: Generated from `#/components/schemas/WeeklyIntent/timePreference/period`.
+                internal var period: Components.Schemas.WeeklyIntent.TimePreferencePayload.PeriodPayload?
+                /// Creates a new `TimePreferencePayload`.
+                ///
+                /// - Parameters:
+                ///   - kind:
+                ///   - startDate:
+                ///   - endDate:
+                ///   - period:
+                internal init(
+                    kind: Components.Schemas.WeeklyIntent.TimePreferencePayload.KindPayload,
+                    startDate: Swift.String? = nil,
+                    endDate: Swift.String? = nil,
+                    period: Components.Schemas.WeeklyIntent.TimePreferencePayload.PeriodPayload? = nil
+                ) {
+                    self.kind = kind
+                    self.startDate = startDate
+                    self.endDate = endDate
+                    self.period = period
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case kind
+                    case startDate
+                    case endDate
+                    case period
+                }
+                internal init(from decoder: any Swift.Decoder) throws {
+                    let container = try decoder.container(keyedBy: CodingKeys.self)
+                    self.kind = try container.decode(
+                        Components.Schemas.WeeklyIntent.TimePreferencePayload.KindPayload.self,
+                        forKey: .kind
+                    )
+                    self.startDate = try container.decodeIfPresent(
+                        Swift.String.self,
+                        forKey: .startDate
+                    )
+                    self.endDate = try container.decodeIfPresent(
+                        Swift.String.self,
+                        forKey: .endDate
+                    )
+                    self.period = try container.decodeIfPresent(
+                        Components.Schemas.WeeklyIntent.TimePreferencePayload.PeriodPayload.self,
+                        forKey: .period
+                    )
+                    try decoder.ensureNoAdditionalProperties(knownKeys: [
+                        "kind",
+                        "startDate",
+                        "endDate",
+                        "period"
+                    ])
+                }
+            }
+            /// Null preserves legacy exact windows and their original expiry.
+            ///
+            /// - Remark: Generated from `#/components/schemas/WeeklyIntent/timePreference`.
+            internal var timePreference: Components.Schemas.WeeklyIntent.TimePreferencePayload?
             /// - Remark: Generated from `#/components/schemas/WeeklyIntent/timeZone`.
             internal var timeZone: Swift.String
             /// - Remark: Generated from `#/components/schemas/WeeklyIntent/note`.
@@ -7181,6 +7526,7 @@ internal enum Components {
             ///   - courseId:
             ///   - course:
             ///   - timeWindows:
+            ///   - timePreference: Null preserves legacy exact windows and their original expiry.
             ///   - timeZone:
             ///   - note:
             ///   - status:
@@ -7202,6 +7548,7 @@ internal enum Components {
                 courseId: Swift.String? = nil,
                 course: Components.Schemas.WeeklyIntentCourse? = nil,
                 timeWindows: [Components.Schemas.WeeklyIntentTimeWindow],
+                timePreference: Components.Schemas.WeeklyIntent.TimePreferencePayload? = nil,
                 timeZone: Swift.String,
                 note: Swift.String? = nil,
                 status: Components.Schemas.WeeklyIntent.StatusPayload,
@@ -7223,6 +7570,7 @@ internal enum Components {
                 self.courseId = courseId
                 self.course = course
                 self.timeWindows = timeWindows
+                self.timePreference = timePreference
                 self.timeZone = timeZone
                 self.note = note
                 self.status = status
@@ -7245,6 +7593,7 @@ internal enum Components {
                 case courseId
                 case course
                 case timeWindows
+                case timePreference
                 case timeZone
                 case note
                 case status
@@ -7298,6 +7647,10 @@ internal enum Components {
                     [Components.Schemas.WeeklyIntentTimeWindow].self,
                     forKey: .timeWindows
                 )
+                self.timePreference = try container.decodeIfPresent(
+                    Components.Schemas.WeeklyIntent.TimePreferencePayload.self,
+                    forKey: .timePreference
+                )
                 self.timeZone = try container.decode(
                     Swift.String.self,
                     forKey: .timeZone
@@ -7349,6 +7702,7 @@ internal enum Components {
                     "courseId",
                     "course",
                     "timeWindows",
+                    "timePreference",
                     "timeZone",
                     "note",
                     "status",
@@ -7527,6 +7881,8 @@ internal enum Components {
             internal var courseId: Swift.String?
             /// - Remark: Generated from `#/components/schemas/WeeklyIntentCreateRequest/timeWindows`.
             internal var timeWindows: [Components.Schemas.WeeklyIntentTimeWindow]
+            /// - Remark: Generated from `#/components/schemas/WeeklyIntentCreateRequest/timePreference`.
+            internal var timePreference: Components.Schemas.IntentTimePreference?
             /// - Remark: Generated from `#/components/schemas/WeeklyIntentCreateRequest/timeZone`.
             internal var timeZone: Swift.String
             /// - Remark: Generated from `#/components/schemas/WeeklyIntentCreateRequest/note`.
@@ -7542,6 +7898,7 @@ internal enum Components {
             ///   - sportOtherNote:
             ///   - courseId:
             ///   - timeWindows:
+            ///   - timePreference:
             ///   - timeZone:
             ///   - note:
             internal init(
@@ -7553,6 +7910,7 @@ internal enum Components {
                 sportOtherNote: Swift.String? = nil,
                 courseId: Swift.String? = nil,
                 timeWindows: [Components.Schemas.WeeklyIntentTimeWindow],
+                timePreference: Components.Schemas.IntentTimePreference? = nil,
                 timeZone: Swift.String,
                 note: Swift.String? = nil
             ) {
@@ -7564,6 +7922,7 @@ internal enum Components {
                 self.sportOtherNote = sportOtherNote
                 self.courseId = courseId
                 self.timeWindows = timeWindows
+                self.timePreference = timePreference
                 self.timeZone = timeZone
                 self.note = note
             }
@@ -7576,6 +7935,7 @@ internal enum Components {
                 case sportOtherNote
                 case courseId
                 case timeWindows
+                case timePreference
                 case timeZone
                 case note
             }
@@ -7613,6 +7973,10 @@ internal enum Components {
                     [Components.Schemas.WeeklyIntentTimeWindow].self,
                     forKey: .timeWindows
                 )
+                self.timePreference = try container.decodeIfPresent(
+                    Components.Schemas.IntentTimePreference.self,
+                    forKey: .timePreference
+                )
                 self.timeZone = try container.decode(
                     Swift.String.self,
                     forKey: .timeZone
@@ -7630,6 +7994,7 @@ internal enum Components {
                     "sportOtherNote",
                     "courseId",
                     "timeWindows",
+                    "timePreference",
                     "timeZone",
                     "note"
                 ])
@@ -7697,6 +8062,8 @@ internal enum Components {
                 internal var courseId: Swift.String?
                 /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case1/timeWindows`.
                 internal var timeWindows: [Components.Schemas.WeeklyIntentTimeWindow]?
+                /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case1/timePreference`.
+                internal var timePreference: Components.Schemas.IntentTimePreference?
                 /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case1/timeZone`.
                 internal var timeZone: Swift.String?
                 /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case1/note`.
@@ -7714,6 +8081,7 @@ internal enum Components {
                 ///   - sportOtherNote:
                 ///   - courseId:
                 ///   - timeWindows:
+                ///   - timePreference:
                 ///   - timeZone:
                 ///   - note:
                 internal init(
@@ -7727,6 +8095,7 @@ internal enum Components {
                     sportOtherNote: Swift.String? = nil,
                     courseId: Swift.String? = nil,
                     timeWindows: [Components.Schemas.WeeklyIntentTimeWindow]? = nil,
+                    timePreference: Components.Schemas.IntentTimePreference? = nil,
                     timeZone: Swift.String? = nil,
                     note: Swift.String? = nil
                 ) {
@@ -7740,6 +8109,7 @@ internal enum Components {
                     self.sportOtherNote = sportOtherNote
                     self.courseId = courseId
                     self.timeWindows = timeWindows
+                    self.timePreference = timePreference
                     self.timeZone = timeZone
                     self.note = note
                 }
@@ -7754,6 +8124,7 @@ internal enum Components {
                     case sportOtherNote
                     case courseId
                     case timeWindows
+                    case timePreference
                     case timeZone
                     case note
                 }
@@ -7799,6 +8170,10 @@ internal enum Components {
                         [Components.Schemas.WeeklyIntentTimeWindow].self,
                         forKey: .timeWindows
                     )
+                    self.timePreference = try container.decodeIfPresent(
+                        Components.Schemas.IntentTimePreference.self,
+                        forKey: .timePreference
+                    )
                     self.timeZone = try container.decodeIfPresent(
                         Swift.String.self,
                         forKey: .timeZone
@@ -7818,6 +8193,7 @@ internal enum Components {
                         "sportOtherNote",
                         "courseId",
                         "timeWindows",
+                        "timePreference",
                         "timeZone",
                         "note"
                     ])
@@ -7874,6 +8250,7 @@ internal enum Components {
                 /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case3/action`.
                 internal enum ActionPayload: String, Codable, Hashable, Sendable, CaseIterable {
                     case resume = "RESUME"
+                    case extend = "EXTEND"
                 }
                 /// - Remark: Generated from `#/components/schemas/WeeklyIntentPatchRequest/case3/action`.
                 internal var action: Components.Schemas.WeeklyIntentPatchRequest.Case3Payload.ActionPayload
@@ -8240,6 +8617,7 @@ internal enum Components {
             /// - Remark: Generated from `#/components/schemas/ActivityFit/policyVersion`.
             internal enum PolicyVersionPayload: String, Codable, Hashable, Sendable, CaseIterable {
                 case activityFitV1 = "ACTIVITY_FIT_V1"
+                case activityFitV2 = "ACTIVITY_FIT_V2"
             }
             /// - Remark: Generated from `#/components/schemas/ActivityFit/policyVersion`.
             internal var policyVersion: Components.Schemas.ActivityFit.PolicyVersionPayload
@@ -8256,7 +8634,7 @@ internal enum Components {
             /// - Remark: Generated from `#/components/schemas/ActivityFit/activityPoints`.
             internal var activityPoints: Swift.Int
             /// - Remark: Generated from `#/components/schemas/ActivityFit/timePoints`.
-            internal var timePoints: Swift.Int
+            internal var timePoints: Swift.Int?
             /// - Remark: Generated from `#/components/schemas/ActivityFit/languagePoints`.
             internal enum LanguagePointsPayload: Int, Codable, Hashable, Sendable, CaseIterable {
                 case _10 = 10
@@ -8270,7 +8648,7 @@ internal enum Components {
             /// - Remark: Generated from `#/components/schemas/ActivityFit/schoolPoints`.
             internal var schoolPoints: Components.Schemas.ActivityFit.SchoolPointsPayload
             /// - Remark: Generated from `#/components/schemas/ActivityFit/overlapMinutes`.
-            internal var overlapMinutes: Swift.Int
+            internal var overlapMinutes: Swift.Int?
             /// - Remark: Generated from `#/components/schemas/ActivityFit/viewerActivityText`.
             internal var viewerActivityText: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ActivityFit/peerActivityText`.
@@ -8293,10 +8671,10 @@ internal enum Components {
                 basis: Components.Schemas.ActivityFit.BasisPayload,
                 score: Swift.Int,
                 activityPoints: Swift.Int,
-                timePoints: Swift.Int,
+                timePoints: Swift.Int? = nil,
                 languagePoints: Components.Schemas.ActivityFit.LanguagePointsPayload,
                 schoolPoints: Components.Schemas.ActivityFit.SchoolPointsPayload,
-                overlapMinutes: Swift.Int,
+                overlapMinutes: Swift.Int? = nil,
                 viewerActivityText: Swift.String? = nil,
                 peerActivityText: Swift.String? = nil
             ) {
@@ -8341,7 +8719,7 @@ internal enum Components {
                     Swift.Int.self,
                     forKey: .activityPoints
                 )
-                self.timePoints = try container.decode(
+                self.timePoints = try container.decodeIfPresent(
                     Swift.Int.self,
                     forKey: .timePoints
                 )
@@ -8353,7 +8731,7 @@ internal enum Components {
                     Components.Schemas.ActivityFit.SchoolPointsPayload.self,
                     forKey: .schoolPoints
                 )
-                self.overlapMinutes = try container.decode(
+                self.overlapMinutes = try container.decodeIfPresent(
                     Swift.Int.self,
                     forKey: .overlapMinutes
                 )
@@ -8478,9 +8856,11 @@ internal enum Components {
             /// - Remark: Generated from `#/components/schemas/MutualOpportunity/course`.
             internal var course: Components.Schemas.MutualOpportunityCourse?
             /// - Remark: Generated from `#/components/schemas/MutualOpportunity/startsAt`.
-            internal var startsAt: Foundation.Date
+            internal var startsAt: Foundation.Date?
             /// - Remark: Generated from `#/components/schemas/MutualOpportunity/endsAt`.
-            internal var endsAt: Foundation.Date
+            internal var endsAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/MutualOpportunity/timeContext`.
+            internal var timeContext: Components.Schemas.OpportunityTimeContext?
             /// - Remark: Generated from `#/components/schemas/MutualOpportunity/expiresAt`.
             internal var expiresAt: Foundation.Date
             /// - Remark: Generated from `#/components/schemas/MutualOpportunity/peer`.
@@ -8520,6 +8900,7 @@ internal enum Components {
             ///   - course:
             ///   - startsAt:
             ///   - endsAt:
+            ///   - timeContext:
             ///   - expiresAt:
             ///   - peer:
             ///   - viewerDecision:
@@ -8543,8 +8924,9 @@ internal enum Components {
                 sportTag: Components.Schemas.MutualOpportunity.SportTagPayload? = nil,
                 sportOtherNote: Swift.String? = nil,
                 course: Components.Schemas.MutualOpportunityCourse? = nil,
-                startsAt: Foundation.Date,
-                endsAt: Foundation.Date,
+                startsAt: Foundation.Date? = nil,
+                endsAt: Foundation.Date? = nil,
+                timeContext: Components.Schemas.OpportunityTimeContext? = nil,
                 expiresAt: Foundation.Date,
                 peer: Components.Schemas.MutualOpportunityPeer,
                 viewerDecision: Components.Schemas.MutualOpportunity.ViewerDecisionPayload? = nil,
@@ -8570,6 +8952,7 @@ internal enum Components {
                 self.course = course
                 self.startsAt = startsAt
                 self.endsAt = endsAt
+                self.timeContext = timeContext
                 self.expiresAt = expiresAt
                 self.peer = peer
                 self.viewerDecision = viewerDecision
@@ -8596,6 +8979,7 @@ internal enum Components {
                 case course
                 case startsAt
                 case endsAt
+                case timeContext
                 case expiresAt
                 case peer
                 case viewerDecision
@@ -8672,13 +9056,17 @@ internal enum Components {
                     Components.Schemas.MutualOpportunityCourse.self,
                     forKey: .course
                 )
-                self.startsAt = try container.decode(
+                self.startsAt = try container.decodeIfPresent(
                     Foundation.Date.self,
                     forKey: .startsAt
                 )
-                self.endsAt = try container.decode(
+                self.endsAt = try container.decodeIfPresent(
                     Foundation.Date.self,
                     forKey: .endsAt
+                )
+                self.timeContext = try container.decodeIfPresent(
+                    Components.Schemas.OpportunityTimeContext.self,
+                    forKey: .timeContext
                 )
                 self.expiresAt = try container.decode(
                     Foundation.Date.self,
@@ -8720,6 +9108,7 @@ internal enum Components {
                     "course",
                     "startsAt",
                     "endsAt",
+                    "timeContext",
                     "expiresAt",
                     "peer",
                     "viewerDecision",
@@ -53731,6 +54120,8 @@ internal enum Operations {
             }
         }
     }
+    /// Send X-SideSeat-Flexible-Timing: 1 to receive undated opportunities and ACTIVITY_FIT_V2 components. Legacy clients receive only dated opportunities, with V2 matchFit omitted as null.
+    ///
     /// - Remark: HTTP `GET /api/v1/me/mutual-opportunities`.
     /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/get(listMutualOpportunities)`.
     internal enum ListMutualOpportunities {

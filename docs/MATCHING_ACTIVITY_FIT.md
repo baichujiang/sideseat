@@ -36,6 +36,16 @@ require both users to allow parallel study; explicit course scope is respected.
 
 ## Explainable policy `ACTIVITY_FIT_V1`
 
+The following policy is preserved for legacy-only matches and historical snapshots.
+For the owner-approved, not-yet-deployed timing-aware amendment, see
+[Flexible intention timing](./FLEXIBLE_INTENT_TIMING.md). New `ACTIVITY_FIT_V2`
+uses `round((activityPoints + languagePoints + schoolPoints) / 70 * 100)`;
+`timePoints` is NULL and `overlapMinutes` is NULL unless both users declared exact
+overlapping windows. Matching ranks exact availability, then compatible date
+preferences, then two undecided preferences; activity score orders each level.
+Explicit conflicts remain ineligible. This does not infer all-day availability
+or assign zero compatibility because someone has not picked an exact time.
+
 | Component       | Points   | Rule                                                                                             |
 | --------------- | -------- | ------------------------------------------------------------------------------------------------ |
 | Activity        | up to 50 | Exact normalized activity: 50; mutually allowed parallel study: 35; related general category: 25 |

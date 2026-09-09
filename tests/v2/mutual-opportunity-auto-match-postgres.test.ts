@@ -264,6 +264,63 @@ for (const related of [false, true]) test(
   },
 );
 
+test("flexible intentions: create, edit, extend, bilateral interest, explicit Plan and both calendars",
+  { skip: localDatabaseUrl ? false : "requires localhost PostgreSQL" }, async () => {
+    const { createWeeklyIntent, patchWeeklyIntent } = await import("../../lib/v2/weekly-intents");
+    const { generateMutualOpportunitiesForUser, listMutualOpportunities, decideMutualOpportunity } = await import("../../lib/v2/mutual-opportunities");
+    const plans = await import("../../lib/api/v1/plans-service");
+    const { formatInTimeZone } = await import("date-fns-tz");
+    const flag = process.env.V2_FLEXIBLE_TIMING_ENABLED;
+    process.env.V2_FLEXIBLE_TIMING_ENABLED = "1";
+    try {
+      await withMatchingPair("flex-timing", async ({ db, userAId, userBId }) => {
+        const now = new Date();
+        const tomorrow = formatInTimeZone(new Date(now.getTime() + 86400000), "Europe/Berlin", "yyyy-MM-dd");
+        const input = { topic: "COFFEE" as const, activityText: "Coffee", timeZone: "Europe/Berlin", timeWindows: [], timePreference: { kind: "UNDECIDED" as const } };
+        const first = await createWeeklyIntent(userAId, input, now);
+        const second = await createWeeklyIntent(userBId, input, now);
+        assert.equal(new Date(first.intent.expiresAt).getTime() - now.getTime(), 14 * 86400000);
+        const edited = await patchWeeklyIntent(userAId, first.intent.id, { action: "EDIT", expectedVersion: first.intent.version,
+          timePreference: { kind: "FLEXIBLE", startDate: tomorrow, endDate: tomorrow, period: "ANY" }, timeWindows: [] });
+        const extended = await patchWeeklyIntent(userAId, first.intent.id, { action: "EXTEND", expectedVersion: edited.intent.version });
+        assert.ok(new Date(extended.intent.expiresAt) >= new Date(first.intent.expiresAt));
+        assert.deepEqual(extended.intent.timeWindows, []);
+        assert.equal(second.intent.status, "ACTIVE");
+        await activateMatchingSessions(db, [userAId, userBId]);
+        assert.equal((await generateMutualOpportunitiesForUser(userAId)).length, 1);
+        const opportunity = (await listMutualOpportunities(userAId, false)).opportunities[0]!;
+        assert.ok(opportunity);
+        assert.equal(opportunity.startsAt, null);
+        assert.equal(opportunity.endsAt, null);
+        assert.equal(opportunity.matchFit?.timePoints, null);
+        assert.equal(opportunity.matchFit?.overlapMinutes, null);
+        assert.equal(opportunity.matchFit?.score, 100);
+        assert.equal((opportunity.timeContext as { kind: string }).kind, "FLEXIBLE");
+        await decideMutualOpportunity({ userId: userAId, opportunityId: opportunity.id, decision: "YES" });
+        assert.equal((await listMutualOpportunities(userBId, false)).opportunities[0]?.viewerDecision, null);
+        const mutual = await decideMutualOpportunity({ userId: userBId, opportunityId: opportunity.id, decision: "YES" });
+        const connectionId = mutual.opportunity.coordination?.connectionId;
+        assert.ok(connectionId);
+        const chat = await db.message.findFirstOrThrow({ where: { connectionId, mutualOpportunityId: opportunity.id } });
+        assert.equal(chat.type, "MUTUAL_OPPORTUNITY_CARD");
+        assert.equal(await db.calendarEntry.count({ where: { userId: { in: [userAId, userBId] } } }), 0);
+        const start = new Date(now.getTime() + 86400000);
+        const created = await plans.createDirectPlanRequest({ userId: userAId, receiverUserId: userBId, connectionId,
+          title: "Coffee together", startTime: start.toISOString(), endTime: new Date(start.getTime() + 3600000).toISOString(),
+          planType: "CUSTOM", origin: { kind: "MUTUAL_OPPORTUNITY", id: opportunity.id } });
+        assert.equal(created.plan.status, "PENDING");
+        assert.equal(await db.calendarEntry.count({ where: { userId: { in: [userAId, userBId] } } }), 0);
+        const accepted = await plans.acceptPlanRequest({ userId: userBId, planId: created.plan.id });
+        assert.equal(accepted.status, "ACCEPTED");
+        assert.ok(accepted.commitmentId);
+        assert.equal(await db.calendarEntry.count({ where: { planCommitmentId: accepted.commitmentId, projectionStatus: "ACTIVE" } }), 2);
+      });
+    } finally {
+      if (flag === undefined) delete process.env.V2_FLEXIBLE_TIMING_ENABLED;
+      else process.env.V2_FLEXIBLE_TIMING_ENABLED = flag;
+    }
+  });
+
 test("legacy intents without concrete activity never receive invented activity points",
   { skip: localDatabaseUrl ? false : "requires localhost PostgreSQL" }, async () => {
     const { createWeeklyIntent } = await import("../../lib/v2/weekly-intents");

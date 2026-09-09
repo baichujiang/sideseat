@@ -124,7 +124,8 @@ test("activity fit is symmetric, explainable and admits a 60/100 related opportu
   const match = classifyActivityMatch(base, peer, true)!;
   const fit = activityFit(match, 30);
   assert.equal(fit.score, 60);
-  assert.equal(fit.activityPoints + fit.timePoints + fit.languagePoints + fit.schoolPoints, fit.score);
+  assert.notEqual(fit.timePoints, null);
+  assert.equal(fit.activityPoints + fit.timePoints! + fit.languagePoints + fit.schoolPoints, fit.score);
   assert.deepEqual(fit, activityFit(classifyActivityMatch(peer, base, true)!, 30));
   assert.equal(activityFit(classifyActivityMatch(base, base, true)!, 60).score, 100);
   assert.equal(activityFit(classifyActivityMatch(base, base, true)!, 120).score, 100);

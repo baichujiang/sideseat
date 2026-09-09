@@ -20,6 +20,7 @@ struct PlanCreateSheet: View {
     @State private var isCreating = false
     @State private var issue: String?
     @State private var didSeed = false
+    @State private var hasConfirmedTiming = false
     @State private var idempotencyKey: String?
     @State private var submissionSignature: String?
     @FocusState private var focusedField: Field?
@@ -109,6 +110,10 @@ struct PlanCreateSheet: View {
                 )
                 .font(.subheadline)
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            } else if needsExplicitTiming {
+                Text("Your activity is filled in. Choose the time you want to propose.")
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             } else if draft != nil {
                 Text("Details from your conversation are already filled in.")
                     .font(.footnote)
@@ -178,6 +183,13 @@ struct PlanCreateSheet: View {
                 dateRow(label: AppLocalization.string("Starts"), icon: "clock", selection: $start)
                 Divider().padding(.leading, 50)
                 dateRow(label: AppLocalization.string("Ends"), icon: "clock.badge.checkmark", selection: $end)
+            }
+            if needsExplicitTiming {
+                Toggle("Propose these times", isOn: $hasConfirmedTiming)
+                    .accessibilityIdentifier("plan-confirm-timing")
+                Text("The other person still needs to accept. Nothing is added to your calendars yet.")
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             }
 
             if start <= Date() {
@@ -258,8 +270,13 @@ struct PlanCreateSheet: View {
 
     private var canSend: Bool {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && (!needsExplicitTiming || hasConfirmedTiming)
             && start > Date()
             && end.timeIntervalSince(start) >= 30 * 60
+    }
+
+    private var needsExplicitTiming: Bool {
+        counterOf == nil && draft?.needsTimeSelection == true
     }
 
     private func create() async {

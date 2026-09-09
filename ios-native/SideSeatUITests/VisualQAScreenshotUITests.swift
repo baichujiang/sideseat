@@ -13,6 +13,96 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
+    func testFlexibleTimingChoicesAcrossLanguages() {
+        verifyFlexibleTimingConfigurations([("zh-Hans", "light", false), ("en", "dark", false)])
+    }
+
+    @MainActor
+    func testFlexibleTimingGermanLargestText() {
+        verifyFlexibleTimingConfigurations([("de", "light", true)])
+    }
+
+    @MainActor
+    private func verifyFlexibleTimingConfigurations(_ configurations: [(String, String, Bool)]) {
+        for (language, appearance, large) in configurations {
+            let app = XCUIApplication()
+            app.launchArguments = [
+                "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-discover", "--ui-testing-weekly-intent",
+                "--ui-testing-mutual-opportunity", "--ui-testing-flexible-timing",
+                "--ui-testing-together-matching",
+                "--ui-testing-language=\(language)", "--ui-testing-appearance=\(appearance)",
+            ]
+            if large { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
+            app.launch()
+            let add = app.buttons["together-add-intent"]
+            XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 8))
+            saveScreenshot(app: app, name: "flexible-opportunity-\(language)-\(appearance)")
+            revealFlowElement(add, in: app)
+            XCTAssertTrue(add.exists)
+            add.tap()
+            let activity = app.descendants(matching: .any)["intent-editor-activity"].firstMatch
+            XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForExistence(timeout: 5))
+            revealFlowElement(activity, in: app)
+            XCTAssertTrue(activity.exists)
+            activity.tap()
+            activity.typeText("Coffee")
+            XCTAssertTrue(app.buttons["intent-editor-next"].isEnabled)
+            app.buttons["intent-editor-next"].tap()
+            saveScreenshot(app: app, name: "flexible-step-entry-\(language)-\(appearance)")
+            let undecided = app.buttons["intent-timing-undecided"]
+            revealFlowElement(undecided, in: app)
+            XCTAssertTrue(undecided.waitForExistence(timeout: 5))
+            XCTAssertTrue(undecided.isSelected)
+            XCTAssertTrue(app.buttons["intent-editor-save"].isEnabled)
+            saveScreenshot(app: app, name: "flexible-undecided-\(language)-\(appearance)")
+            let flexible = app.buttons["intent-timing-flexible"]
+            revealFlowElement(flexible, in: app)
+            flexible.tap()
+            let nextWeek = app.buttons["intent-quick-Next week"]
+            revealFlowElement(nextWeek, in: app)
+            XCTAssertTrue(nextWeek.isEnabled)
+            nextWeek.tap()
+            XCTAssertTrue(app.buttons["intent-editor-save"].isEnabled)
+            let summary = app.descendants(matching: .any)["intent-timing-summary"].firstMatch
+            revealFlowElement(summary, in: app)
+            XCTAssertTrue(summary.exists)
+            saveScreenshot(app: app, name: "flexible-next-week-\(language)-\(appearance)")
+            let exact = app.buttons["intent-timing-exact"]
+            for _ in 0..<8 { if exact.isHittable { break }; app.swipeDown() }
+            exact.tap()
+            XCTAssertTrue(app.buttons["intent-editor-save"].isEnabled)
+            app.terminate()
+        }
+    }
+
+    @MainActor
+    func testUndatedOpportunityRequiresTimeBeforePlan() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial", "--ui-testing-chats",
+            "--ui-testing-flexible-timing", "--ui-testing-language=zh-Hans"]
+        app.launch()
+        let row = app.descendants(matching: .any)["inbox-row-ui-connection-leo"]
+        XCTAssertTrue(row.waitForExistence(timeout: 8))
+        row.tap()
+        let propose = app.buttons["mutual-opportunity-propose-plan-ui-flexible-opportunity"]
+        XCTAssertTrue(propose.waitForExistence(timeout: 8))
+        propose.tap()
+        let send = app.buttons["plan-create-submit"]
+        XCTAssertTrue(send.waitForExistence(timeout: 5))
+        XCTAssertFalse(send.isEnabled)
+        let confirm = app.switches["plan-confirm-timing"]
+        revealFlowElement(confirm, in: app)
+        XCTAssertTrue(confirm.exists)
+        saveScreenshot(app: app, name: "flexible-plan-before-confirmation")
+        confirm.tap()
+        XCTAssertTrue(send.isEnabled)
+        send.tap()
+        XCTAssertTrue(send.waitForNonExistence(timeout: 5))
+        app.terminate()
+    }
+
+    @MainActor
     func testSystemAvatarSelectionLightDarkAndLargeType() {
         for (language, appearance, largeType) in [("zh-Hans", "light", false), ("de", "dark", true)] {
             let app = XCUIApplication()

@@ -24680,6 +24680,8 @@ internal struct Client: APIProtocol {
             }
         )
     }
+    /// Send X-SideSeat-Flexible-Timing: 1 to receive undated opportunities and ACTIVITY_FIT_V2 components. Legacy clients receive only dated opportunities, with V2 matchFit omitted as null.
+    ///
     /// - Remark: HTTP `GET /api/v1/me/mutual-opportunities`.
     /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/get(listMutualOpportunities)`.
     internal func listMutualOpportunities(_ input: Operations.ListMutualOpportunities.Input) async throws -> Operations.ListMutualOpportunities.Output {
