@@ -13,6 +13,69 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
+    func testSystemAvatarSelectionLightDarkAndLargeType() {
+        for (language, appearance, largeType) in [("zh-Hans", "light", false), ("de", "dark", true)] {
+            let app = XCUIApplication()
+            app.launchArguments = [
+                "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-language=\(language)", "--ui-testing-appearance=\(appearance)",
+            ]
+            if largeType { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
+            app.launch()
+            let me = tabButton(in: app, labels: ["Me", "我", "Ich"])
+            XCTAssertTrue(me.waitForExistence(timeout: 8))
+            me.tap()
+            let edit = app.buttons["profile-change-photo"]
+            XCTAssertTrue(edit.waitForExistence(timeout: 8))
+            edit.tap()
+            let first = app.buttons["system-avatar-p01"]
+            XCTAssertTrue(first.waitForExistence(timeout: 5))
+            revealSystemAvatar(first, in: app)
+            first.tap()
+            XCTAssertGreaterThanOrEqual(first.frame.height, 44)
+            if largeType { XCTAssertGreaterThan(first.frame.height, 100) }
+            XCTAssertTrue(first.isSelected)
+            XCTAssertTrue(app.buttons["profile-choose-photo"].exists)
+            saveScreenshot(app: app, name: "system-avatars-\(language)-\(appearance)")
+            let save = app.buttons["system-avatar-save"]
+            XCTAssertTrue(save.isEnabled)
+            XCTAssertTrue(save.isHittable)
+            save.tap()
+            XCTAssertTrue(save.waitForNonExistence(timeout: 5))
+            saveScreenshot(app: app, name: "system-avatar-profile-\(language)-\(appearance)")
+            edit.tap()
+            XCTAssertTrue(first.waitForExistence(timeout: 5))
+            XCTAssertTrue(first.isSelected)
+            XCTAssertFalse(app.buttons["system-avatar-save"].isEnabled)
+            let last = app.buttons["system-avatar-p20"]
+            revealSystemAvatar(last, in: app)
+            last.tap()
+            XCTAssertTrue(last.isSelected)
+            saveScreenshot(app: app, name: "system-avatars-last-\(language)-\(appearance)")
+            app.buttons[language == "zh-Hans" ? "取消" : "Abbrechen"].tap()
+            edit.tap()
+            XCTAssertTrue(first.waitForExistence(timeout: 5))
+            XCTAssertTrue(first.isSelected, "Cancel must leave the saved avatar unchanged")
+            app.terminate()
+        }
+    }
+
+    @MainActor
+    private func revealSystemAvatar(_ avatar: XCUIElement, in app: XCUIApplication) {
+        // XCTest can report offscreen grid cells behind the pinned dock as hittable.
+        let dock = app.buttons["system-avatar-save"]
+        for _ in 0..<20 {
+            if avatar.exists && avatar.frame.maxY < dock.frame.minY - 16 { break }
+            let startY = min(0.7, (dock.frame.minY - 36) / app.frame.height)
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: startY))
+                .press(forDuration: 0.05, thenDragTo:
+                    app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.3)))
+        }
+        XCTAssertTrue(avatar.isHittable)
+        XCTAssertLessThan(avatar.frame.maxY, dock.frame.minY - 16)
+    }
+
+    @MainActor
     func testRelatedActivityFitInThreeLanguages() {
         for (language, title, largeType) in [
             ("zh-Hans", "活动匹配度", false),
@@ -42,13 +105,13 @@ final class VisualQAScreenshotUITests: XCTestCase {
             let disclaimer = app.staticTexts["mutual-opportunity-fit-disclaimer-cmutualui0000000000000001"]
             XCTAssertTrue(disclaimer.waitForExistence(timeout: 5))
             revealFlowElement(disclaimer, in: app)
-            let followingText = app.staticTexts["mutual-opportunity-match-explanation-cmutualui0000000000000001"]
-            XCTAssertTrue(followingText.exists)
-            XCTAssertLessThanOrEqual(disclaimer.frame.maxY, followingText.frame.minY,
-                                     "Expanded text must reserve height before the next section")
-            let verified = app.staticTexts["mutual-opportunity-verified-cmutualui0000000000000001"]
-            XCTAssertLessThanOrEqual(disclaimer.frame.maxY, verified.frame.minY,
-                                     "The following status row must not cover the disclaimer")
+            let matchExplanation = app.staticTexts["mutual-opportunity-match-explanation-cmutualui0000000000000001"]
+            XCTAssertTrue(matchExplanation.exists)
+            XCTAssertLessThanOrEqual(matchExplanation.frame.maxY, disclaimer.frame.minY)
+            let privacy = app.descendants(matching: .any)["mutual-opportunity-privacy-cmutualui0000000000000001"]
+            XCTAssertTrue(privacy.exists)
+            XCTAssertLessThanOrEqual(disclaimer.frame.maxY, privacy.frame.minY,
+                                     "Expanded details must reserve height before the decision section")
             XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "25/50")).firstMatch.exists)
             saveScreenshot(app: app, name: "activity-fit-details-\(suffix)")
             // Return to the disclosure header, including at accessibility text sizes.
@@ -69,6 +132,145 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
+    func testOpportunitySwipeDirectionsAndCancellation() {
+        let id = "cmutualui0000000000000001"
+        for (language, appearance, direction) in [("zh-Hans", "light", 1.0), ("de", "dark", -1.0), ("en", "light", 1.0)] {
+            let app = XCUIApplication()
+            app.launchArguments = [
+                "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-discover", "--ui-testing-weekly-intent",
+                "--ui-testing-mutual-opportunity", "--ui-testing-together-matching",
+                "--ui-testing-opportunity-topic=COFFEE",
+                "--ui-testing-language=\(language)", "--ui-testing-appearance=\(appearance)",
+            ]
+            if language == "en" { app.launchArguments.append("--ui-testing-reduce-motion") }
+            app.launch()
+            let bar = app.descendants(matching: .any)["mutual-opportunity-swipe-\(id)"]
+            let handle = app.descendants(matching: .any)["mutual-opportunity-swipe-handle-\(id)"]
+            let activity = app.descendants(matching: .any)["mutual-opportunity-activity-\(id)"]
+            XCTAssertTrue(bar.waitForExistence(timeout: 8))
+            revealFlowElement(handle, in: app)
+            XCTAssertGreaterThanOrEqual(handle.frame.height, 44)
+            let ignore = app.buttons["mutual-opportunity-no-\(id)"]
+            let interested = app.buttons["mutual-opportunity-yes-\(id)"]
+            XCTAssertEqual(ignore.label, language == "zh-Hans" ? "忽略" : (language == "de" ? "Ignorieren" : "Ignore"))
+            XCTAssertEqual(interested.label, language == "zh-Hans" ? "有兴趣" : (language == "de" ? "Interesse" : "Interested"))
+            XCTAssertLessThan(ignore.frame.maxX, handle.frame.minX)
+            XCTAssertGreaterThan(interested.frame.minX, handle.frame.maxX)
+            saveScreenshot(app: app, name: "opportunity-swipe-\(language)-\(appearance)")
+
+            // A small drag springs back without calling either endpoint.
+            var start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 30, dy: 0)))
+            XCTAssertTrue(activity.exists)
+            XCTAssertEqual(handle.frame.midX, bar.frame.midX, accuracy: 2)
+
+            // Starting a vertical scroll on the handle must scroll the page, not answer.
+            let initialY = handle.frame.midY
+            start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -130)))
+            XCTAssertTrue(activity.exists)
+            XCTAssertLessThan(handle.frame.midY, initialY - 20)
+            XCTAssertEqual(handle.frame.midX, bar.frame.midX, accuracy: 2)
+
+            start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            let end = start.withOffset(CGVector(dx: direction * (bar.frame.width / 2 - 32), dy: 0))
+            start.press(forDuration: 0.1, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.8)
+            XCTAssertTrue(activity.waitForNonExistence(timeout: 5), "The released swipe must call the existing private decision action")
+            app.terminate()
+        }
+    }
+
+    @MainActor
+    func testOpportunitySwipeReturnsToIdleAfterFailedSave() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-discover", "--ui-testing-weekly-intent",
+            "--ui-testing-mutual-opportunity", "--ui-testing-together-matching",
+            "--ui-testing-opportunity-topic=COFFEE", "--ui-testing-opportunity-decision-failure",
+            "--ui-testing-language=en", "--ui-testing-appearance=light",
+        ]
+        app.launch()
+        let id = "cmutualui0000000000000001"
+        let interested = app.buttons["mutual-opportunity-yes-\(id)"]
+        revealFlowElement(interested, in: app)
+        interested.tap()
+        XCTAssertTrue(app.staticTexts["UI test: choice was not saved."].waitForExistence(timeout: 5))
+        let available = expectation(for: NSPredicate(format: "enabled == true"), evaluatedWith: interested)
+        wait(for: [available], timeout: 5)
+        let handle = app.descendants(matching: .any)["mutual-opportunity-swipe-handle-\(id)"]
+        let bar = app.descendants(matching: .any)["mutual-opportunity-swipe-\(id)"]
+        XCTAssertEqual(handle.frame.midX, bar.frame.midX, accuracy: 2)
+        XCTAssertTrue(app.buttons["mutual-opportunity-no-\(id)"].isEnabled)
+        XCTAssertTrue(app.descendants(matching: .any)["mutual-opportunity-activity-\(id)"].exists)
+        app.terminate()
+    }
+
+    @MainActor
+    func testOpportunityCardTopicsAndConsentStates() {
+        let id = "cmutualui0000000000000001"
+        let scenarios = [
+            ("COFFEE", "NEEDS_DECISION", "light"),
+            ("STUDY", "NEEDS_DECISION", "light"),
+            ("SPORTS", "NEEDS_DECISION", "dark"),
+            ("EXPLORE", "NEEDS_DECISION", "light"),
+            ("FOOD", "NEEDS_DECISION", "dark"),
+            ("EVENTS", "NEEDS_DECISION", "light"),
+            ("COFFEE", "DECIDED", "light"),
+            ("COFFEE", "READY_TO_COORDINATE", "dark"),
+        ]
+        for (topic, state, appearance) in scenarios {
+            let app = XCUIApplication()
+            app.launchArguments = [
+                "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-discover", "--ui-testing-weekly-intent",
+                "--ui-testing-mutual-opportunity", "--ui-testing-together-matching",
+                "--ui-testing-opportunity-topic=\(topic)", "--ui-testing-opportunity-state=\(state)",
+                "--ui-testing-language=zh-Hans", "--ui-testing-appearance=\(appearance)",
+            ]
+            app.launch()
+            let activity = app.descendants(matching: .any)["mutual-opportunity-activity-\(id)"]
+            XCTAssertTrue(activity.waitForExistence(timeout: 8))
+            let peer = app.descendants(matching: .any)["mutual-opportunity-peer-\(id)"]
+            let fit = app.descendants(matching: .any)["mutual-opportunity-fit-\(id)"]
+            XCTAssertLessThanOrEqual(activity.frame.maxY, peer.frame.minY)
+            XCTAssertLessThanOrEqual(peer.frame.maxY, fit.frame.minY)
+            XCTAssertTrue(fit.label.contains("100/100"))
+            let yes = app.buttons["mutual-opportunity-yes-\(id)"]
+            let open = app.buttons["mutual-opportunity-open-\(id)"]
+            if state == "NEEDS_DECISION" {
+                revealFlowElement(yes, in: app)
+                XCTAssertTrue(yes.isEnabled)
+                XCTAssertGreaterThanOrEqual(yes.frame.height, 44)
+                XCTAssertTrue(app.buttons["mutual-opportunity-no-\(id)"].exists)
+                XCTAssertFalse(open.exists, "Planning is unavailable before mutual consent")
+            } else if state == "DECIDED" {
+                let withdraw = app.buttons["撤回"]
+                revealFlowElement(withdraw, in: app)
+                XCTAssertFalse(yes.exists)
+                XCTAssertFalse(open.exists, "A private YES must not unlock planning")
+            } else {
+                revealFlowElement(open, in: app)
+                XCTAssertTrue(open.isEnabled)
+                XCTAssertFalse(yes.exists)
+            }
+            saveScreenshot(app: app, name: "opportunity-\(topic.lowercased())-\(state.lowercased())-\(appearance)")
+            if state == "NEEDS_DECISION" {
+                // Exercise both existing private decision callbacks without network or live data.
+                let action = topic == "FOOD" ? app.buttons["mutual-opportunity-no-\(id)"] : yes
+                revealFlowElement(action, in: app)
+                action.tap()
+                XCTAssertTrue(activity.waitForNonExistence(timeout: 5))
+            } else if state == "DECIDED" {
+                app.buttons["撤回"].tap()
+                XCTAssertTrue(activity.waitForNonExistence(timeout: 5))
+            }
+            app.terminate()
+        }
+    }
+
+    @MainActor
     func testTogetherFlowEditorLightAndDark() {
         for appearance in ["light", "dark"] {
             let app = XCUIApplication()
@@ -84,8 +286,20 @@ final class VisualQAScreenshotUITests: XCTestCase {
             let addIntent = app.buttons["together-add-intent"]
             revealFlowElement(addIntent, in: app)
             addIntent.tap()
+            let coffee = app.buttons["intent-topic-coffee"]
+            XCTAssertTrue(coffee.waitForExistence(timeout: 5))
+            XCTAssertTrue(coffee.isSelected)
+            saveScreenshot(app: app, name: "flow-activity-picker-\(appearance)")
+            let explore = app.buttons["intent-topic-explore"]
+            revealFlowElement(explore, in: app)
+            explore.tap()
+            XCTAssertTrue(explore.isSelected)
+            revealFlowElement(coffee, in: app)
+            coffee.tap()
+            XCTAssertTrue(coffee.isSelected)
             let activity = app.descendants(matching: .any)["intent-editor-activity"].firstMatch
             XCTAssertTrue(activity.waitForExistence(timeout: 5))
+            revealFlowElement(activity, in: app)
             activity.tap()
             activity.typeText("课后喝咖啡")
             let next = app.buttons["intent-editor-next"]
@@ -101,6 +315,41 @@ final class VisualQAScreenshotUITests: XCTestCase {
             XCTAssertEqual(activity.value as? String, "课后喝咖啡")
             app.terminate()
         }
+    }
+
+    @MainActor
+    func testActivityPickerAtLargestDynamicType() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-discover", "--ui-testing-weekly-intent",
+            "--ui-testing-mutual-opportunity", "--ui-testing-together-matching",
+            "--ui-testing-language=de", "--ui-testing-appearance=dark",
+            "--ui-testing-dynamic-type-accessibility",
+        ]
+        app.launch()
+        let addIntent = app.buttons["together-add-intent"]
+        revealFlowElement(addIntent, in: app)
+        addIntent.tap()
+        let coffee = app.buttons["intent-topic-coffee"]
+        XCTAssertTrue(coffee.waitForExistence(timeout: 5))
+        XCTAssertTrue(coffee.isSelected)
+        XCTAssertGreaterThan(coffee.frame.width, app.frame.width * 0.7,
+                             "Accessibility text should use a single-column category picker")
+        let explore = app.buttons["intent-topic-explore"]
+        let fields = app.descendants(matching: .any)["intent-editor-fields"].firstMatch
+        saveScreenshot(app: app, name: "flow-activity-picker-de-large-type-initial")
+        for _ in 0..<8 where !explore.exists || !explore.isHittable {
+            fields.swipeUp()
+        }
+        saveScreenshot(app: app, name: "flow-activity-picker-de-large-type-scrolled")
+        XCTAssertTrue(explore.isHittable)
+        XCTAssertGreaterThanOrEqual(explore.frame.height, 44)
+        explore.tap()
+        XCTAssertTrue(explore.isSelected)
+        XCTAssertFalse(coffee.isSelected)
+        saveScreenshot(app: app, name: "flow-activity-picker-de-large-type")
+        app.terminate()
     }
 
     @MainActor

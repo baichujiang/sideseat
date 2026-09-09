@@ -192,7 +192,7 @@ struct CalendarEventShareSheet: View {
                             Task { await send(share, to: contact) }
                         } label: {
                             HStack(spacing: SideSeatTheme.spaceMD) {
-                                InitialAvatar(name: contact.displayName, size: 36)
+                                InitialAvatar(name: contact.displayName, url: contact.peer.avatarUrl, size: 36)
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(contact.displayName)
                                         .foregroundStyle(SideSeatTheme.textPrimary)

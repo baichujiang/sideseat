@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Primary CTA — brand surface uses accent gradient; product surface uses solid accent.
+/// Primary CTA — brand gradient for Auth; adaptive ink/chalk for product actions.
 struct SSPrimaryButton: View {
+    @Environment(\.isEnabled) private var isEnabled
     enum Chrome {
         /// Continuous rounded rect (`controlRadius`) — Auth forms.
         case rounded
@@ -22,7 +23,7 @@ struct SSPrimaryButton: View {
             HStack(spacing: SideSeatTheme.spaceSM) {
                 if isLoading {
                     ProgressView()
-                        .tint(SideSeatTheme.onAccent)
+                        .tint(isEnabled ? fill.foreground : SideSeatTheme.textPrimary)
                 } else {
                     Text(title)
                         .font(.body.weight(.semibold))
@@ -42,6 +43,7 @@ struct SSPrimaryButton: View {
 
 private struct SSPrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let fill: SideSeatTheme.ButtonFill
     let chrome: SSPrimaryButton.Chrome
 
@@ -50,16 +52,16 @@ private struct SSPrimaryButtonStyle: ButtonStyle {
             .foregroundStyle(foreground)
             .background(background(isPressed: configuration.isPressed))
             .opacity(configuration.isPressed ? SideSeatTheme.Interaction.pressedOpacity : 1)
-            .scaleEffect(configuration.isPressed ? SideSeatTheme.Interaction.pressedScale : 1)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? SideSeatTheme.Interaction.pressedScale : 1)
             .animation(
-                .easeOut(duration: SideSeatTheme.Interaction.pressDuration),
+                reduceMotion ? nil : .easeOut(duration: SideSeatTheme.Interaction.pressDuration),
                 value: configuration.isPressed
             )
     }
 
     private var foreground: Color {
         guard isEnabled else { return SideSeatTheme.textPrimary }
-        return SideSeatTheme.onAccent
+        return fill.foreground
     }
 
     @ViewBuilder

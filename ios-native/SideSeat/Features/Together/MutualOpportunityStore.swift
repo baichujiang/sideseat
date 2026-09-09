@@ -54,6 +54,11 @@ final class MutualOpportunityStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-mutual-opportunity") {
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-opportunity-decision-failure") {
+                // Offline UI fixture: exercise release animation → failed save → retry.
+                issue = "UI test: choice was not saved."
+                return
+            }
             opportunities.removeAll { $0.id == opportunity.id }
             notice = AppLocalization.string("Your choice was saved privately.")
             return
@@ -70,7 +75,7 @@ final class MutualOpportunityStore {
             let updated = envelope.data
             if updated.isReadyToCoordinate {
                 upsert(updated)
-                notice = AppLocalization.string("You can plan this together now.")
+                notice = AppLocalization.string("You can chat about the details now.")
             } else if decision == "YES" {
                 upsert(updated)
                 notice = AppLocalization.string("Your choice was saved privately.")
@@ -129,25 +134,32 @@ final class MutualOpportunityStore {
 
 private extension NativeMutualOpportunity {
     static var uiTestingFixture: NativeMutualOpportunity {
-        let related = ProcessInfo.processInfo.arguments.contains("--ui-testing-related-activity")
+        let arguments = ProcessInfo.processInfo.arguments
+        let related = arguments.contains("--ui-testing-related-activity")
+        let topicArgument = arguments.first { $0.hasPrefix("--ui-testing-opportunity-topic=") }
+            .map { String($0.dropFirst("--ui-testing-opportunity-topic=".count)) }
+        let topic = topicArgument.flatMap(NativeWeeklyIntentTopic.init(rawValue:))
+            ?? (related ? .coffee : .study)
+        let state = arguments.first { $0.hasPrefix("--ui-testing-opportunity-state=") }
+            .map { String($0.dropFirst("--ui-testing-opportunity-state=".count)) } ?? "NEEDS_DECISION"
         let start = Date().addingTimeInterval(26 * 60 * 60)
         let end = start.addingTimeInterval((related ? 30 : 60) * 60)
         return NativeMutualOpportunity(
             id: "cmutualui0000000000000001",
             policyVersion: "MUTUAL_OPPORTUNITY_V1",
-            state: "NEEDS_DECISION",
+            state: state,
             viewerIntentId: nil,
-            topic: related ? .coffee : .study,
+            topic: topic,
             activityText: nil,
-            sportTag: nil,
+            sportTag: topic == .sports ? .badminton : nil,
             sportOtherNote: nil,
             viewerTogetherMode: .parallel,
             peerTogetherMode: .either,
             viewerStudyGoal: "Review for the algorithms exam",
             peerStudyGoal: "Finish an algorithms problem set",
-            matchKind: .sharedContext,
-            sharedContext: related ? nil : .parallelStudy,
-            course: related ? nil : NativeMutualOpportunityCourse(
+            matchKind: topic == .study ? .sharedContext : .exactActivity,
+            sharedContext: topic == .study ? .parallelStudy : nil,
+            course: topic != .study ? nil : NativeMutualOpportunityCourse(
                 id: "cui-course",
                 code: "IN0007",
                 name: "Algorithms"
@@ -157,21 +169,27 @@ private extension NativeMutualOpportunity {
             expiresAt: start.addingTimeInterval(-15 * 60).ISO8601Format(),
             peer: NativeMutualOpportunityPeer(
                 displayName: "Mia",
-                avatarUrl: nil,
+                avatarUrl: "p02",
                 verifiedStudent: true,
                 major: "Computer Science",
                 semester: 3,
                 sharedLanguages: ["ENGLISH", "GERMAN"]
             ),
-            viewerDecision: nil,
-            coordination: nil,
+            viewerDecision: ["DECIDED", "READY_TO_COORDINATE"].contains(state) ? "YES" : nil,
+            coordination: state == "READY_TO_COORDINATE"
+                ? NativeMutualOpportunityCoordination(connectionId: "ui-connection-1") : nil,
             version: 1,
             matchFit: related ? NativeActivityFit(
                 policyVersion: "ACTIVITY_FIT_V1", basis: "RELATED_ACTIVITY",
                 score: 60, activityPoints: 25, timePoints: 15,
                 languagePoints: 10, schoolPoints: 10, overlapMinutes: 30,
                 viewerActivityText: "喝咖啡", peerActivityText: "咖啡聊聊"
-            ) : nil
+            ) : topicArgument == nil ? nil : NativeActivityFit(
+                policyVersion: "ACTIVITY_FIT_V1", basis: "EXACT_ACTIVITY",
+                score: 100, activityPoints: 50, timePoints: 30,
+                languagePoints: 10, schoolPoints: 10, overlapMinutes: 60,
+                viewerActivityText: nil, peerActivityText: nil
+            )
         )
     }
 }

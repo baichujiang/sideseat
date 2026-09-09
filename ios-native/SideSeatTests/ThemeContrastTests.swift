@@ -4,6 +4,31 @@ import XCTest
 @testable import SideSeat
 
 final class ThemeContrastTests: XCTestCase {
+    func testProductActionAndActivityInsetContrastInLightAndDarkAppearances() {
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            assertContrast(
+                foreground: UIColor(SideSeatTheme.ProductAction.foreground),
+                background: UIColor(SideSeatTheme.ProductAction.fill),
+                style: style,
+                minimum: 4.5
+            )
+            assertContrast(
+                foreground: UIColor(SideSeatTheme.textSecondaryStrong),
+                background: UIColor(SideSeatTheme.activityInset),
+                style: style,
+                minimum: 4.5
+            )
+        }
+    }
+
+    @MainActor
+    func testEveryActivityHasBundledVectorArtwork() {
+        for topic in NativeWeeklyIntentTopic.allCases {
+            XCTAssertNotNil(UIImage(named: SSActivityArtwork.assetName(for: topic)),
+                            "Missing native activity artwork for \(topic.rawValue)")
+        }
+    }
+
     func testCalendarNowBadgeContrastInLightAndDarkAppearances() {
         assertContrast(
             foreground: UIColor(SideSeatTheme.calendarNowForeground),

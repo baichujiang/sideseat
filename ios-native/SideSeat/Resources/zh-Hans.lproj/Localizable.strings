@@ -1781,3 +1781,49 @@
 "Go climbing together" = "一起攀岩";
 "Do yoga together" = "一起练瑜伽";
 "%@ together" = "一起%@";
+
+/* Original Little Companions system avatars. */
+"Change avatar" = "更换头像";
+"Choose an avatar" = "选择头像";
+"System avatars" = "系统头像";
+"Choose a photo" = "从相册选择照片";
+"Save avatar" = "保存头像";
+"Your current avatar" = "当前头像";
+"A little companion, a familiar face." = "选一位小伙伴，让彼此更好认。";
+"Your avatar appears in chats, plans and your profile." = "头像会显示在消息、计划和个人资料中。";
+"Peach cat" = "桃桃猫";
+"Mint rabbit" = "薄荷兔";
+"Honey bear" = "蜂蜜熊";
+"Apricot fox" = "杏杏狐";
+"Cloud koala" = "云朵考拉";
+"Bamboo panda" = "竹竹熊猫";
+"Cocoa otter" = "可可水獭";
+"Blueberry penguin" = "蓝莓企鹅";
+"Biscuit puppy" = "饼干狗";
+"Pond frog" = "池塘蛙";
+"Lilac cat" = "丁香猫";
+"Rose rabbit" = "玫瑰兔";
+"Sage bear" = "鼠尾草熊";
+"Dusk fox" = "暮色狐";
+"Sand koala" = "沙沙考拉";
+"Pebble panda" = "石石熊猫";
+"River otter" = "河畔水獭";
+"Sunrise penguin" = "晨光企鹅";
+"Maple puppy" = "枫叶狗";
+"Matcha frog" = "抹茶蛙";
+
+/* Opportunity card hierarchy */
+"Available together" = "共同空闲时间";
+"Why this opportunity" = "为什么推荐这次同行";
+"Both say yes, then plan together." = "双方都愿意后，再一起定计划。";
+
+/* Private interest swipe bar */
+"Show interest" = "有兴趣";
+"Ignore" = "忽略";
+"Slide or tap to choose" = "左右滑动，也可轻点";
+"Release to show interest" = "松开，表示有兴趣";
+"Release to ignore" = "松开，忽略";
+"If you both show interest, chat first and confirm a plan later." = "双方都有兴趣后开启聊天，聊好再确认计划。";
+"You both showed interest" = "你们都有兴趣";
+"Chat about the details" = "聊聊细节";
+"You can chat about the details now." = "现在可以聊聊具体安排了。";

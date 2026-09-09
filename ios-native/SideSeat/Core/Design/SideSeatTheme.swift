@@ -4,7 +4,8 @@ import SwiftUI
 ///
 /// # Token freeze (Phase E)
 /// Palette, radii, spacing, `ButtonFill`, `HubTint`, `Chat`, and `CalendarChrome` metrics are
-/// **frozen**. New UI must consume these APIs (or `Core/Design/Components`). Do not introduce
+/// centrally owned. The 2026-09-09 visual refresh introduces neutral product actions and
+/// original activity artwork; new UI must consume these APIs (or `Core/Design/Components`). Do not introduce
 /// ad-hoc hex / system `.blue` / feature-local corner radii except:
 /// - user-authored content colors (`Color(hex:)` on events/courses)
 /// - semantic system roles already wrapped (`danger` / `success` / `warning`)
@@ -41,7 +42,7 @@ enum SideSeatTheme {
     /// Foreground on the bright product accent. Pure black leaves room for icon antialiasing.
     static let onAccent = Color.black
 
-    /// Selected controls, key icons, unread dots, borders, and product primary fills.
+    /// Selected controls, key icons, unread dots and borders. Product CTAs use `ProductAction`.
     /// Body text, captions, dates, display names, and status labels use text or semantic colors.
     /// Resolve the product accent independently from SwiftUI's environment tint. The
     /// reserved `AccentColor` asset name follows `.tint`, so it cannot safely serve both
@@ -147,6 +148,27 @@ enum SideSeatTheme {
     static let fillTertiary = Color(uiColor: .tertiarySystemFill)
     /// Hairline borders that adapt to light, dark, and increased-contrast appearances.
     static let separator = Color(uiColor: .separator)
+
+    /// Product actions are quiet ink in Light and soft chalk in Dark. Rose stays an accent.
+    enum ProductAction {
+        static let fill = Color(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 0.87, green: 0.90, blue: 0.88, alpha: 1)
+                : UIColor(red: 0.16, green: 0.19, blue: 0.18, alpha: 1)
+        })
+        static let foreground = Color(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 0.12, green: 0.15, blue: 0.14, alpha: 1)
+                : UIColor(red: 0.98, green: 0.98, blue: 0.96, alpha: 1)
+        })
+    }
+
+    /// Warm, low-chroma inset for activity context; not a selection or status color.
+    static let activityInset = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.16, green: 0.18, blue: 0.17, alpha: 1)
+            : UIColor(red: 0.96, green: 0.95, blue: 0.92, alpha: 1)
+    })
     /// Compact media thumbnails used by create pickers.
     static let mediaRadius: CGFloat = 10
 
@@ -313,7 +335,7 @@ enum SideSeatTheme {
 
     // MARK: - Button fill strategy
 
-    /// Brand surface → gradient; product surface → solid accent. Prefer this over ad-hoc fills.
+    /// Brand surface → gradient; product surface → adaptive ink/chalk.
     enum ButtonFill: Equatable {
         /// Auth / Tutorial primary CTA.
         case brand
@@ -325,12 +347,16 @@ enum SideSeatTheme {
             case .brand:
                 AnyShapeStyle(SideSeatTheme.accentGradient)
             case .product:
-                AnyShapeStyle(SideSeatTheme.accent)
+                AnyShapeStyle(SideSeatTheme.ProductAction.fill)
             }
         }
 
         var disabledStyle: AnyShapeStyle {
             AnyShapeStyle(Interaction.disabledFill)
+        }
+
+        var foreground: Color {
+            self == .product ? ProductAction.foreground : SideSeatTheme.onAccent
         }
     }
 

@@ -2,7 +2,7 @@
 
 **Status:** Frozen v1.0 for the current one-to-one flow
 
-**Last updated:** 2026-09-08
+**Last updated:** 2026-09-09
 
 **Governing product:** [Product](./PRODUCT.md)
 
@@ -105,13 +105,19 @@ An Opportunity card leads with:
 - for related activities, both participants' descriptions and a details-to-agree cue;
 - minimum identity/trust context such as verified school, shared course or shared
   language;
-- `愿意一起` and `暂时不要`.
+- one bidirectional interest bar: left `忽略`, right `有兴趣`.
 
 It does not show a person's compatibility rating, candidate ranking, full profile
 or the other person's decision. Historical opportunities without a score snapshot
 do not display an invented score. See [Activity fit](./MATCHING_ACTIVITY_FIT.md).
 
 Decision behavior:
+
+Drag the center handle toward either side and release past the threshold to submit.
+Short or cancelled drags return to the center; vertical scrolling does not answer.
+The two labels inside the same bar are also tappable, and VoiceOver exposes both
+actions. While saving, the bar shows progress and disables further choices.
+This is private interest, not acceptance of a Plan.
 
 ```text
 UNDECIDED → YES → WITHDRAWN
@@ -132,7 +138,7 @@ When the second current YES is committed, the system atomically:
 4. marks the Opportunity mutual;
 5. returns the exact Messages route.
 
-The app may now say that both are willing and offer `开始聊`. It must not create a
+The app may now say `你们都有兴趣` and offer `聊聊细节`. It must not create a
 celebratory dating-like Match screen.
 
 The Conversation opens with the source card so neither user enters an unexplained
@@ -142,6 +148,10 @@ specific coordination ends, subject to Block and connection state.
 ## 7. Create and confirm a Plan
 
 From the source card or conversation:
+
+The intended sequence is interest → mutual interest → chat about details → propose
+a Plan → explicit Plan confirmation. Showing interest does not skip the conversation
+or confirm time/place. Chat itself does not confirm a Plan either.
 
 ```text
 Action Context

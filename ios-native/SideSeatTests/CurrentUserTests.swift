@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import Testing
 @testable import SideSeat
@@ -199,6 +200,26 @@ struct TogetherPresentationTests {
                 hasCoordination: false
             ) == .unavailable
         )
+    }
+}
+
+@Suite("Opportunity swipe decision")
+struct OpportunitySwipeDecisionTests {
+    @Test("Actual horizontal travel selects interest on the right and skip on the left")
+    func choosesDirection() {
+        #expect(SSOpportunitySwipeChoice.releasedChoice(
+            translation: CGSize(width: 100, height: 4), travel: 120
+        ) == .interested)
+        #expect(SSOpportunitySwipeChoice.releasedChoice(
+            translation: CGSize(width: -100, height: 4), travel: 120
+        ) == .skip)
+    }
+
+    @Test("Short, returned and vertical drags do not submit a decision")
+    func leavesChoiceOpen() {
+        for translation in [CGSize(width: 30, height: 0), .zero, CGSize(width: 30, height: 120)] {
+            #expect(SSOpportunitySwipeChoice.releasedChoice(translation: translation, travel: 120) == nil)
+        }
     }
 }
 

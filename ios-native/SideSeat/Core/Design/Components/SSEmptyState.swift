@@ -5,7 +5,7 @@ struct SSEmptyState: View {
     let title: LocalizedStringKey
     var systemImage: String = "tray"
     var description: LocalizedStringKey? = nil
-    /// Product-surface solid accent CTA (optional).
+    /// Product-surface adaptive ink/chalk CTA (optional).
     var actionTitle: String? = nil
     var actionAccessibilityID: String? = nil
     var action: (() -> Void)? = nil

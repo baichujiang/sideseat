@@ -132,21 +132,6 @@ struct ProfileAvatar: View {
     var size: CGFloat = 56
 
     var body: some View {
-        Group {
-            if let url, let imageURL = URL(string: url) {
-                AsyncImage(url: imageURL) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image.resizable().scaledToFill()
-                    default:
-                        InitialAvatar(name: name, size: size)
-                    }
-                }
-            } else {
-                InitialAvatar(name: name, size: size)
-            }
-        }
-        .frame(width: size, height: size)
-        .clipShape(Circle())
+        InitialAvatar(name: name, url: url, size: size)
     }
 }

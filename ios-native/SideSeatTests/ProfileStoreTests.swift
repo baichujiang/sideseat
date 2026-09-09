@@ -1,9 +1,54 @@
 import Foundation
 import Testing
+import UIKit
 @testable import SideSeat
 
 @Suite("Profile stores")
 struct ProfileStoreTests {
+    @Test("All twenty original avatars are bundled and localized for offline display")
+    @MainActor
+    func bundledSystemAvatars() {
+        #expect(NativeSystemAvatar.all.count == 20)
+        #expect(Set(NativeSystemAvatar.all.map(\.id)).count == 20)
+        for avatar in NativeSystemAvatar.all {
+            #expect(UIImage(named: avatar.assetName) != nil)
+            #expect(NativeAvatarSource.resolve(avatar.id) == .preset(avatar.id))
+            #expect(NativeAvatarSource.resolve("/avatars/\(avatar.id).jpeg") == .preset(avatar.id))
+            #expect(NativeAvatarSource.resolve("/avatars/companions-v1/\(avatar.id).svg") == .preset(avatar.id))
+            for language in [AppLanguage.simplifiedChinese, .german] {
+                let translated = AppLocalization.localizationBundle(for: language)
+                    .localizedString(forKey: avatar.nameKey, value: nil, table: nil)
+                #expect(translated != avatar.nameKey)
+                #expect(!translated.isEmpty)
+            }
+        }
+    }
+
+    @Test("Preset resolution preserves custom photos and has one consistent fallback")
+    func resolvesSystemAndCustomAvatars() throws {
+        let photo = try #require(URL(string: "https://example.public.blob.vercel-storage.com/avatars/custom/user/p01.jpeg"))
+        #expect(NativeAvatarSource.resolve(photo.absoluteString) == .remote(photo))
+        #expect(NativeAvatarSource.resolve(nil) == .preset("p01"))
+        #expect(NativeAvatarSource.resolve("") == .preset("p01"))
+        #expect(NativeAvatarSource.resolve("p99") == .preset("p01"))
+    }
+
+    @Test("Saves a selected system avatar through the existing bearer-authenticated endpoint")
+    @MainActor
+    func saveSystemAvatar() async throws {
+        let transport = ProfileTestTransport()
+        let session = makeSession(transport: transport)
+        await session.login(identifier: "test_001", password: "Password123")
+        let current = CurrentProfileStore()
+        await current.load(using: session)
+        #expect(await current.saveSystemAvatar("p05", using: session))
+        #expect(current.profile?.avatarUrl == "p05")
+        #expect(await transport.savedSystemAvatarID == "p05")
+        #expect(await transport.systemAvatarAuthorization == "Bearer access-token")
+        #expect(!current.isSaving)
+        #expect(current.issue == nil)
+    }
+
     @Test("Normalizes school identity codes for branded verified badges")
     func schoolIdentityCodes() {
         #expect(StudentIdentityDisplay.schoolCode("TUM") == "TUM")
@@ -308,6 +353,8 @@ private actor ProfileTestTransport: APITransport {
     private(set) var updatedProfilePath: String?
     private(set) var updatedNickname: String?
     private(set) var uploadedAvatarPath: String?
+    private(set) var savedSystemAvatarID: String?
+    private(set) var systemAvatarAuthorization: String?
     private(set) var uploadedAvatarContentType: String?
     private(set) var uploadedAvatarBodyContainsFilename = false
     private(set) var updatedUsernamePath: String?
@@ -355,6 +402,11 @@ private actor ProfileTestTransport: APITransport {
                 {"data":{"id":"user-1","username":"test_001","nickname":"Native Edited","email":"test-001@tum.de","phone":null,"avatarUrl":null,"tagline":"Updated from Swift","school":"\(school)","degreeLevel":"BACHELOR","major":"Mathematics","semester":4,"gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","usernameUpdatedAt":null,"locale":"en","displayName":"Native Edited","schoolSummary":{"schoolShort":"\(school)","degreeLabel":"Bachelor","major":"Mathematics","semester":4},"lifePhotos":[],"contacts":{"wechatHandle":"wx_native","whatsappHandle":"+4915112345678","telegramHandle":"@tg_native","instagramHandle":"ig_native"},"privacy":{"discoverByCourse":true,"discoverByMajor":true,"discoverBySemester":true,"allowInvitationNotes":true,"contactInfoOptIn":true,"hideFromCourseMembers":true,"hideFromDiscovery":true},"counts":{"blocked":0}\(schoolChangeField)}}
                 """
             )
+        case "/api/profile/avatar":
+            #expect(request.httpMethod == "POST")
+            savedSystemAvatarID = try bodyJSON(request)["avatarId"] as? String
+            systemAvatarAuthorization = request.value(forHTTPHeaderField: "Authorization")
+            return response(request, 200, #"{"success":true,"data":{"avatarId":"p05"}}"#)
         case "/api/v1/me/avatar":
             uploadedAvatarPath = request.url?.path
             uploadedAvatarContentType = request.value(forHTTPHeaderField: "Content-Type")?

@@ -24,8 +24,7 @@ struct ContactsView: View {
                                 router.navigate(to: .directChat(connectionID: row.connectionId))
                             } label: {
                                 HStack(spacing: 12) {
-                                    InitialAvatar(name: row.displayName)
-                                        .frame(width: 40, height: 40)
+                                    InitialAvatar(name: row.displayName, url: row.peer.avatarUrl, size: 40)
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(row.displayName)
                                             .font(.body.weight(.semibold))

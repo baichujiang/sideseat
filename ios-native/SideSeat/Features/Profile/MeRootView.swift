@@ -4,12 +4,14 @@ import SwiftUI
 struct MeRootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var store = CurrentProfileStore()
     @State private var editingProfile: NativeCurrentProfile?
     @State private var editingPrivacy: NativeCurrentProfile?
     @State private var editingLanguages: NativeCurrentProfile?
     @State private var verifyingProfile: NativeCurrentProfile?
     @State private var selectedAvatarPhoto: PhotosPickerItem?
+    @State private var isChoosingAvatar = false
     @State private var isPreparingAvatar = false
     @State private var avatarIssue: String?
     @State private var hasCompletedInitialProfileLoad = false
@@ -22,9 +24,9 @@ struct MeRootView: View {
                     VStack(alignment: .leading, spacing: 18) {
                         MeHeroCard(
                             profile: profile,
-                            isPreparingAvatar: isPreparingAvatar || selectedAvatarPhoto != nil,
+                            isPreparingAvatar: isPreparingAvatar || store.isSaving || selectedAvatarPhoto != nil,
                             avatarIssue: avatarIssue,
-                            selectedAvatarPhoto: $selectedAvatarPhoto,
+                            onChangeAvatar: { isChoosingAvatar = true },
                             onEditProfile: { editingProfile = profile }
                         )
 
@@ -140,6 +142,18 @@ struct MeRootView: View {
             }
         }
         .ssRootNavigationTitle("Me")
+        .sheet(isPresented: $isChoosingAvatar) {
+            if let profile = store.profile {
+                SystemAvatarPickerSheet(
+                    profile: profile,
+                    selectedPhoto: $selectedAvatarPhoto,
+                    issue: store.issue
+                ) { id in
+                    await store.saveSystemAvatar(id, using: session)
+                }
+                .dynamicTypeSize(dynamicTypeSize)
+            }
+        }
         .sheet(item: $editingProfile) { profile in
             ProfileEditSheet(profile: profile) { request in
                 let saved = await store.save(request, using: session)
@@ -295,11 +309,149 @@ private struct SchoolChangeResultBanner: View {
 }
 
 
+private struct SystemAvatarPickerSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let profile: NativeCurrentProfile
+    @Binding var selectedPhoto: PhotosPickerItem?
+    let issue: String?
+    let onSave: (String) async -> Bool
+    @State private var selection: String?
+    @State private var isSaving = false
+
+    init(
+        profile: NativeCurrentProfile,
+        selectedPhoto: Binding<PhotosPickerItem?>,
+        issue: String?,
+        onSave: @escaping (String) async -> Bool
+    ) {
+        self.profile = profile
+        _selectedPhoto = selectedPhoto
+        self.issue = issue
+        self.onSave = onSave
+        _selection = State(initialValue: NativeSystemAvatar.presetID(for: profile.avatarUrl))
+    }
+
+    private var previewName: String {
+        NativeSystemAvatar.all.first { $0.id == selection }?.localizedName
+            ?? AppLocalization.string("Your current avatar")
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: SideSeatTheme.spaceXL) {
+                    VStack(spacing: SideSeatTheme.spaceSM) {
+                        ProfileAvatar(url: selection ?? profile.avatarUrl, name: profile.displayName, size: 88)
+                        Text(previewName)
+                            .font(.headline)
+                            .accessibilityIdentifier("system-avatar-preview-name")
+                        Text("A little companion, a familiar face.")
+                            .font(.subheadline)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+
+                    PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                        Label("Choose a photo", systemImage: "photo.on.rectangle")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 48)
+                            .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 14))
+                    }
+                    .disabled(isSaving)
+                    .accessibilityIdentifier("profile-choose-photo")
+
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                        Text("System avatars").font(.headline)
+                        LazyVGrid(
+                            columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 280 : 72), spacing: 12)],
+                            alignment: .center, spacing: 16
+                        ) {
+                            ForEach(NativeSystemAvatar.all) { avatar in
+                                Button { selection = avatar.id } label: {
+                                    VStack(spacing: 8) {
+                                        Image(avatar.assetName)
+                                            .resizable().scaledToFit()
+                                            .frame(width: 64, height: 64)
+                                            .clipShape(Circle())
+                                            .padding(4)
+                                            .overlay {
+                                                if selection == avatar.id {
+                                                    Circle().strokeBorder(SideSeatTheme.accent, lineWidth: 2)
+                                                }
+                                            }
+                                            .overlay(alignment: .bottomTrailing) {
+                                                if selection == avatar.id {
+                                                    Image(systemName: "checkmark.circle.fill")
+                                                        .symbolRenderingMode(.palette)
+                                                        .foregroundStyle(SideSeatTheme.onAccent, SideSeatTheme.accent)
+                                                        .font(.system(size: 21, weight: .semibold))
+                                                }
+                                            }
+                                        Text(avatar.localizedName)
+                                            .font(.caption)
+                                            .foregroundStyle(SideSeatTheme.textPrimary)
+                                            .multilineTextAlignment(.center)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .contentShape(Rectangle())
+                                }
+                                .buttonStyle(SSPressButtonStyle())
+                                .disabled(isSaving)
+                                .accessibilityLabel(avatar.localizedName)
+                                .accessibilityAddTraits(selection == avatar.id ? .isSelected : [])
+                                .accessibilityIdentifier("system-avatar-\(avatar.id)")
+                            }
+                        }
+                    }
+                    if let issue {
+                        Text(issue)
+                            .font(.footnote)
+                            .foregroundStyle(SideSeatTheme.danger)
+                            .accessibilityIdentifier("system-avatar-error")
+                    }
+                }
+                .padding(20)
+            }
+            .navigationTitle("Choose an avatar")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }.disabled(isSaving)
+                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                SSFlowActionDock(
+                    title: AppLocalization.string(dynamicTypeSize.isAccessibilitySize ? "Save" : "Save avatar"),
+                    detail: dynamicTypeSize.isAccessibilitySize ? "" : AppLocalization.string("Your avatar appears in chats, plans and your profile."),
+                    isLoading: isSaving,
+                    isEnabled: selection != nil && selection != NativeSystemAvatar.presetID(for: profile.avatarUrl),
+                    accessibilityID: "system-avatar-save"
+                ) {
+                    guard let selection else { return }
+                    isSaving = true
+                    Task {
+                        if await onSave(selection) { dismiss() }
+                        isSaving = false
+                    }
+                }
+            }
+            .interactiveDismissDisabled(isSaving)
+            .onChange(of: selectedPhoto) { _, item in
+                if item != nil { dismiss() }
+            }
+            .ssFlowSheet()
+        }
+    }
+}
+
 private struct MeHeroCard: View {
     let profile: NativeCurrentProfile
     let isPreparingAvatar: Bool
     let avatarIssue: String?
-    @Binding var selectedAvatarPhoto: PhotosPickerItem?
+    let onChangeAvatar: () -> Void
     let onEditProfile: () -> Void
 
     var body: some View {
@@ -313,7 +465,7 @@ private struct MeHeroCard: View {
                         }
                         .shadow(color: .black.opacity(0.10), radius: 10, y: 4)
 
-                    PhotosPicker(selection: $selectedAvatarPhoto, matching: .images) {
+                    Button(action: onChangeAvatar) {
                         Image(systemName: "camera.fill")
                             .font(.caption2.weight(.bold))
                             .foregroundStyle(SideSeatTheme.onAccent)
@@ -326,6 +478,7 @@ private struct MeHeroCard: View {
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
                     .disabled(isPreparingAvatar)
+                    .accessibilityLabel(AppLocalization.string("Change avatar"))
                     .accessibilityIdentifier("profile-change-photo")
                     .offset(x: 2, y: 2)
                 }

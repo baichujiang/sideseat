@@ -1900,7 +1900,7 @@ private struct MutualOpportunitySourceCard: View {
         SSFlowCard {
             SSFlowCardHeader(
                 title: context.localizedTitle,
-                subtitle: AppLocalization.string("You both want to do this"),
+                subtitle: AppLocalization.string("You both showed interest"),
                 systemImage: "person.2.fill",
                 tint: SideSeatTheme.statusSuccessText
             )

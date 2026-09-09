@@ -1,15 +1,31 @@
 /**
- * Twenty preset avatars, served as static JPEGs under `/public/avatars/`.
- * `User.avatarUrl` is usually a short id like "p07" → `/avatars/p07.jpeg`.
+ * Twenty original Little Companions, served as versioned SVGs and bundled in iOS.
+ * Existing `User.avatarUrl` ids (p01…p20) stay unchanged; legacy JPEGs are retained.
  * It may also hold a public Vercel Blob URL for a user-uploaded photo under
  * `avatars/custom/<userId>/…` (written only by `/api/profile/avatar/upload`).
  */
 
 export const AVATAR_IDS = [
-  "p01", "p02", "p03", "p04", "p05",
-  "p06", "p07", "p08", "p09", "p10",
-  "p11", "p12", "p13", "p14", "p15",
-  "p16", "p17", "p18", "p19", "p20",
+  "p01",
+  "p02",
+  "p03",
+  "p04",
+  "p05",
+  "p06",
+  "p07",
+  "p08",
+  "p09",
+  "p10",
+  "p11",
+  "p12",
+  "p13",
+  "p14",
+  "p15",
+  "p16",
+  "p17",
+  "p18",
+  "p19",
+  "p20",
 ] as const;
 
 export type AvatarId = (typeof AVATAR_IDS)[number];
@@ -17,7 +33,11 @@ export type AvatarId = (typeof AVATAR_IDS)[number];
 export const DEFAULT_AVATAR_ID: AvatarId = "p01";
 
 const BLOB_HOST_SUFFIX = ".public.blob.vercel-storage.com";
-const INLINE_AVATAR_DATA_URL_PREFIXES = ["data:image/jpeg;base64,", "data:image/png;base64,", "data:image/webp;base64,"];
+const INLINE_AVATAR_DATA_URL_PREFIXES = [
+  "data:image/jpeg;base64,",
+  "data:image/png;base64,",
+  "data:image/webp;base64,",
+];
 
 export function userCustomAvatarBlobPrefix(userId: string): string {
   return `avatars/custom/${userId}/`;
@@ -46,7 +66,10 @@ export function isDisplayableCustomAvatarUrl(value: unknown): value is string {
 }
 
 /** Blob URL under this user's upload prefix (server + client for UI hints). */
-export function isTrustedUserAvatarBlobUrl(userId: string, url: string): boolean {
+export function isTrustedUserAvatarBlobUrl(
+  userId: string,
+  url: string,
+): boolean {
   if (!isDisplayableCustomAvatarUrl(url)) return false;
   try {
     const u = new URL(url);
@@ -64,11 +87,14 @@ export function resolveAvatarImageSrc(id?: string | null): string {
 
 export function getAvatarSrc(id?: string | null): string {
   const safe = isValidAvatarId(id) ? id : DEFAULT_AVATAR_ID;
-  return `/avatars/${safe}.jpeg`;
+  return `/avatars/companions-v1/${safe}.svg`;
 }
 
 export function isValidAvatarId(value: unknown): value is AvatarId {
-  return typeof value === "string" && (AVATAR_IDS as readonly string[]).includes(value);
+  return (
+    typeof value === "string" &&
+    (AVATAR_IDS as readonly string[]).includes(value)
+  );
 }
 
 export function randomAvatarId(): AvatarId {

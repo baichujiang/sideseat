@@ -33,8 +33,7 @@ struct GroupCreateSheet: View {
                                 toggle(row)
                             } label: {
                                 HStack {
-                                    InitialAvatar(name: row.displayName)
-                                        .frame(width: 32, height: 32)
+                                    InitialAvatar(name: row.displayName, url: row.peer?.avatarUrl, size: 32)
                                     Text(row.displayName)
                                         .foregroundStyle(.primary)
                                     Spacer()

@@ -44,7 +44,7 @@ final class AccessibilityAuditUITests: XCTestCase {
         )
 
         let togetherHome = app.descendants(matching: .any)["together-home"]
-        let togetherDecision = app.buttons["Do it together"]
+        let togetherDecision = app.buttons["mutual-opportunity-yes-cmutualui0000000000000001"]
         for _ in 0..<8 where !togetherDecision.exists || !togetherDecision.isHittable {
             togetherHome.swipeUp()
         }
@@ -180,10 +180,11 @@ final class AccessibilityAuditUITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(addIntent.frame.width, 44)
         XCTAssertGreaterThanOrEqual(addIntent.frame.height, 44)
 
-        for _ in 0..<10 where !app.buttons["Do it together"].isHittable {
+        for _ in 0..<10 where !app.buttons["mutual-opportunity-yes-cmutualui0000000000000001"].isHittable {
             home.swipeDown()
         }
-        let decisions = [app.buttons["Do it together"], app.buttons["Not this time"]]
+        let decisions = [app.buttons["mutual-opportunity-yes-cmutualui0000000000000001"],
+                         app.buttons["mutual-opportunity-no-cmutualui0000000000000001"]]
         for decision in decisions {
             for _ in 0..<10 where !decision.exists || !decision.isHittable {
                 home.swipeUp()

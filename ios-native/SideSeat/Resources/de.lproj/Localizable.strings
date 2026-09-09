@@ -700,7 +700,7 @@
 "New feedback" = "Neues Feedback";
 "New here?" = "New here?";
 "New password" = "New password";
-"Next" = "Next";
+"Next" = "Weiter";
 "No attendees yet" = "No attendees yet";
 "No blocked users" = "Keine blockierten Nutzer";
 "No feedback yet" = "Noch kein Feedback";
@@ -1780,3 +1780,49 @@
 "Go climbing together" = "Gemeinsam klettern";
 "Do yoga together" = "Gemeinsam Yoga machen";
 "%@ together" = "%@ zusammen";
+
+/* Original Little Companions system avatars. */
+"Change avatar" = "Avatar ändern";
+"Choose an avatar" = "Avatar auswählen";
+"System avatars" = "Systemavatare";
+"Choose a photo" = "Foto auswählen";
+"Save avatar" = "Avatar speichern";
+"Your current avatar" = "Dein aktueller Avatar";
+"A little companion, a familiar face." = "Ein kleiner Begleiter, ein vertrautes Gesicht.";
+"Your avatar appears in chats, plans and your profile." = "Dein Avatar erscheint in Chats, Plänen und deinem Profil.";
+"Peach cat" = "Pfirsichkatze";
+"Mint rabbit" = "Minzhase";
+"Honey bear" = "Honigbär";
+"Apricot fox" = "Aprikosenfuchs";
+"Cloud koala" = "Wolkenkoala";
+"Bamboo panda" = "Bambuspanda";
+"Cocoa otter" = "Kakaootter";
+"Blueberry penguin" = "Blaubeerpinguin";
+"Biscuit puppy" = "Kekshund";
+"Pond frog" = "Teichfrosch";
+"Lilac cat" = "Fliederkatze";
+"Rose rabbit" = "Rosenhase";
+"Sage bear" = "Salbeibär";
+"Dusk fox" = "Abendfuchs";
+"Sand koala" = "Sandkoala";
+"Pebble panda" = "Kieselpanda";
+"River otter" = "Flussotter";
+"Sunrise penguin" = "Morgenpinguin";
+"Maple puppy" = "Ahornhund";
+"Matcha frog" = "Matchafrosch";
+
+/* Opportunity card hierarchy */
+"Available together" = "Gemeinsam Zeit";
+"Why this opportunity" = "Warum dieser Vorschlag";
+"Both say yes, then plan together." = "Erst wenn beide Ja sagen, plant ihr zusammen.";
+
+/* Private interest swipe bar */
+"Show interest" = "Interesse";
+"Ignore" = "Ignorieren";
+"Slide or tap to choose" = "Schieben oder antippen";
+"Release to show interest" = "Loslassen, um Interesse zu zeigen";
+"Release to ignore" = "Loslassen zum Ignorieren";
+"If you both show interest, chat first and confirm a plan later." = "Wenn beide Interesse haben, chattet ihr zuerst und bestätigt den Plan danach.";
+"You both showed interest" = "Ihr habt beide Interesse";
+"Chat about the details" = "Details besprechen";
+"You can chat about the details now." = "Ihr könnt jetzt die Details besprechen.";

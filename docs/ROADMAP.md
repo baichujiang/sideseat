@@ -2,9 +2,55 @@
 
 **Status:** Active dependency roadmap
 
-**Last updated:** 2026-09-08
+**Last updated:** 2026-09-09
 
 **Governing product:** [Product](./PRODUCT.md)
+
+**Current internal matching demo:** [test_001 QA demo](./TOGETHER_QA_DEMO.md)
+has six live, course-scoped QA matching cards covering all Together topics.
+Existing intentions/history and matching rules are preserved. Next: refresh
+Together on the internal app and inspect them before **2026-09-09 15:45 UTC**;
+other Sports options are prepared as separate batches. This is synthetic QA,
+not an organic pilot sample or a new app release.
+
+**Current local UI work:** The [Opportunity card redesign](./DESIGN_SYSTEM.md#opportunity-card-hierarchy--2026-09-09)
+prioritizes activity, peer and shared time; keeps different ideas visible; and
+collapses detailed fit explanations behind a compact score row. A single
+[interest swipe bar](./DESIGN_SYSTEM.md#private-interest-swipe-bar--2026-09-09)
+now offers left “Ignore” / `忽略` and right “Interested” / `有兴趣`, with release-to-submit,
+tap/accessibility alternatives and preserved vertical scrolling. Mutual interest
+offers “Chat about the details”; confirming a Plan is still a separate step. The
+[Little Companions system avatars](./SYSTEM_AVATARS.md) add 20 original animal
+presets, offline native resolution and a Me avatar chooser. Both are local work,
+not included in Build 37 and not yet committed or released. Native card verification
+passed: six topics, private/mutual states, Chinese/English/German, Light/Dark,
+expanded explanations and accessibility5. Final swipe-bar verification passed
+(4 UI + 4 gesture/lifecycle unit tests), including both directions, short-drag
+cancellation and vertical scrolling from the handle. The latest interest/ignore
+visual refinement also passed 3 focused UI + 4 unit tests, with the new labels,
+quieter two-tone track and compact handle verified in Light/Dark. These
+are offline fixtures, not production or TestFlight acceptance. Next: review the
+preview, then commit/push and ship a new internal TestFlight build when authorized;
+verify the physical swipe feel and haptics on both test phones after updating.
+The [comfort and character refinement](./DESIGN_SYSTEM.md#comfort-and-character-refresh--2026-09-09)
+replaces large Rose product buttons with adaptive ink/chalk, introduces six original
+vector activity illustrations, and unifies them across the picker, Intent and
+Opportunity. Verification passed: 26 contrast/asset checks and 6 distinct UI tests.
+Largest-text QA also fixed editor-sheet font inheritance and moved oversized fixed
+instructions into the scrolling form, with Next/Save kept reachable. These changes
+remain local/unreleased. Next: review the new visual direction, then commit/push
+and ship internal TestFlight when authorized.
+No database migration or matching-rule change is required.
+
+**Final interest-bar interaction polish:**
+[Drag feedback](./DESIGN_SYSTEM.md#interest-bar-motion-and-feedback--2026-09-09)
+now includes handle lift/stretch, a continuous trail, progress/target rings,
+threshold feedback, release snap and tiered haptics. The same private decision
+action is awaited before unlocking retries. Normal/forced Reduce Motion and
+failure recovery verification passed (4 distinct UI + 2 gesture unit tests).
+A native motion recording is available in `docs/visual-qa/opportunity-swipe-motion.mp4`.
+This is still local, unreleased work. Next: commit/push and release internal
+TestFlight when authorized, then verify haptic strength on the phones.
 
 **Current release evidence:**
 [TestFlight Build 37 title/disclosure fix](./releases/2026-09-08-testflight-37.md)

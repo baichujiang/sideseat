@@ -1781,3 +1781,49 @@
 "Go climbing together" = "Go climbing together";
 "Do yoga together" = "Do yoga together";
 "%@ together" = "%@ together";
+
+/* Original Little Companions system avatars. */
+"Change avatar" = "Change avatar";
+"Choose an avatar" = "Choose an avatar";
+"System avatars" = "System avatars";
+"Choose a photo" = "Choose a photo";
+"Save avatar" = "Save avatar";
+"Your current avatar" = "Your current avatar";
+"A little companion, a familiar face." = "A little companion, a familiar face.";
+"Your avatar appears in chats, plans and your profile." = "Your avatar appears in chats, plans and your profile.";
+"Peach cat" = "Peach cat";
+"Mint rabbit" = "Mint rabbit";
+"Honey bear" = "Honey bear";
+"Apricot fox" = "Apricot fox";
+"Cloud koala" = "Cloud koala";
+"Bamboo panda" = "Bamboo panda";
+"Cocoa otter" = "Cocoa otter";
+"Blueberry penguin" = "Blueberry penguin";
+"Biscuit puppy" = "Biscuit puppy";
+"Pond frog" = "Pond frog";
+"Lilac cat" = "Lilac cat";
+"Rose rabbit" = "Rose rabbit";
+"Sage bear" = "Sage bear";
+"Dusk fox" = "Dusk fox";
+"Sand koala" = "Sand koala";
+"Pebble panda" = "Pebble panda";
+"River otter" = "River otter";
+"Sunrise penguin" = "Sunrise penguin";
+"Maple puppy" = "Maple puppy";
+"Matcha frog" = "Matcha frog";
+
+/* Opportunity card hierarchy */
+"Available together" = "Available together";
+"Why this opportunity" = "Why this opportunity";
+"Both say yes, then plan together." = "Both say yes, then plan together.";
+
+/* Private interest swipe bar */
+"Show interest" = "Interested";
+"Ignore" = "Ignore";
+"Slide or tap to choose" = "Swipe or tap to choose";
+"Release to show interest" = "Release to show interest";
+"Release to ignore" = "Release to ignore";
+"If you both show interest, chat first and confirm a plan later." = "If you both show interest, chat first and confirm a plan later.";
+"You both showed interest" = "You both showed interest";
+"Chat about the details" = "Chat about the details";
+"You can chat about the details now." = "You can chat about the details now.";

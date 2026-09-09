@@ -1410,50 +1410,96 @@ struct DiscoverStatusBadge: View {
     }
 }
 
+/// The same persisted p01…p20 identities are used by the web and native clients.
+struct NativeSystemAvatar: Identifiable, Equatable, Sendable {
+    let id: String
+    let nameKey: String
+
+    var assetName: String { "SystemAvatar-\(id)" }
+    var localizedName: String { AppLocalization.string(String.LocalizationValue(nameKey)) }
+
+    static let all: [NativeSystemAvatar] = [
+        NativeSystemAvatar(id: "p01", nameKey: "Peach cat"),
+        NativeSystemAvatar(id: "p02", nameKey: "Mint rabbit"),
+        NativeSystemAvatar(id: "p03", nameKey: "Honey bear"),
+        NativeSystemAvatar(id: "p04", nameKey: "Apricot fox"),
+        NativeSystemAvatar(id: "p05", nameKey: "Cloud koala"),
+        NativeSystemAvatar(id: "p06", nameKey: "Bamboo panda"),
+        NativeSystemAvatar(id: "p07", nameKey: "Cocoa otter"),
+        NativeSystemAvatar(id: "p08", nameKey: "Blueberry penguin"),
+        NativeSystemAvatar(id: "p09", nameKey: "Biscuit puppy"),
+        NativeSystemAvatar(id: "p10", nameKey: "Pond frog"),
+        NativeSystemAvatar(id: "p11", nameKey: "Lilac cat"),
+        NativeSystemAvatar(id: "p12", nameKey: "Rose rabbit"),
+        NativeSystemAvatar(id: "p13", nameKey: "Sage bear"),
+        NativeSystemAvatar(id: "p14", nameKey: "Dusk fox"),
+        NativeSystemAvatar(id: "p15", nameKey: "Sand koala"),
+        NativeSystemAvatar(id: "p16", nameKey: "Pebble panda"),
+        NativeSystemAvatar(id: "p17", nameKey: "River otter"),
+        NativeSystemAvatar(id: "p18", nameKey: "Sunrise penguin"),
+        NativeSystemAvatar(id: "p19", nameKey: "Maple puppy"),
+        NativeSystemAvatar(id: "p20", nameKey: "Matcha frog"),
+    ]
+    static let defaultID = "p01"
+
+    static func presetID(for value: String?) -> String? {
+        all.first {
+            value == $0.id || value == "/avatars/\($0.id).jpeg"
+                || value == "/avatars/companions-v1/\($0.id).svg"
+        }?.id
+    }
+}
+
+enum NativeAvatarSource: Equatable {
+    case preset(String)
+    case remote(URL)
+
+    static func resolve(_ value: String?) -> NativeAvatarSource {
+        if let id = NativeSystemAvatar.presetID(for: value) { return .preset(id) }
+        if let value, let url = URL(string: value),
+           ["https", "http", "data"].contains(url.scheme?.lowercased() ?? "") {
+            return .remote(url)
+        }
+        return .preset(NativeSystemAvatar.defaultID)
+    }
+}
+
+/// Unclipped content so individual circles and group collage tiles share resolution.
+private struct NativeAvatarImage: View {
+    let value: String?
+
+    var body: some View {
+        switch NativeAvatarSource.resolve(value) {
+        case .preset(let id):
+            Image("SystemAvatar-\(id)").resizable().scaledToFill()
+        case .remote(let url):
+            AsyncImage(url: url) { phase in
+                if case .success(let image) = phase {
+                    image.resizable().scaledToFill()
+                } else {
+                    Image("SystemAvatar-\(NativeSystemAvatar.defaultID)")
+                        .resizable().scaledToFill()
+                }
+            }
+        }
+    }
+}
+
 struct InitialAvatar: View {
     let name: String
     var url: String? = nil
     var size: CGFloat = 36
 
-    private var tileColor: Color {
-        SideSeatTheme.AvatarPalette.color(for: name)
-    }
-
     var body: some View {
-        ZStack {
-            Circle()
-                .fill(tileColor)
-            if let url, let imageURL = URL(string: url), !url.isEmpty {
-                AsyncImage(url: imageURL) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image.resizable().scaledToFill()
-                    default:
-                        initialsText
-                    }
-                }
-                .frame(width: size, height: size)
-                .clipShape(Circle())
-            } else {
-                initialsText
-            }
-        }
+        NativeAvatarImage(value: url)
         .frame(width: size, height: size)
+        .clipShape(Circle())
         .overlay {
             Circle().strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
         }
         .accessibilityHidden(true)
     }
 
-    private var initialsText: some View {
-        Text(String(name.first ?? "?"))
-            .font(size >= 40 ? .title3.weight(.semibold) : .subheadline.weight(.semibold))
-            .foregroundStyle(.white)
-            .lineLimit(1)
-            .minimumScaleFactor(0.5)
-            .accessibilityHidden(true)
-            .accessibilityIdentifier("avatar-initial-visual")
-    }
 }
 
 /// WeChat-style rounded-square collage of up to 9 member avatars.
@@ -1496,33 +1542,10 @@ struct GroupCompositeAvatar: View {
         .accessibilityHidden(true)
     }
 
-    @ViewBuilder
     private func tile(_ member: Member, cell: CGFloat) -> some View {
-        ZStack {
-            Rectangle().fill(Self.tileColor(for: member.name))
-            if let url = member.url, let imageURL = URL(string: url), !url.isEmpty {
-                AsyncImage(url: imageURL) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image.resizable().scaledToFill()
-                    default:
-                        tileInitials(member.name, cell: cell)
-                    }
-                }
-                .frame(width: cell, height: cell)
-                .clipped()
-            } else {
-                tileInitials(member.name, cell: cell)
-            }
-        }
+        NativeAvatarImage(value: member.url)
         .frame(width: cell, height: cell)
         .clipped()
-    }
-
-    private func tileInitials(_ name: String, cell: CGFloat) -> some View {
-        Text(String(name.first ?? "?"))
-            .font(.system(size: max(8, cell * 0.42), weight: .semibold))
-            .foregroundStyle(.white)
     }
 
     /// WeChat-style row groupings for 1…9 faces.

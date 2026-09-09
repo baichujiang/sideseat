@@ -452,13 +452,13 @@ final class SocialLiveUITests: XCTestCase {
             ).firstMatch
             XCTAssertTrue(details.exists)
         }
-        XCTAssertFalse(secondParticipant.buttons["Start planning"].exists)
+        XCTAssertFalse(secondParticipant.buttons["Chat about the details"].exists)
         secondDecision.tap()
         XCTAssertTrue(
             secondParticipant.staticTexts["Your choice is saved privately"]
                 .waitForExistence(timeout: 12)
         )
-        XCTAssertFalse(secondParticipant.staticTexts["You both want to do this"].exists)
+        XCTAssertFalse(secondParticipant.staticTexts["You both showed interest"].exists)
         secondParticipant.terminate()
 
         let firstReturn = launchAndLogin(
@@ -472,13 +472,13 @@ final class SocialLiveUITests: XCTestCase {
         let firstDecision = togetherYesButton(in: firstReturn)
         XCTAssertFalse(firstReturn.staticTexts[chinesePlan ? "你的选择已私密保存" : "Your choice is saved privately"].exists)
         firstDecision.tap()
-        let startPlanning = firstReturn.buttons[chinesePlan ? "开始计划" : "Start planning"]
+        let startPlanning = firstReturn.buttons[chinesePlan ? "聊聊细节" : "Chat about the details"]
         XCTAssertTrue(startPlanning.waitForExistence(timeout: 12))
         startPlanning.tap()
 
         XCTAssertTrue(firstReturn.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 12))
         XCTAssertTrue(
-            firstReturn.staticTexts[chinesePlan ? "你们都想一起做这件事" : "You both want to do this"]
+            firstReturn.staticTexts[chinesePlan ? "你们都有兴趣" : "You both showed interest"]
                 .waitForExistence(timeout: 12)
         )
         XCTAssertTrue(firstReturn.staticTexts[contextTitle].waitForExistence(timeout: 8))
@@ -789,7 +789,7 @@ final class SocialLiveUITests: XCTestCase {
 
     private func togetherYesButton(in app: XCUIApplication) -> XCUIElement {
         let decision = app.buttons.matching(
-            NSPredicate(format: "label IN %@", ["Do it together", "愿意同行", "Zusammen machen"])
+            NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-yes-")
         ).firstMatch
         for _ in 0..<8 where !decision.isHittable {
             app.swipeUp()

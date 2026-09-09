@@ -281,6 +281,34 @@ final class CurrentProfileStore {
         }
     }
 
+    func saveSystemAvatar(_ id: String, using session: SessionStore) async -> Bool {
+        guard !isSaving, let current = profile,
+              NativeSystemAvatar.all.contains(where: { $0.id == id }) else { return false }
+        isSaving = true
+        issue = nil
+        defer { isSaving = false }
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            install(current.applyingAvatar(url: id))
+            return true
+        }
+        #endif
+
+        struct Selection: Codable, Sendable { let avatarId: String }
+        do {
+            // Existing authenticated endpoint accepts the same access bearer as v1.
+            let response: APIEnvelope<Selection> = try await session.sendAuthorized(
+                "api/profile/avatar", method: .post, body: Selection(avatarId: id)
+            )
+            install(current.applyingAvatar(url: response.data.avatarId))
+            return true
+        } catch {
+            issue = error.localizedDescription
+            return false
+        }
+    }
+
     func uploadAvatar(_ draft: NativeProfileAvatarDraft, using session: SessionStore) async -> Bool {
         guard !isSaving else { return false }
         isSaving = true
