@@ -4,8 +4,9 @@
 not a minimum compatibility threshold. This supersedes the soft eligibility
 rules in Activity Fit, flexible timing and the ordinary-discovery history gate.
 
-**Delivery:** Owner authorized commit/push, backend with discovery OFF and internal
-[Build 40](./releases/2026-09-09-testflight-40.md). Release in progress.
+**Delivery:** Source `f7d5939` committed/pushed; backend deployed with discovery OFF.
+[Build 40](./releases/2026-09-09-testflight-40.md) is processed and available in
+`SideSeat Internal`, with Chinese testing notes saved.
 Production retains Build 39's existing rules until both phones update and the
 owner confirms activation.
 `V2_DISCOVERY_MATCHING_ENABLED` defaults OFF. No new migration is required.
@@ -50,12 +51,12 @@ The frozen heuristic totals 100 possible points; it is neither a person rating
 nor a success probability. Unknown time contributes no asserted overlap and is
 explicitly distinguished from a conflict.
 
-| Component | Points |
-| --- | --- |
-| Activity | Exact 50; parallel study 35; related general activity 25; other same-category activity 10; different category 0 |
-| Time | Exact overlap: up to 30 (one point per two minutes); compatible dated preferences 15; unspecified or conflicting time 0 |
-| Language | Listed common language 10; otherwise 0 |
-| School | Same recognized school 10; otherwise 0 |
+| Component | Points                                                                                                                  |
+| --------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Activity  | Exact 50; parallel study 35; related general activity 25; other same-category activity 10; different category 0         |
+| Time      | Exact overlap: up to 30 (one point per two minutes); compatible dated preferences 15; unspecified or conflicting time 0 |
+| Language  | Listed common language 10; otherwise 0                                                                                  |
+| School    | Same recognized school 10; otherwise 0                                                                                  |
 
 Course differences are disclosed, not scored or presented as a shared course.
 Conflicting times produce **NULL appointment timestamps**, not a made-up overlap;
@@ -120,8 +121,7 @@ SideSeat simulator; no production/user fixture writes or physical-phone changes.
 
 ## Next step
 
-Local native acceptance is complete and release is authorized:
-commit/push scoped changes → deploy backend with discovery OFF → publish internal
-Build 40 → confirm both phones updated → enable discovery →
+Local native acceptance and flags-OFF internal release are complete:
+confirm both phones updated to **1.0.0 (40)** → owner confirmation → enable discovery →
 signed two-account publication-to-Plan acceptance. Build 39 alone cannot show
 this new UI. Preserve unrelated Info.plist changes, old archives and local media.

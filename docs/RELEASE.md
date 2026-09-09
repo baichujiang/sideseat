@@ -154,12 +154,12 @@ Store submission additionally requires:
 - Rollback must not reverse destructive migrations. Use forward repair, feature
   kill switches and compatible older clients where appropriate.
 
-Current recorded build: [TestFlight 1.0.0 (39)](./releases/2026-09-09-testflight-39.md)
-(processed and available in `SideSeat Internal`; production backend and both additive
-migrations are deployed. Automatic matching and flexible timing are now ON after
-the [authorized activation](./releases/2026-09-09-automatic-matching-production.md); existing
-broader matching stays ON. Next: both phone updates,
-configuration refresh and signed two-account acceptance. Build 36
+Current recorded build: [TestFlight 1.0.0 (40)](./releases/2026-09-09-testflight-40.md)
+(processed and available in `SideSeat Internal`, Chinese testing notes saved;
+backend deployed with discovery OFF. Existing automatic matching, flexible timing
+and activity-fit stay ON. No new migration. Next: confirm both phones updated to
+Build 40 → enable discovery → configuration refresh and signed two-account
+acceptance. Do not enable discovery before the owner's update confirmation. Build 36
 matching-to-both-Calendars and Build 34 repeat Outcome acceptance remain historical
-evidence, not acceptance of Build 39. Public-release readiness still requires the
+evidence, not acceptance of Build 40. Public-release readiness still requires the
 separate checks above).
