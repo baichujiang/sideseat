@@ -132,8 +132,8 @@ simulator, `SideSeat-Development`:
   (local, ignored). Strings validation, document formatting and diff checks pass.
 
 These are offline QA fixtures, not production matching or TestFlight acceptance.
-The redesign and system avatars remain uncommitted/unreleased local work. Next:
-review the preview, then commit/push and release a new internal build when authorized.
+The redesign and system avatars are committed/pushed for
+[Build 38](./releases/2026-09-09-testflight-38.md); that record tracks publication.
 
 ### Private interest swipe bar — 2026-09-09
 
@@ -186,8 +186,8 @@ screenshots were refreshed and visually checked. Result:
 diff checks pass. Gesture thresholds, callbacks and private consent are unchanged.
 
 This is local simulator acceptance, not a TestFlight release or a physical-device
-haptic check. Next: commit/push when authorized, ship the new internal build, then
-check swipe feel and haptics on the two test phones.
+haptic check. The feature is committed for Build 38. After internal publication,
+check swipe feel and haptics on the two updated test phones.
 
 ### Interest bar motion and feedback — 2026-09-09
 
@@ -220,13 +220,13 @@ drag cancellation, vertical scrolling, tap actions, six topics/consent states,
 largest text and an offline failed-save fixture returning to centered, enabled
 controls. The failure fixture makes no network request.
 
-An actual simulator recording excerpt is at
+An actual simulator recording excerpt is retained locally, outside Git, at
 `docs/visual-qa/opportunity-swipe-motion.mp4`; the held-threshold frame at
 `opportunity-swipe-motion-held.png` was visually checked. Logs:
 `/tmp/sideseat-swipe-motion-r1.log`, `/tmp/sideseat-swipe-motion-r3.log`.
-Document formatting and diff checks pass. This is not a new TestFlight build or
-a physical haptic sign-off. Next: commit/push and ship internal TestFlight when
-authorized, then check pickup/threshold/release haptics on the test phones.
+Document formatting and diff checks pass. This verifies the local implementation,
+not physical haptics. It is committed for Build 38; after internal publication,
+check pickup/threshold/release haptics on both updated test phones.
 
 ### Comfort and character refresh — 2026-09-09
 
@@ -250,7 +250,7 @@ The same artwork appears in the category picker, saved Intent header, time-step
 summary and Opportunity header. Category options use illustrated tiles with an
 explicit outline/checkmark and selected accessibility trait. Large text changes
 the picker to one column. Matching, private YES/NO, chat and Plan confirmation
-remain unchanged. This is local, unreleased UI work; no live data is written.
+remain unchanged. This UI is committed for Build 38; local QA writes no live data.
 
 Largest-text verification exposed two existing editor constraints: the presented
 sheet did not inherit the explicit Dynamic Type setting, and fixed step/help copy
@@ -274,8 +274,8 @@ and the Chinese Light/Dark two-step editor regression (2 UI tests, zero failures
 `/tmp/sideseat-comfort-ui-large-type-r4.log`. The large-text screenshot
 `flow-activity-picker-de-large-type.png` was visually checked. Across the two final
 runs, 26 unit checks and 6 distinct UI tests passed. Document formatting,
-localization validation and diff checks pass. Next: review this visual direction,
-then commit/push and release a new internal TestFlight build when authorized.
+localization validation and diff checks pass. The changes are committed for
+Build 38; the release record tracks internal availability and the next phone check.
 
 ### Editing sheets
 

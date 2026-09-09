@@ -1,6 +1,7 @@
 # Little Companions — system avatars
 
-Updated: 2026-09-08. Status: implemented locally; not in TestFlight Build 37.
+Updated: 2026-09-09. Status: native avatars released in internal TestFlight Build 38;
+phone acceptance pending. See the [release record](./releases/2026-09-09-testflight-38.md).
 
 ## Product and design
 
@@ -78,13 +79,10 @@ uses the real local database. This is not a physical-device/TestFlight acceptanc
 
 ## Next step
 
-After review, commit and push only the avatar work, then prepare and upload a new
-internal TestFlight build. The native assets and existing API allow the iPhone
-feature to work without a database migration. Publish the versioned static assets
-and middleware change with the corresponding backend/web deployment; do not
-enable the legacy web app. Ask both internal test phones to update and confirm
-that a changed avatar is visible in Me, Messages and the peer's profile.
-
-Build 37 remains the latest recorded internal release; this document does not
-claim the new avatars have been shipped. Preserve the unrelated local Info.plist
-edit and old `.xcarchive` directories when staging or preparing a release.
+Ask both internal test phones to update to the available Build 38 and
+confirm that a saved avatar is visible in Me, Messages and the peer's profile.
+Native assets are offline and use the existing API; no migration or backend/web
+deployment is required for this native release. The matching versioned web assets
+and middleware are committed but their web rollout is deferred; do not enable the
+legacy web app. The unrelated local Info.plist edit and old `.xcarchive` directories
+remain preserved outside the release source.
