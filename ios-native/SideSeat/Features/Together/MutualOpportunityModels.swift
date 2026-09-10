@@ -61,28 +61,81 @@ struct NativeActivityFit: Codable, Hashable, Sendable {
     var isRelatedActivity: Bool { basis == "RELATED_ACTIVITY" }
     var isDiscovery: Bool { policyVersion == "DISCOVERY_FIT_V1" }
     var isDifferentActivity: Bool { basis == "DIFFERENT_ACTIVITY" }
+
+    /// The card keeps a stable two-row scan pattern: activity first, timing second.
+    /// Secondary differences remain available in the expanded explanation below.
     var differenceHints: [String] {
-        (differences ?? []).compactMap { code in
-            let key: String
-            switch code {
-            case "ACTIVITY": key = "Different activities — see what you could enjoy together."
-            case "TIME": key = "Times do not overlap yet — a different time would need agreement."
-            case "TIME_UNDECIDED": key = "Timing is still open — discuss it together."
-            case "LANGUAGE": key = "No shared language listed — check how you would communicate."
-            case "SCHOOL": key = "Different or unspecified schools — agree on a convenient place."
-            case "COURSE": key = "Different course preferences — the course is not agreed."
-            default: return nil
-            }
-            return AppLocalization.string(String.LocalizationValue(key))
-        }
+        guard isDiscovery else { return detailedDifferenceHints }
+        return [activitySummaryHint, timeSummaryHint]
     }
-    var breakdown: String {
-        guard let timePoints else {
-            return AppLocalization.string("Activity fit uses your activities, shared language and school. Timing is discussed separately.")
+
+    private var activitySummaryHint: String {
+        if differenceCodes.contains("ACTIVITY") {
+            return localizedDifference("ACTIVITY")
+                ?? AppLocalization.string("Different activities — see what you could enjoy together.")
         }
-        return String(format: AppLocalization.string(
-            "Activity %d/50 · Time %d/30 · Language %d/10 · School %d/10"
-        ), activityPoints, timePoints, languagePoints, schoolPoints)
+        return AppLocalization.string("Same activity")
+    }
+
+    private var timeSummaryHint: String {
+        if differenceCodes.contains("TIME") {
+            return localizedDifference("TIME")
+                ?? AppLocalization.string("Times do not overlap yet — a different time would need agreement.")
+        }
+        if differenceCodes.contains("TIME_UNDECIDED") {
+            return localizedDifference("TIME_UNDECIDED")
+                ?? AppLocalization.string("Timing is still open — discuss it together.")
+        }
+        if let overlapMinutes, overlapMinutes > 0 {
+            return String(
+                format: AppLocalization.string("%d minutes of shared availability"),
+                overlapMinutes
+            )
+        }
+        if let timePoints, timePoints > 0 {
+            return AppLocalization.string("Available together")
+        }
+        return AppLocalization.string("Time to discuss")
+    }
+
+    private var differenceCodes: Set<String> {
+        Set(differences ?? [])
+    }
+
+    private var detailedDifferenceHints: [String] {
+        (differences ?? []).compactMap(localizedDifference)
+    }
+
+    private func localizedDifference(_ code: String) -> String? {
+        let key: String
+        switch code {
+        case "ACTIVITY": key = "Different activities — see what you could enjoy together."
+        case "TIME": key = "Times do not overlap yet — a different time would need agreement."
+        case "TIME_UNDECIDED": key = "Timing is still open — discuss it together."
+        case "LANGUAGE": key = "No shared language listed — check how you would communicate."
+        case "SCHOOL": key = "Different or unspecified schools — agree on a convenient place."
+        case "COURSE": key = "Different course preferences — the course is not agreed."
+        default: return nil
+        }
+        return AppLocalization.string(String.LocalizationValue(key))
+    }
+
+    var breakdown: String {
+        let scoreBreakdown: String
+        if let timePoints {
+            scoreBreakdown = String(format: AppLocalization.string(
+                "Activity %d/50 · Time %d/30 · Language %d/10 · School %d/10"
+            ), activityPoints, timePoints, languagePoints, schoolPoints)
+        } else {
+            scoreBreakdown = AppLocalization.string(
+                "Activity fit uses your activities, shared language and school. Timing is discussed separately."
+            )
+        }
+
+        guard isDiscovery, !detailedDifferenceHints.isEmpty else {
+            return scoreBreakdown
+        }
+        return (detailedDifferenceHints + [scoreBreakdown]).joined(separator: "\n")
     }
 }
 
