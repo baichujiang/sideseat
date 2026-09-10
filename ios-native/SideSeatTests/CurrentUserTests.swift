@@ -205,19 +205,21 @@ struct TogetherPresentationTests {
 
 @Suite("Opportunity swipe decision")
 struct OpportunitySwipeDecisionTests {
-    @Test("Actual horizontal travel selects interest on the right and skip on the left")
-    func choosesDirection() {
+    @Test("Only deliberate rightward travel selects private interest")
+    func choosesInterestDirection() {
         #expect(SSOpportunitySwipeChoice.releasedChoice(
             translation: CGSize(width: 100, height: 4), travel: 120
         ) == .interested)
-        #expect(SSOpportunitySwipeChoice.releasedChoice(
-            translation: CGSize(width: -100, height: 4), travel: 120
-        ) == .skip)
     }
 
-    @Test("Short, returned and vertical drags do not submit a decision")
+    @Test("Left, short, returned and vertical drags do not submit a decision")
     func leavesChoiceOpen() {
-        for translation in [CGSize(width: 30, height: 0), .zero, CGSize(width: 30, height: 120)] {
+        for translation in [
+            CGSize(width: -100, height: 4),
+            CGSize(width: 30, height: 0),
+            .zero,
+            CGSize(width: 30, height: 120),
+        ] {
             #expect(SSOpportunitySwipeChoice.releasedChoice(translation: translation, travel: 120) == nil)
         }
     }

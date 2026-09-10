@@ -745,8 +745,8 @@ private struct MutualOpportunityCard: View {
     var body: some View {
         SSFlowCard {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
-                activityHeader
                 peerRow
+                activityHeader
                 availabilityRow
                 activityContext
                 fitDisclosure
@@ -844,58 +844,63 @@ private struct MutualOpportunityCard: View {
         .accessibilityValue(opportunity.matchFit?.differences?.contains("TIME") == true
                              ? AppLocalization.string("Time needs a new agreement") : opportunityWindow)
         .accessibilityElement(children: .ignore)
+        .accessibilityIdentifier("mutual-opportunity-time-\(opportunity.id)")
     }
 
     private var activityContext: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            Label(opportunity.matchTitle, systemImage: matchSymbol)
-                .font(.footnote.weight(.medium))
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .fixedSize(horizontal: false, vertical: true)
-
-            if let fit = opportunity.matchFit, fit.isDiscovery {
-                let layout = dynamicTypeSize.isAccessibilitySize
-                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
-                    : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceLG))
-                layout {
-                    if let activity = fit.viewerActivity { explanationRow(title: AppLocalization.string("You"), value: activity.title) }
-                    if let activity = fit.peerActivity { explanationRow(title: opportunity.peer.displayName, value: activity.title) }
-                }
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                    ForEach(fit.differenceHints, id: \.self) { hint in
-                        Label(hint, systemImage: "arrow.left.arrow.right")
-                            .font(.footnote)
-                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .accessibilityElement(children: .ignore)
-                            .accessibilityLabel(hint)
-                    }
-                }
-                .accessibilityElement(children: .combine)
-                .accessibilityIdentifier("mutual-opportunity-differences-\(opportunity.id)")
-            } else if opportunity.topic == .study || opportunity.matchFit?.isRelatedActivity == true {
-                let layout = dynamicTypeSize.isAccessibilitySize
-                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
-                    : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceLG))
-                layout {
-                    if let activity = opportunity.topic == .study
-                        ? opportunity.viewerStudyGoalTitle : opportunity.matchFit?.viewerActivityText {
-                        explanationRow(title: AppLocalization.string("You"), value: activity)
-                    }
-                    if let activity = opportunity.topic == .study
-                        ? opportunity.peerStudyGoalTitle : opportunity.matchFit?.peerActivityText {
-                        explanationRow(title: opportunity.peer.displayName, value: activity)
-                    }
-                }
-            }
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            opportunityFitRow(
+                title: AppLocalization.string("Activity"),
+                value: activityFitSummary,
+                systemImage: "figure.walk"
+            )
+            opportunityFitRow(
+                title: AppLocalization.string("Time"),
+                value: timeFitSummary,
+                systemImage: "clock"
+            )
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("mutual-opportunity-differences-\(opportunity.id)")
     }
 
-    private var matchSymbol: String {
-        if opportunity.matchFit?.isDiscovery == true { return "sparkle.magnifyingglass" }
-        if opportunity.isRepeat == true { return "arrow.clockwise" }
-        if opportunity.matchFit?.isRelatedActivity == true { return "arrow.triangle.branch" }
-        return opportunity.effectiveMatchKind == .sharedContext ? "building.2" : "equal.circle"
+    private var activityFitSummary: String {
+        if let fit = opportunity.matchFit, fit.isDiscovery, let first = fit.differenceHints.first {
+            return first
+        }
+        return opportunity.matchTitle
+    }
+
+    private var timeFitSummary: String {
+        if let fit = opportunity.matchFit, fit.isDiscovery, fit.differenceHints.count > 1 {
+            return fit.differenceHints[1]
+        }
+        if opportunity.matchFit?.differences?.contains("TIME") == true {
+            return AppLocalization.string("Time needs a new agreement")
+        }
+        return opportunity.startDate == nil
+            ? AppLocalization.string("Time to discuss")
+            : AppLocalization.string("Available together")
+    }
+
+    private func opportunityFitRow(title: String, value: String, systemImage: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
+            Image(systemName: systemImage)
+                .font(.subheadline)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .frame(width: 20)
+                .accessibilityHidden(true)
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .frame(width: 54, alignment: .leading)
+            Text(value)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(SideSeatTheme.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .accessibilityElement(children: .combine)
     }
 
     private var fitDisclosure: some View {
@@ -911,18 +916,15 @@ private struct MutualOpportunityCard: View {
                         ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
                         : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
                     layout {
-                        Text(AppLocalization.string(opportunity.matchFit?.isDiscovery == true ? "Relevance" : opportunity.matchFit == nil ? "Why this opportunity" : "Activity fit"))
+                        Text(AppLocalization.string("Why this opportunity"))
                             .font(.subheadline.weight(.medium))
                             .foregroundStyle(SideSeatTheme.textPrimary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         if let fit = opportunity.matchFit {
                             Text("\(fit.score)/100")
-                                .font(.subheadline.weight(.bold))
+                                .font(.caption.weight(.semibold))
                                 .monospacedDigit()
-                                .foregroundStyle(SideSeatTheme.accentText)
-                                .padding(.horizontal, SideSeatTheme.spaceSM)
-                                .padding(.vertical, SideSeatTheme.spaceXS)
-                                .background(SideSeatTheme.accent.opacity(0.09), in: Capsule())
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         }
                     }
                     .fixedSize(horizontal: false, vertical: true)
@@ -950,6 +952,34 @@ private struct MutualOpportunityCard: View {
                     Text(opportunity.matchExplanation)
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityIdentifier("mutual-opportunity-match-explanation-\(opportunity.id)")
+                    if let fit = opportunity.matchFit, fit.isDiscovery {
+                        let layout = dynamicTypeSize.isAccessibilitySize
+                            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
+                            : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceLG))
+                        layout {
+                            if let activity = fit.viewerActivity {
+                                explanationRow(title: AppLocalization.string("You"), value: activity.title)
+                            }
+                            if let activity = fit.peerActivity {
+                                explanationRow(title: opportunity.peer.displayName, value: activity.title)
+                            }
+                        }
+                    }
+                    else if opportunity.topic == .study || opportunity.matchFit?.isRelatedActivity == true {
+                        let layout = dynamicTypeSize.isAccessibilitySize
+                            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
+                            : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceLG))
+                        layout {
+                            if let activity = opportunity.topic == .study
+                                ? opportunity.viewerStudyGoalTitle : opportunity.matchFit?.viewerActivityText {
+                                explanationRow(title: AppLocalization.string("You"), value: activity)
+                            }
+                            if let activity = opportunity.topic == .study
+                                ? opportunity.peerStudyGoalTitle : opportunity.matchFit?.peerActivityText {
+                                explanationRow(title: opportunity.peer.displayName, value: activity)
+                            }
+                        }
+                    }
                     if let course = opportunity.course {
                         Label([course.code, course.name].compactMap { $0 }.joined(separator: " "),
                               systemImage: "book.closed")

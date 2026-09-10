@@ -131,10 +131,10 @@ enum SSOpportunitySwipeChoice: Equatable {
     /// Classifies a deliberate horizontal release. The MVP control only commits a drag for `.interested`.
     static func releasedChoice(translation: CGSize, travel: CGFloat) -> Self? {
         guard travel > 0,
-              abs(translation.width) >= travel * 0.68,
-              abs(translation.width) > abs(translation.height) * 1.5
+              translation.width >= travel * 0.68,
+              translation.width > abs(translation.height) * 1.5
         else { return nil }
-        return translation.width > 0 ? .interested : .skip
+        return .interested
     }
 }
 
