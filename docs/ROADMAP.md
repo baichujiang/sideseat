@@ -13,12 +13,16 @@ ordinary discovery; privacy, safety and explicit refusals remain protected.
 The local 0/100 two-account flow reaches chat, an accepted Plan and both Calendars.
 Backend regressions and native acceptance pass: 26 combined PostgreSQL/pure
 checks, 46 native tests and both three-language/empty-state UI checks.
-Source/Build 40 preparation `f7d5939` is pushed. Backend is deployed with discovery
-OFF; automatic/flexible timing stay ON, no migration or user fixture writes.
+Source/Build 40 preparation `f7d5939` is pushed. Discovery is now ON after
+[owner-authorized activation](./releases/2026-09-09-discovery-matching-production.md);
+automatic/flexible timing remain ON, with no migration or user fixture writes.
 [Build 40](./releases/2026-09-09-testflight-40.md) is processed and available in
-`SideSeat Internal`, with Chinese testing notes saved. Next: both phones
-updated to **1.0.0 (40)** → owner confirmation → enable discovery → signed
-two-account acceptance. Build 39 does not contain this follow-up.
+`SideSeat Internal`. The owner confirmed both phones updated to **1.0.0 (40)**;
+candidate and production two-account configuration/login/read smoke passed.
+Next: reopen both apps to refresh configuration → explicit intention publication
+→ signed two-account acceptance. The original App Store testing notes still
+describe the flags-OFF release; use the activation record above for current steps.
+Build 39 does not contain this follow-up.
 
 **Included publication flow:** [Event-driven automatic matching](./INTENT_DRIVEN_MATCHING.md)
 replaces the new client's separate Start/48-hour session with explicit publication

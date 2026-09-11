@@ -4,12 +4,14 @@
 not a minimum compatibility threshold. This supersedes the soft eligibility
 rules in Activity Fit, flexible timing and the ordinary-discovery history gate.
 
-**Delivery:** Source `f7d5939` committed/pushed; backend deployed with discovery OFF.
+**Delivery:** Source `f7d5939` committed/pushed; discovery is now ON after
+[owner-authorized activation](./releases/2026-09-09-discovery-matching-production.md).
 [Build 40](./releases/2026-09-09-testflight-40.md) is processed and available in
 `SideSeat Internal`, with Chinese testing notes saved.
-Production retains Build 39's existing rules until both phones update and the
-owner confirms activation.
-`V2_DISCOVERY_MATCHING_ENABLED` defaults OFF. No new migration is required.
+The owner confirmed both phones on Build 40; candidate and production two-account
+configuration/login/read smoke passed. Signed-device acceptance is next.
+`V2_DISCOVERY_MATCHING_ENABLED` defaults OFF in code and is explicitly ON in
+Production. No new migration is required.
 
 ## Product contract
 
@@ -121,7 +123,8 @@ SideSeat simulator; no production/user fixture writes or physical-phone changes.
 
 ## Next step
 
-Local native acceptance and flags-OFF internal release are complete:
-confirm both phones updated to **1.0.0 (40)** → owner confirmation → enable discovery →
-signed two-account publication-to-Plan acceptance. Build 39 alone cannot show
-this new UI. Preserve unrelated Info.plist changes, old archives and local media.
+Local native acceptance, internal release and production activation are complete.
+Both phones are owner-confirmed on **1.0.0 (40)**. Reopen both apps to refresh
+configuration, then perform signed two-account publication-to-Plan acceptance.
+Build 39 alone cannot show this new UI. Preserve unrelated Info.plist changes,
+old archives and local media.

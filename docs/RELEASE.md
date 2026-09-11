@@ -155,11 +155,13 @@ Store submission additionally requires:
   kill switches and compatible older clients where appropriate.
 
 Current recorded build: [TestFlight 1.0.0 (40)](./releases/2026-09-09-testflight-40.md)
-(processed and available in `SideSeat Internal`, Chinese testing notes saved;
-backend deployed with discovery OFF. Existing automatic matching, flexible timing
-and activity-fit stay ON. No new migration. Next: confirm both phones updated to
-Build 40 → enable discovery → configuration refresh and signed two-account
-acceptance. Do not enable discovery before the owner's update confirmation. Build 36
+(processed and available in `SideSeat Internal`; discovery is now ON after
+[owner-authorized activation](./releases/2026-09-09-discovery-matching-production.md).
+The owner confirmed both phones on Build 40; candidate and production two-account
+configuration/login/read smoke passed. Automatic matching, flexible timing and
+activity-fit stay ON. No new migration. Next: configuration refresh and signed
+two-account acceptance. Original App Store testing notes describe the flags-OFF
+release; the activation record has current instructions. Build 36
 matching-to-both-Calendars and Build 34 repeat Outcome acceptance remain historical
 evidence, not acceptance of Build 40. Public-release readiness still requires the
 separate checks above).
