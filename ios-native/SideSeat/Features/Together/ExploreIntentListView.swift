@@ -2,18 +2,56 @@ import SwiftUI
 
 struct ExploreIntentListView: View {
     @Environment(SessionStore.self) private var session
+    @Environment(ClientConfigurationStore.self) private var clientConfiguration
+    var embeddedInTogether = false
+    var onUseIntent: ((NativeExploreIntent) -> Void)? = nil
     @State private var store = ExploreIntentStore()
     @State private var searchText = ""
     @State private var selectedTopic: NativeWeeklyIntentTopic? = nil
     private let access = ExploreAccessTier.current
 
+    private var isEnabled: Bool {
+        clientConfiguration.configuration?.isFeatureEnabled("v2ExploreIntents") == true
+    }
+
     var body: some View {
+        Group {
+            if embeddedInTogether { content }
+            else {
+                content.navigationTitle(AppLocalization.string("Explore intentions"))
+                    .navigationBarTitleDisplayMode(.inline)
+            }
+        }
+        .background(SideSeatTheme.bgGrouped)
+        .task(id: isEnabled) { if isEnabled { await store.load(using: session, limit: access.resultLimit) } }
+        .refreshable { if isEnabled { await store.load(using: session, limit: access.resultLimit) } }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("explore-intents-list")
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if !isEnabled {
+            ContentUnavailableView {
+                Label(AppLocalization.string("Explore is not available yet"), systemImage: "sparkle.magnifyingglass")
+            } description: {
+                Text(AppLocalization.string("Explore is not enabled in this environment. Your intentions and recommendations remain separate."))
+            }
+            .accessibilityIdentifier("explore-unavailable")
+        } else {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
                 Text(AppLocalization.string("Explore what people around campus want to do"))
                     .font(.subheadline)
                     .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     .fixedSize(horizontal: false, vertical: true)
+
+                if onUseIntent != nil {
+                    Text(AppLocalization.string("See an activity you like? Create your own intention. Nothing is sent to the other person."))
+                        .font(.footnote)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
 
                 if access.showsAdvancedContext {
                     Label(AppLocalization.string("SideSeat Plus exploration"), systemImage: "sparkles")
@@ -39,6 +77,16 @@ struct ExploreIntentListView: View {
 
                 if store.isLoading, store.intents.isEmpty {
                     ProgressView().frame(maxWidth: .infinity, minHeight: 120)
+                } else if let issue = store.issue, store.intents.isEmpty {
+                    ContentUnavailableView {
+                        Label(AppLocalization.string("Explore couldn't load"), systemImage: "wifi.exclamationmark")
+                    } description: { Text(issue) } actions: {
+                        Button(AppLocalization.string("Try again")) {
+                            Task { await store.load(using: session, limit: access.resultLimit) }
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                    .accessibilityIdentifier("explore-error")
                 } else if store.intents.isEmpty {
                     ContentUnavailableView {
                         Label(AppLocalization.string("Nothing new to explore right now"), systemImage: "sparkles")
@@ -48,7 +96,8 @@ struct ExploreIntentListView: View {
                     .accessibilityIdentifier("explore-intents-empty")
                 } else {
                     ForEach(visibleIntents) { intent in
-                        ExploreIntentCard(intent: intent, compact: false, showsPlusContext: access.showsAdvancedContext)
+                        ExploreIntentCard(intent: intent, compact: false, showsPlusContext: access.showsAdvancedContext,
+                            onUseIntent: onUseIntent.map { use in { use(intent) } })
                     }
                     if visibleIntents.isEmpty {
                         Text(AppLocalization.string("No Explore results match these filters"))
@@ -72,19 +121,14 @@ struct ExploreIntentListView: View {
                     .accessibilityIdentifier("explore-plus-preview")
                 }
 
-                if let issue = store.issue {
+                if let issue = store.issue, !store.intents.isEmpty {
                     Text(issue).font(.footnote).foregroundStyle(SideSeatTheme.danger)
                 }
             }
             .padding(.horizontal, SideSeatTheme.screenHorizontal)
             .padding(.vertical, SideSeatTheme.spaceMD)
         }
-        .background(SideSeatTheme.bgGrouped)
-        .navigationTitle(AppLocalization.string("Explore intentions"))
-        .navigationBarTitleDisplayMode(.inline)
-        .task { await store.load(using: session, limit: access.resultLimit) }
-        .refreshable { await store.load(using: session, limit: access.resultLimit) }
-        .accessibilityIdentifier("explore-intents-list")
+        }
     }
     private var visibleIntents: [NativeExploreIntent] {
         guard access == .plus else { return store.intents }
@@ -106,6 +150,7 @@ struct ExploreIntentCard: View {
     let intent: NativeExploreIntent
     let compact: Bool
     let showsPlusContext: Bool
+    var onUseIntent: (() -> Void)? = nil
 
     var body: some View {
         SSFlowCard(
@@ -172,6 +217,19 @@ struct ExploreIntentCard: View {
                     .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     .lineLimit(compact ? 1 : 4)
                     .fixedSize(horizontal: false, vertical: !compact)
+            }
+
+            if let onUseIntent, !compact {
+                Button(action: onUseIntent) {
+                    Label(AppLocalization.string("I want to do this too"), systemImage: "plus")
+                        .font(.subheadline.weight(.semibold))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.bordered)
+                .accessibilityHint(AppLocalization.string("Opens a draft. Review and publish it yourself; this does not express interest in a person."))
+                .accessibilityIdentifier("explore-use-\(intent.id)")
             }
 
             if showsPlusContext, !compact {

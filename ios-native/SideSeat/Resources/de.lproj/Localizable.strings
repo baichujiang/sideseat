@@ -1940,3 +1940,38 @@
 "Did this plan happen?" = "Hat dieser Plan stattgefunden?";
 
 "No response" = "Keine Antwort";
+
+/* Together task tabs and intention cards */
+"Together recommendations" = "Für dich";
+"My intentions" = "Vorhaben";
+"Together explore" = "Entdecken";
+"Your activities, timing and finding status, all in one place." = "Deine Aktivitäten, Zeiten und Suchstatus auf einen Blick.";
+"Add an activity and choose when. You stay in control of finding company and Explore visibility." = "Füge eine Aktivität hinzu und wähle eine Zeit. Du bestimmst, ob du Gesellschaft suchst und in Entdecken sichtbar bist.";
+"Finding company for you" = "Wir suchen Gesellschaft für dich";
+"Based on %lld intentions finding company" = "Auf Basis von %lld aktiven Suchvorhaben";
+"No new company right now" = "Gerade keine neuen Vorschläge";
+"%lld intentions are still finding company. New suggestions will appear here." = "Für %lld Vorhaben suchst du weiterhin Gesellschaft. Neue Vorschläge erscheinen hier.";
+"Review your intentions to start or resume finding company." = "Prüfe deine Vorhaben, um die Suche zu starten oder fortzusetzen.";
+"View my intentions" = "Meine Vorhaben ansehen";
+"Finding company" = "Suche aktiv";
+"Intention paused" = "Pausiert";
+"Not finding yet" = "Noch keine Suche";
+"Finding unavailable" = "Suche nicht verfügbar";
+"SideSeat is using this intention to find company. You can pause anytime." = "SideSeat sucht anhand dieses Vorhabens Gesellschaft für dich. Du kannst jederzeit pausieren.";
+"This intention is paused and is not used for new suggestions." = "Dieses Vorhaben ist pausiert und wird nicht für neue Vorschläge verwendet.";
+"Review this intention and choose to start finding company." = "Prüfe dieses Vorhaben und starte die Suche nach Gesellschaft.";
+"Finding company is unavailable right now. Your intention is saved." = "Die Suche ist gerade nicht verfügbar. Dein Vorhaben ist gespeichert.";
+"This intention has expired and is no longer finding company." = "Dieses Vorhaben ist abgelaufen und sucht nicht mehr nach Gesellschaft.";
+"This intention has ended and is no longer finding company." = "Dieses Vorhaben ist beendet und sucht nicht mehr nach Gesellschaft.";
+"Also visible in Explore" = "Auch in Entdecken sichtbar";
+"Not visible in Explore" = "Nicht in Entdecken sichtbar";
+"Pause finding company" = "Suche pausieren";
+"Review and start" = "Prüfen und starten";
+"End this intention?" = "Dieses Vorhaben beenden?";
+"This intention will stop finding company. Existing conversations and confirmed plans stay unchanged." = "Dieses Vorhaben sucht dann nicht mehr. Bestehende Gespräche und bestätigte Pläne bleiben unverändert.";
+"Explore is not available yet" = "Entdecken ist noch nicht verfügbar";
+"Explore is not enabled in this environment. Your intentions and recommendations remain separate." = "Entdecken ist in dieser Umgebung noch nicht aktiviert. Deine Vorhaben und Vorschläge bleiben unabhängig davon verfügbar.";
+"Explore couldn't load" = "Entdecken konnte nicht geladen werden";
+"See an activity you like? Create your own intention. Nothing is sent to the other person." = "Eine Aktivität gefällt dir? Erstelle dein eigenes Vorhaben. Der anderen Person wird nichts gesendet.";
+"I want to do this too" = "Das möchte ich auch machen";
+"Opens a draft. Review and publish it yourself; this does not express interest in a person." = "Öffnet einen Entwurf, den du selbst prüfst und veröffentlichst. Das ist keine Interessensbekundung an eine Person.";

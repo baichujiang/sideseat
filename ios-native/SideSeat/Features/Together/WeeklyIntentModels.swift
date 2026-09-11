@@ -610,3 +610,50 @@ struct NativeTogetherMatchingSession: Decodable, Equatable, Sendable {
         )
     }
 }
+
+
+/// Display state follows participation, not merely a stored ACTIVE row.
+enum TogetherIntentStatus: String, Equatable, Sendable {
+    case finding, paused, unpublished, unavailable, expired, ended
+
+    init(intent: NativeWeeklyIntent, matchingEnabled: Bool,
+         automaticMatchingEnabled: Bool, legacySessionActive: Bool, now: Date = Date()) {
+        if intent.status == "ENDED" { self = .ended }
+        else if intent.status == "EXPIRED" || intent.expiresAt <= now { self = .expired }
+        else if intent.isPaused { self = .paused }
+        else if !matchingEnabled { self = .unavailable }
+        else if (automaticMatchingEnabled && intent.automaticMatching == true) || legacySessionActive { self = .finding }
+        else { self = .unpublished }
+    }
+
+    var title: String {
+        switch self {
+        case .finding: AppLocalization.string("Finding company")
+        case .paused: AppLocalization.string("Intention paused")
+        case .unpublished: AppLocalization.string("Not finding yet")
+        case .unavailable: AppLocalization.string("Finding unavailable")
+        case .expired: AppLocalization.string("Expired")
+        case .ended: AppLocalization.string("Ended")
+        }
+    }
+    var detail: String {
+        switch self {
+        case .finding: AppLocalization.string("SideSeat is using this intention to find company. You can pause anytime.")
+        case .paused: AppLocalization.string("This intention is paused and is not used for new suggestions.")
+        case .unpublished: AppLocalization.string("Review this intention and choose to start finding company.")
+        case .unavailable: AppLocalization.string("Finding company is unavailable right now. Your intention is saved.")
+        case .expired: AppLocalization.string("This intention has expired and is no longer finding company.")
+        case .ended: AppLocalization.string("This intention has ended and is no longer finding company.")
+        }
+    }
+    var symbol: String {
+        switch self {
+        case .finding: "dot.radiowaves.left.and.right"
+        case .paused: "pause.circle"
+        case .unpublished: "tray"
+        case .unavailable: "exclamationmark.circle"
+        case .expired: "clock"
+        case .ended: "stop.circle"
+        }
+    }
+}

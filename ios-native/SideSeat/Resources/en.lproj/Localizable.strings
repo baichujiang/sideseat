@@ -1941,3 +1941,38 @@
 "Did this plan happen?" = "Did this plan happen?";
 
 "No response" = "No response";
+
+/* Together task tabs and intention cards */
+"Together recommendations" = "For you";
+"My intentions" = "My intentions";
+"Together explore" = "Explore";
+"Your activities, timing and finding status, all in one place." = "Your activities, timing and finding status, all in one place.";
+"Add an activity and choose when. You stay in control of finding company and Explore visibility." = "Add an activity and choose when. You stay in control of finding company and Explore visibility.";
+"Finding company for you" = "Finding company for you";
+"Based on %lld intentions finding company" = "Based on %lld intentions finding company";
+"No new company right now" = "No new company right now";
+"%lld intentions are still finding company. New suggestions will appear here." = "%lld intentions are still finding company. New suggestions will appear here.";
+"Review your intentions to start or resume finding company." = "Review your intentions to start or resume finding company.";
+"View my intentions" = "View my intentions";
+"Finding company" = "Finding company";
+"Intention paused" = "Paused";
+"Not finding yet" = "Not finding yet";
+"Finding unavailable" = "Finding unavailable";
+"SideSeat is using this intention to find company. You can pause anytime." = "SideSeat is using this intention to find company. You can pause anytime.";
+"This intention is paused and is not used for new suggestions." = "This intention is paused and is not used for new suggestions.";
+"Review this intention and choose to start finding company." = "Review this intention and choose to start finding company.";
+"Finding company is unavailable right now. Your intention is saved." = "Finding company is unavailable right now. Your intention is saved.";
+"This intention has expired and is no longer finding company." = "This intention has expired and is no longer finding company.";
+"This intention has ended and is no longer finding company." = "This intention has ended and is no longer finding company.";
+"Also visible in Explore" = "Also visible in Explore";
+"Not visible in Explore" = "Not visible in Explore";
+"Pause finding company" = "Pause finding";
+"Review and start" = "Review and start";
+"End this intention?" = "End this intention?";
+"This intention will stop finding company. Existing conversations and confirmed plans stay unchanged." = "This intention will stop finding company. Existing conversations and confirmed plans stay unchanged.";
+"Explore is not available yet" = "Explore is not available yet";
+"Explore is not enabled in this environment. Your intentions and recommendations remain separate." = "Explore is not enabled in this environment. Your intentions and recommendations remain separate.";
+"Explore couldn't load" = "Explore couldn't load";
+"See an activity you like? Create your own intention. Nothing is sent to the other person." = "See an activity you like? Create your own intention. Nothing is sent to the other person.";
+"I want to do this too" = "I want to do this too";
+"Opens a draft. Review and publish it yourself; this does not express interest in a person." = "Opens a draft. Review and publish it yourself; this does not express interest in a person.";

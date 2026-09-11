@@ -1941,3 +1941,38 @@
 "Did this plan happen?" = "这次计划发生了吗？";
 
 "No response" = "未回答";
+
+/* Together task tabs and intention cards */
+"Together recommendations" = "推荐";
+"My intentions" = "我的意愿";
+"Together explore" = "探索";
+"Your activities, timing and finding status, all in one place." = "想做什么、什么时候、是否正在寻找，一眼看清。";
+"Add an activity and choose when. You stay in control of finding company and Explore visibility." = "添加一件想做的事，再选择时间。是否寻找同行、是否在探索中展示，都由你决定。";
+"Finding company for you" = "正在为你寻找同行";
+"Based on %lld intentions finding company" = "基于 %lld 个正在寻找的意愿";
+"No new company right now" = "暂时没有新的同行";
+"%lld intentions are still finding company. New suggestions will appear here." = "你的 %lld 个意愿仍在寻找中，有新的推荐时会出现在这里。";
+"Review your intentions to start or resume finding company." = "查看你的意愿，确认后开始或继续寻找同行。";
+"View my intentions" = "查看我的意愿";
+"Finding company" = "正在寻找";
+"Intention paused" = "已暂停";
+"Not finding yet" = "尚未寻找";
+"Finding unavailable" = "寻找暂不可用";
+"SideSeat is using this intention to find company. You can pause anytime." = "SideSeat 正在根据这个意愿寻找同行，你可以随时暂停。";
+"This intention is paused and is not used for new suggestions." = "暂停期间，这个意愿不参与新的同行推荐。";
+"Review this intention and choose to start finding company." = "这个意愿尚未参与寻找。确认内容后，再开始寻找同行。";
+"Finding company is unavailable right now. Your intention is saved." = "寻找同行暂不可用，你的意愿已保存。";
+"This intention has expired and is no longer finding company." = "这个意愿已过期，不再寻找同行。";
+"This intention has ended and is no longer finding company." = "这个意愿已结束，不再寻找同行。";
+"Also visible in Explore" = "也会出现在探索中";
+"Not visible in Explore" = "不在探索中展示";
+"Pause finding company" = "暂停寻找";
+"Review and start" = "确认并开始寻找";
+"End this intention?" = "结束这个意愿？";
+"This intention will stop finding company. Existing conversations and confirmed plans stay unchanged." = "结束后，这个意愿将停止寻找同行，已有对话和已确认计划保持不变。";
+"Explore is not available yet" = "探索尚未开放";
+"Explore is not enabled in this environment. Your intentions and recommendations remain separate." = "当前环境尚未启用探索，你仍可以管理意愿和查看同行推荐。";
+"Explore couldn't load" = "探索加载失败";
+"See an activity you like? Create your own intention. Nothing is sent to the other person." = "看到想做的活动，可以创建自己的意愿；不会直接向对方发送兴趣或消息。";
+"I want to do this too" = "我也想做";
+"Opens a draft. Review and publish it yourself; this does not express interest in a person." = "打开草稿，由你确认并发布，不代表对某个人表示感兴趣。";

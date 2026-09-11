@@ -4,6 +4,15 @@ import Testing
 
 @Suite("Navigation")
 struct NavigationTests {
+    @Test("Together task tabs have a stable order and a useful first section")
+    func togetherTaskNavigation() {
+        #expect(TogetherSection.allCases == [.recommendations, .intentions, .explore])
+        #expect(TogetherSection.initial(hasIntentions: false, hasOpportunities: false, hasLegacySession: false) == .intentions)
+        #expect(TogetherSection.initial(hasIntentions: true, hasOpportunities: false, hasLegacySession: false) == .recommendations)
+        #expect(TogetherSection.initial(hasIntentions: false, hasOpportunities: true, hasLegacySession: false) == .recommendations)
+        #expect(TogetherSection.initial(hasIntentions: false, hasOpportunities: false, hasLegacySession: true) == .recommendations)
+    }
+
     @Test("App shell exposes the new product navigation in its exact order")
     func appShellTabOrder() {
         #expect(AppShellNavigation.tabs.map(\.tab) == [.discover, .plans, .home, .chats, .me])

@@ -6,9 +6,17 @@ import Observation
 final class WeeklyIntentStore {
     private(set) var intents: [NativeWeeklyIntent] = []
     private(set) var isLoading = false
+    private(set) var hasLoaded = false
     private(set) var isCreating = false
     private(set) var mutatingIDs: Set<String> = []
     private(set) var issue: String?
+
+    #if DEBUG
+    private var hasInstalledCardFixtures = false
+    private var usesCardFixtures: Bool {
+        ProcessInfo.processInfo.arguments.contains("--ui-testing-intent-card-states")
+    }
+    #endif
 
     var isMutating: Bool { isCreating || !mutatingIDs.isEmpty }
 
@@ -19,7 +27,20 @@ final class WeeklyIntentStore {
         defer { isLoading = false }
 
         #if DEBUG
+        if usesCardFixtures {
+            if !hasInstalledCardFixtures {
+                hasInstalledCardFixtures = true
+                intents = [
+                    Self.cardFixture(id: "ui-intent-coffee", topic: .coffee, title: "Coffee after class", published: true),
+                    Self.cardFixture(id: "ui-intent-sports", topic: .sports, title: "", status: "PAUSED", published: true),
+                    Self.cardFixture(id: "ui-intent-study", topic: .study, title: "Library study", published: false),
+                ]
+            }
+            hasLoaded = true
+            return
+        }
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-weekly-intent") {
+            hasLoaded = true
             intents = []
             if ProcessInfo.processInfo.arguments.contains("--ui-testing-discovery-published") {
                 intents = [NativeWeeklyIntent(id: "ui-published-intent", topic: .coffee, activityText: AppLocalization.string("Coffee"),
@@ -38,6 +59,7 @@ final class WeeklyIntentStore {
                 "api/v1/me/weekly-intents"
             )
             intents = response.data.intents
+            hasLoaded = true
         } catch is CancellationError {
             return
         } catch {
@@ -57,7 +79,7 @@ final class WeeklyIntentStore {
         timeWindows: [NativeWeeklyIntentTimeWindow],
         timePreference: NativeIntentTimePreference? = nil,
         automaticMatching: Bool = false,
-        exploreVisible: Bool = false,
+        exploreVisible: Bool? = nil,
         note: String,
         using session: SessionStore
     ) async -> Bool {
@@ -76,6 +98,17 @@ final class WeeklyIntentStore {
                 isCreating = false
             }
         }
+
+        #if DEBUG
+        if usesCardFixtures {
+            let value = Self.cardFixture(id: existingIntent?.id ?? "ui-intent-created", topic: topic,
+                title: topic == .study ? studyGoal : activityText,
+                status: existingIntent?.status ?? "ACTIVE", published: automaticMatching,
+                exploreVisible: exploreVisible ?? false)
+            upsert(value)
+            return true
+        }
+        #endif
 
         let trimmedNote = note.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedActivityText = activityText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -164,6 +197,15 @@ final class WeeklyIntentStore {
         mutatingIDs.insert(intent.id)
         issue = nil
         defer { mutatingIDs.remove(intent.id) }
+        #if DEBUG
+        if usesCardFixtures {
+            upsert(Self.cardFixture(id: intent.id, topic: intent.topic, title: intent.activityTitle,
+                status: extend ? intent.status : paused ? "PAUSED" : "ACTIVE",
+                published: automaticMatching || intent.automaticMatching == true,
+                exploreVisible: intent.exploreVisible == true))
+            return true
+        }
+        #endif
         do {
             let response: APIEnvelope<NativeWeeklyIntentPayload> = try await session.sendAuthorized(
                 "api/v1/me/weekly-intents/\(intent.id)",
@@ -194,6 +236,12 @@ final class WeeklyIntentStore {
         mutatingIDs.insert(intent.id)
         issue = nil
         defer { mutatingIDs.remove(intent.id) }
+        #if DEBUG
+        if usesCardFixtures {
+            intents.removeAll { $0.id == intent.id }
+            return true
+        }
+        #endif
         do {
             let response: APIEnvelope<NativeWeeklyIntentPayload> = try await session.sendAuthorized(
                 "api/v1/me/weekly-intents/\(intent.id)",
@@ -214,13 +262,30 @@ final class WeeklyIntentStore {
         }
     }
 
+    #if DEBUG
+    private static func cardFixture(id: String, topic: NativeWeeklyIntentTopic, title: String,
+                                    status: String = "ACTIVE", published: Bool, exploreVisible: Bool = false) -> NativeWeeklyIntent {
+        let now = Date()
+        return NativeWeeklyIntent(id: id, topic: topic, activityText: topic == .coffee ? title : nil,
+            sportTag: topic == .sports ? .badminton : nil, sportOtherNote: nil,
+            togetherMode: .sameActivity, studyGoal: topic == .study ? title : nil,
+            courseId: nil, course: nil,
+            timeWindows: topic == .coffee ? [NativeWeeklyIntentTimeWindow(startAt: now.addingTimeInterval(86400), endAt: now.addingTimeInterval(93600))] : [],
+            timeZone: "Europe/Berlin", note: nil, status: status, policyVersion: 1, version: 1,
+            expiresAt: now.addingTimeInterval(7 * 86400), pausedAt: status == "PAUSED" ? now : nil,
+            endedAt: nil, createdAt: now, updatedAt: now,
+            timePreference: NativeIntentTimePreference(kind: topic == .coffee ? "EXACT" : "UNDECIDED"),
+            automaticMatching: published, exploreVisible: exploreVisible)
+    }
+    #endif
+
     private func upsert(_ intent: NativeWeeklyIntent) {
         if intent.status == "ENDED" || intent.status == "EXPIRED" {
             intents.removeAll { $0.id == intent.id }
         } else if let index = intents.firstIndex(where: { $0.id == intent.id }) {
             intents[index] = intent
         } else {
-            intents.append(intent)
+            intents.insert(intent, at: 0)
         }
     }
 }

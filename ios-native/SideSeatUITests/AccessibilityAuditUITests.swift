@@ -171,20 +171,22 @@ final class AccessibilityAuditUITests: XCTestCase {
         XCTAssertTrue(together.waitForExistence(timeout: 8))
         together.tap()
 
-        let home = app.descendants(matching: .any)["together-home"]
+        let home = app.descendants(matching: .any)["together-home"].firstMatch
         XCTAssertTrue(home.waitForExistence(timeout: 6))
+        app.buttons["together-tab-intentions"].tap()
         let addIntent = app.buttons["together-add-intent"]
         for _ in 0..<10 where !addIntent.exists || !addIntent.isHittable {
-            home.swipeDown()
+            app.scrollViews.firstMatch.swipeDown()
         }
         XCTAssertTrue(addIntent.waitForExistence(timeout: 5))
         XCTAssertTrue(addIntent.isHittable)
         XCTAssertGreaterThanOrEqual(addIntent.frame.width, 44)
         XCTAssertGreaterThanOrEqual(addIntent.frame.height, 44)
 
+        app.buttons["together-tab-recommendations"].tap()
         let decision = app.descendants(matching: .any)["mutual-opportunity-swipe-cmutualui0000000000000001"].firstMatch
         for _ in 0..<10 where !decision.exists || !decision.isHittable {
-            home.swipeUp()
+            app.scrollViews.firstMatch.swipeUp()
         }
         XCTAssertTrue(decision.exists)
         XCTAssertTrue(decision.isHittable)

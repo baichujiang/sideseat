@@ -734,7 +734,10 @@ final class SocialLiveUITests: XCTestCase {
         together.tap()
         XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 15))
 
-        let setIntent = app.buttons["together-set-intent"]
+        let sections = app.segmentedControls["together-segmented-control"]
+        XCTAssertTrue(sections.waitForExistence(timeout: 8))
+        sections.buttons.element(boundBy: 1).tap()
+        let setIntent = app.buttons["together-add-intent"]
         XCTAssertTrue(setIntent.waitForExistence(timeout: 8))
         setIntent.tap()
         XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForExistence(timeout: 8))
@@ -754,6 +757,7 @@ final class SocialLiveUITests: XCTestCase {
             NSPredicate(format: "identifier BEGINSWITH %@", "weekly-intent-")
         ).firstMatch
         XCTAssertTrue(savedIntent.waitForExistence(timeout: 12))
+        sections.buttons.element(boundBy: 0).tap()
         let startMatching = app.buttons.matching(
             NSPredicate(format: "label IN %@", ["Start matching", "开始匹配", "Matching starten"])
         ).firstMatch

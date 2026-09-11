@@ -10,6 +10,10 @@ final class MutualOpportunityStore {
     private(set) var issue: String?
     private(set) var notice: String?
 
+    #if DEBUG
+    private var simulatedDecisionFailures = 0
+    #endif
+
     func load(using session: SessionStore) async {
         guard !isLoading else { return }
         isLoading = true
@@ -54,8 +58,10 @@ final class MutualOpportunityStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-mutual-opportunity") {
-            if ProcessInfo.processInfo.arguments.contains("--ui-testing-opportunity-decision-failure") {
-                // Offline UI fixture: exercise release animation → failed save → retry.
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-opportunity-decision-failure"),
+               simulatedDecisionFailures == 0 || !ProcessInfo.processInfo.arguments.contains("--ui-testing-opportunity-retry-success") {
+                // Offline UI fixture: exercise a real failed release, then an explicit retry.
+                simulatedDecisionFailures += 1
                 issue = "UI test: choice was not saved."
                 return
             }

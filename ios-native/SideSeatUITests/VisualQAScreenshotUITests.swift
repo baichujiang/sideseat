@@ -46,14 +46,14 @@ final class VisualQAScreenshotUITests: XCTestCase {
                 "--ui-testing-language=zh-Hans"]
             if published { app.launchArguments.append("--ui-testing-discovery-published") }
             app.launch()
+            selectTogetherSection(0, in: app)
             let action = app.buttons["together-discovery-empty-action"]
             XCTAssertTrue(action.waitForExistence(timeout: 8))
-            XCTAssertEqual(action.label, published ? "刷新推荐" : "创建意向")
+            XCTAssertEqual(action.label, "查看我的意愿")
             XCTAssertFalse(app.buttons["together-start-matching"].exists)
             saveScreenshot(app: app, name: "discovery-empty-\(published ? "published" : "unpublished")")
             action.tap()
-            if published { XCTAssertTrue(action.waitForExistence(timeout: 5)) }
-            else { XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForExistence(timeout: 5)) }
+            XCTAssertTrue(app.buttons["together-add-intent"].waitForExistence(timeout: 5))
             app.terminate()
         }
     }
@@ -82,6 +82,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
             ]
             if large { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
             app.launch()
+            selectTogetherSection(1, in: app)
             let add = app.buttons["together-add-intent"]
             XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 8))
             XCTAssertFalse(app.buttons["together-start-matching"].exists)
@@ -344,103 +345,168 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
-    func testTogetherHomeCombinesPassiveMatchingAndExplorePreview() {
+    private func togetherApp(_ extra: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = [
-            "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
-            "--ui-testing-discover", "--ui-testing-weekly-intent", "--ui-testing-discovery-published",
-            "--ui-testing-mutual-opportunity", "--ui-testing-automatic-matching",
-            "--ui-testing-discovery-matching", "--ui-testing-explore-intents",
-            "--ui-testing-language=zh-Hans", "--ui-testing-appearance=light",
-        ]
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-discover", "--ui-testing-weekly-intent", "--ui-testing-mutual-opportunity",
+            "--ui-testing-automatic-matching", "--ui-testing-together-matching",
+            "--ui-testing-flexible-timing", "--ui-testing-discovery-matching"] + extra
         app.launch()
-        let intentHeader = app.descendants(matching: .any).matching(identifier: "together-intent-context-list").firstMatch
-        let opportunityHeader = app.descendants(matching: .any)["together-opportunities-section-title"]
-        XCTAssertTrue(intentHeader.waitForExistence(timeout: 8))
-        XCTAssertTrue(opportunityHeader.waitForExistence(timeout: 8))
-        XCTAssertLessThan(intentHeader.frame.minY, opportunityHeader.frame.minY, "Intent input should precede passive matching results")
-
-        let exploreHeader = app.descendants(matching: .any).matching(identifier: "together-explore-section-title").firstMatch
-        revealFlowElement(exploreHeader, in: app)
-        let previewList = app.descendants(matching: .any)["together-explore-preview-list"].firstMatch
-        let firstPreview = app.buttons["together-explore-preview-ui-explore-0"].firstMatch
-        let secondPreview = app.buttons["together-explore-preview-ui-explore-1"].firstMatch
-        XCTAssertTrue(previewList.exists)
-        XCTAssertTrue(firstPreview.exists)
-        XCTAssertTrue(secondPreview.exists)
-        XCTAssertEqual(firstPreview.frame.minY, secondPreview.frame.minY, accuracy: 2, "Explore previews belong to one horizontal row")
-        XCTAssertGreaterThan(secondPreview.frame.maxX, app.frame.maxX, "The next Explore preview should peek rather than form a vertical home feed")
-        let seeMore = app.buttons["together-explore-see-more"]
-        XCTAssertTrue(seeMore.exists)
-        XCTAssertLessThan(abs(seeMore.frame.midY - exploreHeader.frame.midY), 18, "See more should stay in the Explore header, not consume another row")
-        saveScreenshot(app: app, name: "together-home-explore-preview")
-        firstPreview.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["explore-intents-list"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.descendants(matching: .any)["explore-intent-ui-explore-0"].exists)
-        XCTAssertFalse(app.staticTexts["Mia"].exists, "Explore must not reveal a person identity before mutual interest")
-        saveScreenshot(app: app, name: "explore-free-list")
-        app.terminate()
+        XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 8))
+        return app
     }
 
     @MainActor
-    func testTogetherHomeCanShowExploreWhenPassiveSectionsAreEmpty() {
-        let app = XCUIApplication()
-        app.launchArguments = [
-            "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
-            "--ui-testing-discover", "--ui-testing-weekly-intent",
-            "--ui-testing-mutual-opportunity-empty", "--ui-testing-automatic-matching",
-            "--ui-testing-explore-intents", "--ui-testing-language=zh-Hans",
-        ]
-        app.launch()
-        XCTAssertTrue(app.descendants(matching: .any)["together-set-intent"].waitForExistence(timeout: 8))
-        let explore = app.buttons["together-explore-preview-ui-explore-0"].firstMatch
-        revealFlowElement(explore, in: app)
-        XCTAssertTrue(explore.exists)
+    private func selectTogetherSection(_ index: Int, in app: XCUIApplication) {
+        let raw = ["recommendations", "intentions", "explore"][index]
+        let button = app.buttons["together-tab-\(raw)"].firstMatch
+        if button.waitForExistence(timeout: 2) { button.tap() }
+        else {
+            let picker = app.segmentedControls["together-segmented-control"]
+            XCTAssertTrue(picker.waitForExistence(timeout: 5), app.debugDescription)
+            picker.buttons.element(boundBy: index).tap()
+        }
+    }
+
+    @MainActor
+    func testTogetherTabsSeparateRecommendationsIntentionsAndExplore() {
+        let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents",
+            "--ui-testing-language=zh-Hans", "--ui-testing-appearance=light"])
+        let opportunity = app.descendants(matching: .any)["mutual-opportunity-cmutualui0000000000000001"].firstMatch
+        XCTAssertTrue(opportunity.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertFalse(app.descendants(matching: .any)["weekly-intent-ui-intent-coffee"].exists)
+        XCTAssertFalse(app.descendants(matching: .any)["explore-intent-ui-explore-0"].exists)
+        saveScreenshot(app: app, name: "together-tabs-recommendations-zh")
+
+        selectTogetherSection(1, in: app)
+        let coffee = app.descendants(matching: .any)["weekly-intent-ui-intent-coffee"].firstMatch
+        XCTAssertTrue(coffee.waitForExistence(timeout: 5))
+        XCTAssertFalse(opportunity.exists)
+        XCTAssertTrue(app.staticTexts["正在寻找"].exists)
+        let pause = app.buttons["weekly-intent-pause-ui-intent-coffee"]
+        revealFlowElement(pause, in: app)
+        XCTAssertTrue(pause.isHittable)
+        pause.tap()
+        XCTAssertTrue(app.staticTexts["已暂停"].firstMatch.waitForExistence(timeout: 5))
+        XCTAssertEqual(pause.label, "恢复寻找同行")
+        pause.tap()
+        XCTAssertTrue(app.staticTexts["正在寻找"].waitForExistence(timeout: 5))
+        let edit = app.buttons["weekly-intent-edit-ui-intent-coffee"]
+        revealFlowElement(edit, in: app)
+        edit.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.textFields["intent-editor-activity"].value as? String, "Coffee after class")
+        app.buttons["取消"].tap()
+        XCTAssertTrue(coffee.waitForExistence(timeout: 5))
+        saveScreenshot(app: app, name: "together-tabs-intentions-zh")
+
+        selectTogetherSection(2, in: app)
+        XCTAssertTrue(app.descendants(matching: .any)["explore-intent-ui-explore-0"].waitForExistence(timeout: 5))
+        XCTAssertFalse(coffee.exists)
+        XCTAssertFalse(opportunity.exists)
         XCTAssertFalse(app.staticTexts["Mia"].exists)
-        saveScreenshot(app: app, name: "together-explore-only")
+        saveScreenshot(app: app, name: "together-tabs-explore-zh")
+        let use = app.buttons["explore-use-ui-explore-0"]
+        revealFlowElement(use, in: app)
+        use.tap()
+        XCTAssertTrue(app.buttons["intent-topic-sports"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["intent-topic-sports"].isSelected)
+        app.buttons["取消"].tap()
+        XCTAssertTrue(use.waitForExistence(timeout: 5), "Cancel must return to Explore, not recommendations")
+        selectTogetherSection(0, in: app)
+        XCTAssertTrue(opportunity.waitForExistence(timeout: 5), "Browsing Explore must not consume a recommendation")
         app.terminate()
     }
 
     @MainActor
-    func testTogetherExploreEmptyStateIsExplicit() {
-        let app = XCUIApplication()
-        app.launchArguments = [
-            "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
-            "--ui-testing-discover", "--ui-testing-weekly-intent",
-            "--ui-testing-mutual-opportunity-empty", "--ui-testing-automatic-matching",
-            "--ui-testing-explore-empty", "--ui-testing-language=zh-Hans",
-        ]
-        app.launch()
-        let empty = app.descendants(matching: .any)["together-explore-empty"]
-        revealFlowElement(empty, in: app)
-        XCTAssertTrue(empty.exists)
-        XCTAssertEqual(empty.label, "现在还没有新的活动意向")
-        saveScreenshot(app: app, name: "together-explore-empty")
+    func testTogetherCreateReturnsToIntentionsWithoutPublishingExplore() {
+        let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents",
+            "--ui-testing-language=zh-Hans"])
+        selectTogetherSection(2, in: app)
+        let use = app.buttons["explore-use-ui-explore-1"]
+        revealFlowElement(use, in: app)
+        use.tap()
+        XCTAssertTrue(app.textFields["intent-editor-activity"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.textFields["intent-editor-activity"].value as? String, "Coffee after class")
+        app.buttons["intent-editor-next"].tap()
+        let visibility = app.switches["intent-explore-visible"].firstMatch
+        revealFlowElement(visibility, in: app)
+        XCTAssertEqual(visibility.value as? String, "0", "Explore sharing requires an explicit choice")
+        app.buttons["intent-editor-save"].tap()
+        let created = app.descendants(matching: .any)["weekly-intent-ui-intent-created"].firstMatch
+        revealFlowElement(created, in: app)
+        XCTAssertTrue(created.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.descendants(matching: .any)["explore-intents-list"].exists)
+        let status = app.staticTexts["weekly-intent-status-ui-intent-created"].firstMatch
+        XCTAssertTrue(created.label.contains("正在寻找") || status.exists || app.staticTexts["正在寻找"].firstMatch.exists)
+        saveScreenshot(app: app, name: "together-created-intention-zh")
         app.terminate()
+    }
+
+    @MainActor
+    func testTogetherFirstUseStartsWithIntentionsAndExploreEmptyIsIndependent() {
+        let app = togetherApp(["--ui-testing-mutual-opportunity-empty", "--ui-testing-explore-empty",
+            "--ui-testing-language=zh-Hans"])
+        XCTAssertTrue(app.descendants(matching: .any)["together-set-intent"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.descendants(matching: .any)["together-opportunities-empty"].exists)
+        selectTogetherSection(2, in: app)
+        XCTAssertTrue(app.descendants(matching: .any)["explore-intents-empty"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.descendants(matching: .any)["together-set-intent"].exists)
+        selectTogetherSection(0, in: app)
+        let viewMine = app.buttons["together-discovery-empty-action"]
+        XCTAssertTrue(viewMine.waitForExistence(timeout: 5))
+        viewMine.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["together-set-intent"].waitForExistence(timeout: 5))
+        saveScreenshot(app: app, name: "together-tabs-first-use-zh")
+        app.terminate()
+    }
+
+    @MainActor
+    func testTogetherExploreUnavailableKeepsNavigation() {
+        let app = togetherApp(["--ui-testing-discovery-published", "--ui-testing-language=en"])
+        selectTogetherSection(2, in: app)
+        XCTAssertTrue(app.descendants(matching: .any)["explore-unavailable"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.descendants(matching: .any)["explore-intents-empty"].exists)
+        selectTogetherSection(1, in: app)
+        XCTAssertTrue(app.descendants(matching: .any)["weekly-intent-ui-published-intent"].waitForExistence(timeout: 5))
+        app.terminate()
+    }
+
+    @MainActor
+    func testTogetherTabsEnglishDarkAndGermanLargestText() {
+        for language in ["en", "de"] {
+            var args = ["--ui-testing-intent-card-states", "--ui-testing-explore-intents",
+                "--ui-testing-language=\(language)", "--ui-testing-appearance=dark"]
+            if language == "de" { args.append("--ui-testing-dynamic-type-accessibility") }
+            let app = togetherApp(args)
+            selectTogetherSection(1, in: app)
+            let edit = app.buttons["weekly-intent-edit-ui-intent-coffee"]
+            revealFlowElement(edit, in: app)
+            XCTAssertTrue(edit.isHittable)
+            XCTAssertGreaterThanOrEqual(edit.frame.height, 44)
+            XCTAssertLessThanOrEqual(edit.frame.maxX, app.frame.maxX)
+            saveScreenshot(app: app, name: "together-tabs-intentions-\(language)-dark")
+            selectTogetherSection(2, in: app)
+            let use = app.buttons["explore-use-ui-explore-0"]
+            revealFlowElement(use, in: app)
+            XCTAssertTrue(use.isHittable)
+            XCTAssertLessThanOrEqual(use.frame.maxX, app.frame.maxX)
+            saveScreenshot(app: app, name: "together-tabs-explore-\(language)-dark")
+            app.terminate()
+        }
     }
 
     @MainActor
     func testExplorePlusStateSupportsActivitySearch() {
-        let app = XCUIApplication()
-        app.launchArguments = [
-            "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
-            "--ui-testing-discover", "--ui-testing-weekly-intent",
-            "--ui-testing-mutual-opportunity-empty", "--ui-testing-automatic-matching",
-            "--ui-testing-explore-intents", "--ui-testing-explore-plus",
-            "--ui-testing-language=en", "--ui-testing-appearance=light",
-        ]
-        app.launch()
-        let seeMore = app.buttons["together-explore-see-more"]
-        revealFlowElement(seeMore, in: app)
-        seeMore.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["explore-plus-status"].waitForExistence(timeout: 5))
+        let app = togetherApp(["--ui-testing-explore-intents", "--ui-testing-explore-plus",
+            "--ui-testing-language=en", "--ui-testing-appearance=light"])
+        selectTogetherSection(2, in: app)
         let search = app.textFields["explore-search"]
         XCTAssertTrue(search.waitForExistence(timeout: 5))
         search.tap()
         search.typeText("Badminton")
         XCTAssertTrue(app.descendants(matching: .any)["explore-intent-ui-explore-0"].waitForExistence(timeout: 3))
         XCTAssertFalse(app.descendants(matching: .any)["explore-intent-ui-explore-1"].exists)
-        saveScreenshot(app: app, name: "explore-plus-search")
         app.terminate()
     }
 
@@ -452,6 +518,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
             "--ui-testing-discover", "--ui-testing-weekly-intent",
             "--ui-testing-mutual-opportunity", "--ui-testing-together-matching",
             "--ui-testing-opportunity-topic=COFFEE", "--ui-testing-opportunity-decision-failure",
+            "--ui-testing-opportunity-retry-success",
             "--ui-testing-language=en", "--ui-testing-appearance=light",
         ]
         app.launch()
@@ -463,9 +530,19 @@ final class VisualQAScreenshotUITests: XCTestCase {
         swipeOpportunityInterest(id: id, in: app)
         XCTAssertTrue(app.staticTexts["UI test: choice was not saved."].waitForExistence(timeout: 5))
         XCTAssertTrue(bar.waitForExistence(timeout: 5))
-        revealFlowElement(handle, in: app)
         XCTAssertEqual(handle.frame.midX, restingX, accuracy: 2)
-        XCTAssertTrue(app.descendants(matching: .any)["mutual-opportunity-activity-\(id)"].exists)
+        let activity = app.descendants(matching: .any)["mutual-opportunity-activity-\(id)"]
+        XCTAssertTrue(activity.exists)
+        // The handle is a SwiftUI accessibility wrapper over a UIKit pan surface.
+        // Verify the actual second touch/release, not only the wrapper's hit-test report.
+        let frame = handle.frame
+        XCTAssertTrue(app.scrollViews.firstMatch.frame.contains(CGPoint(x: frame.midX, y: frame.midY)))
+        let origin = app.coordinate(withNormalizedOffset: .zero)
+        let start = origin.withOffset(CGVector(dx: frame.midX, dy: frame.midY))
+        start.press(forDuration: 0.1,
+            thenDragTo: start.withOffset(CGVector(dx: bar.frame.width * 0.40, dy: 0)),
+            withVelocity: .slow, thenHoldForDuration: 0.4)
+        XCTAssertTrue(activity.waitForNonExistence(timeout: 5), "The retry gesture must commit successfully after the first failed save")
         app.terminate()
     }
 
@@ -549,6 +626,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
             app.launch()
             XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 8))
             saveScreenshot(app: app, name: "flow-together-\(appearance)")
+            selectTogetherSection(1, in: app)
             let addIntent = app.buttons["together-add-intent"]
             revealFlowElement(addIntent, in: app)
             addIntent.tap()
@@ -594,6 +672,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
             "--ui-testing-dynamic-type-accessibility",
         ]
         app.launch()
+        selectTogetherSection(1, in: app)
         let addIntent = app.buttons["together-add-intent"]
         revealFlowElement(addIntent, in: app)
         addIntent.tap()
@@ -741,7 +820,8 @@ final class VisualQAScreenshotUITests: XCTestCase {
     @MainActor
     private func revealFlowElement(_ element: XCUIElement, in app: XCUIApplication) {
         let fields = app.descendants(matching: .any)["intent-editor-fields"].firstMatch
-        let surface = fields.exists ? fields : app
+        let scroll = app.scrollViews.firstMatch
+        let surface = fields.exists ? fields : scroll.exists ? scroll : app
         for _ in 0..<12 {
             let visible = surface.frame.intersection(app.frame)
             if element.exists, element.isHittable,
@@ -752,6 +832,10 @@ final class VisualQAScreenshotUITests: XCTestCase {
             } else {
                 surface.swipeUp(velocity: .slow)
             }
+        }
+        if !element.isHittable {
+            saveScreenshot(app: app, name: "flow-unhittable-diagnostic")
+            print("FLOW_DIAGNOSTIC: \(element.identifier) element=\(element.frame) surface=\(surface.frame)")
         }
         XCTAssertTrue(element.exists)
         XCTAssertTrue(element.isHittable)
@@ -1024,6 +1108,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
         XCTAssertTrue(together.waitForExistence(timeout: 8))
         together.tap()
         XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 6))
+        selectTogetherSection(0, in: app)
         XCTAssertTrue(app.descendants(matching: .any)["together-opportunities-empty"].waitForExistence(timeout: 5))
         RunLoop.current.run(until: Date().addingTimeInterval(0.35))
         saveScreenshot(app: app, name: "together-idle-\(appearance)")

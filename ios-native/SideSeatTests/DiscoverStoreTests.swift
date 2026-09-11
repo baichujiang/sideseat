@@ -4,6 +4,29 @@ import Testing
 
 @Suite("Discover stores")
 struct DiscoverStoreTests {
+    @Test("Intention card state distinguishes participation from a stored ACTIVE row")
+    func intentionCardParticipationStates() {
+        let now = Date(timeIntervalSince1970: 1_789_000_000)
+        func state(_ status: String = "ACTIVE", published: Bool = false,
+                   legacy: Bool = false, enabled: Bool = true, expires: TimeInterval = 3600) -> TogetherIntentStatus {
+            let intent = NativeWeeklyIntent(id: "test", topic: .coffee, activityText: "Coffee",
+                sportTag: nil, sportOtherNote: nil, togetherMode: .sameActivity, studyGoal: nil,
+                courseId: nil, course: nil, timeWindows: [], timeZone: "Europe/Berlin", note: nil,
+                status: status, policyVersion: 1, version: 1, expiresAt: now.addingTimeInterval(expires),
+                pausedAt: nil, endedAt: nil, createdAt: now, updatedAt: now,
+                timePreference: NativeIntentTimePreference(kind: "UNDECIDED"), automaticMatching: published, exploreVisible: true)
+            return TogetherIntentStatus(intent: intent, matchingEnabled: enabled,
+                automaticMatchingEnabled: true, legacySessionActive: legacy, now: now)
+        }
+        #expect(state(published: true) == .finding)
+        #expect(state(legacy: true) == .finding)
+        #expect(state() == .unpublished)
+        #expect(state("PAUSED", published: true, legacy: true) == .paused)
+        #expect(state(published: true, expires: -1) == .expired)
+        #expect(state("ENDED", published: true) == .ended)
+        #expect(state(published: true, enabled: false) == .unavailable)
+    }
+
     @Test("Explore Intent payload contains activity context without person identity")
     @MainActor
     func exploreIntentPrivacyProjectionDecodes() throws {
