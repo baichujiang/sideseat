@@ -26,6 +26,12 @@ enum AppShellNavigation {
             selectedSystemImage: "person.2.fill"
         ),
         .init(
+            tab: .plans,
+            title: "Plans",
+            systemImage: "list.bullet.rectangle",
+            selectedSystemImage: "list.bullet.rectangle.fill"
+        ),
+        .init(
             tab: .home,
             title: "Calendar",
             systemImage: "calendar",
@@ -179,7 +185,7 @@ struct AppShellView: View {
                     title: LocalizedStringKey(item.title),
                     systemImage: item.systemImage,
                     selectedSystemImage: item.selectedSystemImage,
-                    badge: item.tab == .chats ? inboxStore.attentionBadgeLabel : nil
+                    badge: badgeLabel(for: item.tab)
                 ) {
                     rootView(for: item.tab)
                 }
@@ -223,12 +229,22 @@ struct AppShellView: View {
         switch tab {
         case .discover:
             TogetherRootView()
+        case .plans:
+            PlansRootView()
         case .home:
             HomeRootView()
         case .chats:
             ChatsRootView(store: inboxStore)
         case .me:
             MeRootView()
+        }
+    }
+
+    private func badgeLabel(for tab: AppTab) -> String? {
+        switch tab {
+        case .plans: inboxStore.planBadgeLabel
+        case .chats: inboxStore.messageBadgeLabel
+        case .discover, .home, .me: nil
         }
     }
 
@@ -246,24 +262,9 @@ struct AppShellView: View {
                         : notice.isPlanUpdate ? "calendar.badge.clock" : "bubble.left.fill"
                 )
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(
-                        notice.isMutualOpportunity
-                            ? SideSeatTheme.accent
-                            : notice.isPlanUpdate
-                                ? SideSeatTheme.HubTint.plans
-                                : SideSeatTheme.HubTint.contacts
-                    )
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     .frame(width: 32, height: 32)
-                    .background(
-                        (
-                            notice.isMutualOpportunity
-                                ? SideSeatTheme.accent
-                                : notice.isPlanUpdate
-                                    ? SideSeatTheme.HubTint.plans
-                                    : SideSeatTheme.HubTint.contacts
-                        ).opacity(0.12),
-                        in: Circle()
-                    )
+                    .background(SideSeatTheme.fillTertiary, in: Circle())
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(notice.title.isEmpty ? AppLocalization.string( "SideSeat") : notice.title)
@@ -357,7 +358,7 @@ struct AppShellView: View {
             return
         }
         selectedTab = tab
-        if let route {
+        if let route, route != .plans {
             routers.router(for: tab).navigate(to: route)
         }
     }
@@ -377,6 +378,8 @@ private extension View {
                     ArchivedCourseListView()
                 case .plans:
                     PlansRootView()
+                case .exploreIntents:
+                    ExploreIntentListView()
                 case .settings:
                     SettingsRootView()
                 case .blockedUsers:

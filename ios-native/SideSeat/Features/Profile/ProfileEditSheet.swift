@@ -55,7 +55,7 @@ struct ProfileEditSheet: View {
                     ProfileEditSection(
                         title: AppLocalization.string( "Basics"),
                         systemImage: "person.text.rectangle.fill",
-                        tint: SideSeatTheme.rose
+                        tint: SideSeatTheme.textSecondaryStrong
                     ) {
                         VStack(spacing: SideSeatTheme.spaceLG) {
                             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {

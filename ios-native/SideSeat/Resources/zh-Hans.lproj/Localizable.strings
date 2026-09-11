@@ -1463,7 +1463,7 @@
 "Did it happen?" = "计划发生了吗？";
 "A quick private response helps evaluate whether SideSeat creates real plans." = "简短的私密反馈可以帮助我们判断 SideSeat 是否促成了真实计划。";
 "Happened" = "发生了";
-"Didn't happen" = "没有发生";
+"Didn't happen" = "没发生";
 "Recent Plans" = "最近的计划";
 "Open conversation" = "打开对话";
 "Saving" = "正在保存";
@@ -1886,3 +1886,58 @@
 "Publish intention" = "发布意向";
 "Publish intention (short)" = "发布";
 "Resume finding company" = "恢复寻找同行";
+
+
+/* Together Explore */
+"What I want to do" = "我最近想做什么";
+"Opportunities for you" = "为你找到的机会";
+"See what others want to do" = "看看大家最近想做什么";
+"Explore activity intentions around your campus" = "主动发现校园里的活动意向";
+"Nothing new to explore right now" = "现在还没有新的活动意向";
+"See more" = "看看更多";
+"Explore what people around campus want to do" = "看看校园里大家最近想做什么";
+"SideSeat Plus exploration" = "SideSeat Plus 主动探索";
+"New activity intentions will appear here when students choose to share them." = "有同学选择分享新的活动意向时，会出现在这里。";
+"Explore more with SideSeat Plus" = "用 SideSeat Plus 探索更多";
+"Plus can unlock more Explore results, richer activity context, search and filters. Identity stays hidden until mutual interest." = "Plus 可以解锁更多 Explore 结果、更完整的活动信息、搜索和筛选；双方互相感兴趣前，身份仍保持隐藏。";
+"Explore intentions" = "探索活动意向";
+"Why this might fit" = "为什么可能适合你";
+"Plus can use your active intentions to explain activity and broad timing relevance without rating the person." = "Plus 可以根据你的近期意向解释活动和大致时间是否相关，但不会给人打分。";
+"Allow others to discover this intention" = "允许其他同学发现这个意向";
+"Before mutual interest, Explore shows only the activity, broad timing, campus, verification and limited language context. Your name, photo, profile and contact details stay hidden." = "双方互相感兴趣前，Explore 只展示活动、大致时间、校园、认证状态和有限语言信息；你的姓名、头像、个人资料和联系方式都会隐藏。";
+"This note may appear as a short Explore activity preview." = "这段说明可能会作为 Explore 中的简短活动预览展示。";
+"This note stays private while Explore visibility is off." = "关闭 Explore 可见性时，这段说明只对你自己可见。";
+"Publish an activity for passive matching. You can separately choose whether it appears in Explore." = "发布一件想做的事，SideSeat 会在后台被动寻找同行；你可以另外决定是否让它出现在 Explore。";
+"Add something you would like to do. Your intention stays private unless you choose Explore visibility." = "添加一件最近想做的事；除非你主动开启 Explore 可见性，否则这个意向保持私密。";
+
+"All activities" = "全部活动";
+"No Explore results match these filters" = "没有符合当前筛选条件的活动意向";
+"Based on your intentions" = "基于你的意向";
+/* Opportunity bilateral swipe */
+"Not interested" = "不感兴趣";
+"Choose interest" = "选择";
+"Release for not interested" = "松开，表示不感兴趣";
+"Swipe left for Not interested or right for Interested" = "左滑不感兴趣，右滑感兴趣";
+"Open Explore" = "打开探索";
+
+/* Five-tab Plans navigation */
+"Keep plans moving" = "让计划继续推进";
+"Review proposals, upcoming plans, and follow-ups in one place." = "在一个地方查看待回应、即将进行的计划和后续事项。";
+"Plans tracks coordination status; Calendar shows confirmed time." = "计划页负责跟踪协调状态；日历只显示已确认的时间。";
+"Keep confirmed time together" = "管理已确认的时间";
+"Calendar carries what is confirmed; Together is where opportunities begin." = "日历承载已经确认的安排；同行页负责发现新的机会。";
+
+"Waiting" = "等待回应";
+"Current Plan" = "当前计划";
+"No plans waiting for a response" = "没有等待回应的计划";
+"No upcoming plans" = "没有即将开始的计划";
+"No ended plans" = "还没有已结束的计划";
+"New proposals and time changes will appear here until someone responds." = "新的计划提议和改时间请求会在回应前显示在这里。";
+"Accepted plans will appear here until they finish." = "已确认的计划会在结束前显示在这里。";
+"Completed, declined, canceled, and expired plans will appear here." = "已完成、拒绝、取消或过期的计划会显示在这里。";
+"Happened?" = "发生了吗？";
+"Yes" = "是";
+"No" = "否";
+"Did this plan happen?" = "这次计划发生了吗？";
+
+"No response" = "未回答";

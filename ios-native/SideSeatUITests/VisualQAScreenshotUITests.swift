@@ -295,42 +295,153 @@ final class VisualQAScreenshotUITests: XCTestCase {
             XCTAssertTrue(bar.waitForExistence(timeout: 8))
             revealFlowElement(handle, in: app)
             XCTAssertGreaterThanOrEqual(handle.frame.height, 44)
-            let ignore = app.buttons["mutual-opportunity-no-\(id)"]
-            let interested = app.buttons["mutual-opportunity-yes-\(id)"]
-            XCTAssertEqual(ignore.label, language == "zh-Hans" ? "忽略" : (language == "de" ? "Ignorieren" : "Ignore"))
-            XCTAssertEqual(interested.label, language == "zh-Hans" ? "有兴趣" : (language == "de" ? "Interesse" : "Interested"))
-            XCTAssertLessThan(handle.frame.midX, bar.frame.midX, "Interest handle should start from the left")
-            saveScreenshot(app: app, name: "opportunity-swipe-\(language)-\(appearance)")
+            XCTAssertFalse(app.buttons["mutual-opportunity-no-\(id)"].exists)
+            XCTAssertEqual(handle.frame.midX, bar.frame.midX, accuracy: 3, "Decision handle should rest in the center")
+            saveScreenshot(app: app, name: "opportunity-swipe-bilateral-\(language)-\(appearance)")
 
             let restingX = handle.frame.midX
+            for dx in [30.0, -30.0] {
+                let start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+                start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: dx, dy: 0)))
+                XCTAssertTrue(activity.exists)
+                XCTAssertEqual(handle.frame.midX, restingX, accuracy: 2)
+            }
 
-            // Short right drags spring back without answering.
-            var start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-            start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 30, dy: 0)))
-            XCTAssertTrue(activity.exists)
-            XCTAssertEqual(handle.frame.midX, restingX, accuracy: 2)
-
-            // Left drags are intentionally inert; Ignore is the separate secondary action.
-            start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-            start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: -90, dy: 0)))
-            XCTAssertTrue(activity.exists)
-            XCTAssertEqual(handle.frame.midX, restingX, accuracy: 2)
-
-            // Vertical movement on the handle belongs to the Together scroll view.
             let initialY = handle.frame.midY
-            start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            var start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -130)))
             XCTAssertTrue(activity.exists)
             XCTAssertLessThan(handle.frame.midY, initialY - 20)
 
-            // Only a deliberate rightward release commits private interest.
             revealFlowElement(handle, in: app)
             start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-            let end = start.withOffset(CGVector(dx: max(120, bar.frame.width - 80), dy: 0))
-            start.press(forDuration: 0.1, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.8)
-            XCTAssertTrue(activity.waitForNonExistence(timeout: 5), "Rightward release must call the private interest action")
+            start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: bar.frame.width * 0.40, dy: 0)), withVelocity: .slow, thenHoldForDuration: 0.5)
+            XCTAssertTrue(activity.waitForNonExistence(timeout: 5), "Rightward release must save private interest")
             app.terminate()
         }
+    }
+
+    @MainActor
+    func testOpportunitySwipeLeftCommitsNotInterested() {
+        let app = XCUIApplication()
+        let id = "cmutualui0000000000000001"
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-discover", "--ui-testing-weekly-intent",
+            "--ui-testing-mutual-opportunity", "--ui-testing-together-matching",
+            "--ui-testing-opportunity-topic=COFFEE", "--ui-testing-language=zh-Hans",
+        ]
+        app.launch()
+        let bar = app.descendants(matching: .any)["mutual-opportunity-swipe-\(id)"]
+        let handle = app.descendants(matching: .any)["mutual-opportunity-swipe-handle-\(id)"]
+        let activity = app.descendants(matching: .any)["mutual-opportunity-activity-\(id)"]
+        XCTAssertTrue(bar.waitForExistence(timeout: 8))
+        revealFlowElement(handle, in: app)
+        let start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: -bar.frame.width * 0.40, dy: 0)), withVelocity: .slow, thenHoldForDuration: 0.5)
+        XCTAssertTrue(activity.waitForNonExistence(timeout: 5), "Leftward release must submit not interested")
+        app.terminate()
+    }
+
+    @MainActor
+    func testTogetherHomeCombinesPassiveMatchingAndExplorePreview() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-discover", "--ui-testing-weekly-intent", "--ui-testing-discovery-published",
+            "--ui-testing-mutual-opportunity", "--ui-testing-automatic-matching",
+            "--ui-testing-discovery-matching", "--ui-testing-explore-intents",
+            "--ui-testing-language=zh-Hans", "--ui-testing-appearance=light",
+        ]
+        app.launch()
+        let intentHeader = app.descendants(matching: .any).matching(identifier: "together-intent-context-list").firstMatch
+        let opportunityHeader = app.descendants(matching: .any)["together-opportunities-section-title"]
+        XCTAssertTrue(intentHeader.waitForExistence(timeout: 8))
+        XCTAssertTrue(opportunityHeader.waitForExistence(timeout: 8))
+        XCTAssertLessThan(intentHeader.frame.minY, opportunityHeader.frame.minY, "Intent input should precede passive matching results")
+
+        let exploreHeader = app.descendants(matching: .any).matching(identifier: "together-explore-section-title").firstMatch
+        revealFlowElement(exploreHeader, in: app)
+        let previewList = app.descendants(matching: .any)["together-explore-preview-list"].firstMatch
+        let firstPreview = app.buttons["together-explore-preview-ui-explore-0"].firstMatch
+        let secondPreview = app.buttons["together-explore-preview-ui-explore-1"].firstMatch
+        XCTAssertTrue(previewList.exists)
+        XCTAssertTrue(firstPreview.exists)
+        XCTAssertTrue(secondPreview.exists)
+        XCTAssertEqual(firstPreview.frame.minY, secondPreview.frame.minY, accuracy: 2, "Explore previews belong to one horizontal row")
+        XCTAssertGreaterThan(secondPreview.frame.maxX, app.frame.maxX, "The next Explore preview should peek rather than form a vertical home feed")
+        let seeMore = app.buttons["together-explore-see-more"]
+        XCTAssertTrue(seeMore.exists)
+        XCTAssertLessThan(abs(seeMore.frame.midY - exploreHeader.frame.midY), 18, "See more should stay in the Explore header, not consume another row")
+        saveScreenshot(app: app, name: "together-home-explore-preview")
+        firstPreview.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["explore-intents-list"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["explore-intent-ui-explore-0"].exists)
+        XCTAssertFalse(app.staticTexts["Mia"].exists, "Explore must not reveal a person identity before mutual interest")
+        saveScreenshot(app: app, name: "explore-free-list")
+        app.terminate()
+    }
+
+    @MainActor
+    func testTogetherHomeCanShowExploreWhenPassiveSectionsAreEmpty() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-discover", "--ui-testing-weekly-intent",
+            "--ui-testing-mutual-opportunity-empty", "--ui-testing-automatic-matching",
+            "--ui-testing-explore-intents", "--ui-testing-language=zh-Hans",
+        ]
+        app.launch()
+        XCTAssertTrue(app.descendants(matching: .any)["together-set-intent"].waitForExistence(timeout: 8))
+        let explore = app.buttons["together-explore-preview-ui-explore-0"].firstMatch
+        revealFlowElement(explore, in: app)
+        XCTAssertTrue(explore.exists)
+        XCTAssertFalse(app.staticTexts["Mia"].exists)
+        saveScreenshot(app: app, name: "together-explore-only")
+        app.terminate()
+    }
+
+    @MainActor
+    func testTogetherExploreEmptyStateIsExplicit() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-discover", "--ui-testing-weekly-intent",
+            "--ui-testing-mutual-opportunity-empty", "--ui-testing-automatic-matching",
+            "--ui-testing-explore-empty", "--ui-testing-language=zh-Hans",
+        ]
+        app.launch()
+        let empty = app.descendants(matching: .any)["together-explore-empty"]
+        revealFlowElement(empty, in: app)
+        XCTAssertTrue(empty.exists)
+        XCTAssertEqual(empty.label, "现在还没有新的活动意向")
+        saveScreenshot(app: app, name: "together-explore-empty")
+        app.terminate()
+    }
+
+    @MainActor
+    func testExplorePlusStateSupportsActivitySearch() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-discover", "--ui-testing-weekly-intent",
+            "--ui-testing-mutual-opportunity-empty", "--ui-testing-automatic-matching",
+            "--ui-testing-explore-intents", "--ui-testing-explore-plus",
+            "--ui-testing-language=en", "--ui-testing-appearance=light",
+        ]
+        app.launch()
+        let seeMore = app.buttons["together-explore-see-more"]
+        revealFlowElement(seeMore, in: app)
+        seeMore.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["explore-plus-status"].waitForExistence(timeout: 5))
+        let search = app.textFields["explore-search"]
+        XCTAssertTrue(search.waitForExistence(timeout: 5))
+        search.tap()
+        search.typeText("Badminton")
+        XCTAssertTrue(app.descendants(matching: .any)["explore-intent-ui-explore-0"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.descendants(matching: .any)["explore-intent-ui-explore-1"].exists)
+        saveScreenshot(app: app, name: "explore-plus-search")
+        app.terminate()
     }
 
     @MainActor
@@ -345,16 +456,15 @@ final class VisualQAScreenshotUITests: XCTestCase {
         ]
         app.launch()
         let id = "cmutualui0000000000000001"
-        let interested = app.buttons["mutual-opportunity-yes-\(id)"]
-        revealFlowElement(interested, in: app)
-        swipeOpportunityInterest(id: id, in: app)
-        XCTAssertTrue(app.staticTexts["UI test: choice was not saved."].waitForExistence(timeout: 5))
-        let available = expectation(for: NSPredicate(format: "enabled == true"), evaluatedWith: interested)
-        wait(for: [available], timeout: 5)
         let handle = app.descendants(matching: .any)["mutual-opportunity-swipe-handle-\(id)"]
         let bar = app.descendants(matching: .any)["mutual-opportunity-swipe-\(id)"]
-        XCTAssertLessThan(handle.frame.midX, bar.frame.midX)
-        XCTAssertTrue(app.buttons["mutual-opportunity-no-\(id)"].isEnabled)
+        revealFlowElement(handle, in: app)
+        let restingX = handle.frame.midX
+        swipeOpportunityInterest(id: id, in: app)
+        XCTAssertTrue(app.staticTexts["UI test: choice was not saved."].waitForExistence(timeout: 5))
+        XCTAssertTrue(bar.waitForExistence(timeout: 5))
+        revealFlowElement(handle, in: app)
+        XCTAssertEqual(handle.frame.midX, restingX, accuracy: 2)
         XCTAssertTrue(app.descendants(matching: .any)["mutual-opportunity-activity-\(id)"].exists)
         app.terminate()
     }
@@ -393,31 +503,27 @@ final class VisualQAScreenshotUITests: XCTestCase {
             XCTAssertLessThanOrEqual(time.frame.maxY, summary.frame.minY)
             XCTAssertLessThanOrEqual(summary.frame.maxY, fit.frame.minY)
             XCTAssertTrue(fit.label.contains("100/100"))
-            let yes = app.buttons["mutual-opportunity-yes-\(id)"]
+            let decision = app.descendants(matching: .any)["mutual-opportunity-swipe-\(id)"]
             let open = app.buttons["mutual-opportunity-open-\(id)"]
             if state == "NEEDS_DECISION" {
-                revealFlowElement(yes, in: app)
-                XCTAssertTrue(yes.isEnabled)
-                XCTAssertGreaterThanOrEqual(yes.frame.height, 44)
-                XCTAssertTrue(app.buttons["mutual-opportunity-no-\(id)"].exists)
+                revealFlowElement(decision, in: app)
+                XCTAssertTrue(decision.exists)
+                XCTAssertFalse(app.buttons["mutual-opportunity-no-\(id)"].exists)
                 XCTAssertFalse(open.exists, "Planning is unavailable before mutual consent")
             } else if state == "DECIDED" {
                 let withdraw = app.buttons["撤回"]
                 revealFlowElement(withdraw, in: app)
-                XCTAssertFalse(yes.exists)
+                XCTAssertFalse(decision.exists)
                 XCTAssertFalse(open.exists, "A private YES must not unlock planning")
             } else {
                 revealFlowElement(open, in: app)
                 XCTAssertTrue(open.isEnabled)
-                XCTAssertFalse(yes.exists)
+                XCTAssertFalse(decision.exists)
             }
             saveScreenshot(app: app, name: "opportunity-\(topic.lowercased())-\(state.lowercased())-\(appearance)")
             if state == "NEEDS_DECISION" {
-                // Positive consent is deliberately a rightward gesture; Ignore remains a quiet tap.
                 if topic == "FOOD" {
-                    let ignore = app.buttons["mutual-opportunity-no-\(id)"]
-                    revealFlowElement(ignore, in: app)
-                    ignore.tap()
+                    swipeOpportunityNotInterested(id: id, in: app)
                 } else {
                     swipeOpportunityInterest(id: id, in: app)
                 }
@@ -522,8 +628,10 @@ final class VisualQAScreenshotUITests: XCTestCase {
                 "--ui-testing-language=zh-Hans", "--ui-testing-appearance=\(appearance)",
             ]
             app.launch()
-            XCTAssertTrue(app.buttons["inbox-pending-plans"].waitForExistence(timeout: 8))
-            app.buttons["inbox-pending-plans"].tap()
+            XCTAssertFalse(app.buttons["inbox-pending-plans"].exists)
+            let plansTab = tabButton(in: app, labels: ["Plans", "计划", "Pläne"])
+            XCTAssertTrue(plansTab.waitForExistence(timeout: 8))
+            plansTab.tap()
             let plan = app.buttons["plans-row-ui-plan-1"]
             XCTAssertTrue(plan.waitForExistence(timeout: 5))
             saveScreenshot(app: app, name: "flow-plans-\(appearance)")
@@ -550,10 +658,23 @@ final class VisualQAScreenshotUITests: XCTestCase {
             app.terminate()
 
             app.launch()
-            XCTAssertTrue(app.buttons["inbox-pending-plans"].waitForExistence(timeout: 8))
-            app.buttons["inbox-pending-plans"].tap()
+            XCTAssertFalse(app.buttons["inbox-pending-plans"].exists)
+            let outcomePlansTab = tabButton(in: app, labels: ["Plans", "计划", "Pläne"])
+            XCTAssertTrue(outcomePlansTab.waitForExistence(timeout: 8))
+            outcomePlansTab.tap()
+            let endedTab = app.buttons.matching(
+                NSPredicate(format: "label IN %@", ["Ended", "已结束", "Beendet"])
+            ).firstMatch
+            XCTAssertTrue(endedTab.waitForExistence(timeout: 5))
+            endedTab.tap()
             let happened = app.buttons["plan-outcome-occurred-ui-plan-completed"]
             revealFlowElement(happened, in: app)
+            let didNotHappenInitial = app.buttons["plan-outcome-did_not_occur-ui-plan-completed"]
+            XCTAssertTrue(didNotHappenInitial.waitForExistence(timeout: 3))
+            XCTAssertFalse(app.buttons["plan-outcome-prefer_not_to_say-ui-plan-completed"].exists)
+            XCTAssertEqual(happened.frame.midY, didNotHappenInitial.frame.midY, accuracy: 3)
+            XCTAssertGreaterThanOrEqual(happened.frame.height, 44)
+            XCTAssertGreaterThanOrEqual(didNotHappenInitial.frame.height, 44)
             saveScreenshot(app: app, name: "flow-outcome-\(appearance)")
             happened.tap()
             let edit = app.buttons["plan-outcome-edit-ui-plan-completed"]
@@ -569,7 +690,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
-    func testMeetAgainPrivatePermissionLightAndDark() {
+    func testOutcomeDoesNotPromptMeetAgainLightAndDark() {
         for appearance in ["light", "dark"] {
             let app = XCUIApplication()
             app.launchArguments = [
@@ -578,29 +699,21 @@ final class VisualQAScreenshotUITests: XCTestCase {
                 "--ui-testing-language=zh-Hans", "--ui-testing-appearance=\(appearance)",
             ]
             app.launch()
-            XCTAssertTrue(app.buttons["inbox-pending-plans"].waitForExistence(timeout: 8))
-            app.buttons["inbox-pending-plans"].tap()
+            let plansTab = tabButton(in: app, labels: ["Plans", "计划", "Pläne"])
+            XCTAssertTrue(plansTab.waitForExistence(timeout: 8))
+            plansTab.tap()
+            let endedTab = app.buttons.matching(
+                NSPredicate(format: "label IN %@", ["Ended", "已结束", "Beendet"])
+            ).firstMatch
+            XCTAssertTrue(endedTab.waitForExistence(timeout: 5))
+            endedTab.tap()
             let happened = app.buttons["plan-outcome-occurred-ui-plan-completed"]
             revealFlowElement(happened, in: app)
-            XCTAssertFalse(app.buttons["plan-meet-again-yes-ui-plan-completed"].exists)
             happened.tap()
-            let yes = app.buttons["plan-meet-again-yes-ui-plan-completed"]
-            revealFlowElement(yes, in: app)
-            XCTAssertTrue(app.staticTexts["愿意再次同行吗？"].exists)
-            saveScreenshot(app: app, name: "layer3-permission-\(appearance)")
-            yes.tap()
-            let withdraw = app.buttons["plan-meet-again-withdraw-ui-plan-completed"]
-            revealFlowElement(withdraw, in: app)
-            XCTAssertTrue(app.staticTexts["你愿意再次同行"].exists)
-            saveScreenshot(app: app, name: "layer3-permission-saved-\(appearance)")
-            withdraw.tap()
-            XCTAssertTrue(app.staticTexts["已撤回意愿"].waitForExistence(timeout: 4))
-            app.buttons["plan-meet-again-edit-ui-plan-completed"].tap()
-            let no = app.buttons["plan-meet-again-no-ui-plan-completed"]
-            revealFlowElement(no, in: app)
-            no.tap()
-            XCTAssertTrue(app.buttons["plan-meet-again-edit-ui-plan-completed"].waitForExistence(timeout: 4))
-            XCTAssertFalse(app.buttons["plan-meet-again-withdraw-ui-plan-completed"].exists)
+            XCTAssertTrue(app.descendants(matching: .any)["plan-outcome-saved-ui-plan-completed"].waitForExistence(timeout: 4))
+            XCTAssertFalse(app.descendants(matching: .any).matching(
+                NSPredicate(format: "identifier BEGINSWITH %@", "plan-meet-again-")
+            ).firstMatch.exists)
             app.terminate()
         }
     }
@@ -611,7 +724,17 @@ final class VisualQAScreenshotUITests: XCTestCase {
         let bar = app.descendants(matching: .any)["mutual-opportunity-swipe-\(id)"]
         revealFlowElement(handle, in: app)
         let start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-        let end = start.withOffset(CGVector(dx: max(120, bar.frame.width - 80), dy: 0))
+        let end = start.withOffset(CGVector(dx: bar.frame.width * 0.40, dy: 0))
+        start.press(forDuration: 0.1, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.4)
+    }
+
+    @MainActor
+    private func swipeOpportunityNotInterested(id: String, in app: XCUIApplication) {
+        let handle = app.descendants(matching: .any)["mutual-opportunity-swipe-handle-\(id)"]
+        let bar = app.descendants(matching: .any)["mutual-opportunity-swipe-\(id)"]
+        revealFlowElement(handle, in: app)
+        let start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let end = start.withOffset(CGVector(dx: -bar.frame.width * 0.40, dy: 0))
         start.press(forDuration: 0.1, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.4)
     }
 
@@ -705,18 +828,18 @@ final class VisualQAScreenshotUITests: XCTestCase {
         ]
         app.launch()
 
-        let pendingPlans = app.buttons["inbox-pending-plans"]
-        XCTAssertTrue(pendingPlans.waitForExistence(timeout: 8))
-        pendingPlans.tap()
+        XCTAssertFalse(app.buttons["inbox-pending-plans"].exists)
+        let plansTab = tabButton(in: app, labels: ["Plans", "计划", "Pläne"])
+        XCTAssertTrue(plansTab.waitForExistence(timeout: 8))
+        plansTab.tap()
 
-        XCTAssertTrue(app.navigationBars["计划"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["需要你回应"].exists)
-        XCTAssertTrue(app.staticTexts["即将开始"].exists)
-        XCTAssertTrue(app.staticTexts["历史与已结束"].exists)
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "已确认")).firstMatch.exists)
+        XCTAssertTrue(app.descendants(matching: .any)["plans-root"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["plans-segmented-control"].exists)
+        XCTAssertTrue(app.buttons["等待回应"].exists)
+        XCTAssertTrue(app.buttons["即将开始"].exists)
+        XCTAssertTrue(app.buttons["已结束"].exists)
         XCTAssertTrue(app.staticTexts["在对话中管理"].firstMatch.exists)
         XCTAssertFalse(app.staticTexts["Past & Ended"].exists)
-        XCTAssertFalse(app.staticTexts["Confirmed"].exists)
         XCTAssertFalse(app.staticTexts["Manage in conversation"].exists)
 
         let planRow = app.buttons["plans-row-ui-plan-1"]

@@ -42,7 +42,8 @@ enum SideSeatTheme {
     /// Foreground on the bright product accent. Pure black leaves room for icon antialiasing.
     static let onAccent = Color.black
 
-    /// Selected controls, key icons, unread dots and borders. Product CTAs use `ProductAction`.
+    /// Selected controls and key brand interactions. Product CTAs use `ProductAction`.
+    /// Attention badges and semantic state must never reuse the brand accent.
     /// Body text, captions, dates, display names, and status labels use text or semantic colors.
     /// Resolve the product accent independently from SwiftUI's environment tint. The
     /// reserved `AccentColor` asset name follows `.tint`, so it cannot safely serve both
@@ -87,6 +88,9 @@ enum SideSeatTheme {
     )
     /// Form placeholders remain visually secondary while meeting contrast on field fills.
     static let placeholderText = textSecondaryStrong
+    /// Attention / unread counts use the platform convention instead of the brand palette.
+    static let attention = Color(uiColor: .systemRed)
+    static let onAttention = Color.white
     /// Delete, validation errors — never use ``accent`` for these.
     static let danger = Color(uiColor: .systemRed)
     /// Success / confirmation — never use ``accent`` for these.
@@ -174,20 +178,22 @@ enum SideSeatTheme {
 
     // MARK: - Hub / avatar (functional tints — shape unified via SSListRow)
 
-    /// Me hub row icon tints. Distinct by function; not interactive accent.
+    /// Functional hub icons are deliberately neutral. Color is reserved for semantic meaning,
+    /// verified identity, selected state, and primary actions — not feature decoration.
     enum HubTint {
-        static let courses = Color(red: 0.18, green: 0.62, blue: 0.42)
-        static let plans = Color(red: 0.20, green: 0.52, blue: 0.86)
-        static let posts = Color(red: 0.08, green: 0.58, blue: 0.62)
-        static let savedPosts = Color(red: 0.76, green: 0.43, blue: 0.10)
-        static let contacts = Color(red: 0.55, green: 0.35, blue: 0.82)
-        static let settings = Color(red: 0.42, green: 0.45, blue: 0.50)
-        static let feedback = Color(red: 0.18, green: 0.55, blue: 0.86)
+        private static let neutral = SideSeatTheme.textSecondaryStrong
+        static let courses = neutral
+        static let plans = neutral
+        static let posts = neutral
+        static let savedPosts = neutral
+        static let contacts = neutral
+        static let settings = neutral
+        static let feedback = neutral
         static let blocked = SideSeatTheme.danger
-        static let username = Color(red: 0.35, green: 0.40, blue: 0.55)
-        static let privacySchedule = Color(red: 0.20, green: 0.55, blue: 0.78)
-        static let privacyDiscover = Color(red: 0.35, green: 0.55, blue: 0.42)
-        static let privacyChat = Color(red: 0.55, green: 0.40, blue: 0.75)
+        static let username = neutral
+        static let privacySchedule = neutral
+        static let privacyDiscover = neutral
+        static let privacyChat = neutral
     }
 
     /// Deterministic collage / multi-avatar tile colors (not brand chrome / not Rose accent).
@@ -457,6 +463,11 @@ enum SideSeatTheme {
             .foregroundColor: accent,
             .font: UIFont.systemFont(ofSize: BrandChrome.tabTitleSize, weight: .semibold),
         ]
+        // Badge is semantic attention, never brand chrome. Match the platform convention.
+        for state in [appearance.normal, appearance.selected, appearance.disabled, appearance.focused] {
+            state.badgeBackgroundColor = .systemRed
+            state.badgeTextAttributes = [.foregroundColor: UIColor.white]
+        }
     }
 }
 

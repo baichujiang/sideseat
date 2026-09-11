@@ -11,7 +11,6 @@ struct PlanCardView: View {
     let onWithdraw: () -> Void
     let onCounter: () -> Void
     let onRecordOutcome: (String) -> Void
-    let onRecordMeetAgain: (String) -> Void
     let onOpenCalendar: () -> Void
 
     var body: some View {
@@ -106,7 +105,6 @@ struct PlanCardView: View {
                 PlanOutcomePromptView(
                     plan: plan,
                     isSubmitting: isActing,
-                    onMeetAgain: onRecordMeetAgain,
                     onAnswer: onRecordOutcome
                 )
             } else if plan.status == "ACCEPTED" {
@@ -247,161 +245,188 @@ struct PlanOutcomePromptView: View {
     @State private var isEditing = false
     let plan: NativePlanRequest
     let isSubmitting: Bool
-    var onMeetAgain: ((String) -> Void)? = nil
     let onAnswer: (String) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
-                Label("Did it happen?", systemImage: "lock.fill")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(SideSeatTheme.textPrimary)
-                Spacer(minLength: SideSeatTheme.spaceSM)
-                if isSubmitting {
-                    ProgressView()
-                        .controlSize(.small)
-                        .accessibilityLabel("Saving")
-                }
-            }
-
-            Text("Your answer stays private. Choose what actually happened.")
-                .font(.footnote)
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .fixedSize(horizontal: false, vertical: true)
-
-            if plan.viewerOutcome == nil || isEditing {
-                VStack(spacing: SideSeatTheme.spaceSM) {
-                    outcomeButton(
-                        title: AppLocalization.string("Happened"),
-                        systemImage: "checkmark.circle.fill",
-                        value: "OCCURRED"
-                    )
-                    outcomeButton(
-                        title: AppLocalization.string("Didn't happen"),
-                        systemImage: "xmark.circle",
-                        value: "DID_NOT_OCCUR"
-                    )
-                    outcomeButton(
-                        title: AppLocalization.string("Skip"),
-                        systemImage: "forward.fill",
-                        value: "PREFER_NOT_TO_SAY"
-                    )
-                }
-            } else {
-                HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
-                    Text(savedAnswerTitle)
-                        .font(.subheadline.weight(.semibold))
-                    Spacer(minLength: 0)
-                    Button {
-                        isEditing = true
-                    } label: {
-                        Text("Change answer")
-                            .font(.subheadline)
-                            .frame(minHeight: 44)
-                            .contentShape(Rectangle())
-                    }
-                    .accessibilityIdentifier("plan-outcome-edit-\(plan.id)")
-                }
-            }
-
-            if plan.viewerOutcome != nil {
-                Label("Your answer is saved privately. Only you can see it.", systemImage: "checkmark.shield.fill")
-                    .font(.caption)
-                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityIdentifier("plan-outcome-saved-\(plan.id)")
-            }
-
-            if plan.showsMeetAgain, let onMeetAgain {
-                Divider()
-                PlanMeetAgainPromptView(plan: plan, isSubmitting: isSubmitting, onAnswer: onMeetAgain)
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            ViewThatFits(in: .horizontal) {
+                compactOutcomeRow
+                accessibleOutcomeStack
             }
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("plan-outcome-\(plan.id)")
+        .accessibilityHint(AppLocalization.string("Your answer stays private. Choose what actually happened."))
         .onChange(of: plan.viewerOutcome) { _, _ in isEditing = false }
+    }
+
+    private var compactOutcomeRow: some View {
+        HStack(spacing: SideSeatTheme.spaceSM) {
+            outcomeQuestion
+            Spacer(minLength: SideSeatTheme.spaceXS)
+            outcomeContent(horizontal: true)
+        }
+    }
+
+    private var accessibleOutcomeStack: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            outcomeQuestion
+            outcomeContent(horizontal: false)
+        }
+    }
+
+    private var outcomeQuestion: some View {
+        HStack(spacing: 5) {
+            Text("Did this plan happen?")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(SideSeatTheme.textPrimary)
+                .fixedSize(horizontal: true, vertical: false)
+            if isSubmitting {
+                ProgressView()
+                    .controlSize(.small)
+                    .accessibilityLabel("Saving")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func outcomeContent(horizontal: Bool) -> some View {
+        if plan.viewerOutcome == nil || isEditing {
+            if horizontal {
+                HStack(spacing: 6) {
+                    outcomeButton(title: AppLocalization.string("Happened"), systemImage: "checkmark", value: "OCCURRED", tone: .success)
+                    outcomeButton(title: AppLocalization.string("Didn't happen"), systemImage: "xmark", value: "DID_NOT_OCCUR", tone: .danger)
+                }
+            } else {
+                VStack(spacing: 6) {
+                    outcomeButton(title: AppLocalization.string("Happened"), systemImage: "checkmark", value: "OCCURRED", tone: .success)
+                    outcomeButton(title: AppLocalization.string("Didn't happen"), systemImage: "xmark", value: "DID_NOT_OCCUR", tone: .danger)
+                }
+            }
+        } else {
+            HStack(spacing: 6) {
+                savedOutcomeChip
+                Button {
+                    isEditing = true
+                } label: {
+                    Image(systemName: "pencil")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .frame(width: 44, height: 44)
+                        .background(SideSeatTheme.fillTertiary, in: Circle())
+                }
+                .buttonStyle(SSPressButtonStyle())
+                .accessibilityLabel("Change answer")
+                .accessibilityIdentifier("plan-outcome-edit-\(plan.id)")
+            }
+        }
+    }
+
+    private var savedOutcomeChip: some View {
+        Label(savedAnswerTitle, systemImage: savedAnswerIcon)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(savedAnswerTone.foreground)
+            .lineLimit(1)
+            .minimumScaleFactor(0.78)
+            .padding(.horizontal, 10)
+            .frame(minHeight: 44)
+            .background(savedAnswerTone.fill, in: Capsule())
+            .overlay {
+                Capsule().strokeBorder(savedAnswerTone.stroke, lineWidth: 1)
+            }
+            .accessibilityLabel(AppLocalization.string("Your answer is saved privately. Only you can see it."))
+            .accessibilityValue(savedAnswerTitle)
+            .accessibilityIdentifier("plan-outcome-saved-\(plan.id)")
     }
 
     private var savedAnswerTitle: String {
         switch plan.viewerOutcome {
         case "OCCURRED": AppLocalization.string("Happened")
         case "DID_NOT_OCCUR": AppLocalization.string("Didn't happen")
-        default: AppLocalization.string("Skip")
+        default: AppLocalization.string("No response")
+        }
+    }
+
+    private var savedAnswerIcon: String {
+        switch plan.viewerOutcome {
+        case "OCCURRED": "checkmark"
+        case "DID_NOT_OCCUR": "xmark"
+        default: "minus"
+        }
+    }
+
+    private var savedAnswerTone: OutcomeTone {
+        switch plan.viewerOutcome {
+        case "OCCURRED": .success
+        case "DID_NOT_OCCUR": .danger
+        default: .neutral
         }
     }
 
     private func outcomeButton(
         title: String,
         systemImage: String,
-        value: String
+        value: String,
+        tone: OutcomeTone
     ) -> some View {
         let isSelected = plan.viewerOutcome == value
-        return SSFlowChoice(
-            title: title,
-            systemImage: systemImage,
-            isSelected: isSelected
-        ) {
+        return Button {
             onAnswer(value)
+        } label: {
+            Label(title, systemImage: systemImage)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(tone.foreground)
+                .lineLimit(1)
+                .minimumScaleFactor(0.72)
+                .padding(.horizontal, 9)
+                .frame(minHeight: 44)
+                .background(tone.fill, in: Capsule())
+                .overlay {
+                    Capsule().strokeBorder(tone.stroke, lineWidth: 1)
+                }
         }
+        .buttonStyle(SSPressButtonStyle())
         .disabled(isSubmitting || isSelected)
+        .accessibilityLabel(outcomeAccessibilityLabel(for: value))
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityIdentifier("plan-outcome-\(value.lowercased())-\(plan.id)")
     }
-}
 
-struct PlanMeetAgainPromptView: View {
-    @State private var isEditing = false
-    let plan: NativePlanRequest
-    let isSubmitting: Bool
-    let onAnswer: (String) -> Void
+    private func outcomeAccessibilityLabel(for value: String) -> String {
+        switch value {
+        case "OCCURRED": AppLocalization.string("Happened")
+        case "DID_NOT_OCCUR": AppLocalization.string("Didn't happen")
+        default: AppLocalization.string("No response")
+        }
+    }
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            Label("Would you meet again?", systemImage: "arrow.triangle.2.circlepath")
-                .font(.subheadline.weight(.semibold))
-            Text("Your choice is private. A future opportunity still needs new intentions and consent.")
-                .font(.footnote)
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .fixedSize(horizontal: false, vertical: true)
-            if plan.viewerMeetAgain == nil || isEditing {
-                choice("I'd be open to it", icon: "checkmark.circle", value: "YES")
-                    .disabled(plan.meetAgainAvailable != true)
-                choice("Not this time", icon: "minus.circle", value: "NO")
-            } else {
-                HStack {
-                    Text(savedTitle).font(.subheadline.weight(.medium))
-                    Spacer(minLength: SideSeatTheme.spaceSM)
-                    Button("Change answer") { isEditing = true }
-                        .frame(minHeight: 44)
-                        .accessibilityIdentifier("plan-meet-again-edit-\(plan.id)")
-                }
-                if plan.viewerMeetAgain == "YES" {
-                    Button("Withdraw permission") { onAnswer("WITHDRAWN") }
-                        .frame(minHeight: 44)
-                        .accessibilityIdentifier("plan-meet-again-withdraw-\(plan.id)")
-                }
-                Label("Only your choice is shown. You can change it anytime.", systemImage: "lock.fill")
-                    .font(.caption)
-                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    .accessibilityIdentifier("plan-meet-again-saved-\(plan.id)")
+    private enum OutcomeTone {
+        case success
+        case danger
+        case neutral
+
+        var foreground: Color {
+            switch self {
+            case .success: SideSeatTheme.statusSuccessText
+            case .danger: SideSeatTheme.statusDangerText
+            case .neutral: SideSeatTheme.textSecondaryStrong
             }
         }
-        .disabled(isSubmitting)
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("plan-meet-again-\(plan.id)")
-        .onChange(of: plan.viewerMeetAgain) { _, _ in isEditing = false }
-    }
 
-    private var savedTitle: String {
-        switch plan.viewerMeetAgain {
-        case "YES": AppLocalization.string("Open to meeting again")
-        case "NO": AppLocalization.string("Not this time")
-        default: AppLocalization.string("Permission withdrawn")
+        var fill: Color {
+            switch self {
+            case .success: SideSeatTheme.success.opacity(0.10)
+            case .danger: SideSeatTheme.danger.opacity(0.08)
+            case .neutral: SideSeatTheme.fillTertiary
+            }
         }
-    }
 
-    private func choice(_ title: String.LocalizationValue, icon: String, value: String) -> some View {
-        SSFlowChoice(title: AppLocalization.string(title), systemImage: icon,
-                     isSelected: plan.viewerMeetAgain == value) { onAnswer(value) }
-            .accessibilityIdentifier("plan-meet-again-\(value.lowercased())-\(plan.id)")
+        var stroke: Color {
+            switch self {
+            case .success: SideSeatTheme.success.opacity(0.24)
+            case .danger: SideSeatTheme.danger.opacity(0.20)
+            case .neutral: SideSeatTheme.separator.opacity(0.55)
+            }
+        }
     }
 }

@@ -141,10 +141,10 @@ struct MVPRoutePolicyTests {
         }
     }
 
-    @Test("Maps canonical owners to the stable four-tab IA")
+    @Test("Maps canonical owners to the stable five-tab IA")
     func mapsOwnerTabs() {
         #expect(MVPRoutePolicy.tab(for: .directChat(connectionID: "connection-1")) == .chats)
-        #expect(MVPRoutePolicy.tab(for: .plans) == .chats)
+        #expect(MVPRoutePolicy.tab(for: .plans) == .plans)
         #expect(MVPRoutePolicy.tab(for: .eventShare(token: "event-1")) == .home)
         #expect(MVPRoutePolicy.tab(for: .courses) == .me)
     }
@@ -205,18 +205,21 @@ struct TogetherPresentationTests {
 
 @Suite("Opportunity swipe decision")
 struct OpportunitySwipeDecisionTests {
-    @Test("Only deliberate rightward travel selects private interest")
-    func choosesInterestDirection() {
+    @Test("Deliberate horizontal releases choose interest in either direction")
+    func choosesBothDirections() {
         #expect(SSOpportunitySwipeChoice.releasedChoice(
             translation: CGSize(width: 100, height: 4), travel: 120
         ) == .interested)
+        #expect(SSOpportunitySwipeChoice.releasedChoice(
+            translation: CGSize(width: -100, height: 4), travel: 120
+        ) == .skip)
     }
 
-    @Test("Left, short, returned and vertical drags do not submit a decision")
+    @Test("Short, returned and vertical drags do not submit a decision")
     func leavesChoiceOpen() {
         for translation in [
-            CGSize(width: -100, height: 4),
             CGSize(width: 30, height: 0),
+            CGSize(width: -30, height: 0),
             .zero,
             CGSize(width: 30, height: 120),
         ] {
@@ -249,14 +252,13 @@ struct MVPConversationInfoTests {
 
 @Suite("MVP Plan presentation")
 struct MVPPlanPresentationTests {
-    @Test("Keeps the four frozen Plan Center sections in order")
+    @Test("Keeps the three Plan Center tabs in order")
     func keepsSectionOrder() {
-        #expect(MVPPlanSection.ordered == [.needsResponse, .upcoming, .proposed, .pastEnded])
+        #expect(MVPPlanSection.ordered == [.waitingResponse, .upcoming, .ended])
         #expect(MVPPlanSection.ordered.map(\.title) == [
-            "Needs your response",
+            "Waiting",
             "Upcoming",
-            "Proposed",
-            "Past & Ended",
+            "Ended",
         ].map { AppLocalization.string($0) })
     }
 
@@ -268,14 +270,14 @@ struct MVPPlanPresentationTests {
                 plan(status: "PENDING", proposerID: "peer", receiverID: "viewer", end: now.addingTimeInterval(3600)),
                 currentUserID: "viewer",
                 now: now
-            ) == .needsResponse
+            ) == .waitingResponse
         )
         #expect(
             MVPPlanSection.classify(
                 plan(status: "PENDING", proposerID: "viewer", receiverID: "peer", end: now.addingTimeInterval(3600)),
                 currentUserID: "viewer",
                 now: now
-            ) == .proposed
+            ) == .waitingResponse
         )
         #expect(
             MVPPlanSection.classify(
@@ -289,14 +291,14 @@ struct MVPPlanPresentationTests {
                 plan(status: "ACCEPTED", proposerID: "viewer", receiverID: "peer", end: now.addingTimeInterval(-1)),
                 currentUserID: "viewer",
                 now: now
-            ) == .pastEnded
+            ) == .ended
         )
         #expect(
             MVPPlanSection.classify(
                 plan(status: "CANCELED", proposerID: "viewer", receiverID: "peer", end: now.addingTimeInterval(3600)),
                 currentUserID: "viewer",
                 now: now
-            ) == .pastEnded
+            ) == .ended
         )
     }
 

@@ -3,6 +3,7 @@ import Foundation
 enum AppTab: String, CaseIterable, Hashable, Identifiable {
     case home
     case discover
+    case plans
     case chats
     case me
 
@@ -30,6 +31,7 @@ enum AppRoute: Hashable, Sendable {
     case profile(userID: String)
     case contacts
     case plans
+    case exploreIntents
     case settings
     case blockedUsers
     case supportStore
@@ -72,6 +74,7 @@ enum MVPRoutePolicy {
         case .courses,
              .archivedCourses,
              .plans,
+             .exploreIntents,
              .settings,
              .blockedUsers,
              .feedback,
@@ -102,14 +105,16 @@ enum MVPRoutePolicy {
         switch route {
         case .courses, .archivedCourses, .course:
             return .me
-        case .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .plans, .scheduleShare,
+        case .plans:
+            return .plans
+        case .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .scheduleShare,
              .actionResponses, .coordinationShell:
             return .chats
         case .eventShare:
             return .home
         case .myPosts, .savedPosts, .profile, .settings, .blockedUsers, .supportStore, .feedback, .feedbackDetail:
             return .me
-        case .discoverPost, .activity:
+        case .discoverPost, .activity, .exploreIntents:
             return .discover
         }
     }

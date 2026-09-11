@@ -1,42 +1,35 @@
 import SwiftUI
 
-enum MVPPlanSection: String, CaseIterable, Equatable, Sendable {
-    case needsResponse
+enum MVPPlanSection: String, CaseIterable, Equatable, Sendable, Identifiable {
+    case waitingResponse
     case upcoming
-    case proposed
-    case pastEnded
+    case ended
 
-    static let ordered: [MVPPlanSection] = [
-        .needsResponse,
-        .upcoming,
-        .proposed,
-        .pastEnded,
-    ]
+    static let ordered: [MVPPlanSection] = [.waitingResponse, .upcoming, .ended]
+
+    var id: String { rawValue }
 
     var title: String {
         switch self {
-        case .needsResponse: AppLocalization.string("Needs your response")
+        case .waitingResponse: AppLocalization.string("Waiting")
         case .upcoming: AppLocalization.string("Upcoming")
-        case .proposed: AppLocalization.string("Proposed")
-        case .pastEnded: AppLocalization.string("Past & Ended")
+        case .ended: AppLocalization.string("Ended")
         }
     }
 
     var systemImage: String {
         switch self {
-        case .needsResponse: "envelope.badge"
+        case .waitingResponse: "bubble.left.and.exclamationmark.bubble.right"
         case .upcoming: "calendar.badge.checkmark"
-        case .proposed: "hourglass"
-        case .pastEnded: "clock.arrow.circlepath"
+        case .ended: "clock.arrow.circlepath"
         }
     }
 
     var accessibilityIdentifier: String {
         switch self {
-        case .needsResponse: "plans-section-needs-response"
+        case .waitingResponse: "plans-section-waiting-response"
         case .upcoming: "plans-section-upcoming"
-        case .proposed: "plans-section-proposed"
-        case .pastEnded: "plans-section-past-ended"
+        case .ended: "plans-section-ended"
         }
     }
 
@@ -45,16 +38,13 @@ enum MVPPlanSection: String, CaseIterable, Equatable, Sendable {
         currentUserID: String,
         now: Date
     ) -> MVPPlanSection {
-        if plan.status == "PENDING", plan.receiver.id == currentUserID {
-            return .needsResponse
+        if plan.status == "PENDING" {
+            return .waitingResponse
         }
         if plan.status == "ACCEPTED", (plan.endDate ?? .distantFuture) > now {
             return .upcoming
         }
-        if plan.status == "PENDING" {
-            return .proposed
-        }
-        return .pastEnded
+        return .ended
     }
 }
 
@@ -72,6 +62,7 @@ struct PlansRootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
     @State private var store = PlansStore()
+    @State private var selectedSection: MVPPlanSection = .waitingResponse
 
     var body: some View {
         Group {
@@ -94,7 +85,15 @@ struct PlansRootView: View {
                 )
             } else {
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceXL) {
+                    LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                        Picker(AppLocalization.string("Plans"), selection: $selectedSection) {
+                            ForEach(MVPPlanSection.ordered) { section in
+                                Text(section.title).tag(section)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .accessibilityIdentifier("plans-segmented-control")
+
                         if let issue = store.issue {
                             Label(issue, systemImage: "wifi.exclamationmark")
                                 .font(.footnote)
@@ -111,22 +110,27 @@ struct PlansRootView: View {
                                 .accessibilityIdentifier("plans-issue-banner")
                         }
 
-                        ForEach(MVPPlanSection.ordered, id: \.self) { section in
-                            let plans = plans(in: section)
-                            if !plans.isEmpty {
-                                planSection(section, plans: plans)
+                        let visiblePlans = plans(in: selectedSection)
+                        if visiblePlans.isEmpty {
+                            emptyState(for: selectedSection)
+                        } else {
+                            LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                                ForEach(visiblePlans) { plan in
+                                    planRow(plan, section: selectedSection)
+                                }
                             }
+                            .accessibilityIdentifier(selectedSection.accessibilityIdentifier)
+                            .accessibilityValue("\(visiblePlans.count)")
                         }
                     }
                     .padding(.horizontal, SideSeatTheme.screenHorizontal)
-                    .padding(.top, SideSeatTheme.spaceLG)
+                    .padding(.top, SideSeatTheme.spaceMD)
                     .padding(.bottom, SideSeatTheme.spaceXL)
                 }
                 .background(SideSeatTheme.bgGrouped)
             }
         }
-        .navigationTitle("Plans")
-        .navigationBarTitleDisplayMode(.inline)
+        .ssRootNavigationTitle("Plans")
         .refreshable { await store.load(using: session) }
         .task { await store.load(using: session) }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatPlansNeedsRefresh)) { _ in
@@ -145,29 +149,47 @@ struct PlansRootView: View {
             MVPPlanSection.classify($0, currentUserID: currentUserID, now: now) == section
         }
         switch section {
-        case .pastEnded:
+        case .ended:
             return filtered.sorted {
                 ($0.endDate ?? .distantPast) > ($1.endDate ?? .distantPast)
             }
-        case .needsResponse, .upcoming, .proposed:
+        case .waitingResponse, .upcoming:
             return filtered.sorted {
                 ($0.startDate ?? .distantFuture) < ($1.startDate ?? .distantFuture)
             }
         }
     }
 
-    private func planSection(
-        _ section: MVPPlanSection,
-        plans: [NativePlanRequest]
-    ) -> some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            SSProductSectionHeader(title: section.title)
-                .accessibilityIdentifier(section.accessibilityIdentifier)
-                .accessibilityValue("\(plans.count)")
+    private func emptyState(for section: MVPPlanSection) -> some View {
+        VStack(spacing: SideSeatTheme.spaceSM) {
+            Image(systemName: section.systemImage)
+                .font(.title2)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            Text(sectionEmptyTitle(section))
+                .font(.headline)
+            Text(sectionEmptyDescription(section))
+                .font(.footnote)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity, minHeight: 180)
+        .padding(.horizontal, SideSeatTheme.spaceLG)
+        .accessibilityIdentifier("plans-empty-\(section.rawValue)")
+    }
 
-            ForEach(plans) { plan in
-                planRow(plan, section: section)
-            }
+    private func sectionEmptyTitle(_ section: MVPPlanSection) -> String {
+        switch section {
+        case .waitingResponse: AppLocalization.string("No plans waiting for a response")
+        case .upcoming: AppLocalization.string("No upcoming plans")
+        case .ended: AppLocalization.string("No ended plans")
+        }
+    }
+
+    private func sectionEmptyDescription(_ section: MVPPlanSection) -> String {
+        switch section {
+        case .waitingResponse: AppLocalization.string("New proposals and time changes will appear here until someone responds.")
+        case .upcoming: AppLocalization.string("Accepted plans will appear here until they finish.")
+        case .ended: AppLocalization.string("Completed, declined, canceled, and expired plans will appear here.")
         }
     }
 
@@ -243,10 +265,7 @@ struct PlansRootView: View {
                 Divider()
                 PlanOutcomePromptView(
                     plan: plan,
-                    isSubmitting: store.mutatingOutcomeID == plan.id,
-                    onMeetAgain: { value in
-                        Task { await store.recordMeetAgain(value, for: plan.id, using: session) }
-                    }
+                    isSubmitting: store.mutatingOutcomeID == plan.id
                 ) { value in
                     Task {
                         await store.recordOutcome(value, for: plan.id, using: session)
@@ -288,7 +307,7 @@ struct PlansRootView: View {
         for plan: NativePlanRequest,
         section: MVPPlanSection
     ) -> String {
-        if section == .pastEnded, plan.status == "ACCEPTED" {
+        if section == .ended, plan.status == "ACCEPTED" {
             return AppLocalization.string(plan.viewerOutcome == nil ? "Private response" : "Ended")
         }
         if plan.status == "PENDING", plan.counterOfId != nil, plan.commitmentId != nil {
@@ -296,9 +315,9 @@ struct PlansRootView: View {
         }
         switch plan.status {
         case "PENDING":
-            return section == .needsResponse
+            return plan.receiver.id == currentUserID
                 ? AppLocalization.string("Needs your response")
-                : AppLocalization.string("Proposed")
+                : AppLocalization.string("Waiting for response")
         case "ACCEPTED": return AppLocalization.string("Confirmed")
         case "DECLINED": return AppLocalization.string("Declined")
         case "COUNTER_PROPOSED": return AppLocalization.string("Superseded")
@@ -313,12 +332,12 @@ struct PlansRootView: View {
         for plan: NativePlanRequest,
         section: MVPPlanSection
     ) -> String {
-        if section == .pastEnded, plan.status == "ACCEPTED" {
+        if section == .ended, plan.status == "ACCEPTED" {
             return plan.viewerOutcome == nil ? "lock" : "clock.arrow.circlepath"
         }
         if plan.status == "ACCEPTED" { return "checkmark.circle.fill" }
         if plan.status == "PENDING" {
-            return section == .needsResponse ? "envelope.badge" : "hourglass"
+            return plan.receiver.id == currentUserID ? "envelope.badge" : "hourglass"
         }
         switch plan.status {
         case "DECLINED": return "xmark.circle"
@@ -332,9 +351,9 @@ struct PlansRootView: View {
         for plan: NativePlanRequest,
         section: MVPPlanSection
     ) -> Color {
-        if section == .pastEnded { return SideSeatTheme.textSecondaryStrong }
+        if section == .ended { return SideSeatTheme.textSecondaryStrong }
         if plan.status == "ACCEPTED" { return SideSeatTheme.statusSuccessText }
-        if plan.status == "PENDING", section == .needsResponse {
+        if plan.status == "PENDING", plan.receiver.id == currentUserID {
             return SideSeatTheme.statusWarningText
         }
         if plan.status == "DECLINED" || plan.status == "CANCELED" {

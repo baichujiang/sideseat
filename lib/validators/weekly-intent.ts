@@ -244,6 +244,7 @@ const intentFields = {
   timeWindows: weeklyIntentWindowsSchema,
   timePreference: intentTimePreferenceSchema.optional(),
   automaticMatching: z.literal(true).optional(),
+  exploreVisible: z.boolean().optional(),
   timeZone: timeZoneSchema,
   note: z.string().trim().max(160).nullable().optional(),
 } as const;
@@ -277,6 +278,7 @@ const weeklyIntentEditSchema = z
     timeWindows: intentFields.timeWindows.optional(),
     timePreference: intentFields.timePreference,
     automaticMatching: intentFields.automaticMatching,
+    exploreVisible: intentFields.exploreVisible,
     timeZone: intentFields.timeZone.optional(),
     note: intentFields.note,
   })
@@ -293,6 +295,7 @@ const weeklyIntentEditSchema = z
       value.timeWindows !== undefined ||
       value.timePreference !== undefined ||
       value.automaticMatching !== undefined ||
+      value.exploreVisible !== undefined ||
       value.timeZone !== undefined ||
       value.note !== undefined,
     { message: "Choose at least one field to edit." },

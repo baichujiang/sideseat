@@ -91,6 +91,7 @@ final class AppContainer {
                     "v2FlexibleTiming": arguments.contains("--ui-testing-flexible-timing"),
                     "v2AutomaticMatching": arguments.contains("--ui-testing-automatic-matching"),
                     "v2DiscoveryMatching": arguments.contains("--ui-testing-discovery-matching"),
+                    "v2ExploreIntents": arguments.contains("--ui-testing-explore-intents") || arguments.contains("--ui-testing-explore-empty"),
                 ]
             )
         } else if arguments.contains("--ui-testing-signed-out") {

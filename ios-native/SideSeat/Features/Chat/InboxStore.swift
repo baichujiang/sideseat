@@ -67,16 +67,26 @@ final class InboxStore {
         Self.badgeLabel(for: Self.attentionCount(in: payload))
     }
 
+    var messageBadgeLabel: String? {
+        Self.badgeLabel(for: Self.visibleUnreadCount(in: payload))
+    }
+
+    var planBadgeLabel: String? {
+        Self.badgeLabel(for: Self.planAttentionCount(in: payload))
+    }
+
     private nonisolated static func visibleUnreadCount(in payload: NativeInboxPayload?) -> Int {
         payload?.conversations
             .filter { isMVPVisibleConversationKind($0.kind) }
             .reduce(0) { $0 + $1.unreadCount } ?? 0
     }
 
+    nonisolated static func planAttentionCount(in payload: NativeInboxPayload?) -> Int {
+        payload?.plansNeedingYourAction ?? 0
+    }
+
     nonisolated static func attentionCount(in payload: NativeInboxPayload?) -> Int {
-        visibleUnreadCount(in: payload)
-            + (payload?.plansNeedingYourAction ?? 0)
-            + (payload?.planOutcomesNeedingYourResponse ?? 0)
+        visibleUnreadCount(in: payload) + planAttentionCount(in: payload)
     }
 
     nonisolated static func badgeLabel(for total: Int) -> String? {

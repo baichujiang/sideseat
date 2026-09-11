@@ -468,9 +468,9 @@ private struct MeHeroCard: View {
                     Button(action: onChangeAvatar) {
                         Image(systemName: "camera.fill")
                             .font(.caption2.weight(.bold))
-                            .foregroundStyle(SideSeatTheme.onAccent)
+                            .foregroundStyle(SideSeatTheme.textPrimary)
                             .frame(width: 26, height: 26)
-                            .background(Circle().fill(SideSeatTheme.accent))
+                            .background(Circle().fill(SideSeatTheme.fillTertiary))
                             .overlay {
                                 Circle().strokeBorder(SideSeatTheme.bg, lineWidth: 2)
                             }
@@ -541,33 +541,12 @@ private struct MeHeroCard: View {
         }
         .background {
             RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            SideSeatTheme.surface,
-                            SideSeatTheme.surface.opacity(0.94),
-                            SideSeatTheme.peach.opacity(0.18),
-                            SideSeatTheme.rose.opacity(0.08),
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .fill(SideSeatTheme.surface)
                 .overlay {
                     RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
-                        .strokeBorder(
-                            LinearGradient(
-                                colors: [
-                                    SideSeatTheme.peach.opacity(0.45),
-                                    SideSeatTheme.orchid.opacity(0.22),
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1
-                        )
+                        .strokeBorder(SideSeatTheme.separator.opacity(0.35), lineWidth: 0.5)
                 }
-                .shadow(color: SideSeatTheme.magenta.opacity(0.08), radius: 16, y: 7)
+                .shadow(color: Color.black.opacity(0.04), radius: 10, y: 4)
         }
     }
 

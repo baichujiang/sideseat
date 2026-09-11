@@ -40,6 +40,7 @@ struct DirectChatView: View {
     @State private var actionPlanDraft: ActionPlanPresentation?
     @State private var scrollToMessageID: String?
     @State private var initialFocusMessageID: String?
+    @State private var focusedPlanMessageID: String?
     @State private var hasResolvedInitialFocus: Bool
     @State private var hasPositionedInitialTarget: Bool
     @State private var composerFocus = ChatComposerFocusController()
@@ -151,6 +152,7 @@ struct DirectChatView: View {
                 isInitialViewportVisible = false
                 knownMessageIDs = []
                 initialFocusMessageID = nil
+                focusedPlanMessageID = nil
                 hasResolvedInitialFocus = initialFocus == nil
                 hasPositionedInitialTarget = initialFocus == nil
                 await store.load(
@@ -159,7 +161,11 @@ struct DirectChatView: View {
                     apiBaseURL: container.environment.apiBaseURL
                 )
                 if let initialFocus {
-                    initialFocusMessageID = await resolveMessageID(for: initialFocus)
+                    let resolvedMessageID = await resolveMessageID(for: initialFocus)
+                    initialFocusMessageID = resolvedMessageID
+                    if case .plan = initialFocus {
+                        focusedPlanMessageID = resolvedMessageID
+                    }
                     hasResolvedInitialFocus = true
                 }
                 hasCompletedInitialLoad = true
@@ -423,6 +429,22 @@ struct DirectChatView: View {
                                     if message.sender.id == peer?.id { return peer?.avatarUrl }
                                     return nil
                                 }()
+                                if focusedPlanMessageID == message.id {
+                                    HStack {
+                                        Spacer(minLength: 0)
+                                        Label(AppLocalization.string("Current Plan"), systemImage: "scope")
+                                            .font(.caption2.weight(.semibold))
+                                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                            .padding(.horizontal, 9)
+                                            .frame(minHeight: 28)
+                                            .background(SideSeatTheme.fillTertiary, in: Capsule())
+                                            .accessibilityIdentifier("chat-focused-plan-\(message.id)")
+                                        Spacer(minLength: 0)
+                                    }
+                                    .padding(.top, 8)
+                                    .padding(.bottom, 2)
+                                }
+
                                 DirectMessageBubble(
                                     message: message,
                                     isMine: isMine,
@@ -471,9 +493,6 @@ struct DirectChatView: View {
                                     onCounterPlan: { plan in
                                         counterPlan = plan
                                     },
-                                    onRecordPlanMeetAgain: { value, plan in
-                                        Task { _ = await store.recordMeetAgain(value, for: plan, using: session) }
-                                    },
                                     onRecordPlanOutcome: { value, plan in
                                         Task {
                                             _ = await store.recordOutcome(
@@ -506,7 +525,7 @@ struct DirectChatView: View {
                                         openedScheduleShareToken = ScheduleShareNavToken(id: token)
                                     }
                                 )
-                                .padding(.top, connectsAbove ? 2 : 8)
+                                .padding(.top, focusedPlanMessageID == message.id ? 2 : (connectsAbove ? 2 : 8))
                             }
                             .id(message.id)
                         }
@@ -1507,7 +1526,6 @@ private struct DirectMessageBubble: View {
     let onDeclinePlan: (NativePlanRequest) -> Void
     let onWithdrawPlan: (NativePlanRequest) -> Void
     let onCounterPlan: (NativePlanRequest) -> Void
-    let onRecordPlanMeetAgain: (String, NativePlanRequest) -> Void
     let onRecordPlanOutcome: (String, NativePlanRequest) -> Void
     let onProposeFromAction: (NativeActionInterest, String?) -> Void
     let onProposeFromMutualOpportunity: (NativeMutualOpportunitySource) -> Void
@@ -1708,7 +1726,6 @@ private struct DirectMessageBubble: View {
                 onWithdraw: { onWithdrawPlan(plan) },
                 onCounter: { onCounterPlan(plan) },
                 onRecordOutcome: { onRecordPlanOutcome($0, plan) },
-                onRecordMeetAgain: { onRecordPlanMeetAgain($0, plan) },
                 onOpenCalendar: onOpenCalendar
             )
         } else if message.type == "ACTION_INTEREST_CARD",

@@ -1113,7 +1113,7 @@ struct ChatSSEClientTests {
 
 @Suite("Inbox store")
 struct InboxStoreTests {
-    @Test("Formats the Messages attention badge from 1 through 99+")
+    @Test("Formats tab badges from 1 through 99+")
     func formatsAttentionBadge() {
         #expect(InboxStore.badgeLabel(for: 0) == nil)
         #expect(InboxStore.badgeLabel(for: 1) == "1")
@@ -1121,8 +1121,8 @@ struct InboxStoreTests {
         #expect(InboxStore.badgeLabel(for: 100) == "99+")
     }
 
-    @Test("Counts pending Plan decisions and Outcomes as Messages attention")
-    func countsPlanResponsesInAttentionBadge() {
+    @Test("Counts only actionable Plan decisions as Plans attention")
+    func countsPlanResponsesInPlansBadge() {
         let payload = NativeInboxPayload(
             conversations: [],
             unreadTotal: 0,
@@ -1130,8 +1130,9 @@ struct InboxStoreTests {
             planOutcomesNeedingYourResponse: 3
         )
 
-        #expect(InboxStore.attentionCount(in: payload) == 5)
-        #expect(InboxStore.badgeLabel(for: InboxStore.attentionCount(in: payload)) == "5")
+        #expect(InboxStore.planAttentionCount(in: payload) == 2)
+        #expect(InboxStore.badgeLabel(for: InboxStore.planAttentionCount(in: payload)) == "2")
+        #expect(InboxStore.attentionCount(in: payload) == 2)
     }
 
     @Test("Clears the Chats tab badge immediately after reading")
@@ -1141,9 +1142,10 @@ struct InboxStoreTests {
         let store = InboxStore(cache: InboxCache(inMemoryOnly: true))
         await store.load(using: session)
 
-        #expect(store.attentionBadgeLabel == "1")
+        #expect(store.messageBadgeLabel == "1")
+        #expect(store.planBadgeLabel == nil)
         store.clearUnread(conversationID: "connection-1")
-        #expect(store.attentionBadgeLabel == nil)
+        #expect(store.messageBadgeLabel == nil)
         #expect(store.payload?.unreadTotal == 0)
     }
 

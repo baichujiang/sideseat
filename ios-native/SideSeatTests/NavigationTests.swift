@@ -6,14 +6,14 @@ import Testing
 struct NavigationTests {
     @Test("App shell exposes the new product navigation in its exact order")
     func appShellTabOrder() {
-        #expect(AppShellNavigation.tabs.map(\.tab) == [.discover, .home, .chats, .me])
+        #expect(AppShellNavigation.tabs.map(\.tab) == [.discover, .plans, .home, .chats, .me])
     }
 
     @Test("App shell uses the new customer-facing tab titles")
     func appShellTabTitles() {
         let titles = AppShellNavigation.tabs.map(\.title)
 
-        #expect(titles == ["Together", "Calendar", "Messages", "Me"])
+        #expect(titles == ["Together", "Plans", "Calendar", "Messages", "Me"])
         #expect(!titles.contains("Discover"))
         #expect(!titles.contains("Chats"))
     }

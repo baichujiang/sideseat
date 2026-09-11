@@ -44,12 +44,13 @@ final class AccessibilityAuditUITests: XCTestCase {
         )
 
         let togetherHome = app.descendants(matching: .any)["together-home"]
-        let togetherDecision = app.buttons["mutual-opportunity-yes-cmutualui0000000000000001"]
+        let togetherDecision = app.descendants(matching: .any)["mutual-opportunity-swipe-cmutualui0000000000000001"].firstMatch
         for _ in 0..<8 where !togetherDecision.exists || !togetherDecision.isHittable {
             togetherHome.swipeUp()
         }
         XCTAssertTrue(togetherDecision.exists)
         XCTAssertTrue(togetherDecision.isHittable)
+        XCTAssertGreaterThanOrEqual(togetherDecision.frame.height, 44)
         try performAudit(in: app)
 
         auditTab(
@@ -134,7 +135,7 @@ final class AccessibilityAuditUITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(instructor.frame.height, 32)
 
         let tabButtons = app.tabBars.buttons.allElementsBoundByIndex
-        XCTAssertEqual(tabButtons.count, 4)
+        XCTAssertEqual(tabButtons.count, 5)
         let screenFrame = app.windows.firstMatch.frame
         for button in tabButtons {
             XCTAssertTrue(button.isHittable, "Expected \(button.label) tab to remain hittable.")
@@ -157,6 +158,7 @@ final class AccessibilityAuditUITests: XCTestCase {
             "--ui-testing-skip-tutorial",
             "--ui-testing-discover",
             "--ui-testing-weekly-intent",
+            "--ui-testing-discovery-published",
             "--ui-testing-mutual-opportunity",
             "--ui-testing-together-matching",
             "--ui-testing-dynamic-type-accessibility",
@@ -173,29 +175,24 @@ final class AccessibilityAuditUITests: XCTestCase {
         XCTAssertTrue(home.waitForExistence(timeout: 6))
         let addIntent = app.buttons["together-add-intent"]
         for _ in 0..<10 where !addIntent.exists || !addIntent.isHittable {
-            home.swipeUp()
+            home.swipeDown()
         }
         XCTAssertTrue(addIntent.waitForExistence(timeout: 5))
         XCTAssertTrue(addIntent.isHittable)
         XCTAssertGreaterThanOrEqual(addIntent.frame.width, 44)
         XCTAssertGreaterThanOrEqual(addIntent.frame.height, 44)
 
-        for _ in 0..<10 where !app.buttons["mutual-opportunity-yes-cmutualui0000000000000001"].isHittable {
-            home.swipeDown()
+        let decision = app.descendants(matching: .any)["mutual-opportunity-swipe-cmutualui0000000000000001"].firstMatch
+        for _ in 0..<10 where !decision.exists || !decision.isHittable {
+            home.swipeUp()
         }
-        let decisions = [app.buttons["mutual-opportunity-yes-cmutualui0000000000000001"],
-                         app.buttons["mutual-opportunity-no-cmutualui0000000000000001"]]
-        for decision in decisions {
-            for _ in 0..<10 where !decision.exists || !decision.isHittable {
-                home.swipeUp()
-            }
-            XCTAssertTrue(decision.exists)
-            XCTAssertTrue(decision.isHittable)
-            XCTAssertGreaterThanOrEqual(decision.frame.height, 44)
-        }
+        XCTAssertTrue(decision.exists)
+        XCTAssertTrue(decision.isHittable)
+        XCTAssertGreaterThanOrEqual(decision.frame.height, 44)
+        XCTAssertTrue(decision.label.contains("Choose") || decision.label.contains("interest"), "The bilateral swipe needs an accessible decision label")
 
         let tabButtons = app.tabBars.buttons.allElementsBoundByIndex
-        XCTAssertEqual(tabButtons.count, 4)
+        XCTAssertEqual(tabButtons.count, 5)
         for button in tabButtons {
             XCTAssertTrue(button.isHittable)
             XCTAssertGreaterThanOrEqual(button.frame.height, 44)
@@ -290,18 +287,12 @@ final class AccessibilityAuditUITests: XCTestCase {
         XCTAssertTrue(inbox.waitForExistence(timeout: 8))
         let screenFrame = app.windows.firstMatch.frame
 
-        let pendingPlans = app.buttons["inbox-pending-plans"]
-        XCTAssertTrue(pendingPlans.waitForExistence(timeout: 3))
-        XCTAssertTrue(pendingPlans.isHittable)
-        XCTAssertEqual(pendingPlans.value as? String, "1")
-        XCTAssertGreaterThanOrEqual(pendingPlans.frame.height, 80)
-        XCTAssertLessThan(
-            pendingPlans.frame.height,
-            screenFrame.height * 0.4,
-            "The pending-plans banner should not crowd the conversation list."
-        )
-        XCTAssertTrue(screenFrame.intersects(pendingPlans.frame))
-
+        XCTAssertFalse(app.buttons["inbox-pending-plans"].exists)
+        let plansTab = app.tabBars.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Plans", "计划", "Pläne"])
+        ).firstMatch
+        XCTAssertTrue(plansTab.waitForExistence(timeout: 3))
+        XCTAssertTrue(plansTab.isHittable)
         let firstRow = app.buttons["inbox-row-ui-connection"]
         XCTAssertTrue(firstRow.waitForExistence(timeout: 3))
         XCTAssertTrue(firstRow.isHittable)
@@ -314,12 +305,12 @@ final class AccessibilityAuditUITests: XCTestCase {
         XCTAssertTrue(date.exists)
         XCTAssertGreaterThanOrEqual(date.frame.height, 28)
 
-        pendingPlans.tap()
+        plansTab.tap()
 
         let plansRoot = app.descendants(matching: .any)["plans-root"]
         XCTAssertTrue(plansRoot.waitForExistence(timeout: 5))
 
-        let needsResponseSection = app.descendants(matching: .any)["plans-section-needs-response"]
+        let needsResponseSection = app.descendants(matching: .any)["plans-section-waiting-response"]
         XCTAssertTrue(needsResponseSection.waitForExistence(timeout: 3))
         XCTAssertTrue(
             screenFrame.intersects(needsResponseSection.frame),
@@ -354,9 +345,12 @@ final class AccessibilityAuditUITests: XCTestCase {
         ]
         app.launch()
 
-        let pendingPlans = app.buttons["inbox-pending-plans"]
-        XCTAssertTrue(pendingPlans.waitForExistence(timeout: 8))
-        pendingPlans.tap()
+        XCTAssertFalse(app.buttons["inbox-pending-plans"].exists)
+        let plansTab = app.tabBars.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Plans", "计划", "Pläne"])
+        ).firstMatch
+        XCTAssertTrue(plansTab.waitForExistence(timeout: 8))
+        plansTab.tap()
 
         let planRow = app.buttons["plans-row-ui-plan-1"]
         for _ in 0..<5 where !planRow.exists || !planRow.isHittable { app.swipeUp() }

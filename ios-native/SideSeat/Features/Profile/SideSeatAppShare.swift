@@ -99,7 +99,7 @@ private struct SideSeatAppShareCard: View {
                 VStack(alignment: .leading, spacing: 12) {
                     feature("person.2.fill", "Find buddies", Color(red: 0.18, green: 0.55, blue: 0.86))
                     feature("calendar", "Join plans", Color(red: 0.20, green: 0.62, blue: 0.42))
-                    feature("checkmark.shield.fill", "Verified students", SideSeatTheme.rose)
+                    feature("checkmark.shield.fill", "Verified students", SideSeatTheme.verifiedSeal)
                 }
                 .padding(.top, 30)
 

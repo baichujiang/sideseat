@@ -8,15 +8,12 @@ enum ChatCreationSymbol {
 struct ChatsRootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Bindable var store: InboxStore
 
     var body: some View {
         Group {
             if let payload = store.payload {
-                if store.visibleConversations.isEmpty,
-                   planResponseCount(payload) == 0
-                {
+                if store.visibleConversations.isEmpty {
                     SSEmptyState(
                         title: "No conversations",
                         systemImage: "bubble.left.and.bubble.right",
@@ -32,15 +29,6 @@ struct ChatsRootView: View {
                                     .accessibilityIdentifier("inbox-issue-banner")
                             }
                         }
-                        if planResponseCount(payload) > 0 {
-                            Section {
-                                pendingPlansRow(count: planResponseCount(payload))
-                            }
-                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 4, trailing: 16))
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(Color.clear)
-                        }
-
                         if store.hasNoSearchMatches {
                             Section {
                                 SSEmptyState(
@@ -75,6 +63,8 @@ struct ChatsRootView: View {
                         }
                     }
                     .listStyle(.plain)
+                    .listSectionSpacing(.compact)
+                    .environment(\.defaultMinListRowHeight, 60)
                     .contentMargins(.bottom, 88, for: .scrollContent)
                     .accessibilityIdentifier("inbox-list")
                 }
@@ -118,7 +108,7 @@ struct ChatsRootView: View {
 
     private func inboxSectionHeader(_ title: LocalizedStringKey) -> some View {
         Text(title)
-            .font(.subheadline.weight(.semibold))
+            .font(.caption.weight(.semibold))
             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             .textCase(nil)
     }
@@ -139,92 +129,6 @@ struct ChatsRootView: View {
         }
     }
 
-    private func pendingPlansRow(count: Int) -> some View {
-        Button {
-            router.navigate(to: .plans)
-        } label: {
-            Group {
-                if dynamicTypeSize.isAccessibilitySize {
-                    HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
-                        pendingPlansIcon(size: 36)
-
-                        Text("Plans waiting for your response")
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(SideSeatTheme.textPrimary)
-                            .fixedSize(horizontal: false, vertical: true)
-
-                        Spacer(minLength: SideSeatTheme.spaceXS)
-                        pendingPlansCountBadge(count)
-                    }
-                } else {
-                    HStack(spacing: SideSeatTheme.spaceMD) {
-                        pendingPlansIcon(size: 42)
-
-                        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                            Text("Plans waiting for your response")
-                                .font(.body.weight(.semibold))
-                                .foregroundStyle(SideSeatTheme.textPrimary)
-                                .fixedSize(horizontal: false, vertical: true)
-
-                            Text("Review invitations, schedule updates, and private follow-ups")
-                                .font(.footnote)
-                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                        pendingPlansCountBadge(count)
-                    }
-                }
-            }
-            .padding(.horizontal, SideSeatTheme.spaceLG)
-            .padding(.vertical, SideSeatTheme.spaceLG)
-            .frame(minHeight: 80)
-            .background(
-                SideSeatTheme.surface,
-                in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
-            )
-            .overlay {
-                RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
-                    .strokeBorder(SideSeatTheme.separator.opacity(0.65), lineWidth: 0.5)
-            }
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(SSPressButtonStyle())
-        .accessibilityIdentifier("inbox-pending-plans")
-        .accessibilityLabel("Plans waiting for your response")
-        .accessibilityValue("\(count)")
-        .accessibilityHint("Open plans")
-    }
-
-    private func planResponseCount(_ payload: NativeInboxPayload) -> Int {
-        payload.plansNeedingYourAction + payload.planOutcomesNeedingYourResponse
-    }
-
-    private func pendingPlansIcon(size: CGFloat) -> some View {
-        Image(systemName: "calendar.badge.clock")
-            .symbolRenderingMode(.hierarchical)
-            .font(.system(size: size == 36 ? 17 : 19, weight: .semibold))
-            .foregroundStyle(SideSeatTheme.HubTint.plans)
-            .frame(width: size, height: size)
-            .background(
-                SideSeatTheme.HubTint.plans.opacity(0.12),
-                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
-            )
-            .accessibilityHidden(true)
-    }
-
-    private func pendingPlansCountBadge(_ count: Int) -> some View {
-        Text(count > 99 ? "99+" : "\(count)")
-            .font(.subheadline.weight(.bold))
-            .foregroundStyle(SideSeatTheme.ink)
-            .padding(.horizontal, SideSeatTheme.spaceSM)
-            .frame(minWidth: 30, minHeight: 30)
-            .background(SideSeatTheme.HubTint.plans, in: Capsule())
-            .accessibilityHidden(true)
-    }
-
-    @ViewBuilder
     private func inboxRow(_ row: NativeInboxConversation) -> some View {
         Button {
             if let route = row.route {
@@ -272,16 +176,16 @@ struct ChatsRootView: View {
                         if row.unreadCount > 0 {
                             Text(row.unreadCount > 99 ? "99+" : "\(row.unreadCount)")
                                 .font(.caption.weight(.bold))
-                                .foregroundStyle(SideSeatTheme.onAccent)
+                                .foregroundStyle(SideSeatTheme.onAttention)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
-                                .background(Capsule().fill(SideSeatTheme.accent))
+                                .background(Capsule().fill(SideSeatTheme.attention))
                                 .accessibilityLabel(AppLocalization.string("\(row.unreadCount) unread"))
                         }
                     }
                 }
             }
-            .padding(.vertical, 4)
+            .padding(.vertical, 2)
             .contentShape(Rectangle())
         }
         .buttonStyle(SSPressButtonStyle())

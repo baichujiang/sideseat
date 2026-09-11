@@ -296,15 +296,15 @@ final class SocialLiveUITests: XCTestCase {
         let together = tabButton(in: app, labels: ["Together", "同行", "Zusammen"])
         XCTAssertTrue(together.waitForExistence(timeout: 8))
         together.tap()
-        XCTAssertTrue(
-            app.descendants(matching: .any)["together-outcome-\(planID)"]
-                .waitForExistence(timeout: 15)
-        )
-        XCTAssertTrue(app.staticTexts[planTitle].waitForExistence(timeout: 5))
-        XCTAssertTrue(
-            app.buttons["plan-outcome-occurred-\(planID)"]
-                .waitForExistence(timeout: 5)
-        )
+        XCTAssertFalse(app.descendants(matching: .any)["together-outcome-\(planID)"].exists,
+                       "Together should not duplicate Plan history or outcome prompts")
+        XCTAssertFalse(app.buttons["together-open-plans"].exists)
+        let plans = tabButton(in: app, labels: ["Plans", "计划", "Pläne"])
+        XCTAssertTrue(plans.waitForExistence(timeout: 8))
+        plans.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["plans-root"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts[planTitle].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.buttons["plan-outcome-occurred-\(planID)"].waitForExistence(timeout: 8))
 
         let messages = tabButton(
             in: app,
@@ -312,17 +312,8 @@ final class SocialLiveUITests: XCTestCase {
         )
         XCTAssertTrue(messages.waitForExistence(timeout: 8))
         messages.tap()
-        let responseBanner = app.buttons["inbox-pending-plans"]
-        XCTAssertTrue(responseBanner.waitForExistence(timeout: 12))
-        responseBanner.tap()
-        XCTAssertTrue(
-            app.descendants(matching: .any)["plans-root"]
-                .waitForExistence(timeout: 10)
-        )
-        XCTAssertTrue(
-            app.buttons["plan-outcome-occurred-\(planID)"]
-                .waitForExistence(timeout: 8)
-        )
+        XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["inbox-pending-plans"].exists)
 
         let calendar = tabButton(in: app, labels: ["Calendar", "日历", "Kalender"])
         XCTAssertTrue(calendar.waitForExistence(timeout: 8))
@@ -374,15 +365,9 @@ final class SocialLiveUITests: XCTestCase {
             additionalLaunchArguments: ["--ui-testing-language=en"]
         )
 
-        let messages = tabButton(
-            in: app,
-            labels: ["Messages", "Chats", "消息", "聊天", "Nachrichten"]
-        )
-        XCTAssertTrue(messages.waitForExistence(timeout: 8))
-        messages.tap()
-        let responseBanner = app.buttons["inbox-pending-plans"]
-        XCTAssertTrue(responseBanner.waitForExistence(timeout: 12))
-        responseBanner.tap()
+        let plans = tabButton(in: app, labels: ["Plans", "计划", "Pläne"])
+        XCTAssertTrue(plans.waitForExistence(timeout: 8))
+        plans.tap()
         XCTAssertTrue(
             app.descendants(matching: .any)["plans-root"]
                 .waitForExistence(timeout: 10)
@@ -398,10 +383,7 @@ final class SocialLiveUITests: XCTestCase {
         let together = tabButton(in: app, labels: ["Together", "同行", "Zusammen"])
         XCTAssertTrue(together.waitForExistence(timeout: 8))
         together.tap()
-        XCTAssertTrue(
-            app.descendants(matching: .any)["plan-outcome-saved-\(planID)"]
-                .waitForExistence(timeout: 12)
-        )
+        XCTAssertFalse(app.descendants(matching: .any)["plan-outcome-saved-\(planID)"].exists)
     }
 
     func testTogetherIntentToMutualPlanAddsBothCalendars() {
@@ -439,7 +421,7 @@ final class SocialLiveUITests: XCTestCase {
             additionalLaunchArguments: togetherArguments
         )
         createCoffeeIntentAndStartMatching(peerActivity, in: secondParticipant)
-        let secondDecision = togetherYesButton(in: secondParticipant)
+        let secondDecision = togetherDecisionBar(in: secondParticipant)
         if relatedActivities {
             let fit = secondParticipant.descendants(matching: .any).matching(
                 NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-fit-")
@@ -453,7 +435,8 @@ final class SocialLiveUITests: XCTestCase {
             XCTAssertTrue(details.exists)
         }
         XCTAssertFalse(secondParticipant.buttons["Chat about the details"].exists)
-        secondDecision.tap()
+        XCTAssertTrue(secondDecision.exists)
+        swipeTogetherInterest(in: secondParticipant)
         XCTAssertTrue(
             secondParticipant.staticTexts["Your choice is saved privately"]
                 .waitForExistence(timeout: 12)
@@ -469,9 +452,10 @@ final class SocialLiveUITests: XCTestCase {
             NSPredicate(format: "label CONTAINS[c] %@", chinesePlan ? "剩余" : "remaining")
         ).firstMatch
         XCTAssertTrue(recoveredCountdown.waitForExistence(timeout: 12))
-        let firstDecision = togetherYesButton(in: firstReturn)
+        let firstDecision = togetherDecisionBar(in: firstReturn)
         XCTAssertFalse(firstReturn.staticTexts[chinesePlan ? "你的选择已私密保存" : "Your choice is saved privately"].exists)
-        firstDecision.tap()
+        XCTAssertTrue(firstDecision.exists)
+        swipeTogetherInterest(in: firstReturn)
         let startPlanning = firstReturn.buttons[chinesePlan ? "聊聊细节" : "Chat about the details"]
         XCTAssertTrue(startPlanning.waitForExistence(timeout: 12))
         startPlanning.tap()
@@ -787,15 +771,30 @@ final class SocialLiveUITests: XCTestCase {
         ).firstMatch.exists)
     }
 
-    private func togetherYesButton(in app: XCUIApplication) -> XCUIElement {
-        let decision = app.buttons.matching(
-            NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-yes-")
+    private func togetherDecisionBar(in app: XCUIApplication) -> XCUIElement {
+        let decision = app.descendants(matching: .any).matching(
+            NSPredicate(
+                format: "identifier BEGINSWITH %@ AND NOT identifier BEGINSWITH %@",
+                "mutual-opportunity-swipe-",
+                "mutual-opportunity-swipe-handle-"
+            )
         ).firstMatch
         for _ in 0..<8 where !decision.isHittable {
             app.swipeUp()
         }
         XCTAssertTrue(decision.waitForExistence(timeout: 15))
         return decision
+    }
+
+    private func swipeTogetherInterest(in app: XCUIApplication) {
+        let bar = togetherDecisionBar(in: app)
+        let prefix = "mutual-opportunity-swipe-"
+        let id = String(bar.identifier.dropFirst(prefix.count))
+        let handle = app.descendants(matching: .any)["mutual-opportunity-swipe-handle-\(id)"].firstMatch
+        XCTAssertTrue(handle.waitForExistence(timeout: 5))
+        let start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let end = start.withOffset(CGVector(dx: max(120, bar.frame.width * 0.40), dy: 0))
+        start.press(forDuration: 0.1, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.4)
     }
 
     private func openProfileEditor(in app: XCUIApplication, selectMeTab: Bool = true) {

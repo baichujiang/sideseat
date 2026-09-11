@@ -4305,7 +4305,7 @@ final class AuthenticationUITests: XCTestCase {
         app.launch()
 
         XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.descendants(matching: .any)["inbox-pending-plans"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.descendants(matching: .any)["inbox-pending-plans"].exists)
         XCTAssertFalse(app.buttons["inbox-toolbar-more"].exists)
         XCTAssertFalse(app.descendants(matching: .any)["inbox-toolbar-contacts"].exists)
         XCTAssertFalse(app.descendants(matching: .any)["inbox-toolbar-new-group"].exists)
@@ -4334,44 +4334,41 @@ final class AuthenticationUITests: XCTestCase {
         app.launch()
 
         XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 5))
-        let pendingPlans = app.buttons["inbox-pending-plans"]
-        XCTAssertTrue(pendingPlans.waitForExistence(timeout: 3))
-        XCTAssertGreaterThanOrEqual(pendingPlans.frame.height, 80)
-        XCTAssertEqual(pendingPlans.value as? String, "1")
-        pendingPlans.tap()
+        XCTAssertFalse(app.buttons["inbox-pending-plans"].exists)
+        let plansTab = app.tabBars.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Plans", "计划", "Pläne"])
+        ).firstMatch
+        XCTAssertTrue(plansTab.waitForExistence(timeout: 3))
+        plansTab.tap()
 
         XCTAssertTrue(app.descendants(matching: .any)["plans-root"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["plans-segmented-control"].exists)
         XCTAssertTrue(
-            app.descendants(matching: .any)["plans-section-needs-response"]
+            app.descendants(matching: .any)["plans-section-waiting-response"]
                 .waitForExistence(timeout: 3)
         )
-        XCTAssertFalse(app.descendants(matching: .any)["plans-section-waiting"].exists)
 
         let pendingRow = app.descendants(matching: .any)["plans-row-ui-plan-1"]
         let acceptedRow = app.descendants(matching: .any)["plans-row-ui-plan-accepted"]
         XCTAssertTrue(pendingRow.waitForExistence(timeout: 3))
         XCTAssertFalse(app.descendants(matching: .any)["plans-row-status-ui-plan-1"].exists)
 
-        for _ in 0..<4 {
-            if acceptedRow.exists, acceptedRow.isHittable {
-                break
-            }
-            app.swipeUp()
-        }
+        let upcomingTab = app.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Upcoming", "即将开始", "Demnächst"])
+        ).firstMatch
+        XCTAssertTrue(upcomingTab.waitForExistence(timeout: 3))
+        upcomingTab.tap()
         XCTAssertTrue(acceptedRow.waitForExistence(timeout: 3))
         XCTAssertTrue(acceptedRow.isHittable)
-        XCTAssertTrue(
-            app.descendants(matching: .any)["plans-section-upcoming"]
-                .waitForExistence(timeout: 3)
-        )
+        XCTAssertTrue(app.descendants(matching: .any)["plans-section-upcoming"].exists)
         XCTAssertFalse(app.descendants(matching: .any)["plans-row-status-ui-plan-accepted"].exists)
 
-        for _ in 0..<4 {
-            if pendingRow.exists, pendingRow.isHittable {
-                break
-            }
-            app.swipeDown()
-        }
+        let waitingTab = app.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Waiting", "等待回应", "Ausstehend"])
+        ).firstMatch
+        XCTAssertTrue(waitingTab.waitForExistence(timeout: 3))
+        waitingTab.tap()
+        XCTAssertTrue(pendingRow.waitForExistence(timeout: 3))
         XCTAssertTrue(pendingRow.isHittable)
         pendingRow.tap()
         XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 3))
@@ -4380,6 +4377,11 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(planMessage.waitForExistence(timeout: 4))
         XCTAssertTrue(messageList.waitForExistence(timeout: 3))
         XCTAssertTrue(messageList.frame.intersects(planMessage.frame))
+        XCTAssertTrue(
+            app.descendants(matching: .any)["chat-focused-plan-ui-msg-plan"]
+                .waitForExistence(timeout: 3),
+            "Opening a Plan from Plan Center should mark the exact Plan message in chat."
+        )
 
         let responseActions = app.descendants(matching: .any)["plan-card-actions-ui-plan-1"]
         XCTAssertTrue(responseActions.waitForExistence(timeout: 3))
@@ -4461,7 +4463,11 @@ final class AuthenticationUITests: XCTestCase {
         app.launch()
 
         XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 5))
-        app.buttons["inbox-pending-plans"].tap()
+        let plansTab = app.tabBars.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Plans", "计划", "Pläne"])
+        ).firstMatch
+        XCTAssertTrue(plansTab.waitForExistence(timeout: 3))
+        plansTab.tap()
         XCTAssertTrue(app.descendants(matching: .any)["plans-root"].waitForExistence(timeout: 3))
         app.descendants(matching: .any)["plans-row-ui-plan-1"].tap()
 

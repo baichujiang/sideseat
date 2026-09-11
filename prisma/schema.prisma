@@ -925,8 +925,8 @@ model UserSocialPreference {
   @@index([activeUntil])
 }
 
-/// Private, short-lived activity intent owned by Together. It is never a public
-/// post or a source of Calendar-derived availability.
+/// Short-lived activity intent owned by Together. It is private by default;
+/// users may opt into a privacy-safe Explore projection. Calendar contents are never published.
 model WeeklyIntent {
   id                     String              @id @default(cuid())
   userId                 String
@@ -946,6 +946,7 @@ model WeeklyIntent {
   /// NULL preserves legacy exact windows. New clients declare timing explicitly.
   timePreference         Json?
   automaticMatching      Boolean @default(false)
+  exploreVisible         Boolean @default(false)
   timeZone               String              @default("Europe/Berlin")
   note                   String?             @db.VarChar(160)
   status                 WeeklyIntentStatus  @default(ACTIVE)
@@ -963,6 +964,7 @@ model WeeklyIntent {
 
   @@index([userId, status, expiresAt])
   @@index([status, expiresAt])
+  @@index([exploreVisible, status, expiresAt])
   @@index([courseId, status])
 }
 

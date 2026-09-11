@@ -1886,3 +1886,58 @@
 "Publish intention" = "Publish intention";
 "Publish intention (short)" = "Publish";
 "Resume finding company" = "Resume finding company";
+
+
+/* Together Explore */
+"What I want to do" = "What I want to do";
+"Opportunities for you" = "Opportunities for you";
+"See what others want to do" = "See what others want to do";
+"Explore activity intentions around your campus" = "Explore activity intentions around your campus";
+"Nothing new to explore right now" = "Nothing new to explore right now";
+"See more" = "See more";
+"Explore what people around campus want to do" = "Explore what people around campus want to do";
+"SideSeat Plus exploration" = "SideSeat Plus exploration";
+"New activity intentions will appear here when students choose to share them." = "New activity intentions will appear here when students choose to share them.";
+"Explore more with SideSeat Plus" = "Explore more with SideSeat Plus";
+"Plus can unlock more Explore results, richer activity context, search and filters. Identity stays hidden until mutual interest." = "Plus can unlock more Explore results, richer activity context, search and filters. Identity stays hidden until mutual interest.";
+"Explore intentions" = "Explore intentions";
+"Why this might fit" = "Why this might fit";
+"Plus can use your active intentions to explain activity and broad timing relevance without rating the person." = "Plus can use your active intentions to explain activity and broad timing relevance without rating the person.";
+"Allow others to discover this intention" = "Allow others to discover this intention";
+"Before mutual interest, Explore shows only the activity, broad timing, campus, verification and limited language context. Your name, photo, profile and contact details stay hidden." = "Before mutual interest, Explore shows only the activity, broad timing, campus, verification and limited language context. Your name, photo, profile and contact details stay hidden.";
+"This note may appear as a short Explore activity preview." = "This note may appear as a short Explore activity preview.";
+"This note stays private while Explore visibility is off." = "This note stays private while Explore visibility is off.";
+"Publish an activity for passive matching. You can separately choose whether it appears in Explore." = "Publish an activity for passive matching. You can separately choose whether it appears in Explore.";
+"Add something you would like to do. Your intention stays private unless you choose Explore visibility." = "Add something you would like to do. Your intention stays private unless you choose Explore visibility.";
+
+"All activities" = "All activities";
+"No Explore results match these filters" = "No Explore results match these filters";
+"Based on your intentions" = "Based on your intentions";
+/* Opportunity bilateral swipe */
+"Not interested" = "Not interested";
+"Choose interest" = "Choose";
+"Release for not interested" = "Release for not interested";
+"Swipe left for Not interested or right for Interested" = "Swipe left for Not interested or right for Interested";
+"Open Explore" = "Open Explore";
+
+/* Five-tab Plans navigation */
+"Keep plans moving" = "Keep plans moving";
+"Review proposals, upcoming plans, and follow-ups in one place." = "Review proposals, upcoming plans, and follow-ups in one place.";
+"Plans tracks coordination status; Calendar shows confirmed time." = "Plans tracks coordination status; Calendar shows confirmed time.";
+"Keep confirmed time together" = "Keep confirmed time together";
+"Calendar carries what is confirmed; Together is where opportunities begin." = "Calendar carries what is confirmed; Together is where opportunities begin.";
+
+"Waiting" = "Waiting";
+"Current Plan" = "Current Plan";
+"No plans waiting for a response" = "No plans waiting for a response";
+"No upcoming plans" = "No upcoming plans";
+"No ended plans" = "No ended plans";
+"New proposals and time changes will appear here until someone responds." = "New proposals and time changes will appear here until someone responds.";
+"Accepted plans will appear here until they finish." = "Accepted plans will appear here until they finish.";
+"Completed, declined, canceled, and expired plans will appear here." = "Completed, declined, canceled, and expired plans will appear here.";
+"Happened?" = "Happened?";
+"Yes" = "Yes";
+"No" = "No";
+"Did this plan happen?" = "Did this plan happen?";
+
+"No response" = "No response";

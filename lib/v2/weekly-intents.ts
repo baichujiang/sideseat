@@ -62,6 +62,7 @@ const ownerSelect = {
   timeWindows: true,
   timePreference: true,
   automaticMatching: true,
+  exploreVisible: true,
   timeZone: true,
   note: true,
   status: true,
@@ -371,6 +372,7 @@ export async function createWeeklyIntent(
         timeWindows: normalizedWindows(input.timeWindows),
         ...(input.timePreference ? { timePreference: input.timePreference } : {}),
         automaticMatching: input.automaticMatching ?? false,
+        exploreVisible: input.exploreVisible ?? false,
         timeZone: input.timeZone,
         note: input.note || null,
         policyVersion: CURRENT_POLICY_VERSION,
@@ -506,6 +508,7 @@ export async function patchWeeklyIntent(
         ...(input.timeZone !== undefined ? { timeZone: input.timeZone } : {}),
         ...(input.timePreference !== undefined ? { timePreference: input.timePreference } : {}),
         ...(input.automaticMatching ? { automaticMatching: true } : {}),
+        ...(input.exploreVisible !== undefined ? { exploreVisible: input.exploreVisible } : {}),
         ...(input.note !== undefined ? { note: input.note || null } : {}),
         version: { increment: 1 },
       };

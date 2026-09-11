@@ -4,6 +4,23 @@ import Testing
 
 @Suite("Discover stores")
 struct DiscoverStoreTests {
+    @Test("Explore Intent payload contains activity context without person identity")
+    @MainActor
+    func exploreIntentPrivacyProjectionDecodes() throws {
+        let json = #"{"data":{"intents":[{"id":"explore-1","topic":"SPORTS","togetherMode":"SAME_ACTIVITY","studyGoal":null,"activityText":null,"sportTag":"BADMINTON","sportOtherNote":null,"course":null,"time":{"kind":"FLEXIBLE","startDate":"2026-09-12","endDate":"2026-09-12","period":"AFTERNOON"},"descriptionPreview":"Casual game","campus":"TUM","verifiedStudent":true,"languages":["ENGLISH"],"expiresAt":"2026-09-14T12:00:00Z","createdAt":"2026-09-11T12:00:00Z"}],"hasMore":true}}"#
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let envelope = try decoder.decode(
+            APIEnvelope<NativeExploreIntentPayload>.self, from: Data(json.utf8)
+        )
+        let intent = try #require(envelope.data.intents.first)
+        #expect(intent.activityTitle == NativeSportTag.badminton.title)
+        #expect(intent.campus == "TUM")
+        #expect(intent.primaryLanguageTitle == AppLocalization.string("English"))
+        #expect(intent.time.kind == "FLEXIBLE")
+        #expect(envelope.data.hasMore)
+    }
+
     @Test("Discovery cards disclose differences and decode a zero relevance score")
     @MainActor
     func discoveryFitDecoding() throws {
@@ -21,7 +38,7 @@ struct DiscoverStoreTests {
         let value = try JSONDecoder().decode(NativeMutualOpportunity.self, from: JSONSerialization.data(withJSONObject: json))
         #expect(value.matchFit?.isDiscovery == true)
         #expect(value.matchFit?.score == 0)
-        #expect(value.matchFit?.differenceHints.count == 4)
+        #expect(value.matchFit?.differenceHints.count == 2)
         #expect(value.matchFit?.peerActivity?.title == NativeSportTag.basketball.title)
         #expect(value.matchTitle == AppLocalization.string("A possibility to explore"))
         #expect(value.startDate == nil)

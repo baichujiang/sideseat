@@ -35,20 +35,28 @@ final class ProductTutorialController {
             systemImage: "person.2.fill"
         ),
         ProductTutorialStep(
+            id: "plans",
+            title: AppLocalization.string("Keep plans moving"),
+            body: AppLocalization.string("Review proposals, upcoming plans, and follow-ups in one place."),
+            hint: AppLocalization.string("Plans tracks coordination status; Calendar shows confirmed time."),
+            tab: .plans,
+            systemImage: "checklist"
+        ),
+        ProductTutorialStep(
+            id: "home",
+            title: AppLocalization.string("Keep confirmed time together"),
+            body: AppLocalization.string("See accepted plans, courses, and personal events in one reliable schedule."),
+            hint: AppLocalization.string("Calendar carries what is confirmed; Together is where opportunities begin."),
+            tab: .home,
+            systemImage: "calendar"
+        ),
+        ProductTutorialStep(
             id: "chats",
             title: AppLocalization.string("Turn interest into a plan"),
             body: AppLocalization.string("Keep the action context, coordinate a time, and send a structured plan."),
             hint: AppLocalization.string("The goal is a clear yes, another time, or no—not endless messaging."),
             tab: .chats,
             systemImage: "bubble.left.and.bubble.right.fill"
-        ),
-        ProductTutorialStep(
-            id: "home",
-            title: AppLocalization.string("Keep confirmed plans together"),
-            body: AppLocalization.string("See accepted plans, courses, and personal events in one reliable schedule."),
-            hint: AppLocalization.string("Calendar carries what is confirmed; Together is where plans begin."),
-            tab: .home,
-            systemImage: "calendar"
         ),
         ProductTutorialStep(
             id: "me",

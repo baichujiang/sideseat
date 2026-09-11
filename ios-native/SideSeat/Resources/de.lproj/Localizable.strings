@@ -1885,3 +1885,58 @@
 "Publish intention" = "Vorhaben veröffentlichen";
 "Publish intention (short)" = "Aktivieren";
 "Resume finding company" = "Wieder Begleitung finden";
+
+
+/* Together Explore */
+"What I want to do" = "Was ich unternehmen möchte";
+"Opportunities for you" = "Möglichkeiten für dich";
+"See what others want to do" = "Sieh, was andere unternehmen möchten";
+"Explore activity intentions around your campus" = "Entdecke Aktivitätsvorhaben auf deinem Campus";
+"Nothing new to explore right now" = "Gerade gibt es nichts Neues zu entdecken";
+"See more" = "Mehr ansehen";
+"Explore what people around campus want to do" = "Entdecke, was Menschen auf dem Campus unternehmen möchten";
+"SideSeat Plus exploration" = "SideSeat Plus Entdecken";
+"New activity intentions will appear here when students choose to share them." = "Neue Aktivitätsvorhaben erscheinen hier, wenn Studierende sie zum Entdecken freigeben.";
+"Explore more with SideSeat Plus" = "Mit SideSeat Plus mehr entdecken";
+"Plus can unlock more Explore results, richer activity context, search and filters. Identity stays hidden until mutual interest." = "Plus bietet mehr Explore-Ergebnisse, mehr Aktivitätskontext, Suche und Filter. Die Identität bleibt bis zum beiderseitigen Interesse verborgen.";
+"Explore intentions" = "Aktivitätsvorhaben entdecken";
+"Why this might fit" = "Warum das passen könnte";
+"Plus can use your active intentions to explain activity and broad timing relevance without rating the person." = "Plus kann anhand deiner aktiven Vorhaben Aktivität und grobe Zeitrelevanz erklären, ohne die Person zu bewerten.";
+"Allow others to discover this intention" = "Anderen erlauben, dieses Vorhaben zu entdecken";
+"Before mutual interest, Explore shows only the activity, broad timing, campus, verification and limited language context. Your name, photo, profile and contact details stay hidden." = "Vor beiderseitigem Interesse zeigt Explore nur Aktivität, grobe Zeit, Campus, Verifizierung und begrenzte Sprachinfos. Name, Foto, Profil und Kontaktdaten bleiben verborgen.";
+"This note may appear as a short Explore activity preview." = "Diese Notiz kann als kurze Aktivitätsvorschau in Explore erscheinen.";
+"This note stays private while Explore visibility is off." = "Diese Notiz bleibt privat, solange Explore-Sichtbarkeit ausgeschaltet ist.";
+"Publish an activity for passive matching. You can separately choose whether it appears in Explore." = "Veröffentliche eine Aktivität für passives Matching. Separat kannst du entscheiden, ob sie in Explore erscheint.";
+"Add something you would like to do. Your intention stays private unless you choose Explore visibility." = "Füge etwas hinzu, das du unternehmen möchtest. Dein Vorhaben bleibt privat, sofern du es nicht für Explore freigibst.";
+
+"All activities" = "Alle Aktivitäten";
+"No Explore results match these filters" = "Keine Explore-Ergebnisse passen zu diesen Filtern";
+"Based on your intentions" = "Basierend auf deinen Vorhaben";
+/* Opportunity bilateral swipe */
+"Not interested" = "Kein Interesse";
+"Choose interest" = "Auswählen";
+"Release for not interested" = "Loslassen: kein Interesse";
+"Swipe left for Not interested or right for Interested" = "Nach links: kein Interesse · nach rechts: interessiert";
+"Open Explore" = "Explore öffnen";
+
+/* Five-tab Plans navigation */
+"Keep plans moving" = "Pläne im Blick behalten";
+"Review proposals, upcoming plans, and follow-ups in one place." = "Vorschläge, anstehende Pläne und Nachfassaktionen an einem Ort prüfen.";
+"Plans tracks coordination status; Calendar shows confirmed time." = "„Pläne“ zeigt den Koordinationsstatus; der Kalender zeigt bestätigte Zeiten.";
+"Keep confirmed time together" = "Bestätigte Zeiten im Blick behalten";
+"Calendar carries what is confirmed; Together is where opportunities begin." = "Der Kalender enthält bestätigte Termine; in „Zusammen“ entstehen neue Gelegenheiten.";
+
+"Waiting" = "Ausstehend";
+"Current Plan" = "Aktueller Plan";
+"No plans waiting for a response" = "Keine Pläne warten auf eine Antwort";
+"No upcoming plans" = "Keine anstehenden Pläne";
+"No ended plans" = "Noch keine beendeten Pläne";
+"New proposals and time changes will appear here until someone responds." = "Neue Vorschläge und Zeitänderungen erscheinen hier, bis jemand antwortet.";
+"Accepted plans will appear here until they finish." = "Bestätigte Pläne erscheinen hier bis zu ihrem Ende.";
+"Completed, declined, canceled, and expired plans will appear here." = "Abgeschlossene, abgelehnte, stornierte und abgelaufene Pläne erscheinen hier.";
+"Happened?" = "Stattgefunden?";
+"Yes" = "Ja";
+"No" = "Nein";
+"Did this plan happen?" = "Hat dieser Plan stattgefunden?";
+
+"No response" = "Keine Antwort";

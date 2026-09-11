@@ -188,6 +188,8 @@ final class DeepLinkRouter {
             return (.discover, nil)
         case "/inbox":
             return (.chats, nil)
+        case "/plans":
+            return (.plans, nil)
         case "/courses":
             return (.me, .courses)
         case "/courses/archived":

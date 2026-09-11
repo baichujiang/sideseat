@@ -162,7 +162,7 @@ private struct TogetherHomeView: View {
     @State private var store = WeeklyIntentStore()
     @State private var matchingSessionStore = TogetherMatchingSessionStore()
     @State private var opportunityStore = MutualOpportunityStore()
-    @State private var outcomeStore = PlansStore()
+    @State private var exploreStore = ExploreIntentStore()
     @State private var v2Store = ActionToPlanV2Store.shared
     @State private var presentedEditor: WeeklyIntentEditorPresentation?
 
@@ -170,23 +170,27 @@ private struct TogetherHomeView: View {
         v2Store.isMutualOpportunityEnabled && clientConfiguration.configuration?.isFeatureEnabled("v2AutomaticMatching") == true
     }
 
+    private var exploreEnabled: Bool {
+        clientConfiguration.configuration?.isFeatureEnabled("v2ExploreIntents") == true
+    }
+
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceXL) {
-                if v2Store.isMutualOpportunityEnabled {
-                    opportunitySection
-                }
-                if !automaticMatchingEnabled, v2Store.isMutualOpportunityEnabled,
-                   !store.intents.isEmpty || matchingSessionStore.session.state != .idle {
-                    matchingSessionSection
-                }
                 if v2Store.isWeeklyIntentEnabled {
                     intentSection
                 } else {
                     unavailableSection
                 }
-                if !outcomePlans.isEmpty {
-                    outcomeSection
+                if !automaticMatchingEnabled, v2Store.isMutualOpportunityEnabled,
+                   !store.intents.isEmpty || matchingSessionStore.session.state != .idle {
+                    matchingSessionSection
+                }
+                if v2Store.isMutualOpportunityEnabled {
+                    opportunitySection
+                }
+                if exploreEnabled {
+                    explorePreviewSection
                 }
             }
             .padding(.horizontal, SideSeatTheme.screenHorizontal)
@@ -195,16 +199,6 @@ private struct TogetherHomeView: View {
         }
         .background(SideSeatTheme.bgGrouped)
         .ssRootNavigationTitle("Together")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    router.navigate(to: .plans)
-                } label: {
-                    Label("Plans", systemImage: "calendar")
-                }
-                .accessibilityIdentifier("together-open-plans")
-            }
-        }
         .refreshable {
             await loadContent()
         }
@@ -225,6 +219,7 @@ private struct TogetherHomeView: View {
                 courseId,
                 timeWindows,
                 timePreference,
+                exploreVisible,
                 note in
                 let saved = await store.save(
                     intent: presentation.intent,
@@ -238,6 +233,7 @@ private struct TogetherHomeView: View {
                     timeWindows: timeWindows,
                     timePreference: timePreference,
                     automaticMatching: automaticMatchingEnabled,
+                    exploreVisible: exploreVisible,
                     note: note,
                     using: session
                 )
@@ -254,72 +250,79 @@ private struct TogetherHomeView: View {
 
     @ViewBuilder
     private var intentSection: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            SSProductSectionHeader(
-                title: AppLocalization.string("Recent intentions"),
-                actionTitle: AppLocalization.string("Add"),
-                accessibilityID: "together-intent-section-title",
-                actionAccessibilityID: "together-add-intent",
-                onAction: { presentedEditor = .create() }
-            )
-            .disabled(store.isCreating)
-
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
             if store.isLoading, store.intents.isEmpty {
                 ProgressView()
-                    .frame(maxWidth: .infinity, minHeight: 72)
+                    .frame(maxWidth: .infinity, minHeight: 44)
             } else if store.intents.isEmpty {
-                SSFlowCard {
-                    SSFlowCardHeader(
-                        title: AppLocalization.string("What would you like to do?"),
-                        subtitle: AppLocalization.string("Only you can see this."),
-                        systemImage: "sparkles"
+                Button {
+                    presentedEditor = .create()
+                } label: {
+                    HStack(spacing: SideSeatTheme.spaceSM) {
+                        Image(systemName: "sparkles")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.accent)
+                            .frame(width: 28, height: 28)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(AppLocalization.string("What would you like to do?"))
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(SideSeatTheme.textPrimary)
+                            Text(AppLocalization.string("Add an intention"))
+                                .font(.caption)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textSecondary)
+                    }
+                    .padding(.horizontal, SideSeatTheme.spaceMD)
+                    .frame(maxWidth: .infinity, minHeight: 52)
+                    .background(
+                        SideSeatTheme.surface,
+                        in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
                     )
-                    Text(AppLocalization.string(automaticMatchingEnabled
-                        ? "Publish an activity to find company automatically. There is no public intention feed."
-                        : "Add something you would like to do. Your intention stays private."))
-                        .font(.subheadline)
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    SSPrimaryButton(
-                        title: AppLocalization.string("Add an intention"),
-                        fill: .product,
-                        chrome: .capsule,
-                        height: 46,
-                        accessibilityID: "together-set-intent"
-                    ) { presentedEditor = .create() }
-                    .frame(maxWidth: 280, alignment: .leading)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
+                            .strokeBorder(SideSeatTheme.separator.opacity(0.25), lineWidth: 0.5)
+                    }
                 }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("together-set-intent")
             } else {
-                ForEach(store.intents) { intent in
-                    WeeklyIntentCard(
-                        intent: intent,
-                        isWorking: store.mutatingIDs.contains(intent.id),
-                        onEdit: { presentedEditor = .edit(intent) },
-                        onPause: {
-                            Task {
-                                let changed = await store.setPaused(
-                                    !intent.isPaused,
-                                    intent: intent,
-                                    automaticMatching: automaticMatchingEnabled,
-                                    using: session
-                                )
-                                if changed {
-                                    await refreshOpportunitiesAfterIntentChange()
-                                }
-                            }
-                        },
-                        onExtend: {
-                            Task { _ = await store.setPaused(false, intent: intent, extend: true, using: session) }
-                        },
-                        onEnd: {
-                            Task {
-                                let changed = await store.end(intent, using: session)
-                                if changed {
-                                    await refreshOpportunitiesAfterIntentChange()
-                                }
+                HStack(spacing: SideSeatTheme.spaceSM) {
+                    ScrollView(.horizontal) {
+                        HStack(spacing: SideSeatTheme.spaceSM) {
+                            ForEach(store.intents) { intent in
+                                compactIntentChip(intent)
                             }
                         }
-                    )
+                    }
+                    .scrollIndicators(.hidden)
+                    .scrollClipDisabled()
+                    .accessibilityIdentifier("together-intent-context-list")
+
+                    Button {
+                        presentedEditor = .create()
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(width: 44, height: 44)
+                            .background(
+                                SideSeatTheme.surface,
+                                in: Circle()
+                            )
+                            .overlay {
+                                Circle().strokeBorder(SideSeatTheme.separator.opacity(0.25), lineWidth: 0.5)
+                            }
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(store.isCreating)
+                    .accessibilityLabel(AppLocalization.string("Add an intention"))
+                    .accessibilityIdentifier("together-add-intent")
                 }
+                .frame(minHeight: 52)
             }
 
             if let issue = store.issue {
@@ -328,6 +331,104 @@ private struct TogetherHomeView: View {
                     .foregroundStyle(SideSeatTheme.danger)
             }
         }
+    }
+
+    private func compactIntentChip(_ intent: NativeWeeklyIntent) -> some View {
+        HStack(spacing: 0) {
+            Button {
+                presentedEditor = .edit(intent)
+            } label: {
+                HStack(spacing: SideSeatTheme.spaceSM) {
+                    Image(systemName: intent.topic.systemImage)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .frame(width: 26, height: 26)
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(intent.activityTitle)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textPrimary)
+                            .lineLimit(1)
+                        Text(compactIntentContext(intent))
+                            .font(.caption)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .lineLimit(1)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(.leading, SideSeatTheme.spaceMD)
+                .padding(.vertical, SideSeatTheme.spaceSM)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            Menu {
+                Button("Edit", systemImage: "pencil") { presentedEditor = .edit(intent) }
+                if clientConfiguration.configuration?.isFeatureEnabled("v2FlexibleTiming") == true {
+                    Button("Keep for 14 more days", systemImage: "arrow.clockwise") {
+                        Task { _ = await store.setPaused(false, intent: intent, extend: true, using: session) }
+                    }
+                }
+                Button(
+                    intent.isPaused
+                        ? (automaticMatchingEnabled ? "Resume finding company" : "Resume")
+                        : "Pause",
+                    systemImage: intent.isPaused ? "play.fill" : "pause.fill"
+                ) {
+                    Task {
+                        let changed = await store.setPaused(
+                            !intent.isPaused,
+                            intent: intent,
+                            automaticMatching: automaticMatchingEnabled,
+                            using: session
+                        )
+                        if changed { await refreshOpportunitiesAfterIntentChange() }
+                    }
+                }
+                Divider()
+                Button("End", systemImage: "stop.circle", role: .destructive) {
+                    Task {
+                        let changed = await store.end(intent, using: session)
+                        if changed { await refreshOpportunitiesAfterIntentChange() }
+                    }
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .disabled(store.mutatingIDs.contains(intent.id))
+            .accessibilityLabel("More")
+        }
+        .frame(width: 250)
+        .frame(minHeight: 52)
+        .background(
+            SideSeatTheme.surface,
+            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
+                .strokeBorder(SideSeatTheme.separator.opacity(0.25), lineWidth: 0.5)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("weekly-intent-\(intent.id)")
+    }
+
+    private func compactIntentContext(_ intent: NativeWeeklyIntent) -> String {
+        let status = intent.isPaused ? AppLocalization.string("Paused") : nil
+        let time: String
+        if let timing = intent.timePreference, timing.kind != "EXACT" {
+            time = timing.summary
+        } else if let window = intent.relevantTimeWindows().first {
+            time = window.startAt.formatted(
+                .dateTime.month(.abbreviated).day().locale(AppLocalization.selectedLanguage.locale)
+            )
+        } else {
+            time = AppLocalization.string("Time to discuss")
+        }
+        return [time, status].compactMap { $0 }.joined(separator: " · ")
     }
 
     private var matchingSessionSection: some View {
@@ -505,7 +606,7 @@ private struct TogetherHomeView: View {
     private var opportunitySection: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
             SSProductSectionHeader(
-                title: AppLocalization.string("Opportunities"),
+                title: AppLocalization.string("Opportunities for you"),
                 accessibilityID: "together-opportunities-section-title"
             )
 
@@ -548,12 +649,11 @@ private struct TogetherHomeView: View {
                     .font(.footnote)
                     .foregroundStyle(SideSeatTheme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
-                Button(AppLocalization.string(published ? "Refresh suggestions" : "Create an intention")) {
-                    if published { Task { await loadContent() } }
-                    else { presentedEditor = .create() }
+                if !published {
+                    Button(AppLocalization.string("Create an intention")) { presentedEditor = .create() }
+                        .buttonStyle(.bordered)
+                        .accessibilityIdentifier("together-discovery-empty-action")
                 }
-                .buttonStyle(.bordered)
-                .accessibilityIdentifier("together-discovery-empty-action")
             }
             .padding(.vertical, SideSeatTheme.spaceMD)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -594,6 +694,69 @@ private struct TogetherHomeView: View {
         }
     }
 
+    private var explorePreviewSection: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
+                Text(AppLocalization.string("See what others want to do"))
+                    .font(.headline)
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityIdentifier("together-explore-section-title")
+                Spacer(minLength: SideSeatTheme.spaceSM)
+                Button {
+                    router.navigate(to: .exploreIntents)
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(AppLocalization.string("See more"))
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .frame(minHeight: 44)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("together-explore-see-more")
+            }
+
+            Text(AppLocalization.string("Explore activity intentions around your campus"))
+                .font(.footnote)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+
+            if exploreStore.isLoading, exploreStore.intents.isEmpty {
+                ProgressView().frame(maxWidth: .infinity, minHeight: 72)
+            } else if exploreStore.intents.isEmpty {
+                Text(AppLocalization.string("Nothing new to explore right now"))
+                    .font(.subheadline)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .padding(.vertical, SideSeatTheme.spaceSM)
+                    .accessibilityIdentifier("together-explore-empty")
+            } else {
+                ScrollView(.horizontal) {
+                    HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                        ForEach(exploreStore.intents.prefix(3)) { intent in
+                            Button {
+                                router.navigate(to: .exploreIntents)
+                            } label: {
+                                ExploreIntentCard(intent: intent, compact: true, showsPlusContext: false)
+                                    .frame(width: 300)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(intent.activityTitle)
+                            .accessibilityHint(AppLocalization.string("Open Explore"))
+                            .accessibilityIdentifier("together-explore-preview-\(intent.id)")
+                        }
+                    }
+                }
+                .scrollIndicators(.hidden)
+                .scrollClipDisabled()
+                .accessibilityIdentifier("together-explore-preview-list")
+            }
+
+            if let issue = exploreStore.issue {
+                Text(issue).font(.footnote).foregroundStyle(SideSeatTheme.danger)
+            }
+        }
+    }
+
     private func opportunityCard(_ opportunity: NativeMutualOpportunity) -> some View {
         MutualOpportunityCard(
             opportunity: opportunity,
@@ -631,23 +794,28 @@ private struct TogetherHomeView: View {
     }
 
     private func loadContent() async {
-        async let outcomeLoad: Void = outcomeStore.load(using: session)
+        async let exploreLoad: Void = loadExplorePreview()
         if v2Store.isWeeklyIntentEnabled {
             if v2Store.isMutualOpportunityEnabled {
                 async let intentLoad: Void = store.load(using: session)
                 async let matchingSessionLoad: Void = loadLegacyMatchingSession()
                 async let opportunityLoad: Void = opportunityStore.load(using: session)
-                _ = await (outcomeLoad, intentLoad, matchingSessionLoad, opportunityLoad)
+                _ = await (exploreLoad, intentLoad, matchingSessionLoad, opportunityLoad)
             } else {
                 async let intentLoad: Void = store.load(using: session)
-                _ = await (outcomeLoad, intentLoad)
+                _ = await (exploreLoad, intentLoad)
             }
         } else if v2Store.isMutualOpportunityEnabled {
             async let opportunityLoad: Void = opportunityStore.load(using: session)
-            _ = await (outcomeLoad, opportunityLoad)
+            _ = await (exploreLoad, opportunityLoad)
         } else {
-            _ = await outcomeLoad
+            _ = await exploreLoad
         }
+    }
+
+    private func loadExplorePreview() async {
+        guard exploreEnabled else { return }
+        await exploreStore.load(using: session, limit: 3)
     }
 
     private func refreshOpportunitiesAfterIntentChange() async {
@@ -663,67 +831,7 @@ private struct TogetherHomeView: View {
         store.intents.filter { $0.status == "ACTIVE" }
     }
 
-    private var outcomePlans: [NativePlanRequest] {
-        outcomeStore.plans
-            .filter { $0.isOutcomeEligible() && ($0.viewerOutcome == nil || ($0.showsMeetAgain && $0.viewerMeetAgain == nil)) }
-            .sorted { ($0.endDate ?? .distantPast) > ($1.endDate ?? .distantPast) }
-    }
 
-    private var outcomeSection: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            SSProductSectionHeader(
-                title: AppLocalization.string("Recent Plans"),
-                accessibilityID: "together-outcome-section-title"
-            )
-
-            ForEach(outcomePlans) { plan in
-                SSFlowCard {
-                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                        SSFlowCardHeader(
-                            title: plan.title,
-                            subtitle: AppLocalization.string("Private response"),
-                            systemImage: "lock"
-                        )
-
-                        if let start = plan.startDate, let end = plan.endDate {
-                            Label(
-                                "\(start.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(AppLocalization.selectedLanguage.locale))) – \(end.formatted(.dateTime.hour().minute().locale(AppLocalization.selectedLanguage.locale)))",
-                                systemImage: "calendar"
-                            )
-                            .font(.footnote)
-                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        }
-
-                        PlanOutcomePromptView(
-                            plan: plan,
-                            isSubmitting: outcomeStore.mutatingOutcomeID == plan.id,
-                            onMeetAgain: { value in
-                                Task { await outcomeStore.recordMeetAgain(value, for: plan.id, using: session) }
-                            }
-                        ) { value in
-                            Task {
-                                await outcomeStore.recordOutcome(
-                                    value,
-                                    for: plan.id,
-                                    using: session
-                                )
-                            }
-                        }
-
-                        Button {
-                            router.navigate(to: MVPPlanRoute.route(for: plan))
-                        } label: {
-                            Label("Open conversation", systemImage: "bubble.left.and.bubble.right")
-                                .frame(maxWidth: .infinity, minHeight: 44)
-                        }
-                        .buttonStyle(.bordered)
-                        .accessibilityIdentifier("together-outcome-conversation-\(plan.id)")
-                    }
-                }
-                .accessibilityIdentifier("together-outcome-\(plan.id)")
-            }
-        }
-    }
 }
 
 private struct MutualOpportunityCard: View {
@@ -743,8 +851,8 @@ private struct MutualOpportunityCard: View {
     }
 
     var body: some View {
-        SSFlowCard {
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
+        SSFlowCard(contentPadding: SideSeatTheme.spaceMD) {
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
                 peerRow
                 activityHeader
                 availabilityRow
@@ -770,38 +878,41 @@ private struct MutualOpportunityCard: View {
     }
 
     private var activityHeader: some View {
-        HStack(alignment: .center, spacing: SideSeatTheme.spaceMD) {
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+        HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
+            SSActivityArtwork(
+                topic: opportunity.matchFit?.viewerActivity?.topic ?? opportunity.topic,
+                size: 40
+            )
+            VStack(alignment: .leading, spacing: 2) {
                 if activityTitle != opportunity.topic.title {
                     Text(opportunity.topic.title)
-                        .font(.caption.weight(.medium))
+                        .font(.caption2.weight(.medium))
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 }
                 Text(activityTitle)
-                    .font(.title2.weight(.bold))
+                    .font(.headline.weight(.bold))
                     .foregroundStyle(SideSeatTheme.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            SSActivityArtwork(topic: opportunity.matchFit?.viewerActivity?.topic ?? opportunity.topic)
         }
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("mutual-opportunity-activity-\(opportunity.id)")
     }
 
     private var peerRow: some View {
-        HStack(alignment: .center, spacing: SideSeatTheme.spaceMD) {
-            InitialAvatar(name: opportunity.peer.displayName, url: opportunity.peer.avatarUrl, size: 48)
+        HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
+            InitialAvatar(name: opportunity.peer.displayName, url: opportunity.peer.avatarUrl, size: 36)
                 .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+            VStack(alignment: .leading, spacing: 1) {
                 HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceXS) {
                     Text(opportunity.peer.displayName)
-                        .font(.headline)
+                        .font(.subheadline.weight(.semibold))
                         .foregroundStyle(SideSeatTheme.textPrimary)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(1)
                     if opportunity.peer.verifiedStudent {
                         Image(systemName: "checkmark.seal.fill")
-                            .font(.subheadline)
+                            .font(.caption)
                             .foregroundStyle(SideSeatTheme.verifiedSeal)
                             .accessibilityLabel(AppLocalization.string("Verified student"))
                             .accessibilityIdentifier("mutual-opportunity-verified-\(opportunity.id)")
@@ -809,9 +920,9 @@ private struct MutualOpportunityCard: View {
                 }
                 if !peerContext.isEmpty {
                     Text(peerContext)
-                        .font(.caption)
+                        .font(.caption2)
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(1)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -821,34 +932,30 @@ private struct MutualOpportunityCard: View {
     }
 
     private var availabilityRow: some View {
-        HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+        HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
             Image(systemName: "clock")
-                .font(.subheadline)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .frame(width: 20)
                 .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                Text(AppLocalization.string(opportunity.startDate == nil ? "Timing preference" : "Available together"))
-                    .font(.caption)
-                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                Text(opportunity.matchFit?.differences?.contains("TIME") == true
-                     ? AppLocalization.string("Time needs a new agreement") : opportunityWindow)
-                    .font(.subheadline.weight(.medium))
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            Text(opportunity.matchFit?.differences?.contains("TIME") == true
+                 ? AppLocalization.string("Time needs a new agreement") : opportunityWindow)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(SideSeatTheme.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .foregroundStyle(SideSeatTheme.textPrimary)
-        .padding(SideSeatTheme.spaceMD)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(SideSeatTheme.activityInset,
-                    in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
         .accessibilityLabel(AppLocalization.string(opportunity.startDate == nil ? "Timing preference" : "Available together"))
         .accessibilityValue(opportunity.matchFit?.differences?.contains("TIME") == true
                              ? AppLocalization.string("Time needs a new agreement") : opportunityWindow)
         .accessibilityElement(children: .ignore)
+        .accessibilityRespondsToUserInteraction(false)
         .accessibilityIdentifier("mutual-opportunity-time-\(opportunity.id)")
     }
 
     private var activityContext: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
             opportunityFitRow(
                 title: AppLocalization.string("Activity"),
                 value: activityFitSummary,
@@ -885,11 +992,6 @@ private struct MutualOpportunityCard: View {
 
     private func opportunityFitRow(title: String, value: String, systemImage: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
-            Image(systemName: systemImage)
-                .font(.subheadline)
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .frame(width: 20)
-                .accessibilityHidden(true)
             Text(title)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -1387,6 +1489,7 @@ private struct WeeklyIntentEditorView: View {
     @State private var flexibleStart: Date
     @State private var flexibleEnd: Date
     @State private var period: String
+    @State private var exploreVisible: Bool
     @State private var note: String
     @State private var isSaving = false
     @State private var editorStep = 0
@@ -1407,6 +1510,7 @@ private struct WeeklyIntentEditorView: View {
             String?,
             [NativeWeeklyIntentTimeWindow],
             NativeIntentTimePreference?,
+            Bool,
             String
         ) async -> Bool
 
@@ -1424,6 +1528,7 @@ private struct WeeklyIntentEditorView: View {
                 String?,
                 [NativeWeeklyIntentTimeWindow],
                 NativeIntentTimePreference?,
+                Bool,
                 String
             ) async -> Bool
     ) {
@@ -1447,6 +1552,7 @@ private struct WeeklyIntentEditorView: View {
                 WeeklyIntentWindowDraft(startAt: $0.startAt, endAt: $0.endAt)
             }
         )
+        _exploreVisible = State(initialValue: intent?.exploreVisible ?? true)
         _note = State(initialValue: intent?.note ?? "")
         _timingKind = State(initialValue: intent?.timePreference?.kind ?? (intent == nil ? "UNDECIDED" : "EXACT"))
         let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
@@ -1827,10 +1933,20 @@ private struct WeeklyIntentEditorView: View {
                 }
             }
             }
+            Section("Explore visibility") {
+                Toggle(AppLocalization.string("Allow others to discover this intention"), isOn: $exploreVisible)
+                    .accessibilityIdentifier("intent-explore-visible")
+                Text(AppLocalization.string("Before mutual interest, Explore shows only the activity, broad timing, campus, verification and limited language context. Your name, photo, profile and contact details stay hidden."))
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Section("Optional") {
                 TextField("A short clarification", text: $note, axis: .vertical)
                     .lineLimit(2...4)
-                Text("This is private and is not published as a post.")
+                Text(AppLocalization.string(exploreVisible
+                    ? "This note may appear as a short Explore activity preview."
+                    : "This note stays private while Explore visibility is off."))
                     .font(.footnote)
                     .foregroundStyle(SideSeatTheme.textSecondary)
             }
@@ -2021,7 +2137,7 @@ private struct WeeklyIntentEditorView: View {
         let sportSelection = NativeSportInput.normalized(sportText)
         _ = await onSave(
             topic, activityText, sportSelection.tag, sportSelection.otherNote ?? "",
-            togetherMode, studyGoal, selectedCourseID, normalizedTimeWindows, submittedTiming, note
+            togetherMode, studyGoal, selectedCourseID, normalizedTimeWindows, submittedTiming, exploreVisible, note
         )
     }
 

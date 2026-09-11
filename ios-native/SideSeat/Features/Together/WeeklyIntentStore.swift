@@ -27,7 +27,7 @@ final class WeeklyIntentStore {
                     courseId: nil, course: nil, timeWindows: [], timeZone: "Europe/Berlin", note: nil,
                     status: "ACTIVE", policyVersion: 1, version: 1, expiresAt: Date().addingTimeInterval(86400),
                     pausedAt: nil, endedAt: nil, createdAt: Date(), updatedAt: Date(),
-                    timePreference: NativeIntentTimePreference(kind: "UNDECIDED"), automaticMatching: true)]
+                    timePreference: NativeIntentTimePreference(kind: "UNDECIDED"), automaticMatching: true, exploreVisible: true)]
             }
             return
         }
@@ -57,6 +57,7 @@ final class WeeklyIntentStore {
         timeWindows: [NativeWeeklyIntentTimeWindow],
         timePreference: NativeIntentTimePreference? = nil,
         automaticMatching: Bool = false,
+        exploreVisible: Bool = false,
         note: String,
         using session: SessionStore
     ) async -> Bool {
@@ -114,7 +115,8 @@ final class WeeklyIntentStore {
                         timeZone: TimeZone.current.identifier,
                         note: trimmedNote.isEmpty ? nil : trimmedNote,
                         timePreference: timePreference,
-                        automaticMatching: automaticMatching ? true : nil
+                        automaticMatching: automaticMatching ? true : nil,
+                        exploreVisible: exploreVisible
                     ),
                     idempotencyKey: UUID().uuidString
                 )
@@ -134,7 +136,8 @@ final class WeeklyIntentStore {
                         timeZone: TimeZone.current.identifier,
                         note: trimmedNote.isEmpty ? nil : trimmedNote,
                         timePreference: timePreference,
-                        automaticMatching: automaticMatching ? true : nil
+                        automaticMatching: automaticMatching ? true : nil,
+                        exploreVisible: exploreVisible
                     ),
                     idempotencyKey: UUID().uuidString
                 )
