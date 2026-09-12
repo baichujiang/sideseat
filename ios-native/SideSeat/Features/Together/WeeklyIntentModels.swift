@@ -640,7 +640,7 @@ enum TogetherIntentStatus: String, Equatable, Sendable {
         switch self {
         case .finding: AppLocalization.string("SideSeat is using this intention to find company. You can pause anytime.")
         case .paused: AppLocalization.string("This intention is paused and is not used for new suggestions.")
-        case .unpublished: AppLocalization.string("Review this intention and choose to start finding company.")
+        case .unpublished: AppLocalization.string("This saved intention is not participating in finding company.")
         case .unavailable: AppLocalization.string("Finding company is unavailable right now. Your intention is saved.")
         case .expired: AppLocalization.string("This intention has expired and is no longer finding company.")
         case .ended: AppLocalization.string("This intention has ended and is no longer finding company.")

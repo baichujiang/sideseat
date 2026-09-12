@@ -613,6 +613,47 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
+    func testIntentionsSaveOnceWithoutSeparateFindingConfirmation() {
+        let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents",
+            "--ui-testing-language=en", "--ui-testing-appearance=light"])
+        selectTogetherSection(1, in: app)
+        XCTAssertTrue(app.buttons["weekly-intent-pause-ui-intent-coffee"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "weekly-intent-publish-")).firstMatch.exists)
+        XCTAssertFalse(app.buttons["Review and start"].exists)
+        let legacyStatus = app.staticTexts["weekly-intent-status-ui-intent-study"].firstMatch
+        revealFlowElement(legacyStatus, in: app)
+        XCTAssertEqual(legacyStatus.label, "Not finding yet", "Do not silently publish an old saved intention")
+        saveScreenshot(app: app, name: "intentions-no-extra-confirmation")
+        let edit = app.buttons["weekly-intent-edit-ui-intent-study"]
+        revealFlowElement(edit, in: app)
+        edit.tap()
+        XCTAssertTrue(app.buttons["intent-editor-next"].waitForExistence(timeout: 5))
+        app.buttons["intent-editor-next"].tap()
+        let save = app.buttons["intent-editor-save"]
+        XCTAssertTrue(save.waitForExistence(timeout: 5))
+        save.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForNonExistence(timeout: 5))
+        revealFlowElement(legacyStatus, in: app)
+        XCTAssertEqual(legacyStatus.label, "Finding company", "The single save must already enable finding")
+        XCTAssertFalse(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "weekly-intent-publish-")).firstMatch.exists)
+        let pausedEdit = app.buttons["weekly-intent-edit-ui-intent-sports"]
+        revealFlowElement(pausedEdit, in: app)
+        pausedEdit.tap()
+        XCTAssertTrue(app.buttons["intent-editor-next"].waitForExistence(timeout: 5))
+        app.buttons["intent-editor-next"].tap()
+        app.buttons["intent-editor-save"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForNonExistence(timeout: 5))
+        let pausedStatus = app.staticTexts["weekly-intent-status-ui-intent-sports"].firstMatch
+        revealFlowElement(pausedStatus, in: app)
+        XCTAssertEqual(pausedStatus.label, "Paused", "Saving edits must not undo a deliberate pause")
+        let resume = app.buttons["weekly-intent-pause-ui-intent-sports"]
+        revealFlowElement(resume, in: app)
+        resume.tap()
+        XCTAssertEqual(pausedStatus.label, "Finding company", "Resume is one action, without another confirmation")
+        app.terminate()
+    }
+
+    @MainActor
     func testTogetherCreateReturnsToIntentionsWithoutPublishingExplore() {
         let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents",
             "--ui-testing-language=zh-Hans"])
@@ -637,7 +678,10 @@ final class VisualQAScreenshotUITests: XCTestCase {
         let exploreViewport = app.descendants(matching: .any)["explore-intents-list"].firstMatch
         XCTAssertFalse(exploreViewport.frame.intersects(app.frame), "Retained Explore must be offscreen, not presented over My intentions")
         let status = app.staticTexts["weekly-intent-status-ui-intent-created"].firstMatch
-        XCTAssertTrue(created.label.contains("正在寻找") || status.exists || app.staticTexts["正在寻找"].firstMatch.exists)
+        XCTAssertTrue(status.waitForExistence(timeout: 5))
+        XCTAssertEqual(status.label, "正在寻找")
+        XCTAssertFalse(app.buttons["weekly-intent-publish-ui-intent-created"].exists)
+        XCTAssertFalse(app.buttons["together-start-matching"].exists)
         saveScreenshot(app: app, name: "together-created-intention-zh")
         app.terminate()
     }

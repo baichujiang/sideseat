@@ -1967,7 +1967,6 @@
 "Also visible in Explore" = "Also visible in Explore";
 "Not visible in Explore" = "Not visible in Explore";
 "Pause finding company" = "Pause finding";
-"Review and start" = "Review and start";
 "End this intention?" = "End this intention?";
 "This intention will stop finding company. Existing conversations and confirmed plans stay unchanged." = "This intention will stop finding company. Existing conversations and confirmed plans stay unchanged.";
 "Explore is not available yet" = "Explore is not available yet";
@@ -1989,3 +1988,7 @@
 "Different or unlisted schools" = "Different / unlisted schools";
 "Course to agree" = "Course to agree";
 "Mutual interest opens chat, not a plan." = "Mutual interest opens chat, not a plan.";
+
+/* Save once; no separate finding confirmation */
+"Saving starts finding company automatically. Pause anytime." = "Saving starts finding company automatically. Pause anytime.";
+"This saved intention is not participating in finding company." = "This saved intention is not participating in finding company.";

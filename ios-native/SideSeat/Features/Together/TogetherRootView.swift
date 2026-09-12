@@ -1029,12 +1029,6 @@ private struct WeeklyIntentCard: View {
                         }
                         .buttonStyle(.bordered)
                         .accessibilityIdentifier("weekly-intent-pause-\(intent.id)")
-                    } else if status == .unpublished {
-                        Button(AppLocalization.string("Review and start"), action: onEdit)
-                            .font(.subheadline.weight(.medium))
-                            .buttonStyle(.bordered)
-                            .frame(minHeight: 44)
-                            .accessibilityIdentifier("weekly-intent-publish-\(intent.id)")
                     }
                     if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 0) }
                     Button(action: onEdit) {
@@ -1354,9 +1348,7 @@ private struct WeeklyIntentEditorView: View {
             ? "One activity at a time. You can add more later."
             : automaticMatchingEnabled
                 ? (intent?.isPaused == true ? "This intention stays paused until you resume it."
-                    : clientConfiguration.configuration?.isFeatureEnabled("v2DiscoveryMatching") == true
-                        ? "Discover participating people by relevance, even when preferences differ. Both choose whether to chat. Pause anytime."
-                        : "Automatically find company until this intention expires. Pause anytime.")
+                    : "Saving starts finding company automatically. Pause anytime.")
                 : "Saved privately. Start matching separately when you're ready.")
     }
 

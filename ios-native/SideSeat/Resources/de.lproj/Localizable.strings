@@ -1966,7 +1966,6 @@
 "Also visible in Explore" = "Auch in Entdecken sichtbar";
 "Not visible in Explore" = "Nicht in Entdecken sichtbar";
 "Pause finding company" = "Suche pausieren";
-"Review and start" = "Prüfen und starten";
 "End this intention?" = "Dieses Vorhaben beenden?";
 "This intention will stop finding company. Existing conversations and confirmed plans stay unchanged." = "Dieses Vorhaben sucht dann nicht mehr. Bestehende Gespräche und bestätigte Pläne bleiben unverändert.";
 "Explore is not available yet" = "Entdecken ist noch nicht verfügbar";
@@ -1988,3 +1987,7 @@
 "Different or unlisted schools" = "Andere / offene Hochschule";
 "Course to agree" = "Kurs klären";
 "Mutual interest opens chat, not a plan." = "Beide interessiert: erst chatten, dann planen.";
+
+/* Save once; no separate finding confirmation */
+"Saving starts finding company automatically. Pause anytime." = "Nach dem Speichern wird automatisch gesucht. Jederzeit pausierbar.";
+"This saved intention is not participating in finding company." = "Dieses gespeicherte Vorhaben nimmt noch nicht an der Suche teil.";

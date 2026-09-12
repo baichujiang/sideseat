@@ -1952,7 +1952,7 @@
 "Based on %lld intentions finding company" = "基于 %lld 个正在寻找的意愿";
 "No new company right now" = "暂时没有新的同行";
 "%lld intentions are still finding company. New suggestions will appear here." = "你的 %lld 个意愿仍在寻找中，有新的推荐时会出现在这里。";
-"Review your intentions to start or resume finding company." = "查看你的意愿，确认后开始或继续寻找同行。";
+"Review your intentions to start or resume finding company." = "发布意愿即可自动寻找，也可恢复已暂停的意愿。";
 "View my intentions" = "查看我的意愿";
 "Finding company" = "正在寻找";
 "Intention paused" = "已暂停";
@@ -1967,7 +1967,6 @@
 "Also visible in Explore" = "也会出现在探索中";
 "Not visible in Explore" = "不在探索中展示";
 "Pause finding company" = "暂停寻找";
-"Review and start" = "确认并开始寻找";
 "End this intention?" = "结束这个意愿？";
 "This intention will stop finding company. Existing conversations and confirmed plans stay unchanged." = "结束后，这个意愿将停止寻找同行，已有对话和已确认计划保持不变。";
 "Explore is not available yet" = "探索尚未开放";
@@ -1989,3 +1988,7 @@
 "Different or unlisted schools" = "学校不同／未填";
 "Course to agree" = "课程待商量";
 "Mutual interest opens chat, not a plan." = "互相感兴趣后聊天，计划另行确认。";
+
+/* Save once; no separate finding confirmation */
+"Saving starts finding company automatically. Pause anytime." = "保存后自动寻找同行，可随时暂停。";
+"This saved intention is not participating in finding company." = "这条已保存的意愿尚未参与寻找。";
