@@ -3,9 +3,18 @@ import "server-only";
 import { formatInTimeZone } from "date-fns-tz";
 import { INTERNAL_ACCOUNT_PREFIXES, INTERNAL_ACCOUNT_USERNAMES, isInternalAccount } from "@/lib/analytics/layer2-outcome-pilot";
 import { prisma } from "@/lib/db/prisma";
+import { EXPLORE_EXAMPLE_AUTHORS, EXPLORE_EXAMPLE_CASES, EXPLORE_EXAMPLE_MARKER, EXPLORE_EXAMPLE_NOTE, exploreExampleIntentId } from "@/lib/v2/explore-example-catalog";
 import { readTimePreference } from "@/lib/v2/intent-timing";
 
 const MAX_FREE_EXPLORE_RESULTS = 5;
+
+const exploreIntentSelect = {
+      id: true, topic: true, togetherMode: true, studyGoal: true, activityText: true,
+      sportTag: true, sportOtherNote: true, timeWindows: true, timePreference: true,
+      timeZone: true, note: true, expiresAt: true, createdAt: true,
+      course: { select: { code: true, name: true } },
+      user: { select: { id: true, school: true, verifiedStudent: true, userLanguages: { select: { tag: true }, orderBy: { tag: "asc" } } } },
+    } as const;
 
 type RawWindow = { startAt?: unknown; endAt?: unknown };
 
@@ -68,15 +77,29 @@ export async function listExploreIntents(userId: string, requestedLimit = 3) {
     },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: 32,
-    select: {
-      id: true, topic: true, togetherMode: true, studyGoal: true, activityText: true,
-      sportTag: true, sportOtherNote: true, timeWindows: true, timePreference: true,
-      timeZone: true, note: true, expiresAt: true, createdAt: true,
-      course: { select: { code: true, name: true } },
-      user: { select: { id: true, school: true, verifiedStudent: true, userLanguages: { select: { tag: true }, orderBy: { tag: "asc" } } } },
-    },
+    select: exploreIntentSelect,
   });
-  const candidateUserIds = [...new Set(rows.map(row => row.user.id))];
+  // A separate, tightly scoped sample source. It never opens the general QA cohort
+  // or hidden/private student profiles to ordinary readers. These owners are guests,
+  // unverified and hidden from all people/matching surfaces, with no login sessions.
+  const exampleAuthor = EXPLORE_EXAMPLE_AUTHORS.find(author => author.school === viewer.school);
+  const exampleRows = exampleAuthor ? await prisma.weeklyIntent.findMany({
+    where: {
+      id: { in: EXPLORE_EXAMPLE_CASES.map(item => exploreExampleIntentId(exampleAuthor.id, item.key)) },
+      userId: exampleAuthor.id, status: "ACTIVE", exploreVisible: true, expiresAt: { gt: now },
+      automaticMatching: false, note: EXPLORE_EXAMPLE_NOTE,
+      user: {
+        id: exampleAuthor.id, username: exampleAuthor.username, school: viewer.school,
+        studentVerificationNotes: EXPLORE_EXAMPLE_MARKER, isGuest: true, verifiedStudent: false,
+        hideFromDiscovery: true, hideFromRecommendations: true,
+        moderationBlocks: { none: { isActive: true } },
+      },
+    },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    select: exploreIntentSelect,
+  }) : [];
+  const exampleIds = new Set(exampleRows.map(row => row.id));
+  const candidateUserIds = [...new Set([...rows, ...exampleRows].map(row => row.user.id))];
   const blocks = candidateUserIds.length === 0 ? [] : await prisma.block.findMany({
     where: { OR: [
       { blockerId: userId, blockedId: { in: candidateUserIds } },
@@ -86,10 +109,13 @@ export async function listExploreIntents(userId: string, requestedLimit = 3) {
   });
   const blocked = new Set(blocks.flatMap(row => [row.blockerId, row.blockedId]).filter(id => id !== userId));
   const visible = rows.filter(row => !blocked.has(row.user.id));
-  const selected = visible.slice(0, limit);
+  // Genuine published intentions always precede examples; samples fill spare slots.
+  const examples = exampleRows.filter(row => !blocked.has(row.user.id));
+  const selected = [...visible, ...examples].slice(0, limit);
   return {
     intents: selected.map(row => ({
       id: row.id,
+      isExample: exampleIds.has(row.id),
       topic: row.topic,
       togetherMode: row.togetherMode,
       studyGoal: row.studyGoal,
@@ -105,6 +131,7 @@ export async function listExploreIntents(userId: string, requestedLimit = 3) {
       expiresAt: row.expiresAt.toISOString(),
       createdAt: row.createdAt.toISOString(),
     })),
-    hasMore: visible.length > selected.length,
+    // Unseen demonstration cards are not a reason to advertise a Plus upgrade.
+    hasMore: visible.length > limit,
   };
 }
