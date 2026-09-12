@@ -4,6 +4,7 @@ struct ExploreIntentListView: View {
     @Environment(SessionStore.self) private var session
     @Environment(ClientConfigurationStore.self) private var clientConfiguration
     var embeddedInTogether = false
+    var isPageActive = true
     var onUseIntent: ((NativeExploreIntent) -> Void)? = nil
     @State private var store = ExploreIntentStore()
     @State private var searchText = ""
@@ -23,7 +24,11 @@ struct ExploreIntentListView: View {
             }
         }
         .background(SideSeatTheme.bgGrouped)
-        .task(id: isEnabled) { if isEnabled { await store.load(using: session, limit: access.resultLimit) } }
+        .task(id: isEnabled && isPageActive) {
+            if isEnabled && isPageActive && !store.hasLoaded {
+                await store.load(using: session, limit: access.resultLimit)
+            }
+        }
         .refreshable { if isEnabled { await store.load(using: session, limit: access.resultLimit) } }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("explore-intents-list")
@@ -61,6 +66,7 @@ struct ExploreIntentListView: View {
                     TextField(AppLocalization.string("Search activities"), text: $searchText)
                         .textFieldStyle(.roundedBorder)
                         .accessibilityIdentifier("explore-search")
+                        .background(SSPageSwipeExclusion())
                     ScrollView(.horizontal) {
                         HStack(spacing: SideSeatTheme.spaceSM) {
                             Button(AppLocalization.string("All activities")) { selectedTopic = nil }
@@ -73,6 +79,7 @@ struct ExploreIntentListView: View {
                     }
                     .scrollIndicators(.hidden)
                     .accessibilityIdentifier("explore-topic-filters")
+                    .background(SSPageSwipeExclusion())
                 }
 
                 if store.isLoading, store.intents.isEmpty {

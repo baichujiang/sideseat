@@ -11,6 +11,7 @@ final class PlansStore {
     private(set) var mutatingOutcomeID: String?
 
     func load(using session: SessionStore) async {
+        guard !isLoading else { return }
         isLoading = true
         issue = nil
         defer {
@@ -20,6 +21,15 @@ final class PlansStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-plans-loading") {
+                do { try await Task.sleep(for: .seconds(3)) } catch { return }
+            }
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-plans-error") {
+                plans = []; issue = "UI test: plans unavailable"; return
+            }
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-plans-empty") {
+                plans = []; return
+            }
             let formatter = ISO8601DateFormatter()
             let pendingStart = Date().addingTimeInterval(24 * 60 * 60)
             let acceptedStart = Date().addingTimeInterval(48 * 60 * 60)
@@ -82,6 +92,18 @@ final class PlansStore {
                     updatedAt: formatter.string(from: Date())
                 )
             ]
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-plans-long-list") {
+                plans = plans.flatMap { plan in
+                    (0..<8).map { index in
+                        if index == 0 { return plan }
+                        // Offline fixture copies only; never invokes an API mutation.
+                        var json = try! JSONSerialization.jsonObject(with: JSONEncoder().encode(plan)) as! [String: Any]
+                        json["id"] = "\(plan.id)-\(index)"
+                        json["title"] = "\(plan.title) \(index)"
+                        return try! JSONDecoder().decode(NativePlanRequest.self, from: JSONSerialization.data(withJSONObject: json))
+                    }
+                }
+            }
             return
         }
         #endif

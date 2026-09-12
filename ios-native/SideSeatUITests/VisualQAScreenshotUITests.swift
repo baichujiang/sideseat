@@ -13,6 +13,174 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
+    private func swipeTaskPage(_ surface: XCUIElement, left: Bool, y: CGFloat = 0.12) {
+        XCTAssertTrue(surface.waitForExistence(timeout: 5))
+        let start = surface.coordinate(withNormalizedOffset: CGVector(dx: left ? 0.82 : 0.18, dy: y))
+        let end = surface.coordinate(withNormalizedOffset: CGVector(dx: left ? 0.18 : 0.82, dy: y))
+        start.press(forDuration: 0.08, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.1)
+    }
+
+    @MainActor
+    private func selectPlanSection(_ index: Int, in app: XCUIApplication) {
+        let names = ["waitingResponse", "upcoming", "ended"]
+        let button = app.buttons["plans-tab-\(names[index])"].firstMatch
+        if button.waitForExistence(timeout: 1) { button.tap() }
+        else { app.segmentedControls["plans-segmented-control"].buttons.element(boundBy: index).tap() }
+    }
+
+    @MainActor
+    func testTaskPagerSwipesAndRetainsTogetherPosition() {
+        let app = togetherApp(["--ui-testing-opportunity-list", "--ui-testing-intent-card-states",
+            "--ui-testing-explore-intents", "--ui-testing-language=zh-Hans"])
+        let recommendation = app.scrollViews["together-section-recommendations"].firstMatch
+        let picker = app.segmentedControls["together-segmented-control"]
+        let pinnedY = picker.frame.minY
+        // Swiping from activity content navigates; it must not choose interest.
+        swipeTaskPage(recommendation, left: true)
+        let intentions = app.scrollViews["together-section-intentions"].firstMatch
+        XCTAssertTrue(intentions.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(picker.buttons.element(boundBy: 1).isSelected)
+        intentions.swipeUp(velocity: .slow)
+        let study = app.descendants(matching: .any)["weekly-intent-ui-intent-study"].firstMatch
+        XCTAssertTrue(study.waitForExistence(timeout: 3))
+        let savedY = study.frame.minY
+        XCTAssertEqual(picker.frame.minY, pinnedY, accuracy: 2)
+        selectTogetherSection(0, in: app)
+        XCTAssertTrue(app.descendants(matching: .any)["mutual-opportunity-cmutualui0000000000000001"].waitForExistence(timeout: 5))
+        selectTogetherSection(1, in: app)
+        XCTAssertTrue(study.waitForExistence(timeout: 5))
+        XCTAssertEqual(study.frame.minY, savedY, accuracy: 5, "Each task retains its independent scroll offset")
+        selectTogetherSection(2, in: app)
+        let explore = app.descendants(matching: .any)["explore-intents-list"].firstMatch
+        XCTAssertTrue(explore.waitForExistence(timeout: 5))
+        // The last page does not wrap around to Recommendations.
+        swipeTaskPage(explore, left: true)
+        XCTAssertTrue(picker.buttons.element(boundBy: 2).isSelected)
+        swipeTaskPage(explore, left: false)
+        XCTAssertTrue(intentions.waitForExistence(timeout: 5))
+        XCTAssertTrue(picker.buttons.element(boundBy: 1).isSelected)
+        XCTAssertEqual(study.frame.minY, savedY, accuracy: 5)
+        saveScreenshot(app: app, name: "pager-together-restored-zh")
+        app.terminate()
+    }
+
+    @MainActor
+    func testTaskPagerDecisionBarOwnsWholeTouch() {
+        let app = togetherApp(["--ui-testing-opportunity-list", "--ui-testing-discovery-published",
+            "--ui-testing-language=en"])
+        let id = "cmutualui0000000000000001"
+        let bar = app.descendants(matching: .any)["mutual-opportunity-swipe-\(id)"].firstMatch
+        let handle = app.descendants(matching: .any)["mutual-opportunity-swipe-handle-\(id)"].firstMatch
+        XCTAssertTrue(bar.waitForExistence(timeout: 5))
+        let picker = app.segmentedControls["together-segmented-control"]
+        // A drag beginning on an endpoint (not the knob) must not turn into paging.
+        let endpoint = bar.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.5))
+        endpoint.press(forDuration: 0.08, thenDragTo: endpoint.withOffset(CGVector(dx: -210, dy: -5)), withVelocity: .slow, thenHoldForDuration: 0.2)
+        XCTAssertTrue(picker.buttons.element(boundBy: 0).isSelected)
+        XCTAssertTrue(handle.exists)
+        // A real choice from the knob may leave the control, but must never switch tasks.
+        let start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        start.press(forDuration: 0.08, thenDragTo: start.withOffset(CGVector(dx: -180, dy: 0)), withVelocity: .slow, thenHoldForDuration: 0.2)
+        XCTAssertTrue(app.descendants(matching: .any)["mutual-opportunity-activity-\(id)"].waitForNonExistence(timeout: 5))
+        XCTAssertTrue(picker.buttons.element(boundBy: 0).isSelected)
+        XCTAssertTrue(app.descendants(matching: .any)["mutual-opportunity-cmutualui0000000000000002"].exists)
+        app.terminate()
+    }
+
+    @MainActor
+    func testTaskPagerExploreSearchPersists() {
+        let app = togetherApp(["--ui-testing-explore-intents", "--ui-testing-explore-plus", "--ui-testing-language=en"])
+        selectTogetherSection(2, in: app)
+        let search = app.textFields["explore-search"]
+        XCTAssertTrue(search.waitForExistence(timeout: 5))
+        search.tap(); search.typeText("Badminton")
+        selectTogetherSection(0, in: app)
+        selectTogetherSection(2, in: app)
+        XCTAssertTrue(search.waitForExistence(timeout: 5))
+        XCTAssertEqual(search.value as? String, "Badminton")
+        XCTAssertFalse(app.descendants(matching: .any)["explore-intent-ui-explore-1"].exists)
+        saveScreenshot(app: app, name: "pager-explore-search-retained")
+        app.terminate()
+    }
+
+    @MainActor
+    func testTaskPagerPlansPinnedAndIndependentPositions() {
+        let app = togetherApp(["--ui-testing-chats", "--ui-testing-plans-long-list", "--ui-testing-language=en", "--ui-testing-appearance=dark"])
+        tabButton(in: app, labels: ["Plans"]).tap()
+        let picker = app.segmentedControls["plans-segmented-control"]
+        XCTAssertTrue(picker.waitForExistence(timeout: 5))
+        let fixedY = picker.frame.minY
+        swipeTaskPage(app.scrollViews["plans-scroll-waitingResponse"].firstMatch, left: true)
+        let upcoming = app.scrollViews["plans-scroll-upcoming"].firstMatch
+        XCTAssertTrue(upcoming.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(picker.buttons.element(boundBy: 1).isSelected)
+        upcoming.swipeUp(velocity: .slow)
+        let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plans-row-ui-plan-accepted")).allElementsBoundByIndex.first { $0.isHittable }
+        XCTAssertNotNil(card)
+        let identifier = card!.identifier
+        let savedY = card!.frame.minY
+        XCTAssertEqual(picker.frame.minY, fixedY, accuracy: 2)
+        selectPlanSection(2, in: app)
+        XCTAssertTrue(app.scrollViews["plans-scroll-ended"].waitForExistence(timeout: 5))
+        selectPlanSection(1, in: app)
+        XCTAssertEqual(app.buttons[identifier].frame.minY, savedY, accuracy: 5)
+        tabButton(in: app, labels: ["Together"]).tap()
+        tabButton(in: app, labels: ["Plans"]).tap()
+        XCTAssertTrue(picker.buttons.element(boundBy: 1).isSelected)
+        XCTAssertEqual(app.buttons[identifier].frame.minY, savedY, accuracy: 5)
+        saveScreenshot(app: app, name: "pager-plans-restored-dark")
+        app.buttons[identifier].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 8))
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(picker.waitForExistence(timeout: 5))
+        XCTAssertTrue(picker.buttons.element(boundBy: 1).isSelected)
+        XCTAssertEqual(app.buttons[identifier].frame.minY, savedY, accuracy: 5, "Returning from chat preserves the plan viewport")
+        app.terminate()
+    }
+
+    @MainActor
+    func testTaskPagerAccessibleSelectorsAndReducedMotion() {
+        let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents",
+            "--ui-testing-dynamic-type-accessibility", "--ui-testing-reduce-motion",
+            "--ui-testing-language=de", "--ui-testing-appearance=dark"])
+        for (index, raw) in ["recommendations", "intentions", "explore"].enumerated() {
+            let button = app.buttons["together-tab-\(raw)"].firstMatch
+            XCTAssertTrue(button.waitForExistence(timeout: 5))
+            XCTAssertTrue(button.isHittable)
+            XCTAssertGreaterThanOrEqual(button.frame.height, 44)
+            selectTogetherSection(index, in: app)
+            XCTAssertTrue(button.isSelected)
+        }
+        tabButton(in: app, labels: ["Pläne"]).tap()
+        for (index, raw) in ["waitingResponse", "upcoming", "ended"].enumerated() {
+            selectPlanSection(index, in: app)
+            let button = app.buttons["plans-tab-\(raw)"].firstMatch
+            XCTAssertTrue(button.isHittable)
+            XCTAssertTrue(button.isSelected)
+            XCTAssertGreaterThanOrEqual(button.frame.height, 44)
+        }
+        saveScreenshot(app: app, name: "pager-plans-accessibility-de-dark")
+        app.terminate()
+    }
+
+    @MainActor
+    func testTaskPagerPlansNavigationInEmptyLoadingAndErrorStates() {
+        for state in ["empty", "error", "loading"] {
+            let app = togetherApp(["--ui-testing-plans-\(state)", "--ui-testing-language=en"])
+            tabButton(in: app, labels: ["Plans"]).tap()
+            let picker = app.segmentedControls["plans-segmented-control"]
+            XCTAssertTrue(picker.waitForExistence(timeout: 5))
+            selectPlanSection(1, in: app)
+            XCTAssertTrue(picker.buttons.element(boundBy: 1).isSelected)
+            if state == "empty" { XCTAssertTrue(app.descendants(matching: .any)["plans-empty-upcoming"].waitForExistence(timeout: 5)) }
+            if state == "error" { XCTAssertTrue(app.descendants(matching: .any)["plans-load-error"].waitForExistence(timeout: 5)) }
+            if state == "loading" { XCTAssertTrue(app.buttons["plans-row-ui-plan-accepted"].waitForExistence(timeout: 8)) }
+            saveScreenshot(app: app, name: "pager-plans-\(state)")
+            app.terminate()
+        }
+    }
+
+    @MainActor
     func testDiscoveryDifferencesAcrossLanguages() {
         let id = "cmutualui0000000000000001"
         for (language, coffee, sport, timeText) in [
@@ -375,6 +543,9 @@ final class VisualQAScreenshotUITests: XCTestCase {
             "--ui-testing-automatic-matching", "--ui-testing-together-matching",
             "--ui-testing-flexible-timing", "--ui-testing-discovery-matching"] + extra
         app.launch()
+        if extra.contains("--ui-testing-chats") {
+            tabButton(in: app, labels: ["Together", "同行", "Zusammen"]).tap()
+        }
         XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 8))
         return app
     }
@@ -445,6 +616,8 @@ final class VisualQAScreenshotUITests: XCTestCase {
     func testTogetherCreateReturnsToIntentionsWithoutPublishingExplore() {
         let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents",
             "--ui-testing-language=zh-Hans"])
+        selectTogetherSection(1, in: app)
+        app.scrollViews["together-section-intentions"].swipeUp(velocity: .slow)
         selectTogetherSection(2, in: app)
         let use = app.buttons["explore-use-ui-explore-1"]
         revealFlowElement(use, in: app)
@@ -457,9 +630,12 @@ final class VisualQAScreenshotUITests: XCTestCase {
         XCTAssertEqual(visibility.value as? String, "0", "Explore sharing requires an explicit choice")
         app.buttons["intent-editor-save"].tap()
         let created = app.descendants(matching: .any)["weekly-intent-ui-intent-created"].firstMatch
-        revealFlowElement(created, in: app)
         XCTAssertTrue(created.waitForExistence(timeout: 5))
-        XCTAssertFalse(app.descendants(matching: .any)["explore-intents-list"].exists)
+        XCTAssertGreaterThan(created.frame.minY, app.segmentedControls["together-segmented-control"].frame.maxY)
+        XCTAssertLessThan(created.frame.minY, app.frame.height * 0.55, "A new intention is intentionally revealed at the top")
+        revealFlowElement(created, in: app)
+        let exploreViewport = app.descendants(matching: .any)["explore-intents-list"].firstMatch
+        XCTAssertFalse(exploreViewport.frame.intersects(app.frame), "Retained Explore must be offscreen, not presented over My intentions")
         let status = app.staticTexts["weekly-intent-status-ui-intent-created"].firstMatch
         XCTAssertTrue(created.label.contains("正在寻找") || status.exists || app.staticTexts["正在寻找"].firstMatch.exists)
         saveScreenshot(app: app, name: "together-created-intention-zh")
@@ -840,8 +1016,13 @@ final class VisualQAScreenshotUITests: XCTestCase {
     @MainActor
     private func revealFlowElement(_ element: XCUIElement, in app: XCUIApplication) {
         let fields = app.descendants(matching: .any)["intent-editor-fields"].firstMatch
-        let scroll = app.scrollViews.firstMatch
-        let surface = fields.exists ? fields : scroll.exists ? scroll : app
+        // Retained pages leave offscreen UIKit scroll containers in the hierarchy.
+        // Drive the visible viewport, never whichever container was created first.
+        let scroll = app.scrollViews.allElementsBoundByIndex.filter {
+            let visible = $0.frame.intersection(app.frame)
+            return !visible.isNull && visible.width > app.frame.width * 0.8 && visible.height > 80
+        }.max { $0.frame.intersection(app.frame).height < $1.frame.intersection(app.frame).height }
+        let surface = fields.exists ? fields : scroll ?? app
         for _ in 0..<12 {
             let visible = surface.frame.intersection(app.frame)
             if element.exists, element.isHittable,

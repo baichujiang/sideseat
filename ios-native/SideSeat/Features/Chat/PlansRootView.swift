@@ -61,82 +61,108 @@ enum MVPPlanRoute {
 struct PlansRootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var store = PlansStore()
     @State private var selectedSection: MVPPlanSection = .waitingResponse
 
     var body: some View {
-        Group {
-            if (!store.hasLoaded || store.isLoading) && store.plans.isEmpty {
-                SSLoadingState("Loading plans")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if let issue = store.issue, store.plans.isEmpty {
-                ContentUnavailableView {
-                    Label("Plans unavailable", systemImage: "calendar.badge.exclamationmark")
-                } description: {
-                    Text(issue)
-                } actions: {
-                    Button("Try again") { Task { await store.load(using: session) } }
-                }
-            } else if store.plans.isEmpty {
-                SSEmptyState(
-                    title: "No plans yet",
-                    systemImage: "calendar",
-                    description: "Proposed and confirmed Plans will appear here."
-                )
-            } else {
+        VStack(spacing: 0) {
+            sectionPicker
+                .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                .padding(.vertical, SideSeatTheme.spaceMD)
+                .background(SideSeatTheme.bgGrouped)
+
+            SSSectionPager(sections: MVPPlanSection.ordered, selection: $selectedSection) { section in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                        Picker(AppLocalization.string("Plans"), selection: $selectedSection) {
-                            ForEach(MVPPlanSection.ordered) { section in
-                                Text(section.title).tag(section)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        .accessibilityIdentifier("plans-segmented-control")
-
-                        if let issue = store.issue {
-                            Label(issue, systemImage: "wifi.exclamationmark")
-                                .font(.footnote)
-                                .foregroundStyle(SideSeatTheme.danger)
-                                .padding(SideSeatTheme.spaceMD)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(
-                                    SideSeatTheme.danger.opacity(0.08),
-                                    in: RoundedRectangle(
-                                        cornerRadius: SideSeatTheme.controlRadius,
-                                        style: .continuous
-                                    )
-                                )
-                                .accessibilityIdentifier("plans-issue-banner")
-                        }
-
-                        let visiblePlans = plans(in: selectedSection)
-                        if visiblePlans.isEmpty {
-                            emptyState(for: selectedSection)
-                        } else {
-                            LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                                ForEach(visiblePlans) { plan in
-                                    planRow(plan, section: selectedSection)
-                                }
-                            }
-                            .accessibilityIdentifier(selectedSection.accessibilityIdentifier)
-                            .accessibilityValue("\(visiblePlans.count)")
-                        }
+                        sectionContent(section)
                     }
                     .padding(.horizontal, SideSeatTheme.screenHorizontal)
-                    .padding(.top, SideSeatTheme.spaceMD)
+                    .padding(.top, SideSeatTheme.spaceXS)
                     .padding(.bottom, SideSeatTheme.spaceXL)
                 }
-                .background(SideSeatTheme.bgGrouped)
+                .accessibilityIdentifier("plans-scroll-\(section.rawValue)")
+                .refreshable { await store.load(using: session) }
             }
         }
+        .background(SideSeatTheme.bgGrouped)
         .ssRootNavigationTitle("Plans")
-        .refreshable { await store.load(using: session) }
-        .task { await store.load(using: session) }
+        .task { if !store.hasLoaded { await store.load(using: session) } }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatPlansNeedsRefresh)) { _ in
             Task { await store.load(using: session) }
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("plans-root")
+    }
+
+    @ViewBuilder
+    private var sectionPicker: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(spacing: SideSeatTheme.spaceXS) {
+                ForEach(MVPPlanSection.ordered) { section in
+                    Button { selectedSection = section } label: {
+                        HStack {
+                            Text(section.title).font(.body.weight(.semibold))
+                                .fixedSize(horizontal: false, vertical: true)
+                            Spacer(minLength: SideSeatTheme.spaceSM)
+                            if section == selectedSection { Image(systemName: "checkmark").accessibilityHidden(true) }
+                        }
+                        .padding(.horizontal, SideSeatTheme.spaceMD)
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .background(selectedSection == section ? SideSeatTheme.surface : Color.clear,
+                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(section == selectedSection ? .isSelected : [])
+                    .accessibilityIdentifier("plans-tab-\(section.rawValue)")
+                }
+            }
+            .accessibilityElement(children: .contain)
+        } else {
+            Picker(AppLocalization.string("Plans"), selection: $selectedSection) {
+                ForEach(MVPPlanSection.ordered) { section in
+                    Text(section.title).tag(section)
+                        .accessibilityIdentifier("plans-tab-\(section.rawValue)")
+                }
+            }
+            .pickerStyle(.segmented)
+            .accessibilityIdentifier("plans-segmented-control")
+        }
+    }
+
+    @ViewBuilder
+    private func sectionContent(_ section: MVPPlanSection) -> some View {
+        if (!store.hasLoaded || store.isLoading) && store.plans.isEmpty {
+            SSLoadingState("Loading plans")
+                .frame(maxWidth: .infinity, minHeight: 200)
+                .accessibilityIdentifier("plans-loading")
+        } else if let issue = store.issue, store.plans.isEmpty {
+            ContentUnavailableView {
+                Label("Plans unavailable", systemImage: "calendar.badge.exclamationmark")
+            } description: { Text(issue) } actions: {
+                Button("Try again") { Task { await store.load(using: session) } }
+            }
+            .accessibilityIdentifier("plans-load-error")
+        } else {
+            if let issue = store.issue {
+                Label(issue, systemImage: "wifi.exclamationmark")
+                    .font(.footnote).foregroundStyle(SideSeatTheme.danger)
+                    .padding(SideSeatTheme.spaceMD)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(SideSeatTheme.danger.opacity(0.08),
+                        in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                    .accessibilityIdentifier("plans-issue-banner")
+            }
+            let visiblePlans = plans(in: section)
+            if visiblePlans.isEmpty { emptyState(for: section) }
+            else {
+                LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                    ForEach(visiblePlans) { plan in planRow(plan, section: section) }
+                }
+                .accessibilityIdentifier(section.accessibilityIdentifier)
+                .accessibilityValue("\(visiblePlans.count)")
+            }
+        }
     }
 
     private var currentUserID: String {

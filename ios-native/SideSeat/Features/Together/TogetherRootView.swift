@@ -184,6 +184,7 @@ private struct TogetherHomeView: View {
     @State private var presentedEditor: WeeklyIntentEditorPresentation?
     @State private var selectedSection: TogetherSection = .recommendations
     @State private var resolvedInitialSection = false
+    @State private var createdIntentionRevision = 0
 
     private var automaticMatchingEnabled: Bool {
         v2Store.isMutualOpportunityEnabled && clientConfiguration.configuration?.isFeatureEnabled("v2AutomaticMatching") == true
@@ -206,32 +207,40 @@ private struct TogetherHomeView: View {
                     .padding(.vertical, SideSeatTheme.spaceMD)
                     .background(SideSeatTheme.bgGrouped)
 
-                if selectedSection == .explore {
-                    ExploreIntentListView(embeddedInTogether: true) { inspiration in
-                        presentedEditor = .create(from: inspiration)
-                    }
-                } else {
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
-                            if selectedSection == .intentions {
-                                intentSection(at: context.date)
-                            } else {
-                                recommendationsSection(at: context.date)
+                SSSectionPager(sections: TogetherSection.allCases, selection: sectionSelection) { section in
+                    if section == .explore {
+                        ExploreIntentListView(embeddedInTogether: true, isPageActive: selectedSection == .explore) { inspiration in
+                            presentedEditor = .create(from: inspiration)
+                        }
+                    } else {
+                        ScrollViewReader { scrollProxy in
+                            ScrollView {
+                                LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
+                                    if section == .intentions {
+                                        intentSection(at: context.date)
+                                    } else {
+                                        recommendationsSection(at: context.date)
+                                    }
+                                }
+                                .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                                .padding(.top, SideSeatTheme.spaceXS)
+                                .padding(.bottom, SideSeatTheme.spaceXL)
+                            }
+                            .accessibilityIdentifier("together-section-\(section.rawValue)")
+                            .refreshable { await loadContent() }
+                            .onChange(of: createdIntentionRevision) { _, _ in
+                                if section == .intentions {
+                                    scrollProxy.scrollTo("together-intentions-top", anchor: .top)
+                                }
                             }
                         }
-                        .padding(.horizontal, SideSeatTheme.screenHorizontal)
-                        .padding(.top, SideSeatTheme.spaceXS)
-                        .padding(.bottom, SideSeatTheme.spaceXL)
                     }
-                    .id(selectedSection)
-                    .accessibilityIdentifier("together-section-\(selectedSection.rawValue)")
-                    .refreshable { await loadContent() }
                 }
             }
         }
         .background(SideSeatTheme.bgGrouped)
         .ssRootNavigationTitle("Together")
-        .task { await loadContent() }
+        .task { if !store.hasLoaded { await loadContent() } }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatTogetherNeedsRefresh)) { _ in
             Task { await loadContent() }
         }
@@ -248,6 +257,7 @@ private struct TogetherHomeView: View {
                 )
                 if saved {
                     sectionSelection.wrappedValue = .intentions
+                    if presentation.intent == nil { createdIntentionRevision += 1 }
                     presentedEditor = nil
                     await refreshOpportunitiesAfterIntentChange()
                 }
@@ -334,6 +344,7 @@ private struct TogetherHomeView: View {
                 .disabled(store.isCreating)
                 .accessibilityIdentifier("together-add-intent")
             }
+            .id("together-intentions-top")
             Text(AppLocalization.string("Your activities, timing and finding status, all in one place."))
                 .font(.subheadline)
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)

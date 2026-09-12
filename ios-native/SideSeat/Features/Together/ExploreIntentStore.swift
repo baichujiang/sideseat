@@ -6,6 +6,7 @@ import Observation
 final class ExploreIntentStore {
     private(set) var intents: [NativeExploreIntent] = []
     private(set) var hasMore = false
+    private(set) var hasLoaded = false
     private(set) var isLoading = false
     private(set) var issue: String?
 
@@ -13,7 +14,10 @@ final class ExploreIntentStore {
         guard !isLoading else { return }
         isLoading = true
         issue = nil
-        defer { isLoading = false }
+        defer {
+            isLoading = false
+            if !Task.isCancelled { hasLoaded = true }
+        }
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-explore-empty") {

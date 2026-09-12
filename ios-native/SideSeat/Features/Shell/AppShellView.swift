@@ -230,7 +230,7 @@ struct AppShellView: View {
         case .discover:
             TogetherRootView()
         case .plans:
-            PlansRootView()
+            PlansRootView().id(session.currentUser?.id)
         case .home:
             HomeRootView()
         case .chats:

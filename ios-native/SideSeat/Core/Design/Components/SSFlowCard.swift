@@ -175,6 +175,7 @@ struct SSOpportunityDecisionBar: View {
 
     var body: some View {
         accessibleTrack
+            .background(SSPageSwipeExclusion())
     }
 
     private var feedbackTrack: some View {

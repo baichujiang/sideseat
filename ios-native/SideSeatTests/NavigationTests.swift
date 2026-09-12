@@ -4,6 +4,23 @@ import Testing
 
 @Suite("Navigation")
 struct NavigationTests {
+    @Test("Section paging needs deliberate horizontal travel and never wraps")
+    func sectionPagingBoundariesAndDirection() {
+        func target(_ index: Int, _ dx: CGFloat, _ dy: CGFloat = 0, velocity: CGFloat = 0) -> Int {
+            SSPageSwitchPolicy.destination(index: index, count: 3,
+                translation: CGSize(width: dx, height: dy), velocityX: velocity, width: 400)
+        }
+        #expect(target(0, -180) == 1)
+        #expect(target(1, 180) == 0)
+        #expect(target(1, -380) == 2)
+        #expect(target(2, -180) == 2)
+        #expect(target(0, 180) == 0)
+        #expect(target(1, -20) == 1)
+        #expect(target(1, -80, 150) == 1)
+        #expect(target(1, -45, velocity: -700) == 2)
+        #expect(target(1, -45, velocity: 700) == 1)
+    }
+
     @Test("Together task tabs have a stable order and a useful first section")
     func togetherTaskNavigation() {
         #expect(TogetherSection.allCases == [.recommendations, .intentions, .explore])
