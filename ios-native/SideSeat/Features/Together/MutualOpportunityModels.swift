@@ -256,3 +256,98 @@ struct NativeMutualOpportunitiesPayload: Decodable, Sendable {
 struct NativeMutualOpportunityDecisionRequest: Encodable, Sendable {
     let decision: String
 }
+
+/// Presentation only. Shared preferences are never a confirmed Plan.
+enum NativeOpportunityCueTone: Equatable, Sendable {
+    case shared
+    case discuss
+    case unspecified
+}
+
+extension NativeMutualOpportunity {
+    var activityCueTone: NativeOpportunityCueTone {
+        if matchFit?.differences?.contains("ACTIVITY") == true ||
+            matchFit?.isDifferentActivity == true || matchFit?.isRelatedActivity == true ||
+            effectiveMatchKind == .sharedContext {
+            return .discuss
+        }
+        if let fit = matchFit, fit.basis != "EXACT_ACTIVITY" { return .unspecified }
+        return .shared
+    }
+
+    private var cueViewerActivity: String {
+        nonemptyActivity(matchFit?.viewerActivity?.title) ??
+            nonemptyActivity(matchFit?.viewerActivityText) ??
+            (topic == .study ? viewerStudyGoalTitle : activityTitle)
+    }
+
+    private var cuePeerActivity: String? {
+        nonemptyActivity(matchFit?.peerActivity?.title) ??
+            nonemptyActivity(matchFit?.peerActivityText) ??
+            (topic == .study ? nonemptyActivity(peerStudyGoal) : nil)
+    }
+
+    var shortActivitySummary: String {
+        switch activityCueTone {
+        case .shared:
+            return String(format: AppLocalization.string("Both: %@"), cueViewerActivity)
+        case .discuss:
+            return String(format: AppLocalization.string("You: %@ · Them: %@"),
+                          cueViewerActivity, cuePeerActivity ?? AppLocalization.string("Activity to agree"))
+        case .unspecified:
+            return cueViewerActivity
+        }
+    }
+
+    var timeCueTone: NativeOpportunityCueTone {
+        // Explicit differences outrank timestamps: never invent shared availability.
+        if matchFit?.differences?.contains("TIME") == true { return .discuss }
+        if matchFit?.differences?.contains("TIME_UNDECIDED") == true { return .unspecified }
+        if let start = startDate, let end = endDate, end > start { return .shared }
+        if let timing = timeContext, timing.kind == "FLEXIBLE",
+           let first = NativeIntentTimePreference.date(timing.startDate),
+           let last = NativeIntentTimePreference.date(timing.endDate), first <= last {
+            return .shared
+        }
+        return .unspecified
+    }
+
+    var shortTimeSummary: String {
+        switch timeCueTone {
+        case .discuss: return AppLocalization.string("Find another time")
+        case .unspecified: return AppLocalization.string("Time undecided")
+        case .shared:
+            let locale = AppLocalization.selectedLanguage.locale
+            if let start = startDate, let end = endDate, end > start {
+                let first = start.formatted(.dateTime.month(.abbreviated).day().hour().minute().locale(locale))
+                let endStyle: Date.FormatStyle = Calendar.current.isDate(start, inSameDayAs: end)
+                    ? .dateTime.hour().minute() : .dateTime.month(.abbreviated).day().hour().minute()
+                let range = "\(first)–\(end.formatted(endStyle.locale(locale)))"
+                return String(format: AppLocalization.string("%@ · Shared time"), range)
+            }
+            if let timing = timeContext,
+               let first = NativeIntentTimePreference.date(timing.startDate),
+               let last = NativeIntentTimePreference.date(timing.endDate) {
+                let style = Date.FormatStyle.dateTime.month(.abbreviated).day().locale(locale)
+                let dates = first == last ? first.formatted(style) : "\(first.formatted(style))–\(last.formatted(style))"
+                let period = timing.period.flatMap { $0 == "ANY" ? nil : NativeIntentTimePreference.periodTitle($0) }
+                return [dates, period, AppLocalization.string("Similar timing")].compactMap { $0 }.joined(separator: " · ")
+            }
+            return AppLocalization.string("Time undecided")
+        }
+    }
+
+    /// Secondary caveats stay short and factual, not a score or an explanation paragraph.
+    var shortContextDifferences: [String] {
+        let codes = Set(matchFit?.differences ?? [])
+        return [("LANGUAGE", "Check language"), ("SCHOOL", "Different or unlisted schools"),
+                ("COURSE", "Course to agree")].compactMap { code, key in
+            codes.contains(code) ? AppLocalization.string(String.LocalizationValue(key)) : nil
+        }
+    }
+
+    private func nonemptyActivity(_ value: String?) -> String? {
+        guard let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines), !trimmed.isEmpty else { return nil }
+        return trimmed
+    }
+}

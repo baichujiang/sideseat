@@ -1976,3 +1976,16 @@
 "See an activity you like? Create your own intention. Nothing is sent to the other person." = "See an activity you like? Create your own intention. Nothing is sent to the other person.";
 "I want to do this too" = "I want to do this too";
 "Opens a draft. Review and publish it yourself; this does not express interest in a person." = "Opens a draft. Review and publish it yourself; this does not express interest in a person.";
+
+/* Compact Together opportunity cues */
+"Both: %@" = "Both: %@";
+"You: %@ · Them: %@" = "You: %@ · Them: %@";
+"Activity to agree" = "Activity to agree";
+"Find another time" = "Find another time";
+"Time undecided" = "Time undecided";
+"%@ · Shared time" = "%@ · Shared time";
+"Similar timing" = "Similar timing";
+"Check language" = "Check language";
+"Different or unlisted schools" = "Different / unlisted schools";
+"Course to agree" = "Course to agree";
+"Mutual interest opens chat, not a plan." = "Mutual interest opens chat, not a plan.";

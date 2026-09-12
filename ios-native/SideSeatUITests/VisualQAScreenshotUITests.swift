@@ -14,24 +14,77 @@ final class VisualQAScreenshotUITests: XCTestCase {
 
     @MainActor
     func testDiscoveryDifferencesAcrossLanguages() {
-        for language in ["zh-Hans", "en", "de"] {
+        let id = "cmutualui0000000000000001"
+        for (language, coffee, sport, timeText) in [
+            ("zh-Hans", "咖啡", "篮球", "另约时间"),
+            ("en", "Coffee", "Basketball", "Find another time"),
+            ("de", "Kaffee", "Basketball", "Andere Zeit finden"),
+        ] {
             let app = XCUIApplication()
             app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
-                "--ui-testing-discover", "--ui-testing-weekly-intent", "--ui-testing-mutual-opportunity",
-                "--ui-testing-discovery-matching", "--ui-testing-automatic-matching", "--ui-testing-together-matching",
+                "--ui-testing-discover", "--ui-testing-weekly-intent", "--ui-testing-mutual-opportunity", "--ui-testing-together-matching",
+                "--ui-testing-discovery-matching", "--ui-testing-automatic-matching", "--ui-testing-discovery-published",
                 "--ui-testing-language=\(language)", "--ui-testing-appearance=\(language == "en" ? "dark" : "light")"]
             if language == "de" { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
             app.launch()
-            XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 8))
-            saveScreenshot(app: app, name: "discovery-card-\(language)")
-            let differences = app.descendants(matching: .any)["mutual-opportunity-differences-cmutualui0000000000000001"]
-            revealFlowElement(differences, in: app)
-            XCTAssertTrue(differences.exists)
-            let fit = app.descendants(matching: .any)["mutual-opportunity-fit-cmutualui0000000000000001"]
-            revealFlowElement(fit, in: app)
-            XCTAssertTrue(fit.label.contains("0/100"))
-            saveScreenshot(app: app, name: "discovery-differences-\(language)")
-            XCTAssertFalse(app.buttons["together-start-matching"].exists)
+            let activity = app.descendants(matching: .any)["mutual-opportunity-activity-\(id)"].firstMatch
+            XCTAssertTrue(activity.waitForExistence(timeout: 8))
+            XCTAssertTrue(activity.label.contains(coffee))
+            XCTAssertTrue(activity.label.contains(sport))
+            XCTAssertFalse(app.descendants(matching: .any)["mutual-opportunity-fit-details-\(id)"].exists)
+            XCTAssertFalse(app.descendants(matching: .any)["mutual-opportunity-differences-\(id)"].exists)
+            XCTAssertFalse(app.descendants(matching: .any)["together-finding-summary"].exists)
+            XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "/100")).firstMatch.exists)
+            saveScreenshot(app: app, name: "compact-opportunity-different-\(language)")
+            let time = app.descendants(matching: .any)["mutual-opportunity-time-\(id)"].firstMatch
+            revealCompactCue(time, in: app)
+            XCTAssertEqual(time.label, timeText)
+            saveScreenshot(app: app, name: "compact-opportunity-time-\(language)")
+            app.terminate()
+        }
+    }
+
+    @MainActor
+    private func revealCompactCue(_ element: XCUIElement, in app: XCUIApplication) {
+        let surface = app.scrollViews["together-section-recommendations"].firstMatch
+        XCTAssertTrue(surface.waitForExistence(timeout: 8))
+        for _ in 0..<20 {
+            if element.exists, element.frame.intersects(surface.frame),
+               element.frame.minY >= surface.frame.minY + 8 { break }
+            if element.exists, element.frame.minY < surface.frame.minY {
+                surface.swipeDown(velocity: .slow)
+            } else {
+                surface.swipeUp(velocity: .slow)
+            }
+        }
+        XCTAssertTrue(element.exists)
+        XCTAssertTrue(element.frame.intersects(surface.frame), "The short cue must remain reachable at large text sizes")
+    }
+
+    @MainActor
+    func testCompactOpportunitySharedAndUndecidedTiming() {
+        let id = "cmutualui0000000000000001"
+        let scenarios: [([String], String, String)] = [
+            ([], "共同空闲", "shared"),
+            (["--ui-testing-flexible-timing"], "时间待定", "undecided"),
+            (["--ui-testing-flexible-timing", "--ui-testing-opportunity-flexible-window"], "时段相近", "flexible"),
+        ]
+        for (extra, expected, name) in scenarios {
+            let app = XCUIApplication()
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-discover", "--ui-testing-weekly-intent", "--ui-testing-mutual-opportunity", "--ui-testing-together-matching",
+                "--ui-testing-automatic-matching", "--ui-testing-discovery-published", "--ui-testing-opportunity-topic=COFFEE",
+                "--ui-testing-language=zh-Hans", "--ui-testing-appearance=light"] + extra
+            app.launch()
+            let activity = app.descendants(matching: .any)["mutual-opportunity-activity-\(id)"].firstMatch
+            XCTAssertTrue(activity.waitForExistence(timeout: 8))
+            XCTAssertTrue(activity.label.hasPrefix("都想："))
+            let time = app.descendants(matching: .any)["mutual-opportunity-time-\(id)"].firstMatch
+            XCTAssertTrue(time.label.contains(expected))
+            XCTAssertFalse(app.descendants(matching: .any)["together-finding-summary"].exists)
+            XCTAssertFalse(app.buttons["mutual-opportunity-open-\(id)"].exists)
+            XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "/100")).firstMatch.exists)
+            saveScreenshot(app: app, name: "compact-opportunity-\(name)-zh")
             app.terminate()
         }
     }
@@ -223,55 +276,25 @@ final class VisualQAScreenshotUITests: XCTestCase {
 
     @MainActor
     func testRelatedActivityFitInThreeLanguages() {
-        for (language, largeType) in [
-            ("zh-Hans", false),
-            ("en", false),
-            ("de", false),
-            ("zh-Hans", true),
-        ] {
+        let id = "cmutualui0000000000000001"
+        for (language, largeType) in [("zh-Hans", false), ("en", false), ("de", false), ("zh-Hans", true)] {
             let app = XCUIApplication()
-            app.launchArguments = [
-                "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
-                "--ui-testing-discover", "--ui-testing-weekly-intent",
-                "--ui-testing-mutual-opportunity", "--ui-testing-related-activity",
-                "--ui-testing-together-matching", "--ui-testing-language=\(language)",
-                "--ui-testing-appearance=\(language == "de" ? "dark" : "light")",
-            ]
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-discover", "--ui-testing-weekly-intent", "--ui-testing-mutual-opportunity",
+                "--ui-testing-related-activity", "--ui-testing-together-matching",
+                "--ui-testing-language=\(language)", "--ui-testing-appearance=\(language == "de" ? "dark" : "light")"]
             if largeType { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
             app.launch()
-            let fit = app.descendants(matching: .any)["mutual-opportunity-fit-cmutualui0000000000000001"]
-            revealFlowElement(fit, in: app)
-            XCTAssertTrue(fit.label.contains("60/100"))
-            let suffix = "\(language)\(largeType ? "-large-type" : "")"
-            saveScreenshot(app: app, name: "activity-fit-\(suffix)")
-            let explanation = app.buttons["mutual-opportunity-fit-details-cmutualui0000000000000001"]
-            revealFlowElement(explanation, in: app)
-            explanation.tap()
-            let disclaimer = app.staticTexts["mutual-opportunity-fit-disclaimer-cmutualui0000000000000001"]
-            XCTAssertTrue(disclaimer.waitForExistence(timeout: 5))
-            revealFlowElement(disclaimer, in: app)
-            let matchExplanation = app.staticTexts["mutual-opportunity-match-explanation-cmutualui0000000000000001"]
-            XCTAssertTrue(matchExplanation.exists)
-            XCTAssertLessThanOrEqual(matchExplanation.frame.maxY, disclaimer.frame.minY)
-            let privacy = app.descendants(matching: .any)["mutual-opportunity-privacy-cmutualui0000000000000001"]
-            XCTAssertTrue(privacy.exists)
-            XCTAssertLessThanOrEqual(disclaimer.frame.maxY, privacy.frame.minY,
-                                     "Expanded details must reserve height before the decision section")
-            XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "25/50")).firstMatch.exists)
-            saveScreenshot(app: app, name: "activity-fit-details-\(suffix)")
-            // Return to the disclosure header, including at accessibility text sizes.
-            for _ in 0..<12 {
-                // XCTest calls controls behind the navigation/status bar
-                // hittable. Bring the whole header into the content viewport.
-                if explanation.frame.minY < app.navigationBars.firstMatch.frame.maxY + 4 {
-                    app.swipeDown()
-                } else if !explanation.isHittable {
-                    app.swipeUp()
-                } else { break }
-            }
-            XCTAssertTrue(explanation.isHittable)
-            explanation.tap()
-            XCTAssertTrue(disclaimer.waitForNonExistence(timeout: 5))
+            let activity = app.descendants(matching: .any)["mutual-opportunity-activity-\(id)"].firstMatch
+            XCTAssertTrue(activity.waitForExistence(timeout: 8))
+            XCTAssertTrue(activity.label.contains("喝咖啡"))
+            XCTAssertTrue(activity.label.contains("咖啡聊聊"))
+            let time = app.descendants(matching: .any)["mutual-opportunity-time-\(id)"].firstMatch
+            revealCompactCue(time, in: app)
+            XCTAssertTrue(time.label.contains(language == "zh-Hans" ? "共同空闲" : language == "de" ? "Gemeinsam frei" : "Shared time"))
+            XCTAssertFalse(app.buttons["mutual-opportunity-fit-details-\(id)"].exists)
+            XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "60/100")).firstMatch.exists)
+            saveScreenshot(app: app, name: "compact-related-\(language)\(largeType ? "-large" : "")")
             app.terminate()
         }
     }
@@ -285,7 +308,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
                 "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
                 "--ui-testing-discover", "--ui-testing-weekly-intent",
                 "--ui-testing-mutual-opportunity", "--ui-testing-together-matching",
-                "--ui-testing-opportunity-topic=COFFEE",
+                "--ui-testing-opportunity-topic=COFFEE", "--ui-testing-opportunity-list",
                 "--ui-testing-language=\(language)", "--ui-testing-appearance=\(appearance)",
             ]
             if language == "en" { app.launchArguments.append("--ui-testing-reduce-motion") }
@@ -573,13 +596,10 @@ final class VisualQAScreenshotUITests: XCTestCase {
             XCTAssertTrue(activity.waitForExistence(timeout: 8))
             let peer = app.descendants(matching: .any)["mutual-opportunity-peer-\(id)"]
             let time = app.descendants(matching: .any)["mutual-opportunity-time-\(id)"]
-            let summary = app.descendants(matching: .any)["mutual-opportunity-differences-\(id)"]
-            let fit = app.descendants(matching: .any)["mutual-opportunity-fit-\(id)"]
             XCTAssertLessThanOrEqual(peer.frame.maxY, activity.frame.minY)
             XCTAssertLessThanOrEqual(activity.frame.maxY, time.frame.minY)
-            XCTAssertLessThanOrEqual(time.frame.maxY, summary.frame.minY)
-            XCTAssertLessThanOrEqual(summary.frame.maxY, fit.frame.minY)
-            XCTAssertTrue(fit.label.contains("100/100"))
+            XCTAssertFalse(app.descendants(matching: .any)["mutual-opportunity-fit-details-\(id)"].exists)
+            XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "/100")).firstMatch.exists)
             let decision = app.descendants(matching: .any)["mutual-opportunity-swipe-\(id)"]
             let open = app.buttons["mutual-opportunity-open-\(id)"]
             if state == "NEEDS_DECISION" {

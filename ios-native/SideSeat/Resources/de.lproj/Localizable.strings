@@ -1975,3 +1975,16 @@
 "See an activity you like? Create your own intention. Nothing is sent to the other person." = "Eine Aktivität gefällt dir? Erstelle dein eigenes Vorhaben. Der anderen Person wird nichts gesendet.";
 "I want to do this too" = "Das möchte ich auch machen";
 "Opens a draft. Review and publish it yourself; this does not express interest in a person." = "Öffnet einen Entwurf, den du selbst prüfst und veröffentlichst. Das ist keine Interessensbekundung an eine Person.";
+
+/* Compact Together opportunity cues */
+"Both: %@" = "Beide: %@";
+"You: %@ · Them: %@" = "Du: %@ · Gegenüber: %@";
+"Activity to agree" = "Aktivität offen";
+"Find another time" = "Andere Zeit finden";
+"Time undecided" = "Zeit noch offen";
+"%@ · Shared time" = "%@ · Gemeinsam frei";
+"Similar timing" = "Ähnliche Zeit";
+"Check language" = "Sprache klären";
+"Different or unlisted schools" = "Andere / offene Hochschule";
+"Course to agree" = "Kurs klären";
+"Mutual interest opens chat, not a plan." = "Beide interessiert: erst chatten, dann planen.";

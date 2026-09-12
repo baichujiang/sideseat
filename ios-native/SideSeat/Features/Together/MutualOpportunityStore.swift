@@ -26,7 +26,10 @@ final class MutualOpportunityStore {
             return
         }
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-mutual-opportunity") {
-            opportunities = [.uiTestingFixture]
+            let ids = ProcessInfo.processInfo.arguments.contains("--ui-testing-opportunity-list")
+                ? ["cmutualui0000000000000001", "cmutualui0000000000000002", "cmutualui0000000000000003"]
+                : ["cmutualui0000000000000001"]
+            opportunities = ids.map { .uiTestingFixture(id: $0) }
             return
         }
         #endif
@@ -139,7 +142,7 @@ final class MutualOpportunityStore {
 }
 
 private extension NativeMutualOpportunity {
-    static var uiTestingFixture: NativeMutualOpportunity {
+    static func uiTestingFixture(id: String) -> NativeMutualOpportunity {
         let arguments = ProcessInfo.processInfo.arguments
         let related = arguments.contains("--ui-testing-related-activity")
         let discovery = arguments.contains("--ui-testing-discovery-matching")
@@ -153,7 +156,7 @@ private extension NativeMutualOpportunity {
         let start = Date().addingTimeInterval(26 * 60 * 60)
         let end = start.addingTimeInterval((related ? 30 : 60) * 60)
         var card = NativeMutualOpportunity(
-            id: "cmutualui0000000000000001",
+            id: id,
             policyVersion: "MUTUAL_OPPORTUNITY_V1",
             state: state,
             viewerIntentId: nil,
@@ -204,6 +207,10 @@ private extension NativeMutualOpportunity {
             ),
             timeContext: flexible ? NativeIntentTimePreference(kind: "UNDECIDED") : nil
         )
+        if flexible, arguments.contains("--ui-testing-opportunity-flexible-window") {
+            let day = NativeIntentTimePreference.dateKey(start)
+            card.timeContext = NativeIntentTimePreference(kind: "FLEXIBLE", startDate: day, endDate: day, period: "AFTERNOON")
+        }
         if discovery {
             card.matchFit = NativeActivityFit(
                 policyVersion: "DISCOVERY_FIT_V1", basis: "DIFFERENT_ACTIVITY", score: 0,

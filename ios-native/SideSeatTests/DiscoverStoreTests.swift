@@ -4,6 +4,90 @@ import Testing
 
 @Suite("Discover stores")
 struct DiscoverStoreTests {
+    private func compactOpportunity(_ fields: [String: Any] = [:]) throws -> NativeMutualOpportunity {
+        var wire: [String: Any] = [
+            "id": "compact-cue-test", "policyVersion": "MUTUAL_OPPORTUNITY_V1",
+            "state": "NEEDS_DECISION", "topic": "COFFEE", "activityText": "Coffee",
+            "matchKind": "EXACT_ACTIVITY", "expiresAt": "2026-09-14T10:00:00Z", "version": 1,
+            "peer": ["displayName": "Mia", "verifiedStudent": true, "sharedLanguages": ["ENGLISH"]],
+        ]
+        wire.merge(fields) { _, next in next }
+        return try JSONDecoder().decode(NativeMutualOpportunity.self,
+                                        from: JSONSerialization.data(withJSONObject: wire))
+    }
+
+    private func compactFit(_ fields: [String: Any] = [:]) -> [String: Any] {
+        var fit: [String: Any] = [
+            "policyVersion": "DISCOVERY_FIT_V1", "basis": "EXACT_ACTIVITY", "score": 100,
+            "activityPoints": 50, "timePoints": 30, "languagePoints": 10, "schoolPoints": 10,
+            "viewerActivity": ["topic": "COFFEE", "activityText": "Coffee"],
+            "peerActivity": ["topic": "COFFEE", "activityText": "Coffee"],
+        ]
+        fit.merge(fields) { _, next in next }
+        return fit
+    }
+
+    @Test("Compact activity cues keep both activities without rating a person")
+    @MainActor
+    func compactActivityCues() throws {
+        let exact = try compactOpportunity(["matchFit": compactFit()])
+        #expect(exact.activityCueTone == .shared)
+        #expect(exact.shortActivitySummary == String(format: AppLocalization.string("Both: %@"), "Coffee"))
+        #expect(exact.needsViewerDecision && !exact.isReadyToCoordinate)
+        for basis in ["DIFFERENT_ACTIVITY", "RELATED_ACTIVITY"] {
+            let value = try compactOpportunity(["matchFit": compactFit([
+                "basis": basis, "score": 0, "differences": ["ACTIVITY"],
+                "peerActivity": ["topic": "EXPLORE", "activityText": "Walk"],
+            ])])
+            #expect(value.activityCueTone == .discuss)
+            #expect(value.shortActivitySummary.contains("Coffee"))
+            #expect(value.shortActivitySummary.contains("Walk"))
+            #expect(!value.shortActivitySummary.contains("/100"))
+            #expect(value.matchFit?.score == 0) // Wire score is retained, never rendered by these cues.
+        }
+        let parallel = try compactOpportunity(["topic": "STUDY", "matchKind": "SHARED_CONTEXT",
+            "sharedContext": "PARALLEL_STUDY", "viewerStudyGoal": "Algorithms", "peerStudyGoal": "Probability"])
+        #expect(parallel.activityCueTone == .discuss)
+        #expect(parallel.shortActivitySummary.contains("Algorithms") && parallel.shortActivitySummary.contains("Probability"))
+        let unknown = try compactOpportunity(["matchFit": compactFit(["basis": "FUTURE_POLICY"])])
+        #expect(unknown.activityCueTone == .unspecified)
+    }
+
+    @Test("Compact timing distinguishes conflict, unknown and shared availability")
+    @MainActor
+    func compactTimingCues() throws {
+        let timestamps: [String: Any] = ["startsAt": "2026-09-13T15:00:00Z", "endsAt": "2026-09-13T17:00:00Z"]
+        let exact = try compactOpportunity(timestamps)
+        #expect(exact.timeCueTone == .shared)
+        #expect(!exact.isReadyToCoordinate)
+        var conflictFields = timestamps
+        conflictFields["matchFit"] = compactFit(["differences": ["TIME"]])
+        let conflict = try compactOpportunity(conflictFields)
+        #expect(conflict.timeCueTone == .discuss)
+        #expect(conflict.shortTimeSummary == AppLocalization.string("Find another time"))
+        conflictFields["matchFit"] = compactFit(["differences": ["TIME_UNDECIDED"]])
+        let undecided = try compactOpportunity(conflictFields)
+        #expect(undecided.timeCueTone == .unspecified)
+        #expect(undecided.shortTimeSummary == AppLocalization.string("Time undecided"))
+        let missing = try compactOpportunity(["matchFit": compactFit()])
+        #expect(missing.timeCueTone == .unspecified) // A high score never implies a real time.
+        let flexible = try compactOpportunity(["timeContext": ["kind": "FLEXIBLE", "startDate": "2026-09-13",
+            "endDate": "2026-09-13", "period": "AFTERNOON"]])
+        #expect(flexible.timeCueTone == .shared)
+        #expect(flexible.shortTimeSummary.contains(AppLocalization.string("Similar timing")))
+        #expect(flexible.startDate == nil && flexible.endDate == nil)
+    }
+
+    @Test("Secondary differences remain factual short context without invented matching facts")
+    @MainActor
+    func compactSecondaryCues() throws {
+        let value = try compactOpportunity(["matchFit": compactFit(["differences": ["LANGUAGE", "SCHOOL", "COURSE"]])])
+        #expect(value.shortContextDifferences == [AppLocalization.string("Check language"),
+            AppLocalization.string("Different or unlisted schools"), AppLocalization.string("Course to agree")])
+        let missingPeer = try compactOpportunity(["matchFit": compactFit(["basis": "DIFFERENT_ACTIVITY", "peerActivity": NSNull()])])
+        #expect(missingPeer.shortActivitySummary.contains(AppLocalization.string("Activity to agree")))
+    }
+
     @Test("Intention card state distinguishes participation from a stored ACTIVE row")
     func intentionCardParticipationStates() {
         let now = Date(timeIntervalSince1970: 1_789_000_000)

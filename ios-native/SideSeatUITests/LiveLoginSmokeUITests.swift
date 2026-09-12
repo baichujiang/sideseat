@@ -423,16 +423,15 @@ final class SocialLiveUITests: XCTestCase {
         createCoffeeIntentAndStartMatching(peerActivity, in: secondParticipant)
         let secondDecision = togetherDecisionBar(in: secondParticipant)
         if relatedActivities {
-            let fit = secondParticipant.descendants(matching: .any).matching(
-                NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-fit-")
-            ).matching(NSPredicate(format: "label CONTAINS %@", "60/100")).firstMatch
-            XCTAssertTrue(fit.exists)
-            XCTAssertTrue(secondParticipant.staticTexts[activity].exists)
-            XCTAssertTrue(secondParticipant.staticTexts[peerActivity].exists)
-            let details = secondParticipant.descendants(matching: .any).matching(
-                NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-fit-details-")
+            let summary = secondParticipant.descendants(matching: .any).matching(
+                NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-activity-")
             ).firstMatch
-            XCTAssertTrue(details.exists)
+            XCTAssertTrue(summary.exists)
+            XCTAssertTrue(summary.label.contains(activity))
+            XCTAssertTrue(summary.label.contains(peerActivity))
+            XCTAssertFalse(secondParticipant.descendants(matching: .any).matching(
+                NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-fit-details-")
+            ).firstMatch.exists)
         }
         XCTAssertFalse(secondParticipant.buttons["Chat about the details"].exists)
         XCTAssertTrue(secondDecision.exists)

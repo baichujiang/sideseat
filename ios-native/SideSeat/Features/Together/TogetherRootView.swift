@@ -387,7 +387,8 @@ private struct TogetherHomeView: View {
     private func recommendationsSection(at now: Date) -> some View {
         if v2Store.isMutualOpportunityEnabled {
             let count = findingCount(at: now)
-            if count > 0 {
+            if count > 0, opportunityStore.opportunities.isEmpty,
+               !opportunityStore.isLoading, opportunityStore.issue == nil {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
                     Label(AppLocalization.string("Finding company for you"), systemImage: "sparkle.magnifyingglass")
                         .font(.subheadline.weight(.semibold))
@@ -703,9 +704,7 @@ private struct TogetherHomeView: View {
 }
 
 private struct MutualOpportunityCard: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @State private var isShowingFitDetails = false
+    @ScaledMetric(relativeTo: .subheadline) private var cueIconWidth: CGFloat = 24
 
     let opportunity: NativeMutualOpportunity
     let isWorking: Bool
@@ -724,8 +723,6 @@ private struct MutualOpportunityCard: View {
                 peerRow
                 activityHeader
                 availabilityRow
-                activityContext
-                fitDisclosure
                 decisionArea
             }
         }
@@ -733,39 +730,15 @@ private struct MutualOpportunityCard: View {
         .accessibilityIdentifier("mutual-opportunity-\(opportunity.id)")
     }
 
-    private var activityTitle: String {
-        if opportunity.matchFit?.isDifferentActivity == true { return AppLocalization.string("Do something together") }
-        if let activity = opportunity.matchFit?.viewerActivity { return activity.title }
-        // Related activities are a suggestion to agree on something, not an agreed plan.
-        if opportunity.matchFit?.isRelatedActivity == true { return opportunity.topic.title }
-        if opportunity.topic == .study {
-            return opportunity.effectiveMatchKind == .sharedContext
-                ? opportunity.matchContextTitle : opportunity.viewerStudyGoalTitle
-        }
-        return opportunity.activityTitle
-    }
-
     private var activityHeader: some View {
-        HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
-            SSActivityArtwork(
-                topic: opportunity.matchFit?.viewerActivity?.topic ?? opportunity.topic,
-                size: 40
-            )
-            VStack(alignment: .leading, spacing: 2) {
-                if activityTitle != opportunity.topic.title {
-                    Text(opportunity.topic.title)
-                        .font(.caption2.weight(.medium))
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                }
-                Text(activityTitle)
-                    .font(.headline.weight(.bold))
-                    .foregroundStyle(SideSeatTheme.textPrimary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("mutual-opportunity-activity-\(opportunity.id)")
+        cueRow(
+            text: opportunity.shortActivitySummary,
+            systemImage: opportunity.activityCueTone == .discuss ? "arrow.left.arrow.right"
+                : (opportunity.matchFit?.viewerActivity?.topic ?? opportunity.topic).systemImage,
+            tone: opportunity.activityCueTone,
+            font: .headline,
+            identifier: "mutual-opportunity-activity-\(opportunity.id)"
+        )
     }
 
     private var peerRow: some View {
@@ -788,9 +761,9 @@ private struct MutualOpportunityCard: View {
                 }
                 if !peerContext.isEmpty {
                     Text(peerContext)
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .lineLimit(1)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -800,188 +773,41 @@ private struct MutualOpportunityCard: View {
     }
 
     private var availabilityRow: some View {
+        cueRow(
+            text: opportunity.shortTimeSummary,
+            systemImage: opportunity.timeCueTone == .discuss ? "clock.arrow.circlepath" : "clock",
+            tone: opportunity.timeCueTone,
+            font: .subheadline.weight(.medium),
+            identifier: "mutual-opportunity-time-\(opportunity.id)"
+        )
+    }
+
+    private func cueRow(text: String, systemImage: String, tone: NativeOpportunityCueTone,
+                        font: Font, identifier: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
-            Image(systemName: "clock")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .frame(width: 20)
+            Image(systemName: systemImage)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(cueColor(tone))
+                .frame(width: cueIconWidth)
                 .accessibilityHidden(true)
-            Text(opportunity.matchFit?.differences?.contains("TIME") == true
-                 ? AppLocalization.string("Time needs a new agreement") : opportunityWindow)
-                .font(.subheadline.weight(.medium))
+            Text(text)
+                .font(font)
                 .foregroundStyle(SideSeatTheme.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityLabel(AppLocalization.string(opportunity.startDate == nil ? "Timing preference" : "Available together"))
-        .accessibilityValue(opportunity.matchFit?.differences?.contains("TIME") == true
-                             ? AppLocalization.string("Time needs a new agreement") : opportunityWindow)
         .accessibilityElement(children: .ignore)
+        .accessibilityLabel(text)
         .accessibilityRespondsToUserInteraction(false)
-        .accessibilityIdentifier("mutual-opportunity-time-\(opportunity.id)")
+        .accessibilityIdentifier(identifier)
     }
 
-    private var activityContext: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-            opportunityFitRow(
-                title: AppLocalization.string("Activity"),
-                value: activityFitSummary,
-                systemImage: "figure.walk"
-            )
-            opportunityFitRow(
-                title: AppLocalization.string("Time"),
-                value: timeFitSummary,
-                systemImage: "clock"
-            )
+    private func cueColor(_ tone: NativeOpportunityCueTone) -> Color {
+        switch tone {
+        case .shared: SideSeatTheme.statusSuccessText
+        case .discuss: SideSeatTheme.statusWarningText
+        case .unspecified: SideSeatTheme.textSecondaryStrong
         }
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("mutual-opportunity-differences-\(opportunity.id)")
-    }
-
-    private var activityFitSummary: String {
-        if let fit = opportunity.matchFit, fit.isDiscovery, let first = fit.differenceHints.first {
-            return first
-        }
-        return opportunity.matchTitle
-    }
-
-    private var timeFitSummary: String {
-        if let fit = opportunity.matchFit, fit.isDiscovery, fit.differenceHints.count > 1 {
-            return fit.differenceHints[1]
-        }
-        if opportunity.matchFit?.differences?.contains("TIME") == true {
-            return AppLocalization.string("Time needs a new agreement")
-        }
-        return opportunity.startDate == nil
-            ? AppLocalization.string("Time to discuss")
-            : AppLocalization.string("Available together")
-    }
-
-    private func opportunityFitRow(title: String, value: String, systemImage: String) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
-            Text(title)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .frame(width: 54, alignment: .leading)
-            Text(value)
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(SideSeatTheme.textPrimary)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .accessibilityElement(children: .combine)
-    }
-
-    private var fitDisclosure: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Divider()
-            Button {
-                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
-                    isShowingFitDetails.toggle()
-                }
-            } label: {
-                HStack(spacing: SideSeatTheme.spaceSM) {
-                    let layout = dynamicTypeSize.isAccessibilitySize
-                        ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
-                        : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
-                    layout {
-                        Text(AppLocalization.string("Why this opportunity"))
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(SideSeatTheme.textPrimary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        if let fit = opportunity.matchFit {
-                            Text("\(fit.score)/100")
-                                .font(.caption.weight(.semibold))
-                                .monospacedDigit()
-                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        }
-                    }
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityElement(children: .combine)
-                    .accessibilityIdentifier("mutual-opportunity-fit-\(opportunity.id)")
-                    Image(systemName: "chevron.down")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .rotationEffect(.degrees(isShowingFitDetails ? 180 : 0))
-                        .accessibilityHidden(true)
-                }
-                .padding(.vertical, SideSeatTheme.spaceXS)
-                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityHint(AppLocalization.string(opportunity.matchFit == nil
-                ? "Why this opportunity" : "How this is calculated"))
-            .accessibilityValue(AppLocalization.string(isShowingFitDetails ? "Expanded" : "Collapsed"))
-            .accessibilityIdentifier("mutual-opportunity-fit-details-\(opportunity.id)")
-
-            // Use intrinsic text height so expanded explanations remain scrollable at large sizes.
-            if isShowingFitDetails {
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                    Text(opportunity.matchExplanation)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .accessibilityIdentifier("mutual-opportunity-match-explanation-\(opportunity.id)")
-                    if let fit = opportunity.matchFit, fit.isDiscovery {
-                        let layout = dynamicTypeSize.isAccessibilitySize
-                            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
-                            : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceLG))
-                        layout {
-                            if let activity = fit.viewerActivity {
-                                explanationRow(title: AppLocalization.string("You"), value: activity.title)
-                            }
-                            if let activity = fit.peerActivity {
-                                explanationRow(title: opportunity.peer.displayName, value: activity.title)
-                            }
-                        }
-                    }
-                    else if opportunity.topic == .study || opportunity.matchFit?.isRelatedActivity == true {
-                        let layout = dynamicTypeSize.isAccessibilitySize
-                            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
-                            : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceLG))
-                        layout {
-                            if let activity = opportunity.topic == .study
-                                ? opportunity.viewerStudyGoalTitle : opportunity.matchFit?.viewerActivityText {
-                                explanationRow(title: AppLocalization.string("You"), value: activity)
-                            }
-                            if let activity = opportunity.topic == .study
-                                ? opportunity.peerStudyGoalTitle : opportunity.matchFit?.peerActivityText {
-                                explanationRow(title: opportunity.peer.displayName, value: activity)
-                            }
-                        }
-                    }
-                    if let course = opportunity.course {
-                        Label([course.code, course.name].compactMap { $0 }.joined(separator: " "),
-                              systemImage: "book.closed")
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    if let fit = opportunity.matchFit {
-                        Text(fit.breakdown)
-                            .fixedSize(horizontal: false, vertical: true)
-                        if let minutes = fit.overlapMinutes {
-                            Text(String(format: AppLocalization.string("%d minutes of shared availability"), minutes))
-                                .fixedSize(horizontal: false, vertical: true)
-                        } else {
-                            Text("Time is not agreed yet. Start a conversation to work it out.")
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        Text(AppLocalization.string("This describes the activity, not the person or the chance of success. A lower score can still be worth trying."))
-                            .fixedSize(horizontal: false, vertical: true)
-                            .accessibilityIdentifier("mutual-opportunity-fit-disclaimer-\(opportunity.id)")
-                    }
-                }
-                .font(.footnote)
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .padding(.top, SideSeatTheme.spaceSM)
-                .padding(.bottom, SideSeatTheme.spaceMD)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
-                .transition(.opacity)
-            }
-            Divider()
-        }
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("mutual-opportunity-trust-\(opportunity.id)")
     }
 
     @ViewBuilder
@@ -1022,7 +848,7 @@ private struct MutualOpportunityCard: View {
 
         case .undecided:
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                Label(AppLocalization.string("If you both show interest, chat first and confirm a plan later."), systemImage: "lock")
+                Label(AppLocalization.string("Mutual interest opens chat, not a plan."), systemImage: "lock")
                     .font(.caption)
                     .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     .fixedSize(horizontal: false, vertical: true)
@@ -1054,38 +880,10 @@ private struct MutualOpportunityCard: View {
         }
     }
 
-    private func explanationRow(title: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(title)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-            Text(value)
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(SideSeatTheme.textPrimary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private var opportunityWindow: String {
-        guard let start = opportunity.startDate,
-              let end = opportunity.endDate
-        else {
-            return opportunity.timeContext?.summary ?? AppLocalization.string("Time to discuss")
-        }
-        let startText = start.formatted(.dateTime.month(.abbreviated).day().hour().minute().locale(AppLocalization.selectedLanguage.locale))
-        let format: Date.FormatStyle = Calendar.current.isDate(start, inSameDayAs: end)
-            ? .dateTime.hour().minute() : .dateTime.month(.abbreviated).day().hour().minute()
-        let endText = end.formatted(format.locale(AppLocalization.selectedLanguage.locale))
-        return "\(startText) – \(endText)"
-    }
-
     private var peerContext: String {
         let language = opportunity.peer.sharedLanguages.first.map(languageTitle)
-        return [opportunity.peer.major, language]
-            .compactMap { $0 }
-            .filter { !$0.isEmpty }
-            .joined(separator: " · ")
+        let context = [opportunity.peer.major, language].compactMap { $0 }.filter { !$0.isEmpty }
+        return (context + opportunity.shortContextDifferences).joined(separator: " · ")
     }
 
     private func languageTitle(_ tag: String) -> String {

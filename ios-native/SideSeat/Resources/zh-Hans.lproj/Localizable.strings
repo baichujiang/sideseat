@@ -1976,3 +1976,16 @@
 "See an activity you like? Create your own intention. Nothing is sent to the other person." = "看到想做的活动，可以创建自己的意愿；不会直接向对方发送兴趣或消息。";
 "I want to do this too" = "我也想做";
 "Opens a draft. Review and publish it yourself; this does not express interest in a person." = "打开草稿，由你确认并发布，不代表对某个人表示感兴趣。";
+
+/* Compact Together opportunity cues */
+"Both: %@" = "都想：%@";
+"You: %@ · Them: %@" = "你：%@ · 对方：%@";
+"Activity to agree" = "活动待商量";
+"Find another time" = "另约时间";
+"Time undecided" = "时间待定";
+"%@ · Shared time" = "%@ · 共同空闲";
+"Similar timing" = "时段相近";
+"Check language" = "沟通待确认";
+"Different or unlisted schools" = "学校不同／未填";
+"Course to agree" = "课程待商量";
+"Mutual interest opens chat, not a plan." = "互相感兴趣后聊天，计划另行确认。";
