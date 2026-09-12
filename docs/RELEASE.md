@@ -165,3 +165,8 @@ release; the activation record has current instructions. Build 36
 matching-to-both-Calendars and Build 34 repeat Outcome acceptance remain historical
 evidence, not acceptance of Build 40. Public-release readiness still requires the
 separate checks above).
+
+
+## Explore backend activation
+
+Explore was deployed and enabled in Production on 2026-09-12. See the [activation record](./releases/2026-09-12-explore-production.md) for the additive visibility migration, retained privacy defaults, deployment ID, verification results and outstanding authenticated-device acceptance. This did not upload a new TestFlight build.
