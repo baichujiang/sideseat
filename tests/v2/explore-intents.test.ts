@@ -29,8 +29,9 @@ test("Existing intentions stay private and Explore projection omits identity fie
   const service = fs.readFileSync("lib/v2/explore-intents.ts", "utf8");
   assert.match(schema, /exploreVisible\s+Boolean\s+@default\(false\)/);
   assert.match(migration, /DEFAULT false/);
+  const publisherSelect = service.slice(service.indexOf("const rows ="));
   for (const forbidden of ["username: true", "nickname: true", "avatarUrl: true", "major: true", "semester: true", "email: true", "phone: true"]) {
-    assert.equal(service.includes(forbidden), false, `Explore must not select ${forbidden}`);
+    assert.equal(publisherSelect.includes(forbidden), false, `Explore must not select ${forbidden}`);
   }
   assert.match(service, /descriptionPreview: row\.note\?\.trim\(\)\.slice\(0, 96\)/);
   assert.match(service, /languages: row\.user\.userLanguages\.slice\(0, 1\)/);

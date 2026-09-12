@@ -1,6 +1,7 @@
 import "server-only";
 
 import { formatInTimeZone } from "date-fns-tz";
+import { INTERNAL_ACCOUNT_PREFIXES, INTERNAL_ACCOUNT_USERNAMES, isInternalAccount } from "@/lib/analytics/layer2-outcome-pilot";
 import { prisma } from "@/lib/db/prisma";
 import { readTimePreference } from "@/lib/v2/intent-timing";
 
@@ -47,7 +48,7 @@ export async function listExploreIntents(userId: string, requestedLimit = 3) {
   const limit = Math.max(1, Math.min(MAX_FREE_EXPLORE_RESULTS, requestedLimit));
   const viewer = await prisma.user.findUnique({
     where: { id: userId },
-    select: { school: true, verifiedStudent: true, hideFromDiscovery: true },
+    select: { username: true, school: true, verifiedStudent: true, hideFromDiscovery: true },
   });
   if (!viewer?.verifiedStudent || viewer.hideFromDiscovery || !viewer.school) return { intents: [], hasMore: false };
   const now = new Date();
@@ -58,6 +59,11 @@ export async function listExploreIntents(userId: string, requestedLimit = 3) {
         school: viewer.school, onboardingComplete: true, isGuest: false, verifiedStudent: true,
         hideFromDiscovery: false, hideFromRecommendations: false,
         moderationBlocks: { none: { isActive: true } },
+        // Synthetic QA supply is visible only to the existing internal-account cohort.
+        ...(!isInternalAccount(viewer.username) ? { NOT: { OR: [
+          { username: { in: [...INTERNAL_ACCOUNT_USERNAMES], mode: "insensitive" as const } },
+          ...INTERNAL_ACCOUNT_PREFIXES.map(prefix => ({ username: { startsWith: prefix, mode: "insensitive" as const } })),
+        ] } } : {}),
       },
     },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
