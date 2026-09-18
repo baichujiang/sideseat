@@ -1860,7 +1860,7 @@
 "Add something you would like to do. Your intention stays private." = "Füge etwas hinzu, das du gern machen möchtest. Dein Vorhaben bleibt privat.";
 "Choose timing preference" = "Zeitwunsch auswählen";
 "2 · When would you like to go?" = "2 · Wann würde es dir passen?";
-"Choose future, non-overlapping times of 30 minutes to 12 hours before this intention expires." = "Wähle zukünftige, nicht überlappende Zeiten von 30 Minuten bis 12 Stunden innerhalb der Gültigkeit.";
+"Choose future, non-overlapping times of 30 minutes to 12 hours." = "Wähle zukünftige, überschneidungsfreie Zeiten von 30 Minuten bis 12 Stunden.";
 "Your activity is filled in. Choose the time you want to propose." = "Die Aktivität ist eingetragen. Wähle die Zeit, die du vorschlagen möchtest.";
 "Propose these times" = "Diese Zeiten vorschlagen";
 "The other person still needs to accept. Nothing is added to your calendars yet." = "Die andere Person muss noch zustimmen. Eure Kalender bleiben bis dahin unverändert.";
@@ -1915,6 +1915,8 @@
 /* Opportunity bilateral swipe */
 "Not interested" = "Kein Interesse";
 "Choose interest" = "Auswählen";
+"Keep sliding" = "Weiter schieben";
+"Release to confirm" = "Zum Bestätigen loslassen";
 "Release for not interested" = "Loslassen: kein Interesse";
 "Swipe left for Not interested or right for Interested" = "Nach links: kein Interesse · nach rechts: interessiert";
 "Open Explore" = "Explore öffnen";
@@ -1991,3 +1993,15 @@
 /* Save once; no separate finding confirmation */
 "Saving starts finding company automatically. Pause anytime." = "Nach dem Speichern wird automatisch gesucht. Jederzeit pausierbar.";
 "This saved intention is not participating in finding company." = "Dieses gespeicherte Vorhaben nimmt noch nicht an der Suche teil.";
+
+"Show interest in an activity. Your choice stays private until you both show interest." = "Zeige Interesse an einer Aktivität. Deine Wahl bleibt privat, bis ihr beide Interesse zeigt.";
+
+"Example · No real participant" = "Beispiel · Keine echte Person";
+
+"Create a similar intention" = "Ähnlichen Wunsch erstellen";
+
+"View in recommendations" = "In Empfehlungen ansehen";
+
+"Previous input" = "Vorheriges Eingabefeld";
+
+"Next input" = "Nächstes Eingabefeld";

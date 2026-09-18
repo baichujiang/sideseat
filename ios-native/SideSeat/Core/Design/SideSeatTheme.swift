@@ -196,6 +196,50 @@ enum SideSeatTheme {
         static let privacyChat = neutral
     }
 
+    /// Warm paper surfaces with Rose reserved for selection and interest.
+    enum Together {
+        static let decisionWell = adaptive(light: 0xF4EAE5, dark: 0x342830)
+        static let decisionHandle = adaptive(light: 0xFFFCF8, dark: 0x51404A)
+        static let canvas = adaptive(light: 0xFAF3EC, dark: 0x1C171A)
+        static let selectedTab = adaptive(light: 0xFBE5EA, dark: 0x41252F)
+        static let ink = adaptive(light: 0x35262E, dark: 0xF7EDE9)
+        static let border = adaptive(light: 0xE9DDD5, dark: 0x493A42)
+        static let shadow = Color(red: 0.30, green: 0.15, blue: 0.20)
+        static let cardPadding: CGFloat = 20
+        static let cardRadius: CGFloat = 24
+
+        static func cardFill(for topic: NativeWeeklyIntentTopic) -> Color {
+            switch topic {
+            case .coffee: adaptive(light: 0xFFFBF6, dark: 0x2B2323)
+            case .study: adaptive(light: 0xFCFBFE, dark: 0x29242F)
+            case .sports: adaptive(light: 0xFCFCF6, dark: 0x282923)
+            case .explore: adaptive(light: 0xF9FCF8, dark: 0x232A26)
+            case .food: adaptive(light: 0xFFFAF6, dark: 0x2D2323)
+            case .events: adaptive(light: 0xFFFAFD, dark: 0x2E232C)
+            }
+        }
+
+        static func categoryInk(for topic: NativeWeeklyIntentTopic) -> Color {
+            switch topic {
+            case .coffee: adaptive(light: 0x754420, dark: 0xE9BB87)
+            case .study: adaptive(light: 0x355888, dark: 0xA7C5EF)
+            case .sports: adaptive(light: 0x47612B, dark: 0xBED796)
+            case .explore: adaptive(light: 0x2B6450, dark: 0xA4D8BA)
+            case .food: adaptive(light: 0x87472F, dark: 0xEFBA9E)
+            case .events: adaptive(light: 0x694783, dark: 0xD7B8EC)
+            }
+        }
+
+        private static func adaptive(light: UInt32, dark: UInt32) -> Color {
+            Color(uiColor: UIColor { traits in
+                let rgb = traits.userInterfaceStyle == .dark ? dark : light
+                return UIColor(red: CGFloat((rgb >> 16) & 0xFF) / 255,
+                               green: CGFloat((rgb >> 8) & 0xFF) / 255,
+                               blue: CGFloat(rgb & 0xFF) / 255, alpha: 1)
+            })
+        }
+    }
+
     /// Deterministic collage / multi-avatar tile colors (not brand chrome / not Rose accent).
     enum AvatarPalette {
         static let tiles: [Color] = [

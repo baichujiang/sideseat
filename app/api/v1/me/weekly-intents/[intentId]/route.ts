@@ -1,3 +1,4 @@
+import { requirePersistentIntentSupport } from "@/lib/api/v1/persistent-intents";
 import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 
@@ -49,7 +50,7 @@ function domainError(request: Request, cause: WeeklyIntentError) {
     case "WEEKLY_INTENT_WINDOW_INVALID":
       return v1Error(request, {
         code: "INVALID_REQUEST",
-        message: "Choose future timing within this intention's validity, or leave time undecided.",
+        message: "Choose future timing, or leave time undecided.",
         status: 422,
         field: "timeWindows",
       });
@@ -123,13 +124,15 @@ export async function PATCH(
 ) {
   const auth = await requireV1User(request);
   if (!auth.ok) return auth.response;
+  const unsupportedClient = requirePersistentIntentSupport(request);
+  if (unsupportedClient) return unsupportedClient;
   const identifier = await intentIdOrError(request, params);
   if (!identifier.ok) return identifier.response;
   const parsed = await parseV1Json(request, weeklyIntentPatchSchema);
   if (!parsed.ok) return parsed.response;
   if ("automaticMatching" in parsed.data && parsed.data.automaticMatching &&
     (!isV2FeatureEnabled("v2AutomaticMatching") || !isV2FeatureEnabled("v2MutualOpportunity"))) return unavailable(request);
-  if ((parsed.data.action === "EXTEND" || (parsed.data.action === "EDIT" && parsed.data.timePreference)) &&
+  if (parsed.data.action === "EDIT" && parsed.data.timePreference &&
     !isV2FeatureEnabled("v2FlexibleTiming")) return unavailable(request);
   if (
     parsed.data.action !== "PAUSE" &&
@@ -170,6 +173,8 @@ export async function DELETE(
 ) {
   const auth = await requireV1User(request);
   if (!auth.ok) return auth.response;
+  const unsupportedClient = requirePersistentIntentSupport(request);
+  if (unsupportedClient) return unsupportedClient;
   const identifier = await intentIdOrError(request, params);
   if (!identifier.ok) return identifier.response;
   const parsed = await parseV1Json(request, weeklyIntentEndSchema);

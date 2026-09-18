@@ -280,14 +280,13 @@ test("published flexible intentions: automatic match without sessions, bilateral
         const input = { topic: "COFFEE" as const, activityText: "Automatic coffee", timeZone: "Europe/Berlin", timeWindows: [], timePreference: { kind: "UNDECIDED" as const }, automaticMatching: true as const };
         const publishedAt = new Date(now.getTime() - 3 * 86400000);
         const first = await createWeeklyIntent(userAId, input, publishedAt);
-        assert.equal(new Date(first.intent.expiresAt).getTime() - publishedAt.getTime(), 14 * 86400000);
+        assert.equal(first.intent.expiresAt, null);
         assert.equal(first.intent.automaticMatching, true);
         assert.equal((await listMutualOpportunities(userAId, false)).opportunities.length, 0);
         const edited = await patchWeeklyIntent(userAId, first.intent.id, { action: "EDIT", expectedVersion: first.intent.version,
           timePreference: { kind: "FLEXIBLE", startDate: tomorrow, endDate: tomorrow, period: "ANY" }, timeWindows: [] });
-        const extended = await patchWeeklyIntent(userAId, first.intent.id, { action: "EXTEND", expectedVersion: edited.intent.version });
-        assert.ok(new Date(extended.intent.expiresAt) >= new Date(first.intent.expiresAt));
-        assert.deepEqual(extended.intent.timeWindows, []);
+        assert.equal(edited.intent.expiresAt, null);
+        assert.deepEqual(edited.intent.timeWindows, []);
         const second = await createWeeklyIntent(userBId, input, now);
         assert.equal(second.intent.status, "ACTIVE");
         assert.equal(await db.togetherMatchingSession.count({ where: { userId: { in: [userAId, userBId] } } }), 0);
@@ -722,6 +721,37 @@ async function matchingWindow() {
     endsAt: new Date(startsAt.getTime() + 60 * 60_000),
   };
 }
+
+test("persistent intentions survive 30 days, stay discoverable, pause, resume and end", {
+  skip: localDatabaseUrl ? false : "requires localhost PostgreSQL",
+}, async () => {
+  const { createWeeklyIntent, loadCurrentWeeklyIntent, patchWeeklyIntent, endWeeklyIntent } = await import("../../lib/v2/weekly-intents");
+  const { listExploreIntents } = await import("../../lib/v2/explore-intents");
+  const previous = process.env.V2_FLEXIBLE_TIMING_ENABLED;
+  process.env.V2_FLEXIBLE_TIMING_ENABLED = "1";
+  try {
+    await withMatchingPair("persistent", async ({ userAId, userBId }) => {
+      const createdAt = new Date(Date.now() - 30 * 86400000);
+      const result = await createWeeklyIntent(userAId, { topic: "COFFEE", activityText: "Coffee anytime",
+        timeZone: "Europe/Berlin", timeWindows: [], timePreference: { kind: "UNDECIDED" }, exploreVisible: true }, createdAt);
+      const current = (await loadCurrentWeeklyIntent(userAId)).intents[0]!;
+      assert.equal(current.id, result.intent.id);
+      assert.equal(current.status, "ACTIVE");
+      assert.equal(current.expiresAt, null);
+      assert.equal((await listExploreIntents(userBId)).intents.find(i => i.id === current.id)?.expiresAt, null);
+      const paused = await patchWeeklyIntent(userAId, current.id, { action: "PAUSE", expectedVersion: current.version });
+      assert.equal((await loadCurrentWeeklyIntent(userAId)).intents[0]?.status, "PAUSED");
+      assert.equal((await listExploreIntents(userBId)).intents.some(i => i.id === current.id), false);
+      const resumed = await patchWeeklyIntent(userAId, current.id, { action: "RESUME", expectedVersion: paused.intent.version });
+      assert.equal(resumed.intent.expiresAt, null);
+      await endWeeklyIntent(userAId, current.id, resumed.intent.version);
+      assert.deepEqual((await loadCurrentWeeklyIntent(userAId)).intents, []);
+    });
+  } finally {
+    if (previous === undefined) delete process.env.V2_FLEXIBLE_TIMING_ENABLED;
+    else process.env.V2_FLEXIBLE_TIMING_ENABLED = previous;
+  }
+});
 
 async function withMatchingPair(
   label: string,

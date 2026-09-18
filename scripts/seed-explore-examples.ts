@@ -6,7 +6,7 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { formatInTimeZone } from "date-fns-tz";
 import { weeklyIntentCreateSchema } from "../lib/validators/weekly-intent";
-import { flexiblePreferenceFitsLifecycle, recentIntentExpiry } from "../lib/v2/intent-timing";
+import { flexiblePreferenceFitsLifecycle } from "../lib/v2/intent-timing";
 import { EXPLORE_EXAMPLE_AUTHORS, EXPLORE_EXAMPLE_CASES, EXPLORE_EXAMPLE_MARKER,
   EXPLORE_EXAMPLE_NOTE, exploreExampleIntentId } from "../lib/v2/explore-example-catalog";
 
@@ -21,9 +21,9 @@ if (values.production) {
 }
 const db = new PrismaClient({ datasources: { db: { url: url.toString() } } });
 const now = new Date();
-const expiry = recentIntentExpiry(now);
+const expiry = null;
 const startDate = formatInTimeZone(new Date(now.getTime() + 86_400_000), "Europe/Berlin", "yyyy-MM-dd");
-const endDate = formatInTimeZone(new Date(expiry.getTime() - 86_400_000), "Europe/Berlin", "yyyy-MM-dd");
+const endDate = formatInTimeZone(new Date(now.getTime() + 13 * 86_400_000), "Europe/Berlin", "yyyy-MM-dd");
 const ids = EXPLORE_EXAMPLE_AUTHORS.flatMap(author => EXPLORE_EXAMPLE_CASES.map(item => exploreExampleIntentId(author.id, item.key)));
 const drafts = EXPLORE_EXAMPLE_CASES.map(({ key, period, ...activity }) => {
   const input = weeklyIntentCreateSchema.parse({ ...activity, togetherMode: "SAME_ACTIVITY",
@@ -54,7 +54,7 @@ async function main() {
     assert.ok(existingIntents.every(intent => intent.userId === author.id), "An example ID belongs to another user");
   }
   console.log(JSON.stringify({ mode: values.apply ? "APPLY" : "DRY_RUN", schools: EXPLORE_EXAMPLE_AUTHORS.map(a => a.school),
-    exampleCount: ids.length, expiresAt: expiry.toISOString(), authenticProfilesModified: 0, matchingEnabled: false }));
+    exampleCount: ids.length, expiresAt: expiry, authenticProfilesModified: 0, matchingEnabled: false }));
   if (!values.apply) return;
   const passwords = await Promise.all(EXPLORE_EXAMPLE_AUTHORS.map(() => bcrypt.hash(randomBytes(48).toString("hex"), 12)));
   await db.$transaction(async tx => {
@@ -86,7 +86,7 @@ async function main() {
   assert.equal(await db.togetherMatchingSession.count({ where: { userId: { in: authorIds } } }), 0);
   assert.equal(await db.mutualOpportunity.count({ where: { OR: [{ userAId: { in: authorIds } }, { userBId: { in: authorIds } }] } }), 0);
   console.log(JSON.stringify({ status: "SEEDED", count: rows.length, schools: EXPLORE_EXAMPLE_AUTHORS.map(a => a.school),
-    examplesPerSchool: 5, expiresAt: expiry.toISOString(), loginSessions: 0, matchingSessions: 0, opportunities: 0 }));
+    examplesPerSchool: 5, expiresAt: expiry, loginSessions: 0, matchingSessions: 0, opportunities: 0 }));
 }
 main().catch((error: unknown) => {
   console.error(error instanceof Error ? error.message : "Example setup failed");

@@ -33,7 +33,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
         let app = togetherApp(["--ui-testing-opportunity-list", "--ui-testing-intent-card-states",
             "--ui-testing-explore-intents", "--ui-testing-language=zh-Hans"])
         let recommendation = app.scrollViews["together-section-recommendations"].firstMatch
-        let picker = app.segmentedControls["together-segmented-control"]
+        let picker = app.descendants(matching: .any)["together-segmented-control"].firstMatch
         let pinnedY = picker.frame.minY
         // Swiping from activity content navigates; it must not choose interest.
         swipeTaskPage(recommendation, left: true)
@@ -72,7 +72,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
         let bar = app.descendants(matching: .any)["mutual-opportunity-swipe-\(id)"].firstMatch
         let handle = app.descendants(matching: .any)["mutual-opportunity-swipe-handle-\(id)"].firstMatch
         XCTAssertTrue(bar.waitForExistence(timeout: 5))
-        let picker = app.segmentedControls["together-segmented-control"]
+        let picker = app.descendants(matching: .any)["together-segmented-control"].firstMatch
         // A drag beginning on an endpoint (not the knob) must not turn into paging.
         let endpoint = bar.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.5))
         endpoint.press(forDuration: 0.08, thenDragTo: endpoint.withOffset(CGVector(dx: -210, dy: -5)), withVelocity: .slow, thenHoldForDuration: 0.2)
@@ -515,24 +515,31 @@ final class VisualQAScreenshotUITests: XCTestCase {
 
     @MainActor
     func testOpportunitySwipeLeftCommitsNotInterested() {
-        let app = XCUIApplication()
-        let id = "cmutualui0000000000000001"
-        app.launchArguments = [
-            "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
-            "--ui-testing-discover", "--ui-testing-weekly-intent",
-            "--ui-testing-mutual-opportunity", "--ui-testing-together-matching",
-            "--ui-testing-opportunity-topic=COFFEE", "--ui-testing-language=zh-Hans",
-        ]
-        app.launch()
-        let bar = app.descendants(matching: .any)["mutual-opportunity-swipe-\(id)"]
-        let handle = app.descendants(matching: .any)["mutual-opportunity-swipe-handle-\(id)"]
-        let activity = app.descendants(matching: .any)["mutual-opportunity-activity-\(id)"]
-        XCTAssertTrue(bar.waitForExistence(timeout: 8))
-        revealFlowElement(handle, in: app)
-        let start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-        start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: -bar.frame.width * 0.40, dy: 0)), withVelocity: .slow, thenHoldForDuration: 0.5)
-        XCTAssertTrue(activity.waitForNonExistence(timeout: 5), "Leftward release must submit not interested")
-        app.terminate()
+        for language in ["zh-Hans", "de"] {
+            let app = XCUIApplication()
+            let id = "cmutualui0000000000000001"
+            app.launchArguments = [
+                "--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-discover", "--ui-testing-weekly-intent",
+                "--ui-testing-mutual-opportunity", "--ui-testing-together-matching",
+                "--ui-testing-opportunity-topic=COFFEE", "--ui-testing-language=\(language)",
+                "--ui-testing-appearance=\(language == "de" ? "dark" : "light")",
+            ]
+            if language == "de" { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
+            app.launch()
+            let bar = app.descendants(matching: .any)["mutual-opportunity-swipe-\(id)"]
+            let handle = app.descendants(matching: .any)["mutual-opportunity-swipe-handle-\(id)"]
+            let activity = app.descendants(matching: .any)["mutual-opportunity-activity-\(id)"]
+            XCTAssertTrue(bar.waitForExistence(timeout: 8))
+            revealFlowElement(handle, in: app)
+            XCTAssertGreaterThanOrEqual(handle.frame.height, 44)
+            XCTAssertEqual(handle.frame.midX, bar.frame.midX, accuracy: 3)
+            saveScreenshot(app: app, name: "opportunity-slider-refined-\(language)")
+            let start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: -bar.frame.width * 0.40, dy: 0)), withVelocity: .slow, thenHoldForDuration: 0.5)
+            XCTAssertTrue(activity.waitForNonExistence(timeout: 5), "Leftward release must submit not interested")
+            app.terminate()
+        }
     }
 
     @MainActor
@@ -556,7 +563,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
         let button = app.buttons["together-tab-\(raw)"].firstMatch
         if button.waitForExistence(timeout: 2) { button.tap() }
         else {
-            let picker = app.segmentedControls["together-segmented-control"]
+            let picker = app.descendants(matching: .any)["together-segmented-control"].firstMatch
             XCTAssertTrue(picker.waitForExistence(timeout: 5), app.debugDescription)
             picker.buttons.element(boundBy: index).tap()
         }
@@ -564,7 +571,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
 
     @MainActor
     func testTogetherTabsSeparateRecommendationsIntentionsAndExplore() {
-        let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents",
+        let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents", "--ui-testing-explore-examples",
             "--ui-testing-language=zh-Hans", "--ui-testing-appearance=light"])
         let opportunity = app.descendants(matching: .any)["mutual-opportunity-cmutualui0000000000000001"].firstMatch
         XCTAssertTrue(opportunity.waitForExistence(timeout: 5), app.debugDescription)
@@ -613,6 +620,32 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
+    func testExploreInterestSharesRecommendationWithoutEditor() {
+        let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents",
+            "--ui-testing-language=zh-Hans", "--ui-testing-appearance=light"])
+        selectTogetherSection(2, in: app)
+        let interest = app.buttons["explore-interest-ui-explore-0"]
+        revealFlowElement(interest, in: app)
+        XCTAssertTrue(interest.isHittable)
+        XCTAssertEqual(interest.label, "感兴趣")
+        saveScreenshot(app: app, name: "explore-real-interest-before")
+        interest.tap()
+        let saved = app.descendants(matching: .any)["explore-interest-saved-ui-explore-0"].firstMatch
+        XCTAssertTrue(saved.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.descendants(matching: .any)["intent-editor"].exists)
+        XCTAssertFalse(interest.exists)
+        saveScreenshot(app: app, name: "explore-real-interest-saved")
+        app.buttons["explore-view-recommendations-ui-explore-0"].tap()
+        let recommendation = app.descendants(matching: .any)["mutual-opportunity-saved-ui-explore-opportunity-ui-explore-0"].firstMatch
+        revealFlowElement(recommendation, in: app)
+        XCTAssertTrue(recommendation.exists)
+        XCTAssertFalse(app.buttons["mutual-opportunity-open-ui-explore-opportunity-ui-explore-0"].exists)
+        selectTogetherSection(2, in: app)
+        XCTAssertTrue(saved.waitForExistence(timeout: 5))
+        app.terminate()
+    }
+
+    @MainActor
     func testIntentionsSaveOnceWithoutSeparateFindingConfirmation() {
         let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents",
             "--ui-testing-language=en", "--ui-testing-appearance=light"])
@@ -650,12 +683,13 @@ final class VisualQAScreenshotUITests: XCTestCase {
         revealFlowElement(resume, in: app)
         resume.tap()
         XCTAssertEqual(pausedStatus.label, "Finding company", "Resume is one action, without another confirmation")
+        XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Active until")).firstMatch.exists)
         app.terminate()
     }
 
     @MainActor
     func testTogetherCreateReturnsToIntentionsWithoutPublishingExplore() {
-        let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents",
+        let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents", "--ui-testing-explore-examples",
             "--ui-testing-language=zh-Hans"])
         selectTogetherSection(1, in: app)
         app.scrollViews["together-section-intentions"].swipeUp(velocity: .slow)
@@ -672,7 +706,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
         app.buttons["intent-editor-save"].tap()
         let created = app.descendants(matching: .any)["weekly-intent-ui-intent-created"].firstMatch
         XCTAssertTrue(created.waitForExistence(timeout: 5))
-        XCTAssertGreaterThan(created.frame.minY, app.segmentedControls["together-segmented-control"].frame.maxY)
+        XCTAssertGreaterThan(created.frame.minY, app.descendants(matching: .any)["together-segmented-control"].firstMatch.frame.maxY)
         XCTAssertLessThan(created.frame.minY, app.frame.height * 0.55, "A new intention is intentionally revealed at the top")
         revealFlowElement(created, in: app)
         let exploreViewport = app.descendants(matching: .any)["explore-intents-list"].firstMatch
@@ -730,7 +764,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
             XCTAssertLessThanOrEqual(edit.frame.maxX, app.frame.maxX)
             saveScreenshot(app: app, name: "together-tabs-intentions-\(language)-dark")
             selectTogetherSection(2, in: app)
-            let use = app.buttons["explore-use-ui-explore-0"]
+            let use = app.buttons["explore-interest-ui-explore-0"]
             revealFlowElement(use, in: app)
             XCTAssertTrue(use.isHittable)
             XCTAssertLessThanOrEqual(use.frame.maxX, app.frame.maxX)

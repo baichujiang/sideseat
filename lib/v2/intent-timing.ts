@@ -22,7 +22,7 @@ export type IntentTimingSource = {
   timeWindows: unknown;
   timePreference?: unknown;
   timeZone?: string;
-  expiresAt: Date;
+  expiresAt: Date | null;
 };
 type Window = { startAt: Date; endAt: Date };
 export type OpportunityTimeContext = {
@@ -39,18 +39,14 @@ export function readTimePreference(value: unknown): IntentTimePreference {
   return value == null ? { kind: "EXACT" } : intentTimePreferenceSchema.parse(value);
 }
 
-export function recentIntentExpiry(now = new Date()): Date {
-  return new Date(now.getTime() + 14 * 24 * 3_600_000);
-}
-
 export function flexiblePreferenceFitsLifecycle(
-  preference: IntentTimePreference, timeZone: string, now: Date, expiry: Date,
+  preference: IntentTimePreference, timeZone: string, now: Date, expiry: Date | null,
 ): boolean {
   if (preference.kind !== "FLEXIBLE") return true;
   if (preference.startDate > preference.endDate) return false;
   const start = fromZonedTime(`${preference.startDate}T00:00:00`, timeZone);
   const end = fromZonedTime(`${preference.endDate}T23:59:59.999`, timeZone);
-  return end > now && start <= expiry && end <= expiry &&
+  return end > now && (expiry === null || (start <= expiry && end <= expiry)) &&
     preference.startDate >= formatInTimeZone(now, timeZone, "yyyy-MM-dd");
 }
 
@@ -59,10 +55,10 @@ function exactWindows(value: unknown): Window[] {
   return value.map(window => ({ startAt: new Date(window.startAt), endAt: new Date(window.endAt) }));
 }
 
-function possibleWindows(source: IntentTimingSource, now: Date): Window[] {
+function possibleWindows(source: IntentTimingSource): Window[] {
   const preference = readTimePreference(source.timePreference);
   if (preference.kind === "EXACT") return exactWindows(source.timeWindows);
-  if (preference.kind === "UNDECIDED") return [{ startAt: now, endAt: source.expiresAt }];
+  if (preference.kind === "UNDECIDED") return [];
   const hours = { ANY: [0, 24], MORNING: [6, 12], AFTERNOON: [12, 18], EVENING: [18, 24] }[preference.period]!;
   const windows: Window[] = [];
   for (let day = new Date(`${preference.startDate}T12:00:00Z`);
@@ -85,37 +81,52 @@ export function compatibleIntentTiming(first: IntentTimingSource, second: Intent
   const b = readTimePreference(second.timePreference);
   const exact = a.kind === "EXACT" && b.kind === "EXACT";
   const zone = first.timeZone ?? "Europe/Berlin";
-  const horizon = new Date(Math.min(first.expiresAt.getTime(), second.expiresAt.getTime()));
-  if (horizon <= now) return null;
+  const horizon = Math.min(first.expiresAt?.getTime() ?? Infinity, second.expiresAt?.getTime() ?? Infinity);
+  if (horizon <= now.getTime()) return null;
+  const undecided = a.kind === "UNDECIDED" && b.kind === "UNDECIDED";
+  if (undecided) {
+    return {
+      startsAt: null, endsAt: null, overlapMinutes: null, certainty: 0,
+      expiresAt: new Date(Math.min(horizon, now.getTime() + HOURS_48)),
+      context: { kind: "UNDECIDED" as const, startDate: null, endDate: null, period: "ANY" as const, timeZone: zone },
+    };
+  }
+  const leftWindows = possibleWindows(first);
+  const rightWindows = possibleWindows(second);
+  // Undecided time imposes no date constraint; it never creates an appointment.
+  const left = a.kind === "UNDECIDED" ? rightWindows : leftWindows;
+  const right = b.kind === "UNDECIDED" ? leftWindows : rightWindows;
   let best: Window | null = null;
   let lastEnd: Date | null = null;
-  for (const left of possibleWindows(first, now)) for (const right of possibleWindows(second, now)) {
-    const startAt = new Date(Math.max(left.startAt.getTime(), right.startAt.getTime(),
+  let i = 0, j = 0;
+  while (i < left.length && j < right.length) {
+    const leftWindow = left[i]!, rightWindow = right[j]!;
+    const startAt = new Date(Math.max(leftWindow.startAt.getTime(), rightWindow.startAt.getTime(),
       exact ? 0 : now.getTime() + MINUTES_30));
-    const endAt = new Date(Math.min(left.endAt.getTime(), right.endAt.getTime(), horizon.getTime()));
+    const endAt = new Date(Math.min(leftWindow.endAt.getTime(), rightWindow.endAt.getTime(), horizon));
+    if (leftWindow.endAt <= rightWindow.endAt) i++; else j++;
     if (startAt.getTime() < now.getTime() + MINUTES_30 || endAt.getTime() - startAt.getTime() < MINUTES_30) continue;
     if (!best || startAt < best.startAt) best = { startAt, endAt };
     if (!lastEnd || endAt > lastEnd) lastEnd = endAt;
   }
   if (!best || !lastEnd) return null;
-  const undecided = a.kind === "UNDECIDED" && b.kind === "UNDECIDED";
   const periodA = a.kind === "FLEXIBLE" ? a.period : "ANY";
   const periodB = b.kind === "FLEXIBLE" ? b.period : "ANY";
   const context: OpportunityTimeContext = {
-    kind: exact ? "EXACT" : undecided ? "UNDECIDED" : "FLEXIBLE",
-    startDate: undecided ? null : formatInTimeZone(best.startAt, zone, "yyyy-MM-dd"),
-    endDate: undecided ? null : formatInTimeZone(new Date(lastEnd.getTime() - 1), zone, "yyyy-MM-dd"),
+    kind: exact ? "EXACT" : "FLEXIBLE",
+    startDate: formatInTimeZone(best.startAt, zone, "yyyy-MM-dd"),
+    endDate: formatInTimeZone(new Date(lastEnd.getTime() - 1), zone, "yyyy-MM-dd"),
     period: periodA !== "ANY" ? periodA : periodB,
     timeZone: zone,
   };
-  const expiry = new Date(Math.min(horizon.getTime(),
+  const expiry = new Date(Math.min(horizon,
     exact ? best.startAt.getTime() - 15 * 60_000 : Math.min(now.getTime() + HOURS_48, lastEnd.getTime())));
   return {
     startsAt: exact ? best.startAt : null,
     endsAt: exact ? best.endAt : null,
     expiresAt: expiry,
     overlapMinutes: exact ? Math.floor((best.endAt.getTime() - best.startAt.getTime()) / 60_000) : null,
-    certainty: exact ? 2 : undecided ? 0 : 1,
+    certainty: exact ? 2 : 1,
     context,
   };
 }

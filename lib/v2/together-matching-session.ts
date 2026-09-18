@@ -109,8 +109,9 @@ export async function startTogetherMatchingSession(
     const activeIntentCount = await tx.weeklyIntent.count({
       where: {
         userId,
+        exploreResponseToId: null,
         status: "ACTIVE",
-        expiresAt: { gt: now },
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
       },
     });
     if (activeIntentCount === 0) {

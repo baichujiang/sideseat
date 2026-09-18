@@ -120,3 +120,14 @@ test("OpenAPI exposes one stable no-body GET, POST, and DELETE contract", () => 
     "version",
   ]);
 });
+
+
+test("persistent intention API accepts current clients and directs earlier iOS builds to update", async () => {
+  const { requirePersistentIntentSupport } = await import("../../lib/api/v1/persistent-intents");
+  const request = (headers: Record<string, string>) => new Request("https://example.test/api/v1/me/weekly-intents", { headers });
+  assert.equal(requirePersistentIntentSupport(request({ "X-SideSeat-Platform": "ios", "X-SideSeat-Persistent-Intent": "1" })), null);
+  assert.equal(requirePersistentIntentSupport(request({})), null);
+  const unsupported = requirePersistentIntentSupport(request({ "X-SideSeat-Platform": "ios" }));
+  assert.equal(unsupported?.status, 426);
+  assert.equal((await unsupported!.json()).error.code, "CLIENT_UPDATE_REQUIRED");
+});

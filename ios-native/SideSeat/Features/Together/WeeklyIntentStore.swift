@@ -46,7 +46,7 @@ final class WeeklyIntentStore {
                 intents = [NativeWeeklyIntent(id: "ui-published-intent", topic: .coffee, activityText: AppLocalization.string("Coffee"),
                     sportTag: nil, sportOtherNote: nil, togetherMode: .sameActivity, studyGoal: nil,
                     courseId: nil, course: nil, timeWindows: [], timeZone: "Europe/Berlin", note: nil,
-                    status: "ACTIVE", policyVersion: 1, version: 1, expiresAt: Date().addingTimeInterval(86400),
+                    status: "ACTIVE", policyVersion: 1, version: 1, expiresAt: nil,
                     pausedAt: nil, endedAt: nil, createdAt: Date(), updatedAt: Date(),
                     timePreference: NativeIntentTimePreference(kind: "UNDECIDED"), automaticMatching: true, exploreVisible: true)]
             }
@@ -189,7 +189,6 @@ final class WeeklyIntentStore {
     func setPaused(
         _ paused: Bool,
         intent: NativeWeeklyIntent,
-        extend: Bool = false,
         automaticMatching: Bool = false,
         using session: SessionStore
     ) async -> Bool {
@@ -200,7 +199,7 @@ final class WeeklyIntentStore {
         #if DEBUG
         if usesCardFixtures {
             upsert(Self.cardFixture(id: intent.id, topic: intent.topic, title: intent.activityTitle,
-                status: extend ? intent.status : paused ? "PAUSED" : "ACTIVE",
+                status: paused ? "PAUSED" : "ACTIVE",
                 published: automaticMatching || intent.automaticMatching == true,
                 exploreVisible: intent.exploreVisible == true))
             return true
@@ -211,9 +210,9 @@ final class WeeklyIntentStore {
                 "api/v1/me/weekly-intents/\(intent.id)",
                 method: .patch,
                 body: NativeWeeklyIntentStateRequest(
-                    action: extend ? "EXTEND" : paused ? "PAUSE" : "RESUME",
+                    action: paused ? "PAUSE" : "RESUME",
                     expectedVersion: intent.version,
-                    automaticMatching: !paused && !extend && automaticMatching ? true : nil
+                    automaticMatching: !paused && automaticMatching ? true : nil
                 ),
                 idempotencyKey: UUID().uuidString
             )
@@ -272,7 +271,7 @@ final class WeeklyIntentStore {
             courseId: nil, course: nil,
             timeWindows: topic == .coffee ? [NativeWeeklyIntentTimeWindow(startAt: now.addingTimeInterval(86400), endAt: now.addingTimeInterval(93600))] : [],
             timeZone: "Europe/Berlin", note: nil, status: status, policyVersion: 1, version: 1,
-            expiresAt: now.addingTimeInterval(7 * 86400), pausedAt: status == "PAUSED" ? now : nil,
+            expiresAt: nil, pausedAt: status == "PAUSED" ? now : nil,
             endedAt: nil, createdAt: now, updatedAt: now,
             timePreference: NativeIntentTimePreference(kind: topic == .coffee ? "EXACT" : "UNDECIDED"),
             automaticMatching: published, exploreVisible: exploreVisible)

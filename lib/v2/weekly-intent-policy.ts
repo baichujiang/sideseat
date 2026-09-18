@@ -28,12 +28,11 @@ export function normalizeWeeklyIntentWindows(
 export function weeklyIntentWindowsFitLifecycle(
   windows: readonly WeeklyIntentWindow[],
   now: Date,
-  expiresAt: Date,
+  expiresAt: Date | null,
 ): boolean {
   return windows.every((window) => {
     const startAt = new Date(window.startAt);
     const endAt = new Date(window.endAt);
-    return startAt > now && endAt <= expiresAt;
+    return startAt > now && (expiresAt === null || endAt <= expiresAt);
   });
 }
-

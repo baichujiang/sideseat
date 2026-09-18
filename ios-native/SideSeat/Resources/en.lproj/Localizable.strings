@@ -1861,7 +1861,7 @@
 "Add something you would like to do. Your intention stays private." = "Add something you would like to do. Your intention stays private.";
 "Choose timing preference" = "Choose timing preference";
 "2 · When would you like to go?" = "2 · When would you like to go?";
-"Choose future, non-overlapping times of 30 minutes to 12 hours before this intention expires." = "Choose future, non-overlapping times of 30 minutes to 12 hours before this intention expires.";
+"Choose future, non-overlapping times of 30 minutes to 12 hours." = "Choose future, non-overlapping times of 30 minutes to 12 hours.";
 "Your activity is filled in. Choose the time you want to propose." = "Your activity is filled in. Choose the time you want to propose.";
 "Propose these times" = "Propose these times";
 "The other person still needs to accept. Nothing is added to your calendars yet." = "The other person still needs to accept. Nothing is added to your calendars yet.";
@@ -1916,6 +1916,8 @@
 /* Opportunity bilateral swipe */
 "Not interested" = "Not interested";
 "Choose interest" = "Choose";
+"Keep sliding" = "Keep sliding";
+"Release to confirm" = "Release to confirm";
 "Release for not interested" = "Release for not interested";
 "Swipe left for Not interested or right for Interested" = "Swipe left for Not interested or right for Interested";
 "Open Explore" = "Open Explore";
@@ -1992,3 +1994,15 @@
 /* Save once; no separate finding confirmation */
 "Saving starts finding company automatically. Pause anytime." = "Saving starts finding company automatically. Pause anytime.";
 "This saved intention is not participating in finding company." = "This saved intention is not participating in finding company.";
+
+"Show interest in an activity. Your choice stays private until you both show interest." = "Show interest in an activity. Your choice stays private until you both show interest.";
+
+"Example · No real participant" = "Example · No real participant";
+
+"Create a similar intention" = "Create a similar intention";
+
+"View in recommendations" = "View in recommendations";
+
+"Previous input" = "Previous input";
+
+"Next input" = "Next input";

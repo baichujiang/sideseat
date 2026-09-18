@@ -947,12 +947,15 @@ model WeeklyIntent {
   timePreference         Json?
   automaticMatching      Boolean @default(false)
   exploreVisible         Boolean @default(false)
+  /// Private backing intention for one Explore response; never general matching supply.
+  exploreResponseToId    String?
   timeZone               String              @default("Europe/Berlin")
   note                   String?             @db.VarChar(160)
   status                 WeeklyIntentStatus  @default(ACTIVE)
   policyVersion          Int                 @default(1)
   version                Int                 @default(1)
-  expiresAt              DateTime
+  /// NULL means the owner keeps this intention until ending it.
+  expiresAt              DateTime?
   pausedAt               DateTime?
   endedAt                DateTime?
   createdAt              DateTime            @default(now())

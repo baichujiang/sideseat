@@ -5,22 +5,29 @@ import UIKit
 struct SSFlowCard<Content: View>: View {
     var contentPadding: CGFloat = SideSeatTheme.spaceLG
     var contentSpacing: CGFloat = SideSeatTheme.spaceMD
+    var activityTopic: NativeWeeklyIntentTopic? = nil
     @ViewBuilder var content: () -> Content
+
+    private var radius: CGFloat {
+        activityTopic == nil ? SideSeatTheme.cardRadius : SideSeatTheme.Together.cardRadius
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: contentSpacing, content: content)
             .padding(contentPadding)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
-                SideSeatTheme.surface,
+                activityTopic.map(SideSeatTheme.Together.cardFill) ?? SideSeatTheme.surface,
                 in: RoundedRectangle(
-                    cornerRadius: SideSeatTheme.cardRadius, style: .continuous
+                    cornerRadius: radius, style: .continuous
                 )
             )
             .overlay {
-                RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
-                    .strokeBorder(SideSeatTheme.separator.opacity(0.25), lineWidth: 0.5)
+                RoundedRectangle(cornerRadius: radius, style: .continuous)
+                    .strokeBorder(activityTopic == nil ? SideSeatTheme.separator.opacity(0.25)
+                                  : SideSeatTheme.Together.border.opacity(0.7), lineWidth: 0.5)
             }
+            .shadow(color: activityTopic == nil ? .clear : SideSeatTheme.Together.shadow.opacity(0.045), radius: 16, y: 6)
     }
 }
 
@@ -142,6 +149,7 @@ enum SSOpportunitySwipeChoice: Equatable {
 /// A compact bilateral decision control: left means not interested, right means interested.
 struct SSOpportunityDecisionBar: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var translation: CGSize = .zero
     @State private var trackWidth: CGFloat = 0
     @State private var committedChoice: SSOpportunitySwipeChoice?
@@ -151,8 +159,9 @@ struct SSOpportunityDecisionBar: View {
     let onInterested: () async -> Void
     let onSkip: () async -> Void
 
-    private let thumbSize: CGFloat = 48
-    private let trackInset: CGFloat = 8
+    private let thumbSize: CGFloat = 52
+    private let trackInset: CGFloat = 6
+    private var trackHeight: CGFloat { dynamicTypeSize.isAccessibilitySize ? 72 : 64 }
 
     private var reduceMotion: Bool {
         #if DEBUG
@@ -169,18 +178,30 @@ struct SSOpportunityDecisionBar: View {
     }
     private var isDragging: Bool { translation != .zero && committedChoice == nil }
     private var isSubmitting: Bool { committedChoice != nil || isWorking }
+    private var activeChoice: SSOpportunitySwipeChoice? {
+        if let committedChoice { return committedChoice }
+        guard abs(offset) > 3 else { return nil }
+        return offset > 0 ? .interested : .skip
+    }
+    private var progress: CGFloat { travel > 0 ? abs(offset) / travel : 0 }
+    private var feedbackText: String {
+        if isSubmitting { return AppLocalization.string("Saving…") }
+        return AppLocalization.string(armedChoice == nil ? "Keep sliding" : "Release to confirm")
+    }
     private var returnAnimation: Animation? {
         reduceMotion ? nil : .spring(response: 0.34, dampingFraction: 0.74)
     }
 
     var body: some View {
-        accessibleTrack
-            .background(SSPageSwipeExclusion())
+        VStack(spacing: SideSeatTheme.spaceSM) {
+            decisionLabels
+            accessibleTrack
+        }
+        .background(SSPageSwipeExclusion())
     }
 
     private var feedbackTrack: some View {
         decisionTrack
-            .opacity(isSubmitting ? 0.72 : 1)
             .sensoryFeedback(.impact(weight: .light, intensity: 0.55), trigger: armedChoice) { old, new in
                 old == nil && new != nil && !isSubmitting
             }
@@ -194,6 +215,7 @@ struct SSOpportunityDecisionBar: View {
             .accessibilityElement(children: .contain)
             .accessibilityLabel(AppLocalization.string("Choose interest"))
             .accessibilityHint(AppLocalization.string("Swipe left for Not interested or right for Interested"))
+            .accessibilityValue(isSubmitting ? AppLocalization.string("Saving…") : AppLocalization.string("Not selected"))
             .accessibilityAdjustableAction { direction in
                 switch direction {
                 case .increment: submit(.interested)
@@ -201,46 +223,84 @@ struct SSOpportunityDecisionBar: View {
                 @unknown default: break
                 }
             }
+            .accessibilityAction(named: AppLocalization.string("Interested")) { submit(.interested) }
+            .accessibilityAction(named: AppLocalization.string("Not interested")) { submit(.skip) }
             .accessibilityIdentifier("mutual-opportunity-swipe-\(opportunityID)")
     }
 
     private var decisionTrack: some View {
         ZStack(alignment: .leading) {
             Capsule()
-                .fill(SideSeatTheme.fillTertiary)
+                .fill(SideSeatTheme.Together.decisionWell)
 
-            decisionLabels
+            // The wash follows actual distance; it never advances on its own.
+            Capsule()
+                .fill(activeChoice == .interested ? SideSeatTheme.accent.opacity(0.16) : SideSeatTheme.Together.ink.opacity(0.07))
+                .frame(width: thumbSize + abs(offset), height: trackHeight - trackInset * 2)
+                .offset(x: centerOffset + min(0, offset))
+                .opacity(Double(min(1, progress * 4)))
+                .allowsHitTesting(false)
+
+            HStack {
+                Image(systemName: "minus")
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                Spacer()
+                Image(systemName: "heart")
+                    .foregroundStyle(SideSeatTheme.accentText)
+            }
+            .font(.system(size: 16, weight: .medium))
+            .padding(.horizontal, 22)
+            .opacity(activeChoice == nil ? 1 : 0)
+            .accessibilityHidden(true)
+
+            dragFeedback
 
             Capsule()
-                .strokeBorder(trackStroke, lineWidth: armedChoice == nil ? 0.5 : 1.5)
+                .strokeBorder(trackStroke, lineWidth: armedChoice == nil ? 0.5 : 1)
                 .allowsHitTesting(false)
 
             thumb
                 .offset(x: centerOffset + offset)
         }
-        .frame(height: 60)
+        .frame(height: trackHeight)
         .background(trackWidthReader)
     }
 
     private var decisionLabels: some View {
-        HStack(spacing: SideSeatTheme.spaceXS) {
-            Label(AppLocalization.string("Not interested"), systemImage: "arrow.left")
-                .font(.caption.weight(armedChoice == .skip ? .semibold : .medium))
-                .foregroundStyle(armedChoice == .skip ? SideSeatTheme.textPrimary : SideSeatTheme.textSecondaryStrong)
-                .lineLimit(1)
+        HStack(alignment: .top, spacing: SideSeatTheme.spaceLG) {
+            Text(AppLocalization.string("Not interested"))
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .opacity(activeChoice == .interested ? 0.5 : 1)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            Color.clear.frame(width: thumbSize + SideSeatTheme.spaceSM)
-
-            Label(AppLocalization.string("Interested"), systemImage: "arrow.right")
-                .font(.caption.weight(armedChoice == .interested ? .semibold : .medium))
-                .foregroundStyle(armedChoice == .interested ? SideSeatTheme.accentText : SideSeatTheme.textSecondaryStrong)
-                .lineLimit(1)
+            Text(AppLocalization.string("Interested"))
+                .foregroundStyle(SideSeatTheme.accentText)
+                .opacity(activeChoice == .skip ? 0.5 : 1)
+                .multilineTextAlignment(.trailing)
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
-        .padding(.horizontal, SideSeatTheme.spaceMD)
+        .font(.caption.weight(.medium))
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(.horizontal, 4)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: activeChoice)
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+    }
+
+    private var dragFeedback: some View {
+        let isRight = offset >= 0
+        let availableWidth = max(0, centerOffset + abs(offset) - 24)
+        return Text(feedbackText)
+            .font(.caption.weight(armedChoice == nil ? .medium : .semibold))
+            .foregroundStyle(SideSeatTheme.Together.ink)
+            .multilineTextAlignment(.center)
+            .lineLimit(2)
+            .minimumScaleFactor(0.85)
+            .frame(width: availableWidth, height: trackHeight - 12)
+            .offset(x: isRight ? 12 : centerOffset + offset + thumbSize + 12)
+            .opacity(Double(min(1, max(0, (progress - 0.12) / 0.25))))
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
     }
 
     private var trackWidthReader: some View {
@@ -252,35 +312,52 @@ struct SSOpportunityDecisionBar: View {
     }
 
     private var trackStroke: Color {
-        switch armedChoice {
-        case .interested: return SideSeatTheme.accent.opacity(0.55)
-        case .skip: return SideSeatTheme.textSecondaryStrong.opacity(0.42)
-        case nil: return SideSeatTheme.separator.opacity(0.22)
+        switch armedChoice ?? committedChoice {
+        case .interested: return SideSeatTheme.accent.opacity(0.45)
+        case .skip: return SideSeatTheme.Together.ink.opacity(0.25)
+        case nil: return SideSeatTheme.Together.border
         }
     }
 
     private var thumb: some View {
         ZStack {
             Circle().fill(thumbFill)
-            Circle().strokeBorder(thumbStroke, lineWidth: armedChoice == nil ? 0.75 : 2)
-            if isWorking {
+            Circle().strokeBorder(thumbStroke, lineWidth: 0.75)
+            if isSubmitting {
                 ProgressView().tint(thumbForeground)
-            } else {
-                Image(systemName: thumbSymbol)
-                    .font(.system(size: 16, weight: .bold))
+            } else if let choice = armedChoice {
+                Image(systemName: choice == .interested ? "heart.fill" : "minus")
+                    .font(.system(size: 19, weight: .semibold))
                     .foregroundStyle(thumbForeground)
+            } else {
+                HStack(spacing: 5) {
+                    Image(systemName: "chevron.left").font(.system(size: 8, weight: .semibold))
+                    HStack(spacing: 3) {
+                        Capsule().frame(width: 2, height: 14)
+                        Capsule().frame(width: 2, height: 14)
+                    }
+                    Image(systemName: "chevron.right").font(.system(size: 8, weight: .semibold))
+                }
+                .foregroundStyle(SideSeatTheme.accentText)
             }
         }
         .frame(width: thumbSize, height: thumbSize)
         .contentShape(Circle())
-        .shadow(color: SideSeatTheme.accent.opacity(isDragging ? 0.18 : 0.08), radius: isDragging ? 7 : 3, y: 2)
-        .scaleEffect(reduceMotion || !isDragging ? 1 : (armedChoice == nil ? 1.04 : 1.08))
-        .animation(reduceMotion ? nil : .spring(response: 0.22, dampingFraction: 0.7), value: armedChoice)
+        .shadow(color: SideSeatTheme.Together.shadow.opacity(isDragging ? 0.16 : 0.10), radius: isDragging ? 8 : 4, y: isDragging ? 3 : 2)
+        .scaleEffect(reduceMotion || !isDragging ? 1 : 1.04)
+        .animation(reduceMotion ? nil : .spring(response: 0.24, dampingFraction: 0.8), value: isDragging)
         .overlay(dragSurface)
         .allowsHitTesting(!isSubmitting)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(AppLocalization.string("Choose interest"))
         .accessibilityHint(AppLocalization.string("Swipe left for Not interested or right for Interested"))
+        .accessibilityAdjustableAction { direction in
+            switch direction {
+            case .increment: submit(.interested)
+            case .decrement: submit(.skip)
+            @unknown default: break
+            }
+        }
         .accessibilityIdentifier("mutual-opportunity-swipe-handle-\(opportunityID)")
     }
 
@@ -310,28 +387,24 @@ struct SSOpportunityDecisionBar: View {
     private var thumbFill: Color {
         switch armedChoice ?? committedChoice {
         case .interested: return SideSeatTheme.accent
-        case .skip: return SideSeatTheme.textSecondaryStrong
-        case nil: return SideSeatTheme.surface
+        case .skip: return SideSeatTheme.Together.ink
+        case nil: return SideSeatTheme.Together.decisionHandle
         }
     }
 
     private var thumbStroke: Color {
         switch armedChoice {
         case .interested: return SideSeatTheme.accent
-        case .skip: return SideSeatTheme.textSecondaryStrong
-        case nil: return SideSeatTheme.separator.opacity(0.28)
+        case .skip: return SideSeatTheme.Together.ink
+        case nil: return SideSeatTheme.Together.border
         }
     }
 
     private var thumbForeground: Color {
-        (armedChoice ?? committedChoice) == nil ? SideSeatTheme.accentText : SideSeatTheme.onAccent
-    }
-
-    private var thumbSymbol: String {
         switch armedChoice ?? committedChoice {
-        case .interested: return "checkmark"
-        case .skip: return "xmark"
-        case nil: return "arrow.left.and.right"
+        case .interested: return SideSeatTheme.onAccent
+        case .skip: return SideSeatTheme.Together.canvas
+        case nil: return SideSeatTheme.accentText
         }
     }
 

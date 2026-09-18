@@ -132,7 +132,7 @@ final class MutualOpportunityStore {
         }
     }
 
-    private func upsert(_ opportunity: NativeMutualOpportunity) {
+    func upsert(_ opportunity: NativeMutualOpportunity) {
         if let index = opportunities.firstIndex(where: { $0.id == opportunity.id }) {
             opportunities[index] = opportunity
         } else {
@@ -141,8 +141,8 @@ final class MutualOpportunityStore {
     }
 }
 
-private extension NativeMutualOpportunity {
-    static func uiTestingFixture(id: String) -> NativeMutualOpportunity {
+extension NativeMutualOpportunity {
+    static func uiTestingFixture(id: String, stateOverride: String? = nil) -> NativeMutualOpportunity {
         let arguments = ProcessInfo.processInfo.arguments
         let related = arguments.contains("--ui-testing-related-activity")
         let discovery = arguments.contains("--ui-testing-discovery-matching")
@@ -151,7 +151,7 @@ private extension NativeMutualOpportunity {
             .map { String($0.dropFirst("--ui-testing-opportunity-topic=".count)) }
         let topic = topicArgument.flatMap(NativeWeeklyIntentTopic.init(rawValue:))
             ?? (related || flexible ? .coffee : .study)
-        let state = arguments.first { $0.hasPrefix("--ui-testing-opportunity-state=") }
+        let state = stateOverride ?? arguments.first { $0.hasPrefix("--ui-testing-opportunity-state=") }
             .map { String($0.dropFirst("--ui-testing-opportunity-state=".count)) } ?? "NEEDS_DECISION"
         let start = Date().addingTimeInterval(26 * 60 * 60)
         let end = start.addingTimeInterval((related ? 30 : 60) * 60)

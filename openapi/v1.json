@@ -12,6 +12,72 @@
     }
   ],
   "paths": {
+    "/api/v1/explore/intents/{intentId}/interest": {
+      "post": {
+        "operationId": "expressExploreIntentInterest",
+        "x-sideseat-empty-request-body": true,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._:-]{8,128}$"
+            }
+          },
+          {
+            "name": "intentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The shared recommendation opportunity after saving this participant’s private interest.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MutualOpportunityEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "426": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "description": "Privately express interest in a real published intention. Reuses the recommendation opportunity and never enables automatic matching. Both participants must independently choose YES before chat opens."
+      }
+    },
     "/api/v1/client-config": {
       "get": {
         "operationId": "getClientConfig",
@@ -7572,10 +7638,57 @@
         }
       }
     },
+    "/api/v1/explore/intents": {
+      "get": {
+        "operationId": "listExploreIntents",
+        "description": "iOS clients must send X-SideSeat-Persistent-Intent: 1; earlier builds receive 426 CLIENT_UPDATE_REQUIRED.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 3
+            },
+            "description": "Requested count, clamped to 1–5."
+          }
+        ],
+        "responses": {
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "426": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "200": {
+            "description": "Published intentions with limited author context. Null expiry means the intention persists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExploreIntentEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/me/weekly-intents": {
       "get": {
         "operationId": "getCurrentWeeklyIntent",
-        "security": [{ "bearerAuth": [] }],
+        "description": "iOS clients must send X-SideSeat-Persistent-Intent: 1; earlier builds receive 426 CLIENT_UPDATE_REQUIRED.",
+      "security": [{ "bearerAuth": [] }],
         "responses": {
           "200": { "description": "The owner's active and paused Weekly Intents, plus a legacy singular projection.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WeeklyIntentCollectionEnvelope" } } } },
           "401": { "$ref": "#/components/responses/Error" }, "403": { "$ref": "#/components/responses/Error" }, "404": { "$ref": "#/components/responses/Error" }, "500": { "$ref": "#/components/responses/Error" }
@@ -7583,7 +7696,8 @@
       },
       "post": {
         "operationId": "createWeeklyIntent",
-        "security": [{ "bearerAuth": [] }],
+        "description": "iOS clients must send X-SideSeat-Persistent-Intent: 1; earlier builds receive 426 CLIENT_UPDATE_REQUIRED.",
+      "security": [{ "bearerAuth": [] }],
         "parameters": [
           { "name": "Idempotency-Key", "in": "header", "required": true, "schema": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]{8,128}$" } }
         ],
@@ -7601,7 +7715,8 @@
       ],
       "patch": {
         "operationId": "updateWeeklyIntent",
-        "security": [{ "bearerAuth": [] }],
+        "description": "iOS clients must send X-SideSeat-Persistent-Intent: 1; earlier builds receive 426 CLIENT_UPDATE_REQUIRED.",
+      "security": [{ "bearerAuth": [] }],
         "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WeeklyIntentPatchRequest" } } } },
         "responses": {
           "200": { "description": "The Weekly Intent was edited, paused, or resumed.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WeeklyIntentEnvelope" } } } },
@@ -7610,7 +7725,8 @@
       },
       "delete": {
         "operationId": "endWeeklyIntent",
-        "security": [{ "bearerAuth": [] }],
+        "description": "iOS clients must send X-SideSeat-Persistent-Intent: 1; earlier builds receive 426 CLIENT_UPDATE_REQUIRED.",
+      "security": [{ "bearerAuth": [] }],
         "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WeeklyIntentEndRequest" } } } },
         "responses": {
           "200": { "description": "The Weekly Intent is terminal and no longer supplies opportunities.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WeeklyIntentEnvelope" } } } },
@@ -9216,7 +9332,7 @@
         "required": ["topics", "meetingPreference", "weeklyWindows", "timeZone"]
       },
       "IntentTimePreference": {
-        "description": "EXACT requires 1–7 timeWindows. FLEXIBLE uses inclusive local dates and an optional day-part (ANY means no day-part preference); UNDECIDED is not declared all-day availability. Both non-exact modes require empty timeWindows. New intentions last 14 days.",
+        "description": "EXACT requires 1–7 timeWindows. FLEXIBLE uses inclusive local dates and an optional day-part (ANY means no day-part preference); UNDECIDED is not declared all-day availability. Both non-exact modes require empty timeWindows. New intentions do not expire; dates describe timing preferences only.",
         "oneOf": [
           { "type": "object", "additionalProperties": false, "properties": { "kind": { "type": "string", "const": "EXACT" } }, "required": ["kind"] },
           { "type": "object", "additionalProperties": false, "properties": { "kind": { "type": "string", "const": "UNDECIDED" } }, "required": ["kind"] },
@@ -9256,6 +9372,231 @@
         },
         "required": ["id", "code", "name"]
       },
+      "ExploreIntent": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "isExample": {
+          "type": "boolean",
+          "description": "Examples have no real recipient and cannot receive interest."
+        },
+        "topic": {
+          "type": "string",
+          "enum": [
+            "COFFEE",
+            "STUDY",
+            "SPORTS",
+            "EXPLORE",
+            "FOOD",
+            "EVENTS"
+          ]
+        },
+        "togetherMode": {
+          "type": "string"
+        },
+        "studyGoal": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "activityText": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sportTag": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sportOtherNote": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "course": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "code": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "name"
+          ]
+        },
+        "time": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "EXACT",
+                "FLEXIBLE",
+                "UNDECIDED"
+              ]
+            },
+            "startDate": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date"
+            },
+            "endDate": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date"
+            },
+            "period": {
+              "type": "string",
+              "enum": [
+                "ANY",
+                "MORNING",
+                "AFTERNOON",
+                "EVENING"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "startDate",
+            "endDate",
+            "period"
+          ]
+        },
+        "descriptionPreview": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "campus": {
+          "type": "string"
+        },
+        "verifiedStudent": {
+          "type": "boolean"
+        },
+        "languages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expiresAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "interest": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "required": [
+            "opportunityId",
+            "state",
+            "coordination"
+          ],
+          "properties": {
+            "opportunityId": {
+              "type": "string"
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "NEEDS_DECISION",
+                "DECIDED",
+                "READY_TO_COORDINATE",
+                "UNAVAILABLE"
+              ]
+            },
+            "coordination": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "required": [
+                "connectionId"
+              ],
+              "properties": {
+                "connectionId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "id",
+        "isExample",
+        "topic",
+        "togetherMode",
+        "studyGoal",
+        "activityText",
+        "sportTag",
+        "sportOtherNote",
+        "course",
+        "time",
+        "descriptionPreview",
+        "campus",
+        "verifiedStudent",
+        "languages",
+        "expiresAt",
+        "createdAt"
+      ]
+    },
+      "ExploreIntentEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "intents": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ExploreIntent"
+                }
+              },
+              "hasMore": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "intents",
+              "hasMore"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "WeeklyIntent": {
         "type": "object",
         "additionalProperties": false,
@@ -9285,7 +9626,7 @@
           "status": { "type": "string", "enum": ["ACTIVE", "PAUSED", "ENDED", "EXPIRED"] },
           "policyVersion": { "type": "integer", "minimum": 1 },
           "version": { "type": "integer", "minimum": 1 },
-          "expiresAt": { "type": "string", "format": "date-time" },
+          "expiresAt": { "type": ["string", "null"], "format": "date-time", "description": "Null for persistent intentions. Finite dates are retained on historical records." },
           "pausedAt": { "type": ["string", "null"], "format": "date-time" },
           "endedAt": { "type": ["string", "null"], "format": "date-time" },
           "createdAt": { "type": "string", "format": "date-time" },
@@ -9382,15 +9723,6 @@
             "properties": {
               "action": { "type": "string", "const": "RESUME" },
               "automaticMatching": { "type": "boolean", "const": true },
-              "expectedVersion": { "type": "integer", "minimum": 1 }
-            },
-            "required": ["action", "expectedVersion"]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "action": { "type": "string", "const": "EXTEND" },
               "expectedVersion": { "type": "integer", "minimum": 1 }
             },
             "required": ["action", "expectedVersion"]

@@ -70,7 +70,7 @@ export function discoveryFit(first: DiscoveryIntent, second: DiscoveryIntent, no
     classification,
     timing: overlap ?? {
       startsAt: null, endsAt: null, overlapMinutes: null, certainty: 0,
-      expiresAt: new Date(Math.min(first.expiresAt.getTime(), second.expiresAt.getTime(), now.getTime() + 48 * 3600_000)),
+      expiresAt: new Date(Math.min(first.expiresAt?.getTime() ?? Infinity, second.expiresAt?.getTime() ?? Infinity, now.getTime() + 48 * 3600_000)),
       context: { kind: "UNDECIDED" as const, startDate: null, endDate: null, period: "ANY" as const, timeZone: first.timeZone ?? "Europe/Berlin" },
     },
     snapshot: {

@@ -44,6 +44,7 @@ actor APIClient {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("ios", forHTTPHeaderField: "X-SideSeat-Platform")
         request.setValue("1", forHTTPHeaderField: "X-SideSeat-Flexible-Timing")
+        request.setValue("1", forHTTPHeaderField: "X-SideSeat-Persistent-Intent")
         request.setValue("1", forHTTPHeaderField: "X-SideSeat-Discovery-Matching")
         request.setValue(environment.appVersion, forHTTPHeaderField: "X-SideSeat-App-Version")
         request.setValue(environment.buildNumber, forHTTPHeaderField: "X-SideSeat-Build")

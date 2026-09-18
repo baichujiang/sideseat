@@ -1,3 +1,4 @@
+import { requirePersistentIntentSupport } from "@/lib/api/v1/persistent-intents";
 import type { Prisma } from "@prisma/client";
 
 import { requireV1User } from "@/lib/api/v1/auth";
@@ -39,7 +40,7 @@ function domainError(request: Request, cause: WeeklyIntentError) {
     case "WEEKLY_INTENT_WINDOW_INVALID":
       return v1Error(request, {
         code: "INVALID_REQUEST",
-        message: "Choose future timing within this intention's validity, or leave time undecided.",
+        message: "Choose future timing, or leave time undecided.",
         status: 422,
         field: "timeWindows",
       });
@@ -83,6 +84,8 @@ function domainError(request: Request, cause: WeeklyIntentError) {
 export async function GET(request: Request) {
   const auth = await requireV1User(request);
   if (!auth.ok) return auth.response;
+  const unsupportedClient = requirePersistentIntentSupport(request);
+  if (unsupportedClient) return unsupportedClient;
   try {
     return v1Success(await loadCurrentWeeklyIntent(auth.user.id), { request });
   } catch (cause) {
@@ -99,6 +102,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const auth = await requireV1User(request);
   if (!auth.ok) return auth.response;
+  const unsupportedClient = requirePersistentIntentSupport(request);
+  if (unsupportedClient) return unsupportedClient;
   if (!isV2FeatureEnabled("v2WeeklyIntent")) {
     return unavailable(request);
   }

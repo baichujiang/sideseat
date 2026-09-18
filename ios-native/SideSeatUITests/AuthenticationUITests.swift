@@ -1238,6 +1238,60 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Test User Native"].waitForExistence(timeout: 3))
     }
 
+    func testMeProfileInputRowsSupportTapAndKeyboardNavigation() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated"]
+        app.launch()
+
+        let meTab = app.tabBars.buttons["我"]
+        XCTAssertTrue(meTab.waitForExistence(timeout: 5))
+        meTab.tap()
+        let edit = app.buttons["me-hero-edit"]
+        XCTAssertTrue(edit.waitForExistence(timeout: 3))
+        edit.tap()
+
+        let nicknameLabel = app.staticTexts["昵称"]
+        XCTAssertTrue(nicknameLabel.waitForExistence(timeout: 3))
+        nicknameLabel.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
+        app.typeText(" Tap\n")
+
+        let tagline = app.descendants(matching: .any)["profile-edit-tagline"].firstMatch
+        app.typeText(" More\nSecond line")
+        XCTAssertTrue((tagline.value as? String)?.contains("More\nSecond line") == true)
+        let taglineScreenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        taglineScreenshot.name = "Profile multiline input and keyboard navigation"
+        taglineScreenshot.lifetime = .keepAlways
+        add(taglineScreenshot)
+
+        let nextInput = app.buttons["profile-edit-input-next"]
+        XCTAssertTrue(nextInput.exists)
+        nextInput.tap()
+        app.typeText(" Design\n")
+        app.typeText("wx_nav_test\n")
+        app.typeText("wa_nav_test")
+
+        let previousInput = app.buttons["profile-edit-input-previous"]
+        XCTAssertTrue(previousInput.isEnabled)
+        previousInput.tap()
+        app.typeText("_edited")
+        let contactScreenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        contactScreenshot.name = "Profile contact input after keyboard navigation"
+        contactScreenshot.lifetime = .keepAlways
+        add(contactScreenshot)
+
+        app.buttons["profile-edit-input-done"].tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 3))
+        XCTAssertEqual(app.textFields["profile-edit-nickname"].value as? String, "Test User Tap")
+        XCTAssertEqual(app.textFields["profile-edit-major"].value as? String, "Informatics Design")
+        XCTAssertEqual(app.textFields["profile-edit-wechat"].value as? String, "wx_nav_test_edited")
+        XCTAssertEqual(app.textFields["profile-edit-whatsapp"].value as? String, "wa_nav_test")
+
+        app.buttons["profile-edit-save"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["profile-edit"].waitForNonExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Test User Tap"].waitForExistence(timeout: 3))
+    }
+
     func testMeProfileEditSheetProtectsUnsavedChanges() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-authenticated"]
@@ -1315,9 +1369,10 @@ final class AuthenticationUITests: XCTestCase {
         confirmSchoolChange.tap()
 
         XCTAssertTrue(app.descendants(matching: .any)["profile-edit"].waitForNonExistence(timeout: 3))
-        XCTAssertTrue(app.buttons["me-school-verification"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["me-school-identity"].label.contains("LMU"))
-        XCTAssertTrue(app.staticTexts["me-school-status-visual"].exists)
+        let verification = app.buttons["me-verification"]
+        XCTAssertTrue(verification.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["me-campus-summary"].label.contains("LMU"))
+        XCTAssertTrue(verification.label.contains("尚未完成学校认证"))
         XCTAssertTrue(app.descendants(matching: .any)["me-school-change-result"].waitForExistence(timeout: 3))
 
         let viewArchive = app.buttons["me-school-change-view-archive"]

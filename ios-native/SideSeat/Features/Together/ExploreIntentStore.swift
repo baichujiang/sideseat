@@ -9,6 +9,7 @@ final class ExploreIntentStore {
     private(set) var hasLoaded = false
     private(set) var isLoading = false
     private(set) var issue: String?
+    private(set) var mutatingIDs: Set<String> = []
 
     func load(using session: SessionStore, limit: Int) async {
         guard !isLoading else { return }
@@ -27,7 +28,14 @@ final class ExploreIntentStore {
         }
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-explore-intents") {
             let count = min(limit, ExploreAccessTier.current == .plus ? 10 : 3)
-            intents = (0..<count).map(Self.fixture(index:))
+            let choices = Dictionary(uniqueKeysWithValues: intents.compactMap { intent in
+                intent.interest.map { (intent.id, $0) }
+            })
+            intents = (0..<count).map { index in
+                var intent = Self.fixture(index: index)
+                intent.interest = choices[intent.id]
+                return intent
+            }
             hasMore = ExploreAccessTier.current == .free
             return
         }
@@ -44,6 +52,40 @@ final class ExploreIntentStore {
             return
         } catch {
             issue = error.localizedDescription
+        }
+    }
+
+    func expressInterest(in intent: NativeExploreIntent, using session: SessionStore) async -> NativeMutualOpportunity? {
+        guard intent.isExample != true, !mutatingIDs.contains(intent.id) else { return nil }
+        mutatingIDs.insert(intent.id)
+        issue = nil
+        defer { mutatingIDs.remove(intent.id) }
+        do {
+            let opportunity: NativeMutualOpportunity
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-explore-intents") {
+                opportunity = .uiTestingFixture(id: "ui-explore-opportunity-\(intent.id)", stateOverride: "DECIDED")
+            } else {
+                let response: APIEnvelope<NativeMutualOpportunity> = try await session.sendAuthorized(
+                    "api/v1/explore/intents/\(intent.id)/interest", method: .post,
+                    idempotencyKey: UUID().uuidString
+                )
+                opportunity = response.data
+            }
+            #else
+            let response: APIEnvelope<NativeMutualOpportunity> = try await session.sendAuthorized(
+                "api/v1/explore/intents/\(intent.id)/interest", method: .post,
+                idempotencyKey: UUID().uuidString
+            )
+            opportunity = response.data
+            #endif
+            if let index = intents.firstIndex(where: { $0.id == intent.id }) {
+                intents[index].interest = NativeExploreInterest(opportunity: opportunity)
+            }
+            return opportunity
+        } catch {
+            issue = error.localizedDescription
+            return nil
         }
     }
 
@@ -64,7 +106,8 @@ final class ExploreIntentStore {
                 period: index % 2 == 0 ? "AFTERNOON" : "EVENING"),
             descriptionPreview: "Looking for someone to join casually. We can decide the exact details together.",
             campus: "TUM", verifiedStudent: true, languages: ["ENGLISH"],
-            expiresAt: Date().addingTimeInterval(Double(3 + index) * 86400), createdAt: Date()
+            expiresAt: nil, createdAt: Date(),
+            isExample: ProcessInfo.processInfo.arguments.contains("--ui-testing-explore-examples")
         )
     }
     #endif

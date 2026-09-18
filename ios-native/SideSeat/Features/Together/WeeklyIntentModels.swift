@@ -289,7 +289,7 @@ struct NativeWeeklyIntent: Codable, Identifiable, Hashable, Sendable {
     let status: String
     let policyVersion: Int
     let version: Int
-    let expiresAt: Date
+    let expiresAt: Date?
     let pausedAt: Date?
     let endedAt: Date?
     let createdAt: Date
@@ -619,7 +619,7 @@ enum TogetherIntentStatus: String, Equatable, Sendable {
     init(intent: NativeWeeklyIntent, matchingEnabled: Bool,
          automaticMatchingEnabled: Bool, legacySessionActive: Bool, now: Date = Date()) {
         if intent.status == "ENDED" { self = .ended }
-        else if intent.status == "EXPIRED" || intent.expiresAt <= now { self = .expired }
+        else if intent.status == "EXPIRED" || (intent.expiresAt.map { $0 <= now } ?? false) { self = .expired }
         else if intent.isPaused { self = .paused }
         else if !matchingEnabled { self = .unavailable }
         else if (automaticMatchingEnabled && intent.automaticMatching == true) || legacySessionActive { self = .finding }

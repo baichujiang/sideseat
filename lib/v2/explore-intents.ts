@@ -1,7 +1,7 @@
 import "server-only";
 
 import { formatInTimeZone } from "date-fns-tz";
-import { INTERNAL_ACCOUNT_PREFIXES, INTERNAL_ACCOUNT_USERNAMES, isInternalAccount } from "@/lib/analytics/layer2-outcome-pilot";
+import { realExploreIntentWhere } from "@/lib/v2/explore-intent-access";
 import { prisma } from "@/lib/db/prisma";
 import { EXPLORE_EXAMPLE_AUTHORS, EXPLORE_EXAMPLE_CASES, EXPLORE_EXAMPLE_MARKER, EXPLORE_EXAMPLE_NOTE, exploreExampleIntentId } from "@/lib/v2/explore-example-catalog";
 import { readTimePreference } from "@/lib/v2/intent-timing";
@@ -62,19 +62,7 @@ export async function listExploreIntents(userId: string, requestedLimit = 3) {
   if (!viewer?.verifiedStudent || viewer.hideFromDiscovery || !viewer.school) return { intents: [], hasMore: false };
   const now = new Date();
   const rows = await prisma.weeklyIntent.findMany({
-    where: {
-      userId: { not: userId }, status: "ACTIVE", exploreVisible: true, expiresAt: { gt: now },
-      user: {
-        school: viewer.school, onboardingComplete: true, isGuest: false, verifiedStudent: true,
-        hideFromDiscovery: false, hideFromRecommendations: false,
-        moderationBlocks: { none: { isActive: true } },
-        // Synthetic QA supply is visible only to the existing internal-account cohort.
-        ...(!isInternalAccount(viewer.username) ? { NOT: { OR: [
-          { username: { in: [...INTERNAL_ACCOUNT_USERNAMES], mode: "insensitive" as const } },
-          ...INTERNAL_ACCOUNT_PREFIXES.map(prefix => ({ username: { startsWith: prefix, mode: "insensitive" as const } })),
-        ] } } : {}),
-      },
-    },
+    where: realExploreIntentWhere(userId, { username: viewer.username, school: viewer.school }, now),
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: 32,
     select: exploreIntentSelect,
@@ -86,7 +74,7 @@ export async function listExploreIntents(userId: string, requestedLimit = 3) {
   const exampleRows = exampleAuthor ? await prisma.weeklyIntent.findMany({
     where: {
       id: { in: EXPLORE_EXAMPLE_CASES.map(item => exploreExampleIntentId(exampleAuthor.id, item.key)) },
-      userId: exampleAuthor.id, status: "ACTIVE", exploreVisible: true, expiresAt: { gt: now },
+      userId: exampleAuthor.id, status: "ACTIVE", exploreVisible: true, OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
       automaticMatching: false, note: EXPLORE_EXAMPLE_NOTE,
       user: {
         id: exampleAuthor.id, username: exampleAuthor.username, school: viewer.school,
@@ -112,10 +100,36 @@ export async function listExploreIntents(userId: string, requestedLimit = 3) {
   // Genuine published intentions always precede examples; samples fill spare slots.
   const examples = exampleRows.filter(row => !blocked.has(row.user.id));
   const selected = [...visible, ...examples].slice(0, limit);
+  const selectedIds = selected.map(row => row.id);
+  const opportunities = await prisma.mutualOpportunity.findMany({
+    where: { AND: [
+      { OR: [{ userAId: userId }, { userBId: userId }] },
+      { OR: [{ intentAId: { in: selectedIds } }, { intentBId: { in: selectedIds } }] },
+      { OR: [{ status: { in: ["PENDING", "MUTUAL"] } },
+        { createdAt: { gte: new Date(now.getTime() - 14 * 86400000) } }] },
+    ] },
+    select: { id: true, intentAId: true, intentBId: true, status: true, expiresAt: true,
+      startsAt: true, connectionId: true,
+      intentA: { select: { status: true } }, intentB: { select: { status: true } },
+      decisions: { where: { userId }, select: { value: true } } },
+    orderBy: { createdAt: "desc" },
+  });
+  function interestFor(intentId: string) {
+    const opportunity = opportunities.find(row => row.intentAId === intentId || row.intentBId === intentId);
+    if (!opportunity) return null;
+    const state = opportunity.status === "MUTUAL" && opportunity.connectionId ? "READY_TO_COORDINATE"
+      : opportunity.status !== "PENDING" || opportunity.expiresAt <= now ||
+        (opportunity.startsAt && opportunity.startsAt <= now) ||
+        opportunity.intentA.status !== "ACTIVE" || opportunity.intentB.status !== "ACTIVE" ? "UNAVAILABLE"
+      : opportunity.decisions[0]?.value === "YES" ? "DECIDED" : "NEEDS_DECISION";
+    return { opportunityId: opportunity.id, state,
+      coordination: state === "READY_TO_COORDINATE" ? { connectionId: opportunity.connectionId! } : null };
+  }
   return {
     intents: selected.map(row => ({
       id: row.id,
       isExample: exampleIds.has(row.id),
+      interest: exampleIds.has(row.id) ? null : interestFor(row.id),
       topic: row.topic,
       togetherMode: row.togetherMode,
       studyGoal: row.studyGoal,
@@ -128,7 +142,7 @@ export async function listExploreIntents(userId: string, requestedLimit = 3) {
       campus: row.user.school,
       verifiedStudent: row.user.verifiedStudent,
       languages: row.user.userLanguages.slice(0, 1).map(language => language.tag),
-      expiresAt: row.expiresAt.toISOString(),
+      expiresAt: row.expiresAt?.toISOString() ?? null,
       createdAt: row.createdAt.toISOString(),
     })),
     // Unseen demonstration cards are not a reason to advertise a Plus upgrade.

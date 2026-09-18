@@ -1,3 +1,4 @@
+import { requirePersistentIntentSupport } from "@/lib/api/v1/persistent-intents";
 import { requireV1User } from "@/lib/api/v1/auth";
 import { v1Error, v1Success } from "@/lib/api/v1/http";
 import { isV2FeatureEnabled } from "@/lib/v2/feature-flags";
@@ -8,6 +9,8 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   const auth = await requireV1User(request);
   if (!auth.ok) return auth.response;
+  const unsupportedClient = requirePersistentIntentSupport(request);
+  if (unsupportedClient) return unsupportedClient;
   if (!isV2FeatureEnabled("v2ExploreIntents")) {
     return v1Error(request, { code: "FEATURE_UNAVAILABLE", message: "Explore is not available.", status: 404 });
   }

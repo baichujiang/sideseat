@@ -324,7 +324,6 @@ export const weeklyIntentPatchSchema = z.union([
   weeklyIntentEditSchema,
   weeklyIntentPauseSchema,
   weeklyIntentResumeSchema,
-  z.object({ action: z.literal("EXTEND"), expectedVersion: z.number().int().positive() }).strict(),
 ]);
 
 export const weeklyIntentEndSchema = z

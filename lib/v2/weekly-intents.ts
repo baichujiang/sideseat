@@ -15,11 +15,10 @@ import type {
 } from "@/lib/validators/weekly-intent";
 import {
   normalizeWeeklyIntentWindows,
-  weeklyIntentExpiry,
   weeklyIntentWindowsFitLifecycle,
 } from "@/lib/v2/weekly-intent-policy";
 import { matchAndNotifyForUser } from "@/lib/v2/mutual-opportunity-auto-match";
-import { readTimePreference, recentIntentExpiry, flexiblePreferenceFitsLifecycle } from "@/lib/v2/intent-timing";
+import { readTimePreference, flexiblePreferenceFitsLifecycle } from "@/lib/v2/intent-timing";
 
 const CURRENT_POLICY_VERSION = 1;
 // This is a hidden abuse guard, not a product-level weekly quota. A normal
@@ -80,7 +79,7 @@ type OwnerRow = Prisma.WeeklyIntentGetPayload<{ select: typeof ownerSelect }>;
 function ownerResponse(row: OwnerRow) {
   return {
     ...row,
-    expiresAt: row.expiresAt.toISOString(),
+    expiresAt: row.expiresAt?.toISOString() ?? null,
     pausedAt: row.pausedAt?.toISOString() ?? null,
     endedAt: row.endedAt?.toISOString() ?? null,
     createdAt: row.createdAt.toISOString(),
@@ -195,7 +194,7 @@ async function autoMatchAfterMutation(userId: string) {
 function assertWindowsWithinLifecycle(
   windows: WeeklyIntentCreateInput["timeWindows"],
   now: Date,
-  expiresAt: Date,
+  expiresAt: Date | null,
 ) {
   if (!weeklyIntentWindowsFitLifecycle(windows, now, expiresAt)) {
     throw new WeeklyIntentError("WEEKLY_INTENT_WINDOW_INVALID");
@@ -203,7 +202,7 @@ function assertWindowsWithinLifecycle(
 }
 
 function assertTiming(windows: WeeklyIntentCreateInput["timeWindows"], preference: unknown,
-  timeZone: string, now: Date, expiresAt: Date) {
+  timeZone: string, now: Date, expiresAt: Date | null) {
   const timing = readTimePreference(preference);
   if (timing.kind === "EXACT") {
     if (!windows.length) throw new WeeklyIntentError("WEEKLY_INTENT_WINDOW_INVALID");
@@ -321,7 +320,7 @@ export async function loadCurrentWeeklyIntent(
     await lockUserIntents(tx, userId);
     await expireCurrentRows(tx, userId, now);
     const rows = await tx.weeklyIntent.findMany({
-      where: { userId, status: { in: [...NON_TERMINAL_STATES] } },
+      where: { userId, exploreResponseToId: null, status: { in: [...NON_TERMINAL_STATES] } },
       select: ownerSelect,
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     });
@@ -334,7 +333,7 @@ export async function createWeeklyIntent(
   input: WeeklyIntentCreateInput,
   now = new Date(),
 ) {
-  const expiresAt = input.timePreference || input.automaticMatching ? recentIntentExpiry(now) : weeklyIntentExpiry(input.timeZone, now);
+  const expiresAt = null;
   assertTiming(input.timeWindows, input.timePreference, input.timeZone, now, expiresAt);
   const sport = normalizedSportSelection(
     input.topic,
@@ -353,7 +352,7 @@ export async function createWeeklyIntent(
     await lockUserIntents(tx, userId);
     await expireCurrentRows(tx, userId, now);
     const currentCount = await tx.weeklyIntent.count({
-      where: { userId, status: { in: [...NON_TERMINAL_STATES] } },
+      where: { userId, exploreResponseToId: null, status: { in: [...NON_TERMINAL_STATES] } },
     });
     if (currentCount >= MAX_NON_TERMINAL_INTENTS_PER_USER) {
       throw new WeeklyIntentError("WEEKLY_INTENT_LIMIT_REACHED");
@@ -420,13 +419,13 @@ export async function patchWeeklyIntent(
       }
       data = { status: "ACTIVE", pausedAt: null, version: { increment: 1 },
         ...(input.automaticMatching ? { automaticMatching: true } : {}) };
-    } else if (input.action === "EXTEND") {
-      data = { expiresAt: recentIntentExpiry(now), version: { increment: 1 } };
     } else {
       const nextWindows = input.timeWindows ??
         (current.timeWindows as WeeklyIntentCreateInput["timeWindows"]);
       const nextPreference = input.timePreference ?? current.timePreference;
-      assertTiming(nextWindows, nextPreference, input.timeZone ?? current.timeZone, now, current.expiresAt);
+      if (input.timeWindows !== undefined || input.timePreference !== undefined || input.timeZone !== undefined) {
+        assertTiming(nextWindows, nextPreference, input.timeZone ?? current.timeZone, now, current.expiresAt);
+      }
       const nextCourseId = input.courseId === undefined
         ? current.courseId
         : input.courseId;
@@ -524,7 +523,7 @@ export async function patchWeeklyIntent(
     }
     return { intent: ownerResponse(row) };
   });
-  if (input.action === "EDIT" || input.action === "RESUME" || input.action === "EXTEND") {
+  if (input.action === "EDIT" || input.action === "RESUME") {
     await autoMatchAfterMutation(userId);
   }
   return result;

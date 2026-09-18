@@ -2,7 +2,7 @@
 
 **Status:** Current native design contract
 
-**Last updated:** 2026-09-09
+**Last updated:** 2026-09-12
 
 **Governing flow:** [User Flow](./USER_FLOW.md)
 
@@ -12,7 +12,7 @@
 
 - Use native SwiftUI structure and behavior first.
 - One primary task per screen.
-- Use one interactive Rose accent (`#FB4185`) consistently.
+- Rose (`#FB4185`) is the shared selection and interest accent, including Together.
 - Product primary actions use adaptive ink/chalk; Rose is a small selection accent,
   not a large filled area on every card. Original category artwork adds personality.
 - Brand gradients belong to Auth/Tutorial and rare hero moments, not product lists.
@@ -75,12 +75,46 @@ prompt. Long-press menus share an action model but choose presentation by object
 message and event actions remain anchored near their source; region actions may
 use a panel. Tapping outside dismisses any custom menu.
 
+### Together warm paper refresh — 2026-09-12
+
+Following review of Preview 46, the owner selected warm cream, brand Rose accents
+and restrained card layers. This replaces the forest/citron header and broad
+category fills from that preview.
+
+`SideSeatTheme.Together` owns the adaptive paper colors. The root uses the native
+large navigation title and a single native Add action shared by all three tabs.
+Text tabs have a short Rose underline and a small intention-count badge. The
+underline follows selection with a spring, disabled by Reduce Motion; at
+accessibility sizes the tabs stack and labels wrap without shrinking.
+
+Together cards use a 24pt radius, 20pt inset, near-ivory category surfaces, a warm
+hairline and a subtle shadow. Category artwork stays compact. Activity headings
+are semibold; timing is an unboxed detail row. A 64pt warm inset decision rail has
+a 52pt ivory handle, with the privacy explanation underneath. Owner and Explore
+actions share the same restrained Rose treatment. Dark Mode uses warm charcoal
+and plum. Category color never indicates match quality, consent or a Plan.
+Opportunity reading order remains peer → activity → timing → private decision.
+
+The Preview 49 refinement places the two decision labels above the rail so the
+handle never covers their meaning. Labels wrap at accessibility sizes, where the
+rail grows to 72pt. Minus and heart endpoints accompany a centered directional
+grip. During dragging, a restrained wash grows from the origin with actual travel;
+the free side shows “Keep sliding”, then “Release to confirm” at the existing
+68% threshold. Threshold haptics and the heart/minus handle state accompany the
+text. Release pins the handle and shows a spinner while saving; a retained card
+returns to center after the async action. Short or cancelled drags spring back.
+Reduce Motion preserves direct tracking and state feedback without lift/spring.
+VoiceOver supports adjustable selection and named interest actions. The native
+horizontal recognizer continues to leave vertical scrolling to the page, while
+the entire control excludes horizontal page changes.
+
 ### Together and Plan card template
 
 Use one anatomy across owner Intent, Opportunity, mutual chat source, Plan list
 and chat Plan cards: context/status → concrete title → time/place/person → action.
 The shared surface uses a 22pt radius, 16pt content inset, neutral adaptive fill
-and a quiet hairline. Status always includes text; it never relies on color alone.
+by default (Together opts into category colors), and a quiet hairline.
+Status always includes text; it never relies on color alone.
 Use inset notices for privacy and the effect of accepting or rescheduling.
 
 An actionable Plan or mutual Opportunity has one full-width ink/chalk primary action.
@@ -286,6 +320,34 @@ above the safe area/keyboard. Disable dismissal and duplicate submission only
 while saving. Back navigation retains editor input; save errors remain inside
 the editor. Native sheet motion respects Reduce Motion; the Intent step change
 also disables its animation when Reduce Motion is enabled.
+
+### Profile editor — 2026-09-12
+
+Edit Profile keeps labels on the left and values on the right at ordinary text
+sizes. Each inset card has a compact icon/header and quiet row separators;
+inputs no longer sit inside individual gray wells. A native menu/picker keeps
+selection checkmarks while exposing a consistent trailing chevron. Only the
+focused text row receives a light Rose wash, without a leading marker. Focus
+animation respects Reduce Motion. The header pairs the existing avatar with the
+sheet title and account handle. Semantic colors, the ink/chalk Save action and
+44pt minimum input/control targets remain in use.
+
+Editable text stays leading-aligned within the right-hand input column before
+and during editing. Tapping the label or row whitespace focuses that field.
+One sheet-level focus state orders the text inputs; single-line Return advances
+to the next input and the last field uses Done. The multiline tagline retains
+Return for line breaks. A keyboard toolbar provides previous/next input and
+Done; focus transitions animate only the row wash, not text or layout.
+
+Field order is personal identity first: Basics contains nickname → gender →
+tagline. Study contains school → student status → degree → major → semester
+(or graduation year for alumni). Contact handles follow in their existing order.
+
+Accessibility text sizes stack field labels and controls. Decorative header
+icons stay within their badges while text scales normally. Save, validation,
+school-change confirmation and unsaved-edit protection are unchanged. Shared
+privacy/account sheet components retain their prior appearance. Verification is
+local/simulator only; see [profile editor visual QA](visual-qa/profile-editor-polish-2026-09-12.md).
 
 ### System avatars
 

@@ -42,8 +42,10 @@ struct NativeExploreIntent: Codable, Identifiable, Hashable, Sendable {
     let campus: String
     let verifiedStudent: Bool
     let languages: [String]
-    let expiresAt: Date
+    let expiresAt: Date?
     let createdAt: Date
+    var isExample: Bool? = nil
+    var interest: NativeExploreInterest? = nil
 
     var activityTitle: String {
         if topic == .study, let studyGoal, !studyGoal.isEmpty { return studyGoal }
@@ -61,6 +63,18 @@ struct NativeExploreIntent: Codable, Identifiable, Hashable, Sendable {
             "CHINESE": "Chinese", "ENGLISH": "English", "GERMAN": "German",
             "FRENCH": "French", "HINDI": "Hindi", "SPANISH": "Spanish", "OTHER": "Other"
         ][language] ?? "Other"))
+    }
+}
+
+struct NativeExploreInterest: Codable, Hashable, Sendable {
+    let opportunityId: String
+    let state: String
+    let coordination: NativeMutualOpportunityCoordination?
+
+    init(opportunity: NativeMutualOpportunity) {
+        opportunityId = opportunity.id
+        state = opportunity.state
+        coordination = opportunity.coordination
     }
 }
 

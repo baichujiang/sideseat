@@ -125,6 +125,19 @@ struct WeeklyIntentModelsTests {
         #expect(legacy.intent?.id == "intent-2")
     }
 
+    @Test("Persistent intentions decode and remain available after 30 days")
+    func persistentIntentionDoesNotExpire() throws {
+        let json = intentJSON(id: "persistent", topic: "COFFEE")
+            .replacingOccurrences(of: #""expiresAt":"2026-09-06T21:59:59Z""#, with: #""expiresAt":null"#)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let intent = try decoder.decode(NativeWeeklyIntent.self, from: Data(json.utf8))
+        #expect(intent.expiresAt == nil)
+        let later = intent.createdAt.addingTimeInterval(30 * 86400)
+        #expect(TogetherIntentStatus(intent: intent, matchingEnabled: true,
+            automaticMatchingEnabled: false, legacySessionActive: true, now: later) == .finding)
+    }
+
     @Test("Keeps every upcoming time and presents them chronologically")
     func ordersRelevantTimeWindows() {
         let now = Date(timeIntervalSince1970: 10_000)

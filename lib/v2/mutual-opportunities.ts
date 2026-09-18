@@ -21,6 +21,7 @@ import { repeatEligibility } from "@/lib/plans/repeat-eligibility";
 import { isV2FeatureEnabled } from "@/lib/v2/feature-flags";
 import { activityFit, activityFitProjection } from "@/lib/v2/activity-fit";
 import { discoveryFit } from "@/lib/v2/discovery-fit";
+import { realExploreIntentWhere } from "@/lib/v2/explore-intent-access";
 import { compatibleIntentTiming, type OpportunityTimeContext } from "@/lib/v2/intent-timing";
 import {
   classifyActivityMatch,
@@ -213,6 +214,8 @@ function viewerProjection(row: OpportunityRow, viewerId: string) {
         : ownDecision === MutualOpportunityDecisionValue.YES
           ? "DECIDED"
           : "CLOSED";
+  const hideExploreIdentity = state !== "READY_TO_COORDINATE" &&
+    typeof (row.contextSnapshot as Prisma.JsonObject)?.exploreIntentId === "string";
 
   return {
     id: row.id,
@@ -241,11 +244,11 @@ function viewerProjection(row: OpportunityRow, viewerId: string) {
     timeContext: (row.contextSnapshot as Prisma.JsonObject)?.timeContext ?? null,
     expiresAt: row.expiresAt.toISOString(),
     peer: {
-      displayName: displayName(peer),
-      avatarUrl: peer.avatarUrl,
+      displayName: hideExploreIdentity ? "Student" : displayName(peer),
+      avatarUrl: hideExploreIdentity ? null : peer.avatarUrl,
       verifiedStudent: peer.verifiedStudent,
-      major: peer.major,
-      semester: peer.semester,
+      major: hideExploreIdentity ? null : peer.major,
+      semester: hideExploreIdentity ? null : peer.semester,
       sharedLanguages: sharedLanguages(viewer, peer),
     },
     viewerDecision: ownDecision,
@@ -393,7 +396,7 @@ async function createCandidateOpportunity(options: {
     timePreference: Prisma.JsonValue;
     automaticMatching: boolean;
     timeZone: string;
-    expiresAt: Date;
+    expiresAt: Date | null;
     version: number;
     user: LimitedUser;
   };
@@ -412,7 +415,7 @@ async function createCandidateOpportunity(options: {
     timePreference: Prisma.JsonValue;
     automaticMatching: boolean;
     timeZone: string;
-    expiresAt: Date;
+    expiresAt: Date | null;
     version: number;
     user: LimitedUser;
     course: { id: string; code: string | null; name: string } | null;
@@ -513,7 +516,7 @@ async function createCandidateOpportunity(options: {
           return snapshot !== undefined &&
             intent.userId === snapshot.userId &&
             intent.status === "ACTIVE" &&
-            intent.expiresAt > recheckNow &&
+            (intent.expiresAt === null || intent.expiresAt > recheckNow) &&
             intent.automaticMatching === snapshot.automaticMatching &&
             (!intent.automaticMatching || isV2FeatureEnabled("v2AutomaticMatching")) &&
             intent.version === snapshot.version &&
@@ -724,6 +727,7 @@ async function createCandidateOpportunity(options: {
 
 function matchingEnrollmentWhere(now: Date): Prisma.WeeklyIntentWhereInput {
   return {
+    exploreResponseToId: null,
     OR: [
       ...(isV2FeatureEnabled("v2AutomaticMatching") ? [{ automaticMatching: true }] : []),
       { automaticMatching: false, user: { togetherMatchingSession: { is: {
@@ -744,7 +748,7 @@ export async function generateMutualOpportunitiesForUser(
       ...matchingEnrollmentWhere(now),
       userId,
       status: "ACTIVE",
-      expiresAt: { gt: now },
+      AND: [{ OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] }],
       mutualOpportunitiesAsA: {
         none: { status: { in: ["PENDING", "MUTUAL"] } },
       },
@@ -796,7 +800,7 @@ export async function generateMutualOpportunitiesForUser(
       ...matchingEnrollmentWhere(now),
       userId: { not: userId },
       status: "ACTIVE",
-      expiresAt: { gt: now },
+      AND: [{ OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] }],
       ...(!discoveryEnabled ? { topic: { in: [...new Set(ownerIntents.map((intent) => intent.topic))] } } : {}),
       mutualOpportunitiesAsA: {
         none: {
@@ -962,6 +966,116 @@ async function lockedOpportunity(
   });
 }
 
+/** Explore selects the pair explicitly, then uses the same private decisions and chat transition. */
+export async function expressExploreInterest(userId: string, intentId: string) {
+  const seed = await prisma.weeklyIntent.findUnique({ where: { id: intentId }, select: { userId: true } });
+  if (!seed || seed.userId === userId) throw new MutualOpportunityError("NOT_FOUND");
+  await expireStaleForUser(userId, new Date());
+  const result = await prisma.$transaction(async (tx) =>
+    withCanonicalConnectionScope(tx, userId, seed.userId, async (scope) => {
+      const now = new Date();
+      await lockIntentRows(tx, [intentId]);
+      const viewer = await tx.user.findFirst({
+        where: { id: userId, onboardingComplete: true, verifiedStudent: true, isGuest: false,
+          hideFromDiscovery: false, hideFromRecommendations: false,
+          moderationBlocks: { none: { isActive: true } } },
+        select: opportunityInclude.userA.select,
+      });
+      if (!viewer?.school) throw new MutualOpportunityError("NOT_FOUND");
+      const target = await tx.weeklyIntent.findFirst({
+        where: { ...realExploreIntentWhere(userId, { username: viewer.username, school: viewer.school }, now), id: intentId },
+        include: { user: { select: opportunityInclude.userB.select } },
+      });
+      const blocked = await tx.block.findFirst({ where: { OR: [
+        { blockerId: userId, blockedId: seed.userId }, { blockerId: seed.userId, blockedId: userId },
+      ] }, select: { id: true } });
+      if (!target || blocked || (scope.existing && scope.existing.status !== "ACTIVE")) {
+        throw new MutualOpportunityError("NOT_FOUND");
+      }
+      const userAId = scope.pair.minUserId;
+      const userBId = scope.pair.maxUserId;
+      const existing = await tx.mutualOpportunity.findFirst({
+        where: { userAId, userBId, OR: [{ intentAId: intentId }, { intentBId: intentId }],
+          status: { in: ["PENDING", "MUTUAL"] } },
+        include: opportunityInclude, orderBy: { createdAt: "desc" },
+      });
+      if (existing?.status === "MUTUAL") return { opportunity: viewerProjection(existing, userId), created: false };
+      if (existing && existing.expiresAt > now && (!existing.startsAt || existing.startsAt > now)) {
+        return { existingId: existing.id, created: false };
+      }
+      const permission = await repeatEligibility(tx, userId, target.userId, now);
+      if (!permission.discoveryAllowed) throw new MutualOpportunityError("NO_LONGER_AVAILABLE");
+      const recentNo = await tx.mutualOpportunity.findFirst({ where: {
+        userAId, userBId, createdAt: { gte: new Date(now.getTime() - PAIR_COOLDOWN_MS) },
+        decisions: { some: { value: { in: ["NO", "WITHDRAWN"] } } },
+      }, select: { id: true } });
+      if (recentNo) throw new MutualOpportunityError("NO_LONGER_AVAILABLE");
+      const occupied = await tx.mutualOpportunity.findMany({ where: {
+        AND: [
+          { OR: [{ intentAId: intentId }, { intentBId: intentId }, { userAId, userBId }] },
+          { OR: [{ status: "MUTUAL" }, { status: "PENDING", expiresAt: { gt: now },
+            OR: [{ startsAt: null }, { startsAt: { gt: now } }],
+            intentA: { status: "ACTIVE" }, intentB: { status: "ACTIVE" } }] },
+        ],
+      }, select: { id: true, status: true } });
+      const arranged = await tx.planRequest.findMany({ where: {
+        originKind: "MUTUAL_OPPORTUNITY", originId: { in: occupied.map(row => row.id) }, status: "ACCEPTED",
+      }, select: { originId: true } });
+      if (occupied.some(row => row.status === "PENDING" || !arranged.some(plan => plan.originId === row.id))) {
+        throw new MutualOpportunityError("NO_LONGER_AVAILABLE");
+      }
+      // This is consent only to this activity with this peer. The private backing
+      // record is excluded from My Intentions and every automatic matching query.
+      // Clicking a broad activity card does not assert the author's exact availability.
+      const response = await tx.weeklyIntent.create({ data: {
+        userId, exploreResponseToId: target.id, topic: target.topic,
+        togetherMode: target.togetherMode, studyGoal: target.studyGoal,
+        activityText: target.activityText, sportTag: target.sportTag, sportOtherNote: target.sportOtherNote,
+        timeWindows: [], timePreference: { kind: "UNDECIDED" }, timeZone: target.timeZone,
+        automaticMatching: false, exploreVisible: false, expiresAt: null,
+      } });
+      const fit = discoveryFit({ ...response, user: viewer }, target, now);
+      const viewerFirst = userId === userAId;
+      const userA = viewerFirst ? viewer : target.user;
+      const userB = viewerFirst ? target.user : viewer;
+      const orientedFit = { ...fit.snapshot,
+        intentAActivityText: viewerFirst ? response.activityText : target.activityText,
+        intentBActivityText: viewerFirst ? target.activityText : response.activityText,
+        intentAActivity: viewerFirst ? fit.snapshot.intentAActivity : fit.snapshot.intentBActivity,
+        intentBActivity: viewerFirst ? fit.snapshot.intentBActivity : fit.snapshot.intentAActivity,
+      };
+      const context = { activityFit: orientedFit, topic: target.topic,
+        matchKind: fit.classification.matchKind, sharedContext: fit.classification.sharedContext,
+        intentAStudyGoal: target.studyGoal, intentBStudyGoal: target.studyGoal,
+        intentATogetherMode: target.togetherMode, intentBTogetherMode: target.togetherMode,
+        activityText: target.activityText, sportTag: target.sportTag, sportOtherNote: target.sportOtherNote,
+        startsAt: fit.timing.startsAt, endsAt: fit.timing.endsAt,
+        timeContext: fit.timing.context, userA, userB, course: null,
+      };
+      const row = await tx.mutualOpportunity.create({ data: {
+        userAId, userBId, intentAId: viewerFirst ? response.id : target.id,
+        intentBId: viewerFirst ? target.id : response.id,
+        topic: context.topic, matchKind: context.matchKind, sharedContext: context.sharedContext,
+        intentAStudyGoal: context.intentAStudyGoal, intentBStudyGoal: context.intentBStudyGoal,
+        intentATogetherMode: context.intentATogetherMode, intentBTogetherMode: context.intentBTogetherMode,
+        activityText: target.activityText, sportTag: target.sportTag, sportOtherNote: target.sportOtherNote,
+        startsAt: context.startsAt, endsAt: context.endsAt, expiresAt: fit.timing.expiresAt,
+        contextSnapshot: { ...contextSnapshot({ ...context, id: "pending" }), exploreIntentId: target.id },
+        decisions: { create: { userId, value: "YES" } },
+      }, include: opportunityInclude });
+      const updated = await tx.mutualOpportunity.update({ where: { id: row.id }, data: {
+        contextSnapshot: { ...contextSnapshot({ ...context, id: row.id }), exploreIntentId: target.id },
+      }, include: opportunityInclude });
+      return { opportunity: viewerProjection(updated, userId), created: true };
+    }),
+  );
+  if ("existingId" in result && result.existingId) {
+    const saved = await decideMutualOpportunity({ userId, opportunityId: result.existingId, decision: "YES" });
+    return { opportunity: saved.opportunity, activated: saved.opportunity.state === "READY_TO_COORDINATE" };
+  }
+  return { opportunity: result.opportunity!, activated: false };
+}
+
 export async function decideMutualOpportunity(options: {
   userId: string;
   opportunityId: string;
@@ -1063,7 +1177,7 @@ export async function decideMutualOpportunity(options: {
           where: {
             id: { in: [row.intentAId, row.intentBId] },
             status: "ACTIVE",
-            expiresAt: { gt: now },
+            OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
           },
         }),
       ]);
