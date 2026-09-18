@@ -244,8 +244,7 @@ private struct TogetherHomeView: View {
             }
         }
         .background(SideSeatTheme.Together.canvas)
-        .navigationTitle(AppLocalization.string("Together"))
-        .navigationBarTitleDisplayMode(.large)
+        .ssRootNavigationTitle("Together")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { presentedEditor = .create() } label: {
