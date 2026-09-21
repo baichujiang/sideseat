@@ -1651,6 +1651,7 @@
 "Your choice was saved privately." = "Deine Entscheidung wurde privat gespeichert.";
 "Saved privately" = "Privat gespeichert";
 "Your choice is saved privately" = "Deine Entscheidung ist privat gespeichert";
+"Interest shown" = "Interesse bekundet";
 "Withdraw" = "Zurückziehen";
 "Your choice was withdrawn." = "Deine Entscheidung wurde zurückgezogen.";
 "What exactly?" = "Was genau?";
@@ -1870,6 +1871,8 @@
 "Specific times" = "Genaue Zeiten";
 "I already know when I am available." = "Ich weiß bereits, wann ich Zeit habe.";
 "Timing preference" = "Zeitwunsch";
+"Choose a time" = "Zeit auswählen";
+"Choose a day, a date range, or specific times." = "Wähle einen Tag, einen Zeitraum oder genaue Uhrzeiten.";
 "This is a preference, not an appointment. Agree on the exact time in chat." = "Das ist ein Wunsch, kein Termin. Vereinbart die genaue Zeit im Chat.";
 "Through" = "Bis";
 "Part of the day" = "Tageszeit";
@@ -1996,9 +1999,7 @@
 
 "Show interest in an activity. Your choice stays private until you both show interest." = "Zeige Interesse an einer Aktivität. Deine Wahl bleibt privat, bis ihr beide Interesse zeigt.";
 
-"Example · No real participant" = "Beispiel · Keine echte Person";
 
-"Create a similar intention" = "Ähnlichen Wunsch erstellen";
 
 "View in recommendations" = "In Empfehlungen ansehen";
 

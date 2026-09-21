@@ -4,6 +4,54 @@ import XCTest
 @testable import SideSeat
 
 final class ThemeContrastTests: XCTestCase {
+    func testActivityChoiceContrastInLightAndDarkAppearances() {
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            for topic in NativeWeeklyIntentTopic.allCases {
+                let background = UIColor(SideSeatTheme.Together.activityChoiceFill(for: topic))
+                for foreground in [SideSeatTheme.textPrimary, SideSeatTheme.accentText] {
+                    assertContrast(foreground: UIColor(foreground), background: background,
+                        style: style, minimum: 4.5)
+                }
+            }
+        }
+    }
+
+    func testInterestStarContrastInLightAndDarkAppearances() {
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            for background in [SideSeatTheme.Together.decisionHandle, SideSeatTheme.Together.decisionWell] {
+                assertContrast(foreground: UIColor(SideSeatTheme.Together.decisionHandleInk),
+                    background: UIColor(background), style: style, minimum: 4.5)
+            }
+        }
+    }
+
+    func testActivityHeaderContrastInLightAndDarkAppearances() {
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            for topic in NativeWeeklyIntentTopic.allCases {
+                let background = UIColor(SideSeatTheme.Together.headerFill(for: topic))
+                for foreground in [UIColor.label, UIColor(SideSeatTheme.textSecondaryStrong),
+                    UIColor(SideSeatTheme.Together.categoryInk(for: topic))] {
+                    assertContrast(foreground: foreground, background: background,
+                        style: style, minimum: 4.5)
+                }
+                assertContrast(foreground: UIColor(SideSeatTheme.verifiedSeal), background: background,
+                    style: style, minimum: 3)
+            }
+        }
+    }
+
+    func testTogetherSectionNavigationContrastInLightAndDarkAppearances() {
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            for (foreground, background) in [
+                (SideSeatTheme.accentText, SideSeatTheme.Together.navigationSelection),
+                (SideSeatTheme.Together.ink, SideSeatTheme.Together.decisionWell),
+            ] {
+                assertContrast(foreground: UIColor(foreground), background: UIColor(background),
+                    style: style, minimum: 4.5)
+            }
+        }
+    }
+
     func testProductActionAndActivityInsetContrastInLightAndDarkAppearances() {
         for style in [UIUserInterfaceStyle.light, .dark] {
             assertContrast(

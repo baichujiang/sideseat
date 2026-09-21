@@ -326,14 +326,18 @@ final class VisualQAScreenshotUITests: XCTestCase {
             revealFlowElement(undecided, in: app)
             XCTAssertTrue(undecided.waitForExistence(timeout: 5))
             XCTAssertTrue(undecided.isSelected)
+            let choose = app.buttons["intent-timing-choose"]
+            XCTAssertTrue(choose.exists)
+            XCTAssertFalse(app.buttons["intent-timing-flexible"].exists)
+            XCTAssertFalse(app.buttons["intent-timing-exact"].exists)
+            XCTAssertFalse(app.descendants(matching: .any)["intent-timing-detail"].firstMatch.exists)
             XCTAssertTrue(app.buttons["intent-editor-save"].isEnabled)
             XCTAssertEqual(app.buttons["intent-editor-save"].label,
                 language == "zh-Hans" ? "发布意向" : language == "de" ? (large ? "Aktivieren" : "Vorhaben veröffentlichen") : "Publish intention")
             saveScreenshot(app: app, name: "flexible-undecided-\(language)-\(appearance)")
-            let flexible = app.buttons["intent-timing-flexible"]
-            revealFlowElement(flexible, in: app)
-            flexible.tap()
-            XCTAssertTrue(flexible.isSelected)
+            revealFlowElement(choose, in: app)
+            choose.tap()
+            XCTAssertTrue(choose.isSelected)
             let nextWeek = app.buttons["intent-quick-Next week"]
             revealFlowElement(nextWeek, in: app)
             XCTAssertTrue(nextWeek.isEnabled)
@@ -344,10 +348,39 @@ final class VisualQAScreenshotUITests: XCTestCase {
             revealFlowElement(summary, in: app)
             XCTAssertTrue(summary.exists)
             XCTAssertTrue(summary.label.contains("–"), "Next week must select a range, not leave the default tomorrow: \(summary.label)")
+            let savedSummary = summary.label
             saveScreenshot(app: app, name: "flexible-next-week-\(language)-\(appearance)")
-            let exact = app.buttons["intent-timing-exact"]
-            for _ in 0..<8 { if exact.isHittable { break }; app.swipeDown() }
-            exact.tap()
+            let detail = app.descendants(matching: .any)["intent-timing-detail"].firstMatch
+            func selectTimeDetail(exact: Bool) {
+                for _ in 0..<8 { if detail.isHittable { break }; app.swipeDown() }
+                XCTAssertTrue(detail.isHittable)
+                if large {
+                    detail.tap()
+                    let title = exact ? "Genaue Zeiten" : "Tag oder Zeitraum"
+                    let option = app.buttons[title].firstMatch
+                    XCTAssertTrue(option.waitForExistence(timeout: 3))
+                    option.tap()
+                } else {
+                    app.segmentedControls["intent-timing-detail"].buttons.element(boundBy: exact ? 1 : 0).tap()
+                }
+            }
+            selectTimeDetail(exact: true)
+            XCTAssertTrue(app.buttons["intent-editor-save"].isEnabled)
+            XCTAssertFalse(app.datePickers["intent-flexible-start"].exists)
+            saveScreenshot(app: app, name: "timing-choose-exact-\(language)-\(appearance)")
+            for _ in 0..<8 { if undecided.isHittable { break }; app.swipeDown() }
+            undecided.tap()
+            XCTAssertTrue(undecided.isSelected)
+            XCTAssertFalse(detail.exists)
+            XCTAssertTrue(app.buttons["intent-editor-save"].isEnabled)
+            revealFlowElement(choose, in: app)
+            choose.tap()
+            XCTAssertTrue(choose.isSelected)
+            XCTAssertFalse(app.datePickers["intent-flexible-start"].exists, "Returning to Choose a time keeps the exact-time selection")
+            revealFlowElement(detail, in: app)
+            selectTimeDetail(exact: false)
+            revealFlowElement(summary, in: app)
+            XCTAssertEqual(summary.label, savedSummary, "Switching modes must preserve the previously chosen date range")
             XCTAssertTrue(app.buttons["intent-editor-save"].isEnabled)
             app.terminate()
         }
@@ -508,7 +541,18 @@ final class VisualQAScreenshotUITests: XCTestCase {
             revealFlowElement(handle, in: app)
             start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: bar.frame.width * 0.40, dy: 0)), withVelocity: .slow, thenHoldForDuration: 0.5)
-            XCTAssertTrue(activity.waitForNonExistence(timeout: 5), "Rightward release must save private interest")
+            let saved = app.descendants(matching: .any)["mutual-opportunity-saved-\(id)"].firstMatch
+            XCTAssertTrue(saved.waitForExistence(timeout: 5), "Rightward release must retain the selected interest state")
+            XCTAssertTrue(activity.exists)
+            XCTAssertFalse(bar.exists)
+            let withdraw = app.buttons["mutual-opportunity-withdraw-\(id)"]
+            revealFlowElement(withdraw, in: app)
+            XCTAssertGreaterThanOrEqual(withdraw.frame.height, 44 - 0.01)
+            let selectedEnd = saved.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.5))
+            selectedEnd.press(forDuration: 0.1, thenDragTo: saved.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.5)))
+            XCTAssertTrue(saved.exists, "Dragging a committed state must not withdraw or reset interest")
+            XCTAssertTrue(app.buttons["together-tab-recommendations"].isSelected)
+            saveScreenshot(app: app, name: "opportunity-interest-retained-\(language)-\(appearance)")
             app.terminate()
         }
     }
@@ -570,8 +614,33 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
+    func testTogetherCategoryHeaderBandsLightAndDark() {
+        let cards = [
+            ("recommendations", "mutual-opportunity-cmutualui0000000000000001", "mutual-opportunity-peer-cmutualui0000000000000001"),
+            ("intentions", "weekly-intent-ui-intent-coffee", "weekly-intent-header-ui-intent-coffee"),
+            ("explore", "explore-intent-ui-explore-0", "explore-intent-header-ui-explore-0"),
+        ]
+        for appearance in ["light", "dark"] {
+            let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents",
+                "--ui-testing-language=zh-Hans", "--ui-testing-appearance=\(appearance)"])
+            for (index, (section, cardID, headerID)) in cards.enumerated() {
+                selectTogetherSection(index, in: app)
+                let card = app.descendants(matching: .any)[cardID].firstMatch
+                let header = app.descendants(matching: .any)[headerID].firstMatch
+                XCTAssertTrue(header.waitForExistence(timeout: 5))
+                XCTAssertEqual(header.frame.minX, card.frame.minX, accuracy: 1)
+                XCTAssertEqual(header.frame.minY, card.frame.minY, accuracy: 1)
+                XCTAssertEqual(header.frame.width, card.frame.width, accuracy: 1)
+                XCTAssertLessThan(header.frame.height, card.frame.height / 2, "Category color belongs to the top row, not the entire card")
+                saveScreenshot(app: app, name: "category-header-\(section)-\(appearance)")
+            }
+            app.terminate()
+        }
+    }
+
+    @MainActor
     func testTogetherTabsSeparateRecommendationsIntentionsAndExplore() {
-        let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents", "--ui-testing-explore-examples",
+        let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents",
             "--ui-testing-language=zh-Hans", "--ui-testing-appearance=light"])
         let opportunity = app.descendants(matching: .any)["mutual-opportunity-cmutualui0000000000000001"].firstMatch
         XCTAssertTrue(opportunity.waitForExistence(timeout: 5), app.debugDescription)
@@ -607,13 +676,12 @@ final class VisualQAScreenshotUITests: XCTestCase {
         XCTAssertFalse(opportunity.exists)
         XCTAssertFalse(app.staticTexts["Mia"].exists)
         saveScreenshot(app: app, name: "together-tabs-explore-zh")
-        let use = app.buttons["explore-use-ui-explore-0"]
-        revealFlowElement(use, in: app)
-        use.tap()
-        XCTAssertTrue(app.buttons["intent-topic-sports"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["intent-topic-sports"].isSelected)
-        app.buttons["取消"].tap()
-        XCTAssertTrue(use.waitForExistence(timeout: 5), "Cancel must return to Explore, not recommendations")
+        let interest = app.buttons["explore-interest-ui-explore-0"]
+        revealFlowElement(interest, in: app)
+        XCTAssertTrue(interest.isHittable)
+        XCTAssertFalse(app.buttons["explore-use-ui-explore-0"].exists)
+        XCTAssertFalse(app.staticTexts["示例 · 无真实参与者"].exists)
+        XCTAssertFalse(app.descendants(matching: .any)["intent-editor"].exists)
         selectTogetherSection(0, in: app)
         XCTAssertTrue(opportunity.waitForExistence(timeout: 5), "Browsing Explore must not consume a recommendation")
         app.terminate()
@@ -632,6 +700,9 @@ final class VisualQAScreenshotUITests: XCTestCase {
         interest.tap()
         let saved = app.descendants(matching: .any)["explore-interest-saved-ui-explore-0"].firstMatch
         XCTAssertTrue(saved.waitForExistence(timeout: 5))
+        XCTAssertEqual(saved.label, "已感兴趣")
+        XCTAssertEqual(app.staticTexts["explore-interest-waiting-ui-explore-0"].label, "等待对方回应")
+        XCTAssertTrue(app.buttons["explore-interest-withdraw-ui-explore-0"].exists)
         XCTAssertFalse(app.descendants(matching: .any)["intent-editor"].exists)
         XCTAssertFalse(interest.exists)
         saveScreenshot(app: app, name: "explore-real-interest-saved")
@@ -639,9 +710,33 @@ final class VisualQAScreenshotUITests: XCTestCase {
         let recommendation = app.descendants(matching: .any)["mutual-opportunity-saved-ui-explore-opportunity-ui-explore-0"].firstMatch
         revealFlowElement(recommendation, in: app)
         XCTAssertTrue(recommendation.exists)
+        XCTAssertEqual(app.staticTexts["mutual-opportunity-waiting-ui-explore-opportunity-ui-explore-0"].label, "等待对方回应")
+        let withdraw = app.buttons["mutual-opportunity-withdraw-ui-explore-opportunity-ui-explore-0"]
+        revealFlowElement(withdraw, in: app)
+        XCTAssertEqual(withdraw.label, "撤回兴趣")
+        XCTAssertGreaterThanOrEqual(withdraw.frame.height, 44 - 0.01)
+        XCTAssertFalse(app.buttons["mutual-opportunity-interest-more-ui-explore-opportunity-ui-explore-0"].exists)
         XCTAssertFalse(app.buttons["mutual-opportunity-open-ui-explore-opportunity-ui-explore-0"].exists)
+        saveScreenshot(app: app, name: "together-interest-waiting-zh")
         selectTogetherSection(2, in: app)
         XCTAssertTrue(saved.waitForExistence(timeout: 5))
+        selectTogetherSection(0, in: app)
+        revealFlowElement(withdraw, in: app)
+        withdraw.tap()
+        XCTAssertTrue(recommendation.waitForNonExistence(timeout: 5))
+        selectTogetherSection(2, in: app)
+        let secondInterest = app.buttons["explore-interest-ui-explore-1"]
+        revealFlowElement(secondInterest, in: app)
+        secondInterest.tap()
+        let secondSaved = app.descendants(matching: .any)["explore-interest-saved-ui-explore-1"].firstMatch
+        XCTAssertTrue(secondSaved.waitForExistence(timeout: 5))
+        let exploreWithdraw = app.buttons["explore-interest-withdraw-ui-explore-1"]
+        revealFlowElement(exploreWithdraw, in: app)
+        exploreWithdraw.tap()
+        XCTAssertTrue(secondSaved.waitForNonExistence(timeout: 5))
+        XCTAssertFalse(secondInterest.exists, "Withdrawal closes this opportunity; it is not an interest toggle")
+        selectTogetherSection(0, in: app)
+        XCTAssertFalse(app.descendants(matching: .any)["mutual-opportunity-saved-ui-explore-opportunity-ui-explore-1"].exists)
         app.terminate()
     }
 
@@ -689,20 +784,19 @@ final class VisualQAScreenshotUITests: XCTestCase {
 
     @MainActor
     func testTogetherCreateReturnsToIntentionsWithoutPublishingExplore() {
-        let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents", "--ui-testing-explore-examples",
+        let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents",
             "--ui-testing-language=zh-Hans"])
         selectTogetherSection(1, in: app)
         app.scrollViews["together-section-intentions"].swipeUp(velocity: .slow)
         selectTogetherSection(2, in: app)
-        let use = app.buttons["explore-use-ui-explore-1"]
-        revealFlowElement(use, in: app)
-        use.tap()
+        app.buttons["together-add-intent"].tap()
+        app.buttons["intent-topic-coffee"].tap()
         XCTAssertTrue(app.textFields["intent-editor-activity"].waitForExistence(timeout: 5))
-        XCTAssertEqual(app.textFields["intent-editor-activity"].value as? String, "Coffee after class")
+        app.textFields["intent-editor-activity"].tap()
+        app.textFields["intent-editor-activity"].typeText("Coffee after class")
         app.buttons["intent-editor-next"].tap()
-        let visibility = app.switches["intent-explore-visible"].firstMatch
-        revealFlowElement(visibility, in: app)
-        XCTAssertEqual(visibility.value as? String, "0", "Explore sharing requires an explicit choice")
+        XCTAssertTrue(app.buttons["intent-editor-save"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.switches["intent-explore-visible"].exists, "The form no longer exposes a visibility option")
         app.buttons["intent-editor-save"].tap()
         let created = app.descendants(matching: .any)["weekly-intent-ui-intent-created"].firstMatch
         XCTAssertTrue(created.waitForExistence(timeout: 5))
@@ -819,7 +913,8 @@ final class VisualQAScreenshotUITests: XCTestCase {
         start.press(forDuration: 0.1,
             thenDragTo: start.withOffset(CGVector(dx: bar.frame.width * 0.40, dy: 0)),
             withVelocity: .slow, thenHoldForDuration: 0.4)
-        XCTAssertTrue(activity.waitForNonExistence(timeout: 5), "The retry gesture must commit successfully after the first failed save")
+        XCTAssertTrue(app.descendants(matching: .any)["mutual-opportunity-saved-\(id)"].waitForExistence(timeout: 5), "The retry gesture must retain the saved interest after the first failed save")
+        XCTAssertTrue(activity.exists)
         app.terminate()
     }
 
@@ -850,6 +945,10 @@ final class VisualQAScreenshotUITests: XCTestCase {
             XCTAssertTrue(activity.waitForExistence(timeout: 8))
             let peer = app.descendants(matching: .any)["mutual-opportunity-peer-\(id)"]
             let time = app.descendants(matching: .any)["mutual-opportunity-time-\(id)"]
+            let card = app.descendants(matching: .any)["mutual-opportunity-\(id)"].firstMatch
+            XCTAssertTrue(peer.exists)
+            XCTAssertEqual(peer.frame.minX, card.frame.minX, accuracy: 1)
+            XCTAssertEqual(peer.frame.width, card.frame.width, accuracy: 1, "The stronger category header spans the card width")
             XCTAssertLessThanOrEqual(peer.frame.maxY, activity.frame.minY)
             XCTAssertLessThanOrEqual(activity.frame.maxY, time.frame.minY)
             XCTAssertFalse(app.descendants(matching: .any)["mutual-opportunity-fit-details-\(id)"].exists)
@@ -862,8 +961,10 @@ final class VisualQAScreenshotUITests: XCTestCase {
                 XCTAssertFalse(app.buttons["mutual-opportunity-no-\(id)"].exists)
                 XCTAssertFalse(open.exists, "Planning is unavailable before mutual consent")
             } else if state == "DECIDED" {
-                let withdraw = app.buttons["撤回"]
+                let withdraw = app.buttons["mutual-opportunity-withdraw-\(id)"]
                 revealFlowElement(withdraw, in: app)
+                XCTAssertEqual(app.staticTexts["mutual-opportunity-waiting-\(id)"].label, "等待对方回应")
+                XCTAssertEqual(withdraw.label, "撤回兴趣")
                 XCTAssertFalse(decision.exists)
                 XCTAssertFalse(open.exists, "A private YES must not unlock planning")
             } else {
@@ -875,12 +976,18 @@ final class VisualQAScreenshotUITests: XCTestCase {
             if state == "NEEDS_DECISION" {
                 if topic == "FOOD" {
                     swipeOpportunityNotInterested(id: id, in: app)
+                    XCTAssertTrue(activity.waitForNonExistence(timeout: 5))
                 } else {
-                    swipeOpportunityInterest(id: id, in: app)
+                    if topic == "EVENTS" {
+                        app.buttons["mutual-opportunity-interest-action-\(id)"].tap()
+                    } else {
+                        swipeOpportunityInterest(id: id, in: app)
+                    }
+                    XCTAssertTrue(app.descendants(matching: .any)["mutual-opportunity-saved-\(id)"].waitForExistence(timeout: 5))
+                    XCTAssertTrue(activity.exists)
                 }
-                XCTAssertTrue(activity.waitForNonExistence(timeout: 5))
             } else if state == "DECIDED" {
-                app.buttons["撤回"].tap()
+                app.buttons["mutual-opportunity-withdraw-\(id)"].tap()
                 XCTAssertTrue(activity.waitForNonExistence(timeout: 5))
             }
             app.terminate()

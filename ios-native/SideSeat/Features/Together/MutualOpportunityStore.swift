@@ -68,7 +68,11 @@ final class MutualOpportunityStore {
                 issue = "UI test: choice was not saved."
                 return
             }
-            opportunities.removeAll { $0.id == opportunity.id }
+            if decision == "YES" {
+                upsert(.uiTestingFixture(id: opportunity.id, stateOverride: "DECIDED"))
+            } else {
+                opportunities.removeAll { $0.id == opportunity.id }
+            }
             notice = AppLocalization.string("Your choice was saved privately.")
             return
         }
@@ -133,6 +137,10 @@ final class MutualOpportunityStore {
     }
 
     func upsert(_ opportunity: NativeMutualOpportunity) {
+        if opportunity.state == "UNAVAILABLE" || opportunity.state == "CLOSED" {
+            opportunities.removeAll { $0.id == opportunity.id }
+            return
+        }
         if let index = opportunities.firstIndex(where: { $0.id == opportunity.id }) {
             opportunities[index] = opportunity
         } else {

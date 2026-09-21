@@ -22,7 +22,7 @@ After authentication, onboarding and required student eligibility, the app opens
 Together. The bottom navigation is always:
 
 ```text
-Together / Calendar / Messages / Me
+Together / Plans / Calendar / Messages / Me
 ```
 
 If Together is temporarily unavailable, show an explicit retry/unavailable state.
@@ -142,11 +142,24 @@ UNDECIDED → YES → WITHDRAWN
 UNDECIDED → NO
 ```
 
-One-sided YES remains private. It creates no chat, waiting badge or “they have not
-answered” state. NO and expiry use neutral closure. An unresolved YES may be
-withdrawn without a confirmation dialog.
+One-sided YES remains private and creates no chat. Following the 2026-09-20
+feedback update, both Recommendations and Explore retain a selected interest
+rail with its star at the right, labeled “Interest shown”, with “Waiting for a
+response” below. This describes the user's pending state without exposing the
+peer's private decision or read status. “Withdraw interest” is directly visible
+beside the waiting text (below it at accessibility text sizes), with secondary
+visual emphasis and no menu or confirmation dialog. The selected rail cannot
+be dragged back: withdrawal closes this opportunity rather than resetting it
+to undecided. NO and expiry use neutral closure.
 
 ## 6. Mutual consent and Messages
+
+Explore uses the same real Weekly Intents and consent flow: show interest directly,
+wait for the other participant, then open Messages after mutual interest. It does
+not open a prefilled intention editor. The 2026-09-21 update removes the separate
+showcase cards and their “Create a similar intention” action; an empty feed stays
+empty. QA accounts publish real intentions within the isolated QA cohort, using
+the same card UI and actions as ordinary accounts.
 
 When the second current YES is committed, the system atomically:
 
@@ -248,5 +261,34 @@ qualifying encounter is independently confirmed and reported occurred.
 
 Existing public Course/Buddy Actions and Activities may finish their safe lifecycle
 and preserve trusted Plan provenance. They do not appear as a public acquisition
-surface in the current four-tab app. Their technical behavior is isolated in
+surface in the current five-tab app. Their technical behavior is isolated in
 [Legacy Action Compatibility](./LEGACY_ACTION_COMPATIBILITY.md).
+
+## Browser workspace — 2026-09-21
+
+After browser login, `/together` opens the five-destination shell. A desktop rail
+and phone navigation lead to Together, Plans, Calendar, Messages and Me. Course
+management is under Me. Old Discover/public-publishing URLs redirect to Together;
+old Plan shortcuts redirect to Plans. No installation or add-to-home workflow is
+part of the browser.
+
+Together uses private persistent intentions and the same server-controlled feature
+gates as the App. Publish explicitly enables matching; edit, pause, resume and end
+use version checks. An individual YES stays private. Mutual YES opens coordination;
+its source card can propose a Plan. Plans separates Waiting, Upcoming and Ended.
+Acceptance creates both calendar projections; outcomes and meet-again permission
+remain private. The browser reads actual persisted records, without demo cards.
+
+Calendar remains the most complete migrated module: day/week/month navigation,
+manual and natural-language entry, categories, course schedules, ICS import/export,
+subscription calendars, search and availability sharing. Recurring edits can affect
+one occurrence, this and future occurrences, or the series; an empty repeat end
+means no end date. Shared Plan facts open coordination in chat and cannot be
+edited/deleted as personal events. Calendar data refreshes from the server instead
+of restoring a persistent page snapshot.
+
+The browser uses ICS for calendar interoperability. Apple Calendar access remains
+native. Event-share links show the filtered snapshot and currently use the App to
+add a copy. The rebuilt messaging workspace covers text, replies, history, shared
+calendar viewing and Plan negotiation; advanced media composition and the remaining
+native-only utilities are subsequent migration work.

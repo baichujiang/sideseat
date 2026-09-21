@@ -1652,6 +1652,7 @@
 "Your choice was saved privately." = "你的选择已私密保存。";
 "Saved privately" = "已私密保存";
 "Your choice is saved privately" = "你的选择已私密保存";
+"Interest shown" = "已感兴趣";
 "Withdraw" = "撤回";
 "Your choice was withdrawn." = "你的选择已撤回。";
 "What exactly?" = "具体想做什么？";
@@ -1871,6 +1872,8 @@
 "Specific times" = "具体时间";
 "I already know when I am available." = "已经知道自己什么时候有空。";
 "Timing preference" = "时间偏好";
+"Choose a time" = "选择时间";
+"Choose a day, a date range, or specific times." = "选择某天、日期范围，或具体时段。";
 "This is a preference, not an appointment. Agree on the exact time in chat." = "这只是时间偏好，不是约定。具体时间可以匹配后在聊天中商量。";
 "Through" = "至";
 "Part of the day" = "偏好时段";
@@ -1997,9 +2000,7 @@
 
 "Show interest in an activity. Your choice stays private until you both show interest." = "对活动感兴趣，就点一下。双方都感兴趣前，你的选择仅自己可见。";
 
-"Example · No real participant" = "示例 · 无真实参与者";
 
-"Create a similar intention" = "创建类似意愿";
 
 "View in recommendations" = "在推荐中查看";
 

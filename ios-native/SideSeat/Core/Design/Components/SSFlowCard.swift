@@ -17,7 +17,7 @@ struct SSFlowCard<Content: View>: View {
             .padding(contentPadding)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
-                activityTopic.map(SideSeatTheme.Together.cardFill) ?? SideSeatTheme.surface,
+                SideSeatTheme.surface,
                 in: RoundedRectangle(
                     cornerRadius: radius, style: .continuous
                 )
@@ -28,6 +28,30 @@ struct SSFlowCard<Content: View>: View {
                                   : SideSeatTheme.Together.border.opacity(0.7), lineWidth: 0.5)
             }
             .shadow(color: activityTopic == nil ? .clear : SideSeatTheme.Together.shadow.opacity(0.045), radius: 16, y: 6)
+    }
+}
+
+/// Full-width category band shared by all three Together lists; the body stays neutral.
+struct SSActivityHeaderBand<Content: View>: View {
+    let topic: NativeWeeklyIntentTopic
+    var horizontalPadding: CGFloat = SideSeatTheme.Together.cardPadding
+    var verticalPadding: CGFloat = SideSeatTheme.spaceMD
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        content()
+            .padding(.horizontal, horizontalPadding)
+            .padding(.vertical, verticalPadding)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background {
+                UnevenRoundedRectangle(
+                    topLeadingRadius: SideSeatTheme.Together.cardRadius,
+                    topTrailingRadius: SideSeatTheme.Together.cardRadius,
+                    style: .continuous
+                )
+                .fill(SideSeatTheme.Together.headerFill(for: topic))
+            }
+            .accessibilityElement(children: .contain)
     }
 }
 
@@ -108,7 +132,7 @@ struct SSActivityChoice: View {
             .frame(maxWidth: .infinity, minHeight: 112)
             .foregroundStyle(SideSeatTheme.textPrimary)
             .background(
-                isSelected ? SideSeatTheme.activityInset : SideSeatTheme.surface,
+                SideSeatTheme.Together.activityChoiceFill(for: topic),
                 in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
             )
             .overlay {
@@ -146,7 +170,71 @@ enum SSOpportunitySwipeChoice: Equatable {
     }
 }
 
-/// A compact bilateral decision control: left means not interested, right means interested.
+/// The committed position of the interest control. It is a status, not a reversible slider.
+struct SSOpportunityInterestStatus: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let id: String
+    var accessibilityPrefix = "mutual-opportunity"
+    let isWorking: Bool
+    let onWithdraw: () -> Void
+
+    private var footerLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
+            : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                Text(AppLocalization.string("Interest shown"))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.accentText)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.leading, SideSeatTheme.spaceMD)
+                Spacer(minLength: 0)
+                Image(systemName: "star.fill")
+                    .font(.system(size: 19, weight: .semibold))
+                    .foregroundStyle(SideSeatTheme.Together.decisionHandleInk)
+                    .frame(width: 52, height: 52)
+                    .background(SideSeatTheme.Together.decisionHandle, in: Circle())
+                    .overlay { Circle().strokeBorder(SideSeatTheme.Together.decisionHandleBorder, lineWidth: 0.75) }
+                    .accessibilityHidden(true)
+            }
+            .padding(6)
+            .frame(maxWidth: .infinity, minHeight: dynamicTypeSize.isAccessibilitySize ? 72 : 64)
+            .background(SideSeatTheme.Together.selectedTab, in: Capsule())
+            .overlay { Capsule().strokeBorder(SideSeatTheme.accent.opacity(0.25), lineWidth: 0.5) }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(AppLocalization.string("Interest shown"))
+            .accessibilityIdentifier("\(accessibilityPrefix)-saved-\(id)")
+
+            footerLayout {
+                Text(AppLocalization.string("Waiting for a response"))
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityIdentifier("\(accessibilityPrefix)-waiting-\(id)")
+                Button(action: onWithdraw) {
+                    Text(AppLocalization.string("Withdraw interest"))
+                        .font(.footnote.weight(.medium))
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(minWidth: 44, minHeight: 44, alignment: .leading)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .disabled(isWorking)
+                .accessibilityIdentifier("\(accessibilityPrefix)-withdraw-\(id)")
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .background(SSPageSwipeExclusion())
+    }
+}
+
+/// A bilateral decision control that retains its selected appearance after interest is saved.
 struct SSOpportunityDecisionBar: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -155,9 +243,11 @@ struct SSOpportunityDecisionBar: View {
     @State private var committedChoice: SSOpportunitySwipeChoice?
 
     let opportunityID: String
+    let isInterested: Bool
     let isWorking: Bool
     let onInterested: () async -> Void
     let onSkip: () async -> Void
+    let onWithdraw: () -> Void
 
     private let thumbSize: CGFloat = 52
     private let trackInset: CGFloat = 6
@@ -193,9 +283,15 @@ struct SSOpportunityDecisionBar: View {
     }
 
     var body: some View {
-        VStack(spacing: SideSeatTheme.spaceSM) {
-            decisionLabels
-            accessibleTrack
+        Group {
+            if isInterested {
+                SSOpportunityInterestStatus(id: opportunityID, isWorking: isWorking, onWithdraw: onWithdraw)
+            } else {
+                VStack(spacing: SideSeatTheme.spaceSM) {
+                    decisionLabels
+                    accessibleTrack
+                }
+            }
         }
         .background(SSPageSwipeExclusion())
     }
@@ -245,8 +341,8 @@ struct SSOpportunityDecisionBar: View {
                 Image(systemName: "minus")
                     .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 Spacer()
-                Image(systemName: "heart")
-                    .foregroundStyle(SideSeatTheme.accentText)
+                Image(systemName: "star")
+                    .foregroundStyle(SideSeatTheme.Together.decisionHandleInk)
             }
             .font(.system(size: 16, weight: .medium))
             .padding(.horizontal, 22)
@@ -268,23 +364,31 @@ struct SSOpportunityDecisionBar: View {
 
     private var decisionLabels: some View {
         HStack(alignment: .top, spacing: SideSeatTheme.spaceLG) {
-            Text(AppLocalization.string("Not interested"))
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .opacity(activeChoice == .interested ? 0.5 : 1)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            Button { submit(.skip) } label: {
+                Text(AppLocalization.string("Not interested"))
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .opacity(activeChoice == .interested ? 0.5 : 1)
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    .contentShape(Rectangle())
+            }
+            .accessibilityIdentifier("mutual-opportunity-skip-action-\(opportunityID)")
 
-            Text(AppLocalization.string("Interested"))
-                .foregroundStyle(SideSeatTheme.accentText)
-                .opacity(activeChoice == .skip ? 0.5 : 1)
-                .multilineTextAlignment(.trailing)
-                .frame(maxWidth: .infinity, alignment: .trailing)
+            Button { submit(.interested) } label: {
+                Text(AppLocalization.string("Interested"))
+                    .foregroundStyle(SideSeatTheme.accentText)
+                    .opacity(activeChoice == .skip ? 0.5 : 1)
+                    .multilineTextAlignment(.trailing)
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .trailing)
+                    .contentShape(Rectangle())
+            }
+            .accessibilityIdentifier("mutual-opportunity-interest-action-\(opportunityID)")
         }
+        .buttonStyle(.plain)
+        .disabled(isSubmitting)
         .font(.caption.weight(.medium))
         .fixedSize(horizontal: false, vertical: true)
         .padding(.horizontal, 4)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: activeChoice)
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
     }
 
     private var dragFeedback: some View {
@@ -326,19 +430,16 @@ struct SSOpportunityDecisionBar: View {
             if isSubmitting {
                 ProgressView().tint(thumbForeground)
             } else if let choice = armedChoice {
-                Image(systemName: choice == .interested ? "heart.fill" : "minus")
+                Image(systemName: choice == .interested ? "star.fill" : "minus")
                     .font(.system(size: 19, weight: .semibold))
                     .foregroundStyle(thumbForeground)
             } else {
-                HStack(spacing: 5) {
+                HStack(spacing: 3) {
                     Image(systemName: "chevron.left").font(.system(size: 8, weight: .semibold))
-                    HStack(spacing: 3) {
-                        Capsule().frame(width: 2, height: 14)
-                        Capsule().frame(width: 2, height: 14)
-                    }
+                    Image(systemName: "star").font(.system(size: 19, weight: .semibold))
                     Image(systemName: "chevron.right").font(.system(size: 8, weight: .semibold))
                 }
-                .foregroundStyle(SideSeatTheme.accentText)
+                .foregroundStyle(thumbForeground)
             }
         }
         .frame(width: thumbSize, height: thumbSize)
@@ -386,7 +487,7 @@ struct SSOpportunityDecisionBar: View {
 
     private var thumbFill: Color {
         switch armedChoice ?? committedChoice {
-        case .interested: return SideSeatTheme.accent
+        case .interested: return SideSeatTheme.Together.decisionHandle
         case .skip: return SideSeatTheme.Together.ink
         case nil: return SideSeatTheme.Together.decisionHandle
         }
@@ -394,22 +495,22 @@ struct SSOpportunityDecisionBar: View {
 
     private var thumbStroke: Color {
         switch armedChoice {
-        case .interested: return SideSeatTheme.accent
+        case .interested: return SideSeatTheme.Together.decisionHandleBorder
         case .skip: return SideSeatTheme.Together.ink
-        case nil: return SideSeatTheme.Together.border
+        case nil: return SideSeatTheme.Together.decisionHandleBorder
         }
     }
 
     private var thumbForeground: Color {
         switch armedChoice ?? committedChoice {
-        case .interested: return SideSeatTheme.onAccent
+        case .interested: return SideSeatTheme.Together.decisionHandleInk
         case .skip: return SideSeatTheme.Together.canvas
-        case nil: return SideSeatTheme.accentText
+        case nil: return SideSeatTheme.Together.decisionHandleInk
         }
     }
 
     private func submit(_ choice: SSOpportunitySwipeChoice) {
-        guard !isSubmitting else { return }
+        guard !isInterested, !isSubmitting else { return }
         committedChoice = choice
         withAnimation(reduceMotion ? nil : .easeOut(duration: 0.16)) {
             translation = CGSize(width: choice == .interested ? travel : -travel, height: 0)

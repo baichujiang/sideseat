@@ -199,23 +199,41 @@ enum SideSeatTheme {
     /// Warm paper surfaces with Rose reserved for selection and interest.
     enum Together {
         static let decisionWell = adaptive(light: 0xF4EAE5, dark: 0x342830)
-        static let decisionHandle = adaptive(light: 0xFFFCF8, dark: 0x51404A)
+        /// Muted gold is scoped to the interest knob; navigation keeps the brand Rose.
+        static let decisionHandle = adaptive(light: 0xEBDDCA, dark: 0x514635)
+        static let decisionHandleInk = adaptive(light: 0x72562D, dark: 0xF2DBAF)
+        static let decisionHandleBorder = adaptive(light: 0xC7B58F, dark: 0x8D7B5A)
         static let canvas = adaptive(light: 0xFAF3EC, dark: 0x1C171A)
         static let selectedTab = adaptive(light: 0xFBE5EA, dark: 0x41252F)
+        /// Dusty Rose gives the pinned navigation a distinct, soft selection surface.
+        static let navigationSelection = adaptive(light: 0xF2CCD8, dark: 0x4C2A39)
         static let ink = adaptive(light: 0x35262E, dark: 0xF7EDE9)
         static let border = adaptive(light: 0xE9DDD5, dark: 0x493A42)
         static let shadow = Color(red: 0.30, green: 0.15, blue: 0.20)
         static let cardPadding: CGFloat = 20
         static let cardRadius: CGFloat = 24
 
-        static func cardFill(for topic: NativeWeeklyIntentTopic) -> Color {
+        /// Full category color is reserved for the activity-type picker tiles.
+        static func activityChoiceFill(for topic: NativeWeeklyIntentTopic) -> Color {
             switch topic {
-            case .coffee: adaptive(light: 0xFFFBF6, dark: 0x2B2323)
-            case .study: adaptive(light: 0xFCFBFE, dark: 0x29242F)
-            case .sports: adaptive(light: 0xFCFCF6, dark: 0x282923)
-            case .explore: adaptive(light: 0xF9FCF8, dark: 0x232A26)
-            case .food: adaptive(light: 0xFFFAF6, dark: 0x2D2323)
-            case .events: adaptive(light: 0xFFFAFD, dark: 0x2E232C)
+            case .coffee: adaptive(light: 0xF4E5D6, dark: 0x342A25)
+            case .study: adaptive(light: 0xE5EFF9, dark: 0x233244)
+            case .sports: adaptive(light: 0xE9F0D6, dark: 0x2D3623)
+            case .explore: adaptive(light: 0xDEF0E7, dark: 0x243A32)
+            case .food: adaptive(light: 0xF9E5DA, dark: 0x402C26)
+            case .events: adaptive(light: 0xEFE4F8, dark: 0x372C43)
+            }
+        }
+
+        /// Category color is limited to the top band in all three Together lists.
+        static func headerFill(for topic: NativeWeeklyIntentTopic) -> Color {
+            switch topic {
+            case .coffee: adaptive(light: 0xEDD5BE, dark: 0x4A3429)
+            case .study: adaptive(light: 0xD4E3F2, dark: 0x293D54)
+            case .sports: adaptive(light: 0xDCE8BB, dark: 0x3A4628)
+            case .explore: adaptive(light: 0xC9E5DA, dark: 0x26483D)
+            case .food: adaptive(light: 0xF4D4C4, dark: 0x51332D)
+            case .events: adaptive(light: 0xE4D5F2, dark: 0x433251)
             }
         }
 

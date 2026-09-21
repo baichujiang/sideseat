@@ -58,10 +58,11 @@ Stars.
 
 ## 3. Information architecture
 
-The native app has four stable destinations and opens on Together:
+The current native app and browser have five destinations and open on Together:
 
 ```text
 Together / 同行
+Plans / 计划
 Calendar / 日历
 Messages / 消息
 Me / 我
@@ -69,6 +70,7 @@ Me / 我
 
 - **Together** owns Weekly Intent, matching sessions, first/repeat Opportunities,
   post-event follow-up and later Pod formation.
+- **Plans** owns waiting proposals, upcoming commitments and ended-plan feedback.
 - **Calendar** owns personal scheduling, courses, confirmed Plan projections,
   retrieval and Apple Calendar interoperability.
 - **Messages** owns communication after current mutual consent and all Plan
@@ -166,6 +168,18 @@ remain available after their first coordination ends unless safety state prevent
 contact.
 
 ### Calendar
+
+Owner decision on 2026-09-21: rebuild the browser interface around the current App,
+with scheduling as the first complete workflow. Browser entry opens Together
+(`/together`), and the five-destination shell exposes Plans, Calendar (`/home`),
+Messages and Me. Courses are managed under Me. Legacy public publishing screens
+redirect to current destinations. Installation prompts, the PWA manifest and
+persistent page snapshots are removed.
+
+Web and native scheduling share account identity, persistent calendar data,
+recurrence and sharing services. The browser uses the existing HttpOnly session
+and versioned native APIs for intentions, opportunities, plans, chat and profile.
+Browser access does not imply EventKit access. See [browser delivery](./releases/2026-09-21-web-calendar.md).
 
 Reliably carry personal events, course timetable and confirmed commitments.
 Calendar is the destination of the social funnel, not a recommendation surface.

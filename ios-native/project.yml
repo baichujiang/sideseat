@@ -8,10 +8,12 @@ options:
   generateEmptyDirectories: true
 configs:
   Development: debug
+  Preview: debug
   Staging: release
   Production: release
 configFiles:
   Development: Configuration/Development.xcconfig
+  Preview: Configuration/Preview.xcconfig
   Staging: Configuration/Staging.xcconfig
   Production: Configuration/Production.xcconfig
 settings:
@@ -41,7 +43,7 @@ targets:
     info:
       path: SideSeat/Resources/Info.plist
       properties:
-        CFBundleDisplayName: SideSeat
+        CFBundleDisplayName: $(PRODUCT_NAME)
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         ITSAppUsesNonExemptEncryption: false
@@ -73,6 +75,9 @@ targets:
         PRODUCT_MODULE_NAME: SideSeat
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_ENTITLEMENTS: SideSeat/SideSeat.entitlements
+      configs:
+        Preview:
+          PRODUCT_NAME: SideSeat Preview
     entitlements:
       path: SideSeat/SideSeat.entitlements
       properties:
@@ -167,6 +172,17 @@ schemes:
       config: Development
     archive:
       config: Production
+  SideSeat-Preview:
+    build:
+      targets:
+        SideSeat: all
+    run:
+      config: Preview
+      storeKitConfiguration: Configuration/SideSeat.storekit
+    analyze:
+      config: Preview
+    archive:
+      config: Preview
   SideSeat-Staging:
     build:
       targets:

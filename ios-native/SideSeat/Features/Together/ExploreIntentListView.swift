@@ -8,7 +8,6 @@ struct ExploreIntentListView: View {
     var isPageActive = true
     var onOpportunityChange: ((NativeMutualOpportunity) -> Void)? = nil
     var onShowRecommendations: (() -> Void)? = nil
-    var onUseIntent: ((NativeExploreIntent) -> Void)? = nil
     @State private var store = ExploreIntentStore()
     @State private var searchText = ""
     @State private var selectedTopic: NativeWeeklyIntentTopic? = nil
@@ -26,7 +25,7 @@ struct ExploreIntentListView: View {
                     .navigationBarTitleDisplayMode(.inline)
             }
         }
-        .background(SideSeatTheme.Together.canvas)
+        .background(SideSeatTheme.bgGrouped)
         .tint(SideSeatTheme.accentText)
         .task(id: isEnabled && isPageActive) {
             if isEnabled && isPageActive {
@@ -55,12 +54,10 @@ struct ExploreIntentListView: View {
                     .foregroundStyle(SideSeatTheme.Together.ink)
                     .fixedSize(horizontal: false, vertical: true)
 
-                if onUseIntent != nil {
-                    Text(AppLocalization.string("Show interest in an activity. Your choice stays private until you both show interest."))
-                        .font(.footnote)
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                Text(AppLocalization.string("Show interest in an activity. Your choice stays private until you both show interest."))
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 if access.showsAdvancedContext {
                     Label(AppLocalization.string("SideSeat Plus exploration"), systemImage: "sparkles")
@@ -116,13 +113,19 @@ struct ExploreIntentListView: View {
                                     }
                                 }
                             },
+                            onWithdraw: {
+                                Task {
+                                    if let opportunity = await store.withdrawInterest(in: intent, using: session) {
+                                        onOpportunityChange?(opportunity)
+                                    }
+                                }
+                            },
                             onShowRecommendations: onShowRecommendations,
                             onOpenConversation: {
                                 if let connectionID = intent.interest?.coordination?.connectionId {
                                     router.navigate(to: .directChat(connectionID: connectionID))
                                 }
-                            },
-                            onUseIntent: onUseIntent.map { use in { use(intent) } })
+                            })
                     }
                     if visibleIntents.isEmpty {
                         Text(AppLocalization.string("No Explore results match these filters"))
@@ -177,30 +180,49 @@ struct ExploreIntentCard: View {
     let showsPlusContext: Bool
     var isWorking = false
     var onInterested: (() -> Void)? = nil
+    var onWithdraw: (() -> Void)? = nil
     var onShowRecommendations: (() -> Void)? = nil
     var onOpenConversation: (() -> Void)? = nil
-    var onUseIntent: (() -> Void)? = nil
 
     var body: some View {
         SSFlowCard(
-            contentPadding: compact ? SideSeatTheme.spaceMD : SideSeatTheme.Together.cardPadding,
-            contentSpacing: compact ? SideSeatTheme.spaceSM : SideSeatTheme.spaceMD,
+            contentPadding: 0,
+            contentSpacing: 0,
             activityTopic: intent.topic
         ) {
-            HStack(alignment: .top, spacing: compact ? SideSeatTheme.spaceSM : SideSeatTheme.spaceMD) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(intent.topic.title)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.Together.categoryInk(for: intent.topic))
-                    Text(intent.activityTitle)
-                        .font(compact ? .headline : .title3.weight(.semibold))
-                        .lineLimit(compact ? 1 : nil)
-                        .fixedSize(horizontal: false, vertical: !compact)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                SSActivityArtwork(topic: intent.topic, size: compact ? 36 : 44)
+            SSActivityHeaderBand(
+                topic: intent.topic,
+                horizontalPadding: compact ? SideSeatTheme.spaceMD : SideSeatTheme.Together.cardPadding,
+                verticalPadding: compact ? SideSeatTheme.spaceSM : SideSeatTheme.spaceMD
+            ) {
+                header
             }
+            .accessibilityIdentifier("explore-intent-header-\(intent.id)")
+            details
+                .padding(compact ? SideSeatTheme.spaceMD : SideSeatTheme.Together.cardPadding)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("explore-intent-\(intent.id)")
+    }
 
+    private var header: some View {
+        HStack(alignment: .top, spacing: compact ? SideSeatTheme.spaceSM : SideSeatTheme.spaceMD) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(intent.topic.title)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.Together.categoryInk(for: intent.topic))
+                Text(intent.activityTitle)
+                    .font(compact ? .headline : .title3.weight(.semibold))
+                    .lineLimit(compact ? 1 : nil)
+                    .fixedSize(horizontal: false, vertical: !compact)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            SSActivityArtwork(topic: intent.topic, size: compact ? 36 : 44)
+        }
+    }
+
+    private var details: some View {
+        VStack(alignment: .leading, spacing: compact ? SideSeatTheme.spaceSM : SideSeatTheme.spaceMD) {
             Label(intent.time.summary, systemImage: "calendar")
                 .font(.footnote.weight(.medium))
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -259,28 +281,21 @@ struct ExploreIntentCard: View {
                 }
             }
         }
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("explore-intent-\(intent.id)")
     }
 
     @ViewBuilder
     private var interestAction: some View {
-        if intent.isExample == true {
-            Label(AppLocalization.string("Example · No real participant"), systemImage: "sparkles")
-                .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-            if let onUseIntent {
-                actionButton("Create a similar intention", icon: "plus", identifier: "explore-use-\(intent.id)", action: onUseIntent)
-            }
-        } else if intent.interest?.state == "READY_TO_COORDINATE" {
+        if intent.interest?.state == "READY_TO_COORDINATE" {
             Label(AppLocalization.string("You both showed interest"), systemImage: "checkmark.circle.fill")
                 .font(.subheadline.weight(.semibold)).foregroundStyle(SideSeatTheme.statusSuccessText)
             if let onOpenConversation {
                 actionButton("Chat about the details", icon: "bubble.left.and.bubble.right", identifier: "explore-chat-\(intent.id)", action: onOpenConversation)
             }
         } else if intent.interest?.state == "DECIDED" {
-            Label(AppLocalization.string("Your choice is saved privately"), systemImage: "heart.fill")
-                .font(.subheadline.weight(.semibold)).foregroundStyle(SideSeatTheme.accentText)
-                .accessibilityIdentifier("explore-interest-saved-\(intent.id)")
+            if let onWithdraw {
+                SSOpportunityInterestStatus(id: intent.id, accessibilityPrefix: "explore-interest",
+                    isWorking: isWorking, onWithdraw: onWithdraw)
+            }
             if let onShowRecommendations {
                 Button(AppLocalization.string("View in recommendations"), action: onShowRecommendations)
                     .font(.footnote.weight(.medium)).frame(minHeight: 44)

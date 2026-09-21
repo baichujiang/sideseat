@@ -1652,6 +1652,7 @@
 "Your choice was saved privately." = "Your choice was saved privately.";
 "Saved privately" = "Saved privately";
 "Your choice is saved privately" = "Your choice is saved privately";
+"Interest shown" = "Interest shown";
 "Withdraw" = "Withdraw";
 "Your choice was withdrawn." = "Your choice was withdrawn.";
 "What exactly?" = "What exactly?";
@@ -1871,6 +1872,8 @@
 "Specific times" = "Specific times";
 "I already know when I am available." = "I already know when I am available.";
 "Timing preference" = "Timing preference";
+"Choose a time" = "Choose a time";
+"Choose a day, a date range, or specific times." = "Choose a day, a date range, or specific times.";
 "This is a preference, not an appointment. Agree on the exact time in chat." = "This is a preference, not an appointment. Agree on the exact time in chat.";
 "Through" = "Through";
 "Part of the day" = "Part of the day";
@@ -1997,9 +2000,7 @@
 
 "Show interest in an activity. Your choice stays private until you both show interest." = "Show interest in an activity. Your choice stays private until you both show interest.";
 
-"Example · No real participant" = "Example · No real participant";
 
-"Create a similar intention" = "Create a similar intention";
 
 "View in recommendations" = "View in recommendations";
 

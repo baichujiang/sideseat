@@ -42,7 +42,9 @@ Tokens live in `SideSeatTheme.swift`; calendar-specific metrics live in
 | ------------------------------ | ------------------------------------------------------------- |
 | `accent` / `rose`              | selected controls, compact emphasis, unread state             |
 | `ProductAction.*`              | paired ink/chalk product button fill and foreground           |
-| `activityInset`                | warm neutral activity context and selected category surface   |
+| `activityInset`                | warm neutral activity context                                |
+| `Together.activityChoiceFill`  | category-tinted activity-type picker tiles                    |
+| `Together.headerFill`          | colored top row in all three Together card lists              |
 | `verifiedSeal`                 | verified trust state; never reuse interaction Rose            |
 | `bg`, `bgGrouped`, `surface`   | system-adaptive canvases and cards                            |
 | `textPrimary`, `textSecondary` | system-adaptive content hierarchy                             |
@@ -81,13 +83,20 @@ Following review of Preview 46, the owner selected warm cream, brand Rose accent
 and restrained card layers. This replaces the forest/citron header and broad
 category fills from that preview.
 
-`SideSeatTheme.Together` owns the adaptive paper colors. The root uses the native
-large navigation title and a single native Add action shared by all three tabs.
-Text tabs have a short Rose underline and a small intention-count badge. The
-underline follows selection with a spring, disabled by Reduce Motion; at
-accessibility sizes the tabs stack and labels wrap without shrinking.
+`SideSeatTheme.Together` owns the adaptive paper colors used by the cards. The
+2026-09-20 navigation refinement keeps the shared inline brand title and system
+navigation chrome, with no Together-specific title-bar background or tint. The
+page and section-selector surround use the grouped system background. A neutral
+native Add action is shared by all three tabs; it shows a text label when
+space permits and an icon at accessibility sizes. The pinned section selector
+uses equal-width, minimum-44pt buttons on a warm inset surface, with dusty-Rose
+fill and semibold Rose ink marking selection. Warm colors are confined to this
+section selector, not the shared top title bar. Dark Mode adapts the selector to
+charcoal and muted plum; its text keeps at least 4.5:1 contrast. At accessibility sizes the buttons
+stack, labels wrap, and a checkmark reinforces selection. A divider separates the
+fixed navigation from scrolling content; page swipes retain each scroll position.
 
-Together cards use a 24pt radius, 20pt inset, near-ivory category surfaces, a warm
+Together cards use a 24pt radius, 20pt inset, neutral system-adaptive bodies, a warm
 hairline and a subtle shadow. Category artwork stays compact. Activity headings
 are semibold; timing is an unboxed detail row. A 64pt warm inset decision rail has
 a 52pt ivory handle, with the privacy explanation underneath. Owner and Explore
@@ -171,6 +180,24 @@ The redesign and system avatars are committed/pushed for
 
 ### Private interest swipe bar — 2026-09-09
 
+2026-09-21 card-header refinement: recommendation cards emphasize category
+color in the full-width peer/avatar-to-activity-artwork row. Coffee uses latte,
+Study mist blue, Sports olive, Explore mint, Food peach, and Events lavender,
+with corresponding deeper surfaces in Dark mode. `Together.headerFill` owns
+these colors. The header follows the card's top corners; activity details,
+interest controls, and page navigation retain their existing styling. Category
+color never represents consent or interest status.
+The corrected category-surface refinement keeps full category backgrounds only
+on activity-type picker tiles via `Together.activityChoiceFill`. Recommendations,
+Intentions and Explore share `SSActivityHeaderBand`: a full-width colored top row
+with rounded top corners, followed by a neutral `surface` body. The same latte,
+mist-blue, olive, mint, peach or lavender hue identifies the activity in all
+three lists, with corresponding Dark mode headers. Selection still uses the
+explicit outline/checkmark. The shared top navigation and controls are unchanged.
+Card-body rows use 8pt gaps and 12pt vertical insets, with no additional padding
+around the availability row. Header styling, 20pt horizontal insets, text sizes,
+and the existing 44pt-or-larger action targets stay unchanged.
+
 `SSOpportunityDecisionBar` replaces the undecided card's two standalone buttons
 with one neutral capsule track, embedded direction labels and a 48pt circular
 handle. Right is “Interested” / `有兴趣`; left is “Ignore” / `忽略`.
@@ -195,6 +222,23 @@ named VoiceOver actions. Large text grows the track and wraps labels instead of
 shrinking them. This is one visual control, not a people-swiping deck or match
 celebration. Existing private YES/NO, withdrawal and bilateral consent rules stay
 unchanged; mutual interest opens chat, while Plan confirmation remains separate.
+
+2026-09-20 refinement: after a successful private YES, the control retains a
+Rose selected rail with the heart at the right and “Interest shown”. A separate
+footer pairs “Waiting for a response” with a directly visible “Withdraw interest”
+button (44pt minimum target); accessibility text sizes stack the footer. Explore
+uses the same saved-state component. There is no reverse-drag action because
+withdrawal closes the opportunity, while mutual consent replaces the control
+with “Chat about the details”. Failed submissions keep the undecided control
+retryable. Page title/header styling is unchanged.
+
+2026-09-21 interest-knob refinement: the 52pt circle uses a muted cream-gold fill,
+warm gold-brown ink and a soft border, with an outlined star while undecided and
+a filled star when interest is armed or saved. Small direction chevrons remain
+in the idle knob; skipping still uses a minus. The shared saved-state control
+uses the same star and colors in Recommendations and Explore. Only the knob
+palette and matching interest symbol change; Rose navigation, rail styling,
+tap targets, gesture thresholds and consent behavior stay unchanged.
 
 Swipe-bar verification passed on the same iPhone 17 Pro / iOS 26.5 simulator:
 
@@ -382,10 +426,19 @@ uses a ring, checkmark and accessibility selected state, not color alone.
 - calendar-category color appears beside category identity;
 - event editor uses one component for manual and smart-add editing.
 
+### Browser calendar workspace — 2026-09-21
+
+The requested Teams-inspired browser layout uses a compact app rail, a collapsible
+month/category sidebar and a wide calendar grid. Desktop actions live in the top
+command bar, with date and view controls directly above the grid. Month cells
+show event summaries. Phone keeps bottom navigation and the visible-day slider;
+sharing lives in the top bar so it does not overlap either control. Calendar
+category color remains beside category identity; existing event editing is reused.
+
 ## 7. Visual acceptance
 
 Before freezing a release, capture Light/Dark for Together states, Calendar,
-Messages, Me, Auth and the four-tab shell. Record build, device, iOS and fixture.
+Plans, Messages, Me, Auth and the five-tab shell. Record build, device, iOS and fixture.
 The existing pre-Together screenshot set is historical only and lives under
 `docs/archive/visual-qa-pre-together/`.
 
@@ -407,3 +460,14 @@ artifacts in `docs/visual-qa/`; screenshots use local UI fixtures, not pilot dat
 This is simulator evidence for the native changes, not physical acceptance or
 TestFlight build 32 certification. The next release still needs its own signed
 archive, TestFlight distribution and focused physical smoke.
+
+
+### Browser workspaces — 2026-09-21
+
+The rebuilt browser uses a five-destination rail (Together, Plans, Calendar,
+Messages, Me), a fixed phone navigation bar and one main scrolling region. Shared
+workspace headers, explicit empty/error states and simple bordered content groups
+replace the old install-first shell. Calendar retains the Teams-inspired mini-month
+sidebar, category filters, top actions and day/week/month workspace. Me contains
+campus identity, verification, courses, languages, privacy and account settings.
+No install bar, PWA update notice or cached tab snapshot is part of the new shell.
