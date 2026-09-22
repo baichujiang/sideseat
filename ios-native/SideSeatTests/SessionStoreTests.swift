@@ -4,6 +4,39 @@ import Testing
 
 @Suite("Authenticated networking", .serialized)
 struct SessionStoreTests {
+    @Test("Closing the tutorial does not wait for dismissal synchronization")
+    @MainActor
+    func tutorialClosesBeforeSynchronization() async throws {
+        let transport = AuthTestTransport()
+        let store = SessionStore(
+            apiClient: APIClient(environment: .test, transport: transport),
+            credentialStore: MemoryCredentialStore(),
+            device: .test
+        )
+        await store.login(identifier: "test_001", password: "Password123")
+        let userID = try #require(store.currentUser?.id)
+        defer {
+            UserDefaults.standard.removeObject(forKey: "sideseat.productTutorial.dismissed." + userID)
+            UserDefaults.standard.removeObject(forKey: "sideseat.productTutorial.step." + userID)
+        }
+        let controller = ProductTutorialController()
+        var selectedTab: AppTab = .me
+        controller.replay(for: userID) { selectedTab = $0 }
+        controller.advance { selectedTab = $0 }
+        let dismissal = Task {
+            await controller.dismiss(using: store) { selectedTab = $0 }
+        }
+        await transport.waitUntilTutorialDismissStarted()
+        #expect(!controller.isPresented)
+        #expect(selectedTab == .discover)
+        #expect(UserDefaults.standard.bool(forKey: "sideseat.productTutorial.dismissed." + userID))
+        controller.replay(for: userID) { selectedTab = $0 }
+        await transport.finishTutorialDismiss()
+        await dismissal.value
+        #expect(controller.isPresented)
+        #expect(store.currentUser?.productTutorialDismissedAt == "2026-09-22T00:00:00Z")
+    }
+
     @Test("Signup normalizes the username, signs in, and persists credentials")
     @MainActor
     func signupCompletesNativeAuthentication() async throws {
@@ -103,7 +136,7 @@ struct SessionStoreTests {
             password: "NewPassword123",
             confirmPassword: "DifferentPassword123"
         )
-        #expect(mismatched == String(localized: "Passwords do not match."))
+        #expect(mismatched == AppLocalization.string("Passwords do not match."))
         #expect(await transport.passwordResetEmail == nil)
         #expect(await transport.passwordResetCapture == nil)
     }
@@ -488,6 +521,18 @@ private actor AuthTestTransport: APITransport {
     private(set) var passwordResetCapture: PasswordResetCapture?
     private var refreshStarted = false
     private var refreshStartWaiters: [CheckedContinuation<Void, Never>] = []
+    private var tutorialDismissContinuation: CheckedContinuation<Void, Never>?
+    private var tutorialDismissStartWaiter: CheckedContinuation<Void, Never>?
+
+    func waitUntilTutorialDismissStarted() async {
+        if tutorialDismissContinuation != nil { return }
+        await withCheckedContinuation { tutorialDismissStartWaiter = $0 }
+    }
+
+    func finishTutorialDismiss() {
+        tutorialDismissContinuation?.resume()
+        tutorialDismissContinuation = nil
+    }
 
     init(refreshBehavior: RefreshBehavior = .slowSuccess) {
         self.refreshBehavior = refreshBehavior
@@ -503,6 +548,16 @@ private actor AuthTestTransport: APITransport {
     func data(for request: URLRequest) async throws -> (Data, URLResponse) {
         let path = request.url?.path ?? ""
         switch path {
+        case "/api/v1/me/product-tutorial/dismiss":
+            await withCheckedContinuation { continuation in
+                tutorialDismissContinuation = continuation
+                tutorialDismissStartWaiter?.resume()
+                tutorialDismissStartWaiter = nil
+            }
+            return response(
+                for: request, status: 200,
+                body: #"{"data":{"saved":true,"productTutorialDismissedAt":"2026-09-22T00:00:00Z"}}"#
+            )
         case "/api/auth/signup":
             let body = jsonBody(from: request)
             signupCapture = SignupCapture(

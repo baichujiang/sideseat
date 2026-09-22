@@ -597,7 +597,10 @@ final class AuthenticationUITests: XCTestCase {
 
     func testProductTutorialShowsCustomerFacingCopy() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-product-tutorial"]
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-product-tutorial", "--ui-testing-language=en",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL",
+        ]
         app.launch()
 
         XCTAssertTrue(app.descendants(matching: .any)["product-tutorial"].waitForExistence(timeout: 5))
@@ -615,9 +618,9 @@ final class AuthenticationUITests: XCTestCase {
             NSPredicate(
                 format: "label IN %@",
                 [
-                    "Set one private intention and receive a small number of concrete opportunities.",
-                    "Lege einen privaten Wunsch fest und erhalte wenige konkrete Möglichkeiten.",
-                    "设置一个私密意愿，SideSeat 会给出少量具体的同行机会。",
+                    "Add private intentions and receive a concrete opportunity for each.",
+                    "Füge private Vorhaben hinzu und erhalte für jedes eine konkrete Möglichkeit.",
+                    "添加你的私密意愿，每件事都可以获得一个具体的同行机会。",
                 ]
             )
         ).firstMatch
@@ -629,6 +632,14 @@ final class AuthenticationUITests: XCTestCase {
             )
         )
         XCTAssertEqual(internalCopy.count, 0)
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = "Product tutorial at standard text"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        let skip = app.buttons["product-tutorial-skip"]
+        XCTAssertGreaterThanOrEqual(skip.frame.height, 43.5)
+        skip.tap()
+        XCTAssertTrue(outcomeTitle.waitForNonExistence(timeout: 5))
     }
 
     func testDiscoverShowsUnifiedPlansAndPublishOpensBuddyForm() {

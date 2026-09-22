@@ -669,6 +669,55 @@ final class AccessibilityAuditUITests: XCTestCase {
         XCTAssertTrue(submit.waitForNonExistence(timeout: 5))
     }
 
+    func testProductTutorialKeepsNavigationReachableAtLargestText() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-product-tutorial",
+            "--ui-testing-dynamic-type-accessibility", "--ui-testing-language=de",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
+        ]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["product-tutorial-title"].waitForExistence(timeout: 5))
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = "Product tutorial at accessibility5"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        let skip = app.buttons["product-tutorial-skip"]
+        let next = app.buttons["product-tutorial-next"]
+        XCTAssertTrue(skip.isHittable)
+        XCTAssertTrue(next.isHittable)
+        XCTAssertGreaterThanOrEqual(skip.frame.height, 44)
+        XCTAssertGreaterThanOrEqual(next.frame.height, 44)
+        XCTAssertEqual(skip.label, "Schließen")
+        XCTAssertGreaterThanOrEqual(skip.frame.minY, app.navigationBars.firstMatch.frame.minY)
+        let title = app.staticTexts["product-tutorial-title"]
+        XCTAssertGreaterThan(title.frame.height, 60)
+        XCTAssertGreaterThanOrEqual(title.frame.minY, skip.frame.maxY)
+        XCTAssertLessThanOrEqual(next.frame.maxY, app.frame.maxY)
+
+        let firstTitle = title.label
+        let content = app.scrollViews["product-tutorial-content"]
+        XCTAssertTrue(content.exists)
+        content.swipeUp()
+        XCTAssertTrue(app.staticTexts["product-tutorial-hint"].isHittable)
+        XCTAssertTrue(next.isHittable)
+        next.tap()
+        XCTAssertNotEqual(title.label, firstTitle)
+        let back = app.buttons["product-tutorial-back"]
+        XCTAssertTrue(back.isHittable)
+        back.tap()
+        XCTAssertEqual(title.label, firstTitle)
+        for _ in 0..<4 {
+            XCTAssertTrue(skip.isHittable)
+            XCTAssertTrue(next.isHittable)
+            next.tap()
+        }
+        let done = app.buttons["product-tutorial-done"]
+        XCTAssertTrue(done.isHittable)
+        done.tap()
+        XCTAssertTrue(title.waitForNonExistence(timeout: 5))
+    }
+
     private func auditTab(
         in app: XCUIApplication,
         labels: [String],

@@ -21,52 +21,53 @@ struct ProductTutorialStep: Identifiable, Hashable, Sendable {
 final class ProductTutorialController {
     private(set) var isPresented = false
     private(set) var stepIndex = 0
-    private(set) var isDismissing = false
     private(set) var hasEntered = false
     private var activeUserID: String?
 
-    static let steps: [ProductTutorialStep] = [
-        ProductTutorialStep(
-            id: "together",
-            title: AppLocalization.string("Say what you want to do"),
-            body: AppLocalization.string("Set one private intention and receive a small number of concrete opportunities."),
-            hint: AppLocalization.string("Your intention is not a public post or a people directory."),
-            tab: .discover,
-            systemImage: "person.2.fill"
-        ),
-        ProductTutorialStep(
-            id: "plans",
-            title: AppLocalization.string("Keep plans moving"),
-            body: AppLocalization.string("Review proposals, upcoming plans, and follow-ups in one place."),
-            hint: AppLocalization.string("Plans tracks coordination status; Calendar shows confirmed time."),
-            tab: .plans,
-            systemImage: "checklist"
-        ),
-        ProductTutorialStep(
-            id: "home",
-            title: AppLocalization.string("Keep confirmed time together"),
-            body: AppLocalization.string("See accepted plans, courses, and personal events in one reliable schedule."),
-            hint: AppLocalization.string("Calendar carries what is confirmed; Together is where opportunities begin."),
-            tab: .home,
-            systemImage: "calendar"
-        ),
-        ProductTutorialStep(
-            id: "chats",
-            title: AppLocalization.string("Turn interest into a plan"),
-            body: AppLocalization.string("Keep the action context, coordinate a time, and send a structured plan."),
-            hint: AppLocalization.string("The goal is a clear yes, another time, or no—not endless messaging."),
-            tab: .chats,
-            systemImage: "bubble.left.and.bubble.right.fill"
-        ),
-        ProductTutorialStep(
-            id: "me",
-            title: AppLocalization.string("Set your context"),
-            body: AppLocalization.string("Your school, courses, and verification improve relevance and trust."),
-            hint: AppLocalization.string("Courses power matching and schedule data, not a separate social network."),
-            tab: .me,
-            systemImage: "person.fill"
-        ),
-    ]
+    static var steps: [ProductTutorialStep] {
+        [
+            ProductTutorialStep(
+                id: "together",
+                title: AppLocalization.string("Say what you want to do"),
+                body: AppLocalization.string("Set one private intention and receive a small number of concrete opportunities."),
+                hint: AppLocalization.string("Your intention is not a public post or a people directory."),
+                tab: .discover,
+                systemImage: "person.2.fill"
+            ),
+            ProductTutorialStep(
+                id: "plans",
+                title: AppLocalization.string("Keep plans moving"),
+                body: AppLocalization.string("Review proposals, upcoming plans, and follow-ups in one place."),
+                hint: AppLocalization.string("Plans tracks coordination status; Calendar shows confirmed time."),
+                tab: .plans,
+                systemImage: "checklist"
+            ),
+            ProductTutorialStep(
+                id: "home",
+                title: AppLocalization.string("Keep confirmed time together"),
+                body: AppLocalization.string("See accepted plans, courses, and personal events in one reliable schedule."),
+                hint: AppLocalization.string("Calendar carries what is confirmed; Together is where opportunities begin."),
+                tab: .home,
+                systemImage: "calendar"
+            ),
+            ProductTutorialStep(
+                id: "chats",
+                title: AppLocalization.string("Turn interest into a plan"),
+                body: AppLocalization.string("Keep the action context, coordinate a time, and send a structured plan."),
+                hint: AppLocalization.string("The goal is a clear yes, another time, or no—not endless messaging."),
+                tab: .chats,
+                systemImage: "bubble.left.and.bubble.right.fill"
+            ),
+            ProductTutorialStep(
+                id: "me",
+                title: AppLocalization.string("Set your context"),
+                body: AppLocalization.string("Your school, courses, and verification improve relevance and trust."),
+                hint: AppLocalization.string("Courses power matching and schedule data, not a separate social network."),
+                tab: .me,
+                systemImage: "person.fill"
+            ),
+        ]
+    }
 
     private static let localDismissPrefix = "sideseat.productTutorial.dismissed."
     private static let localStepPrefix = "sideseat.productTutorial.step."
@@ -132,26 +133,30 @@ final class ProductTutorialController {
         selectTab(currentStep.tab)
     }
 
-    func jump(to index: Int, selectTab: (AppTab) -> Void) {
-        guard Self.steps.indices.contains(index) else { return }
-        stepIndex = index
-        persistStepIfNeeded()
-        selectTab(currentStep.tab)
-    }
-
     func markEntered() {
         hasEntered = true
     }
 
     func dismiss(using session: SessionStore?, selectTab: (AppTab) -> Void) async {
-        guard !isDismissing else { return }
-        isDismissing = true
-        defer { isDismissing = false }
+        guard isPresented else { return }
+        let dismissedUserID = session?.currentUser?.id
 
-        if let userID = session?.currentUser?.id {
+        if let userID = dismissedUserID {
             writeLocalDismissed(userID: userID)
             clearLocalStep(userID: userID)
         }
+
+        // Closing is local and immediate; account synchronization can finish afterward.
+        isPresented = false
+        hasEntered = false
+        stepIndex = 0
+        selectTab(.discover)
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            return
+        }
+        #endif
 
         if let session, session.phase == .signedIn, !(session.currentUser?.isGuest ?? true) {
             do {
@@ -160,7 +165,7 @@ final class ProductTutorialController {
                     method: .post,
                     idempotencyKey: UUID().uuidString
                 )
-                if var user = session.currentUser {
+                if var user = session.currentUser, user.id == dismissedUserID {
                     let dismissedAt =
                         response.data.productTutorialDismissedAt
                         ?? ISO8601DateFormatter().string(from: Date())
@@ -193,11 +198,6 @@ final class ProductTutorialController {
                 // Local dismiss still stands when offline.
             }
         }
-
-        isPresented = false
-        hasEntered = false
-        stepIndex = 0
-        selectTab(.discover)
     }
 
     func replay(for userID: String, selectTab: (AppTab) -> Void) {

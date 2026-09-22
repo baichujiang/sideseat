@@ -535,6 +535,20 @@ struct MVPCalendarPresentationTests {
 
 @Suite("App language", .serialized)
 struct AppLanguageTests {
+    @Test("Replaying the tutorial uses the language selected since its first presentation")
+    @MainActor
+    func tutorialUsesCurrentLanguage() {
+        let defaults = UserDefaults.standard
+        let original = defaults.object(forKey: AppLocalization.preferenceKey)
+        defer { defaults.set(original, forKey: AppLocalization.preferenceKey) }
+
+        defaults.set(AppLanguage.english.rawValue, forKey: AppLocalization.preferenceKey)
+        #expect(ProductTutorialController.steps[0].title == "Say what you want to do")
+        defaults.set(AppLanguage.german.rawValue, forKey: AppLocalization.preferenceKey)
+        #expect(ProductTutorialController.steps[0].title == "Sag, was du machen möchtest")
+        #expect(ProductTutorialController.steps[0].body == "Füge private Vorhaben hinzu und erhalte für jedes eine konkrete Möglichkeit.")
+    }
+
     @Test("Persists an in-app language selection")
     @MainActor
     func persistsSelection() throws {
