@@ -176,6 +176,13 @@ final class VisualQAScreenshotUITests: XCTestCase {
             if state == "error" { XCTAssertTrue(app.descendants(matching: .any)["plans-load-error"].waitForExistence(timeout: 5)) }
             if state == "loading" { XCTAssertTrue(app.buttons["plans-row-ui-plan-accepted"].waitForExistence(timeout: 8)) }
             saveScreenshot(app: app, name: "pager-plans-\(state)")
+            if state == "empty" {
+                let openTogether = app.buttons["plans-open-together"]
+                XCTAssertTrue(openTogether.isHittable)
+                openTogether.tap()
+                XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 5),
+                    "Empty Plans should offer a direct route to finding an activity.")
+            }
             app.terminate()
         }
     }

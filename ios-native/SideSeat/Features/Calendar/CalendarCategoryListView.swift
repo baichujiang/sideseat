@@ -110,6 +110,7 @@ struct CalendarCategoryListView: View {
 struct CalendarConnectionView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(SessionStore.self) private var session
 
     @State private var connectionStore = CalendarConnectionStore()
@@ -300,40 +301,19 @@ struct CalendarConnectionView: View {
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Button {
+            SSPrimaryButton(
+                title: AppLocalization.string(
+                    connectionStore.connections.isEmpty
+                        ? "Add to Apple Calendar"
+                        : "Add another Apple Calendar"
+                ),
+                isLoading: connectionStore.isMutating,
+                fill: .product,
+                accessibilityID: "calendar-connection-add-apple"
+            ) {
                 Task { await connectAppleCalendar() }
-            } label: {
-                HStack(spacing: SideSeatTheme.spaceSM) {
-                    if connectionStore.isMutating {
-                        ProgressView()
-                            .tint(SideSeatTheme.onAccent)
-                    } else {
-                        Image(systemName: "calendar.badge.plus")
-                            .font(.subheadline.weight(.semibold))
-                    }
-                    Text(
-                        connectionStore.connections.isEmpty
-                            ? "Add to Apple Calendar"
-                            : "Add another Apple Calendar"
-                    )
-                    .font(.body.weight(.semibold))
-                    Spacer(minLength: SideSeatTheme.spaceSM)
-                    Image(systemName: "arrow.up.right")
-                        .font(.caption.weight(.bold))
-                }
-                .foregroundStyle(SideSeatTheme.onAccent)
-                .padding(.horizontal, SideSeatTheme.spaceLG)
-                .frame(maxWidth: .infinity)
-                .frame(minHeight: 50)
-                .background(SideSeatTheme.accent, in: RoundedRectangle(
-                    cornerRadius: SideSeatTheme.controlRadius,
-                    style: .continuous
-                ))
-                .contentShape(Rectangle())
             }
-            .buttonStyle(SSPressButtonStyle())
             .disabled(connectionStore.isMutating)
-            .accessibilityIdentifier("calendar-connection-add-apple")
 
             if let url = connectionStore.latestSubscriptionURL {
                 Divider()
@@ -360,14 +340,20 @@ struct CalendarConnectionView: View {
     }
 
     private var appleCalendarHeader: some View {
-        HStack(spacing: SideSeatTheme.spaceMD) {
-            appleCalendarIcon
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
+            : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceMD))
+        return layout {
+            if !dynamicTypeSize.isAccessibilitySize { appleCalendarIcon }
             Text("Apple Calendar")
                 .font(.headline)
                 .foregroundStyle(SideSeatTheme.textPrimary)
-            Spacer(minLength: SideSeatTheme.spaceSM)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("calendar-connection-title")
+            if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: SideSeatTheme.spaceSM) }
             readOnlyBadge
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var appleCalendarIcon: some View {
@@ -376,6 +362,7 @@ struct CalendarConnectionView: View {
                 .fill(connectionTint.opacity(0.14))
             Image(systemName: "apple.logo")
                 .font(.title3.weight(.semibold))
+                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                 .foregroundStyle(connectionTint)
         }
         .frame(width: 48, height: 48)
@@ -389,7 +376,7 @@ struct CalendarConnectionView: View {
             .padding(.horizontal, 9)
             .padding(.vertical, 6)
             .background(connectionTint.opacity(0.18), in: Capsule())
-            .fixedSize(horizontal: true, vertical: false)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private var loadingConnectionsCard: some View {
@@ -494,25 +481,30 @@ struct CalendarConnectionView: View {
     ) -> some View {
         Button(action: action) {
             HStack(spacing: SideSeatTheme.spaceMD) {
-                ZStack {
-                    Circle()
-                        .fill(connectionTint.opacity(0.12))
-                    Image(systemName: systemImage)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(connectionTint)
+                if !dynamicTypeSize.isAccessibilitySize {
+                    ZStack {
+                        Circle()
+                            .fill(connectionTint.opacity(0.12))
+                        Image(systemName: systemImage)
+                            .font(.subheadline.weight(.semibold))
+                            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                            .foregroundStyle(connectionTint)
+                    }
+                    .frame(width: 40, height: 40)
+                    .accessibilityHidden(true)
                 }
-                .frame(width: 40, height: 40)
-                .accessibilityHidden(true)
 
                 Text(title)
                     .font(.body.weight(.semibold))
                     .foregroundStyle(SideSeatTheme.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
                     .layoutPriority(1)
 
                 Spacer(minLength: SideSeatTheme.spaceSM)
 
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.bold))
+                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                     .foregroundStyle(.tertiary)
                     .accessibilityHidden(true)
             }

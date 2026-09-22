@@ -61,6 +61,7 @@ enum MVPPlanRoute {
 struct PlansRootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
+    @Environment(DeepLinkRouter.self) private var deepLinkRouter
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var store = PlansStore()
     @State private var selectedSection: MVPPlanSection = .waitingResponse
@@ -197,9 +198,21 @@ struct PlansRootView: View {
                 .font(.footnote)
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 .multilineTextAlignment(.center)
+            if store.plans.isEmpty {
+                SSPrimaryButton(
+                    title: AppLocalization.string("Open Together"),
+                    fill: .product,
+                    accessibilityID: "plans-open-together"
+                ) {
+                    deepLinkRouter.handleAppPath("/together")
+                }
+                .frame(maxWidth: 280)
+                .padding(.top, SideSeatTheme.spaceSM)
+            }
         }
         .frame(maxWidth: .infinity, minHeight: 180)
         .padding(.horizontal, SideSeatTheme.spaceLG)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("plans-empty-\(section.rawValue)")
     }
 

@@ -1423,7 +1423,8 @@ final class AuthenticationUITests: XCTestCase {
 
     func testMeProfileInputRowsSupportTapAndKeyboardNavigation() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing-authenticated"]
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-language=zh-Hans"]
         app.launch()
 
         let meTab = app.tabBars.buttons["我"]
@@ -1477,7 +1478,8 @@ final class AuthenticationUITests: XCTestCase {
 
     func testMeProfileEditSheetProtectsUnsavedChanges() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing-authenticated"]
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-language=zh-Hans"]
         app.launch()
 
         let meTab = app.tabBars.buttons["我"]

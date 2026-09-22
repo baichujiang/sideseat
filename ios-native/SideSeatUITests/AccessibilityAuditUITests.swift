@@ -562,6 +562,7 @@ final class AccessibilityAuditUITests: XCTestCase {
             "--ui-testing-authenticated",
             "--ui-testing-skip-tutorial",
             "--ui-testing-dynamic-type-accessibility",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
             "--ui-testing-appearance=dark",
             "--ui-testing-language=de",
         ]
@@ -573,9 +574,22 @@ final class AccessibilityAuditUITests: XCTestCase {
 
         let page = app.scrollViews["calendar-connections"]
         XCTAssertTrue(page.waitForExistence(timeout: 5))
+        let title = app.staticTexts["calendar-connection-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 3))
+        XCTAssertTrue(title.isHittable)
+        XCTAssertGreaterThan(title.frame.height, 40)
+        XCTAssertLessThanOrEqual(title.frame.maxX, page.frame.maxX)
+
+        let headerAttachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        headerAttachment.name = "Calendar connection header at accessibility5"
+        headerAttachment.lifetime = .keepAlways
+        add(headerAttachment)
 
         let addAppleCalendar = app.buttons["calendar-connection-add-apple"]
         XCTAssertTrue(addAppleCalendar.waitForExistence(timeout: 5))
+        for _ in 0..<5 where !addAppleCalendar.isHittable {
+            page.swipeUp()
+        }
         XCTAssertTrue(addAppleCalendar.isHittable)
         XCTAssertGreaterThanOrEqual(addAppleCalendar.frame.height, 44)
 
