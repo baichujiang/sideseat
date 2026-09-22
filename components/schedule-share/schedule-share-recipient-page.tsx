@@ -1,8 +1,8 @@
 "use client";
 
 import type { Route } from "next";
-import { X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { CalendarDays, ChevronDown, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { BackLink } from "@/components/nav/back-link";
@@ -26,6 +26,7 @@ import {
   scheduleShareRecipientViewPath,
 } from "@/lib/schedule-share/share-link-urls";
 import type { ViewerScheduleShareProposal } from "@/lib/schedule-share/viewer-proposal";
+import { recommendScheduleShareCandidates } from "@/lib/schedule-share/recommended-candidates";
 import { cn } from "@/lib/utils";
 
 /**
@@ -57,7 +58,7 @@ export function ScheduleShareRecipientPage({
   backReturnTo?: string | null;
   backFallback?: string;
 }) {
-  const { messages: ui } = useLocaleContext();
+  const { locale, messages: ui } = useLocaleContext();
   const s = ui.scheduleShare;
 
   const [myProposal, setMyProposal] = useState<ViewerScheduleShareProposal | null>(initialMyProposal);
@@ -65,6 +66,7 @@ export function ScheduleShareRecipientPage({
   const [isEditingProposal, setIsEditingProposal] = useState(false);
   const [storedDraft, setStoredDraft] = useState<ScheduleShareProposalDraft | null>(null);
   const [proposalTimeEditorOpen, setProposalTimeEditorOpen] = useState(false);
+  const [showsFullAvailability, setShowsFullAvailability] = useState(false);
 
   const returnTo = token ? scheduleShareRecipientViewPath(token) : "/share/view";
   const allowProposals = snapshot?.allowGuestProposals === true;
@@ -76,6 +78,11 @@ export function ScheduleShareRecipientPage({
     !isLinkOwner &&
     !hasAcceptedProposal &&
     !(isSignedIn && hasPendingProposal);
+  const candidateTimes = useMemo(
+    () => recommendScheduleShareCandidates(snapshot?.freeSlots ?? []),
+    [snapshot?.freeSlots],
+  );
+  const showTimeline = showsFullAvailability || candidateTimes.length === 0;
 
   const ownerSettingsPath =
     ownerEditPath ?? (token ? scheduleShareOwnerEditPath(token) : undefined);
@@ -287,26 +294,97 @@ export function ScheduleShareRecipientPage({
           </p>
         ) : null}
 
-        <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-1 pb-1">
-          <ScheduleShareGuestViewer
-            fillParent
-            readOnly={!allowProposals}
-            snapshot={snapshot}
-            labels={viewerLabels}
-            allowGuestProposals={canPickNewTime}
-            freeSlots={snapshot.freeSlots}
-            proposalSelection={proposalSelection}
-            onProposalSelectionChange={
-              canPickNewTime
-                ? (next) => {
-                    setProposalSelection(next);
-                    if (next) setProposalTimeEditorOpen(true);
-                  }
-                : undefined
-            }
-            onEditProposalSelection={() => setProposalTimeEditorOpen(true)}
-          />
-        </section>
+        {candidateTimes.length > 0 ? (
+          <section className="shrink-0 space-y-2.5 border-b border-border/50 px-4 py-3">
+            <div className="space-y-0.5">
+              <h2 className="text-[13px] font-semibold text-foreground">{s.candidateTimesTitle}</h2>
+              <p className="text-[11px] leading-snug text-muted-foreground">
+                {allowProposals ? s.candidateTimesHint : s.viewOnlyAvailability}
+              </p>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-0.5">
+              {candidateTimes.map((candidate) => {
+                const dateLabel = new Intl.DateTimeFormat(locale, {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                  timeZone: "Europe/Berlin",
+                }).format(candidate.start);
+                const timeFormatter = new Intl.DateTimeFormat(locale, {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  timeZone: "Europe/Berlin",
+                });
+                const content = (
+                  <>
+                    <span className="text-[11px] font-semibold text-foreground">{dateLabel}</span>
+                    <span className="whitespace-nowrap text-[12px] tabular-nums text-muted-foreground">
+                      {timeFormatter.format(candidate.start)}–{timeFormatter.format(candidate.end)}
+                    </span>
+                  </>
+                );
+                return canPickNewTime ? (
+                  <button
+                    key={candidate.id}
+                    type="button"
+                    onClick={() => {
+                      setProposalSelection({
+                        start: candidate.start,
+                        end: candidate.end,
+                        bounds: candidate.bounds,
+                      });
+                      setProposalTimeEditorOpen(true);
+                    }}
+                    className="flex min-h-14 shrink-0 flex-col items-start justify-center rounded-xl border border-primary/25 bg-primary/[0.06] px-3 text-left transition hover:border-primary/45 hover:bg-primary/[0.1]"
+                  >
+                    {content}
+                  </button>
+                ) : (
+                  <div
+                    key={candidate.id}
+                    className="flex min-h-14 shrink-0 flex-col items-start justify-center rounded-xl border border-border/70 bg-muted/25 px-3"
+                  >
+                    {content}
+                  </div>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowsFullAvailability((value) => !value)}
+              className="flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl text-[12px] font-semibold text-primary transition hover:bg-primary/[0.06]"
+            >
+              <CalendarDays className="h-4 w-4" />
+              {showsFullAvailability ? s.hideFullAvailability : s.viewAllAvailability}
+              <ChevronDown className={cn("h-3.5 w-3.5 transition", showsFullAvailability && "rotate-180")} />
+            </button>
+          </section>
+        ) : null}
+
+        {showTimeline ? (
+          <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-1 pb-1">
+            <ScheduleShareGuestViewer
+              fillParent
+              readOnly={!allowProposals}
+              snapshot={snapshot}
+              labels={viewerLabels}
+              allowGuestProposals={canPickNewTime}
+              freeSlots={snapshot.freeSlots}
+              proposalSelection={proposalSelection}
+              onProposalSelectionChange={
+                canPickNewTime
+                  ? (next) => {
+                      setProposalSelection(next);
+                      if (next) setProposalTimeEditorOpen(true);
+                    }
+                  : undefined
+              }
+              onEditProposalSelection={() => setProposalTimeEditorOpen(true)}
+            />
+          </section>
+        ) : (
+          <div className="min-h-0 flex-1 bg-muted/10" />
+        )}
 
         {showFooter ? (
           <div className="shrink-0 overflow-y-auto overscroll-y-contain border-t border-border/50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">

@@ -38,6 +38,13 @@ export type SubmitScheduleSharePlanResult =
 
 type Tx = Prisma.TransactionClient;
 
+class ScheduleShareAlreadyAcceptedRollback extends Error {
+  constructor() {
+    super("already_accepted");
+    this.name = "ScheduleShareAlreadyAcceptedRollback";
+  }
+}
+
 const planSelect = {
   id: true,
   title: true,
@@ -75,56 +82,65 @@ export async function submitScheduleSharePlanProposal(
   db: PrismaClient,
   input: SubmitScheduleSharePlanInput,
 ): Promise<SubmitScheduleSharePlanResult> {
-  const acceptedPlan = await db.planRequest.findFirst({
-    where: {
-      scheduleShareLinkId: input.scheduleShareLinkId,
-      proposerUserId: input.proposerUserId,
-      status: "ACCEPTED",
-    },
-    select: { id: true },
-  });
-  if (acceptedPlan) {
-    return { ok: false, reason: "already_accepted" };
-  }
+  try {
+    return await db.$transaction(async (tx) => {
+      // ensureActiveConnection reuses this transaction, takes the canonical
+      // pair lock and revalidates both users and safety barriers. The xact lock
+      // remains held through the Plan and card writes below.
+      const connectionResult = await ensureActiveConnectionForScheduleShare(
+        tx,
+        input.proposerUserId,
+        input.ownerUserId,
+      );
+      if (!connectionResult.ok) {
+        return { ok: false, reason: connectionResult.reason } as const;
+      }
 
-  const acceptedGuest = await db.scheduleShareGuestProposal.findFirst({
-    where: {
-      scheduleShareLinkId: input.scheduleShareLinkId,
-      proposerUserId: input.proposerUserId,
-      status: "ACCEPTED",
-    },
-    select: { id: true },
-  });
-  if (acceptedGuest) {
-    return { ok: false, reason: "already_accepted" };
-  }
+      const [acceptedPlan, acceptedGuest] = await Promise.all([
+        tx.planRequest.findFirst({
+          where: {
+            scheduleShareLinkId: input.scheduleShareLinkId,
+            proposerUserId: input.proposerUserId,
+            status: "ACCEPTED",
+          },
+          select: { id: true },
+        }),
+        tx.scheduleShareGuestProposal.findFirst({
+          where: {
+            scheduleShareLinkId: input.scheduleShareLinkId,
+            proposerUserId: input.proposerUserId,
+            status: "ACCEPTED",
+          },
+          select: { id: true },
+        }),
+      ]);
+      if (acceptedPlan || acceptedGuest) {
+        // Throwing is intentional: if ensureActiveConnection created a row in
+        // this transaction, an already-accepted result must roll it back.
+        throw new ScheduleShareAlreadyAcceptedRollback();
+      }
 
-  const connectionResult = await ensureActiveConnectionForScheduleShare(
-    db,
-    input.proposerUserId,
-    input.ownerUserId,
-  );
-  if (!connectionResult.ok) {
-    return { ok: false, reason: connectionResult.reason };
-  }
+      const outcome = await upsertScheduleSharePlanInTx(tx, {
+        ...input,
+        connectionId: connectionResult.connectionId,
+      });
+      if (!outcome.ok) {
+        throw new ScheduleShareAlreadyAcceptedRollback();
+      }
 
-  const outcome = await db.$transaction(async (tx) => {
-    return upsertScheduleSharePlanInTx(tx, {
-      ...input,
-      connectionId: connectionResult.connectionId,
+      return {
+        ok: true,
+        updated: outcome.updated,
+        connectionCreated: connectionResult.created,
+        proposal: outcome.proposal,
+      } as const;
     });
-  });
-
-  if (!outcome.ok) {
-    return outcome;
+  } catch (cause) {
+    if (cause instanceof ScheduleShareAlreadyAcceptedRollback) {
+      return { ok: false, reason: "already_accepted" };
+    }
+    throw cause;
   }
-
-  return {
-    ok: true,
-    updated: outcome.updated,
-    connectionCreated: connectionResult.created,
-    proposal: outcome.proposal,
-  };
 }
 
 async function upsertScheduleSharePlanInTx(

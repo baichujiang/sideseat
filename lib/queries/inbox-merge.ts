@@ -1,4 +1,11 @@
-import type { Course, CourseRoomMessage, GroupChat, GroupChatMessage, User } from "@prisma/client";
+import type {
+  Course,
+  CourseRoomMessage,
+  GroupChat,
+  GroupChatMessage,
+  Prisma,
+  User,
+} from "@prisma/client";
 import { ConnectionStatus, PlanRequestStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
@@ -9,6 +16,17 @@ import {
 } from "@/lib/queries/inbox-unread-counts";
 import { inboxMergedPinned } from "@/lib/inbox/inbox-merged-pinned";
 import { compareConnectionsForInbox } from "@/lib/queries/inbox-order";
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
+import { RETIRED_SYSTEM_USERNAMES } from "@/lib/auth/retired-system-users";
+
+function activeUserConnectionWhere(userId: string): Prisma.ConnectionWhereInput {
+  return {
+    status: ConnectionStatus.ACTIVE,
+    userA: { username: { notIn: [...RETIRED_SYSTEM_USERNAMES] } },
+    userB: { username: { notIn: [...RETIRED_SYSTEM_USERNAMES] } },
+    OR: [{ userAId: userId }, { userBId: userId }],
+  };
+}
 
 type ConnectionInbox = Awaited<
   ReturnType<
@@ -93,20 +111,19 @@ export type InboxMergeBundle = {
   unreadTotal: number;
   /** Plan requests where you are the receiver and must accept / decline / counter. */
   plansNeedingYourAction: number;
+  /** Ended accepted Plans where this viewer has not privately answered Outcome. */
+  planOutcomesNeedingYourResponse: number;
 };
 
 /** Same total as {@link InboxMergeBundle.unreadTotal}, without loading merged rows (for nav badges). */
 export async function getInboxUnreadTotal(userId: string): Promise<number> {
   const [connections, userCourses, groupParticipants] = await Promise.all([
     prisma.connection.findMany({
-      where: {
-        status: ConnectionStatus.ACTIVE,
-        OR: [{ userAId: userId }, { userBId: userId }],
-      },
+      where: activeUserConnectionWhere(userId),
       select: { id: true },
     }),
     prisma.userCourse.findMany({
-      where: { userId, inboxHiddenAt: null },
+      where: { userId, inboxHiddenAt: null, ...activeCourseMembershipWhere() },
       select: { courseId: true },
     }),
     prisma.groupChatParticipant.findMany({
@@ -132,12 +149,17 @@ export async function getInboxUnreadTotal(userId: string): Promise<number> {
 }
 
 export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBundle> {
-  const [connections, userCourses, groupParticipants, plansNeedingYourAction] = await Promise.all([
+  const now = new Date();
+  const recentOutcomeCutoff = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1_000);
+  const [
+    connections,
+    userCourses,
+    groupParticipants,
+    plansNeedingYourAction,
+    planOutcomesNeedingYourResponse,
+  ] = await Promise.all([
     prisma.connection.findMany({
-      where: {
-        status: ConnectionStatus.ACTIVE,
-        OR: [{ userAId: userId }, { userBId: userId }],
-      },
+      where: activeUserConnectionWhere(userId),
       include: {
         userA: true,
         userB: true,
@@ -170,7 +192,7 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
       },
     }),
     prisma.userCourse.findMany({
-      where: { userId, inboxHiddenAt: null },
+      where: { userId, inboxHiddenAt: null, ...activeCourseMembershipWhere() },
       include: { course: true },
     }),
     prisma.groupChatParticipant.findMany({
@@ -194,11 +216,33 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
     prisma.planRequest.count({
       where: {
         connection: {
-          status: ConnectionStatus.ACTIVE,
-          OR: [{ userAId: userId }, { userBId: userId }],
+          ...activeUserConnectionWhere(userId),
         },
         receiverUserId: userId,
         status: PlanRequestStatus.PENDING,
+      },
+    }),
+    prisma.planRequest.count({
+      where: {
+        connection: {
+          ...activeUserConnectionWhere(userId),
+          userA: { moderationBlocks: { none: { isActive: true } } },
+          userB: { moderationBlocks: { none: { isActive: true } } },
+        },
+        AND: [
+          {
+            OR: [
+              { commitmentId: null },
+              { commitment: { is: { safetyRestrictedAt: null } } },
+            ],
+          },
+          {
+            status: PlanRequestStatus.ACCEPTED,
+            endTime: { lte: now, gte: recentOutcomeCutoff },
+            OR: [{ proposerUserId: userId }, { receiverUserId: userId }],
+            outcomeResponses: { none: { userId } },
+          },
+        ],
       },
     }),
   ]);
@@ -281,5 +325,6 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
     merged,
     unreadTotal,
     plansNeedingYourAction,
+    planOutcomesNeedingYourResponse,
   };
 }

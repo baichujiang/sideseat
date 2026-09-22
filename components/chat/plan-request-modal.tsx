@@ -14,6 +14,8 @@ import { ScheduleStyleDateTimeRange } from "@/components/schedule/event-datetime
 import { AppPushLayer } from "@/components/ui/app-push-layer";
 import { Button } from "@/components/ui/button";
 import type { PlanRequestPrefill } from "@/lib/calendar/plan-invite-from-event";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 const FIELD_INPUT =
@@ -44,6 +46,9 @@ export function PlanRequestModal({
   layerZClassName?: string;
 }) {
   const router = useRouter();
+  const messages = useAppMessages();
+  const chat = messages.chat;
+  const common = messages.common;
   const defaults = useMemo(() => computeDefaults(slot, prefill), [slot, prefill]);
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
@@ -67,7 +72,7 @@ export function PlanRequestModal({
     setBusy(true);
     setErr(null);
     const payload = {
-      title: title.trim() || defaultTitle(),
+      title: title.trim() || chat.planDefaultTitle,
       location: location.trim() || undefined,
       message: message.trim() || undefined,
       startTime: new Date(startAt).toISOString(),
@@ -84,7 +89,7 @@ export function PlanRequestModal({
       onClose();
       router.refresh();
     } catch (error) {
-      setErr(error instanceof Error ? error.message : "Unable to send request.");
+      setErr(error instanceof Error ? error.message : chat.planUnableSend);
     } finally {
       setBusy(false);
     }
@@ -96,7 +101,7 @@ export function PlanRequestModal({
       onClose={onClose}
       zClassName={layerZClassName}
       panelClassName="w-[min(100vw,28rem)] border-0"
-      ariaLabel={mode.kind === "counter" ? "Suggest another time" : `Plan with ${peerName}`}
+      ariaLabel={mode.kind === "counter" ? chat.planModalCounterTitle : formatMessage(chat.planModalWithPeer, { name: peerName })}
     >
       <div className="flex h-full min-h-0 flex-col bg-background pt-[env(safe-area-inset-top)]">
         <div className="shrink-0 px-4 pb-3 pt-2">
@@ -107,15 +112,15 @@ export function PlanRequestModal({
               </span>
               <div>
                 <h2 className="text-sm font-semibold">
-                  {mode.kind === "counter" ? `Suggest another time` : `Plan with ${peerName}`}
+                  {mode.kind === "counter" ? chat.planModalCounterTitle : formatMessage(chat.planModalWithPeer, { name: peerName })}
                 </h2>
-                <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">Pick a time and add details.</p>
+                <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">{chat.planModalSubtitle}</p>
               </div>
             </div>
             <button
               type="button"
               onClick={onClose}
-              aria-label="Close"
+              aria-label={common.close}
               className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
             >
               <X className="h-4 w-4" strokeWidth={2.25} />
@@ -124,30 +129,30 @@ export function PlanRequestModal({
         </div>
 
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-3">
-          <Labeled label="Title">
+          <Labeled label={chat.planFieldTitle}>
             <input
               className={FIELD_INPUT}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={defaultTitle()}
+              placeholder={chat.planDefaultTitle}
               maxLength={120}
             />
           </Labeled>
 
-          <Labeled label="Location">
+          <Labeled label={chat.planFieldLocation}>
             <div className="relative">
               <MapPin className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" strokeWidth={2.25} />
               <input
                 className={cn(FIELD_INPUT, "pl-10")}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="Library / Mensa / Online / TBD"
+                placeholder={chat.planLocationPlaceholder}
                 maxLength={120}
               />
             </div>
           </Labeled>
 
-          <Labeled label="Time">
+          <Labeled label={chat.planFieldTime}>
             <ScheduleStyleDateTimeRange
               startAt={startAt}
               endAt={endAt}
@@ -156,14 +161,14 @@ export function PlanRequestModal({
             />
           </Labeled>
 
-          <Labeled label="Message (optional)">
+          <Labeled label={chat.planFieldMessage}>
             <textarea
               className={cn(FIELD_INPUT, "min-h-[88px] resize-none py-3")}
               rows={3}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               maxLength={500}
-              placeholder="Want to review the exercise sheet together?"
+              placeholder={chat.planMessagePlaceholder}
             />
           </Labeled>
         </div>
@@ -172,10 +177,10 @@ export function PlanRequestModal({
           {err ? <p className="mb-2 text-[11.5px] text-destructive">{err}</p> : null}
           <div className="flex gap-2">
             <Button type="button" variant="ghost" className="h-11 flex-1 rounded-xl" onClick={onClose}>
-              Cancel
+              {common.cancel}
             </Button>
             <Button type="button" className="h-11 flex-1 rounded-xl" onClick={submit} disabled={busy}>
-              {busy ? "Sending…" : "Send request"}
+              {busy ? common.sending : chat.planSendRequest}
             </Button>
           </div>
         </div>
@@ -226,8 +231,4 @@ function computeDefaults(
     startAt: format(now, "yyyy-MM-dd'T'HH:mm"),
     endAt: format(end, "yyyy-MM-dd'T'HH:mm"),
   };
-}
-
-function defaultTitle() {
-  return "Plan together";
 }

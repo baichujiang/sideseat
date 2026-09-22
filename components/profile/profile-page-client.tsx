@@ -6,7 +6,6 @@ import {
   BookOpen,
   Bookmark,
   CalendarClock,
-  CalendarDays,
   ChevronRight,
   Settings,
   SquarePen,
@@ -25,8 +24,6 @@ import {
   mePageIconCoursesClass,
   mePageIconCoursesShellClass,
   mePageIconMutedClass,
-  mePageIconMyActivitiesClass,
-  mePageIconMyActivitiesShellClass,
   mePageIconMyPlanClass,
   mePageIconMyPlanShellClass,
   mePageIconMyPostsClass,
@@ -260,16 +257,6 @@ export function ProfilePageClient({ initialPayload }: { initialPayload: ProfileP
               iconClass={mePageIconCoursesClass}
               title={ui.profile.coursesRowTitle}
               subtitle={ui.profile.coursesRowSubtitle}
-            />
-            <MeDestRow
-              href={"/profile/my-activities" as Route}
-              icon={CalendarDays}
-              iconShellClass={mePageIconMyActivitiesShellClass}
-              iconClass={mePageIconMyActivitiesClass}
-              title={ui.profile.myActivitiesRowTitle}
-              subtitle={ui.profile.myActivitiesRowSubtitle}
-              disabled={readOnly}
-              disabledTitle={disabledTitle}
             />
             <MeDestRow
               href={"/profile/my-posts" as Route}

@@ -12,8 +12,13 @@ import {
 import { DEFAULT_SCHOOL, getSchoolLabel } from "@/lib/constants/schools";
 import { prisma } from "@/lib/db/prisma";
 import { emailDeliveryConfigured } from "@/lib/email/resend";
-import { sendStudentVerificationEmail } from "@/lib/email/send-student-verification";
+import {
+  checkStudentVerificationDelivery,
+  sendStudentVerificationEmail,
+} from "@/lib/email/send-student-verification";
 import { error, ok, parseJson } from "@/lib/http";
+import { deleteVerificationProof } from "@/lib/media/verification-proof-storage";
+import { consumeV1RateLimit, rateLimitSubject } from "@/lib/api/v1/rate-limit";
 import { mirrorSchoolVerificationToUser, upsertSchoolVerificationState } from "@/lib/verification/school-state";
 import { verifyEmailRequestSchema } from "@/lib/validators/verification";
 
@@ -25,7 +30,7 @@ import { verifyEmailRequestSchema } from "@/lib/validators/verification";
 function isPublicHttpsLike(rawUrl: string): boolean {
   try {
     const url = new URL(rawUrl);
-    if (url.protocol !== "https:" && url.protocol !== "http:") return false;
+    if (url.protocol !== "https:") return false;
     const host = url.hostname.toLowerCase();
     if (host === "localhost" || host.endsWith(".localhost")) return false;
     if (host === "127.0.0.1" || host === "::1") return false;
@@ -37,6 +42,12 @@ function isPublicHttpsLike(rawUrl: string): boolean {
   }
 }
 
+const EMAIL_DELIVERY_SETTLE_MS = 2_000;
+
+function waitForInitialDeliveryResult(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, EMAIL_DELIVERY_SETTLE_MS));
+}
+
 export async function POST(request: Request) {
   try {
     const user = await requireUser();
@@ -44,6 +55,24 @@ export async function POST(request: Request) {
 
     const school = user.school ?? DEFAULT_SCHOOL;
     const matchedSchool = getSchoolByEmail(email);
+    const existingState = await prisma.userSchoolVerification.findUnique({
+      where: { userId_school: { userId: user.id, school } },
+      select: {
+        studentVerificationStatus: true,
+        manualReviewProofUrl: true,
+      },
+    });
+
+    if (
+      existingState?.studentVerificationStatus ===
+      StudentVerificationStatus.VERIFIED
+    ) {
+      return ok({
+        status: StudentVerificationStatus.VERIFIED,
+        delivery: "verified",
+        message: "Your school identity is already verified.",
+      });
+    }
 
     const emailOwner = await prisma.user.findUnique({ where: { email } });
     if (emailOwner && emailOwner.id !== user.id) {
@@ -51,25 +80,11 @@ export async function POST(request: Request) {
     }
 
     if (!schoolSupportsAutomaticVerification(school)) {
-      await prisma.$transaction(async (tx) => {
-        await upsertSchoolVerificationState(tx, user.id, school, {
-          email,
-          verifiedStudent: false,
-          studentVerificationStatus: StudentVerificationStatus.MANUAL_REVIEW_REQUIRED,
-          emailVerifiedAt: null,
-          studentVerificationNotes:
-            `${getSchoolLabel(school)} currently uses manual review for student verification.`,
-          manualReviewProofUrl: null,
-          manualReviewProofFilename: null,
-          manualReviewRequestedAt: null,
-        });
-        await mirrorSchoolVerificationToUser(tx, user.id, school);
-      });
-
       return ok({
-        status: StudentVerificationStatus.MANUAL_REVIEW_REQUIRED,
+        status:
+          existingState?.studentVerificationStatus ?? StudentVerificationStatus.UNVERIFIED,
         delivery: "manual",
-        message: getSchoolVerificationHint(school),
+        message: `${getSchoolLabel(school)} does not support automatic email verification yet. Use the document option below.`,
       });
     }
 
@@ -80,28 +95,42 @@ export async function POST(request: Request) {
     }
 
     if (!matchedSchool) {
-      await prisma.$transaction(async (tx) => {
-        await upsertSchoolVerificationState(tx, user.id, school, {
-          email,
-          verifiedStudent: false,
-          studentVerificationStatus: StudentVerificationStatus.MANUAL_REVIEW_REQUIRED,
-          emailVerifiedAt: null,
-          studentVerificationNotes:
-            "The submitted email could not be matched to a verified school domain and needs manual review.",
-        });
-        await mirrorSchoolVerificationToUser(tx, user.id, school);
-      });
-
       return ok({
-        status: StudentVerificationStatus.MANUAL_REVIEW_REQUIRED,
+        status:
+          existingState?.studentVerificationStatus ?? StudentVerificationStatus.UNVERIFIED,
         delivery: "manual",
         message:
-          "This school email could not be matched automatically, so it was sent to manual review.",
+          "This school email cannot be verified automatically. Use the document option below.",
       });
     }
 
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const isEmailSafeUrl = isPublicHttpsLike(appUrl);
+    if (
+      process.env.NODE_ENV === "production" &&
+      (!emailDeliveryConfigured() || !isEmailSafeUrl)
+    ) {
+      return ok({
+        status:
+          existingState?.studentVerificationStatus ?? StudentVerificationStatus.UNVERIFIED,
+        delivery: "manual",
+        message:
+          "School email verification is temporarily unavailable. Use document review below.",
+      });
+    }
+
+    const rateLimit = await consumeV1RateLimit({
+      scope: "school-email-verification",
+      subject: rateLimitSubject(`${user.id}:${email}`),
+      limit: 5,
+      windowMs: 60 * 60 * 1000,
+    });
+    if (!rateLimit.allowed) {
+      return error("Too many verification emails. Try again in about an hour.", 429);
+    }
+
     const rawToken = randomBytes(24).toString("hex");
-    const token = createHash("sha256").update(rawToken).digest("hex");
+    const tokenHash = createHash("sha256").update(rawToken).digest("hex");
     const expiresAt = addDays(new Date(), 2);
 
     await prisma.schoolEmailVerification.updateMany({
@@ -111,7 +140,7 @@ export async function POST(request: Request) {
         status: "PENDING",
       },
       data: {
-        status: "CANCELED",
+        status: "EXPIRED",
       },
     });
 
@@ -120,35 +149,56 @@ export async function POST(request: Request) {
         userId: user.id,
         school,
         email,
-        token,
+        token: tokenHash,
         expiresAt,
       },
     });
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    const verifyUrl = `${appUrl}/api/student-verification/verify?token=${token}`;
+    const verifyUrl = `${appUrl}/api/student-verification/verify?token=${rawToken}`;
 
     let delivery: "sent" | "failed" | "skipped" = "skipped";
-    let deliveryMessage = "";
-    const isEmailSafeUrl = isPublicHttpsLike(appUrl);
-
     if (emailDeliveryConfigured() && isEmailSafeUrl) {
       const result = await sendStudentVerificationEmail({ email, verifyUrl });
       if (result.sent) {
         delivery = "sent";
+        if (result.id) {
+          await waitForInitialDeliveryResult();
+          const initialDelivery = await checkStudentVerificationDelivery(result.id);
+          if (initialDelivery.status === "failed") {
+            delivery = "failed";
+            console.warn(
+              "[verification] destination mail server rejected email:",
+              initialDelivery.providerStatus,
+              initialDelivery.reason,
+            );
+          }
+        }
       } else {
         delivery = "failed";
-        deliveryMessage = result.reason;
         console.error("[verification] email send failed:", result.reason);
       }
     } else if (emailDeliveryConfigured() && !isEmailSafeUrl) {
       delivery = "skipped";
-      deliveryMessage =
-        "NEXT_PUBLIC_APP_URL points to localhost or a private host, so strict school inboxes would bounce the email. Use the link below to finish verification.";
       console.warn(
         "[verification] Skipping Resend send because NEXT_PUBLIC_APP_URL is not publicly reachable:",
         appUrl,
       );
+    }
+
+    if (delivery === "failed") {
+      await prisma.schoolEmailVerification.update({
+        where: { token: tokenHash },
+        data: { status: "EXPIRED" },
+      });
+      return ok({
+        status:
+          existingState?.studentVerificationStatus ?? StudentVerificationStatus.UNVERIFIED,
+        delivery: "manual",
+        message:
+          school === "TUM"
+            ? "TUM rejected the email. Try your @mytum.de school alias, try again later, or use document review."
+            : "Your school mail server rejected the email. Try another official school alias, try again later, or use document review.",
+      });
     }
 
     const skippedReason = !emailDeliveryConfigured()
@@ -157,9 +207,7 @@ export async function POST(request: Request) {
 
     const notesByDelivery: Record<typeof delivery, string> = {
       sent:
-        `Verification email queued for ${matchedSchool}. It can take a minute; if it doesn't arrive you can tap the link in your profile.`,
-      failed:
-        `Verification email could not be delivered (${deliveryMessage || "bounced"}). Use the verification link in your profile instead.`,
+        `Verification email queued for ${matchedSchool}. Open the link in that school inbox within 48 hours.`,
       skipped: skippedReason,
     };
 
@@ -168,25 +216,37 @@ export async function POST(request: Request) {
         email,
         verifiedStudent: false,
         studentVerificationStatus: StudentVerificationStatus.EMAIL_PENDING,
+        studentVerificationMethod: null,
+        studentVerifiedAt: null,
         emailVerifiedAt: null,
         studentVerificationNotes: notesByDelivery[delivery],
+        manualReviewProofUrl: null,
+        manualReviewProofFilename: null,
+        manualReviewRequestedAt: null,
       });
       await mirrorSchoolVerificationToUser(tx, user.id, school);
     });
 
+    if (existingState?.manualReviewProofUrl) {
+      try {
+        await deleteVerificationProof(existingState.manualReviewProofUrl);
+      } catch (cause) {
+        console.error("[verification] failed to delete superseded proof", cause);
+      }
+    }
+
     const userMessage =
       delivery === "sent"
-        ? "Verification email queued. It usually arrives within a minute — if it doesn't, use the link below."
-        : delivery === "failed"
-          ? "We couldn't deliver the email right now, but you can still finish verification with the link below."
-          : emailDeliveryConfigured() && !isEmailSafeUrl
-            ? "Skipped email because the verify link points to localhost. Use the link below to finish now; deploy with a public NEXT_PUBLIC_APP_URL to enable email."
-            : "Email delivery isn't configured yet. Use the link below to finish verification.";
+        ? "Verification email sent. Open the link in your school inbox within 48 hours."
+      : emailDeliveryConfigured() && !isEmailSafeUrl
+        ? "Email delivery is disabled in this test build. Use the verification link below to finish now."
+        : "Email delivery isn't configured yet. Use the link below to finish verification.";
 
     return ok({
       status: StudentVerificationStatus.EMAIL_PENDING,
       delivery,
-      verifyUrl,
+      verifyUrl:
+        process.env.NODE_ENV !== "production" && !isEmailSafeUrl ? verifyUrl : undefined,
       message: userMessage,
     });
   } catch (cause) {

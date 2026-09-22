@@ -14,6 +14,7 @@ export const discoverActivityCategorySchema = z.nativeEnum(DiscoverActivityCateg
 
 export const createDiscoverActivitySchema = z
   .object({
+    city: z.string().trim().min(1).optional(),
     title: z.string().trim().min(1).max(DISCOVER_ACTIVITY_TITLE_MAX),
     description: z.string().trim().min(1).max(DISCOVER_ACTIVITY_DESCRIPTION_MAX),
     startAt: z.string().datetime({ offset: true }).or(z.string().min(1)),

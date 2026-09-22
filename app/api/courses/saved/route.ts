@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { getCurrentSemesterLabel } from "@/lib/constants/semester";
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseBody } from "@/lib/http";
 
@@ -28,9 +29,11 @@ export async function POST(request: Request) {
       return error("Course not found for this semester.");
     }
 
-    const enrolled = await prisma.userCourse.findUnique({
+    const enrolled = await prisma.userCourse.findFirst({
       where: {
-        userId_courseId: { userId: user.id, courseId: course.id },
+        userId: user.id,
+        courseId: course.id,
+        ...activeCourseMembershipWhere(),
       },
     });
     if (enrolled) {

@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   typedRoutes: true,
+  // node-ical's Temporal implementation must execute natively in Node; Webpack
+  // rewriting it causes BigInt initialization to fail during route collection.
+  serverExternalPackages: ["node-ical"],
   /** Hides the floating dev/build indicator (often mistaken for an in-app “debug” chip). */
   devIndicators: false,
   images: {

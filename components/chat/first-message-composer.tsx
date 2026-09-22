@@ -6,6 +6,8 @@ import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage } from "@/lib/i18n/messages";
 
 /**
  * First-message composer: one textarea + Send. On success it navigates to the
@@ -34,6 +36,7 @@ export function FirstMessageComposer({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { chat, common } = useAppMessages();
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
@@ -58,14 +61,14 @@ export function FirstMessageComposer({
         setError(
           typeof payload.error === "string"
             ? payload.error
-            : "Unable to send message.",
+            : chat.unableToSendMessage,
         );
         return;
       }
       const data = payload.data as { connectionId?: string } | undefined;
       if (!data?.connectionId) {
         setSending(false);
-        setError("Unexpected server response.");
+        setError(chat.unexpectedServerResponse);
         return;
       }
       onSent?.();
@@ -78,7 +81,7 @@ export function FirstMessageComposer({
     } catch (cause) {
       console.error(cause);
       setSending(false);
-      setError("Network error. Try again.");
+      setError(chat.networkErrorTryAgain);
     }
   }
 
@@ -87,7 +90,7 @@ export function FirstMessageComposer({
       <textarea
         autoFocus={autoFocus}
         className="min-h-16 w-full rounded-xl border border-border bg-background px-3 py-2 text-[16px] leading-snug focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
-        placeholder={placeholder ?? "Say hi…"}
+        placeholder={placeholder ?? chat.sayHiPlaceholder}
         value={body}
         onChange={(event) => setBody(event.target.value)}
         onKeyDown={(event) => {
@@ -102,10 +105,10 @@ export function FirstMessageComposer({
       <div className="flex items-center justify-between gap-2">
         <p className="text-[11px] text-muted-foreground">
           {tooLong
-            ? `Too long — ${trimmed.length}/500`
+            ? formatMessage(chat.firstMessageTooLong, { count: trimmed.length })
             : trimmed.length > 0
-              ? `${trimmed.length}/500`
-              : "Your first message unlocks the chat."}
+              ? formatMessage(chat.firstMessageCharCount, { count: trimmed.length })
+              : chat.firstMessageUnlockHint}
         </p>
         <Button
           size="sm"
@@ -113,7 +116,7 @@ export function FirstMessageComposer({
           onClick={submit}
           type="button"
         >
-          {sending ? "Sending…" : "Send"}
+          {sending ? common.sending : chat.sendAria}
         </Button>
       </div>
       {error ? <p className="text-xs text-rose-600">{error}</p> : null}

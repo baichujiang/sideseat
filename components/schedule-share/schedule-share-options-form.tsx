@@ -82,10 +82,6 @@ function RangeChip({
   );
 }
 
-function Subheading({ children }: { children: React.ReactNode }) {
-  return <p className="text-[12px] font-medium text-muted-foreground">{children}</p>;
-}
-
 export function ScheduleShareOptionsForm({
   value,
   onChange,

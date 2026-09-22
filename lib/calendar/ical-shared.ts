@@ -1,5 +1,9 @@
 /** Minimal RFC 5545 helpers for SideSeat calendar export/import. */
 
+import { formatInTimeZone } from "date-fns-tz";
+
+import { SCHEDULE_DISPLAY_TZ } from "@/lib/calendar/schedule-berlin";
+
 export function escapeIcsText(value: string): string {
   return value
     .replace(/\\/g, "\\\\")
@@ -47,6 +51,19 @@ export function formatIcsUtc(dt: Date): string {
   const mi = String(dt.getUTCMinutes()).padStart(2, "0");
   const s = String(dt.getUTCSeconds()).padStart(2, "0");
   return `${y}${mo}${d}T${h}${mi}${s}Z`;
+}
+
+export function formatIcsDate(dt: Date): string {
+  return formatInTimeZone(dt, SCHEDULE_DISPLAY_TZ, "yyyyMMdd");
+}
+
+export function isBerlinAllDayRange(start: Date, end: Date): boolean {
+  if (!(end > start)) return false;
+  return (
+    formatInTimeZone(start, SCHEDULE_DISPLAY_TZ, "HH:mm:ss.SSS") === "00:00:00.000" &&
+    formatInTimeZone(end, SCHEDULE_DISPLAY_TZ, "HH:mm:ss.SSS") === "00:00:00.000" &&
+    formatIcsDate(start) !== formatIcsDate(end)
+  );
 }
 
 /** Floating local civil time (no Z) — used for recurring class wall-clock. */

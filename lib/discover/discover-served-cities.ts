@@ -1,7 +1,7 @@
-import {
-  DEFAULT_DISCOVER_SERVED_CITY,
-  type DiscoverCityNameKey,
-} from "@/lib/discover/discover-city-name-keys";
+import type { DiscoverCityNameKey } from "@/lib/i18n/messages/discover-city-name-keys";
+
+/** Canonical fallback before a client has loaded the runtime city configuration. */
+export const DEFAULT_DISCOVER_SERVED_CITY = "Munich" satisfies DiscoverCityNameKey;
 
 /** Metros with live Discover + Courses content. Expand as new cities launch. */
 export const DISCOVER_SERVED_CITIES = [DEFAULT_DISCOVER_SERVED_CITY] as const satisfies readonly DiscoverCityNameKey[];

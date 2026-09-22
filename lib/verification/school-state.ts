@@ -5,6 +5,8 @@ type VerificationStateLike = Pick<
   | "email"
   | "verifiedStudent"
   | "studentVerificationStatus"
+  | "studentVerificationMethod"
+  | "studentVerifiedAt"
   | "emailVerifiedAt"
   | "studentVerificationNotes"
   | "manualReviewProofUrl"
@@ -21,6 +23,8 @@ export function userVerificationFieldsFromState(
     email: state?.email ?? null,
     verifiedStudent: state?.verifiedStudent ?? false,
     studentVerificationStatus: state?.studentVerificationStatus ?? "UNVERIFIED",
+    studentVerificationMethod: state?.studentVerificationMethod ?? null,
+    studentVerifiedAt: state?.studentVerifiedAt ?? null,
     emailVerifiedAt: state?.emailVerifiedAt ?? null,
     studentVerificationNotes: state?.studentVerificationNotes ?? null,
     manualReviewProofUrl: state?.manualReviewProofUrl ?? null,

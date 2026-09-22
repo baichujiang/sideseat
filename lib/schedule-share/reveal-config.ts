@@ -4,39 +4,81 @@ import { z } from "zod";
 import { SCHEDULE_SHARE_MAX_RANGE_DAYS } from "@/lib/schedule-share/constants";
 
 export const UNCATEGORIZED_REVEAL_PRESET_KEY = "none";
-export const REVEAL_PRESET_KEYS_ALLOWLIST = [
+/** Virtual schedule sources that do not have a user-owned calendar category ID. */
+export const REVEAL_VIRTUAL_SOURCE_KEYS = [
   "course",
-  "personal",
-  "work",
-  "other",
   UNCATEGORIZED_REVEAL_PRESET_KEY,
 ] as const;
-export type RevealPresetKeyAllowlisted = (typeof REVEAL_PRESET_KEYS_ALLOWLIST)[number];
+export type RevealVirtualSourceKey = (typeof REVEAL_VIRTUAL_SOURCE_KEYS)[number];
 
 const isoDateOnly = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
 export type NormalizedRevealConfig = {
   categoryIds: string[];
   presetKeys: string[];
+  /** Explicit privacy mode for new links. Missing stays false for legacy unrestricted links. */
+  hideAllDetails: boolean;
   /** Berlin yyyy-MM-dd keys; when set, only these days within [rangeStart, rangeEnd] are shared. */
   includedDates: string[];
+  /** Minutes after Berlin midnight that the owner explicitly makes available. */
+  availabilityStartMinutes: number;
+  /** Exclusive daily end, in minutes after Berlin midnight. */
+  availabilityEndMinutes: number;
 };
 
-const presetEnum = z.enum(REVEAL_PRESET_KEYS_ALLOWLIST);
+export const SCHEDULE_SHARE_DEFAULT_AVAILABILITY_START_MINUTES = 9 * 60;
+export const SCHEDULE_SHARE_DEFAULT_AVAILABILITY_END_MINUTES = 21 * 60;
+export const SCHEDULE_SHARE_LEGACY_AVAILABILITY_START_MINUTES = 0;
+export const SCHEDULE_SHARE_LEGACY_AVAILABILITY_END_MINUTES = 24 * 60;
+
+const presetKeySchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(64)
+  .regex(/^[a-z0-9][a-z0-9_-]*$/);
 
 export const revealConfigSchema = z.object({
   categoryIds: z.array(z.string().trim().min(1)).default([]),
-  presetKeys: z.array(presetEnum).default([]),
+  // Accept legacy and future source keys. New clients send real calendar categories by ID.
+  presetKeys: z.array(presetKeySchema).default([]),
+  hideAllDetails: z.boolean().optional().default(false),
   includedDates: z.array(isoDateOnly).max(SCHEDULE_SHARE_MAX_RANGE_DAYS).optional(),
+  availabilityStartMinutes: z.number().int().min(0).max(24 * 60 - 1).optional(),
+  availabilityEndMinutes: z.number().int().min(1).max(24 * 60).optional(),
+}).superRefine((value, ctx) => {
+  if (
+    value.availabilityStartMinutes != null
+    && value.availabilityEndMinutes != null
+    && value.availabilityEndMinutes <= value.availabilityStartMinutes
+  ) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["availabilityEndMinutes"],
+      message: "Daily availability end must be after start.",
+    });
+  }
 });
 
-export function normalizeRevealConfig(raw: z.infer<typeof revealConfigSchema>): NormalizedRevealConfig {
-  const categoryIds = [...new Set(raw.categoryIds.map((id) => id.trim()))].filter(Boolean).sort();
-  const presetKeys = [...new Set(raw.presetKeys)].sort();
+export function normalizeRevealConfig(raw: z.input<typeof revealConfigSchema>): NormalizedRevealConfig {
+  const categoryIds = [...new Set((raw.categoryIds ?? []).map((id) => id.trim()))].filter(Boolean).sort();
+  const presetKeys = [...new Set(raw.presetKeys ?? [])].sort();
+  const hideAllDetails = raw.hideAllDetails ?? false;
   const includedDates = raw.includedDates?.length
     ? [...new Set(raw.includedDates)].sort()
     : [];
-  return { categoryIds, presetKeys, includedDates };
+  const availabilityStartMinutes = raw.availabilityStartMinutes
+    ?? SCHEDULE_SHARE_LEGACY_AVAILABILITY_START_MINUTES;
+  const availabilityEndMinutes = raw.availabilityEndMinutes
+    ?? SCHEDULE_SHARE_LEGACY_AVAILABILITY_END_MINUTES;
+  return {
+    categoryIds,
+    presetKeys,
+    hideAllDetails,
+    includedDates,
+    availabilityStartMinutes,
+    availabilityEndMinutes,
+  };
 }
 
 /** Parse untrusted JSON (e.g. from DB). Throws ZodError if invalid. */
@@ -69,11 +111,14 @@ export function shareIncludedDateKeySet(
 }
 
 /** Legacy links with empty reveal lists are treated as “show everything”. */
-export function isRevealUnrestricted(reveal: Pick<NormalizedRevealConfig, "categoryIds" | "presetKeys">): boolean {
-  return reveal.categoryIds.length === 0 && reveal.presetKeys.length === 0;
+export function isRevealUnrestricted(
+  reveal: Pick<NormalizedRevealConfig, "categoryIds" | "presetKeys" | "hideAllDetails">,
+): boolean {
+  return !reveal.hideAllDetails && reveal.categoryIds.length === 0 && reveal.presetKeys.length === 0;
 }
 
 export function isBlockRevealed(block: InternalBlockRevealFields, reveal: NormalizedRevealConfig): boolean {
+  if (reveal.hideAllDetails) return false;
   if (isRevealUnrestricted(reveal)) return true;
   if (block.internalCategoryId && reveal.categoryIds.includes(block.internalCategoryId)) return true;
   const pk = block.internalPresetKey;

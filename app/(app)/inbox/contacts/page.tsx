@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Route } from "next";
-import { redirect } from "next/navigation";
 import { ConnectionStatus, FriendLinkStatus } from "@prisma/client";
 
 import { GuestAppCta } from "@/components/app/guest-app-cta";
@@ -11,15 +10,20 @@ import { UserGenderCardIcon } from "@/components/ui/user-gender-icon";
 import { getSessionUser } from "@/lib/auth/session";
 import { contactRemarkForViewer } from "@/lib/connections/contact-remark";
 import { prisma } from "@/lib/db/prisma";
+import { getMessages } from "@/lib/i18n/messages";
+import { getServerAppLocale } from "@/lib/i18n/server-locale";
 
 export default async function ContactsPage() {
+  const locale = await getServerAppLocale();
+  const messages = getMessages(locale);
+  const inbox = messages.inbox;
   const sessionUser = await getSessionUser();
   if (!sessionUser) {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <BackLink fallback="/inbox" label="Back to Chats" />
-          <h1 className="page-screen-title">Close friends</h1>
+          <BackLink fallback="/inbox" label={inbox.contactsBackLabel} />
+          <h1 className="page-screen-title">{inbox.contactsTitle}</h1>
         </div>
         <GuestAppCta returnTo="/inbox/contacts" />
       </div>
@@ -50,9 +54,9 @@ export default async function ContactsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <BackLink fallback="/inbox" label="Back to Chats" />
+        <BackLink fallback="/inbox" label={inbox.contactsBackLabel} />
         <div>
-          <h1 className="page-screen-title">Close friends</h1>
+          <h1 className="page-screen-title">{inbox.contactsTitle}</h1>
         </div>
       </div>
 
@@ -63,7 +67,7 @@ export default async function ContactsPage() {
             const peer = c.userAId === user.id ? c.userB : c.userA;
             const myRemark = contactRemarkForViewer(c, user.id);
             const peerNick = peer.nickname?.trim() ?? "";
-            const listTitle = myRemark || peerNick || "Student";
+            const listTitle = myRemark || peerNick || messages.common.studentFallback;
             const subtitle = c.invitation?.course?.name ?? null;
             const profileHref =
               `/users/${peer.id}?returnTo=${encodeURIComponent("/inbox/contacts")}` as Route;
@@ -100,17 +104,14 @@ export default async function ContactsPage() {
                   href={chatHref}
                   className="shrink-0 rounded-full bg-primary/10 px-3.5 py-1.5 text-[13px] font-semibold text-primary transition-colors hover:bg-primary/15 active:bg-primary/20"
                 >
-                  Chat
+                  {inbox.chatAction}
                 </Link>
               </li>
             );
           })}
         </ul>
       ) : (
-        <EmptyState
-          title="No close friends yet"
-          description="When a chat goes well, invite them as a close friend from their profile or the chat screen. After you both accept, they appear here."
-        />
+        <EmptyState title={inbox.contactsEmptyTitle} description={inbox.contactsEmptyDesc} />
       )}
     </div>
   );

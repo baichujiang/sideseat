@@ -7,7 +7,7 @@ import { Eye, MessageCircle } from "lucide-react";
 import { BuddyRequestCard } from "@/components/discover/buddy-request-card";
 import { ClassmatePostDetailShareMenu } from "@/components/discover/classmate-post-detail-share-menu";
 import { useLocaleContext } from "@/components/i18n/locale-provider";
-import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
+import type { DiscoverPostClientRow } from "@/lib/discover/discover-post-row";
 import { useAppMessages } from "@/hooks/use-app-locale";
 import {
   formatClassmatePostExpiryFullDate,
@@ -24,7 +24,7 @@ export function MyPostBuddyCard({
   insights,
   muted,
 }: {
-  post: DiscoverPostRow;
+  post: DiscoverPostClientRow;
   status: ClassmatePostStatus;
   createdAt: Date;
   updatedAt: Date;

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { Route } from "next";
-import { CalendarDays, Heart } from "lucide-react";
+import { CalendarDays, Heart, MapPin, UsersRound } from "lucide-react";
 
 import { ClassmatePostImagesGallery } from "@/components/discover/classmate-post-images-gallery";
 import { displayableClassmatePostImageUrls } from "@/lib/discover/classmate-post-display-images";
@@ -12,7 +12,7 @@ import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { buddyRequestAvailabilityValue, buddyRequestStatusLabel } from "@/lib/discover/buddy-request-detail-meta";
 import { getBuddyRequestDisplayStatus } from "@/lib/discover/buddy-request-status";
 import { buddyTypeLabel, shouldShowBuddyCategoryLabel } from "@/lib/discover/buddy-type-labels";
-import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
+import type { DiscoverPostClientRow } from "@/lib/discover/discover-post-row";
 import { formatClassmatePostExpiryMonthDay } from "@/lib/i18n/format-classmate-post-expiry";
 import { formatMessage } from "@/lib/i18n/messages";
 import { ClassmatePostStatus } from "@prisma/client";
@@ -34,7 +34,7 @@ export function BuddyRequestCard({
   hideAuthorRow = false,
   listingStatus,
 }: {
-  post: DiscoverPostRow;
+  post: DiscoverPostClientRow;
   returnTo?: string;
   /** When set, replaces the default message action in the author row. */
   customFooter?: ReactNode;
@@ -68,7 +68,10 @@ export function BuddyRequestCard({
     new Date(post.createdAt),
   );
   const showSave = post.savedByViewer !== undefined && !post.isDevExample;
-  const showDefaultMessage = customFooter === undefined && !post.isDevExample;
+  const showDefaultMessage =
+    customFooter === undefined &&
+    !post.isDevExample &&
+    post.allowsLegacyDirectConversation;
   const linkedCourseId = post.linkedCourses?.[0]?.id;
   const contentReserveClass = showSave ? "pr-11 sm:pr-12" : undefined;
   const interestedLine =
@@ -81,6 +84,14 @@ export function BuddyRequestCard({
     : formatMessage(dl.postActiveUntil, {
         date: formatClassmatePostExpiryMonthDay(new Date(post.expiresAt), locale),
       });
+  const scheduledAtLabel = post.startsAt
+    ? new Intl.DateTimeFormat(locale, {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(new Date(post.startsAt))
+    : null;
 
   const articleSurfaceClassName = cn(
     "break-inside-avoid overflow-hidden rounded-2xl border border-[#E7E0D6] bg-white shadow-[0_4px_16px_rgba(15,23,42,0.04)] dark:border-border/80 dark:bg-card",
@@ -119,9 +130,21 @@ export function BuddyRequestCard({
         <span className="inline-flex min-w-0 items-center gap-1.5">
           <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden />
           <span className="min-w-0 truncate">
-            {displayStatus === "open" ? expiryLabel : availabilityLine}
+            {displayStatus === "open" ? scheduledAtLabel ?? expiryLabel : availabilityLine}
           </span>
         </span>
+        {post.location ? (
+          <span className="inline-flex min-w-0 items-center gap-1.5">
+            <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            <span className="max-w-40 truncate">{post.location}</span>
+          </span>
+        ) : null}
+        {post.capacity ? (
+          <span className="inline-flex shrink-0 items-center gap-1.5 tabular-nums">
+            <UsersRound className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            {post.capacity}
+          </span>
+        ) : null}
         {interestedLine ? (
           <span className="inline-flex shrink-0 items-center gap-1.5 tabular-nums">
             <Heart className="h-3.5 w-3.5 shrink-0 text-red-500" aria-hidden />

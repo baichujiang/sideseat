@@ -73,6 +73,18 @@ export const planRequestCreateSchema = z
     startTime: isoDateString,
     endTime: isoDateString,
     receiverUserId: z.string().cuid().optional(),
+    origin: z
+      .union([
+        z.object({
+          kind: z.literal("ACTION_INTEREST"),
+          id: z.string().cuid(),
+        }).strict(),
+        z.object({
+          kind: z.literal("MUTUAL_OPPORTUNITY"),
+          id: z.string().cuid(),
+        }).strict(),
+      ])
+      .optional(),
   })
   .superRefine((value, ctx) => {
     const start = new Date(value.startTime);

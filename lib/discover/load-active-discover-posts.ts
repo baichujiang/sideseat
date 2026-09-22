@@ -1,3 +1,5 @@
+import "server-only";
+
 import { ClassmatePostStatus } from "@prisma/client";
 
 import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
@@ -6,17 +8,53 @@ import {
   classmatePostForDiscoverInclude,
   prismaClassmatePostToDiscoverRow,
 } from "@/lib/discover/prisma-classmate-post-for-discover";
+import {
+  buildViewerCourseMatchIndex,
+  courseMatchesViewer,
+  type ViewerCourseMatchIndex,
+} from "@/lib/discover/viewer-course-match";
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
+import { getSchoolMatchValues } from "@/lib/constants/schools";
 import { prisma } from "@/lib/db/prisma";
+
+type DiscoverPostViewerScope = {
+  id: string;
+  school: string | null;
+  verifiedStudent: boolean;
+  courses: ViewerCourseMatchIndex;
+} | null;
+
+function canViewerSeePost(post: DiscoverPostRow, viewer: DiscoverPostViewerScope) {
+  if (!viewer) {
+    return post.visibility === "CITY_INTERNATIONALS";
+  }
+  if (post.isOwn) return true;
+
+  switch (post.visibility) {
+    case "CITY_INTERNATIONALS":
+      return true;
+    case "VERIFIED_ONLY":
+      return viewer.verifiedStudent;
+    case "COURSEMATES_ONLY":
+      return (post.linkedCourses ?? []).some((course) =>
+        courseMatchesViewer(course, viewer.courses),
+      );
+    case "SCHOOL_ONLY":
+    default:
+      return Boolean(viewer.school && post.school && viewer.school === post.school);
+  }
+}
 
 /** Active Discover posts for a city — browse without signing in. */
 export async function loadActiveDiscoverPostsForCity(
   servedCity: string,
   viewerUserId?: string | null,
 ): Promise<DiscoverPostRow[]> {
+  const now = new Date();
   const activePosts = await prisma.classmatePost.findMany({
     where: {
       status: ClassmatePostStatus.ACTIVE,
-      expiresAt: { gt: new Date() },
+      expiresAt: { gt: now },
       city: servedCity,
       user: {
         moderationBlocks: { none: { isActive: true } },
@@ -33,20 +71,64 @@ export async function loadActiveDiscoverPostsForCity(
     take: 120,
   });
 
+  const [savedRows, interestRows, viewerProfile] = viewerUserId
+    ? await Promise.all([
+        prisma.classmatePostSave.findMany({
+          where: { userId: viewerUserId },
+          select: { classmatePostId: true },
+        }),
+        prisma.actionInterest.findMany({
+          where: { userId: viewerUserId, status: "ACTIVE" },
+          select: { classmatePostId: true },
+        }),
+        prisma.user.findUnique({
+          where: { id: viewerUserId },
+          select: {
+            id: true,
+            school: true,
+            verifiedStudent: true,
+            courses: {
+              where: activeCourseMembershipWhere(),
+              select: {
+                course: { select: { id: true, code: true, school: true } },
+              },
+            },
+          },
+        }),
+      ])
+    : [[], [], null] as const;
+
   const savedPostIdSet = new Set<string>();
+  const interestedPostIdSet = new Set<string>();
   if (viewerUserId) {
-    const savedRows = await prisma.classmatePostSave.findMany({
-      where: { userId: viewerUserId },
-      select: { classmatePostId: true },
-    });
     for (const row of savedRows) savedPostIdSet.add(row.classmatePostId);
   }
-
+  if (viewerUserId) {
+    for (const row of interestRows) interestedPostIdSet.add(row.classmatePostId);
+  }
+  const viewer: DiscoverPostViewerScope = viewerProfile
+    ? {
+        id: viewerProfile.id,
+        school: viewerProfile.school,
+        verifiedStudent: viewerProfile.verifiedStudent,
+        courses: buildViewerCourseMatchIndex(
+          viewerProfile.courses
+            .map((row) => row.course)
+            .filter((course) => getSchoolMatchValues(viewerProfile.school).includes(course.school)),
+        ),
+      }
+    : null;
   const postsFromDb: DiscoverPostRow[] = activePosts.map((post) =>
     prismaClassmatePostToDiscoverRow(post, viewerUserId ?? null, {
       savedByViewer: viewerUserId ? savedPostIdSet.has(post.id) : false,
+      interestedByViewer: viewerUserId ? interestedPostIdSet.has(post.id) : false,
     }),
-  );
+  ).filter((post) => canViewerSeePost(post, viewer))
+    .filter((post) => {
+      if (post.endsAt) return post.endsAt >= now;
+      if (post.startsAt) return post.startsAt >= now;
+      return true;
+    });
 
   return process.env.NEXT_PUBLIC_DISCOVER_DEV_EXAMPLE_POSTS === "1"
     ? [...getDevExampleDiscoverPosts(), ...postsFromDb]

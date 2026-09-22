@@ -22,8 +22,7 @@ export function LogoutForm({ children, className }: { children: ReactNode; class
           headers: { Accept: "application/json" },
         });
         setAccessToken(null);
-        router.push("/login");
-        router.refresh();
+        router.replace("/login");
       }}
     >
       {children}

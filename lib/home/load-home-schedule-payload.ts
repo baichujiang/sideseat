@@ -1,20 +1,19 @@
 import type { PrismaClient } from "@prisma/client";
 
-import type {
-  CalendarCategoryLite,
-  ClassBlock,
-  CompanionOption,
-  StudyEntry,
-} from "@/components/home/schedule-surface";
+import {
+  homeSchedulePlanProjectionFields,
+  type HomeCalendarCategory,
+  type HomeClassBlock,
+  type HomeCompanionOption,
+  type HomeSchedulePayload,
+  type HomeStudyEntry,
+} from "@/lib/home/home-schedule-dto";
 import { isCalendarCourseMirrorRow } from "@/lib/calendar/calendar-course-mirror";
+import { loadCalendarEntryOccurrences } from "@/lib/calendar/load-calendar-entry-occurrences";
 import { ensureUserCalendarCategories } from "@/lib/calendar/default-user-calendar-categories";
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
 
-export type HomeSchedulePayload = {
-  classBlocks: ClassBlock[];
-  studyEntries: StudyEntry[];
-  companionOptions: CompanionOption[];
-  initialCalendarCategories: CalendarCategoryLite[];
-};
+export type { HomeSchedulePayload } from "@/lib/home/home-schedule-dto";
 
 export async function loadHomeSchedulePayload(args: {
   prisma: PrismaClient;
@@ -24,28 +23,15 @@ export async function loadHomeSchedulePayload(args: {
 }): Promise<HomeSchedulePayload> {
   const { prisma, userId, windowStart, windowEnd } = args;
 
-  const [, memberships, calendarEntries, calendarCategories, mirroredScheduleKeys, connections] =
+  await ensureUserCalendarCategories(prisma, userId);
+
+  const [memberships, calendarEntries, calendarCategories, mirroredScheduleKeys, connections] =
     await Promise.all([
-      ensureUserCalendarCategories(prisma, userId),
       prisma.userCourse.findMany({
-        where: { userId },
+        where: { userId, ...activeCourseMembershipWhere() },
         include: { course: true, sessions: true },
       }),
-      prisma.calendarEntry.findMany({
-        where: {
-          userId,
-          AND: [{ startAt: { lte: windowEnd } }, { endAt: { gte: windowStart } }],
-        },
-        include: {
-          companions: {
-            orderBy: { createdAt: "asc" },
-          },
-          category: {
-            select: { id: true, name: true, color: true },
-          },
-        },
-        orderBy: { startAt: "asc" },
-      }),
+      loadCalendarEntryOccurrences(prisma, { userId, windowStart, windowEnd }),
       prisma.userCalendarCategory.findMany({
         where: { userId },
         orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
@@ -59,7 +45,11 @@ export async function loadHomeSchedulePayload(args: {
         },
       }),
       prisma.calendarEntry.findMany({
-        where: { userId, courseScheduleMirrorKey: { not: null } },
+        where: {
+          userId,
+          projectionStatus: "ACTIVE",
+          courseScheduleMirrorKey: { not: null },
+        },
         select: { courseScheduleMirrorKey: true },
       }),
       prisma.connection.findMany({
@@ -85,7 +75,7 @@ export async function loadHomeSchedulePayload(args: {
       .filter((k): k is string => Boolean(k)),
   );
 
-  const classBlocks: ClassBlock[] = memberships.flatMap((m) =>
+  const classBlocks: HomeClassBlock[] = memberships.flatMap((m) =>
     m.sessions
       .filter((s) => {
         const key = `${m.course.id}_${s.weekday}_${s.startMinute}`;
@@ -105,7 +95,7 @@ export async function loadHomeSchedulePayload(args: {
       })),
   );
 
-  const studyEntries: StudyEntry[] = calendarEntries.map((e) => {
+  const studyEntries: HomeStudyEntry[] = calendarEntries.map((e) => {
     const mirrorCourse = isCalendarCourseMirrorRow(e);
     return {
       id: e.id,
@@ -126,10 +116,11 @@ export async function loadHomeSchedulePayload(args: {
       categoryColor: mirrorCourse ? null : (e.category?.color ?? null),
       categoryName: mirrorCourse ? null : (e.category?.name ?? null),
       discoverActivityId: e.discoverActivityId,
+      ...homeSchedulePlanProjectionFields(e),
     };
   });
 
-  const initialCalendarCategories: CalendarCategoryLite[] = calendarCategories.map((c) => ({
+  const initialCalendarCategories: HomeCalendarCategory[] = calendarCategories.map((c) => ({
     id: c.id,
     name: c.name,
     color: c.color,
@@ -137,7 +128,7 @@ export async function loadHomeSchedulePayload(args: {
     icsSubscriptionUrl: c.icsSubscriptionUrl,
   }));
 
-  const companionOptions: CompanionOption[] = connections.map((connection) => {
+  const companionOptions: HomeCompanionOption[] = connections.map((connection) => {
     const other = connection.userAId === userId ? connection.userB : connection.userA;
     return {
       id: other.id,

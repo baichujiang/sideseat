@@ -69,6 +69,15 @@ export function isVisibleInFeed(activity: DiscoverActivityCore, now: Date): bool
   return activity.status === "OPEN" || activity.status === "FULL";
 }
 
+export function isVisibleToSchoolInFeed(
+  activity: DiscoverActivityCore,
+  viewerSchool: string | null | undefined,
+  now: Date,
+): boolean {
+  if (!isVisibleInFeed(activity, now)) return false;
+  return viewerSchool === undefined || schoolsMatch(activity.school, viewerSchool);
+}
+
 export function nextStatusAfterSignup(
   currentStatus: DiscoverActivityStatus,
   goingCount: number,

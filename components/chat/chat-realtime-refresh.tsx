@@ -98,12 +98,31 @@ export function ChatRealtimeRefresh(props: ChatRealtimeRefreshProps) {
         ? `course:${props.courseId}`
         : `group:${props.groupChatId}`;
   const staleRefreshAttempts = useRef(0);
+  const routeDepartureStarted = useRef(false);
   const latestPropRef = useRef(props.latestMessageId);
   latestPropRef.current = props.latestMessageId;
 
   useEffect(() => {
     staleRefreshAttempts.current = 0;
   }, [props.latestMessageId, targetKey]);
+
+  useEffect(() => {
+    const markRouteDeparture = (event: MouseEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const anchor = target.closest<HTMLAnchorElement>("a[href]");
+      if (!anchor || anchor.target === "_blank" || anchor.hasAttribute("download")) return;
+
+      const destination = new URL(anchor.href, window.location.href);
+      if (destination.origin !== window.location.origin) return;
+      if (`${destination.pathname}${destination.search}` !== `${pathname}${window.location.search}`) {
+        routeDepartureStarted.current = true;
+      }
+    };
+
+    document.addEventListener("click", markRouteDeparture, true);
+    return () => document.removeEventListener("click", markRouteDeparture, true);
+  }, [pathname]);
 
   useEffect(() => {
     let cancelled = false;
@@ -123,10 +142,15 @@ export function ChatRealtimeRefresh(props: ChatRealtimeRefreshProps) {
 
   const applyRemoteLatest = useCallback(
     (remoteLatest: string | null) => {
+      if (routeDepartureStarted.current || window.location.pathname !== pathname) return;
       if (remoteLatest !== latestPropRef.current) {
         staleRefreshAttempts.current += 1;
         router.refresh();
-        if (staleRefreshAttempts.current >= 2) {
+        if (
+          staleRefreshAttempts.current >= 2 &&
+          !routeDepartureStarted.current &&
+          window.location.pathname === pathname
+        ) {
           const query = searchParams.toString();
           window.location.replace(query ? `${pathname}?${query}` : pathname);
         }

@@ -4,7 +4,6 @@ import { MapPin } from "lucide-react";
 import { useState } from "react";
 
 import { useLocaleContext } from "@/components/i18n/locale-provider";
-import type { ChatLocationMapPreviewMode } from "@/lib/maps/static-preview-types";
 import { latLngToTilePixel, OSM_STATIC_PREVIEW_ZOOM } from "@/lib/maps/osm-tile";
 import { OSM_STITCH_PX } from "@/lib/maps/osm-stitch-preview";
 import { cn } from "@/lib/utils";
@@ -13,26 +12,23 @@ export function ChatLocationLinkPreview({
   lat,
   lng,
   name,
-  previewMode,
 }: {
   lat: number;
   lng: number;
   name: string | null;
-  /** `google` — marker baked into image; `osm-tile` — show pin overlay on tile. */
-  previewMode: ChatLocationMapPreviewMode;
 }) {
   const { messages: ui } = useLocaleContext();
   const c = ui.chat;
   const [thumbFailed, setThumbFailed] = useState(false);
+  const [usesOsmTile, setUsesOsmTile] = useState(false);
   const mapsHref = `https://www.google.com/maps?q=${lat},${lng}`;
   const label = name?.trim() || c.locationShareDefaultLabel;
   const showThumb = !thumbFailed;
   const previewSrc = `/api/maps/static?lat=${encodeURIComponent(String(lat))}&lng=${encodeURIComponent(String(lng))}`;
-  const showPinOverlay = previewMode === "osm-tile" && showThumb;
-  const osmTileOffset =
-    previewMode === "osm-tile"
-      ? latLngToTilePixel(lat, lng, OSM_STATIC_PREVIEW_ZOOM)
-      : null;
+  const showPinOverlay = usesOsmTile && showThumb;
+  const osmTileOffset = usesOsmTile
+    ? latLngToTilePixel(lat, lng, OSM_STATIC_PREVIEW_ZOOM)
+    : null;
 
   return (
     <a
@@ -52,7 +48,7 @@ export function ChatLocationLinkPreview({
             alt=""
             loading="lazy"
             className={cn(
-              previewMode === "osm-tile"
+              usesOsmTile
                 ? "absolute max-w-none"
                 : "block h-full w-full object-cover",
             )}
@@ -66,6 +62,10 @@ export function ChatLocationLinkPreview({
                   }
                 : undefined
             }
+            onLoad={(event) => {
+              const image = event.currentTarget;
+              setUsesOsmTile(image.naturalWidth === image.naturalHeight);
+            }}
             onError={() => setThumbFailed(true)}
           />
           {showPinOverlay ? (

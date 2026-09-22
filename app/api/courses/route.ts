@@ -3,6 +3,7 @@ import { Weekday } from "@prisma/client";
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { DEFAULT_SCHOOL, normalizeSchoolCode } from "@/lib/constants/schools";
 import { getCurrentSemesterLabel } from "@/lib/constants/semester";
+import { courseMembershipActiveUntilForSemester } from "@/lib/courses/active-membership";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
 import { courseSchema, parseTimeToMinutes } from "@/lib/validators/course";
@@ -10,7 +11,10 @@ import { courseSchema, parseTimeToMinutes } from "@/lib/validators/course";
 export async function GET() {
   const user = await requireOnboardedUser();
   const memberships = await prisma.userCourse.findMany({
-    where: { userId: user.id },
+    where: {
+      userId: user.id,
+      OR: [{ activeUntil: null }, { activeUntil: { gte: new Date() } }],
+    },
     include: { course: true, sessions: true },
   });
 
@@ -75,9 +79,11 @@ export async function POST(request: Request) {
         userId: user.id,
         courseId: course.id,
         intentions: values.intentions,
+        activeUntil: courseMembershipActiveUntilForSemester(course.semesterLabel),
       },
       update: {
         intentions: values.intentions,
+        activeUntil: courseMembershipActiveUntilForSemester(course.semesterLabel),
       },
     });
 

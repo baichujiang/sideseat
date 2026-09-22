@@ -102,8 +102,7 @@ export function ForgotPasswordForm({
       payload.data?.onboardingComplete === false
         ? "/onboarding"
         : safeReturnPath(returnTo, "/home");
-    router.push(dest as Route);
-    router.refresh();
+    router.replace(dest as Route);
   });
 
   return (

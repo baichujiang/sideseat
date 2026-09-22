@@ -74,15 +74,21 @@ export async function PATCH(
       data.studentVerificationStatus = values.studentVerificationStatus;
       const verified =
         values.studentVerificationStatus === StudentVerificationStatus.VERIFIED;
+      const verifiedAt = verified ? new Date() : null;
       data.verifiedStudent =
         values.verifiedStudent !== undefined ? values.verifiedStudent : verified;
-      data.emailVerifiedAt = verified ? new Date() : null;
+      data.studentVerificationMethod = verified ? "MANUAL_DOCUMENT" : null;
+      data.studentVerifiedAt = verifiedAt;
+      data.emailVerifiedAt = null;
     } else if (values.verifiedStudent !== undefined) {
       data.verifiedStudent = values.verifiedStudent;
       data.studentVerificationStatus = values.verifiedStudent
         ? StudentVerificationStatus.VERIFIED
         : StudentVerificationStatus.UNVERIFIED;
-      data.emailVerifiedAt = values.verifiedStudent ? new Date() : null;
+      const verifiedAt = values.verifiedStudent ? new Date() : null;
+      data.studentVerificationMethod = values.verifiedStudent ? "MANUAL_DOCUMENT" : null;
+      data.studentVerifiedAt = verifiedAt;
+      data.emailVerifiedAt = null;
     }
 
     if (values.studentVerificationNotes !== undefined) {
@@ -111,6 +117,8 @@ export async function PATCH(
           email: result.email ?? null,
           verifiedStudent: result.verifiedStudent,
           studentVerificationStatus: result.studentVerificationStatus,
+          studentVerificationMethod: result.studentVerificationMethod,
+          studentVerifiedAt: result.studentVerifiedAt,
           emailVerifiedAt: result.emailVerifiedAt,
           studentVerificationNotes: result.studentVerificationNotes,
           manualReviewProofUrl: result.manualReviewProofUrl,

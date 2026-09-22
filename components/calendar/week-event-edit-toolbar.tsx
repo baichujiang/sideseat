@@ -428,7 +428,7 @@ function ToolbarButton({
         e.stopPropagation();
       }}
       className={cn(
-        "min-w-[3.25rem] whitespace-nowrap px-3.5 py-2 text-[14px] font-medium leading-tight transition",
+        "min-w-[4.5rem] whitespace-nowrap px-5 py-2.5 text-[14px] font-medium leading-snug transition",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/35",
         destructive
           ? "text-[#E53935] hover:bg-red-50 active:bg-red-100 dark:text-red-400 dark:hover:bg-red-950/40"

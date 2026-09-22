@@ -9,6 +9,9 @@ import {
   startOfWeek,
 } from "date-fns";
 
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
+import { loadCalendarEntryOccurrences } from "@/lib/calendar/load-calendar-entry-occurrences";
+
 type DbClient = Prisma.TransactionClient;
 
 const DAY_START_MINUTE = 8 * 60;
@@ -85,6 +88,7 @@ export async function materializePlanCalendarEntries(
   db: DbClient,
   args: {
     planRequestId: string;
+    planCommitmentId?: string | null;
     proposerUserId: string;
     proposerName: string | null;
     receiverUserId: string;
@@ -97,39 +101,61 @@ export async function materializePlanCalendarEntries(
     endTime: Date;
   },
 ) {
-  await db.calendarEntry.createMany({
-    data: [
-      {
-        userId: args.proposerUserId,
-        planRequestId: args.planRequestId,
-        title: args.title,
-        eventType: args.planType,
-        source: "plan_request",
-        location: args.location,
-        note: args.note,
-        startAt: args.startTime,
-        endAt: args.endTime,
-      },
-      {
-        userId: args.receiverUserId,
-        planRequestId: args.planRequestId,
-        title: args.title,
-        eventType: args.planType,
-        source: "plan_request",
-        location: args.location,
-        note: args.note,
-        startAt: args.startTime,
-        endAt: args.endTime,
-      },
-    ],
-    skipDuplicates: true,
-  });
+  const projectionData = [args.proposerUserId, args.receiverUserId].map(
+    (userId) => ({
+      userId,
+      planRequestId: args.planRequestId,
+      planCommitmentId: args.planCommitmentId ?? null,
+      projectionStatus: "ACTIVE" as const,
+      title: args.title,
+      eventType: args.planType,
+      source: "plan_request",
+      location: args.location,
+      note: args.note,
+      startAt: args.startTime,
+      endAt: args.endTime,
+    }),
+  );
+
+  if (args.planCommitmentId) {
+    for (const data of projectionData) {
+      await db.calendarEntry.upsert({
+        where: {
+          userId_planCommitmentId: {
+            userId: data.userId,
+            planCommitmentId: args.planCommitmentId,
+          },
+        },
+        create: data,
+        update: {
+          planRequestId: data.planRequestId,
+          projectionStatus: data.projectionStatus,
+          title: data.title,
+          eventType: data.eventType,
+          source: data.source,
+          location: data.location,
+          startAt: data.startAt,
+          endAt: data.endAt,
+        },
+      });
+    }
+  } else {
+    await db.calendarEntry.createMany({
+      data: projectionData,
+      skipDuplicates: true,
+    });
+  }
 
   const entries = await db.calendarEntry.findMany({
-    where: {
-      planRequestId: args.planRequestId,
-      userId: { in: [args.proposerUserId, args.receiverUserId] },
-    },
+    where: args.planCommitmentId
+      ? {
+          planCommitmentId: args.planCommitmentId,
+          userId: { in: [args.proposerUserId, args.receiverUserId] },
+        }
+      : {
+          planRequestId: args.planRequestId,
+          userId: { in: [args.proposerUserId, args.receiverUserId] },
+        },
     select: { id: true, userId: true },
   });
 
@@ -169,17 +195,16 @@ async function getBusyIntervalsForUser(
   rangeEnd: Date,
 ): Promise<BusyInterval[]> {
   const [calendarEntries, memberships] = await Promise.all([
-    db.calendarEntry.findMany({
-      where: {
-        userId,
-        startAt: { lt: rangeEnd },
-        endAt: { gt: rangeStart },
-      },
-      select: { startAt: true, endAt: true },
-      orderBy: { startAt: "asc" },
+    loadCalendarEntryOccurrences(db, {
+      userId,
+      windowStart: rangeStart,
+      windowEnd: rangeEnd,
     }),
     db.userCourse.findMany({
-      where: { userId },
+      where: {
+        userId,
+        ...activeCourseMembershipWhere(rangeStart),
+      },
       include: {
         sessions: {
           orderBy: [{ weekday: "asc" }, { startMinute: "asc" }],

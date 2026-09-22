@@ -11,6 +11,7 @@ export type DiscoverActivityRow = {
   organizerId: string;
   organizerNickname: string;
   organizerAvatarUrl: string | null;
+  organizerVerifiedStudent: boolean;
   city: string;
   school: string;
   title: string;
@@ -23,6 +24,7 @@ export type DiscoverActivityRow = {
   status: DiscoverActivityStatus;
   phase: DiscoverActivityPhase;
   goingCount: number;
+  commentCount: number;
   viewerSignupStatus: DiscoverActivitySignupStatus | null;
   isOrganizer: boolean;
 };

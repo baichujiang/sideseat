@@ -1,9 +1,20 @@
 import "server-only";
 
-import type { LanguageProficiency, LanguageTag } from "@prisma/client";
-import { ClassmatePostCategory, ClassmatePostStatus } from "@prisma/client";
+import type {
+  ActionCoordinationPolicy,
+  ClassmatePostReplyPreference,
+  ClassmatePostVisibility,
+  LanguageProficiency,
+  LanguageTag,
+  Prisma,
+} from "@prisma/client";
+import {
+  ClassmatePostCategory,
+  type ClassmatePostClosureReason,
+  ClassmatePostStatus,
+} from "@prisma/client";
 
-import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
+import { isDiscoverServedCity } from "@/lib/discover/discover-served-cities";
 import {
   mapPrismaLanguageToDiscoverRow,
   mapPrismaMealsToDiscoverRow,
@@ -16,6 +27,13 @@ import {
   type DiscoverPostRowStudyMeta,
 } from "@/lib/discover/discover-post-row";
 import { prisma } from "@/lib/db/prisma";
+import { activeCourseMembershipWhere } from "@/lib/courses/active-membership";
+import { getSchoolMatchValues } from "@/lib/constants/schools";
+import {
+  buildViewerCourseMatchIndex,
+  courseMatchesViewer,
+} from "@/lib/discover/viewer-course-match";
+import { allowsLegacyDirectConversationForAction } from "@/lib/v2/action-coordination/policy-snapshot";
 
 export type ClassmatePostDetailAuthor = {
   id: string;
@@ -24,6 +42,8 @@ export type ClassmatePostDetailAuthor = {
   avatarUrl: string | null;
   major: string | null;
   semester: number | null;
+  studentStatus: "CURRENT_STUDENT" | "EXCHANGE_STUDENT" | "ALUMNI" | null;
+  graduationYear: number | null;
   school: string | null;
   languages: Array<{ tag: LanguageTag; proficiency: LanguageProficiency }>;
   verifiedStudent: boolean;
@@ -43,6 +63,22 @@ export type ClassmatePostDetail = {
   title: string;
   body: string | null;
   status: ClassmatePostStatus;
+  closureReason: ClassmatePostClosureReason | null;
+  closedAt: Date | null;
+  coordinationPolicy?: ActionCoordinationPolicy | null;
+  policySchemaVersion?: number | null;
+  policyParametersSnapshot?: Prisma.JsonValue | null;
+  experimentKeySnapshot?: string | null;
+  experimentVariantSnapshot?: "CONTROL" | "TREATMENT" | null;
+  clientCapabilitySnapshot?: Prisma.JsonValue | null;
+  policySnapshottedAt?: Date | null;
+  tags: string[];
+  visibility: ClassmatePostVisibility;
+  replyPreference: ClassmatePostReplyPreference;
+  startsAt: Date | null;
+  endsAt: Date | null;
+  location: string | null;
+  capacity: number | null;
   expiresAt: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -73,11 +109,46 @@ type UserAuthorSelect = {
   avatarUrl: string | null;
   major: string | null;
   semester: number | null;
+  studentStatus: ClassmatePostDetailAuthor["studentStatus"];
+  graduationYear: number | null;
   school: string | null;
   verifiedStudent: boolean;
   studentVerificationStatus: ClassmatePostDetailAuthor["studentVerificationStatus"];
   userLanguages: Array<{ tag: LanguageTag; proficiency: LanguageProficiency }>;
 };
+
+type DetailViewerSelect = {
+  id: string;
+  school: string | null;
+  verifiedStudent: boolean;
+  courses: Array<{ course: { id: string; code: string | null; school: string } }>;
+};
+
+function canViewerSeePostDetail(
+  post: ClassmatePostDetail,
+  author: ClassmatePostDetailAuthor,
+  viewer: DetailViewerSelect,
+) {
+  switch (post.visibility) {
+    case "CITY_INTERNATIONALS":
+      return true;
+    case "VERIFIED_ONLY":
+      return viewer.verifiedStudent;
+    case "COURSEMATES_ONLY": {
+      const viewerCourses = buildViewerCourseMatchIndex(
+        viewer.courses
+          .map((row) => row.course)
+          .filter((course) => getSchoolMatchValues(viewer.school).includes(course.school)),
+      );
+      return post.linkedCourses.some((course) =>
+        courseMatchesViewer(course, viewerCourses),
+      );
+    }
+    case "SCHOOL_ONLY":
+    default:
+      return Boolean(viewer.school && author.school && viewer.school === author.school);
+  }
+}
 
 function toAuthor(user: UserAuthorSelect): ClassmatePostDetailAuthor {
   return {
@@ -87,6 +158,8 @@ function toAuthor(user: UserAuthorSelect): ClassmatePostDetailAuthor {
     avatarUrl: user.avatarUrl,
     major: user.major,
     semester: user.semester,
+    studentStatus: user.studentStatus,
+    graduationYear: user.graduationYear,
     school: user.school,
     languages: user.userLanguages.map((r) => ({ tag: r.tag, proficiency: r.proficiency })),
     verifiedStudent: user.verifiedStudent,
@@ -113,6 +186,8 @@ export async function getClassmatePostDetailForViewer(
           avatarUrl: true,
           major: true,
           semester: true,
+          studentStatus: true,
+          graduationYear: true,
           school: true,
           verifiedStudent: true,
           studentVerificationStatus: true,
@@ -125,7 +200,7 @@ export async function getClassmatePostDetailForViewer(
       language: true,
       sport: true,
       images: { select: { url: true, sortOrder: true } },
-      _count: { select: { saves: true } },
+      _count: { select: { interests: { where: { status: "ACTIVE" } } } },
     },
   });
 
@@ -146,28 +221,46 @@ export async function getClassmatePostDetailForViewer(
   const sportMeta = mapPrismaSportToDiscoverRow(post.sport);
   const imageUrls = mapPrismaClassmatePostImagesToUrls(post.images) ?? [];
 
+  const basePost: ClassmatePostDetail = {
+    id: post.id,
+    userId: post.userId,
+    city: post.city,
+    category: post.category,
+    title: post.title,
+    body: post.body,
+    status: post.status,
+    closureReason: post.closureReason,
+    closedAt: post.closedAt,
+    coordinationPolicy: post.coordinationPolicy,
+    policySchemaVersion: post.policySchemaVersion,
+    policyParametersSnapshot: post.policyParametersSnapshot,
+    experimentKeySnapshot: post.experimentKeySnapshot,
+    experimentVariantSnapshot: post.experimentVariantSnapshot,
+    clientCapabilitySnapshot: post.clientCapabilitySnapshot,
+    policySnapshottedAt: post.policySnapshottedAt,
+    tags: post.tags,
+    visibility: post.visibility,
+    replyPreference: post.replyPreference,
+    startsAt: post.startsAt,
+    endsAt: post.endsAt,
+    location: post.location,
+    capacity: post.capacity,
+    expiresAt: post.expiresAt,
+    createdAt: post.createdAt,
+    updatedAt: post.updatedAt,
+    linkedCourses,
+    studyMeta,
+    mealsMeta,
+    languageMeta,
+    sportMeta,
+    imageUrls,
+    interestedCount: post._count.interests,
+  };
+
   if (post.userId === viewerId) {
     return {
       ok: true,
-      post: {
-        id: post.id,
-        userId: post.userId,
-        city: post.city,
-        category: post.category,
-        title: post.title,
-        body: post.body,
-        status: post.status,
-        expiresAt: post.expiresAt,
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
-        linkedCourses,
-        studyMeta,
-        mealsMeta,
-        languageMeta,
-        sportMeta,
-        imageUrls,
-        interestedCount: post._count.saves,
-      },
+      post: basePost,
       author,
       isAuthor: true,
       viewerCanMessage: false,
@@ -178,11 +271,23 @@ export async function getClassmatePostDetailForViewer(
   if (post.status !== ClassmatePostStatus.ACTIVE || post.expiresAt <= now) {
     return { ok: false };
   }
-  if (post.city !== DEFAULT_DISCOVER_SERVED_CITY) {
+  if (!isDiscoverServedCity(post.city)) {
     return { ok: false };
   }
 
-  const [moderationBlock, mutualBlock] = await Promise.all([
+  const [viewer, moderationBlock, mutualBlock] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: viewerId },
+      select: {
+        id: true,
+        school: true,
+        verifiedStudent: true,
+        courses: {
+          where: activeCourseMembershipWhere(now),
+          select: { course: { select: { id: true, code: true, school: true } } },
+        },
+      },
+    }),
     prisma.moderationBlock.findFirst({
       where: { userId: post.userId, isActive: true },
       select: { id: true },
@@ -198,33 +303,15 @@ export async function getClassmatePostDetailForViewer(
     }),
   ]);
 
-  if (moderationBlock || mutualBlock) {
+  if (!viewer || moderationBlock || mutualBlock || !canViewerSeePostDetail(basePost, author, viewer)) {
     return { ok: false };
   }
 
   return {
     ok: true,
-    post: {
-      id: post.id,
-      userId: post.userId,
-      city: post.city,
-      category: post.category,
-      title: post.title,
-      body: post.body,
-      status: post.status,
-      expiresAt: post.expiresAt,
-      createdAt: post.createdAt,
-      updatedAt: post.updatedAt,
-      linkedCourses,
-      studyMeta,
-      mealsMeta,
-      languageMeta,
-      sportMeta,
-      imageUrls,
-      interestedCount: post._count.saves,
-    },
+    post: basePost,
     author,
     isAuthor: false,
-    viewerCanMessage: true,
+    viewerCanMessage: allowsLegacyDirectConversationForAction(basePost),
   };
 }

@@ -4,6 +4,8 @@ import { format, isSameDay, isToday, isYesterday } from "date-fns";
 import { enUS, zhCN } from "date-fns/locale";
 
 import { CourseChatComposer } from "@/components/chat/course-chat-composer";
+import { ChatMessageBubble } from "@/components/chat/chat-message-bubble";
+import { ChatMessageSelectionProvider } from "@/components/chat/chat-message-selection";
 import { ChatReplyProvider } from "@/components/chat/chat-reply-context";
 import { ChatRealtimeRefresh } from "@/components/chat/chat-realtime-refresh";
 import { ChatScrollContainer } from "@/components/chat/chat-scroll-container";
@@ -19,7 +21,6 @@ import { getSchoolLabel } from "@/lib/constants/schools";
 import { courseChatHeadline } from "@/lib/courses/course-code-label";
 import { formatMessage, getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
-import { resolveBackHref } from "@/lib/nav/back";
 import { chatMessageDomId } from "@/lib/chat/chat-message-dom-id";
 import { indexPlainTextMessagesForSearch } from "@/lib/chat/thread-search-index";
 
@@ -97,6 +98,7 @@ export default async function CourseChatPage({
   });
 
   return (
+    <ChatMessageSelectionProvider>
     <ChatReplyProvider>
     <ChatRealtimeRefresh kind="course" courseId={courseId} latestMessageId={latestMessageId} />
     <div className="flex h-full min-h-0 flex-1 flex-col bg-[#F6F8FB] dark:bg-[#090B10]">
@@ -163,6 +165,7 @@ export default async function CourseChatPage({
                   ) : null}
 
                   <div
+                    data-chat-message-row
                     className={cn(
                       "group flex items-start gap-2",
                       isOwn ? "justify-end" : "justify-start",
@@ -214,7 +217,8 @@ export default async function CourseChatPage({
                           {message.sender.nickname ?? ui.common.studentFallback}
                         </Link>
                       )}
-                      <div
+                      <ChatMessageBubble
+                        messageId={message.id}
                         className={cn(
                           "inline-block px-3.5 py-2 text-[15px] leading-snug text-left",
                           isOwn
@@ -236,7 +240,7 @@ export default async function CourseChatPage({
                               : null
                           }
                         />
-                      </div>
+                      </ChatMessageBubble>
                       <time
                         className={cn(
                           "mt-0.5 block text-[10px] text-muted-foreground",
@@ -289,5 +293,6 @@ export default async function CourseChatPage({
       </div>
     </div>
     </ChatReplyProvider>
+    </ChatMessageSelectionProvider>
   );
 }

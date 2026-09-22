@@ -4,10 +4,9 @@ import { DEFAULT_USER_CALENDAR_PRESETS } from "@/lib/calendar/default-user-calen
 import type { AppLocale } from "@/lib/i18n/app-locale";
 
 export const CALENDAR_CATEGORY_PRESET_KEYS = [
-  "personal",
+  "study",
   "work",
-  "important",
-  "other",
+  "personal",
 ] as const satisfies ReadonlyArray<
   (typeof DEFAULT_USER_CALENDAR_PRESETS)[number]["presetKey"]
 >;

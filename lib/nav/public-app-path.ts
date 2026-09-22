@@ -17,7 +17,12 @@ export function isPublicAppPath(pathname: string): boolean {
     pathname.startsWith("/discover/") ||
     pathname === "/courses" ||
     pathname.startsWith("/courses/") ||
-    pathname === "/forgot-password"
+    pathname === "/forgot-password" ||
+    pathname === "/ios" ||
+    pathname === "/privacy" ||
+    pathname === "/support" ||
+    pathname === "/about" ||
+    pathname.startsWith("/.well-known/")
   ) {
     return true;
   }
@@ -37,7 +42,9 @@ export function isPublicAppPath(pathname: string): boolean {
     pathname === "/share/schedule" ||
     pathname.startsWith("/share/schedule/") ||
     pathname === "/share/view" ||
-    pathname.startsWith("/share/view/")
+    pathname.startsWith("/share/view/") ||
+    pathname === "/share/event" ||
+    pathname.startsWith("/share/event/")
   ) {
     return true;
   }

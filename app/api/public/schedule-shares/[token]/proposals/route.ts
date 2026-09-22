@@ -15,6 +15,7 @@ import { assertScheduleShareProposalRateLimit, getClientIp, maybeHashIp } from "
 import { findScheduleShareLinkByPlainToken } from "@/lib/schedule-share/resolve-link";
 import { consumeScheduleShareLinkForVisitor } from "@/lib/schedule-share/usage-limit";
 import { rangeFitsScheduleShareSnapshot } from "@/lib/schedule-share/build-schedule-share-snapshot";
+import { parseRevealConfigJson } from "@/lib/schedule-share/reveal-config";
 import { createScheduleShareProposalSchema } from "@/lib/schedule-share/validation";
 import { scheduleShareProposerDisplayName } from "@/lib/schedule-share/proposer-display-name";
 
@@ -74,12 +75,16 @@ export async function POST(
     return error("Proposal times must fall within the shared schedule range.", 400);
   }
 
+  const reveal = parseRevealConfigJson(link.revealConfig);
   const fits = await rangeFitsScheduleShareSnapshot(prisma, {
     ownerUserId: link.ownerUserId,
     rangeStart: link.rangeStart,
     rangeEnd: link.rangeEnd,
     proposalStart: startTime,
     proposalEnd: endTime,
+    includedDates: reveal.includedDates,
+    availabilityStartMinutes: reveal.availabilityStartMinutes,
+    availabilityEndMinutes: reveal.availabilityEndMinutes,
   });
 
   if (!fits) {

@@ -7,6 +7,7 @@ import { loadActiveDiscoverPostsForCity } from "@/lib/discover/load-active-disco
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { getServerDiscoverServedCity } from "@/lib/discover/discover-city-preference";
+import { toPublicDiscoverPostRow } from "@/lib/discover/public-discover-post-row";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
 
 export default async function DiscoverPage() {
@@ -15,7 +16,9 @@ export default async function DiscoverPage() {
   const servedCity = await getServerDiscoverServedCity();
 
   if (!sessionUser) {
-    const posts = await loadActiveDiscoverPostsForCity(servedCity, null);
+    const posts = (await loadActiveDiscoverPostsForCity(servedCity, null)).map(
+      toPublicDiscoverPostRow,
+    );
     return (
       <TabKeepAliveSnapshot tab="discover">
         <div className="min-w-0 space-y-3">
@@ -51,9 +54,11 @@ export default async function DiscoverPage() {
   const connectedUserIds = new Set<string>(
     activeConnections.map((c) => (c.userAId === user.id ? c.userBId : c.userAId)),
   );
-  const posts = loadedPosts.filter(
-    (post) => post.userId === user.id || !connectedUserIds.has(post.userId),
-  );
+  const posts = loadedPosts
+    .filter(
+      (post) => post.userId === user.id || !connectedUserIds.has(post.userId),
+    )
+    .map(toPublicDiscoverPostRow);
 
   const enrolledCourses = myEnrolledCourses.map((uc) => ({
     id: uc.course.id,

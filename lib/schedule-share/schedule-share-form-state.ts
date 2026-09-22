@@ -1,6 +1,5 @@
 import { parseRevealConfigJson } from "@/lib/schedule-share/reveal-config";
 import {
-  allRevealedCategoryIds,
   initialRevealedCategoryIds,
   revealConfigFromRevealedCategoryIds,
   type ShareRevealCategoryInput,
@@ -12,6 +11,10 @@ import {
   type ShareRangePreset,
 } from "@/lib/schedule-share/share-range-presets";
 import type { ScheduleShareUsageLimitInput } from "@/lib/schedule-share/usage-limit";
+import {
+  SCHEDULE_SHARE_DEFAULT_AVAILABILITY_END_MINUTES,
+  SCHEDULE_SHARE_DEFAULT_AVAILABILITY_START_MINUTES,
+} from "@/lib/schedule-share/reveal-config";
 
 export function toDatetimeLocalValue(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -23,6 +26,8 @@ export type ScheduleShareFormState = {
   rangeStartInput: string;
   rangeEndInput: string;
   revealedCategoryIds: string[];
+  availabilityStartMinutes: number;
+  availabilityEndMinutes: number;
   allowGuestProposals: boolean;
   usageLimit: ScheduleShareUsageLimitInput;
   expiresInput: string;
@@ -35,8 +40,10 @@ export function defaultScheduleShareFormState(baseNow = new Date()): ScheduleSha
     rangeStartInput: toDatetimeLocalValue(start),
     rangeEndInput: toDatetimeLocalValue(end),
     revealedCategoryIds: [],
+    availabilityStartMinutes: SCHEDULE_SHARE_DEFAULT_AVAILABILITY_START_MINUTES,
+    availabilityEndMinutes: SCHEDULE_SHARE_DEFAULT_AVAILABILITY_END_MINUTES,
     allowGuestProposals: true,
-    usageLimit: "SINGLE_USE",
+    usageLimit: "UNLIMITED",
     expiresInput: toDatetimeLocalValue(defaultShareExpiresAt(baseNow)),
   };
 }
@@ -60,6 +67,8 @@ export function scheduleShareFormFromLink(
     rangeStartInput: toDatetimeLocalValue(link.rangeStart),
     rangeEndInput: toDatetimeLocalValue(link.rangeEnd),
     revealedCategoryIds: initialRevealedCategoryIds(categories, reveal),
+    availabilityStartMinutes: reveal.availabilityStartMinutes,
+    availabilityEndMinutes: reveal.availabilityEndMinutes,
     allowGuestProposals: link.allowGuestProposals,
     usageLimit: link.usageLimit,
     expiresInput: toDatetimeLocalValue(link.expiresAt),
@@ -79,14 +88,20 @@ export function scheduleShareFormToPayload(
       expiresAt = exp.toISOString();
     }
   }
-  const { categoryIds, presetKeys } = revealConfigFromRevealedCategoryIds(
+  const { categoryIds, presetKeys, hideAllDetails } = revealConfigFromRevealedCategoryIds(
     categories,
     form.revealedCategoryIds,
   );
   return {
     rangeStart: rangeStart.toISOString(),
     rangeEnd: rangeEnd.toISOString(),
-    revealConfig: { categoryIds, presetKeys },
+    revealConfig: {
+      categoryIds,
+      presetKeys,
+      hideAllDetails,
+      availabilityStartMinutes: form.availabilityStartMinutes,
+      availabilityEndMinutes: form.availabilityEndMinutes,
+    },
     allowGuestProposals: form.allowGuestProposals,
     usageLimit: form.usageLimit,
     expiresAt,

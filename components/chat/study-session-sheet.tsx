@@ -254,7 +254,7 @@ export function StudySessionSheet({
   if (presentation === "anchored") {
     if (!open) return null;
     return (
-      <div className={anchoredShellClassName} role="presentation" aria-modal="true">
+      <div className={anchoredShellClassName} role="dialog" aria-modal="true">
         <div ref={panelRef} className={anchoredPanelClassName}>
           {sheetBody}
         </div>

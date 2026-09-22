@@ -1,14 +1,17 @@
-import type { Prisma } from "@prisma/client";
-
 import { requireOnboardedUser } from "@/lib/auth/guards";
-import { isCalendarCourseMirrorRow } from "@/lib/calendar/calendar-course-mirror";
+import {
+  deleteCalendarEventForUser,
+  InvalidCalendarCategoryError,
+  InvalidCalendarCompanionsError,
+  type CalendarDeleteScope,
+  type CalendarUpdateScope,
+  updateCalendarEventForUser,
+} from "@/lib/api/v1/calendar-event-service";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
-import { calendarEventSchema } from "@/lib/validators/calendar";
+import { calendarEventSchema, type CalendarEventInput } from "@/lib/validators/calendar";
 
-type CalendarDeleteScope = "this" | "future" | "all";
-
-function parseDeleteScope(raw: string | null): CalendarDeleteScope {
+function parseScope(raw: string | null): CalendarDeleteScope & CalendarUpdateScope {
   if (raw === "future" || raw === "all") return raw;
   return "this";
 }
@@ -21,82 +24,24 @@ export async function PATCH(
     const user = await requireOnboardedUser();
     const { eventId } = await params;
     const values = await parseJson(request, calendarEventSchema);
-
-    const existing = await prisma.calendarEntry.findFirst({
-      where: { id: eventId, userId: user.id },
-      select: { id: true, source: true, courseScheduleMirrorKey: true },
-    });
-
-    if (!existing) {
-      return error("Schedule item not found.", 404);
-    }
-
-    const requestedCompanionIds = [...new Set(values.withUserIds ?? [])];
-    const activeConnections = requestedCompanionIds.length
-      ? await prisma.connection.findMany({
-          where: {
-            status: "ACTIVE",
-            OR: [
-              { userAId: user.id, userBId: { in: requestedCompanionIds } },
-              { userBId: user.id, userAId: { in: requestedCompanionIds } },
-            ],
-          },
-          include: {
-            userA: { select: { id: true, nickname: true, username: true } },
-            userB: { select: { id: true, nickname: true, username: true } },
-          },
-        })
-      : [];
-
-    const companions = activeConnections.map((connection) => {
-      const other = connection.userAId === user.id ? connection.userB : connection.userA;
-      return {
-        userId: other.id,
-        displayName: other.nickname ?? other.username,
-      };
-    });
-
-    if (companions.length !== requestedCompanionIds.length) {
-      return error("Some classmates can no longer be added to this event.", 400);
-    }
-
-    const mirrorCourse = isCalendarCourseMirrorRow(existing);
-    let resolvedCategoryId: string | null | undefined = undefined;
-    if (mirrorCourse) {
-      resolvedCategoryId = null;
-    } else if (values.categoryId) {
-      const cat = await prisma.userCalendarCategory.findFirst({
-        where: { id: values.categoryId, userId: user.id },
-        select: { id: true },
-      });
-      if (!cat) {
-        return error("Choose a valid calendar category.", 400);
-      }
-      resolvedCategoryId = values.categoryId;
-    } else if (values.categoryId !== undefined) {
-      resolvedCategoryId = values.categoryId;
-    }
-
-    await prisma.calendarEntry.update({
-      where: { id: existing.id },
-      data: {
-        title: values.title.trim(),
-        location: values.location?.trim() || null,
-        note: values.note?.trim() || null,
-        ...(resolvedCategoryId !== undefined ? { categoryId: resolvedCategoryId } : {}),
-        repeatRule: values.repeat,
-        repeatUntil: values.repeat === "NONE" ? null : values.repeatUntil ? new Date(values.repeatUntil) : null,
-        startAt: new Date(values.startAt),
-        endAt: new Date(values.endAt),
-        companions: {
-          deleteMany: {},
-          create: companions,
-        },
-      },
-    });
-
+    const scope = parseScope(new URL(request.url).searchParams.get("scope"));
+    const updated = await prisma.$transaction((tx) =>
+      updateCalendarEventForUser(tx, {
+        eventId,
+        userId: user.id,
+        values: values as CalendarEventInput,
+        scope,
+      }),
+    );
+    if (!updated) return error("Schedule item not found.", 404);
     return ok({ ok: true });
   } catch (cause) {
+    if (cause instanceof InvalidCalendarCompanionsError) {
+      return error("Some classmates can no longer be added to this event.", 400);
+    }
+    if (cause instanceof InvalidCalendarCategoryError) {
+      return error("Choose a valid calendar category.", 400);
+    }
     console.error(cause);
     return error("Unable to update schedule item.");
   }
@@ -109,60 +54,15 @@ export async function DELETE(
   try {
     const user = await requireOnboardedUser();
     const { eventId } = await params;
-    const scope = parseDeleteScope(new URL(request.url).searchParams.get("scope"));
-
-    const existing = await prisma.calendarEntry.findFirst({
-      where: { id: eventId, userId: user.id },
-      select: {
-        id: true,
-        title: true,
-        repeatRule: true,
-        repeatUntil: true,
-        startAt: true,
-        recurrenceGroupId: true,
-        categoryId: true,
-      },
-    });
-
-    if (!existing) {
-      return error("Schedule item not found.", 404);
-    }
-
-    const isRecurringSeries =
-      existing.repeatRule !== "NONE" || Boolean(existing.recurrenceGroupId?.trim());
-
-    if (!isRecurringSeries || scope === "this") {
-      await prisma.calendarEntry.delete({
-        where: { id: existing.id },
-      });
-      return ok({ ok: true });
-    }
-
-    const seriesWhere: Prisma.CalendarEntryWhereInput = existing.recurrenceGroupId
-      ? { userId: user.id, recurrenceGroupId: existing.recurrenceGroupId }
-      : existing.repeatRule !== "NONE"
-        ? {
-            userId: user.id,
-            title: existing.title,
-            repeatRule: existing.repeatRule,
-            repeatUntil: existing.repeatUntil,
-            categoryId: existing.categoryId,
-          }
-        : { userId: user.id, id: existing.id };
-
-    if (scope === "all") {
-      await prisma.calendarEntry.deleteMany({ where: seriesWhere });
-      return ok({ ok: true });
-    }
-
-    /** `future` — this occurrence and later instances in the same series. */
-    await prisma.calendarEntry.deleteMany({
-      where: {
-        ...seriesWhere,
-        startAt: { gte: existing.startAt },
-      },
-    });
-
+    const scope = parseScope(new URL(request.url).searchParams.get("scope"));
+    const deleted = await prisma.$transaction((tx) =>
+      deleteCalendarEventForUser(tx, {
+        eventId,
+        userId: user.id,
+        scope,
+      }),
+    );
+    if (!deleted) return error("Schedule item not found.", 404);
     return ok({ ok: true });
   } catch (cause) {
     console.error(cause);

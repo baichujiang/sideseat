@@ -1,6 +1,7 @@
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseBody } from "@/lib/http";
+import { defaultApnsEnvironment } from "@/lib/push/apns-env";
 import {
   nativePushRegisterSchema,
   nativePushUnregisterSchema,
@@ -15,7 +16,8 @@ export async function POST(request: Request) {
     if (!parsed.ok) {
       return error(parsed.error, 400);
     }
-    const { token, platform, userAgent } = parsed.data;
+    const { token, platform, environment, userAgent } = parsed.data;
+    const resolvedEnvironment = environment ?? defaultApnsEnvironment();
 
     await prisma.nativePushDevice.upsert({
       where: { token },
@@ -23,11 +25,13 @@ export async function POST(request: Request) {
         userId: user.id,
         token,
         platform,
+        environment: resolvedEnvironment,
         userAgent: userAgent ?? request.headers.get("user-agent")?.slice(0, 512) ?? null,
       },
       update: {
         userId: user.id,
         platform,
+        environment: resolvedEnvironment,
         userAgent: userAgent ?? request.headers.get("user-agent")?.slice(0, 512) ?? null,
       },
     });

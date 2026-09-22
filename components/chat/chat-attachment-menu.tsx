@@ -100,11 +100,12 @@ export function ChatAttachmentPlusButton({
   open: boolean;
   onToggle: () => void;
 }) {
+  const { messages } = useLocaleContext();
   return (
     <ChatComposerSlotButton
       onClick={onToggle}
       active={open}
-      aria-label={open ? "Close attachment menu" : "Open attachment menu"}
+      aria-label={open ? messages.chat.attachmentMenuCloseAria : messages.chat.attachmentMenuOpenAria}
       aria-expanded={open}
     >
       {open ? (
@@ -160,13 +161,13 @@ export function ChatAttachmentTray({
       const uploadPayload = await up.json().catch(() => ({}));
       if (!up.ok || uploadPayload.success !== true) {
         const msg =
-          typeof uploadPayload.error === "string" ? uploadPayload.error : "Upload failed.";
+          typeof uploadPayload.error === "string" ? uploadPayload.error : messages.chat.uploadFailed;
         setError(msg);
         return;
       }
       const url = uploadPayload.data?.url;
       if (typeof url !== "string") {
-        setError("Upload failed.");
+        setError(messages.chat.uploadFailed);
         return;
       }
       const msgRes = await apiFetch(`/api/connections/${connectionId}/messages`, {
@@ -177,7 +178,7 @@ export function ChatAttachmentTray({
       const msgPayload = await msgRes.json().catch(() => ({}));
       if (!msgRes.ok || msgPayload.success !== true) {
         const msg =
-          typeof msgPayload.error === "string" ? msgPayload.error : "Could not send photo.";
+          typeof msgPayload.error === "string" ? msgPayload.error : messages.chat.couldNotSendPhoto;
         setError(msg);
         return;
       }
@@ -190,7 +191,7 @@ export function ChatAttachmentTray({
 
   function sendLocation() {
     if (!navigator.geolocation) {
-      setError("Location is not supported on this device.");
+      setError(messages.chat.locationUnsupported);
       return;
     }
     setBusy(true);
@@ -211,7 +212,7 @@ export function ChatAttachmentTray({
           const payload = await r.json().catch(() => ({}));
           if (!r.ok || payload.success !== true) {
             const msg =
-              typeof payload.error === "string" ? payload.error : "Could not send location.";
+              typeof payload.error === "string" ? payload.error : messages.chat.couldNotSendLocation;
             setError(msg);
             return;
           }
@@ -222,7 +223,7 @@ export function ChatAttachmentTray({
         }
       },
       () => {
-        setError("Could not read location. Check permissions in your browser settings.");
+        setError(messages.chat.locationPermissionDenied);
         setBusy(false);
       },
       { enableHighAccuracy: true, timeout: 15_000, maximumAge: 0 },
@@ -247,7 +248,7 @@ export function ChatAttachmentTray({
             <div
               className="border-t border-border/50 bg-muted/15 px-1 pb-1.5 pt-1.5"
               role="region"
-              aria-label="Attachments: Photo, Location, Share schedule, Plan"
+              aria-label={messages.chat.attachmentMenuAria}
             >
             <input
               ref={fileRef}
@@ -263,16 +264,16 @@ export function ChatAttachmentTray({
             <div role="menu" className="grid w-full min-w-0 grid-cols-4 gap-0 px-2.5 pb-0.5 pt-0">
               <AttachmentMenuTile
                 icon={Image}
-                caption="Photo"
-                ariaLabel="Send photo"
+                caption={messages.chat.attachmentPhotoCaption}
+                ariaLabel={messages.chat.attachmentPhotoAria}
                 tone="violet"
                 disabled={busy}
                 onClick={() => fileRef.current?.click()}
               />
               <AttachmentMenuTile
                 icon={MapPin}
-                caption="Location"
-                ariaLabel="Send location"
+                caption={messages.chat.attachmentLocationCaption}
+                ariaLabel={messages.chat.attachmentLocationAria}
                 tone="emerald"
                 disabled={busy}
                 onClick={sendLocation}
@@ -290,8 +291,8 @@ export function ChatAttachmentTray({
               />
               <AttachmentMenuTile
                 icon={CalendarClock}
-                caption="Plan"
-                ariaLabel="Plan together"
+                caption={messages.chat.attachmentPlanCaption}
+                ariaLabel={messages.chat.attachmentPlanAria}
                 tone="amber"
                 disabled={busy}
                 onClick={() => {

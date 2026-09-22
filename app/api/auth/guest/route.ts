@@ -1,8 +1,5 @@
 import { randomBytes } from "crypto";
 
-import { LanguageProficiency, LanguageTag } from "@prisma/client";
-
-import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
 import { guestNicknameFields } from "@/lib/auth/nickname-fields";
 import { hashPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
@@ -32,14 +29,10 @@ export async function POST(request: Request) {
         school: DEFAULT_SCHOOL,
         major: "Exploring",
         semester: 1,
-        userLanguages: {
-          create: [{ tag: LanguageTag.ENGLISH, proficiency: LanguageProficiency.FLUENT }],
-        },
         onboardingComplete: true,
       },
     });
 
-    const botConnectionId = await ensureAssistantBotConnection(user.id);
     const { accessToken, expiresIn } = await createSession(user.id);
 
     return ok(
@@ -47,7 +40,6 @@ export async function POST(request: Request) {
         userId: user.id,
         onboardingComplete: true,
         isGuest: true,
-        botConnectionId,
         accessToken,
         expiresIn,
       },

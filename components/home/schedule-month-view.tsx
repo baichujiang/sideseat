@@ -52,11 +52,13 @@ export function ScheduleMonthView({
   const gridStart = startOfWeek(monthStart, { weekStartsOn: 1 });
   const gridEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
+  const gridStartTime = gridStart.getTime();
 
   const weekdayLabels = useMemo(() => {
     const fmt = new Intl.DateTimeFormat(locale, { weekday: "short" });
-    return Array.from({ length: 7 }, (_, i) => fmt.format(addDays(gridStart, i)));
-  }, [locale, gridStart.getTime()]);
+    const firstDay = new Date(gridStartTime);
+    return Array.from({ length: 7 }, (_, i) => fmt.format(addDays(firstDay, i)));
+  }, [locale, gridStartTime]);
 
   const dayLongFmt = useMemo(
     () => new Intl.DateTimeFormat(locale, { dateStyle: "long" }),

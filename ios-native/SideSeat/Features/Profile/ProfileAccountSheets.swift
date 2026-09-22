@@ -1,0 +1,240 @@
+import SwiftUI
+
+struct ProfileUsernameSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let profile: NativeCurrentProfile
+    let onSave: (String) async -> String?
+
+    @State private var username: String
+    @State private var isSubmitting = false
+    @State private var issue: String?
+
+    init(profile: NativeCurrentProfile, onSave: @escaping (String) async -> String?) {
+        self.profile = profile
+        self.onSave = onSave
+        _username = State(initialValue: profile.username)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("Username", text: $username)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .font(.body.monospaced())
+                        .accessibilityIdentifier("profile-username-field")
+                } footer: {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("2-32 letters, numbers, _ or -.")
+                        Text("You can change your username up to 3 times every 7 days.")
+                    }
+                }
+
+                if let nextAllowedAt = profile.usernameNextAllowedAt, !profile.canChangeUsernameNow {
+                    Section {
+                        Label(
+                            AppLocalization.string(
+                                "Available \(nextAllowedAt.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(AppLocalization.selectedLanguage.locale)))."
+                            ),
+                            systemImage: "clock"
+                        )
+                        .foregroundStyle(.secondary)
+                        .accessibilityIdentifier("profile-username-limit")
+                    }
+                } else {
+                    Section {
+                        Label(
+                            AppLocalization.string(
+                                "\(profile.usernameChangesRemaining) username changes remaining in this 7-day period."
+                            ),
+                            systemImage: "arrow.counterclockwise"
+                        )
+                        .foregroundStyle(.secondary)
+                        .accessibilityIdentifier("profile-username-allowance")
+                    }
+                }
+
+                if let issue {
+                    Section {
+                        Text(issue)
+                            .foregroundStyle(SideSeatTheme.danger)
+                            .accessibilityIdentifier("profile-username-error")
+                    }
+                }
+            }
+            .navigationTitle("Username")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        Task { await save() }
+                    } label: {
+                        if isSubmitting {
+                            ProgressView()
+                                .ssNeutralProgressTint()
+                        } else {
+                            Text("Save")
+                        }
+                    }
+                    .disabled(!canSave || isSubmitting || !profile.canChangeUsernameNow)
+                    .ssConfirmationActionStyle()
+                    .accessibilityIdentifier("profile-username-save")
+                }
+            }
+        }
+    }
+
+    private var normalizedUsername: String {
+        username.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    }
+
+    private var canSave: Bool {
+        let value = normalizedUsername
+        guard value != profile.username else { return false }
+        guard (2...32).contains(value.count) else { return false }
+        return value.range(of: #"^[a-z0-9_-]+$"#, options: .regularExpression) != nil &&
+            !value.hasPrefix("guest_")
+    }
+
+    private func save() async {
+        guard !isSubmitting else { return }
+        isSubmitting = true
+        defer { isSubmitting = false }
+        issue = nil
+        if let message = await onSave(normalizedUsername) {
+            issue = message
+        } else {
+            dismiss()
+        }
+    }
+}
+
+struct ProfilePrivacySheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let profile: NativeCurrentProfile
+    let onSave: (NativeProfileUpdateRequest) async -> Bool
+
+    @State private var isDiscoverable: Bool
+    @State private var isVisibleToCourseMembers: Bool
+    @State private var allowsContactExchange: Bool
+    @State private var isSubmitting = false
+    @State private var issue: String?
+
+    init(
+        profile: NativeCurrentProfile,
+        onSave: @escaping (NativeProfileUpdateRequest) async -> Bool
+    ) {
+        self.profile = profile
+        self.onSave = onSave
+        _isDiscoverable = State(initialValue: !profile.privacy.hideFromDiscovery)
+        _isVisibleToCourseMembers = State(initialValue: !profile.privacy.hideFromCourseMembers)
+        _allowsContactExchange = State(initialValue: profile.privacy.contactInfoOptIn)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Profile visibility") {
+                    ProfileEditToggleRow(
+                        title: AppLocalization.string("Include me in Together suggestions"),
+                        subtitle: AppLocalization.string("SideSeat may use limited profile context for relevant opportunities."),
+                        isOn: $isDiscoverable,
+                        accessibilityID: "profile-privacy-discover"
+                    )
+                    ProfileEditToggleRow(
+                        title: AppLocalization.string("Use shared courses for matching"),
+                        subtitle: AppLocalization.string("A shared course can make an opportunity more relevant."),
+                        isOn: $isVisibleToCourseMembers,
+                        accessibilityID: "profile-privacy-course-members"
+                    )
+                }
+
+                Section("Contact sharing") {
+                    ProfileEditToggleRow(
+                        title: AppLocalization.string("Allow contact exchange"),
+                        subtitle: AppLocalization.string("Handles stay private until you exchange them with a connection."),
+                        isOn: $allowsContactExchange,
+                        accessibilityID: "profile-privacy-contact-exchange"
+                    )
+                }
+
+                if let issue {
+                    Section {
+                        SSFieldMessage(text: issue, accessibilityID: "profile-privacy-error")
+                    }
+                }
+            }
+            .disabled(isSubmitting)
+            .accessibilityIdentifier("profile-privacy")
+            .navigationTitle("Privacy")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                        .disabled(isSubmitting)
+                        .accessibilityIdentifier("profile-sheet-close")
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        Task { await save() }
+                    } label: {
+                        if isSubmitting {
+                            ProgressView()
+                        } else {
+                            Text("Save")
+                        }
+                    }
+                    .accessibilityLabel("Save")
+                    .disabled(!hasChanges || isSubmitting)
+                    .ssConfirmationActionStyle()
+                    .accessibilityIdentifier("profile-privacy-save")
+                }
+            }
+        }
+        .interactiveDismissDisabled(isSubmitting)
+    }
+
+    private var hasChanges: Bool {
+        isDiscoverable != !profile.privacy.hideFromDiscovery ||
+            isVisibleToCourseMembers != !profile.privacy.hideFromCourseMembers ||
+            allowsContactExchange != profile.privacy.contactInfoOptIn
+    }
+
+    private func save() async {
+        guard hasChanges, !isSubmitting else { return }
+        isSubmitting = true
+        defer { isSubmitting = false }
+        issue = nil
+
+        let request = NativeProfileUpdateRequest(
+            contactInfoOptIn: allowsContactExchange,
+            hideFromDiscovery: !isDiscoverable,
+            hideFromCourseMembers: !isVisibleToCourseMembers
+        )
+        if await onSave(request) {
+            dismiss()
+        } else {
+            issue = AppLocalization.string( "Privacy settings could not be saved.")
+        }
+    }
+}
+
+
+private struct ProfileToggleSummary: View {
+    let title: String
+    let value: Bool
+    let systemImage: String
+
+    var body: some View {
+        HStack {
+            Label(title, systemImage: systemImage)
+            Spacer()
+            Text(value ? AppLocalization.string( "On") : AppLocalization.string( "Off"))
+                .foregroundStyle(value ? SideSeatTheme.success : SideSeatTheme.textSecondary)
+        }
+    }
+}

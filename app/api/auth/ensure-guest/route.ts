@@ -1,8 +1,5 @@
 import { randomBytes } from "crypto";
 
-import { LanguageProficiency, LanguageTag } from "@prisma/client";
-
-import { ensureAssistantBotConnection } from "@/lib/auth/assistant-bot";
 import { guestNicknameFields } from "@/lib/auth/nickname-fields";
 import { hashPassword } from "@/lib/auth/password";
 import { createSession, getSessionUser } from "@/lib/auth/session";
@@ -13,19 +10,17 @@ import { error, ok } from "@/lib/http";
 
 /**
  * Starts a lightweight guest session (no signup) so tabs work without login walls.
- * Also ensures the default assistant bot chat exists.
+ * Reuses the current session when available so guest data remains stable.
  */
 export async function POST() {
   try {
     const existing = await getSessionUser();
     if (existing) {
-      const botConnectionId = await ensureAssistantBotConnection(existing.id);
       return ok({
         userId: existing.id,
         isGuest: existing.isGuest,
         onboardingComplete: existing.onboardingComplete,
         created: false,
-        botConnectionId,
       });
     }
 
@@ -42,14 +37,10 @@ export async function POST() {
         school: DEFAULT_SCHOOL,
         major: "Exploring",
         semester: 1,
-        userLanguages: {
-          create: [{ tag: LanguageTag.ENGLISH, proficiency: LanguageProficiency.FLUENT }],
-        },
         onboardingComplete: true,
       },
     });
 
-    const botConnectionId = await ensureAssistantBotConnection(user.id);
     const { accessToken, expiresIn } = await createSession(user.id);
 
     return ok(
@@ -58,7 +49,6 @@ export async function POST() {
         isGuest: true,
         onboardingComplete: true,
         created: true,
-        botConnectionId,
         accessToken,
         expiresIn,
       },

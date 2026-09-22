@@ -7,6 +7,7 @@ import { requireOnboardedUser } from "@/lib/auth/guards";
 import { ensureUserCalendarCategories } from "@/lib/calendar/default-user-calendar-categories";
 import { courseScheduleMirrorKey, materializeWeeklyCourseSlot } from "@/lib/calendar/course-schedule-mirror";
 import { getClassScheduleDateRange } from "@/lib/constants/vorlesungszeit";
+import { courseMembershipActiveUntilForSemester } from "@/lib/courses/active-membership";
 import { isDatabaseUnreachable } from "@/lib/db/prisma-errors";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseBody } from "@/lib/http";
@@ -41,7 +42,9 @@ export async function POST(request: Request) {
 
     const membership = await prisma.userCourse.findFirst({
       where: { userId: user.id, courseId: values.courseId },
-      include: { course: { select: { id: true, name: true, code: true } } },
+      include: {
+        course: { select: { id: true, name: true, code: true, semesterLabel: true } },
+      },
     });
 
     if (!membership) {
@@ -143,6 +146,14 @@ export async function POST(request: Request) {
     }
 
     await prisma.$transaction(async (tx) => {
+      await tx.userCourse.update({
+        where: { id: membership.id },
+        data: {
+          activeUntil: courseMembershipActiveUntilForSemester(
+            membership.course.semesterLabel,
+          ),
+        },
+      });
       await tx.calendarEntry.deleteMany({
         where: {
           userId: user.id,

@@ -5,6 +5,7 @@ import {
   classmatePostForDiscoverInclude,
   prismaClassmatePostToDiscoverRow,
 } from "@/lib/discover/prisma-classmate-post-for-discover";
+import { toPublicDiscoverPostRow } from "@/lib/discover/public-discover-post-row";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok } from "@/lib/http";
 
@@ -42,7 +43,11 @@ export async function GET(request: Request) {
     const hasMore = saves.length > take;
     const pageRows = saves.slice(0, take);
     const posts = pageRows.map((s) =>
-      prismaClassmatePostToDiscoverRow(s.classmatePost, user.id, { savedByViewer: true }),
+      toPublicDiscoverPostRow(
+        prismaClassmatePostToDiscoverRow(s.classmatePost, user.id, {
+          savedByViewer: true,
+        }),
+      ),
     );
 
     return ok({

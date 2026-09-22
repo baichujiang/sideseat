@@ -47,7 +47,10 @@ export async function persistScheduleShareLinkUpdate(
   const normalizedReveal = normalizeRevealConfig({
     categoryIds: rc.categoryIds ?? [],
     presetKeys: rc.presetKeys ?? [],
+    hideAllDetails: rc.hideAllDetails ?? false,
     includedDates: rc.includedDates,
+    availabilityStartMinutes: rc.availabilityStartMinutes,
+    availabilityEndMinutes: rc.availabilityEndMinutes,
   });
 
   const owned = await validateRevealCategoryOwnership(db, ownerUserId, normalizedReveal.categoryIds);
@@ -80,7 +83,7 @@ export async function persistScheduleShareLinkUpdate(
       rangeEnd,
       revealConfig: normalizedReveal as Prisma.InputJsonValue,
       allowGuestProposals: parsed.data.allowGuestProposals ?? true,
-      usageLimit: parsed.data.usageLimit ?? "SINGLE_USE",
+      usageLimit: parsed.data.usageLimit ?? "UNLIMITED",
       expiresAt,
     },
   });

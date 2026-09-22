@@ -18,6 +18,7 @@ import {
   scheduleVisualToneKey,
 } from "@/lib/schedule-event-card-tone";
 import { isLongOrAllDayTimedMinutes } from "@/lib/calendar/long-calendar-block";
+import { useAppMessages } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
 
 const LIST_LONG_PRESS_MS = 450;
@@ -75,13 +76,13 @@ function attachListTapOrLongPress(
   document.addEventListener("pointercancel", onUp);
 }
 
-function formatItemTimeRange(item: DayTimelineItem): string {
+function formatItemTimeRange(item: DayTimelineItem, allDayLabel: string): string {
   if (
     item.kind === "study" &&
     item.source === "calendar" &&
     isLongOrAllDayTimedMinutes(item.startMinute, item.endMinute)
   ) {
-    return "All day";
+    return allDayLabel;
   }
   const fmt = (total: number) => {
     const h = Math.floor(total / 60);
@@ -101,10 +102,11 @@ export function ScheduleDayEventList({
   onLongPressItem: (item: DayTimelineItem, anchorEl?: HTMLElement | null) => void;
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { schedule: s } = useAppMessages();
   if (items.length === 0) {
     return (
       <div className="rounded-2xl border border-[#E7E0D6] bg-white/90 px-3 py-3.5 text-center text-[12px] text-[#5F6B7A] shadow-[0_2px_8px_rgba(15,23,42,0.04)] dark:border-border dark:bg-card/80 dark:text-muted-foreground">
-        No events this day
+        {s.noEventsThisDay}
       </div>
     );
   }
@@ -210,7 +212,7 @@ export function ScheduleDayEventList({
                         : undefined
                     }
                   >
-                    {formatItemTimeRange(item)}
+                    {formatItemTimeRange(item, s.allDayRowLabel)}
                   </span>
                   {item.source === "course" && item.courseCode?.trim() ? (
                     <>

@@ -17,14 +17,40 @@ export function InboxRealtimeRefresh({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const staleRefreshAttempts = useRef(0);
+  const routeDepartureStarted = useRef(false);
 
   useEffect(() => {
     staleRefreshAttempts.current = 0;
   }, [version]);
 
   useEffect(() => {
+    const markRouteDeparture = (event: MouseEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const anchor = target.closest<HTMLAnchorElement>("a[href]");
+      if (!anchor || anchor.target === "_blank" || anchor.hasAttribute("download")) return;
+
+      const destination = new URL(anchor.href, window.location.href);
+      if (destination.origin !== window.location.origin) return;
+      if (`${destination.pathname}${destination.search}` !== `${pathname}${window.location.search}`) {
+        routeDepartureStarted.current = true;
+      }
+    };
+
+    document.addEventListener("click", markRouteDeparture, true);
+    return () => document.removeEventListener("click", markRouteDeparture, true);
+  }, [pathname]);
+
+  useEffect(() => {
     async function pollInboxState() {
-      if (document.visibilityState !== "visible" || !navigator.onLine) return;
+      if (
+        routeDepartureStarted.current ||
+        window.location.pathname !== pathname ||
+        document.visibilityState !== "visible" ||
+        !navigator.onLine
+      ) {
+        return;
+      }
 
       const response = await apiFetch("/api/inbox/state", {
         cache: "no-store",
@@ -36,11 +62,16 @@ export function InboxRealtimeRefresh({
       if (typeof remoteVersion !== "string") return;
 
       if (remoteVersion !== version) {
+        if (routeDepartureStarted.current || window.location.pathname !== pathname) return;
         staleRefreshAttempts.current += 1;
         window.dispatchEvent(new Event("sideseat:inbox-unread-changed"));
         router.refresh();
 
-        if (staleRefreshAttempts.current >= 2) {
+        if (
+          staleRefreshAttempts.current >= 2 &&
+          !routeDepartureStarted.current &&
+          window.location.pathname === pathname
+        ) {
           const query = searchParams.toString();
           window.location.replace(query ? `${pathname}?${query}` : pathname);
         }

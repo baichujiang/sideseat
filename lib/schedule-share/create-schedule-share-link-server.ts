@@ -3,6 +3,7 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 
 import { SCHEDULE_SHARE_DEFAULT_TTL_DAYS, SCHEDULE_SHARE_MAX_TTL_DAYS } from "@/lib/schedule-share/constants";
 import { normalizeRevealConfig, validateRevealCategoryOwnership } from "@/lib/schedule-share/reveal-config";
+import { publicScheduleShareOrigin } from "@/lib/schedule-share/public-share-origin";
 import { scheduleShareRecipientViewUrl } from "@/lib/schedule-share/share-link-urls";
 import { generateScheduleShareToken, hashScheduleShareToken } from "@/lib/schedule-share/token";
 import { createScheduleShareSchema } from "@/lib/schedule-share/validation";
@@ -22,7 +23,10 @@ export async function createScheduleShareLinkForUser(
   const normalizedReveal = normalizeRevealConfig({
     categoryIds: rc.categoryIds ?? [],
     presetKeys: rc.presetKeys ?? [],
+    hideAllDetails: rc.hideAllDetails ?? false,
     includedDates: rc.includedDates,
+    availabilityStartMinutes: rc.availabilityStartMinutes,
+    availabilityEndMinutes: rc.availabilityEndMinutes,
   });
 
   const owned = await validateRevealCategoryOwnership(db, args.ownerUserId, normalizedReveal.categoryIds);
@@ -59,12 +63,18 @@ export async function createScheduleShareLinkForUser(
       rangeEnd,
       revealConfig: normalizedReveal as Prisma.InputJsonValue,
       allowGuestProposals: args.input.allowGuestProposals ?? true,
-      usageLimit: args.input.usageLimit ?? "SINGLE_USE",
+      usageLimit: args.input.usageLimit ?? "UNLIMITED",
       expiresAt,
     },
     select: { id: true },
   });
 
-  const shareUrl = scheduleShareRecipientViewUrl(args.appOrigin, plaintext);
+  const shareUrl = scheduleShareRecipientViewUrl(
+    publicScheduleShareOrigin({
+      requestOrigin: args.appOrigin,
+      configuredOrigin: process.env.SIDESEAT_PUBLIC_SHARE_ORIGIN,
+    }),
+    plaintext,
+  );
   return { shareUrl, linkId: link.id };
 }

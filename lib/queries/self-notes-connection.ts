@@ -1,7 +1,11 @@
 import "server-only";
 
-import { ConnectionStatus, Prisma } from "@prisma/client";
+import { ConnectionStatus } from "@prisma/client";
 
+import {
+  withConnectionTransaction,
+  withSelfNotesConnectionScope,
+} from "@/lib/connections/canonical-connection";
 import { prisma } from "@/lib/db/prisma";
 
 /**
@@ -11,31 +15,17 @@ import { prisma } from "@/lib/db/prisma";
 export async function findOrCreateSelfNotesConnection(
   userId: string,
 ): Promise<{ connectionId: string; created: boolean }> {
-  return prisma.$transaction(
-    async (tx) => {
-      const existing = await tx.connection.findFirst({
-        where: {
-          userAId: userId,
-          userBId: userId,
-          status: ConnectionStatus.ACTIVE,
-        },
-        select: { id: true },
-      });
-      if (existing) {
-        return { connectionId: existing.id, created: false };
+  return withConnectionTransaction(prisma, (tx) =>
+    withSelfNotesConnectionScope(tx, userId, async (scope) => {
+      if (scope.existing?.status === ConnectionStatus.ACTIVE) {
+        return { connectionId: scope.existing.id, created: false };
       }
-
-      const row = await tx.connection.create({
-        data: {
-          userAId: userId,
-          userBId: userId,
-          status: ConnectionStatus.ACTIVE,
-        },
-        select: { id: true },
-      });
-      return { connectionId: row.id, created: true };
-    },
-    { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      if (scope.existing) {
+        throw new Error("The self-notes conversation is no longer available.");
+      }
+      const row = await scope.createActive();
+      return { connectionId: row.id, created: row.created };
+    }),
   );
 }
 

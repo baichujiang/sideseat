@@ -1,4 +1,4 @@
-import { LanguageProficiency, LanguageTag, UserGender } from "@prisma/client";
+import { LanguageProficiency, LanguageTag, StudentStatus, UserGender } from "@prisma/client";
 import { z } from "zod";
 
 import { loginUsernameField, LOGIN_USERNAME_MESSAGES_EN } from "@/lib/validators/auth";
@@ -79,7 +79,7 @@ export const homeProfileQuickPatchSchema = z
   });
 
 /** Profile fields saved via PUT /api/profile (avatar is POST /api/profile/avatar). */
-export const profileSchema = z.object({
+export const profileObjectSchema = z.object({
   nickname: z.string().min(2).max(32),
   gender: z.nativeEnum(UserGender),
   school: z.enum(
@@ -88,6 +88,7 @@ export const profileSchema = z.object({
       ...(keyof typeof schoolDirectory)[],
     ]
   ),
+  studentStatus: z.nativeEnum(StudentStatus),
   degreeLevel: z.enum(DEGREE_LEVELS, {
     errorMap: () => ({ message: "Pick a degree level." }),
   }),
@@ -99,6 +100,12 @@ export const profileSchema = z.object({
       message: "Pick a major or leave it as not specified.",
     }),
   semester: z.coerce.number().int().min(1).max(MAX_SEMESTER),
+  graduationYear: z.coerce
+    .number()
+    .int()
+    .min(new Date().getFullYear() - 80)
+    .max(new Date().getFullYear() + 1)
+    .optional(),
   /** Languages + level (shown on profile / Discover). */
   languages: z
     .array(
@@ -124,4 +131,14 @@ export const profileSchema = z.object({
   hideFromCourseMembers: z.boolean(),
   hideFromDiscovery: z.boolean(),
   hideFromRecommendations: z.boolean(),
+});
+
+export const profileSchema = profileObjectSchema.superRefine((values, ctx) => {
+  if (values.studentStatus === StudentStatus.ALUMNI && !values.graduationYear) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["graduationYear"],
+      message: "Select your graduation year.",
+    });
+  }
 });

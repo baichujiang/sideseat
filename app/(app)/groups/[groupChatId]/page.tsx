@@ -12,7 +12,6 @@ import { GroupChatAvatarCollage } from "@/components/ui/group-chat-avatar-collag
 import { PresetAvatar } from "@/components/ui/preset-avatar";
 import { requireGroupChatParticipant } from "@/lib/auth/guards";
 import { groupChatDisplayTitle } from "@/lib/group-chats/title";
-import { resolveBackHref } from "@/lib/nav/back";
 import { cn } from "@/lib/utils";
 import { chatMessageDomId } from "@/lib/chat/chat-message-dom-id";
 import { indexPlainTextMessagesForSearch } from "@/lib/chat/thread-search-index";

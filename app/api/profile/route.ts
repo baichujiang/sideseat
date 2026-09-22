@@ -8,6 +8,7 @@ import {
 } from "@/lib/profile/nickname-api-errors";
 import { mirrorSchoolVerificationToUser } from "@/lib/verification/school-state";
 import { profileSchema } from "@/lib/validators/profile";
+import { archivePreviousSchoolSocialState, schoolIdentityChanged } from "@/lib/profile/school-change";
 
 export async function PUT(request: Request) {
   try {
@@ -46,9 +47,11 @@ export async function PUT(request: Request) {
           nicknameKey: nicknameCheck.nicknameKey,
           gender: values.gender,
           school: values.school,
+          studentStatus: values.studentStatus,
           degreeLevel: values.degreeLevel,
           major: values.major === "" ? null : values.major,
-          semester: values.semester,
+          semester: values.studentStatus === "ALUMNI" ? null : values.semester,
+          graduationYear: values.studentStatus === "ALUMNI" ? values.graduationYear : null,
           bio: values.bio || null,
           wechatHandle: values.wechatHandle || null,
           whatsappHandle: values.whatsappHandle || null,
@@ -65,6 +68,13 @@ export async function PUT(request: Request) {
           onboardingComplete: true,
         },
       });
+      if (schoolIdentityChanged(user.school, values.school)) {
+        await archivePreviousSchoolSocialState(tx, {
+          userId: user.id,
+          previousSchool: user.school,
+          nextSchool: values.school,
+        });
+      }
       await mirrorSchoolVerificationToUser(tx, user.id, values.school);
     });
 

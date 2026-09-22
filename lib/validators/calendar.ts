@@ -34,15 +34,17 @@ export const calendarEventSchema = z
     }
     if (value.repeat !== "NONE") {
       const repeatUntil = value.repeatUntil ? new Date(value.repeatUntil) : null;
-      if (!repeatUntil || Number.isNaN(repeatUntil.getTime())) {
+      // Empty means a series without an end, matching RFC 5545 and the native
+      // calendar platforms. Only validate the boundary when one was supplied.
+      if (repeatUntil && Number.isNaN(repeatUntil.getTime())) {
         ctx.addIssue({
           code: "custom",
           path: ["repeatUntil"],
-          message: "Choose when the repeating event should end.",
+          message: "Choose a valid repeat end.",
         });
         return;
       }
-      if (repeatUntil < start) {
+      if (repeatUntil && repeatUntil < start) {
         ctx.addIssue({
           code: "custom",
           path: ["repeatUntil"],

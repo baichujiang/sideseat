@@ -1,11 +1,10 @@
 import { randomBytes } from "crypto";
 
-import { del, put } from "@vercel/blob";
+import { put } from "@vercel/blob";
 
 import { requireUser } from "@/lib/auth/session";
 import {
   USER_LIFE_PHOTO_MAX,
-  isTrustedUserLifePhotoBlobUrl,
   userLifePhotoBlobPrefix,
 } from "@/lib/constants/user-life-photo-media";
 import { prisma } from "@/lib/db/prisma";

@@ -122,11 +122,6 @@ export async function destroySession() {
 
 export const getSessionUser = cache(async function getSessionUser() {
   try {
-    const fromCookie = await getUserFromRefreshCookie();
-    if (fromCookie) {
-      return fromCookie;
-    }
-
     const headerList = await headers();
     const auth = headerList.get("authorization");
     if (auth?.startsWith("Bearer ")) {
@@ -137,6 +132,14 @@ export const getSessionUser = cache(async function getSessionUser() {
           return user;
         }
       }
+      // An explicit bearer credential is authoritative. Never silently fall
+      // back to a cookie from another account when the token is invalid.
+      return null;
+    }
+
+    const fromCookie = await getUserFromRefreshCookie();
+    if (fromCookie) {
+      return fromCookie;
     }
 
     return null;

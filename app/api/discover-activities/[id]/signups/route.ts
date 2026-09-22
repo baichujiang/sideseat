@@ -1,5 +1,3 @@
-import { DiscoverActivitySignupStatus } from "@prisma/client";
-
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import {
@@ -7,120 +5,47 @@ import {
   discoverActivityErrorStatus,
 } from "@/lib/discover/discover-activity-api-messages";
 import {
-  canCancelSignup,
-  canSignup,
-  nextStatusAfterCancel,
-  nextStatusAfterSignup,
-} from "@/lib/discover/discover-activity-state";
-import {
-  discoverActivityForFeedInclude,
-  prismaDiscoverActivityToRow,
-} from "@/lib/discover/prisma-discover-activity-for-discover";
-import { isBlockedBetween, viewerFromUser } from "@/lib/discover/discover-activity-server";
+  DiscoverActivitySignupError,
+  setDiscoverActivitySignup,
+} from "@/lib/discover/discover-activity-signup-service";
 import { error, ok } from "@/lib/http";
+
+async function requireUser() {
+  const user = await getSessionUser();
+  if (!user) return { ok: false as const, response: error("Sign in to continue.", 401, "AUTH_REQUIRED") };
+  if (user.isGuest || !user.onboardingComplete) {
+    return {
+      ok: false as const,
+      response: error("Complete your profile to continue.", 403, "ONBOARDING_REQUIRED"),
+    };
+  }
+  return { ok: true as const, user };
+}
+
+function signupError(cause: DiscoverActivitySignupError) {
+  if (cause.code === "NOT_FOUND") return error("Activity not found.", 404);
+  return error(
+    discoverActivityErrorMessage(cause.code),
+    discoverActivityErrorStatus(cause.code),
+    cause.code,
+  );
+}
 
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id: activityId } = await params;
-  const user = await getSessionUser();
-  const viewer = viewerFromUser(user);
-
+  const auth = await requireUser();
+  if (!auth.ok) return auth.response;
+  const { id } = await params;
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      await tx.$executeRaw`SELECT id FROM "DiscoverActivity" WHERE id = ${activityId} FOR UPDATE`;
-
-      const activity = await tx.discoverActivity.findUnique({
-        where: { id: activityId },
-        include: {
-          signups: { select: { userId: true, status: true } },
-          _count: {
-            select: { signups: { where: { status: DiscoverActivitySignupStatus.GOING } } },
-          },
-        },
-      });
-
-      if (!activity) return { kind: "not_found" as const };
-
-      const blocked = user
-        ? await isBlockedBetween(user.id, activity.organizerId)
-        : false;
-      const signupCtx = {
-        ...activity,
-        goingCount: activity._count.signups,
-        viewerSignupStatus:
-          activity.signups.find((s) => s.userId === user?.id)?.status ?? null,
-      };
-
-      const check = canSignup(
-        { ...viewer, blockedWithOrganizer: blocked },
-        signupCtx,
-        new Date(),
-      );
-
-      if (!check.ok) {
-        if (check.code === "ALREADY_GOING") {
-          const fresh = await tx.discoverActivity.findUnique({
-            where: { id: activityId },
-            include: discoverActivityForFeedInclude,
-          });
-          return { kind: "ok" as const, activity: fresh, status: 200 };
-        }
-        return { kind: "error" as const, code: check.code };
-      }
-
-      if (!user) return { kind: "error" as const, code: "AUTH_REQUIRED" as const };
-
-      await tx.discoverActivitySignup.upsert({
-        where: { activityId_userId: { activityId, userId: user.id } },
-        create: {
-          activityId,
-          userId: user.id,
-          status: DiscoverActivitySignupStatus.GOING,
-        },
-        update: {
-          status: DiscoverActivitySignupStatus.GOING,
-          canceledAt: null,
-        },
-      });
-
-      const goingCount = await tx.discoverActivitySignup.count({
-        where: { activityId, status: DiscoverActivitySignupStatus.GOING },
-      });
-
-      const nextStatus = nextStatusAfterSignup(activity.status, goingCount, activity.capacity);
-      await tx.discoverActivity.update({
-        where: { id: activityId },
-        data: { status: nextStatus },
-      });
-
-      const fresh = await tx.discoverActivity.findUnique({
-        where: { id: activityId },
-        include: discoverActivityForFeedInclude,
-      });
-
-      return { kind: "ok" as const, activity: fresh, status: 201 };
-    });
-
-    if (result.kind === "not_found") {
-      return error("Activity not found.", 404);
-    }
-    if (result.kind === "error") {
-      return error(
-        discoverActivityErrorMessage(result.code),
-        discoverActivityErrorStatus(result.code),
-        result.code,
-      );
-    }
-    if (!result.activity || !user) {
-      return error("Activity not found.", 404);
-    }
-
-    const row = prismaDiscoverActivityToRow(result.activity, user.id, new Date());
-    return ok({ activity: row }, { status: result.status });
-  } catch (err) {
-    console.error("POST signups", err);
+    const result = await prisma.$transaction((tx) =>
+      setDiscoverActivitySignup(auth.user, id, true, tx),
+    );
+    return ok({ activity: result.activity }, { status: result.changed ? 201 : 200 });
+  } catch (cause) {
+    if (cause instanceof DiscoverActivitySignupError) return signupError(cause);
+    console.error("POST signups", cause);
     return error("Unable to sign up.", 500);
   }
 }
@@ -129,81 +54,18 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id: activityId } = await params;
-  const user = await getSessionUser();
-  const viewer = viewerFromUser(user);
-
+  const auth = await requireUser();
+  if (!auth.ok) return auth.response;
+  const { id } = await params;
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      await tx.$executeRaw`SELECT id FROM "DiscoverActivity" WHERE id = ${activityId} FOR UPDATE`;
-
-      const activity = await tx.discoverActivity.findUnique({
-        where: { id: activityId },
-        include: {
-          signups: { where: { userId: user?.id ?? "" }, select: { status: true } },
-        },
-      });
-
-      if (!activity) return { kind: "not_found" as const };
-
-      const viewerSignupStatus = activity.signups[0]?.status ?? null;
-      const cancelCheck = canCancelSignup(viewer, viewerSignupStatus);
-      if (!cancelCheck.ok) {
-        if (cancelCheck.code === "NOT_GOING") {
-          return { kind: "noop" as const };
-        }
-        return { kind: "error" as const, code: cancelCheck.code };
-      }
-
-      if (!user) return { kind: "error" as const, code: "AUTH_REQUIRED" as const };
-
-      await tx.discoverActivitySignup.update({
-        where: { activityId_userId: { activityId, userId: user.id } },
-        data: {
-          status: DiscoverActivitySignupStatus.CANCELED,
-          canceledAt: new Date(),
-        },
-      });
-
-      const goingCount = await tx.discoverActivitySignup.count({
-        where: { activityId, status: DiscoverActivitySignupStatus.GOING },
-      });
-
-      const nextStatus = nextStatusAfterCancel(activity.status, goingCount, activity.capacity);
-      await tx.discoverActivity.update({
-        where: { id: activityId },
-        data: { status: nextStatus },
-      });
-
-      const fresh = await tx.discoverActivity.findUnique({
-        where: { id: activityId },
-        include: discoverActivityForFeedInclude,
-      });
-
-      return { kind: "ok" as const, activity: fresh };
-    });
-
-    if (result.kind === "not_found") {
-      return error("Activity not found.", 404);
-    }
-    if (result.kind === "noop") {
-      return new Response(null, { status: 204 });
-    }
-    if (result.kind === "error") {
-      return error(
-        discoverActivityErrorMessage(result.code),
-        discoverActivityErrorStatus(result.code),
-        result.code,
-      );
-    }
-    if (!result.activity || !user) {
-      return error("Activity not found.", 404);
-    }
-
-    const row = prismaDiscoverActivityToRow(result.activity, user.id, new Date());
-    return ok({ activity: row });
-  } catch (err) {
-    console.error("DELETE signups", err);
+    const result = await prisma.$transaction((tx) =>
+      setDiscoverActivitySignup(auth.user, id, false, tx),
+    );
+    if (!result.changed) return new Response(null, { status: 204 });
+    return ok({ activity: result.activity });
+  } catch (cause) {
+    if (cause instanceof DiscoverActivitySignupError) return signupError(cause);
+    console.error("DELETE signups", cause);
     return error("Unable to cancel sign-up.", 500);
   }
 }

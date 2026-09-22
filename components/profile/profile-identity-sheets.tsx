@@ -83,8 +83,6 @@ export function ProfileIdentitySheets({
   sheetProfileFormKey,
   belowDisplayName,
   discoverCity,
-  /** Public username, also usable for sign-in. */
-  loginUsername,
 }: {
   initialNickname: string | null;
   initialBio: string | null;
@@ -98,7 +96,6 @@ export function ProfileIdentitySheets({
   /** Me /profile summary only — e.g. private self-chat title under the username. */
   belowDisplayName?: ReactNode;
   discoverCity?: DiscoverCityNameKey;
-  loginUsername?: string | null;
 }) {
   const t = useAppMessages().meIdentity;
   const crop = useAppMessages().meAvatarCrop;

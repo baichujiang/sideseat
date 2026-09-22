@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { createHash } from "crypto";
 import { StudentVerificationStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
+import { deleteVerificationProof } from "@/lib/media/verification-proof-storage";
 import { mirrorSchoolVerificationToUser, upsertSchoolVerificationState } from "@/lib/verification/school-state";
 
 export async function GET(request: Request) {
@@ -12,22 +14,51 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/profile?verification=invalid", request.url));
   }
 
-  const verification = await prisma.schoolEmailVerification.findUnique({
+  const tokenHash = createHash("sha256").update(token).digest("hex");
+  let verification = await prisma.schoolEmailVerification.findUnique({
     where: {
-      token,
+      token: tokenHash,
+    },
+    include: {
+      user: {
+        select: { school: true },
+      },
     },
   });
+
+  // Keep already-issued development links working across this security upgrade.
+  if (!verification && process.env.NODE_ENV !== "production") {
+    verification = await prisma.schoolEmailVerification.findUnique({
+      where: { token },
+      include: {
+        user: {
+          select: { school: true },
+        },
+      },
+    });
+  }
 
   if (!verification || verification.status !== "PENDING" || verification.expiresAt < new Date()) {
     return NextResponse.redirect(new URL("/profile?verification=expired", request.url));
   }
+
+  const verifiedAt = new Date();
+  const existingState = await prisma.userSchoolVerification.findUnique({
+    where: {
+      userId_school: {
+        userId: verification.userId,
+        school: verification.school,
+      },
+    },
+    select: { manualReviewProofUrl: true },
+  });
 
   await prisma.$transaction(async (tx) => {
     await tx.schoolEmailVerification.update({
       where: { id: verification.id },
       data: {
         status: "VERIFIED",
-        verifiedAt: new Date(),
+        verifiedAt,
       },
     });
 
@@ -35,21 +66,27 @@ export async function GET(request: Request) {
       email: verification.email,
       verifiedStudent: true,
       studentVerificationStatus: StudentVerificationStatus.VERIFIED,
-      emailVerifiedAt: new Date(),
-      studentVerificationNotes: "Student email verified successfully.",
+      studentVerificationMethod: "SCHOOL_EMAIL",
+      studentVerifiedAt: verifiedAt,
+      emailVerifiedAt: verifiedAt,
+      studentVerificationNotes: "School identity verified by school email.",
       manualReviewProofUrl: null,
       manualReviewProofFilename: null,
       manualReviewRequestedAt: null,
     });
 
-    const verifiedUser = await tx.user.findUnique({
-      where: { id: verification.userId },
-      select: { school: true },
-    });
-    if (verifiedUser?.school === verification.school) {
+    if (verification.user.school === verification.school) {
       await mirrorSchoolVerificationToUser(tx, verification.userId, verification.school);
     }
   });
+
+  if (existingState?.manualReviewProofUrl) {
+    try {
+      await deleteVerificationProof(existingState.manualReviewProofUrl);
+    } catch (cause) {
+      console.error("[verification] failed to delete proof after email verification", cause);
+    }
+  }
 
   return NextResponse.redirect(new URL("/profile?verification=success", request.url));
 }

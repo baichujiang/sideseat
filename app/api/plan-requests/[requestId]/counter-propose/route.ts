@@ -1,6 +1,11 @@
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
+import {
+  counterLegacyPlanRevision,
+  LegacyPlanPolicyUnsupportedError,
+  LegacyPlanTransitionConflictError,
+} from "@/lib/plans/legacy-plan-commitment-compat";
 import { counterProposeSchema } from "@/lib/validators/chat-planning";
 
 export async function POST(
@@ -18,7 +23,17 @@ export async function POST(
         connection: {
           OR: [{ userAId: user.id }, { userBId: user.id }],
           status: "ACTIVE",
+          userA: { moderationBlocks: { none: { isActive: true } } },
+          userB: { moderationBlocks: { none: { isActive: true } } },
         },
+        AND: [
+          {
+            OR: [
+              { commitmentId: null },
+              { commitment: { is: { safetyRestrictedAt: null } } },
+            ],
+          },
+        ],
       },
     });
 
@@ -36,25 +51,25 @@ export async function POST(
     const endTime = new Date(values.endTime);
 
     const result = await prisma.$transaction(async (tx) => {
-      await tx.planRequest.update({
-        where: { id: planRequest.id },
-        data: { status: "COUNTER_PROPOSED" },
-      });
-
-      const counter = await tx.planRequest.create({
-        data: {
-          connectionId: planRequest.connectionId,
-          availabilityShareId: null,
-          counterOfId: planRequest.id,
-          proposerUserId: user.id,
-          receiverUserId: planRequest.proposerUserId,
-          planType: values.planType ?? "CUSTOM",
-          title: values.title.trim(),
-          location: values.location?.trim() || null,
-          message: values.message?.trim() || null,
-          startTime,
-          endTime,
-        },
+      const counter = await counterLegacyPlanRevision(tx, {
+        planRequestId: planRequest.id,
+        createCounter: (inheritance) =>
+          tx.planRequest.create({
+            data: {
+              connectionId: planRequest.connectionId,
+              availabilityShareId: null,
+              counterOfId: planRequest.id,
+              proposerUserId: user.id,
+              receiverUserId: planRequest.proposerUserId,
+              planType: values.planType ?? "CUSTOM",
+              title: values.title.trim(),
+              location: values.location?.trim() || null,
+              message: values.message?.trim() || null,
+              startTime,
+              endTime,
+              ...(inheritance ?? {}),
+            },
+          }),
       });
 
       const message = await tx.message.create({
@@ -72,6 +87,12 @@ export async function POST(
 
     return ok(result, { status: 201 });
   } catch (cause) {
+    if (cause instanceof LegacyPlanPolicyUnsupportedError) {
+      return error(cause.message, 409, cause.code);
+    }
+    if (cause instanceof LegacyPlanTransitionConflictError) {
+      return error(cause.message, 409);
+    }
     console.error(cause);
     return error("Unable to suggest another time.");
   }

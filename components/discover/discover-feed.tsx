@@ -1,12 +1,12 @@
 "use client";
 
 import { BuddyRequestCard } from "@/components/discover/buddy-request-card";
-import type { DiscoverPostRow } from "@/lib/discover/discover-post-row";
+import type { DiscoverPostClientRow } from "@/lib/discover/discover-post-row";
 
 export function DiscoverFeed({
   posts,
 }: {
-  posts: DiscoverPostRow[];
+  posts: DiscoverPostClientRow[];
 }) {
   if (posts.length === 0) return null;
 

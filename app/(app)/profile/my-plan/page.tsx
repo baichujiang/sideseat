@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
 import { format, formatDistanceToNowStrict } from "date-fns";
@@ -13,7 +12,6 @@ import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { formatMessage, getMessages } from "@/lib/i18n/messages";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
-import { resolveBackHref } from "@/lib/nav/back";
 import { cn } from "@/lib/utils";
 
 export default async function ProfileMyPlanPage({
@@ -25,7 +23,6 @@ export default async function ProfileMyPlanPage({
   const locale = await getServerAppLocale();
   const ui = getMessages(locale);
   const query = (await searchParams) ?? {};
-  const backHref = resolveBackHref(query.returnTo, "/profile") as Route;
   const planPageReturnTo = encodeURIComponent(
     query.returnTo
       ? `/profile/my-plan?returnTo=${encodeURIComponent(query.returnTo)}`

@@ -46,6 +46,12 @@ export function ScheduleShareOwnerInlineControls({
   onUsageLimitChange,
   expiresInDays,
   onExpiresInDaysChange,
+  availabilityStartMinutes,
+  onAvailabilityStartMinutesChange,
+  availabilityEndMinutes,
+  onAvailabilityEndMinutesChange,
+  allowGuestProposals,
+  onAllowGuestProposalsChange,
 }: {
   categories: readonly ShareRevealCategoryInput[];
   revealedCategoryIds: string[];
@@ -54,12 +60,71 @@ export function ScheduleShareOwnerInlineControls({
   onUsageLimitChange: (next: ScheduleShareUsageLimitInput) => void;
   expiresInDays: 7 | 14 | 30;
   onExpiresInDaysChange: (next: 7 | 14 | 30) => void;
+  availabilityStartMinutes: number;
+  onAvailabilityStartMinutesChange: (next: number) => void;
+  availabilityEndMinutes: number;
+  onAvailabilityEndMinutesChange: (next: number) => void;
+  allowGuestProposals: boolean;
+  onAllowGuestProposalsChange: (next: boolean) => void;
 }) {
   const { messages: ui } = useLocaleContext();
   const s = ui.scheduleShare;
 
   return (
     <div className="shrink-0 space-y-2.5 pb-1">
+      <div className="space-y-1.5">
+        <p className="text-[12px] font-semibold text-foreground">{s.availabilityHoursLabel}</p>
+        <div className="flex items-center gap-2">
+          <select
+            value={availabilityStartMinutes}
+            onChange={(event) => {
+              const next = Number(event.target.value);
+              onAvailabilityStartMinutesChange(next);
+              if (availabilityEndMinutes <= next) {
+                onAvailabilityEndMinutesChange(Math.min(next + 60, 24 * 60));
+              }
+            }}
+            aria-label={s.availabilityStartLabel}
+            className="h-10 min-w-0 flex-1 rounded-xl border border-input bg-background px-3 text-[13px] font-medium text-foreground"
+          >
+            {Array.from({ length: 48 }, (_, index) => index * 30)
+              .filter((value) => value < availabilityEndMinutes)
+              .map((value) => (
+                <option key={value} value={value}>{formatMinuteOfDay(value)}</option>
+              ))}
+          </select>
+          <span className="text-muted-foreground">–</span>
+          <select
+            value={availabilityEndMinutes}
+            onChange={(event) => onAvailabilityEndMinutesChange(Number(event.target.value))}
+            aria-label={s.availabilityEndLabel}
+            className="h-10 min-w-0 flex-1 rounded-xl border border-input bg-background px-3 text-[13px] font-medium text-foreground"
+          >
+            {Array.from({ length: 48 }, (_, index) => (index + 1) * 30)
+              .filter((value) => value > availabilityStartMinutes)
+              .map((value) => (
+                <option key={value} value={value}>{formatMinuteOfDay(value)}</option>
+              ))}
+          </select>
+        </div>
+        <p className="text-[11px] leading-snug text-muted-foreground">{s.availabilityHoursHint}</p>
+      </div>
+
+      <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-border/70 bg-background px-3 py-2">
+        <input
+          type="checkbox"
+          checked={allowGuestProposals}
+          onChange={(event) => onAllowGuestProposalsChange(event.target.checked)}
+          className="h-4 w-4 rounded border-input accent-primary"
+        />
+        <span className="min-w-0">
+          <span className="block text-[12px] font-semibold text-foreground">{s.allowProposals}</span>
+          <span className="block text-[11px] leading-snug text-muted-foreground">
+            {s.allowProposalsHelper}
+          </span>
+        </span>
+      </label>
+
       <div className="space-y-1.5">
         <p className="text-[12px] font-semibold text-foreground">{s.revealSectionTitle}</p>
         <ScheduleShareRevealCategoryChips
@@ -113,4 +178,11 @@ export function ScheduleShareOwnerInlineControls({
       </div>
     </div>
   );
+}
+
+function formatMinuteOfDay(value: number): string {
+  if (value === 24 * 60) return "24:00";
+  const hours = String(Math.floor(value / 60)).padStart(2, "0");
+  const minutes = String(value % 60).padStart(2, "0");
+  return `${hours}:${minutes}`;
 }

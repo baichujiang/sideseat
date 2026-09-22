@@ -48,6 +48,8 @@ function languageTagOrderIndex(tag: LanguageTag): number {
 const settingsControlClass = profileSettingsControlClassName;
 
 const settingsSelectClass = cn(settingsControlClass, "cursor-pointer appearance-none pr-10");
+const currentYear = new Date().getFullYear();
+const graduationYears = Array.from({ length: 82 }, (_, index) => currentYear + 1 - index);
 
 export function ProfileForm({
   initialValues,
@@ -159,8 +161,10 @@ export function ProfileForm({
         : submitLabel;
 
   const degreeLevel = watch("degreeLevel");
+  const studentStatus = watch("studentStatus") ?? "CURRENT_STUDENT";
   const semester = watch("semester");
-  const selectedLanguages = watch("languages") ?? [];
+  const watchedLanguages = watch("languages");
+  const selectedLanguages = useMemo(() => watchedLanguages ?? [], [watchedLanguages]);
   const selectedTags = new Set(selectedLanguages.map((l) => l.tag));
   const unselectedLanguageOptions = LANGUAGE_TAG_OPTIONS.filter((o) => !selectedTags.has(o.value));
   const sortedSelectedLanguages = useMemo(
@@ -316,6 +320,22 @@ export function ProfileForm({
             <FormMessage message={errors.school?.message} />
           </div>
           <div className="flex flex-col gap-1">
+            <FieldLabel>{pf.labelStudentStatus}</FieldLabel>
+            <div className="relative">
+              <select className={settingsSelectClass} {...register("studentStatus")}>
+                <option value="CURRENT_STUDENT">{pf.statusCurrentStudent}</option>
+                <option value="EXCHANGE_STUDENT">{pf.statusExchangeStudent}</option>
+                <option value="ALUMNI">{pf.statusAlumni}</option>
+              </select>
+              <ChevronDown
+                className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-classmates-hint dark:text-zinc-500"
+                strokeWidth={2}
+                aria-hidden
+              />
+            </div>
+            <FormMessage message={errors.studentStatus?.message} />
+          </div>
+          <div className="flex flex-col gap-1">
             <FieldLabel>{pf.labelDegree}</FieldLabel>
             <div className="relative">
               <select className={settingsSelectClass} {...register("degreeLevel")}>
@@ -357,22 +377,37 @@ export function ProfileForm({
             <FormMessage message={errors.major?.message} />
           </div>
           <div className="flex flex-col gap-1">
-            <FieldLabel>{pf.labelSemester}</FieldLabel>
+            <FieldLabel>
+              {studentStatus === "ALUMNI" ? pf.labelGraduationYear : pf.labelSemester}
+            </FieldLabel>
             <div className="relative">
-              <select className={settingsSelectClass} {...register("semester", { valueAsNumber: true })}>
-                {semesterChoices.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
+              {studentStatus === "ALUMNI" ? (
+                <select
+                  className={settingsSelectClass}
+                  {...register("graduationYear", { valueAsNumber: true })}
+                >
+                  {graduationYears.map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              ) : (
+                <select className={settingsSelectClass} {...register("semester", { valueAsNumber: true })}>
+                  {semesterChoices.map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+              )}
               <ChevronDown
                 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-classmates-hint dark:text-zinc-500"
                 strokeWidth={2}
                 aria-hidden
               />
             </div>
-            <FormMessage message={errors.semester?.message} />
+            <FormMessage
+              message={studentStatus === "ALUMNI" ? errors.graduationYear?.message : errors.semester?.message}
+            />
           </div>
         </div>
         {/* Gender feature is temporarily disabled in UI; keep current value unchanged. */}

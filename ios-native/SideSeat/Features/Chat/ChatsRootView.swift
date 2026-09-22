@@ -1,0 +1,278 @@
+import SwiftUI
+
+enum ChatCreationSymbol {
+    static let addFriend = "person.crop.circle.badge.plus"
+    static let newGroup = "person.2.badge.plus"
+}
+
+struct ChatsRootView: View {
+    @Environment(SessionStore.self) private var session
+    @Environment(RouterPath.self) private var router
+    @Environment(DeepLinkRouter.self) private var deepLinkRouter
+    @Bindable var store: InboxStore
+
+    var body: some View {
+        Group {
+            if store.payload != nil {
+                List {
+                    if let issue = store.issue {
+                        Section {
+                            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                                Text(issue)
+                                    .font(.footnote)
+                                    .foregroundStyle(SideSeatTheme.danger)
+                                SSSecondaryButton(
+                                    title: AppLocalization.string("Try again"),
+                                    expands: false,
+                                    accessibilityID: "inbox-retry"
+                                ) {
+                                    Task { await loadInboxAndPrefetch() }
+                                }
+                                .disabled(store.isLoading)
+                            }
+                            .accessibilityElement(children: .contain)
+                            .accessibilityIdentifier("inbox-issue-banner")
+                        }
+                    }
+                    if store.visibleConversations.isEmpty {
+                        SSEmptyState(
+                            title: "No conversations",
+                            systemImage: "bubble.left.and.bubble.right",
+                            description: "Conversations appear here after you both choose to do something together.",
+                            actionTitle: AppLocalization.string("Open Together"),
+                            actionAccessibilityID: "inbox-open-together"
+                        ) {
+                            deepLinkRouter.handleAppPath("/together")
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 260)
+                        .ssListPageStateRow()
+                        .accessibilityElement(children: .contain)
+                        .accessibilityIdentifier("inbox-empty")
+                    } else if store.hasNoSearchMatches {
+                        Section {
+                            SSEmptyState(
+                                title: "No matches",
+                                systemImage: "magnifyingglass",
+                                description: "Try a different name or message.",
+                                actionTitle: AppLocalization.string("Clear search"),
+                                actionAccessibilityID: "inbox-clear-search"
+                            ) { store.searchQuery = "" }
+                            .frame(maxWidth: .infinity, minHeight: 260)
+                            .accessibilityElement(children: .contain)
+                            .accessibilityIdentifier("inbox-empty-no-matches")
+                        }
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                    } else {
+                        if !store.pinned.isEmpty {
+                            Section {
+                                ForEach(store.pinned) { row in
+                                    inboxRow(row)
+                                }
+                            } header: {
+                                inboxSectionHeader("Pinned")
+                            }
+                        }
+                        Section {
+                            ForEach(store.recent) { row in
+                                inboxRow(row)
+                            }
+                        } header: {
+                            if !store.pinned.isEmpty {
+                                inboxSectionHeader("Recent")
+                            }
+                        }
+                    }
+                }
+                .listStyle(.plain)
+                .listSectionSpacing(.compact)
+                .environment(\.defaultMinListRowHeight, 60)
+                .contentMargins(.bottom, 88, for: .scrollContent)
+                .scrollDismissesKeyboard(.interactively)
+                .accessibilityIdentifier("inbox-list")
+            } else if let issue = store.issue {
+                ContentUnavailableView {
+                    Label("Messages unavailable", systemImage: "wifi.exclamationmark")
+                } description: {
+                    Text(issue)
+                } actions: {
+                    SSPrimaryButton(
+                        title: AppLocalization.string("Try again"),
+                        fill: .product,
+                        height: 44
+                    ) {
+                        Task { await loadInboxAndPrefetch() }
+                    }
+                    .frame(maxWidth: 220)
+                }
+            } else {
+                SSLoadingState("Loading messages")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
+        .ssRootNavigationTitle("Messages")
+        .searchable(
+            text: $store.searchQuery,
+            placement: .navigationBarDrawer(displayMode: .always),
+            prompt: "Search messages"
+        )
+        .ssRootSearchSurface()
+        .refreshable { await loadInboxAndPrefetch() }
+        .onAppear {
+            Task { await loadInboxAndPrefetch() }
+        }
+        .onChange(of: router.path.count) { previous, current in
+            if previous > 0, current == 0 {
+                Task { await loadInboxAndPrefetch() }
+            }
+        }
+    }
+
+    private func inboxSectionHeader(_ title: LocalizedStringKey) -> some View {
+        Text(title)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            .textCase(nil)
+    }
+
+    private func loadInboxAndPrefetch() async {
+        await store.load(using: session)
+        guard let payload = store.payload else { return }
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            return
+        }
+        #endif
+        Task {
+            await DirectChatPreloader.primeAndPrefetch(
+                payload: payload,
+                using: session
+            )
+        }
+    }
+
+    private func inboxRow(_ row: NativeInboxConversation) -> some View {
+        Button {
+            if let route = row.route {
+                if row.unreadCount > 0 {
+                    ChatUnreadLaunch.stage(conversationID: row.id, unreadCount: row.unreadCount)
+                    store.clearUnread(conversationID: row.id)
+                }
+                router.navigate(to: route)
+            }
+        } label: {
+            HStack(spacing: 12) {
+                if row.usesCompositeAvatar {
+                    GroupCompositeAvatar(
+                        members: row.compositeAvatarMembers,
+                        size: 44
+                    )
+                } else {
+                    InitialAvatar(
+                        name: row.displayName,
+                        url: row.avatarUrl,
+                        size: 44
+                    )
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack {
+                        Text(row.displayName)
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                        Spacer(minLength: 8)
+                        if let date = Date.sideSeatInboxISO8601(row.lastActivityAt) {
+                            Text(InboxActivityFormatting.label(for: date))
+                                .font(.caption)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                .accessibilityIdentifier("inbox-date-visual-\(row.id)")
+                        }
+                    }
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(row.listPreview(currentUserID: session.currentUser?.id))
+                            .font(.subheadline)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .lineLimit(2)
+                            .accessibilityIdentifier("inbox-preview-visual-\(row.id)")
+                        Spacer(minLength: 8)
+                        if row.unreadCount > 0 {
+                            Text(row.unreadCount > 99 ? "99+" : "\(row.unreadCount)")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(SideSeatTheme.onAttention)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Capsule().fill(SideSeatTheme.attention))
+                                .accessibilityLabel(AppLocalization.string("\(row.unreadCount) unread"))
+                        }
+                    }
+                }
+            }
+            .padding(.vertical, 2)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(SSPressButtonStyle())
+        .disabled(row.route == nil)
+        .opacity(row.route == nil ? 0.55 : 1)
+        .accessibilityIdentifier("inbox-row-\(row.id)")
+        .ssLongPressActionMenu(
+            isEnabled: row.route != nil,
+            title: row.displayName
+        ) {
+            var actions = [
+                SSLongPressAction(
+                    id: "inbox-row-\(row.id)-pin-menu",
+                    title: row.pinned
+                        ? AppLocalization.string("Unpin")
+                        : AppLocalization.string("Pin"),
+                    systemImage: row.pinned ? "pin.slash.fill" : "pin.fill",
+                    perform: {
+                        Task { await store.togglePin(row, using: session) }
+                    }
+                ),
+            ]
+            if row.supportsHide {
+                actions.append(
+                    SSLongPressAction(
+                        id: "inbox-row-\(row.id)-hide-menu",
+                        title: AppLocalization.string("Hide"),
+                        systemImage: "eye.slash",
+                        role: .destructive,
+                        perform: {
+                            Task { await store.hide(row, using: session) }
+                        }
+                    )
+                )
+            }
+            return actions
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            Button {
+                Task { await store.togglePin(row, using: session) }
+            } label: {
+                Label(
+                    row.pinned ? AppLocalization.string("Unpin") : AppLocalization.string("Pin"),
+                    systemImage: row.pinned ? "pin.slash.fill" : "pin.fill"
+                )
+            }
+            .tint(SideSeatTheme.warning)
+            .accessibilityIdentifier("inbox-row-\(row.id)-pin")
+
+            if row.supportsHide {
+                Button(role: .destructive) {
+                    Task { await store.hide(row, using: session) }
+                } label: {
+                    Label("Hide", systemImage: "eye.slash")
+                }
+                .accessibilityIdentifier("inbox-row-\(row.id)-hide")
+            }
+        }
+    }
+}
+
+private extension Date {
+    static func sideSeatInboxISO8601(_ value: String) -> Date? {
+        let fractional = ISO8601DateFormatter()
+        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return fractional.date(from: value) ?? ISO8601DateFormatter().date(from: value)
+    }
+}

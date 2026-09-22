@@ -3,14 +3,16 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { format } from "date-fns";
-import { Clock3, MapPin, Repeat2, X } from "lucide-react";
+import { enUS, zhCN } from "date-fns/locale";
+import { Clock3, Loader2, MapPin, Repeat2, X } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { Button } from "@/components/ui/button";
 import { useGhostClickGuard } from "@/lib/ui/suppress-ghost-click";
 import { isIcsFeedStudyEntryId } from "@/lib/calendar/ics-feed-event-id";
-import { useAppMessages } from "@/hooks/use-app-locale";
+import { formatMessage } from "@/lib/i18n/messages";
+import { useAppLocale, useAppMessages } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
 
 import type { ScheduleDetailItem } from "@/components/home/schedule-item-detail-sheet";
@@ -24,6 +26,10 @@ export function ScheduleItemDetailPopover({
   onClose,
   onEdit,
   onDelete,
+  planInvitePeer,
+  onSendPlanInvite,
+  planInviteBusy = false,
+  planInviteError,
 }: {
   item: ScheduleDetailItem | null;
   anchorEl: HTMLElement | null;
@@ -33,15 +39,22 @@ export function ScheduleItemDetailPopover({
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  planInvitePeer?: { userId: string; name: string } | null;
+  onSendPlanInvite?: () => void;
+  planInviteBusy?: boolean;
+  planInviteError?: string | null;
 }) {
+  const { locale } = useAppLocale();
   const { schedule: s } = useAppMessages();
+  const dfLocale = locale === "zh-CN" ? zhCN : enUS;
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const guardAction = useGhostClickGuard(open && item ? item.id : null);
+  const itemId = item?.id;
 
   useLayoutEffect(() => {
-    if (!open || !anchorEl || !item) {
+    if (!open || !anchorEl || !itemId) {
       setPos(null);
       return;
     }
@@ -93,7 +106,7 @@ export function ScheduleItemDetailPopover({
       window.removeEventListener("resize", onScrollOrResize);
       if (raf != null) cancelAnimationFrame(raf);
     };
-  }, [open, anchorEl, item?.id]);
+  }, [open, anchorEl, itemId]);
 
   useEffect(() => {
     if (!open) return;
@@ -123,7 +136,10 @@ export function ScheduleItemDetailPopover({
 
   const start = new Date(displayItem.startISO);
   const end = new Date(displayItem.endISO);
-  const timeLabel = `${format(start, "EEE, d MMM · HH:mm")} – ${format(end, "HH:mm")}`;
+  const timeLabel =
+    locale === "zh-CN"
+      ? `${format(start, "M月d日 EEE · HH:mm", { locale: dfLocale })} – ${format(end, "HH:mm")}`
+      : `${format(start, "EEE, d MMM · HH:mm", { locale: dfLocale })} – ${format(end, "HH:mm")}`;
   const canEdit = displayItem.source === "calendar" && !isIcsFeedStudyEntryId(displayItem.id);
   const fromSubscribedCalendar = isIcsFeedStudyEntryId(displayItem.id);
   const locationLine = displayItem.location?.trim() || null;
@@ -230,6 +246,30 @@ export function ScheduleItemDetailPopover({
             >
               {s.viewDiscoverActivity}
             </Link>
+          ) : null}
+
+          {planInvitePeer && onSendPlanInvite ? (
+            <div className="space-y-1.5 border-t border-border/50 pt-2.5">
+              <Button
+                type="button"
+                variant="secondary"
+                className="h-9 w-full rounded-full text-[12px] font-semibold"
+                onClick={guardAction(onSendPlanInvite)}
+                disabled={planInviteBusy || deleting}
+              >
+                {planInviteBusy ? (
+                  <>
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" aria-hidden />
+                    {s.sendPlanInviteOpening}
+                  </>
+                ) : (
+                  formatMessage(s.sendPlanInviteTo, { name: planInvitePeer.name })
+                )}
+              </Button>
+              {planInviteError ? (
+                <p className="text-[11px] leading-snug text-destructive">{planInviteError}</p>
+              ) : null}
+            </div>
           ) : null}
         </div>
 

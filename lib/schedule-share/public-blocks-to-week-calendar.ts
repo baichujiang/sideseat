@@ -6,7 +6,6 @@ import type { WeekCalendarBlock } from "@/components/calendar/week-calendar";
 import type { ScheduleShareProposalSelection } from "@/lib/schedule-share/proposal-selection";
 import {
   berlinClockMinutes,
-  berlinEndOfWeek,
   berlinStartOfWeek,
   berlinWeekdayFromInstant,
   scheduleDateKeyInBerlin,

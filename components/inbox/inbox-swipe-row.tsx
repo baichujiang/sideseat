@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { useCallback, useRef, useState } from "react";
 
+import { useLocaleContext } from "@/components/i18n/locale-provider";
 import { cn } from "@/lib/utils";
 
 const ACTION_WIDTH = 76;
@@ -28,6 +29,9 @@ export function InboxSwipeRow({
   pinned?: boolean;
   children: React.ReactNode;
 }) {
+  const { messages } = useLocaleContext();
+  const common = messages.common;
+  const inbox = messages.inbox;
   const [offset, setOffset] = useState(0);
   const startX = useRef(0);
   const startY = useRef(0);
@@ -112,7 +116,7 @@ export function InboxSwipeRow({
             type="submit"
             className="flex flex-1 items-center justify-center bg-[#D97706] px-2 text-center text-[11px] font-semibold uppercase tracking-wide text-white transition-colors hover:bg-[#B45309]"
           >
-            {pinned ? "Unpin" : "Pin"}
+            {pinned ? common.unpin : common.pin}
           </button>
         </form>
         <form action={removeAction} method="post" className="flex w-[76px] shrink-0">
@@ -121,14 +125,14 @@ export function InboxSwipeRow({
             type="submit"
             title={
               swipeTarget.type === "course"
-                ? "Remove from Chats list only — you stay enrolled in the course."
+                ? inbox.swipeHideCourseTitle
                 : swipeTarget.type === "group"
-                  ? "Remove from Chats list only — you stay in the group."
+                  ? inbox.swipeHideGroupTitle
                   : undefined
             }
             className="flex flex-1 items-center justify-center bg-[#94A3B8] px-2 text-center text-[11px] font-semibold uppercase tracking-wide text-white transition-colors hover:bg-[#64748B]"
           >
-            Delete
+            {common.delete}
           </button>
         </form>
       </div>
@@ -164,7 +168,7 @@ export function InboxSwipeRow({
               : "[@media(hover:hover)]:hover:bg-muted/25",
           )}
         >
-          {pinned ? <span className="sr-only">Pinned conversation</span> : null}
+          {pinned ? <span className="sr-only">{inbox.pinnedConversationAria}</span> : null}
           {children}
         </Link>
       </div>

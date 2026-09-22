@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { error, ok } from "@/lib/http";
 import { loadHomeSchedulePayload } from "@/lib/home/load-home-schedule-payload";
 
-function parseWindowParam(value: string | null, label: string): Date | null {
+function parseWindowParam(value: string | null): Date | null {
   if (!value?.trim()) return null;
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return null;
@@ -16,8 +16,8 @@ export async function GET(request: Request) {
     if (!auth.ok) return error(auth.error, auth.status);
 
     const { searchParams } = new URL(request.url);
-    const windowStart = parseWindowParam(searchParams.get("windowStart"), "windowStart");
-    const windowEnd = parseWindowParam(searchParams.get("windowEnd"), "windowEnd");
+    const windowStart = parseWindowParam(searchParams.get("windowStart"));
+    const windowEnd = parseWindowParam(searchParams.get("windowEnd"));
     if (!windowStart || !windowEnd) {
       return error("windowStart and windowEnd query params are required (ISO dates).");
     }

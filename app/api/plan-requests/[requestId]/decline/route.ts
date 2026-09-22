@@ -1,6 +1,11 @@
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok } from "@/lib/http";
+import {
+  declineLegacyPlanRevision,
+  LegacyPlanPolicyUnsupportedError,
+  LegacyPlanTransitionConflictError,
+} from "@/lib/plans/legacy-plan-commitment-compat";
 import { syncScheduleShareGuestProposalStatus } from "@/lib/schedule-share/create-plan-from-guest-proposal";
 
 export async function POST(
@@ -17,7 +22,17 @@ export async function POST(
         connection: {
           OR: [{ userAId: user.id }, { userBId: user.id }],
           status: "ACTIVE",
+          userA: { moderationBlocks: { none: { isActive: true } } },
+          userB: { moderationBlocks: { none: { isActive: true } } },
         },
+        AND: [
+          {
+            OR: [
+              { commitmentId: null },
+              { commitment: { is: { safetyRestrictedAt: null } } },
+            ],
+          },
+        ],
       },
     });
 
@@ -32,10 +47,7 @@ export async function POST(
     }
 
     await prisma.$transaction(async (tx) => {
-      await tx.planRequest.update({
-        where: { id: planRequest.id },
-        data: { status: "DECLINED" },
-      });
+      await declineLegacyPlanRevision(tx, planRequest.id);
 
       await syncScheduleShareGuestProposalStatus(
         tx,
@@ -56,6 +68,12 @@ export async function POST(
 
     return ok({ status: "declined" });
   } catch (cause) {
+    if (cause instanceof LegacyPlanPolicyUnsupportedError) {
+      return error(cause.message, 409, cause.code);
+    }
+    if (cause instanceof LegacyPlanTransitionConflictError) {
+      return error(cause.message, 409);
+    }
     console.error(cause);
     return error("Unable to decline plan request.");
   }

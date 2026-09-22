@@ -17,7 +17,7 @@ function deriveLabel(code: string | null | undefined, name: string) {
 }
 
 export function CourseAvatar({
-  id: _courseId,
+  id,
   code,
   name,
   size = 48,
@@ -36,6 +36,7 @@ export function CourseAvatar({
   return (
     <span
       aria-hidden
+      data-course-id={id}
       className={cn(
         "inline-flex shrink-0 items-center justify-center rounded-2xl font-semibold tracking-tight text-white select-none",
         "bg-gradient-to-br from-[#8BB8FF] to-[#6366F1]",

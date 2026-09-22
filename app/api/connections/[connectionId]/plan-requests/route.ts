@@ -3,6 +3,10 @@ import { ConnectionStatus } from "@prisma/client";
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
+import {
+  LegacyPlanTransitionConflictError,
+  lockLegacyPlanConnectionSafety,
+} from "@/lib/plans/legacy-plan-commitment-compat";
 import { planRequestCreateSchema } from "@/lib/validators/chat-planning";
 
 export async function POST(
@@ -18,6 +22,8 @@ export async function POST(
       where: {
         id: connectionId,
         status: ConnectionStatus.ACTIVE,
+        userA: { moderationBlocks: { none: { isActive: true } } },
+        userB: { moderationBlocks: { none: { isActive: true } } },
         OR: [{ userAId: user.id }, { userBId: user.id }],
       },
       select: {
@@ -43,6 +49,11 @@ export async function POST(
     const endTime = new Date(values.endTime);
 
     const result = await prisma.$transaction(async (tx) => {
+      await lockLegacyPlanConnectionSafety(tx, {
+        connectionId,
+        actorId: user.id,
+        expectedPeerId: receiverUserId,
+      });
       const planRequest = await tx.planRequest.create({
         data: {
           connectionId,
@@ -72,6 +83,9 @@ export async function POST(
 
     return ok(result, { status: 201 });
   } catch (cause) {
+    if (cause instanceof LegacyPlanTransitionConflictError) {
+      return error("Connection not found.", 404);
+    }
     console.error(cause);
     return error("Unable to send plan request.");
   }

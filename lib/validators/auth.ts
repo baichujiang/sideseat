@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { schoolDirectory } from "@/lib/constants/schools";
+
 export type LoginUsernameMessages = {
   tooShort: string;
   tooLong: string;
@@ -116,11 +118,48 @@ export function createSignupPhoneSchema(
 export function createSignupSchema(
   usernameMessages: LoginUsernameMessages = LOGIN_USERNAME_MESSAGES_EN,
   passwordMessages: SignupPasswordMessages = SIGNUP_PASSWORD_MESSAGES_EN,
+  displayNameMessages: SignupDisplayNameMessages = SIGNUP_DISPLAY_NAME_MESSAGES_EN,
 ) {
-  return z.object({
-    username: loginUsernameField(usernameMessages),
-    password: z.string().min(8, passwordMessages.tooShort),
-  });
+  return z
+    .object({
+      displayName: signupDisplayNameField(displayNameMessages),
+      username: loginUsernameField(usernameMessages),
+      password: z.string().min(8, passwordMessages.tooShort),
+      school: z.enum(
+        Object.keys(schoolDirectory) as [
+          keyof typeof schoolDirectory,
+          ...(keyof typeof schoolDirectory)[],
+        ],
+      ),
+      studentStatus: z.enum(["CURRENT_STUDENT", "EXCHANGE_STUDENT", "ALUMNI"]),
+      degreeLevel: z.enum(["BACHELOR", "MASTER", "OTHER"]),
+      semester: z.number().int().min(1).max(20).optional(),
+      graduationYear: z
+        .number()
+        .int()
+        .min(new Date().getFullYear() - 80)
+        .max(new Date().getFullYear() + 1)
+        .optional(),
+    })
+    .superRefine((values, context) => {
+      if (values.studentStatus === "ALUMNI") {
+        if (values.graduationYear === undefined) {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["graduationYear"],
+            message: "Enter your graduation year.",
+          });
+        }
+        return;
+      }
+      if (values.semester === undefined) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["semester"],
+          message: "Select your current semester.",
+        });
+      }
+    });
 }
 
 export const signupSchema = createSignupSchema();

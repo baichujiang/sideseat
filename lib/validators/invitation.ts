@@ -19,14 +19,16 @@ export const messageSchema = chatTextMessageSchema;
 const directMessageDiscriminated = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("TEXT"),
-    body: z.string().min(1).max(500),
+    body: z.string().trim().min(1).max(500),
     replyToId: z.string().cuid().optional(),
+    actionContextId: z.string().min(1).max(128).optional(),
   }),
   z.object({
     type: z.literal("IMAGE"),
     imageUrl: z.string().min(1).max(4_000_000),
     body: z.string().max(500).optional(),
     replyToId: z.string().cuid().optional(),
+    actionContextId: z.string().min(1).max(128).optional(),
   }),
   z.object({
     type: z.literal("LOCATION"),
@@ -35,6 +37,7 @@ const directMessageDiscriminated = z.discriminatedUnion("type", [
     locationName: z.string().max(200).optional().or(z.literal("")),
     body: z.string().max(500).optional(),
     replyToId: z.string().cuid().optional(),
+    actionContextId: z.string().min(1).max(128).optional(),
   }),
 ]);
 
@@ -68,6 +71,7 @@ export const startConversationSchema = z.object({
 export const openConversationSchema = z.object({
   peerId: z.string().cuid(),
   courseId: z.string().cuid().optional(),
+  postId: z.string().cuid().optional(),
 });
 
 export const contactExchangeSchema = z.object({
@@ -94,6 +98,14 @@ export const reportSchema = z.object({
   messageId: z.string().cuid().optional(),
   /** Report targets a specific course-room message. */
   courseRoomMessageId: z.string().cuid().optional(),
+  /** Report targets a specific multi-person group-chat message. */
+  groupChatMessageId: z.string().cuid().optional(),
+  /** Report targets a specific Discover buddy post. */
+  classmatePostId: z.string().cuid().optional(),
+  /** Report targets a public question or host answer under a buddy post. */
+  classmatePostCommentId: z.string().cuid().optional(),
+  /** Report targets a public message or organizer reply under an activity. */
+  discoverActivityCommentId: z.string().cuid().optional(),
   reason: z.nativeEnum(ReportReason),
   details: z.string().max(500).optional().or(z.literal("")),
 });

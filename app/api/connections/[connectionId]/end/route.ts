@@ -1,9 +1,9 @@
-import { ConnectionStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { safeReturnPath } from "@/lib/nav/back";
+import { terminalizeConnectionAndDirectV1Contexts } from "@/lib/v2/direct-v1-context-sync";
 
 export async function POST(
   request: Request,
@@ -22,17 +22,15 @@ export async function POST(
     formReturnTo = typeof raw === "string" ? raw : null;
   }
 
-  await prisma.connection.updateMany({
-    where: {
-      id: connectionId,
-      OR: [{ userAId: user.id }, { userBId: user.id }],
-    },
-    data: {
-      status: ConnectionStatus.ENDED,
-      endedById: user.id,
+  await prisma.$transaction((tx) =>
+    terminalizeConnectionAndDirectV1Contexts(tx, {
+      connectionId,
+      targetStatus: "ENDED",
+      connectionEndedById: user.id,
       endedAt: new Date(),
-    },
-  });
+      requiredParticipantId: user.id,
+    }),
+  );
 
   const redirectTo = safeReturnPath(formReturnTo ?? qsReturnTo, "/inbox");
   return NextResponse.redirect(new URL(redirectTo, request.url));

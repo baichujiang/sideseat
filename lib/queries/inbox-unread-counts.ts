@@ -20,6 +20,8 @@ export async function inboxDirectUnreadCounts(
       WHERE c."id" IN (${Prisma.join(connectionIds)})
         AND m."senderId" <> ${userId}
         AND m."deletedAt" IS NULL
+        AND m."type" <> 'ACTION_INTEREST_CARD'
+        AND m."type" <> 'MUTUAL_OPPORTUNITY_CARD'
         AND m."createdAt" > COALESCE(
           CASE
             WHEN c."userAId" = ${userId} THEN c."readByAAt"
