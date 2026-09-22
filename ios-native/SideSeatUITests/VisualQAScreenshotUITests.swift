@@ -1,6 +1,6 @@
 import XCTest
 
-/// Captures Auth, Together states, and the current 4-tab shell for visual QA.
+/// Captures Auth, Together states, and the current 5-tab shell for visual QA.
 /// Appearance: host writes `.appearance` (and optionally `simctl ui`); tests also pass
 /// `--ui-testing-appearance=` so physical devices force light/dark without simctl.
 final class VisualQAScreenshotUITests: XCTestCase {
@@ -879,6 +879,49 @@ final class VisualQAScreenshotUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["explore-intent-ui-explore-0"].waitForExistence(timeout: 3))
         XCTAssertFalse(app.descendants(matching: .any)["explore-intent-ui-explore-1"].exists)
         app.terminate()
+    }
+
+    @MainActor
+    func testExploreFiltersShowSelectionAndResetWithoutLeavingPage() {
+        for (language, appearance, largeText) in [("en", "light", false), ("zh-Hans", "dark", false), ("de", "dark", true)] {
+            var arguments = ["--ui-testing-explore-intents", "--ui-testing-explore-plus",
+                "--ui-testing-language=\(language)", "--ui-testing-appearance=\(appearance)"]
+            if largeText { arguments.append("--ui-testing-dynamic-type-accessibility") }
+            let app = togetherApp(arguments)
+            selectTogetherSection(2, in: app)
+            let page = app.descendants(matching: .any)["explore-intents-list"].firstMatch
+            let search = app.textFields["explore-search"]
+            let all = app.buttons["explore-filter-all"]
+            XCTAssertTrue(all.waitForExistence(timeout: 5))
+            if largeText {
+                for _ in 0..<8 where !all.isHittable { page.swipeUp(velocity: .slow) }
+            }
+            XCTAssertTrue(all.isSelected)
+            XCTAssertGreaterThanOrEqual(all.frame.height, 44 - 0.5)
+            let coffee = app.buttons["explore-filter-COFFEE"]
+            let filters = app.scrollViews["explore-topic-filters"]
+            for _ in 0..<4 where !coffee.isHittable { filters.swipeLeft() }
+            coffee.tap()
+            XCTAssertTrue(coffee.isSelected)
+            XCTAssertFalse(all.isSelected)
+            for _ in 0..<8 where !search.isHittable { page.swipeDown(velocity: .slow) }
+            search.tap()
+            search.typeText("zzzz-no-match")
+            let clearSearch = app.buttons["explore-clear-search"]
+            XCTAssertTrue(clearSearch.waitForExistence(timeout: 3))
+            clearSearch.tap()
+            XCTAssertTrue(coffee.isSelected, "Clearing text keeps the chosen category.")
+            search.typeText("zzzz-no-match")
+            let reset = app.buttons["explore-clear-filters"]
+            for _ in 0..<8 where !reset.isHittable { page.swipeUp(velocity: .slow) }
+            XCTAssertTrue(reset.waitForExistence(timeout: 3))
+            saveScreenshot(app: app, name: "explore-filter-recovery-\(language)-\(appearance)")
+            reset.tap()
+            XCTAssertTrue(all.isSelected)
+            XCTAssertFalse(app.descendants(matching: .any)["explore-filter-empty"].exists)
+            XCTAssertFalse(app.buttons["explore-clear-search"].exists)
+            app.terminate()
+        }
     }
 
     @MainActor

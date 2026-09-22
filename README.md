@@ -27,13 +27,14 @@ SideSeat 不提供人物广场、滑动匹配、课程大群、同学名单或�
 
 ## Product surfaces
 
-原生 iPhone App 使用四个稳定入口：
+原生 iPhone App 使用五个稳定入口：
 
 ```text
-Together / 同行   Calendar / 日历   Messages / 消息   Me / 我
+Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me / 我
 ```
 
 - **Together**：管理多个短期意愿、开启或停止 48 小时匹配、决定有限的同行机会。
+- **Plans**：集中处理待回复的提议、即将进行的计划与结束后的反馈。
 - **Calendar**：个人日程、课程、确认后的 Plan、搜索以及 Apple Calendar 互操作。
 - **Messages**：双方同意后的上下文沟通、Plan 提议、接受、改期与取消。
 - **Me**：身份、学生认证、课程、语言、隐私、安全和设置。

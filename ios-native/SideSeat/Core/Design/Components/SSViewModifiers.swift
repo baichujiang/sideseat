@@ -96,21 +96,22 @@ extension View {
 /// The label owns its semantic colors and surfaces; this style only standardizes interaction.
 struct SSPressButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? SideSeatTheme.Interaction.pressedScale : 1)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? SideSeatTheme.Interaction.pressedScale : 1)
             .opacity(
                 isEnabled
                     ? (configuration.isPressed ? SideSeatTheme.Interaction.pressedOpacity : 1)
                     : 0.46
             )
             .animation(
-                .easeOut(duration: SideSeatTheme.Interaction.pressDuration),
+                reduceMotion ? nil : .easeOut(duration: SideSeatTheme.Interaction.pressDuration),
                 value: configuration.isPressed
             )
             .animation(
-                .easeOut(duration: SideSeatTheme.Interaction.pressDuration),
+                reduceMotion ? nil : .easeOut(duration: SideSeatTheme.Interaction.pressDuration),
                 value: isEnabled
             )
     }

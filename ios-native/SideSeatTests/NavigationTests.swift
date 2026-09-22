@@ -317,6 +317,22 @@ struct NavigationTests {
         #expect(router.navigationEpoch == 1)
     }
 
+    @Test("Canonical Together links open the same root as legacy Discover links")
+    @MainActor
+    func routesCanonicalTogetherLinks() throws {
+        let router = DeepLinkRouter()
+        router.handleAppPath("/together")
+        #expect(router.consumePendingTab() == .discover)
+        #expect(router.consumePendingRoute() == nil)
+
+        for raw in ["sideseat://together", "https://sideseat.example/together"] {
+            router.handle(try #require(URL(string: raw)))
+            #expect(router.consumePendingTab() == .discover)
+            #expect(router.consumePendingRoute() == nil)
+        }
+        #expect(router.navigationEpoch == 3)
+    }
+
     @Test("Mutual opportunity delivery refreshes Together exactly once")
     @MainActor
     func refreshesTogetherForMutualOpportunityPush() async {

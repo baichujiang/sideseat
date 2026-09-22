@@ -129,6 +129,12 @@ final class InboxStore {
                 to: .uiTestingFixture,
                 readMessageIDs: locallyReadMessageIDs
             )
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-inbox-empty") {
+                payload = NativeInboxPayload(conversations: [], unreadTotal: 0, plansNeedingYourAction: 0)
+            }
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-inbox-refresh-error") {
+                issue = AppLocalization.string("Messages unavailable")
+            }
             return
         }
         #endif

@@ -388,6 +388,30 @@ final class AccessibilityAuditUITests: XCTestCase {
         add(attachment)
     }
 
+    func testMeProfileUsesFullWidthAtLargestGermanText() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-deep-link=/profile", "--ui-testing-language=de",
+            "--ui-testing-dynamic-type-accessibility", "--ui-testing-appearance=dark"]
+        app.launch()
+        let profile = app.descendants(matching: .any)["me-profile"]
+        XCTAssertTrue(profile.waitForExistence(timeout: 8))
+        let school = app.staticTexts["me-campus-summary"]
+        XCTAssertTrue(school.waitForExistence(timeout: 3))
+        XCTAssertGreaterThan(school.frame.width, app.windows.firstMatch.frame.width * 0.6,
+            "Large text needs a full-width details column instead of squeezing beside the avatar.")
+        let name = app.staticTexts["me-display-name-visual"]
+        XCTAssertTrue(name.exists)
+        XCTAssertEqual(name.label, "Test User")
+        XCTAssertEqual(name.frame.minX, school.frame.minX, accuracy: 1)
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "Me German accessibility5 dark full-width identity"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        app.buttons["me-hero-edit"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["profile-edit"].waitForExistence(timeout: 5))
+    }
+
     func testMeLayoutAtLargestDynamicType() {
         let app = XCUIApplication()
         app.launchArguments = [

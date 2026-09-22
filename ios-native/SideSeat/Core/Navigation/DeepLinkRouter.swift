@@ -184,7 +184,7 @@ final class DeepLinkRouter {
         switch path {
         case "/home":
             return (.home, nil)
-        case "/discover":
+        case "/together", "/discover":
             return (.discover, nil)
         case "/inbox":
             return (.chats, nil)

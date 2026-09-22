@@ -20,7 +20,8 @@ struct SSSecondaryButton: View {
         Button(action: action) {
             Text(title)
                 .font(.subheadline.weight(fontWeight))
-                .lineLimit(1)
+                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.center)
                 .padding(.horizontal, kind == .softFill ? SideSeatTheme.spaceLG : 0)
                 .frame(maxWidth: expands ? .infinity : nil)
                 .frame(minHeight: 44)
@@ -32,6 +33,7 @@ struct SSSecondaryButton: View {
 }
 
 private struct SSSecondaryButtonStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let kind: SSSecondaryButton.Kind
 
     func makeBody(configuration: Configuration) -> some View {
@@ -52,7 +54,7 @@ private struct SSSecondaryButtonStyle: ButtonStyle {
                         .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
                 }
                 .opacity(configuration.isPressed ? SideSeatTheme.Interaction.pressedOpacity : 1)
-                .scaleEffect(configuration.isPressed ? SideSeatTheme.Interaction.pressedScale : 1)
+                .scaleEffect(configuration.isPressed && !reduceMotion ? SideSeatTheme.Interaction.pressedScale : 1)
         }
     }
 }

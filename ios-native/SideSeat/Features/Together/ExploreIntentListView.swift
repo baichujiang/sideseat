@@ -11,6 +11,7 @@ struct ExploreIntentListView: View {
     @State private var store = ExploreIntentStore()
     @State private var searchText = ""
     @State private var selectedTopic: NativeWeeklyIntentTopic? = nil
+    @FocusState private var searchIsFocused: Bool
     private let access = ExploreAccessTier.current
 
     private var isEnabled: Bool {
@@ -64,17 +65,40 @@ struct ExploreIntentListView: View {
                         .font(.footnote.weight(.semibold))
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .accessibilityIdentifier("explore-plus-status")
-                    TextField(AppLocalization.string("Search activities"), text: $searchText)
-                        .textFieldStyle(.roundedBorder)
-                        .accessibilityIdentifier("explore-search")
-                        .background(SSPageSwipeExclusion())
+                    HStack(spacing: SideSeatTheme.spaceSM) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundStyle(SideSeatTheme.textSecondary)
+                            .accessibilityHidden(true)
+                        TextField(AppLocalization.string("Search activities"), text: $searchText)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .submitLabel(.search)
+                            .focused($searchIsFocused)
+                            .onSubmit { searchIsFocused = false }
+                            .accessibilityIdentifier("explore-search")
+                        if !searchText.isEmpty {
+                            Button { searchText = "" } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(SideSeatTheme.textSecondary)
+                                    .frame(width: 44, height: 44)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Clear search")
+                            .accessibilityIdentifier("explore-clear-search")
+                        }
+                    }
+                    .padding(.leading, SideSeatTheme.spaceMD)
+                    .padding(.trailing, searchText.isEmpty ? SideSeatTheme.spaceMD : 0)
+                    .frame(minHeight: 44)
+                    .background(SideSeatTheme.fillTertiary,
+                        in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                    .background(SSPageSwipeExclusion())
                     ScrollView(.horizontal) {
                         HStack(spacing: SideSeatTheme.spaceSM) {
-                            Button(AppLocalization.string("All activities")) { selectedTopic = nil }
-                                .buttonStyle(.bordered)
+                            topicFilter(nil)
                             ForEach(NativeWeeklyIntentTopic.allCases) { topic in
-                                Button(topic.title) { selectedTopic = topic }
-                                    .buttonStyle(.bordered)
+                                topicFilter(topic)
                             }
                         }
                     }
@@ -128,11 +152,24 @@ struct ExploreIntentListView: View {
                             })
                     }
                     if visibleIntents.isEmpty {
-                        Text(AppLocalization.string("No Explore results match these filters"))
-                            .font(.subheadline)
-                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                            .padding(.vertical, SideSeatTheme.spaceMD)
-                            .accessibilityIdentifier("explore-filter-empty")
+                        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                            Text(AppLocalization.string("No Explore results match these filters"))
+                                .font(.subheadline)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                .fixedSize(horizontal: false, vertical: true)
+                            SSSecondaryButton(
+                                title: AppLocalization.string("Clear filters"),
+                                expands: false,
+                                accessibilityID: "explore-clear-filters"
+                            ) {
+                                searchText = ""
+                                selectedTopic = nil
+                                searchIsFocused = false
+                            }
+                        }
+                        .padding(.vertical, SideSeatTheme.spaceMD)
+                        .accessibilityElement(children: .contain)
+                        .accessibilityIdentifier("explore-filter-empty")
                     }
                 }
 
@@ -156,8 +193,36 @@ struct ExploreIntentListView: View {
             .padding(.horizontal, SideSeatTheme.screenHorizontal)
             .padding(.vertical, SideSeatTheme.spaceMD)
         }
+        .scrollDismissesKeyboard(.interactively)
         }
     }
+
+    private func topicFilter(_ topic: NativeWeeklyIntentTopic?) -> some View {
+        let isSelected = selectedTopic == topic
+        let title = topic?.title ?? AppLocalization.string("All activities")
+        return Button {
+            selectedTopic = topic
+            searchIsFocused = false
+        } label: {
+            HStack(spacing: SideSeatTheme.spaceXS) {
+                Image(systemName: "checkmark")
+                    .opacity(isSelected ? 1 : 0)
+                    .accessibilityHidden(true)
+                Text(title)
+            }
+            .font(.subheadline.weight(isSelected ? .semibold : .regular))
+            .foregroundStyle(isSelected ? SideSeatTheme.accentText : SideSeatTheme.textPrimary)
+            .padding(.horizontal, SideSeatTheme.spaceMD)
+            .frame(minHeight: 44)
+            .background(isSelected ? SideSeatTheme.Together.navigationSelection : SideSeatTheme.fillTertiary,
+                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityIdentifier("explore-filter-\(topic?.rawValue ?? "all")")
+    }
+
     private var visibleIntents: [NativeExploreIntent] {
         guard access == .plus else { return store.intents }
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)

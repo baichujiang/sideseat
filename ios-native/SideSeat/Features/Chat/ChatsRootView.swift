@@ -8,66 +8,88 @@ enum ChatCreationSymbol {
 struct ChatsRootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
+    @Environment(DeepLinkRouter.self) private var deepLinkRouter
     @Bindable var store: InboxStore
 
     var body: some View {
         Group {
-            if let payload = store.payload {
-                if store.visibleConversations.isEmpty {
-                    SSEmptyState(
-                        title: "No conversations",
-                        systemImage: "bubble.left.and.bubble.right",
-                        description: "Conversations appear here after you both choose to do something together."
-                    )
-                } else {
-                    List {
-                        if let issue = store.issue {
-                            Section {
+            if store.payload != nil {
+                List {
+                    if let issue = store.issue {
+                        Section {
+                            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                                 Text(issue)
                                     .font(.footnote)
                                     .foregroundStyle(SideSeatTheme.danger)
-                                    .accessibilityIdentifier("inbox-issue-banner")
-                            }
-                        }
-                        if store.hasNoSearchMatches {
-                            Section {
-                                SSEmptyState(
-                                    title: "No matches",
-                                    systemImage: "magnifyingglass",
-                                    description: "Try a different name or message."
-                                )
-                                .frame(maxWidth: .infinity, minHeight: 260)
-                                .accessibilityIdentifier("inbox-empty-no-matches")
-                            }
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(Color.clear)
-                        } else {
-                            if !store.pinned.isEmpty {
-                                Section {
-                                    ForEach(store.pinned) { row in
-                                        inboxRow(row)
-                                    }
-                                } header: {
-                                    inboxSectionHeader("Pinned")
+                                SSSecondaryButton(
+                                    title: AppLocalization.string("Try again"),
+                                    expands: false,
+                                    accessibilityID: "inbox-retry"
+                                ) {
+                                    Task { await loadInboxAndPrefetch() }
                                 }
+                                .disabled(store.isLoading)
                             }
+                            .accessibilityElement(children: .contain)
+                            .accessibilityIdentifier("inbox-issue-banner")
+                        }
+                    }
+                    if store.visibleConversations.isEmpty {
+                        SSEmptyState(
+                            title: "No conversations",
+                            systemImage: "bubble.left.and.bubble.right",
+                            description: "Conversations appear here after you both choose to do something together.",
+                            actionTitle: AppLocalization.string("Open Together"),
+                            actionAccessibilityID: "inbox-open-together"
+                        ) {
+                            deepLinkRouter.handleAppPath("/together")
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 260)
+                        .ssListPageStateRow()
+                        .accessibilityElement(children: .contain)
+                        .accessibilityIdentifier("inbox-empty")
+                    } else if store.hasNoSearchMatches {
+                        Section {
+                            SSEmptyState(
+                                title: "No matches",
+                                systemImage: "magnifyingglass",
+                                description: "Try a different name or message.",
+                                actionTitle: AppLocalization.string("Clear search"),
+                                actionAccessibilityID: "inbox-clear-search"
+                            ) { store.searchQuery = "" }
+                            .frame(maxWidth: .infinity, minHeight: 260)
+                            .accessibilityElement(children: .contain)
+                            .accessibilityIdentifier("inbox-empty-no-matches")
+                        }
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                    } else {
+                        if !store.pinned.isEmpty {
                             Section {
-                                ForEach(store.recent) { row in
+                                ForEach(store.pinned) { row in
                                     inboxRow(row)
                                 }
                             } header: {
-                                if !store.pinned.isEmpty {
-                                    inboxSectionHeader("Recent")
-                                }
+                                inboxSectionHeader("Pinned")
+                            }
+                        }
+                        Section {
+                            ForEach(store.recent) { row in
+                                inboxRow(row)
+                            }
+                        } header: {
+                            if !store.pinned.isEmpty {
+                                inboxSectionHeader("Recent")
                             }
                         }
                     }
-                    .listStyle(.plain)
-                    .listSectionSpacing(.compact)
-                    .environment(\.defaultMinListRowHeight, 60)
-                    .contentMargins(.bottom, 88, for: .scrollContent)
-                    .accessibilityIdentifier("inbox-list")
                 }
+                .listStyle(.plain)
+                .listSectionSpacing(.compact)
+                .environment(\.defaultMinListRowHeight, 60)
+                .contentMargins(.bottom, 88, for: .scrollContent)
+                .scrollDismissesKeyboard(.interactively)
+                .accessibilityIdentifier("inbox-list")
             } else if let issue = store.issue {
                 ContentUnavailableView {
                     Label("Messages unavailable", systemImage: "wifi.exclamationmark")

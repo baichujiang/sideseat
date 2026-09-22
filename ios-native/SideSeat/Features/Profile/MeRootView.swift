@@ -448,6 +448,7 @@ private struct SystemAvatarPickerSheet: View {
 }
 
 private struct MeHeroCard: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let profile: NativeCurrentProfile
     let isPreparingAvatar: Bool
     let avatarIssue: String?
@@ -456,7 +457,7 @@ private struct MeHeroCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .center, spacing: 14) {
+            profileLayout {
                 ZStack(alignment: .bottomTrailing) {
                     ProfileAvatar(url: profile.avatarUrl, name: profile.displayName, size: 64)
                         .overlay {
@@ -486,11 +487,12 @@ private struct MeHeroCard: View {
                 Button(action: onEditProfile) {
                     HStack(spacing: 14) {
                         VStack(alignment: .leading, spacing: 5) {
-                            HStack(spacing: 6) {
+                            nameLayout {
                                 Text(profile.displayName)
                                     .font(.title3.weight(.bold))
                                     .foregroundStyle(.primary)
-                                    .lineLimit(1)
+                                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                                    .fixedSize(horizontal: false, vertical: true)
                                     .accessibilityIdentifier("me-display-name-visual")
                                 if profile.verifiedStudent {
                                     VerifiedSchoolMark(school: profile.school, compact: false)
@@ -517,6 +519,7 @@ private struct MeHeroCard: View {
                     }
                     .contentShape(Rectangle())
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .buttonStyle(SSPressButtonStyle())
                 .accessibilityLabel(AppLocalization.string( "Edit profile"))
                 .accessibilityValue("\(profile.displayName), @\(profile.username)")
@@ -550,6 +553,17 @@ private struct MeHeroCard: View {
         }
     }
 
+    private var profileLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
+            : AnyLayout(HStackLayout(alignment: .center, spacing: 14))
+    }
+
+    private var nameLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
+            : AnyLayout(HStackLayout(spacing: 6))
+    }
 }
 
 private struct NativeSocialWindow: Codable, Hashable, Sendable {

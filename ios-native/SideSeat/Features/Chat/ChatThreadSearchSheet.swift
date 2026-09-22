@@ -5,6 +5,7 @@ struct ChatThreadSearchSheet: View {
     let rows: [ChatThreadSearchRow]
     var onSelect: ((String) -> Void)?
     @State private var query = ""
+    @State private var searchIsPresented = false
     @Environment(\.dismiss) private var dismiss
 
     private var filtered: [ChatThreadSearchRow] {
@@ -22,6 +23,7 @@ struct ChatThreadSearchSheet: View {
                         systemImage: "magnifyingglass",
                         description: "Try a different word from the conversation."
                     )
+                    .ssListPageStateRow()
                     .accessibilityIdentifier("thread-search-empty")
                 } else {
                     ForEach(filtered) { row in
@@ -50,6 +52,8 @@ struct ChatThreadSearchSheet: View {
                                     .multilineTextAlignment(.leading)
                             }
                             .padding(.vertical, 2)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(SSPressButtonStyle())
                         .accessibilityIdentifier("thread-search-row-\(row.id)")
@@ -57,9 +61,11 @@ struct ChatThreadSearchSheet: View {
                 }
             }
             .listStyle(.plain)
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
-            .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search loaded messages")
+            .searchable(text: $query, isPresented: $searchIsPresented,
+                placement: .navigationBarDrawer(displayMode: .always), prompt: "Search loaded messages")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") { dismiss() }
@@ -67,6 +73,10 @@ struct ChatThreadSearchSheet: View {
                 }
             }
             .accessibilityIdentifier("thread-search-sheet")
+        }
+        .task {
+            await Task.yield()
+            searchIsPresented = true
         }
     }
 }

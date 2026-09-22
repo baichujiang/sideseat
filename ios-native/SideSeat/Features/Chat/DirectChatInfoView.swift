@@ -363,6 +363,7 @@ struct DirectChatInfoView: View {
     let onConversationClosed: () -> Void
 
     @State private var showThreadSearch = false
+    @State private var selectedSearchMessageID: String?
     @State private var showParticipantContext = false
     @State private var showContextDetails = false
     @State private var confirmEnd = false
@@ -401,13 +402,17 @@ struct DirectChatInfoView: View {
         .navigationTitle("Chat info")
         .navigationBarTitleDisplayMode(.inline)
         .accessibilityIdentifier("direct-chat-info")
-        .sheet(isPresented: $showThreadSearch) {
+        .sheet(isPresented: $showThreadSearch, onDismiss: {
+            guard let messageID = selectedSearchMessageID else { return }
+            selectedSearchMessageID = nil
+            onSelectMessage(messageID)
+        }) {
             ChatThreadSearchSheet(
                 title: AppLocalization.string("Search chat"),
                 rows: searchRows,
                 onSelect: { messageID in
+                    selectedSearchMessageID = messageID
                     showThreadSearch = false
-                    onSelectMessage(messageID)
                 }
             )
         }

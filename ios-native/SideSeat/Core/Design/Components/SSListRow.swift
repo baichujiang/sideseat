@@ -89,6 +89,7 @@ extension SSListRow {
 /// Neutral management row for Me / Settings / campus and safety screens.
 /// Icons are deliberately quiet; Rose is reserved for interaction rather than category decoration.
 struct SSManagementRow: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let title: String
     var subtitle: String? = nil
     var value: String? = nil
@@ -102,7 +103,7 @@ struct SSManagementRow: View {
         Button(action: action) {
             VStack(spacing: 0) {
                 HStack(spacing: SideSeatTheme.spaceMD) {
-                    if let systemImage {
+                    if let systemImage, !dynamicTypeSize.isAccessibilitySize {
                         Image(systemName: systemImage)
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -111,6 +112,7 @@ struct SSManagementRow: View {
                                 SideSeatTheme.fillTertiary,
                                 in: RoundedRectangle(cornerRadius: 8, style: .continuous)
                             )
+                            .accessibilityHidden(true)
                     }
 
                     VStack(alignment: .leading, spacing: 2) {
@@ -125,23 +127,25 @@ struct SSManagementRow: View {
                                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
+                        if dynamicTypeSize.isAccessibilitySize {
+                            valueLabel
+                        }
                     }
                     .layoutPriority(1)
 
                     Spacer(minLength: SideSeatTheme.spaceSM)
 
-                    if let value, !value.isEmpty {
-                        Text(value)
-                            .font(.subheadline)
-                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    if !dynamicTypeSize.isAccessibilitySize {
+                        valueLabel
                             .multilineTextAlignment(.trailing)
-                            .fixedSize(horizontal: false, vertical: true)
                     }
 
                     if showsChevron {
                         Image(systemName: "chevron.right")
                             .font(.footnote.weight(.semibold))
                             .foregroundStyle(.tertiary)
+                            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                            .accessibilityHidden(true)
                     }
                 }
                 .padding(.horizontal, SideSeatTheme.spaceLG)
@@ -150,13 +154,23 @@ struct SSManagementRow: View {
 
                 if showDivider {
                     Divider()
-                        .padding(.leading, systemImage == nil ? SideSeatTheme.spaceLG : 60)
+                        .padding(.leading, systemImage == nil || dynamicTypeSize.isAccessibilitySize ? SideSeatTheme.spaceLG : 60)
                 }
             }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .ssAccessibilityIdentifier(accessibilityID)
+    }
+
+    @ViewBuilder
+    private var valueLabel: some View {
+        if let value, !value.isEmpty {
+            Text(value)
+                .font(.subheadline)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }
 

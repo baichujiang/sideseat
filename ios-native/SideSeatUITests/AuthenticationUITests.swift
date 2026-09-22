@@ -6,6 +6,77 @@ final class AuthenticationUITests: XCTestCase {
         continueAfterFailure = false
     }
 
+    func testChatSearchIsReadyToTypeAndReturnsToSelectedMessage() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-chats", "--ui-testing-language=en"]
+        app.launch()
+
+        let conversation = app.buttons["inbox-row-ui-connection-leo"]
+        XCTAssertTrue(conversation.waitForExistence(timeout: 8))
+        conversation.tap()
+        let info = app.buttons["direct-chat-actions"]
+        XCTAssertTrue(info.waitForExistence(timeout: 5))
+        info.tap()
+        let searchAction = app.buttons["direct-info-search"]
+        XCTAssertTrue(searchAction.waitForExistence(timeout: 5))
+        searchAction.tap()
+
+        let search = app.searchFields.firstMatch
+        XCTAssertTrue(search.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3),
+            "Search should be ready to type without another tap.")
+        search.typeText("zzzz-no-match")
+        XCTAssertTrue(app.descendants(matching: .any)["thread-search-empty"].waitForExistence(timeout: 3))
+        search.buttons.firstMatch.tap()
+        let result = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "thread-search-row-")).firstMatch
+        XCTAssertTrue(result.waitForExistence(timeout: 3))
+        result.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.descendants(matching: .any)["thread-search-sheet"].exists)
+        XCTAssertFalse(app.descendants(matching: .any)["direct-chat-info"].exists)
+    }
+
+    func testEmptyMessagesOfferTogetherAndKeepRefreshFailureVisible() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-chats", "--ui-testing-inbox-empty", "--ui-testing-inbox-refresh-error",
+            "--ui-testing-language=en"]
+        app.launch()
+
+        XCTAssertTrue(app.descendants(matching: .any)["inbox-empty"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.descendants(matching: .any)["inbox-issue-banner"].exists,
+            "A failed refresh of an empty cache must not look like a successful empty inbox.")
+        let retry = app.buttons["inbox-retry"]
+        XCTAssertTrue(retry.isHittable)
+        XCTAssertGreaterThanOrEqual(retry.frame.height, 44 - 0.5)
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "Messages empty cache with recovery actions"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        let together = app.buttons["inbox-open-together"]
+        XCTAssertTrue(together.isHittable)
+        together.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.tabBars.buttons["Together"].isSelected)
+    }
+
+    func testMessageSearchCanRecoverFromNoMatchesInOneTap() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-chats", "--ui-testing-language=en"]
+        app.launch()
+        let search = app.searchFields.firstMatch
+        XCTAssertTrue(search.waitForExistence(timeout: 8))
+        search.tap()
+        search.typeText("zzzz-no-match")
+        let clear = app.buttons["inbox-clear-search"]
+        XCTAssertTrue(clear.waitForExistence(timeout: 3))
+        clear.tap()
+        XCTAssertTrue(app.buttons["inbox-row-ui-connection-leo"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.descendants(matching: .any)["inbox-empty-no-matches"].exists)
+    }
+
     func testSignedOutLaunchShowsLoginControls() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-signed-out"]
