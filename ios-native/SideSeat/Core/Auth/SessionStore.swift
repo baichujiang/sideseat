@@ -66,7 +66,7 @@ final class SessionStore {
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-slow-cached-launch") {
             isRestoringConnection = true
             defer { isRestoringConnection = false }
-            try? await Task.sleep(for: .seconds(8))
+            try? await Task.sleep(for: .seconds(12))
             accessToken = "ui-test-restored-access-token"
             isOffline = false
             restorationIssue = nil

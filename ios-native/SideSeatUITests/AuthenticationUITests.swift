@@ -280,12 +280,7 @@ final class AuthenticationUITests: XCTestCase {
 
     func testSlowSessionRestoreShowsCachedHomeBeforeNetworkCompletes() {
         let app = XCUIApplication()
-        app.launchArguments = [
-            "--ui-testing-authenticated",
-            "--ui-testing-slow-cached-launch",
-            "--ui-testing-skip-tutorial",
-        ]
-        app.launch()
+        launchCachedAccount(app, arguments: ["--ui-testing-slow-cached-launch"])
 
         XCTAssertTrue(
             app.descendants(matching: .any)["home-week-timetable"]
@@ -300,34 +295,37 @@ final class AuthenticationUITests: XCTestCase {
 
     func testTogetherWaitsForSlowCachedSessionThenLoads() {
         let app = XCUIApplication()
-        app.launchArguments = [
-            "--ui-testing-authenticated",
+        launchCachedAccount(app, arguments: [
             "--ui-testing-slow-cached-launch",
             "--ui-testing-weekly-intent",
             "--ui-testing-mutual-opportunity",
             "--ui-testing-together-matching",
-            "--ui-testing-skip-tutorial",
-        ]
-        app.launch()
+        ])
 
         let togetherTab = app.tabBars.buttons.element(boundBy: 0)
-        XCTAssertTrue(togetherTab.waitForExistence(timeout: 8))
+        XCTAssertTrue(togetherTab.waitForExistence(timeout: 2))
         togetherTab.tap()
 
         let loadedHome = app.descendants(matching: .any)["together-home"]
+        XCTAssertTrue(app.descendants(matching: .any)["together-assignment-loading"].exists)
         XCTAssertFalse(app.descendants(matching: .any)["together-assignment-failure"].exists)
         XCTAssertTrue(loadedHome.waitForExistence(timeout: 12))
+        XCTAssertTrue(togetherTab.isSelected)
         XCTAssertFalse(app.descendants(matching: .any)["together-assignment-failure"].exists)
+    }
+
+    func testSlowCachedLaunchKeepsIncompleteSetupBehindGate() {
+        let app = XCUIApplication()
+        launchCachedAccount(app, arguments: ["--ui-testing-slow-cached-launch"], setupRequired: true)
+        XCTAssertTrue(app.descendants(matching: .any)["startup-transition"].waitForExistence(timeout: 2))
+        XCTAssertFalse(app.tabBars.firstMatch.exists)
+        XCTAssertTrue(app.descendants(matching: .any)["required-setup"].waitForExistence(timeout: 12))
+        XCTAssertFalse(app.tabBars.firstMatch.exists)
     }
 
     func testOfflineColdLaunchShowsSavedHomeInsteadOfLogin() {
         let app = XCUIApplication()
-        app.launchArguments = [
-            "--ui-testing-authenticated",
-            "--ui-testing-offline-cached-launch",
-            "--ui-testing-skip-tutorial",
-        ]
-        app.launch()
+        launchCachedAccount(app, arguments: ["--ui-testing-offline-cached-launch"])
 
         XCTAssertTrue(
             app.descendants(matching: .any)["home-week-timetable"]
@@ -345,12 +343,7 @@ final class AuthenticationUITests: XCTestCase {
 
     func testTogetherOfflineCachedLaunchShowsExplicitOfflineState() {
         let app = XCUIApplication()
-        app.launchArguments = [
-            "--ui-testing-authenticated",
-            "--ui-testing-offline-cached-launch",
-            "--ui-testing-skip-tutorial",
-        ]
-        app.launch()
+        launchCachedAccount(app, arguments: ["--ui-testing-offline-cached-launch"])
 
         let togetherTab = app.tabBars.buttons.element(boundBy: 0)
         XCTAssertTrue(togetherTab.waitForExistence(timeout: 2))
@@ -362,6 +355,20 @@ final class AuthenticationUITests: XCTestCase {
         )
         XCTAssertFalse(app.descendants(matching: .any)["together-assignment-loading"].exists)
         XCTAssertFalse(app.descendants(matching: .any)["together-assignment-failure"].exists)
+    }
+
+    private func launchCachedAccount(_ app: XCUIApplication, arguments: [String], setupRequired: Bool = false) {
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-skip-tutorial", "--ui-testing-language=en",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL",
+        ]
+        if setupRequired { app.launchArguments.append("--ui-testing-required-setup") }
+        app.launch()
+        let initialScreen = setupRequired ? "required-setup" : "home-week-timetable"
+        XCTAssertTrue(app.descendants(matching: .any)[initialScreen].waitForExistence(timeout: 5))
+        app.terminate()
+        app.launchArguments += arguments
+        app.launch()
     }
 
     func testAuthenticatedWarmResumePerformance() {

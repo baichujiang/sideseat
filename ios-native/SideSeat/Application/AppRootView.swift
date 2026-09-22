@@ -47,31 +47,33 @@ struct AppRootView: View {
 
     @ViewBuilder
     private var sessionContent: some View {
-        switch session.phase {
-        case .restoring:
-            StartupTransitionView()
-        case .signedOut:
-            LoginView()
-        case .signedIn:
+        if session.canPresentAppShell {
             signedInContent
+        } else if session.phase == .signedOut {
+            LoginView()
+        } else {
+            StartupTransitionView()
         }
+    }
+
+    private var canUseAppShell: Bool {
+        if let readiness = readinessProfile.profile?.readiness {
+            return readiness.ready && setupRequiredForCurrentSession != true
+        }
+        guard let userID = session.currentUser?.id else { return false }
+        return MVPReadinessCache.ready(userID: userID) == true
     }
 
     @ViewBuilder
     private var signedInContent: some View {
-        if let profile = readinessProfile.profile, let readiness = profile.readiness {
-            if readiness.ready && setupRequiredForCurrentSession != true {
-                AppShellView()
-            } else {
-                RequiredSetupView(
-                    profileStore: readinessProfile,
-                    onEnter: { setupRequiredForCurrentSession = false }
-                )
-            }
-        } else if let userID = session.currentUser?.id,
-                  session.isOffline,
-                  MVPReadinessCache.ready(userID: userID) == true {
+        // Keep one shell identity while cached readiness is refreshed, preserving navigation.
+        if canUseAppShell {
             AppShellView()
+        } else if readinessProfile.profile?.readiness != nil {
+            RequiredSetupView(
+                profileStore: readinessProfile,
+                onEnter: { setupRequiredForCurrentSession = false }
+            )
         } else if session.isOffline {
             RequiredSetupUnavailableView(
                 onRetry: {
@@ -110,13 +112,7 @@ struct AppRootView: View {
             setupRequiredForCurrentSession = nil
         }
 
-        #if DEBUG
-        let canUseUITestingFixture = ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated")
-        #else
-        let canUseUITestingFixture = false
-        #endif
-
-        guard session.canMakeAuthenticatedRequests || canUseUITestingFixture else {
+        guard session.canMakeAuthenticatedRequests else {
             if session.isOffline, MVPReadinessCache.ready(userID: user.id) == true {
                 setupRequiredForCurrentSession = false
             }
