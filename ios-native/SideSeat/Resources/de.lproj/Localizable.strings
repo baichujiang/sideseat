@@ -1681,6 +1681,9 @@
 "Verification" = "Verifizierung";
 "Languages" = "Sprachen";
 "Choose at least one language." = "Wähle mindestens eine Sprache.";
+"Use up to 60 characters." = "Verwende höchstens 60 Zeichen.";
+"Use up to 80 characters." = "Verwende höchstens 80 Zeichen.";
+"Use up to 160 characters." = "Verwende höchstens 160 Zeichen.";
 "Privacy & Safety" = "Privatsphäre & Sicherheit";
 "Coordination languages" = "Koordinationssprachen";
 

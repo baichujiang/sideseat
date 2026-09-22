@@ -1682,6 +1682,9 @@
 "Verification" = "Verification";
 "Languages" = "Languages";
 "Choose at least one language." = "Choose at least one language.";
+"Use up to 60 characters." = "Use up to 60 characters.";
+"Use up to 80 characters." = "Use up to 80 characters.";
+"Use up to 160 characters." = "Use up to 160 characters.";
 "Privacy & Safety" = "Privacy & Safety";
 "Coordination languages" = "Coordination languages";
 

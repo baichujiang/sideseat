@@ -1682,6 +1682,9 @@
 "Verification" = "认证";
 "Languages" = "语言";
 "Choose at least one language." = "请选择至少一种语言。";
+"Use up to 60 characters." = "最多输入 60 个字符。";
+"Use up to 80 characters." = "最多输入 80 个字符。";
+"Use up to 160 characters." = "最多输入 160 个字符。";
 "Privacy & Safety" = "隐私与安全";
 "Coordination languages" = "沟通语言";
 

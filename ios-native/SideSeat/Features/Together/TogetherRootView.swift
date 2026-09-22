@@ -1344,10 +1344,10 @@ private struct WeeklyIntentEditorView: View {
                     }
                     SSFlowActionDock(
                         title: editorActionTitle,
-                        detail: dynamicTypeSize.isAccessibilitySize ? "" : editorActionDetail,
+                        detail: inputLengthIssue ?? (dynamicTypeSize.isAccessibilitySize ? "" : editorActionDetail),
                         isLoading: isSaving,
                         isEnabled: editorStep == 0
-                            ? hasValidActivity : hasValidActivity && hasValidTimeWindows && note.count <= 160,
+                            ? hasValidActivity : hasValidActivity && hasValidTimeWindows && normalizedNoteCount <= 160,
                         accessibilityID: editorStep == 0 ? "intent-editor-next" : "intent-editor-save"
                     ) {
                         if editorStep == 0 {
@@ -1447,6 +1447,7 @@ private struct WeeklyIntentEditorView: View {
                         .submitLabel(.done)
                         .focused($isSportInputFocused)
                         .onSubmit { isSportInputFocused = false }
+                        .accessibilityIdentifier("intent-editor-sport")
 
                     if !sportSuggestions.isEmpty {
                         ScrollView(.horizontal) {
@@ -1463,10 +1464,11 @@ private struct WeeklyIntentEditorView: View {
                         }
                         .scrollIndicators(.hidden)
                     }
-                    if !hasValidSportSelection {
+                    if !hasValidSportSelection, inputLengthIssue == nil {
                         Text("Enter the sport you want to do.")
                             .font(.footnote)
                             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .accessibilityIdentifier("intent-editor-sport-guidance")
                     }
                 }
             }
@@ -1482,10 +1484,11 @@ private struct WeeklyIntentEditorView: View {
                     .textInputAutocapitalization(.sentences)
                     .accessibilityIdentifier("intent-editor-activity")
 
-                    if !hasValidActivityText {
+                    if !hasValidActivityText, inputLengthIssue == nil {
                         Text("Describe the specific thing you want to do.")
                             .font(.footnote)
                             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .accessibilityIdentifier("intent-editor-activity-guidance")
                     }
                 }
             }
@@ -1499,11 +1502,13 @@ private struct WeeklyIntentEditorView: View {
                     )
                     .lineLimit(1...3)
                     .textInputAutocapitalization(.sentences)
+                    .accessibilityIdentifier("intent-editor-study-goal")
 
-                    if !hasValidStudyGoal {
+                    if !hasValidStudyGoal, inputLengthIssue == nil {
                         Text("Add a short study goal so SideSeat can find a useful match.")
                             .font(.footnote)
                             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .accessibilityIdentifier("intent-editor-study-guidance")
                     }
                 }
 
@@ -1592,6 +1597,7 @@ private struct WeeklyIntentEditorView: View {
             Section("Optional") {
                 TextField("A short clarification", text: $note, axis: .vertical)
                     .lineLimit(2...4)
+                    .accessibilityIdentifier("intent-editor-note")
                 Text(AppLocalization.string(exploreVisible
                     ? "This note may appear as a short Explore activity preview."
                     : "This note stays private while Explore visibility is off."))
@@ -1870,6 +1876,19 @@ private struct WeeklyIntentEditorView: View {
 
     private var hasValidActivity: Bool {
         hasValidActivityText && hasValidSportSelection && hasValidStudyGoal
+    }
+
+    private var normalizedNoteCount: Int {
+        note.trimmingCharacters(in: .whitespacesAndNewlines).count
+    }
+
+    private var inputLengthIssue: String? {
+        if editorStep == 1 {
+            return normalizedNoteCount > 160 ? AppLocalization.string("Use up to 160 characters.") : nil
+        }
+        let limit = topic == .sports ? 60 : 80
+        guard activitySummary.count > limit else { return nil }
+        return AppLocalization.string(topic == .sports ? "Use up to 60 characters." : "Use up to 80 characters.")
     }
 
     private func changeStep(_ step: Int) {

@@ -748,6 +748,73 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
+    func testIntentionExplainsTextLimitsAndPreservesInputWhileGoingBack() {
+        let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-language=en",
+            "--ui-testing-appearance=light", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"])
+        selectTogetherSection(1, in: app)
+        let add = app.buttons["together-add-intent"]
+        XCTAssertTrue(add.waitForExistence(timeout: 3))
+        add.tap()
+        let next = app.buttons["intent-editor-next"]
+        let activity = app.descendants(matching: .any)["intent-editor-activity"].firstMatch
+        revealFlowElement(activity, in: app)
+        activity.tap()
+        activity.typeText(String(repeating: "a", count: 81))
+        XCTAssertFalse(next.isEnabled)
+        let activityGuidance = app.staticTexts["Use up to 80 characters."]
+        XCTAssertTrue(activityGuidance.isHittable)
+        XCTAssertLessThanOrEqual(activityGuidance.frame.maxY, app.keyboards.firstMatch.frame.minY + 1)
+        saveScreenshot(app: app, name: "intention-activity-limit")
+        activity.typeText(XCUIKeyboardKey.delete.rawValue)
+        XCTAssertTrue(next.isEnabled)
+
+        let sports = app.buttons["intent-topic-sports"]
+        revealFlowElement(sports, in: app)
+        sports.tap()
+        let sport = app.textFields["intent-editor-sport"]
+        revealFlowElement(sport, in: app)
+        sport.tap()
+        sport.typeText(String(repeating: "b", count: 61))
+        XCTAssertFalse(next.isEnabled)
+        XCTAssertTrue(app.staticTexts["Use up to 60 characters."].isHittable)
+        sport.typeText(XCUIKeyboardKey.delete.rawValue)
+        XCTAssertTrue(next.isEnabled)
+
+        let study = app.buttons["intent-topic-study"]
+        revealFlowElement(study, in: app)
+        study.tap()
+        let goal = app.descendants(matching: .any)["intent-editor-study-goal"].firstMatch
+        revealFlowElement(goal, in: app)
+        goal.tap()
+        goal.typeText(String(repeating: "c", count: 81))
+        XCTAssertFalse(next.isEnabled)
+        XCTAssertTrue(app.staticTexts["Use up to 80 characters."].isHittable)
+        goal.typeText(XCUIKeyboardKey.delete.rawValue)
+        next.tap()
+
+        let note = app.descendants(matching: .any)["intent-editor-note"].firstMatch
+        revealFlowElement(note, in: app)
+        note.tap()
+        note.typeText(String(repeating: "d", count: 161))
+        let save = app.buttons["intent-editor-save"]
+        XCTAssertFalse(save.isEnabled)
+        let noteGuidance = app.staticTexts["Use up to 160 characters."]
+        XCTAssertTrue(noteGuidance.isHittable)
+        XCTAssertLessThanOrEqual(noteGuidance.frame.maxY, app.keyboards.firstMatch.frame.minY + 1)
+        saveScreenshot(app: app, name: "intention-note-limit")
+        note.typeText(XCUIKeyboardKey.delete.rawValue + "\n\n")
+        XCTAssertTrue(save.isEnabled, "Trailing whitespace is removed by the existing submission contract")
+        app.buttons["intent-editor-back"].tap()
+        revealFlowElement(goal, in: app)
+        XCTAssertEqual(goal.value as? String, String(repeating: "c", count: 80))
+        next.tap()
+        revealFlowElement(note, in: app)
+        XCTAssertEqual(note.value as? String, String(repeating: "d", count: 160) + "\n\n")
+        save.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForNonExistence(timeout: 5))
+    }
+
+    @MainActor
     func testIntentionsSaveOnceWithoutSeparateFindingConfirmation() {
         let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-explore-intents",
             "--ui-testing-language=en", "--ui-testing-appearance=light"])
