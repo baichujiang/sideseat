@@ -75,7 +75,7 @@ struct PlanCreateSheet: View {
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 SSFlowActionDock(
                     title: AppLocalization.string(counterOf == nil ? "Send plan" : "Send new time"),
-                    detail: AppLocalization.string("Review the details, then send for the other person to accept."),
+                    detail: "",
                     isLoading: isCreating,
                     isEnabled: canSend,
                     accessibilityID: "plan-create-submit"
@@ -130,8 +130,10 @@ struct PlanCreateSheet: View {
             VStack(spacing: 0) {
                 HStack(spacing: SideSeatTheme.spaceMD) {
                     Image(systemName: "text.cursor")
+                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .frame(width: 22)
+                        .accessibilityHidden(true)
                     TextField("What are you planning?", text: $title)
                         .focused($focusedField, equals: .title)
                         .submitLabel(.next)
@@ -145,8 +147,10 @@ struct PlanCreateSheet: View {
 
                 HStack(spacing: SideSeatTheme.spaceMD) {
                     Image(systemName: "mappin.and.ellipse")
+                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .frame(width: 22)
+                        .accessibilityHidden(true)
                     TextField("Location (optional)", text: $location)
                         .focused($focusedField, equals: .location)
                         .submitLabel(.next)
@@ -160,9 +164,11 @@ struct PlanCreateSheet: View {
 
                 HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
                     Image(systemName: "note.text")
+                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .frame(width: 22)
                         .padding(.top, 3)
+                        .accessibilityHidden(true)
                     TextField("Note (optional)", text: $message, axis: .vertical)
                         .lineLimit(2...4)
                         .focused($focusedField, equals: .note)

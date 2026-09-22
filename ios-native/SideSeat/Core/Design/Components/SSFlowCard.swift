@@ -69,6 +69,7 @@ struct SSFlowCardHeader: View {
             } else {
                 Image(systemName: systemImage)
                     .font(.body.weight(.semibold))
+                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                     .foregroundStyle(tint)
                     .frame(width: 44, height: 44)
                     .background(

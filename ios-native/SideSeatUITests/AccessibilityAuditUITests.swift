@@ -618,6 +618,57 @@ final class AccessibilityAuditUITests: XCTestCase {
         add(attachment)
     }
 
+    func testPlanComposerKeepsInputsVisibleAboveKeyboardAtLargestText() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-skip-tutorial", "--ui-testing-chats",
+            "--ui-testing-cached-chat-refresh", "--ui-testing-dynamic-type-accessibility",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
+            "--ui-testing-language=de", "--ui-testing-appearance=light",
+        ]
+        app.launch()
+        let conversation = app.descendants(matching: .any)["inbox-row-ui-connection"].firstMatch
+        XCTAssertTrue(conversation.waitForExistence(timeout: 8))
+        conversation.tap()
+        let propose = app.buttons["chat-composer-plan"]
+        XCTAssertTrue(propose.waitForExistence(timeout: 5))
+        propose.tap()
+
+        let submit = app.buttons["plan-create-submit"]
+        XCTAssertTrue(submit.waitForExistence(timeout: 5))
+        let opening = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        opening.name = "Plan composer opening at accessibility5"
+        opening.lifetime = .keepAlways
+        add(opening)
+
+        let form = app.scrollViews["plan-create-sheet"]
+        XCTAssertTrue(form.exists)
+        let title = app.textFields["plan-create-title"]
+        for _ in 0..<8 where !title.isHittable || title.frame.midY > submit.frame.minY {
+            form.swipeUp()
+        }
+        XCTAssertTrue(title.isHittable)
+        title.tap()
+        title.typeText("Lernen")
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
+
+        let editing = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        editing.name = "Plan title above keyboard at accessibility5"
+        editing.lifetime = .keepAlways
+        add(editing)
+        XCTAssertGreaterThan(title.frame.height, 40)
+        XCTAssertGreaterThanOrEqual(title.frame.minY, app.navigationBars.firstMatch.frame.maxY)
+        XCTAssertLessThanOrEqual(title.frame.maxY, submit.frame.minY)
+
+        app.typeText("\nBibliothek")
+        let location = app.textFields["plan-create-location"]
+        XCTAssertEqual(location.value as? String, "Bibliothek")
+        XCTAssertTrue(submit.isEnabled)
+        XCTAssertTrue(submit.isHittable)
+        submit.tap()
+        XCTAssertTrue(submit.waitForNonExistence(timeout: 5))
+    }
+
     private func auditTab(
         in app: XCUIApplication,
         labels: [String],
