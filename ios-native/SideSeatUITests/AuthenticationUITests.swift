@@ -4541,6 +4541,48 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(quote.waitForExistence(timeout: 3))
     }
 
+    func testReportExplainsDetailLimitAndLocksPendingSubmission() {
+        for (language, size) in [("en", "UICTContentSizeCategoryL"),
+                                 ("de", "UICTContentSizeCategoryAccessibilityXXXL")] {
+            let app = XCUIApplication()
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-chats", "--ui-testing-cached-chat-refresh", "--ui-testing-slow-report",
+                "--ui-testing-language=\(language)", "--ui-testing-appearance=light",
+                "-UIPreferredContentSizeCategoryName", size]
+            app.launch()
+            let chat = app.buttons["inbox-row-ui-connection"]
+            XCTAssertTrue(chat.waitForExistence(timeout: 5))
+            chat.tap()
+            openChatContextAction(in: app, bubbleID: "chat-bubble-ui-unread-12",
+                actionID: "chat-report-ui-unread-12", actionLabels: ["Report", "Melden"],
+                maximumMenuWidthFraction: language == "de" ? 0.85 : 0.55)
+            let sheet = app.descendants(matching: .any)["chat-report-sheet"]
+            XCTAssertTrue(sheet.waitForExistence(timeout: 3))
+            let details = app.descendants(matching: .any)["chat-report-details"].firstMatch
+            details.tap()
+            details.typeText(String(repeating: "a", count: 497) + "TAIL")
+            let send = app.buttons["chat-report-send"]
+            XCTAssertFalse(send.isEnabled, "Explain the limit rather than silently removing part of a report")
+            XCTAssertEqual(details.value as? String, String(repeating: "a", count: 497) + "TAIL")
+            let guidance = app.staticTexts["chat-report-details-guidance"]
+            XCTAssertTrue(guidance.isHittable)
+            XCTAssertLessThanOrEqual(guidance.frame.maxY, app.keyboards.firstMatch.frame.minY)
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = "Report detail limit \(language)"
+            screenshot.lifetime = .keepAlways
+            add(screenshot)
+            XCTAssertTrue(details.isHittable)
+            details.typeText(XCUIKeyboardKey.delete.rawValue)
+            XCTAssertTrue(send.isEnabled)
+            send.tap()
+            XCTAssertFalse(details.isEnabled)
+            XCTAssertFalse(app.buttons["chat-report-cancel"].isEnabled)
+            XCTAssertTrue(sheet.waitForNonExistence(timeout: 7))
+            XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].exists)
+            app.terminate()
+        }
+    }
+
     func testDirectChatLocationSendAndReport() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-chats"]
@@ -5265,7 +5307,8 @@ final class AuthenticationUITests: XCTestCase {
         in app: XCUIApplication,
         bubbleID: String,
         actionID: String,
-        actionLabels: [String]
+        actionLabels: [String],
+        maximumMenuWidthFraction: CGFloat = 0.55
     ) {
         let bubble = app.descendants(matching: .any)[bubbleID]
         if !bubble.waitForExistence(timeout: 1) {
@@ -5289,8 +5332,8 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertFalse(menu.frame.isEmpty)
         XCTAssertLessThanOrEqual(
             menu.frame.width,
-            app.frame.width * 0.55,
-            "The chat action menu should size to its labels instead of leaving a wide empty trailing area."
+            app.frame.width * maximumMenuWidthFraction,
+            "The chat action menu should size to its labels within the available width."
         )
         XCTAssertTrue(
             menu.frame.maxY <= bubble.frame.minY + 20

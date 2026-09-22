@@ -930,6 +930,9 @@ final class DirectChatStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-slow-report") {
+                try? await Task.sleep(for: .seconds(5))
+            }
             return nil
         }
         #endif
