@@ -1369,6 +1369,26 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
+    func testMessageDatesFollowSelectedAppLanguage() {
+        for (language, month) in [("en", "Jul"), ("de", "Juli"), ("zh-Hans", "月")] {
+            let app = XCUIApplication()
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-chats", "--ui-testing-language=\(language)",
+                "--ui-testing-appearance=light", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
+            app.launch()
+            let date = app.staticTexts["inbox-date-visual-ui-connection"]
+            XCTAssertTrue(date.waitForExistence(timeout: 5))
+            XCTAssertTrue(date.label.contains(month), date.label)
+            saveScreenshot(app: app, name: "message-dates-\(language)")
+            app.buttons["inbox-row-ui-connection"].tap()
+            let timestamp = app.staticTexts.matching(NSPredicate(format: "identifier BEGINSWITH %@", "chat-timestamp-")).firstMatch
+            XCTAssertTrue(timestamp.waitForExistence(timeout: 5))
+            XCTAssertTrue(timestamp.label.contains(month), timestamp.label)
+            app.terminate()
+        }
+    }
+
+    @MainActor
     func testCaptureCurrentAppearanceMatrix() throws {
         let appearance = Self.resolvedAppearance()
         XCTAssertTrue(["light", "dark"].contains(appearance), "appearance must be light|dark")

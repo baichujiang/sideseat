@@ -1621,7 +1621,7 @@ enum InboxActivityFormatting {
     /// Today → time; yesterday → label; this week → weekday; older → short date.
     static func label(for date: Date, now: Date = Date(), calendar: Calendar = .current) -> String {
         if calendar.isDate(date, inSameDayAs: now) {
-            return date.formatted(date: .omitted, time: .shortened)
+            return date.formatted(Date.FormatStyle(date: .omitted, time: .shortened).locale(AppLocalization.selectedLanguage.locale))
         }
         if let yesterday = calendar.date(byAdding: .day, value: -1, to: now),
            calendar.isDate(date, inSameDayAs: yesterday)
@@ -1631,9 +1631,9 @@ enum InboxActivityFormatting {
         if let weekAgo = calendar.date(byAdding: .day, value: -6, to: calendar.startOfDay(for: now)),
            date >= weekAgo
         {
-            return date.formatted(.dateTime.weekday(.abbreviated))
+            return date.formatted(.dateTime.weekday(.abbreviated).locale(AppLocalization.selectedLanguage.locale))
         }
-        return date.formatted(date: .abbreviated, time: .omitted)
+        return date.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted).locale(AppLocalization.selectedLanguage.locale))
     }
 }
 
@@ -1641,7 +1641,7 @@ enum ChatDaySeparatorFormatting {
     static func label(for day: Date, calendar: Calendar = .current) -> String {
         if calendar.isDateInToday(day) { return AppLocalization.string( "Today") }
         if calendar.isDateInYesterday(day) { return AppLocalization.string( "Yesterday") }
-        return day.formatted(date: .abbreviated, time: .omitted)
+        return day.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted).locale(AppLocalization.selectedLanguage.locale))
     }
 
     static func dayStart(for date: Date?, calendar: Calendar = .current) -> Date? {
@@ -1684,14 +1684,14 @@ enum ChatMessageGrouping {
         for date: Date,
         calendar: Calendar = .current
     ) -> String {
-        let time = date.formatted(date: .omitted, time: .shortened)
+        let time = date.formatted(Date.FormatStyle(date: .omitted, time: .shortened).locale(AppLocalization.selectedLanguage.locale))
         if calendar.isDateInToday(date) {
             return AppLocalization.string( "Today, \(time)")
         }
         if calendar.isDateInYesterday(date) {
             return AppLocalization.string( "Yesterday, \(time)")
         }
-        return date.formatted(date: .abbreviated, time: .shortened)
+        return date.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened).locale(AppLocalization.selectedLanguage.locale))
     }
 }
 
