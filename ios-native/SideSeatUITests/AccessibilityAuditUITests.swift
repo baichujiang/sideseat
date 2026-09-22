@@ -808,6 +808,67 @@ final class AccessibilityAuditUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["profile-privacy"].waitForNonExistence(timeout: 5))
     }
 
+    func testEmptyMessagesKeepRecoveryReachableAtLargestGermanText() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-skip-tutorial", "--ui-testing-chats",
+            "--ui-testing-inbox-empty", "--ui-testing-inbox-refresh-error",
+            "--ui-testing-language=de", "--ui-testing-appearance=dark",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
+        ]
+        app.launch()
+        let list = app.descendants(matching: .any)["inbox-list"]
+        XCTAssertTrue(list.waitForExistence(timeout: 5))
+        let retry = app.buttons["inbox-retry"]
+        XCTAssertTrue(retry.isHittable)
+        retry.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["inbox-issue-banner"].exists)
+        let together = app.buttons["inbox-open-together"]
+        for _ in 0..<5 where !together.isHittable || together.frame.maxY > app.tabBars.firstMatch.frame.minY - 8 {
+            list.swipeUp()
+        }
+        XCTAssertTrue(together.isHittable)
+        XCTAssertLessThanOrEqual(together.frame.maxY, app.tabBars.firstMatch.frame.minY - 8)
+        XCTAssertGreaterThan(together.frame.width, app.frame.width * 0.8,
+            "An accessibility-size action should use the available width instead of breaking its destination name.")
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Empty Messages recovery at German accessibility5"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        together.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.tabBars.buttons["Zusammen"].isSelected)
+    }
+
+    func testOfflineTogetherKeepsReconnectVisibleAtLargestGermanText() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-skip-tutorial", "--ui-testing-ephemeral-credentials",
+            "--ui-testing-language=de", "--ui-testing-appearance=light",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
+        ]
+        app.launch()
+        XCTAssertTrue(app.descendants(matching: .any)["home-week-timetable"].waitForExistence(timeout: 5))
+        app.terminate()
+        app.launchArguments.append("--ui-testing-offline-cached-launch")
+        app.launch()
+        let together = app.tabBars.buttons["Zusammen"]
+        XCTAssertTrue(together.waitForExistence(timeout: 5))
+        together.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["together-assignment-offline"].waitForExistence(timeout: 3))
+        let reconnect = app.buttons["together-reconnect"]
+        XCTAssertEqual(reconnect.label, "Neu verbinden")
+        XCTAssertTrue(reconnect.isHittable)
+        XCTAssertGreaterThanOrEqual(reconnect.frame.minY, app.navigationBars.firstMatch.frame.maxY)
+        XCTAssertLessThanOrEqual(reconnect.frame.maxY, app.tabBars.firstMatch.frame.minY - 8)
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Offline Together at German accessibility5"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        app.tabBars.buttons["Kalender"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["home-week-timetable"].waitForExistence(timeout: 3))
+    }
+
     private func auditTab(
         in app: XCUIApplication,
         labels: [String],

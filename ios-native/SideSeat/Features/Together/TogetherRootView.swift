@@ -113,6 +113,8 @@ private struct TogetherAssignmentOfflineView: View {
             }
             .buttonStyle(.borderedProminent)
             .disabled(isReconnecting)
+            .accessibilityLabel(AppLocalization.string("Reconnect"))
+            .accessibilityIdentifier("together-reconnect")
         }
         .background(SideSeatTheme.bgGrouped)
         .ssRootNavigationTitle("Together")
