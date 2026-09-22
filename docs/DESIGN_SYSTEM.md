@@ -383,9 +383,10 @@ sizes. Each inset card has a compact icon/header and quiet row separators;
 inputs no longer sit inside individual gray wells. A native menu/picker keeps
 selection checkmarks while exposing a consistent trailing chevron. Only the
 focused text row receives a light Rose wash, without a leading marker. Focus
-animation respects Reduce Motion. The header pairs the existing avatar with the
-sheet title and account handle. Semantic colors, the ink/chalk Save action and
-44pt minimum input/control targets remain in use.
+animation respects Reduce Motion. As of 2026-09-22, the editor uses a native
+inline title with Cancel and Save, matching Privacy. The avatar/account header
+and bottom Save area are removed to leave more room for fields and the keyboard.
+Semantic colors and 44pt minimum custom input/control targets remain in use.
 
 Editable text stays leading-aligned within the right-hand input column before
 and during editing. Tapping the label or row whitespace focuses that field.
@@ -399,9 +400,10 @@ tagline. Study contains school → student status → degree → major → semes
 (or graduation year for alumni). Contact handles follow in their existing order.
 
 Accessibility text sizes stack field labels and controls. Decorative header
-icons stay within their badges while text scales normally. Save, validation,
-school-change confirmation and unsaved-edit protection are unchanged. Shared
-privacy/account sheet components retain their prior appearance. Verification is
+icons stay within their badges while text scales normally. School-change
+confirmation and unsaved-edit protection remain in place. Submission ends input
+focus and disables fields and cancellation until the request completes, keeping
+the displayed draft aligned with what is being saved. Verification is
 local/simulator only; see [profile editor visual QA](visual-qa/profile-editor-polish-2026-09-12.md).
 
 ### System avatars

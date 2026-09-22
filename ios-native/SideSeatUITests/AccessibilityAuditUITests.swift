@@ -407,7 +407,8 @@ final class AccessibilityAuditUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
             "--ui-testing-deep-link=/profile", "--ui-testing-language=de",
-            "--ui-testing-dynamic-type-accessibility", "--ui-testing-appearance=dark"]
+            "--ui-testing-dynamic-type-accessibility", "--ui-testing-appearance=dark",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
         app.launch()
         let profile = app.descendants(matching: .any)["me-profile"]
         XCTAssertTrue(profile.waitForExistence(timeout: 8))
@@ -425,6 +426,32 @@ final class AccessibilityAuditUITests: XCTestCase {
         add(attachment)
         app.buttons["me-hero-edit"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["profile-edit"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Profil"].exists)
+        let save = app.buttons["profile-edit-save"]
+        XCTAssertTrue(save.isHittable)
+        XCTAssertFalse(save.isEnabled)
+        XCTAssertTrue(app.buttons["profile-edit-close"].isHittable)
+        let editorScreenshot = XCTAttachment(screenshot: app.screenshot())
+        editorScreenshot.name = "Profile native navigation at German accessibility5"
+        editorScreenshot.lifetime = .keepAlways
+        add(editorScreenshot)
+        let nickname = app.textFields["profile-edit-nickname"]
+        XCTAssertTrue(nickname.isHittable)
+        nickname.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+        nickname.typeText(" UX")
+        XCTAssertEqual(nickname.value as? String, "Test User UX")
+        XCTAssertTrue(save.isHittable)
+        XCTAssertTrue(save.isEnabled)
+        let keyboardDone = app.buttons["profile-edit-input-done"]
+        XCTAssertTrue(keyboardDone.isHittable)
+        XCTAssertLessThanOrEqual(nickname.frame.maxY, keyboardDone.frame.minY)
+        let inputScreenshot = XCTAttachment(screenshot: app.screenshot())
+        inputScreenshot.name = "Profile input and native Save at German accessibility5"
+        inputScreenshot.lifetime = .keepAlways
+        add(inputScreenshot)
+        save.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["profile-edit"].waitForNonExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["me-display-name-visual"].label, "Test User UX")
     }
 
     func testSettingsLanguageFlowAtLargestGermanText() {

@@ -187,12 +187,38 @@ struct ProfileEditSheet: View {
                 .padding(.horizontal, SideSeatTheme.spaceLG)
                 .padding(.top, SideSeatTheme.spaceSM)
                 .padding(.bottom, SideSeatTheme.spaceLG)
+                .disabled(isSubmitting)
             }
             .scrollDismissesKeyboard(.interactively)
             .background(SideSeatTheme.bgGrouped.ignoresSafeArea())
             .accessibilityIdentifier("profile-edit")
-            .toolbar(.hidden, for: .navigationBar)
+            .navigationTitle("Profile")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { requestDismissal() }
+                        .disabled(isSubmitting)
+                        .accessibilityIdentifier("profile-edit-close")
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        if hasChangedSchool {
+                            showsSchoolChangeConfirmation = true
+                        } else {
+                            Task { await save() }
+                        }
+                    } label: {
+                        if isSubmitting {
+                            ProgressView().ssNeutralProgressTint()
+                        } else {
+                            Text("Save")
+                        }
+                    }
+                    .disabled(!canSave || !hasUnsavedChanges || isSubmitting)
+                    .ssConfirmationActionStyle()
+                    .accessibilityLabel(AppLocalization.string("Save"))
+                    .accessibilityIdentifier("profile-edit-save")
+                }
                 ToolbarItemGroup(placement: .keyboard) {
                     Button {
                         focusedInput = focusedInput?.previous
@@ -219,36 +245,6 @@ struct ProfileEditSheet: View {
                     Button("Done") { focusedInput = nil }
                         .accessibilityIdentifier("profile-edit-input-done")
                 }
-            }
-            .safeAreaInset(edge: .top, spacing: 0) {
-                ProfileEditorHeader(
-                    profile: profile,
-                    nickname: nickname,
-                    isSubmitting: isSubmitting
-                ) {
-                    requestDismissal()
-                }
-            }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                VStack(spacing: 0) {
-                    Divider()
-                    SSPrimaryButton(
-                        title: AppLocalization.string( "Save"),
-                        isLoading: isSubmitting,
-                        fill: .product,
-                        accessibilityID: "profile-edit-save"
-                    ) {
-                        if hasChangedSchool {
-                            showsSchoolChangeConfirmation = true
-                        } else {
-                            Task { await save() }
-                        }
-                    }
-                    .disabled(!canSave || !hasUnsavedChanges || isSubmitting)
-                    .padding(.horizontal, SideSeatTheme.spaceLG)
-                    .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? SideSeatTheme.spaceMD : SideSeatTheme.spaceSM)
-                }
-                .background(.bar)
             }
         }
         .background {
@@ -349,6 +345,7 @@ struct ProfileEditSheet: View {
     private func save() async {
         guard !isSubmitting else { return }
         isSubmitting = true
+        focusedInput = nil
         defer { isSubmitting = false }
         issue = nil
         let request = currentDraft.updateRequest(comparedTo: initialDraft)
@@ -598,6 +595,7 @@ private struct ProfileEditMenuPicker: View {
                         .fixedSize(horizontal: false, vertical: true)
                     Image(systemName: "chevron.down")
                         .font(.caption2.weight(.semibold))
+                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         .foregroundStyle(SideSeatTheme.textSecondary)
                 }
                 .frame(maxWidth: .infinity, minHeight: 44, alignment: dynamicTypeSize.isAccessibilitySize ? .leading : .trailing)
@@ -642,45 +640,6 @@ private struct ProfileEditorSection<Content: View>: View {
             RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
                 .strokeBorder(SideSeatTheme.separator.opacity(0.18), lineWidth: 0.5)
         }
-    }
-}
-
-private struct ProfileEditorHeader: View {
-    let profile: NativeCurrentProfile
-    let nickname: String
-    let isSubmitting: Bool
-    let onClose: () -> Void
-
-    var body: some View {
-        HStack(spacing: SideSeatTheme.spaceMD) {
-            ProfileAvatar(url: profile.avatarUrl, name: nickname.isEmpty ? profile.displayName : nickname, size: 40)
-                .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Edit profile")
-                    .font(.headline)
-                    .foregroundStyle(SideSeatTheme.textPrimary)
-                    .accessibilityAddTraits(.isHeader)
-                Text("@\(profile.username)")
-                    .font(.caption)
-                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    .lineLimit(1)
-            }
-            Spacer(minLength: SideSeatTheme.spaceSM)
-            Button(action: onClose) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    .frame(width: 44, height: 44)
-                    .background(SideSeatTheme.fillTertiary, in: Circle())
-            }
-            .buttonStyle(SSPressButtonStyle())
-            .disabled(isSubmitting)
-            .accessibilityLabel(AppLocalization.string("Cancel"))
-            .accessibilityIdentifier("profile-edit-close")
-        }
-        .padding(.horizontal, SideSeatTheme.screenHorizontal)
-        .padding(.vertical, SideSeatTheme.spaceSM)
-        .background(SideSeatTheme.bgGrouped)
     }
 }
 

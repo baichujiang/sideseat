@@ -1455,7 +1455,9 @@ final class AuthenticationUITests: XCTestCase {
 
     func testMeProfileEditSheetSavesInlineChanges() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing-authenticated"]
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-language=zh-Hans", "--ui-testing-appearance=light",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
         app.launch()
 
         let meTab = app.tabBars.buttons["我"]
@@ -1492,7 +1494,8 @@ final class AuthenticationUITests: XCTestCase {
     func testMeProfileInputRowsSupportTapAndKeyboardNavigation() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
-            "--ui-testing-language=zh-Hans"]
+            "--ui-testing-language=zh-Hans", "--ui-testing-slow-profile-save",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
         app.launch()
 
         let meTab = app.tabBars.buttons["我"]
@@ -1539,15 +1542,21 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertEqual(app.textFields["profile-edit-wechat"].value as? String, "wx_nav_test_edited")
         XCTAssertEqual(app.textFields["profile-edit-whatsapp"].value as? String, "wa_nav_test")
 
-        app.buttons["profile-edit-save"].tap()
-        XCTAssertTrue(app.descendants(matching: .any)["profile-edit"].waitForNonExistence(timeout: 3))
+        let save = app.buttons["profile-edit-save"]
+        let saveLabel = save.label
+        save.tap()
+        XCTAssertEqual(save.label, saveLabel)
+        XCTAssertFalse(app.textFields["profile-edit-wechat"].isEnabled)
+        XCTAssertFalse(app.buttons["profile-edit-close"].isEnabled)
+        XCTAssertTrue(app.descendants(matching: .any)["profile-edit"].waitForNonExistence(timeout: 6))
         XCTAssertTrue(app.staticTexts["Test User Tap"].waitForExistence(timeout: 3))
     }
 
     func testMeProfileEditSheetProtectsUnsavedChanges() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
-            "--ui-testing-language=zh-Hans"]
+            "--ui-testing-language=zh-Hans", "--ui-testing-appearance=dark",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
         app.launch()
 
         let meTab = app.tabBars.buttons["我"]
@@ -1591,7 +1600,8 @@ final class AuthenticationUITests: XCTestCase {
     func testMeProfileSchoolChangeRequiresNewVerification() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
-            "--ui-testing-language=zh-Hans"]
+            "--ui-testing-language=zh-Hans",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
         app.launch()
 
         let meTab = app.tabBars.buttons["我"]
