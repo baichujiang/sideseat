@@ -1197,6 +1197,20 @@ final class VisualQAScreenshotUITests: XCTestCase {
         XCTAssertTrue(explore.isSelected)
         XCTAssertFalse(coffee.isSelected)
         saveScreenshot(app: app, name: "flow-activity-picker-de-large-type")
+        let activity = app.descendants(matching: .any)["intent-editor-activity"].firstMatch
+        revealFlowElement(activity, in: app)
+        activity.tap()
+        activity.typeText(String(repeating: "a", count: 81))
+        let guidance = app.staticTexts["Max. 80 Zeichen."]
+        XCTAssertTrue(guidance.isHittable)
+        XCTAssertLessThanOrEqual(guidance.frame.maxY, app.keyboards.firstMatch.frame.minY + 1)
+        saveScreenshot(app: app, name: "flow-intent-limit-de-large-type-keyboard")
+        activity.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 76))
+        app.buttons["intent-editor-next"].tap()
+        XCTAssertTrue(app.buttons["intent-editor-save"].waitForExistence(timeout: 3))
+        app.buttons["intent-editor-back"].tap()
+        revealFlowElement(activity, in: app)
+        XCTAssertEqual(activity.value as? String, "aaaaa")
         app.terminate()
     }
 
