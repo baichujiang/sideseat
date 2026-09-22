@@ -3,6 +3,7 @@ import SwiftUI
 struct BlockedUsersView: View {
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var store = BlockedUsersStore()
     @State private var pendingUnblock: NativeBlockedUser?
     @State private var showsUnblockPrompt = false
@@ -12,6 +13,18 @@ struct BlockedUsersView: View {
             if (!store.hasLoaded || store.isLoading) && store.blocks.isEmpty {
                 SSLoadingState("Loading blocked users")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let issue = store.issue, store.blocks.isEmpty {
+                SSEmptyState(
+                    title: "Blocked users unavailable",
+                    systemImage: "wifi.exclamationmark",
+                    description: LocalizedStringKey(issue),
+                    actionTitle: AppLocalization.string("Try again"),
+                    actionAccessibilityID: "blocked-users-retry"
+                ) {
+                    Task { await store.load(using: session) }
+                }
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("blocked-users-load-error")
             } else if store.blocks.isEmpty {
                 SSEmptyState(
                     title: "No blocked users",
@@ -22,7 +35,7 @@ struct BlockedUsersView: View {
             } else {
                 List {
                     ForEach(store.blocks) { block in
-                        HStack(spacing: 12) {
+                        rowLayout {
                             Button {
                                 router.navigate(to: .profile(userID: block.blockedId))
                             } label: {
@@ -35,13 +48,15 @@ struct BlockedUsersView: View {
                                         Text(blockedRelativeLabel(for: block.createdAt))
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
+                                            .accessibilityIdentifier("blocked-users-date-\(block.blockedId)")
                                     }
                                 }
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             }
                             .buttonStyle(SSPressButtonStyle())
                             .accessibilityIdentifier("blocked-users-row-\(block.blockedId)")
 
-                            Spacer(minLength: 8)
+                            if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 8) }
 
                             Button("Unblock") {
                                 pendingUnblock = block
@@ -110,7 +125,7 @@ struct BlockedUsersView: View {
             ]
         }
         .overlay(alignment: .bottom) {
-            if let issue = store.issue {
+            if let issue = store.issue, !store.blocks.isEmpty {
                 Text(issue)
                     .font(.footnote)
                     .foregroundStyle(SideSeatTheme.danger)
@@ -120,12 +135,18 @@ struct BlockedUsersView: View {
         }
     }
 
+    private var rowLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+            : AnyLayout(HStackLayout(spacing: 12))
+    }
+
     private func blockedRelativeLabel(for iso: String) -> String {
         let fractional = ISO8601DateFormatter()
         fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         let date = fractional.date(from: iso) ?? ISO8601DateFormatter().date(from: iso)
         guard let date else { return AppLocalization.string( "Blocked") }
-        let relative = date.formatted(.relative(presentation: .named))
+        let relative = date.formatted(.relative(presentation: .named).locale(AppLocalization.selectedLanguage.locale))
         return String(format: AppLocalization.string( "Blocked %@"), relative)
     }
 }

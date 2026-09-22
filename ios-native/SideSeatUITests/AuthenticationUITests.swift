@@ -5044,9 +5044,63 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["UI feedback"].waitForExistence(timeout: 3))
     }
 
+    func testBlockedUsersLoadFailureOffersRetryAndKeepsBlocksIntact() {
+        for (language, size, meTitle) in [
+            ("en", "UICTContentSizeCategoryL", "Me"),
+            ("de", "UICTContentSizeCategoryAccessibilityXXXL", "Ich"),
+        ] {
+            let app = XCUIApplication()
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-blocked-users-load-error", "--ui-testing-language=\(language)",
+                "--ui-testing-appearance=dark", "-UIPreferredContentSizeCategoryName", size]
+            app.launch()
+            let me = app.tabBars.buttons[meTitle]
+            XCTAssertTrue(me.waitForExistence(timeout: 5))
+            me.tap()
+            let blocked = app.buttons["me-blocked"]
+            let profile = app.scrollViews["me-profile"]
+            for _ in 0..<6 where !blocked.isHittable { profile.swipeUp() }
+            blocked.tap()
+            let failure = app.descendants(matching: .any)["blocked-users-load-error"]
+            XCTAssertTrue(failure.waitForExistence(timeout: 3))
+            XCTAssertFalse(app.descendants(matching: .any)["blocked-users-empty"].exists)
+            let retry = app.buttons["blocked-users-retry"]
+            XCTAssertTrue(retry.waitForExistence(timeout: 3))
+            XCTAssertTrue(retry.isHittable, app.debugDescription)
+            XCTAssertLessThanOrEqual(retry.frame.maxY, app.tabBars.firstMatch.frame.minY - 8)
+            let errorScreenshot = XCTAttachment(screenshot: app.screenshot())
+            errorScreenshot.name = "Blocked list recovery \(language)"
+            errorScreenshot.lifetime = .keepAlways
+            add(errorScreenshot)
+            retry.tap()
+            let row = app.buttons["blocked-users-row-ui-blocked-user"]
+            XCTAssertTrue(row.waitForExistence(timeout: 3))
+            XCTAssertFalse(failure.exists)
+            let unblock = app.buttons["blocked-users-unblock-ui-blocked-user"]
+            XCTAssertTrue(unblock.isHittable)
+            let date = app.staticTexts["blocked-users-date-ui-blocked-user"]
+            XCTAssertTrue(date.label.contains(language == "de" ? "vor " : "ago"))
+            if language == "de" {
+                XCTAssertGreaterThan(row.frame.width, app.frame.width * 0.7)
+                XCTAssertGreaterThanOrEqual(unblock.frame.minY, row.frame.maxY)
+            }
+            let listScreenshot = XCTAttachment(screenshot: app.screenshot())
+            listScreenshot.name = "Recovered blocked list \(language)"
+            listScreenshot.lifetime = .keepAlways
+            add(listScreenshot)
+            unblock.tap()
+            let cancel = app.buttons["blocked-users-unblock-cancel"].firstMatch
+            XCTAssertTrue(cancel.waitForExistence(timeout: 3))
+            cancel.tap()
+            XCTAssertTrue(row.exists)
+            app.terminate()
+        }
+    }
+
     func testSettingsUnblocksUserAndShowsEmptyState() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing-authenticated"]
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-language=zh-Hans", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
         app.launch()
 
         app.tabBars.buttons["我"].tap()

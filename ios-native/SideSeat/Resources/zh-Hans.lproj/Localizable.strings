@@ -1687,6 +1687,7 @@
 "Use up to 160 characters." = "最多输入 160 个字符。";
 "Use up to 120 characters." = "最多输入 120 个字符。";
 "Use 2–160 characters, or leave it blank." = "请输入 2–160 个字符，或留空。";
+"Blocked users unavailable" = "无法加载已屏蔽用户";
 "Privacy & Safety" = "隐私与安全";
 "Coordination languages" = "沟通语言";
 

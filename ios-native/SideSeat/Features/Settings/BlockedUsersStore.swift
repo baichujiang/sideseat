@@ -48,6 +48,10 @@ final class BlockedUsersStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-blocked-users-load-error"), !hasLoaded {
+                issue = AppLocalization.string("The network connection failed. Please try again.")
+                return
+            }
             if blocks.isEmpty {
                 blocks = [
                     NativeBlockedUser(
