@@ -316,6 +316,9 @@ category colors remain as described above.
 Text-limit guidance replaces the intention action dock's general detail only
 while input is too long. It stays above the keyboard, next to the disabled action.
 When publication is available, the existing matching/paused disclosure returns.
+The editor uses native focus and scroll centering when focus, the input reason or
+the available Form height changes, keeping the active input above the action
+dock. Step navigation ends focus locally and preserves the draft.
 
 ### Comfort and character refresh — 2026-09-09
 

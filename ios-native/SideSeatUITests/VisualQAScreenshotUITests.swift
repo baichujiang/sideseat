@@ -764,6 +764,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
         let activityGuidance = app.staticTexts["Use up to 80 characters."]
         XCTAssertTrue(activityGuidance.isHittable)
         XCTAssertLessThanOrEqual(activityGuidance.frame.maxY, app.keyboards.firstMatch.frame.minY + 1)
+        XCTAssertLessThanOrEqual(activity.frame.maxY, next.frame.minY - 8)
         saveScreenshot(app: app, name: "intention-activity-limit")
         activity.typeText(XCUIKeyboardKey.delete.rawValue)
         XCTAssertTrue(next.isEnabled)
@@ -789,6 +790,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
         goal.typeText(String(repeating: "c", count: 81))
         XCTAssertFalse(next.isEnabled)
         XCTAssertTrue(app.staticTexts["Use up to 80 characters."].isHittable)
+        XCTAssertLessThanOrEqual(goal.frame.maxY, next.frame.minY - 8)
         goal.typeText(XCUIKeyboardKey.delete.rawValue)
         next.tap()
 
@@ -801,6 +803,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
         let noteGuidance = app.staticTexts["Use up to 160 characters."]
         XCTAssertTrue(noteGuidance.isHittable)
         XCTAssertLessThanOrEqual(noteGuidance.frame.maxY, app.keyboards.firstMatch.frame.minY + 1)
+        XCTAssertLessThanOrEqual(note.frame.maxY, save.frame.minY - 8)
         saveScreenshot(app: app, name: "intention-note-limit")
         note.typeText(XCUIKeyboardKey.delete.rawValue + "\n\n")
         XCTAssertTrue(save.isEnabled, "Trailing whitespace is removed by the existing submission contract")
@@ -1204,6 +1207,8 @@ final class VisualQAScreenshotUITests: XCTestCase {
         let guidance = app.staticTexts["Max. 80 Zeichen."]
         XCTAssertTrue(guidance.isHittable)
         XCTAssertLessThanOrEqual(guidance.frame.maxY, app.keyboards.firstMatch.frame.minY + 1)
+        XCTAssertLessThanOrEqual(activity.frame.maxY, app.buttons["intent-editor-next"].frame.minY - 8)
+        XCTAssertGreaterThanOrEqual(activity.frame.minY, app.navigationBars.firstMatch.frame.maxY)
         saveScreenshot(app: app, name: "flow-intent-limit-de-large-type-keyboard")
         activity.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 76))
         app.buttons["intent-editor-next"].tap()

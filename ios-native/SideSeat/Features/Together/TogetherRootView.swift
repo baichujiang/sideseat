@@ -1220,7 +1220,11 @@ private struct WeeklyIntentEditorView: View {
     @State private var editorStep = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @FocusState private var isSportInputFocused: Bool
+    @FocusState private var focusedInput: InputField?
+
+    private enum InputField: Hashable {
+        case activity, sport, studyGoal, note
+    }
 
     let intent: NativeWeeklyIntent?
     let saveIssue: String?
@@ -1292,32 +1296,43 @@ private struct WeeklyIntentEditorView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 if !dynamicTypeSize.isAccessibilitySize { editorProgress }
-                Form {
-                    if dynamicTypeSize.isAccessibilitySize {
-                        Section { editorProgress }
-                            .listRowBackground(Color.clear)
-                            .listRowInsets(EdgeInsets())
-                    }
-                    if editorStep == 0 {
-                        activityFields
-                    } else {
-                        timeFields
-                    }
-                    if dynamicTypeSize.isAccessibilitySize {
-                        Section {
-                            Text(editorActionDetail)
-                                .font(.caption)
-                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                                .fixedSize(horizontal: false, vertical: true)
+                ScrollViewReader { scroll in
+                    Form {
+                        if dynamicTypeSize.isAccessibilitySize {
+                            Section { editorProgress }
+                                .listRowBackground(Color.clear)
+                                .listRowInsets(EdgeInsets())
                         }
-                        .listRowBackground(Color.clear)
+                        if editorStep == 0 {
+                            activityFields
+                        } else {
+                            timeFields
+                        }
+                        if dynamicTypeSize.isAccessibilitySize {
+                            Section {
+                                Text(editorActionDetail)
+                                    .font(.caption)
+                                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            .listRowBackground(Color.clear)
+                        }
+                    }
+                    .scrollContentBackground(.hidden)
+                    .scrollDismissesKeyboard(.interactively)
+                    .accessibilityIdentifier("intent-editor-fields")
+                    .id(editorStep)
+                    .disabled(isSaving)
+                    .onChange(of: focusedInput) { _, field in
+                        if let field { scroll.scrollTo(field, anchor: .center) }
+                    }
+                    .onChange(of: inputLengthIssue) { _, _ in
+                        if let focusedInput { scroll.scrollTo(focusedInput, anchor: .center) }
+                    }
+                    .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { _ in
+                        if let focusedInput { scroll.scrollTo(focusedInput, anchor: .center) }
                     }
                 }
-                .scrollContentBackground(.hidden)
-                .scrollDismissesKeyboard(.interactively)
-                .accessibilityIdentifier("intent-editor-fields")
-                .id(editorStep)
-                .disabled(isSaving)
             }
             .background(SideSeatTheme.bgGrouped)
             .navigationTitle(AppLocalization.string(intent == nil ? "Add an intention" : "Edit intention"))
@@ -1447,8 +1462,9 @@ private struct WeeklyIntentEditorView: View {
                     TextField("Which sport?", text: $sportText)
                         .textInputAutocapitalization(.words)
                         .submitLabel(.done)
-                        .focused($isSportInputFocused)
-                        .onSubmit { isSportInputFocused = false }
+                        .focused($focusedInput, equals: .sport)
+                        .id(InputField.sport)
+                        .onSubmit { focusedInput = nil }
                         .accessibilityIdentifier("intent-editor-sport")
 
                     if !sportSuggestions.isEmpty {
@@ -1457,7 +1473,7 @@ private struct WeeklyIntentEditorView: View {
                                 ForEach(sportSuggestions) { sport in
                                     Button(sport.title) {
                                         sportText = sport.title
-                                        isSportInputFocused = false
+                                        focusedInput = nil
                                     }
                                     .buttonStyle(.bordered)
                                     .controlSize(.small)
@@ -1484,6 +1500,8 @@ private struct WeeklyIntentEditorView: View {
                     )
                     .lineLimit(1...3)
                     .textInputAutocapitalization(.sentences)
+                    .focused($focusedInput, equals: .activity)
+                    .id(InputField.activity)
                     .accessibilityIdentifier("intent-editor-activity")
 
                     if !hasValidActivityText, inputLengthIssue == nil {
@@ -1504,6 +1522,8 @@ private struct WeeklyIntentEditorView: View {
                     )
                     .lineLimit(1...3)
                     .textInputAutocapitalization(.sentences)
+                    .focused($focusedInput, equals: .studyGoal)
+                    .id(InputField.studyGoal)
                     .accessibilityIdentifier("intent-editor-study-goal")
 
                     if !hasValidStudyGoal, inputLengthIssue == nil {
@@ -1599,6 +1619,8 @@ private struct WeeklyIntentEditorView: View {
             Section("Optional") {
                 TextField("A short clarification", text: $note, axis: .vertical)
                     .lineLimit(2...4)
+                    .focused($focusedInput, equals: .note)
+                    .id(InputField.note)
                     .accessibilityIdentifier("intent-editor-note")
                 Text(AppLocalization.string(exploreVisible
                     ? "This note may appear as a short Explore activity preview."
@@ -1894,8 +1916,7 @@ private struct WeeklyIntentEditorView: View {
     }
 
     private func changeStep(_ step: Int) {
-        isSportInputFocused = false
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        focusedInput = nil
         withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
             editorStep = step
         }
@@ -2015,7 +2036,7 @@ private struct WeeklyIntentEditorView: View {
     }
 
     private var sportSuggestions: [NativeSportTag] {
-        guard isSportInputFocused else { return [] }
+        guard focusedInput == .sport else { return [] }
         let selection = NativeSportInput.normalized(sportText)
         guard selection.tag == .other else { return [] }
         return NativeSportInput.suggestions(matching: sportText)
