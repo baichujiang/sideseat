@@ -1606,6 +1606,8 @@ final class VisualQAScreenshotUITests: XCTestCase {
     private func captureAuth(appearance: String) {
         let app = XCUIApplication()
         app.launchArguments = [
+            "--ui-testing-language=en",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL",
             "--ui-testing-signed-out",
             "--ui-testing-skip-tutorial",
             "--ui-testing-appearance=\(appearance)",
@@ -1621,6 +1623,8 @@ final class VisualQAScreenshotUITests: XCTestCase {
     private func captureAuthenticatedTabs(appearance: String) {
         let app = XCUIApplication()
         app.launchArguments = [
+            "--ui-testing-language=en",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL",
             "--ui-testing-authenticated",
             "--ui-testing-skip-tutorial",
             "--ui-testing-chats",
