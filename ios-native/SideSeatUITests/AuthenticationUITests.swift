@@ -2746,6 +2746,42 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertLessThanOrEqual(trailingGap, 48)
     }
 
+    func testNewEventExplainsMissingTitleAndKeepsCorrectionVisible() {
+        for (language, size, message, cancel) in [
+            ("en", "UICTContentSizeCategoryL", "Title is required.", "Cancel"),
+            ("de", "UICTContentSizeCategoryAccessibilityXXXL", "Titel ist erforderlich.", "Abbrechen"),
+        ] {
+            let app = XCUIApplication()
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+                "--ui-testing-language=\(language)", "--ui-testing-appearance=light",
+                "-UIPreferredContentSizeCategoryName", size]
+            app.launch()
+            let addEvent = app.buttons["new-event"]
+            XCTAssertTrue(addEvent.waitForExistence(timeout: 5))
+            addEvent.tap()
+            let title = app.textFields["event-title"]
+            XCTAssertTrue(title.waitForExistence(timeout: 3))
+            app.buttons["event-save"].tap()
+            let guidance = app.staticTexts[message]
+            XCTAssertTrue(guidance.waitForExistence(timeout: 3))
+            XCTAssertTrue(guidance.isHittable, "The missing-title reason must be visible without hunting through the form")
+            XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2))
+            XCTAssertLessThanOrEqual(guidance.frame.maxY, app.keyboards.firstMatch.frame.minY)
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = "Missing event title \(language)"
+            screenshot.lifetime = .keepAlways
+            add(screenshot)
+            title.typeText("Library review")
+            XCTAssertTrue(guidance.waitForNonExistence(timeout: 2))
+            XCTAssertEqual(title.value as? String, "Library review")
+            XCTAssertTrue(app.buttons["event-save"].isEnabled)
+            // Only invalid Save was invoked. A valid Save would call the real event API.
+            app.buttons[cancel].tap()
+            XCTAssertTrue(title.waitForNonExistence(timeout: 3))
+            app.terminate()
+        }
+    }
+
     func testHomeNewEventOpensEditableCalendarForm() {
         let app = XCUIApplication()
         app.launchArguments = [

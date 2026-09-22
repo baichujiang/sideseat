@@ -521,6 +521,7 @@ struct CalendarEventEditorView: View {
     @State private var companionIDs: Set<String>
     @State private var isSaving = false
     @State private var issue: String?
+    @State private var hasAttemptedSave = false
     @State private var confirmation: CalendarEventConfirmation?
     @State private var showConfirmation = false
     @State private var pendingSaveRequest: NativeCalendarEventRequest?
@@ -636,13 +637,6 @@ struct CalendarEventEditorView: View {
                     }
                 }
 
-                if let issue {
-                    Section {
-                        Label(issue, systemImage: "exclamationmark.triangle")
-                            .foregroundStyle(SideSeatTheme.danger)
-                    }
-                }
-
                 if context.event != nil {
                     Section {
                         Button("Delete event", role: .destructive) {
@@ -666,8 +660,22 @@ struct CalendarEventEditorView: View {
                 }
             )
             .scrollDismissesKeyboard(.immediately)
+            .disabled(isSaving)
             .accessibilityIdentifier("event-editor-form")
-            .navigationTitle(context.event == nil ? "New event" : "Edit event")
+            .safeAreaInset(edge: .top, spacing: 0) {
+                if let displayedIssue {
+                    Text(displayedIssue)
+                        .font(.footnote)
+                        .foregroundStyle(SideSeatTheme.danger)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, SideSeatTheme.spaceLG)
+                        .padding(.vertical, SideSeatTheme.spaceSM)
+                        .background(SideSeatTheme.bgGrouped)
+                        .accessibilityIdentifier("event-editor-issue")
+                }
+            }
+            .navigationTitle("Event")
             .navigationBarTitleDisplayMode(.inline)
             .interactiveDismissDisabled(isSaving)
             .toolbar {
@@ -708,6 +716,21 @@ struct CalendarEventEditorView: View {
         .presentationDetents(presentationDetents, selection: $selectedPresentationDetent)
         .presentationDragIndicator(.visible)
         .presentationContentInteraction(.scrolls)
+    }
+
+    private var currentInputIssue: String? {
+        CalendarEventFormValidation.issue(
+            title: title,
+            startAt: startAt,
+            endAt: endAt,
+            repeatRule: repeatRule,
+            repeatUntil: repeatUntil,
+            repeatHasEnd: repeatHasEnd
+        )
+    }
+
+    private var displayedIssue: String? {
+        (hasAttemptedSave ? currentInputIssue : nil) ?? issue
     }
 
     private var presentationDetents: Set<PresentationDetent> {
@@ -847,15 +870,9 @@ struct CalendarEventEditorView: View {
         guard !isSaving else { return }
         issue = nil
         let normalizedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let validationIssue = CalendarEventFormValidation.issue(
-            title: normalizedTitle,
-            startAt: startAt,
-            endAt: endAt,
-            repeatRule: repeatRule,
-            repeatUntil: repeatUntil,
-            repeatHasEnd: repeatHasEnd
-        ) {
-            issue = validationIssue
+        hasAttemptedSave = true
+        guard currentInputIssue == nil else {
+            if normalizedTitle.isEmpty { focusedTextField = .title }
             return
         }
 
