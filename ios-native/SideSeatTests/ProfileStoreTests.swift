@@ -5,6 +5,54 @@ import UIKit
 
 @Suite("Profile stores")
 struct ProfileStoreTests {
+    @Test("Nickname edits leave unrelated academic details out of the PATCH")
+    func profileDraftPatchesOnlyChangedFields() throws {
+        let profile = NativeCurrentProfile.uiTestingFixture.applying(
+            NativeProfileUpdateRequest(semester: 20)
+        )
+        let initial = ProfileEditDraft(profile: profile)
+        var edited = initial
+        edited.nickname = " Updated name "
+
+        let data = try JSONEncoder().encode(edited.updateRequest(comparedTo: initial))
+        let fields = try #require(JSONSerialization.jsonObject(with: data) as? [String: String])
+        #expect(fields == ["nickname": "Updated name"])
+    }
+
+    @Test("Clearing contact handles sends an empty value instead of dropping the edit")
+    func profileDraftClearsContactHandle() throws {
+        let profile = NativeCurrentProfile.uiTestingFixture.applying(
+            NativeProfileUpdateRequest(wechatHandle: "old_handle")
+        )
+        let initial = ProfileEditDraft(profile: profile)
+        var edited = initial
+        edited.wechatHandle = "  \n"
+
+        let data = try JSONEncoder().encode(edited.updateRequest(comparedTo: initial))
+        let fields = try #require(JSONSerialization.jsonObject(with: data) as? [String: String])
+        #expect(fields == ["wechatHandle": ""])
+    }
+
+    @Test("Student-status changes include the matching year or semester")
+    func profileDraftKeepsAcademicTransitionsTogether() {
+        let initial = ProfileEditDraft(profile: .uiTestingFixture)
+        var alumni = initial
+        alumni.studentStatus = "ALUMNI"
+        alumni.graduationYear = 2025
+        let alumniRequest = alumni.updateRequest(comparedTo: initial)
+        #expect(alumniRequest.studentStatus == "ALUMNI")
+        #expect(alumniRequest.graduationYear == 2025)
+        #expect(alumniRequest.semester == nil)
+
+        var student = alumni
+        student.studentStatus = "CURRENT_STUDENT"
+        student.semester = 1
+        let studentRequest = student.updateRequest(comparedTo: alumni)
+        #expect(studentRequest.studentStatus == "CURRENT_STUDENT")
+        #expect(studentRequest.semester == 1)
+        #expect(studentRequest.graduationYear == nil)
+    }
+
     @Test("All twenty original avatars are bundled and localized for offline display")
     @MainActor
     func bundledSystemAvatars() {

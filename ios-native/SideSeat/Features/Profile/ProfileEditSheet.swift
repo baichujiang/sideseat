@@ -351,22 +351,7 @@ struct ProfileEditSheet: View {
         isSubmitting = true
         defer { isSubmitting = false }
         issue = nil
-        let draft = currentDraft.normalized
-        let request = NativeProfileUpdateRequest(
-            nickname: draft.nickname,
-            bio: draft.bio,
-            gender: draft.gender,
-            school: draft.school,
-            studentStatus: draft.studentStatus,
-            degreeLevel: draft.degreeLevel,
-            major: draft.major,
-            semester: draft.studentStatus == "ALUMNI" ? nil : draft.semester,
-            graduationYear: draft.studentStatus == "ALUMNI" ? draft.graduationYear : nil,
-            wechatHandle: draft.wechatHandle,
-            whatsappHandle: draft.whatsappHandle,
-            telegramHandle: draft.telegramHandle,
-            instagramHandle: draft.instagramHandle
-        )
+        let request = currentDraft.updateRequest(comparedTo: initialDraft)
         if await onSave(request) {
             dismiss()
         } else {
@@ -384,7 +369,7 @@ struct ProfileEditSheet: View {
     }
 }
 
-private struct ProfileEditDraft: Equatable {
+struct ProfileEditDraft: Equatable {
     var nickname: String
     var bio: String
     var gender: String
@@ -460,6 +445,29 @@ private struct ProfileEditDraft: Equatable {
             draft.graduationYear = 0
         }
         return draft
+    }
+
+    func updateRequest(comparedTo initial: ProfileEditDraft) -> NativeProfileUpdateRequest {
+        let draft = normalized
+        let original = initial.normalized
+        let statusChanged = draft.studentStatus != original.studentStatus
+        return NativeProfileUpdateRequest(
+            nickname: draft.nickname != original.nickname ? draft.nickname : nil,
+            bio: draft.bio != original.bio ? draft.bio : nil,
+            gender: draft.gender != original.gender ? draft.gender : nil,
+            school: draft.school != original.school ? draft.school : nil,
+            studentStatus: statusChanged ? draft.studentStatus : nil,
+            degreeLevel: draft.degreeLevel != original.degreeLevel ? draft.degreeLevel : nil,
+            major: draft.major != original.major ? draft.major : nil,
+            semester: draft.studentStatus != "ALUMNI" && (statusChanged || draft.semester != original.semester)
+                ? draft.semester : nil,
+            graduationYear: draft.studentStatus == "ALUMNI" && (statusChanged || draft.graduationYear != original.graduationYear)
+                ? draft.graduationYear : nil,
+            wechatHandle: draft.wechatHandle != original.wechatHandle ? draft.wechatHandle : nil,
+            whatsappHandle: draft.whatsappHandle != original.whatsappHandle ? draft.whatsappHandle : nil,
+            telegramHandle: draft.telegramHandle != original.telegramHandle ? draft.telegramHandle : nil,
+            instagramHandle: draft.instagramHandle != original.instagramHandle ? draft.instagramHandle : nil
+        )
     }
 }
 

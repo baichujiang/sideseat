@@ -1522,7 +1522,8 @@ final class AuthenticationUITests: XCTestCase {
 
     func testMeProfileSchoolChangeRequiresNewVerification() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing-authenticated"]
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-language=zh-Hans"]
         app.launch()
 
         let meTab = app.tabBars.buttons["我"]
