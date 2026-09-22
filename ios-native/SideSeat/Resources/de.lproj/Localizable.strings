@@ -1634,7 +1634,7 @@
 "Overlapping availability" = "Überschneidende Zeit";
 "Library or study space" = "Bibliothek oder Lernraum";
 "Together matching, courses, and contact sharing" = "Zusammen-Vorschläge, Kurse und Kontaktaustausch";
-"Include me in Together suggestions" = "In Zusammen-Vorschläge einbeziehen";
+"Include me in Together suggestions" = "Mich in Zusammen vorschlagen";
 "SideSeat may use limited profile context for relevant opportunities." = "SideSeat darf begrenzte Profilinformationen für passende Möglichkeiten verwenden.";
 "Use shared courses for matching" = "Gemeinsame Kurse für Vorschläge nutzen";
 "A shared course can make an opportunity more relevant." = "Ein gemeinsamer Kurs kann eine Möglichkeit relevanter machen.";
@@ -1680,6 +1680,7 @@
 "Campus" = "Campus";
 "Verification" = "Verifizierung";
 "Languages" = "Sprachen";
+"Choose at least one language." = "Wähle mindestens eine Sprache.";
 "Privacy & Safety" = "Privatsphäre & Sicherheit";
 "Coordination languages" = "Koordinationssprachen";
 

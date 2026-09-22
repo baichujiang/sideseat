@@ -361,11 +361,14 @@ struct CoordinationLanguageSelectionSheet: View {
                             HStack {
                                 Text(option.name)
                                     .foregroundStyle(SideSeatTheme.textPrimary)
+                                    .fixedSize(horizontal: false, vertical: true)
                                 Spacer()
                                 if selectedTags.contains(option.tag) {
                                     Image(systemName: "checkmark")
                                         .font(.body.weight(.semibold))
                                         .foregroundStyle(SideSeatTheme.utilityAction)
+                                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                                        .accessibilityHidden(true)
                                 }
                             }
                             .contentShape(Rectangle())
@@ -374,6 +377,11 @@ struct CoordinationLanguageSelectionSheet: View {
                         .accessibilityAddTraits(selectedTags.contains(option.tag) ? .isSelected : [])
                         .accessibilityIdentifier("coordination-language-\(option.tag.lowercased())")
                     }
+                } header: {
+                    Text("Choose at least one language.")
+                        .font(.footnote)
+                        .textCase(nil)
+                        .accessibilityIdentifier("coordination-languages-guidance")
                 }
 
                 if let issue {
@@ -383,31 +391,41 @@ struct CoordinationLanguageSelectionSheet: View {
                     }
                 }
             }
-            .navigationTitle("Languages used for matching")
+            .disabled(isSaving)
+            .navigationTitle("Languages")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .disabled(isSaving)
+                        .accessibilityIdentifier("coordination-languages-cancel")
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if isSaving {
                         ProgressView()
+                            .accessibilityLabel(AppLocalization.string("Saving"))
                     } else {
                         Button("Done") {
                             Task { await save() }
                         }
                         .disabled(selectedTags.isEmpty)
+                        .ssConfirmationActionStyle()
                         .accessibilityIdentifier("coordination-languages-save")
                     }
                 }
             }
         }
+        .interactiveDismissDisabled(isSaving)
         .accessibilityIdentifier(accessibilityID)
     }
 
     @MainActor
     private func save() async {
         guard !selectedTags.isEmpty, !isSaving else { return }
+        guard selectedTags != Set(profile.languages?.map(\.tag) ?? []) else {
+            dismiss()
+            return
+        }
         isSaving = true
         issue = nil
         defer { isSaving = false }

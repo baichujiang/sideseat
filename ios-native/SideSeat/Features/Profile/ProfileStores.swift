@@ -83,6 +83,9 @@ final class CurrentProfileStore {
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             let current = profile ?? .uiTestingFixture
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-slow-profile-save") {
+                try? await Task.sleep(for: .seconds(5))
+            }
             let changedSchool = request.school.map {
                 StudentIdentityDisplay.schoolCode($0) != StudentIdentityDisplay.schoolCode(current.school)
             } ?? false
@@ -127,6 +130,9 @@ final class CurrentProfileStore {
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
             let current = profile ?? .uiTestingRequiredSetupFixture
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-slow-profile-save") {
+                try? await Task.sleep(for: .seconds(5))
+            }
             let campusComplete =
                 !StudentIdentityDisplay.schoolCode(current.school).isEmpty &&
                 !(current.studentStatus?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)

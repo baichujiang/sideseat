@@ -1181,9 +1181,52 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["App language"].waitForExistence(timeout: 3))
     }
 
+    func testCoordinationLanguagesExplainSelectionAndKeepSavingUnambiguous() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-skip-tutorial", "--ui-testing-language=en",
+            "--ui-testing-slow-profile-save",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL",
+        ]
+        app.launch()
+        app.tabBars.buttons["Me"].tap()
+        let entry = app.buttons["me-languages"]
+        XCTAssertTrue(entry.waitForExistence(timeout: 5))
+        if !entry.isHittable { app.swipeUp() }
+        entry.tap()
+        let done = app.buttons["coordination-languages-save"]
+        XCTAssertTrue(done.waitForExistence(timeout: 3))
+        done.tap()
+        // An unchanged selection should close locally, without the five-second fixture save.
+        XCTAssertTrue(app.descendants(matching: .any)["me-coordination-languages"].waitForNonExistence(timeout: 1))
+
+        entry.tap()
+        let english = app.buttons["coordination-language-english"]
+        XCTAssertTrue(english.waitForExistence(timeout: 3))
+        XCTAssertTrue(english.isSelected)
+        english.tap()
+        XCTAssertFalse(done.isEnabled)
+        XCTAssertTrue(app.staticTexts["coordination-languages-guidance"].exists)
+        let german = app.buttons["coordination-language-german"]
+        german.tap()
+        XCTAssertTrue(done.isEnabled)
+        done.tap()
+        XCTAssertFalse(german.isEnabled)
+        XCTAssertFalse(app.buttons["coordination-languages-cancel"].isEnabled)
+        XCTAssertTrue(app.descendants(matching: .any)["me-coordination-languages"].waitForNonExistence(timeout: 6))
+        entry.tap()
+        XCTAssertTrue(german.waitForExistence(timeout: 3))
+        XCTAssertTrue(german.isSelected)
+        XCTAssertFalse(english.isSelected)
+    }
+
     func testMePrivacySettingsSaveAsOneFocusedFlow() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing-authenticated"]
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-skip-tutorial", "--ui-testing-language=zh-Hans",
+            "--ui-testing-slow-profile-save",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL",
+        ]
         app.launch()
 
         let meTab = app.tabBars.buttons["我"]
@@ -1207,12 +1250,19 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertEqual(discover.value as? String, "1")
         XCTAssertEqual(contactExchange.value as? String, "0")
 
-        discover.tap()
-        contactExchange.tap()
+        // Form exposes the complete label as a switch; target the native thumb itself.
+        discover.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
+        XCTAssertEqual(discover.value as? String, "0")
+        contactExchange.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
+        XCTAssertEqual(contactExchange.value as? String, "1")
         let save = app.buttons["profile-privacy-save"]
         XCTAssertTrue(save.isEnabled)
+        let saveLabel = save.label
         save.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["profile-privacy"].waitForNonExistence(timeout: 3))
+        XCTAssertEqual(save.label, saveLabel)
+        XCTAssertFalse(discover.isEnabled)
+        XCTAssertFalse(app.buttons["profile-sheet-close"].isEnabled)
+        XCTAssertTrue(app.descendants(matching: .any)["profile-privacy"].waitForNonExistence(timeout: 6))
 
         privacyEntry.tap()
         XCTAssertTrue(app.descendants(matching: .any)["profile-privacy"].waitForExistence(timeout: 3))

@@ -37,6 +37,7 @@ struct SSPrimaryButton: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(SSPrimaryButtonStyle(fill: fill, chrome: chrome))
+        .accessibilityLabel(title)
         .ssAccessibilityIdentifier(accessibilityID)
     }
 }

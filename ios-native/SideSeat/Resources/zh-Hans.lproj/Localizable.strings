@@ -1681,6 +1681,7 @@
 "Campus" = "校园";
 "Verification" = "认证";
 "Languages" = "语言";
+"Choose at least one language." = "请选择至少一种语言。";
 "Privacy & Safety" = "隐私与安全";
 "Coordination languages" = "沟通语言";
 

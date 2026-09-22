@@ -137,77 +137,65 @@ struct ProfilePrivacySheet: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXL) {
-                    ProfileEditSection(
-                        title: AppLocalization.string( "Profile visibility"),
-                        systemImage: "eye.fill",
-                        tint: SideSeatTheme.HubTint.privacyDiscover
-                    ) {
-                        VStack(spacing: 0) {
-                            ProfileEditToggleRow(
-                                title: AppLocalization.string( "Include me in Together suggestions"),
-                                subtitle: AppLocalization.string( "SideSeat may use limited profile context for relevant opportunities."),
-                                isOn: $isDiscoverable,
-                                accessibilityID: "profile-privacy-discover"
-                            )
-                            Divider().padding(.leading, 4)
-                            ProfileEditToggleRow(
-                                title: AppLocalization.string( "Use shared courses for matching"),
-                                subtitle: AppLocalization.string( "A shared course can make an opportunity more relevant."),
-                                isOn: $isVisibleToCourseMembers,
-                                accessibilityID: "profile-privacy-course-members"
-                            )
-                        }
-                    }
+            Form {
+                Section("Profile visibility") {
+                    ProfileEditToggleRow(
+                        title: AppLocalization.string("Include me in Together suggestions"),
+                        subtitle: AppLocalization.string("SideSeat may use limited profile context for relevant opportunities."),
+                        isOn: $isDiscoverable,
+                        accessibilityID: "profile-privacy-discover"
+                    )
+                    ProfileEditToggleRow(
+                        title: AppLocalization.string("Use shared courses for matching"),
+                        subtitle: AppLocalization.string("A shared course can make an opportunity more relevant."),
+                        isOn: $isVisibleToCourseMembers,
+                        accessibilityID: "profile-privacy-course-members"
+                    )
+                }
 
-                    ProfileEditSection(
-                        title: AppLocalization.string( "Contact sharing"),
-                        systemImage: "person.crop.circle.badge.checkmark",
-                        tint: SideSeatTheme.HubTint.privacyChat
-                    ) {
-                        ProfileEditToggleRow(
-                            title: AppLocalization.string( "Allow contact exchange"),
-                            subtitle: AppLocalization.string( "Handles stay private until you exchange them with a connection."),
-                            isOn: $allowsContactExchange,
-                            accessibilityID: "profile-privacy-contact-exchange"
-                        )
-                    }
+                Section("Contact sharing") {
+                    ProfileEditToggleRow(
+                        title: AppLocalization.string("Allow contact exchange"),
+                        subtitle: AppLocalization.string("Handles stay private until you exchange them with a connection."),
+                        isOn: $allowsContactExchange,
+                        accessibilityID: "profile-privacy-contact-exchange"
+                    )
+                }
 
-                    if let issue {
+                if let issue {
+                    Section {
                         SSFieldMessage(text: issue, accessibilityID: "profile-privacy-error")
                     }
                 }
-                .padding(.horizontal, SideSeatTheme.spaceLG)
-                .padding(.top, SideSeatTheme.spaceMD)
-                .padding(.bottom, SideSeatTheme.spaceXL)
             }
-            .background(SideSeatTheme.bgGrouped.ignoresSafeArea())
+            .disabled(isSubmitting)
             .accessibilityIdentifier("profile-privacy")
-            .toolbar(.hidden, for: .navigationBar)
-            .safeAreaInset(edge: .top, spacing: 0) {
-                ProfileSheetHeader(title: AppLocalization.string( "Privacy & visibility")) {
-                    dismiss()
+            .navigationTitle("Privacy")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                        .disabled(isSubmitting)
+                        .accessibilityIdentifier("profile-sheet-close")
                 }
-            }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                VStack(spacing: 0) {
-                    Divider()
-                    SSPrimaryButton(
-                        title: AppLocalization.string( "Save changes"),
-                        isLoading: isSubmitting,
-                        fill: .product,
-                        accessibilityID: "profile-privacy-save"
-                    ) {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
                         Task { await save() }
+                    } label: {
+                        if isSubmitting {
+                            ProgressView()
+                        } else {
+                            Text("Save")
+                        }
                     }
+                    .accessibilityLabel("Save")
                     .disabled(!hasChanges || isSubmitting)
-                    .padding(.horizontal, SideSeatTheme.spaceLG)
-                    .padding(.vertical, SideSeatTheme.spaceMD)
+                    .ssConfirmationActionStyle()
+                    .accessibilityIdentifier("profile-privacy-save")
                 }
-                .background(SideSeatTheme.surface)
             }
         }
+        .interactiveDismissDisabled(isSubmitting)
     }
 
     private var hasChanges: Bool {

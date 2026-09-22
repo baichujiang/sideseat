@@ -733,6 +733,54 @@ final class AccessibilityAuditUITests: XCTestCase {
         XCTAssertTrue(title.waitForNonExistence(timeout: 5))
     }
 
+    func testLanguageAndPrivacySheetsAtLargestGermanText() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-skip-tutorial", "--ui-testing-language=de",
+            "--ui-testing-dynamic-type-accessibility", "--ui-testing-appearance=dark",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
+        ]
+        app.launch()
+        let me = app.tabBars.buttons["Ich"]
+        XCTAssertTrue(me.waitForExistence(timeout: 5))
+        me.tap()
+        let profile = app.descendants(matching: .any)["me-profile"]
+        XCTAssertTrue(profile.waitForExistence(timeout: 5))
+        let languages = app.buttons["me-languages"]
+        for _ in 0..<8 where !languages.isHittable { profile.swipeUp() }
+        languages.tap()
+        let done = app.buttons["coordination-languages-save"]
+        XCTAssertTrue(done.waitForExistence(timeout: 3))
+        let guidance = app.staticTexts["coordination-languages-guidance"]
+        XCTAssertTrue(guidance.exists)
+        XCTAssertGreaterThan(guidance.frame.height, 40)
+        XCTAssertTrue(done.isHittable)
+        let languageScreenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        languageScreenshot.name = "Matching languages at accessibility5"
+        languageScreenshot.lifetime = .keepAlways
+        add(languageScreenshot)
+        app.buttons["coordination-languages-cancel"].tap()
+
+        let privacy = app.buttons["profile-privacy-settings"]
+        for _ in 0..<8 where !privacy.isHittable { profile.swipeUp() }
+        privacy.tap()
+        let save = app.buttons["profile-privacy-save"]
+        XCTAssertTrue(save.waitForExistence(timeout: 3))
+        XCTAssertTrue(save.isHittable)
+        XCTAssertTrue(app.buttons["profile-sheet-close"].isHittable)
+        let privacyScreenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        privacyScreenshot.name = "Privacy controls at accessibility5"
+        privacyScreenshot.lifetime = .keepAlways
+        add(privacyScreenshot)
+        let discover = app.switches["profile-privacy-discover"]
+        XCTAssertEqual(discover.value as? String, "1")
+        discover.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
+        XCTAssertEqual(discover.value as? String, "0")
+        XCTAssertTrue(save.isEnabled)
+        save.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["profile-privacy"].waitForNonExistence(timeout: 5))
+    }
+
     private func auditTab(
         in app: XCUIApplication,
         labels: [String],

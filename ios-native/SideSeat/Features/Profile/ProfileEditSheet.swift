@@ -900,27 +900,40 @@ private struct ProfileEditGraduationYearControl: View {
 }
 
 struct ProfileEditToggleRow: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let title: String
     var subtitle: String? = nil
     @Binding var isOn: Bool
     let accessibilityID: String
 
     var body: some View {
-        Toggle(isOn: $isOn) {
-            VStack(alignment: .leading, spacing: 3) {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+            if dynamicTypeSize.isAccessibilitySize {
                 Text(title)
                     .font(.body.weight(.medium))
-                if let subtitle {
-                    Text(subtitle)
-                        .font(.footnote)
-                        .foregroundStyle(SideSeatTheme.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityHidden(true)
+                toggle.labelsHidden()
+            } else {
+                toggle
             }
-            .padding(.trailing, SideSeatTheme.spaceSM)
+            if let subtitle {
+                Text(subtitle)
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.vertical, SideSeatTheme.spaceXS)
+    }
+
+    private var toggle: some View {
+        Toggle(isOn: $isOn) {
+            Text(title)
+                .font(.body.weight(.medium))
+                .fixedSize(horizontal: false, vertical: true)
         }
         .tint(SideSeatTheme.accentText)
-        .padding(.vertical, SideSeatTheme.spaceXS)
         .accessibilityIdentifier(accessibilityID)
     }
 }
