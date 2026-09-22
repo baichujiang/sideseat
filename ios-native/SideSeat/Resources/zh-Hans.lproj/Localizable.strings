@@ -992,6 +992,9 @@
 "Add course manually" = "手动添加课程";
 "Add course" = "添加课程";
 "Course name" = "课程名称";
+"Use 2–160 characters for the course name." = "课程名称需为 2–160 个字符。";
+"Use up to 40 characters for the course code." = "课程代码最多 40 个字符。";
+"New courses are added to the school in your profile and are available to other students there." = "新课程会添加到你个人资料中的学校，供该校其他同学使用。";
 "Course code (optional)" = "课程代码（可选）";
 "Enter the course name." = "请输入课程名称。";
 "Community courses are available immediately for classmate matching and show their community source." = "社区补充课程会立即用于同课匹配，并显示社区来源标识。";

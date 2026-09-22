@@ -3,6 +3,7 @@ import SwiftUI
 struct CourseManualAddView: View {
     @Environment(SessionStore.self) private var session
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     let school: String
     let onCreated: (String) async -> Void
@@ -21,18 +22,34 @@ struct CourseManualAddView: View {
         NavigationStack {
             Form {
                 Section {
-                    LabeledContent("School", value: school)
+                    LabeledContent("School") {
+                        Text(school)
+                            .accessibilityIdentifier("course-manual-school")
+                    }
+                    .accessibilityElement(children: .contain)
                     TextField("Course name", text: $name)
                         .focused($focusedField, equals: .name)
                         .textInputAutocapitalization(.words)
+                        .submitLabel(.next)
+                        .onSubmit { focusedField = .code }
                         .accessibilityIdentifier("course-manual-name")
                     TextField("Course code (optional)", text: $code)
                         .focused($focusedField, equals: .code)
                         .textInputAutocapitalization(.characters)
                         .autocorrectionDisabled()
+                        .submitLabel(.done)
+                        .onSubmit { focusedField = nil }
                         .accessibilityIdentifier("course-manual-code")
                 } footer: {
-                    Text("Community courses are available immediately for classmate matching and show their community source.")
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Use 2–160 characters for the course name.")
+                            .accessibilityIdentifier("course-manual-name-guidance")
+                        if code.trimmingCharacters(in: .whitespacesAndNewlines).count > 40 {
+                            Text("Use up to 40 characters for the course code.")
+                                .foregroundStyle(SideSeatTheme.danger)
+                        }
+                        Text("New courses are added to the school in your profile and are available to other students there.")
+                    }
                 }
 
                 if let issue = store.issue {
@@ -42,6 +59,8 @@ struct CourseManualAddView: View {
                     }
                 }
             }
+            .disabled(store.isSaving)
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Add course")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -63,7 +82,7 @@ struct CourseManualAddView: View {
                             await onCreated(courseID)
                         }
                     }
-                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).count < 2 || store.isSaving)
+                    .disabled(!canSubmit || store.isSaving)
                     .ssConfirmationActionStyle()
                     .accessibilityIdentifier("course-manual-confirm")
                 }
@@ -77,6 +96,15 @@ struct CourseManualAddView: View {
                 }
             }
         }
+        .interactiveDismissDisabled(store.isSaving)
+        .task {
+            if !dynamicTypeSize.isAccessibilitySize { focusedField = .name }
+        }
         .accessibilityIdentifier("course-manual-add")
+    }
+
+    private var canSubmit: Bool {
+        (2...160).contains(name.trimmingCharacters(in: .whitespacesAndNewlines).count)
+            && code.trimmingCharacters(in: .whitespacesAndNewlines).count <= 40
     }
 }

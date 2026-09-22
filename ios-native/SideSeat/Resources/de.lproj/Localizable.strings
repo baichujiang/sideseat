@@ -991,6 +991,9 @@
 "Add course manually" = "Kurs manuell hinzufügen";
 "Add course" = "Kurs hinzufügen";
 "Course name" = "Kursname";
+"Use 2–160 characters for the course name." = "Verwende 2–160 Zeichen für den Kursnamen.";
+"Use up to 40 characters for the course code." = "Verwende höchstens 40 Zeichen für die Kursnummer.";
+"New courses are added to the school in your profile and are available to other students there." = "Neue Kurse werden der Hochschule in deinem Profil hinzugefügt und sind für andere Studierende dort verfügbar.";
 "Course code (optional)" = "Kursnummer (optional)";
 "Enter the course name." = "Gib den Kursnamen ein.";
 "Community courses are available immediately for classmate matching and show their community source." = "Community-Kurse sind sofort für die Kommilitonensuche verfügbar und als Community-Eintrag gekennzeichnet.";

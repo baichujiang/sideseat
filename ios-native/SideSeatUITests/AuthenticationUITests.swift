@@ -3523,6 +3523,42 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(popular.isSelected)
     }
 
+    func testManualCourseKeepsProfileSchoolAndKeyboardNavigation() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-authenticated", "--ui-testing-skip-tutorial", "--ui-testing-language=en",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL",
+        ]
+        app.launch()
+        openCoursesFromMe(in: app)
+        app.buttons["course-school"].tap()
+        app.buttons["Ludwig Maximilian University of Munich"].tap()
+        XCTAssertEqual(app.buttons["course-school"].value as? String, "Ludwig Maximilian University of Munich")
+        app.buttons["course-add-menu"].tap()
+        app.buttons["course-add-manual"].tap()
+
+        let school = app.staticTexts["course-manual-school"]
+        XCTAssertTrue(school.waitForExistence(timeout: 3))
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = "Manual course after browsing another school"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        XCTAssertEqual(school.label, "School, TUM")
+
+        let name = app.textFields["course-manual-name"]
+        XCTAssertTrue(app.keyboards.firstMatch.exists)
+        name.typeText("M")
+        XCTAssertFalse(app.buttons["course-manual-confirm"].isEnabled)
+        XCTAssertTrue(app.staticTexts["course-manual-name-guidance"].exists)
+        name.typeText("ath\nMAT101")
+        XCTAssertEqual(app.textFields["course-manual-code"].value as? String, "MAT101")
+        let add = app.buttons["course-manual-confirm"]
+        XCTAssertTrue(add.isEnabled)
+        add.tap()
+        XCTAssertTrue(add.waitForNonExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["course-detail"].waitForExistence(timeout: 5))
+    }
+
     func testCourseReviewAndImportEntryPoints() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-authenticated"]

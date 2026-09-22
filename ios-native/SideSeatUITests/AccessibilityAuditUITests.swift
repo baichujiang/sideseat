@@ -99,6 +99,8 @@ final class AccessibilityAuditUITests: XCTestCase {
             "--ui-testing-skip-tutorial",
             "--ui-testing-dynamic-type-accessibility",
             "--ui-testing-appearance=light",
+            "--ui-testing-language=de",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
         ]
         app.launch()
 
@@ -119,6 +121,19 @@ final class AccessibilityAuditUITests: XCTestCase {
 
         let list = app.descendants(matching: .any)["courses-list"]
         XCTAssertTrue(list.waitForExistence(timeout: 5))
+        let scope = app.buttons["course-scope"]
+        XCTAssertTrue(scope.exists)
+        XCTAssertGreaterThanOrEqual(scope.frame.height, 44)
+        scope.tap()
+        app.buttons["Beliebt"].tap()
+        XCTAssertEqual(scope.value as? String, "Beliebt")
+        scope.tap()
+        app.buttons["Meine Kurse"].tap()
+        XCTAssertEqual(scope.value as? String, "Meine Kurse")
+        let header = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        header.name = "Course controls at accessibility5"
+        header.lifetime = .keepAlways
+        add(header)
         let title = app.descendants(matching: .any)["course-title-visual-ui-course"]
         for _ in 0..<5 where !title.exists || !title.isHittable {
             list.swipeUp()

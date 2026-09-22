@@ -992,6 +992,9 @@
 "Add course manually" = "Add course manually";
 "Add course" = "Add course";
 "Course name" = "Course name";
+"Use 2–160 characters for the course name." = "Use 2–160 characters for the course name.";
+"Use up to 40 characters for the course code." = "Use up to 40 characters for the course code.";
+"New courses are added to the school in your profile and are available to other students there." = "New courses are added to the school in your profile and are available to other students there.";
 "Course code (optional)" = "Course code (optional)";
 "Enter the course name." = "Enter the course name.";
 "Community courses are available immediately for classmate matching and show their community source." = "Community courses are available immediately for classmate matching and show their community source.";

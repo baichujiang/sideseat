@@ -89,7 +89,7 @@ struct CourseListView: View {
         }
         .sheet(isPresented: $showsManualAdd) {
             CourseManualAddView(
-                school: selectedSchool ?? store.payload?.school ?? "School",
+                school: session.currentUser?.school ?? "",
                 onCreated: { courseID in
                     await load()
                     router.navigate(to: .course(courseID: courseID))
@@ -132,13 +132,38 @@ struct CourseListView: View {
         Section {
             schoolContext
 
-            Picker("Course list", selection: $scope) {
-                ForEach(NativeCourseScope.primaryCases) { value in
-                    Text(value.title).tag(value)
+            if dynamicTypeSize.isAccessibilitySize {
+                Menu {
+                    Picker("Course list", selection: $scope) {
+                        ForEach(NativeCourseScope.primaryCases) { value in
+                            Text(value.title).tag(value)
+                        }
+                    }
+                } label: {
+                    HStack {
+                        Text(scope.title)
+                            .font(.body.weight(.semibold))
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 8)
+                        Image(systemName: "chevron.down")
+                            .font(.caption.weight(.semibold))
+                            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                    }
+                    .frame(minHeight: 44)
                 }
+                .tint(SideSeatTheme.textPrimary)
+                .accessibilityLabel("Course list")
+                .accessibilityValue(Text(scope.title))
+                .accessibilityIdentifier("course-scope")
+            } else {
+                Picker("Course list", selection: $scope) {
+                    ForEach(NativeCourseScope.primaryCases) { value in
+                        Text(value.title).tag(value)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .accessibilityIdentifier("course-scope")
             }
-            .pickerStyle(.segmented)
-            .accessibilityIdentifier("course-scope")
         }
     }
 
@@ -181,10 +206,14 @@ struct CourseListView: View {
         showsDisclosure: Bool
     ) -> some View {
         HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
-            Image(systemName: "building.columns.fill")
-                .font(.body.weight(.semibold))
-                .foregroundStyle(SideSeatTheme.textSecondary)
-                .frame(width: 28, height: 28)
+            if !dynamicTypeSize.isAccessibilitySize {
+                Image(systemName: "building.columns.fill")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.textSecondary)
+                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                    .frame(width: 28, height: 28)
+                    .accessibilityHidden(true)
+            }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(activeSchool?.name ?? payload.school)
@@ -214,10 +243,14 @@ struct CourseListView: View {
                 showsArchivedCourses = true
             } label: {
                 HStack(spacing: SideSeatTheme.spaceMD) {
-                    Image(systemName: "archivebox.fill")
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.HubTint.courses)
-                        .frame(width: 28, height: 28)
+                    if !dynamicTypeSize.isAccessibilitySize {
+                        Image(systemName: "archivebox.fill")
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.HubTint.courses)
+                            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                            .frame(width: 28, height: 28)
+                            .accessibilityHidden(true)
+                    }
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Archived courses")
                             .font(.body.weight(.medium))
@@ -230,6 +263,8 @@ struct CourseListView: View {
                     Image(systemName: "chevron.right")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.tertiary)
+                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                        .accessibilityHidden(true)
                 }
                 .contentShape(Rectangle())
             }
@@ -253,10 +288,14 @@ struct CourseListView: View {
                 showsSemesterReview = true
             } label: {
                 HStack(spacing: SideSeatTheme.spaceMD) {
-                    Image(systemName: "calendar.badge.clock")
-                        .font(.title3)
-                        .foregroundStyle(SideSeatTheme.HubTint.courses)
-                        .frame(width: 34)
+                    if !dynamicTypeSize.isAccessibilitySize {
+                        Image(systemName: "calendar.badge.clock")
+                            .font(.title3)
+                            .foregroundStyle(SideSeatTheme.HubTint.courses)
+                            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                            .frame(width: 34)
+                            .accessibilityHidden(true)
+                    }
                     VStack(alignment: .leading, spacing: 3) {
                         Text(String(
                             format: AppLocalization.string( "Confirm %@ courses"),
@@ -275,6 +314,8 @@ struct CourseListView: View {
                     Image(systemName: "chevron.right")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.tertiary)
+                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                        .accessibilityHidden(true)
                 }
             }
             .buttonStyle(SSPressButtonStyle())
