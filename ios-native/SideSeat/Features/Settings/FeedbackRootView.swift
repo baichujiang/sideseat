@@ -383,6 +383,7 @@ struct FeedbackRootView: View {
                 } label: {
                     Image(systemName: "square.and.pencil")
                 }
+                .accessibilityLabel("Share feedback")
                 .accessibilityIdentifier("feedback-compose")
             }
         }
@@ -574,6 +575,17 @@ private struct FeedbackComposeSheet: View {
     @State private var message = ""
     @State private var isSubmitting = false
     @State private var issue: String?
+    @FocusState private var focusedField: Field?
+
+    private enum Field: Hashable {
+        case title
+        case message
+    }
+
+    private var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var trimmedMessage: String { message.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var titleIsValid: Bool { trimmedTitle.isEmpty || (3...120).contains(trimmedTitle.count) }
+    private var canSubmit: Bool { titleIsValid && (10...4000).contains(trimmedMessage.count) }
 
     var body: some View {
         NavigationStack {
@@ -587,11 +599,30 @@ private struct FeedbackComposeSheet: View {
                     .accessibilityIdentifier("feedback-topic")
                 }
                 Section("Details") {
-                    TextField("Title (optional)", text: $title)
-                        .accessibilityIdentifier("feedback-title")
-                    TextField("Message", text: $message, axis: .vertical)
-                        .lineLimit(4...8)
-                        .accessibilityIdentifier("feedback-message")
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                        TextField("Title (optional)", text: $title)
+                            .focused($focusedField, equals: .title)
+                            .submitLabel(.next)
+                            .onSubmit { focusedField = .message }
+                            .accessibilityIdentifier("feedback-title")
+                        if !titleIsValid {
+                            SSFieldMessage(
+                                text: AppLocalization.string("Use 3–120 characters, or leave the title blank."),
+                                accessibilityID: "feedback-title-guidance"
+                            )
+                        }
+                    }
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                        TextField("Message", text: $message, axis: .vertical)
+                            .focused($focusedField, equals: .message)
+                            .lineLimit(4...8)
+                            .accessibilityIdentifier("feedback-message")
+                        Text("Use 10–4,000 characters.")
+                            .font(.footnote)
+                            .foregroundStyle(trimmedMessage.count > 4000 ? SideSeatTheme.danger : SideSeatTheme.textSecondaryStrong)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityIdentifier("feedback-message-guidance")
+                    }
                 }
                 if let issue {
                     Section {
@@ -601,23 +632,32 @@ private struct FeedbackComposeSheet: View {
                     }
                 }
             }
+            .scrollDismissesKeyboard(.interactively)
+            .disabled(isSubmitting)
             .navigationTitle("New feedback")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .disabled(isSubmitting)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Send") {
+                    Button {
+                        focusedField = nil
                         Task { await submit() }
+                    } label: {
+                        if isSubmitting { ProgressView() }
+                        else { Text("Send") }
                     }
-                    .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).count < 10 || isSubmitting)
+                    .disabled(!canSubmit || isSubmitting)
                     .ssConfirmationActionStyle()
+                    .accessibilityLabel("Send feedback")
                     .accessibilityIdentifier("feedback-submit")
                 }
             }
             .accessibilityIdentifier("feedback-compose-sheet")
         }
+        .interactiveDismissDisabled(isSubmitting)
     }
 
     private func submit() async {
@@ -634,11 +674,10 @@ private struct FeedbackComposeSheet: View {
         #endif
 
         do {
-            let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
             let body = NativeFeedbackCreateRequest(
                 topic: topic,
-                title: trimmedTitle.count >= 3 ? trimmedTitle : nil,
-                message: message.trimmingCharacters(in: .whitespacesAndNewlines)
+                title: trimmedTitle.isEmpty ? nil : trimmedTitle,
+                message: trimmedMessage
             )
             let response: APIEnvelope<NativeFeedbackCreatePayload> = try await session.sendAuthorized(
                 "api/v1/feedback",

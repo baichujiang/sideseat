@@ -4789,7 +4789,8 @@ final class AuthenticationUITests: XCTestCase {
 
     func testFeedbackForumCreatesVotesAndCommentsWithoutStaleState() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing-authenticated"]
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-language=zh-Hans"]
         app.launch()
 
         func reveal(_ element: XCUIElement) {
@@ -4811,18 +4812,29 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["feedback-compose-sheet"].waitForExistence(timeout: 3))
         let title = app.textFields["feedback-title"]
         let message = app.textFields["feedback-message"]
-        title.tap()
-        title.typeText("Keyboard responsiveness")
-        message.tap()
-        message.typeText("Typing and deleting should remain smooth in every form.")
         let send = app.buttons["feedback-submit"]
+        XCTAssertTrue(app.staticTexts["feedback-message-guidance"].exists)
+        title.tap()
+        title.typeText("UI\n")
+        app.typeText("Too short")
+        XCTAssertEqual(message.value as? String, "Too short")
+        XCTAssertFalse(send.isEnabled)
+        app.typeText(" to explain what happened.")
+        XCTAssertFalse(send.isEnabled, "A short optional title must be explained, not silently discarded.")
+        XCTAssertTrue(app.descendants(matching: .any)["feedback-title-guidance"].exists)
+        let guidance = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        guidance.name = "Feedback explains why Send is unavailable"
+        guidance.lifetime = .keepAlways
+        add(guidance)
+        title.tap()
+        title.typeText(" feedback")
         XCTAssertTrue(send.isEnabled)
         send.tap()
         XCTAssertTrue(
             app.descendants(matching: .any)["feedback-compose-sheet"]
                 .waitForNonExistence(timeout: 3)
         )
-        XCTAssertTrue(app.staticTexts["Keyboard responsiveness"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["UI feedback"].waitForExistence(timeout: 3))
 
         let existing = app.descendants(matching: .any)["feedback-row-ui-feedback-1"]
         XCTAssertTrue(existing.waitForExistence(timeout: 3))
@@ -4852,7 +4864,7 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(waitForEnabled(submitComment, equals: false, timeout: 3))
 
         app.navigationBars.buttons.firstMatch.tap()
-        XCTAssertTrue(app.staticTexts["Keyboard responsiveness"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["UI feedback"].waitForExistence(timeout: 3))
     }
 
     func testSettingsUnblocksUserAndShowsEmptyState() {

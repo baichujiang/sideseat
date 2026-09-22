@@ -713,6 +713,8 @@
 "My hub" = "我的主页";
 "My plans" = "我的计划";
 "New feedback" = "新建反馈";
+"Use 3–120 characters, or leave the title blank." = "标题需为 3–120 个字符，也可以留空。";
+"Use 10–4,000 characters." = "请输入 10–4,000 个字符。";
 "New here?" = "新用户？";
 "New password" = "新密码";
 "Next" = "下一步";
