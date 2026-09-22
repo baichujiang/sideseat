@@ -213,18 +213,6 @@ enum SideSeatTheme {
         static let cardPadding: CGFloat = 20
         static let cardRadius: CGFloat = 24
 
-        /// Full category color is reserved for the activity-type picker tiles.
-        static func activityChoiceFill(for topic: NativeWeeklyIntentTopic) -> Color {
-            switch topic {
-            case .coffee: adaptive(light: 0xF4E5D6, dark: 0x342A25)
-            case .study: adaptive(light: 0xE5EFF9, dark: 0x233244)
-            case .sports: adaptive(light: 0xE9F0D6, dark: 0x2D3623)
-            case .explore: adaptive(light: 0xDEF0E7, dark: 0x243A32)
-            case .food: adaptive(light: 0xF9E5DA, dark: 0x402C26)
-            case .events: adaptive(light: 0xEFE4F8, dark: 0x372C43)
-            }
-        }
-
         /// Category color is limited to the top band in all three Together lists.
         static func headerFill(for topic: NativeWeeklyIntentTopic) -> Color {
             switch topic {

@@ -6,12 +6,9 @@ import XCTest
 final class ThemeContrastTests: XCTestCase {
     func testActivityChoiceContrastInLightAndDarkAppearances() {
         for style in [UIUserInterfaceStyle.light, .dark] {
-            for topic in NativeWeeklyIntentTopic.allCases {
-                let background = UIColor(SideSeatTheme.Together.activityChoiceFill(for: topic))
-                for foreground in [SideSeatTheme.textPrimary, SideSeatTheme.accentText] {
-                    assertContrast(foreground: UIColor(foreground), background: background,
-                        style: style, minimum: 4.5)
-                }
+            for foreground in [SideSeatTheme.textPrimary, SideSeatTheme.accentText] {
+                assertContrast(foreground: UIColor(foreground), background: UIColor(SideSeatTheme.surface),
+                    style: style, minimum: 4.5)
             }
         }
     }

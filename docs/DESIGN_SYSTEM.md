@@ -43,7 +43,6 @@ Tokens live in `SideSeatTheme.swift`; calendar-specific metrics live in
 | `accent` / `rose`              | selected controls, compact emphasis, unread state             |
 | `ProductAction.*`              | paired ink/chalk product button fill and foreground           |
 | `activityInset`                | warm neutral activity context                                |
-| `Together.activityChoiceFill`  | category-tinted activity-type picker tiles                    |
 | `Together.headerFill`          | colored top row in all three Together card lists              |
 | `verifiedSeal`                 | verified trust state; never reuse interaction Rose            |
 | `bg`, `bgGrouped`, `surface`   | system-adaptive canvases and cards                            |
@@ -187,9 +186,8 @@ with corresponding deeper surfaces in Dark mode. `Together.headerFill` owns
 these colors. The header follows the card's top corners; activity details,
 interest controls, and page navigation retain their existing styling. Category
 color never represents consent or interest status.
-The corrected category-surface refinement keeps full category backgrounds only
-on activity-type picker tiles via `Together.activityChoiceFill`. Recommendations,
-Intentions and Explore share `SSActivityHeaderBand`: a full-width colored top row
+Category picker options use the neutral `surface` token with explicit selection.
+Recommendations, Intentions and Explore share `SSActivityHeaderBand`: a full-width colored top row
 with rounded top corners, followed by a neutral `surface` body. The same latte,
 mist-blue, olive, mint, peach or lavender hue identifies the activity in all
 three lists, with corresponding Dark mode headers. Selection still uses the
@@ -305,6 +303,19 @@ An actual simulator recording excerpt is retained locally, outside Git, at
 Document formatting and diff checks pass. This verifies the local implementation,
 not physical haptics. It is committed for Build 38; after internal publication,
 check pickup/threshold/release haptics on both updated test phones.
+
+### Compact intention inputs — 2026-09-22
+
+The activity picker uses compact horizontal buttons with a 56pt minimum height,
+small existing artwork, a neutral surface, an outline and an inline checkmark.
+This keeps one-tap selection while leaving more space for the concrete activity
+above the keyboard. At accessibility sizes, the picker remains a single column,
+text scales fully and decorative artwork is omitted. Card-header artwork and
+category colors remain as described above.
+
+Text-limit guidance replaces the intention action dock's general detail only
+while input is too long. It stays above the keyboard, next to the disabled action.
+When publication is available, the existing matching/paused disclosure returns.
 
 ### Comfort and character refresh — 2026-09-09
 

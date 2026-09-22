@@ -116,39 +116,40 @@ struct SSActivityArtwork: View {
 
 /// A visual category picker; the title and checkmark carry selection, not the illustration.
 struct SSActivityChoice: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let topic: NativeWeeklyIntentTopic
     let isSelected: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: SideSeatTheme.spaceSM) {
-                SSActivityArtwork(topic: topic, size: 56)
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                if !dynamicTypeSize.isAccessibilitySize {
+                    SSActivityArtwork(topic: topic, size: 28)
+                }
                 Text(topic.title)
                     .font(.subheadline.weight(.semibold))
-                    .multilineTextAlignment(.center)
+                    .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Image(systemName: "checkmark")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(SideSeatTheme.accentText)
+                    .opacity(isSelected ? 1 : 0)
+                    .accessibilityHidden(true)
             }
-            .padding(SideSeatTheme.spaceMD)
-            .frame(maxWidth: .infinity, minHeight: 112)
+            .padding(.horizontal, SideSeatTheme.spaceSM)
+            .padding(.vertical, SideSeatTheme.spaceSM)
+            .frame(maxWidth: .infinity, minHeight: 56)
             .foregroundStyle(SideSeatTheme.textPrimary)
             .background(
-                SideSeatTheme.Together.activityChoiceFill(for: topic),
-                in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
+                SideSeatTheme.surface,
+                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
             )
             .overlay {
-                RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
+                RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
                     .strokeBorder(isSelected ? SideSeatTheme.textPrimary.opacity(0.6)
                                   : SideSeatTheme.separator.opacity(0.2), lineWidth: isSelected ? 1.5 : 0.5)
-            }
-            .overlay(alignment: .topTrailing) {
-                if isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(SideSeatTheme.accentText)
-                        .padding(SideSeatTheme.spaceSM)
-                        .accessibilityHidden(true)
-                }
             }
             .contentShape(Rectangle())
         }

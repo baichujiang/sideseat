@@ -1120,13 +1120,14 @@ final class VisualQAScreenshotUITests: XCTestCase {
                 "--ui-testing-discover", "--ui-testing-weekly-intent",
                 "--ui-testing-mutual-opportunity", "--ui-testing-together-matching",
                 "--ui-testing-language=zh-Hans", "--ui-testing-appearance=\(appearance)",
+                "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL",
             ]
             app.launch()
             XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 8))
             saveScreenshot(app: app, name: "flow-together-\(appearance)")
             selectTogetherSection(1, in: app)
             let addIntent = app.buttons["together-add-intent"]
-            revealFlowElement(addIntent, in: app)
+            XCTAssertTrue(addIntent.waitForExistence(timeout: 3))
             addIntent.tap()
             let coffee = app.buttons["intent-topic-coffee"]
             XCTAssertTrue(coffee.waitForExistence(timeout: 5))
@@ -1146,6 +1147,9 @@ final class VisualQAScreenshotUITests: XCTestCase {
             activity.typeText("课后喝咖啡")
             let next = app.buttons["intent-editor-next"]
             XCTAssertTrue(next.isEnabled)
+            XCTAssertTrue(activity.isHittable)
+            XCTAssertLessThanOrEqual(activity.frame.maxY, next.frame.minY,
+                                     "The concrete activity input must stay above the keyboard action dock")
             saveScreenshot(app: app, name: "flow-intent-activity-\(appearance)")
             next.tap()
             let save = app.buttons["intent-editor-save"]
@@ -1168,11 +1172,12 @@ final class VisualQAScreenshotUITests: XCTestCase {
             "--ui-testing-mutual-opportunity", "--ui-testing-together-matching",
             "--ui-testing-language=de", "--ui-testing-appearance=dark",
             "--ui-testing-dynamic-type-accessibility",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
         ]
         app.launch()
         selectTogetherSection(1, in: app)
         let addIntent = app.buttons["together-add-intent"]
-        revealFlowElement(addIntent, in: app)
+        XCTAssertTrue(addIntent.waitForExistence(timeout: 3))
         addIntent.tap()
         let coffee = app.buttons["intent-topic-coffee"]
         XCTAssertTrue(coffee.waitForExistence(timeout: 5))
