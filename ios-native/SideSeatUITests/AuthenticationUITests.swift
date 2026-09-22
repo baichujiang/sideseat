@@ -6,6 +6,118 @@ final class AuthenticationUITests: XCTestCase {
         continueAfterFailure = false
     }
 
+    func testPasswordResetReusesLoginEmailAndLeavesUsernamesOut() {
+        for (language, identifierValue, largeText) in [("de", "student@example.com", true), ("en", "student_name", false)] {
+            let app = XCUIApplication()
+            app.launchArguments = ["--ui-testing-signed-out", "--ui-testing-skip-tutorial",
+                "--ui-testing-language=\(language)", "--ui-testing-appearance=dark"]
+            if largeText {
+                app.launchArguments += ["--ui-testing-dynamic-type-accessibility",
+                    "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+            } else {
+                app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
+            }
+            app.launch()
+            let identifier = app.textFields["login-identifier"]
+            XCTAssertTrue(identifier.waitForExistence(timeout: 8))
+            identifier.tap()
+            identifier.typeText(identifierValue)
+            let forgot = app.buttons["login-forgot-password"]
+            revealAuthControl(forgot, in: app)
+            XCTAssertTrue(forgot.isHittable)
+            if language == "de" { XCTAssertEqual(forgot.label, "Passwort vergessen?") }
+            forgot.tap()
+
+            let email = app.textFields["forgot-email"]
+            XCTAssertTrue(email.waitForExistence(timeout: 5))
+            if identifierValue.contains("@") {
+                XCTAssertEqual(email.value as? String, identifierValue)
+                XCTAssertTrue(app.buttons["forgot-send-code"].isEnabled)
+                XCTAssertFalse(app.keyboards.firstMatch.exists,
+                    "A valid prefilled email should be ready to confirm without the keyboard covering the page.")
+            } else {
+                XCTAssertEqual(email.value as? String, "Email")
+                XCTAssertFalse(app.buttons["forgot-send-code"].isEnabled)
+            }
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = "Password reset email handoff \(language)"
+            screenshot.lifetime = .keepAlways
+            add(screenshot)
+            // Do not send email or reset a real account in this UI journey.
+            app.buttons["forgot-cancel"].tap()
+            XCTAssertTrue(identifier.waitForExistence(timeout: 5))
+            XCTAssertEqual(identifier.value as? String, identifierValue)
+            app.terminate()
+        }
+    }
+
+    func testGermanSignupExplainsPasswordRequirementBeforeSubmission() {
+        for largeText in [false, true] {
+            let app = XCUIApplication()
+            app.launchArguments = ["--ui-testing-signed-out", "--ui-testing-skip-tutorial",
+                "--ui-testing-language=de", "--ui-testing-appearance=light",
+                "-UIPreferredContentSizeCategoryName",
+                largeText ? "UICTContentSizeCategoryAccessibilityXXXL" : "UICTContentSizeCategoryL"]
+            app.launch()
+            let create = app.buttons["login-create-account"]
+            XCTAssertTrue(create.waitForExistence(timeout: 8))
+            revealAuthControl(create, in: app)
+            XCTAssertEqual(create.label, "Konto erstellen")
+            create.tap()
+            XCTAssertTrue(app.textFields["signup-display-name"].waitForExistence(timeout: 5))
+            let guidance = app.staticTexts["signup-password-guidance"]
+            revealAuthControl(guidance, in: app)
+            XCTAssertTrue(guidance.isHittable)
+            XCTAssertEqual(guidance.label, "Das Passwort muss mindestens 8 Zeichen lang sein.")
+            if largeText {
+                XCTAssertGreaterThan(guidance.frame.height, 60,
+                    "The presented signup sheet must use the actual accessibility text size.")
+            }
+            XCTAssertFalse(app.buttons["signup-submit"].isEnabled)
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = "German signup password guidance \(largeText ? "accessibility5" : "standard")"
+            screenshot.lifetime = .keepAlways
+            add(screenshot)
+            let semester = app.steppers["signup-semester"]
+            let increment = semester.buttons.element(boundBy: 1)
+            revealAuthControl(increment, in: app)
+            XCTAssertTrue(increment.isHittable)
+            XCTAssertTrue(semester.label.contains("Aktuelles Semester: 1"))
+            increment.tap()
+            XCTAssertTrue(semester.label.contains("Aktuelles Semester: 2"))
+            let schoolScreenshot = XCTAttachment(screenshot: app.screenshot())
+            schoolScreenshot.name = "German signup school identity \(largeText ? "accessibility5" : "standard")"
+            schoolScreenshot.lifetime = .keepAlways
+            add(schoolScreenshot)
+            app.terminate()
+        }
+    }
+
+    private func revealAuthControl(_ control: XCUIElement, in app: XCUIApplication) {
+        // XCTest can report controls behind the keyboard as hittable. Drag inside
+        // the visible content, then require the target to be above its accessory bar.
+        for _ in 0..<10 {
+            let signup = app.scrollViews["signup-form"]
+            let scroll = signup.exists ? signup : app.scrollViews["login-form"]
+            let navigationBottom = app.navigationBars.allElementsBoundByIndex.map { $0.frame.maxY }.max() ?? 90
+            let top = max(scroll.frame.minY, navigationBottom)
+            let keyboard = app.keyboards.firstMatch
+            let bottom = min(scroll.frame.maxY, keyboard.exists ? keyboard.frame.minY - 48 : app.frame.maxY - 40)
+            if control.exists, control.isHittable,
+               control.frame.minY >= top, control.frame.maxY <= bottom { return }
+            let upward = !control.exists || control.frame.maxY > bottom
+            let overflow = control.exists
+                ? (upward ? control.frame.maxY - bottom : top - control.frame.minY) + 24
+                : bottom - top
+            let distance = min(max(overflow, 80), (bottom - top) * 0.65)
+            let origin = app.coordinate(withNormalizedOffset: .zero)
+            let startY = upward ? bottom - 24 : top + 24
+            let start = origin.withOffset(CGVector(dx: app.frame.midX, dy: startY))
+            let end = origin.withOffset(CGVector(dx: app.frame.midX, dy: startY + (upward ? -distance : distance)))
+            start.press(forDuration: 0.05, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.1)
+        }
+    }
+
     func testChatSearchIsReadyToTypeAndReturnsToSelectedMessage() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
@@ -2610,7 +2722,8 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(startPicker.exists)
         XCTAssertTrue(endPicker.exists)
         XCTAssertTrue(repeatPicker.exists)
-        XCTAssertTrue(app.buttons["event-smart-fill"].exists)
+        XCTAssertFalse(app.buttons["event-smart-fill"].exists,
+            "Manual event entry does not require the optional natural-language scheduling feature.")
     }
 
     func testNewEventKeyboardDismissesOnBackgroundTapAndScroll() {
@@ -4121,7 +4234,8 @@ final class AuthenticationUITests: XCTestCase {
 
     func testDirectChatReplyPreviewStaysCompact() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-chats"]
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-chats",
+            "--ui-testing-skip-tutorial", "--ui-testing-language=en"]
         app.launch()
 
         XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 5))
@@ -4165,6 +4279,15 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(composerField.waitForExistence(timeout: 3))
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
         XCTAssertLessThan(composerField.frame.minY - replyPreview.frame.maxY, 80)
+        let cancel = app.buttons["chat-reply-cancel"]
+        XCTAssertEqual(cancel.label, "Cancel reply")
+        XCTAssertGreaterThanOrEqual(cancel.frame.width, 43.5)
+        XCTAssertGreaterThanOrEqual(cancel.frame.height, 43.5)
+        composerField.tap()
+        composerField.typeText("Keep this draft")
+        cancel.tap()
+        XCTAssertTrue(replyPreview.waitForNonExistence(timeout: 3))
+        XCTAssertEqual(composerField.value as? String, "Keep this draft")
     }
 
     func testDirectChatReplyAndDelete() {

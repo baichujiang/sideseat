@@ -3,6 +3,7 @@ import SwiftUI
 struct ForgotPasswordSheet: View {
     @Environment(SessionStore.self) private var session
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var onReset: (String, String) -> Void
 
@@ -18,6 +19,12 @@ struct ForgotPasswordSheet: View {
     @State private var resendSecondsRemaining = 0
     @State private var resendTickTask: Task<Void, Never>?
     @FocusState private var focusedField: Field?
+
+    init(initialEmail: String = "", onReset: @escaping (String, String) -> Void) {
+        self.onReset = onReset
+        _email = State(initialValue: AuthFieldValidation.emailIssue(initialEmail) == nil
+            ? initialEmail.trimmingCharacters(in: .whitespacesAndNewlines) : "")
+    }
 
     private enum Step {
         case email
@@ -40,7 +47,7 @@ struct ForgotPasswordSheet: View {
                             .font(SideSeatTheme.Text.title)
                         Text(stepSubtitle)
                             .font(.subheadline)
-                            .foregroundStyle(SideSeatTheme.textSecondary)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
 
                         switch step {
                         case .email:
@@ -54,15 +61,19 @@ struct ForgotPasswordSheet: View {
                     .animation(.easeInOut(duration: 0.22), value: step)
                 }
                 .scrollDismissesKeyboard(.interactively)
+                .accessibilityIdentifier("forgot-form")
             }
             .navigationTitle(AppLocalization.string( "Reset password"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(AppLocalization.string( "Cancel")) { dismiss() }
+                        .accessibilityIdentifier("forgot-cancel")
                 }
             }
-            .onAppear { focusedField = .email }
+            .onAppear {
+                if email.isEmpty && !dynamicTypeSize.isAccessibilitySize { focusedField = .email }
+            }
             .onDisappear { resendTickTask?.cancel() }
         }
     }
@@ -134,6 +145,11 @@ struct ForgotPasswordSheet: View {
                 onSubmit: { focusedField = .confirm }
             )
             .focused($focusedField, equals: .password)
+
+            Text(AppLocalization.string("Password must be at least 8 characters."))
+                .font(.footnote)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .fixedSize(horizontal: false, vertical: true)
 
             SSSecureField(
                 title: AppLocalization.string( "Confirm new password"),

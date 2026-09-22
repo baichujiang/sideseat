@@ -1696,6 +1696,9 @@
 "Courses you leave unchecked keep their history and stop appearing in current matching and course chat." = "未勾选的课程会保留历史记录，但不再用于当前匹配，也不会显示在课程聊天中。";
 "Create your account and add the school identity shown on your posts." = "创建账号，并添加会显示在帖子上的学校身份。";
 "Current semester: %@" = "当前学期：%@";
+"Current semester: %lld" = "当前学期：%lld";
+"auth.signup.action" = "创建";
+"Cancel reply" = "取消回复";
 "Degree" = "学位";
 "Exchange" = "交换生";
 "Expanded" = "已展开";

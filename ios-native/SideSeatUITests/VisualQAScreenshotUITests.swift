@@ -1542,6 +1542,11 @@ final class VisualQAScreenshotUITests: XCTestCase {
         RunLoop.current.run(until: Date().addingTimeInterval(0.35))
         saveScreenshot(app: app, name: "together-idle-\(appearance)")
 
+        tabButton(in: app, labels: ["Plans", "计划", "Pläne"]).tap()
+        XCTAssertTrue(app.descendants(matching: .any)["plans-root"].waitForExistence(timeout: 6))
+        XCTAssertTrue(app.buttons["plans-row-ui-plan-1"].waitForExistence(timeout: 5))
+        saveScreenshot(app: app, name: "plans-\(appearance)")
+
         tabButton(in: app, labels: ["Calendar", "日历", "Kalender"]).tap()
         XCTAssertTrue(tabButton(in: app, labels: ["Calendar", "日历"]).waitForExistence(timeout: 8))
         XCTAssertTrue(app.descendants(matching: .any)["home-week-timetable"].waitForExistence(timeout: 6)

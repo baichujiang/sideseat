@@ -9,6 +9,7 @@ struct SettingsRootView: View {
     @Environment(AppLanguageStore.self) private var appLanguage
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     @State private var cityPreference = DiscoverCityPreferenceStore.shared
     @State private var showDeleteAccount = false
@@ -47,13 +48,8 @@ struct SettingsRootView: View {
                 NavigationLink {
                     AppLanguageSettingsView()
                 } label: {
-                    HStack(spacing: 12) {
-                        Label("App language", systemImage: "globe")
-                            .foregroundStyle(.primary)
-                        Spacer()
-                        Text(appLanguage.currentSelectionName)
-                            .foregroundStyle(.secondary)
-                    }
+                    preferenceLabel("App language", icon: "globe",
+                        value: appLanguage.currentSelectionName, id: "settings-language")
                 }
                 .accessibilityIdentifier("settings-language")
                 .accessibilityValue(appLanguage.currentSelectionName)
@@ -69,14 +65,12 @@ struct SettingsRootView: View {
                     }
                 } label: {
                     HStack(spacing: 12) {
-                        Label("Notifications", systemImage: "bell")
-                            .foregroundStyle(.primary)
-                        Spacer()
-                        Text(notificationStatusLabel)
-                            .foregroundStyle(.secondary)
+                        preferenceLabel("Notifications", icon: "bell",
+                            value: notificationStatusLabel, id: "settings-notifications")
                         Image(systemName: notificationStatus == .notDetermined ? "chevron.right" : "arrow.up.forward.app")
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.tertiary)
+                            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                     }
                 }
                 .accessibilityIdentifier("settings-notifications")
@@ -174,6 +168,30 @@ struct SettingsRootView: View {
             Task { await refreshNotificationStatus() }
         }
         .accessibilityIdentifier("settings-root")
+    }
+
+    private func preferenceLabel(_ title: LocalizedStringKey, icon: String, value: String, id: String) -> some View {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
+            : AnyLayout(HStackLayout(spacing: 12))
+        return layout {
+            Group {
+                if dynamicTypeSize.isAccessibilitySize {
+                    Text(title)
+                } else {
+                    Label(title, systemImage: icon)
+                }
+            }
+            .foregroundStyle(.primary)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityIdentifier("\(id)-title")
+            if !dynamicTypeSize.isAccessibilitySize { Spacer() }
+            Text(value)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("\(id)-value")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func url(from raw: String?) -> URL? {

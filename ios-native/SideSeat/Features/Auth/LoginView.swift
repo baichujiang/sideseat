@@ -2,14 +2,13 @@ import SwiftUI
 
 struct LoginView: View {
     @Environment(SessionStore.self) private var session
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var identifier = ""
     @State private var password = ""
     @State private var isPasswordVisible = false
     @State private var showSignup = false
     @State private var showForgotPassword = false
     @FocusState private var focusedField: Field?
-    @State private var appearHero = false
-    @State private var appearForm = false
 
     private enum Field {
         case identifier
@@ -22,27 +21,19 @@ struct LoginView: View {
                 ScrollView {
                     VStack(spacing: SideSeatTheme.spaceXL + 4) {
                         brandHeader
-                            .opacity(appearHero ? 1 : 0)
-                            .offset(y: appearHero ? 0 : 14)
-
                         loginCard
-                            .opacity(appearForm ? 1 : 0)
-                            .offset(y: appearForm ? 0 : 18)
-
                         secondaryActions
-                            .opacity(appearForm ? 1 : 0)
                     }
                     .padding(.horizontal, 22)
                     .padding(.top, 36)
                     .padding(.bottom, 40)
                 }
                 .scrollDismissesKeyboard(.interactively)
+                .accessibilityIdentifier("login-form")
             }
             .navigationBarHidden(true)
             .onAppear {
-                focusedField = .identifier
-                withAnimation(.easeOut(duration: 0.45)) { appearHero = true }
-                withAnimation(.easeOut(duration: 0.55).delay(0.08)) { appearForm = true }
+                if !dynamicTypeSize.isAccessibilitySize { focusedField = .identifier }
             }
             .sheet(isPresented: $showSignup) {
                 SignupSheet { username, password in
@@ -52,7 +43,7 @@ struct LoginView: View {
                 .environment(session)
             }
             .sheet(isPresented: $showForgotPassword) {
-                ForgotPasswordSheet { email, password in
+                ForgotPasswordSheet(initialEmail: identifier) { email, password in
                     identifier = email
                     self.password = password
                 }
@@ -64,7 +55,6 @@ struct LoginView: View {
     private var brandHeader: some View {
         VStack(spacing: 14) {
             SideSeatBrandMark(size: 108)
-                .scaleEffect(appearHero ? 1 : 0.92)
 
             Text("sideseat")
                 .font(SideSeatTheme.Text.display)
@@ -74,7 +64,7 @@ struct LoginView: View {
 
             Text(AppLocalization.string("Find people to do things with—and make a plan."))
                 .font(.subheadline.weight(.medium))
-                .foregroundStyle(SideSeatTheme.ink)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
@@ -135,7 +125,7 @@ struct LoginView: View {
     }
 
     private var secondaryActions: some View {
-        HStack(spacing: 6) {
+        secondaryActionsLayout {
             Text(AppLocalization.string( "New here?"))
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             SSSecondaryButton(
@@ -148,6 +138,12 @@ struct LoginView: View {
             }
         }
         .font(.subheadline)
+    }
+
+    private var secondaryActionsLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceXS))
+            : AnyLayout(HStackLayout(spacing: 6))
     }
 
     private var canSubmit: Bool {

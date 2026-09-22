@@ -46,6 +46,7 @@ struct CommunityChatView: View {
             .background(SideSeatTheme.Chat.canvas)
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .accessibilityElement(children: .contain)
             .accessibilityIdentifier(kind.accessibilityRootID)
             .toolbar {
                 ToolbarItem(placement: .principal) {
@@ -483,7 +484,9 @@ struct CommunityChatView: View {
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundStyle(.secondary)
+                            .ssIconButtonHitTarget()
                     }
+                    .accessibilityLabel(AppLocalization.string("Cancel reply"))
                     .accessibilityIdentifier("chat-reply-cancel")
                 }
                 .fixedSize(horizontal: false, vertical: true)

@@ -1696,6 +1696,9 @@
 "Courses you leave unchecked keep their history and stop appearing in current matching and course chat." = "Courses you leave unchecked keep their history and stop appearing in current matching and course chat.";
 "Create your account and add the school identity shown on your posts." = "Create your account and add the school identity shown on your posts.";
 "Current semester: %@" = "Current semester: %@";
+"Current semester: %lld" = "Current semester: %lld";
+"auth.signup.action" = "Create";
+"Cancel reply" = "Cancel reply";
 "Degree" = "Degree";
 "Exchange" = "Exchange";
 "Expanded" = "Expanded";

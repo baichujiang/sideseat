@@ -3,6 +3,7 @@ import SwiftUI
 struct SignupSheet: View {
     @Environment(SessionStore.self) private var session
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var onSignedUp: (String, String) -> Void
 
@@ -37,7 +38,7 @@ struct SignupSheet: View {
                             .font(SideSeatTheme.Text.title)
                         Text(AppLocalization.string( "Create your account and add the school identity shown on your posts."))
                             .font(.subheadline)
-                            .foregroundStyle(SideSeatTheme.textSecondary)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
 
                         SSTextField(
                             title: AppLocalization.string( "Nickname"),
@@ -71,6 +72,12 @@ struct SignupSheet: View {
                         )
                         .focused($focusedField, equals: .password)
 
+                        Text(AppLocalization.string("Password must be at least 8 characters."))
+                            .font(.footnote)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityIdentifier("signup-password-guidance")
+
                         SSSecureField(
                             title: AppLocalization.string( "Confirm password"),
                             text: $confirmPassword,
@@ -84,9 +91,15 @@ struct SignupSheet: View {
                         .focused($focusedField, equals: .confirm)
 
                         VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                            Label(AppLocalization.string( "School identity"), systemImage: "graduationcap.fill")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(SideSeatTheme.textPrimary)
+                            Group {
+                                if dynamicTypeSize.isAccessibilitySize {
+                                    Text(AppLocalization.string("School identity"))
+                                } else {
+                                    Label(AppLocalization.string("School identity"), systemImage: "graduationcap.fill")
+                                }
+                            }
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textPrimary)
 
                             Picker(AppLocalization.string( "School"), selection: $school) {
                                 Text("TUM").tag("TUM")
@@ -103,13 +116,11 @@ struct SignupSheet: View {
                             .pickerStyle(.menu)
                             .accessibilityIdentifier("signup-student-status")
 
-                            Picker(AppLocalization.string( "Degree"), selection: $degreeLevel) {
-                                Text("Bachelor").tag("BACHELOR")
-                                Text("Master").tag("MASTER")
-                                Text("Other").tag("OTHER")
+                            if dynamicTypeSize.isAccessibilitySize {
+                                degreePicker.pickerStyle(.menu)
+                            } else {
+                                degreePicker.pickerStyle(.segmented)
                             }
-                            .pickerStyle(.segmented)
-                            .accessibilityIdentifier("signup-degree-level")
 
                             if studentStatus == "ALUMNI" {
                                 Stepper(
@@ -129,7 +140,7 @@ struct SignupSheet: View {
 
                             Text(AppLocalization.string( "Verify this school later with an official school email or manual review."))
                                 .font(.caption)
-                                .foregroundStyle(SideSeatTheme.textSecondary)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         }
                         .padding(SideSeatTheme.spaceLG)
                         .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
@@ -143,8 +154,9 @@ struct SignupSheet: View {
                     .padding(.top, SideSeatTheme.spaceSM)
                 }
                 .scrollDismissesKeyboard(.interactively)
+                .accessibilityIdentifier("signup-form")
             }
-            .navigationTitle(AppLocalization.string( "Sign up"))
+            .navigationTitle(AppLocalization.string(dynamicTypeSize.isAccessibilitySize ? "Account" : "Sign up"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -155,17 +167,29 @@ struct SignupSheet: View {
                         if isWorking || session.isWorking {
                             ProgressView()
                         } else {
-                            Text(AppLocalization.string( "Create account"))
+                            Text(AppLocalization.string("auth.signup.action"))
                                 .fontWeight(.semibold)
                         }
                     }
                     .disabled(!canSubmit || isWorking || session.isWorking)
                     .ssConfirmationActionStyle()
+                    .accessibilityLabel(AppLocalization.string("Create account"))
                     .accessibilityIdentifier("signup-submit")
                 }
             }
-            .onAppear { focusedField = .displayName }
+            .onAppear {
+                if !dynamicTypeSize.isAccessibilitySize { focusedField = .displayName }
+            }
         }
+    }
+
+    private var degreePicker: some View {
+        Picker(AppLocalization.string("Degree"), selection: $degreeLevel) {
+            Text("Bachelor").tag("BACHELOR")
+            Text("Master").tag("MASTER")
+            Text("Other").tag("OTHER")
+        }
+        .accessibilityIdentifier("signup-degree-level")
     }
 
     private var canSubmit: Bool {

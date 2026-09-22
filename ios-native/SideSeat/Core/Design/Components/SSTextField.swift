@@ -67,6 +67,7 @@ struct SSSecureField: View {
                 } label: {
                     Image(systemName: isVisible ? "eye.slash.fill" : "eye.fill")
                         .font(.body)
+                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .frame(width: 44, height: 44)
                         .contentShape(Rectangle())

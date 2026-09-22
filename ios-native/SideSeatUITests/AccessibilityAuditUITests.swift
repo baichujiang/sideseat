@@ -412,6 +412,36 @@ final class AccessibilityAuditUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["profile-edit"].waitForExistence(timeout: 5))
     }
 
+    func testSettingsLanguageFlowAtLargestGermanText() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-deep-link=/profile/account", "--ui-testing-language=de",
+            "--ui-testing-dynamic-type-accessibility", "--ui-testing-appearance=dark"]
+        app.launch()
+        XCTAssertTrue(app.descendants(matching: .any)["settings-root"].waitForExistence(timeout: 8))
+        let language = app.descendants(matching: .any)["settings-language"].firstMatch
+        XCTAssertTrue(language.waitForExistence(timeout: 5))
+        let languageTitle = app.staticTexts["settings-language-title"]
+        let languageValue = app.staticTexts["settings-language-value"]
+        XCTAssertTrue(languageTitle.exists)
+        XCTAssertTrue(languageValue.exists)
+        XCTAssertGreaterThanOrEqual(languageValue.frame.minY, languageTitle.frame.maxY - 1,
+            "The selected language should sit below its label at accessibility sizes.")
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Settings German accessibility5 dark"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        language.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["app-language-settings"].waitForExistence(timeout: 5))
+        let english = app.buttons["app-language-en"]
+        XCTAssertTrue(english.waitForExistence(timeout: 3))
+        english.tap()
+        XCTAssertTrue(english.isSelected)
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(language.waitForExistence(timeout: 5))
+        XCTAssertEqual(language.value as? String, "English")
+    }
+
     func testMeLayoutAtLargestDynamicType() {
         let app = XCUIApplication()
         app.launchArguments = [
