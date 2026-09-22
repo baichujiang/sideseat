@@ -1684,6 +1684,8 @@
 "Use up to 60 characters." = "Max. 60 Zeichen.";
 "Use up to 80 characters." = "Max. 80 Zeichen.";
 "Use up to 160 characters." = "Max. 160 Zeichen.";
+"Use up to 120 characters." = "Max. 120 Zeichen.";
+"Use 2–160 characters, or leave it blank." = "2–160 Zeichen oder leer lassen.";
 "Privacy & Safety" = "Privatsphäre & Sicherheit";
 "Coordination languages" = "Koordinationssprachen";
 
@@ -1715,7 +1717,7 @@
 "Join at least one course to use coursemate visibility." = "Tritt mindestens einem Kurs bei, um die Sichtbarkeit für Kursteilnehmende zu verwenden.";
 "Keep %d" = "%d behalten";
 "Master" = "Master";
-"Nickname must be 2–32 characters." = "Der Anzeigename muss 2–32 Zeichen lang sein.";
+"Nickname must be 2–32 characters." = "Spitzname: 2–32 Zeichen.";
 "Offline" = "Offline";
 "On-device speech recognition is unavailable for this language." = "Die Spracherkennung auf dem Gerät ist für diese Sprache nicht verfügbar.";
 "Only you can see this." = "Nur du kannst das sehen.";

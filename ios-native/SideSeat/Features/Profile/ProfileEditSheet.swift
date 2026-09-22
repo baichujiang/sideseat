@@ -52,198 +52,218 @@ struct ProfileEditSheet: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: dynamicTypeSize.isAccessibilitySize ? SideSeatTheme.spaceXL : SideSeatTheme.spaceLG) {
-                    ProfileEditorSection(
-                        title: AppLocalization.string( "Basics"),
-                        systemImage: "person.text.rectangle.fill",
-                        tint: SideSeatTheme.textSecondaryStrong
-                    ) {
-                        VStack(spacing: 0) {
-                            ProfileEditTextField(
-                                focus: $focusedInput,
-                                field: .nickname,
-                                title: AppLocalization.string( "Nickname"),
-                                text: $nickname,
-                                capitalization: .words,
-                                autocorrectionDisabled: false,
-                                accessibilityID: "profile-edit-nickname",
-                                isOptional: false
-                            )
-                            ProfileEditGenderPicker(selection: $gender)
-                            ProfileEditTaglineField(focus: $focusedInput, text: $bio)
+            ScrollViewReader { scroll in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: dynamicTypeSize.isAccessibilitySize ? SideSeatTheme.spaceXL : SideSeatTheme.spaceLG) {
+                        ProfileEditorSection(
+                            title: AppLocalization.string( "Basics"),
+                            systemImage: "person.text.rectangle.fill",
+                            tint: SideSeatTheme.textSecondaryStrong
+                        ) {
+                            VStack(spacing: 0) {
+                                ProfileEditTextField(
+                                    focus: $focusedInput,
+                                    field: .nickname,
+                                    title: AppLocalization.string( "Nickname"),
+                                    text: $nickname,
+                                    capitalization: .words,
+                                    autocorrectionDisabled: false,
+                                    accessibilityID: "profile-edit-nickname",
+                                    isOptional: false
+                                )
+                                ProfileEditGenderPicker(selection: $gender)
+                                ProfileEditTaglineField(focus: $focusedInput, text: $bio)
+                            }
                         }
-                    }
 
-                    ProfileEditorSection(
-                        title: AppLocalization.string( "Study"),
-                        systemImage: "graduationcap.fill",
-                        tint: SideSeatTheme.HubTint.courses
-                    ) {
-                        VStack(spacing: 0) {
-                            VStack(alignment: .leading, spacing: 0) {
+                        ProfileEditorSection(
+                            title: AppLocalization.string( "Study"),
+                            systemImage: "graduationcap.fill",
+                            tint: SideSeatTheme.HubTint.courses
+                        ) {
+                            VStack(spacing: 0) {
+                                VStack(alignment: .leading, spacing: 0) {
+                                    ProfileEditMenuPicker(
+                                        title: AppLocalization.string( "School"),
+                                        selection: $school,
+                                        options: [("TUM", "TUM"), ("LMU", "LMU")],
+                                        accessibilityID: "profile-edit-school",
+                                        showsDivider: false
+                                    )
+                                    if hasChangedSchool {
+                                        Label {
+                                            Text("Changing school archives active courses and school-specific posts. The new school requires separate verification.")
+                                        } icon: {
+                                            Image(systemName: "exclamationmark.triangle.fill")
+                                        }
+                                        .font(.footnote)
+                                        .foregroundStyle(SideSeatTheme.warning)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                        .padding(.horizontal, SideSeatTheme.spaceSM)
+                                        .padding(.bottom, SideSeatTheme.spaceSM)
+                                        .accessibilityIdentifier("profile-edit-school-verification-warning")
+                                    }
+                                    Divider().padding(.horizontal, SideSeatTheme.spaceSM)
+                                }
                                 ProfileEditMenuPicker(
-                                    title: AppLocalization.string( "School"),
-                                    selection: $school,
-                                    options: [("TUM", "TUM"), ("LMU", "LMU")],
-                                    accessibilityID: "profile-edit-school",
+                                    title: AppLocalization.string( "Student status"),
+                                    selection: $studentStatus,
+                                    options: [
+                                        ("CURRENT_STUDENT", AppLocalization.string( "Current student")),
+                                        ("EXCHANGE_STUDENT", AppLocalization.string( "Exchange student")),
+                                        ("ALUMNI", AppLocalization.string( "Alumni"))
+                                    ],
+                                    accessibilityID: "profile-edit-student-status"
+                                )
+                                ProfileEditMenuPicker(
+                                    title: AppLocalization.string( "Degree"),
+                                    selection: $degreeLevel,
+                                    options: [
+                                        ("BACHELOR", AppLocalization.string( "Bachelor")),
+                                        ("MASTER", AppLocalization.string( "Master")),
+                                        ("OTHER", AppLocalization.string( "Other"))
+                                    ],
+                                    accessibilityID: "profile-edit-degree-level"
+                                )
+                                ProfileEditTextField(
+                                    focus: $focusedInput,
+                                    field: .major,
+                                    title: AppLocalization.string( "Major"),
+                                    text: $major,
+                                    capitalization: .words,
+                                    autocorrectionDisabled: false,
+                                    accessibilityID: "profile-edit-major"
+                                )
+                                if studentStatus == "ALUMNI" {
+                                    ProfileEditGraduationYearControl(year: $graduationYear)
+                                } else {
+                                    ProfileEditSemesterControl(semester: $semester)
+                                }
+                            }
+                        }
+
+                        ProfileEditorSection(
+                            title: AppLocalization.string( "Contact handles"),
+                            systemImage: "bubble.left.and.bubble.right.fill",
+                            tint: SideSeatTheme.HubTint.contacts
+                        ) {
+                            VStack(spacing: 0) {
+                                ProfileEditTextField(
+                                    focus: $focusedInput,
+                                    field: .wechat,
+                                    title: AppLocalization.string( "WeChat"),
+                                    text: $wechatHandle,
+                                    accessibilityID: "profile-edit-wechat"
+                                )
+                                ProfileEditTextField(
+                                    focus: $focusedInput,
+                                    field: .whatsapp,
+                                    title: AppLocalization.string( "WhatsApp"),
+                                    text: $whatsappHandle,
+                                    accessibilityID: "profile-edit-whatsapp"
+                                )
+                                ProfileEditTextField(
+                                    focus: $focusedInput,
+                                    field: .telegram,
+                                    title: AppLocalization.string( "Telegram"),
+                                    text: $telegramHandle,
+                                    accessibilityID: "profile-edit-telegram"
+                                )
+                                ProfileEditTextField(
+                                    focus: $focusedInput,
+                                    field: .instagram,
+                                    title: AppLocalization.string( "Instagram"),
+                                    text: $instagramHandle,
+                                    accessibilityID: "profile-edit-instagram",
                                     showsDivider: false
                                 )
-                                if hasChangedSchool {
-                                    Label {
-                                        Text("Changing school archives active courses and school-specific posts. The new school requires separate verification.")
-                                    } icon: {
-                                        Image(systemName: "exclamationmark.triangle.fill")
-                                    }
-                                    .font(.footnote)
-                                    .foregroundStyle(SideSeatTheme.warning)
-                                    .fixedSize(horizontal: false, vertical: true)
-                                    .padding(.horizontal, SideSeatTheme.spaceSM)
-                                    .padding(.bottom, SideSeatTheme.spaceSM)
-                                    .accessibilityIdentifier("profile-edit-school-verification-warning")
-                                }
-                                Divider().padding(.horizontal, SideSeatTheme.spaceSM)
+
                             }
-                            ProfileEditMenuPicker(
-                                title: AppLocalization.string( "Student status"),
-                                selection: $studentStatus,
-                                options: [
-                                    ("CURRENT_STUDENT", AppLocalization.string( "Current student")),
-                                    ("EXCHANGE_STUDENT", AppLocalization.string( "Exchange student")),
-                                    ("ALUMNI", AppLocalization.string( "Alumni"))
-                                ],
-                                accessibilityID: "profile-edit-student-status"
-                            )
-                            ProfileEditMenuPicker(
-                                title: AppLocalization.string( "Degree"),
-                                selection: $degreeLevel,
-                                options: [
-                                    ("BACHELOR", AppLocalization.string( "Bachelor")),
-                                    ("MASTER", AppLocalization.string( "Master")),
-                                    ("OTHER", AppLocalization.string( "Other"))
-                                ],
-                                accessibilityID: "profile-edit-degree-level"
-                            )
-                            ProfileEditTextField(
-                                focus: $focusedInput,
-                                field: .major,
-                                title: AppLocalization.string( "Major"),
-                                text: $major,
-                                capitalization: .words,
-                                autocorrectionDisabled: false,
-                                accessibilityID: "profile-edit-major"
-                            )
-                            if studentStatus == "ALUMNI" {
-                                ProfileEditGraduationYearControl(year: $graduationYear)
+                        }
+
+                        if let issue {
+                            SSFieldMessage(text: issue, accessibilityID: "profile-edit-error")
+                        }
+                    }
+                    .padding(.horizontal, SideSeatTheme.spaceLG)
+                    .padding(.top, SideSeatTheme.spaceSM)
+                    .padding(.bottom, SideSeatTheme.spaceLG)
+                    .disabled(isSubmitting)
+                }
+                .scrollDismissesKeyboard(.interactively)
+                .background(SideSeatTheme.bgGrouped.ignoresSafeArea())
+                .accessibilityIdentifier("profile-edit")
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    if let inputIssue {
+                        Text(inputIssue)
+                            .font(.footnote)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, SideSeatTheme.spaceLG)
+                            .padding(.vertical, SideSeatTheme.spaceSM)
+                            .background(SideSeatTheme.bgGrouped)
+                            .accessibilityIdentifier("profile-edit-input-guidance")
+                    }
+                }
+                .onChange(of: inputIssue) { _, _ in
+                    if let focusedInput {
+                        scroll.scrollTo(focusedInput, anchor: .center)
+                    }
+                }
+                .navigationTitle("Profile")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { requestDismissal() }
+                            .disabled(isSubmitting)
+                            .accessibilityIdentifier("profile-edit-close")
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button {
+                            if hasChangedSchool {
+                                showsSchoolChangeConfirmation = true
                             } else {
-                                ProfileEditSemesterControl(semester: $semester)
+                                Task { await save() }
+                            }
+                        } label: {
+                            if isSubmitting {
+                                ProgressView().ssNeutralProgressTint()
+                            } else {
+                                Text("Save")
                             }
                         }
+                        .disabled(!canSave || !hasUnsavedChanges || isSubmitting)
+                        .ssConfirmationActionStyle()
+                        .accessibilityLabel(AppLocalization.string("Save"))
+                        .accessibilityIdentifier("profile-edit-save")
                     }
-
-                    ProfileEditorSection(
-                        title: AppLocalization.string( "Contact handles"),
-                        systemImage: "bubble.left.and.bubble.right.fill",
-                        tint: SideSeatTheme.HubTint.contacts
-                    ) {
-                        VStack(spacing: 0) {
-                            ProfileEditTextField(
-                                focus: $focusedInput,
-                                field: .wechat,
-                                title: AppLocalization.string( "WeChat"),
-                                text: $wechatHandle,
-                                accessibilityID: "profile-edit-wechat"
-                            )
-                            ProfileEditTextField(
-                                focus: $focusedInput,
-                                field: .whatsapp,
-                                title: AppLocalization.string( "WhatsApp"),
-                                text: $whatsappHandle,
-                                accessibilityID: "profile-edit-whatsapp"
-                            )
-                            ProfileEditTextField(
-                                focus: $focusedInput,
-                                field: .telegram,
-                                title: AppLocalization.string( "Telegram"),
-                                text: $telegramHandle,
-                                accessibilityID: "profile-edit-telegram"
-                            )
-                            ProfileEditTextField(
-                                focus: $focusedInput,
-                                field: .instagram,
-                                title: AppLocalization.string( "Instagram"),
-                                text: $instagramHandle,
-                                accessibilityID: "profile-edit-instagram",
-                                showsDivider: false
-                            )
-
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Button {
+                            focusedInput = focusedInput?.previous
+                        } label: {
+                            Image(systemName: "chevron.up")
+                                .frame(minWidth: 44, minHeight: 44)
                         }
-                    }
+                        .disabled(focusedInput?.previous == nil)
+                        .accessibilityLabel(AppLocalization.string("Previous input"))
+                        .accessibilityIdentifier("profile-edit-input-previous")
 
-                    if let issue {
-                        SSFieldMessage(text: issue, accessibilityID: "profile-edit-error")
-                    }
-                }
-                .padding(.horizontal, SideSeatTheme.spaceLG)
-                .padding(.top, SideSeatTheme.spaceSM)
-                .padding(.bottom, SideSeatTheme.spaceLG)
-                .disabled(isSubmitting)
-            }
-            .scrollDismissesKeyboard(.interactively)
-            .background(SideSeatTheme.bgGrouped.ignoresSafeArea())
-            .accessibilityIdentifier("profile-edit")
-            .navigationTitle("Profile")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { requestDismissal() }
-                        .disabled(isSubmitting)
-                        .accessibilityIdentifier("profile-edit-close")
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        if hasChangedSchool {
-                            showsSchoolChangeConfirmation = true
-                        } else {
-                            Task { await save() }
+                        Button {
+                            focusedInput = focusedInput?.next
+                        } label: {
+                            Image(systemName: "chevron.down")
+                                .frame(minWidth: 44, minHeight: 44)
                         }
-                    } label: {
-                        if isSubmitting {
-                            ProgressView().ssNeutralProgressTint()
-                        } else {
-                            Text("Save")
-                        }
-                    }
-                    .disabled(!canSave || !hasUnsavedChanges || isSubmitting)
-                    .ssConfirmationActionStyle()
-                    .accessibilityLabel(AppLocalization.string("Save"))
-                    .accessibilityIdentifier("profile-edit-save")
-                }
-                ToolbarItemGroup(placement: .keyboard) {
-                    Button {
-                        focusedInput = focusedInput?.previous
-                    } label: {
-                        Image(systemName: "chevron.up")
-                            .frame(minWidth: 44, minHeight: 44)
-                    }
-                    .disabled(focusedInput?.previous == nil)
-                    .accessibilityLabel(AppLocalization.string("Previous input"))
-                    .accessibilityIdentifier("profile-edit-input-previous")
+                        .disabled(focusedInput?.next == nil)
+                        .accessibilityLabel(AppLocalization.string("Next input"))
+                        .accessibilityIdentifier("profile-edit-input-next")
 
-                    Button {
-                        focusedInput = focusedInput?.next
-                    } label: {
-                        Image(systemName: "chevron.down")
-                            .frame(minWidth: 44, minHeight: 44)
+                        Spacer()
+
+                        Button("Done") { focusedInput = nil }
+                            .accessibilityIdentifier("profile-edit-input-done")
                     }
-                    .disabled(focusedInput?.next == nil)
-                    .accessibilityLabel(AppLocalization.string("Next input"))
-                    .accessibilityIdentifier("profile-edit-input-next")
-
-                    Spacer()
-
-                    Button("Done") { focusedInput = nil }
-                        .accessibilityIdentifier("profile-edit-input-done")
                 }
             }
         }
@@ -333,13 +353,32 @@ struct ProfileEditSheet: View {
     }
 
     private var canSave: Bool {
-        let trimmedNickname = nickname.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmedNickname.count >= 2 && trimmedNickname.count <= 32 &&
-            bio.count <= 120 &&
-            wechatHandle.count <= 80 &&
-            whatsappHandle.count <= 80 &&
-            telegramHandle.count <= 80 &&
-            instagramHandle.count <= 80
+        inputIssue == nil
+    }
+
+    private var inputIssue: String? {
+        // Validate the same trimmed, changed values that the existing PATCH sends.
+        let request = currentDraft.updateRequest(comparedTo: initialDraft)
+        if let nickname = request.nickname, !(2...32).contains(nickname.count) {
+            return AppLocalization.string("Nickname must be 2–32 characters.")
+        }
+        if let bio = request.bio, bio.count > 120 {
+            return AppLocalization.string("Tagline") + ": " + AppLocalization.string("Use up to 120 characters.")
+        }
+        if let major = request.major, !major.isEmpty, !(2...160).contains(major.count) {
+            return AppLocalization.string("Major") + ": " + AppLocalization.string("Use 2–160 characters, or leave it blank.")
+        }
+        for (title, value) in [
+            (AppLocalization.string("WeChat"), request.wechatHandle),
+            (AppLocalization.string("WhatsApp"), request.whatsappHandle),
+            (AppLocalization.string("Telegram"), request.telegramHandle),
+            (AppLocalization.string("Instagram"), request.instagramHandle),
+        ] {
+            if let value, value.count > 80 {
+                return title + ": " + AppLocalization.string("Use up to 80 characters.")
+            }
+        }
+        return nil
     }
 
     private func save() async {
@@ -741,6 +780,7 @@ private struct ProfileEditTextField: View {
         }
         .contentShape(Rectangle())
         .onTapGesture { focus.wrappedValue = field }
+        .id(field)
     }
 }
 
@@ -748,11 +788,15 @@ private struct ProfileEditTaglineField: View {
     let focus: FocusState<ProfileEditInputField?>.Binding
     @Binding var text: String
 
+    private var characterCount: Int {
+        text.trimmingCharacters(in: .whitespacesAndNewlines).count
+    }
+
     var body: some View {
         ProfileEditFieldRow(
             title: AppLocalization.string("Tagline"),
-            detail: "\(text.count)/120",
-            detailColor: text.count > 120 ? SideSeatTheme.danger : SideSeatTheme.textSecondary,
+            detail: "\(characterCount)/120",
+            detailColor: characterCount > 120 ? SideSeatTheme.danger : SideSeatTheme.textSecondary,
             isFocused: focus.wrappedValue == .tagline,
             showsDivider: false
         ) {
@@ -769,6 +813,7 @@ private struct ProfileEditTaglineField: View {
         }
         .contentShape(Rectangle())
         .onTapGesture { focus.wrappedValue = .tagline }
+        .id(ProfileEditInputField.tagline)
     }
 }
 

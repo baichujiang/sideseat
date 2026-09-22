@@ -438,7 +438,17 @@ final class AccessibilityAuditUITests: XCTestCase {
         let nickname = app.textFields["profile-edit-nickname"]
         XCTAssertTrue(nickname.isHittable)
         nickname.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
-        nickname.typeText(" UX")
+        nickname.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 9) + "A")
+        XCTAssertFalse(save.isEnabled)
+        let guidance = app.staticTexts["profile-edit-input-guidance"]
+        XCTAssertTrue(guidance.isHittable)
+        XCTAssertLessThanOrEqual(guidance.frame.maxY, app.buttons["profile-edit-input-done"].frame.minY)
+        XCTAssertLessThanOrEqual(nickname.frame.maxY, app.buttons["profile-edit-input-done"].frame.minY)
+        let guidanceScreenshot = XCTAttachment(screenshot: app.screenshot())
+        guidanceScreenshot.name = "Profile correction guidance at German accessibility5"
+        guidanceScreenshot.lifetime = .keepAlways
+        add(guidanceScreenshot)
+        nickname.typeText(XCUIKeyboardKey.delete.rawValue + "Test User UX")
         XCTAssertEqual(nickname.value as? String, "Test User UX")
         XCTAssertTrue(save.isHittable)
         XCTAssertTrue(save.isEnabled)

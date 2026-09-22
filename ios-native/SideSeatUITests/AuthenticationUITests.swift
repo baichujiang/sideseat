@@ -1552,6 +1552,69 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Test User Tap"].waitForExistence(timeout: 3))
     }
 
+    func testProfileInputExplainsLimitsAndPreservesDraftWhileCorrecting() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",
+            "--ui-testing-language=en", "--ui-testing-appearance=light",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
+        app.launch()
+        let me = app.tabBars.buttons["Me"]
+        XCTAssertTrue(me.waitForExistence(timeout: 5))
+        me.tap()
+        app.buttons["me-hero-edit"].tap()
+        let nickname = app.textFields["profile-edit-nickname"]
+        XCTAssertTrue(nickname.waitForExistence(timeout: 3))
+        nickname.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+        nickname.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 9) + "A")
+        let save = app.buttons["profile-edit-save"]
+        let guidance = app.staticTexts["profile-edit-input-guidance"]
+        XCTAssertFalse(save.isEnabled)
+        XCTAssertEqual(guidance.label, "Nickname must be 2–32 characters.")
+        XCTAssertTrue(guidance.isHittable)
+        nickname.typeText(XCUIKeyboardKey.delete.rawValue + "Ava\n")
+
+        let tagline = app.descendants(matching: .any)["profile-edit-tagline"].firstMatch
+        let originalTagline = tagline.value as? String ?? ""
+        app.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: originalTagline.count) + String(repeating: "a", count: 121))
+        XCTAssertFalse(save.isEnabled)
+        XCTAssertEqual(guidance.label, "Tagline: Use up to 120 characters.")
+        XCTAssertTrue(guidance.isHittable)
+        app.typeText(XCUIKeyboardKey.delete.rawValue + "\n\n")
+        XCTAssertTrue(save.isEnabled, "Trailing whitespace is trimmed by the existing profile request.")
+        XCTAssertTrue(app.staticTexts["120/120"].exists)
+        app.buttons["profile-edit-input-next"].tap()
+
+        let major = app.textFields["profile-edit-major"]
+        let originalMajor = major.value as? String ?? ""
+        app.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: originalMajor.count) + "A")
+        XCTAssertFalse(save.isEnabled)
+        XCTAssertEqual(guidance.label, "Major: Use 2–160 characters, or leave it blank.")
+        XCTAssertTrue(guidance.isHittable)
+        app.typeText(XCUIKeyboardKey.delete.rawValue)
+        XCTAssertTrue(save.isEnabled)
+        app.typeText("Design\n")
+
+        app.typeText(String(repeating: "a", count: 81))
+        XCTAssertFalse(save.isEnabled)
+        XCTAssertEqual(guidance.label, "WeChat: Use up to 80 characters.")
+        XCTAssertTrue(guidance.isHittable)
+        XCTAssertLessThanOrEqual(guidance.frame.maxY, app.buttons["profile-edit-input-done"].frame.minY)
+        XCTAssertLessThanOrEqual(app.textFields["profile-edit-wechat"].frame.maxY, app.buttons["profile-edit-input-done"].frame.minY)
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Profile input guidance above the keyboard"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        app.typeText(XCUIKeyboardKey.delete.rawValue)
+        XCTAssertTrue(save.isEnabled)
+        save.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["profile-edit"].waitForNonExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["me-display-name-visual"].label, "Ava")
+        app.buttons["me-hero-edit"].tap()
+        XCTAssertEqual(app.textFields["profile-edit-major"].value as? String, "Design")
+        XCTAssertEqual(app.textFields["profile-edit-wechat"].value as? String, String(repeating: "a", count: 80))
+        XCTAssertEqual(app.descendants(matching: .any)["profile-edit-tagline"].firstMatch.value as? String, String(repeating: "a", count: 120))
+    }
+
     func testMeProfileEditSheetProtectsUnsavedChanges() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial",

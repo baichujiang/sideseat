@@ -403,7 +403,10 @@ Accessibility text sizes stack field labels and controls. Decorative header
 icons stay within their badges while text scales normally. School-change
 confirmation and unsaved-edit protection remain in place. Submission ends input
 focus and disables fields and cancellation until the request completes, keeping
-the displayed draft aligned with what is being saved. Verification is
+the displayed draft aligned with what is being saved. An invalid submitted field
+shows one concise reason below the navigation bar; when that reason changes,
+native scrolling keeps the current input in view. Validation and the tagline
+counter use the same trimmed values as the partial save request. Verification is
 local/simulator only; see [profile editor visual QA](visual-qa/profile-editor-polish-2026-09-12.md).
 
 ### System avatars
