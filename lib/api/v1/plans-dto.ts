@@ -9,6 +9,7 @@ import type {
 type PlanAuthor = Pick<User, "id" | "username" | "nickname" | "avatarUrl">;
 
 export type PlanRequestV1Row = PlanRequest & {
+  cancellationNotice?: { actorId: string; reasonCode: string | null; note: string | null; createdAt: Date; wasConfirmed: boolean } | null;
   proposer: PlanAuthor;
   receiver: PlanAuthor;
   originAction: { coordinationPolicy: ActionCoordinationPolicy | null } | null;
@@ -45,7 +46,14 @@ export function planRequestV1(plan: PlanRequestV1Row, viewerId?: string) {
       plan.originAction?.coordinationPolicy ??
       plan.actionInterest?.classmatePost.coordinationPolicy ??
       null,
-    status: plan.status as PlanRequestStatus,
+    status: plan.cancellationNotice ? "CANCELED" as PlanRequestStatus : plan.status as PlanRequestStatus,
+    cancellation: plan.cancellationNotice ? {
+      actorId: plan.cancellationNotice.actorId,
+      reasonCode: plan.cancellationNotice.reasonCode,
+      note: plan.cancellationNotice.note,
+      canceledAt: plan.cancellationNotice.createdAt.toISOString(),
+      wasConfirmed: plan.cancellationNotice.wasConfirmed,
+    } : null,
     planType: plan.planType as PlanType,
     title: plan.title,
     location: plan.location,
@@ -71,13 +79,14 @@ export function planRequestV1(plan: PlanRequestV1Row, viewerId?: string) {
       : null,
     meetAgainAvailable: process.env.V2_MEET_AGAIN_ENABLED === "1" &&
       process.env.V2_GLOBAL_KILL_SWITCH !== "1" &&
-      viewerOutcome === "OCCURRED" && plan.status === "ACCEPTED" && plan.endTime <= new Date(),
+      !plan.cancellationNotice && viewerOutcome === "OCCURRED" && plan.status === "ACCEPTED" && plan.endTime <= new Date(),
     createdAt: plan.createdAt.toISOString(),
     updatedAt: plan.updatedAt.toISOString(),
   };
 }
 
 export const planRequestV1Include = {
+  cancellationNotice: { select: { actorId: true, reasonCode: true, note: true, createdAt: true, wasConfirmed: true } },
   proposer: {
     select: { id: true, username: true, nickname: true, avatarUrl: true },
   },

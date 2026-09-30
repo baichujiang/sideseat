@@ -37,6 +37,7 @@ Historical build evidence never certifies a newer build.
 | [Together Contract](./TOGETHER_CONTRACT.md) | Weekly Intent, matching session and Mutual Opportunity engineering rules |
 | [Safety](./SAFETY.md) | Pair-wide Block, Plan/Calendar cleanup, privacy and concurrency |
 | [Native iOS](./IOS.md) | SwiftUI architecture, environments, build and Calendar sync |
+| [Membership](./MEMBERSHIP.md) | Free/Plus identity, invitation redemption limits and operator instructions |
 | [Design System](./DESIGN_SYSTEM.md) | Tokens, reusable UI, interaction and visual acceptance |
 | [Release](./RELEASE.md) | Database/Vercel/TestFlight/App Store procedure and gates |
 | [Privacy](./PRIVACY.md) | App Store data disclosure and provider mapping |
@@ -48,6 +49,8 @@ Historical build evidence never certifies a newer build.
 | Document | Purpose |
 | --- | --- |
 | [Legacy Action Compatibility](./LEGACY_ACTION_COMPATIBILITY.md) | Existing B-light/public Action, legacy Activity and web fallback only |
+| [Storage lifecycle and cost audit](./qa/2026-09-30-storage-lifecycle-and-cost.md) | Sequential fixes, local verification, production follow-up and Vercel Pro cost scenarios |
+| [Storage production release](./releases/2026-10-01-storage-production.md) | Published backend, database recovery point, 18 migrated chat images and authenticated production verification |
 | [TestFlight 1.0.0 (29)](./releases/2026-09-02-testflight-29.md) | Immutable facts and missing evidence for one uploaded build |
 | [TestFlight 1.0.0 (30)](./releases/2026-09-07-testflight-30.md) | Distributed Layer 2 build and physical acceptance evidence |
 | [TestFlight 1.0.0 (31)](./releases/2026-09-07-testflight-31.md) | Localization-complete internal pilot build and focused smoke plan |

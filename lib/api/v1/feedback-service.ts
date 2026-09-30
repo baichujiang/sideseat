@@ -84,6 +84,7 @@ export async function listFeedbackPosts(options: {
     posts: rankFeedbackPosts(posts),
     viewer: {
       isAdmin: isConfiguredAdmin({
+        id: options.userId,
         email: options.email,
         username: options.username,
       }),
@@ -255,6 +256,7 @@ export async function commentOnFeedbackPost(options: {
       userId: options.userId,
       body: options.body,
       isOfficial: isConfiguredAdmin({
+        id: options.userId,
         email: options.email,
         username: options.username,
       }),

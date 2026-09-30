@@ -22,6 +22,13 @@ const required = [
 ];
 
 const failures = [];
+if (process.env.MEDIA_LOCAL_STORAGE === "1") {
+  failures.push("MEDIA_LOCAL_STORAGE is only for isolated API tests and must not be enabled in Production.");
+}
+const privateMediaToken = process.env.PRIVATE_MEDIA_BLOB_READ_WRITE_TOKEN?.trim() || process.env.VERIFICATION_BLOB_READ_WRITE_TOKEN?.trim();
+if (privateMediaToken && privateMediaToken === process.env.BLOB_READ_WRITE_TOKEN?.trim()) {
+  failures.push("Chat media must use a private Blob store, not the public BLOB_READ_WRITE_TOKEN.");
+}
 
 if (process.env.ALLOW_REMOTE_DATABASE_MIGRATIONS?.trim() === "1") {
   failures.push(

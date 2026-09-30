@@ -216,6 +216,9 @@ export function ProfilePageClient({ initialPayload }: { initialPayload: ProfileP
           <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
             {ui.me.adminLabel}
           </span>
+          <Link className="rounded-full bg-teal-100 px-2 py-0.5 text-[11px] font-semibold text-teal-800" href="/admin/invitations">
+            邀请码
+          </Link>
           <Link className="rounded-full bg-[#e5f1ee] px-2 py-0.5 text-[11px] font-semibold text-[#20524d]" href="/admin/reports">
             {ui.me.adminReports}
           </Link>

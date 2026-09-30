@@ -31,6 +31,7 @@ type CursorPayload = {
 };
 
 const POLL_INTERVAL_MS = 500;
+const IDLE_POLL_INTERVAL_MS = 2_000;
 const HEARTBEAT_INTERVAL_MS = 15_000;
 const AUTHORIZATION_INTERVAL_MS = 15_000;
 const BATCH_SIZE = 100;
@@ -175,13 +176,15 @@ export async function chatRealtimeSseResponse<T>(
   const requestId = v1RequestId(request);
   const initialSequence = sequence;
   const encoder = new TextEncoder();
-  const signal = request.signal;
+  const cancellation = new AbortController();
+  const signal = AbortSignal.any([request.signal, cancellation.signal]);
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const enqueue = (value: string) => controller.enqueue(encoder.encode(value));
       let cursor = encodeChatRealtimeCursor(options.conversation, sequence);
       let lastHeartbeatAt = Date.now();
       let lastAuthorizationAt = Date.now();
+      let pollInterval = POLL_INTERVAL_MS;
 
       enqueue(
         sseBlock({
@@ -289,13 +292,15 @@ export async function chatRealtimeSseResponse<T>(
             );
           }
 
+          if (deliveries.length > 0) pollInterval = POLL_INTERVAL_MS;
           if (deliveries.length === BATCH_SIZE) continue;
 
           if (Date.now() - lastHeartbeatAt >= HEARTBEAT_INTERVAL_MS) {
             enqueue(`: heartbeat ${Date.now()}\n\n`);
             lastHeartbeatAt = Date.now();
           }
-          await sleep(POLL_INTERVAL_MS, signal);
+          await sleep(pollInterval, signal);
+          if (deliveries.length === 0) pollInterval = Math.min(pollInterval * 2, IDLE_POLL_INTERVAL_MS);
         }
       } catch (cause) {
         if (!isAbortError(cause)) {
@@ -327,6 +332,7 @@ export async function chatRealtimeSseResponse<T>(
         }
       }
     },
+    cancel() { cancellation.abort(); },
   });
 
   return new Response(stream, {

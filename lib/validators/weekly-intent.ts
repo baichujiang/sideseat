@@ -232,12 +232,10 @@ const intentFields = {
   topic: z.nativeEnum(SocialIntentTopic),
   togetherMode: z.nativeEnum(TogetherMode).optional(),
   studyGoal: studyGoalSchema,
-  // Optional/nullable keeps old TestFlight clients readable. Current clients
-  // always provide a concrete action for the four general categories.
+  // General activity details are optional; the topic itself expresses intent.
   activityText: activityTextSchema,
-  // Optional/nullable keeps already-shipped clients compatible. New clients
-  // provide one concrete value for SPORTS so matching never treats every
-  // sport as interchangeable.
+  // A category-only sports intention has no tag. When details specify a sport,
+  // matching retains that distinction instead of treating sports as interchangeable.
   sportTag: sportTagSchema,
   sportOtherNote: sportOtherNoteSchema,
   courseId: z.string().trim().min(1).max(191).nullable().optional(),

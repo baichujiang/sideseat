@@ -1,0 +1,25 @@
+[local-test-db] Running against sideseat_loop_20260926 on 127.0.0.1:5433.
+prisma:error
+Invalid `tx.membershipInviteBatch.create()` invocation in
+/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/lib/membership/admin.ts:34:52
+
+  31 const codes = Array.from({ length: values.mode === "SHARED" ? 1 : values.quantity }, () => generateMembershipCode());
+  32 try {
+  33   return await prisma.$transaction(async tx => {
+→ 34     const batch = await tx.membershipInviteBatch.create(
+Unique constraint failed on the fields: (`requestKey`)
+✔ Invitation batches create once, export no secrets on reads, paginate, disable and audit (189.584041ms)
+✔ Fixed-ID administrator survives rename; another Pipi username does not gain access (5.535708ms)
+✔ Free becomes Plus, expiry returns Free, and retry never renews or spends another use (206.3895ms)
+✔ Concurrent users cannot redeem beyond the code's capacity (118.360667ms)
+✔ Same-account retries are idempotent; different codes extend without lost days (90.761333ms)
+✔ Invalid, expired and disabled codes do not grant membership or consume capacity (83.259708ms)
+✔ Real HTTP requires login, redeems persistently, rejects client privilege input and rate limits attempts (1998.307792ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2642.726416

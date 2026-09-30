@@ -1,0 +1,1 @@
+ALTER TYPE "MutualOpportunityStatus" ADD VALUE IF NOT EXISTS 'DRAFT';

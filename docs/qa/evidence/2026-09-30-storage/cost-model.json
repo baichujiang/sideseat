@@ -1,0 +1,134 @@
+{
+  "assumptions": "Flat Rate CDN enabled and eligible; entire team budget available to SideSeat; iad1 rates; 2 GB Fluid instances; normal monthly activity; no tax/Neon/AI/email/App Store fees. Sharing and timings are assumptions, not production measurements. Media-heavy workloads may be ineligible for Flat Rate CDN.",
+  "base20CapacityDAU": {
+    "light": {
+      "noSharing": 441,
+      "fiveStreamsPerInstance": 594
+    },
+    "normal": {
+      "noSharing": 139,
+      "fiveStreamsPerInstance": 248
+    },
+    "chatHeavy": {
+      "noSharing": 47,
+      "fiveStreamsPerInstance": 135
+    }
+  },
+  "normalMonthlyUSD": [
+    {
+      "dau": 100,
+      "shared": {
+        "dau": 100,
+        "scenario": "normal",
+        "streamsPerInstance": 5,
+        "cdnRequests": 402000,
+        "transferGB": 36.3,
+        "infrastructure": 6.7344,
+        "cdnFee": 0,
+        "bill": 20
+      },
+      "unshared": {
+        "dau": 100,
+        "scenario": "normal",
+        "streamsPerInstance": 1,
+        "cdnRequests": 402000,
+        "transferGB": 36.3,
+        "infrastructure": 15.214400000000001,
+        "cdnFee": 0,
+        "bill": 20
+      }
+    },
+    {
+      "dau": 200,
+      "shared": {
+        "dau": 200,
+        "scenario": "normal",
+        "streamsPerInstance": 5,
+        "cdnRequests": 804000,
+        "transferGB": 72.6,
+        "infrastructure": 10.4688,
+        "cdnFee": 0,
+        "bill": 20
+      },
+      "unshared": {
+        "dau": 200,
+        "scenario": "normal",
+        "streamsPerInstance": 1,
+        "cdnRequests": 804000,
+        "transferGB": 72.6,
+        "infrastructure": 27.428800000000003,
+        "cdnFee": 0,
+        "bill": 27.428800000000003
+      }
+    },
+    {
+      "dau": 500,
+      "shared": {
+        "dau": 500,
+        "scenario": "normal",
+        "streamsPerInstance": 5,
+        "cdnRequests": 2010000,
+        "transferGB": 181.5,
+        "infrastructure": 21.672000000000004,
+        "cdnFee": 20,
+        "bill": 41.672000000000004
+      },
+      "unshared": {
+        "dau": 500,
+        "scenario": "normal",
+        "streamsPerInstance": 1,
+        "cdnRequests": 2010000,
+        "transferGB": 181.5,
+        "infrastructure": 64.072,
+        "cdnFee": 20,
+        "bill": 84.072
+      }
+    },
+    {
+      "dau": 1000,
+      "shared": {
+        "dau": 1000,
+        "scenario": "normal",
+        "streamsPerInstance": 5,
+        "cdnRequests": 4020000,
+        "transferGB": 363,
+        "infrastructure": 40.34400000000001,
+        "cdnFee": 20,
+        "bill": 60.34400000000001
+      },
+      "unshared": {
+        "dau": 1000,
+        "scenario": "normal",
+        "streamsPerInstance": 1,
+        "cdnRequests": 4020000,
+        "transferGB": 363,
+        "infrastructure": 125.144,
+        "cdnFee": 20,
+        "bill": 145.144
+      }
+    },
+    {
+      "dau": 2000,
+      "shared": {
+        "dau": 2000,
+        "scenario": "normal",
+        "streamsPerInstance": 5,
+        "cdnRequests": 8040000,
+        "transferGB": 726,
+        "infrastructure": 77.68800000000002,
+        "cdnFee": 20,
+        "bill": 97.68800000000002
+      },
+      "unshared": {
+        "dau": 2000,
+        "scenario": "normal",
+        "streamsPerInstance": 1,
+        "cdnRequests": 8040000,
+        "transferGB": 726,
+        "infrastructure": 247.288,
+        "cdnFee": 20,
+        "bill": 267.288
+      }
+    }
+  ]
+}

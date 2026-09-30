@@ -1,0 +1,33 @@
+{
+  "base": "https://sideseat-jpskcyd4j-baichus-projects.vercel.app",
+  "at": "2026-09-30T22:30:53.209Z",
+  "passed": true,
+  "checks": [
+    "public configuration 200",
+    "image route requires authentication",
+    "temporary account a login",
+    "temporary account b login",
+    "temporary account c login",
+    "private upload 200",
+    "private storage pointer",
+    "raw private image not public",
+    "upload idempotency",
+    "private image message sent",
+    "message uses signed proxy",
+    "signed image bytes match",
+    "private no-store response",
+    "recipient can read image",
+    "unrelated account cannot read",
+    "expired signature rejected",
+    "recipient thread excludes raw storage URL",
+    "blocked image inaccessible",
+    "image withdrawal succeeds",
+    "withdrawn image inaccessible",
+    "withdrawal cleanup queue drained",
+    "public avatar upload",
+    "avatar stored externally",
+    "account deletion through API",
+    "account avatar cleanup queue drained"
+  ],
+  "temporaryAccountsRemaining": 0
+}

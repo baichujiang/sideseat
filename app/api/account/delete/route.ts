@@ -3,11 +3,7 @@ import { NextResponse } from "next/server";
 
 import { destroySession, getSessionUser } from "@/lib/auth/session";
 import { isDatabaseUnreachable, warnDatabaseUnreachableThrottled } from "@/lib/db/prisma-errors";
-import { prisma } from "@/lib/db/prisma";
-import {
-  deleteVerificationProofsForUser,
-  isVerificationProofStorageConfigured,
-} from "@/lib/media/verification-proof-storage";
+import { eraseAccountRecords } from "@/lib/api/v1/account-service";
 
 export async function POST(request: Request) {
   const user = await getSessionUser();
@@ -16,15 +12,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const verificationProofs = await prisma.userSchoolVerification.findMany({
-      where: { userId: user.id, manualReviewProofUrl: { not: null } },
-      select: { manualReviewProofUrl: true },
-    });
-    const knownProofUrls = verificationProofs.map((row) => row.manualReviewProofUrl);
-    if (isVerificationProofStorageConfigured() || knownProofUrls.length > 0) {
-      await deleteVerificationProofsForUser(user.id, knownProofUrls);
-    }
-    await prisma.user.delete({ where: { id: user.id } });
+    await eraseAccountRecords(user.id);
   } catch (cause) {
     if (isDatabaseUnreachable(cause)) {
       warnDatabaseUnreachableThrottled("account/delete");

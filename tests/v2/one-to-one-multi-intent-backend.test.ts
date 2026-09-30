@@ -12,7 +12,8 @@ test("Weekly Intent collection keeps the legacy singular field while returning a
   assert.match(service, /const intents = ordered\.map\(ownerResponse\)/);
   assert.match(service, /intent: intents\[0\] \?\? null,[\s\S]*intents/);
   assert.match(service, /const rows = await tx\.weeklyIntent\.findMany/);
-  assert.match(service, /return ownerCollection\(rows\)/);
+  assert.match(service, /ownerCollection\(rows\.filter\(row => row\.status !== "EXPIRED"\)\)/);
+  assert.match(service, /expiredIntents: rows\.filter\(row => row\.status === "EXPIRED"\)\.map\(ownerResponse\)/);
 });
 
 test("editing, pausing, ending, or expiring an intent terminalizes only pending opportunities", () => {

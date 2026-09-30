@@ -285,7 +285,8 @@ test("published flexible intentions: automatic match without sessions, bilateral
         assert.equal((await listMutualOpportunities(userAId, false)).opportunities.length, 0);
         const edited = await patchWeeklyIntent(userAId, first.intent.id, { action: "EDIT", expectedVersion: first.intent.version,
           timePreference: { kind: "FLEXIBLE", startDate: tomorrow, endDate: tomorrow, period: "ANY" }, timeWindows: [] });
-        assert.equal(edited.intent.expiresAt, null);
+        assert.ok(edited.intent.expiresAt);
+        assert.equal(formatInTimeZone(new Date(edited.intent.expiresAt), "Europe/Berlin", "yyyy-MM-dd"), tomorrow);
         assert.deepEqual(edited.intent.timeWindows, []);
         const second = await createWeeklyIntent(userBId, input, now);
         assert.equal(second.intent.status, "ACTIVE");

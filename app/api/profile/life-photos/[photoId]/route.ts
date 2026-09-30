@@ -1,4 +1,4 @@
-import { del } from "@vercel/blob";
+import { queueMediaDeletion, processMediaDeletionJobs } from "@/lib/media/lifecycle";
 
 import { requireUser } from "@/lib/auth/session";
 import { isTrustedUserLifePhotoBlobUrl } from "@/lib/constants/user-life-photo-media";
@@ -21,10 +21,13 @@ export async function DELETE(
       return error("Photo not found.", 404);
     }
 
-    await prisma.userLifePhoto.delete({ where: { id: photo.id } });
+    await prisma.$transaction(async tx => {
+      await tx.userLifePhoto.delete({ where: { id: photo.id } });
+      await queueMediaDeletion(tx, [photo.url]);
+    });
 
     if (isTrustedUserLifePhotoBlobUrl(user.id, photo.url)) {
-      del(photo.url).catch(() => {});
+      await processMediaDeletionJobs({ urls: [photo.url] });
     }
 
     return ok({ deleted: true });

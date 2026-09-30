@@ -1,3 +1,5 @@
+import { MediaUploadRateLimitError } from "@/lib/media/upload-allowance";
+import { MediaStorageUnavailableError } from "@/lib/media/private-blob";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
@@ -216,7 +218,7 @@ export async function POST(request: Request) {
         } as const;
       }
 
-      const uploaded = await uploadNativeImage({
+      const uploaded = await uploadNativeImage({ userId: auth.user.id,
         image,
         blobPrefix: userLifePhotoBlobPrefix(auth.user.id),
         logScope: "v1/me/life-photos",
@@ -238,6 +240,8 @@ export async function POST(request: Request) {
 
     return mutationResponse(request, result);
   } catch (cause) {
+    if (cause instanceof MediaUploadRateLimitError) return v1Error(request, { code: "RATE_LIMITED", message: cause.message, status: 429, retryable: true, headers: cause.headers });
+    if (cause instanceof MediaStorageUnavailableError) return v1Error(request, { code: "INTERNAL_ERROR", message: cause.message, status: 503, retryable: true });
     if (cause instanceof NativeImageUploadError) {
       return v1Error(request, {
         code: "INVALID_REQUEST",

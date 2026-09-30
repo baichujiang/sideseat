@@ -21,12 +21,10 @@ export function classmatePostImageBlobPrefix(userId: string): string {
 }
 
 /**
- * Accepts HTTPS URLs on our Vercel Blob classmate-post prefix for this user, a
- * bounded inline data URL when blob storage is disabled (same pattern as chat images),
- * or HTTPS `picsum.photos/seed/…/w/h` URLs for dev seed data and demos.
+ * Accepts HTTPS URLs on our Vercel Blob classmate-post prefix for this user, or HTTPS `picsum.photos/seed/…/w/h` URLs for dev seed data and demos.
  */
 export function isAllowedClassmatePostImageUrl(userId: string, url: string): boolean {
-  if (typeof url !== "string" || url.length > 4_000_000) return false;
+  if (typeof url !== "string" || url.length > 2048) return false;
   if (url.startsWith("https://")) {
     if (isSeedDemoHttpsImageUrl(url)) return true;
     try {
@@ -37,7 +35,5 @@ export function isAllowedClassmatePostImageUrl(userId: string, url: string): boo
       return false;
     }
   }
-  const prefixes = ["data:image/jpeg;base64,", "data:image/png;base64,", "data:image/webp;base64,"];
-  if (!prefixes.some((p) => url.startsWith(p))) return false;
-  return url.length <= 2_800_000;
+  return false;
 }

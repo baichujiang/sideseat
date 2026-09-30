@@ -72,8 +72,12 @@ export const adminUsernames = (process.env.ADMIN_USERNAMES ?? "")
   .map((u) => u.trim().toLowerCase())
   .filter(Boolean);
 
-/** True if this account is listed in ADMIN_EMAILS or ADMIN_USERNAMES. */
-export function isConfiguredAdmin(user: { email: string | null; username: string }): boolean {
+/** Prefer immutable account IDs for new grants, so renames cannot transfer access. */
+export const adminUserIds = (process.env.ADMIN_USER_IDS ?? "").split(",").map(id => id.trim()).filter(Boolean);
+
+/** Server authorization still verifies the authenticated account on every request. */
+export function isConfiguredAdmin(user: { id?: string; email: string | null; username: string }): boolean {
+  if (user.id && adminUserIds.includes(user.id)) return true;
   const email = user.email?.trim().toLowerCase() ?? "";
   if (email && adminEmails.includes(email)) return true;
   const uname = user.username.trim().toLowerCase();

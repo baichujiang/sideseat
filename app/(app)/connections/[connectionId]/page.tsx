@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { chatImageReadUrl } from "@/lib/media/chat-image-access";
 import type { Route } from "next";
 import { format, isSameDay, isToday, isYesterday } from "date-fns";
 import { enUS, zhCN } from "date-fns/locale";
@@ -344,7 +345,7 @@ export default async function ConnectionPage({
                 message.type === "IMAGE" && message.imageUrl
                   ? {
                       kind: "image" as const,
-                      imageUrl: message.imageUrl,
+                      imageUrl: chatImageReadUrl(connectionId, message.id, user.id),
                       caption: message.body,
                     }
                   : message.type === "LOCATION" &&

@@ -1,3 +1,4 @@
+import { isPlusMember } from "@/lib/membership/status";
 import "server-only";
 
 import { ConnectionStatus, Prisma, type User } from "@prisma/client";
@@ -91,6 +92,7 @@ function courseDto(course: { id: string; name: string; code: string | null }) {
 }
 
 function profileUserDto(user: {
+  membership?: { plusExpiresAt: Date } | null;
   id: string;
   username: string;
   nickname: string | null;
@@ -111,6 +113,7 @@ function profileUserDto(user: {
     id: user.id,
     username: user.username,
     displayName: user.nickname?.trim() || user.username,
+    isPlus: isPlusMember(user.membership?.plusExpiresAt),
     nickname: user.nickname,
     gender: user.gender,
     avatarUrl: user.avatarUrl,
@@ -326,6 +329,7 @@ export async function loadNativePublicProfile(options: {
       nickname: true,
       gender: true,
       avatarUrl: true,
+      membership: { select: { plusExpiresAt: true } },
       bio: true,
       school: true,
       studentStatus: true,
@@ -421,7 +425,7 @@ export async function loadNativePublicProfile(options: {
     metVia: connection?.invitation?.course?.name ?? sharedCourses[0]?.name ?? null,
     viewerCanMessage: true,
     myContactRemark: connection ? contactRemarkForViewer(connection, options.viewer.id) : null,
-    profile: profileUserDto(peer),
+    profile: profileUserDto({ ...peer, membership: peerBase.membership }),
     sharedCourses: sharedCourses.map(courseDto),
     peerCourses: peerCourses.map((row) => courseDto(row.course)),
   };

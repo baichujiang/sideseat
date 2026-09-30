@@ -11,6 +11,7 @@ import {
   weeklyIntentCreateSchema,
   weeklyIntentPatchSchema,
 } from "../../lib/validators/weekly-intent";
+import { classifyActivityMatch } from "../../lib/v2/mutual-opportunity-activity-compatibility";
 
 const validCreate = {
   topic: "COFFEE",
@@ -24,6 +25,21 @@ const validCreate = {
   timeZone: "Europe/Berlin",
   note: "Coffee after class",
 };
+
+test("all categories support creating and clearing optional details and matching category-only intentions", () => {
+  for (const topic of ["COFFEE", "STUDY", "SPORTS", "EXPLORE", "FOOD", "EVENTS"] as const) {
+    const activity = { topic, activityText: null, sportTag: null, sportOtherNote: null,
+      togetherMode: "SAME_ACTIVITY" as const, studyGoal: null };
+    assert.equal(weeklyIntentCreateSchema.safeParse({
+      ...validCreate, ...activity, timeWindows: [],
+      timePreference: { kind: "UNDECIDED" }, automaticMatching: true,
+    }).success, true, `${topic} can be published without details or a fixed time`);
+    assert.equal(weeklyIntentPatchSchema.safeParse({
+      action: "EDIT", expectedVersion: 1, ...activity,
+    }).success, true, `${topic} can clear previously entered details`);
+    assert.equal(classifyActivityMatch(activity, activity)?.matchKind, "EXACT_ACTIVITY");
+  }
+});
 
 test("Weekly Intent input is strict, bounded, and activity-first", () => {
   assert.equal(weeklyIntentCreateSchema.safeParse(validCreate).success, true);

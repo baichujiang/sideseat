@@ -1,4 +1,6 @@
+import { isPlusMember } from "@/lib/membership/status";
 import "server-only";
+import { type Prisma } from "@prisma/client";
 
 import { formatInTimeZone } from "date-fns-tz";
 import { realExploreIntentWhere } from "@/lib/v2/explore-intent-access";
@@ -13,7 +15,7 @@ const exploreIntentSelect = {
       sportTag: true, sportOtherNote: true, timeWindows: true, timePreference: true,
       timeZone: true, note: true, expiresAt: true, createdAt: true,
       course: { select: { code: true, name: true } },
-      user: { select: { id: true, school: true, verifiedStudent: true, userLanguages: { select: { tag: true }, orderBy: { tag: "asc" } } } },
+      user: { select: { id: true, school: true, verifiedStudent: true, membership: { select: { plusExpiresAt: true } }, userLanguages: { select: { tag: true }, orderBy: { tag: "asc" } } } },
     } as const;
 
 type RawWindow = { startAt?: unknown; endAt?: unknown };
@@ -61,8 +63,19 @@ export async function listExploreIntents(userId: string, requestedLimit = 3) {
   });
   if (!viewer?.verifiedStudent || viewer.hideFromDiscovery || !viewer.school) return { intents: [], hasMore: false };
   const now = new Date();
+  // Remove saved/contacted intentions before selecting the limited feed, so new cards fill the slots.
+  const handled: Prisma.MutualOpportunityWhereInput = {
+    AND: [
+      { OR: [{ userAId: userId }, { userBId: userId }] },
+      { OR: [{ messageRequest: { isNot: null } }, { connectionId: { not: null } }, { bookmarks: { some: { userId } } }] },
+    ],
+  };
   const rows = await prisma.weeklyIntent.findMany({
-    where: realExploreIntentWhere(userId, { username: viewer.username, school: viewer.school }, now),
+    where: {
+      ...realExploreIntentWhere(userId, { username: viewer.username, school: viewer.school }, now),
+      mutualOpportunitiesAsA: { none: handled },
+      mutualOpportunitiesAsB: { none: handled },
+    },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: 32,
     select: exploreIntentSelect,
@@ -105,7 +118,7 @@ export async function listExploreIntents(userId: string, requestedLimit = 3) {
     where: { AND: [
       { OR: [{ userAId: userId }, { userBId: userId }] },
       { OR: [{ intentAId: { in: selectedIds } }, { intentBId: { in: selectedIds } }] },
-      { OR: [{ status: { in: ["PENDING", "MUTUAL"] } },
+      { OR: [{ status: { in: ["DRAFT", "PENDING", "MUTUAL"] } },
         { createdAt: { gte: new Date(now.getTime() - 14 * 86400000) } }] },
     ] },
     select: { id: true, intentAId: true, intentBId: true, status: true, expiresAt: true,
@@ -118,7 +131,7 @@ export async function listExploreIntents(userId: string, requestedLimit = 3) {
     const opportunity = opportunities.find(row => row.intentAId === intentId || row.intentBId === intentId);
     if (!opportunity) return null;
     const state = opportunity.status === "MUTUAL" && opportunity.connectionId ? "READY_TO_COORDINATE"
-      : opportunity.status !== "PENDING" || opportunity.expiresAt <= now ||
+      : (opportunity.status !== "PENDING" && opportunity.status !== "DRAFT") || opportunity.expiresAt <= now ||
         (opportunity.startsAt && opportunity.startsAt <= now) ||
         opportunity.intentA.status !== "ACTIVE" || opportunity.intentB.status !== "ACTIVE" ? "UNAVAILABLE"
       : opportunity.decisions[0]?.value === "YES" ? "DECIDED" : "NEEDS_DECISION";
@@ -129,6 +142,7 @@ export async function listExploreIntents(userId: string, requestedLimit = 3) {
     intents: selected.map(row => ({
       id: row.id,
       isExample: exampleIds.has(row.id),
+      isPlus: !exampleIds.has(row.id) && isPlusMember(row.user.membership?.plusExpiresAt, now),
       interest: exampleIds.has(row.id) ? null : interestFor(row.id),
       topic: row.topic,
       togetherMode: row.togetherMode,

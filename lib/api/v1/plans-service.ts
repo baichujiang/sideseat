@@ -85,9 +85,11 @@ export async function listPlansForUser(userId: string) {
         {
           OR: [
             { status: "PENDING" },
-            { status: "ACCEPTED", endTime: { gt: now } },
+            { cancellationNotice: { is: { createdAt: { gte: recentOutcomeCutoff } } } },
+            { status: "ACCEPTED", cancellationNotice: { is: null }, endTime: { gt: now } },
             {
               status: "ACCEPTED",
+              cancellationNotice: { is: null },
               endTime: { lte: now, gte: recentOutcomeCutoff },
             },
           ],

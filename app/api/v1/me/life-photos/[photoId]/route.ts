@@ -1,4 +1,4 @@
-import { del } from "@vercel/blob";
+import { queueMediaDeletion, processMediaDeletionJobs } from "@/lib/media/lifecycle";
 import { Prisma } from "@prisma/client";
 
 import { requireV1User } from "@/lib/api/v1/auth";
@@ -158,6 +158,7 @@ export async function DELETE(
       }
 
       await tx.userLifePhoto.delete({ where: { id: photo.id } });
+      await queueMediaDeletion(tx, [photo.url]);
       const remaining = await tx.userLifePhoto.findMany({
         where: { userId: auth.user.id },
         select: { id: true },
@@ -196,7 +197,7 @@ export async function DELETE(
       result.deletedUrl &&
       isTrustedUserLifePhotoBlobUrl(auth.user.id, result.deletedUrl)
     ) {
-      del(result.deletedUrl).catch(() => {});
+      await processMediaDeletionJobs({ urls: [result.deletedUrl] });
     }
     return response;
   } catch (cause) {

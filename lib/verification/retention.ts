@@ -3,7 +3,7 @@ import "server-only";
 import { StudentVerificationStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
-import { deleteVerificationProof } from "@/lib/media/verification-proof-storage";
+import { queueMediaDeletion } from "@/lib/media/lifecycle";
 import { manualReviewProofCutoff } from "@/lib/verification/policy";
 import { mirrorSchoolVerificationToUser } from "@/lib/verification/school-state";
 
@@ -29,16 +29,9 @@ export async function cleanupStudentVerificationData(options?: {
     take: batchSize,
   });
 
-  let deletedProofCount = 0;
+  let queuedProofCount = 0;
   for (const state of staleProofs) {
     if (!state.manualReviewProofUrl) continue;
-    try {
-      await deleteVerificationProof(state.manualReviewProofUrl);
-    } catch (cause) {
-      console.error("[verification-retention] failed to delete stale proof", cause);
-      continue;
-    }
-
     await prisma.$transaction(async (tx) => {
       const changed = await tx.userSchoolVerification.updateMany({
         where: {
@@ -62,7 +55,8 @@ export async function cleanupStudentVerificationData(options?: {
       if (changed.count > 0 && state.user.school === state.school) {
         await mirrorSchoolVerificationToUser(tx, state.userId, state.school);
       }
-      deletedProofCount += changed.count;
+      if (changed.count > 0) await queueMediaDeletion(tx, [state.manualReviewProofUrl]);
+      queuedProofCount += changed.count;
     });
   }
 
@@ -72,7 +66,7 @@ export async function cleanupStudentVerificationData(options?: {
   });
 
   return {
-    deletedProofCount,
+    queuedProofCount,
     expiredEmailRequestCount: expiredEmailRequests.count,
   };
 }

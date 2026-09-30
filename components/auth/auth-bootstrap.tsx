@@ -99,6 +99,8 @@ export function AuthBootstrap() {
   useEffect(() => {
     if (!sessionReady) return;
     if (getAccessToken()) return;
+    // These pages use server-side cookie authentication, including the admin guard.
+    if (isNativeWebPath(pathname)) return;
     if (isPublicAppPath(pathname) || shouldAutoGuestSession(pathname)) return;
     const returnTo = `${pathname}${typeof window !== "undefined" ? window.location.search : ""}`;
     router.replace(`/login?returnTo=${encodeURIComponent(returnTo)}` as Route);

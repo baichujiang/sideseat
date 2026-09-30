@@ -65,12 +65,19 @@ test("viewer projection exposes only explainable activity fit, never peer decisi
   );
   assert.match(projection, /viewerIntentId: viewerIsA \? row\.intentAId : row\.intentBId/);
   assert.match(projection, /viewerDecision: ownDecision/);
+  assert.match(projection, /const peerIntention = viewerIsA \? row\.intentB : row\.intentA/);
+  assert.match(projection, /timeWindows: peerIntention\.timeWindows/);
+  const projectedPeerIntent = projection.slice(
+    projection.indexOf("peerIntention: "),
+    projection.indexOf("isBookmarked: "),
+  );
+  assert.doesNotMatch(projectedPeerIntent, /^\s+(?:userId|id|status):/m);
   assert.doesNotMatch(projection, /peerDecision/);
   assert.doesNotMatch(projection, /peerIntentId/);
   assert.doesNotMatch(projection, /peerId/);
   assert.match(projection, /matchFit: activityFitProjection\(row.contextSnapshot, viewerIsA\)/);
   assert.doesNotMatch(projection, /personScore|rank|compatibility/i);
-  assert.doesNotMatch(projection, /decidedAt|createdAt|updatedAt/);
+  assert.doesNotMatch(projection, /decidedAt|decision\.(createdAt|updatedAt)/);
 });
 
 test("both current YES decisions activate one canonical contextual conversation", () => {
@@ -98,20 +105,13 @@ test("decision mutations are idempotent and notify only after mutual activation"
   assert.match(route, /senderId: auth\.user\.id/);
 });
 
-test("Together presents finite private decisions and reveals chat only after mutual YES", () => {
-  const root = source(
-    "ios-native/SideSeat/Features/Together/TogetherRootView.swift",
-  );
-  const store = source(
-    "ios-native/SideSeat/Features/Together/MutualOpportunityStore.swift",
-  );
-  assert.match(root, /onInterested: onYes/);
-  assert.match(root, /onSkip: onNo/);
-  assert.match(root, /Button\(action: onWithdraw\)[\s\S]{0,100}Text\("Withdraw"\)/);
-  assert.match(root, /case "READY_TO_COORDINATE" where hasCoordination:/);
-  assert.match(root, /case \.mutual:[\s\S]*"Chat about the details"/);
-  assert.match(store, /opportunities\.removeAll \{ \$0\.id == opportunity\.id \}/);
-  assert.match(root, /Your choice is saved privately/);
-  assert.doesNotMatch(root, /Waiting for the other person to respond/);
-  assert.doesNotMatch(store, /Waiting for the other person to respond/);
+test("Together offers private bookmarks and a written first contact", () => {
+  const root = source("ios-native/SideSeat/Features/Together/TogetherRootView.swift");
+  const store = source("ios-native/SideSeat/Features/Together/MutualOpportunityStore.swift");
+  assert.match(root, /onBookmark:/);
+  assert.match(root, /OpportunityMessageComposer/);
+  assert.match(root, /View chat/);
+  assert.match(root, /Saved intentions/);
+  assert.doesNotMatch(root, /SSOpportunityDecisionButtons\(/);
+  assert.match(store, /NativeOpportunityInteraction/);
 });

@@ -2,7 +2,9 @@ import "server-only";
 
 import { randomBytes } from "crypto";
 
-import { put } from "@vercel/blob";
+import { putStoredMedia, mediaStoreConfigured } from "@/lib/media/storage";
+import { MediaStorageUnavailableError } from "@/lib/media/private-blob";
+import { consumeMediaUploadAllowance } from "@/lib/media/upload-allowance";
 
 export const NATIVE_IMAGE_MAX_BYTES = 2 * 1024 * 1024;
 export const NATIVE_IMAGE_MAX_WIDTH = 4096;
@@ -155,27 +157,17 @@ export async function validateNativeImageFile(file: File): Promise<ValidatedNati
 }
 
 export async function uploadNativeImage(options: {
+  userId: string;
   image: ValidatedNativeImage;
   blobPrefix: string;
   logScope: string;
 }) {
   const { image } = options;
-  let url: string;
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
-    const token = randomBytes(18).toString("hex");
-    const blobKey = `${options.blobPrefix}${token}.${MIME_TO_EXT[image.contentType]}`;
-    const blob = await put(blobKey, new Blob([new Uint8Array(image.bytes)], { type: image.contentType }), {
-      access: "public",
-      contentType: image.contentType,
-      addRandomSuffix: false,
-    });
-    url = blob.url;
-  } else {
-    console.warn(
-      `[${options.logScope}] BLOB_READ_WRITE_TOKEN is not configured. Falling back to inline image storage.`,
-    );
-    url = `data:${image.contentType};base64,${image.bytes.toString("base64")}`;
-  }
+  if (!mediaStoreConfigured("public")) throw new MediaStorageUnavailableError();
+  await consumeMediaUploadAllowance(options.userId);
+  const token = randomBytes(18).toString("hex");
+  const blobKey = `${options.blobPrefix}${token}.${MIME_TO_EXT[image.contentType]}`;
+  const { url } = await putStoredMedia("public", blobKey, image.bytes, image.contentType);
 
   return {
     url,

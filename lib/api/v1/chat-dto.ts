@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 
 import { planRequestV1, planRequestV1Include } from "@/lib/api/v1/plans-dto";
 import { parseActionOriginSnapshot } from "@/lib/v2/action-context-snapshot";
+import { chatImageReadUrl } from "@/lib/media/chat-image-access";
 
 export const directMessageV1Include = {
   sender: {
@@ -62,7 +63,8 @@ export function directMessageV1(message: DirectMessageV1Row, viewerId?: string) 
     sender: messageAuthor(message.sender),
     type: message.type,
     body: deleted ? null : message.body,
-    imageUrl: deleted ? null : message.imageUrl,
+    imageUrl: !deleted && message.imageUrl && viewerId
+      ? chatImageReadUrl(message.connectionId, message.id, viewerId) : null,
     location:
       !deleted && message.locationLat !== null && message.locationLng !== null
         ? {

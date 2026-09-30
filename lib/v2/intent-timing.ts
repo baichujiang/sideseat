@@ -39,6 +39,15 @@ export function readTimePreference(value: unknown): IntentTimePreference {
   return value == null ? { kind: "EXACT" } : intentTimePreferenceSchema.parse(value);
 }
 
+// An intention lasts through its final advertised time, with no artificial weekly deadline.
+export function intentionDeadline(windows: unknown, preference: unknown, timeZone: string): Date | null {
+  const timing = readTimePreference(preference);
+  if (timing.kind === "UNDECIDED") return null;
+  if (timing.kind === "FLEXIBLE") return fromZonedTime(`${timing.endDate}T23:59:59.999`, timeZone);
+  const ends = exactWindows(windows).map(window => window.endAt.getTime()).filter(Number.isFinite);
+  return ends.length ? new Date(Math.max(...ends)) : null;
+}
+
 export function flexiblePreferenceFitsLifecycle(
   preference: IntentTimePreference, timeZone: string, now: Date, expiry: Date | null,
 ): boolean {

@@ -3,10 +3,7 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
-import {
-  deleteVerificationProofsForUser,
-  isVerificationProofStorageConfigured,
-} from "@/lib/media/verification-proof-storage";
+import { queueAccountMediaDeletion, processMediaDeletionJobs } from "@/lib/media/lifecycle";
 
 export class AccountServiceError extends Error {
   constructor(
@@ -30,17 +27,21 @@ export async function deleteAccount(options: {
     );
   }
 
-  const verificationProofs = await prisma.userSchoolVerification.findMany({
-    where: { userId: options.userId, manualReviewProofUrl: { not: null } },
-    select: { manualReviewProofUrl: true },
-  });
-  const knownProofUrls = verificationProofs.map((row) => row.manualReviewProofUrl);
-  if (isVerificationProofStorageConfigured() || knownProofUrls.length > 0) {
-    await deleteVerificationProofsForUser(options.userId, knownProofUrls);
-  }
+  return eraseAccountRecords(options.userId);
+}
 
+export async function eraseAccountRecords(userId: string) {
   try {
-    await prisma.user.delete({ where: { id: options.userId } });
+    const urls = await prisma.$transaction(async tx => {
+      const urls = await queueAccountMediaDeletion(tx, userId);
+      await tx.user.delete({ where: { id: userId } });
+      return urls;
+    });
+    // The account deletion has committed. A worker outage must not turn it into
+    // an apparent failed deletion; the transaction already persisted retries.
+    await processMediaDeletionJobs({ urls, limit: 100 }).catch(cause => {
+      console.error("Account media cleanup deferred to cron", { error: cause instanceof Error ? cause.name : "UnknownError" });
+    });
   } catch (cause) {
     if (cause instanceof Prisma.PrismaClientKnownRequestError && cause.code === "P2025") {
       return { deleted: true as const };

@@ -1,4 +1,5 @@
 import "server-only";
+import { queueMediaDeletion } from "@/lib/media/lifecycle";
 
 import {
   ClassmatePostCategory,
@@ -274,8 +275,10 @@ export async function updateClassmatePostForUser(
     }
   }
 
+  const oldImages = await tx.classmatePostImage.findMany({ where: { postId }, select: { url: true } });
+  const existingUrls = new Set(oldImages.map(image => image.url));
   const imageUrls = Array.from(new Set(values.imageUrls ?? []));
-  if (imageUrls.some((url) => !isAllowedClassmatePostImageUrl(user.id, url))) {
+  if (imageUrls.some((url) => !existingUrls.has(url) && !isAllowedClassmatePostImageUrl(user.id, url))) {
     throw new ClassmatePostCreateError("INVALID_IMAGE");
   }
 
@@ -302,6 +305,7 @@ export async function updateClassmatePostForUser(
     });
   }
   await tx.classmatePostImage.deleteMany({ where: { postId } });
+  await queueMediaDeletion(tx, oldImages.map(image => image.url).filter(url => !imageUrls.includes(url)));
   if (imageUrls.length > 0) {
     await tx.classmatePostImage.createMany({
       data: imageUrls.map((url, sortOrder) => ({ postId, url, sortOrder })),

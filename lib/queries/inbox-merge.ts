@@ -238,6 +238,7 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
           },
           {
             status: PlanRequestStatus.ACCEPTED,
+            cancellationNotice: { is: null },
             endTime: { lte: now, gte: recentOutcomeCutoff },
             OR: [{ proposerUserId: userId }, { receiverUserId: userId }],
             outcomeResponses: { none: { userId } },

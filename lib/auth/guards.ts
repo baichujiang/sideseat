@@ -504,7 +504,7 @@ export async function requireCourseChatMember(courseId: string) {
 }
 
 /**
- * Admin routes: allow accounts listed in ADMIN_EMAILS and/or ADMIN_USERNAMES
+ * Admin routes: allow accounts listed in ADMIN_USER_IDS, ADMIN_EMAILS and/or ADMIN_USERNAMES
  * (see `lib/constants/app.ts`). `adminActor` is used in audit fields (email or username).
  */
 export async function requireAdminUser(): Promise<User & { adminActor: string }> {

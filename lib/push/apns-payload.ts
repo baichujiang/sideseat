@@ -6,6 +6,7 @@ export type PushNotificationKind =
   | "plan_counter"
   | "plan_accepted"
   | "plan_declined"
+  | "plan_canceled"
   | "discover_comment"
   | "discover_reply";
 

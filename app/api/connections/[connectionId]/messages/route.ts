@@ -1,4 +1,5 @@
 import { requireOnboardedUser } from "@/lib/auth/guards";
+import { chatImageReadUrl } from "@/lib/media/chat-image-access";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok, parseJson } from "@/lib/http";
 import { scheduleNewDirectChatMessageNotification } from "@/lib/push/notify-user";
@@ -44,7 +45,7 @@ export async function POST(
       bodyPreview,
     });
 
-    return ok(message, { status: 201 });
+    return ok({ ...message, imageUrl: message.imageUrl ? chatImageReadUrl(connectionId, message.id, user.id) : null }, { status: 201 });
   } catch (cause) {
     if (cause instanceof InvalidDirectMessageImageError) {
       return error("Invalid image.", 400);

@@ -1,3 +1,4 @@
+import { isPlusMember } from "@/lib/membership/status";
 import "server-only";
 
 import {
@@ -53,7 +54,16 @@ type LimitedUser = Readonly<{
   userLanguages: Array<{ tag: string }>;
 }>;
 
+const intentionCardSelect = {
+  status: true, expiresAt: true,
+  topic: true, activityText: true, studyGoal: true, sportTag: true,
+  sportOtherNote: true, timePreference: true, timeWindows: true,
+  note: true, exploreVisible: true, course: { select: { code: true, name: true } },
+} satisfies Prisma.WeeklyIntentSelect;
+
 const opportunityInclude = {
+  intentA: { select: intentionCardSelect },
+  intentB: { select: intentionCardSelect },
   userA: {
     select: {
       id: true,
@@ -64,6 +74,7 @@ const opportunityInclude = {
       semester: true,
       verifiedStudent: true,
       school: true,
+      membership: { select: { plusExpiresAt: true } },
       userLanguages: { select: { tag: true } },
     },
   },
@@ -77,11 +88,14 @@ const opportunityInclude = {
       semester: true,
       verifiedStudent: true,
       school: true,
+      membership: { select: { plusExpiresAt: true } },
       userLanguages: { select: { tag: true } },
     },
   },
   course: { select: { id: true, code: true, name: true } },
   decisions: { select: { userId: true, value: true } },
+  bookmarks: { select: { userId: true } },
+  messageRequest: true,
 } satisfies Prisma.MutualOpportunityInclude;
 
 type OpportunityRow = Prisma.MutualOpportunityGetPayload<{
@@ -204,17 +218,20 @@ function viewerProjection(row: OpportunityRow, viewerId: string) {
   const viewerIsA = row.userAId === viewerId;
   const peer = viewerIsA ? row.userB : row.userA;
   const viewer = viewerIsA ? row.userA : row.userB;
+  const peerIntention = viewerIsA ? row.intentB : row.intentA;
+  const isExpired = peerIntention.status === "EXPIRED" ||
+    (peerIntention.expiresAt !== null && peerIntention.expiresAt <= new Date());
   const ownDecision = row.decisions.find((decision) => decision.userId === viewerId)?.value ?? null;
   const state = row.status === MutualOpportunityStatus.MUTUAL && row.connectionId
     ? "READY_TO_COORDINATE"
-    : row.status !== MutualOpportunityStatus.PENDING
+    : isExpired || (row.status !== MutualOpportunityStatus.PENDING && row.status !== MutualOpportunityStatus.DRAFT)
       ? "UNAVAILABLE"
       : ownDecision === null
         ? "NEEDS_DECISION"
         : ownDecision === MutualOpportunityDecisionValue.YES
           ? "DECIDED"
           : "CLOSED";
-  const hideExploreIdentity = state !== "READY_TO_COORDINATE" &&
+  const hideExploreIdentity = state !== "READY_TO_COORDINATE" && !row.messageRequest &&
     typeof (row.contextSnapshot as Prisma.JsonObject)?.exploreIntentId === "string";
 
   return {
@@ -222,6 +239,7 @@ function viewerProjection(row: OpportunityRow, viewerId: string) {
     viewerIntentId: viewerIsA ? row.intentAId : row.intentBId,
     policyVersion: row.policyVersion,
     isRepeat: Boolean(row.repeatOfPlanId),
+    isExpired,
     state,
     topic: row.topic,
     matchKind: row.matchKind,
@@ -247,10 +265,36 @@ function viewerProjection(row: OpportunityRow, viewerId: string) {
       displayName: hideExploreIdentity ? "Student" : displayName(peer),
       avatarUrl: hideExploreIdentity ? null : peer.avatarUrl,
       verifiedStudent: peer.verifiedStudent,
+      isPlus: isPlusMember(peer.membership?.plusExpiresAt),
       major: hideExploreIdentity ? null : peer.major,
       semester: hideExploreIdentity ? null : peer.semester,
       sharedLanguages: sharedLanguages(viewer, peer),
+      campus: peer.school,
+      languages: peer.userLanguages.slice(0, 1).map(language => language.tag),
     },
+    peerIntention: state === "CLOSED" || peerIntention.status === "ENDED" || (state === "UNAVAILABLE" && !isExpired) ? null : {
+      activity: {
+        topic: peerIntention.topic,
+        activityText: peerIntention.activityText,
+        studyGoal: peerIntention.studyGoal,
+        sportTag: peerIntention.sportTag,
+        sportOtherNote: peerIntention.sportOtherNote,
+      },
+      timePreference: peerIntention.timePreference ?? { kind: "EXACT" },
+      timeWindows: peerIntention.timeWindows,
+      course: peerIntention.course,
+      descriptionPreview: peerIntention.exploreVisible ? peerIntention.note?.trim().slice(0, 96) || null : null,
+    },
+    isBookmarked: row.bookmarks.some(bookmark => bookmark.userId === viewerId),
+    messageRequest: row.messageRequest ? {
+      body: row.messageRequest.body,
+      intention: (row.contextSnapshot as Prisma.JsonObject)?.messageRequestIntention ?? null,
+      direction: row.messageRequest.senderId === viewerId ? "OUTGOING" : "INCOMING",
+      // Ignoring a request is private; its sender still sees a sent message.
+      status: row.messageRequest.status === "IGNORED" && row.messageRequest.senderId === viewerId
+        ? "PENDING" : row.messageRequest.status,
+      createdAt: row.messageRequest.createdAt.toISOString(),
+    } : null,
     viewerDecision: ownDecision,
     coordination:
       state === "READY_TO_COORDINATE" && row.connectionId
@@ -316,7 +360,7 @@ function contextSnapshot(options: {
 async function expireStaleForUser(userId: string, now: Date) {
   const stale = await prisma.mutualOpportunity.findMany({
     where: {
-      status: MutualOpportunityStatus.PENDING,
+      status: { in: ["PENDING", "DRAFT"] },
       AND: [
         { OR: [{ userAId: userId }, { userBId: userId }] },
         { OR: [
@@ -331,7 +375,7 @@ async function expireStaleForUser(userId: string, now: Date) {
   });
   if (stale.length === 0) return;
   await prisma.mutualOpportunity.updateMany({
-    where: { id: { in: stale.map((row) => row.id) }, status: "PENDING" },
+    where: { id: { in: stale.map((row) => row.id) }, status: { in: ["PENDING", "DRAFT"] } },
     data: { status: "EXPIRED", terminalAt: now, version: { increment: 1 } },
   });
 }
@@ -925,7 +969,10 @@ async function rowsForUser(userId: string) {
         ? { id: { notIn: acceptedOpportunityIds } }
         : {}),
       OR: [{ userAId: userId }, { userBId: userId }],
-      status: { in: ["PENDING", "MUTUAL"] },
+      AND: [{ OR: [
+        { status: { in: ["PENDING", "MUTUAL"] } },
+        { status: "DRAFT", contextSnapshot: { path: ["explorePreparedBy"], equals: userId } },
+      ] }],
     },
     include: opportunityInclude,
     orderBy: [{ updatedAt: "desc" }, { startsAt: "asc" }],
@@ -937,13 +984,21 @@ export async function listMutualOpportunities(userId: string, generate: boolean)
   const now = new Date();
   await expireStaleForUser(userId, now);
   if (generate) await generateMutualOpportunitiesForUser(userId);
-  const rows = await rowsForUser(userId);
+  const [current, saved] = await Promise.all([
+    rowsForUser(userId),
+    prisma.mutualOpportunity.findMany({
+      where: { bookmarks: { some: { userId } } },
+      include: opportunityInclude,
+      orderBy: { updatedAt: "desc" },
+    }),
+  ]);
+  const rows = [...new Map([...current, ...saved].map(row => [row.id, row])).values()];
   const hasDiscovery = rows.some(row => activityFitProjection(row.contextSnapshot, true)?.policyVersion === "DISCOVERY_FIT_V1");
   return {
     opportunities: rows
       .map((row) => viewerProjection(row, userId))
       .filter((row) =>
-        row.state === "NEEDS_DECISION" ||
+        row.isBookmarked || row.state === "NEEDS_DECISION" ||
         row.state === "DECIDED" ||
         row.state === "READY_TO_COORDINATE"
       ).sort((a, b) => {
@@ -966,8 +1021,16 @@ async function lockedOpportunity(
   });
 }
 
-/** Explore selects the pair explicitly, then uses the same private decisions and chat transition. */
+/** Legacy interest route; new clients use a private contact draft and explicit first message. */
 export async function expressExploreInterest(userId: string, intentId: string) {
+  return resolveExploreOpportunity(userId, intentId, false);
+}
+
+export async function prepareExploreOpportunity(userId: string, intentId: string) {
+  return (await resolveExploreOpportunity(userId, intentId, true)).opportunity;
+}
+
+async function resolveExploreOpportunity(userId: string, intentId: string, prepareOnly: boolean) {
   const seed = await prisma.weeklyIntent.findUnique({ where: { id: intentId }, select: { userId: true } });
   if (!seed || seed.userId === userId) throw new MutualOpportunityError("NOT_FOUND");
   await expireStaleForUser(userId, new Date());
@@ -996,11 +1059,12 @@ export async function expressExploreInterest(userId: string, intentId: string) {
       const userBId = scope.pair.maxUserId;
       const existing = await tx.mutualOpportunity.findFirst({
         where: { userAId, userBId, OR: [{ intentAId: intentId }, { intentBId: intentId }],
-          status: { in: ["PENDING", "MUTUAL"] } },
+          status: { in: prepareOnly ? ["DRAFT", "PENDING", "MUTUAL"] : ["PENDING", "MUTUAL"] } },
         include: opportunityInclude, orderBy: { createdAt: "desc" },
       });
       if (existing?.status === "MUTUAL") return { opportunity: viewerProjection(existing, userId), created: false };
       if (existing && existing.expiresAt > now && (!existing.startsAt || existing.startsAt > now)) {
+        if (prepareOnly) return { opportunity: viewerProjection(existing, userId), created: false };
         return { existingId: existing.id, created: false };
       }
       const permission = await repeatEligibility(tx, userId, target.userId, now);
@@ -1021,11 +1085,11 @@ export async function expressExploreInterest(userId: string, intentId: string) {
       const arranged = await tx.planRequest.findMany({ where: {
         originKind: "MUTUAL_OPPORTUNITY", originId: { in: occupied.map(row => row.id) }, status: "ACCEPTED",
       }, select: { originId: true } });
-      if (occupied.some(row => row.status === "PENDING" || !arranged.some(plan => plan.originId === row.id))) {
+      if (!prepareOnly && occupied.some(row => row.status === "PENDING" || !arranged.some(plan => plan.originId === row.id))) {
         throw new MutualOpportunityError("NO_LONGER_AVAILABLE");
       }
-      // This is consent only to this activity with this peer. The private backing
-      // record is excluded from My Intentions and every automatic matching query.
+      // Private contact context, excluded from My Intentions and automatic matching.
+      // DRAFT does not reserve the author's intention or notify either participant.
       // Clicking a broad activity card does not assert the author's exact availability.
       const response = await tx.weeklyIntent.create({ data: {
         userId, exploreResponseToId: target.id, topic: target.topic,
@@ -1060,11 +1124,12 @@ export async function expressExploreInterest(userId: string, intentId: string) {
         intentATogetherMode: context.intentATogetherMode, intentBTogetherMode: context.intentBTogetherMode,
         activityText: target.activityText, sportTag: target.sportTag, sportOtherNote: target.sportOtherNote,
         startsAt: context.startsAt, endsAt: context.endsAt, expiresAt: fit.timing.expiresAt,
-        contextSnapshot: { ...contextSnapshot({ ...context, id: "pending" }), exploreIntentId: target.id },
-        decisions: { create: { userId, value: "YES" } },
+        contextSnapshot: { ...contextSnapshot({ ...context, id: "pending" }), exploreIntentId: target.id, ...(prepareOnly ? { explorePreparedBy: userId } : {}) },
+        status: prepareOnly ? "DRAFT" : "PENDING",
+        ...(prepareOnly ? {} : { decisions: { create: { userId, value: "YES" as const } } }),
       }, include: opportunityInclude });
       const updated = await tx.mutualOpportunity.update({ where: { id: row.id }, data: {
-        contextSnapshot: { ...contextSnapshot({ ...context, id: row.id }), exploreIntentId: target.id },
+        contextSnapshot: { ...contextSnapshot({ ...context, id: row.id }), exploreIntentId: target.id, ...(prepareOnly ? { explorePreparedBy: userId } : {}) },
       }, include: opportunityInclude });
       return { opportunity: viewerProjection(updated, userId), created: true };
     }),
@@ -1118,6 +1183,7 @@ export async function decideMutualOpportunity(options: {
           throw new MutualOpportunityError("NO_LONGER_AVAILABLE");
         }
       }
+      if (row.messageRequest) throw new MutualOpportunityError("DECISION_FINAL");
       const existing = row.decisions.find((decision) => decision.userId === options.userId);
       if (existing && existing.value !== options.decision) {
         throw new MutualOpportunityError("DECISION_FINAL");
@@ -1298,4 +1364,158 @@ export async function withdrawMutualOpportunityDecision(options: {
       };
     }),
   );
+}
+
+
+/** The sender retains a readable conversation while waiting, even if the request expires. */
+export async function listOpportunityMessageRequests(userId: string) {
+  await expireStaleForUser(userId, new Date());
+  const rows = await prisma.mutualOpportunity.findMany({
+    where: {
+      AND: [
+        { OR: [{ userAId: userId }, { userBId: userId }] },
+        { OR: [
+          { messageRequest: { is: { senderId: userId, status: { in: ["PENDING", "IGNORED"] } } } },
+          { status: "PENDING", expiresAt: { gt: new Date() }, messageRequest: { is: { status: "PENDING" } } },
+        ] },
+      ],
+    },
+    include: opportunityInclude,
+    orderBy: { updatedAt: "desc" },
+  });
+  return rows.map(row => viewerProjection(row, userId));
+}
+
+/** Resolve the same conversation before and after the written reply creates a Connection. */
+export async function getOpportunityConversation(userId: string, opportunityId: string) {
+  await expireStaleForUser(userId, new Date());
+  const row = await prisma.mutualOpportunity.findFirst({
+    where: { id: opportunityId, AND: [
+      { OR: [{ userAId: userId }, { userBId: userId }] },
+      { OR: [{ messageRequest: { isNot: null } }, { status: "MUTUAL" }] },
+    ] },
+    include: opportunityInclude,
+  });
+  if (!row) throw new MutualOpportunityError("NOT_FOUND");
+  return viewerProjection(row, userId);
+}
+
+/** First contact is readable immediately; a written reply creates the shared Connection. */
+export async function interactWithOpportunity(options: {
+  userId: string;
+  opportunityId: string;
+  action: "BOOKMARK" | "UNBOOKMARK" | "SEND" | "REPLY" | "IGNORE";
+  body?: string;
+}) {
+  const seed = await prisma.mutualOpportunity.findFirst({
+    where: { id: options.opportunityId, OR: [{ userAId: options.userId }, { userBId: options.userId }] },
+    select: { userAId: true, userBId: true, intentAId: true, intentBId: true },
+  });
+  if (!seed) throw new MutualOpportunityError("NOT_FOUND");
+  return prisma.$transaction(tx => withCanonicalConnectionScope(tx, seed.userAId, seed.userBId, async scope => {
+    await lockIntentRows(tx, [seed.intentAId, seed.intentBId]);
+    const row = await lockedOpportunity(tx, options.opportunityId);
+    if (!row) throw new MutualOpportunityError("NOT_FOUND");
+    const isDraft = row.status === "DRAFT";
+    if (isDraft && (row.contextSnapshot as Prisma.JsonObject)?.explorePreparedBy !== options.userId) {
+      throw new MutualOpportunityError("NOT_FOUND");
+    }
+    if (options.action === "UNBOOKMARK") {
+      await tx.mutualOpportunityBookmark.deleteMany({ where: { opportunityId: row.id, userId: options.userId } });
+    } else {
+      const now = new Date();
+      const [blocked, moderated, intents] = await Promise.all([
+        tx.block.findFirst({ where: { OR: [
+          { blockerId: row.userAId, blockedId: row.userBId },
+          { blockerId: row.userBId, blockedId: row.userAId },
+        ] } }),
+        tx.moderationBlock.findFirst({ where: { userId: { in: [row.userAId, row.userBId] }, isActive: true } }),
+        tx.weeklyIntent.count({ where: {
+          id: { in: [row.intentAId, row.intentBId] }, status: "ACTIVE",
+          OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+        } }),
+      ]);
+      if (blocked || moderated || intents !== 2 || row.expiresAt <= now ||
+        (row.startsAt && row.startsAt <= now) ||
+        (scope.existing && scope.existing.status !== "ACTIVE") ||
+        (row.status !== "PENDING" && !(isDraft && ["BOOKMARK", "SEND"].includes(options.action)) &&
+          !(options.action === "BOOKMARK" && row.status === "MUTUAL"))) {
+        throw new MutualOpportunityError("NO_LONGER_AVAILABLE");
+      }
+      if (isDraft) {
+        const viewer = row.userAId === options.userId ? row.userA : row.userB;
+        const targetId = row.userAId === options.userId ? row.intentBId : row.intentAId;
+        const stillPublic = viewer.school && await tx.weeklyIntent.count({ where: {
+          ...realExploreIntentWhere(options.userId, { username: viewer.username, school: viewer.school }, now), id: targetId,
+        } });
+        if (!stillPublic) throw new MutualOpportunityError("NO_LONGER_AVAILABLE");
+      }
+      if (options.action === "BOOKMARK") {
+        await tx.mutualOpportunityBookmark.upsert({
+          where: { opportunityId_userId: { opportunityId: row.id, userId: options.userId } },
+          create: { opportunityId: row.id, userId: options.userId }, update: {},
+        });
+      } else if (options.action === "SEND") {
+        if (row.messageRequest) throw new MutualOpportunityError("DECISION_FINAL");
+        if (!options.body?.trim() || options.body.trim().length > 500) throw new MutualOpportunityError("DECISION_FINAL");
+        if (activityFitProjection(row.contextSnapshot, true)?.policyVersion === "DISCOVERY_FIT_V1") {
+          const permission = await repeatEligibility(tx, row.userAId, row.userBId, now);
+          if (!permission.discoveryAllowed) throw new MutualOpportunityError("NO_LONGER_AVAILABLE");
+        }
+        if (row.repeatOfPlanId) {
+          const repeat = isV2FeatureEnabled("v2MeetAgain") ? await repeatEligibility(tx, row.userAId, row.userBId, now) : null;
+          if (repeat?.source?.planId !== row.repeatOfPlanId) throw new MutualOpportunityError("NO_LONGER_AVAILABLE");
+        }
+        await tx.mutualOpportunityMessageRequest.create({ data: {
+          opportunityId: row.id, senderId: options.userId, body: options.body.trim(),
+        } });
+        const target = row.userAId === options.userId ? row.intentB : row.intentA;
+        await tx.mutualOpportunity.update({ where: { id: row.id }, data: { status: "PENDING", contextSnapshot: {
+          ...(row.contextSnapshot as Prisma.JsonObject),
+          messageRequestIntention: {
+            activity: { topic: target.topic, activityText: target.activityText, studyGoal: target.studyGoal,
+              sportTag: target.sportTag, sportOtherNote: target.sportOtherNote },
+            timePreference: target.timePreference, timeWindows: target.timeWindows,
+          },
+        } } });
+      } else {
+        const request = row.messageRequest;
+        if (!request || request.senderId === options.userId || request.status !== "PENDING") {
+          throw new MutualOpportunityError("DECISION_FINAL");
+        }
+        if (options.action === "IGNORE") {
+          await tx.mutualOpportunityMessageRequest.update({ where: { opportunityId: row.id }, data: { status: "IGNORED" } });
+          await tx.mutualOpportunity.update({ where: { id: row.id }, data: {
+            status: "UNAVAILABLE", terminalAt: now, version: { increment: 1 },
+          } });
+        } else {
+          if (!options.body?.trim() || options.body.trim().length > 500) throw new MutualOpportunityError("DECISION_FINAL");
+          const connection = scope.existing ?? await scope.createActive({ originCourseId: row.courseId });
+          // Commit the context, original introduction and reply together, in display order.
+          await tx.message.create({ data: {
+            connectionId: connection.id, senderId: request.senderId, body: "",
+            type: MessageType.MUTUAL_OPPORTUNITY_CARD, mutualOpportunityId: row.id,
+            createdAt: now,
+          } });
+          await tx.message.create({ data: {
+            connectionId: connection.id, senderId: request.senderId, body: request.body,
+            type: MessageType.TEXT, createdAt: new Date(now.getTime() + 1),
+          } });
+          await tx.message.create({ data: {
+            connectionId: connection.id, senderId: options.userId, body: options.body.trim(),
+            type: MessageType.TEXT, createdAt: new Date(now.getTime() + 2),
+          } });
+          await tx.connection.update({ where: { id: connection.id }, data: { replyLimitUnlockedAt: now } });
+          await tx.mutualOpportunityMessageRequest.update({ where: { opportunityId: row.id }, data: { status: "REPLIED" } });
+          await tx.mutualOpportunity.update({ where: { id: row.id }, data: {
+            status: "MUTUAL", connectionId: connection.id, activatedAt: now, version: { increment: 1 },
+          } });
+        }
+      }
+    }
+    return viewerProjection((await lockedOpportunity(tx, row.id))!, options.userId);
+  })).catch(cause => {
+    if (cause instanceof CanonicalConnectionIntegrityError) throw new MutualOpportunityError("CONVERSATION_UNAVAILABLE");
+    throw cause;
+  });
 }

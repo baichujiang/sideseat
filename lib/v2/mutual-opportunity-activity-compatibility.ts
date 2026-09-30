@@ -38,9 +38,8 @@ export function normalizeSportOtherNote(value: string | null): string | null {
 }
 
 /**
- * Concrete sports never fall back to the broad SPORTS category. Nullable
- * values exist only for pre-concrete-activity TestFlight intents: two legacy
- * rows may still meet, while a legacy row never consumes a new concrete one.
+ * Concrete sports never fall back to the broad SPORTS category. Two
+ * category-only intentions may meet; specifying a sport keeps that distinction.
  */
 export function sportIntentsAreCompatible(
   first: Readonly<{ sportTag: SportTag | null; sportOtherNote: string | null }>,
@@ -82,8 +81,7 @@ export function normalizeActivityText(value: string | null): string | null {
 
 /**
  * Checks exact normalized wording before the optional related-category pass.
- * Two NULL values remain compatible solely for intents
- * created before concrete general activities were introduced.
+ * Two category-only intentions remain compatible without additional details.
  */
 export function generalActivityTextsAreCompatible(
   first: string | null,
@@ -159,8 +157,8 @@ export function classifyActivityMatch(
 
   const firstGoal = normalizeStudyGoal(first.studyGoal);
   const secondGoal = normalizeStudyGoal(second.studyGoal);
-  // Two pre-goal intents remain compatible. A legacy intent never consumes a
-  // new, explicit study goal because the opportunity would be unexplainable.
+  // Two category-only study intentions remain compatible. A specific study
+  // goal is kept distinct from an intention without a goal.
   if (firstGoal === null || secondGoal === null) {
     return firstGoal === null && secondGoal === null
       ? exact(first, second)

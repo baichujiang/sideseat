@@ -412,6 +412,7 @@ enum MutualOpportunitySharedContext {
 }
 
 enum MutualOpportunityStatus {
+  DRAFT
   PENDING
   MUTUAL
   EXPIRED
@@ -580,6 +581,8 @@ enum SessionRevocationReason {
 }
 
 model User {
+  membership                         UserMembership?
+  membershipRedemptions              MembershipRedemption[]
   id                                 String                              @id @default(cuid())
   username                           String                              @unique
   email                              String?                             @unique
@@ -680,6 +683,8 @@ model User {
   actionInterestPresentations        ActionInterestPresentation[]
   actionInterestViewReceipts         ActionInterestViewReceipt[]
   actionResponseSnapshots            ActionResponseSnapshot[]
+  cancellationNoticesReceived        PlanCancellationNotice[] @relation("CancellationRecipient")
+  cancellationNoticesSent            PlanCancellationNotice[] @relation("CancellationActor")
   notificationOutboxRows             NotificationOutbox[]
   classmatePostComments              ClassmatePostComment[]
   lifePhotos                         UserLifePhoto[]
@@ -697,6 +702,8 @@ model User {
   togetherMatchingSession            TogetherMatchingSession?
   mutualOpportunitiesAsA             MutualOpportunity[]                 @relation("MutualOpportunityUserA")
   mutualOpportunitiesAsB             MutualOpportunity[]                 @relation("MutualOpportunityUserB")
+  mutualOpportunityBookmarks         MutualOpportunityBookmark[]
+  mutualOpportunityRequests          MutualOpportunityMessageRequest[]
   mutualOpportunityDecisions         MutualOpportunityDecision[]
   planOutcomeResponses               PlanOutcomeResponse[]
   meetAgainPermissions               MeetAgainPermission[]
@@ -713,6 +720,73 @@ model User {
   storeKitTransactions               StoreKitTransaction[]
 
   @@index([nicknameKey])
+}
+
+/// Server-owned entitlement. Absence or expiry means Free.
+model UserMembership {
+  userId        String   @id
+  plusExpiresAt DateTime
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MembershipInviteCode {
+  batchId        String?
+  batch          MembershipInviteBatch? @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  id             String   @id @default(cuid())
+  codeHash       String   @unique
+  label          String
+  durationDays   Int
+  maxRedemptions Int
+  redeemedCount  Int      @default(0)
+  expiresAt      DateTime
+  disabledAt     DateTime?
+  createdAt      DateTime @default(now())
+  redemptions    MembershipRedemption[]
+
+  @@index([batchId, createdAt])
+}
+
+model MembershipInviteBatch {
+  id             String @id @default(cuid())
+  requestKey     String @unique
+  createdById    String
+  createdByName  String
+  label          String
+  mode           String
+  quantity       Int
+  durationDays   Int
+  expiresAt      DateTime
+  disabledAt     DateTime?
+  createdAt      DateTime @default(now())
+  codes          MembershipInviteCode[]
+  audit          MembershipInviteAudit[]
+}
+
+model MembershipInviteAudit {
+  id           String @id @default(cuid())
+  batchId      String
+  actorId      String
+  actorName    String
+  action       String
+  codeId       String?
+  createdAt    DateTime @default(now())
+  batch        MembershipInviteBatch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+
+  @@index([batchId, createdAt])
+}
+
+model MembershipRedemption {
+  id            String   @id @default(cuid())
+  codeId        String
+  userId        String
+  plusExpiresAt DateTime
+  createdAt     DateTime @default(now())
+  code          MembershipInviteCode @relation(fields: [codeId], references: [id], onDelete: Restrict)
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([codeId, userId])
+  @@index([userId, createdAt])
 }
 
 /// Short-lived SMS OTP for phone signup (and future phone login without password).
@@ -1028,6 +1102,8 @@ model MutualOpportunity {
   intentB             WeeklyIntent                    @relation("MutualOpportunityIntentB", fields: [intentBId], references: [id], onDelete: Cascade)
   course              Course?                         @relation(fields: [courseId], references: [id], onDelete: SetNull)
   connection          Connection?                     @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+  bookmarks           MutualOpportunityBookmark[]
+  messageRequest      MutualOpportunityMessageRequest?
   decisions           MutualOpportunityDecision[]
   sourceMessage       Message?
   repeatOfPlan        PlanRequest? @relation("RepeatOpportunitySource", fields: [repeatOfPlanId], references: [id], onDelete: Cascade)
@@ -1039,6 +1115,31 @@ model MutualOpportunity {
   @@index([userAId, userBId, createdAt])
   @@index([connectionId, status])
   @@index([repeatOfPlanId, status])
+}
+
+/// Private saved recommendation. Saving never notifies the counterpart.
+model MutualOpportunityBookmark {
+  opportunityId String
+  userId String
+  createdAt DateTime @default(now())
+  opportunity MutualOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([opportunityId, userId])
+  @@index([userId, createdAt])
+}
+
+/// One first message per opportunity; a recipient's written reply opens chat.
+model MutualOpportunityMessageRequest {
+  opportunityId String @id
+  senderId String
+  body String @db.VarChar(500)
+  status String @default("PENDING") @db.VarChar(16)
+  createdAt DateTime @default(now())
+  opportunity MutualOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  sender User @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([senderId, status])
 }
 
 /// One participant's private decision. The API never returns the counterpart's
@@ -1093,6 +1194,26 @@ model ApiRateLimitCounter {
 
   @@index([expiresAt])
   @@index([scope, windowStartedAt])
+}
+
+/// Survives user/content deletion so failed object-store deletions can be retried.
+model MediaDeletionJob {
+  id          String   @id @default(cuid())
+  url         String   @unique
+  store       String
+  attempts    Int      @default(0)
+  availableAt DateTime @default(now())
+  lastError   String?
+  createdAt   DateTime @default(now())
+
+  @@index([availableAt])
+}
+
+/// Each sweep resumes its object-store listing instead of revisiting the first page.
+model MediaSweepState {
+  store     String   @id
+  cursor    String?
+  updatedAt DateTime @updatedAt
 }
 
 model ApiIdempotencyRecord {
@@ -1802,7 +1923,7 @@ model Message {
   senderId            String
   body                String
   type                MessageType                @default(TEXT)
-  /// Set when `type` is IMAGE — public HTTPS blob URL or dev inline data URL from upload.
+  /// Server-only private Blob pointer. API serializers issue temporary, message-scoped read grants.
   imageUrl            String?
   /// Shared pin; used when `type` is LOCATION.
   locationLat         Float?
@@ -2058,6 +2179,7 @@ model PlanRequest {
   meetAgainPermissions         MeetAgainPermission[]
   repeatOpportunities          MutualOpportunity[] @relation("RepeatOpportunitySource")
   productFunnelEvents          ProductFunnelEvent[]        @relation("ProductFunnelLegacyPlanRequest")
+  cancellationNotice          PlanCancellationNotice?
   productFunnelRevisionEvents  ProductFunnelEvent[]        @relation("ProductFunnelPlanRevision")
 
   @@index([connectionId, createdAt])
@@ -2604,4 +2726,22 @@ model CalendarEntryCompanion {
 
   @@index([calendarEntryId])
   @@index([userId])
+}
+
+/// Durable unread notice; push delivery is independent of the recipient acknowledging it.
+model PlanCancellationNotice {
+  id           String @id @default(cuid())
+  planId       String @unique
+  actorId      String
+  recipientId  String
+  wasConfirmed Boolean
+  isLate       Boolean
+  reasonCode   String? @db.VarChar(32)
+  note         String? @db.VarChar(240)
+  readAt       DateTime?
+  createdAt    DateTime @default(now())
+  plan         PlanRequest @relation(fields: [planId], references: [id], onDelete: Cascade)
+  actor        User @relation("CancellationActor", fields: [actorId], references: [id], onDelete: Cascade)
+  recipient    User @relation("CancellationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  @@index([recipientId, readAt, createdAt])
 }

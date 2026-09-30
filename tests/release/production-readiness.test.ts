@@ -73,6 +73,10 @@ function runReadiness(overrides: Partial<NodeJS.ProcessEnv> = {}) {
 }
 
 describe("production readiness guard", () => {
+  it("rejects test media storage and sharing the public token with private media", () => {
+    assert.equal(runReadiness({ MEDIA_LOCAL_STORAGE: "1" }).status, 1);
+    assert.equal(runReadiness({ PRIVATE_MEDIA_BLOB_READ_WRITE_TOKEN: "vercel_blob_release_token" }).status, 1);
+  });
   it("accepts a complete production configuration", () => {
     const result = runReadiness();
 

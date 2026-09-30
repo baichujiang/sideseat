@@ -1,0 +1,12 @@
+[local-test-db] Running against sideseat_loop_20260926 on 127.0.0.1:5433.
+
+Running 2 tests using 1 worker
+
+(node:16234) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:16234) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › e2e/admin-membership-invites.spec.ts:15:5 › Only admins can read or mutate; cross-origin requests are refused (751ms)
+  ✓  2 [chromium] › e2e/admin-membership-invites.spec.ts:39:5 › Browser creates shared and individual invitations, sees redemption history, and stops a batch (4.6s)
+
+  2 passed (6.0s)

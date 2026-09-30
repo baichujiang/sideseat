@@ -1,0 +1,12 @@
+{
+  "at": "2026-09-30T22:29:28.973Z",
+  "counts": {
+    "inline": 17,
+    "publicBlob": 1,
+    "privateBlob": 0,
+    "other": 0
+  },
+  "credentials": {
+    "privatePublicDiffer": true
+  }
+}

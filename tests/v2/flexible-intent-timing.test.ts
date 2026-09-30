@@ -43,3 +43,14 @@ test("explicit date / period conflicts remain incompatible, exact overlap remain
   assert.equal(flexiblePreferenceFitsLifecycle(dates("2026-09-20", "2026-09-14").timePreference, "Europe/Berlin", now, expiry), false);
   assert.equal(flexiblePreferenceFitsLifecycle(dates("2026-09-24").timePreference, "Europe/Berlin", now, expiry), true);
 });
+
+test("intention deadlines follow the final slot or local calendar day across DST", async () => {
+  const { intentionDeadline } = await import("../../lib/v2/intent-timing");
+  assert.equal(intentionDeadline([], { kind: "UNDECIDED" }, "Europe/Berlin"), null);
+  assert.equal(intentionDeadline([
+    { startAt: "2026-09-30T10:00:00Z", endAt: "2026-09-30T11:00:00Z" },
+    { startAt: "2026-09-28T10:00:00Z", endAt: "2026-09-28T11:00:00Z" },
+  ], { kind: "EXACT" }, "Europe/Berlin")?.toISOString(), "2026-09-30T11:00:00.000Z");
+  assert.equal(intentionDeadline([], { kind: "FLEXIBLE", startDate: "2026-10-24", endDate: "2026-10-25", period: "ANY" },
+    "Europe/Berlin")?.toISOString(), "2026-10-25T22:59:59.999Z");
+});

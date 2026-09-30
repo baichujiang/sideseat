@@ -5,6 +5,7 @@ import { courseChatHeadline } from "@/lib/courses/course-code-label";
 import { groupChatDisplayTitle } from "@/lib/group-chats/title";
 import type { InboxMerged } from "@/lib/queries/inbox-merge";
 import { isConnectionPinned } from "@/lib/queries/inbox-order";
+import { chatImageReadUrl } from "@/lib/media/chat-image-access";
 
 type InboxAuthor = Pick<User, "id" | "username" | "nickname" | "avatarUrl">;
 
@@ -57,7 +58,7 @@ export function inboxConversationV1(item: InboxMerged, viewerId: string) {
               : last.type === "PLAN_REQUEST_CARD" || last.type === "PLAN_CONFIRMED_CARD"
                 ? last.planRequest?.title.trim() || last.body
                 : last.body,
-            imageUrl: last.deletedAt ? null : last.imageUrl,
+            imageUrl: !last.deletedAt && last.imageUrl ? chatImageReadUrl(connection.id, last.id, viewerId) : null,
             deletedAt: last.deletedAt?.toISOString() ?? null,
             createdAt: last.createdAt.toISOString(),
           }

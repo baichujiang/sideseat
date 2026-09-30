@@ -65,24 +65,29 @@ The initial empty state leads with publishing an activity. The top-right Plans e
 to coordination and history. Recent Plans on Together contain unanswered private
 Outcome prompts; saved answers remain editable in Plans history or conversation.
 
-The user can edit, pause, resume or end each Intent independently. New timing-aware
-intentions last 14 days; active/paused intentions can be explicitly extended for
-14 days from now. Extension does not move the selected dates or exact windows.
-Legacy intentions keep their original expiry unless the owner extends them.
+In My intentions, tapping a card opens its editor. The top-right × opens a delete
+confirmation; confirming removes that intention and stops new matching. The card
+has no bottom action row, pause/resume control or overflow menu. Existing
+conversations and confirmed Plans remain unchanged. Old paused intentions retain
+their status when edited and can be deleted through the same × control.
+
+The existing backend expiry and legacy pause/resume contracts remain supported
+for older clients. This card simplification does not change saved timing or expiry.
 
 ## 3. Automatic matching
 
 The new client labels the final action `发布意向` and explains that SideSeat
-automatically finds company during its validity; the user may pause anytime.
+automatically finds company during its validity; the user can delete the intention anytime.
 
 ```text
-Publish → ACTIVE (automatically find company) ↔ PAUSED
-                   └── end / expiry → no new matches
+Publish → ACTIVE (automatically find company)
+                   └── delete / expiry → no new matches
 ```
 
 Both users need not be online together. A compatible new publication can match
 an existing active intention, and both users receive a notification. No match is
-guaranteed. Pause/end removes that intention from supply; resume tries immediately.
+guaranteed. Deleting removes that intention from supply. Legacy clients can still
+pause/resume through the existing API.
 Pending cards become unavailable, while mutual chat and confirmed Plans remain.
 Old saved intentions offer review/publication, not silent enrollment. Until rollout,
 Build 38 and legacy intentions keep the original explicit 48-hour session path.
@@ -99,8 +104,8 @@ not mean both people are free all day. Their cards say “time to discuss”.
 
 - General categories prefer the same normalized action. Under the approved
   activity-fit rollout, different concrete actions within Coffee, Food, Explore
-  or Events may be offered as details-to-agree opportunities. Both original
-  descriptions are shown; an exact shared action is not fabricated.
+  or Events may be offered as details-to-agree opportunities. The peer’s original
+  description is shown; an exact shared action is not fabricated.
 - Sports requires the same normalized concrete activity.
 - Study prefers the same goal.
 - Different Study goals may form a parallel-study Opportunity only when both
@@ -111,57 +116,75 @@ Each unoccupied Intent may have one current Opportunity. There is no global
 Feasible opportunities are ordered by activity fit, with oldest-first ties.
 A lower score does not prevent delivery; no eligible active peer still means no match.
 
-## 5. Decide on an Opportunity
+### Together page layout (2026-09-26)
 
-An Opportunity card leads with:
+The page order is **My intentions / Recommendations / Saved intentions**.
+Recommendations initially shows personalized opportunities, without a finding-status
+explanation. A **Find more recommendations** button at the bottom explicitly searches
+for additional public intentions. Results appear in the same feed, with no separate
+“More intentions” heading, search/filter panel, or upgrade panel. The button becomes
+**Search again**, refreshing this supplementary result set rather than paginating.
+The native access configuration allows five results for Free and ten for Plus;
+Plus is currently a DEBUG preview only. Production membership entitlements are not
+connected and the server still caps results at five.
+Explore cards use exactly the same private Interested/save and Say hello controls
+as recommendations. Opening the composer needs no prior interest action and creates
+no notification; canceling sends nothing. The private contact draft does not reserve
+matching supply. Preparing an opportunity updates its card in place. Saving removes
+it from the recommendation feed after success and animates a miniature card toward
+Saved intentions. A successfully sent message removes the card from recommendations
+and exploration; eligible cards refill the requested result set up to its access
+limit. Demonstration cards have disabled contact/save controls.
+Saved intentions contains private heart bookmarks, an empty state and removal.
+My intentions keeps its existing editing and deletion behavior.
 
-- the shared thing;
-- overlapping availability or a date preference / “time to discuss” label;
-- activity fit out of 100 and an expandable explanation. Timing-aware V2 scores
-  activity, common language and school, with timing shown separately. Legacy V1
-  snapshots keep their original time points. Neither is a person rating or success probability;
-- for related activities, both participants' descriptions and a details-to-agree cue;
-- minimum identity/trust context such as verified school, shared course or shared
-  language;
-- one bidirectional interest bar: left `忽略`, right `有兴趣`.
+## 5. Save an intention or send a message
 
-It does not show a person's compatibility rating, candidate ranking, full profile
-or the other person's decision. Historical opportunities without a score snapshot
-do not display an invented score. See [Activity fit](./MATCHING_ACTIVITY_FIT.md).
+Recommendation cards show the other person's avatar/name, activity, declared timing, school, primary language, intention course and public description preview when available. Private notes and missing details are omitted.
+They do not repeat the viewer's intention, display scores or explain matching.
+Two equal-width buttons sit at the bottom of each recommendation card: a heart
+with **Interested** for private saving, and **Say hello** for the first message.
+A filled heart indicates a saved intention. Accessibility text sizes stack the
+buttons vertically so their labels remain readable.
 
-Decision behavior:
+- Bookmarks never notify the other person. **Saved intentions** retrieves them, including
+  ended intentions with messaging disabled; users can remove a bookmark at any time.
+- Say hello opens a composer with the target intention attached. Nonempty text, up
+  to 500 characters, is required. Cancellation sends nothing; failures retain the draft.
+- A highlighted notice above the first-message field explicitly states that only one
+  message can be sent before the recipient replies, and suggests a brief introduction.
+  Incoming replies do not show this first-message notice.
+- One first message is allowed per opportunity. Sending immediately opens the conversation
+  with that message as the sender's bubble. Contacted cards leave recommendations,
+  including after a reply. Saved cards remain in **Saved intentions** with a clickable
+  **View chat** button. Saved cards are also removed from recommendations; removing a bookmark restores an
+  otherwise eligible, uncontacted card.
+- The conversation is available in **Messages** for both participants. Before a reply,
+  the sender can read it while the input area says to wait for the recipient's reply.
+  The recipient can reply directly in the chat or ignore it. Incoming pending requests
+  count in the Messages badge. Ignoring is private and does not permit resending.
+- The same conversation page resolves to normal chat after a written reply; the sender
+  sees this update while the page is open or when reopening it. Sent history remains
+  readable if the intention expires or the request is ignored.
+- A written reply creates/reuses the canonical chat, preserving the intention context,
+  first message and reply in one transaction. Only then can this flow continue chatting.
+- No plan or Calendar event is created by bookmarking, sending or replying.
+- Expired/ended intentions cannot receive new messages or replies. Blocks and active
+  moderation restrictions prevent contact. Legacy private-decision endpoints remain for
+  Explore/older clients, but cannot accept a message request without a written reply.
 
-Drag the center handle toward either side and release past the threshold to submit.
-Short or cancelled drags return to the center; vertical scrolling does not answer.
-The two labels inside the same bar are also tappable, and VoiceOver exposes both
-actions. While saving, the bar shows progress and disables further choices.
-This is private interest, not acceptance of a Plan.
-
-```text
-UNDECIDED → YES → WITHDRAWN
-UNDECIDED → NO
-```
-
-One-sided YES remains private and creates no chat. Following the 2026-09-20
-feedback update, both Recommendations and Explore retain a selected interest
-rail with its star at the right, labeled “Interest shown”, with “Waiting for a
-response” below. This describes the user's pending state without exposing the
-peer's private decision or read status. “Withdraw interest” is directly visible
-beside the waiting text (below it at accessibility text sizes), with secondary
-visual emphasis and no menu or confirmation dialog. The selected rail cannot
-be dragged back: withdrawal closes this opportunity rather than resetting it
-to undecided. NO and expiry use neutral closure.
 
 ## 6. Mutual consent and Messages
 
-Explore uses the same real Weekly Intents and consent flow: show interest directly,
-wait for the other participant, then open Messages after mutual interest. It does
-not open a prefilled intention editor. The 2026-09-21 update removes the separate
+Additional recommendations use the same real Weekly Intents, private bookmark,
+and first-message flow: send a contextual greeting, then continue chatting after a
+written reply. They do not open a prefilled intention editor. The 2026-09-21 update removes the separate
 showcase cards and their “Create a similar intention” action; an empty feed stays
 empty. QA accounts publish real intentions within the isolated QA cohort, using
 the same card UI and actions as ordinary accounts.
 
-When the second current YES is committed, the system atomically:
+For recommendations, the recipient’s written reply performs the following transition.
+The legacy Explore path performs it after two explicit YES decisions:
 
 1. revalidates both users, Intents, the Opportunity window and safety state;
 2. creates or reuses one canonical active Conversation;
@@ -169,8 +192,8 @@ When the second current YES is committed, the system atomically:
 4. marks the Opportunity mutual;
 5. returns the exact Messages route.
 
-The app may now say `你们都有兴趣` and offer `聊聊细节`. It must not create a
-celebratory dating-like Match screen.
+The saved card offers `查看聊天`; the conversation source card says `关于这条意愿`.
+No separate Match screen is introduced.
 
 The Conversation opens with the source card so neither user enters an unexplained
 blank chat. People who have chatted remain reachable in Messages after this
@@ -180,7 +203,7 @@ specific coordination ends, subject to Block and connection state.
 
 From the source card or conversation:
 
-The intended sequence is interest → mutual interest → chat about details → propose
+The intended sequence is first message → reply → chat about details → propose
 a Plan → explicit Plan confirmation. Showing interest does not skip the conversation
 or confirm time/place. Chat itself does not confirm a Plan either.
 

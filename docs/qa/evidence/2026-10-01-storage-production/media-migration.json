@@ -1,0 +1,11 @@
+{
+  "remainingBefore": 18,
+  "migrated": 18,
+  "failed": 0,
+  "remainingAfter": 0,
+  "deletion": {
+    "deleted": 1,
+    "failed": 0,
+    "retained": 0
+  }
+}

@@ -1,4 +1,6 @@
-import { del } from "@vercel/blob";
+import { MediaUploadRateLimitError } from "@/lib/media/upload-allowance";
+import { MediaStorageUnavailableError } from "@/lib/media/private-blob";
+import { queueMediaDeletion, processMediaDeletionJobs } from "@/lib/media/lifecycle";
 import { Prisma } from "@prisma/client";
 
 import { requireV1User } from "@/lib/api/v1/auth";
@@ -135,7 +137,7 @@ export async function POST(request: Request) {
           where: { id: auth.user.id },
           select: { avatarUrl: true },
         }),
-        uploadNativeImage({
+        uploadNativeImage({ userId: auth.user.id,
           image,
           blobPrefix: userCustomAvatarBlobPrefix(auth.user.id),
           logScope: "v1/me/avatar",
@@ -153,6 +155,7 @@ export async function POST(request: Request) {
         },
       });
       const blockedCount = await tx.block.count({ where: { blockerId: auth.user.id } });
+      await queueMediaDeletion(tx, [oldProfile?.avatarUrl]);
       const body = {
         avatar: uploaded,
         profile: currentProfileDto(profile, { blockedCount, locale }),
@@ -177,10 +180,12 @@ export async function POST(request: Request) {
       result.oldAvatarUrl !== result.nextAvatarUrl &&
       isTrustedUserAvatarBlobUrl(auth.user.id, result.oldAvatarUrl)
     ) {
-      del(result.oldAvatarUrl).catch(() => {});
+      await processMediaDeletionJobs({ urls: [result.oldAvatarUrl] });
     }
     return response;
   } catch (cause) {
+    if (cause instanceof MediaUploadRateLimitError) return v1Error(request, { code: "RATE_LIMITED", message: cause.message, status: 429, retryable: true, headers: cause.headers });
+    if (cause instanceof MediaStorageUnavailableError) return v1Error(request, { code: "INTERNAL_ERROR", message: cause.message, status: 503, retryable: true });
     if (cause instanceof NativeImageUploadError) {
       return v1Error(request, {
         code: "INVALID_REQUEST",

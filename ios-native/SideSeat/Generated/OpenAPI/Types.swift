@@ -13,6 +13,19 @@ import struct Foundation.Date
 #endif
 /// A type that performs HTTP operations defined by the OpenAPI document.
 internal protocol APIProtocol: Sendable {
+    /// - Remark: HTTP `GET /api/v1/me/mutual-opportunities/{opportunityId}`.
+    /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/{opportunityId}/get(getOpportunityConversation)`.
+    func getOpportunityConversation(_ input: Operations.GetOpportunityConversation.Input) async throws -> Operations.GetOpportunityConversation.Output
+    /// Prepare a private contact draft without saving interest, notifying the author or reserving the intention. Use opportunity interaction to bookmark or send a first message.
+    ///
+    /// - Remark: HTTP `POST /api/v1/explore/intents/{intentId}/contact`.
+    /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/contact/post(prepareExploreIntentContact)`.
+    func prepareExploreIntentContact(_ input: Operations.PrepareExploreIntentContact.Input) async throws -> Operations.PrepareExploreIntentContact.Output
+    /// Privately express interest in a real published intention. Reuses the recommendation opportunity and never enables automatic matching. Both participants must independently choose YES before chat opens.
+    ///
+    /// - Remark: HTTP `POST /api/v1/explore/intents/{intentId}/interest`.
+    /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)`.
+    func expressExploreIntentInterest(_ input: Operations.ExpressExploreIntentInterest.Input) async throws -> Operations.ExpressExploreIntentInterest.Output
     /// - Remark: HTTP `GET /api/v1/client-config`.
     /// - Remark: Generated from `#/paths//api/v1/client-config/get(getClientConfig)`.
     func getClientConfig(_ input: Operations.GetClientConfig.Input) async throws -> Operations.GetClientConfig.Output
@@ -470,6 +483,11 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /api/v1/me/mutual-opportunities`.
     /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/get(listMutualOpportunities)`.
     func listMutualOpportunities(_ input: Operations.ListMutualOpportunities.Input) async throws -> Operations.ListMutualOpportunities.Output
+    /// Privately bookmark, send a first message, reply, or ignore a request
+    ///
+    /// - Remark: HTTP `POST /api/v1/me/mutual-opportunities/{opportunityId}/interaction`.
+    /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/{opportunityId}/interaction/post(interactWithOpportunity)`.
+    func interactWithOpportunity(_ input: Operations.InteractWithOpportunity.Input) async throws -> Operations.InteractWithOpportunity.Output
     /// - Remark: HTTP `POST /api/v1/me/mutual-opportunities/{opportunityId}/decision`.
     /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/{opportunityId}/decision/post(decideMutualOpportunity)`.
     func decideMutualOpportunity(_ input: Operations.DecideMutualOpportunity.Input) async throws -> Operations.DecideMutualOpportunity.Output
@@ -554,15 +572,64 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /api/v1/me/product-tutorial/dismiss`.
     /// - Remark: Generated from `#/paths//api/v1/me/product-tutorial/dismiss/post(dismissProductTutorial)`.
     func dismissProductTutorial(_ input: Operations.DismissProductTutorial.Input) async throws -> Operations.DismissProductTutorial.Output
-    /// Privately express interest in a real published intention. Reuses the recommendation opportunity and never enables automatic matching. Both participants must independently choose YES before chat opens.
+    /// - Remark: HTTP `GET /api/v1/me/membership`.
+    /// - Remark: Generated from `#/paths//api/v1/me/membership/get(getMembership)`.
+    func getMembership(_ input: Operations.GetMembership.Input) async throws -> Operations.GetMembership.Output
+    /// Idempotent per authenticated account and code, including retries after expiry or capacity exhaustion. Membership days extend the later of now or current expiry.
     ///
-    /// - Remark: HTTP `POST /api/v1/explore/intents/{intentId}/interest`.
-    /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)`.
-    func expressExploreIntentInterest(_ input: Operations.ExpressExploreIntentInterest.Input) async throws -> Operations.ExpressExploreIntentInterest.Output
+    /// - Remark: HTTP `POST /api/v1/me/membership/redeem`.
+    /// - Remark: Generated from `#/paths//api/v1/me/membership/redeem/post(redeemMembershipInvite)`.
+    func redeemMembershipInvite(_ input: Operations.RedeemMembershipInvite.Input) async throws -> Operations.RedeemMembershipInvite.Output
+    /// - Remark: HTTP `POST /api/v1/plans/{planId}/cancel`.
+    /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/cancel/post(cancelPlan)`.
+    func cancelPlan(_ input: Operations.CancelPlan.Input) async throws -> Operations.CancelPlan.Output
+    /// - Remark: HTTP `GET /api/v1/me/plan-cancellations`.
+    /// - Remark: Generated from `#/paths//api/v1/me/plan-cancellations/get(listPlanCancellations)`.
+    func listPlanCancellations(_ input: Operations.ListPlanCancellations.Input) async throws -> Operations.ListPlanCancellations.Output
+    /// - Remark: HTTP `PATCH /api/v1/me/plan-cancellations/{noticeId}`.
+    /// - Remark: Generated from `#/paths//api/v1/me/plan-cancellations/{noticeId}/patch(acknowledgePlanCancellation)`.
+    func acknowledgePlanCancellation(_ input: Operations.AcknowledgePlanCancellation.Input) async throws -> Operations.AcknowledgePlanCancellation.Output
 }
 
 /// Convenience overloads for operation inputs.
 extension APIProtocol {
+    /// - Remark: HTTP `GET /api/v1/me/mutual-opportunities/{opportunityId}`.
+    /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/{opportunityId}/get(getOpportunityConversation)`.
+    internal func getOpportunityConversation(
+        path: Operations.GetOpportunityConversation.Input.Path,
+        headers: Operations.GetOpportunityConversation.Input.Headers = .init()
+    ) async throws -> Operations.GetOpportunityConversation.Output {
+        try await getOpportunityConversation(Operations.GetOpportunityConversation.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Prepare a private contact draft without saving interest, notifying the author or reserving the intention. Use opportunity interaction to bookmark or send a first message.
+    ///
+    /// - Remark: HTTP `POST /api/v1/explore/intents/{intentId}/contact`.
+    /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/contact/post(prepareExploreIntentContact)`.
+    internal func prepareExploreIntentContact(
+        path: Operations.PrepareExploreIntentContact.Input.Path,
+        headers: Operations.PrepareExploreIntentContact.Input.Headers
+    ) async throws -> Operations.PrepareExploreIntentContact.Output {
+        try await prepareExploreIntentContact(Operations.PrepareExploreIntentContact.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Privately express interest in a real published intention. Reuses the recommendation opportunity and never enables automatic matching. Both participants must independently choose YES before chat opens.
+    ///
+    /// - Remark: HTTP `POST /api/v1/explore/intents/{intentId}/interest`.
+    /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)`.
+    internal func expressExploreIntentInterest(
+        path: Operations.ExpressExploreIntentInterest.Input.Path,
+        headers: Operations.ExpressExploreIntentInterest.Input.Headers
+    ) async throws -> Operations.ExpressExploreIntentInterest.Output {
+        try await expressExploreIntentInterest(Operations.ExpressExploreIntentInterest.Input(
+            path: path,
+            headers: headers
+        ))
+    }
     /// - Remark: HTTP `GET /api/v1/client-config`.
     /// - Remark: Generated from `#/paths//api/v1/client-config/get(getClientConfig)`.
     internal func getClientConfig(headers: Operations.GetClientConfig.Input.Headers = .init()) async throws -> Operations.GetClientConfig.Output {
@@ -2102,6 +2169,21 @@ extension APIProtocol {
     internal func listMutualOpportunities(headers: Operations.ListMutualOpportunities.Input.Headers = .init()) async throws -> Operations.ListMutualOpportunities.Output {
         try await listMutualOpportunities(Operations.ListMutualOpportunities.Input(headers: headers))
     }
+    /// Privately bookmark, send a first message, reply, or ignore a request
+    ///
+    /// - Remark: HTTP `POST /api/v1/me/mutual-opportunities/{opportunityId}/interaction`.
+    /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/{opportunityId}/interaction/post(interactWithOpportunity)`.
+    internal func interactWithOpportunity(
+        path: Operations.InteractWithOpportunity.Input.Path,
+        headers: Operations.InteractWithOpportunity.Input.Headers,
+        body: Operations.InteractWithOpportunity.Input.Body
+    ) async throws -> Operations.InteractWithOpportunity.Output {
+        try await interactWithOpportunity(Operations.InteractWithOpportunity.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
     /// - Remark: HTTP `POST /api/v1/me/mutual-opportunities/{opportunityId}/decision`.
     /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/{opportunityId}/decision/post(decideMutualOpportunity)`.
     internal func decideMutualOpportunity(
@@ -2422,15 +2504,49 @@ extension APIProtocol {
     internal func dismissProductTutorial(headers: Operations.DismissProductTutorial.Input.Headers) async throws -> Operations.DismissProductTutorial.Output {
         try await dismissProductTutorial(Operations.DismissProductTutorial.Input(headers: headers))
     }
-    /// Privately express interest in a real published intention. Reuses the recommendation opportunity and never enables automatic matching. Both participants must independently choose YES before chat opens.
+    /// - Remark: HTTP `GET /api/v1/me/membership`.
+    /// - Remark: Generated from `#/paths//api/v1/me/membership/get(getMembership)`.
+    internal func getMembership(headers: Operations.GetMembership.Input.Headers = .init()) async throws -> Operations.GetMembership.Output {
+        try await getMembership(Operations.GetMembership.Input(headers: headers))
+    }
+    /// Idempotent per authenticated account and code, including retries after expiry or capacity exhaustion. Membership days extend the later of now or current expiry.
     ///
-    /// - Remark: HTTP `POST /api/v1/explore/intents/{intentId}/interest`.
-    /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)`.
-    internal func expressExploreIntentInterest(
-        path: Operations.ExpressExploreIntentInterest.Input.Path,
-        headers: Operations.ExpressExploreIntentInterest.Input.Headers
-    ) async throws -> Operations.ExpressExploreIntentInterest.Output {
-        try await expressExploreIntentInterest(Operations.ExpressExploreIntentInterest.Input(
+    /// - Remark: HTTP `POST /api/v1/me/membership/redeem`.
+    /// - Remark: Generated from `#/paths//api/v1/me/membership/redeem/post(redeemMembershipInvite)`.
+    internal func redeemMembershipInvite(
+        headers: Operations.RedeemMembershipInvite.Input.Headers = .init(),
+        body: Operations.RedeemMembershipInvite.Input.Body
+    ) async throws -> Operations.RedeemMembershipInvite.Output {
+        try await redeemMembershipInvite(Operations.RedeemMembershipInvite.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// - Remark: HTTP `POST /api/v1/plans/{planId}/cancel`.
+    /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/cancel/post(cancelPlan)`.
+    internal func cancelPlan(
+        path: Operations.CancelPlan.Input.Path,
+        headers: Operations.CancelPlan.Input.Headers,
+        body: Operations.CancelPlan.Input.Body
+    ) async throws -> Operations.CancelPlan.Output {
+        try await cancelPlan(Operations.CancelPlan.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// - Remark: HTTP `GET /api/v1/me/plan-cancellations`.
+    /// - Remark: Generated from `#/paths//api/v1/me/plan-cancellations/get(listPlanCancellations)`.
+    internal func listPlanCancellations(headers: Operations.ListPlanCancellations.Input.Headers = .init()) async throws -> Operations.ListPlanCancellations.Output {
+        try await listPlanCancellations(Operations.ListPlanCancellations.Input(headers: headers))
+    }
+    /// - Remark: HTTP `PATCH /api/v1/me/plan-cancellations/{noticeId}`.
+    /// - Remark: Generated from `#/paths//api/v1/me/plan-cancellations/{noticeId}/patch(acknowledgePlanCancellation)`.
+    internal func acknowledgePlanCancellation(
+        path: Operations.AcknowledgePlanCancellation.Input.Path,
+        headers: Operations.AcknowledgePlanCancellation.Input.Headers = .init()
+    ) async throws -> Operations.AcknowledgePlanCancellation.Output {
+        try await acknowledgePlanCancellation(Operations.AcknowledgePlanCancellation.Input(
             path: path,
             headers: headers
         ))
@@ -7572,6 +7688,10 @@ internal enum Components {
             }
             /// - Remark: Generated from `#/components/schemas/ExploreIntent/interest`.
             internal var interest: Components.Schemas.ExploreIntent.InterestPayload?
+            /// Whether this person currently has an active Plus membership. Omitted by older servers; clients default to false. Does not expose expiry, payment, or invitation details.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ExploreIntent/isPlus`.
+            internal var isPlus: Swift.Bool?
             /// Creates a new `ExploreIntent`.
             ///
             /// - Parameters:
@@ -7592,6 +7712,7 @@ internal enum Components {
             ///   - expiresAt:
             ///   - createdAt:
             ///   - interest:
+            ///   - isPlus: Whether this person currently has an active Plus membership. Omitted by older servers; clients default to false. Does not expose expiry, payment, or invitation details.
             internal init(
                 id: Swift.String,
                 isExample: Swift.Bool,
@@ -7609,7 +7730,8 @@ internal enum Components {
                 languages: [Swift.String],
                 expiresAt: Foundation.Date? = nil,
                 createdAt: Foundation.Date,
-                interest: Components.Schemas.ExploreIntent.InterestPayload? = nil
+                interest: Components.Schemas.ExploreIntent.InterestPayload? = nil,
+                isPlus: Swift.Bool? = nil
             ) {
                 self.id = id
                 self.isExample = isExample
@@ -7628,6 +7750,7 @@ internal enum Components {
                 self.expiresAt = expiresAt
                 self.createdAt = createdAt
                 self.interest = interest
+                self.isPlus = isPlus
             }
             internal enum CodingKeys: String, CodingKey {
                 case id
@@ -7647,6 +7770,7 @@ internal enum Components {
                 case expiresAt
                 case createdAt
                 case interest
+                case isPlus
             }
         }
         /// - Remark: Generated from `#/components/schemas/ExploreIntentEnvelope`.
@@ -8123,21 +8247,27 @@ internal enum Components {
             internal var intent: Components.Schemas.WeeklyIntent?
             /// - Remark: Generated from `#/components/schemas/WeeklyIntentCollectionData/intents`.
             internal var intents: [Components.Schemas.WeeklyIntent]
+            /// - Remark: Generated from `#/components/schemas/WeeklyIntentCollectionData/expiredIntents`.
+            internal var expiredIntents: [Components.Schemas.WeeklyIntent]?
             /// Creates a new `WeeklyIntentCollectionData`.
             ///
             /// - Parameters:
             ///   - intent:
             ///   - intents:
+            ///   - expiredIntents:
             internal init(
                 intent: Components.Schemas.WeeklyIntent? = nil,
-                intents: [Components.Schemas.WeeklyIntent]
+                intents: [Components.Schemas.WeeklyIntent],
+                expiredIntents: [Components.Schemas.WeeklyIntent]? = nil
             ) {
                 self.intent = intent
                 self.intents = intents
+                self.expiredIntents = expiredIntents
             }
             internal enum CodingKeys: String, CodingKey {
                 case intent
                 case intents
+                case expiredIntents
             }
             internal init(from decoder: any Swift.Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -8149,9 +8279,14 @@ internal enum Components {
                     [Components.Schemas.WeeklyIntent].self,
                     forKey: .intents
                 )
+                self.expiredIntents = try container.decodeIfPresent(
+                    [Components.Schemas.WeeklyIntent].self,
+                    forKey: .expiredIntents
+                )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
                     "intent",
-                    "intents"
+                    "intents",
+                    "expiredIntents"
                 ])
             }
         }
@@ -8902,6 +9037,14 @@ internal enum Components {
             internal var semester: Swift.Int?
             /// - Remark: Generated from `#/components/schemas/MutualOpportunityPeer/sharedLanguages`.
             internal var sharedLanguages: [Swift.String]
+            /// - Remark: Generated from `#/components/schemas/MutualOpportunityPeer/campus`.
+            internal var campus: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/MutualOpportunityPeer/languages`.
+            internal var languages: [Swift.String]?
+            /// Whether this person currently has an active Plus membership. Omitted by older servers; clients default to false. Does not expose expiry, payment, or invitation details.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MutualOpportunityPeer/isPlus`.
+            internal var isPlus: Swift.Bool?
             /// Creates a new `MutualOpportunityPeer`.
             ///
             /// - Parameters:
@@ -8911,13 +9054,19 @@ internal enum Components {
             ///   - major:
             ///   - semester:
             ///   - sharedLanguages:
+            ///   - campus:
+            ///   - languages:
+            ///   - isPlus: Whether this person currently has an active Plus membership. Omitted by older servers; clients default to false. Does not expose expiry, payment, or invitation details.
             internal init(
                 displayName: Swift.String,
                 avatarUrl: Swift.String? = nil,
                 verifiedStudent: Swift.Bool,
                 major: Swift.String? = nil,
                 semester: Swift.Int? = nil,
-                sharedLanguages: [Swift.String]
+                sharedLanguages: [Swift.String],
+                campus: Swift.String? = nil,
+                languages: [Swift.String]? = nil,
+                isPlus: Swift.Bool? = nil
             ) {
                 self.displayName = displayName
                 self.avatarUrl = avatarUrl
@@ -8925,6 +9074,9 @@ internal enum Components {
                 self.major = major
                 self.semester = semester
                 self.sharedLanguages = sharedLanguages
+                self.campus = campus
+                self.languages = languages
+                self.isPlus = isPlus
             }
             internal enum CodingKeys: String, CodingKey {
                 case displayName
@@ -8933,6 +9085,9 @@ internal enum Components {
                 case major
                 case semester
                 case sharedLanguages
+                case campus
+                case languages
+                case isPlus
             }
             internal init(from decoder: any Swift.Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -8960,13 +9115,28 @@ internal enum Components {
                     [Swift.String].self,
                     forKey: .sharedLanguages
                 )
+                self.campus = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .campus
+                )
+                self.languages = try container.decodeIfPresent(
+                    [Swift.String].self,
+                    forKey: .languages
+                )
+                self.isPlus = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: .isPlus
+                )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
                     "displayName",
                     "avatarUrl",
                     "verifiedStudent",
                     "major",
                     "semester",
-                    "sharedLanguages"
+                    "sharedLanguages",
+                    "campus",
+                    "languages",
+                    "isPlus"
                 ])
             }
         }
@@ -9270,6 +9440,117 @@ internal enum Components {
                 ])
             }
         }
+        /// The other participant's current activity, declared timing and course. Description is limited to the public exploration preview; private notes are never exposed. No owner ID, decision or viewer-intention comparison. Null when unavailable.
+        ///
+        /// - Remark: Generated from `#/components/schemas/OpportunityPeerIntention`.
+        internal struct OpportunityPeerIntention: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/OpportunityPeerIntention/course`.
+            internal struct CoursePayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/OpportunityPeerIntention/course/code`.
+                internal var code: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/OpportunityPeerIntention/course/name`.
+                internal var name: Swift.String
+                /// Creates a new `CoursePayload`.
+                ///
+                /// - Parameters:
+                ///   - code:
+                ///   - name:
+                internal init(
+                    code: Swift.String? = nil,
+                    name: Swift.String
+                ) {
+                    self.code = code
+                    self.name = name
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case code
+                    case name
+                }
+                internal init(from decoder: any Swift.Decoder) throws {
+                    let container = try decoder.container(keyedBy: CodingKeys.self)
+                    self.code = try container.decodeIfPresent(
+                        Swift.String.self,
+                        forKey: .code
+                    )
+                    self.name = try container.decode(
+                        Swift.String.self,
+                        forKey: .name
+                    )
+                    try decoder.ensureNoAdditionalProperties(knownKeys: [
+                        "code",
+                        "name"
+                    ])
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/OpportunityPeerIntention/course`.
+            internal var course: Components.Schemas.OpportunityPeerIntention.CoursePayload?
+            /// - Remark: Generated from `#/components/schemas/OpportunityPeerIntention/descriptionPreview`.
+            internal var descriptionPreview: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/OpportunityPeerIntention/activity`.
+            internal var activity: Components.Schemas.DiscoveryActivity
+            /// - Remark: Generated from `#/components/schemas/OpportunityPeerIntention/timePreference`.
+            internal var timePreference: Components.Schemas.IntentTimePreference
+            /// - Remark: Generated from `#/components/schemas/OpportunityPeerIntention/timeWindows`.
+            internal var timeWindows: [Components.Schemas.WeeklyIntentTimeWindow]
+            /// Creates a new `OpportunityPeerIntention`.
+            ///
+            /// - Parameters:
+            ///   - course:
+            ///   - descriptionPreview:
+            ///   - activity:
+            ///   - timePreference:
+            ///   - timeWindows:
+            internal init(
+                course: Components.Schemas.OpportunityPeerIntention.CoursePayload? = nil,
+                descriptionPreview: Swift.String? = nil,
+                activity: Components.Schemas.DiscoveryActivity,
+                timePreference: Components.Schemas.IntentTimePreference,
+                timeWindows: [Components.Schemas.WeeklyIntentTimeWindow]
+            ) {
+                self.course = course
+                self.descriptionPreview = descriptionPreview
+                self.activity = activity
+                self.timePreference = timePreference
+                self.timeWindows = timeWindows
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case course
+                case descriptionPreview
+                case activity
+                case timePreference
+                case timeWindows
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.course = try container.decodeIfPresent(
+                    Components.Schemas.OpportunityPeerIntention.CoursePayload.self,
+                    forKey: .course
+                )
+                self.descriptionPreview = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .descriptionPreview
+                )
+                self.activity = try container.decode(
+                    Components.Schemas.DiscoveryActivity.self,
+                    forKey: .activity
+                )
+                self.timePreference = try container.decode(
+                    Components.Schemas.IntentTimePreference.self,
+                    forKey: .timePreference
+                )
+                self.timeWindows = try container.decode(
+                    [Components.Schemas.WeeklyIntentTimeWindow].self,
+                    forKey: .timeWindows
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "course",
+                    "descriptionPreview",
+                    "activity",
+                    "timePreference",
+                    "timeWindows"
+                ])
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/MutualOpportunity`.
         internal struct MutualOpportunity: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/MutualOpportunity/id`.
@@ -9378,6 +9659,12 @@ internal enum Components {
             internal var expiresAt: Foundation.Date
             /// - Remark: Generated from `#/components/schemas/MutualOpportunity/peer`.
             internal var peer: Components.Schemas.MutualOpportunityPeer
+            /// - Remark: Generated from `#/components/schemas/MutualOpportunity/peerIntention`.
+            internal var peerIntention: Components.Schemas.OpportunityPeerIntention?
+            /// - Remark: Generated from `#/components/schemas/MutualOpportunity/isBookmarked`.
+            internal var isBookmarked: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/MutualOpportunity/messageRequest`.
+            internal var messageRequest: Components.Schemas.OpportunityMessageRequest?
             /// - Remark: Generated from `#/components/schemas/MutualOpportunity/viewerDecision`.
             internal enum ViewerDecisionPayload: String, Codable, Hashable, Sendable, CaseIterable {
                 case yes = "YES"
@@ -9391,6 +9678,8 @@ internal enum Components {
             internal var coordination: Components.Schemas.MutualOpportunityCoordination?
             /// - Remark: Generated from `#/components/schemas/MutualOpportunity/version`.
             internal var version: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/MutualOpportunity/isExpired`.
+            internal var isExpired: Swift.Bool?
             /// Creates a new `MutualOpportunity`.
             ///
             /// - Parameters:
@@ -9416,9 +9705,13 @@ internal enum Components {
             ///   - timeContext:
             ///   - expiresAt:
             ///   - peer:
+            ///   - peerIntention:
+            ///   - isBookmarked:
+            ///   - messageRequest:
             ///   - viewerDecision:
             ///   - coordination:
             ///   - version:
+            ///   - isExpired:
             internal init(
                 id: Swift.String,
                 viewerIntentId: Swift.String,
@@ -9442,9 +9735,13 @@ internal enum Components {
                 timeContext: Components.Schemas.OpportunityTimeContext? = nil,
                 expiresAt: Foundation.Date,
                 peer: Components.Schemas.MutualOpportunityPeer,
+                peerIntention: Components.Schemas.OpportunityPeerIntention? = nil,
+                isBookmarked: Swift.Bool? = nil,
+                messageRequest: Components.Schemas.OpportunityMessageRequest? = nil,
                 viewerDecision: Components.Schemas.MutualOpportunity.ViewerDecisionPayload? = nil,
                 coordination: Components.Schemas.MutualOpportunityCoordination? = nil,
-                version: Swift.Int
+                version: Swift.Int,
+                isExpired: Swift.Bool? = nil
             ) {
                 self.id = id
                 self.viewerIntentId = viewerIntentId
@@ -9468,9 +9765,13 @@ internal enum Components {
                 self.timeContext = timeContext
                 self.expiresAt = expiresAt
                 self.peer = peer
+                self.peerIntention = peerIntention
+                self.isBookmarked = isBookmarked
+                self.messageRequest = messageRequest
                 self.viewerDecision = viewerDecision
                 self.coordination = coordination
                 self.version = version
+                self.isExpired = isExpired
             }
             internal enum CodingKeys: String, CodingKey {
                 case id
@@ -9495,9 +9796,13 @@ internal enum Components {
                 case timeContext
                 case expiresAt
                 case peer
+                case peerIntention
+                case isBookmarked
+                case messageRequest
                 case viewerDecision
                 case coordination
                 case version
+                case isExpired
             }
             internal init(from decoder: any Swift.Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -9589,6 +9894,18 @@ internal enum Components {
                     Components.Schemas.MutualOpportunityPeer.self,
                     forKey: .peer
                 )
+                self.peerIntention = try container.decodeIfPresent(
+                    Components.Schemas.OpportunityPeerIntention.self,
+                    forKey: .peerIntention
+                )
+                self.isBookmarked = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: .isBookmarked
+                )
+                self.messageRequest = try container.decodeIfPresent(
+                    Components.Schemas.OpportunityMessageRequest.self,
+                    forKey: .messageRequest
+                )
                 self.viewerDecision = try container.decodeIfPresent(
                     Components.Schemas.MutualOpportunity.ViewerDecisionPayload.self,
                     forKey: .viewerDecision
@@ -9600,6 +9917,10 @@ internal enum Components {
                 self.version = try container.decode(
                     Swift.Int.self,
                     forKey: .version
+                )
+                self.isExpired = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: .isExpired
                 )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
                     "id",
@@ -9624,9 +9945,13 @@ internal enum Components {
                     "timeContext",
                     "expiresAt",
                     "peer",
+                    "peerIntention",
+                    "isBookmarked",
+                    "messageRequest",
                     "viewerDecision",
                     "coordination",
-                    "version"
+                    "version",
+                    "isExpired"
                 ])
             }
         }
@@ -9702,6 +10027,136 @@ internal enum Components {
                 )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
                     "data"
+                ])
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/OpportunityMessageRequest`.
+        internal struct OpportunityMessageRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/OpportunityMessageRequest/body`.
+            internal var body: Swift.String
+            /// - Remark: Generated from `#/components/schemas/OpportunityMessageRequest/direction`.
+            internal enum DirectionPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case incoming = "INCOMING"
+                case outgoing = "OUTGOING"
+            }
+            /// - Remark: Generated from `#/components/schemas/OpportunityMessageRequest/direction`.
+            internal var direction: Components.Schemas.OpportunityMessageRequest.DirectionPayload
+            /// - Remark: Generated from `#/components/schemas/OpportunityMessageRequest/status`.
+            internal enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case pending = "PENDING"
+                case replied = "REPLIED"
+                case ignored = "IGNORED"
+            }
+            /// - Remark: Generated from `#/components/schemas/OpportunityMessageRequest/status`.
+            internal var status: Components.Schemas.OpportunityMessageRequest.StatusPayload
+            /// - Remark: Generated from `#/components/schemas/OpportunityMessageRequest/createdAt`.
+            internal var createdAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/OpportunityMessageRequest/intention`.
+            internal var intention: Components.Schemas.OpportunityPeerIntention?
+            /// Creates a new `OpportunityMessageRequest`.
+            ///
+            /// - Parameters:
+            ///   - body:
+            ///   - direction:
+            ///   - status:
+            ///   - createdAt:
+            ///   - intention:
+            internal init(
+                body: Swift.String,
+                direction: Components.Schemas.OpportunityMessageRequest.DirectionPayload,
+                status: Components.Schemas.OpportunityMessageRequest.StatusPayload,
+                createdAt: Foundation.Date,
+                intention: Components.Schemas.OpportunityPeerIntention? = nil
+            ) {
+                self.body = body
+                self.direction = direction
+                self.status = status
+                self.createdAt = createdAt
+                self.intention = intention
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case body
+                case direction
+                case status
+                case createdAt
+                case intention
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.body = try container.decode(
+                    Swift.String.self,
+                    forKey: .body
+                )
+                self.direction = try container.decode(
+                    Components.Schemas.OpportunityMessageRequest.DirectionPayload.self,
+                    forKey: .direction
+                )
+                self.status = try container.decode(
+                    Components.Schemas.OpportunityMessageRequest.StatusPayload.self,
+                    forKey: .status
+                )
+                self.createdAt = try container.decode(
+                    Foundation.Date.self,
+                    forKey: .createdAt
+                )
+                self.intention = try container.decodeIfPresent(
+                    Components.Schemas.OpportunityPeerIntention.self,
+                    forKey: .intention
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "body",
+                    "direction",
+                    "status",
+                    "createdAt",
+                    "intention"
+                ])
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/OpportunityInteractionRequest`.
+        internal struct OpportunityInteractionRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/OpportunityInteractionRequest/action`.
+            internal enum ActionPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case bookmark = "BOOKMARK"
+                case unbookmark = "UNBOOKMARK"
+                case send = "SEND"
+                case reply = "REPLY"
+                case ignore = "IGNORE"
+            }
+            /// - Remark: Generated from `#/components/schemas/OpportunityInteractionRequest/action`.
+            internal var action: Components.Schemas.OpportunityInteractionRequest.ActionPayload
+            /// Required for SEND and REPLY.
+            ///
+            /// - Remark: Generated from `#/components/schemas/OpportunityInteractionRequest/body`.
+            internal var body: Swift.String?
+            /// Creates a new `OpportunityInteractionRequest`.
+            ///
+            /// - Parameters:
+            ///   - action:
+            ///   - body: Required for SEND and REPLY.
+            internal init(
+                action: Components.Schemas.OpportunityInteractionRequest.ActionPayload,
+                body: Swift.String? = nil
+            ) {
+                self.action = action
+                self.body = body
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case action
+                case body
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.action = try container.decode(
+                    Components.Schemas.OpportunityInteractionRequest.ActionPayload.self,
+                    forKey: .action
+                )
+                self.body = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .body
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "action",
+                    "body"
                 ])
             }
         }
@@ -10057,6 +10512,10 @@ internal enum Components {
             internal var nickname: Swift.String?
             /// - Remark: Generated from `#/components/schemas/MessageAuthor/avatarUrl`.
             internal var avatarUrl: Swift.String?
+            /// Whether this person currently has an active Plus membership. Omitted by older servers; clients default to false. Does not expose expiry, payment, or invitation details.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MessageAuthor/isPlus`.
+            internal var isPlus: Swift.Bool?
             /// Creates a new `MessageAuthor`.
             ///
             /// - Parameters:
@@ -10064,22 +10523,26 @@ internal enum Components {
             ///   - username:
             ///   - nickname:
             ///   - avatarUrl:
+            ///   - isPlus: Whether this person currently has an active Plus membership. Omitted by older servers; clients default to false. Does not expose expiry, payment, or invitation details.
             internal init(
                 id: Swift.String,
                 username: Swift.String,
                 nickname: Swift.String? = nil,
-                avatarUrl: Swift.String? = nil
+                avatarUrl: Swift.String? = nil,
+                isPlus: Swift.Bool? = nil
             ) {
                 self.id = id
                 self.username = username
                 self.nickname = nickname
                 self.avatarUrl = avatarUrl
+                self.isPlus = isPlus
             }
             internal enum CodingKeys: String, CodingKey {
                 case id
                 case username
                 case nickname
                 case avatarUrl
+                case isPlus
             }
         }
         /// - Remark: Generated from `#/components/schemas/DirectMessage`.
@@ -11298,6 +11761,8 @@ internal enum Components {
         internal struct InboxEnvelope: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/InboxEnvelope/data`.
             internal struct DataPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/InboxEnvelope/data/messageRequests`.
+                internal var messageRequests: [Components.Schemas.MutualOpportunity]?
                 /// - Remark: Generated from `#/components/schemas/InboxEnvelope/data/conversations`.
                 internal var conversations: [Components.Schemas.InboxConversation]
                 /// - Remark: Generated from `#/components/schemas/InboxEnvelope/data/unreadTotal`.
@@ -11311,18 +11776,21 @@ internal enum Components {
                 /// Creates a new `DataPayload`.
                 ///
                 /// - Parameters:
+                ///   - messageRequests:
                 ///   - conversations:
                 ///   - unreadTotal:
                 ///   - plansNeedingYourAction:
                 ///   - planOutcomesNeedingYourResponse:
                 ///   - actionResponseSummary:
                 internal init(
+                    messageRequests: [Components.Schemas.MutualOpportunity]? = nil,
                     conversations: [Components.Schemas.InboxConversation],
                     unreadTotal: Swift.Int,
                     plansNeedingYourAction: Swift.Int,
                     planOutcomesNeedingYourResponse: Swift.Int,
                     actionResponseSummary: Components.Schemas.ActionResponseSummary? = nil
                 ) {
+                    self.messageRequests = messageRequests
                     self.conversations = conversations
                     self.unreadTotal = unreadTotal
                     self.plansNeedingYourAction = plansNeedingYourAction
@@ -11330,6 +11798,7 @@ internal enum Components {
                     self.actionResponseSummary = actionResponseSummary
                 }
                 internal enum CodingKeys: String, CodingKey {
+                    case messageRequests
                     case conversations
                     case unreadTotal
                     case plansNeedingYourAction
@@ -17185,6 +17654,10 @@ internal enum Components {
             internal var schoolSummary: Components.Schemas.ProfileSchoolSummary
             /// - Remark: Generated from `#/components/schemas/PublicProfileUser/lifePhotos`.
             internal var lifePhotos: [Components.Schemas.ProfileLifePhoto]
+            /// Whether this person currently has an active Plus membership. Omitted by older servers; clients default to false. Does not expose expiry, payment, or invitation details.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PublicProfileUser/isPlus`.
+            internal var isPlus: Swift.Bool?
             /// Creates a new `PublicProfileUser`.
             ///
             /// - Parameters:
@@ -17205,6 +17678,7 @@ internal enum Components {
             ///   - studentVerificationStatus:
             ///   - schoolSummary:
             ///   - lifePhotos:
+            ///   - isPlus: Whether this person currently has an active Plus membership. Omitted by older servers; clients default to false. Does not expose expiry, payment, or invitation details.
             internal init(
                 id: Swift.String,
                 username: Swift.String,
@@ -17222,7 +17696,8 @@ internal enum Components {
                 verifiedStudent: Swift.Bool,
                 studentVerificationStatus: Swift.String,
                 schoolSummary: Components.Schemas.ProfileSchoolSummary,
-                lifePhotos: [Components.Schemas.ProfileLifePhoto]
+                lifePhotos: [Components.Schemas.ProfileLifePhoto],
+                isPlus: Swift.Bool? = nil
             ) {
                 self.id = id
                 self.username = username
@@ -17241,6 +17716,7 @@ internal enum Components {
                 self.studentVerificationStatus = studentVerificationStatus
                 self.schoolSummary = schoolSummary
                 self.lifePhotos = lifePhotos
+                self.isPlus = isPlus
             }
             internal enum CodingKeys: String, CodingKey {
                 case id
@@ -17260,6 +17736,7 @@ internal enum Components {
                 case studentVerificationStatus
                 case schoolSummary
                 case lifePhotos
+                case isPlus
             }
         }
         /// - Remark: Generated from `#/components/schemas/PublicProfile`.
@@ -18178,6 +18655,49 @@ internal enum Components {
             internal var createdAt: Foundation.Date
             /// - Remark: Generated from `#/components/schemas/PlanRequest/updatedAt`.
             internal var updatedAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/PlanRequest/cancellation`.
+            internal struct CancellationPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/PlanRequest/cancellation/actorId`.
+                internal var actorId: Swift.String
+                /// - Remark: Generated from `#/components/schemas/PlanRequest/cancellation/reasonCode`.
+                internal var reasonCode: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/PlanRequest/cancellation/note`.
+                internal var note: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/PlanRequest/cancellation/canceledAt`.
+                internal var canceledAt: Foundation.Date
+                /// - Remark: Generated from `#/components/schemas/PlanRequest/cancellation/wasConfirmed`.
+                internal var wasConfirmed: Swift.Bool
+                /// Creates a new `CancellationPayload`.
+                ///
+                /// - Parameters:
+                ///   - actorId:
+                ///   - reasonCode:
+                ///   - note:
+                ///   - canceledAt:
+                ///   - wasConfirmed:
+                internal init(
+                    actorId: Swift.String,
+                    reasonCode: Swift.String? = nil,
+                    note: Swift.String? = nil,
+                    canceledAt: Foundation.Date,
+                    wasConfirmed: Swift.Bool
+                ) {
+                    self.actorId = actorId
+                    self.reasonCode = reasonCode
+                    self.note = note
+                    self.canceledAt = canceledAt
+                    self.wasConfirmed = wasConfirmed
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case actorId
+                    case reasonCode
+                    case note
+                    case canceledAt
+                    case wasConfirmed
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/PlanRequest/cancellation`.
+            internal var cancellation: Components.Schemas.PlanRequest.CancellationPayload?
             /// Creates a new `PlanRequest`.
             ///
             /// - Parameters:
@@ -18204,6 +18724,7 @@ internal enum Components {
             ///   - meetAgainAvailable: Based only on feature availability and the viewer's own occurred answer.
             ///   - createdAt:
             ///   - updatedAt:
+            ///   - cancellation:
             internal init(
                 id: Swift.String,
                 connectionId: Swift.String,
@@ -18227,7 +18748,8 @@ internal enum Components {
                 viewerMeetAgain: Components.Schemas.PlanRequest.ViewerMeetAgainPayload? = nil,
                 meetAgainAvailable: Swift.Bool? = nil,
                 createdAt: Foundation.Date,
-                updatedAt: Foundation.Date
+                updatedAt: Foundation.Date,
+                cancellation: Components.Schemas.PlanRequest.CancellationPayload? = nil
             ) {
                 self.id = id
                 self.connectionId = connectionId
@@ -18252,6 +18774,7 @@ internal enum Components {
                 self.meetAgainAvailable = meetAgainAvailable
                 self.createdAt = createdAt
                 self.updatedAt = updatedAt
+                self.cancellation = cancellation
             }
             internal enum CodingKeys: String, CodingKey {
                 case id
@@ -18277,6 +18800,7 @@ internal enum Components {
                 case meetAgainAvailable
                 case createdAt
                 case updatedAt
+                case cancellation
             }
         }
         /// - Remark: Generated from `#/components/schemas/MeetAgainRequest`.
@@ -19986,6 +20510,295 @@ internal enum Components {
                 case reason
             }
         }
+        /// - Remark: Generated from `#/components/schemas/MembershipStatus`.
+        internal struct MembershipStatus: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/MembershipStatus/tier`.
+            internal enum TierPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case free = "FREE"
+                case plus = "PLUS"
+            }
+            /// - Remark: Generated from `#/components/schemas/MembershipStatus/tier`.
+            internal var tier: Components.Schemas.MembershipStatus.TierPayload
+            /// - Remark: Generated from `#/components/schemas/MembershipStatus/plusExpiresAt`.
+            internal var plusExpiresAt: Foundation.Date?
+            /// Present on redemption. True means this account already used this code; no capacity or days were added.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MembershipStatus/alreadyRedeemed`.
+            internal var alreadyRedeemed: Swift.Bool?
+            /// Creates a new `MembershipStatus`.
+            ///
+            /// - Parameters:
+            ///   - tier:
+            ///   - plusExpiresAt:
+            ///   - alreadyRedeemed: Present on redemption. True means this account already used this code; no capacity or days were added.
+            internal init(
+                tier: Components.Schemas.MembershipStatus.TierPayload,
+                plusExpiresAt: Foundation.Date? = nil,
+                alreadyRedeemed: Swift.Bool? = nil
+            ) {
+                self.tier = tier
+                self.plusExpiresAt = plusExpiresAt
+                self.alreadyRedeemed = alreadyRedeemed
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case tier
+                case plusExpiresAt
+                case alreadyRedeemed
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.tier = try container.decode(
+                    Components.Schemas.MembershipStatus.TierPayload.self,
+                    forKey: .tier
+                )
+                self.plusExpiresAt = try container.decodeIfPresent(
+                    Foundation.Date.self,
+                    forKey: .plusExpiresAt
+                )
+                self.alreadyRedeemed = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: .alreadyRedeemed
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "tier",
+                    "plusExpiresAt",
+                    "alreadyRedeemed"
+                ])
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/MembershipRedemptionRequest`.
+        internal struct MembershipRedemptionRequest: Codable, Hashable, Sendable {
+            /// 8 letters/digits, displayed as XXXX-XXXX. Previously issued 32-character hexadecimal codes remain valid. Spaces, hyphens and letter case are ignored.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MembershipRedemptionRequest/code`.
+            internal var code: Swift.String
+            /// Creates a new `MembershipRedemptionRequest`.
+            ///
+            /// - Parameters:
+            ///   - code: 8 letters/digits, displayed as XXXX-XXXX. Previously issued 32-character hexadecimal codes remain valid. Spaces, hyphens and letter case are ignored.
+            internal init(code: Swift.String) {
+                self.code = code
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case code
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.code = try container.decode(
+                    Swift.String.self,
+                    forKey: .code
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "code"
+                ])
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PlanCancellation`.
+        internal struct PlanCancellation: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PlanCancellation/actorId`.
+            internal var actorId: Swift.String
+            /// - Remark: Generated from `#/components/schemas/PlanCancellation/reasonCode`.
+            internal var reasonCode: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PlanCancellation/note`.
+            internal var note: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PlanCancellation/canceledAt`.
+            internal var canceledAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/PlanCancellation/wasConfirmed`.
+            internal var wasConfirmed: Swift.Bool
+            /// Creates a new `PlanCancellation`.
+            ///
+            /// - Parameters:
+            ///   - actorId:
+            ///   - reasonCode:
+            ///   - note:
+            ///   - canceledAt:
+            ///   - wasConfirmed:
+            internal init(
+                actorId: Swift.String,
+                reasonCode: Swift.String? = nil,
+                note: Swift.String? = nil,
+                canceledAt: Foundation.Date,
+                wasConfirmed: Swift.Bool
+            ) {
+                self.actorId = actorId
+                self.reasonCode = reasonCode
+                self.note = note
+                self.canceledAt = canceledAt
+                self.wasConfirmed = wasConfirmed
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case actorId
+                case reasonCode
+                case note
+                case canceledAt
+                case wasConfirmed
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PlanCancellationInput`.
+        internal struct PlanCancellationInput: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PlanCancellationInput/reasonCode`.
+            internal enum ReasonCodePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case scheduleChanged = "SCHEDULE_CHANGED"
+                case unwell = "UNWELL"
+                case safety = "SAFETY"
+                case other = "OTHER"
+                case _empty_ = ""
+            }
+            /// - Remark: Generated from `#/components/schemas/PlanCancellationInput/reasonCode`.
+            internal var reasonCode: Components.Schemas.PlanCancellationInput.ReasonCodePayload?
+            /// - Remark: Generated from `#/components/schemas/PlanCancellationInput/note`.
+            internal var note: Swift.String?
+            /// Creates a new `PlanCancellationInput`.
+            ///
+            /// - Parameters:
+            ///   - reasonCode:
+            ///   - note:
+            internal init(
+                reasonCode: Components.Schemas.PlanCancellationInput.ReasonCodePayload? = nil,
+                note: Swift.String? = nil
+            ) {
+                self.reasonCode = reasonCode
+                self.note = note
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case reasonCode
+                case note
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.reasonCode = try container.decodeIfPresent(
+                    Components.Schemas.PlanCancellationInput.ReasonCodePayload.self,
+                    forKey: .reasonCode
+                )
+                self.note = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .note
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "reasonCode",
+                    "note"
+                ])
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PlanCancellationNotice`.
+        internal struct PlanCancellationNotice: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PlanCancellationNotice/id`.
+            internal var id: Swift.String
+            /// - Remark: Generated from `#/components/schemas/PlanCancellationNotice/actorName`.
+            internal var actorName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/PlanCancellationNotice/wasConfirmed`.
+            internal var wasConfirmed: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/PlanCancellationNotice/isLate`.
+            internal var isLate: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/PlanCancellationNotice/reasonCode`.
+            internal var reasonCode: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PlanCancellationNotice/note`.
+            internal var note: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PlanCancellationNotice/createdAt`.
+            internal var createdAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/PlanCancellationNotice/plan`.
+            internal var plan: Components.Schemas.PlanRequest
+            /// Creates a new `PlanCancellationNotice`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - actorName:
+            ///   - wasConfirmed:
+            ///   - isLate:
+            ///   - reasonCode:
+            ///   - note:
+            ///   - createdAt:
+            ///   - plan:
+            internal init(
+                id: Swift.String,
+                actorName: Swift.String,
+                wasConfirmed: Swift.Bool,
+                isLate: Swift.Bool,
+                reasonCode: Swift.String? = nil,
+                note: Swift.String? = nil,
+                createdAt: Foundation.Date,
+                plan: Components.Schemas.PlanRequest
+            ) {
+                self.id = id
+                self.actorName = actorName
+                self.wasConfirmed = wasConfirmed
+                self.isLate = isLate
+                self.reasonCode = reasonCode
+                self.note = note
+                self.createdAt = createdAt
+                self.plan = plan
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case id
+                case actorName
+                case wasConfirmed
+                case isLate
+                case reasonCode
+                case note
+                case createdAt
+                case plan
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PlanCancellationNoticesEnvelope`.
+        internal struct PlanCancellationNoticesEnvelope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PlanCancellationNoticesEnvelope/data`.
+            internal struct DataPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/PlanCancellationNoticesEnvelope/data/notices`.
+                internal var notices: [Components.Schemas.PlanCancellationNotice]
+                /// Creates a new `DataPayload`.
+                ///
+                /// - Parameters:
+                ///   - notices:
+                internal init(notices: [Components.Schemas.PlanCancellationNotice]) {
+                    self.notices = notices
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case notices
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/PlanCancellationNoticesEnvelope/data`.
+            internal var data: Components.Schemas.PlanCancellationNoticesEnvelope.DataPayload
+            /// Creates a new `PlanCancellationNoticesEnvelope`.
+            ///
+            /// - Parameters:
+            ///   - data:
+            internal init(data: Components.Schemas.PlanCancellationNoticesEnvelope.DataPayload) {
+                self.data = data
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case data
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PlanCancellationAckEnvelope`.
+        internal struct PlanCancellationAckEnvelope: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PlanCancellationAckEnvelope/data`.
+            internal struct DataPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/PlanCancellationAckEnvelope/data/acknowledged`.
+                internal var acknowledged: Swift.Bool
+                /// Creates a new `DataPayload`.
+                ///
+                /// - Parameters:
+                ///   - acknowledged:
+                internal init(acknowledged: Swift.Bool) {
+                    self.acknowledged = acknowledged
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case acknowledged
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/PlanCancellationAckEnvelope/data`.
+            internal var data: Components.Schemas.PlanCancellationAckEnvelope.DataPayload
+            /// Creates a new `PlanCancellationAckEnvelope`.
+            ///
+            /// - Parameters:
+            ///   - data:
+            internal init(data: Components.Schemas.PlanCancellationAckEnvelope.DataPayload) {
+                self.data = data
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case data
+            }
+        }
     }
     /// Types generated from the `#/components/parameters` section of the OpenAPI document.
     internal enum Parameters {}
@@ -20239,6 +21052,793 @@ internal enum Components {
 
 /// API operations, with input and output types, generated from `#/paths` in the OpenAPI document.
 internal enum Operations {
+    /// - Remark: HTTP `GET /api/v1/me/mutual-opportunities/{opportunityId}`.
+    /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/{opportunityId}/get(getOpportunityConversation)`.
+    internal enum GetOpportunityConversation {
+        internal static let id: Swift.String = "getOpportunityConversation"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/me/mutual-opportunities/{opportunityId}/GET/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/mutual-opportunities/{opportunityId}/GET/path/opportunityId`.
+                internal var opportunityId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - opportunityId:
+                internal init(opportunityId: Swift.String) {
+                    self.opportunityId = opportunityId
+                }
+            }
+            internal var path: Operations.GetOpportunityConversation.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/me/mutual-opportunities/{opportunityId}/GET/header`.
+            internal struct Headers: Sendable, Hashable {
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetOpportunityConversation.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetOpportunityConversation.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.GetOpportunityConversation.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            internal init(
+                path: Operations.GetOpportunityConversation.Input.Path,
+                headers: Operations.GetOpportunityConversation.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/mutual-opportunities/{opportunityId}/GET/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/me/mutual-opportunities/{opportunityId}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.MutualOpportunityEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.MutualOpportunityEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.GetOpportunityConversation.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.GetOpportunityConversation.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Participant-scoped first message and resolved chat destination after reply.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/{opportunityId}/get(getOpportunityConversation)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetOpportunityConversation.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.GetOpportunityConversation.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/{opportunityId}/get(getOpportunityConversation)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/{opportunityId}/get(getOpportunityConversation)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/{opportunityId}/get(getOpportunityConversation)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Prepare a private contact draft without saving interest, notifying the author or reserving the intention. Use opportunity interaction to bookmark or send a first message.
+    ///
+    /// - Remark: HTTP `POST /api/v1/explore/intents/{intentId}/contact`.
+    /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/contact/post(prepareExploreIntentContact)`.
+    internal enum PrepareExploreIntentContact {
+        internal static let id: Swift.String = "prepareExploreIntentContact"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/contact/POST/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/contact/POST/path/intentId`.
+                internal var intentId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - intentId:
+                internal init(intentId: Swift.String) {
+                    self.intentId = intentId
+                }
+            }
+            internal var path: Operations.PrepareExploreIntentContact.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/contact/POST/header`.
+            internal struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/contact/POST/header/Idempotency-Key`.
+                internal var idempotencyKey: Swift.String
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.PrepareExploreIntentContact.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                internal init(
+                    idempotencyKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.PrepareExploreIntentContact.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.PrepareExploreIntentContact.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            internal init(
+                path: Operations.PrepareExploreIntentContact.Input.Path,
+                headers: Operations.PrepareExploreIntentContact.Input.Headers
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/contact/POST/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/contact/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.MutualOpportunityEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.MutualOpportunityEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.PrepareExploreIntentContact.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.PrepareExploreIntentContact.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The shared recommendation opportunity after saving this participant’s private interest.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/contact/post(prepareExploreIntentContact)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.PrepareExploreIntentContact.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.PrepareExploreIntentContact.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/contact/post(prepareExploreIntentContact)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/contact/post(prepareExploreIntentContact)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/contact/post(prepareExploreIntentContact)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            internal var conflict: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/contact/post(prepareExploreIntentContact)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/contact/post(prepareExploreIntentContact)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/contact/post(prepareExploreIntentContact)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            internal var forbidden: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/contact/post(prepareExploreIntentContact)/responses/426`.
+            ///
+            /// HTTP response code: `426 upgradeRequired`.
+            case upgradeRequired(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.upgradeRequired`.
+            ///
+            /// - Throws: An error if `self` is not `.upgradeRequired`.
+            /// - SeeAlso: `.upgradeRequired`.
+            internal var upgradeRequired: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .upgradeRequired(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "upgradeRequired",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Privately express interest in a real published intention. Reuses the recommendation opportunity and never enables automatic matching. Both participants must independently choose YES before chat opens.
+    ///
+    /// - Remark: HTTP `POST /api/v1/explore/intents/{intentId}/interest`.
+    /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)`.
+    internal enum ExpressExploreIntentInterest {
+        internal static let id: Swift.String = "expressExploreIntentInterest"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/interest/POST/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/interest/POST/path/intentId`.
+                internal var intentId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - intentId:
+                internal init(intentId: Swift.String) {
+                    self.intentId = intentId
+                }
+            }
+            internal var path: Operations.ExpressExploreIntentInterest.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/interest/POST/header`.
+            internal struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/interest/POST/header/Idempotency-Key`.
+                internal var idempotencyKey: Swift.String
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ExpressExploreIntentInterest.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                internal init(
+                    idempotencyKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ExpressExploreIntentInterest.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.ExpressExploreIntentInterest.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            internal init(
+                path: Operations.ExpressExploreIntentInterest.Input.Path,
+                headers: Operations.ExpressExploreIntentInterest.Input.Headers
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/interest/POST/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/interest/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.MutualOpportunityEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.MutualOpportunityEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.ExpressExploreIntentInterest.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.ExpressExploreIntentInterest.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The shared recommendation opportunity after saving this participant’s private interest.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ExpressExploreIntentInterest.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.ExpressExploreIntentInterest.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            internal var conflict: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            internal var forbidden: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)/responses/426`.
+            ///
+            /// HTTP response code: `426 upgradeRequired`.
+            case upgradeRequired(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.upgradeRequired`.
+            ///
+            /// - Throws: An error if `self` is not `.upgradeRequired`.
+            /// - SeeAlso: `.upgradeRequired`.
+            internal var upgradeRequired: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .upgradeRequired(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "upgradeRequired",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
     /// - Remark: HTTP `GET /api/v1/client-config`.
     /// - Remark: Generated from `#/paths//api/v1/client-config/get(getClientConfig)`.
     internal enum GetClientConfig {
@@ -55065,6 +56665,169 @@ internal enum Operations {
             }
         }
     }
+    /// Privately bookmark, send a first message, reply, or ignore a request
+    ///
+    /// - Remark: HTTP `POST /api/v1/me/mutual-opportunities/{opportunityId}/interaction`.
+    /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/{opportunityId}/interaction/post(interactWithOpportunity)`.
+    internal enum InteractWithOpportunity {
+        internal static let id: Swift.String = "interactWithOpportunity"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/me/mutual-opportunities/{opportunityId}/interaction/POST/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/mutual-opportunities/{opportunityId}/interaction/POST/path/opportunityId`.
+                internal var opportunityId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - opportunityId:
+                internal init(opportunityId: Swift.String) {
+                    self.opportunityId = opportunityId
+                }
+            }
+            internal var path: Operations.InteractWithOpportunity.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/me/mutual-opportunities/{opportunityId}/interaction/POST/header`.
+            internal struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/mutual-opportunities/{opportunityId}/interaction/POST/header/Idempotency-Key`.
+                internal var idempotencyKey: Swift.String
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.InteractWithOpportunity.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                internal init(
+                    idempotencyKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.InteractWithOpportunity.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.InteractWithOpportunity.Input.Headers
+            /// - Remark: Generated from `#/paths/api/v1/me/mutual-opportunities/{opportunityId}/interaction/POST/requestBody`.
+            internal enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/mutual-opportunities/{opportunityId}/interaction/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.OpportunityInteractionRequest)
+            }
+            internal var body: Operations.InteractWithOpportunity.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            internal init(
+                path: Operations.InteractWithOpportunity.Input.Path,
+                headers: Operations.InteractWithOpportunity.Input.Headers,
+                body: Operations.InteractWithOpportunity.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/mutual-opportunities/{opportunityId}/interaction/POST/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/me/mutual-opportunities/{opportunityId}/interaction/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.MutualOpportunityEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.MutualOpportunityEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.InteractWithOpportunity.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.InteractWithOpportunity.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Saved state; a written recipient reply opens chat atomically.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/{opportunityId}/interaction/post(interactWithOpportunity)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.InteractWithOpportunity.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.InteractWithOpportunity.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/{opportunityId}/interaction/post(interactWithOpportunity)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            internal var `default`: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
     /// - Remark: HTTP `POST /api/v1/me/mutual-opportunities/{opportunityId}/decision`.
     /// - Remark: Generated from `#/paths//api/v1/me/mutual-opportunities/{opportunityId}/decision/post(decideMutualOpportunity)`.
     internal enum DecideMutualOpportunity {
@@ -63127,69 +64890,57 @@ internal enum Operations {
             }
         }
     }
-    /// Privately express interest in a real published intention. Reuses the recommendation opportunity and never enables automatic matching. Both participants must independently choose YES before chat opens.
-    ///
-    /// - Remark: HTTP `POST /api/v1/explore/intents/{intentId}/interest`.
-    /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)`.
-    internal enum ExpressExploreIntentInterest {
-        internal static let id: Swift.String = "expressExploreIntentInterest"
+    /// - Remark: HTTP `GET /api/v1/me/membership`.
+    /// - Remark: Generated from `#/paths//api/v1/me/membership/get(getMembership)`.
+    internal enum GetMembership {
+        internal static let id: Swift.String = "getMembership"
         internal struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/interest/POST/path`.
-            internal struct Path: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/interest/POST/path/intentId`.
-                internal var intentId: Swift.String
-                /// Creates a new `Path`.
-                ///
-                /// - Parameters:
-                ///   - intentId:
-                internal init(intentId: Swift.String) {
-                    self.intentId = intentId
-                }
-            }
-            internal var path: Operations.ExpressExploreIntentInterest.Input.Path
-            /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/interest/POST/header`.
+            /// - Remark: Generated from `#/paths/api/v1/me/membership/GET/header`.
             internal struct Headers: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/interest/POST/header/Idempotency-Key`.
-                internal var idempotencyKey: Swift.String
-                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ExpressExploreIntentInterest.AcceptableContentType>]
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetMembership.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
-                ///   - idempotencyKey:
                 ///   - accept:
-                internal init(
-                    idempotencyKey: Swift.String,
-                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ExpressExploreIntentInterest.AcceptableContentType>] = .defaultValues()
-                ) {
-                    self.idempotencyKey = idempotencyKey
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetMembership.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            internal var headers: Operations.ExpressExploreIntentInterest.Input.Headers
+            internal var headers: Operations.GetMembership.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
-            ///   - path:
             ///   - headers:
-            internal init(
-                path: Operations.ExpressExploreIntentInterest.Input.Path,
-                headers: Operations.ExpressExploreIntentInterest.Input.Headers
-            ) {
-                self.path = path
+            internal init(headers: Operations.GetMembership.Input.Headers = .init()) {
                 self.headers = headers
             }
         }
         internal enum Output: Sendable, Hashable {
             internal struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/interest/POST/responses/200/content`.
+                /// - Remark: Generated from `#/paths/api/v1/me/membership/GET/responses/200/content`.
                 internal enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/api/v1/explore/intents/{intentId}/interest/POST/responses/200/content/application\/json`.
-                    case json(Components.Schemas.MutualOpportunityEnvelope)
+                    /// - Remark: Generated from `#/paths/api/v1/me/membership/GET/responses/200/content/json`.
+                    internal struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/api/v1/me/membership/GET/responses/200/content/json/data`.
+                        internal var data: Components.Schemas.MembershipStatus
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - data:
+                        internal init(data: Components.Schemas.MembershipStatus) {
+                            self.data = data
+                        }
+                        internal enum CodingKeys: String, CodingKey {
+                            case data
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/api/v1/me/membership/GET/responses/200/content/application\/json`.
+                    case json(Operations.GetMembership.Output.Ok.Body.JsonPayload)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    internal var json: Components.Schemas.MutualOpportunityEnvelope {
+                    internal var json: Operations.GetMembership.Output.Ok.Body.JsonPayload {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -63199,26 +64950,26 @@ internal enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                internal var body: Operations.ExpressExploreIntentInterest.Output.Ok.Body
+                internal var body: Operations.GetMembership.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                internal init(body: Operations.ExpressExploreIntentInterest.Output.Ok.Body) {
+                internal init(body: Operations.GetMembership.Output.Ok.Body) {
                     self.body = body
                 }
             }
-            /// The shared recommendation opportunity after saving this participant’s private interest.
+            /// Current server membership status.
             ///
-            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)/responses/200`.
+            /// - Remark: Generated from `#/paths//api/v1/me/membership/get(getMembership)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.ExpressExploreIntentInterest.Output.Ok)
+            case ok(Operations.GetMembership.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            internal var ok: Operations.ExpressExploreIntentInterest.Output.Ok {
+            internal var ok: Operations.GetMembership.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -63233,7 +64984,7 @@ internal enum Operations {
             }
             /// Stable API error.
             ///
-            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)/responses/401`.
+            /// - Remark: Generated from `#/paths//api/v1/me/membership/get(getMembership)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses._Error)
@@ -63256,99 +65007,7 @@ internal enum Operations {
             }
             /// Stable API error.
             ///
-            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)/responses/404`.
-            ///
-            /// HTTP response code: `404 notFound`.
-            case notFound(Components.Responses._Error)
-            /// The associated value of the enum case if `self` is `.notFound`.
-            ///
-            /// - Throws: An error if `self` is not `.notFound`.
-            /// - SeeAlso: `.notFound`.
-            internal var notFound: Components.Responses._Error {
-                get throws {
-                    switch self {
-                    case let .notFound(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "notFound",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Stable API error.
-            ///
-            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)/responses/409`.
-            ///
-            /// HTTP response code: `409 conflict`.
-            case conflict(Components.Responses._Error)
-            /// The associated value of the enum case if `self` is `.conflict`.
-            ///
-            /// - Throws: An error if `self` is not `.conflict`.
-            /// - SeeAlso: `.conflict`.
-            internal var conflict: Components.Responses._Error {
-                get throws {
-                    switch self {
-                    case let .conflict(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "conflict",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Stable API error.
-            ///
-            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)/responses/422`.
-            ///
-            /// HTTP response code: `422 unprocessableContent`.
-            case unprocessableContent(Components.Responses._Error)
-            /// The associated value of the enum case if `self` is `.unprocessableContent`.
-            ///
-            /// - Throws: An error if `self` is not `.unprocessableContent`.
-            /// - SeeAlso: `.unprocessableContent`.
-            internal var unprocessableContent: Components.Responses._Error {
-                get throws {
-                    switch self {
-                    case let .unprocessableContent(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unprocessableContent",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Stable API error.
-            ///
-            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)/responses/500`.
-            ///
-            /// HTTP response code: `500 internalServerError`.
-            case internalServerError(Components.Responses._Error)
-            /// The associated value of the enum case if `self` is `.internalServerError`.
-            ///
-            /// - Throws: An error if `self` is not `.internalServerError`.
-            /// - SeeAlso: `.internalServerError`.
-            internal var internalServerError: Components.Responses._Error {
-                get throws {
-                    switch self {
-                    case let .internalServerError(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "internalServerError",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Stable API error.
-            ///
-            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)/responses/403`.
+            /// - Remark: Generated from `#/paths//api/v1/me/membership/get(getMembership)/responses/403`.
             ///
             /// HTTP response code: `403 forbidden`.
             case forbidden(Components.Responses._Error)
@@ -63371,22 +65030,925 @@ internal enum Operations {
             }
             /// Stable API error.
             ///
-            /// - Remark: Generated from `#/paths//api/v1/explore/intents/{intentId}/interest/post(expressExploreIntentInterest)/responses/426`.
+            /// - Remark: Generated from `#/paths//api/v1/me/membership/get(getMembership)/responses/500`.
             ///
-            /// HTTP response code: `426 upgradeRequired`.
-            case upgradeRequired(Components.Responses._Error)
-            /// The associated value of the enum case if `self` is `.upgradeRequired`.
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
             ///
-            /// - Throws: An error if `self` is not `.upgradeRequired`.
-            /// - SeeAlso: `.upgradeRequired`.
-            internal var upgradeRequired: Components.Responses._Error {
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
                 get throws {
                     switch self {
-                    case let .upgradeRequired(response):
+                    case let .internalServerError(response):
                         return response
                     default:
                         try throwUnexpectedResponseStatus(
-                            expectedStatus: "upgradeRequired",
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Idempotent per authenticated account and code, including retries after expiry or capacity exhaustion. Membership days extend the later of now or current expiry.
+    ///
+    /// - Remark: HTTP `POST /api/v1/me/membership/redeem`.
+    /// - Remark: Generated from `#/paths//api/v1/me/membership/redeem/post(redeemMembershipInvite)`.
+    internal enum RedeemMembershipInvite {
+        internal static let id: Swift.String = "redeemMembershipInvite"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/me/membership/redeem/POST/header`.
+            internal struct Headers: Sendable, Hashable {
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RedeemMembershipInvite.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RedeemMembershipInvite.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.RedeemMembershipInvite.Input.Headers
+            /// - Remark: Generated from `#/paths/api/v1/me/membership/redeem/POST/requestBody`.
+            internal enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/membership/redeem/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.MembershipRedemptionRequest)
+            }
+            internal var body: Operations.RedeemMembershipInvite.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            internal init(
+                headers: Operations.RedeemMembershipInvite.Input.Headers = .init(),
+                body: Operations.RedeemMembershipInvite.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/membership/redeem/POST/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/me/membership/redeem/POST/responses/200/content/json`.
+                    internal struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/api/v1/me/membership/redeem/POST/responses/200/content/json/data`.
+                        internal var data: Components.Schemas.MembershipStatus
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - data:
+                        internal init(data: Components.Schemas.MembershipStatus) {
+                            self.data = data
+                        }
+                        internal enum CodingKeys: String, CodingKey {
+                            case data
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/api/v1/me/membership/redeem/POST/responses/200/content/application\/json`.
+                    case json(Operations.RedeemMembershipInvite.Output.Ok.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Operations.RedeemMembershipInvite.Output.Ok.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.RedeemMembershipInvite.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.RedeemMembershipInvite.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Current server membership status.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/membership/redeem/post(redeemMembershipInvite)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.RedeemMembershipInvite.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.RedeemMembershipInvite.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/membership/redeem/post(redeemMembershipInvite)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/membership/redeem/post(redeemMembershipInvite)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            internal var forbidden: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/membership/redeem/post(redeemMembershipInvite)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/membership/redeem/post(redeemMembershipInvite)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/membership/redeem/post(redeemMembershipInvite)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            internal var tooManyRequests: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `POST /api/v1/plans/{planId}/cancel`.
+    /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/cancel/post(cancelPlan)`.
+    internal enum CancelPlan {
+        internal static let id: Swift.String = "cancelPlan"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/plans/{planId}/cancel/POST/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/plans/{planId}/cancel/POST/path/planId`.
+                internal var planId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - planId:
+                internal init(planId: Swift.String) {
+                    self.planId = planId
+                }
+            }
+            internal var path: Operations.CancelPlan.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/plans/{planId}/cancel/POST/header`.
+            internal struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/plans/{planId}/cancel/POST/header/Idempotency-Key`.
+                internal var idempotencyKey: Swift.String
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CancelPlan.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                internal init(
+                    idempotencyKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CancelPlan.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.CancelPlan.Input.Headers
+            /// - Remark: Generated from `#/paths/api/v1/plans/{planId}/cancel/POST/requestBody`.
+            internal enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/plans/{planId}/cancel/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.PlanCancellationInput)
+            }
+            internal var body: Operations.CancelPlan.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            internal init(
+                path: Operations.CancelPlan.Input.Path,
+                headers: Operations.CancelPlan.Input.Headers,
+                body: Operations.CancelPlan.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/plans/{planId}/cancel/POST/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/plans/{planId}/cancel/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.PlanEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.PlanEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.CancelPlan.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.CancelPlan.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Plan canceled or proposal withdrawn; repeat requests do not duplicate notifications.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/cancel/post(cancelPlan)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.CancelPlan.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.CancelPlan.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/cancel/post(cancelPlan)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/cancel/post(cancelPlan)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            internal var forbidden: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/cancel/post(cancelPlan)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/cancel/post(cancelPlan)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            internal var conflict: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/cancel/post(cancelPlan)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/cancel/post(cancelPlan)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `GET /api/v1/me/plan-cancellations`.
+    /// - Remark: Generated from `#/paths//api/v1/me/plan-cancellations/get(listPlanCancellations)`.
+    internal enum ListPlanCancellations {
+        internal static let id: Swift.String = "listPlanCancellations"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/me/plan-cancellations/GET/header`.
+            internal struct Headers: Sendable, Hashable {
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListPlanCancellations.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListPlanCancellations.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.ListPlanCancellations.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            internal init(headers: Operations.ListPlanCancellations.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/plan-cancellations/GET/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/me/plan-cancellations/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.PlanCancellationNoticesEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.PlanCancellationNoticesEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.ListPlanCancellations.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.ListPlanCancellations.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Success.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/plan-cancellations/get(listPlanCancellations)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListPlanCancellations.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.ListPlanCancellations.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/plan-cancellations/get(listPlanCancellations)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/plan-cancellations/get(listPlanCancellations)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/plan-cancellations/get(listPlanCancellations)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `PATCH /api/v1/me/plan-cancellations/{noticeId}`.
+    /// - Remark: Generated from `#/paths//api/v1/me/plan-cancellations/{noticeId}/patch(acknowledgePlanCancellation)`.
+    internal enum AcknowledgePlanCancellation {
+        internal static let id: Swift.String = "acknowledgePlanCancellation"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/me/plan-cancellations/{noticeId}/PATCH/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/plan-cancellations/{noticeId}/PATCH/path/noticeId`.
+                internal var noticeId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - noticeId:
+                internal init(noticeId: Swift.String) {
+                    self.noticeId = noticeId
+                }
+            }
+            internal var path: Operations.AcknowledgePlanCancellation.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/me/plan-cancellations/{noticeId}/PATCH/header`.
+            internal struct Headers: Sendable, Hashable {
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.AcknowledgePlanCancellation.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.AcknowledgePlanCancellation.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.AcknowledgePlanCancellation.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            internal init(
+                path: Operations.AcknowledgePlanCancellation.Input.Path,
+                headers: Operations.AcknowledgePlanCancellation.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/plan-cancellations/{noticeId}/PATCH/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/me/plan-cancellations/{noticeId}/PATCH/responses/200/content/application\/json`.
+                    case json(Components.Schemas.PlanCancellationAckEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.PlanCancellationAckEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.AcknowledgePlanCancellation.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.AcknowledgePlanCancellation.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Success.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/plan-cancellations/{noticeId}/patch(acknowledgePlanCancellation)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.AcknowledgePlanCancellation.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.AcknowledgePlanCancellation.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/plan-cancellations/{noticeId}/patch(acknowledgePlanCancellation)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/plan-cancellations/{noticeId}/patch(acknowledgePlanCancellation)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/plan-cancellations/{noticeId}/patch(acknowledgePlanCancellation)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
                             response: self
                         )
                     }

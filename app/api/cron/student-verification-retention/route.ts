@@ -1,6 +1,7 @@
 import { error, ok } from "@/lib/http";
 import { runObservedCron } from "@/lib/ops/cron-observability";
 import { cleanupStudentVerificationData } from "@/lib/verification/retention";
+import { processMediaDeletionJobs, sweepUnreferencedMedia } from "@/lib/media/lifecycle";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,9 +16,13 @@ export async function GET(request: Request) {
 
   try {
     return ok(
-      await runObservedCron("student-verification-retention", () =>
-        cleanupStudentVerificationData(),
-      ),
+      await runObservedCron("student-verification-retention", async () => {
+        const verification = await cleanupStudentVerificationData();
+        const sweep = await sweepUnreferencedMedia({ batchSize: 500 });
+        const deletion = await processMediaDeletionJobs({ limit: 200 });
+        if (deletion.failed) throw new Error(`${deletion.failed} media deletions queued for retry.`);
+        return { ...verification, media: { ...sweep, ...deletion } };
+      }),
     );
   } catch (cause) {
     console.error("GET /api/cron/student-verification-retention", cause);

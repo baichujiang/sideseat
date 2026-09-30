@@ -3,6 +3,7 @@ import { ConnectionStatus, MessageType } from "@prisma/client";
 import { requireOnboardedUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok } from "@/lib/http";
+import { queueMediaDeletion, processMediaDeletionJobs } from "@/lib/media/lifecycle";
 
 /**
  * Soft-delete user-authored 1:1 content. Workflow cards are server-owned
@@ -35,17 +36,18 @@ export async function DELETE(
           OR: [{ userAId: user.id }, { userBId: user.id }],
         },
       },
-      select: { id: true },
+      select: { id: true, imageUrl: true },
     });
 
     if (!message) {
       return error("Message not found or not yours to delete.", 404);
     }
 
-    await prisma.message.update({
-      where: { id: message.id },
-      data: { deletedAt: new Date(), body: "" },
+    await prisma.$transaction(async tx => {
+      await tx.message.update({ where: { id: message.id }, data: { deletedAt: new Date(), body: "" } });
+      await queueMediaDeletion(tx, [message.imageUrl]);
     });
+    if (message.imageUrl) await processMediaDeletionJobs({ urls: [message.imageUrl] });
 
     return ok({ id: message.id });
   } catch (cause) {

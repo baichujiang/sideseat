@@ -174,7 +174,7 @@ export async function createDirectMessageRecord(
   }
 
   if (options.input.type === "IMAGE") {
-    if (!isAllowedChatImageUrl(options.connectionId, options.input.imageUrl)) {
+    if (!isAllowedChatImageUrl(options.connectionId, options.input.imageUrl, options.senderId)) {
       throw new InvalidDirectMessageImageError("Invalid image URL.");
     }
     const caption = (options.input.body ?? "").trim();

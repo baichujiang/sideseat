@@ -1,0 +1,27 @@
+[
+  {
+    "url": "https://api.sideseat.de/api/v1/client-config",
+    "status": 200,
+    "finalUrl": "https://api.sideseat.de/api/v1/client-config"
+  },
+  {
+    "url": "https://api.sideseat.de/api/v1/me/plan-cancellations",
+    "status": 401,
+    "finalUrl": "https://api.sideseat.de/api/v1/me/plan-cancellations"
+  },
+  {
+    "url": "https://api.sideseat.de/.well-known/apple-app-site-association",
+    "status": 200,
+    "finalUrl": "https://api.sideseat.de/.well-known/apple-app-site-association"
+  },
+  {
+    "url": "https://sideseat.de/privacy",
+    "status": 200,
+    "finalUrl": "https://www.sideseat.de/privacy"
+  },
+  {
+    "url": "https://sideseat.de/support",
+    "status": 200,
+    "finalUrl": "https://www.sideseat.de/support"
+  }
+]

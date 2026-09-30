@@ -4,11 +4,76 @@
 
 **Policy:** `MUTUAL_OPPORTUNITY_V1`
 
-**Last updated:** 2026-09-09
+**Last updated:** 2026-09-26
 
 **Governing flow:** [User Flow](./USER_FLOW.md)
 
 **Scope:** Weekly Intent, matching session, Mutual Opportunity and mutual activation
+
+**2026-09-26 recommendation contact amendment (local, not deployed):**
+Recommendations use private bookmarks and explicit first messages. This supersedes
+private YES/NO UI and the bilateral-YES activation rules below for this new path.
+`POST /api/v1/me/mutual-opportunities/{id}/interaction` accepts BOOKMARK,
+UNBOOKMARK, SEND (body), REPLY (body), or IGNORE. Mutations require ownership,
+authentication and an idempotency key. First messages require 1–500 trimmed characters.
+
+`MutualOpportunityBookmark` is viewer-private. `MutualOpportunityMessageRequest`
+holds one first message per opportunity. `/api/v1/inbox` exposes participant-scoped
+pending `messageRequests`; the receiver sees sender identity and the target intention
+snapshot, never its private note. A message request remains outside `Connection`
+until the recipient supplies a written reply. Under the canonical pair, intention and
+opportunity locks, reply atomically creates/reuses chat, inserts the context card and
+both messages, unlocks normal messaging, and marks the opportunity MUTUAL. Existing
+private-decision routes cannot bypass this reply requirement. Blocks, moderation,
+ended intentions and inactive canonical chats reject new contact.
+
+Saved opportunities remain retrievable when expired, with actions disabled except
+unbookmark. Ignore is not disclosed to the sender. Sending/replying may notify the
+other participant; bookmarking never does. Plan acceptance remains separate.
+
+**2026-09-26 conversation presentation amendment (local, not deployed):**
+Native first-message sending opens an intention conversation immediately. Saved cards
+and the inbox both provide a clickable chat destination. The participant-scoped
+`GET /api/v1/me/mutual-opportunities/{opportunityId}` returns the first message and,
+after reply, its canonical connection. The native destination renders a pending
+message timeline and transitions in place to DirectChatView after reply. The sender
+has no send control before reply. Recipient reply uses the existing interaction
+transaction; no Connection is created prematurely. Inbox retains outgoing unresolved
+requests as readable conversations, including expired/ignored requests; ignored status
+remains private and REPLIED requests are represented by the normal conversation.
+
+**2026-09-26 contacted-feed amendment (local, not deployed):**
+Native recommendations exclude opportunities with a message request or coordination.
+Private bookmarks also exclude a card from the feed after a successful save.
+The tab order is intentions → recommendations → bookmarks; the default selection
+logic is unchanged. Native saving animates a small card toward the bookmarks tab
+and announces success. Reduce Motion uses static confirmation instead. Saved cards and message history are
+preserved; only feed presentation changes. Exploration filters intentions linked to
+participant-owned contacted or viewer-bookmarked opportunities before applying its result limit, allowing
+eligible cards to refill the requested result set up to its access limit. Failed sends and canceled composers
+leave cards in place. The opportunity API remains a shared source for bookmarks and
+conversation state; feed filtering does not delete opportunities or messages.
+
+**2026-09-26 on-demand recommendations amendment (local, not deployed):**
+The recommendation page omits the finding-status description. Additional public
+intentions load only after tapping Find more recommendations, then appear directly
+in the same feed without a More intentions section. Search again refreshes those
+results. Native limits are Free five / Plus ten; Plus is a DEBUG-only preview until
+membership entitlements are connected. The production endpoint remains capped at
+five. Saving and contact retain their shared card actions and feed exclusions.
+
+**2026-09-26 unified exploration contact amendment (local, not deployed):**
+Explore cards use the recommendation bookmark and first-message mechanism.
+`POST /api/v1/explore/intents/{intentId}/contact` prepares or reuses contact context
+under canonical pair and intention locks, without recording YES or sending a notification.
+A new `DRAFT` opportunity is visible only to its creator, excluded from matching
+occupancy, and backed by a private response intention excluded from My Intentions.
+BOOKMARK remains private; SEND rechecks the current public intention and transitions
+the draft to PENDING with a message request. Reply still creates the chat. Preparing
+or canceling the composer never bookmarks, sends, or starts a chat. Existing
+recommendations are reused. The legacy `/interest` route remains for older clients;
+the current native app no longer calls it. The draft enum and activation constraint
+are separate additive migrations so PostgreSQL commits the enum value before use.
 
 **2026-09-09 publication amendment (local, rollout-gated):**
 [Event-driven automatic matching](./INTENT_DRIVEN_MATCHING.md) supersedes the
@@ -188,9 +253,21 @@ DELETE /api/v1/me/mutual-opportunities/{opportunityId}/decision
 - Kill switches disable new enrollment/activation but keep read, pause, end,
   withdraw and expiry safe-drain paths available.
 
+The recommendation projection also includes `peerIntention`: the other owner's
+current activity fields, declared timing and their course. It selects intent B for viewer
+A and intent A for viewer B. `descriptionPreview` is limited to 96 trimmed characters
+from explicitly exploration-visible intentions, matching the public exploration card.
+Non-public notes and intention/owner IDs are not exposed. `peer.campus` and
+`peer.languages` provide the school and primary language independently of shared fit. Legacy
+null timing preferences map to EXACT and retain their existing windows. Closed
+or unavailable opportunities omit this content. Existing source snapshots used
+by conversations and Plans remain unchanged. The native card uses peer activity
+and timing without displaying comparisons or scores; older responses without
+peer timing show “time to discuss”.
+
 ## 7. Privacy, retention and compatibility
 
-- No Intent note, raw decision, exact private location, person ranking or Calendar
+- No private Intent note, raw decision, exact private location, person ranking or Calendar
   content enters another user's projection.
 - The approved activity-fit score and both relevant concrete activity texts may
   enter that opportunity's projection; score is symmetric and independent of consent.
@@ -217,3 +294,11 @@ DELETE /api/v1/me/mutual-opportunities/{opportunityId}/decision
 - Block versus decision cannot leave a live hidden commitment;
 - account deletion and global kill-switch safe drain work;
 - OpenAPI and generated Swift types remain synchronized.
+
+### 2026-09-26 意愿过期与重新发布（开发版本）
+
+`GET /api/v1/me/weekly-intents` 保持 `intent` / `intents` 为非终态记录，新增 `expiredIntents` 历史数组。确切时间的截止点为最后一个时段的结束，灵活日期范围按原时区最后一天结束计算；未定时间无截止点。原生端将过期记录放入默认折叠的历史区。
+
+「再约一次」是带入活动内容、重新选时间的 POST 创建，不是恢复或编辑旧 ID。旧收藏、招呼、聊天及计划关系不迁移到新记录。收藏响应以 `isExpired` 标识对方意愿过期，保留过期卡片上下文；已有会话继续可访问，过期意愿不接受新招呼。
+
+原生新发布明确发送 `exploreVisible: true`；旧未公开意愿只有在编辑中主动开启后才加入更多推荐。服务端保留省略该参数时的旧默认行为，避免旧客户端无意公开内容。暂不支持周期性自动发布。

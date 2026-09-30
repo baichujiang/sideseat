@@ -156,6 +156,7 @@ export function ChatAttachmentTray({
       fd.set("file", file);
       const up = await apiFetch(`/api/connections/${connectionId}/chat-images`, {
         method: "POST",
+        headers: { "Idempotency-Key": crypto.randomUUID() },
         body: fd,
       });
       const uploadPayload = await up.json().catch(() => ({}));

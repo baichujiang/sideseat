@@ -1,100 +1,59 @@
-import { ConnectionStatus } from "@prisma/client";
-import { randomBytes } from "crypto";
-import { put } from "@vercel/blob";
+import { randomBytes } from "node:crypto";
 
-import { requireOnboardedUser } from "@/lib/auth/guards";
+import { requireV1User } from "@/lib/api/v1/auth";
+import { activeDirectConnectionWhere, assertDirectUnrepliedSendAllowed, PeerReplyRequiredError } from "@/lib/chat/direct-message-service";
 import { chatImageBlobPrefix } from "@/lib/constants/chat-media";
 import { prisma } from "@/lib/db/prisma";
 import { error, ok } from "@/lib/http";
+import { NativeImageUploadError, validateNativeImageFile } from "@/lib/media/native-image-upload";
+import { putStoredMedia } from "@/lib/media/storage";
+import { MediaStorageUnavailableError } from "@/lib/media/private-blob";
+import { consumeMediaUploadAllowance, MediaUploadRateLimitError } from "@/lib/media/upload-allowance";
+import { hashIdempotencyRequest, readIdempotencyKey } from "@/lib/api/v1/idempotency";
+import { runV1Mutation } from "@/lib/api/v1/mutation";
 
-const MAX_BYTES = 2 * 1024 * 1024;
-const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
-
-function extForMime(type: string): string {
-  if (type === "image/png") return "png";
-  if (type === "image/webp") return "webp";
-  return "jpg";
-}
-
-async function fileToDataUrl(file: File): Promise<string> {
-  const bytes = Buffer.from(await file.arrayBuffer());
-  return `data:${file.type};base64,${bytes.toString("base64")}`;
-}
-
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ connectionId: string }> },
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ connectionId: string }> }) {
   try {
-    const user = await requireOnboardedUser();
+    const auth = await requireV1User(request);
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
+    const idempotencyKey = readIdempotencyKey(request);
+    if (!idempotencyKey) return error("A valid Idempotency-Key header is required.", 422, "IDEMPOTENCY_KEY_REQUIRED");
     const { connectionId } = await params;
-
     const connection = await prisma.connection.findFirst({
-      where: {
-        id: connectionId,
-        status: ConnectionStatus.ACTIVE,
-        userA: {
-          moderationBlocks: {
-            none: {
-              isActive: true,
-            },
-          },
-        },
-        userB: {
-          moderationBlocks: {
-            none: {
-              isActive: true,
-            },
-          },
-        },
-        OR: [{ userAId: user.id }, { userBId: user.id }],
+      where: activeDirectConnectionWhere(connectionId, user.id), select: { id: true, userAId: true, userBId: true },
+    });
+    if (!connection) return error("Connection not found.", 404);
+    const blocked = await prisma.block.findFirst({ where: { OR: [
+      { blockerId: connection.userAId, blockedId: connection.userBId },
+      { blockerId: connection.userBId, blockedId: connection.userAId },
+    ] }, select: { id: true } });
+    if (blocked) return error("Connection not found.", 404);
+    await prisma.$transaction(tx => assertDirectUnrepliedSendAllowed(tx, { connectionId, senderId: user.id }));
+    const file = (await request.formData()).get("file");
+    if (!(file instanceof File)) return error("Choose a JPG, PNG, or WEBP image.");
+    const image = await validateNativeImageFile(file);
+    const ext = image.contentType === "image/png" ? "png" : image.contentType === "image/webp" ? "webp" : "jpg";
+    const result = await runV1Mutation({
+      actorId: user.id, key: idempotencyKey, scope: `chat-image-upload:${connectionId}`,
+      requestHash: hashIdempotencyRequest({ contentType: image.contentType, bytes: image.bytes.toString("base64") }),
+      execute: async () => {
+        await consumeMediaUploadAllowance(user.id);
+        const key = `${chatImageBlobPrefix(connectionId)}${user.id}/${randomBytes(18).toString("hex")}.${ext}`;
+        const blob = await putStoredMedia("chat", key, image.bytes, image.contentType);
+        return { status: 200, body: { url: blob.url } };
       },
     });
-
-    if (!connection) {
-      return error("Connection not found.", 404);
-    }
-
-    const formData = await request.formData();
-    const file = formData.get("file");
-
-    if (!(file instanceof File)) {
-      return error("Choose a JPG, PNG, or WEBP image.");
-    }
-
-    if (file.size === 0) {
-      return error("The file is empty.");
-    }
-
-    if (file.size > MAX_BYTES) {
-      return error("Image is too large. Max 2 MB.");
-    }
-
-    if (!ALLOWED_TYPES.has(file.type)) {
-      return error("Use JPG, PNG, or WEBP.");
-    }
-
-    let url: string;
-    if (process.env.BLOB_READ_WRITE_TOKEN) {
-      const token = randomBytes(18).toString("hex");
-      const ext = extForMime(file.type);
-      const blobKey = `${chatImageBlobPrefix(connectionId)}${token}.${ext}`;
-      const blob = await put(blobKey, file, {
-        access: "public",
-        contentType: file.type,
-        addRandomSuffix: false,
-      });
-      url = blob.url;
-    } else {
-      console.warn(
-        "[chat-images] BLOB_READ_WRITE_TOKEN is not configured. Falling back to inline image storage.",
-      );
-      url = await fileToDataUrl(file);
-    }
-
-    return ok({ url });
+    if (result.kind === "replay" || result.kind === "completed") return ok(result.body, {
+      status: result.status, headers: result.kind === "replay" ? { "Idempotency-Replayed": "true" } : {},
+    });
+    return error("The matching upload is already in progress or the key was used for a different file.", 409, "IDEMPOTENCY_CONFLICT");
   } catch (cause) {
-    console.error(cause);
+    if (cause instanceof MediaUploadRateLimitError) return Response.json({ success: false, error: cause.message, code: "RATE_LIMITED" }, { status: 429, headers: cause.headers });
+    if (cause instanceof NativeImageUploadError) return error(cause.message, 400);
+    if (cause instanceof MediaStorageUnavailableError) return error(cause.message, 503);
+    if (cause instanceof PeerReplyRequiredError) return error(cause.message, 403, "PEER_REPLY_REQUIRED");
+    console.error("POST chat image", cause);
     return error("Could not upload photo.");
   }
 }

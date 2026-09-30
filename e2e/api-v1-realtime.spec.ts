@@ -7,8 +7,8 @@ import { messageBody, openSse as openSseAt } from "./helpers/sse-client";
 assertLocalTestDatabase();
 const prisma = new PrismaClient();
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000";
-const E2E_USER = process.env.E2E_USER ?? "test_001";
-const E2E_PEER = process.env.E2E_PEER ?? "test_002";
+let E2E_USER = process.env.E2E_USER ?? "test_001";
+let E2E_PEER = process.env.E2E_PEER ?? "test_002";
 const E2E_OUTSIDER = "test_004";
 const E2E_PASSWORD = process.env.E2E_PASSWORD ?? "Password123";
 const E2E_CRON_SECRET = process.env.CRON_SECRET ?? "playwright-cron-secret";
@@ -30,6 +30,7 @@ let courseId = "";
 let groupChatId = "";
 let createdBlockId = "";
 const directMessageIds: string[] = [];
+const disposableUserIds: string[] = [];
 
 async function accessToken(request: APIRequestContext, identifier = E2E_USER) {
   const response = await request.post("/api/v1/auth/login", {
@@ -50,6 +51,20 @@ async function openSse(path: string, token: string, cursor?: string) {
 }
 
 test.beforeAll(async () => {
+  // The current schema permits one connection per pair. Use disposable peers
+  // so this suite never duplicates or deletes the shared seeded conversation.
+  const names: string[] = [];
+  for (const username of [E2E_USER, E2E_PEER]) {
+    const source = await prisma.user.findUniqueOrThrow({ where: { username } });
+    const created = await prisma.user.create({ data: {
+      username: `rt_${Date.now()}_${names.length}`, hashedPassword: source.hashedPassword,
+      school: source.school, nickname: source.nickname, onboardingComplete: true,
+      verifiedStudent: source.verifiedStudent, studentVerificationStatus: source.studentVerificationStatus,
+      isGuest: false,
+    } });
+    disposableUserIds.push(created.id); names.push(created.username);
+  }
+  [E2E_USER, E2E_PEER] = names;
   const users = await prisma.user.findMany({
     where: { username: { in: [E2E_USER, E2E_PEER, E2E_OUTSIDER] } },
     select: { id: true, username: true },
@@ -66,6 +81,7 @@ test.beforeAll(async () => {
       userAId: userId,
       userBId: peerId,
       status: "ACTIVE",
+      replyLimitUnlockedAt: new Date(),
     },
     select: { id: true },
   });
@@ -137,6 +153,7 @@ test.afterAll(async () => {
   if (createdConnectionId) {
     await prisma.connection.deleteMany({ where: { id: createdConnectionId } });
   }
+  await prisma.user.deleteMany({ where: { id: { in: disposableUserIds } } });
   await prisma.$disconnect();
 });
 

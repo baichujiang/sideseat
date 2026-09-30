@@ -1,0 +1,16 @@
+{
+  "projectId": "hidden-star-16421165",
+  "branchId": "br-frosty-snow-apffdw0p",
+  "recoveryBranchId": "br-tiny-scene-apa9lbbv",
+  "recoveryBranchName": "release-backup-20261001-storage",
+  "historyRetentionHours": 6,
+  "pendingBefore": [
+    "20260930190000_media_lifecycle"
+  ],
+  "applied": [
+    "20260930190000_media_lifecycle"
+  ],
+  "totalMigrations": 145,
+  "pendingAfter": 0,
+  "remoteBuildSkippedMigration": true
+}

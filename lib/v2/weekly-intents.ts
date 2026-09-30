@@ -18,7 +18,7 @@ import {
   weeklyIntentWindowsFitLifecycle,
 } from "@/lib/v2/weekly-intent-policy";
 import { matchAndNotifyForUser } from "@/lib/v2/mutual-opportunity-auto-match";
-import { readTimePreference, flexiblePreferenceFitsLifecycle } from "@/lib/v2/intent-timing";
+import { readTimePreference, flexiblePreferenceFitsLifecycle, intentionDeadline } from "@/lib/v2/intent-timing";
 
 const CURRENT_POLICY_VERSION = 1;
 // This is a hidden abuse guard, not a product-level weekly quota. A normal
@@ -128,8 +128,7 @@ function normalizedSportSelection(
   if (normalizedOtherNote) {
     throw new WeeklyIntentError("WEEKLY_INTENT_SPORT_INVALID");
   }
-  // NULL intentionally represents an intent created by an older client. It
-  // remains readable/editable but is not a concrete sport match candidate.
+  // NULL represents a category-only intention, with no specific sport chosen.
   return { sportTag: sportTag ?? null, sportOtherNote: null };
 }
 
@@ -174,8 +173,7 @@ function normalizedActivityText(
     }
     return null;
   }
-  // NULL is retained only for old clients. Current clients require a concrete
-  // action before enabling Save, and the matcher never pairs NULL with text.
+  // Details are optional. A blank detail stays NULL instead of inventing text.
   return normalized;
 }
 
@@ -320,11 +318,14 @@ export async function loadCurrentWeeklyIntent(
     await lockUserIntents(tx, userId);
     await expireCurrentRows(tx, userId, now);
     const rows = await tx.weeklyIntent.findMany({
-      where: { userId, exploreResponseToId: null, status: { in: [...NON_TERMINAL_STATES] } },
+      where: { userId, exploreResponseToId: null, status: { in: [...NON_TERMINAL_STATES, "EXPIRED"] } },
       select: ownerSelect,
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     });
-    return ownerCollection(rows);
+    return {
+      ...ownerCollection(rows.filter(row => row.status !== "EXPIRED")),
+      expiredIntents: rows.filter(row => row.status === "EXPIRED").map(ownerResponse),
+    };
   });
 }
 
@@ -333,7 +334,7 @@ export async function createWeeklyIntent(
   input: WeeklyIntentCreateInput,
   now = new Date(),
 ) {
-  const expiresAt = null;
+  const expiresAt = intentionDeadline(input.timeWindows, input.timePreference, input.timeZone);
   assertTiming(input.timeWindows, input.timePreference, input.timeZone, now, expiresAt);
   const sport = normalizedSportSelection(
     input.topic,
@@ -424,7 +425,7 @@ export async function patchWeeklyIntent(
         (current.timeWindows as WeeklyIntentCreateInput["timeWindows"]);
       const nextPreference = input.timePreference ?? current.timePreference;
       if (input.timeWindows !== undefined || input.timePreference !== undefined || input.timeZone !== undefined) {
-        assertTiming(nextWindows, nextPreference, input.timeZone ?? current.timeZone, now, current.expiresAt);
+        assertTiming(nextWindows, nextPreference, input.timeZone ?? current.timeZone, now, null);
       }
       const nextCourseId = input.courseId === undefined
         ? current.courseId
@@ -490,6 +491,7 @@ export async function patchWeeklyIntent(
         nextSportOtherNote,
       );
       data = {
+        expiresAt: intentionDeadline(nextWindows, nextPreference, input.timeZone ?? current.timeZone),
         ...(input.topic !== undefined ? { topic: input.topic } : {}),
         togetherMode: study.togetherMode,
         studyGoal: study.studyGoal,

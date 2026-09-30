@@ -1,3 +1,4 @@
+import { isPlusMember } from "@/lib/membership/status";
 import { Prisma } from "@prisma/client";
 
 import { requireV1User } from "@/lib/api/v1/auth";
@@ -80,8 +81,8 @@ export async function GET(
           replyLimitUnlockedAt: true,
           contactRemarkByA: true,
           contactRemarkByB: true,
-          userA: { select: { id: true, username: true, nickname: true, avatarUrl: true } },
-          userB: { select: { id: true, username: true, nickname: true, avatarUrl: true } },
+          userA: { select: { id: true, username: true, nickname: true, avatarUrl: true, membership: { select: { plusExpiresAt: true } } } },
+          userB: { select: { id: true, username: true, nickname: true, avatarUrl: true, membership: { select: { plusExpiresAt: true } } } },
         },
       }),
       // Capture before history so concurrent writes appear in history, the stream, or both.
@@ -117,7 +118,8 @@ export async function GET(
           isSelfNotes: connection.userAId === connection.userBId,
           replyLimitUnlocked: connection.replyLimitUnlockedAt !== null,
           displayName: viewerRemark?.trim() || peer.nickname?.trim() || peer.username,
-          peer,
+          peer: { id: peer.id, username: peer.username, nickname: peer.nickname, avatarUrl: peer.avatarUrl,
+            isPlus: isPlusMember(peer.membership?.plusExpiresAt) },
         },
         messages: pageRows.reverse().map((message) =>
           directMessageV1(message, auth.user.id),
@@ -288,7 +290,15 @@ export async function POST(
       });
     }
     if (result.kind === "replay") {
-      return v1Success(result.body, {
+      // Replays may outlive a media grant or follow a message retraction.
+      let body = result.body;
+      if (body && typeof body === "object" && !Array.isArray(body) && typeof body.id === "string" && body.imageUrl) {
+        const message = await prisma.message.findFirst({
+          where: { id: body.id, connectionId }, include: directMessageV1Include,
+        });
+        if (message) body = directMessageV1(message, auth.user.id) as Prisma.JsonValue;
+      }
+      return v1Success(body, {
         request,
         status: result.status,
         headers: { "Idempotency-Replayed": "true" },

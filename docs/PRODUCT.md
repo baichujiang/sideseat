@@ -2,9 +2,27 @@
 
 **Status:** Frozen v1.0 with approved activity-fit (2026-09-08), flexible-timing, event-driven publication and discovery-first (2026-09-09) amendments
 
-**Last updated:** 2026-09-09
+**Last updated:** 2026-09-26
 
 **Scope:** Product positioning, canonical objects, information architecture, invariants, and non-goals
+
+**2026-09-26 owner-approved interaction amendment (local implementation):**
+Together uses My intentions → Recommendations → Saved intentions. A private heart
+bookmark does not notify the peer. Say hello sends one contextual message and opens
+its readable conversation; the peer must reply before ongoing chat is available.
+Contacted and saved cards leave recommendations; saved cards retain the chat entry.
+Additional public intentions load from Find more recommendations into the same feed.
+This amendment supersedes legacy bilateral-YES and no-save-shelf descriptions;
+older endpoints remain compatibility paths. It does not approve paid quotas,
+additional identity disclosure, production deployment, or a new history policy.
+
+**2026-09-26 owner-approved membership foundation:**
+Accounts distinguish Free and time-limited Plus through server-owned membership.
+An invitation grants configurable membership days with a shared redemption cap
+and deadline; each account can redeem a given code once. See
+[Membership](./MEMBERSHIP.md) for implemented behavior and operator controls.
+Recommendation quotas, exposure weighting and Plus-only calendar AI remain
+separate follow-up integrations; the membership badge does not certify them.
 
 This is the highest product authority in the repository. Implementation details
 belong in feature contracts; build status belongs in release records.
@@ -69,26 +87,26 @@ Me / 我
 ```
 
 - **Together** owns Weekly Intent, matching sessions, first/repeat Opportunities,
-  post-event follow-up and later Pod formation.
+  private bookmarks and later Pod formation.
 - **Plans** owns waiting proposals, upcoming commitments and ended-plan feedback.
 - **Calendar** owns personal scheduling, courses, confirmed Plan projections,
   retrieval and Apple Calendar interoperability.
-- **Messages** owns communication after current mutual consent and all Plan
-  negotiation or shared-commitment changes.
+- **Messages** owns contextual first-message requests, ongoing communication after a
+  written reply, and all Plan negotiation or shared-commitment changes.
 - **Me** owns identity, verification, courses, language, privacy, safety and
   durable preferences.
 
-There is no public Discover feed, city selector, people search, save shelf,
+There is no separate public Discover tab, city selector, people search,
 generic publisher, classmate roster or course chat in the current product.
 
 ## 4. Canonical objects
 
 | Object | Meaning | Not equivalent to |
 | --- | --- | --- |
-| Weekly Intent | Private, short-lived willingness to do one concrete thing | Post, profile field, calendar event |
+| Weekly Intent | Activity-specific willingness with owner-controlled public visibility | Post, profile field, calendar event |
 | Matching Session | Explicit, bounded participation in Opportunity generation | Guarantee of a match |
 | Mutual Opportunity | Private, finite, action-first possibility between two eligible users | Person recommendation, invitation, Plan |
-| Decision | One participant's private YES/NO/withdraw state | Public like or counterpart status |
+| Bookmark / first message | Private saving, or an explicit contextual contact request; a written reply opens ongoing chat | Automatic matching consent, a Plan or a public like |
 | Action Context | Immutable, privacy-filtered source carried into coordination | Mutable copy of the source Intent |
 | Conversation | Transport for mutually authorized coordination | Friendship or Familiar Face |
 | Plan Draft | Prefilled but non-binding proposal input | Commitment |
@@ -108,7 +126,7 @@ authorize a current acquisition surface.
 ## 5. Source-of-truth invariants
 
 1. A user begins with a shared action, never a people directory.
-2. A Weekly Intent is private and grants only bounded, action-specific eligibility.
+2. A Weekly Intent grants action-specific eligibility. Its public visibility and contact controls follow the current Together contract; private bookmarks are never peer notifications.
 3. A user may maintain multiple independent Intents; each Intent describes one
    concrete thing.
 4. Explicitly publishing an Intent starts automatic matching, with disclosure
@@ -128,9 +146,8 @@ authorize a current acquisition surface.
    public candidate pool or winner. The 2026-09-08 owner decision permits
    explainable activity-fit scores and internal ordering of feasible opportunities,
    not ratings or popularity ranking of people.
-9. One-sided consent is private and creates no chat, waiting indicator, message or
-   disclosure of the other participant's state.
-10. Only current bilateral consent authorizes contextual coordination.
+9. A bookmark is private and sends no notification. An explicit Say hello action sends one contextual message, visible in Messages to both participants. No further message is allowed before the peer replies.
+10. A written reply authorizes ongoing contextual chat. Legacy private YES/NO decisions remain compatibility behavior.
 11. Conversation permission is not commitment. Only an accepted Plan creates a
     shared commitment and two Calendar projections.
 12. Shared Plan facts are owned by Plan. Calendar may edit only personal metadata.
@@ -179,7 +196,7 @@ persistent page snapshots are removed.
 Web and native scheduling share account identity, persistent calendar data,
 recurrence and sharing services. The browser uses the existing HttpOnly session
 and versioned native APIs for intentions, opportunities, plans, chat and profile.
-Browser access does not imply EventKit access. See [browser delivery](./releases/2026-09-21-web-calendar.md).
+Browser access does not imply EventKit access. See [current browser flow](./USER_FLOW.md#browser-workspace--2026-09-21).
 
 Reliably carry personal events, course timetable and confirmed commitments.
 Calendar is the destination of the social funnel, not a recommendation surface.
