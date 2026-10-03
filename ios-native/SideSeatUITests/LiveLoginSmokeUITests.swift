@@ -952,6 +952,112 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["together-section-picker"].waitForNonExistence(timeout: 8))
     }
 
+    private func loopSelectPlanSection(_ section: String, in app: XCUIApplication) {
+        let menu = app.buttons["plans-section-menu"]
+        if menu.exists {
+            menu.tap()
+            let item = app.buttons["plans-tab-\(section)"]
+            XCTAssertTrue(item.waitForExistence(timeout: 8))
+            item.tap()
+            XCTAssertTrue(app.descendants(matching: .any)["plans-section-picker"].waitForNonExistence(timeout: 8))
+        } else {
+            let index = ["waitingResponse", "upcoming", "ended"].firstIndex(of: section)!
+            let picker = app.segmentedControls["plans-segmented-control"]
+            XCTAssertTrue(picker.waitForExistence(timeout: 8))
+            picker.buttons.element(boundBy: index).tap()
+        }
+    }
+
+    func testNewIntentLoop10AccessiblePlanNavigationAndContinuation() {
+        for (language, appearance, size) in [
+            ("de", "dark", "UICTContentSizeCategoryAccessibilityXXXL"),
+            ("en", "dark", "UICTContentSizeCategoryAccessibilityXXXL"),
+            ("zh-Hans", "dark", "UICTContentSizeCategoryAccessibilityXXXL"),
+            ("en", "light", "UICTContentSizeCategoryL"),
+            ("de", "light", "UICTContentSizeCategoryL"),
+            ("zh-Hans", "light", "UICTContentSizeCategoryL")
+        ] {
+            let app = launchAndLogin(username: "loopqa_a", additionalLaunchArguments: [
+                "--ui-testing-discover", "--ui-testing-language=\(language)",
+                "--ui-testing-appearance=\(appearance)", "-UIPreferredContentSizeCategoryName", size
+            ])
+            let large = size.contains("Accessibility")
+            tabButton(in: app, labels: ["Plans", "计划", "Pläne"]).tap()
+            XCTAssertTrue(app.descendants(matching: .any)["plans-root"].waitForExistence(timeout: 12))
+            if large {
+                let menu = app.buttons["plans-section-menu"]
+                XCTAssertTrue(menu.waitForExistence(timeout: 8))
+                XCTAssertLessThan(menu.frame.height, app.frame.height * 0.13)
+                XCTAssertGreaterThanOrEqual(menu.frame.height, 44)
+                menu.tap()
+                let ended = app.buttons["plans-tab-ended"]
+                XCTAssertTrue(ended.waitForExistence(timeout: 8))
+                XCTAssertTrue(ended.isHittable)
+                XCTAssertTrue(app.buttons["plans-tab-waitingResponse"].isSelected)
+                XCTAssertTrue(app.buttons["plans-tab-upcoming"].isHittable)
+                loopCapture(app, "plans-accessible-picker-\(language)")
+                ended.tap()
+                XCTAssertTrue(app.descendants(matching: .any)["plans-section-picker"].waitForNonExistence(timeout: 8))
+            } else {
+                XCTAssertTrue(app.segmentedControls["plans-segmented-control"].exists)
+                loopSelectPlanSection("ended", in: app)
+            }
+            let create = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-new-intention-")).firstMatch
+            XCTAssertTrue(create.waitForExistence(timeout: 12))
+            let planID = String(create.identifier.dropFirst("plan-new-intention-".count))
+            let repeatButton = app.buttons["plan-repeat-\(planID)"]
+            loopReveal(create, in: app)
+            XCTAssertTrue(repeatButton.label.contains("Loop Mia"), "The compact action retains the other person's name for accessibility")
+            let expectedNewLabel = ["de": "Neuen Wunsch veröffentlichen", "en": "Publish new intention", "zh-Hans": "发布新意愿"][language]!
+            XCTAssertEqual(create.label, expectedNewLabel)
+            if large {
+                XCTAssertLessThan(repeatButton.frame.height, app.frame.height * 0.18)
+                XCTAssertLessThan(create.frame.height, app.frame.height * 0.20)
+                XCTAssertGreaterThanOrEqual(repeatButton.frame.height, 44)
+                XCTAssertGreaterThanOrEqual(create.frame.height, 44)
+                XCTAssertTrue(repeatButton.isHittable)
+            }
+            loopCapture(app, "plans-compact-actions-\(language)-\(appearance)")
+            let savedY = create.frame.minY
+            loopSelectPlanSection("waitingResponse", in: app)
+            loopSelectPlanSection("upcoming", in: app)
+            XCTAssertTrue(app.descendants(matching: .any)["plans-empty-upcoming"].waitForExistence(timeout: 8))
+            loopSelectPlanSection("ended", in: app)
+            XCTAssertTrue(create.waitForExistence(timeout: 8))
+            XCTAssertEqual(create.frame.minY, savedY, accuracy: 12, "Changing sections preserves the ended list's scroll position")
+            create.tap()
+            XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForExistence(timeout: 8))
+            app.navigationBars.buttons.matching(NSPredicate(format: "label IN %@", ["Cancel", "取消", "Abbrechen"])).firstMatch.tap()
+            XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForNonExistence(timeout: 8))
+            XCTAssertTrue(create.isHittable)
+            if large {
+                repeatButton.tap()
+                XCTAssertTrue(app.descendants(matching: .any)["plan-create-sheet"].waitForExistence(timeout: 8))
+                XCTAssertTrue(app.navigationBars.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Loop Mia")).firstMatch.exists)
+                app.navigationBars.buttons.matching(NSPredicate(format: "label IN %@", ["Cancel", "取消", "Abbrechen"])).firstMatch.tap()
+                XCTAssertTrue(app.descendants(matching: .any)["plan-create-sheet"].waitForNonExistence(timeout: 8))
+            }
+            if language == "de" && large {
+                let row = app.buttons["plans-row-\(planID)"]
+                for _ in 0..<6 where !row.isHittable { app.scrollViews["plans-scroll-ended"].swipeDown(velocity: .slow) }
+                XCTAssertTrue(row.isHittable); row.tap()
+                XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 12))
+                let chatCreate = app.buttons.matching(identifier: "plan-new-intention-\(planID)").firstMatch
+                loopReveal(chatCreate, in: app)
+                let chatRepeat = app.buttons.matching(identifier: "plan-repeat-\(planID)").firstMatch
+                XCTAssertTrue(chatRepeat.label.contains("Loop Mia"))
+                XCTAssertLessThan(chatCreate.frame.height, app.frame.height * 0.2)
+                loopCapture(app, "plans-compact-chat-de-dark")
+                chatCreate.tap()
+                XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForExistence(timeout: 8))
+                app.navigationBars.buttons["Abbrechen"].tap()
+                XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForNonExistence(timeout: 8))
+                XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].exists)
+            }
+            app.terminate()
+        }
+    }
+
     func testNewIntentLoop09RetainsPlanContinuationAndRecommendations() {
         for (language, appearance, size) in [
             ("zh-Hans", "light", "UICTContentSizeCategoryL"),
@@ -962,8 +1068,7 @@ final class SocialLiveUITests: XCTestCase {
                 "--ui-testing-appearance=\(appearance)", "-UIPreferredContentSizeCategoryName", size
             ])
             tabButton(in: app, labels: ["计划", "Pläne"]).tap()
-            let ended = app.buttons.matching(NSPredicate(format: "label IN %@", ["已结束", "Beendet"])).firstMatch
-            XCTAssertTrue(ended.waitForExistence(timeout: 8)); ended.tap()
+            loopSelectPlanSection("ended", in: app)
             let create = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-new-intention-")).firstMatch
             XCTAssertTrue(create.waitForExistence(timeout: 12))
             loopReveal(create, in: app)

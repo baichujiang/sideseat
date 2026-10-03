@@ -289,6 +289,13 @@ invitations. **View all** opens the complete Upcoming list, grouped by date.
 Outgoing invitations sit in a collapsed **Awaiting their response** section with
 a count. The existing Upcoming and Ended tabs remain available.
 
+At accessibility text sizes, one current-section button opens a full-height section
+sheet. All three sections remain selectable, with the current selection announced;
+switching sections retains each list's scroll position. Normal text sizes keep the
+segmented control. Ended-plan continuation actions in both Plans and chat use short
+visible labels at accessibility sizes, while their accessibility labels retain the
+full action and the original companion's name. No text-size cap is applied.
+
 Each card separates activity, time, location and participant. Incoming invitations
 name the sender and show **View and respond**, opening the existing conversation
 and its accept / alternative-time / decline controls. Confirmed cards carry an

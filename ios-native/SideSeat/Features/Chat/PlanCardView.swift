@@ -272,6 +272,7 @@ struct PlanCardView: View {
 }
 
 struct PlanContinuationActions: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(DeepLinkRouter.self) private var deepLinkRouter
     @State private var showsNewIntention = false
     @State private var publishedIntentID: String?
@@ -290,7 +291,8 @@ struct PlanContinuationActions: View {
             }
             if ActionToPlanV2Store.shared.isWeeklyIntentEnabled {
                 Button { showsNewIntention = true } label: {
-                    Text(AppLocalization.string("Publish new intention"))
+                    Text(AppLocalization.string(dynamicTypeSize.isAccessibilitySize
+                        ? "New intention (compact)" : "Publish new intention"))
                         .font(.subheadline.weight(.medium))
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: .infinity, minHeight: 44)
@@ -299,6 +301,7 @@ struct PlanContinuationActions: View {
                 .buttonStyle(SSPressButtonStyle())
                 .foregroundStyle(SideSeatTheme.utilityAction)
                 .disabled(isDisabled)
+                .accessibilityLabel(AppLocalization.string("Publish new intention"))
                 .accessibilityIdentifier("plan-new-intention-\(plan.id)")
             }
         }
@@ -317,6 +320,7 @@ struct PlanContinuationActions: View {
 }
 
 struct PlanRepeatButton: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let plan: NativePlanRequest
     var isDisabled = false
     var recipientName: String? = nil
@@ -328,7 +332,25 @@ struct PlanRepeatButton: View {
             : recipientName.map { String(format: AppLocalization.string("Plan again with %@"), $0) }
                 ?? AppLocalization.string("Plan again")
         Group {
-            if plan.viewerOutcome != nil {
+            if dynamicTypeSize.isAccessibilitySize {
+                Button(action: action) {
+                    Text(AppLocalization.string(plan.viewerOutcome == "DID_NOT_OCCUR"
+                        ? "New time (compact)" : "Plan again (compact)"))
+                        .font(.body.weight(.semibold))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, SideSeatTheme.spaceSM)
+                        .padding(.vertical, SideSeatTheme.spaceXS)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .foregroundStyle(plan.viewerOutcome != nil
+                            ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.utilityAction)
+                        .background(plan.viewerOutcome != nil ? SideSeatTheme.ProductAction.fill : Color.clear,
+                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(title)
+                .accessibilityIdentifier("plan-repeat-\(plan.id)")
+            } else if plan.viewerOutcome != nil {
                 SSPrimaryButton(title: title, fill: .product, height: 46,
                                 accessibilityID: "plan-repeat-\(plan.id)", action: action)
             } else {

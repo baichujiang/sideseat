@@ -71,6 +71,7 @@ struct PlansRootView: View {
     @State private var now = Date()
     @State private var showsAllIncoming = false
     @State private var showsOutgoing = false
+    @State private var showsSectionPicker = false
     @State private var repeatPlan: NativePlanRequest?
     @ScaledMetric(relativeTo: .subheadline) private var detailIconWidth: CGFloat = 18
 
@@ -123,26 +124,64 @@ struct PlansRootView: View {
     @ViewBuilder
     private var sectionPicker: some View {
         if dynamicTypeSize.isAccessibilitySize {
-            VStack(spacing: SideSeatTheme.spaceXS) {
-                ForEach(MVPPlanSection.ordered) { section in
-                    Button { selectedSection = section } label: {
-                        HStack {
-                            Text(section.title).font(.body.weight(.semibold))
-                                .fixedSize(horizontal: false, vertical: true)
-                            Spacer(minLength: SideSeatTheme.spaceSM)
-                            if section == selectedSection { Image(systemName: "checkmark").accessibilityHidden(true) }
-                        }
-                        .padding(.horizontal, SideSeatTheme.spaceMD)
-                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                        .background(selectedSection == section ? SideSeatTheme.surface : Color.clear,
-                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(section == selectedSection ? .isSelected : [])
-                    .accessibilityIdentifier("plans-tab-\(section.rawValue)")
+            Button { showsSectionPicker = true } label: {
+                HStack(spacing: SideSeatTheme.spaceSM) {
+                    Text(selectedSection.title)
+                        .font(.body.weight(.semibold))
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.down")
+                        .font(.subheadline.weight(.semibold))
+                        .accessibilityHidden(true)
                 }
+                .padding(.horizontal, SideSeatTheme.spaceMD)
+                .padding(.vertical, SideSeatTheme.spaceXS)
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                .background(SideSeatTheme.surface,
+                    in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                .contentShape(Rectangle())
             }
-            .accessibilityElement(children: .contain)
+            .buttonStyle(.plain)
+            .foregroundStyle(SideSeatTheme.utilityAction)
+            .accessibilityLabel(AppLocalization.string("Plan sections"))
+            .accessibilityValue(selectedSection.title)
+            .accessibilityHint(AppLocalization.string("Choose a section"))
+            .accessibilityIdentifier("plans-section-menu")
+            .sheet(isPresented: $showsSectionPicker) {
+                NavigationStack {
+                    List(MVPPlanSection.ordered) { section in
+                        Button {
+                            selectedSection = section
+                            showsSectionPicker = false
+                        } label: {
+                            HStack(spacing: SideSeatTheme.spaceSM) {
+                                Text(section.title)
+                                    .font(.body.weight(section == selectedSection ? .semibold : .regular))
+                                    .fixedSize(horizontal: false, vertical: true)
+                                Spacer(minLength: 0)
+                                if section == selectedSection {
+                                    Image(systemName: "checkmark").accessibilityHidden(true)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        }
+                        .foregroundStyle(SideSeatTheme.utilityAction)
+                        .accessibilityAddTraits(section == selectedSection ? .isSelected : [])
+                        .accessibilityIdentifier("plans-tab-\(section.rawValue)")
+                    }
+                    .navigationTitle("Plans")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { showsSectionPicker = false }
+                        }
+                    }
+                }
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("plans-section-picker")
+                .presentationDetents([.large])
+                .dynamicTypeSize(dynamicTypeSize)
+            }
         } else {
             Picker(AppLocalization.string("Plans"), selection: $selectedSection) {
                 ForEach(MVPPlanSection.ordered) { section in
