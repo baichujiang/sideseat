@@ -469,7 +469,8 @@ struct PlansRootView: View {
                 ) { value in
                     Task { await store.recordOutcome(value, for: plan.id, using: session) }
                 }
-                PlanRepeatButton(plan: plan, isDisabled: store.mutatingOutcomeID == plan.id) {
+                PlanContinuationActions(plan: plan, currentUserID: currentUserID,
+                                        isDisabled: store.mutatingOutcomeID == plan.id) {
                     scrollPositions.capture(selectedSection)
                     repeatPlan = plan
                 }

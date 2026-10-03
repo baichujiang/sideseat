@@ -37,6 +37,41 @@ private struct TogetherAssignmentLoadID: Equatable {
     let canMakeAuthenticatedRequests: Bool
 }
 
+@MainActor @Observable
+final class IntentionPublicationLaunch {
+    static let shared = IntentionPublicationLaunch()
+    var intentID: String?
+}
+
+/// Present on the originating Plan surface so cancelling preserves its navigation/scroll state.
+struct CompletedPlanIntentionSheet: View {
+    @Environment(SessionStore.self) private var session
+    @Environment(ClientConfigurationStore.self) private var clientConfiguration
+    @State private var store = WeeklyIntentStore()
+    let draft: CompletedPlanIntentDraft
+    let onPublished: (String) -> Void
+
+    var body: some View {
+        WeeklyIntentEditorView(intent: nil, completedPlanDraft: draft, saveIssue: store.issue) {
+            topic, activityText, sportTag, sportOtherNote, togetherMode, studyGoal,
+            courseId, timeWindows, timePreference, exploreVisible, note in
+            let config = clientConfiguration.configuration
+            let saved = await store.save(
+                intent: nil, topic: topic, activityText: activityText,
+                sportTag: sportTag, sportOtherNote: sportOtherNote,
+                togetherMode: togetherMode, studyGoal: studyGoal, courseId: courseId,
+                timeWindows: timeWindows, timePreference: timePreference,
+                automaticMatching: config?.isFeatureEnabled("v2AutomaticMatching") == true
+                    && ActionToPlanV2Store.shared.isMutualOpportunityEnabled,
+                exploreVisible: config?.isFeatureEnabled("v2ExploreIntents") == true ? exploreVisible : nil,
+                note: note, using: session
+            )
+            if saved, let id = store.lastSavedIntentID { onPublished(id) }
+            return saved
+        }
+    }
+}
+
 private struct WeeklyIntentEditorPresentation: Identifiable {
     let id: String
     let intent: NativeWeeklyIntent?
@@ -193,6 +228,7 @@ private struct TogetherHomeView: View {
     @State private var selectedSection: TogetherSection = .recommendations
     @State private var resolvedInitialSection = false
     @State private var createdIntentionRevision = 0
+    @State private var publishedIntentID: String?
     @State private var exploreStore = ExploreIntentStore()
     @State private var hasRequestedMoreRecommendations = false
     @State private var messageOpportunity: NativeMutualOpportunity?
@@ -217,6 +253,15 @@ private struct TogetherHomeView: View {
         PlanRebookingLaunch.shared.plan = nil
         sectionSelection.wrappedValue = .intentions
         presentedEditor = .init(id: "rebook-" + plan.id, intent: nil, rebookingPlan: plan)
+    }
+
+    private func consumePublication() async {
+        guard let id = IntentionPublicationLaunch.shared.intentID else { return }
+        IntentionPublicationLaunch.shared.intentID = nil
+        sectionSelection.wrappedValue = .intentions
+        publishedIntentID = id
+        await loadContent()
+        createdIntentionRevision += 1
     }
 
     var body: some View {
@@ -277,8 +322,11 @@ private struct TogetherHomeView: View {
         }
         .background(SideSeatTheme.bgGrouped)
         .ssRootNavigationTitle("Together")
-        .task { await loadContent(); consumeRebooking() }
+        .task { await loadContent(); consumeRebooking(); await consumePublication() }
         .onChange(of: PlanRebookingLaunch.shared.plan?.id) { consumeRebooking() }
+        .onChange(of: IntentionPublicationLaunch.shared.intentID) { _, id in
+            if id != nil { Task { await consumePublication() } }
+        }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatTogetherNeedsRefresh)) { _ in
             Task { await loadContent() }
         }
@@ -303,7 +351,10 @@ private struct TogetherHomeView: View {
                 )
                 if saved {
                     sectionSelection.wrappedValue = .intentions
-                    if presentation.intent == nil { createdIntentionRevision += 1 }
+                    if presentation.intent == nil {
+                        publishedIntentID = store.lastSavedIntentID
+                        createdIntentionRevision += 1
+                    }
                     presentedEditor = nil
                     await refreshOpportunitiesAfterIntentChange()
                 }
@@ -434,6 +485,27 @@ private struct TogetherHomeView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             .id("together-intentions-top")
+
+            if let publishedIntentID, store.intents.contains(where: { $0.id == publishedIntentID }) {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                    Label("Intention published", systemImage: "checkmark.circle")
+                        .font(.subheadline.weight(.medium))
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button {
+                        sectionSelection.wrappedValue = .recommendations
+                        self.publishedIntentID = nil
+                    } label: {
+                        Text("View recommendations")
+                            .font(.subheadline.weight(.medium))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(minHeight: 44)
+                    }
+                    .foregroundStyle(SideSeatTheme.utilityAction)
+                    .accessibilityIdentifier("together-view-recommendations")
+                }
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("together-publication-success")
+            }
 
             if !store.hasLoaded && store.issue == nil && current.isEmpty {
                 ProgressView().frame(maxWidth: .infinity, minHeight: 120)
@@ -1482,6 +1554,7 @@ private struct WeeklyIntentEditorView: View {
     @Environment(ClientConfigurationStore.self) private var clientConfiguration
     @Environment(\.dismiss) private var dismiss
     @State private var topic: NativeWeeklyIntentTopic
+    @State private var hasChosenTopic: Bool
     @State private var activityText: String
     @State private var timeWindows: [WeeklyIntentWindowDraft]
     @State private var preservedTimePreference: NativeIntentTimePreference?
@@ -1500,6 +1573,7 @@ private struct WeeklyIntentEditorView: View {
     let intent: NativeWeeklyIntent?
     let template: NativeWeeklyIntent?
     let rebookingPlan: NativePlanRequest?
+    let completedPlanDraft: CompletedPlanIntentDraft?
     let saveIssue: String?
     let onSave:
         (
@@ -1520,6 +1594,7 @@ private struct WeeklyIntentEditorView: View {
         intent: NativeWeeklyIntent?,
         template: NativeWeeklyIntent? = nil,
         rebookingPlan: NativePlanRequest? = nil,
+        completedPlanDraft: CompletedPlanIntentDraft? = nil,
         saveIssue: String?,
         onSave:
             @escaping (
@@ -1539,6 +1614,7 @@ private struct WeeklyIntentEditorView: View {
         self.intent = intent
         self.template = template
         self.rebookingPlan = rebookingPlan
+        self.completedPlanDraft = completedPlanDraft
         self.saveIssue = saveIssue
         self.onSave = onSave
         let proposed: [NativeWeeklyIntentTimeWindow]
@@ -1548,7 +1624,8 @@ private struct WeeklyIntentEditorView: View {
             proposed = NativeWeeklyIntentTimeRules.repeatedWindows(from: template.timeWindows)
         } else { proposed = Self.defaultWindows(intent: intent) }
         let source = intent ?? template
-        _topic = State(initialValue: source?.topic ?? (rebookingPlan.map { ["MEAL": NativeWeeklyIntentTopic.food, "STUDY": .study, "LANGUAGE": .study, "SPORTS": .sports][$0.planType] ?? .events } ?? .coffee))
+        _topic = State(initialValue: completedPlanDraft?.topic ?? source?.topic ?? (rebookingPlan.map { ["MEAL": NativeWeeklyIntentTopic.food, "STUDY": .study, "LANGUAGE": .study, "SPORTS": .sports][$0.planType] ?? .events } ?? .coffee))
+        _hasChosenTopic = State(initialValue: completedPlanDraft == nil || completedPlanDraft?.topic != nil)
         _exploreVisible = State(initialValue: intent == nil || intent?.exploreVisible == true)
         _note = State(initialValue: source?.note ?? "")
         let initialActivity: String
@@ -1557,7 +1634,7 @@ private struct WeeklyIntentEditorView: View {
         case .sports: initialActivity = NativeSportInput.displayText(tag: source?.sportTag, otherNote: source?.sportOtherNote)
         default: initialActivity = source?.activityText ?? ""
         }
-        _activityText = State(initialValue: rebookingPlan?.title ?? initialActivity)
+        _activityText = State(initialValue: completedPlanDraft?.title ?? rebookingPlan?.title ?? initialActivity)
         _timeWindows = State(
             initialValue: proposed.map {
                 WeeklyIntentWindowDraft(startAt: $0.startAt, endAt: $0.endAt)
@@ -1575,6 +1652,10 @@ private struct WeeklyIntentEditorView: View {
                 ScrollViewReader { scroll in
                     Form {
                         activityFields
+                        if completedPlanDraft != nil {
+                            Text("Publish a new intention to find company. Choose a new time or leave it undecided.")
+                                .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        }
                         if !((intent ?? template)?.note ?? "").isEmpty {
                             Section("Description") {
                                 TextField(AppLocalization.string("Description"), text: $note, axis: .vertical)
@@ -1697,7 +1778,7 @@ private struct WeeklyIntentEditorView: View {
     }
 
     private var editorActionTitle: String {
-        if template != nil { return AppLocalization.string("Publish new intention") }
+        if template != nil || completedPlanDraft != nil { return AppLocalization.string("Publish new intention") }
         let useShortTitle = focusedInput != nil || dynamicTypeSize.isAccessibilitySize
         if automaticMatchingEnabled, intent?.isPaused != true {
             if intent?.automaticMatching == true {
@@ -1711,15 +1792,21 @@ private struct WeeklyIntentEditorView: View {
     private var activityFields: some View {
         Group {
             Section {
+                if !hasChosenTopic {
+                    Text("Choose an activity")
+                        .font(.subheadline.weight(.medium))
+                        .accessibilityIdentifier("intent-topic-required")
+                }
                 let columns = dynamicTypeSize.isAccessibilitySize ? 1 : 3
                 Grid(horizontalSpacing: SideSeatTheme.spaceSM, verticalSpacing: SideSeatTheme.spaceSM) {
                     ForEach(0..<(NativeWeeklyIntentTopic.allCases.count / columns), id: \.self) { row in
                         GridRow {
                             ForEach(0..<columns, id: \.self) { column in
                                 let option = NativeWeeklyIntentTopic.allCases[row * columns + column]
-                                SSActivityChoice(topic: option, isSelected: topic == option) {
+                                SSActivityChoice(topic: option, isSelected: hasChosenTopic && topic == option) {
                                     focusedInput = nil
                                     topic = option
+                                    hasChosenTopic = true
                                 }
                                 .accessibilityIdentifier("intent-topic-\(option.rawValue.lowercased())")
                             }
@@ -1728,7 +1815,7 @@ private struct WeeklyIntentEditorView: View {
                 }
                 .accessibilityElement(children: .contain)
                 .accessibilityLabel(AppLocalization.string("Activity"))
-                .accessibilityValue(topic.title)
+                .accessibilityValue(hasChosenTopic ? topic.title : AppLocalization.string("Choose an activity"))
                 .accessibilityIdentifier("intent-editor-topic")
                 .listRowInsets(EdgeInsets(top: SideSeatTheme.spaceMD, leading: SideSeatTheme.spaceMD,
                                          bottom: SideSeatTheme.spaceMD, trailing: SideSeatTheme.spaceMD))
@@ -1866,7 +1953,7 @@ private struct WeeklyIntentEditorView: View {
             : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
     }
 
-    private var hasValidDetails: Bool { inputLengthIssue == nil }
+    private var hasValidDetails: Bool { hasChosenTopic && inputLengthIssue == nil }
 
     private var inputLengthIssue: String? {
         if NativeWeeklyIntentSubmissionRules.normalizedTextLength(note) > 160 {

@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 
 const url = new URL(process.env.DATABASE_URL ?? "http://invalid");
 assert(["localhost", "127.0.0.1"].includes(url.hostname));
-assert.equal(url.pathname, "/sideseat_new_intent_20261003", "Use the dedicated closed-loop database");
+assert(["/sideseat_new_intent_20261003", "/sideseat_return_flow_20261003", "/sideseat_return_flow_retry_20261003"].includes(url.pathname), "Use a dedicated closed-loop database");
 const db = new PrismaClient();
 const names = ["loopqa_a", "loopqa_b", "loopqa_c"];
 const mode = process.argv[2];
@@ -50,6 +50,10 @@ try {
     console.log("Seeded three isolated test users; no intentions, connections or plans.");
   } else if (mode === "check-plan" || mode === "advance") {
     const { plan, entries } = await confirmedPlan();
+    assert.equal(await db.weeklyIntent.count(), 2, "Opening/canceling drafts adds no intention");
+    assert.equal(await db.mutualOpportunity.count(), 1);
+    assert.equal(await db.connection.count(), 1);
+    assert.equal(await db.calendarEntry.count(), 2);
     assert.equal(await db.planOutcomeResponse.count(), 0);
     assert.equal(await db.sharedEncounter.count(), 0);
     if (mode === "advance") {
@@ -61,7 +65,21 @@ try {
         await tx.calendarEntry.updateMany({ where: { planCommitmentId: plan.commitmentId }, data: { startAt: startTime, endAt: endTime } });
       });
     }
-    console.log(JSON.stringify({ checked: mode, planId: plan.id, connectionId: plan.connectionId, calendarOwners: entries.map(e => e.userId) }, null, 2));
+    console.log(JSON.stringify({ checked: mode, planId: plan.id, connectionId: plan.connectionId,
+      intentions: 2, opportunities: 1, connections: 1, plans: 1, calendarEntries: 2, outcomes: 0,
+      calendarOwners: entries.map(e => e.userId) }, null, 2));
+  } else if (mode === "check-peer-ready") {
+    await confirmedPlan();
+    const c = await db.user.findUniqueOrThrow({ where: { username: names[2] } });
+    const active = await db.weeklyIntent.findMany({ where: { status: "ACTIVE" } });
+    assert.equal(active.length, 1);
+    assert.equal(active[0]!.userId, c.id);
+    assert.equal(active[0]!.activityText, "[new-loop] Library coffee");
+    assert.equal(await db.weeklyIntent.count(), 3);
+    assert.equal(await db.mutualOpportunity.count(), 1);
+    assert.equal(await db.connection.count(), 1);
+    assert.equal(await db.planOutcomeResponse.count(), 2);
+    console.log(JSON.stringify({ result: "PASS", resume: "Alex has not published; only Lee's UI-created intention is active", intentions: 3, opportunities: 1, plans: 1, calendarEntries: 2 }, null, 2));
   } else if (mode === "verify" || mode === "check-return") {
     const { plan } = await confirmedPlan();
     const outcomes = await db.planOutcomeResponse.findMany({ where: { planId: plan.id } });
@@ -105,7 +123,7 @@ try {
     console.log(JSON.stringify({ result: "PASS", planId: plan.id, bilateralOutcomes: outcomes.length,
       sharedEncounters: 1, continuedConversation: connection.id, newOpportunity: next.id,
       intentions: { total: 4, originalEnded: 2, newActive: 2 }, connections: 1, plans: 1, calendarEntries: 2, meetAgainPermissions: 0 }, null, 2));
-  } else throw new Error("Usage: qa-new-intent-loop.ts seed|check-plan|advance|check-return|verify");
+  } else throw new Error("Usage: qa-new-intent-loop.ts seed|check-plan|advance|check-return|check-peer-ready|verify");
 } finally { await db.$disconnect(); }
 
 }

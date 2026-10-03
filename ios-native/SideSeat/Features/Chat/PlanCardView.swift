@@ -110,9 +110,8 @@ struct PlanCardView: View {
                     showsSavedQuestion: false,
                     onAnswer: onRecordOutcome
                 )
-                if let onRepeat {
-                    PlanRepeatButton(plan: plan, isDisabled: isActing, action: onRepeat)
-                }
+                PlanContinuationActions(plan: plan, currentUserID: currentUserID,
+                                        isDisabled: isActing, onRepeat: onRepeat)
             } else if plan.status == "ACCEPTED" {
                 HStack(spacing: 8) {
                     Label("Confirmed in both calendars", systemImage: "calendar.badge.checkmark")
@@ -272,13 +271,62 @@ struct PlanCardView: View {
     }
 }
 
+struct PlanContinuationActions: View {
+    @Environment(DeepLinkRouter.self) private var deepLinkRouter
+    @State private var showsNewIntention = false
+    @State private var publishedIntentID: String?
+    let plan: NativePlanRequest
+    let currentUserID: String
+    var isDisabled = false
+    var onRepeat: (() -> Void)?
+
+    var body: some View {
+        VStack(spacing: SideSeatTheme.spaceXS) {
+            if let onRepeat {
+                PlanRepeatButton(plan: plan, isDisabled: isDisabled,
+                                 recipientName: plan.proposer.id == currentUserID
+                                    ? plan.receiver.displayName : plan.proposer.displayName,
+                                 action: onRepeat)
+            }
+            if ActionToPlanV2Store.shared.isWeeklyIntentEnabled {
+                Button { showsNewIntention = true } label: {
+                    Text(AppLocalization.string("Publish new intention"))
+                        .font(.subheadline.weight(.medium))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(SSPressButtonStyle())
+                .foregroundStyle(SideSeatTheme.utilityAction)
+                .disabled(isDisabled)
+                .accessibilityIdentifier("plan-new-intention-\(plan.id)")
+            }
+        }
+        .sheet(isPresented: $showsNewIntention, onDismiss: {
+            guard let id = publishedIntentID else { return }
+            publishedIntentID = nil
+            IntentionPublicationLaunch.shared.intentID = id
+            deepLinkRouter.handleAppPath("/together")
+        }) {
+            CompletedPlanIntentionSheet(draft: CompletedPlanIntentDraft(plan: plan)) { id in
+                publishedIntentID = id
+                showsNewIntention = false
+            }
+        }
+    }
+}
+
 struct PlanRepeatButton: View {
     let plan: NativePlanRequest
     var isDisabled = false
+    var recipientName: String? = nil
     let action: () -> Void
 
     var body: some View {
-        let title = AppLocalization.string(plan.viewerOutcome == "DID_NOT_OCCUR" ? "Arrange another time" : "Plan again")
+        let title = plan.viewerOutcome == "DID_NOT_OCCUR"
+            ? AppLocalization.string("Arrange another time")
+            : recipientName.map { String(format: AppLocalization.string("Plan again with %@"), $0) }
+                ?? AppLocalization.string("Plan again")
         Group {
             if plan.viewerOutcome != nil {
                 SSPrimaryButton(title: title, fill: .product, height: 46,

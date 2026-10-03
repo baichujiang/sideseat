@@ -7,10 +7,10 @@ struct ConversationPlansTests {
     let now = Date(timeIntervalSince1970: 1_800_000_000)
 
     private func plan(_ id: String, status: String = "PENDING", receiver: String = "me",
-                      hours: Double = 2, commitment: String? = nil) -> NativePlanRequest {
+                      hours: Double = 2, commitment: String? = nil, type: String = "STUDY") -> NativePlanRequest {
         let start = now.addingTimeInterval(hours * 3600)
         return NativePlanRequest(id: id, connectionId: "chat", commitmentId: commitment,
-            status: status, planType: "STUDY", title: "Library", location: "Campus", message: "Old note",
+            status: status, planType: type, title: "Library", location: "Campus", message: "Old note",
             startTime: start.ISO8601Format(), endTime: start.addingTimeInterval(3600).ISO8601Format(),
             proposer: NativePlanAuthor(id: receiver == "me" ? "peer" : "me", username: "author", nickname: nil, avatarUrl: nil),
             receiver: NativePlanAuthor(id: receiver, username: receiver, nickname: nil, avatarUrl: nil),
@@ -30,6 +30,14 @@ struct ConversationPlansTests {
         #expect(draft.needsTimeSelection && draft.isRepeat)
         #expect(draft.suggestedDuration == 3600)
         #expect(first.viewerOutcome == nil && first.meetAgainAvailable == false)
+    }
+
+    @Test("New intentions preserve activity but never guess a category from a custom plan")
+    func completedPlanIntention() {
+        let known = CompletedPlanIntentDraft(plan: plan("known", status: "ACCEPTED", hours: -3))
+        #expect(known.title == "Library" && known.topic == .study)
+        let custom = CompletedPlanIntentDraft(plan: plan("custom", status: "ACCEPTED", hours: -3, type: "CUSTOM"))
+        #expect(custom.title == "Library" && custom.topic == nil)
     }
 
     @Test("An invitation needing my reply takes precedence over an earlier confirmed meet-up")

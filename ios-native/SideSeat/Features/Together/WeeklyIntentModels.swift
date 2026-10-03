@@ -1,5 +1,18 @@
 import Foundation
 
+/// Only editable activity content crosses from a completed Plan into a new publication.
+/// CUSTOM cannot identify Coffee/Explore/Events, so the user chooses instead of guessing.
+struct CompletedPlanIntentDraft {
+    let title: String
+    let topic: NativeWeeklyIntentTopic?
+
+    init(plan: NativePlanRequest) {
+        title = plan.title
+        topic = ["STUDY": .study, "LANGUAGE": .study, "MEAL": .food,
+                 "SPORTS": .sports, "EVENT": .events][plan.planType]
+    }
+}
+
 enum NativeWeeklyIntentTopic: String, Codable, CaseIterable, Identifiable, Sendable {
     case coffee = "COFFEE"
     case study = "STUDY"

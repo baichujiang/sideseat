@@ -391,6 +391,24 @@ Submission creates an independent Plan in the original conversation, with no
 reused intention origin or counterproposal link. Acceptance adds the new activity
 to both calendars; the first Plan and its feedback are preserved.
 
+### Publish a new intention after an ended activity — 2026-10-03
+
+Ended, accepted Plans in Plans and chat offer two distinct paths: **Plan again
+with [person]** continues the existing conversation; the lighter **Publish new
+intention** opens a new-intention draft on the current surface. Neither path waits
+for the peer's private feedback or Meet Again permission.
+
+The new intention starts with the Plan title and an unambiguous activity category
+when available. Custom Plan types require an explicit category choice. Time
+starts undecided; old dates, participants, messages and private notes are not
+copied. The user reviews the public-intention disclosure before publishing.
+Cancel returns to the same Plan/chat without writing. Successful publication opens
+My intentions with the newly published card and a **View recommendations** action;
+recommendations keep their real loading/empty state. Original history is retained.
+
+This does not expose ENDED intentions as a history list: deleted and consumed
+intentions currently share that state.
+
 ### Private permission for future matching
 
 The owner authorized implementation and internal acceptance of the following

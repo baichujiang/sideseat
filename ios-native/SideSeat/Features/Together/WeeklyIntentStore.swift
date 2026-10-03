@@ -11,6 +11,7 @@ final class WeeklyIntentStore {
     private(set) var isCreating = false
     private(set) var mutatingIDs: Set<String> = []
     private(set) var issue: String?
+    private(set) var lastSavedIntentID: String?
 
     #if DEBUG
     private var hasInstalledFixtures = false
@@ -154,6 +155,7 @@ final class WeeklyIntentStore {
                 automaticMatching: automaticMatching || existingIntent?.automaticMatching == true,
                 exploreVisible: exploreVisible ?? existingIntent?.exploreVisible ?? false
             ))
+            lastSavedIntentID = id
             return true
         }
         #endif
@@ -206,6 +208,7 @@ final class WeeklyIntentStore {
             }
             if let changedIntent = response.data.intent {
                 upsert(changedIntent)
+                lastSavedIntentID = changedIntent.id
             }
             await load(using: session)
             return true
