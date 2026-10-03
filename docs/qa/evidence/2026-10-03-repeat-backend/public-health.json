@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-03T20:23:00.449Z",
+  "checks": [
+    {
+      "url": "https://api.sideseat.de/api/v1/client-config",
+      "status": 200
+    },
+    {
+      "url": "https://www.sideseat.de/privacy",
+      "status": 200
+    },
+    {
+      "url": "https://www.sideseat.de/support",
+      "status": 200
+    },
+    {
+      "url": "https://www.sideseat.de/.well-known/apple-app-site-association",
+      "status": 200,
+      "previewUniversalLink": true
+    },
+    {
+      "url": "https://www.sideseat.de/xhs/callback",
+      "status": 200
+    }
+  ],
+  "completed": true
+}

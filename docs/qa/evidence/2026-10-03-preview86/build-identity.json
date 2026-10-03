@@ -1,0 +1,13 @@
+{
+  "CFBundleIdentifier": "app.sideseat.mobile.preview",
+  "CFBundleDisplayName": "SideSeat Preview",
+  "CFBundleShortVersionString": "1.0.0",
+  "CFBundleVersion": "86",
+  "SideSeatAPIBaseURL": "https://api.sideseat.de",
+  "executableSHA256": "c2b1120d1b784bef624b0e760331b87ac83e90edce90138bc8a3d8ce28354ea6",
+  "signatureVerified": true,
+  "deviceProvisioningVerified": true,
+  "sourceManifestVerified": true,
+  "sourceFileCount": 292,
+  "appPath": "/tmp/sideseat-repeat-preview86-20261003/DerivedData/Build/Products/Preview-iphoneos/SideSeat Preview.app"
+}

@@ -1,0 +1,11 @@
+{
+  "sourceCommit": "b76214e30dc011c9a5a3259dd297128c576063a9",
+  "beforePreviewBuild": "85",
+  "installedPreviewBuild": "86",
+  "installVerified": true,
+  "launchVerified": true,
+  "installTime": null,
+  "launchTime": null,
+  "backendDeployment": "dpl_7eTKXSMpLAiJSzN6LU1UNS115f5k",
+  "scope": "Signed physical-device install, version readback and launch; complete interaction flow was verified on the simulator."
+}

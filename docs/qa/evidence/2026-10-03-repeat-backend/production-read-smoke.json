@@ -1,0 +1,14 @@
+{
+  "mode": "production",
+  "origin": "https://api.sideseat.de",
+  "checks": [
+    "anonymous scoped read rejected",
+    "participant 1 receives scoped plan and explicit null nextCursor",
+    "participant 1 existing plan overview remains compatible",
+    "participant 2 receives scoped plan and explicit null nextCursor",
+    "participant 2 existing plan overview remains compatible"
+  ],
+  "completed": true,
+  "qaAccountsRemoved": true,
+  "at": "2026-10-03T20:23:01.134Z"
+}
