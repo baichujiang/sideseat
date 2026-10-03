@@ -1,0 +1,18 @@
+{
+  "verifiedAt": "2026-10-03T22:33:20.291148+00:00",
+  "sourceCommit": "e0c7ca303ed2854e7546ff455b8a430a57d506c2",
+  "githubBranch": "codex/ios-uxui-20260922",
+  "beforeVersion": "89",
+  "installed": {
+    "bundleIdentifier": "app.sideseat.mobile.preview",
+    "bundleVersion": "90",
+    "version": "1.0.0",
+    "name": "SideSeat Preview"
+  },
+  "installOutcome": "success",
+  "launchOutcome": "success",
+  "sourceManifestVerified": true,
+  "backendDeployment": "dpl_56ce6g2JaUMRuQMCbofBftrMMq1s",
+  "backendChangedByThisStage": false,
+  "verificationBoundary": "Native full-flow QA used isolated local API and iPhone 13 mini simulator. Physical phone verified signed installation, version read-back and process launch."
+}

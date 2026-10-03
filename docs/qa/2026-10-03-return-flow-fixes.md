@@ -37,9 +37,19 @@
 
 最终计划／表单回归通过，0 失败、0 跳过，覆盖中文普通浅色与德语最大辅助字号深色：已结束计划打开草稿、标题保留、时间入口可操作、取消回到原页面，再进入新意愿与 Lee 的新推荐：[结果](evidence/2026-10-03-return-flow-fixes/stage2-short-dock-final-summary.json)、[修复后表单](evidence/2026-10-03-return-flow-fixes/closed-loop-adaptive-new-draft-de.png)、[最大字号新推荐](evidence/2026-10-03-return-flow-fixes/closed-loop-adaptive-new-company-de.png)。
 
+## 最终整合版本复跑（2026-10-04）
+
+最终测试与 Preview 90 使用相同的 294 个已提交源码／资源文件，逐一哈希与 `e0c7ca303ed2854e7546ff455b8a430a57d506c2` 一致：[来源核验](evidence/2026-10-04-return-flow-final/tested-source.json)。包含另一个任务已提交的智能输入更新。
+
+全新隔离库 `sideseat_return_flow_final_20261004` 从 3 个账号、0 条业务记录开始。8 项模型测试和首次发布—推荐—收藏—招呼—回复—计划确认—双方日历 UI 测试通过，0 失败、0 跳过：[测试结果](evidence/2026-10-04-return-flow-final/final-first-plan-summary.json)、[成约后数据库核验](evidence/2026-10-04-return-flow-final/first-plan-state.json)。之后只压缩该计划及两条日历的时间，以触发活动后反馈；反馈和再次发布两个 UI 方法也通过，0 失败、0 跳过：[闭环结果](evidence/2026-10-04-return-flow-final/final-return-loop-summary.json)。最终版本共 8 项模型测试 + 3 个业务 UI 方法全部通过；这次从全新库连续完成，未使用恢复发布测试。
+
+[最终数据库核验](evidence/2026-10-04-return-flow-final/final-state.json)确认：双方发生反馈各 1 个，共同经历 1 条；原聊天、私有收藏、原计划与两条日历保留。2 条原意愿仍为 ENDED，2 条新意愿为 ACTIVE 且时间待定；出现与 Lee 的新机会，但聊天仍为 1、计划仍为 1、日历仍为 2、再次同行许可为 0，没有隐式创建新的联系或计划。发布成功提示、跳转查看推荐和重登持久化通过，截图已复核。
+
+最终交付：[Preview 90](../releases/2026-10-04-preview90.md)，手机已安装并启动，源码和验收证据分别提交到 GitHub。
+
 ## 验证边界与问题记录
 
-本轮使用隔离本地 API，未写正式用户数据，APNs 关闭；不据此声称已验证生产推送时延。手机 Preview 单独记录安装和启动，完整业务闭环在原生模拟器验证。未完成的资料功能改动未纳入本次提交或发布。Preview 88 不含同期日历更新；最终客户端将保留另一个任务已经提交的日历更新，具体源码及后台版本以最终发布记录为准。
+本轮使用隔离本地 API，未写正式用户数据，APNs 关闭；不据此声称已验证生产推送时延。手机 Preview 单独记录安装和启动，完整业务闭环在原生模拟器验证。未完成的资料功能改动未纳入本次提交或发布。Preview 88 不含同期日历更新；最终客户端已保留另一个任务已经提交的日历更新，具体源码及后台版本以最终发布记录为准。
 
 原报告的 ENDED 历史语义仍是单独产品议题：删除和被计划消费共享状态，本次用计划入口解决再次发布，不恢复已删除意愿。
 
