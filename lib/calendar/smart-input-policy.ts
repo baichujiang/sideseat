@@ -142,8 +142,13 @@ function localDuration(source: string): number | null {
 }
 
 export function defaultSmartInputMinutes(source: string, eventType = "other"): number {
-  if (new RegExp(policy.shortErrandPattern, "i").test(source) || eventType === "short_errand") return policy.shortErrandMinutes;
-  if (new RegExp(policy.activityPattern, "i").test(source) || ["meal", "meeting", "study", "sport"].includes(eventType)) return policy.activityMinutes;
+  // Explicitly recognized meaning outranks the model's broad classification.
+  // Live Qwen QA classified generic "办事" as short_errand; SI-04 requires 30m.
+  if (new RegExp(policy.shortErrandPattern, "i").test(source)) return policy.shortErrandMinutes;
+  if (new RegExp(policy.activityPattern, "i").test(source)) return policy.activityMinutes;
+  if (/办事|处理事情|\b(?:errands?|do something)\b/i.test(source)) return policy.defaultMinutes;
+  if (eventType === "short_errand") return policy.shortErrandMinutes;
+  if (["meal", "meeting", "study", "sport"].includes(eventType)) return policy.activityMinutes;
   return policy.defaultMinutes;
 }
 
