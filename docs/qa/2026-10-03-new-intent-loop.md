@@ -6,7 +6,7 @@
 
 **主闭环通过。** Alex 与 Mia 从意愿、推荐、招呼与回复到第一次计划及双方日历，分别反馈活动发生后，Alex 发布新的图书馆咖啡意愿，成功与新同伴 Lee 进入下一轮推荐。Alex 与 Mia 的旧聊天、第一次计划、日历和反馈都保留；新推荐没有自动创建聊天、计划或日历。
 
-已修复 1 个文案问题；记录 2 个需要产品／布局设计的问题。英文、中文和德文最大辅助字号的入口、取消行为均通过；德文最大字号整体视觉仍有不足，不能算整页视觉验收通过。手机交付结果另见发布记录。
+已修复 1 个文案问题；记录 2 个需要产品／布局设计的问题。英文、中文和德文最大辅助字号的入口、取消行为均通过；德文最大字号整体视觉仍有不足，不能算整页视觉验收通过。手机交付结果见 [Preview 87 发布记录](../releases/2026-10-03-preview87.md)。
 
 ## 路径测绘
 
@@ -82,6 +82,7 @@ flowchart TD
 - iPhone 13 mini 模拟器，iOS 26.5；英语浅色、普通字号，真实 Development App。本次采用当前的社交开关，包括 `v2MeetAgain=true`；没有填写再次同行许可，仍能发布新意愿找新同伴。
 - API 运行于活跃工作区 `127.0.0.1:3033`；隔离库 `sideseat_new_intent_20261003`，147 个迁移。只预置 3 个完整测试账号。除进入活动后反馈阶段而修改第一次计划和日历的时间外，业务写入由 App 操作完成。
 - 本地库包含工作区已有的资料迁移；本次没有修改、部署这些资料或日历后台工作。原生产品源码起点与 Preview 86 一致，[源文件记录](evidence/2026-10-03-new-intent-loop/baseline-tested-source.json)。
+- 本轮本地 API 和数据库进程已停止，隔离数据与完整结果保留；Next 自动生成的临时目录配置已恢复。
 - 本轮未用真实用户、未写正式数据库；APNs 关闭。不能以本地编译/请求耗时判断正式消息时延；未覆盖两台真机推送、断网恢复或真实线下活动。
 
 复现：`scripts/qa-new-intent-loop.ts` 的 `seed → UI 01 → check-plan → advance → UI 02 → UI 03 → UI 04 → verify`。只可对新的空隔离库 seed；不要重跑已写入的反馈或发布阶段。相关 UI 方法在 `SocialLiveUITests` 的 `testClosedLoop01…` 和 `testNewIntentLoop02/03/04…`。完整 xcresult 位于本机 `/tmp/sideseat-new-intent-phase{1,2,3}-20261003.xcresult`，小修复回归在 `/tmp/sideseat-new-intent-copy-fix-20261003.xcresult`。

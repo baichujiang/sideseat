@@ -1,0 +1,23 @@
+{
+  "sourceCommit": "46a7108e7fcc664072c1d0d8bcee94abc4e60ced",
+  "previousInstalledBuild": "86",
+  "installed": {
+    "bundleIdentifier": "app.sideseat.mobile.preview",
+    "bundleVersion": "87",
+    "version": "1.0.0",
+    "name": "SideSeat Preview"
+  },
+  "receipts": {
+    "install-receipt": {
+      "commandType": "devicectl.device.install.app",
+      "outcome": "success",
+      "receiptModifiedAtUTC": "2026-10-03T21:15:40.963787+00:00"
+    },
+    "launch-receipt": {
+      "commandType": "devicectl.device.process.launch",
+      "outcome": "success",
+      "receiptModifiedAtUTC": "2026-10-03T21:15:41.728130+00:00"
+    }
+  },
+  "verificationScope": "Signed build, committed source hashes, physical device installation readback and process launch; complete business flow verified in native simulator with isolated local API/database."
+}
