@@ -1,0 +1,9 @@
+{
+  "observedRequests": 283,
+  "statusCounts": {
+    "200": 276,
+    "201": 7
+  },
+  "httpFailures": [],
+  "note": "Local native QA requests through the final localized check; no production latency claim."
+}

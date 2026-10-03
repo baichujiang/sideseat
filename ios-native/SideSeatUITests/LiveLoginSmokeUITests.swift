@@ -126,7 +126,7 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertTrue(waitUntilEnabled(submit, timeout: 5))
         submit.tap()
 
-        XCTAssertTrue(tabButton(in: app, labels: ["Calendar", "日历"]).waitForExistence(timeout: 20))
+        XCTAssertTrue(tabButton(in: app, labels: ["Calendar", "日历", "Kalender"]).waitForExistence(timeout: 20))
         assertSignedInProfile(username: username, in: app)
         XCTAssertTrue(app.staticTexts[displayName].firstMatch.waitForExistence(timeout: 8))
         app.terminate()
@@ -135,7 +135,7 @@ final class SocialLiveUITests: XCTestCase {
         app.launchArguments = ["--ui-testing-skip-tutorial"]
         app.configureForSideSeatLiveAPI()
         app.launch()
-        XCTAssertTrue(tabButton(in: app, labels: ["Calendar", "日历"]).waitForExistence(timeout: 20))
+        XCTAssertTrue(tabButton(in: app, labels: ["Calendar", "日历", "Kalender"]).waitForExistence(timeout: 20))
         assertSignedInProfile(username: username, in: app)
 
         let settings = app.buttons["me-settings"]
@@ -768,6 +768,35 @@ final class SocialLiveUITests: XCTestCase {
         b.terminate()
     }
 
+    func testNewIntentLoop05ReturningEmptyStateLocalized() {
+        for (language, appearance, size, expectedTitle) in [
+            ("en", "light", "UICTContentSizeCategoryL", "Add an intention"),
+            ("zh-Hans", "light", "UICTContentSizeCategoryL", "添加意愿"),
+            ("de", "dark", "UICTContentSizeCategoryAccessibilityXXXL", "Vorhaben hinzufügen")
+        ] {
+            let app = launchAndLogin(username: "loopqa_b", additionalLaunchArguments: [
+                "--ui-testing-discover", "--ui-testing-language=\(language)",
+                "--ui-testing-appearance=\(appearance)", "-UIPreferredContentSizeCategoryName", size
+            ])
+            XCTAssertTrue(app.buttons["together-tab-intentions"].waitForExistence(timeout: 12))
+            app.buttons["together-tab-intentions"].tap()
+            let add = app.buttons["together-add-first-intent"]
+            XCTAssertTrue(add.waitForExistence(timeout: 12))
+            loopReveal(add, in: app)
+            XCTAssertEqual(add.label, expectedTitle)
+            XCTAssertGreaterThanOrEqual(add.frame.height, 44)
+            loopCapture(app, "new-intent-empty-fixed-\(language)-\(appearance)")
+            add.tap()
+            XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForExistence(timeout: 8))
+            loopCapture(app, "new-intent-draft-fixed-\(language)-\(appearance)")
+            let cancel = app.navigationBars.buttons.matching(NSPredicate(format: "label IN %@", ["Cancel", "取消", "Abbrechen"])).firstMatch
+            XCTAssertTrue(cancel.exists)
+            cancel.tap()
+            XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForNonExistence(timeout: 8))
+            app.terminate()
+        }
+    }
+
     func testMembershipInviteRedemption() throws {
         let env = ProcessInfo.processInfo.environment
         let username = try XCTUnwrap(env["SIDESEAT_MEMBERSHIP_USER"])
@@ -1111,7 +1140,7 @@ final class SocialLiveUITests: XCTestCase {
         let denyNotifications = system.buttons.matching(NSPredicate(format: "label IN %@",
             ["Don’t Allow", "Don't Allow", "不允许", "Nicht erlauben"])).firstMatch
         if denyNotifications.waitForExistence(timeout: 4) { denyNotifications.tap() }
-        XCTAssertTrue(tabButton(in: app, labels: ["Calendar", "日历"]).waitForExistence(timeout: 20))
+        XCTAssertTrue(tabButton(in: app, labels: ["Calendar", "日历", "Kalender"]).waitForExistence(timeout: 20))
         return app
     }
 

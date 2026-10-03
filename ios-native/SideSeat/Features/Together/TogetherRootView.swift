@@ -443,7 +443,7 @@ private struct TogetherHomeView: View {
                 SSEmptyState(
                     title: "What would you like to do?", systemImage: "sparkles",
                     description: "Add an activity and choose when to find company.",
-                    actionTitle: AppLocalization.string("Add your first intention"),
+                    actionTitle: AppLocalization.string("Add an intention"),
                     actionAccessibilityID: "together-add-first-intent",
                     action: { presentedEditor = .create() }
                 )

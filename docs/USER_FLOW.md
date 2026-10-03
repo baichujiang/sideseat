@@ -39,7 +39,7 @@ Together initially explains one action:
 
 With current intentions, the compact + Add text action sits beside "What I want
 to do" in the content heading, without a background or border and with a minimum
-44-point touch target. The empty state shows only Add your first intention.
+44-point touch target. The empty state shows only Add an intention, including when a returning user has completed their previous intentions.
 The Together navigation bar has no creation action.
 
 The user may create several independent Intents. One Intent contains one concrete
