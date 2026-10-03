@@ -1,0 +1,11 @@
+{
+  "baseCommit": "cc56a1bea65738e77f5122b80338094751192a19",
+  "files": {
+    "ios-native/SideSeatUITests/LiveLoginSmokeUITests.swift": "0027ce3275c09d9aef67bf3ebd95deed62e2a381647668bb7f07b9bc59f974a5",
+    "ios-native/SideSeat/Features/Together/TogetherRootView.swift": "f095861e0449aaa7a5aca682fa11869e036c3481961e7e0cc1baa28705f656c0",
+    "lib/v2/weekly-intents.ts": "7dee88cdfe12514b7a436189272de24dce2692b6feac183462b2e35bc82a8af3",
+    "lib/v2/mutual-opportunity-auto-match.ts": "0fffcd79eb83cbc9eb39b44b21d690a2c6fa5152c81c8a77a3f28dd5f6ec7b78",
+    "lib/api/v1/plans-service.ts": "ac939e4d85e6c855c027413d7584d4820602a90079e33a116552ad50029316ca",
+    "scripts/qa-new-intent-loop.ts": "6ecb69e34446452512e6d332db1b5c9f86f298777fa7a8e238062ea9ea17e80e"
+  }
+}

@@ -669,6 +669,105 @@ final class SocialLiveUITests: XCTestCase {
         b.terminate()
     }
 
+    // Second loop: run 01, compress the first plan time, then 02 → 03 → 04.
+    func testNewIntentLoop02OutcomesAndOriginalChat() {
+        for (username, peer, text) in [
+            ("loopqa_a", "Loop Mia", "[loop-qa] Thanks for today!"),
+            ("loopqa_b", "Loop Alex", "[loop-qa] Great to meet you!")
+        ] {
+            let app = loopLogin(username)
+            tabButton(in: app, labels: ["Plans"]).tap()
+            app.segmentedControls["plans-segmented-control"].buttons["Ended"].tap()
+            let occurred = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-outcome-occurred-")).firstMatch
+            XCTAssertTrue(occurred.waitForExistence(timeout: 12))
+            loopReveal(occurred, in: app)
+            occurred.tap()
+            let saved = app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-outcome-saved-")).firstMatch
+            XCTAssertTrue(saved.waitForExistence(timeout: 12))
+            loopCapture(app, "new-intent-11-outcome-\(username)")
+            openDirectChat(in: app, peerName: peer)
+            sendMessage(text, in: app)
+            loopCapture(app, "new-intent-12-old-chat-\(username)")
+            app.terminate()
+        }
+    }
+
+    func testNewIntentLoop03CancelNewDraftWithoutChangingHistory() {
+        let app = loopLogin("loopqa_a")
+        tabButton(in: app, labels: ["Together"]).tap()
+        app.buttons["together-tab-intentions"].tap()
+        let add = app.buttons["together-add-first-intent"]
+        XCTAssertTrue(add.waitForExistence(timeout: 12))
+        loopCapture(app, "new-intent-13-return-to-intentions")
+        add.tap()
+        let activity = app.textFields["intent-editor-activity"]
+        XCTAssertTrue(activity.waitForExistence(timeout: 8))
+        XCTAssertEqual(activity.value as? String, activity.placeholderValue ?? "")
+        XCTAssertTrue(app.buttons["intent-timing-choose"].label.contains("Time undecided"))
+        loopCapture(app, "new-intent-14-blank-draft")
+        activity.tap(); activity.typeText("[new-loop] Cancel this draft")
+        app.buttons["Cancel"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForNonExistence(timeout: 8))
+        XCTAssertFalse(app.staticTexts["[new-loop] Cancel this draft"].exists)
+        XCTAssertTrue(add.exists)
+        add.tap()
+        XCTAssertTrue(activity.waitForExistence(timeout: 8))
+        XCTAssertEqual(activity.value as? String, activity.placeholderValue ?? "")
+        app.buttons["Cancel"].tap()
+        openDirectChat(in: app, peerName: "Loop Mia")
+        XCTAssertTrue(app.staticTexts["[loop-qa] Great to meet you!"].waitForExistence(timeout: 12))
+        loopCapture(app, "new-intent-15-history-after-cancel")
+        app.terminate()
+    }
+
+    func testNewIntentLoop04PublishAndDiscoverNewCompany() {
+        let title = "[new-loop] Library coffee"
+        let c = loopLogin("loopqa_c")
+        loopCreateIntent(title, in: c)
+        c.terminate()
+
+        let a = loopLogin("loopqa_a")
+        loopCreateIntent(title, in: a)
+        loopCapture(a, "new-intent-16-new-publication")
+        a.buttons["together-tab-recommendations"].tap()
+        XCTAssertTrue(a.staticTexts["Loop Lee"].waitForExistence(timeout: 20))
+        XCTAssertFalse(a.staticTexts["Loop Mia"].exists)
+        let greeting = a.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-message-")).firstMatch
+        loopReveal(greeting, in: a)
+        XCTAssertTrue(greeting.isEnabled)
+        loopCapture(a, "new-intent-17-new-company")
+        a.buttons["together-tab-bookmarks"].tap()
+        let privateBookmark = a.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-open-")).firstMatch
+        XCTAssertFalse(privateBookmark.exists)
+        openDirectChat(in: a, peerName: "Loop Mia")
+        XCTAssertTrue(a.staticTexts["[loop-qa] Great to meet you!"].waitForExistence(timeout: 12))
+        loopCapture(a, "new-intent-18-original-chat-retained")
+        a.terminate()
+
+        let newPeer = loopLogin("loopqa_c")
+        XCTAssertTrue(newPeer.buttons["together-tab-recommendations"].waitForExistence(timeout: 12))
+        newPeer.buttons["together-tab-recommendations"].tap()
+        XCTAssertTrue(newPeer.staticTexts["Loop Alex"].waitForExistence(timeout: 20))
+        loopCapture(newPeer, "new-intent-19-new-peer-recommendation")
+        newPeer.terminate()
+
+        let returning = loopLogin("loopqa_a")
+        returning.buttons["together-tab-intentions"].tap()
+        XCTAssertTrue(returning.staticTexts[title].firstMatch.waitForExistence(timeout: 12))
+        loopCapture(returning, "new-intent-20-reloaded-publication")
+        returning.terminate()
+
+        let b = loopLogin("loopqa_b")
+        b.buttons["together-tab-bookmarks"].tap()
+        let chat = b.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-open-")).firstMatch
+        XCTAssertTrue(chat.waitForExistence(timeout: 12))
+        loopReveal(chat, in: b); chat.tap()
+        XCTAssertTrue(b.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 12))
+        XCTAssertTrue(b.staticTexts["[loop-qa] Thanks for today!"].waitForExistence(timeout: 12))
+        loopCapture(b, "new-intent-21-saved-history-chat")
+        b.terminate()
+    }
+
     func testMembershipInviteRedemption() throws {
         let env = ProcessInfo.processInfo.environment
         let username = try XCTUnwrap(env["SIDESEAT_MEMBERSHIP_USER"])

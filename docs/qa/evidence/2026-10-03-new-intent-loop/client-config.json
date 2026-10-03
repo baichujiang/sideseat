@@ -1,0 +1,42 @@
+{
+  "data": {
+    "apiVersion": "v1",
+    "serverTime": "2026-10-03T20:49:22.830Z",
+    "ios": {
+      "minimumSupportedVersion": "1.0.0",
+      "latestVersion": "1.0.0",
+      "maintenanceMode": false
+    },
+    "features": {
+      "nativeAuthentication": true,
+      "naturalLanguageSchedule": false,
+      "storeKitSupport": true,
+      "apnsDelivery": false,
+      "apnsSandboxDelivery": false,
+      "apnsProductionDelivery": false,
+      "v2ActionInterest": false,
+      "v2PlanInheritance": false,
+      "v2SocialPreferences": false,
+      "v2WeeklyIntent": true,
+      "v2MutualOpportunity": true,
+      "v2ActivityFit": true,
+      "v2FlexibleTiming": true,
+      "v2AutomaticMatching": true,
+      "v2DiscoveryMatching": true,
+      "v2ExploreIntents": true,
+      "v2MeetAgain": true,
+      "v2Recommendations": false,
+      "v2SmallGroupPilot": false
+    },
+    "discover": {
+      "defaultCity": "Munich",
+      "servedCities": [
+        "Munich"
+      ]
+    },
+    "links": {
+      "privacyUrl": "http://127.0.0.1:3033/privacy",
+      "supportUrl": "http://127.0.0.1:3033/support"
+    }
+  }
+}
