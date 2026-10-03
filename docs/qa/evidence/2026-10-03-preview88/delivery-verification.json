@@ -1,0 +1,23 @@
+{
+  "sourceCommit": "4e2ff6ea8b3b05b55fc4676453059a663553ef58",
+  "previousInstalledBuild": "87",
+  "installed": {
+    "bundleIdentifier": "app.sideseat.mobile.preview",
+    "bundleVersion": "88",
+    "version": "1.0.0",
+    "name": "SideSeat Preview"
+  },
+  "receipts": {
+    "install-receipt": {
+      "outcome": "success",
+      "commandType": "devicectl.device.install.app",
+      "receiptModifiedAtUTC": "2026-10-03T22:00:11.590994+00:00"
+    },
+    "launch-receipt": {
+      "outcome": "success",
+      "commandType": "devicectl.device.process.launch",
+      "receiptModifiedAtUTC": "2026-10-03T22:00:12.637138+00:00"
+    }
+  },
+  "backendChanged": false
+}
