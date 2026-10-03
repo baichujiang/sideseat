@@ -1,5 +1,24 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Owner delivery rule — 2026-10-03
+
+The owner requires every completed modification stage to be traceable in Git and
+available in the phone Preview, rather than accumulating local-only changes.
+
+- After relevant verification, make a focused commit for each completed stage and
+  push the current branch to GitHub. Include related tests and documentation.
+- Update the native phone Preview for user-visible app changes. Release required
+  backend dependencies through the documented release procedure before installing
+  a client that depends on them. This standing instruction does not authorize
+  App Store submission or TestFlight distribution.
+- Record the commit SHA, Preview build number, relevant backend deployment ID,
+  and actual install/launch verification in `docs/releases/`. Distinguish committed,
+  pushed, backend deployed, and device installed; never use “done” for all four
+  when only local implementation has finished.
+- Keep unrelated unfinished work and credentials out of a stage's commit. Preserve
+  the current branch and other local edits. Historical catch-up commits must say
+  they capture an existing release/snapshot, without inventing past commit dates.
+
 ## Core Philosophy
 
 This repository follows a **Positive-First, Execution-First** development philosophy.
