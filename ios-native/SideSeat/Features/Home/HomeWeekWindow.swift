@@ -34,6 +34,17 @@ enum HomeWeekWindow {
 
     static let allowedVisibleDayCounts = [3, 5, 7]
     static let defaultVisibleDayCount = 5
+
+    static func monthTitle(from start: Date, visibleDayCount: Int, locale: Locale,
+                           calendar: Calendar = .sideSeatBerlin) -> String {
+        let end = calendar.date(byAdding: .day, value: clampVisibleDayCount(visibleDayCount) - 1, to: start) ?? start
+        let formatter = DateIntervalFormatter()
+        formatter.locale = locale
+        formatter.calendar = calendar
+        formatter.timeZone = calendar.timeZone
+        formatter.dateTemplate = calendar.isDate(start, equalTo: end, toGranularity: .month) ? "yMMMM" : "yMMM"
+        return formatter.string(from: start, to: end)
+    }
     static let minimumTimelineScale: CGFloat = 0.8
     static let defaultTimelineScale: CGFloat = 1
     static let maximumTimelineScale: CGFloat = 1.35

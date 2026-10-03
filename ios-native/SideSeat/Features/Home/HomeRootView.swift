@@ -370,7 +370,10 @@ struct HomeRootView: View {
     }
 
     private var calendarMonthTitle: some View {
-        Text(calendarMode == .week ? weekViewportDate : selectedDate, format: .dateTime.month(.wide).year())
+        Text(calendarMode == .week
+            ? HomeWeekWindow.monthTitle(from: weekViewportDate, visibleDayCount: weekVisibleDayCount,
+                locale: AppLocalization.selectedLanguage.locale)
+            : selectedDate.formatted(.dateTime.month(.wide).year().locale(AppLocalization.selectedLanguage.locale)))
             .font(SideSeatTheme.Text.title)
             .foregroundStyle(SideSeatTheme.textPrimary)
             .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)

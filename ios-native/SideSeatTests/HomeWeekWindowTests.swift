@@ -6,6 +6,35 @@ import Testing
 struct HomeWeekWindowTests {
     private let calendar = Calendar.sideSeatBerlin
 
+    @Test("Week title covers both visible months at a month boundary")
+    func titleAcrossMonths() throws {
+        let start = try #require(calendar.date(from: DateComponents(year: 2026, month: 9, day: 29)))
+        let title = HomeWeekWindow.monthTitle(from: start, visibleDayCount: 5, locale: Locale(identifier: "en_US"))
+        #expect(title.contains("Sep"))
+        #expect(title.contains("Oct"))
+        #expect(title.contains("2026"))
+    }
+
+    @Test("Week title does not introduce a month outside the visible range")
+    func titleWithinMonth() throws {
+        let start = try #require(calendar.date(from: DateComponents(year: 2026, month: 10, day: 3)))
+        let title = HomeWeekWindow.monthTitle(from: start, visibleDayCount: 3, locale: Locale(identifier: "zh_CN"))
+        #expect(title.contains("10月"))
+        #expect(title.contains("2026"))
+        #expect(!title.contains("9月"))
+        #expect(!title.contains("11月"))
+    }
+
+    @Test("Week title preserves both years when the visible range crosses New Year")
+    func titleAcrossYears() throws {
+        let start = try #require(calendar.date(from: DateComponents(year: 2026, month: 12, day: 29)))
+        let title = HomeWeekWindow.monthTitle(from: start, visibleDayCount: 7, locale: Locale(identifier: "de_DE"))
+        #expect(title.contains("Dez"))
+        #expect(title.contains("Jan"))
+        #expect(title.contains("2026"))
+        #expect(title.contains("2027"))
+    }
+
     @Test("Prefers a Monday-start 5-day viewport for midweek focus")
     func mondayViewportForWeekday() throws {
         // 2026-07-15 is a Wednesday in Europe/Berlin.
